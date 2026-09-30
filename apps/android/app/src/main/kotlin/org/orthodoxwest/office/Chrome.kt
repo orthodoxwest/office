@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -49,6 +50,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
@@ -209,15 +211,20 @@ fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String
     }
 }
 
+/** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
+private val PICKER_YEARS = 1950..2150
+
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days
  * are the choices. Sundays are red; the chosen day takes the gold underline, as a chosen
- * prayer form does, and today a quiet wash.
+ * prayer form does, and today a quiet wash. The title turns the grid into the year's months,
+ * and back; both views keep six weeks' height, so turning between them moves nothing below.
  */
 @Composable
 fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
-    var month by remember(shown) { mutableStateOf(YearMonth.from(shown)) }
+    var month by remember(shown) { mutableStateOf(YearMonth.from(shown).coerceIn(PICKER_YEARS)) }
+    var months by remember(shown) { mutableStateOf(false) }
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
@@ -229,47 +236,115 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
             Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
         }
         Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹", Modifier.tap(label = "Previous month") { month = month.minusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
+            // A month's step in the days, a year's in the months; none past the picker's span.
+            val step = if (months) 12L else 1L
+            val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
+            val forward = month.plusMonths(step).takeIf { it.year in PICKER_YEARS }
+            val stepStyle = link.copy(fontSize = 22.sp)
             Text(
-                "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US).uppercase()} ${month.year}",
-                Modifier.weight(1f),
-                style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center),
+                "‹",
+                Modifier.then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier)
+                    .padding(horizontal = 24.dp),
+                style = if (back != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
             )
-            Text("›", Modifier.tap(label = "Next month") { month = month.plusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
+            val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
+            Row(
+                Modifier.weight(1f).heightIn(min = 44.dp)
+                    .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(title.uppercase(), style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
+                Caret(months)
+            }
+            Text(
+                "›",
+                Modifier.then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier)
+                    .padding(horizontal = 24.dp),
+                style = if (forward != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
+            )
         }
-        val days = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
-        // The weekday letters are for the eye; each day below names itself in full.
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp).clearAndSetSemantics {}) {
-            days.forEach { d ->
-                Text(
-                    d.getDisplayName(JavaTextStyle.NARROW, Locale.US),
-                    Modifier.weight(1f).padding(vertical = 8.dp),
-                    style = Type.label(11.5f, 0.08f).copy(color = p.muted, textAlign = TextAlign.Center),
-                )
+        Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            // The days always lay out, for the height both views share; the months cover them.
+            Column(Modifier.then(if (months) Modifier.alpha(0f).clearAndSetSemantics {} else Modifier)) { Days(month, shown, today, live = !months, onPick) }
+            if (months) {
+                MonthGrid(month.year, shown, today, Modifier.matchParentSize()) { m ->
+                    month = YearMonth.of(month.year, m)
+                    months = false
+                }
             }
         }
-        val first = month.atDay(1)
-        val lead = first.dayOfWeek.value % 7
-        val cells = (0 until lead).map { null } + (1..month.lengthOfMonth()).map { month.atDay(it) }
-        cells.chunked(7).forEach { week ->
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                (0 until 7).forEach { i ->
-                    val day = week.getOrNull(i)
-                    Box(
-                        Modifier
-                            .weight(1f)
-                            .heightIn(min = 44.dp)
-                            .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
-                            .then(if (day != null) Modifier.tap(label = spokenDay(day, today), selected = day == shown) { onPick(day) } else Modifier),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (day != null) {
-                            Text(
-                                day.dayOfMonth.toString(),
-                                Modifier.goldUnderline(day == shown, p.goldLine),
-                                style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = if (day.dayOfWeek == DayOfWeek.SUNDAY) p.rubric else p.text, fontFeatureSettings = "lnum"),
-                            )
-                        }
+    }
+}
+
+private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
+    year < years.first -> YearMonth.of(years.first, 1)
+    year > years.last -> YearMonth.of(years.last, 12)
+    else -> this
+}
+
+/** A month's days in six weeks always, blank where the month is not; `live` false while the months cover them. */
+@Composable
+private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boolean, onPick: (LocalDate) -> Unit) {
+    val p = LocalPalette.current
+    val days = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
+    // The weekday letters are for the eye; each day below names itself in full.
+    Row(Modifier.fillMaxWidth().clearAndSetSemantics {}) {
+        days.forEach { d ->
+            Text(
+                d.getDisplayName(JavaTextStyle.NARROW, Locale.US),
+                Modifier.weight(1f).padding(vertical = 8.dp),
+                style = Type.label(11.5f, 0.08f).copy(color = p.muted, textAlign = TextAlign.Center),
+            )
+        }
+    }
+    val lead = month.atDay(1).dayOfWeek.value % 7
+    val cells = (0 until 42).map { i -> (i - lead + 1).takeIf { it in 1..month.lengthOfMonth() }?.let(month::atDay) }
+    cells.chunked(7).forEach { week ->
+        Row(Modifier.fillMaxWidth()) {
+            week.forEach { day ->
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .heightIn(min = 44.dp)
+                        .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) { onPick(day) } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (day != null) {
+                        Text(
+                            day.dayOfMonth.toString(),
+                            Modifier.goldUnderline(day == shown, p.goldLine),
+                            style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = if (day.dayOfWeek == DayOfWeek.SUNDAY) p.rubric else p.text, fontFeatureSettings = "lnum"),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** The year's months, three to a row: the chosen day's month underlined in gold, today's washed. */
+@Composable
+private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: Modifier, onMonth: (Int) -> Unit) {
+    val p = LocalPalette.current
+    Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
+        (1..12).chunked(3).forEach { row ->
+            Row(Modifier.fillMaxWidth()) {
+                row.forEach { m ->
+                    val name = Month.of(m).getDisplayName(JavaTextStyle.FULL, Locale.US)
+                    val chosen = shown.year == year && shown.monthValue == m
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
+                            Modifier
+                                .then(if (today.year == year && today.monthValue == m) Modifier.background(p.gold.copy(alpha = 0.1f)) else Modifier)
+                                .tap(label = "$name $year", selected = chosen) { onMonth(m) }
+                                .heightIn(min = 44.dp)
+                                .goldUnderline(chosen, p.goldLine)
+                                .padding(horizontal = 14.4.dp, vertical = 13.dp),
+                            style = Type.label(11.5f, 0.1f).copy(color = if (chosen) p.accent else p.text),
+                        )
                     }
                 }
             }

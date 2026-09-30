@@ -38,11 +38,15 @@ fun hourLabel(hour: String): String = hour.replaceFirstChar { it.titlecase() }
 fun CivilDate.toLocalDate(): LocalDate = LocalDate.of(year, month, day)
 fun LocalDate.toCivil(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 
-/** The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo. */
+/**
+ * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
+ * (brought to `day` when one is asked for, as the web's #d-date), and a year's frontispiece.
+ */
 sealed interface Page {
     data class Home(val date: LocalDate) : Page
     data class Hour(val date: LocalDate, val hour: String) : Page
-    data class Ordo(val year: Int, val month: Int) : Page
+    data class Ordo(val year: Int, val month: Int, val day: Int = 0) : Page
+    data class Year(val year: Int) : Page
     data object Reminders : Page
 }
 
@@ -50,7 +54,8 @@ sealed interface Page {
 fun Page.encode(): String = when (this) {
     is Page.Home -> "home $date"
     is Page.Hour -> "hour $date $hour"
-    is Page.Ordo -> "ordo $year $month"
+    is Page.Ordo -> "ordo $year $month $day"
+    is Page.Year -> "year $year"
     Page.Reminders -> "reminders"
 }
 
@@ -59,7 +64,8 @@ fun decodePage(s: String): Page? = runCatching {
     when (f[0]) {
         "home" -> Page.Home(LocalDate.parse(f[1]))
         "hour" -> Page.Hour(LocalDate.parse(f[1]), f[2]).takeIf { it.hour in hourNames() }
-        "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt())
+        "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt(), f.getOrNull(3)?.toInt() ?: 0)
+        "year" -> Page.Year(f[1].toInt())
         "reminders" -> Page.Reminders
         else -> null
     }
@@ -201,7 +207,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     val season: String get() = when (page) {
         is Page.Home -> home?.ornament.orEmpty()
         is Page.Hour -> hour?.ornament.orEmpty()
-        is Page.Ordo, Page.Reminders -> ""
+        is Page.Ordo, is Page.Year, Page.Reminders -> ""
     }
 
     private fun load() {
@@ -222,6 +228,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         if (ordo?.let { it.year != shown.year || it.month != shown.month } == true) ordo = null
                         ordo = withContext(Dispatchers.Default) { office.ordoMonth(shown.year, shown.month) }
                     }
+                    // The frontispiece is arithmetic, drawn at once from the page itself.
+                    is Page.Year -> Unit
                     Page.Reminders -> refreshReminderStatus()
                 }
                 error = null

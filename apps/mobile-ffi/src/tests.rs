@@ -147,3 +147,18 @@ fn reminder_defaults_are_the_webs() {
     assert_eq!(chosen, ["lauds", "vespers", "compline"]);
     assert_eq!((d[0].hour_of_day, d[0].minute), (6, 45));
 }
+
+#[test]
+fn the_ordo_year_sets_out_the_tabula() {
+    let y = ordo_year(2026);
+    assert_eq!(y.roman, "MMXXVI");
+    let figures: Vec<(&str, &str)> = y.figures.iter().map(|r| (r.label.as_str(), r.value.as_str())).collect();
+    assert_eq!(
+        figures,
+        [("Golden Number", "XIII"), ("Dominical Letter", "D"), ("Sundays after Epiphany", "4"), ("Sundays after Pentecost", "25")]
+    );
+    assert!(y.figures.iter().all(|r| r.date.is_none()));
+    let easter = y.moveable.iter().find(|r| r.label == "Easter Day").unwrap();
+    assert_eq!((easter.value.as_str(), easter.date), ("April 12", Some(civil(2026, 4, 12))));
+    assert_eq!(y.ember[0].value, "March 4, 6, 7");
+}

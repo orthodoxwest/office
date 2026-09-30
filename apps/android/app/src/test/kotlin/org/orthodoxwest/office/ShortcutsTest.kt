@@ -30,7 +30,7 @@ class ShortcutsTest {
     fun eachOpensTheDayItIsTapped() {
         val evening = LocalDateTime.of(2026, 3, 15, 19, 30)
         assertEquals(Page.Hour(LocalDate.of(2026, 3, 15), "vespers"), Shortcuts.page("vespers", evening))
-        assertEquals(Page.Ordo(2026, 3), Shortcuts.page(Shortcuts.ORDO, evening))
+        assertEquals(Page.Ordo(2026, 3, 15), Shortcuts.page(Shortcuts.ORDO, evening))
         // Compline after midnight is the day before's; Lauds at that hour is already the new day's.
         val late = LocalDateTime.of(2026, 3, 16, 1, 0)
         assertEquals(Page.Hour(LocalDate.of(2026, 3, 15), "compline"), Shortcuts.page("compline", late))

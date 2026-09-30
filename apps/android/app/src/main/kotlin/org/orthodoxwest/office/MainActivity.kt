@@ -41,6 +41,7 @@ import java.time.LocalDate
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.ordoYear
 
 /** The scrims `enableEdgeToEdge` gives a three-button navigation bar by default (Android 8–9). */
 private val LIGHT_SCRIM = Color.argb(0xe6, 0xff, 0xff, 0xff)
@@ -210,15 +211,18 @@ fun OfficeApp(
                 onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
                 onOrdo = {
                     menu = false
-                    val d = when (page) {
-                        is Page.Home -> page.date
-                        is Page.Hour -> page.date
-                        is Page.Ordo -> LocalDate.of(page.year, page.month, 1)
-                        Page.Reminders -> today
-                    }
-                    onOpen(Page.Ordo(d.year, d.monthValue))
+                    // The ordo at the day shown, as the web's /calendar opens at today's row.
+                    onOpen(
+                        when (page) {
+                            is Page.Home -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                            is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                            is Page.Ordo -> Page.Ordo(page.year, page.month)
+                            is Page.Year -> Page.Year(page.year)
+                            Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                        },
+                    )
                 },
-                onOrdoCurrent = page is Page.Ordo,
+                onOrdoCurrent = page is Page.Ordo || page is Page.Year,
                 onReminders = { menu = false; onOpen(Page.Reminders) },
                 onRemindersCurrent = page is Page.Reminders,
                 theme = theme,
@@ -243,7 +247,7 @@ fun OfficeApp(
                     insets = insets,
                     onDate = { onOpen(Page.Home(it)) },
                     onHour = { d, h -> onOpen(Page.Hour(d, h)) },
-                    onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue)) },
+                    onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
                 )
                 page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
                     view = hour,
@@ -266,7 +270,20 @@ fun OfficeApp(
                     chrome = chrome,
                     insets = insets,
                     onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                    onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                    onYear = { onOpen(Page.Year(it)) },
                     onDay = { onOpen(Page.Home(it)) },
+                    focusDay = page.day,
+                )
+                page is Page.Year -> OrdoYearScreen(
+                    view = remember(page.year) { ordoYear(page.year) },
+                    today = today,
+                    chrome = chrome,
+                    insets = insets,
+                    onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                    onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                    onYear = { onOpen(Page.Year(it)) },
+                    onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
                 )
                 page is Page.Reminders -> RemindersScreen(
                     settings = reminders,

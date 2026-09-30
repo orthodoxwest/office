@@ -229,6 +229,63 @@ pub fn report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str) -> String
     issue_url(&title, &body)
 }
 
+/// One row of the Tabula Temporaria: a figure, or a date and the day it leads to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TabulaRow {
+    pub label: &'static str,
+    pub value: String,
+    pub date: Option<Date>,
+}
+
+/// The Tabula Temporaria as the printed ordo opens: the year's figures, its moveable feasts, and
+/// its Ember days.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TabulaRows {
+    pub figures: Vec<TabulaRow>,
+    pub moveable: Vec<TabulaRow>,
+    pub ember: Vec<TabulaRow>,
+}
+
+pub fn tabula(year: i32) -> TabulaRows {
+    let t = calendar::Tabula::compute(year);
+    let moveable = calendar::MoveableDates::compute(year);
+    let figure = |label, value| TabulaRow { label, value, date: None };
+    let date = |label, d: Date| TabulaRow { label, value: format!("{} {}", month_name(d), d.day()), date: Some(d) };
+    let ember = |label, e: &calendar::computus::EmberSet| TabulaRow {
+        label,
+        value: format!("{} {}, {}, {}", month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
+        date: Some(e.wed),
+    };
+    TabulaRows {
+        figures: vec![
+            figure("Golden Number", calendar::computus::roman(t.golden_number)),
+            figure("Dominical Letter", t.dominical_letter.to_string()),
+            figure("Sundays after Epiphany", t.sundays_after_epiphany.to_string()),
+            figure("Sundays after Pentecost", t.sundays_after_pentecost.to_string()),
+        ],
+        moveable: vec![
+            date("Septuagesima Sunday", moveable.septuagesima),
+            date("Ash Wednesday", moveable.ash_wednesday),
+            date("Easter Day", moveable.easter),
+            date("Ascension Day", moveable.ascension),
+            date("Pentecost", moveable.pentecost),
+            date("Corpus Christi", moveable.corpus_christi),
+            date("Advent Sunday", moveable.advent1),
+        ],
+        ember: vec![
+            ember("Spring (Lent)", &t.spring),
+            ember("Summer (Whitsun)", &t.summer),
+            ember("Autumn (Holy Cross)", &t.autumn),
+            ember("Winter (Advent)", &t.winter),
+        ],
+    }
+}
+
+/// "Anno Domini MMXXVI"'s numeral, or empty past the numerals' reach.
+pub fn year_roman(year: i32) -> String {
+    if (1..=3999).contains(&year) { calendar::computus::roman(year) } else { String::new() }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

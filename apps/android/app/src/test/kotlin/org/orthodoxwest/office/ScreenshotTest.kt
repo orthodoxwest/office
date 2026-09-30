@@ -148,11 +148,24 @@ class ScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
+    fun ordoYearNave() { show(Page.Year(2026), ThemeChoice.NAVE); shoot("ordo-year-nave") }
+
+    @Test
     fun datePicker() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
         compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
+    }
+
+    @Test
+    fun datePickerMonths() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
+        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        compose.onNodeWithText("MARCH 2026").performClick()
+        compose.waitForIdle()
+        shoot("date-picker-months-nave")
     }
 
     @Test

@@ -45,7 +45,7 @@ object Shortcuts {
      */
     fun page(target: String, now: LocalDateTime = LocalDateTime.now()): Page? {
         val today = now.toLocalDate()
-        if (target == ORDO) return Page.Ordo(today.year, today.monthValue)
+        if (target == ORDO) return Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
         if (SHOWN.none { it.first == target }) return null
         val current = currentOffice(now.hour)
         val date: LocalDate = if (current.hour == target) today.plusDays(current.dayOffset.toLong()) else today

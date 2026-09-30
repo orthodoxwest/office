@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,8 @@ import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.CommemorationView
 import org.orthodoxwest.office.core.OrdoDayView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.OrdoYearView
+import org.orthodoxwest.office.core.TabulaRowView
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
 @Composable
@@ -65,12 +69,24 @@ fun OrdoScreen(
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
     onMonth: (Int, Int) -> Unit,
+    onToday: () -> Unit,
+    onYear: (Int) -> Unit,
     onDay: (LocalDate) -> Unit,
+    focusDay: Int = 0,
 ) {
     val p = LocalPalette.current
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
     val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) { LazyListState() }
     val scope = rememberCoroutineScope()
+    // A day asked for (the web's #d-date) is brought into view once, when the month is ready;
+    // after that the reader's own scroll position stands, restored or not.
+    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0) }
+    LaunchedEffect(month != null, focused) {
+        if (month != null && !focused) {
+            listState.scrollToItem(FIRST_DAY_ITEM + focusDay - 1)
+            focused = true
+        }
+    }
     LazyColumn(
         Modifier.fillMaxSize(),
         state = listState,
@@ -78,7 +94,7 @@ fun OrdoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item(key = "chrome") { chrome() }
-        item(key = "header") { OrdoHeader(year, monthNumber, today, onMonth, Modifier.measure().padding(top = 17.6.dp)) }
+        item(key = "header") { OrdoHeader(year, monthNumber, null, today, onMonth, onToday, onYear, Modifier.measure().padding(top = 17.6.dp)) }
         item(key = "tools") {
             Row(Modifier.measure().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -115,7 +131,7 @@ fun OrdoScreen(
                 previous = Month.of(prev.second).getDisplayName(JavaTextStyle.FULL, Locale.US),
                 onPrevious = { onMonth(prev.first, prev.second) },
                 middle = "$year Ordo",
-                onMiddle = { scope.launch { listState.animateScrollToItem(0) } },
+                onMiddle = { onYear(year) },
                 nextLabel = "Next month",
                 next = Month.of(next.second).getDisplayName(JavaTextStyle.FULL, Locale.US),
                 onNext = { onMonth(next.first, next.second) },
@@ -126,8 +142,21 @@ fun OrdoScreen(
     }
 }
 
+/**
+ * The ordo's title, year navigation and month strip. `month` is the month shown, or null on the
+ * year's frontispiece, which takes "Anno Domini" and `roman` for its subtitle.
+ */
 @Composable
-private fun OrdoHeader(year: Int, month: Int, today: LocalDate, onMonth: (Int, Int) -> Unit, modifier: Modifier) {
+private fun OrdoHeader(
+    year: Int,
+    month: Int?,
+    roman: String?,
+    today: LocalDate,
+    onMonth: (Int, Int) -> Unit,
+    onToday: () -> Unit,
+    onYear: (Int) -> Unit,
+    modifier: Modifier,
+) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     Column(
@@ -142,36 +171,146 @@ private fun OrdoHeader(year: Int, month: Int, today: LocalDate, onMonth: (Int, I
     ) {
         Headpiece()
         Text("$year Ordo", Modifier.padding(top = 2.dp).semantics { heading() }, style = Type.body.copy(fontSize = 28.sp, lineHeight = 34.sp, color = p.text, fontFeatureSettings = "lnum"))
-        Text("Feasts & daily observances", Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
+        // The frontispiece reads as the printed ordo's title page.
+        val subtitle = if (month == null && !roman.isNullOrEmpty()) "Anno Domini $roman" else "Feasts & daily observances"
+        Text(subtitle, Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
+        // Previous and next year keep the page's kind: a month's, or the frontispiece.
+        val sameView = { y: Int -> if (month == null) onYear(y) else onMonth(y, month) }
         Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
             val nav = Type.body.copy(fontSize = 12.8.sp, lineHeight = 20.5.sp, color = p.accent, fontFeatureSettings = "lnum")
-            Text("‹ ${year - 1}", Modifier.weight(1f).tap(label = "Previous year, ${year - 1}") { onMonth(year - 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("‹ ${year - 1}", Modifier.weight(1f).tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
-            Text("Today", Modifier.weight(1f).tap { onMonth(today.year, today.monthValue) }.padding(12.dp).goldUnderline(today.year == year, p.goldLine, 24.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("Today", Modifier.weight(1f).tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(today.year == year, p.goldLine, 24.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
-            Text("${year + 1} ›", Modifier.weight(1f).tap(label = "Next year, ${year + 1}") { onMonth(year + 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("${year + 1} ›", Modifier.weight(1f).tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
         Hairline(p.border, Modifier.padding(top = 8.dp))
-        // The month strip: six to a row, the shown month underlined with its lozenge.
+        // The month strip: six to a row, the shown month underlined in gold, and today's month
+        // marked with the lozenge, on its underline or on the strip's hairline beneath.
         Month.entries.chunked(6).forEach { row ->
             Row(Modifier.fillMaxWidth()) {
                 row.forEach { m ->
                     val current = m.value == month
+                    val todays = today.year == year && today.monthValue == m.value
                     Box(Modifier.weight(1f).height(44.dp).tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) }, contentAlignment = Alignment.Center) {
                         Text(
                             m.getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier.drawBehind {
-                                if (current) {
-                                    val y = size.height + 4.dp.toPx()
-                                    drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
-                                    lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), o.flat, null)
-                                }
+                                val y = size.height + 4.dp.toPx()
+                                if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
+                                if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), o.flat, null)
                             },
                             style = Type.label(12.48f, 0.06f).copy(color = if (current) p.text else p.muted),
                         )
                     }
                 }
             }
+        }
+    }
+}
+
+/** The first day's item in a month's list: after the chrome, header, tools and month heading. */
+private const val FIRST_DAY_ITEM = 4
+
+/**
+ * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
+ * Tabula Temporaria. Each date leads to its day in the ordo.
+ */
+@Composable
+fun OrdoYearScreen(
+    view: OrdoYearView,
+    today: LocalDate,
+    chrome: @Composable () -> Unit,
+    insets: PaddingValues,
+    onMonth: (Int, Int) -> Unit,
+    onToday: () -> Unit,
+    onYear: (Int) -> Unit,
+    onDay: (LocalDate) -> Unit,
+) {
+    val p = LocalPalette.current
+    val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        item(key = "chrome") { chrome() }
+        item(key = "header") { OrdoHeader(view.year, null, view.roman, today, onMonth, onToday, onYear, Modifier.measure().padding(top = 17.6.dp)) }
+        item(key = "tabula") {
+            Column(Modifier.measure().padding(top = 40.dp)) {
+                TabulaHeading()
+                Figures(view.figures, Modifier.padding(top = 24.dp))
+                TabulaTable("Moveable feasts", view.moveable, onDay, Modifier.padding(top = 24.dp))
+                TabulaTable("Ember days", view.ember, onDay, Modifier.padding(top = 24.dp))
+            }
+        }
+        item(key = "footer") { Footer() }
+    }
+}
+
+/** "Tabula Temporaria" in small capitals over the ornament's double rule, its lozenge at the centre. */
+@Composable
+private fun TabulaHeading() {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    Text(
+        "Tabula Temporaria",
+        Modifier.fillMaxWidth().semantics { heading() }.drawBehind {
+            val w = 1.dp.toPx()
+            drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
+            drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
+            // Ringed in the page's ground, as the web's box-shadow parts the rules around it.
+            val c = Offset(size.width / 2f, size.height - w * 1.5f)
+            lozenge(c, 4.5.dp.toPx(), p.bg, null)
+            lozenge(c, 2.5.dp.toPx(), o.flat, null)
+        }.padding(vertical = 6.4.dp),
+        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
+    )
+}
+
+/** The year's four figures, two to a row: the numeral large in the accent, its name beneath. */
+@Composable
+private fun Figures(figures: List<TabulaRowView>, modifier: Modifier) {
+    val p = LocalPalette.current
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        figures.chunked(2).forEach { pair ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                pair.forEach { f ->
+                    Column(
+                        Modifier.weight(1f).semantics(mergeDescendants = true) {},
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        // Lining figures stand 4 and 25 level with XIII and D.
+                        Text(f.value, style = Type.body.copy(fontSize = 25.6.sp, lineHeight = 30.7.sp, color = p.accent, fontFeatureSettings = "lnum"))
+                        Text(f.label.uppercase(), Modifier.padding(top = 3.dp), style = Type.label(11.2f, 0.06f).copy(color = p.muted, textAlign = TextAlign.Center))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A titled list of dates, ruled between rows; a date that cannot share its row takes the next line whole. */
+@Composable
+private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalDate) -> Unit, modifier: Modifier) {
+    val p = LocalPalette.current
+    Column(modifier.fillMaxWidth()) {
+        Text(title.uppercase(), Modifier.fillMaxWidth().semantics { heading() }.padding(vertical = 5.6.dp), style = Type.label(11.2f, 0.06f).copy(color = p.muted))
+        Hairline(p.border)
+        rows.forEach { r ->
+            val date = r.date?.toLocalDate()
+            FlowRow(
+                Modifier.fillMaxWidth().heightIn(min = 44.dp)
+                    .then(if (date != null) Modifier.tap(label = "${r.label}, ${r.value}", action = "open the day in the ordo") { onDay(date) } else Modifier)
+                    .padding(vertical = 8.8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(r.label, Modifier.padding(end = 16.dp), style = Type.body.copy(color = p.text))
+                Text(r.value, Modifier.weight(1f, fill = false).fillMaxWidth(), softWrap = false, style = Type.body.copy(color = p.accent, textAlign = TextAlign.End))
+            }
+            Hairline(p.border)
         }
     }
 }
