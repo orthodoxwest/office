@@ -117,6 +117,63 @@ pub struct RubricSpan {
     pub prayed: bool,
 }
 
+/// A congregational posture, as the parish booklets cue it in red.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Posture {
+    Sit,
+    Stand,
+    Bow,
+    StandUpright,
+}
+
+impl Posture {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Posture::Sit => "sit",
+            Posture::Stand => "stand",
+            Posture::Bow => "bow",
+            Posture::StandUpright => "stand-upright",
+        }
+    }
+
+    /// The printed cue.
+    pub fn cue(self) -> &'static str {
+        match self {
+            Posture::Sit => "Sit.",
+            Posture::Stand => "Stand.",
+            Posture::Bow => "Bow.",
+            Posture::StandUpright => "Stand upright.",
+        }
+    }
+}
+
+/// Where a posture cue falls, counted in the verses `corpus::parse_psalm`
+/// yields for a psalm or canticle, or in the lines of a psalm doxology.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum PostureAnchor {
+    /// After the verse's " * " mediant, or at its end when it has none.
+    AfterMediant(usize),
+    /// Before the verse begins.
+    BeforeVerse(usize),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct PostureCue {
+    pub posture: Posture,
+    pub at: PostureAnchor,
+}
+
+impl PostureCue {
+    pub fn new(posture: Posture, at: PostureAnchor) -> PostureCue {
+        PostureCue { posture, at }
+    }
+}
+
+/// The cues at one anchor, in order.
+pub fn posture_cues_at(cues: &[PostureCue], at: PostureAnchor) -> impl Iterator<Item = &'static str> + '_ {
+    cues.iter().filter(move |c| c.at == at).map(|c| c.posture.cue())
+}
+
 /// One element of a composed hour, with presentation and source metadata.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OfficeElement {
@@ -128,6 +185,8 @@ pub struct OfficeElement {
     pub rubric: String,
     pub voice: Vec<VoiceSpan>,
     pub rubric_spans: Vec<RubricSpan>,
+    /// Congregational posture cues within a psalm, canticle or psalm doxology.
+    pub postures: Vec<PostureCue>,
     pub slot_ref: String,
     pub source_ref: String,
     pub source_refs: Vec<String>,
@@ -147,6 +206,7 @@ impl OfficeElement {
             rubric: String::new(),
             voice: Vec::new(),
             rubric_spans: Vec::new(),
+            postures: Vec::new(),
             slot_ref: String::new(),
             source_ref: String::new(),
             source_refs: Vec::new(),

@@ -45,7 +45,8 @@ async function openingTextLines(opening) {
     const tops = [];
     let node;
     while ((node = walker.nextNode())) {
-      if (node === el.firstChild || node.parentElement.closest(".mediant") || !node.textContent.trim()) continue;
+      // A posture cue's smaller type shares the line but not its glyph tops.
+      if (node === el.firstChild || node.parentElement.closest(".mediant, .posture") || !node.textContent.trim()) continue;
       const range = document.createRange();
       range.setStart(node, node.textContent.search(/\S/));
       range.setEnd(node, node.textContent.trimEnd().length);
@@ -1958,7 +1959,9 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     await page.setViewportSize({ width, height: 1000 });
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
-      const divided = width === 1280 && size === "normal";
+      // With its "Sit." cue the opening no longer fits one wide line in
+      // large type either, so both sizes divide at the mediant.
+      const divided = width === 1280;
       const elevated = width >= 768 && !divided;
       await expect.poll(() => opening.evaluate(el => ({
         divided: el.classList.contains("initial-divided"),
@@ -1967,9 +1970,10 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
       await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
       const geometry = await opening.evaluate(el => {
         const cap = getComputedStyle(el, "::first-letter");
-        const mediant = el.querySelector(".mediant");
         const range = document.createRange();
-        const after = mediant.nextSibling;
+        // Measure the verse's own words, past any smaller posture cue.
+        const mediant = el.querySelector(".mediant");
+        const after = mediant.nextElementSibling?.matches(".posture") ? mediant.nextElementSibling.nextSibling : mediant.nextSibling;
         const start = after.textContent.search(/\S/);
         range.setStart(after, start);
         range.setEnd(after, start + 1);
@@ -2012,11 +2016,14 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const width of [320, 390, 414, 430, 1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
-      const divided = [390, 414].includes(width) || (width === 430 && size === "large");
+      // The opening carries its "Sit." cue after the mediant: at 430px it no
+      // longer fits one line and divides there; large type at 390px leaves a
+      // three-word tail, which wraps naturally.
+      const divided = [414, 430].includes(width) || (width === 390 && size === "normal");
       await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
       await expect(opening).not.toHaveClass(/initial-raised/);
       const lines = await openingTextLines(opening);
-      const elevated = width === 1280 || (width === 430 && size === "normal");
+      const elevated = width === 1280;
       expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
       expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
       expect(await opening.textContent()).toBe(original);
@@ -2029,7 +2036,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
       await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
     }
   }
-  await page.setViewportSize({ width: 430, height: 900 });
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.evaluate(() => document.documentElement.dataset.textSize = "normal");
   await expect(opening).not.toHaveClass(/initial-divided/);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
@@ -2252,6 +2259,33 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
       }
     }
   }
+});
+
+test("posture cues sit in the psalm verses as red rubric runs", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/lauds/2026-04-23");
+  const psalm = page.locator(".psalm").nth(1);
+  const verses = psalm.locator(".psalm-verses .verse");
+  // Parish booklet, Psalm 92 at Lauds: Sit. after the first mediant, Stand.
+  // after the last, Bow. at Glory be, Stand upright. at As it was.
+  await expect(verses.first().locator(".mediant + .posture")).toHaveText("Sit.");
+  await expect(verses.last().locator(".mediant + .posture")).toHaveText("Stand.");
+  await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  const style = await psalm.locator(".posture").first().evaluate((cue) => {
+    const probe = document.createElement("span");
+    probe.className = "rubric";
+    cue.parentElement.appendChild(probe);
+    const rubric = getComputedStyle(probe).color;
+    probe.remove();
+    const verse = cue.closest(".verse");
+    return {
+      color: getComputedStyle(cue).color,
+      rubric,
+      smaller: parseFloat(getComputedStyle(cue).fontSize) < parseFloat(getComputedStyle(verse).fontSize),
+    };
+  });
+  expect(style.color).toBe(style.rubric);
+  expect(style.smaller).toBe(true);
 });
 
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
@@ -3414,6 +3448,7 @@ test("long opening verses return to the numbered text edge below the initial", a
       await page.evaluate((value) => document.documentElement.setAttribute("data-text-size", value), size);
       const geometry = await page.locator(".psalm-verses").first().evaluate((psalm) => {
         const opening = psalm.querySelector(".verse");
+        const leading = parseFloat(getComputedStyle(opening).lineHeight);
         const walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
         const lines = new Map();
         let node;
@@ -3428,7 +3463,8 @@ test("long opening verses return to the numbered text edge below the initial", a
             const rect = range.getBoundingClientRect();
             // Mediant has an optical vertical offset; it is not a new line.
             if (node.parentElement.closest(".mediant")) continue;
-            const y = Math.round(rect.top);
+            // A smaller posture cue has its own glyph top on the same line.
+            const y = [...lines.keys()].find((top) => Math.abs(top - rect.top) < leading / 2) ?? Math.round(rect.top);
             lines.set(y, Math.min(lines.get(y) ?? Infinity, rect.left));
           }
         }

@@ -165,7 +165,9 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
-for (const [width, theme, divided] of [[390, "light", true], [430, "dark", false]]) {
+// Psalm 63's opening carries its "Sit." cue: it divides at the mediant from
+// 390px up to 430px and wraps naturally only on the narrowest screens.
+for (const [width, theme, divided] of [[390, "light", true], [320, "dark", false]]) {
   test(`mobile psalm opening at ${width}px — ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 600 });
     await openForSnapshot(page, "/lauds/2026-09-13", theme);
