@@ -1,0 +1,17 @@
+[package]
+name = "presentation"
+version = "0.1.0"
+description = "How the Office is named on every front: days, seasons, dates, the hour being prayed now, home's invitation, and the report link"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+calendar.workspace = true
+liturgy.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+wildcard_enum_match_arm = "deny"

@@ -39,20 +39,29 @@ async function choosePreference(page, name) {
 }
 
 // The raised initial increases the line box without adding a line of text.
+function textLinesIn(el) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const tops = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    // A posture cue's smaller type shares the line but not its glyph tops.
+    if (node === el.firstChild || node.parentElement.closest(".mediant, .posture") || !node.textContent.trim()) continue;
+    const range = document.createRange();
+    range.setStart(node, node.textContent.search(/\S/));
+    range.setEnd(node, node.textContent.trimEnd().length);
+    for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
+  }
+  return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
+}
+
 async function openingTextLines(opening) {
-  return opening.evaluate(el => {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    const tops = [];
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node === el.firstChild || node.parentElement.closest(".mediant") || !node.textContent.trim()) continue;
-      const range = document.createRange();
-      range.setStart(node, node.textContent.search(/\S/));
-      range.setEnd(node, node.textContent.trimEnd().length);
-      for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
-    }
-    return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
-  });
+  return opening.evaluate(textLinesIn);
+}
+
+// Every match in one round trip: an element-by-element loop over a whole
+// alphabet of specimens costs hundreds of protocol calls per layout.
+async function openingsTextLines(page, selector) {
+  return page.evaluate(`[...document.querySelectorAll(${JSON.stringify(selector)})].map(${textLinesIn})`);
 }
 
 // Contour-fitting deliberately puts text inside the initial's rectangular
@@ -61,6 +70,20 @@ async function openingTextLines(opening) {
 async function expectInitialInkClear(page, specimen, capSelector, label, baselineWord = null) {
   await specimen.evaluate(el => el.setAttribute("data-ink-specimen", ""));
   const root = "[data-ink-specimen]";
+  // Only the specimen, padded for an initial that overhangs its box, is read:
+  // decoding a whole long page costs seconds per layer.
+  const clip = await specimen.evaluate(el => {
+    const pad = 64;
+    const box = el.getBoundingClientRect();
+    const doc = document.documentElement;
+    const x = Math.max(0, Math.floor(box.left + scrollX - pad));
+    const y = Math.max(0, Math.floor(box.top + scrollY - pad));
+    return {
+      x, y,
+      width: Math.min(doc.scrollWidth, Math.ceil(box.right + scrollX + pad)) - x,
+      height: Math.min(doc.scrollHeight, Math.ceil(box.bottom + scrollY + pad)) - y,
+    };
+  });
   const layers = [];
   try {
     for (const cap of [true, false]) {
@@ -74,8 +97,8 @@ async function expectInitialInkClear(page, specimen, capSelector, label, baselin
       ` });
       try {
         // Whole-page coordinates remain stable when a specimen exceeds the
-        // mobile visual viewport; a clipped element screenshot can scroll it.
-        layers.push((await page.screenshot({ fullPage: true, animations: "disabled" })).toString("base64"));
+        // mobile visual viewport; an element screenshot can scroll it.
+        layers.push((await page.screenshot({ fullPage: true, clip, animations: "disabled" })).toString("base64"));
       } finally {
         await style.evaluate(el => el.remove());
       }
@@ -1958,7 +1981,9 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     await page.setViewportSize({ width, height: 1000 });
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
-      const divided = width === 1280 && size === "normal";
+      // With its "Sit." cue the opening no longer fits one wide line in
+      // large type either, so both sizes divide at the mediant.
+      const divided = width === 1280;
       const elevated = width >= 768 && !divided;
       await expect.poll(() => opening.evaluate(el => ({
         divided: el.classList.contains("initial-divided"),
@@ -1967,9 +1992,10 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
       await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
       const geometry = await opening.evaluate(el => {
         const cap = getComputedStyle(el, "::first-letter");
-        const mediant = el.querySelector(".mediant");
         const range = document.createRange();
-        const after = mediant.nextSibling;
+        // Measure the verse's own words, past any smaller posture cue.
+        const mediant = el.querySelector(".mediant");
+        const after = mediant.nextElementSibling?.matches(".posture") ? mediant.nextElementSibling.nextSibling : mediant.nextSibling;
         const start = after.textContent.search(/\S/);
         range.setStart(after, start);
         range.setEnd(after, start + 1);
@@ -2012,11 +2038,14 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const width of [320, 390, 414, 430, 1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
-      const divided = [390, 414].includes(width) || (width === 430 && size === "large");
+      // The opening carries its "Sit." cue after the mediant: at 430px it no
+      // longer fits one line and divides there; large type at 390px leaves a
+      // three-word tail, which wraps naturally.
+      const divided = [414, 430].includes(width) || (width === 390 && size === "normal");
       await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
       await expect(opening).not.toHaveClass(/initial-raised/);
       const lines = await openingTextLines(opening);
-      const elevated = width === 1280 || (width === 430 && size === "normal");
+      const elevated = width === 1280;
       expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
       expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
       expect(await opening.textContent()).toBe(original);
@@ -2029,7 +2058,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
       await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
     }
   }
-  await page.setViewportSize({ width: 430, height: 900 });
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.evaluate(() => document.documentElement.dataset.textSize = "normal");
   await expect(opening).not.toHaveClass(/initial-divided/);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
@@ -2085,11 +2114,12 @@ test("single-line initials clear the following verse across the alphabet and fal
         ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
       }) : null;
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-      for (const opening of await page.locator(".verse:first-child").all()) {
-        await expect(opening).toHaveClass(/initial-elevated/);
-        await expect(opening).not.toHaveClass(/initial-raised/);
-        expect(await openingTextLines(opening)).toBeCloseTo(1, 1);
-      }
+      await expect.poll(() => page.locator(".verse:first-child").evaluateAll(els => els.map(el => el.className))).toEqual(
+        Array(words.length).fill(expect.stringMatching(/^(?!.*\binitial-raised\b).*\binitial-elevated\b/)),
+      );
+      const lines = await openingsTextLines(page, ".verse:first-child");
+      expect(lines).toHaveLength(words.length);
+      for (const count of lines) expect(count).toBeCloseTo(1, 1);
       await expectInitialInkClear(page, page.locator(".elements"), ".verse:first-child", `${size}/${fallback} alphabet clears numbered verses`);
       if (override) await override.evaluate(el => el.remove());
     }
@@ -2252,6 +2282,33 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
       }
     }
   }
+});
+
+test("posture cues sit in the psalm verses as red rubric runs", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/lauds/2026-04-23");
+  const psalm = page.locator(".psalm").nth(1);
+  const verses = psalm.locator(".psalm-verses .verse");
+  // Parish booklet, Psalm 92 at Lauds: Sit. after the first mediant, Stand.
+  // after the last, Bow. at Glory be, Stand upright. at As it was.
+  await expect(verses.first().locator(".mediant + .posture")).toHaveText("Sit.");
+  await expect(verses.last().locator(".mediant + .posture")).toHaveText("Stand.");
+  await expect(psalm.locator(".gloria-patri .source-line > .posture")).toHaveText(["Bow.", "Stand upright."]);
+  const style = await psalm.locator(".posture").first().evaluate((cue) => {
+    const probe = document.createElement("span");
+    probe.className = "rubric";
+    cue.parentElement.appendChild(probe);
+    const rubric = getComputedStyle(probe).color;
+    probe.remove();
+    const verse = cue.closest(".verse");
+    return {
+      color: getComputedStyle(cue).color,
+      rubric,
+      smaller: parseFloat(getComputedStyle(cue).fontSize) < parseFloat(getComputedStyle(verse).fontSize),
+    };
+  });
+  expect(style.color).toBe(style.rubric);
+  expect(style.smaller).toBe(true);
 });
 
 test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
@@ -2506,14 +2563,11 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   const printStyles = await page.evaluate(() => {
     const body = getComputedStyle(document.body);
     const elements = getComputedStyle(document.querySelector(".elements"));
-    // Review progress can make this office fully verified, which omits the banner.
-    const banner = document.querySelector(".site-banner");
     return {
       bodyFont: parseFloat(body.fontSize),
       prayerFont: parseFloat(elements.fontSize),
       prayerMaxWidth: elements.maxWidth,
       headerDisplay: getComputedStyle(document.querySelector("header")).display,
-      bannerDisplay: banner ? getComputedStyle(banner).display : "none",
       sessionSummaryDisplay: getComputedStyle(
         document.querySelector(".session-prayers > summary"),
       ).display,
@@ -2527,7 +2581,6 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   // the full sheet width, which ran to 120-odd characters a line.
   expect(parseFloat(printStyles.prayerMaxWidth)).toBeCloseTo(30 * printStyles.bodyFont, 0);
   expect(printStyles.headerDisplay).toBe("none");
-  expect(printStyles.bannerDisplay).toBe("none");
   expect(printStyles.sessionSummaryDisplay).toBe("none");
   await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
 });
@@ -3139,6 +3192,11 @@ function easternDay(offsetDays = 0) {
 // that page was rendered; most of these tests care only about the scope.
 const scopes = (events) => events.map(body => body.split(" ")[0]);
 
+// Any key or pointer press engages the page. A bare Shift does so without a
+// click that may land on a link (the home hour directory fills the middle of
+// a phone screen) and start a navigation that races the test's next goto.
+const engage = (page) => page.keyboard.press("Shift");
+
 // A person, not the default HeadlessChrome agent the server drops as a bot.
 const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
@@ -3169,13 +3227,13 @@ test("engaged visits to a current page send an event, passive and background one
   expect(scopes(events)).toEqual(["lauds"]);
 
   await page.goto(`/?date=${easternDay()}`);
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect.poll(() => events.length).toBe(2);
   expect(scopes(events)[1]).toBe("site");
 
   // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect(page.getByRole("heading", { name: "Daily usage", exact: true })).toBeVisible();
   expect(events.length).toBe(2);
 });
@@ -3189,7 +3247,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   // Deep past, far future, and a distant ordo year: all render, none report.
   for (const path of ["/lauds/2019-03-04", "/?date=2045-06-01", "/calendar/2050", "/vespers/2031-12-25"]) {
     await page.goto(path);
-    await page.mouse.click(200, 300);
+    await engage(page);
     await page.waitForTimeout(300);
     await expect(page.locator("body")).toBeVisible();
   }
@@ -3198,7 +3256,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   // Yesterday and tomorrow are ordinary use, not archive.
   for (const day of [easternDay(-1), easternDay(1)]) {
     await page.goto(`/lauds/${day}`);
-    await page.mouse.click(200, 300);
+    await engage(page);
   }
   await expect.poll(() => events.length).toBe(2);
 });
@@ -3211,7 +3269,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
   });
   const year = new Date().getFullYear();
   await page.goto(`/calendar/${year}/01`);
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect.poll(() => events.length).toBe(1);
   expect(scopes(events)).toEqual(["ordo"]);
 });
@@ -3230,7 +3288,7 @@ test("generating a reminder feed link is tracked separately from viewing the pag
     });
   });
   await page.goto("/reminders");
-  await page.mouse.click(200, 300);
+  await engage(page);
   // Merely opening and engaging with the page reports "site", never "reminders".
   await expect.poll(() => scopes(events)).toEqual(["site"]);
 
@@ -3248,7 +3306,7 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   const read = async (label) => {
     events.length = 0;
     await page.goto(`/vespers/${easternDay()}`);
-    await page.mouse.click(200, 300);
+    await engage(page);
     await expect.poll(() => events.length, { message: label }).toBe(1);
     return events[0];
   };
@@ -3277,7 +3335,7 @@ test.describe("on a screen with a mouse", () => {
     const read = async (label) => {
       events.length = 0;
       await page.goto(`/vespers/${easternDay()}`);
-      await page.mouse.click(200, 300);
+      await engage(page);
       await expect.poll(() => events.length, { message: label }).toBe(1);
       return events[0];
     };
@@ -3306,7 +3364,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
   // One browser reading several hours is one visitor, however many pages.
   for (const hour of ["lauds", "prime", "vespers"]) {
     await reader.goto(`/${hour}/${easternDay()}`);
-    await reader.mouse.click(200, 300);
+    await engage(reader);
     await reader.waitForTimeout(300);
   }
   expect(await today(reader)).toBe(before + 1);
@@ -3319,7 +3377,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
     });
     const bot = await botCtx.newPage();
     await bot.goto(path);
-    await bot.mouse.click(200, 300);
+    await engage(bot);
     await bot.waitForTimeout(300);
     await botCtx.close();
   }
@@ -3418,6 +3476,7 @@ test("long opening verses return to the numbered text edge below the initial", a
       await page.evaluate((value) => document.documentElement.setAttribute("data-text-size", value), size);
       const geometry = await page.locator(".psalm-verses").first().evaluate((psalm) => {
         const opening = psalm.querySelector(".verse");
+        const leading = parseFloat(getComputedStyle(opening).lineHeight);
         const walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
         const lines = new Map();
         let node;
@@ -3432,7 +3491,8 @@ test("long opening verses return to the numbered text edge below the initial", a
             const rect = range.getBoundingClientRect();
             // Mediant has an optical vertical offset; it is not a new line.
             if (node.parentElement.closest(".mediant")) continue;
-            const y = Math.round(rect.top);
+            // A smaller posture cue has its own glyph top on the same line.
+            const y = [...lines.keys()].find((top) => Math.abs(top - rect.top) < leading / 2) ?? Math.round(rect.top);
             lines.set(y, Math.min(lines.get(y) ?? Infinity, rect.left));
           }
         }
@@ -3787,17 +3847,6 @@ test("Compline openings preserve words and align response columns around the ble
     expect(blessingText.left).toBeCloseTo(blessingText.reference, 0);
     expect(blessingText.width).toBeGreaterThan(200);
     expect(blessingText.right).toBeLessThanOrEqual(width);
-
-    // The notice follows the selected form's text provenance (the server's
-    // show_vetting_banner tests decide when); with the corpus verified it
-    // may not show. When it does, it stays compact and dismissible.
-    const banner = page.locator(".site-banner:visible");
-    if (await banner.count()) {
-      expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
-      expect((await banner.boundingBox()).height).toBeLessThan(100);
-      await banner.getByRole("button", { name: "Dismiss review notice" }).click();
-      await expect(banner).toHaveCount(0);
-    }
   }
 });
 
@@ -3817,21 +3866,31 @@ test("Office prayer instructions retain spacing and Marian collects share initia
   }
 });
 
-test("Apse clears the report line from the starfield", async ({ page }) => {
+// The report line clears its own glyphs, as the footer lettering does, and
+// leaves the stars around it: an opaque ground across its touch-target box
+// erased a whole row of the vault on phones.
+test("Apse clears the report lettering, not a band of the starfield", async ({ page }) => {
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/vespers/2026-09-22", "dark");
-    const grounds = await page.locator(".report-issue:visible").evaluateAll(els => {
-      const ground = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-      const probe = document.createElement("span");
-      probe.style.backgroundColor = ground;
-      document.body.append(probe);
-      const expected = getComputedStyle(probe).backgroundColor;
-      probe.remove();
-      return els.map(el => ({ background: getComputedStyle(el).backgroundColor, expected }));
-    });
-    expect(grounds.length).toBe(1);
-    for (const ground of grounds) expect(ground.background).toBe(ground.expected);
+    const lines = await page.locator(".report-issue:visible").evaluateAll(els =>
+      els.map(el => {
+        const style = getComputedStyle(el);
+        return {
+          background: style.backgroundColor,
+          boxShadow: style.boxShadow,
+          textShadow: style.textShadow,
+          footerShadow: getComputedStyle(document.querySelector("footer")).textShadow,
+        };
+      }),
+    );
+    expect(lines.length).toBe(1);
+    for (const line of lines) {
+      expect(line.background).toBe("rgba(0, 0, 0, 0)");
+      expect(line.boxShadow).toBe("none");
+      expect(line.textShadow).not.toBe("none");
+      expect(line.textShadow).toBe(line.footerShadow);
+    }
   }
 });
 

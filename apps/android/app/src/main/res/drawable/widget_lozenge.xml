@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The day's liturgical colour, as the lozenge on the hour title's double rule; tinted in code. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="9dp"
+    android:height="9dp"
+    android:viewportWidth="10"
+    android:viewportHeight="10">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M5,0L10,5L5,10L0,5Z" />
+</vector>

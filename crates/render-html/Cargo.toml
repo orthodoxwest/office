@@ -11,6 +11,7 @@ calendar.workspace = true
 data-format.workspace = true
 corpus.workspace = true
 liturgy.workspace = true
+presentation.workspace = true
 minijinja.workspace = true
 serde.workspace = true
 

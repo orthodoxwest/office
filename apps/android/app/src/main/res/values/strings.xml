@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Divine Office</string>
+    <string name="widget_description">Today\'s feast and the hour to pray</string>
+    <!-- What the widget picker's preview shows. -->
+    <string name="widget_preview_date">Sunday, March 15</string>
+    <string name="widget_preview_feast">III Sunday in Lent</string>
+    <string name="widget_preview_pray">Pray Vespers</string>
+</resources>

@@ -2,7 +2,7 @@
 //! the typography every run of display text passes through.
 
 use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use liturgy::{ElementType, OfficeElement, VoiceRole, VoiceSpan};
+use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, VoiceRole, VoiceSpan, posture_cues_at};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
@@ -40,12 +40,12 @@ pub fn render_section_elements(elems: &[OfficeElement]) -> String {
     let mut i = 0;
     while i < elems.len() {
         let elem = &elems[i];
-        let mut doxology = "";
+        let mut doxology = None;
         if i + 1 < elems.len()
             && matches!(elem.kind, ElementType::Psalm | ElementType::Canticle)
             && elems[i + 1].kind == ElementType::PsalmDoxology
         {
-            doxology = &elems[i + 1].text;
+            doxology = Some(&elems[i + 1]);
             i += 1;
         }
         sb.push_str(&render_office_element(elem, doxology));
@@ -65,7 +65,7 @@ pub fn render_section_heading(label: &str) -> String {
     format!("<h2 class=\"section-heading\">{}</h2>", esc_text(label))
 }
 
-fn render_office_element(elem: &OfficeElement, doxology: &str) -> String {
+fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>) -> String {
     let mut sb = String::new();
     match elem.kind {
         ElementType::Heading => sb.push_str(&render_section_heading(&elem.text)),
@@ -103,9 +103,9 @@ fn render_office_element(elem: &OfficeElement, doxology: &str) -> String {
                 }
                 sb.push_str("</h3>");
             }
-            sb.push_str(&render_psalm_verses(&elem.text));
-            if !doxology.is_empty() {
-                sb.push_str(&render_gloria_patri(doxology));
+            sb.push_str(&render_psalm_verses(&elem.text, &elem.postures));
+            if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
+                sb.push_str(&render_gloria_patri(&doxology.text, &doxology.postures));
             }
             sb.push_str("</div>");
         }
@@ -164,14 +164,19 @@ fn render_office_element(elem: &OfficeElement, doxology: &str) -> String {
             sb.push_str(&render_liturgical_block(&elem.text));
             sb.push_str("</div>");
         }
-        ElementType::PsalmDoxology => sb.push_str(&render_gloria_patri(&elem.text)),
+        ElementType::PsalmDoxology => sb.push_str(&render_gloria_patri(&elem.text, &elem.postures)),
     }
     sb
 }
 
+/// Posture cues at one anchor, each a red rubric run.
+fn posture_html(cues: &[PostureCue], at: PostureAnchor) -> String {
+    posture_cues_at(cues, at).map(|cue| format!("<span class=\"posture\">{cue}</span> ")).collect()
+}
+
 /// A psalm or canticle. A scripture reference precedes the verses so the
 /// first verse is the first child of `.psalm-verses` and takes the drop cap.
-pub fn render_psalm_verses(text: &str) -> String {
+pub fn render_psalm_verses(text: &str, postures: &[PostureCue]) -> String {
     let psalm = parse_psalm(text);
     let mut sb = String::new();
     if !psalm.scripture_ref.is_empty() {
@@ -179,6 +184,7 @@ pub fn render_psalm_verses(text: &str) -> String {
     }
     sb.push_str("<div class=\"psalm-verses\">");
     let mut drop_cap_next = true;
+    let mut verse = 0;
     for item in &psalm.items {
         match item {
             PsalmItem::Section { heading } => {
@@ -212,11 +218,18 @@ pub fn render_psalm_verses(text: &str) -> String {
                         esc_text(number)
                     ));
                 }
+                sb.push_str(&posture_html(postures, PostureAnchor::BeforeVerse(verse)));
                 sb.push_str(&esc_cross(&first));
+                let after_mediant = posture_html(postures, PostureAnchor::AfterMediant(verse));
                 if !second.is_empty() {
                     sb.push_str(MEDIANT);
+                    sb.push_str(&after_mediant);
                     sb.push_str(&esc_cross(second));
+                } else if !after_mediant.is_empty() {
+                    sb.push(' ');
+                    sb.push_str(after_mediant.trim_end());
                 }
+                verse += 1;
                 if !number.is_empty() {
                     sb.push_str("</span>");
                 }
@@ -552,16 +565,18 @@ fn is_hymn_amen(stanza: &[String]) -> bool {
 }
 
 /// The Gloria Patri as two pointed lines.
-pub fn render_gloria_patri(text: &str) -> String {
+pub fn render_gloria_patri(text: &str, postures: &[PostureCue]) -> String {
     let trimmed = text.trim();
     let lines: Vec<&str> = trimmed.split('\n').collect();
     let (line1, line2) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
     let mut sb = String::from("<p class=\"gloria-patri\">");
     if line2.is_empty() {
+        sb.push_str(&posture_html(postures, PostureAnchor::BeforeVerse(0)));
         sb.push_str(&chant_line_html(line1));
     } else {
-        for line in [line1, line2] {
-            sb.push_str(&format!("{SOURCE_LINE_OPEN}{}</span>", chant_line_html(line)));
+        for (n, line) in [line1, line2].into_iter().enumerate() {
+            let cue = posture_html(postures, PostureAnchor::BeforeVerse(n));
+            sb.push_str(&format!("{SOURCE_LINE_OPEN}{cue}{}</span>", chant_line_html(line)));
         }
     }
     sb.push_str("</p>");

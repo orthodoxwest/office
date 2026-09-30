@@ -1923,6 +1923,15 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   line-height: 1.5;
 }
 
+/* Congregational posture cues inside psalmody (Sit., Stand., Bow., Stand
+   upright.), set as the parish booklets set them: red roman runs in the verse.
+   Inline, so the line height is the verse's own. */
+.posture {
+  color: var(--rubric);
+  font-style: normal;
+  font-size: 0.9em;
+}
+
 /* Rubrics may quote a prayer-name or an actual spoken response. The composed
    element, not a text-matching rule, marks those small runs as prayer. */
 .rubric-prayed {
@@ -2544,60 +2553,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 .elements > .session-prayers:first-child > summary {
   margin-top: 0;
-}
-
-/* ── Review notice ──
-   This belongs to the opening flow of an unvetted hour. It used to be fixed
-   to the bottom of the viewport, where it covered several lines of prayer on
-   a phone and forced every page to reserve a deep bottom gutter. Inline, it
-   is encountered before prayer begins and then scrolls away naturally.
-   It reads as a rubric line, not a card: no filled panel and no coloured
-   edge competing with the prayer that follows — the caution lives in the
-   wording, and the hour-header rule above already frames it. */
-
-.site-banner {
-  position: relative;
-  width: 100%;
-  max-width: 38rem;
-  margin: -0.5rem auto 0;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-  padding: 0.35rem 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.15rem 0.65rem;
-  text-align: left;
-}
-
-.site-banner p {
-  flex: 1 1 12rem;
-  margin: 0;
-}
-
-.site-banner button {
-  margin-left: 0;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  min-height: var(--touch-target);
-  min-width: var(--touch-target);
-  padding: 0 0.5rem;
-  flex-shrink: 0;
-}
-
-.site-banner button:hover {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 /* ── Offline state ── */
@@ -4991,7 +4946,6 @@ body.season-eastertide {
 .month-jump a,
 .month-top,
 .year-nav a,
-.site-banner button,
 .skip-link {
   -webkit-tap-highlight-color: transparent;
 }
@@ -5024,8 +4978,7 @@ body.season-eastertide {
 .hour-continuation a:active,
 .month-jump a:active,
 .month-top:active,
-.year-nav a:active,
-.site-banner button:active {
+.year-nav a:active {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
 }
@@ -5477,13 +5430,11 @@ body {
   --apse-vault: none;
   --apse-gild: none;
   --apse-ink: transparent;
-  --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
-    --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-ink: var(--ornament);
     --apse-gild: var(--apse-gilding);
@@ -5492,7 +5443,6 @@ body {
 }
 
 :root[data-theme="dark"] body {
-  --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-ink: var(--ornament);
   --apse-gild: var(--apse-gilding);
@@ -5584,20 +5534,47 @@ body.page-hour footer::after {
   mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
 }
 
+/* A phone's ending is short: without the footer preferences the epilogue
+   and footer together are about 2.5 tiles tall, and the fades above (made
+   for the desktop ending) left one full-strength row between ghost rows,
+   a narrow band floating between blank wall. Here the ending makes room
+   for the vault instead: air between the continuation and the report
+   line, and a margin of sky below the footer. The epilogue's fade is set
+   from its bottom, so it reaches full strength at the seam whatever the
+   epilogue's height, and the footer only thins, running off the screen's
+   foot as the vault continues past it. */
+@media (max-width: 700px) {
+  body.page-hour .report-issue {
+    margin-top: 4.5rem;
+  }
+
+  body.page-hour footer {
+    padding-bottom: 4.5rem;
+  }
+
+  body.page-hour .hour-epilogue::before {
+    -webkit-mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
+    mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
+  }
+
+  body.page-hour footer::after {
+    -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
+    mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
+  }
+}
+
 /* The ending's stars sit straight on the wall, as the home vault's do.
    A flat night ground once eased in beneath them to quiet the plaster, but
    Apse's plaster varies by under a level, and the ground's fade over so
    smooth a dark field banded into horizontal lines in software rendering. */
 
-/* Keep the existing footer lettering treatment. */
-body:is(.page-home, .page-hour) footer {
-  text-shadow: var(--apse-copy-shadow);
-}
-
-/* Clear the complete report line, including spaces between its glyphs. */
+/* The footer and report lettering each carry their own soft clearing, so
+   the vault runs on around them. The report line once sat on an opaque
+   ground; on a phone its touch-target box plus the ground's spread came to
+   half a tile, which erased a whole row of stars across the screen. */
+body:is(.page-home, .page-hour) footer,
 body.page-hour .report-issue {
-  background-color: var(--apse-ground);
-  box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
+  text-shadow: var(--apse-copy-shadow);
 }
 
 @media (min-width: 701px) {
@@ -5749,7 +5726,6 @@ body.page-home::before {
   .not-today-notice,
   .color-band,
   .hour-scroll-progress,
-  .site-banner,
   .offline-indicator {
     display: none;
   }
@@ -5851,6 +5827,7 @@ body.page-home::before {
   /* ℣, ℟ and their spelled-out forms are rubrics too; the booklet sets them
      in its rubric red, and grey here made them read as page furniture. */
   .rubric,
+  .posture,
   .prayer-speaker,
   .cross,
   .sigil,

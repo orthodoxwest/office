@@ -7,9 +7,10 @@ use minijinja::{AutoEscape, Environment};
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
-use crate::links::{home_link, hour_link, nav_link, season_label, title_case};
+use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
 use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
+use presentation::{season_label, title_case};
 
 const TEMPLATES: [(&str, &str); 9] = [
     ("layout.html", include_str!("../templates/layout.html")),
@@ -65,18 +66,9 @@ impl Pages {
     }
 
     /// A composed hour. With leader forms, the forms' sections are aligned
-    /// into one page and the review banner follows the forms that need it.
+    /// into one page.
     pub fn hour(&self, data: &mut HourData, forms: &[(liturgy::PrayerForm, &liturgy::OfficeHour)]) -> Result<String, String> {
         if !data.leader_forms.is_empty() {
-            data.show_banner = false;
-            data.banner_forms.clear();
-            for form in &data.leader_forms {
-                if form.show_banner {
-                    data.show_banner = true;
-                    data.banner_forms.push_str(&form.form);
-                    data.banner_forms.push(' ');
-                }
-            }
             data.leader_sections = leader_sections(forms)?;
         }
         self.render("hour.html", data)
@@ -107,7 +99,7 @@ impl Pages {
 #[cfg(test)]
 mod tests {
     use super::{Pages, TEMPLATES};
-    use crate::links::{season_class, static_url};
+    use crate::links::static_url;
     use crate::view::{CalendarData, Chrome, HomeData};
 
     fn source(name: &str) -> &'static str {
@@ -148,26 +140,6 @@ mod tests {
         assert!(html.contains(r##"href="#invalid-url""##));
         assert!(html.ends_with("<strong>Trusted &amp; text</strong>"));
         assert!(pages.env.render_str("{{ missing }}", ()).is_err());
-    }
-
-    #[test]
-    fn hour_includes_inline_construction_banner() {
-        let body = source("hour.html");
-        has_all(
-            body,
-            &[
-                "{% if show_banner %}",
-                r#"<aside class="site-banner""#,
-                r#"id="site-banner""#,
-                r#"aria-label="Review notice""#,
-                "data-dismiss-banner",
-                "Not fully checked against the printed books",
-            ],
-        );
-        let (header, banner, elements) =
-            (at(body, r#"class="hour-header"#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
-        assert!(header < banner && banner < elements, "the notice sits between the hour header and the prayers");
-        assert!(!source("layout.html").contains(r#"class="site-banner""#), "the shared layout has no hour banner");
     }
 
     #[test]
@@ -241,13 +213,6 @@ mod tests {
     }
 
     #[test]
-    fn hour_review_banner_uses_consistent_accessible_names() {
-        let body = source("hour.html");
-        has_all(body, &[r#"aria-label="Review notice""#, r#"aria-label="Dismiss review notice""#]);
-        assert!(!body.contains("development notice"));
-    }
-
-    #[test]
     fn home_groups_hours_without_breaking_client_selectors() {
         let body = source("home.html");
         has_all(
@@ -304,18 +269,6 @@ mod tests {
         assert!(source("macros.html").contains(r##"<use href="#icon-fish"/>"##), "fish instances use the symbol");
         let paths: usize = TEMPLATES.iter().map(|(_, s)| s.matches("M1 6 C5 1.2").count()).sum();
         assert_eq!(paths, 1, "the fish path is defined once");
-    }
-
-    #[test]
-    fn season_class_veils_passiontide_and_brightens_paschaltide() {
-        use calendar::Season;
-        assert_eq!(season_class(Some(Season::Passiontide)), "season-passiontide");
-        assert_eq!(season_class(Some(Season::Easter)), "season-eastertide");
-        // Lent is deliberately unveiled: the veiling begins at Passion Sunday.
-        for s in [Season::Lent, Season::Advent, Season::Christmas, Season::Epiphany, Season::Septuagesima, Season::Pentecost] {
-            assert_eq!(season_class(Some(s)), "", "{s:?}");
-        }
-        assert_eq!(season_class(None), "");
     }
 
     #[test]

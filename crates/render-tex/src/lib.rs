@@ -4,7 +4,7 @@
 use calendar::{Color, Season};
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, RubricSpan, VoiceRole};
+use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at};
 
 const PREAMBLE: &str = include_str!("preamble.tex");
 
@@ -135,7 +135,7 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
             if !elem.label.is_empty() {
                 b.push_str(&format!("\n\\psalmlabel{{{}}}{{{}}}\n\n", tex_line(&elem.label), tex_line(&elem.incipit)));
             }
-            b.push_str(&format_psalm(&elem.text, &elem.label, elem.kind, chant));
+            b.push_str(&format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, chant));
         }
         ElementType::Hymn => {
             if !elem.label.is_empty() {
@@ -143,7 +143,7 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
             }
             b.push_str(&format_hymn(&elem.text, &elem.label, chant));
         }
-        ElementType::PsalmDoxology => b.push_str(&format_gloria_patri(&elem.text)),
+        ElementType::PsalmDoxology => b.push_str(&format_gloria_patri(&elem.text, &elem.postures)),
         ElementType::Prayer | ElementType::Reading => {
             if elem.voice.len() == 1 && !elem.voice[0].spoken && elem.voice[0].text == elem.text {
                 b.push_str("{\\color{mutedgray}\n");
@@ -201,7 +201,20 @@ fn format_rubric(elem: &OfficeElement) -> String {
     b
 }
 
-fn format_psalm(text: &str, label: &str, kind: ElementType, chant: Option<&Chant<'_>>) -> String {
+/// Posture cues at one anchor, as red rubric runs.
+fn posture_tex(cues: &[PostureCue], at: PostureAnchor) -> String {
+    posture_cues_at(cues, at).map(|cue| format!("\\rubric{{{cue}}} ")).collect()
+}
+
+/// A half-verse's cues after the mediant, or at the verse's end without one.
+fn verse_halves(first: &str, second: &str, before: String, after: String) -> String {
+    if second.is_empty() {
+        return format!("{before}{first}{}", if after.is_empty() { String::new() } else { format!(" {}", after.trim_end()) });
+    }
+    format!("{before}{first}\\mediant{{}}{after}{second}")
+}
+
+fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureCue], chant: Option<&Chant<'_>>) -> String {
     let category = if kind == ElementType::Canticle { "canticles" } else { "psalms" };
     if let Some(score) = chant.and_then(|c| c.score(category, &label_to_slug(label, kind))) {
         return score;
@@ -215,6 +228,7 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, chant: Option<&Chant
     // The first verse of each block takes the gilt initial; a Gloria never
     // does; a section break re-arms it.
     let mut first_verse = true;
+    let mut verse = 0;
     for item in &psalm.items {
         match item {
             PsalmItem::Section { heading } => {
@@ -232,22 +246,18 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, chant: Option<&Chant
                 }
             }
             PsalmItem::Verse { number, first, second } => {
+                let before = posture_tex(postures, PostureAnchor::BeforeVerse(verse));
+                let after = posture_tex(postures, PostureAnchor::AfterMediant(verse));
+                verse += 1;
+                let second = if second.is_empty() { String::new() } else { tex_line(second) };
                 if first_verse {
                     first_verse = false;
                     if number.is_empty() {
-                        if second.is_empty() {
-                            b.push_str(&format!("\\psalmverse{{}}{{{}}}\n", drop_cap(first)));
-                        } else {
-                            b.push_str(&format!("\\psalmverse{{}}{{{}\\mediant{{}}{}}}\n", drop_cap(first), tex_line(second)));
-                        }
+                        b.push_str(&format!("\\psalmverse{{}}{{{}}}\n", verse_halves(&drop_cap(first), &second, before, after)));
                         continue;
                     }
                 }
-                if second.is_empty() {
-                    b.push_str(&format!("\\psalmverse{{{number}}}{{{}}}\n", tex_line(first)));
-                } else {
-                    b.push_str(&format!("\\psalmverse{{{number}}}{{{}\\mediant{{}}{}}}\n", tex_line(first), tex_line(second)));
-                }
+                b.push_str(&format!("\\psalmverse{{{number}}}{{{}}}\n", verse_halves(&tex_line(first), &second, before, after)));
             }
         }
     }
@@ -496,13 +506,14 @@ fn format_block_with_opening(text: &str, opening_drop_cap: bool) -> String {
     b
 }
 
-fn format_gloria_patri(text: &str) -> String {
+fn format_gloria_patri(text: &str, postures: &[PostureCue]) -> String {
     let lines: Vec<&str> = text.split('\n').collect();
     let (line1, line2) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
+    let cued = |n: usize, line: &str| format!("{}{}", posture_tex(postures, PostureAnchor::BeforeVerse(n)), mediant_line(line));
     if line2.is_empty() {
-        format!("\\noindent {}\\par\n\n", mediant_line(line1))
+        format!("\\noindent {}\\par\n\n", cued(0, line1))
     } else {
-        format!("\\gloriapatri{{{}}}{{{}}}\n\n", mediant_line(line1), mediant_line(line2))
+        format!("\\gloriapatri{{{}}}{{{}}}\n\n", cued(0, line1), cued(1, line2))
     }
 }
 
@@ -615,6 +626,8 @@ fn format_prayer_voice(elem: &OfficeElement) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+    use liturgy::Posture;
+
     use super::*;
     use calendar::Date;
     use liturgy::{PrayerForm, VoiceSpan};
@@ -757,18 +770,19 @@ mod tests {
 
     #[test]
     fn psalm_opening_takes_one_softened_initial() {
-        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, None);
+        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], None);
         assert!(got.contains("\\psalmverse{}{\\dropcap{G}{od} be merciful unto us, and bless us\\mediant{}and shew us"), "{got}");
         assert_eq!(got.matches("\\dropcap{").count(), 1);
         assert!(got.contains("\\psalmverse{2}") && got.contains("\\gloriapatri{"));
 
-        let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, None);
+        let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, &[], None);
         assert!(!numbered.contains("\\dropcap{"), "{numbered}");
 
         let sectioned = format_psalm(
             "Canticle\n\nFirst opening * alpha.\n\n[section: Part II]\n\nSECOND opening * beta.\n",
             "Canticle",
             ElementType::Canticle,
+            &[],
             None,
         );
         assert_eq!(sectioned.matches("\\dropcap{").count(), 2, "{sectioned}");
@@ -779,9 +793,9 @@ mod tests {
     fn chant_scores_replace_text_only_when_found() {
         let base = |category: &str, slug: &str| (category == "psalms" && slug == "067").then(|| "data/texts/chant/psalms/067".to_string());
         let chant = Chant { base: &base };
-        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, Some(&chant));
+        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], Some(&chant));
         assert_eq!(got, "\\gregorioscore{data/texts/chant/psalms/067}\n\n");
-        let missing = format_psalm(PSALM_67, "Psalm 68", ElementType::Psalm, Some(&chant));
+        let missing = format_psalm(PSALM_67, "Psalm 68", ElementType::Psalm, &[], Some(&chant));
         assert!(missing.contains("\\psalmverse"));
 
         let hymn = "Aeterne rerum conditor\n\nO Framer of the earth and sky,\nRuler of all things high and low.\n";
@@ -813,8 +827,33 @@ mod tests {
 
     #[test]
     fn gloria_patri() {
-        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.");
+        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);
         assert_eq!(got, "\\gloriapatri{Glory be to the Father;}{as it was in the beginning.}\n\n");
-        assert_eq!(format_gloria_patri("Glory be"), "\\noindent Glory be\\par\n\n");
+        assert_eq!(format_gloria_patri("Glory be", &[]), "\\noindent Glory be\\par\n\n");
+        let cues = [
+            PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
+            PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
+        ];
+        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &cues);
+        assert_eq!(got, "\\gloriapatri{\\rubric{Bow.} Glory be to the Father;}{\\rubric{Stand upright.} as it was in the beginning.}\n\n");
+    }
+
+    #[test]
+    fn posture_cues_follow_mediants() {
+        let cues = [
+            PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(0)),
+            PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(1)),
+            PostureCue::new(Posture::Stand, PostureAnchor::AfterMediant(2)),
+        ];
+        let got = format_psalm(
+            "Psalm\n\nTHE Lord * is King.\n2. He hath * made.\n3. No mediant here\n",
+            "Psalm 93",
+            ElementType::Psalm,
+            &cues,
+            None,
+        );
+        assert!(got.contains("{\\dropcap{T}{he} Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
+        assert!(got.contains("\\psalmverse{2}{\\rubric{Bow.} He hath\\mediant{}made.}"), "{got}");
+        assert!(got.contains("\\psalmverse{3}{No mediant here \\rubric{Stand.}}"), "{got}");
     }
 }

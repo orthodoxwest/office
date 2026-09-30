@@ -16,6 +16,7 @@ pub mod lauds_psalmody;
 pub mod leader;
 pub mod major;
 pub mod minor;
+pub mod posture;
 pub mod preces;
 pub mod prime;
 pub mod proper;

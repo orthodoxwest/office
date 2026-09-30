@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The night: a crescent, drawn in the web's hairline to sit beside its glyphs. A 24×16 glyph, scaled into the 72dp visible area of a 108dp layer. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="33"
+        android:translateY="40"
+        android:scaleX="1.75"
+        android:scaleY="1.75">
+        <path
+            android:pathData="M17.4 1.76A7.2 7.2 0 1 0 17.4 14.24A6.48 6.48 0 0 1 17.4 1.76Z"
+            android:strokeColor="@color/icon_cross"
+            android:strokeWidth="1.3"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

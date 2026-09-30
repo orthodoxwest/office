@@ -1,4 +1,4 @@
-use liturgy::{ElementType, OfficeElement, RubricSpan, VoiceRole, VoiceSpan};
+use liturgy::{ElementType, OfficeElement, Posture, PostureAnchor, PostureCue, RubricSpan, VoiceRole, VoiceSpan};
 
 use crate::html::*;
 
@@ -7,7 +7,7 @@ fn elem(kind: ElementType, text: &str) -> OfficeElement {
 }
 
 fn render(e: &OfficeElement) -> String {
-    render_office_element(e, "")
+    render_office_element(e, None)
 }
 
 fn short_responsory(text: &str) -> String {
@@ -31,6 +31,7 @@ fn benedicite_space_numbered_verses() {
          O ALL ye Works of the Lord, bless ye the Lord: * praise him, and magnify him forever.\n\
          2 O ye Angels of the Lord, bless ye the Lord: * O ye Heavens, bless ye the Lord.\n\
          10 O let the Earth bless the Lord: * yea, let it praise him, and magnify him for ever.\n",
+        &[],
     );
     has(&html, r#"<p class="verse numbered"><span class="verse-num">2</span>"#);
     has(&html, r#"<span class="verse-num">10</span>"#);
@@ -87,6 +88,7 @@ fn psalm_softens_drop_cap_opening_only() {
         "Psalm 67\n\n\
          GOD be merciful unto us, and bless us * and shew us the light of his countenance.\n\
          2. That thy way may be known upon earth * thy saving health among all nations.\n",
+        &[],
     );
     has(&html, ">God be merciful unto us");
     lacks(&html, ">GOD be merciful");
@@ -105,12 +107,42 @@ fn psalm_softens_drop_cap_after_section_break() {
          [section: Part II]\n\
          O LET the Earth bless the Lord: * yea, let it praise him forever.\n\
          10 O ye Mountains and Hills, bless ye the Lord: * praise him forever.\n",
+        &[],
     );
     has(&html, "O All ye Works of the Lord");
     has(&html, "O Let the Earth bless the Lord");
     lacks(&html, "O LET the Earth");
     lacks(&html, "O ALL ye Works");
     has(&html, "O ye Mountains and Hills");
+}
+
+#[test]
+fn posture_cues_follow_their_mediants_and_precede_the_doxology_lines() {
+    let mut psalm = elem(
+        ElementType::Psalm,
+        "Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n2. He hath made the round world so sure * that it cannot be moved.\n3. Without a mediant",
+    );
+    psalm.postures = vec![
+        PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(0)),
+        PostureCue::new(Posture::Stand, PostureAnchor::AfterMediant(2)),
+        PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(1)),
+    ];
+    let mut gloria = elem(
+        ElementType::PsalmDoxology,
+        "Glory be to the Father, * and to the Holy Ghost;\nAs it was in the beginning, * world without end. Amen.",
+    );
+    gloria.postures = vec![
+        PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
+        PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
+    ];
+    let html = render_section_elements(&[psalm, gloria]);
+    has(&html, r#"<span class="mediant">*</span> <span class="posture">Sit.</span> and hath put on"#);
+    has(&html, r#"<span class="verse-body"><span class="posture">Bow.</span> He hath made"#);
+    has(&html, r#"Without a mediant <span class="posture">Stand.</span></span>"#);
+    has(&html, r#"<span class="source-line"><span class="posture">Bow.</span> Glory be"#);
+    has(&html, r#"<span class="source-line"><span class="posture">Stand upright.</span> As it was"#);
+    // Without cues nothing is added.
+    lacks(&render_psalm_verses("Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n", &[]), "posture");
 }
 
 #[test]

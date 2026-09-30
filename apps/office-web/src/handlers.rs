@@ -3,25 +3,24 @@
 
 use axum::body::Body;
 use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
-use calendar::{MoveableDates, Tabula};
+use calendar::MoveableDates;
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
-use office::summary::{CommSummary, summarize_hour};
-use office::{ComposeOptions, Engine, VespersOwner};
-use render_html::links::{
-    calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link, season_class, title_case,
-};
+use office::summary::{CommSummary, ordo_day};
+use office::{ComposeOptions, Engine};
+use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
     CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
     MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
 };
-use tools::review::assurance::hour_dependencies;
-use tools::review::provenance::ProvenanceStatus;
 
+use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
-use crate::web_time::{MONTHS, date_slug, load_location, local, long_date, now_in, parse_date};
-use crate::{Review, Server};
+use crate::web_time::{load_location, local, now_in, parse_date};
+use presentation::{
+    MONTHS, REMINDER_DEFAULTS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str,
+};
 
 /// What a page handler reads from the request.
 pub struct Req<'a> {
@@ -43,79 +42,6 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Vespers", "vespers"),
     ("Compline", "compline"),
 ];
-
-/// The GitHub new-issue endpoint behind "Report a problem".
-const REPO_ISSUES_URL: &str = "https://github.com/orthodoxwest/office/issues/new";
-
-/// Escapes a query component; spaces become `+`.
-fn query_escape(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for &c in s.as_bytes() {
-        match c {
-            b' ' => out.push('+'),
-            c if c.is_ascii_alphanumeric() || matches!(c, b'-' | b'_' | b'.' | b'~') => out.push(c as char),
-            c => out.push_str(&format!("%{c:02X}")),
-        }
-    }
-    out
-}
-
-/// `url.Values{title, body, labels=review}.Encode()`: keys sorted.
-fn issue_url(title: &str, body: &str) -> String {
-    format!("{REPO_ISSUES_URL}?body={}&labels=review&title={}", query_escape(body), query_escape(title))
-}
-
-fn season_str(hour: &OfficeHour) -> &'static str {
-    hour.season.map(|s| s.as_str()).unwrap_or("")
-}
-
-fn celebration(hour: &OfficeHour) -> String {
-    if hour.feast.is_empty() { format!("{} feria", title_case(season_str(hour))) } else { hour.feast.clone() }
-}
-
-/// A prefilled issue identifying the exact page under review.
-fn report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str) -> String {
-    let celebration = celebration(hour);
-    let title = format!("[review] {} — {date_slug} ({celebration})", hour.title);
-    let body = format!(
-        "**Page:** /{hour_name}/{date_slug}?form={form}
-**Prayer form:** {label}
-**Celebration:** {celebration}
-**Season:** {season}
-
-**Category** (check all that apply):
-- [ ] Missing proper — the app shows a generic/ordinary text where the diurnal or archdiocese supplement has a specific one
-- [ ] Incorrect translation — wording differs from our diocesan books
-- [ ] Logic or rubric error — wrong structure, missing or extra element, wrong psalms/antiphons for the day
-
-**What the books say** (cite diurnal/supplement page if possible):
-
-**What the app shows:**
-
-",
-        form = hour.form.as_str(),
-        label = hour.form.label(),
-        season = title_case(season_str(hour)),
-    );
-    issue_url(&title, &body)
-}
-
-/// The schedule mirrored in app.js: from each clock hour, the office being prayed and its day
-/// offset.
-const CURRENT_HOUR_SCHEDULE: [(i8, &str, &str, i32); 8] = [
-    (0, "compline", "Compline", -1),
-    (2, "lauds", "Lauds", 0),
-    (7, "prime", "Prime", 0),
-    (9, "terce", "Terce", 0),
-    (11, "sext", "Sext", 0),
-    (13, "none", "None", 0),
-    (17, "vespers", "Vespers", 0),
-    (20, "compline", "Compline", 0),
-];
-
-fn current_hour_entry(hour: i8) -> (&'static str, &'static str, i32) {
-    CURRENT_HOUR_SCHEDULE.iter().rev().find(|b| hour >= b.0).map(|b| (b.1, b.2, b.3)).unwrap_or(("compline", "Compline", -1))
-}
 
 fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
     ORDERED_HOURS
@@ -156,17 +82,6 @@ fn render_failed(e: &str) -> Response<Body> {
     crate::http::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-/// The day's display name, as the ordo row names it.
-fn day_name(day: &Day) -> String {
-    if let Some(c) = &day.celebration {
-        return c.name.clone();
-    }
-    if let Some(t) = &day.tempora {
-        return t.clone();
-    }
-    format!("{} feria", title_case(day.season.as_str()))
-}
-
 fn comm_rows(comms: &[CommSummary]) -> Vec<CommemorationRow> {
     comms.iter().map(|c| CommemorationRow { name: c.name.clone(), incipit: c.incipit.clone() }).collect()
 }
@@ -174,49 +89,38 @@ fn comm_rows(comms: &[CommSummary]) -> Vec<CommemorationRow> {
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
 /// and Vespers digest. `days` are the month's days in order.
 pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> MonthData {
-    let name = days.first().map(|d| crate::web_time::month_name(d.date)).unwrap_or_default();
+    let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
-    let summarize = |hour: &str, day: &Day| engine.compose_hour(hour, day, moveable, PrayerForm::Private).ok().map(|h| summarize_hour(&h));
     for d in days {
-        let (rank, rank_full) = match &d.celebration {
-            Some(c) => (c.rank.abbrev().to_string(), c.rank.display_name().to_string()),
-            None => (String::new(), String::new()),
-        };
+        let o = ordo_day(d, engine, moveable);
         let mut row = DayRow {
             day_num: d.date.day(),
             weekday: d.date.weekday().name()[..3].to_string(),
             date_slug: date_slug(d.date),
-            rank,
-            rank_full,
-            color: d.color.as_str().to_string(),
-            color_class: format!("day-color-{}", d.color.as_str()),
+            rank: o.rank,
+            rank_full: o.rank_full,
+            color: o.color.as_str().to_string(),
+            color_class: format!("day-color-{}", o.color.as_str()),
             feast_name: day_name(d),
-            fast: d.penitential.fast,
-            abstinence: d.penitential.abstinence,
-            commemorations: d.commemorations.iter().map(|c| c.name.clone()).collect(),
+            fast: o.fast,
+            abstinence: o.abstinence,
+            commemorations: o.commemorations,
+            hours_preces: o.hours_preces,
+            vespers_note: o.vespers_note,
             ..DayRow::default()
         };
-        if let Some(lauds) = summarize("lauds", d) {
+        if let Some(lauds) = o.lauds {
             row.benedictus_antiphon = lauds.gospel_ant;
             row.lauds_preces = lauds.preces;
             row.lauds_suffrage = lauds.suffrage;
             row.lauds_comms = comm_rows(&lauds.comms);
         }
-        // The minor hours share one preces disposition; Prime stands for them.
-        if let Some(hours) = summarize("prime", d) {
-            row.hours_preces = hours.preces;
-        }
-        if let Some(vespers) = summarize("vespers", d) {
+        if let Some(vespers) = o.vespers {
             row.magnificat_antiphon = vespers.gospel_ant;
             row.vespers_preces = vespers.preces;
             row.vespers_suffrage = vespers.suffrage;
             row.vespers_comms = comm_rows(&vespers.comms);
         }
-        row.vespers_note = match d.vespers.owner {
-            VespersOwner::IIOfPreceding => "II Vespers of preceding".to_string(),
-            VespersOwner::IOfFollowing => d.vespers.feast.as_ref().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
-            VespersOwner::NotApplicable => String::new(),
-        };
         month.days.push(row);
     }
     month
@@ -264,54 +168,19 @@ fn loose_month(s: &str) -> Option<u32> {
     MONTHS.iter().zip(1..).find(|(name, _)| name.eq_ignore_ascii_case(s) || name[..3].eq_ignore_ascii_case(s)).map(|(_, m)| m)
 }
 
-/// The Tabula Temporaria as the printed ordo opens: the year's figures, its
-/// moveable feasts, and its Ember days, each date leading to its row.
+/// The Tabula Temporaria (presentation::tabula), each date leading to its row.
 fn tabula(year: i32) -> TabulaData {
-    let t = Tabula::compute(year);
-    let moveable = MoveableDates::compute(year);
-    let figure = |label: &str, value: String| TabulaRow { label: label.into(), value, href: String::new() };
-    let date = |label: &str, d: calendar::Date| TabulaRow {
-        label: label.into(),
-        value: format!("{} {}", crate::web_time::month_name(d), d.day()),
-        href: calendar_link(&date_slug(d)),
+    let rows = |rows: Vec<presentation::TabulaRow>| {
+        rows.into_iter()
+            .map(|r| TabulaRow {
+                label: r.label.into(),
+                value: r.value,
+                href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+            })
+            .collect()
     };
-    let ember = |label: &str, e: &calendar::computus::EmberSet| TabulaRow {
-        label: label.into(),
-        value: format!("{} {}, {}, {}", crate::web_time::month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
-        href: calendar_link(&date_slug(e.wed)),
-    };
-    TabulaData {
-        figures: vec![
-            figure("Golden Number", calendar::computus::roman(t.golden_number)),
-            figure("Dominical Letter", t.dominical_letter.to_string()),
-            figure("Sundays after Epiphany", t.sundays_after_epiphany.to_string()),
-            figure("Sundays after Pentecost", t.sundays_after_pentecost.to_string()),
-        ],
-        moveable: vec![
-            date("Septuagesima Sunday", moveable.septuagesima),
-            date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter Day", moveable.easter),
-            date("Ascension Day", moveable.ascension),
-            date("Pentecost", moveable.pentecost),
-            date("Corpus Christi", moveable.corpus_christi),
-            date("Advent Sunday", moveable.advent1),
-        ],
-        ember: vec![
-            ember("Spring (Lent)", &t.spring),
-            ember("Summer (Whitsun)", &t.summer),
-            ember("Autumn (Holy Cross)", &t.autumn),
-            ember("Winter (Advent)", &t.winter),
-        ],
-    }
-}
-
-impl Review {
-    /// The review notice shows unless every text the hour draws on is
-    /// verified.
-    pub(crate) fn show_vetting_banner(&self, hour: &OfficeHour) -> bool {
-        let deps = hour_dependencies(hour);
-        deps.is_empty() || deps.iter().any(|k| self.provenance.get(k) != Some(&ProvenanceStatus::Verified))
-    }
+    let t = presentation::tabula(year);
+    TabulaData { figures: rows(t.figures), moveable: rows(t.moveable), ember: rows(t.ember) }
 }
 
 impl Server {
@@ -384,34 +253,10 @@ impl Server {
             return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "date out of range");
         };
 
-        let feast_name = day_name(day);
-        let lower_feast = feast_name.to_lowercase();
-        // A short note for home; the ordo carries the full wording.
-        let octave_note = match &day.within_octave_of {
-            Some(id) if !id.is_empty() && !lower_feast.contains("octave") => {
-                format!("Octave of {}", calendar::builder::octave_display_name(id))
-            }
-            _ => String::new(),
-        };
-        // Not repeated when the celebration already names the season.
-        let mut season = title_case(day.season.as_str());
-        if !season.is_empty() && lower_feast.contains(&season.to_lowercase()) {
-            season.clear();
-        }
-
+        let heading = day_heading(day);
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
-        let (mut current_slug, mut label, mut pray_now_date, mut grid_current) = ("", "Open Lauds".to_string(), slug.clone(), "");
-        if slug == now_slug {
-            let (s, l, offset) = current_hour_entry(now_hour);
-            current_slug = s;
-            label = format!("Pray {l}");
-            if offset != 0 {
-                pray_now_date = date_slug(now.add_days(offset));
-            } else {
-                grid_current = s;
-            }
-        }
+        let invite = invitation(date, now, now_hour);
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -426,16 +271,16 @@ impl Server {
             prev_link: home_link(&date_slug(date.add_days(-1))),
             next_link: home_link(&date_slug(date.add_days(1))),
             today_link: home_link(&now_slug),
-            feast_name,
+            feast_name: heading.feast,
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
             color: day.color.as_str().into(),
-            season,
-            octave_note,
+            season: heading.season,
+            octave_note: heading.octave_note,
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             calendar_link: calendar_link(&slug),
-            pray_now_label: label,
-            pray_now_link: hour_link(if current_slug.is_empty() { "lauds" } else { current_slug }, &pray_now_date),
-            hours: build_home_hours(&slug, grid_current),
+            pray_now_label: invite.label,
+            pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
+            hours: build_home_hours(&slug, invite.current),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -506,7 +351,6 @@ impl Server {
                     form: form.as_str().into(),
                     label: form.label().into(),
                     report_url: report_url(h, hour_name, &date_str),
-                    show_banner: self.review.show_vetting_banner(h),
                 })
                 .collect(),
             hour_name: hour_name.into(),
@@ -527,7 +371,6 @@ impl Server {
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
-            show_banner: self.review.show_vetting_banner(&hour),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -602,7 +445,7 @@ impl Server {
             chrome: Chrome { page: "calendar".into(), nav_date: date_slug(now), usage_when: year.to_string(), ..Chrome::default() },
             year,
             view: view.name().into(),
-            year_roman: if year <= 3999 { calendar::computus::roman(year) } else { String::new() },
+            year_roman: presentation::year_roman(year),
             prev_year: year - 1,
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
@@ -645,23 +488,17 @@ impl Server {
     }
 
     pub fn reminders(&self, req: &Req) -> Response<Body> {
-        let hour = |name: &str, slug: &str, default: &str, checked: bool| ReminderHour {
-            name: name.into(),
-            slug: slug.into(),
-            default: default.into(),
-            checked,
-        };
         let data = RemindersData {
             chrome: Chrome { page: "reminders".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
-            hours: vec![
-                hour("Lauds", "lauds", "06:45", true),
-                hour("Prime", "prime", "07:30", false),
-                hour("Terce", "terce", "09:00", false),
-                hour("Sext", "sext", "12:00", false),
-                hour("None", "none", "15:00", false),
-                hour("Vespers", "vespers", "18:00", true),
-                hour("Compline", "compline", "21:00", true),
-            ],
+            hours: REMINDER_DEFAULTS
+                .iter()
+                .map(|&(slug, name, hh, mm, checked)| ReminderHour {
+                    name: name.into(),
+                    slug: slug.into(),
+                    default: format!("{hh:02}:{mm:02}"),
+                    checked,
+                })
+                .collect(),
             days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                 .iter()
                 .map(|d| ReminderDay { name: d.to_string(), slug: d.to_lowercase() })
@@ -679,14 +516,10 @@ impl Server {
     }
 }
 
-/// A day's display name for the reminder feed.
-pub fn celebration_name(day: &Day) -> String {
-    day_name(day)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use presentation::CURRENT_HOUR_SCHEDULE;
 
     // app.js mirrors the schedule so a cached home page can update itself.
     #[test]
@@ -711,42 +544,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn current_hour_entry_at_every_boundary() {
-        for (start, slug, label, offset) in CURRENT_HOUR_SCHEDULE {
-            assert_eq!(current_hour_entry(start), (slug, label, offset), "{start:02}:00");
-        }
-        assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
-        assert_eq!(current_hour_entry(16), ("none", "None", 0));
-        assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
-    }
-
     use axum::http::Uri;
-    use liturgy::{ElementType, OfficeElement, OfficeSection};
 
     use crate::test_server;
-
-    fn hour_with(elements: Vec<OfficeElement>) -> OfficeHour {
-        OfficeHour {
-            form: PrayerForm::Private,
-            date: calendar::Date::new(2026, 1, 1),
-            hour: "lauds".into(),
-            title: "Lauds".into(),
-            season: Some(calendar::Season::Pentecost),
-            feast: "Trinity Sunday".into(),
-            color: Some(calendar::Color::White),
-            sections: vec![OfficeSection { label: "The Collect".into(), collapsible: false, elements }],
-            decisions: Vec::new(),
-        }
-    }
-
-    fn sourced(kind: ElementType, text: &str, key: &str) -> OfficeElement {
-        OfficeElement { source_ref: key.into(), source_refs: vec![key.into()], ..OfficeElement::new(kind, text) }
-    }
-
-    fn review(entries: &[(&str, ProvenanceStatus)]) -> Review {
-        Review { provenance: entries.iter().map(|(k, s)| (k.to_string(), *s)).collect() }
-    }
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
@@ -757,14 +557,6 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
-    }
-
-    #[test]
-    fn show_vetting_banner_depends_on_corpus_provenance() {
-        let hour = hour_with(vec![sourced(ElementType::Collect, "Almighty and everlasting God...", "proper/example/collect")]);
-        assert!(!review(&[("proper/example/collect", ProvenanceStatus::Verified)]).show_vetting_banner(&hour), "verified hides it");
-        assert!(review(&[("proper/example/collect", ProvenanceStatus::NeedsReview)]).show_vetting_banner(&hour), "unreviewed shows it");
-        assert!(review(&[]).show_vetting_banner(&hour), "unknown provenance shows it");
     }
 
     /// The page ends with the continuation links and each form's report
@@ -793,13 +585,6 @@ mod tests {
         assert!(prev.is_empty() && prev_link.is_empty());
         let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
         assert!(next.is_empty() && next_link.is_empty());
-    }
-
-    #[test]
-    fn not_found_page_has_no_vetting_banner() {
-        let (status, _, body) = get("/missing/page/here");
-        assert_eq!(status, StatusCode::NOT_FOUND);
-        assert!(!body.contains(r#"id="site-banner""#));
     }
 
     #[test]
@@ -877,7 +662,7 @@ mod tests {
     fn ordo_frontispiece_sets_out_the_tabula() {
         let body = ordo("/calendar/2026");
         assert!(body.contains("<title>Ordo 2026</title>") && body.contains("Tabula Temporaria"));
-        let t = Tabula::compute(2026);
+        let t = calendar::Tabula::compute(2026);
         for want in [
             format!("<dt>Golden Number</dt><dd>{}</dd>", calendar::computus::roman(t.golden_number)),
             format!("<dt>Dominical Letter</dt><dd>{}</dd>", t.dominical_letter),
@@ -980,10 +765,5 @@ mod tests {
         assert!(body_classes(&format!("/lauds/{slug}")).contains(&"season-passiontide".into()));
         assert!(body_classes(&format!("/vespers/{slug}")).contains(&"season-eastertide".into()));
         assert!(body_classes(&format!("/?date={slug}")).contains(&"season-passiontide".into()));
-    }
-
-    #[test]
-    fn query_escape_encodes_special_characters() {
-        assert_eq!(query_escape("a b/c?d=é—*"), "a+b%2Fc%3Fd%3D%C3%A9%E2%80%94%2A");
     }
 }

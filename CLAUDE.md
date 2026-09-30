@@ -10,18 +10,25 @@ crates/
   data-format/             Corpus/ledger CSV, report JSON, quoting and parsing contracts
   calendar/                Computus, feast loading, occurrence, octaves, fasting; no file access
   corpus/                  Text loading, aliases, sidecars and shared line grammar
-  liturgy/                 Document model, element kinds, prayer forms and voice spans
+  liturgy/                 Document model, element kinds, prayer forms, voice spans and posture cues
   office/                  Hour composition, concurrence, scopes, summaries and tracing
   ordo/                    Text calendar and rubrics TSV
   render-text/             Plain-text office rendering
   render-tex/              LuaLaTeX booklet; caller supplies GABC lookup
   render-html/             HTML rendering, view models and minijinja templates
+  render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
+                           word-for-word against render-html
+  presentation/            Words every front shares: day, season and date names, the current-hour
+                           schedule (app.js mirrors it), home's invitation, the report-issue link
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
   cli/                     office command dispatch, dump stream, diff and digest
   office-web/              Axum routes, usage SQLite store, reminders, embedded static/ assets
                            http.rs holds saved-link query/cookie parsing; web_time.rs handles
                            civil dates, time zones and reminder instants
+  mobile-ffi/              UniFFI bindings for the native apps; embeds data/ at build time
+  android/                 Kotlin/Compose app; Gradle drives cargo-ndk and binding generation
+                           (see apps/android/README.md; `make android`, `make android-screenshots`)
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
@@ -86,6 +93,8 @@ work separate from an assessment of the rest of the year.
 
 Texts seeded from Divinum Officium carry a `# SOURCE: divinum-officium <file> [<section>] — check against diurnal` comment inside the section. Grep for `SOURCE: divinum-officium` to find texts awaiting verification against the printed diurnal; delete the comment once verified. Comment lines (`#`) inside INI text sections are stripped by the corpus loader and never render. `# TODO(diurnal):` comments mark refs that DO could not supply at all.
 
+Every corpus entry must have a current `verified` attestation in `data/review/provenance.csv`; `make validate` fails otherwise (a stale hash counts as unverified). Adding or editing a text means attesting it (`./office review attest`, `--replace` for an edit) in the same PR. The web server does not load provenance.
+
 ## Git workflow
 
 All changes must go through a pull request — do not push directly to `master`.
@@ -133,7 +142,7 @@ make check       # Formatting, Clippy, JS lint, tests, data validation and text 
 make serve       # Start web server on :8080
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
-make validate    # Validate data files
+make validate    # Validate data files (fails on any unverified or stale corpus entry)
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
@@ -159,6 +168,8 @@ make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make test-ux      # Playwright browser suites
 make parity      # Check all snapshots, including the full 2026–2053 digest
+make android     # Sideloadable Android preview APK (needs Android SDK/NDK, cargo-ndk)
+make android-screenshots # Render Android screens on the JVM (Robolectric) for review
 make clean       # Remove artifacts
 ```
 
