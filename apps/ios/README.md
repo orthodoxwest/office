@@ -16,7 +16,7 @@ native text, screen for screen:
 - **The ordo**: the month (the wide table on an iPad), each day's office digest, and the year's
   Tabula Temporaria.
 - **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
-  and offers "In 10 minutes".
+  and offers "Remind me in 10 min".
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
 

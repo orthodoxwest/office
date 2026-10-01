@@ -13,16 +13,20 @@ import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
+import android.text.format.DateFormat
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import org.orthodoxwest.office.core.OfficeCore
 import org.orthodoxwest.office.core.ReminderChoice
 import org.orthodoxwest.office.core.reminderDefaults
@@ -127,7 +131,7 @@ object ReminderScheduler {
             .apply()
     }
 
-    /** "In 10 minutes": the reminder is put away and rings again, with the same words, after the wait. */
+    /** "Remind me in 10 min": the reminder is put away and rings again, with the same words, after the wait. */
     fun snooze(context: Context, reminder: Intent, now: ZonedDateTime = ZonedDateTime.now()) {
         val code = reminderCode(LocalDate.parse(reminder.getStringExtra(EXTRA_DATE) ?: return), reminder.getStringExtra(EXTRA_HOUR) ?: return)
         NotificationManagerCompat.from(context).cancel(code)
@@ -234,8 +238,21 @@ object Notifications {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) &&
             NotificationManagerCompat.from(context).areNotificationsEnabled()
 
-    /** "Vespers", then the day it keeps; a tap opens that hour. */
-    fun post(context: Context, alarm: Intent) {
+    /** How long after its office begins a reminder stays in the shade before it clears itself. */
+    val LINGER: Duration = Duration.ofHours(1)
+
+    /** Time left until the reminder is stale; one fired late (after Doze, say) still shows for a snooze's length. */
+    fun lingers(office: Instant, now: Instant): Duration =
+        Duration.between(now, office.plus(LINGER)).coerceAtLeast(ReminderScheduler.SNOOZE)
+
+    /** "Vespers · 6:00 PM": the clock time, not an age that drifts and reads as past. */
+    fun title(context: Context, name: String, office: ZonedDateTime): String {
+        val clock = DateTimeFormatter.ofPattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", Locale.getDefault())
+        return "$name · ${office.format(clock)}"
+    }
+
+    /** "Vespers · 6:00 PM", then the day it keeps; a tap opens that hour. */
+    fun post(context: Context, alarm: Intent, now: Instant = Instant.now()) {
         if (!allowed(context)) return
         ensureChannel(context)
         val hour = alarm.getStringExtra(EXTRA_HOUR) ?: return
@@ -252,17 +269,20 @@ object Notifications {
             Intent(context, ReminderReceiver::class.java).putExtras(alarm).setAction(ReminderReceiver.SNOOZE),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        val office = Instant.ofEpochMilli(alarm.getLongExtra(EXTRA_WHEN, now.toEpochMilli()))
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(Nave.gold.toArgb())
-            .setContentTitle(alarm.getStringExtra(EXTRA_TITLE))
+            .setContentTitle(title(context, alarm.getStringExtra(EXTRA_TITLE) ?: return, office.atZone(ZoneId.systemDefault())))
             .setContentText(alarm.getStringExtra(EXTRA_FEAST))
             .setTicker(alarm.getStringExtra(EXTRA_SUMMARY))
-            .setWhen(alarm.getLongExtra(EXTRA_WHEN, System.currentTimeMillis()))
-            .setShowWhen(true)
+            // Orders the shade by the office's time; the title shows it, so no "30m" beside it.
+            .setWhen(office.toEpochMilli())
+            .setShowWhen(false)
+            .setTimeoutAfter(lingers(office, now).toMillis())
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(tap)
-            .addAction(R.drawable.ic_notification, "In 10 minutes", later)
+            .addAction(R.drawable.ic_notification, "Remind me in 10 min", later)
             .setAutoCancel(true)
             .build()
         @Suppress("MissingPermission")
