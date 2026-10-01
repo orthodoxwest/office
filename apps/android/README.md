@@ -111,11 +111,17 @@ and a tap opens that hour.
   their own channel, so the phone's settings can still change or silence it. The recording is
   from the Versilian Community Sample Library, dedicated to the public domain (CC0 1.0);
   `tools/bake-bell.py` names the file and how it was trimmed.
-- **In 10 minutes.** A reminder's one action puts it away and rings it again, with the same
-  words, ten minutes later.
+- **Remind me in 10 min.** A reminder's one action puts it away and rings it again, with the
+  same words, ten minutes later. The action is worded as an action, so it is not read as the
+  office's own countdown.
+- **The time, not an age.** A reminder's title gives the office's clock time ("Prime · 7:00
+  AM", following the phone's 12/24-hour setting) rather than Android's relative "30m", which
+  drifts and does not say whether the office is past or to come.
+- **Clears itself.** A reminder leaves the shade an hour after its office begins (one fired late
+  still shows for ten minutes), so an old Prime does not linger into the afternoon.
 
 `ReminderTest` checks the schedule the alarm service holds, cancellation, the bell's channel,
-the ten-minute wait, and the posted notification.
+the ten-minute wait, and the posted notification, its clock time and when it clears.
 
 ## Usage counts
 

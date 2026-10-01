@@ -8,9 +8,12 @@ import android.app.NotificationManager
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.TimeZone
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -30,8 +33,15 @@ class ReminderTest {
     private val zone = ZoneId.of("America/New_York")
     private val alarms get() = shadowOf(app.getSystemService(AlarmManager::class.java))
 
+    private val systemZone = TimeZone.getDefault()
+
+    @After
+    fun restoreZone() = TimeZone.setDefault(systemZone)
+
     @Before
     fun allow() {
+        // The notification's clock time is the phone's.
+        TimeZone.setDefault(TimeZone.getTimeZone(zone))
         ShadowAlarmManager.setCanScheduleExactAlarms(true)
         shadowOf(app).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }
@@ -114,7 +124,7 @@ class ReminderTest {
         Notifications.post(app, alarms.scheduledAlarms.minBy { it.triggerAtMs }.intent)
         val notifications = shadowOf(app.getSystemService(NotificationManager::class.java))
         val later = notifications.allNotifications.single().actions.single()
-        assertEquals("In 10 minutes", later.title)
+        assertEquals("Remind me in 10 min", later.title)
         val snooze = shadowOf(later.actionIntent).savedIntent
         assertEquals(ReminderReceiver.SNOOZE, snooze.action)
         val before = alarms.scheduledAlarms.size
@@ -124,7 +134,7 @@ class ReminderTest {
         val again = alarms.scheduledAlarms.single { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() == "2026-03-15T06:46" }
         // The same words, ready to post again.
         Notifications.post(app, again.intent)
-        assertEquals("Lauds", notifications.allNotifications.single().extras.getString("android.title"))
+        assertEquals("Lauds · 6:45 AM", notifications.allNotifications.single().extras.getString("android.title"))
     }
 
     @Test
@@ -135,10 +145,25 @@ class ReminderTest {
         val intent: Intent = fired.intent
         Notifications.post(app, intent)
         val posted = shadowOf(app.getSystemService(NotificationManager::class.java)).allNotifications.single()
-        assertEquals("Lauds", posted.extras.getString("android.title"))
+        assertEquals("Lauds · 6:45 AM", posted.extras.getString("android.title"))
         assertEquals("III Sunday in Lent", posted.extras.getString("android.text"))
         val open = shadowOf(posted.contentIntent).savedIntent
         assertEquals("lauds", open.getStringExtra(EXTRA_HOUR))
         assertEquals("2026-03-15", open.getStringExtra(EXTRA_DATE))
+    }
+
+    @Test
+    fun aReminderShowsTheClockTimeAndClearsItselfOnceStale() {
+        turn(on = true)
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))
+        val intent = alarms.scheduledAlarms.minBy { it.triggerAtMs }.intent
+        // Fired on time, ten minutes before Lauds: it stays until an hour after Lauds begins.
+        Notifications.post(app, intent, ZonedDateTime.of(2026, 3, 15, 6, 35, 0, 0, zone).toInstant())
+        val posted = shadowOf(app.getSystemService(NotificationManager::class.java)).allNotifications.single()
+        assertEquals(false, posted.extras.getBoolean("android.showWhen"))
+        assertEquals(Duration.ofMinutes(70).toMillis(), posted.timeoutAfter)
+        // Fired long after (the phone was off): still a snooze's length to see it.
+        val late = Notifications.lingers(ZonedDateTime.of(2026, 3, 15, 6, 45, 0, 0, zone).toInstant(), ZonedDateTime.of(2026, 3, 15, 9, 0, 0, 0, zone).toInstant())
+        assertEquals(ReminderScheduler.SNOOZE, late)
     }
 }

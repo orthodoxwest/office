@@ -21,7 +21,7 @@ struct OfficeApp: App {
     }
 }
 
-/// Reminders: how a tapped one opens its hour, and how "In 10 minutes" puts one off.
+/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off.
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
