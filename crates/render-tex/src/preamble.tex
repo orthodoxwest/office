@@ -30,6 +30,8 @@
 % Small caps carry web-like tracking everywhere (\scshape, \textsc), matching
 % the letterspaced section headings, psalm labels, and Ant. sigils online.
 \setmainfont{EB Garamond}[Ligatures=TeX,SmallCapsFeatures={LetterSpace=8.0}]
+% One word space after a full stop, as the web and book work set it.
+\frenchspacing
 
 % Prayer leading sits a touch deeper than LaTeX's default, as the web hour
 % sets body text at 1.6 and psalm/hymn verse at 1.75.
@@ -353,7 +355,7 @@
 \initialprofile{Q}{0.06}     {-0.2}     {-0.025}   {1}  {0}
 \initialprofile{R}{0.08}     {-0.8}     {0}        {0}  {0}
 \initialprofile{S}{0.06}     {-0.05}    {0}        {0}  {0}
-\initialprofile{T}{-0.08}    {0.44}     {-0.06}    {0}  {-0.04}
+\initialprofile{T}{-0.08}{0.37}{-0.06}{0}{-0.04}
 \initialprofile{U}{0.03}     {0.09}     {0}        {0}  {0}
 \initialprofile{V}{-0.14}    {0.62}     {-0.025}   {0}  {-0.04}
 \initialprofile{W}{-0.10}    {0.50}     {-0.025}   {0}  {-0.04}
@@ -381,10 +383,10 @@
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone. Kept with its first verses.
 \newcommand{\psalmlabel}[2]{%
-  \Needspace{5\baselineskip}\par\addvspace{\medskipamount}%
+  \Needspace{5\baselineskip}\par\addvspace{\bigskipamount}%
   {\centering{\color{mutedgray}\scshape #1}%
   \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi\par}%
-  \nopagebreak\addvspace{0.75\bigskipamount}%
+  \nopagebreak\addvspace{\medskipamount}%
 }
 
 % Hymn or anthem title (usually its Latin incipit): muted italic, as the
@@ -455,15 +457,15 @@
 
 % Gloria Patri: two verses, each pointed at its own mediant, on their own
 % lines with a wrap hanging beneath, standing a little apart from the verses
-% above as its own stanza.
-\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\sourceline{#1}\sourceline{#2}\end{sourcelines}}
+% above as its own stanza. It is sung to the psalm tone, so it keeps the
+% verses' text edge, as the web indents it by the verse gutter.
+\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\leftskip=2em\sourceline{#1}\sourceline{#2}\end{sourcelines}}
+\newcommand{\glorialine}[1]{\medskip\begin{sourcelines}\leftskip=2em\sourceline{#1}\end{sourcelines}}
 
 % Spoken-role sigils set in rubric red, as the web sigil column does.
 % \Vbar/\Rbar come from gregoriotex, which the preamble loads above.
 \newcommand{\Vsig}{{\color{rubricred}\Vbar{}}}
 \newcommand{\Rsig}{{\color{rubricred}\Rbar{}}}
-\newcommand{\allsig}{{\color{rubricred}\scshape All:}\kern0.3em{}}
-\newcommand{\blessingsig}{{\color{rubricred}Blessing.}\kern0.3em{}}
 
 % ℣ and ℟ lines: the sigil sits in a narrow gutter and a wrapped remainder
 % tucks under the text, not the sigil, as the web sigil column does.
@@ -474,15 +476,23 @@
 }
 \newcommand{\versicle}[1]{\sigilline{\Vsig}{#1}}
 \newcommand{\response}[1]{\sigilline{\Rsig}{#1}}
+% A spelled-out sigil is wider than the gutter: it ends where ℣ and ℟ end
+% and hangs the rest into the margin, so the spoken text keeps their edge,
+% as the web hangs its sigil words.
+\newcommand{\wordsigil}[1]{\hbox to \sigilwidth{\hss{\color{rubricred}#1}\hspace{0.35em}}}
+\newcommand{\allline}[1]{\sigilline{\wordsigil{\scshape All:}}{#1}}
+\newcommand{\blessingline}[1]{\sigilline{\wordsigil{Blessing.}}{#1}}
 
 % Antiphon: a red small-cap sigil with the body in ordinary roman, hanging so
-% a wrapped remainder tucks under its own line, as body antiphons do online.
-\newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
-% An antiphon that closes a psalm leaves a little air before what follows, so
-% it and the next psalm's opening antiphon read as two; one that opens a
-% psalm is kept with it (the label and its first verses).
+% a wrapped remainder tucks under the first word of its text.
+\newlength{\antwidth}
+\settowidth{\antwidth}{{\scshape Ant.}\hspace{0.3em}}
+\newcommand{\ant}[1]{\noindent\hangindent=\antwidth\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
+% An antiphon beside a psalm leaves a little air on its far side, so a
+% closing antiphon and the next psalm's opening one read as two; one that
+% opens a psalm is kept with it (the label and its first verses).
 \newcommand{\antclose}[1]{\ant{#1}\addvspace{0.5\baselineskip}}
-\newcommand{\antopen}[1]{\Needspace{7\baselineskip}\ant{#1}\nopagebreak}
+\newcommand{\antopen}[1]{\Needspace{7\baselineskip}\addvspace{0.5\baselineskip}\ant{#1}\nopagebreak}
 % Opening acclamation (not an antiphon)
 \newcommand{\acclamation}[1]{\noindent #1\par}
 

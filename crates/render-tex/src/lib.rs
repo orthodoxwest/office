@@ -153,6 +153,7 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
             b.push_str(&format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, chant));
         }
         ElementType::Hymn => {
+            b.push_str("\\sectionheading{Hymn}\n\n");
             if !elem.label.is_empty() {
                 b.push_str(&format!("\n\\hymnlabel{{{}}}\n\n", tex_line(&elem.label)));
             }
@@ -193,7 +194,13 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
                 b.push_str(&format_collect(&elem.text));
             }
         }
-        ElementType::Chapter => b.push_str(&format_collect(&elem.text)),
+        ElementType::Chapter => {
+            b.push_str("\\sectionheading{Chapter}\n\n");
+            if !elem.label.is_empty() {
+                b.push_str(&format!("{{\\centering\\scriptureref{{{}}}\\par}}\\nopagebreak\n", tex_line(&elem.label)));
+            }
+            b.push_str(&format_collect(&elem.text));
+        }
         ElementType::ShortResponsory => b.push_str(&format_short_responsory(&elem.text)),
         ElementType::CorporateLordPrayer => b.push_str(&format_corporate_lord_prayer(elem)),
     }
@@ -255,7 +262,7 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureC
             PsalmItem::Gloria { first, second } => {
                 first_verse = false;
                 if second.is_empty() {
-                    b.push_str(&format!("\\psalmverse{{}}{{{}}}\n", mediant_line(first)));
+                    b.push_str(&format!("\\glorialine{{{}}}\n", mediant_line(first)));
                 } else {
                     b.push_str(&format!("\\gloriapatri{{{}}}{{{}}}\n", mediant_line(first), mediant_line(second)));
                 }
@@ -416,11 +423,11 @@ fn format_short_responsory(text: &str) -> String {
             }
             BlockKind::All => {
                 flush(&mut b, &mut prose);
-                b.push_str(&format!("\\noindent\\allsig{{}}{}\\par\n", mediant_line(&line.text)));
+                b.push_str(&format!("\\allline{{{}}}\n", mediant_line(&line.text)));
             }
             BlockKind::Blessing => {
                 flush(&mut b, &mut prose);
-                b.push_str(&format!("\\noindent\\blessingsig{{}}{}\\par\n", mediant_line(&line.text)));
+                b.push_str(&format!("\\blessingline{{{}}}\n", mediant_line(&line.text)));
             }
             BlockKind::ScriptureRef => {
                 flush(&mut b, &mut prose);
@@ -659,15 +666,15 @@ fn format_block_as(text: &str, mode: Prose) -> String {
                 b.push_str(&format!("\\response{{{}}}\n", mediant_line(&line.text)));
                 continue;
             }
-            BlockKind::Blessing => "\\blessingsig{}",
-            BlockKind::All => "\\allsig{}",
+            BlockKind::Blessing => "blessingline",
+            BlockKind::All => "allline",
             BlockKind::Prose => {
                 prose.push(line.text);
                 continue;
             }
         };
         flush(&mut b, &mut prose, &mut dropped);
-        b.push_str(&format!("\\noindent{sigil}{}\\par\n", mediant_line(&line.text)));
+        b.push_str(&format!("\\{sigil}{{{}}}\n", mediant_line(&line.text)));
     }
     flush(&mut b, &mut prose, &mut dropped);
     b.push('\n');
@@ -679,7 +686,7 @@ fn format_gloria_patri(text: &str, postures: &[PostureCue]) -> String {
     let (line1, line2) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
     let cued = |n: usize, line: &str| format!("{}{}", posture_tex(postures, PostureAnchor::BeforeVerse(n)), mediant_line(line));
     if line2.is_empty() {
-        format!("\\noindent {}\\par\n\n", cued(0, line1))
+        format!("\\glorialine{{{}}}\n\n", cued(0, line1))
     } else {
         format!("\\gloriapatri{{{}}}{{{}}}\n\n", cued(0, line1), cued(1, line2))
     }
@@ -860,7 +867,7 @@ mod tests {
         let got = format_block("V. O Lord, open thou our lips.\nR. And our mouth * shall shew forth thy praise.\nAll: Amen.");
         assert!(got.contains("\\versicle{O Lord, open thou our lips.}\n"), "{got}");
         assert!(got.contains("\\response{And our mouth\\mediant{}shall shew forth thy praise.}\n"), "{got}");
-        assert!(got.contains("\\noindent\\allsig{}Amen.\\par"), "{got}");
+        assert!(got.contains("\\allline{Amen.}\n"), "{got}");
     }
 
     #[test]
@@ -1087,10 +1094,32 @@ mod tests {
     }
 
     #[test]
+    fn chapter_and_hymn_take_their_headings() {
+        let mut chapter = OfficeElement::new(ElementType::Chapter, "Brethren, be sober.\nR. Thanks be to God.");
+        chapter.label = "1 Peter 5:8".into();
+        let got = tex_element(&chapter, "ant", None);
+        assert!(
+            got.starts_with(
+                "\\sectionheading{Chapter}\n\n{\\centering\\scriptureref{1 Peter 5:8}\\par}\\nopagebreak\n\\initial{prose}{B}{B}{rethren,}"
+            ),
+            "{got}"
+        );
+        let mut hymn = OfficeElement::new(ElementType::Hymn, "Te lucis\n\nTo thee before the close of day,\nCreator of the world.\n");
+        hymn.label = "Te lucis ante terminum".into();
+        let got = tex_element(&hymn, "ant", None);
+        assert!(got.starts_with("\\sectionheading{Hymn}\n\n\n\\hymnlabel{Te lucis ante terminum}"), "{got}");
+        // Word sigils keep the spoken text on the ℣/℟ edge.
+        assert!(
+            format_lines("Blessing. The Lord Almighty grant us a quiet night.")
+                .contains("\\blessingline{The Lord Almighty grant us a quiet night.}")
+        );
+    }
+
+    #[test]
     fn gloria_patri() {
         let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);
         assert_eq!(got, "\\gloriapatri{Glory be to the Father;}{as it was in the beginning.}\n\n");
-        assert_eq!(format_gloria_patri("Glory be", &[]), "\\noindent Glory be\\par\n\n");
+        assert_eq!(format_gloria_patri("Glory be", &[]), "\\glorialine{Glory be}\n\n");
         let cues = [
             PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
             PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
