@@ -391,6 +391,12 @@
   \begin{center}{\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip%
 }
 
+% Marian anthem: roman, each source line its own line with a wrapped
+% remainder hanging beneath it, as the web's chant lines; the opening pair
+% carries the initial (\initial).
+\newenvironment{anthem}{\setlength{\parskip}{1pt}}{\par}
+\newcommand{\anthemline}[1]{\noindent\hangindent=1.2em\hangafter=1 #1\par}
+
 % Pointing mediant: muted and raised to the optical middle of the line, as the
 % web verse renderer lifts the asterisk clear of the ascenders.
 \newcommand{\mediant}{\,\raisebox{0.25em}{\small\color{mutedgray}*}\,}

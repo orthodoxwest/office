@@ -306,8 +306,9 @@ fn format_hymn(text: &str, label: &str, chant: Option<&Chant<'_>>) -> String {
     b
 }
 
-/// A multi-line antiphon (a Marian antiphon): the anthem in italics, then any
-/// versicle and collect as a block.
+/// A multi-line antiphon (a Marian antiphon), then any versicle and collect as
+/// a block. The anthem keeps its source lines, as the web's chant lines do:
+/// the opening pair carries the initial and each later line stands alone.
 fn format_multiline_antiphon(elem: &OfficeElement) -> String {
     let mut b = String::new();
     if !elem.label.is_empty() {
@@ -316,10 +317,14 @@ fn format_multiline_antiphon(elem: &OfficeElement) -> String {
     let (anthem, rest) = elem.text.split_once("\n\n").unwrap_or((&elem.text, ""));
     let lines: Vec<&str> = anthem.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect();
     if let Some((first, more)) = lines.split_first() {
-        let more: String = more.iter().map(|l| format!(" {}", mediant_line(l))).collect();
-        b.push_str("{\\itshape ");
-        b.push_str(&initial(Initial::Drop, first, &more));
-        b.push_str("}\n");
+        let (pair, more) = more.split_at(more.len().min(1));
+        let pair: String = pair.iter().map(|l| format!("\\\\\n{}", mediant_line(l))).collect();
+        b.push_str("\\begin{anthem}\n");
+        b.push_str(&initial(Initial::Drop, first, &pair));
+        for line in more {
+            b.push_str(&format!("\\anthemline{{{}}}\n", mediant_line(line)));
+        }
+        b.push_str("\\end{anthem}\n");
     }
     let rest = rest.trim();
     if rest.is_empty() {
@@ -894,23 +899,25 @@ mod tests {
     }
 
     #[test]
-    fn multiline_antiphon_flows_the_anthem() {
+    fn multiline_antiphon_keeps_its_lines() {
         let mut elem = OfficeElement::new(
             ElementType::Antiphon,
-            "Hail, holy Queen, Mother of mercy,\nour life, our sweetness, and our hope.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
+            "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness, and our hope.\nTo thee do we cry.\nTo thee do we send up our sighs.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
         );
         elem.label = "Salve Regina".into();
         let got = format_multiline_antiphon(&elem);
         assert!(got.contains("\\hymnlabel{Salve Regina}"));
         assert!(
-            got.contains("{\\itshape \\initial{drop}{H}{H}{ail,}{ holy Queen, Mother of mercy, our life, our sweetness, and our hope.}\n}"),
+            got.contains(
+                "\\begin{anthem}\n\\initial{drop}{H}{H}{ail,}{ holy Queen,\\mediant{}Mother of mercy,\\\\\nour life, our sweetness, and our hope.}\n\\anthemline{To thee do we cry.}\n\\anthemline{To thee do we send up our sighs.}\n\\end{anthem}\n"
+            ),
             "{got}"
         );
+        assert!(!got.contains("\\itshape"), "{got}");
         assert!(got.contains("\\versicle{") && got.contains("\\response{"));
 
-        let only =
-            format_multiline_antiphon(&OfficeElement::new(ElementType::Antiphon, "Line one of the anthem,\nline two of the anthem."));
-        assert!(only.contains("{\\itshape \\initial{drop}{L}{L}{ine}{ one of the anthem, line two of the anthem.}\n}"), "{only}");
+        let only = format_multiline_antiphon(&OfficeElement::new(ElementType::Antiphon, "Line one of the anthem."));
+        assert!(only.contains("\\begin{anthem}\n\\initial{drop}{L}{L}{ine}{ one of the anthem.}\n\\end{anthem}\n"), "{only}");
     }
 
     #[test]
