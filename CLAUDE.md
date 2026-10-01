@@ -35,7 +35,7 @@ apps/
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
-  genicons.py              PWA icon generator; requires tools/requirements.txt
+  genicons.py              App icon (web, iOS, Android) generator; requires tools/requirements.txt
   genplaster.py            Texture generator; source photograph stays in ../resources/
 data/
   feasts/                  Feast definitions (INI-like format)

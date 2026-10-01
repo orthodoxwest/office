@@ -1,5 +1,6 @@
 # Optional dependencies for deterministic asset generation.
 Pillow>=10
 numpy>=1.26
+scipy>=1.11
 fonttools>=4.50
 brotli>=1.1
