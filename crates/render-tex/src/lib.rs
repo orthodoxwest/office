@@ -3,7 +3,7 @@
 
 use calendar::{Color, Season};
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use corpus::typography::{soften_drop_cap_opening, typeset};
+use corpus::typography::typeset;
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at};
 
 const PREAMBLE: &str = include_str!("preamble.tex");
@@ -109,13 +109,28 @@ fn tex_section(section: &OfficeSection, chant: Option<&Chant<'_>>) -> String {
     if !section.label.is_empty() {
         b.push_str(&format!("\\sectionheading{{{}}}\n\n", tex_line(&section.label)));
     }
-    for elem in &section.elements {
-        b.push_str(&tex_element(elem, chant));
+    let kinds: Vec<ElementType> = section.elements.iter().map(|e| e.kind).collect();
+    for (i, elem) in section.elements.iter().enumerate() {
+        let after_psalm = i > 0 && (kinds[i - 1].is_psalmody() || kinds[i - 1] == ElementType::PsalmDoxology);
+        let before_psalm = kinds.get(i + 1).is_some_and(|k| k.is_psalmody());
+        b.push_str(&tex_element(elem, antiphon_macro(after_psalm, before_psalm), chant));
     }
     b
 }
 
-fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
+/// The macro for a one-line antiphon by its place: one that closes a psalm
+/// takes a little air after it, as the web's antiphon margin does, so a
+/// closing antiphon and the next psalm's opening one read as two; an opening
+/// antiphon stays with the psalm it introduces.
+fn antiphon_macro(after_psalm: bool, before_psalm: bool) -> &'static str {
+    match (after_psalm, before_psalm) {
+        (_, true) => "antopen",
+        (true, false) => "antclose",
+        (false, false) => "ant",
+    }
+}
+
+fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> String {
     let mut b = String::new();
     match elem.kind {
         ElementType::Rubric => b.push_str(&format_rubric(elem)),
@@ -126,7 +141,7 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
                 if text.contains('\n') {
                     b.push_str(&format_multiline_antiphon(elem));
                 } else {
-                    b.push_str(&format!("\\ant{{{}}}\n\n", mediant_line(&text)));
+                    b.push_str(&format!("\\{ant}{{{}}}\n\n", mediant_line(&text)));
                 }
             }
         }
@@ -138,6 +153,7 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
             b.push_str(&format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, chant));
         }
         ElementType::Hymn => {
+            b.push_str("\\sectionheading{Hymn}\n\n");
             if !elem.label.is_empty() {
                 b.push_str(&format!("\n\\hymnlabel{{{}}}\n\n", tex_line(&elem.label)));
             }
@@ -166,7 +182,7 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
         | ElementType::Response
         | ElementType::Dialogue
         | ElementType::Blessing
-        | ElementType::Preces => b.push_str(&format_block(&elem.text)),
+        | ElementType::Preces => b.push_str(&format_lines(&elem.text)),
         ElementType::Collect => {
             let v = &elem.voice;
             if v.len() == 2 && v[0].spoken && !v[1].spoken && format!("{}{}", v[0].text, v[1].text) == elem.text {
@@ -178,7 +194,13 @@ fn tex_element(elem: &OfficeElement, chant: Option<&Chant<'_>>) -> String {
                 b.push_str(&format_collect(&elem.text));
             }
         }
-        ElementType::Chapter => b.push_str(&format_collect(&elem.text)),
+        ElementType::Chapter => {
+            b.push_str("\\sectionheading{Chapter}\n\n");
+            if !elem.label.is_empty() {
+                b.push_str(&format!("{{\\centering\\scriptureref{{{}}}\\par}}\\nopagebreak\n", tex_line(&elem.label)));
+            }
+            b.push_str(&format_collect(&elem.text));
+        }
         ElementType::ShortResponsory => b.push_str(&format_short_responsory(&elem.text)),
         ElementType::CorporateLordPrayer => b.push_str(&format_corporate_lord_prayer(elem)),
     }
@@ -240,7 +262,7 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureC
             PsalmItem::Gloria { first, second } => {
                 first_verse = false;
                 if second.is_empty() {
-                    b.push_str(&format!("\\psalmverse{{}}{{{}}}\n", mediant_line(first)));
+                    b.push_str(&format!("\\glorialine{{{}}}\n", mediant_line(first)));
                 } else {
                     b.push_str(&format!("\\gloriapatri{{{}}}{{{}}}\n", mediant_line(first), mediant_line(second)));
                 }
@@ -253,7 +275,12 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureC
                 if first_verse {
                     first_verse = false;
                     if number.is_empty() {
-                        b.push_str(&format!("\\psalmverse{{}}{{{}}}\n", verse_halves(&drop_cap(first), &second, before, after)));
+                        // A cue before the opening verse stands on its own line, so the
+                        // initial still opens the verse; a cue after the mediant stays in it.
+                        if !before.is_empty() {
+                            b.push_str(&format!("\\noindent {}\\par\\nopagebreak\n", before.trim_end()));
+                        }
+                        b.push_str(&initial(Initial::Psalm, first, &verse_halves("", &second, String::new(), after)));
                         continue;
                     }
                 }
@@ -277,37 +304,64 @@ fn format_hymn(text: &str, label: &str, chant: Option<&Chant<'_>>) -> String {
             None => b.push_str(&format!("\\hymnlabel{{{}}}\n\n", tex_line(&hymn.title))),
         }
     }
-    b.push_str("\\begin{hymnverses}\n");
+    // A closing "Amen." runs on at the end of the last line, as printed
+    // diurnals and the web hour set it, rather than standing as a stanza.
+    let mut stanzas: Vec<Vec<String>> = Vec::new();
+    for (i, stanza) in hymn.stanzas.iter().enumerate() {
+        if i > 0
+            && is_hymn_amen(stanza)
+            && hymn_rubric_stanza(&hymn.stanzas[i - 1]).is_none()
+            && let Some(last) = stanzas.last_mut().and_then(|s| s.last_mut())
+        {
+            last.push(' ');
+            last.push_str(stanza[0].trim());
+            continue;
+        }
+        stanzas.push(stanza.clone());
+    }
+    // The block is centred on its longest line, as the web centres the
+    // stanzas; the opening lines also make room for the initial.
+    b.push_str("\\hymnmeasure{");
+    let mut opening = true;
+    for stanza in stanzas.iter().filter(|s| hymn_rubric_stanza(s).is_none()) {
+        for (i, line) in stanza.iter().enumerate() {
+            let measure = if opening && i < 2 { "hmopening" } else { "hm" };
+            b.push_str(&format!("\\{measure}{{{}}}", tex_line(line)));
+        }
+        opening = false;
+    }
+    b.push_str("}\n\\begin{hymnverses}\n");
     let mut dropped = false;
-    for stanza in &hymn.stanzas {
+    for stanza in &stanzas {
         if let Some(rubrics) = hymn_rubric_stanza(stanza) {
             for rubric in rubrics {
                 b.push_str(&format!("{{\\centering\\rubric{{{}}}\\par}}\\smallskip\n", tex_line(rubric)));
             }
             continue;
         }
-        if dropped {
-            b.push_str("\\noindent ");
+        if !dropped && let Some((first, more)) = stanza.split_first() {
+            let more: String = more.iter().map(|line| format!("\\\\\n{}", tex_line(line))).collect();
+            b.push_str(&initial(Initial::Drop, first, &more));
+            b.push_str("\\smallskip\n");
+            dropped = true;
+            continue;
         }
-        for (i, line) in stanza.iter().enumerate() {
-            if i > 0 {
-                b.push_str("\\\\\n");
-            }
-            if !dropped && i == 0 {
-                b.push_str(&drop_cap(line));
-                dropped = true;
-            } else {
-                b.push_str(&tex_line(line));
-            }
-        }
-        b.push_str("\\par\\capclear\\smallskip\n");
+        b.push_str("\\noindent ");
+        b.push_str(&stanza.iter().map(|line| tex_line(line)).collect::<Vec<_>>().join("\\\\\n"));
+        b.push_str("\\par\\smallskip\n");
     }
     b.push_str("\\end{hymnverses}\n\n");
     b
 }
 
-/// A multi-line antiphon (a Marian antiphon): the anthem in italics, then any
-/// versicle and collect as a block.
+/// A stanza that is only the hymn's closing Amen.
+fn is_hymn_amen(stanza: &[String]) -> bool {
+    stanza.len() == 1 && stanza[0].trim().trim_end_matches(['.', '!', ' ']).eq_ignore_ascii_case("amen")
+}
+
+/// A multi-line antiphon (a Marian antiphon), then any versicle and collect as
+/// a block. The anthem keeps its source lines, as the web's chant lines do:
+/// the opening pair carries the initial and each later line stands alone.
 fn format_multiline_antiphon(elem: &OfficeElement) -> String {
     let mut b = String::new();
     if !elem.label.is_empty() {
@@ -316,13 +370,14 @@ fn format_multiline_antiphon(elem: &OfficeElement) -> String {
     let (anthem, rest) = elem.text.split_once("\n\n").unwrap_or((&elem.text, ""));
     let lines: Vec<&str> = anthem.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect();
     if let Some((first, more)) = lines.split_first() {
-        b.push_str("{\\itshape ");
-        b.push_str(&drop_cap(first));
-        if !more.is_empty() {
-            b.push(' ');
-            b.push_str(&more.iter().map(|l| mediant_line(l)).collect::<Vec<_>>().join(" "));
+        let (pair, more) = more.split_at(more.len().min(1));
+        let pair: String = pair.iter().map(|l| format!("\\\\\n{}", mediant_line(l))).collect();
+        b.push_str("\\begin{sourcelines}\n");
+        b.push_str(&initial(Initial::Drop, first, &pair));
+        for line in more {
+            b.push_str(&format!("\\sourceline{{{}}}\n", mediant_line(line)));
         }
-        b.push_str("}\\par\\capclear\n");
+        b.push_str("\\end{sourcelines}\n");
     }
     let rest = rest.trim();
     if rest.is_empty() {
@@ -343,7 +398,7 @@ fn format_short_responsory(text: &str) -> String {
     let mut prose: Vec<String> = Vec::new();
     let flush = |b: &mut String, prose: &mut Vec<String>| {
         if !prose.is_empty() {
-            b.push_str(&format!("\\noindent {}\\par\n", prose.join(" ")));
+            b.push_str(&format!("\\sigilline{{}}{{{}}}\n", prose.join(" ")));
             prose.clear();
         }
     };
@@ -356,13 +411,7 @@ fn format_short_responsory(text: &str) -> String {
             BlockKind::Response => {
                 flush(&mut b, &mut prose);
                 if first_response {
-                    let (initial, word_rest, tail) = split_drop_cap(&typeset(&soften_drop_cap_opening(&line.text)));
-                    b.push_str(&format!(
-                        "\\shortresponse{{{}}}{{{}}}{}\\par\\capclear\n",
-                        tex_line(&initial),
-                        tex_line(&word_rest),
-                        mediant_line(&tail)
-                    ));
+                    b.push_str(&initial(Initial::Response, &line.text, ""));
                     first_response = false;
                 } else {
                     b.push_str(&format!("\\response{{{}}}\n", mediant_line(&line.text)));
@@ -374,11 +423,11 @@ fn format_short_responsory(text: &str) -> String {
             }
             BlockKind::All => {
                 flush(&mut b, &mut prose);
-                b.push_str(&format!("\\noindent\\allsig{{}}{}\\par\n", mediant_line(&line.text)));
+                b.push_str(&format!("\\allline{{{}}}\n", mediant_line(&line.text)));
             }
             BlockKind::Blessing => {
                 flush(&mut b, &mut prose);
-                b.push_str(&format!("\\noindent\\blessingsig{{}}{}\\par\n", mediant_line(&line.text)));
+                b.push_str(&format!("\\blessingline{{{}}}\n", mediant_line(&line.text)));
             }
             BlockKind::ScriptureRef => {
                 flush(&mut b, &mut prose);
@@ -392,12 +441,121 @@ fn format_short_responsory(text: &str) -> String {
     b
 }
 
-fn drop_cap(text: &str) -> String {
-    let (initial, word_rest, tail) = split_drop_cap(&typeset(&soften_drop_cap_opening(text)));
-    if initial.is_empty() {
-        return tex_line(text);
+/// How an ornamented opening is set; `\initial` in the preamble chooses
+/// between a dropped and a raised initial by the lines the opening takes.
+#[derive(Clone, Copy)]
+enum Initial {
+    /// Always dropped: a hymn's opening stanza, a Marian anthem.
+    Drop,
+    /// Dropped, or raised when the opening fits one line: chapter, collect,
+    /// the officiant's Lord's Prayer.
+    Prose,
+    /// Dropped, or elevated to full size on the line when the verse fits one.
+    Psalm,
+    /// Raised at the ℟ text edge: a Short Responsory's opening response.
+    Response,
+}
+
+impl Initial {
+    fn mode(self) -> &'static str {
+        match self {
+            Initial::Drop => "drop",
+            Initial::Prose => "prose",
+            Initial::Psalm => "psalm",
+            Initial::Response => "response",
+        }
     }
-    format!("\\dropcap{{{}}}{{{}}}{}", tex_line(&initial), tex_line(&word_rest), mediant_line(&tail))
+}
+
+/// An opening line as one `\initial` paragraph: the gilt initial, the rest of
+/// its word in small caps, and the remainder, with `more` (already TeX)
+/// appended. A standalone O or I (`\initial*`) keeps its word space and gives
+/// the small caps to the next word, as the web hour does.
+///
+/// A source opening in capitals ("IN THE LORD put I my trust") runs on in
+/// small caps to the end of the capitals, as a printed psalter sets it. The
+/// small-caps face draws capitals and lowercase alike, so the text keeps its
+/// source case and needs no softening.
+fn initial(mode: Initial, text: &str, more: &str) -> String {
+    let text = typeset(text);
+    let Some(o) = split_opening(&text) else {
+        return format!("\\noindent {}{more}\\par\n", mediant_line(&text));
+    };
+    let key: String = o.letter.to_uppercase().collect();
+    format!(
+        "\\initial{}{{{}}}{{{key}}}{{{}}}{{{}}}{{{}{more}}}\n",
+        if o.standalone { "*" } else { "" },
+        mode.mode(),
+        tex_line(&o.init),
+        tex_line(&o.word),
+        mediant_line(&o.tail)
+    )
+}
+
+/// A plain opening in capitals ("I CONFESS to God Almighty") keeps its first
+/// letter and sets the rest of the capitals in small caps, as the web hour
+/// does where no ornamented initial stands. Any other line is unchanged.
+fn capitals_opening(line: &str) -> String {
+    let text = typeset(line);
+    match split_opening(&text) {
+        Some(o) if o.capitals && o.letter.is_uppercase() => format!(
+            "{}{}\\capsrun{{{}}}{}",
+            tex_line(&o.init),
+            if o.standalone { " " } else { "" },
+            tex_line(&o.word),
+            mediant_line(&o.tail)
+        ),
+        _ => mediant_line(&text),
+    }
+}
+
+/// An opening line split for typesetting.
+struct Opening {
+    /// The initial, with any opening quote.
+    init: String,
+    letter: char,
+    /// A one-letter first word (O, I): `word` is then the next word.
+    standalone: bool,
+    /// The words the small caps cover.
+    word: String,
+    tail: String,
+    /// Whether the opening is in capitals, so `word` runs to their end.
+    capitals: bool,
+}
+
+fn split_opening(text: &str) -> Option<Opening> {
+    let (init, word, tail) = split_drop_cap(text);
+    let letter = init.chars().find(|c| c.is_alphanumeric())?;
+    let (standalone, word, tail) = match tail.strip_prefix(char::is_whitespace) {
+        Some(rest) if word.is_empty() && !rest.starts_with('*') => {
+            let end = rest.find(char::is_whitespace).unwrap_or(rest.len());
+            (true, rest[..end].to_string(), rest[end..].to_string())
+        }
+        _ => (false, word, tail),
+    };
+    let capitals = is_capitals(&if standalone { word.clone() } else { format!("{init}{word}") });
+    let run = if capitals { capitals_run(&tail) } else { 0 };
+    Some(Opening { word: format!("{word}{}", &tail[..run]), tail: tail[run..].to_string(), init, letter, standalone, capitals })
+}
+
+/// A word of two or more letters, all capitals ("LORD," but not "I" or "God").
+fn is_capitals(word: &str) -> bool {
+    let mut letters = word.chars().filter(|c| c.is_alphabetic()).peekable();
+    letters.clone().count() >= 2 && letters.all(char::is_uppercase)
+}
+
+/// The byte length of the run of capital words that opens `tail`.
+fn capitals_run(tail: &str) -> usize {
+    let mut end = 0;
+    loop {
+        let rest = &tail[end..];
+        let start = rest.len() - rest.trim_start().len();
+        let len = rest[start..].find(char::is_whitespace).unwrap_or(rest.len() - start);
+        if len == 0 || !is_capitals(&rest[start..start + len]) {
+            return end;
+        }
+        end += start + len;
+    }
 }
 
 /// The initial, the rest of the opening word, and the remainder. Opening
@@ -433,20 +591,37 @@ fn format_corporate_lord_prayer(elem: &OfficeElement) -> String {
         return format_block(&elem.text);
     }
     let flow = |s: &str| s.split_whitespace().collect::<Vec<_>>().join(" ");
-    format!("{}\\par\\capclear\n\\response{{{}}}\n\n", drop_cap(&flow(&officiant)), mediant_line(&flow(&response)))
+    format!("{}\\response{{{}}}\n\n", initial(Initial::Prose, &flow(&officiant), ""), mediant_line(&flow(&response)))
+}
+
+/// How a block sets its plain prose lines.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Prose {
+    /// Lines flow into paragraphs: prayers and readings.
+    Flow,
+    /// Each source line keeps its own line, a wrap hanging beneath it:
+    /// versicles, the Gloria, blessings and preces, as the web keeps them.
+    Lines,
+    /// Flowing, opening on an ornamented initial: chapter and collect.
+    Initial,
 }
 
 fn format_collect(text: &str) -> String {
-    format_block_with_opening(text, true)
+    format_block_as(text, Prose::Initial)
 }
 
 fn format_block(text: &str) -> String {
-    format_block_with_opening(text, false)
+    format_block_as(text, Prose::Flow)
 }
 
-/// Versicles, responses, prayers, chapters, blessings, preces: hard-wrapped
-/// prose lines flow into paragraphs; blank lines break them.
-fn format_block_with_opening(text: &str, opening_drop_cap: bool) -> String {
+fn format_lines(text: &str) -> String {
+    format_block_as(text, Prose::Lines)
+}
+
+/// Versicles, responses, prayers, chapters, blessings, preces: blank lines
+/// break paragraphs, and plain lines flow or keep their breaks by `mode`. A
+/// block that opens on plain prose in capitals sets them in small caps.
+fn format_block_as(text: &str, mode: Prose) -> String {
     let mut b = String::new();
     let mut prose: Vec<String> = Vec::new();
     let mut dropped = false;
@@ -454,18 +629,18 @@ fn format_block_with_opening(text: &str, opening_drop_cap: bool) -> String {
         if prose.is_empty() {
             return;
         }
-        if opening_drop_cap && !*dropped {
-            b.push_str(&drop_cap(&prose[0]));
-            if prose.len() > 1 {
-                b.push(' ');
-                b.push_str(&prose[1..].iter().map(|l| mediant_line(l)).collect::<Vec<_>>().join(" "));
-            }
+        let first = b.is_empty();
+        let line = |i: usize, l: &str| if i == 0 && first { capitals_opening(l) } else { mediant_line(l) };
+        if mode == Prose::Initial && !*dropped {
+            let more: String = prose[1..].iter().map(|l| format!(" {}", mediant_line(l))).collect();
+            b.push_str(&initial(Initial::Prose, &prose[0], &more));
             *dropped = true;
-            b.push_str("\\par\\capclear\n");
+        } else if mode == Prose::Lines && prose.len() > 1 {
+            let lines: String = prose.iter().enumerate().map(|(i, l)| format!("\\sourceline{{{}}}\n", line(i, l))).collect();
+            b.push_str(&format!("\\begin{{sourcelines}}\n{lines}\\end{{sourcelines}}\n"));
         } else {
-            b.push_str("\\noindent ");
-            b.push_str(&prose.iter().map(|l| mediant_line(l)).collect::<Vec<_>>().join(" "));
-            b.push_str("\\par\n");
+            let text = prose.iter().enumerate().map(|(i, l)| line(i, l)).collect::<Vec<_>>().join(" ");
+            b.push_str(&format!("\\noindent {text}\\par\n"));
         }
         prose.clear();
     };
@@ -491,15 +666,15 @@ fn format_block_with_opening(text: &str, opening_drop_cap: bool) -> String {
                 b.push_str(&format!("\\response{{{}}}\n", mediant_line(&line.text)));
                 continue;
             }
-            BlockKind::Blessing => "\\blessingsig{}",
-            BlockKind::All => "\\allsig{}",
+            BlockKind::Blessing => "blessingline",
+            BlockKind::All => "allline",
             BlockKind::Prose => {
                 prose.push(line.text);
                 continue;
             }
         };
         flush(&mut b, &mut prose, &mut dropped);
-        b.push_str(&format!("\\noindent{sigil}{}\\par\n", mediant_line(&line.text)));
+        b.push_str(&format!("\\{sigil}{{{}}}\n", mediant_line(&line.text)));
     }
     flush(&mut b, &mut prose, &mut dropped);
     b.push('\n');
@@ -511,7 +686,7 @@ fn format_gloria_patri(text: &str, postures: &[PostureCue]) -> String {
     let (line1, line2) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
     let cued = |n: usize, line: &str| format!("{}{}", posture_tex(postures, PostureAnchor::BeforeVerse(n)), mediant_line(line));
     if line2.is_empty() {
-        format!("\\noindent {}\\par\n\n", cued(0, line1))
+        format!("\\glorialine{{{}}}\n\n", cued(0, line1))
     } else {
         format!("\\gloriapatri{{{}}}{{{}}}\n\n", cued(0, line1), cued(1, line2))
     }
@@ -630,7 +805,7 @@ mod tests {
 
     use super::*;
     use calendar::Date;
-    use liturgy::{PrayerForm, VoiceSpan};
+    use liturgy::{PrayerForm, VoiceRole, VoiceSpan};
 
     const PSALM_67: &str = "Psalm 67\n\nGOD be merciful unto us, and bless us * and shew us the light of his countenance:\n2. That thy way may be known upon earth * thy saving health among all nations.\nGlory be to the Father, and to the Son, and to the Holy Ghost;\nas it was in the beginning, is now, and ever shall be, world without end. Amen.\n";
 
@@ -684,7 +859,7 @@ mod tests {
         // A pointed line is typeset whole, so a quote after the mediant still closes.
         assert_eq!(mediant_line("and said, 'Peace * be with you.'"), "and said, ‘Peace\\mediant{}be with you.’");
         // Opening punctuation joins the initial, as ::first-letter takes it on the web.
-        assert_eq!(drop_cap("'Twas the Lord's doing"), "\\dropcap{’T}{was} the Lord’s doing");
+        assert_eq!(initial(Initial::Prose, "'Twas the Lord's doing", ""), "\\initial{prose}{T}{’T}{was}{ the Lord’s doing}\n");
     }
 
     #[test]
@@ -692,27 +867,42 @@ mod tests {
         let got = format_block("V. O Lord, open thou our lips.\nR. And our mouth * shall shew forth thy praise.\nAll: Amen.");
         assert!(got.contains("\\versicle{O Lord, open thou our lips.}\n"), "{got}");
         assert!(got.contains("\\response{And our mouth\\mediant{}shall shew forth thy praise.}\n"), "{got}");
-        assert!(got.contains("\\noindent\\allsig{}Amen.\\par"), "{got}");
+        assert!(got.contains("\\allline{Amen.}\n"), "{got}");
     }
 
     #[test]
     fn short_responsory_initial_only_on_an_opening_response() {
-        let opening =
-            format_short_responsory("R. Incline my heart * unto thy testimonies.\nV. Turn away mine eyes.\nR. Unto thy testimonies.");
-        assert!(opening.starts_with("\\shortresponse{I}{ncline} my heart\\mediant{}unto thy testimonies.\\par\\capclear\n"), "{opening}");
+        let opening = format_short_responsory(
+            "R. Incline my heart * unto thy testimonies.\nV. Turn away mine eyes.\nR. Unto thy testimonies.\nGlory be to the Father.",
+        );
+        assert!(opening.starts_with("\\initial{response}{I}{I}{ncline}{ my heart\\mediant{}unto thy testimonies.}\n"), "{opening}");
         assert!(opening.contains("\\versicle{Turn away mine eyes.}") && opening.contains("\\response{Unto thy testimonies.}"));
+        // Plain lines share the ℟ text edge, as on the web.
+        assert!(opening.contains("\\sigilline{}{Glory be to the Father.}"), "{opening}");
 
         let versicle_first =
             format_short_responsory("V. Keep us, O Lord, as the apple of an eye.\nR. Hide us under the shadow of thy wings.");
-        assert!(!versicle_first.contains("\\shortresponse"), "{versicle_first}");
+        assert!(!versicle_first.contains("\\initial"), "{versicle_first}");
         assert!(versicle_first.contains("\\response{Hide us under the shadow of thy wings.}"), "{versicle_first}");
     }
 
     #[test]
-    fn drop_cap_paragraphs_clear_their_initial() {
-        assert!(format_collect("Almighty God, who art.\n").contains("\\dropcap{A}{lmighty} God, who art.\\par\\capclear\n"));
-        let hymn = format_hymn("O Framer of the earth and sky,\nRuler of all things.\n\nSecond stanza here.\n", "", None);
-        assert_eq!(hymn.matches("\\capclear").count(), 2, "{hymn}");
+    fn each_opening_is_one_initial_paragraph() {
+        assert_eq!(format_collect("Almighty God,\nwho art."), "\\initial{prose}{A}{A}{lmighty}{ God, who art.}\n\n");
+        let hymn = format_hymn("O Framer of the earth and sky,\nRuler of all things.\n\nSecond stanza,\nhere.\n", "", None);
+        assert!(hymn.contains("\\initial*{drop}{O}{O}{Framer}{ of the earth and sky,\\\\\nRuler of all things.}\n\\smallskip\n"), "{hymn}");
+        assert!(hymn.contains("\\noindent Second stanza,\\\\\nhere.\\par\\smallskip\n"), "{hymn}");
+        let lord = OfficeElement {
+            voice: vec![
+                VoiceSpan::new("Our Father,\nwho art in heaven.\n", true, Some(VoiceRole::Officiant)),
+                VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
+            ],
+            ..OfficeElement::new(ElementType::CorporateLordPrayer, "Our Father,\nwho art in heaven.\nBut deliver us from evil.")
+        };
+        assert_eq!(
+            format_corporate_lord_prayer(&lord),
+            "\\initial{prose}{O}{O}{ur}{ Father, who art in heaven.}\n\\response{But deliver us from evil.}\n\n"
+        );
     }
 
     #[test]
@@ -753,30 +943,43 @@ mod tests {
     }
 
     #[test]
-    fn drop_cap_boxes_only_the_first_word() {
+    fn initial_takes_the_opening_word_in_small_caps() {
         for (text, parts, tex) in [
-            ("", ("", "", ""), ""),
-            ("O", ("O", "", ""), "\\dropcap{O}{}"),
-            ("Almighty God", ("A", "lmighty", " God"), "\\dropcap{A}{lmighty} God"),
-            ("O God", ("O", "", " God"), "\\dropcap{O}{} God"),
-            ("O\u{a0}God", ("O", "", "\u{a0}God"), "\\dropcap{O}{}\u{a0}God"),
-            ("God * save us", ("G", "od", " * save us"), "\\dropcap{G}{od}\\mediant{}save us"),
+            ("", ("", "", ""), "\\noindent \\par\n"),
+            ("O", ("O", "", ""), "\\initial{prose}{O}{O}{}{}\n"),
+            ("Almighty God", ("A", "lmighty", " God"), "\\initial{prose}{A}{A}{lmighty}{ God}\n"),
+            ("God * save us", ("G", "od", " * save us"), "\\initial{prose}{G}{G}{od}{\\mediant{}save us}\n"),
+            // A standalone O or I gives the small caps to the next word.
+            ("O God", ("O", "", " God"), "\\initial*{prose}{O}{O}{God}{}\n"),
+            ("O\u{a0}God", ("O", "", "\u{a0}God"), "\\initial*{prose}{O}{O}{God}{}\n"),
+            ("I said, I will", ("I", "", " said, I will"), "\\initial*{prose}{I}{I}{said,}{ I will}\n"),
+            ("O * rest", ("O", "", " * rest"), "\\initial{prose}{O}{O}{}{\\mediant{}rest}\n"),
+            // An opening in capitals runs on in small caps to the end of the capitals.
+            ("GOD be merciful", ("G", "OD", " be merciful"), "\\initial{prose}{G}{G}{OD}{ be merciful}\n"),
+            ("IN THE Lord put I my trust", ("I", "N", " THE Lord put I my trust"), "\\initial{prose}{I}{I}{N THE}{ Lord put I my trust}\n"),
+            ("MY SOUL * cleaveth", ("M", "Y", " SOUL * cleaveth"), "\\initial{prose}{M}{M}{Y SOUL}{\\mediant{}cleaveth}\n"),
+            (
+                "O GIVE THANKS unto the Lord",
+                ("O", "", " GIVE THANKS unto the Lord"),
+                "\\initial*{prose}{O}{O}{GIVE THANKS}{ unto the Lord}\n",
+            ),
+            ("O LORD, I cry", ("O", "", " LORD, I cry"), "\\initial*{prose}{O}{O}{LORD,}{ I cry}\n"),
         ] {
             let (a, b, c) = split_drop_cap(text);
             assert_eq!((a.as_str(), b.as_str(), c.as_str()), parts, "{text:?}");
-            assert_eq!(drop_cap(text), tex);
+            assert_eq!(initial(Initial::Prose, text, ""), tex, "{text:?}");
         }
     }
 
     #[test]
-    fn psalm_opening_takes_one_softened_initial() {
+    fn psalm_opening_takes_one_initial() {
         let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], None);
-        assert!(got.contains("\\psalmverse{}{\\dropcap{G}{od} be merciful unto us, and bless us\\mediant{}and shew us"), "{got}");
-        assert_eq!(got.matches("\\dropcap{").count(), 1);
+        assert!(got.contains("\\initial{psalm}{G}{G}{OD}{ be merciful unto us, and bless us\\mediant{}and shew us"), "{got}");
+        assert_eq!(got.matches("\\initial").count(), 1);
         assert!(got.contains("\\psalmverse{2}") && got.contains("\\gloriapatri{"));
 
         let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, &[], None);
-        assert!(!numbered.contains("\\dropcap{"), "{numbered}");
+        assert!(!numbered.contains("\\initial"), "{numbered}");
 
         let sectioned = format_psalm(
             "Canticle\n\nFirst opening * alpha.\n\n[section: Part II]\n\nSECOND opening * beta.\n",
@@ -785,8 +988,11 @@ mod tests {
             &[],
             None,
         );
-        assert_eq!(sectioned.matches("\\dropcap{").count(), 2, "{sectioned}");
-        assert!(sectioned.contains("\\canticlesection{Part II}") && sectioned.contains("\\dropcap{S}{econd} opening"));
+        assert_eq!(sectioned.matches("\\initial").count(), 2, "{sectioned}");
+        assert!(
+            sectioned.contains("\\canticlesection{Part II}")
+                && sectioned.contains("\\initial{psalm}{S}{S}{ECOND}{ opening\\mediant{}beta.}")
+        );
     }
 
     #[test]
@@ -800,36 +1006,120 @@ mod tests {
 
         let hymn = "Aeterne rerum conditor\n\nO Framer of the earth and sky,\nRuler of all things high and low.\n";
         let text = format_hymn(hymn, "Aeterne Rerum Conditor", Some(&chant));
-        assert!(text.contains("\\dropcap{O}{} Framer"), "{text}");
+        assert!(text.contains("\\initial*{drop}{O}{O}{Framer}{ of the earth and sky,\\\\\nRuler of all things high and low.}"), "{text}");
     }
 
     #[test]
-    fn multiline_antiphon_flows_the_anthem() {
+    fn multiline_antiphon_keeps_its_lines() {
         let mut elem = OfficeElement::new(
             ElementType::Antiphon,
-            "Hail, holy Queen, Mother of mercy,\nour life, our sweetness, and our hope.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
+            "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness, and our hope.\nTo thee do we cry.\nTo thee do we send up our sighs.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
         );
         elem.label = "Salve Regina".into();
         let got = format_multiline_antiphon(&elem);
         assert!(got.contains("\\hymnlabel{Salve Regina}"));
         assert!(
             got.contains(
-                "{\\itshape \\dropcap{H}{ail,} holy Queen, Mother of mercy, our life, our sweetness, and our hope.}\\par\\capclear"
+                "\\begin{sourcelines}\n\\initial{drop}{H}{H}{ail,}{ holy Queen,\\mediant{}Mother of mercy,\\\\\nour life, our sweetness, and our hope.}\n\\sourceline{To thee do we cry.}\n\\sourceline{To thee do we send up our sighs.}\n\\end{sourcelines}\n"
             ),
             "{got}"
         );
+        assert!(!got.contains("\\itshape"), "{got}");
         assert!(got.contains("\\versicle{") && got.contains("\\response{"));
 
-        let only =
-            format_multiline_antiphon(&OfficeElement::new(ElementType::Antiphon, "Line one of the anthem,\nline two of the anthem."));
-        assert!(only.contains("{\\itshape \\dropcap{L}{ine} one of the anthem, line two of the anthem.}"), "{only}");
+        let only = format_multiline_antiphon(&OfficeElement::new(ElementType::Antiphon, "Line one of the anthem."));
+        assert!(only.contains("\\begin{sourcelines}\n\\initial{drop}{L}{L}{ine}{ one of the anthem.}\n\\end{sourcelines}\n"), "{only}");
+    }
+
+    #[test]
+    fn hymn_is_measured_and_runs_on_its_amen() {
+        let got =
+            format_hymn("Lucis Creator\n\nO blest Creator of the light,\nWho mak'st the day.\n\nAll laud to God.\n\nAmen.\n", "", None);
+        assert!(
+            got.contains("\\hymnmeasure{\\hmopening{O blest Creator of the light,}\\hmopening{Who mak’st the day.}\\hm{All laud to God. Amen.}}\n\\begin{hymnverses}\n"),
+            "{got}"
+        );
+        assert!(got.contains("\\noindent All laud to God. Amen.\\par\\smallskip\n"), "{got}");
+        assert!(!got.contains("Amen.\\par\\smallskip\n\\noindent"), "{got}");
+        for (stanza, amen) in [(&["Amen."][..], true), (&["amen!"], true), (&["Amen, amen."], false), (&["Amen.", "More."], false)] {
+            let stanza: Vec<String> = stanza.iter().map(|l| l.to_string()).collect();
+            assert_eq!(is_hymn_amen(&stanza), amen, "{stanza:?}");
+        }
+    }
+
+    #[test]
+    fn versicles_and_the_gloria_keep_their_lines() {
+        let got = format_lines("Glory be to the Father, * and to the Son;\nAs it was in the beginning. Amen.\nAlleluia.");
+        assert_eq!(
+            got,
+            "\\begin{sourcelines}\n\\sourceline{Glory be to the Father,\\mediant{}and to the Son;}\n\\sourceline{As it was in the beginning. Amen.}\n\\sourceline{Alleluia.}\n\\end{sourcelines}\n\n"
+        );
+        // Prayers still flow.
+        assert_eq!(format_block("Almighty God,\nwho art."), "\\noindent Almighty God, who art.\\par\n\n");
+    }
+
+    #[test]
+    fn plain_openings_in_capitals_take_small_caps() {
+        assert_eq!(capitals_opening("I CONFESS to God Almighty"), "I \\capsrun{CONFESS} to God Almighty");
+        assert_eq!(capitals_opening("GOD be merciful"), "G\\capsrun{OD} be merciful");
+        assert_eq!(capitals_opening("O God, make speed"), "O God, make speed");
+        assert_eq!(capitals_opening("I said, I will"), "I said, I will");
+        // Only a block's opening line, and never a collect's or chapter's.
+        assert!(format_block("I CONFESS to God.\n\nI CONFESS again.").starts_with("\\noindent I \\capsrun{CONFESS} to God.\\par\n"));
+        assert!(format_block("I CONFESS to God.\n\nI CONFESS again.").contains("\\noindent I CONFESS again.\\par"));
+        assert!(format_block("V. Lord, have mercy.\nI CONFESS to God.").contains("\\noindent I CONFESS to God.\\par"));
+    }
+
+    #[test]
+    fn antiphons_take_their_place_beside_the_psalm() {
+        assert_eq!(antiphon_macro(true, false), "antclose");
+        assert_eq!(antiphon_macro(false, true), "antopen");
+        assert_eq!(antiphon_macro(true, true), "antopen");
+        assert_eq!(antiphon_macro(false, false), "ant");
+        let section = OfficeSection {
+            label: String::new(),
+            collapsible: false,
+            elements: vec![
+                OfficeElement::new(ElementType::Antiphon, "First antiphon."),
+                OfficeElement::new(ElementType::Psalm, "Psalm 1\n\nBLESSED is the man * that hath not walked.\n"),
+                OfficeElement::new(ElementType::PsalmDoxology, "Glory be;\nAs it was."),
+                OfficeElement::new(ElementType::Antiphon, "First antiphon."),
+                OfficeElement::new(ElementType::Antiphon, "Second antiphon."),
+                OfficeElement::new(ElementType::Psalm, "Psalm 2\n\nWHY do the heathen * rage.\n"),
+            ],
+        };
+        let got = tex_section(&section, None);
+        let order: Vec<&str> = got.lines().filter_map(|l| l.split_once('{').map(|(m, _)| m)).filter(|m| m.starts_with("\\ant")).collect();
+        assert_eq!(order, ["\\antopen", "\\antclose", "\\antopen"], "{got}");
+    }
+
+    #[test]
+    fn chapter_and_hymn_take_their_headings() {
+        let mut chapter = OfficeElement::new(ElementType::Chapter, "Brethren, be sober.\nR. Thanks be to God.");
+        chapter.label = "1 Peter 5:8".into();
+        let got = tex_element(&chapter, "ant", None);
+        assert!(
+            got.starts_with(
+                "\\sectionheading{Chapter}\n\n{\\centering\\scriptureref{1 Peter 5:8}\\par}\\nopagebreak\n\\initial{prose}{B}{B}{rethren,}"
+            ),
+            "{got}"
+        );
+        let mut hymn = OfficeElement::new(ElementType::Hymn, "Te lucis\n\nTo thee before the close of day,\nCreator of the world.\n");
+        hymn.label = "Te lucis ante terminum".into();
+        let got = tex_element(&hymn, "ant", None);
+        assert!(got.starts_with("\\sectionheading{Hymn}\n\n\n\\hymnlabel{Te lucis ante terminum}"), "{got}");
+        // Word sigils keep the spoken text on the ℣/℟ edge.
+        assert!(
+            format_lines("Blessing. The Lord Almighty grant us a quiet night.")
+                .contains("\\blessingline{The Lord Almighty grant us a quiet night.}")
+        );
     }
 
     #[test]
     fn gloria_patri() {
         let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);
         assert_eq!(got, "\\gloriapatri{Glory be to the Father;}{as it was in the beginning.}\n\n");
-        assert_eq!(format_gloria_patri("Glory be", &[]), "\\noindent Glory be\\par\n\n");
+        assert_eq!(format_gloria_patri("Glory be", &[]), "\\glorialine{Glory be}\n\n");
         let cues = [
             PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
             PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
@@ -852,7 +1142,7 @@ mod tests {
             &cues,
             None,
         );
-        assert!(got.contains("{\\dropcap{T}{he} Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
+        assert!(got.contains("\\initial{psalm}{T}{T}{HE}{ Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
         assert!(got.contains("\\psalmverse{2}{\\rubric{Bow.} He hath\\mediant{}made.}"), "{got}");
         assert!(got.contains("\\psalmverse{3}{No mediant here \\rubric{Stand.}}"), "{got}");
     }
