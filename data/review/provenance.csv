@@ -2818,8 +2818,8 @@ psalms/136,111b27d55637,Coverdale Psalter,Psalm 136,,verified,codex,2026-07-10,M
 psalms/137,d04b91b4b0cd,Coverdale Psalter,Psalm 137,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/138,6b0353f9230a,Coverdale Psalter,Psalm 138,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/139,456446354166,Coverdale Psalter,Psalm 139,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/139a,20125cdb74fd,Coverdale Psalter,Psalm 139:1-11,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/139b,1f40db2d6ac7,Coverdale Psalter,Psalm 139:12-24,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/139a,e1823ee01ffc,Coverdale Psalter,Psalm 139:1-9,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
+psalms/139b,3ed0433ba095,Coverdale Psalter,Psalm 139:10-24,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
 psalms/140,b55807026c26,Coverdale Psalter,Psalm 140,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/141,77a1a6ca5b46,Coverdale Psalter,Psalm 141,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/142,e854bfb34c28,Coverdale Psalter,Psalm 142,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
