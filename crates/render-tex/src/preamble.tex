@@ -364,8 +364,11 @@
 
 % Section heading: centered small caps with open air, as the web hour centers
 % each transition in tracked small caps. Never stranded at the foot of a page.
+% Headings and labels set their space with \addvspace, so a heading directly
+% above a psalm or hymn label shares one gap rather than stacking two.
 \newcommand{\sectionheading}[1]{%
-  \Needspace{6\baselineskip}\bigskip\begin{center}{\scshape #1}\end{center}\nopagebreak\smallskip\noindent%
+  \Needspace{6\baselineskip}\par\addvspace{1.5\bigskipamount}%
+  {\centering\scshape #1\par}\nopagebreak\addvspace{0.75\bigskipamount}%
 }
 
 % Mid-canticle section break (e.g. the two-part structure of Deut 32):
@@ -378,24 +381,29 @@
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone. Kept with its first verses.
 \newcommand{\psalmlabel}[2]{%
-  \Needspace{5\baselineskip}%
-  \begin{center}{\color{mutedgray}\scshape #1}%
-  \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi%
-  \end{center}\nopagebreak\smallskip%
+  \Needspace{5\baselineskip}\par\addvspace{\medskipamount}%
+  {\centering{\color{mutedgray}\scshape #1}%
+  \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi\par}%
+  \nopagebreak\addvspace{0.75\bigskipamount}%
 }
 
 % Hymn or anthem title (usually its Latin incipit): muted italic, as the
-% incipit beside a psalm label. Kept with its first stanza.
+% incipit beside a psalm label. Kept with its first stanza. Its space above
+% merges with a section heading's rather than adding to it.
 \newcommand{\hymnlabel}[1]{%
-  \Needspace{5\baselineskip}%
-  \begin{center}{\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip%
+  \Needspace{5\baselineskip}\par\addvspace{\medskipamount}%
+  {\centering\color{mutedgray}\itshape #1\par}\nopagebreak\smallskip%
 }
 
-% Marian anthem: roman, each source line its own line with a wrapped
-% remainder hanging beneath it, as the web's chant lines; the opening pair
-% carries the initial (\initial).
-\newenvironment{anthem}{\setlength{\parskip}{1pt}}{\par}
-\newcommand{\anthemline}[1]{\noindent\hangindent=1.2em\hangafter=1 #1\par}
+% Source lines kept as lines (the Marian anthem, versicles, the Gloria,
+% blessings, preces): each its own line, a wrapped remainder hanging
+% beneath it, as the web's chant and source lines.
+\newenvironment{sourcelines}{\setlength{\parskip}{1pt}}{\par}
+\newcommand{\sourceline}[1]{\noindent\hangindent=1.2em\hangafter=1 #1\par}
+
+% A plain opening in capitals, after its first letter: the font's drawn small
+% caps, as the web sets "I CONFESS" where no ornamented initial stands.
+\newcommand{\capsrun}[1]{{\upshape\InitialWordFont #1}}
 
 % Pointing mediant: muted and raised to the optical middle of the line, as the
 % web verse renderer lifts the asterisk clear of the ascenders.
@@ -413,10 +421,23 @@
 
 % Hymn stanza environment: deeper verse leading, as hymn-verses does. A
 % stanza is one paragraph, so the page-flow penalties keep it whole unless it
-% is longer than a page.
+% is longer than a page. The stanzas are centred as a block on their longest
+% line, left-aligned within it, as the web centres hymn-verses; a \leftskip
+% does it without boxing the hymn, so it still breaks across pages.
+% \hymnmeasure{\hm{line}...} records that line before the environment opens;
+% \hmopening adds room for the initial beside the opening pair.
+\newlength{\hymnwidth}
+\newcommand{\hymnmeasure}[1]{{\setstretch{1.35}\global\hymnwidth=0pt #1}}
+\newcommand{\hm}[1]{%
+  \settowidth{\dimen0}{#1}\ifdim\dimen0>\hymnwidth\global\hymnwidth=\dimen0\fi%
+}
+\newcommand{\hmopening}[1]{\hm{\hspace{3em}#1}}
 \newenvironment{hymnverses}{%
   \setstretch{1.35}%
   \interlinepenalty=10000%
+  \ifdim\hymnwidth<\linewidth
+    \leftskip=\dimexpr(\linewidth-\hymnwidth)/2\relax
+  \fi
 }{%
   \par%
 }
@@ -433,8 +454,9 @@
 }
 
 % Gloria Patri: two verses, each pointed at its own mediant, on their own
-% lines, standing a little apart from the verses above as its own stanza.
-\newcommand{\gloriapatri}[2]{\medskip\noindent #1\\#2\par}
+% lines with a wrap hanging beneath, standing a little apart from the verses
+% above as its own stanza.
+\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\sourceline{#1}\sourceline{#2}\end{sourcelines}}
 
 % Spoken-role sigils set in rubric red, as the web sigil column does.
 % \Vbar/\Rbar come from gregoriotex, which the preamble loads above.
@@ -456,6 +478,11 @@
 % Antiphon: a red small-cap sigil with the body in ordinary roman, hanging so
 % a wrapped remainder tucks under its own line, as body antiphons do online.
 \newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
+% An antiphon that closes a psalm leaves a little air before what follows, so
+% it and the next psalm's opening antiphon read as two; one that opens a
+% psalm is kept with it (the label and its first verses).
+\newcommand{\antclose}[1]{\ant{#1}\addvspace{0.5\baselineskip}}
+\newcommand{\antopen}[1]{\Needspace{7\baselineskip}\ant{#1}\nopagebreak}
 % Opening acclamation (not an antiphon)
 \newcommand{\acclamation}[1]{\noindent #1\par}
 
