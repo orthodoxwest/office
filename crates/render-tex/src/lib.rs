@@ -4,7 +4,9 @@
 use calendar::{Color, Season};
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
-use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at};
+use liturgy::{
+    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at, split_words,
+};
 
 const PREAMBLE: &str = include_str!("preamble.tex");
 
@@ -147,10 +149,16 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
         }
         ElementType::OpeningAcclamation => b.push_str(&format!("\\acclamation{{{}}}\n\n", mediant_line(&elem.text))),
         ElementType::Psalm | ElementType::Canticle => {
+            let unrepeated = elem.unrepeated.as_ref().map_or(0, |u| u.words);
+            let psalm = format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, unrepeated, chant);
+            // A chant score sets the psalm whole, so the rubric stands only over text.
+            if unrepeated > 0 && psalm.contains("\\begin{psalmverses}") {
+                b.push_str(&format_rubric_spans(&elem.unrepeated_rubric()));
+            }
             if !elem.label.is_empty() {
                 b.push_str(&format!("\n\\psalmlabel{{{}}}{{{}}}\n\n", tex_line(&elem.label), tex_line(&elem.incipit)));
             }
-            b.push_str(&format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, chant));
+            b.push_str(&psalm);
         }
         ElementType::Hymn => {
             b.push_str("\\sectionheading{Hymn}\n\n");
@@ -211,8 +219,12 @@ fn format_rubric(elem: &OfficeElement) -> String {
     if elem.rubric_spans.is_empty() {
         return format!("\\rubric{{{}}}\n\n", tex_line(&elem.text));
     }
+    format_rubric_spans(&elem.rubric_spans)
+}
+
+fn format_rubric_spans(spans: &[RubricSpan]) -> String {
     let mut b = String::from("\\rubric{");
-    for RubricSpan { text, prayed } in &elem.rubric_spans {
+    for RubricSpan { text, prayed } in spans {
         if *prayed {
             b.push_str(&format!("\\rubricprayed{{{}}}", tex_line(text)));
         } else {
@@ -236,7 +248,50 @@ fn verse_halves(first: &str, second: &str, before: String, after: String) -> Str
     format!("{before}{first}\\mediant{{}}{after}{second}")
 }
 
-fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureCue], chant: Option<&Chant<'_>>) -> String {
+/// A half-verse with its first `words` words muted as not said; returns the
+/// words still to mute. `set` typesets the unmuted rest.
+fn unrepeated_tex(s: &str, words: usize, set: fn(&str) -> String) -> (String, usize) {
+    let (unsaid, rest, taken) = split_words(s, words);
+    if unsaid.is_empty() {
+        return (set(s), words);
+    }
+    // Leading space stays outside the colour group, where the initial macro looks for it.
+    let words_start = unsaid.len() - unsaid.trim_start().len();
+    let (space, unsaid) = unsaid.split_at(words_start);
+    (format!("{space}{{\\color{{mutedgray}}{}}}{}", tex_line(unsaid), set(rest)), words - taken)
+}
+
+/// The psalm's opening `initial` with its first `words` words muted; the gilt
+/// initial itself stays ornamental, as on the web. Returns the words still to
+/// mute.
+fn unrepeated_initial(mode: Initial, text: &str, more: &str, words: usize) -> (String, usize) {
+    let text = typeset(text);
+    let Some(o) = split_opening(&text) else {
+        let (line, left) = unrepeated_tex(&text, words, mediant_line);
+        return (format!("\\noindent {line}{more}\\par\n"), left);
+    };
+    let key: String = o.letter.to_uppercase().collect();
+    // A standalone initial is a word of its own; otherwise it opens the first word of `word`.
+    let left = if o.standalone { words - 1 } else { words };
+    let (word, left) = unrepeated_tex(&o.word, left, tex_line);
+    let (tail, left) = unrepeated_tex(&o.tail, left, mediant_line);
+    let line = format!(
+        "\\initial{}{{{}}}{{{key}}}{{{}}}{{{word}}}{{{tail}{more}}}\n",
+        if o.standalone { "*" } else { "" },
+        mode.mode(),
+        tex_line(&o.init),
+    );
+    (line, left)
+}
+
+fn format_psalm(
+    text: &str,
+    label: &str,
+    kind: ElementType,
+    postures: &[PostureCue],
+    mut unrepeated: usize,
+    chant: Option<&Chant<'_>>,
+) -> String {
     let category = if kind == ElementType::Canticle { "canticles" } else { "psalms" };
     if let Some(score) = chant.and_then(|c| c.score(category, &label_to_slug(label, kind))) {
         return score;
@@ -271,7 +326,6 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureC
                 let before = posture_tex(postures, PostureAnchor::BeforeVerse(verse));
                 let after = posture_tex(postures, PostureAnchor::AfterMediant(verse));
                 verse += 1;
-                let second = if second.is_empty() { String::new() } else { tex_line(second) };
                 if first_verse {
                     first_verse = false;
                     if number.is_empty() {
@@ -280,11 +334,25 @@ fn format_psalm(text: &str, label: &str, kind: ElementType, postures: &[PostureC
                         if !before.is_empty() {
                             b.push_str(&format!("\\noindent {}\\par\\nopagebreak\n", before.trim_end()));
                         }
+                        if unrepeated > 0 {
+                            // The first half's words are muted before the second half's.
+                            let words_in_first = split_words(first, usize::MAX).2;
+                            let (second, left) = unrepeated_tex(second, unrepeated.saturating_sub(words_in_first), tex_line);
+                            let more = verse_halves("", &second, String::new(), after);
+                            let (line, _) = unrepeated_initial(Initial::Psalm, first, &more, unrepeated);
+                            b.push_str(&line);
+                            unrepeated = left;
+                            continue;
+                        }
+                        let second = if second.is_empty() { String::new() } else { tex_line(second) };
                         b.push_str(&initial(Initial::Psalm, first, &verse_halves("", &second, String::new(), after)));
                         continue;
                     }
                 }
-                b.push_str(&format!("\\psalmverse{{{number}}}{{{}}}\n", verse_halves(&tex_line(first), &second, before, after)));
+                let (first, left) = unrepeated_tex(first, unrepeated, tex_line);
+                let (second, left) = unrepeated_tex(second, left, tex_line);
+                unrepeated = left;
+                b.push_str(&format!("\\psalmverse{{{number}}}{{{}}}\n", verse_halves(&first, &second, before, after)));
             }
         }
     }
@@ -973,12 +1041,12 @@ mod tests {
 
     #[test]
     fn psalm_opening_takes_one_initial() {
-        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], None);
+        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], 0, None);
         assert!(got.contains("\\initial{psalm}{G}{G}{OD}{ be merciful unto us, and bless us\\mediant{}and shew us"), "{got}");
         assert_eq!(got.matches("\\initial").count(), 1);
         assert!(got.contains("\\psalmverse{2}") && got.contains("\\gloriapatri{"));
 
-        let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, &[], None);
+        let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, &[], 0, None);
         assert!(!numbered.contains("\\initial"), "{numbered}");
 
         let sectioned = format_psalm(
@@ -986,6 +1054,7 @@ mod tests {
             "Canticle",
             ElementType::Canticle,
             &[],
+            0,
             None,
         );
         assert_eq!(sectioned.matches("\\initial").count(), 2, "{sectioned}");
@@ -999,9 +1068,9 @@ mod tests {
     fn chant_scores_replace_text_only_when_found() {
         let base = |category: &str, slug: &str| (category == "psalms" && slug == "067").then(|| "data/texts/chant/psalms/067".to_string());
         let chant = Chant { base: &base };
-        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], Some(&chant));
+        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], 0, Some(&chant));
         assert_eq!(got, "\\gregorioscore{data/texts/chant/psalms/067}\n\n");
-        let missing = format_psalm(PSALM_67, "Psalm 68", ElementType::Psalm, &[], Some(&chant));
+        let missing = format_psalm(PSALM_67, "Psalm 68", ElementType::Psalm, &[], 0, Some(&chant));
         assert!(missing.contains("\\psalmverse"));
 
         let hymn = "Aeterne rerum conditor\n\nO Framer of the earth and sky,\nRuler of all things high and low.\n";
@@ -1129,6 +1198,20 @@ mod tests {
     }
 
     #[test]
+    fn unrepeated_words_are_muted_with_their_spaces_outside_the_colour() {
+        let got = format_psalm(
+            "Psalm 140\n\nDELIVER me, O Lord, from the evil man * and preserve me.\n2. Who imagine * mischief.\n",
+            "Psalm 140",
+            ElementType::Psalm,
+            &[],
+            2,
+            None,
+        );
+        assert!(got.contains("{{\\color{mutedgray}ELIVER}}{ {\\color{mutedgray}me,} O Lord, from the evil man\\mediant{}and"), "{got}");
+        assert!(got.contains("\\psalmverse{2}{Who imagine\\mediant{}mischief.}"), "{got}");
+    }
+
+    #[test]
     fn posture_cues_follow_mediants() {
         let cues = [
             PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(0)),
@@ -1140,6 +1223,7 @@ mod tests {
             "Psalm 93",
             ElementType::Psalm,
             &cues,
+            0,
             None,
         );
         assert!(got.contains("\\initial{psalm}{T}{T}{HE}{ Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");

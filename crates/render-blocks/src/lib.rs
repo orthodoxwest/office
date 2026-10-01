@@ -9,7 +9,9 @@ use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, VoiceRole, VoiceSpan, posture_cues_at};
+use liturgy::{
+    ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceRole, VoiceSpan, posture_cues_at, split_words,
+};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -62,7 +64,8 @@ pub enum RunStyle {
     Cross,
     /// Words quoted in a rubric for recitation, set as prayer, not rubric.
     Prayed,
-    /// Words said silently.
+    /// Words said silently, or a psalm's opening words not repeated after
+    /// its antiphon; both are set muted.
     Secret,
     /// A Latin title or incipit.
     Latin,
@@ -200,6 +203,10 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
             }
         }
         ElementType::Psalm | ElementType::Canticle => {
+            let unrepeated = elem.unrepeated_rubric();
+            if !unrepeated.is_empty() {
+                out.push(rubric_block(&unrepeated));
+            }
             if !elem.label.is_empty() {
                 let mut runs = text_runs(&elem.label);
                 if !elem.incipit.is_empty() {
@@ -208,7 +215,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
-            psalm_verses(out, &elem.text, &elem.postures);
+            psalm_verses(out, &elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words));
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
                 out.push(gloria_patri(&doxology.text, &doxology.postures));
             }
@@ -329,8 +336,12 @@ fn rubric(elem: &OfficeElement) -> Block {
     if elem.rubric_spans.is_empty() {
         return Block::new(BlockKind::Rubric, text_runs(&elem.text));
     }
+    rubric_block(&elem.rubric_spans)
+}
+
+fn rubric_block(spans: &[RubricSpan]) -> Block {
     let mut runs = Vec::new();
-    for span in &elem.rubric_spans {
+    for span in spans {
         if span.prayed {
             runs.extend(cross_runs(&span.text, RunStyle::Prayed));
         } else {
@@ -348,8 +359,22 @@ fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
     }
 }
 
+/// Runs of a half-verse, its first `words` words muted as not said; returns
+/// the words still to mute.
+fn push_unrepeated(runs: &mut Vec<Run>, s: &str, words: usize) -> usize {
+    let (unsaid, rest, taken) = split_words(s, words);
+    if !unsaid.is_empty() {
+        runs.extend(cross_runs(unsaid, RunStyle::Secret));
+    }
+    if !rest.is_empty() {
+        runs.extend(cross_runs(rest, RunStyle::Plain));
+    }
+    words - taken
+}
+
 /// A psalm or canticle: any scripture reference, then its verses, with posture cues at their anchors.
-fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue]) {
+/// The first `unrepeated` words, which the antiphon has just said, are muted.
+fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue], mut unrepeated: usize) {
     let psalm = parse_psalm(text);
     if !psalm.scripture_ref.is_empty() {
         out.push(Block::new(BlockKind::ScriptureRef, text_runs(&psalm.scripture_ref)));
@@ -377,13 +402,13 @@ fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue]) {
                 let first = if drop_cap { soften_drop_cap_opening(first) } else { first.clone() };
                 let mut runs = Vec::new();
                 push_postures(&mut runs, postures, PostureAnchor::BeforeVerse(verse));
-                runs.extend(cross_runs(&first, RunStyle::Plain));
+                unrepeated = push_unrepeated(&mut runs, &first, unrepeated);
                 let mut after_mediant = Vec::new();
                 push_postures(&mut after_mediant, postures, PostureAnchor::AfterMediant(verse));
                 if !second.is_empty() {
                     push_mediant(&mut runs, true);
                     runs.extend(after_mediant);
-                    runs.extend(cross_runs(second, RunStyle::Plain));
+                    unrepeated = push_unrepeated(&mut runs, second, unrepeated);
                 } else if !after_mediant.is_empty() {
                     // Without a mediant the cue ends the verse.
                     after_mediant.pop();

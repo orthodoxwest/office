@@ -2484,6 +2484,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--muted);
 }
 
+/* A psalm's opening words that its antiphon has just said are not repeated
+   (General Rubrics XXIV.8): kept in place so the verse reads whole, muted as
+   the secret prayers are. The drop cap keeps its ornament colour. */
+.unrepeated {
+  color: var(--muted);
+}
+
 /* Name each speaker, including the leader's replies to the people. These
    labels are part of the reading order and remain visible when printed. */
 .prayer-turn {

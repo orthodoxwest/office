@@ -1,13 +1,14 @@
 //! Plain-text rendering of a composed hour, for the CLI and the text goldens.
 
 use corpus::lines::{psalm_verse_lines, split_leading_verse_number};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, VoiceRole, posture_cues_at};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, VoiceRole, posture_cues_at, split_words};
 
 const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// Formats a composed hour. Announced antiphons print only through the
-/// mediant.
+/// mediant; a psalm's opening words that its antiphon has just said are
+/// parenthesized under the rubric that explains them.
 pub fn format_office_hour(hour: &OfficeHour) -> String {
     let mut b = String::new();
     b.push_str(&hour.hour.to_uppercase());
@@ -23,6 +24,11 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
     b.push_str("\n\n");
     for section in &hour.sections {
         for elem in &section.elements {
+            let rubric = elem.unrepeated_rubric();
+            if !rubric.is_empty() {
+                b.push_str(&rubric.iter().map(|r| r.text.as_str()).collect::<String>());
+                b.push_str("\n\n");
+            }
             if !elem.label.is_empty() {
                 // The Latin incipit rides on the label line.
                 let mut label = elem.label.clone();
@@ -35,7 +41,9 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
             let text = if elem.kind == ElementType::CorporateLordPrayer {
                 corporate_lord_prayer_text(elem)
             } else if !elem.postures.is_empty() {
-                posture_text(elem)
+                posture_text(elem, &unrepeated_text(elem))
+            } else if elem.unrepeated.is_some() {
+                unrepeated_text(elem)
             } else {
                 elem.display_text()
             };
@@ -48,15 +56,26 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
     b
 }
 
+/// A psalm's text with the opening words its antiphon has just said in
+/// parentheses.
+fn unrepeated_text(elem: &OfficeElement) -> String {
+    let Some(u) = &elem.unrepeated else { return elem.text.clone() };
+    let mut lines: Vec<String> = elem.text.split('\n').map(str::to_string).collect();
+    if let Some(&i) = psalm_verse_lines(&elem.text).first() {
+        let line = &lines[i];
+        let start = line.find(split_leading_verse_number(line.trim()).1).unwrap_or(0);
+        let (unsaid, rest, _) = split_words(&line[start..], u.words);
+        lines[i] = format!("{}({unsaid}){rest}", &line[..start]);
+    }
+    lines.join("\n")
+}
+
 /// A psalm, canticle or doxology with its posture cues bracketed: after the
 /// " * " mediant, or before the verse's words, past its number.
-fn posture_text(elem: &OfficeElement) -> String {
-    let mut lines: Vec<String> = elem.text.split('\n').map(str::to_string).collect();
-    let verses: Vec<usize> = if elem.kind.is_psalmody() {
-        psalm_verse_lines(&elem.text)
-    } else {
-        (0..lines.len()).filter(|&i| !lines[i].trim().is_empty()).collect()
-    };
+fn posture_text(elem: &OfficeElement, text: &str) -> String {
+    let mut lines: Vec<String> = text.split('\n').map(str::to_string).collect();
+    let verses: Vec<usize> =
+        if elem.kind.is_psalmody() { psalm_verse_lines(text) } else { (0..lines.len()).filter(|&i| !lines[i].trim().is_empty()).collect() };
     let bracketed = |cues: Vec<&str>| cues.iter().map(|c| format!("[{c}]")).collect::<Vec<_>>().join(" ");
     for (n, &i) in verses.iter().enumerate() {
         let after = bracketed(posture_cues_at(&elem.postures, PostureAnchor::AfterMediant(n)).collect());
@@ -112,7 +131,7 @@ mod tests {
             PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(3)),
         ];
         assert_eq!(
-            posture_text(&psalm),
+            posture_text(&psalm, &psalm.text),
             "Title\n\nO ALL ye Works * [Sit.] bless ye.\n2 Ananias * [Stand.] praise him.\n3 [Bow.] Let us bless the Father * praise him.\n4 [Stand upright.] No mediant [Sit.]"
         );
         let mut gloria = OfficeElement::new(ElementType::PsalmDoxology, "Glory be * Ghost;\nAs it was * Amen.");
@@ -120,6 +139,6 @@ mod tests {
             PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
             PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
         ];
-        assert_eq!(posture_text(&gloria), "[Bow.] Glory be * Ghost;\n[Stand upright.] As it was * Amen.");
+        assert_eq!(posture_text(&gloria, &gloria.text), "[Bow.] Glory be * Ghost;\n[Stand upright.] As it was * Amen.");
     }
 }

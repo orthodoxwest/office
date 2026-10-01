@@ -193,6 +193,21 @@ pub struct OfficeElement {
     pub commemoration_owner_id: String,
     pub is_commemoration: bool,
     pub announce: bool,
+    /// The opening words of a psalm or canticle that the antiphon before it
+    /// has just said, and so are not repeated.
+    pub unrepeated: Option<Unrepeated>,
+}
+
+/// Words that open a psalm or canticle exactly as its antiphon does: once the
+/// antiphon has said them, the psalm continues where the antiphon's words end
+/// (General Rubrics XXIV.8).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Unrepeated {
+    /// How many words of the first verse are not said.
+    pub words: usize,
+    /// Those words as the antiphon has them, when the antiphon said more than
+    /// them; empty when they are all it said.
+    pub named: String,
 }
 
 impl OfficeElement {
@@ -213,6 +228,7 @@ impl OfficeElement {
             commemoration_owner_id: String::new(),
             is_commemoration: false,
             announce: false,
+            unrepeated: None,
         }
     }
 
@@ -223,6 +239,21 @@ impl OfficeElement {
             return antiphon_announcement(&self.text);
         }
         self.text.clone()
+    }
+
+    /// The rubric before a psalm or canticle whose opening words are not
+    /// repeated, worded as the Diurnal words it.
+    pub fn unrepeated_rubric(&self) -> Vec<RubricSpan> {
+        let Some(u) = &self.unrepeated else { return Vec::new() };
+        let item = if self.kind == ElementType::Canticle { "Canticle" } else { "Psalm" };
+        if u.named.is_empty() {
+            return vec![RubricSpan { text: format!("This is not repeated in the {item}."), prayed: false }];
+        }
+        vec![
+            RubricSpan { text: "The words ".to_string(), prayed: false },
+            RubricSpan { text: u.named.clone(), prayed: true },
+            RubricSpan { text: format!(" are not repeated in the {item}."), prayed: false },
+        ]
     }
 
     /// The speaker turns, when every span is spoken by a named role and the
@@ -258,6 +289,29 @@ pub fn antiphon_announcement(text: &str) -> String {
         return format!("{incipit}.");
     }
     text.to_string()
+}
+
+/// Splits `s` after its first `n` words, each word keeping its trailing
+/// punctuation: the head, the rest, and how many words the head holds (fewer
+/// than `n` when `s` runs out). A mark with no letter or digit, such as a
+/// mediant, is not a word.
+pub fn split_words(s: &str, n: usize) -> (&str, &str, usize) {
+    let mut taken = 0;
+    let mut end = 0;
+    let mut rest = s;
+    while taken < n {
+        let ws = rest.len() - rest.trim_start().len();
+        let token = rest[ws..].split(char::is_whitespace).next().unwrap_or("");
+        if token.is_empty() {
+            break;
+        }
+        if token.chars().any(char::is_alphanumeric) {
+            taken += 1;
+        }
+        end += ws + token.len();
+        rest = &s[end..];
+    }
+    (&s[..end], &s[end..], taken)
 }
 
 /// A group of elements; `collapsible` renders as a closed disclosure.
@@ -324,6 +378,14 @@ pub struct OfficeHour {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn split_words_keeps_punctuation_and_skips_marks() {
+        assert_eq!(split_words("O LORD, thou hast", 2), ("O LORD,", " thou hast", 2));
+        assert_eq!(split_words("Deliver me * O Lord", 3), ("Deliver me * O", " Lord", 3));
+        assert_eq!(split_words("Up, Lord", 5), ("Up, Lord", "", 2));
+        assert_eq!(split_words("anything", 0), ("", "anything", 0));
+    }
 
     #[test]
     fn announcements() {

@@ -32,6 +32,7 @@ fn benedicite_space_numbered_verses() {
          2 O ye Angels of the Lord, bless ye the Lord: * O ye Heavens, bless ye the Lord.\n\
          10 O let the Earth bless the Lord: * yea, let it praise him, and magnify him for ever.\n",
         &[],
+        0,
     );
     has(&html, r#"<p class="verse numbered"><span class="verse-num">2</span>"#);
     has(&html, r#"<span class="verse-num">10</span>"#);
@@ -89,6 +90,7 @@ fn psalm_softens_drop_cap_opening_only() {
          GOD be merciful unto us, and bless us * and shew us the light of his countenance.\n\
          2. That thy way may be known upon earth * thy saving health among all nations.\n",
         &[],
+        0,
     );
     has(&html, ">God be merciful unto us");
     lacks(&html, ">GOD be merciful");
@@ -108,6 +110,7 @@ fn psalm_softens_drop_cap_after_section_break() {
          O LET the Earth bless the Lord: * yea, let it praise him forever.\n\
          10 O ye Mountains and Hills, bless ye the Lord: * praise him forever.\n",
         &[],
+        0,
     );
     has(&html, "O All ye Works of the Lord");
     has(&html, "O Let the Earth bless the Lord");
@@ -142,7 +145,7 @@ fn posture_cues_follow_their_mediants_and_precede_the_doxology_lines() {
     has(&html, r#"<span class="source-line"><span class="posture">Bow.</span> Glory be"#);
     has(&html, r#"<span class="source-line"><span class="posture">Stand upright.</span> As it was"#);
     // Without cues nothing is added.
-    lacks(&render_psalm_verses("Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n", &[]), "posture");
+    lacks(&render_psalm_verses("Psalm 93\n\nTHE Lord is King * and hath put on glorious apparel.\n", &[], 0), "posture");
 }
 
 #[test]
@@ -644,4 +647,13 @@ fn prayer_speaker_labels_keep_responses_in_order() {
     let html = render(&e);
     has(&html, "Amen.");
     lacks(&html, "prayer-speaker");
+}
+
+#[test]
+fn unrepeated_words_are_muted_across_the_mediant() {
+    let html = render_psalm_verses("Psalm 133\n\nBEHOLD, how good * brethren, to dwell.\n2. It is * like.\n", &[], 5);
+    has(&html, r#"<span class="unrepeated">Behold, how good</span>"#);
+    has(&html, r#"<span class="unrepeated">brethren, to</span> dwell."#);
+    has(&html, "It is");
+    lacks(&html, r#"<span class="unrepeated">It"#);
 }
