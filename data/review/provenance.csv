@@ -2664,7 +2664,7 @@ psalms/009a,4d50bb471ef6,Coverdale Psalter,Psalm 9:1-18,,verified,codex,2026-07-
 psalms/009b,7a0744ed2318,Coverdale Psalter,Psalm 9:19-20,,verified,codex,2026-07-15,Text extracted from verified psalms/009; Prime division confirmed against parish prayerbook
 psalms/010,75baa9c5f3d4,Coverdale Psalter,Psalm 10,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/011,49be3fd46375,Coverdale Psalter,Psalm 11,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/012,6a52a330701e,Coverdale Psalter,Psalm 12,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/012,3a2549cc84ab,Coverdale Psalter,Psalm 12,,verified,bwaldrep,2026-10-01,"Removed the space before the comma in v. 4 (ought to speak, who), which the 1662 comparison cannot see because it ignores space before punctuation. Checked against the 1662 BCP and the Monastic Diurnal page image (printed p. 20, PDF page 66), which agree. The diurnal also differs from this 1662 text at v. 5 (Now, for the comfortless troubles sake) and v. 7 (silver which); the 1662 reading is kept. Reviewed by Claude; attested by bwaldrep."
 psalms/013,114e0484147d,Coverdale Psalter,Psalm 13,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/014,bae3277a576d,Coverdale Psalter,Psalm 14,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/015,a4575d592bfc,Coverdale Psalter,Psalm 15,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2771,7 +2771,7 @@ psalms/113,8ff16357e4ad,Coverdale Psalter,Psalm 113,,verified,codex,2026-07-10,M
 psalms/114,18328e9cc7da,Coverdale Psalter,Psalm 114,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/115,4d4149435af6,Coverdale Psalter,Psalm 115,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/116,43e5bc403367,Coverdale Psalter,Psalm 116,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/116a,787067eb29d0,diurnal,,119-120,verified,claude,2026-09-30,"Direct page-image review (PDF pages 165-166); identical to psalms/116 vv. 1-9."
+psalms/116a,787067eb29d0,diurnal,,119-120,verified,claude,2026-09-30,Direct page-image review (PDF pages 165-166); identical to psalms/116 vv. 1-9.
 psalms/116b,381b821a03e6,Coverdale Psalter,Psalm 116:10-16,,verified,codex,2026-07-18,"Machine-verified against attested psalms/116 (1662 BCP); printed as Vulgate 115 Credidi in draft Commons Vespers book pp. 11, 27, 45, 61, 79"
 psalms/117,4ca37f9f33e0,Coverdale Psalter,Psalm 117,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/118,582d574649c2,Coverdale Psalter,Psalm 118,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
