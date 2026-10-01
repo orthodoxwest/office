@@ -288,7 +288,7 @@ jobs:
     if: needs.ux-changes.outputs.run == 'true'
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+      image: mcr.microsoft.com/playwright:v1.63.0-jammy
     permissions:
       contents: read
       pull-requests: write
