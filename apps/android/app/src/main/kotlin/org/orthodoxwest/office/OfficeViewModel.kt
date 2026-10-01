@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import android.app.Application
 import android.app.AlarmManager
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -23,6 +24,7 @@ import org.orthodoxwest.office.core.CivilDate
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.UsageEvent
 import org.orthodoxwest.office.core.hourNames
 
 /** The prayer forms: value, the control's label, and the chooser's phrase (hour.html). */
@@ -81,6 +83,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     // Parsing the corpus takes a moment; it starts at once, off the main thread. The alarms share it.
     private val core = viewModelScope.async(Dispatchers.Default) { Office.core }
     private val reminderStore = ReminderStore(app)
+    private val usage = Usage(prefs)
     private var loading: Job? = null
 
     val hours: List<String> = hourNames()
@@ -167,6 +170,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         theme = value
         prefs.edit().putString("theme", value.name).apply()
         refreshWidgets()
+        countVisit()
     }
 
     fun refreshWidgets() {
@@ -181,6 +185,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /** Saves the reminder page's choices and, when reminders are on, reschedules at once. */
     fun changeReminders(value: ReminderSettings) {
+        // Turning reminders on counts as the web counts a generated feed link.
+        if (value.on && !reminders.on) usage.record(UsageEvent.RemindersOn, dark(), form)
         reminders = value
         reminderStore.save(value)
         syncReminders()
@@ -201,6 +207,27 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     fun syncReminders() {
         val app = getApplication<Application>()
         viewModelScope.launch(Dispatchers.Default) { runCatching { ReminderScheduler.sync(app) } }
+    }
+
+    /**
+     * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme or its prayer
+     * form changes, and on every return to the app. Each is counted once a day.
+     */
+    fun countVisit() {
+        val event = when (val shown = page) {
+            is Page.Home -> UsageEvent.Home(shown.date.toCivil())
+            is Page.Hour -> UsageEvent.Hour(shown.date.toCivil(), shown.hour)
+            is Page.Ordo -> UsageEvent.Ordo(shown.year)
+            is Page.Year -> UsageEvent.Ordo(shown.year)
+            Page.Reminders -> UsageEvent.RemindersPage
+        }
+        usage.record(event, dark(), form)
+    }
+
+    /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */
+    private fun dark(): Boolean {
+        val night = getApplication<Application>().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return theme.dark(night == Configuration.UI_MODE_NIGHT_YES)
     }
 
     /** The ornament season of what is shown, which retints the gilding. */
@@ -233,6 +260,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                     Page.Reminders -> refreshReminderStatus()
                 }
                 error = null
+                countVisit()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

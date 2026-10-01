@@ -1,0 +1,223 @@
+//! The usage beacon's words. The server parses them ([`parse_event`]), the web's app.js writes
+//! them (it mirrors [`app_beacon`]'s grammar and [`current_day`]'s window), and the native apps
+//! write them through [`app_beacon`], so every front is counted in one vocabulary.
+//!
+//! A beacon is one line: a page scope, then "family:value" tokens describing how the page was
+//! read ("lauds appearance:apse screen:mobile prayer-form:private client:android").
+
+use calendar::Date;
+
+/// Where the native apps report: the production server's usage endpoint.
+pub const ENDPOINT: &str = "https://office.fly.dev/api/usage";
+
+/// The longest beacon body the server reads.
+pub const MAX_BEACON: usize = 96;
+
+/// The seven hours, as the usage store names its office scopes.
+pub const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+
+/// Single-purpose scopes counted beside the hours: the ordo (calendar) page
+/// and turning reminders on (the web's generated feed link).
+pub const EXTRA_SCOPES: [&str; 2] = ["ordo", "reminders"];
+
+/// The prayer forms an office page reports.
+pub const PRAYER_FORMS: &[&str] = &["private", "deacon", "priest"];
+
+/// A dimension family and its values.
+pub struct Dimension<'a> {
+    pub key: &'a str,
+    pub values: &'a [&'a str],
+}
+
+/// Families of mutually exclusive values describing how a page was
+/// rendered. Stored as "<key>:<value>"; a written key or value is never
+/// redefined.
+pub const DIMENSIONS: [Dimension<'static>; 4] = [
+    Dimension { key: "appearance", values: &["nave", "apse"] },
+    Dimension { key: "screen", values: &["desktop", "mobile"] },
+    Dimension { key: "prayer-form", values: PRAYER_FORMS },
+    // A browser tab, the installed web app, or a native app.
+    Dimension { key: "client", values: &["browser", "pwa", "android", "ios"] },
+];
+
+/// The family a stored dimension scope belongs to.
+pub fn dimension_key(scope: &str) -> Option<&'static str> {
+    DIMENSIONS
+        .iter()
+        .find(|d| d.values.iter().any(|v| scope.strip_prefix(d.key).and_then(|r| r.strip_prefix(':')) == Some(v)))
+        .map(|d| d.key)
+}
+
+pub fn valid_scope(scope: &str) -> bool {
+    scope == "site" || HOURS.contains(&scope) || EXTRA_SCOPES.contains(&scope)
+}
+
+/// One beacon: the page scope and the dimensions reported about it.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Event {
+    pub scope: String,
+    pub dimensions: Vec<String>,
+}
+
+/// Reads a beacon body ("lauds appearance:apse screen:mobile"). Only the
+/// scope must be understood; unknown or repeated dimension tokens are
+/// dropped, so clients from either side of a deploy still count.
+pub fn parse_event(body: &str) -> Option<Event> {
+    let mut fields = body.split(' ');
+    let scope = fields.next().unwrap_or("");
+    if !valid_scope(scope) {
+        return None;
+    }
+    let mut event = Event { scope: scope.to_string(), dimensions: Vec::new() };
+    let mut seen = Vec::new();
+    for field in fields {
+        let Some(key) = dimension_key(field) else { continue };
+        if seen.contains(&key) || (key == "prayer-form" && !HOURS.contains(&scope)) {
+            continue;
+        }
+        seen.push(key);
+        event.dimensions.push(field.to_string());
+    }
+    Some(event)
+}
+
+/// A native app, as the `client` family names it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum App {
+    Android,
+    Ios,
+}
+
+impl App {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            App::Android => "android",
+            App::Ios => "ios",
+        }
+    }
+}
+
+/// A native app's beacon for `scope`, or `None` for a scope the server would refuse. The apps
+/// run on phones and tablets, which the web's screen family counts as mobile (a touch-primary
+/// pointer); an office page adds the prayer form it was read in.
+pub fn app_beacon(scope: &str, app: App, dark: bool, form: &str) -> Option<String> {
+    if !valid_scope(scope) {
+        return None;
+    }
+    let appearance = if dark { "apse" } else { "nave" };
+    let mut body = format!("{scope} appearance:{appearance} screen:mobile");
+    if HOURS.contains(&scope) && PRAYER_FORMS.contains(&form) {
+        body.push_str(&format!(" prayer-form:{form}"));
+    }
+    body.push_str(&format!(" client:{}", app.as_str()));
+    Some(body)
+}
+
+/// Whether a page dated `day` is current enough to count: today, or a day either side, which
+/// covers a reader in another time zone than the reporting day's. The dated archive is
+/// unbounded, so counting it would let a crawler mint a visitor per URL.
+pub fn current_day(day: Date, today: Date) -> bool {
+    day.days_since(today).abs() <= 1
+}
+
+/// Whether an ordo year is current enough to count: this year or either neighbour.
+pub fn current_year(year: i32, today: Date) -> bool {
+    (year - today.year()).abs() <= 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn events_validate_scopes_and_dimensions() {
+        assert_eq!(parse_event("lauds appearance:apse screen:mobile prayer-form:priest").unwrap().dimensions.len(), 3);
+        let e = parse_event("ordo prayer-form:priest appearance:nave appearance:apse future:x").unwrap();
+        assert_eq!(e.dimensions, vec!["appearance:nave".to_string()]);
+        assert!(parse_event("matins").is_none());
+        assert!(parse_event("").is_none());
+        assert!(parse_event(" lauds").is_none());
+    }
+
+    #[test]
+    fn beacon_dimensions_parse() {
+        let dims = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        for (body, scope, want) in [
+            ("lauds appearance:apse screen:mobile", "lauds", vec!["appearance:apse", "screen:mobile"]),
+            ("site appearance:nave screen:desktop", "site", vec!["appearance:nave", "screen:desktop"]),
+            // A client from before dimensions existed.
+            ("vespers", "vespers", vec![]),
+            // Unreadable tokens are dropped; a bare value names no family.
+            ("ordo chant:gabc appearance:apse", "ordo", vec!["appearance:apse"]),
+            ("ordo apse", "ordo", vec![]),
+            // One value per family wins.
+            ("prime appearance:nave appearance:apse screen:mobile", "prime", vec!["appearance:nave", "screen:mobile"]),
+            ("site client:pwa client:browser", "site", vec!["client:pwa"]),
+        ] {
+            let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
+            assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
+        }
+        for body in ["", "matins", "matins appearance:nave", "appearance:nave", " lauds"] {
+            assert!(parse_event(body).is_none(), "{body:?} accepted");
+        }
+    }
+
+    #[test]
+    fn dimension_vocabulary_is_unambiguous() {
+        // Counts live under "<key>:<value>" forever: keys and values stay
+        // distinct and colon-free, and no page scope looks qualified.
+        let mut keys = Vec::new();
+        let mut scopes = Vec::new();
+        for d in &DIMENSIONS {
+            assert!(!d.key.is_empty() && !d.key.contains(':') && !keys.contains(&d.key), "key {:?}", d.key);
+            keys.push(d.key);
+            for (i, value) in d.values.iter().enumerate() {
+                assert!(!value.is_empty() && !value.contains(':') && !d.values[..i].contains(value), "{} value {value:?}", d.key);
+                let scope = format!("{}:{value}", d.key);
+                assert!(!scopes.contains(&scope) && !valid_scope(&scope), "scope {scope:?} collides");
+                assert_eq!(dimension_key(&scope), Some(d.key));
+                scopes.push(scope);
+            }
+        }
+        for scope in ["site", "ordo", "reminders"].iter().chain(HOURS.iter()) {
+            assert!(!scope.contains(':'));
+        }
+    }
+
+    // Everything an app can send is read back whole by the server, and fits its limit.
+    #[test]
+    fn app_beacons_round_trip() {
+        for app in [App::Android, App::Ios] {
+            for scope in ["site", "ordo", "reminders"].iter().chain(HOURS.iter()) {
+                for dark in [false, true] {
+                    for form in PRAYER_FORMS {
+                        let body = app_beacon(scope, app, dark, form).unwrap();
+                        assert!(body.len() <= MAX_BEACON, "{body:?} is too long");
+                        let event = parse_event(&body).unwrap();
+                        assert_eq!(event.scope, *scope);
+                        assert_eq!(event.dimensions.len(), body.split(' ').count() - 1, "{body:?} lost a token");
+                        assert_eq!(body.contains("prayer-form:"), HOURS.contains(scope), "{body:?}");
+                    }
+                }
+            }
+        }
+        assert_eq!(
+            app_beacon("compline", App::Android, false, "priest").as_deref(),
+            Some("compline appearance:nave screen:mobile prayer-form:priest client:android")
+        );
+        assert_eq!(app_beacon("site", App::Ios, true, "priest").as_deref(), Some("site appearance:apse screen:mobile client:ios"));
+        assert_eq!(app_beacon("vespers", App::Ios, false, "cantor").as_deref(), Some("vespers appearance:nave screen:mobile client:ios"));
+        assert!(app_beacon("matins", App::Android, false, "private").is_none());
+    }
+
+    #[test]
+    fn only_current_pages_count() {
+        let today = Date::new(2026, 1, 1);
+        for (day, current) in
+            [((2025, 12, 31), true), ((2026, 1, 1), true), ((2026, 1, 2), true), ((2025, 12, 30), false), ((2026, 1, 3), false)]
+        {
+            assert_eq!(current_day(Date::new(day.0, day.1, day.2), today), current, "{day:?}");
+        }
+        assert!(current_year(2025, today) && current_year(2027, today) && !current_year(2028, today) && !current_year(2024, today));
+    }
+}

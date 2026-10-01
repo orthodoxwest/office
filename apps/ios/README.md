@@ -31,6 +31,15 @@ as fit, up to four weeks. Every visit, and a background refresh about twice a da
 schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
 (`apps/android/tools/bake-bell.py`).
 
+## Usage counts
+
+As the Android app does (apps/android/README.md, "Usage counts"), the app is counted in the
+web's daily usage report: `Usage.swift` posts the Rust core's beacon when a page is shown, how
+it is read changes, or the app comes forward, once a day each, under a random identifier it
+replaces every reporting day. Only Release builds report (`OfficeCountsUsage`, set per
+configuration in `project.yml`); Debug builds, and so the tests and the simulator screenshots,
+never do. `UsageTests` checks what counts, the daily identifier, and the retry.
+
 ## Building
 
 On a Mac with Xcode 16, Rust (with the `aarch64-apple-ios` and `aarch64-apple-ios-sim` targets)

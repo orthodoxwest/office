@@ -217,18 +217,23 @@ document.documentElement.classList.add("js");
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
-// coarse pointer, which catches tablets and a phone held in landscape. Both
-// are read at send time; the server counts each like any
-// other scope, once per browser per day.
+// coarse pointer, which catches tablets and a phone held in landscape — and
+// whether it is a browser tab or the installed web app (the native apps
+// report their own). All are read at send time; the server counts each like
+// any other scope, once per browser per day.
 //
 // Each is reported as "family:value", the name it is stored under, so a value
 // belongs to exactly one family and a family retired later cannot be confused
-// with a value name reused by a different one (see usage.Dimensions).
+// with a value name reused by a different one (see presentation::usage, whose
+// app_beacon writes the native apps' beacons in the same order).
 function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
+  var installed = navigator.standalone === true ||
+    (!!window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  var clientToken = installed ? " client:pwa" : " client:browser";
   if (!window.matchMedia) {
-    return scope + leaderToken;
+    return scope + leaderToken + clientToken;
   }
   var forced = document.documentElement.getAttribute("data-theme");
   var dark = forced === "dark" ||
@@ -236,7 +241,7 @@ function usageBeaconBody(scope) {
   var handheld = window.matchMedia("(max-width: 700px), (pointer: coarse)").matches;
   return scope +
     (dark ? " appearance:apse" : " appearance:nave") +
-    (handheld ? " screen:mobile" : " screen:desktop") + leaderToken;
+    (handheld ? " screen:mobile" : " screen:desktop") + leaderToken + clientToken;
 }
 
 (function () {

@@ -205,6 +205,52 @@ pub fn current_office(clock_hour: i32) -> CurrentOffice {
     CurrentOffice { hour: hour.to_string(), day_offset }
 }
 
+/// A native app, as the usage report names it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Enum)]
+pub enum UsageClient {
+    Android,
+    Ios,
+}
+
+/// What the apps count, as the web counts its pages: home and the reminders page count toward
+/// the day's readers, an hour and the ordo in their own columns too, and turning reminders on
+/// as the web counts a generated feed link.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+pub enum UsageEvent {
+    Home { date: CivilDate },
+    Hour { date: CivilDate, hour: String },
+    Ordo { year: i32 },
+    RemindersPage,
+    RemindersOn,
+}
+
+/// The usage beacon for `event`, or none when it does not count: as on the web, only a page
+/// for today or a day either side (the ordo: this year or either side) is counted, so reading
+/// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form.
+#[uniffi::export]
+pub fn usage_beacon(event: UsageEvent, today: CivilDate, dark: bool, form: String, client: UsageClient) -> Option<String> {
+    use presentation::usage::{App, app_beacon, current_day, current_year};
+    let today = today.parse().ok()?;
+    let scope = match &event {
+        UsageEvent::Home { date } => current_day(date.parse().ok()?, today).then_some("site")?,
+        UsageEvent::Hour { date, hour } => current_day(date.parse().ok()?, today).then_some(hour.as_str())?,
+        UsageEvent::Ordo { year } => current_year(*year, today).then_some("ordo")?,
+        UsageEvent::RemindersPage => "site",
+        UsageEvent::RemindersOn => "reminders",
+    };
+    let app = match client {
+        UsageClient::Android => App::Android,
+        UsageClient::Ios => App::Ios,
+    };
+    app_beacon(scope, app, dark, &form)
+}
+
+/// Where a release build of the apps posts its beacons.
+#[uniffi::export]
+pub fn usage_endpoint() -> String {
+    presentation::usage::ENDPOINT.to_string()
+}
+
 /// An hour the reader asks to be reminded of, at a time of day.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ReminderChoice {

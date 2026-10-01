@@ -229,3 +229,75 @@ final class ReminderTests: XCTestCase {
         XCTAssertTrue(try ReminderScheduler.plan(off, now: now, core: Office.core.get(), calendar: calendar).isEmpty)
     }
 }
+
+/// The daily usage beacon: what counts, once a day, under an identifier that lasts the day.
+final class UsageTests: XCTestCase {
+    private let suite = "usage-tests"
+    private var posted: [(id: String, body: String)] = []
+    private var online = true
+    // 15 March 2026, mid-morning in New York.
+    private var now = Date(timeIntervalSince1970: 1_773_586_800)
+    private let today = CivilDate(year: 2026, month: 3, day: 15)
+
+    override func setUp() {
+        UserDefaults().removePersistentDomain(forName: suite)
+        posted = []
+        online = true
+    }
+
+    private func usage() -> Usage {
+        Usage(enabled: true, defaults: UserDefaults(suiteName: suite)!, now: { [unowned self] in self.now }) { [unowned self] id, body, done in
+            if self.online { self.posted.append((id, body)) }
+            done(self.online)
+        }
+    }
+
+    func testEachPageCountsOnceADay() {
+        let usage = usage()
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.hour(date: today, hour: "vespers"), dark: true, form: "priest")
+        usage.record(.remindersOn, dark: true, form: "priest")
+        XCTAssertEqual(posted.map { $0.body }, [
+            "site appearance:nave screen:mobile client:ios",
+            "vespers appearance:apse screen:mobile prayer-form:priest client:ios",
+            "reminders appearance:apse screen:mobile client:ios",
+        ])
+        XCTAssertEqual(Set(posted.map { $0.id }).count, 1)
+        XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
+    }
+
+    func testTheArchiveIsNotCounted() {
+        let usage = usage()
+        usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
+        usage.record(.ordo(year: 2031), dark: false, form: "private")
+        usage.record(Page.year(2026).usageEvent, dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile client:ios"])
+    }
+
+    func testTheIdentifierLastsOneReportingDay() {
+        usage().record(.home(date: today), dark: false, form: "private")
+        // Half past midnight in New York: a new identifier, and home counts again.
+        now = Date(timeIntervalSince1970: 1_773_635_400)
+        XCTAssertEqual(Usage.reportingDay(now), "2026-03-16")
+        let later = usage()
+        later.record(.home(date: today), dark: false, form: "private")
+        later.record(.hour(date: today, hour: "compline"), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 3)
+        XCTAssertNotEqual(posted[0].id, posted[1].id)
+        XCTAssertEqual(posted[1].id, posted[2].id)
+    }
+
+    func testAFailedBeaconIsTriedAgainOnTheNextVisit() {
+        let usage = usage()
+        online = false
+        usage.record(.home(date: today), dark: false, form: "private")
+        online = true
+        usage.record(.home(date: today), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 1)
+    }
+
+    func testDebugBuildsNeverReport() {
+        XCTAssertNotEqual(Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String, "YES")
+    }
+}

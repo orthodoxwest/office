@@ -162,3 +162,32 @@ fn the_ordo_year_sets_out_the_tabula() {
     assert_eq!((easter.value.as_str(), easter.date), ("April 12", Some(civil(2026, 4, 12))));
     assert_eq!(y.ember[0].value, "March 4, 6, 7");
 }
+
+#[test]
+fn usage_beacons_count_current_pages_as_the_web_does() {
+    let today = civil(2026, 3, 15);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android);
+    assert_eq!(
+        beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
+        Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
+    );
+    assert_eq!(beacon(UsageEvent::Home { date: today }).as_deref(), Some("site appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::Ordo { year: 2027 }).as_deref(), Some("ordo appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::RemindersPage).as_deref(), Some("site appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::RemindersOn).as_deref(), Some("reminders appearance:nave screen:mobile client:android"));
+    assert_eq!(
+        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios).as_deref(),
+        Some("site appearance:apse screen:mobile client:ios")
+    );
+    // The archive, and anything the server would refuse, are not counted.
+    for event in [
+        UsageEvent::Hour { date: civil(2026, 3, 17), hour: "lauds".into() },
+        UsageEvent::Home { date: civil(2019, 3, 15) },
+        UsageEvent::Ordo { year: 2030 },
+        UsageEvent::Hour { date: today, hour: "matins".into() },
+        UsageEvent::Home { date: civil(2026, 2, 30) },
+    ] {
+        assert_eq!(beacon(event.clone()), None, "{event:?}");
+    }
+    assert!(usage_endpoint().starts_with("https://") && usage_endpoint().ends_with("/api/usage"));
+}

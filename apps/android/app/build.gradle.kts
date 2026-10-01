@@ -44,9 +44,12 @@ android {
     }
 
     buildTypes {
+        // Only builds that go to readers count usage (Usage.kt): never a debug build, its tests,
+        // or its screenshots.
         debug {
             applicationIdSuffix = ".preview"
             signingConfig = signingConfigs.getByName("preview")
+            buildConfigField("boolean", "COUNT_USAGE", "false")
         }
         // Shrunk by R8: the app's code is otherwise seven times the size of the whole
         // Rust engine, loaded on every launch and every reminder.
@@ -54,6 +57,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("boolean", "COUNT_USAGE", "true")
         }
         // Optimized and non-debuggable, so scrolling is as smooth as a release,
         // but installable beside the eventual store app.
@@ -67,6 +71,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets {

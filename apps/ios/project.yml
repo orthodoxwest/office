@@ -46,6 +46,8 @@ targets:
           - fetch
         BGTaskSchedulerPermittedIdentifiers:
           - org.orthodoxwest.office.reminders
+        # Whether this build reports the daily usage count (Usage.swift): Release only.
+        OfficeCountsUsage: $(OFFICE_COUNTS_USAGE)
         UIAppFonts:
           - eb_garamond_regular.otf
           - eb_garamond_italic.otf
@@ -66,6 +68,13 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      # Only builds that go to readers count usage: never a Debug build, its tests, or the
+      # simulator screenshots.
+      configs:
+        Debug:
+          OFFICE_COUNTS_USAGE: "NO"
+        Release:
+          OFFICE_COUNTS_USAGE: "YES"
   OfficeTests:
     type: bundle.unit-test
     platform: iOS

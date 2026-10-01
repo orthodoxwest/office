@@ -3336,15 +3336,29 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private client:browser");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private client:browser");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private client:browser");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
+});
+
+test("the installed web app reports itself apart from a browser tab", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  // Safari's home-screen app says so on navigator; others match display-mode: standalone.
+  await page.addInitScript(() => Object.defineProperty(navigator, "standalone", { configurable: true, value: true }));
+  await page.goto(`/?date=${easternDay()}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0]).toBe("site appearance:nave screen:mobile client:pwa");
 });
 
 test.describe("on a screen with a mouse", () => {
@@ -3364,11 +3378,11 @@ test.describe("on a screen with a mouse", () => {
       return events[0];
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private client:browser");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private client:browser");
   });
 });
 
