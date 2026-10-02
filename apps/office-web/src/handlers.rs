@@ -200,7 +200,7 @@ impl Server {
     /// The styled page for a 4xx or 5xx condition.
     pub fn error_page(&self, req: &Req, status: StatusCode, message: &str) -> Response<Body> {
         let data = ErrorData {
-            chrome: Chrome { nav_date: self.nav_date_now(req), ..Chrome::default() },
+            chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
             title: status.canonical_reason().unwrap_or("").to_string(),
             message: message.to_string(),
         };
@@ -212,7 +212,7 @@ impl Server {
     }
 
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
-        let data = NotFoundData { chrome: Chrome { nav_date: self.nav_date_now(req), ..Chrome::default() } };
+        let data = NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), ..Chrome::default() } };
         match self.pages.not_found(&data) {
             Ok(body) => html(StatusCode::NOT_FOUND, body),
             Err(e) => render_failed(&e),

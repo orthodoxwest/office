@@ -879,6 +879,54 @@ summary:focus-visible {
   }
 }
 
+/* A finger needs the same floor on a tablet's header as in a phone's menu.
+   The links keep their type and the header its height: only the box each
+   answers to grows, through a pseudo-element centred on the word. */
+@media (min-width: 701px) and (pointer: coarse) {
+  .site-brand,
+  .site-menu nav a,
+  .site-settings > summary {
+    position: relative;
+  }
+
+  .site-brand::after,
+  .site-menu nav a::after,
+  .site-settings > summary::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--touch-target);
+    transform: translateY(-50%);
+  }
+}
+
+/* A tablet's width holds the hours' full list but not beside the brand and
+   Settings: left to wrap, it broke wherever it ran out and stranded
+   Reminders on a line of its own. There the list takes a rank to itself
+   under them, centred, as a book sets its running head over the page. The
+   upper bound is where the list fits on one line at Larger text. */
+@media (min-width: 701px) and (max-width: 959px) {
+  .page-hour .site-nav-shell {
+    flex-wrap: wrap;
+    row-gap: 0.15rem;
+  }
+
+  .page-hour .site-menu {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .page-hour .site-menu-panel {
+    justify-content: center;
+  }
+
+  .page-hour .site-menu nav {
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+}
+
 /* Narrow screens: collapse the full list into a compact menu so the office
    text starts high on the page and remains the visual focus. */
 @media (max-width: 700px) {
@@ -1046,6 +1094,23 @@ footer::before {
   user-select: none;
 }
 
+/* A painter leaves a reserve for an inscription: the powdering and the
+   vault stop short of the colophon and the report line and never run under
+   the letters (the lettering's own shadow clears a glyph's edge, not a
+   rosette). The clearing is the wall's own colour, feathered, on the pages
+   that carry a field; its padding is taken back by the margin, so the
+   footer keeps its height and the wide hours' seam holds. */
+body:is(.page-home, .page-hour) footer > p,
+body:is(.page-home, .page-hour) footer .report-issue {
+  --reserve-pad: 0.6rem;
+  padding: var(--reserve-pad) 1.75rem;
+  background: radial-gradient(closest-side, var(--bg) 58%, transparent);
+}
+
+body:is(.page-home, .page-hour) footer > p {
+  margin: calc(-1 * var(--reserve-pad)) 0;
+}
+
 /* ── Report a problem ── */
 
 .report-issue {
@@ -1059,6 +1124,10 @@ footer::before {
 footer .report-issue {
   margin-top: 0.3rem;
   font-size: 0.74rem;
+}
+
+body.page-hour footer .report-issue {
+  margin: calc(0.3rem - var(--reserve-pad)) 0 calc(-1 * var(--reserve-pad));
 }
 
 .report-issue a {
@@ -2418,7 +2487,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -2435,7 +2504,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -2552,7 +2621,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -3113,8 +3182,28 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   white-space: nowrap;
 }
 .tabula-tables dd a {
+  position: relative;
   color: var(--accent);
   text-decoration: none;
+}
+
+/* The ordo's day links are a line of type in a taller row: each answers
+   to the row's height under a finger, not only to its letters. A feast's
+   name reaches up into its row's own padding and barely down, where the
+   day's disclosures begin. */
+.tabula-tables dd a::after,
+.day-feast-name::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: var(--touch-target);
+  transform: translateY(-50%);
+}
+
+.day-feast-name::after {
+  inset: -0.75rem 0 -0.2rem;
+  height: auto;
+  transform: none;
 }
 .tabula-tables dd a:hover {
   text-decoration: underline;
@@ -3204,6 +3293,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .month-table tr:target > td { border-bottom-color: var(--gold-line); }
 .day-mobile-head { display: none; }
 .day-feast-name {
+  position: relative;
   color: var(--text);
   text-decoration: none;
 }
@@ -4489,8 +4579,15 @@ body.season-eastertide {
       0 0 1.8rem 1.4rem var(--niche-clear);
     zoom: var(--niche-zoom);
     max-width: var(--card-w);
-    /* Room under the head for the crown's cross and the lining's arch. */
-    padding: calc(var(--niche-head) * 0.62 + 2.1rem) 1.75rem 1.25rem;
+    /* Room under the head for the lining's arch, then the crown's cross,
+       then air before the date. Measured down from the lining and not from
+       the head's height: a head that flattens on a narrow window once left
+       the lining's crown running through the cross. */
+    --lining-inset: 26px;
+    --crown-size: 2.25rem;
+    --crown-top: calc(var(--lining-inset) + 11px + 0.55rem);
+    --niche-pad-top: calc(var(--crown-top) + var(--crown-size) + 1.35rem);
+    padding: var(--niche-pad-top) 1.75rem 1.25rem;
     border-width: 2px;
     border-top-color: var(--frontispiece-frame);
     border-radius: 50% 50% 0 0 / var(--niche-head) var(--niche-head) 0 0;
@@ -4686,26 +4783,33 @@ body.season-eastertide {
 
 .not-found {
   text-align: center;
-  padding: 3rem 0 4rem;
+  padding: 2.25rem 0 4rem;
 }
 
+.not-found .ornament-headpiece {
+  margin: 0 auto 1.1rem;
+}
+
+/* A notice is set as the ordo's title is: the text's own ink at a title's
+   size, under the headpiece, with the verse as its matter. */
 .not-found h1 {
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: normal;
-  color: var(--accent);
-  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 1.6rem;
 }
 
 .not-found-quote {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-style: italic;
   color: var(--text);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
+/* A scripture reference is red work here as in the hours. */
 .not-found-ref {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--rubric);
   letter-spacing: 0.04em;
   margin-bottom: 2rem;
 }
@@ -4713,18 +4817,23 @@ body.season-eastertide {
 .not-found-msg {
   color: var(--muted);
   font-size: 0.95rem;
-  max-width: 36em;
-  margin: 0 auto 2rem;
+  max-width: 30em;
+  margin: 0 auto 1.6rem;
 }
 
 .not-found-home a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
   color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
 }
 
 .not-found-home a:hover {
-  border-bottom-color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 /* ── Reminders page ──
@@ -4798,6 +4907,42 @@ body.season-eastertide {
 .reminder-hour-name {
   color: var(--muted);
   transition: color 140ms ease;
+}
+
+/* The boxes are set by hand, as the prayer form's choices are: a ruled
+   square that fills with oak inside a margin of the ground when chosen.
+   The platform's own box (blue-tinted glass on some, a rounded tile on
+   others) belongs to no theme here. */
+.reminders input[type="checkbox"] {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0;
+  border: 1px solid var(--muted);
+  border-radius: 1px;
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.reminders input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+
+@media (forced-colors: active) {
+  .reminders input[type="checkbox"] { appearance: auto; }
+}
+
+/* The time field's clock is the platform's; it is quietened to the weight
+   of the caret beside the page's other controls. */
+.reminder-hour-row input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
 }
 
 .reminder-hour-row.is-selected .reminder-hour-name {
@@ -5076,48 +5221,110 @@ body.season-eastertide {
   .short-responsory-opening .sigil-text::first-letter {
     initial-letter: 2;
     margin-top: 0.1em;
-    margin-bottom: calc(-0.1em + var(--initial-depth, 0em));
+    margin-bottom: calc(-0.1em + var(--initial-depth, 0) * 1em);
+  }
+}
+
+/* Without initial-letter (WebKit, Firefox), the same two-line initial as a
+   float. Its cap height spans a line pitch and the text's cap height
+   (Garamond's 0.65em), as initial-letter: 2 sizes it, so with its cap top
+   on the first line's cap height its foot stands on the second baseline.
+   Engines size a floated first letter two ways: by its ink (Chromium,
+   Firefox), its cap top then the float's top, or by its line-height. At
+   0.88, 1 - 2 x (ascent 0.71 - cap height 0.65), the line-height box seats
+   the cap top there too, so one top margin serves both: the first line's
+   half-leading and the text's ascent above its caps. Either way -0.1em
+   below ends the float inside the second line, and Q's depth reaches the
+   third, at the leadings the openings use (32-35px on 20px text). The
+   letter reads its opening's leading and text size through registered
+   lengths, resolved on the opening itself; the profiles keep their
+   declared 3.05em, as initial-letter keeps it. Without lh or registered
+   lengths, the 3.05em float above stands. */
+@property --opening-line {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --opening-text {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@supports (not (initial-letter: 2)) and (width: 1lh) {
+  .psalm-verses .verse:first-child,
+  .chapter .liturgical-block .plain-line:first-child,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text,
+  .collect .liturgical-block .plain-line:first-child,
+  .hymn-stanza-opening .hymn-line:first-child,
+  .marian-antiphon .chant-line-opening,
+  .corporate-lord-prayer-officiant {
+    --opening-line: 1lh;
+    --opening-text: 1em;
+  }
+
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+  .collect .liturgical-block .plain-line:first-child::first-letter,
+  .hymn-stanza-opening .hymn-line:first-child::first-letter,
+  .marian-antiphon .chant-line-opening::first-letter,
+  .corporate-lord-prayer-officiant::first-letter {
+    --opening-em: calc(3.05 * var(--opening-text));
+    font-size: calc(var(--opening-text) + var(--opening-line) / 0.65);
+    line-height: 0.88;
+    margin-top: calc((var(--opening-line) - var(--opening-text)) / 2 + 0.06 * var(--opening-text));
+    margin-right: calc(var(--initial-gap, 0.06) * var(--opening-em));
+    margin-bottom: calc(-0.1em + var(--initial-depth, 0) * var(--opening-em));
+    margin-left: calc(var(--initial-hang, 0) * var(--opening-em));
+  }
+
+  .psalm-verses .verse:first-child::first-letter {
+    margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * var(--opening-em));
   }
 }
 
 /* Optical profiles for every Latin capital in the bundled EB Garamond.
    The float gap reserves space beside the lower line; the word adjustment
    independently fits the upper line. Both follow the painted glyph contour,
-   with a common breathing space. Gap/hang use the initial em; word uses the
-   body em. A negative gap lets text sit below a bowl or beside a narrow stem.
+   with a common breathing space. Gap/hang use the initial's declared em
+   (3.05em; initial-letter draws it larger without changing it); word uses
+   the body em. Each is a bare number, multiplied by its em where it is
+   used, so the fallback below keeps that em while drawing a larger letter. A negative gap lets text sit below a bowl or beside a narrow stem.
    Calibrated against two-line initials, then checked at other leading/sizes.
    Depth keeps a descending tail clear of a following row (notably Q).
    Recalibrate these values when changing the initial face. */
-.elements [data-initial="A"] { --initial-gap: 0.06em; --initial-tuck: -0.8em; --initial-hang: -0.02em; }
-.elements [data-initial="B"] { --initial-gap: 0.08em; --initial-tuck: -0.2em; }
-.elements [data-initial="C"] { --initial-gap: 0.08em; --initial-tuck: -0.05em; --initial-hang: -0.025em; }
-.elements [data-initial="D"] { --initial-gap: 0.03em; --initial-tuck: 0.1em; }
-.elements [data-initial="E"] { --initial-gap: 0.08em; --initial-tuck: -0.15em; }
-.elements [data-initial="F"] { --initial-gap: -0.135em; --initial-tuck: 0.65em; }
-.elements [data-initial="G"] { --initial-gap: -0.005em; --initial-tuck: 0em; --initial-hang: -0.025em; }
-.elements [data-initial="H"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="I"] { --initial-gap: 0.03em; --initial-tuck: 0em; }
-.elements [data-initial="J"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="K"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="L"] { --initial-gap: 0.06em; --initial-tuck: -0.9em; }
-.elements [data-initial="M"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
-.elements [data-initial="N"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="O"] { --initial-gap: 0.045em; --initial-tuck: 0em; --initial-hang: -0.025em; }
-.elements [data-initial="P"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; }
-.elements [data-initial="Q"] { --initial-gap: 0.06em; --initial-tuck: -0.2em; --initial-hang: -0.025em; --initial-depth: 0.1em; }
-.elements [data-initial="R"] { --initial-gap: 0.08em; --initial-tuck: -0.8em; }
-.elements [data-initial="S"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
-.elements [data-initial="T"] { --initial-gap: -0.15em; --initial-tuck: 0.65em; --initial-hang: -0.06em; }
-.elements [data-initial="U"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="V"] { --initial-gap: -0.265em; --initial-tuck: 1em; --initial-hang: -0.025em; }
-.elements [data-initial="W"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; --initial-hang: -0.025em; }
-.elements [data-initial="X"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="Y"] { --initial-gap: -0.1em; --initial-tuck: 0.6em; --initial-hang: -0.025em; }
-.elements [data-initial="Z"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
+.elements [data-initial="A"] { --initial-gap: 0.06; --initial-tuck: -0.8; --initial-hang: -0.02; }
+.elements [data-initial="B"] { --initial-gap: 0.08; --initial-tuck: -0.2; }
+.elements [data-initial="C"] { --initial-gap: 0.08; --initial-tuck: -0.05; --initial-hang: -0.025; }
+.elements [data-initial="D"] { --initial-gap: 0.03; --initial-tuck: 0.1; }
+.elements [data-initial="E"] { --initial-gap: 0.08; --initial-tuck: -0.15; }
+.elements [data-initial="F"] { --initial-gap: -0.135; --initial-tuck: 0.65; }
+.elements [data-initial="G"] { --initial-gap: -0.005; --initial-tuck: 0; --initial-hang: -0.025; }
+.elements [data-initial="H"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="I"] { --initial-gap: 0.03; --initial-tuck: 0; }
+.elements [data-initial="J"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="K"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="L"] { --initial-gap: 0.06; --initial-tuck: -0.9; }
+.elements [data-initial="M"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
+.elements [data-initial="N"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="O"] { --initial-gap: 0.045; --initial-tuck: 0; --initial-hang: -0.025; }
+.elements [data-initial="P"] { --initial-gap: -0.215; --initial-tuck: 0.85; }
+.elements [data-initial="Q"] { --initial-gap: 0.06; --initial-tuck: -0.2; --initial-hang: -0.025; --initial-depth: 0.1; }
+.elements [data-initial="R"] { --initial-gap: 0.08; --initial-tuck: -0.8; }
+.elements [data-initial="S"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
+.elements [data-initial="T"] { --initial-gap: -0.15; --initial-tuck: 0.65; --initial-hang: -0.06; }
+.elements [data-initial="U"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="V"] { --initial-gap: -0.265; --initial-tuck: 1; --initial-hang: -0.025; }
+.elements [data-initial="W"] { --initial-gap: -0.215; --initial-tuck: 0.85; --initial-hang: -0.025; }
+.elements [data-initial="X"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="Y"] { --initial-gap: -0.1; --initial-tuck: 0.6; --initial-hang: -0.025; }
+.elements [data-initial="Z"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
 
 /* A raised initial sits on one baseline; its join uses a much smaller fit. */
 .elements :is([data-initial="T"], [data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
-  --initial-raised-tuck: -0.04em;
+  --initial-raised-tuck: -0.04;
 }
 
 .opening-small-caps {
@@ -5130,12 +5337,12 @@ body.season-eastertide {
   font-variant-caps: all-small-caps;
   font-synthesis: none;
   letter-spacing: 0.025em;
-  margin-left: var(--initial-tuck, 0em);
+  margin-left: calc(var(--initial-tuck, 0) * 1em);
 }
 
 .initial-raised > .initial-word,
 .short-responsory-opening .initial-word {
-  margin-left: var(--initial-raised-tuck, 0em);
+  margin-left: calc(var(--initial-raised-tuck, 0) * 1em);
 }
 
 [data-initial-standalone] > .initial-word {
@@ -5158,7 +5365,7 @@ body.season-eastertide {
   float: none;
   font-size: 1.65em;
   line-height: 0;
-  margin: 0 0.035em 0 var(--initial-hang, 0em);
+  margin: 0 0.035em 0 calc(var(--initial-hang, 0) * 1em);
 }
 
 .psalm-verses .verse.initial-raised:first-child:not(.numbered) {
@@ -5174,7 +5381,7 @@ body.season-eastertide {
   float: none;
   line-height: 1;
   vertical-align: baseline;
-  margin: 0 var(--initial-gap, 0.06em) 0 calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+  margin: 0 calc(var(--initial-gap, 0.06) * 1em) 0 calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
 }
 .psalm-verses .verse.initial-elevated > .initial-word {
   margin-left: 0;
@@ -5442,7 +5649,7 @@ body.page-hour::before {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour))) {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice))) {
   background-color: var(--bg);
 }
 
@@ -5450,11 +5657,12 @@ body.page-home,
 body.page-calendar,
 body.page-reminders,
 body.page-usage,
-body.page-hour {
+body.page-hour,
+body.page-notice {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -5462,7 +5670,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before,
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
@@ -5629,9 +5837,9 @@ html:where(:has(> body.page-hour))::before {
   /* The consecration cross at the niche's crown, as heavy as the one that
      ends each hour. */
   .page-home .home-crown {
-    top: calc(var(--niche-head) * 0.36 - 4px);
-    width: 2.25rem;
-    height: 2.25rem;
+    top: var(--crown-top);
+    width: var(--crown-size);
+    height: var(--crown-size);
   }
 
   /* The phone panel's lining, restated for the niche: a 2px band and a
@@ -5640,8 +5848,7 @@ html:where(:has(> body.page-hour))::before {
      moulding, so it reads as paint on the wall, not another edge of the
      arch. */
   .page-home .home-lining {
-    --lining-inset: 26px;
-    top: calc(var(--lining-inset) - var(--niche-head) * 0.62 - 2.1rem);
+    top: calc(var(--lining-inset) - var(--niche-pad-top));
     right: calc(var(--lining-inset) - 1.75rem);
     left: calc(var(--lining-inset) - 1.75rem);
     border-radius: 50% 50% 0 0 / calc(var(--niche-head) - var(--lining-inset)) calc(var(--niche-head) - var(--lining-inset)) 0 0;

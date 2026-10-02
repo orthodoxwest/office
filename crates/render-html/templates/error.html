@@ -1,5 +1,6 @@
-{% extends "layout.html" %}{% block title %}{{ title }} — Divine Office{% endblock %}{% block content %}
+{% extends "layout.html" %}{% block title %}{{ title }} — Divine Office{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="not-found">
+  {{ headpiece() }}
   <h1>{{ title }}</h1>
   <p class="not-found-quote">&#8220;Knock, and it shall be opened unto you.&#8221;</p>
   <p class="not-found-ref">Matthew 7:7</p>
