@@ -13,8 +13,10 @@ description: >-
 Prayer is the product. Most readers are lay people on phones: keep the text
 central, navigation quiet, and administrative material after the office.
 Use the parish's material palette—warm plaster, oak, gold, and a blue night
-sky—with EB Garamond, restrained rules, and generous reading space. Avoid
-playful rewards, motion for its own sake, and decorative layers behind prayer.
+sky—with EB Garamond, restrained rules, and generous reading space. Ornament
+is English wall painting on that limewash: earth pigments drawn thinly on a
+pale ground, painted into the wall rather than laid on it. Avoid playful
+rewards, motion for its own sake, and decorative layers behind prayer.
 
 Administrative pages should belong to the same app, but may use denser tables,
 charts, and more direct language. They need not imitate a liturgical page.
@@ -31,7 +33,17 @@ or impose a redesign on an unrelated change.
   Ornament (`--ornament`, `--ornament-line`, `--ornament-hi/lo`) changes with
   Passiontide/Paschaltide. Decide which job a colour serves before choosing it.
   Dark inscription backgrounds use the seasonal Apse leaf colours in both themes.
-- Current controls use a gold underline; disclosures use the existing caret.
+- Painted ornament is one painter's logic: terracotta `--lining` for rules,
+  linings and crosses (opaque, since thinned crimson goes rose on this
+  plaster, and it does not veil with the season); `--titulus` for tituli
+  (section headings, psalm numbers, "Ant."), red ochre on Nave and gilt on
+  Apse, clear of the rubrics' red; gold for initials, lettering and the hour
+  glyphs, never hardware on a rule. Shapes are masks in `static/ornaments/`
+  (`tools/genornaments.py`), so colours stay tokens. The consecration cross
+  ends each hour, crowns home and is the brand mark; Lauds' headpiece carries
+  the sun and Vespers' and Compline's the moon. One mark per threshold.
+- Current controls use a gold underline (the header's current page takes the
+  lining's terracotta); disclosure carets take their label's ink at 70%.
   Keep Default / Nave / Apse labels and visible keyboard focus.
 - The starfield belongs to Apse home, the post-office epilogue, and, on
   screens 1680px and wider, the margins beside an hour's prayer, which run
@@ -58,14 +70,19 @@ or impose a redesign on an unrelated change.
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
 - From 701px home's frontispiece is a niche set into the wall (round head,
-  stone moulding, day-colour trim, recess shadow), and the room is lit toward
+  stone moulding, day-colour trim, recess shadow, a terracotta lining painted
+  on its back wall round the head with the consecration cross at the crown;
+  phones show the cross alone), and the room is lit toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
   `--niche-zoom` steps gated on width and height. Its background and shadows
   are tokens (`--niche-background`, `--niche-shadows`) because the Apse card
   rules outrank the base selector and must repeat them. Drawn architecture
   around it (columns, sconces, sills, arches) has been tried and read as
-  illustration; prefer light and tone to objects.
+  illustration; prefer light and tone to objects. Fills in its head (a
+  mosaic conch, a painted sky, ochre voussoirs, glory rays) were tried too and
+  read as stickers or sunbursts: keep the head plaster. The mosaic belongs to
+  the app icon (`tools/genicons.py`), an object seen at one scale.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's

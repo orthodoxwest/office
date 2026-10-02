@@ -70,7 +70,14 @@ var CORE_ASSETS = [
   assetURL("/static/plaster-wide.jpg"),
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
-  assetURL("/static/leaf.png")
+  assetURL("/static/leaf.png"),
+  // The painted ornaments style.css masks its colours through
+  // (tools/genornaments.py).
+  assetURL("/static/ornaments/consecration.svg"),
+  assetURL("/static/ornaments/cross.svg"),
+  assetURL("/static/ornaments/sun.svg"),
+  assetURL("/static/ornaments/moon.svg"),
+  assetURL("/static/ornaments/vault.svg")
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always

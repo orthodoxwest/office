@@ -1,31 +1,27 @@
 # Apse vault implementation
 
 Read when changing the starfield, its masks, or post-office decoration.
-The existing design is a geometric diaper: crossed diagonal hairlines with
-principal stars at intersections and smaller stars at panel centres. The star
-shapes follow the parish apse: eight-ray principal stars (four long rays,
-four short diagonals) and small four-ray sparks.
+The field is the parish apse's painted vault: eight-ray stars (four long
+rays, four short diagonals) in three sizes, set by hand rather than on a
+lattice, each at its own opacity. A ribbed diaper with principal stars at the
+crossings came first and read as printed wallpaper.
 
-- The cell is one SVG data URL (`--apse-star-tile`) used as a **mask**, never
-  as a background image. The mask supplies only shape and alpha; the colour
-  is the pseudo-element's `background-color: var(--apse-ink)`, which is
+- The tile is `ornaments/vault.svg` (`--apse-star-tile`), written by
+  `tools/genornaments.py` (seeded), used as a **mask**, never as a background
+  image. The mask supplies only shape and alpha; the colour is the
+  pseudo-element's `background-color: var(--apse-ink)`, which is
   `--ornament` in Apse and transparent in Nave. An SVG image cannot read
   tokens, so painting it directly would freeze the stars through the seasons.
-  CSS gradients keep the colour too but cannot draw diagonal rays.
+  A star crossing the tile's edge is drawn again on the far side, so the
+  repeat is seamless.
 - Each field's fade is a second mask layer (`linear-gradient`, sized 100%),
   intersected with the tile (`mask-composite: intersect` plus
   `-webkit-mask-composite: source-in`). Give both layers the tile's position
   so the phase reads the same on every layer.
-- Ribs run corner to corner and through the edge midpoints. Principal stars
-  sit at (25%,25%) and (75%,75%); smaller stars at (75%,25%) and (25%,75%).
-  Keep stars inside the cell, where no neighbour tile is needed to finish them.
-  The tile scales with `mask-size`, so star size scales with it. Every field
-  reads one `--apse-tile` from `body`: 132px on phones, 176px from 701px,
-  then 208px from 1800px and 240px from 2400px, so on very wide screens the
-  diaper reads as a painted ceiling rather than a wallpaper of small stars.
-  Keep the steps whole pixels; fractional tiles can seam. Each principal star carries a soft radial halo inside the
-  cell (28% at the centre, gone by 12 units), so the gold reads as catching
-  light; keep it interior to the cell like the stars.
+- Every field reads one `--apse-tile` from `body`: 528px on phones, 704px
+  from 701px, then 832px from 1800px and 960px from 2400px, so on very wide
+  screens the vault reads as a painted ceiling rather than a wallpaper of
+  small stars. Keep the steps whole pixels; fractional tiles can seam.
 - Every field adds `--apse-leaf` as a further mask layer: `leaf.png`, 64px
   of seamless low-frequency noise (`tools/genplaster --leaf`) drawn at
   1024px, so each star catches its own share of light (about 60-100%) as

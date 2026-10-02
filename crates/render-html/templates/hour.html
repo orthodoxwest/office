@@ -7,7 +7,9 @@
   {# The day's colour reaches the title's lozenge; the headpiece is set
        into the title's upper rule, as home and the ordo open their pages. #}
   <div class="hour-header day-color-{{ hour.color }}">
-    {{ headpiece(true) }}
+    {# Lauds is sung at sunrise and Vespers and Compline at its going down:
+         their headpieces carry the sun and the moon in place of the cross. #}
+    {{ headpiece("sun" if hour_name == "lauds" else ("moon" if hour_name in ["vespers", "compline"] else "")) }}
     <h1>{{ hour.title }}</h1>
     {# The no-break space holds each dot to the part before it, so a wrapped
          line never opens with a separator. #}
@@ -83,6 +85,7 @@
        where the vault may fade in around the administrative epilogue without
        ever sitting behind liturgical text. #}
   <div class="hour-epilogue">
+    <span class="hour-end-mark" aria-hidden="true"></span>
     <nav class="hour-continuation" aria-label="Other hours for this day">
       {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>

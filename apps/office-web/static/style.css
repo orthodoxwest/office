@@ -293,13 +293,14 @@
   --gold-line: #c9ac72;
   /* Ornament tokens: gold leaf by default, in both themes (the var() resolves
      against whichever --gold won the cascade on :root). Only the gilding reads
-     these — drop caps, the double hairlines around the hour title, and the ✦
-     diamonds — so a season can
-     retint the ornaments without disturbing anything functional that also
-     happens to be gold: focus rings, disclosure markers, today's ordo row.
-     See "Seasonal ornament" at the foot of this file. */
+     these — drop caps, the hour glyphs, the inscription band's letters — so a
+     season can retint the ornaments without disturbing anything functional
+     that also happens to be gold: focus rings, today's ordo row. Painted
+     rules are --lining (below), so --ornament-line resolves to it except
+     where a season gilds or veils it. See "Seasonal ornament" at the foot of
+     this file. */
   --ornament: var(--gold);
-  --ornament-line: var(--gold-line);
+  --ornament-line: var(--lining);
   /* The two stops of the gilded caps, about 18% apart in lightness so gold
      reads as leaf catching light rather than flat paint. Stated as literal
      colours rather than derived from --ornament, because a gradient needs a
@@ -321,6 +322,15 @@
   --unsaid: #786b62;
   --border: #dccfc3;
   --rubric: #8b1a1a;
+  /* Painted ornament, in the earth pigments of English wall painting:
+     terracotta for rules, linings and crosses; red ochre for the tituli
+     (section headings, psalm numbers, "Ant."); slate blue for the ordo's
+     doubles. Opaque, because thinned crimson goes rose on this plaster. Apse
+     redeclares them: on the night ground the tituli are gilt. */
+  --lining: #a85a48;
+  --titulus: #93412c;
+  --kalendar-blue: #34507a;
+  --moon-ink: var(--gold);
   --white: #f8f4ec;
   --red: #fdf0f0;
   --green: #f0f4f0;
@@ -352,13 +362,14 @@
   --oak: #3f372f;
   --oak-line: rgba(63, 55, 47, 0.34);
   /* The nave's painted frieze (St Patrick's Breastplate, just under the wall
-     plate): gold lettering on a sage-green course between two thin oxblood
-     rules. Ground and edge are the photograph's lit end, darkened just enough
-     that the veiled Passiontide ink still clears 4.5:1 at the band's small
-     size (see "Seasonal ornament"). */
-  --inscription-ground: #34403a;
+     plate): gold lettering on a green-earth course between two thin oxblood
+     rules. Gold reads as gold only when lighter than its ground, so the
+     ground is as pale as the letters allow at the band's small size; a
+     near-black course read as a slab on the limewash (see "Seasonal
+     ornament" for the seasons' inks). */
+  --inscription-ground: #545f54;
   --inscription-edge: #5e2a27;
-  --inscription-ink: #d7b878;
+  --inscription-ink: #ecd9a0;
   /* Side gutter for the reading column. The measure lives on main/footer so
      the header beam can span the full width (see .site-header). */
   --page-gutter: 1.5rem;
@@ -556,16 +567,19 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-/* The cross beside capitals: its drawing is 88% of Garamond's cap height and
-   floats 0.074em above the line, which suits running text but looked shrunk
-   beside DAILY OFFICE. Scaled to the capitals and seated on their baseline;
-   line-height 1 keeps the larger glyph from deepening the header. */
+/* The brand's mark is the consecration roundel that ends every hour,
+   painted in the lining's terracotta. The ✠ stays in the markup for a page
+   read without styles; the mask draws over it. */
 .site-brand span {
-  color: var(--ornament);
-  margin-right: 0.2rem;
-  font-size: 1.14em;
-  line-height: 1;
-  vertical-align: -0.074em;
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.38rem;
+  color: transparent;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  vertical-align: -0.2em;
 }
 
 .site-menu {
@@ -589,7 +603,7 @@ summary:focus-visible {
 }
 
 .site-menu nav a {
-  color: var(--accent);
+  color: var(--muted);
   text-decoration: none;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
@@ -601,9 +615,10 @@ summary:focus-visible {
   text-decoration: underline;
 }
 
+/* The current page is underlined in the lining's terracotta. */
 .site-menu nav a.active {
   color: var(--text);
-  border-bottom: 1px solid var(--accent);
+  border-bottom: 1.5px solid var(--lining);
 }
 
 /* Habit setup, not an hour — quieter than Lauds…Compline / Ordo. */
@@ -619,7 +634,6 @@ summary:focus-visible {
 
 .site-menu nav a.nav-secondary.active {
   color: var(--text);
-  border-bottom-color: var(--muted);
 }
 
 .nav-divider {
@@ -698,11 +712,11 @@ summary:focus-visible {
   color: var(--accent);
 }
 
-/* The app's one caret, in gold. */
+/* The app's one caret, in the ink of the words it opens, a little lighter. */
 .site-settings > summary::after {
   content: "▾";
   margin-left: 0.4rem;
-  color: var(--gold-line);
+  color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
 
@@ -878,11 +892,11 @@ summary:focus-visible {
   }
 
   /* Same disclosure mark as "Change date" on home and the hours: the app has
-     one caret in gold, not a caret here and a math sign there. */
+     one caret, not a caret here and a math sign there. */
   .site-menu > summary::after {
     content: "▾";
     margin-left: 0.4rem;
-    color: var(--gold-line);
+    color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: 0.85em;
   }
 
@@ -951,12 +965,12 @@ summary:focus-visible {
     font-size: 0.82rem;
   }
 
-  /* The current page wears the same gold underline as every other chosen
-     control — a filled cell reads as a settings panel. */
+  /* The current page wears the header's terracotta underline — a filled
+     cell reads as a settings panel. */
   .site-menu nav a.active {
     background: transparent;
     border-bottom: none;
-    box-shadow: inset 0 -1px 0 var(--gold-line);
+    box-shadow: inset 0 -1.5px 0 var(--lining);
   }
 
   .nav-divider {
@@ -1280,36 +1294,41 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin: 0 auto 1.1rem;
   padding: 0 0 0.45rem;
   text-align: center;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid color-mix(in srgb, var(--lining) 30%, transparent);
 }
 
-/* Double gold hairlines framing the hour title, echoing the gilded altar
-   frame. The printer's headpiece home and the ordo open with is set into the
-   upper rule, as the lozenge is into the lower, so the ornament costs the
-   phone no extra height. That rule is two gradient hairlines rather than a
-   border because a border cannot open a gap for it, and a patch of ground
-   behind the ornament would show on the wide hours' plaster wall. */
+/* Painted double rules frame the hour title, 2px over 1px like the home
+   niche's lining. The headpiece's sign — the cross, or the sun at Lauds and
+   the moon at Vespers and Compline — is set into the upper rule, as the
+   lozenge is into the lower, so the ornament costs the phone no extra
+   height. That rule is two gradient lines rather than a border because a
+   border cannot open a gap for the sign, and a patch of ground behind it
+   would show on the wide hours' plaster wall. */
 .hour-header {
-  --title-rule: var(--ornament-line);
-  /* Half the break in the upper rule: the headpiece's 4.25rem half-width,
-     less the 0.5rem its sprigs are inset in their boxes, plus 0.4rem of
-     clear air before each end of the rule. */
-  --title-rule-break: 4.15rem;
+  --title-rule: var(--lining);
+  /* Half the break in the upper rule: the sign alone, with clear air. */
+  --title-rule-break: 1.25rem;
 }
 
 .hour-header .ornament-headpiece {
   position: relative;
   z-index: 1;
-  /* Centred on the 3px rule below it: half its own 0.9rem height, plus half
+  width: auto;
+  /* Centred on the 6px rule below it: half its own 0.9rem height, plus half
      the rule. */
-  margin: 0 auto calc(-0.45rem - 1.5px);
+  margin: 0 auto calc(-0.45rem - 3px);
 }
 
 /* The cross's ink sits high in its line box (measured 3px at the default
-   size); lowered so it centres on the rule with the leaves. */
+   size); lowered so it centres on the rule. The sun and moon are drawn
+   centred in their boxes and need only a nudge. */
 .hour-header .ornament-headpiece > span {
   position: relative;
   top: 0.23em;
+}
+
+.hour-header .ornament-headpiece > span[data-sign] {
+  top: 0.06em;
 }
 
 .hour-header h1 {
@@ -1325,11 +1344,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   width: fit-content;
   min-width: min(100%, 24rem);
   margin: 0 auto 0.25rem;
-  /* Room for the headpiece's lower leaves above the capitals. */
-  padding: calc(0.3rem + 3px) 1.3rem 0.2rem;
+  padding: calc(0.3rem + 6px) 1.3rem 0.2rem;
   background:
-    var(--title-upper-rule) 0 0 / 100% 1px no-repeat,
-    var(--title-upper-rule) 0 2px / 100% 1px no-repeat;
+    var(--title-upper-rule) 0 0 / 100% 2px no-repeat,
+    var(--title-upper-rule) 0 5px / 100% 1px no-repeat;
   border-bottom: 3px double var(--title-rule);
 }
 
@@ -1347,17 +1365,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   }
 }
 
-/* Passiontide veils the foliage. In the title rule the cross stands alone,
-   and the rule closes up to it. */
-.season-passiontide .hour-header {
-  --title-rule-break: 0.8rem;
-}
-
-.season-passiontide .hour-header .ornament-headpiece {
-  width: auto;
-}
-
-.season-passiontide .hour-header .ornament-sprig {
+/* In the title rule the sign stands alone; the rule itself is the line. */
+.hour-header .ornament-sprig {
   display: none;
 }
 
@@ -1373,7 +1382,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   width: 0.3rem;
   height: 0.3rem;
   background: var(--day-color, var(--ornament));
-  box-shadow: 0 0 0 1px var(--ornament), 0 0 0 3px var(--bg);
+  box-shadow: 0 0 0 1px var(--lining), 0 0 0 3px var(--bg);
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
 }
@@ -1458,7 +1467,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .hour-date-nav > summary::after {
   content: "▾";
   margin-inline-start: 0.35em;
-  color: var(--gold-line);
+  color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
 
@@ -1850,16 +1859,17 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin: 2.75rem auto 0;
 }
 
-/* Diamond separator, after the lorica boards lining the nave roof */
-.hour-continuation::before {
-  content: "\2726";
-  grid-column: 1 / -1;
-  text-align: center;
-  color: var(--ornament-line);
-  font-size: 0.8rem;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  user-select: none;
+/* The hour ends on one mark: a consecration cross in its compass circle,
+   as painted where the bishop anointed the walls. Only the hour's end takes
+   it; the continuation links and footer below carry no further ornament. */
+.hour-end-mark {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0.4rem auto 1.2rem;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
 }
 
 .hour-continuation a {
@@ -1928,7 +1938,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-weight: normal;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.11em;
-  color: var(--text);
+  /* Tituli were painted in red ochre on the limewash; on the Apse night
+     they are gilt (--titulus), clear of the rubrics' red. */
+  color: var(--titulus);
   text-align: center;
   text-wrap: balance;
   /* Small caps have a shallow silhouette. Body leading left single-line
@@ -1949,6 +1961,18 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 .elements > .section-heading:first-child {
   margin-top: 0;
+}
+
+/* Between the office's parts, one small painted cross as well as air. */
+.elements > .section-heading:not(:first-child)::before {
+  content: "";
+  display: block;
+  width: 0.62rem;
+  height: 0.62rem;
+  margin: 0 auto 0.7rem;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/cross.svg") center / contain no-repeat;
+  mask: url("ornaments/cross.svg") center / contain no-repeat;
 }
 
 .rubric {
@@ -2008,7 +2032,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    rather than a full-size A leading three small letters. */
 .antiphon em {
   font-style: normal;
-  color: var(--rubric);
+  color: var(--titulus);
   font-variant-caps: all-small-caps;
   letter-spacing: 0.07em;
   margin-right: 0.3rem;
@@ -2127,6 +2151,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .psalm > .item-label,
 .canticle > .item-label {
   font-size: 1em;
+  color: var(--titulus);
 }
 
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
@@ -2136,6 +2161,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    the title; a title longer than the line still wraps within itself. */
 .psalm-incipit {
   display: inline-block;
+  color: var(--muted);
   font-variant: normal;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -2613,7 +2639,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .session-prayers summary::after {
   content: "▾";
   margin-inline-start: 0.35em;
-  color: var(--gold-line);
+  color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.75em;
   letter-spacing: 0;
 }
@@ -2879,9 +2905,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   position: absolute;
   left: 50%;
   bottom: -1.5px;
-  width: 0.22rem;
-  height: 0.22rem;
-  background: var(--ornament);
+  width: 6px;
+  height: 6px;
+  background: var(--lining);
   box-shadow: 0 0 0 2px var(--bg);
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
@@ -3105,9 +3131,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   line-height: 1.2;
 }
 .month-table .day-num a:hover { text-decoration: underline; }
+/* A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule. */
 .month-table abbr {
   text-decoration: none;
-  border-bottom: 1px solid var(--gold-line);
   cursor: default;
   position: relative;
 }
@@ -3150,7 +3176,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .day-disclosures summary::after {
   content: "▾";
   margin-left: 0.3em;
-  color: var(--gold-line);
+  color: color-mix(in srgb, currentColor 70%, transparent);
   font-size: 0.85em;
 }
 .day-disclosures details[open] > summary::after { content: "▴"; }
@@ -3197,10 +3223,36 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-style: normal;
   white-space: nowrap;
 }
+/* Fasting and abstinence marks stay quiet, so red in a row means rank. */
 .day-penitential-flag {
   text-align: center;
-  color: var(--rubric);
+  color: var(--muted);
   font-weight: bold;
+}
+
+/* A day's rank is read from its ink, as in a Book of Hours: the great feasts
+   red-letter (the first class with a small cross before the name), doubles
+   slate blue, lesser days black. */
+.month-table tr:is([data-rank="1cl"], [data-rank="2cl"], [data-rank="gd"]) .day-feast-name,
+.month-table tr:is([data-rank="1cl"], [data-rank="2cl"], [data-rank="gd"]) .day-rank {
+  color: var(--rubric);
+}
+
+.month-table tr[data-rank="1cl"] .day-feast-name::before {
+  content: "";
+  display: inline-block;
+  width: 0.62em;
+  height: 0.62em;
+  margin-right: 0.32em;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/cross.svg") center / contain no-repeat;
+  mask: url("ornaments/cross.svg") center / contain no-repeat;
+  vertical-align: 0.02em;
+}
+
+.month-table tr[data-rank="d"] .day-feast-name,
+.month-table tr[data-rank="d"] .day-rank {
+  color: var(--kalendar-blue);
 }
 .svg-sprite {
   position: absolute;
@@ -3314,7 +3366,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --text: #e8e2d0;
+    --text: #ddd6c3;
     --bg: #121c28;
     /* Apse's dark ground has headroom above it, so its knee is white:
        the full texture, base × screen(texture, tint), solved to --bg. */
@@ -3332,6 +3384,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     --unsaid: #9aa4b0;
     --border: #2a3648;
     --rubric: #d47070;
+    --lining: #cf8c6a;
+    --titulus: #d8bc74;
+    --kalendar-blue: #a9bedf;
+    --moon-ink: #c9d0d9;
     --white: #1a2430;
     --red: #261e1d;
     --green: #142028;
@@ -3364,7 +3420,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --text: #e8e2d0;
+  --text: #ddd6c3;
   --bg: #121c28;
   /* Apse's dark ground has headroom above it, so its knee is white:
      the full texture, base × screen(texture, tint), solved to --bg. */
@@ -3382,6 +3438,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   --unsaid: #9aa4b0;
   --border: #2a3648;
   --rubric: #d47070;
+  --lining: #cf8c6a;
+  --titulus: #d8bc74;
+  --kalendar-blue: #a9bedf;
+  --moon-ink: #c9d0d9;
   --white: #1a2430;
   --red: #261e1d;
   --green: #142028;
@@ -3529,11 +3589,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    disclosure carets, the ordo rank hairlines, today's ordo row — read --gold /
    --gold-line directly and are unaffected.
 
-   The frontispiece invitation is the opposite case, and deliberately so: its
-   double border reads --ornament-line, so "Pray {hour}" veils and brightens
-   with the rest of the gilding. The plain .pray-now button outside the
-   frontispiece is bordered in --accent and never was gold; nor are the focus
-   rings, which are --accent too.
+   Painted rules and linings (--lining) do not move: the church veils its
+   images, not its walls. The focus rings are --accent and never were gold.
 
    The season class is stamped on <body> server-side per date
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
@@ -3564,14 +3621,14 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    sage and oxblood do not move — the church veils its images, not its walls.
 
    Contrast on the band, worst case:
-   nave ground #34403a  veiled #b0a4c2 = 4.6:1   paschal #e6cf8c = 7.0:1
-   apse ground #263431  veiled #b0a4c2 = 5.5:1   paschal #e6cf8c = 8.5:1 */
+   nave ground #545f54  veiled #ddd6e8 = 4.7:1   paschal #f2e2b1 = 5.2:1
+   apse ground #263431  veiled #ddd6e8 = 8.8:1   paschal #f2e2b1 = 9.6:1 */
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;
   --ornament-hi: #8d8395;
   --ornament-lo: #605469;
-  --inscription-ink: #b0a4c2;
+  --inscription-ink: #ddd6e8;
 }
 
 body.season-eastertide {
@@ -3579,7 +3636,7 @@ body.season-eastertide {
   --ornament-line: #d0b06c;
   --ornament-hi: #c8922d;
   --ornament-lo: #886011;
-  --inscription-ink: #e6cf8c;
+  --inscription-ink: #f2e2b1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -3846,16 +3903,17 @@ body.season-eastertide {
 }
 
 /* ── Shared printer's headpiece ──
-   One cross opens the home, year, or reminders heading. Foliage yields to
-   simple rules in Passiontide; both occupy exactly the same space. The Ordo
-   has no seasonal body class, keeping its year heading in ordinary gold. */
+   One painted cross between two short rules opens the hours, the year and
+   the reminders page. At Lauds the sun takes the cross's place, and at
+   Vespers and Compline the moon: the hours that keep them. They are drawn
+   filled, as painters drew them, through masks so the colour stays a token. */
 .ornament-headpiece {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
   width: 8.5rem;
-  color: var(--ornament);
+  color: var(--lining);
   font-size: 0.8rem;
   line-height: 1;
   pointer-events: none;
@@ -3866,28 +3924,33 @@ body.season-eastertide {
   flex: 1;
   min-width: 0;
   height: 0.9rem;
-  fill: currentColor;
   opacity: 0.55;
 }
 
 .ornament-sprig-end { transform: scaleX(-1); }
 
-.ornament-sprig-stem,
 .ornament-sprig-rule {
   fill: none;
   stroke: currentColor;
   stroke-width: 0.8;
 }
 
-.ornament-sprig-rule,
-.season-passiontide .ornament-foliage {
-  /* Visibility belongs to the <use> instances, outside SVG's shadow tree. */
-  visibility: hidden;
+.ornament-headpiece > span[data-sign] {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  color: transparent;
+  background: var(--gold);
+  -webkit-mask: url("ornaments/sun.svg") center / contain no-repeat;
+  mask: url("ornaments/sun.svg") center / contain no-repeat;
 }
 
-.ornament-headpiece-plain .ornament-sprig-rule,
-.season-passiontide .ornament-sprig-rule {
-  visibility: visible;
+.ornament-headpiece > span[data-sign="moon"] {
+  width: 1.3em;
+  height: 1.3em;
+  background: var(--moon-ink);
+  -webkit-mask-image: url("ornaments/moon.svg");
+  mask-image: url("ornaments/moon.svg");
 }
 
 /* ── Home frontispiece ──
@@ -3924,24 +3987,26 @@ body.season-eastertide {
   pointer-events: none;
 }
 
-.page-home .home-frame-corner {
-  position: absolute;
-  width: 1.65rem;
-  height: 1.65rem;
-  fill: none;
-  stroke: var(--ornament);
-  stroke-width: 0.9;
-  stroke-linejoin: round;
-  opacity: 0.5;
-  pointer-events: none;
+/* The card opens with the consecration cross, the mark that ends every
+   hour. On a desktop it moves to the niche's crown (see "Home niche"). */
+.page-home .home-crown {
+  display: block;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin: 0 auto 0.55rem;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
 }
 
-.page-home .home-frame-corner-start { top: 0.2rem; left: 0.2rem; }
-.page-home .home-frame-corner-end { top: 0.2rem; right: 0.2rem; transform: scaleX(-1); }
-.page-home .home-frame-corner-bottom-start { bottom: 0.2rem; left: 0.2rem; transform: scaleY(-1); }
-.page-home .home-frame-corner-bottom-end { bottom: 0.2rem; right: 0.2rem; transform: scale(-1); }
+/* The niche's painted lining exists only where the card has a head to
+   follow (see "Home niche"); a phone's card is a plain panel. */
+.page-home .home-lining {
+  display: none;
+}
 
 .page-home .home-summary {
+  position: relative;
   padding: 0;
   border: 0;
   background: transparent;
@@ -3953,10 +4018,6 @@ body.season-eastertide {
   align-items: center;
   gap: 0.12rem;
   margin: 0 0 0.8rem;
-}
-
-.page-home .ornament-headpiece {
-  margin: 0.05rem auto 0.4rem;
 }
 
 .page-home .home h1 {
@@ -4009,14 +4070,14 @@ body.season-eastertide {
   margin: 0.15rem -1rem 0.85rem;
   /* Proportionally thin, as the course is on the wall. A taller band would
      out-shout "Pray {hour}", and the invitation has to lead the page. */
-  padding: 0.2rem 1rem 0.16rem;
+  padding: 0.16rem 1rem 0.12rem;
   background: var(--inscription-ground);
   /* The oxblood edges are painted inside the band, not added as borders: a
-     phone's home fits its viewport with nothing to spare, and four extra
-     pixels would make it scroll. */
+     phone's home fits its viewport with nothing to spare, and extra pixels
+     would make it scroll. */
   box-shadow:
-    inset 0 2px 0 var(--inscription-edge),
-    inset 0 -2px 0 var(--inscription-edge);
+    inset 0 1px 0 var(--inscription-edge),
+    inset 0 -1px 0 var(--inscription-edge);
   color: var(--inscription-ink);
   font-size: 0.8rem;
   font-weight: normal;
@@ -4027,16 +4088,15 @@ body.season-eastertide {
 
 /* Gilt lozenges either side, as between the frieze's phrases. Empty boxes
    rather than a glyph: ◆ is not in EB Garamond, and a fallback face would
-   set it at its own weight and height. Dimmed so the words lead. */
+   set it at its own weight and height. */
 .page-home .home-prayer-card h2::before,
 .page-home .home-prayer-card h2::after {
   content: "";
   display: inline-block;
-  width: 0.26em;
-  height: 0.26em;
+  width: 5px;
+  height: 5px;
   margin-inline: 0.95em;
   background: currentColor;
-  opacity: 0.7;
   transform: rotate(45deg);
   vertical-align: 0.07em;
 }
@@ -4049,30 +4109,13 @@ body.season-eastertide {
 .page-home .pray-now:hover {
   position: relative;
   padding: 0.68rem 0.8rem 0.72rem;
-  border: 3px double var(--ornament-line);
+  /* A single painted line; it does not veil with the season. */
+  border: 1px solid var(--lining);
   background: transparent;
   color: var(--accent);
   font-size: 1.2rem;
   line-height: 1.3;
 }
-
-/* Small gilt lozenges finish the invitation's double rule. Empty generated
-   boxes leave its spoken name and app.js's changing hour label untouched. */
-.page-home .pray-now::before,
-.page-home .pray-now::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 0.28rem;
-  height: 0.28rem;
-  background: var(--ornament);
-  box-shadow: 0 0 0 2px var(--surface);
-  transform: translateY(-50%) rotate(45deg);
-  pointer-events: none;
-}
-
-.page-home .pray-now::before { left: -0.22rem; }
-.page-home .pray-now::after { right: -0.22rem; }
 
 .page-home .pray-now:active {
   border-color: var(--accent);
@@ -4127,18 +4170,15 @@ body.season-eastertide {
   padding: 0 0.4rem;
 }
 
-/* Tiny sun and star engravings mark the day's three periods. Labels carry
-   their meaning; these inline vectors stay decorative and inherit the leaf. */
+/* The rising sun, the sun and the moon mark the day's three periods, drawn
+   filled like the hour headpieces' signs. Labels carry their meaning; these
+   inline vectors stay decorative and take the leaf. */
 .page-home .home-period-ornament {
   display: block;
   flex: none;
   width: 1.2rem;
   height: 0.8rem;
-  fill: none;
-  stroke: var(--ornament);
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  fill: var(--ornament);
   opacity: 0.7;
 }
 
@@ -4245,9 +4285,10 @@ body.season-eastertide {
       radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
       linear-gradient(180deg, var(--niche-sheen), transparent 30%),
       var(--surface);
+    /* The day's colour is a hint at the niche's edge, not a second frame. */
     --niche-shadows:
       inset 0 2.6rem 2.6rem -2rem var(--niche-recess),
-      0 0 0 2px var(--day-color, var(--niche-edge)),
+      0 0 0 1.5px var(--day-color, var(--niche-edge)),
       0 0 0 0.75rem var(--niche-stone),
       0 0 0 calc(0.75rem + 1px) var(--niche-edge),
       0 0 0 calc(0.75rem + 0.5rem) var(--niche-clear),
@@ -4255,7 +4296,8 @@ body.season-eastertide {
       0 0 1.8rem 1.4rem var(--niche-clear);
     zoom: var(--niche-zoom);
     max-width: var(--card-w);
-    padding: calc(var(--niche-head) * 0.5 + 1.1rem) 1.75rem 1.25rem;
+    /* Room under the head for the crown's cross and the lining's arch. */
+    padding: calc(var(--niche-head) * 0.62 + 2.1rem) 1.75rem 1.25rem;
     border-width: 2px;
     border-top-color: var(--frontispiece-frame);
     border-radius: 50% 50% 0 0 / var(--niche-head) var(--niche-head) 0 0;
@@ -4280,9 +4322,10 @@ body.season-eastertide {
      bleed to match the frontispiece's larger side padding. */
   .page-home .home-prayer-card h2 {
     margin-inline: -1.75rem;
-    padding-inline: 1.75rem;
+    padding: 0.1rem 1.75rem 0.06rem;
     margin-bottom: 0.95rem;
-    letter-spacing: 0.185em;
+    font-size: 0.72rem;
+    letter-spacing: 0.17em;
   }
 
   .page-home .pray-now-wrap {
@@ -4354,9 +4397,10 @@ body.season-eastertide {
 
   :root:not([data-theme="light"]) .page-home .pray-now,
   :root:not([data-theme="light"]) .page-home .pray-now:hover {
-    border-color: var(--ornament-line);
+    border-color: var(--lining);
     background: transparent;
-    color: var(--accent);
+    /* Ivory words, so the frame carries the colour. */
+    color: var(--text);
   }
 
   :root:not([data-theme="light"]) .page-home .pray-now:active {
@@ -4400,9 +4444,9 @@ body.season-eastertide {
 
 :root[data-theme="dark"] .page-home .pray-now,
 :root[data-theme="dark"] .page-home .pray-now:hover {
-  border-color: var(--ornament-line);
+  border-color: var(--lining);
   background: transparent;
-  color: var(--accent);
+  color: var(--text);
 }
 
 :root[data-theme="dark"] .page-home .pray-now:active {
@@ -4798,32 +4842,20 @@ body.season-eastertide {
   background: rgba(216, 188, 116, 0.3);
 }
 
-/* ── Gilded caps ──
-   Gold leaf is never one flat tone: it catches light across the stroke. Two
-   stops about 18% apart in lightness, raked at 145°, give the drop caps a
-   shift without turning them into an effect. Gated on
-   background-clip so a browser that cannot clip the gradient to the glyph
-   never gets `color: transparent` and an invisible letter.
-
-   The stops are the --ornament-hi / --ornament-lo tokens, so this one rule
-   covers both appearances and every season: dark mode redeclares the pair on
-   :root, and Passiontide and Paschaltide redeclare it on <body>. Hard-coding
-   gold here would have left the caps gilt while the rest of the page was
-   veiled. */
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .psalm-verses .verse:first-child::first-letter,
-  .chapter .liturgical-block .plain-line:first-child::first-letter,
-  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
-  .collect .liturgical-block .plain-line:first-child::first-letter,
-  .hymn-stanza-opening .hymn-line:first-child::first-letter,
-  .marian-antiphon .chant-line-opening::first-letter,
-  .corporate-lord-prayer-officiant::first-letter,
-  .short-responsory-opening .sigil-text::first-letter {
-    background-image: linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+/* ── Painted caps ──
+   The drop caps are flat ochre, as a painter laid them, with a hint of the
+   brush's edge below. They read --ornament, so they veil in Passiontide and
+   brighten at Easter with the rest of the gilding. */
+.psalm-verses .verse:first-child::first-letter,
+.chapter .liturgical-block .plain-line:first-child::first-letter,
+.chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+.collect .liturgical-block .plain-line:first-child::first-letter,
+.hymn-stanza-opening .hymn-line:first-child::first-letter,
+.marian-antiphon .chant-line-opening::first-letter,
+.corporate-lord-prayer-officiant::first-letter,
+.short-responsory-opening .sigil-text::first-letter {
+  color: var(--ornament);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--ornament) 30%, transparent);
 }
 
 /* Native initial sizing follows the local leading (prose, psalm, or chant).
@@ -5338,11 +5370,9 @@ html:where(:has(> body.page-hour))::before {
   box-shadow: inset 0 1px 0 var(--material-highlight);
 }
 
-/* Ordo is a non-liturgical inspection room, so its year heading can carry a
-   stronger architectural threshold than an hour page's surrounding chrome. */
+/* The ordo opens like the hours: its headpiece alone, no rule above. */
 .page-calendar .calendar-header {
   padding-top: 0.65rem;
-  border-top: 3px double var(--ornament-line);
 }
 
 /* ── Home niche ──
@@ -5393,14 +5423,48 @@ html:where(:has(> body.page-hour))::before {
 }
 
 @media (min-width: 701px) {
+  /* The painted lining replaces the phone card's tooled frame. */
   .page-home .home-hero::before {
-    border-radius: 50% 50% 0 0 / calc(var(--niche-head) - 0.35rem) calc(var(--niche-head) - 0.35rem) 0 0;
+    display: none;
   }
 
-  /* The head's curve replaces the upper corner tooling. */
-  .page-home .home-frame-corner-start,
-  .page-home .home-frame-corner-end {
-    display: none;
+  /* The consecration cross at the niche's crown, as heavy as the one that
+     ends each hour. */
+  .page-home .home-crown {
+    position: absolute;
+    top: calc(var(--niche-head) * 0.36 - 4px);
+    left: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+
+  /* A border painted on the niche's back wall: a 2px band and a lighter
+     hairline 5px inside it, round the head only, ending at the inscription
+     band. 26px of plain plaster lies between it and the moulding, so it
+     reads as paint on the wall, not another edge of the arch. */
+  .page-home .home-lining {
+    --lining-inset: 26px;
+    display: block;
+    position: absolute;
+    top: calc(var(--lining-inset) - var(--niche-head) * 0.62 - 2.1rem);
+    right: calc(var(--lining-inset) - 1.75rem);
+    bottom: -0.15rem;
+    left: calc(var(--lining-inset) - 1.75rem);
+    border: 2px solid var(--lining);
+    border-bottom: 0;
+    border-radius: 50% 50% 0 0 / calc(var(--niche-head) - var(--lining-inset)) calc(var(--niche-head) - var(--lining-inset)) 0 0;
+    pointer-events: none;
+  }
+
+  .page-home .home-lining::after {
+    content: "";
+    position: absolute;
+    inset: 5px 5px 0;
+    border: 1px solid color-mix(in srgb, var(--lining) 62%, transparent);
+    border-bottom: 0;
+    border-radius: inherit;
   }
 
   /* Chapel light: a warm pool where the niche stands and the room's edges
@@ -5508,14 +5572,12 @@ html:where(:has(> body.page-hour))::before {
    while the seasonal --ornament lands on body — declaring it higher freezes
    the stars gold through Passiontide while every other ornament veils. */
 :root {
-  /* One diaper cell, as a mask: the rib hairlines at 7%, the principal
-     eight-ray stars at 78% with a small boss and a soft halo (28% at the
-     centre, gone by 12 units) so the gold reads as catching light rather
-     than printed flat, the lesser four-ray stars at 50%. Only alpha matters
-     here — the colour is --apse-ink, painted through it — so the file needs
-     no tokens and can live on :root. Drawn in a 132-unit cell; --apse-tile
-     sets its size. */
-  --apse-star-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 132 132'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-opacity='.28'/%3E%3Cstop offset='.3' stop-opacity='.09'/%3E%3Cstop offset='1' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='33' cy='33' r='12' fill='url(%23g)'/%3E%3Ccircle cx='99' cy='99' r='12' fill='url(%23g)'/%3E%3Cpath d='M0 0L132 132M0 66L66 0M66 132L132 66' stroke='%23000' stroke-opacity='.07' stroke-width='1.2'/%3E%3Cpath d='M33 25.5L33.52 31.75L36.39 29.61L34.25 32.48L40.5 33L34.25 33.52L36.39 36.39L33.52 34.25L33 40.5L32.48 34.25L29.61 36.39L31.75 33.52L25.5 33L31.75 32.48L29.61 29.61L32.48 31.75ZM99 91.5L99.52 97.75L102.39 95.61L100.25 98.48L106.5 99L100.25 99.52L102.39 102.39L99.52 100.25L99 106.5L98.48 100.25L95.61 102.39L97.75 99.52L91.5 99L97.75 98.48L95.61 95.61L98.48 97.75Z' fill-opacity='.78'/%3E%3Ccircle cx='33' cy='33' r='1.7' fill-opacity='.78'/%3E%3Ccircle cx='99' cy='99' r='1.7' fill-opacity='.78'/%3E%3Cpath d='M99 28.2L99.64 32.36L102.2 33L99.64 33.64L99 37.8L98.36 33.64L95.8 33L98.36 32.36ZM33 94.2L33.64 98.36L36.2 99L33.64 99.64L33 103.8L32.36 99.64L29.8 99L32.36 98.36Z' fill-opacity='.5'/%3E%3C/svg%3E");
+  /* The vault's stars as one seamless mask tile: parish eight-ray stars in
+     three sizes, set by hand rather than on a lattice, each at its own
+     opacity (tools/genornaments.py). Only alpha matters here — the colour is
+     --apse-ink, painted through it — so the file needs no tokens and can
+     live on :root. --apse-tile sets its size. */
+  --apse-star-tile: url("ornaments/vault.svg");
   /* Gold leaf is laid by hand, piece by piece, and no two stars catch the
      light alike. A further mask of slow noise gives each star its own share
      (about 60-100%, most near 85%): leaf.png, 64px of seamless noise from
@@ -5576,24 +5638,24 @@ body {
    with them, so it reads as a painted ceiling rather than a wallpaper of
    small stars; whole pixels keep the tiles seamless. */
 body {
-  --apse-tile: 132px;
+  --apse-tile: 528px;
 }
 
 @media (min-width: 701px) {
   body {
-    --apse-tile: 176px;
+    --apse-tile: 704px;
   }
 }
 
 @media (min-width: 1800px) {
   body {
-    --apse-tile: 208px;
+    --apse-tile: 832px;
   }
 }
 
 @media (min-width: 2400px) {
   body {
-    --apse-tile: 240px;
+    --apse-tile: 960px;
   }
 }
 
@@ -5736,10 +5798,10 @@ body.page-hour .report-issue {
       -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       /* Where the epilogue meets the footer at rest (the footer's height,
-         now that it is one line under its diamond): the scrolling fields
-         took their phase from that seam. Four values, since mask-position
-         has no three-value form. */
-      --apse-rest-seam: 8.625rem;
+         now that it is one line with no diamond above it): the scrolling
+         fields took their phase from that seam. Four values, since
+         mask-position has no three-value form. */
+      --apse-rest-seam: 6.97rem;
       -webkit-mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       -webkit-mask-composite: source-in;
@@ -5751,14 +5813,14 @@ body.page-hour .report-issue {
     body.page-hour .office-hour::before {
       /* Set from the seam: clear through the continuation links, full
          around the report link, thinning to nothing at the screen's foot. */
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 6.27rem, rgba(0, 0, 0, 0.28) 8.57rem, transparent 12.57rem), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 6.27rem, rgba(0, 0, 0, 0.28) 8.57rem, transparent 12.57rem), var(--apse-leaf);
       animation-range: calc(100% - 9rem) 100%;
     }
 
     body.page-hour .office-hour::after {
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6) calc(50% - 31rem), transparent calc(50% - 26.5rem), transparent calc(50% + 26.5rem), rgba(0, 0, 0, 0.6) calc(50% + 31rem), rgba(0, 0, 0, 0.6)), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6) calc(50% - 31rem), transparent calc(50% - 26.5rem), transparent calc(50% + 26.5rem), rgba(0, 0, 0, 0.6) calc(50% + 31rem), rgba(0, 0, 0, 0.6)), var(--apse-leaf);
       animation-range: 0 50vh;
     }
 
@@ -5769,21 +5831,11 @@ body.page-hour .report-issue {
   }
 }
 
-/* The footer diamond still provides a structural threshold on Nave plaster.
-   Where the Apse vault is present it becomes a second boss floating over a
-   field already full of them, so the starfield takes over that work.
-
-   Hiding it keeps the box (visibility: hidden) rather than dropping it, so
-   switching Nave/Apse never moves the footer. The vault layers are out of
-   flow and have no stake in the footer's height. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
-    visibility: hidden;
-  }
-}
-
-:root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
-  visibility: hidden;
+/* Home and the hours already end on a cross (the niche's crown, the hour's
+   consecration mark), so their footers carry no diamond in either theme;
+   the same in both, so switching Nave/Apse never moves the footer. */
+body:is(.page-home, .page-hour) footer::before {
+  display: none;
 }
 
 /* One viewport-anchored homepage vault at every width. A single fixed layer
@@ -6203,7 +6255,7 @@ body.page-home::before {
 .leader-selector > summary [data-leaders] { color: var(--text); }
 .leader-selector[open] > summary { color: var(--accent); }
 .leader-selector > summary::-webkit-details-marker { display: none; }
-.leader-selector > summary::after { content: "▾"; margin-inline-start: .1em; color: var(--gold-line); font-size: .85em; letter-spacing: 0; }
+.leader-selector > summary::after { content: "▾"; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
 .leader-selector[open] > summary::after { content: "▴"; }
 .leader-selector[open] { flex: 1 1 100%; }
 .leader-selector fieldset {
