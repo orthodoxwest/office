@@ -158,11 +158,11 @@ enum Motion { case next, previous, fade }
  * One place on the way back. While a page of the same kind replaces its page it stays the same
  * visit to the navigation stack, so the screen changes in place rather than pushing.
  */
-struct Visit: Hashable {
+struct Entry: Hashable {
     let id: Int
     var page: Page
 
-    static func == (a: Visit, b: Visit) -> Bool { a.id == b.id }
+    static func == (a: Entry, b: Entry) -> Bool { a.id == b.id }
     func hash(into h: inout Hasher) { h.combine(id) }
 }
 
@@ -174,7 +174,7 @@ final class AppModel: ObservableObject {
     static let shared = AppModel()
 
     @Published var root: CivilDate
-    @Published var path: [Visit] = []
+    @Published var path: [Entry] = []
     /// How the page replaced in place last moves, and the page it moved to.
     @Published private(set) var step: (to: Page, motion: Motion)?
     @Published var menuOpen = false
@@ -190,7 +190,7 @@ final class AppModel: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private let pinnedToday: CivilDate?
-    private var nextVisit = 1
+    private var nextEntry = 1
 
     let hours: [String] = hourNames()
 
@@ -211,15 +211,15 @@ final class AppModel: ObservableObject {
     var pages: [Page] { path.map(\.page) }
 
     /// The page a visit on the way back shows now.
-    func page(of visit: Int) -> Page? { path.first { $0.id == visit }?.page }
+    func page(of entry: Int) -> Page? { path.first { $0.id == entry }?.page }
 
     /// How a page coming in place moves: as it was opened, or after any other change, a fade.
     func motion(to page: Page) -> Motion { step.flatMap { $0.to == page ? $0.motion : nil } ?? .fade }
 
-    private func visits(_ pages: [Page]) -> [Visit] {
+    private func visits(_ pages: [Page]) -> [Entry] {
         pages.map { page in
-            defer { nextVisit += 1 }
-            return Visit(id: nextVisit, page: page)
+            defer { nextEntry += 1 }
+            return Entry(id: nextEntry, page: page)
         }
     }
 

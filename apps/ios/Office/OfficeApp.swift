@@ -65,7 +65,7 @@ struct RootView: View {
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
-                    .navigationDestination(for: Visit.self) { visit in VisitPage(visit: visit.id) }
+                    .navigationDestination(for: Entry.self) { entry in EntryPage(entry: entry.id) }
             }
             .overlay(alignment: .topTrailing) {
                 if model.menuOpen && geo.size.width < wideFrom {
@@ -127,12 +127,12 @@ struct RootView: View {
  * A visit's page, read from the way back as it is now: a page of the same kind replacing it
  * changes it here, in place.
  */
-private struct VisitPage: View {
-    let visit: Int
+private struct EntryPage: View {
+    let entry: Int
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        switch model.page(of: visit) {
+        switch model.page(of: entry) {
         case let .home(d)?: HomePage(date: d)
         case let .hour(d, h)?: HourPage(date: d, hour: h)
         case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
