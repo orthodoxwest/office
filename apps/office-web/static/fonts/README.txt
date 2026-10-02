@@ -33,8 +33,10 @@ Licensed under the SIL Open Font License, Version 1.1.
 See OFL-1.1.txt in this directory.
 
 im-fell-french-canon-caps.woff2 holds the capitals A–Z only of the Roman,
-subset from the Google Fonts build. Home's leaf sets them as versals (the
-feast's initial and the collect's).
+subset from the Google Fonts build. The OFL treats a subset as a Modified
+Version, so the file's internal names read "Office Fell Caps" rather than
+the Reserved Font Name. Home's leaf sets them as versals (the feast's
+initial and the collect's).
 
 Goudy Initialen (Frederic W. Goudy, 1917; digitised by Dieter Steffmann)
 Distributed by its digitiser as free to use; this is a freeware licence,
