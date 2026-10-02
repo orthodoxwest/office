@@ -118,8 +118,8 @@ private func inWord(_ c: unichar) -> Bool {
  * words go unsaid after its antiphon: the initial stays gilt, the words after it muted.
  */
 func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: String, rest: NSAttributedString)? {
-    let first = block.runs.first?.style
-    guard first == .plain || (first == .secret && block.kind == .verse) else { return nil }
+    let lead = block.runs.first?.style
+    guard lead == .plain || (lead == .secret && block.kind == .verse) else { return nil }
     let s = text.string as NSString
     var at = 0
     while at < s.length && isSpace(s.character(at: at)) { at += 1 }

@@ -97,11 +97,13 @@ def sweep(root, hours, dry_run=False, log=print):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--hours", type=float, default=72,
-                        help="idle time before a target/ is swept (default 72)")
+    parser.add_argument("--hours", type=float, default=24,
+                        help="idle time before a target/ is swept (default 24)")
+    parser.add_argument("--root", type=Path, default=ROOT,
+                        help="any checkout of the repository (default: this script's)")
     parser.add_argument("--dry-run", action="store_true", help="report without deleting")
     args = parser.parse_args(argv)
-    sweep(ROOT, args.hours, args.dry_run)
+    sweep(args.root, args.hours, args.dry_run)
 
 
 if __name__ == "__main__":
