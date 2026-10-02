@@ -100,7 +100,7 @@ impl Pages {
 mod tests {
     use super::{Pages, TEMPLATES};
     use crate::links::static_url;
-    use crate::view::{CalendarData, Chrome, HomeData};
+    use crate::view::{CalendarData, Chrome, HomeData, HomeHourLink};
 
     fn source(name: &str) -> &'static str {
         TEMPLATES.iter().find(|(n, _)| *n == name).map(|(_, s)| *s).unwrap()
@@ -223,36 +223,92 @@ mod tests {
     }
 
     #[test]
-    fn home_groups_hours_without_breaking_client_selectors() {
+    fn home_leaf_keeps_client_selectors_and_reading_order() {
         let body = source("home.html");
         has_all(
             body,
             &[
-                r#"class="home-hero day-color-{{ color }}""#,
-                r#"class="home-prayer-card""#,
+                r#"class="leaf home-prayer-card day-color-{{ color }}"#,
+                r#"data-date-slug="{{ date_slug }}""#,
                 r#"class="pray-now""#,
-                r#"class="home-hour-links""#,
-                "home-hour-group-morning",
-                "home-hour-group-day",
-                "home-hour-group-evening",
-                r#"id="home-hours-morning">"#,
-                "<span>Morning</span>",
-                r#"id="home-hours-day">"#,
-                "<span>Day</span>",
-                r#"id="home-hours-evening">"#,
-                "<span>Evening</span>",
+                " is-now pray-now",
+                r#"class="leaf-horarium home-hour-links""#,
                 r#"data-hour="{{ h.slug }}""#,
                 r#"aria-current="time""#,
                 "home-hour-link-name",
+                r#"class="leaf-hour-time""#,
                 r#"class="not-today-notice""#,
                 "Go to today",
+                r#"class="hour-date-nav home-date-nav""#,
             ],
         );
-        let (day, prayer, meta) =
-            (at(body, r#"class="home-summary"#), at(body, r#"class="home-prayer-card""#), at(body, r#"class="home-day-meta""#));
-        assert!(day < prayer && prayer < meta, "day identity, prayer invitation, then date control");
+        let (head, hours, collect, foot) = (
+            at(body, r#"class="home-day-head"#),
+            at(body, r#"class="leaf-horarium"#),
+            at(body, r#"class="leaf-collect""#),
+            at(body, r#"class="leaf-foot"#),
+        );
+        assert!(head < hours && hours < collect && collect < foot, "day, hours, collect, then date control");
         let (notice, date_nav) = (at(body, r#"class="not-today-notice""#), at(body, r#"class="hour-date-nav home-date-nav""#));
-        assert!(notice < prayer && notice < date_nav, "the not-today notice leads the day");
+        assert!(notice < hours && notice < date_nav, "the not-today notice leads the day");
+    }
+
+    fn leaf(data: HomeData) -> String {
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        pages.home(&HomeData { date_str: "Friday, December 25, 2026".into(), date_slug: "2026-12-25".into(), ..data }).unwrap()
+    }
+
+    fn hours(now: &str) -> Vec<HomeHourLink> {
+        [("Lauds", "lauds"), ("Prime", "prime"), ("Terce", "terce")]
+            .iter()
+            .map(|(name, slug)| HomeHourLink {
+                name: name.to_string(),
+                slug: slug.to_string(),
+                url: format!("/{slug}/2026-12-25"),
+                time: "at daybreak".into(),
+                is_current: *slug == now,
+                is_now: *slug == now,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn home_leaf_points_at_one_hour_or_leads_off_the_leaf() {
+        let html = leaf(HomeData { hours: hours("prime"), now_cue: "pray now".into(), ..HomeData::default() });
+        assert_eq!(html.matches("pray-now").count(), 1, "one invitation");
+        assert!(html.contains(r#"<span class="leaf-hour-cue">pray now</span>"#));
+        assert!(html.contains(r#"<span class="home-hour-link-name"><span class="leaf-hour-initial">P</span>rime</span>"#));
+        assert!(!html.contains("leaf-late"));
+        // After midnight no hour of today's leaf is the one being prayed.
+        let html = leaf(HomeData {
+            hours: hours(""),
+            pray_now_label: "Pray Compline".into(),
+            pray_now_link: "/compline/2026-12-24".into(),
+            ..HomeData::default()
+        });
+        assert!(html.contains(r#"<p class="leaf-late"><a class="pray-now" href="&#x2f;compline&#x2f;2026-12-24">Pray Compline</a></p>"#));
+    }
+
+    #[test]
+    fn home_leaf_sets_versals_and_the_first_class_border() {
+        let data = || HomeData {
+            color: "white".into(),
+            grade: 4,
+            title: crate::view::Versal::new("Nativity of Our Lord", true),
+            collect: crate::view::Versal::new("Grant, we beseech thee", true),
+            ..HomeData::default()
+        };
+        let html = leaf(data());
+        assert!(html.contains(r#"<span class="leaf-versal" data-vl="N"><span>N</span></span>ativity of Our Lord"#));
+        assert!(
+            html.contains(r#"<span class="leaf-versal" data-vl="G">G</span>rant, we beseech thee <span class="leaf-amen">℟. Amen.</span>"#)
+        );
+        assert!(html.contains(r#"class="leaf-bar""#) && html.contains("leaf-g4"));
+        let html = leaf(HomeData { grade: 3, ..data() });
+        assert!(!html.contains(r#"class="leaf-bar""#), "the border is the first class's");
+        let html = leaf(HomeData { color: "black".into(), ..data() });
+        assert!(!html.contains(r#"class="leaf-bar""#) && html.contains("leaf-bare"));
+        assert!(!html.contains("leaf-collect") || html.contains("The Collect"));
     }
 
     #[test]

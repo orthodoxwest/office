@@ -15,6 +15,9 @@ pub struct Chrome {
     /// ordo, or empty when the page is always current.
     pub usage_when: String,
     pub season_class: String,
+    /// The light of the hour being prayed ("dawn", "day", "dusk", "night"), which home's wall
+    /// takes as a `time-*` body class; empty elsewhere.
+    pub time_of_day: String,
     pub show_today: bool,
 }
 
@@ -23,7 +26,31 @@ pub struct HomeHourLink {
     pub name: String,
     pub slug: String,
     pub url: String,
+    /// The hour in the old reckoning ("the third hour").
+    pub time: String,
     pub is_current: bool,
+    /// The hour the leaf points at: the one being prayed, or where another day begins.
+    pub is_now: bool,
+}
+
+/// Text opened by a versal: its first letter, set apart, and the rest, both typeset. The
+/// initial is empty when the text takes none; `rest` is then the whole text.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct Versal {
+    pub initial: String,
+    pub rest: String,
+}
+
+impl Versal {
+    /// Typesets `text` and, when `opened` and it begins with a capital A–Z (the versal faces hold
+    /// no other letter), sets that capital apart.
+    pub fn new(text: &str, opened: bool) -> Versal {
+        let text = crate::html::typeset(text.trim());
+        match text.chars().next() {
+            Some(c) if opened && c.is_ascii_uppercase() => Versal { initial: c.to_string(), rest: text[1..].to_string() },
+            _ => Versal { initial: String::new(), rest: text },
+        }
+    }
 }
 
 /// The day-landing page.
@@ -46,6 +73,20 @@ pub struct HomeData {
     pub pray_now_label: String,
     pub pray_now_link: String,
     pub hours: Vec<HomeHourLink>,
+    /// The weekday and the rest of the date, which the leaf's rubric line sets apart.
+    pub weekday: String,
+    pub date_rest: String,
+    /// The day's title with its versal ([`Versal`]), and the rank's name and grade
+    /// (`presentation::leaf_rank`).
+    pub title: Versal,
+    pub rank_label: String,
+    pub grade: u8,
+    /// The title opens with a Roman numeral ("III Sunday in Lent"), which keeps it whole.
+    pub numeral: bool,
+    /// The leaf's pointer says "pray now" (the hour being prayed) or "begin here".
+    pub now_cue: String,
+    /// The day's collect, from its Lauds; empty when there is none.
+    pub collect: Versal,
 }
 
 /// One prayer form's composition of the hour.
