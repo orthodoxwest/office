@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -95,6 +96,8 @@ fun HourScreen(
         // Each block's space depends on the one before it, across sections.
         var prev: BlockView? = null
         var afterClosed = false
+        // Whether anything of the office stands above: its first part takes no cross.
+        var begun = false
         view.sections.forEachIndexed { i, section ->
             if (section.collapsible) {
                 val expanded = open[i] == true
@@ -105,12 +108,13 @@ fun HourScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(section.label, style = Type.heading.copy(color = p.text))
-                        Caret(expanded)
+                        Text(section.label, style = Type.heading.copy(color = p.titulus))
+                        Caret(expanded, p.titulus)
                     }
                 }
                 prev = null
                 afterClosed = !expanded
+                begun = true
                 if (!expanded) return@forEachIndexed
             }
             section.blocks.forEachIndexed { j, block ->
@@ -120,8 +124,16 @@ fun HourScreen(
                     afterClosed -> if (heading) 23.2.dp else 14.dp
                     else -> if (heading) 12.dp else 0.dp
                 }
+                // A small painted cross before each of the office's parts after the first, as the
+                // web's `.elements > .section-heading`: a section's heading, or a heading standing
+                // as an element of its own; not the hymn's or the chapter's, which open their
+                // element's other blocks, nor any in the preparation.
+                val part = (heading || block.kind == BlockKind.COMMEMORATION_HEADING) && !section.collapsible &&
+                    (!block.startsElement || section.blocks.getOrNull(j + 1)?.startsElement != false)
+                val cross = part && begun
+                begun = true
                 afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap), column = columns[i to j]) }
+                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap), column = columns[i to j], cross = cross) }
                 prev = block
             }
         }
@@ -143,19 +155,20 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
     var picking by remember { mutableStateOf(false) }
     var choosing by remember { mutableStateOf(false) }
     Column(Modifier.measure().padding(top = 17.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        // The headpiece is set into the title's upper rule; the day's colour reaches the lower one's lozenge.
-        // The rules take the title's width, at least 24rem (the measure, on a phone), as the web's h1.
+        // Painted double rules frame the title. The hour's sign is set alone into the upper rule,
+        // broken only for it; the day's colour reaches the lower one's lozenge. The rules take
+        // the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                DoubleRule(gap = 132.8.dp)
-                Headpiece()
+                DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
+                HourSign(view.hour)
             }
             Text(
                 view.title.uppercase(),
                 Modifier.padding(horizontal = 20.8.dp).semantics { heading(); contentDescription = view.title },
                 style = Type.hourTitle.copy(color = p.text),
             )
-            DoubleRule(lozenge = dayColor(view.color))
+            DoubleRule(lozenge = dayColor(view.color), color = p.lining)
         }
         val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
         Text(
@@ -178,11 +191,14 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         if (picking) DatePicker(date, today) { picking = false; onDate(it) }
         if (choosing) FormChooser(form) { choosing = false; onForm(it) }
         Spacer(Modifier.height(7.2.dp))
-        Hairline(p.border)
+        Hairline(p.lining.copy(alpha = 0.3f))
     }
 }
 
-/** After the prayer: the other hours, the report link, and the foot. In Apse the vault fades in here. */
+/**
+ * After the prayer: the consecration cross that ends the hour, the other hours, the report link,
+ * and the foot. In Apse the vault fades in here.
+ */
 @Composable
 private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour: (String) -> Unit, onAllHours: () -> Unit) {
     val p = LocalPalette.current
@@ -190,6 +206,9 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
     Box(Modifier.fillMaxWidth()) {
         VaultField(Modifier.matchParentSize(), listOf(0f to 0f, 0.35f to 0f, 0.7f to 0.8f, 1f to 1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+            // The hour ends on one mark, as painted where the bishop anointed the walls; the links
+            // and the foot below carry no other.
+            ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
             Continuation(
                 previousLabel = "Previous hour",
                 previous = previous?.let(::hourLabel),
@@ -199,7 +218,7 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
                 nextLabel = "Next hour",
                 next = next?.let(::hourLabel),
                 onNext = { next?.let(onHour) },
-                modifier = Modifier.measure().padding(top = 44.dp),
+                modifier = Modifier.measure().padding(top = 83.2.dp),
             )
             Text(
                 buildAnnotatedString {
@@ -209,7 +228,7 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
                 Modifier.measure().padding(top = 40.dp).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
                 style = Type.small.copy(color = p.muted, textAlign = TextAlign.Center),
             )
-            Footer(diamond = !p.dark)
+            Footer(diamond = false)
         }
     }
 }

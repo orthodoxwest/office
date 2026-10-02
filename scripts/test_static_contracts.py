@@ -156,12 +156,12 @@ class StaticContracts(unittest.TestCase):
         body = (STATIC / "style.css").read_text()
         self.required(body, [
             '--ornament: var(--gold);',
-            '--ornament-line: var(--gold-line);',
+            '--ornament-line: var(--lining);',
             'body.season-passiontide {',
             'body.season-eastertide {',
             '.cross {\n  color: var(--rubric);',
             'border-top: 3px double var(--ornament-line);',
-            'linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%)',
+            'color: var(--ornament);\n  text-shadow: 0 1px 0 color-mix(in srgb, var(--ornament) 30%, transparent);',
         ])
         self.required(body, [
             'outline: 2px solid var(--gold);',

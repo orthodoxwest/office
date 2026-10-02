@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /**
- * An opening's initial: a gilded capital two lines deep when the text wraps beside it, or raised
+ * An opening's initial: a painted capital two lines deep when the text wraps beside it, or raised
  * on the line when the text is short (the web's adaptive initial).
  */
 struct Initial: Equatable {
@@ -15,14 +15,14 @@ struct Initial: Equatable {
     let gap: CGFloat
     /// A versicle's initial is always raised.
     let alwaysRaised: Bool
-    let hi: UIColor
-    let lo: UIColor
+    /// The gilding's flat ochre, which veils and brightens with the season.
+    let color: UIColor
 }
 
 /**
  * A block's text as the web sets it: every line box exactly `line` tall with the glyphs centred
  * in it (CSS half-leading), hanging indents, tab-set gutters for verse numbers and sigils, and
- * the gilded initial with the text running beside it.
+ * the painted initial with the text running beside it.
  */
 struct ProseSpec: Equatable {
     var text: NSAttributedString
@@ -160,11 +160,14 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         manager.drawBackground(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
         manager.drawGlyphs(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
         guard let initial = spec.initial, let origin = capOrigin, let font = capFont else { return }
-        ProseLayout.gild(initial.letter, font, at: origin, hi: initial.hi, lo: initial.lo, in: ctx)
+        ProseLayout.paint(initial.letter, font, at: origin, color: initial.color, in: ctx)
     }
 
-    /// Draws `letter` filled with the gold leaf, lit from above, its baseline at `origin`.
-    static func gild(_ letter: String, _ font: UIFont, at origin: CGPoint, hi: UIColor, lo: UIColor, in ctx: CGContext) {
+    /**
+     * Draws `letter` flat in `color`, as a painter laid it, its baseline at `origin`, with a hint of
+     * the brush's edge a point below it (the web's 1px text-shadow at 30%).
+     */
+    static func paint(_ letter: String, _ font: UIFont, at origin: CGPoint, color: UIColor, in ctx: CGContext) {
         let line = CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: font]))
         let outline = CGMutablePath()
         for run in CTLineGetGlyphRuns(line) as! [CTRun] {
@@ -183,16 +186,15 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
                 outline.addPath(glyph, transform: t)
             }
         }
-        guard let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [hi.cgColor, lo.cgColor] as CFArray, locations: [0, 1]) else { return }
+        let shadow = CGMutablePath()
+        shadow.addPath(outline, transform: CGAffineTransform(translationX: 0, y: 1))
         ctx.saveGState()
+        ctx.addPath(shadow)
+        ctx.setFillColor(color.withAlphaComponent(0.3).cgColor)
+        ctx.fillPath()
         ctx.addPath(outline)
-        ctx.clip()
-        ctx.drawLinearGradient(
-            gradient,
-            start: CGPoint(x: 0, y: origin.y - font.ascender),
-            end: CGPoint(x: 0, y: origin.y - font.descender),
-            options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
-        )
+        ctx.setFillColor(color.cgColor)
+        ctx.fillPath()
         ctx.restoreGState()
     }
 }

@@ -414,7 +414,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
     borderStyle: getComputedStyle(element).borderTopStyle,
   }));
   expect(naveState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(naveState.borderStyle).toBe("double");
+  expect(naveState.borderStyle).toBe("solid");
 
   await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -423,7 +423,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
     borderStyle: getComputedStyle(element).borderTopStyle,
   }));
   expect(apseState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(apseState.borderStyle).toBe("double");
+  expect(apseState.borderStyle).toBe("solid");
 });
 
 test("the early-morning invitation opens the previous day's Compline", async ({ page }) => {
@@ -558,12 +558,12 @@ test("parish material stays off the mobile prayer page", async ({
       const style = getComputedStyle(document.body, "::before");
       return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
     });
-  // One diaper cell as a mask tile (ribs, eight-ray principal stars, four-ray
-  // panel stars) intersected with the page fade, painted in the gilding. The
-  // ink crossfades in with the theme, so poll past its transparent start.
+  // One tile of hand-set stars as a mask, intersected with the page fade,
+  // painted in the gilding. The ink crossfades in with the theme, so poll
+  // past its transparent start.
   await expect.poll(async () => vaultPaints(await readVault())).toBe(true);
   const vault = await readVault();
-  expect((vault.mask.match(/data:image\/svg\+xml/g) || []).length).toBe(1);
+  expect((vault.mask.match(/ornaments\/vault\.svg/g) || []).length).toBe(1);
   expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
 });
 
@@ -1030,7 +1030,7 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
 // has both. Takes { mask, ink } read from a computed style.
 function vaultPaints({ mask, ink }) {
   const transparent = /^transparent$|^rgba\(\d+, \d+, \d+, 0\)$/.test(String(ink));
-  return String(mask).includes("data:image/svg+xml") && !transparent;
+  return String(mask).includes("ornaments/vault.svg") && !transparent;
 }
 
 // Multi-layer backgrounds serialize each layer's position/size (Chromium:
@@ -1112,7 +1112,9 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        diamondVisible: diamond.visibility !== "hidden",
+        // Home already ends on the niche's cross: no footer diamond, in
+        // either theme, so the footer never moves when the theme changes.
+        diamondShown: diamond.display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -1128,9 +1130,9 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
   expect(vaultPaints(apse.stars)).toBe(true);
   expect(apse.position).toBe("fixed");
-  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 132, h: 132 });
+  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.diamondVisible).toBe(false);
+  expect(apse.diamondShown).toBe(false);
   expect(apse.cardShadow).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
 
@@ -1141,7 +1143,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   ]) {
     const nave = await read({ height: 844, theme, scheme });
     expect(vaultPaints(nave.stars)).toBe(false);
-    expect(nave.diamondVisible).toBe(true);
+    expect(nave.diamondShown).toBe(false);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
@@ -1158,7 +1160,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     const bare = await read({ width, height, theme: "light", scheme: "light" });
     expect(vaultPaints(field.stars)).toBe(true);
     expect(field.position).toBe("fixed");
-    expect(tileEdgePx(field.tileSize)).toEqual({ w: 132, h: 132 });
+    expect(tileEdgePx(field.tileSize)).toEqual({ w: 528, h: 528 });
     expect(isTopCenterPhase(field.phase)).toBe(true);
     expect(field.scrollHeight).toBe(bare.scrollHeight);
   }
@@ -1230,8 +1232,8 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
           field.maskPosition || field.webkitMaskPosition,
           footerField.maskPosition || footerField.webkitMaskPosition,
         ],
-        diamond: diamond.content,
-        diamondVisibility: diamond.visibility,
+        diamondShown: diamond.display !== "none",
+        endMark: getComputedStyle(epilogue.querySelector(".hour-end-mark")).maskImage || "",
       };
     });
     await context.close();
@@ -1254,18 +1256,17 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   expect(apse.horizontalOverflow).toBe(false);
   expect(isBottomCenterPhase(apse.phase[0])).toBe(true);
   expect(isTopCenterPhase(apse.phase[1])).toBe(true);
-  // Kept, not dropped: the diamond's box stays (visibility: hidden) so the
-  // footer's own height — and everything below the glyph — never moves when
-  // Nave/Apse toggles.
-  expect(apse.diamond).toContain("✦");
-  expect(apse.diamondVisibility).toBe("hidden");
+  // The hour ends on one mark, the consecration cross, in both themes; the
+  // footer adds no diamond, so its height never moves when Nave/Apse toggles.
+  expect(apse.endMark).toContain("ornaments/consecration.svg");
+  expect(apse.diamondShown).toBe(false);
 
   const nave = await read("light");
   expect(nave.prayerField).toBe("none");
   expect(vaultPaints(nave.fieldLayers)).toBe(false);
   expect(vaultPaints(nave.footerLayers)).toBe(false);
-  expect(nave.diamond).toContain("✦");
-  expect(nave.diamondVisibility).toBe("visible");
+  expect(nave.endMark).toContain("ornaments/consecration.svg");
+  expect(nave.diamondShown).toBe(false);
 
   const desktop = await read("dark", 1280);
   expect(desktop.prayerField).toBe("none");
@@ -1312,9 +1313,9 @@ test("wide hours set a still vault beside the prayer that comes down to meet the
   for (const field of [top.sides, top.ending]) {
     expect(field.position).toBe("fixed");
     expect(vaultPaints(field)).toBe(true);
-    // From 1800px the diaper widens, and every star takes its own share of
+    // From 1800px the vault widens, and every star takes its own share of
     // the leaf.
-    expect(field.size.startsWith("208px 208px")).toBe(true);
+    expect(field.size.startsWith("832px 832px")).toBe(true);
     expect(field.mask).toContain("leaf.png");
     expect(field.opacity).toBe(0);
   }
@@ -1379,7 +1380,7 @@ test("the home vault is lit from the frontispiece in Apse only", async ({ page }
     return { mask: style.maskImage || style.webkitMaskImage, size: style.maskSize || style.webkitMaskSize };
   });
   expect(field.mask).toContain("leaf.png");
-  expect(field.size.startsWith("176px 176px")).toBe(true);
+  expect(field.size.startsWith("704px 704px")).toBe(true);
   await openDatedPage(page, `/?date=${testDate}`, "light");
   expect(await gilding()).toBe("none");
 });
@@ -1499,65 +1500,65 @@ test("the inscription band keeps the season with the rest of the gilding", async
 });
 
 for (const theme of ["light", "dark"]) {
-  test(`Passiontide simplifies foliage without moving the prayer invitation — ${theme}`, async ({ page }) => {
-    await openDatedPage(page, "/?date=2026-04-08", theme);
-    const leaves = page.locator("use.ornament-foliage");
-    const rules = page.locator("use.ornament-sprig-rule");
-    // Inspect rendered instances: styling only a definition can leave a
-    // reused SVG painting leaves even when its source reports hidden.
-    expect(await leaves.count()).toBe(6);
-    for (const leaf of await leaves.all()) await expect(leaf).toBeHidden();
+  test(`the painted headpiece keeps one form through the seasons without moving the invitation — ${theme}`, async ({ page }) => {
+    // The ordo, reminders and usage headpieces are a cross between two
+    // painted rules in every season; home opens on the consecration cross.
+    await page.goto("/calendar/2026/04");
+    await expect(page.locator(".ornament-foliage")).toHaveCount(0);
+    const rules = page.locator(".ornament-headpiece .ornament-sprig-rule");
+    expect(await rules.count()).toBe(2);
     // A horizontal SVG stroke has a zero-height bounding box, so assert
     // its visibility directly rather than Playwright's box-based matcher.
     for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "visible");
     await expect(page.locator(".ornament-headpiece > span")).toBeVisible();
 
+    await openDatedPage(page, "/?date=2026-04-08", theme);
+    await expect(page.locator(".home-crown")).toBeVisible();
     const invitation = page.locator(".pray-now");
     const veiledBox = await invitation.boundingBox();
+    const lining = await invitation.evaluate(el => getComputedStyle(el).borderTopColor);
     // Hold the day's content constant to isolate ornament from different
-    // feast names, notices, or commemorations changing the page height.
+    // feast names, notices, or commemorations changing the page height. The
+    // painted frame does not veil or gild with the season.
     await page.evaluate(() => {
       document.body.classList.replace("season-passiontide", "season-eastertide");
     });
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
-    for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "hidden");
     expect(await invitation.boundingBox()).toEqual(veiledBox);
-
-    await page.goto("/?date=2026-04-20");
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
-    // The year heading remains in ordinary gold even after browsing Easter.
-    await page.goto("/calendar/2026/04");
-    await expect(page.locator("body")).not.toHaveClass(/season-/);
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
+    expect(await invitation.evaluate(el => getComputedStyle(el).borderTopColor)).toBe(lining);
   });
 }
 
 for (const theme of ["light", "dark"]) {
-  test(`hour titles set the headpiece in their rule and the day's colour in the lozenge — ${theme}`, async ({ page }) => {
+  test(`hour titles set their sign in the rule and the day's colour in the lozenge — ${theme}`, async ({ page }) => {
     const title = async () => page.evaluate(() => {
       const heading = document.querySelector(".hour-header h1");
       const headpiece = document.querySelector(".hour-header .ornament-headpiece");
       const box = headpiece.getBoundingClientRect();
       return {
         lozenge: getComputedStyle(heading, "::after").backgroundColor,
-        // The upper rule is 3px deep at the heading's top edge.
-        offset: (box.top + box.bottom) / 2 - (heading.getBoundingClientRect().top + 1.5),
+        // The upper rule is 6px deep at the heading's top edge.
+        offset: (box.top + box.bottom) / 2 - (heading.getBoundingClientRect().top + 3),
         sprigs: [...headpiece.querySelectorAll(".ornament-sprig")].map(svg => getComputedStyle(svg).display),
+        sign: headpiece.querySelector("span").dataset.sign || "cross",
       };
     });
+    // Lauds keeps the sun, Vespers and Compline the moon, the little hours
+    // the cross; the rule itself is the line, so the sprigs never show.
     await openDatedPage(page, "/lauds/2026-09-28", theme);
     const green = await title();
     expect(Math.abs(green.offset)).toBeLessThan(1);
-    expect(green.sprigs).toEqual(["block", "block"]);
+    expect(green.sprigs).toEqual(["none", "none"]);
+    expect(green.sign).toBe("sun");
     await openDatedPage(page, "/lauds/2026-06-29", theme);
     const red = await title();
     expect(red.lozenge).toBe("rgb(176, 42, 36)");
     expect(red.lozenge).not.toBe(green.lozenge);
-    // Passiontide veils the foliage: the cross stands alone in the rule.
-    await openDatedPage(page, "/lauds/2026-03-31", theme);
-    const veiled = await title();
-    expect(veiled.sprigs).toEqual(["none", "none"]);
-    expect(Math.abs(veiled.offset)).toBeLessThan(1);
+    await openDatedPage(page, "/terce/2026-03-31", theme);
+    const terce = await title();
+    expect(terce.sign).toBe("cross");
+    expect(Math.abs(terce.offset)).toBeLessThan(1);
+    await openDatedPage(page, "/vespers/2026-03-31", theme);
+    expect((await title()).sign).toBe("moon");
     await expect(page.locator(".hour-header .ornament-headpiece > span")).toBeVisible();
   });
 }

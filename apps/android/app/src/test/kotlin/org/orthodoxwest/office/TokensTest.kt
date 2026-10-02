@@ -24,12 +24,20 @@ class TokensTest {
         return floatArrayOf(parts[0], parts[1], parts[2], parts.getOrElse(3) { 1f })
     }
 
+    private fun value(block: String, token: String): String? =
+        Regex("(?m)^\\s*--" + Regex.escape(token) + ":\\s*([^;]+);").find(block)?.groupValues?.get(1)
+
     private fun check(block: String, token: String, color: Color) {
-        val value = Regex("(?m)^\\s*--" + Regex.escape(token) + ":\\s*([^;]+);").find(block)?.groupValues?.get(1) ?: error("--$token missing")
+        val value = value(block, token) ?: error("--$token missing")
         val want = parse(value)
         val got = floatArrayOf(color.red * 255f, color.green * 255f, color.blue * 255f, color.alpha)
         for (i in 0..2) assertTrue("--$token: $value vs $color", abs(want[i] - got[i]) < 0.6f)
         assertEquals("--$token alpha", want[3], got[3], 0.01f)
+    }
+
+    /** A token the stylesheet declares as another's value (`--moon-ink: var(--gold)`). */
+    private fun alias(block: String, token: String, target: String) {
+        assertEquals("--$token", "var(--$target)", value(block, token)?.trim() ?: error("--$token missing"))
     }
 
     private fun checkPalette(block: String, p: Palette) {
@@ -49,13 +57,25 @@ class TokensTest {
         check(block, "inscription-ground", p.inscriptionGround)
         check(block, "inscription-edge", p.inscriptionEdge)
         check(block, "inscription-wash", p.inscriptionWash)
+        check(block, "lining", p.lining)
+        check(block, "titulus", p.titulus)
+        check(block, "kalendar-blue", p.kalendarBlue)
     }
+
+    private val root get() = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
 
     @Test
     fun naveIsTheRoot() {
-        val root = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
         checkPalette(root, Nave)
+        // The moon is Nave's gold.
+        alias(root, "moon-ink", "gold")
+        assertEquals(Nave.gold, Nave.moonInk)
         val o = ornament(Nave, "")
+        // Out of season the gilding is the gold, and the ornament's line the painted lining.
+        alias(root, "ornament", "gold")
+        assertEquals(Nave.gold, o.flat)
+        alias(root, "ornament-line", "lining")
+        assertEquals(Nave.lining, o.line)
         check(root, "ornament-hi", o.hi)
         check(root, "ornament-lo", o.lo)
         check(root, "inscription-ink", o.ink)
@@ -65,9 +85,18 @@ class TokensTest {
     fun apseIsTheDarkTheme() {
         val dark = rule(":root[data-theme=\"dark\"]")
         checkPalette(dark, Apse)
+        check(dark, "moon-ink", Apse.moonInk)
         val o = ornament(Apse, "")
+        // The root's aliases resolve against Apse's own gold and lining.
+        assertEquals(null, value(dark, "ornament"))
+        assertEquals(Apse.gold, o.flat)
+        assertEquals(null, value(dark, "ornament-line"))
+        assertEquals(Apse.lining, o.line)
         check(dark, "ornament-hi", o.hi)
         check(dark, "ornament-lo", o.lo)
+        // Apse declares no inscription ink of its own: its band is lettered in the root's.
+        assertEquals(null, value(dark, "inscription-ink"))
+        check(root, "inscription-ink", o.ink)
     }
 
     @Test
@@ -86,6 +115,9 @@ class TokensTest {
             check(dark, "ornament-line", d.line)
             check(dark, "ornament-hi", d.hi)
             check(dark, "ornament-lo", d.lo)
+            // The season's inscription ink is set on the body in both themes.
+            assertEquals(null, value(dark, "inscription-ink"))
+            check(block, "inscription-ink", d.ink)
         }
     }
 }

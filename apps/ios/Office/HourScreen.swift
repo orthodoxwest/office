@@ -74,15 +74,18 @@ struct HourPage: View {
     }
 }
 
-/// One row of an hour's page: a collapsible section's toggle, or a block with the space above it.
+/**
+ * One row of an hour's page: a collapsible section's toggle, or a block with the space above it
+ * and, before a heading between the office's parts, the small painted cross.
+ */
 private enum Row: Identifiable {
     case toggle(section: Int, label: String, open: Bool)
-    case block(BlockAt, BlockView, gap: CGFloat)
+    case block(BlockAt, BlockView, gap: CGFloat, cross: Bool)
 
     var id: String {
         switch self {
         case let .toggle(i, _, _): return "toggle-\(i)"
-        case let .block(at, _, _): return "\(at.section)-\(at.block)"
+        case let .block(at, _, _, _): return "\(at.section)-\(at.block)"
         }
     }
 }
@@ -121,8 +124,8 @@ struct HourScreen: View {
                         case let .toggle(i, label, expanded):
                             Button { open[i] = !expanded } label: {
                                 HStack(spacing: 0) {
-                                    Text(label).type(Scale.heading).foregroundStyle(p.text)
-                                    Caret(open: expanded)
+                                    Text(label).type(Scale.heading).foregroundStyle(p.titulus)
+                                    Caret(open: expanded, color: p.titulus)
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 44)
                             }
@@ -132,10 +135,15 @@ struct HourScreen: View {
                             .padding(.top, m.px(5.6))
                             .padding(.bottom, expanded ? m.px(12.8) : 0)
                             .measured(m)
-                        case let .block(at, block, gap):
-                            BlockRow(block: block, column: columns[at])
-                                .padding(.top, m.px(gap))
-                                .measured(m)
+                        case let .block(at, block, gap, cross):
+                            VStack(spacing: 0) {
+                                if cross {
+                                    PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
+                                }
+                                BlockRow(block: block, column: columns[at])
+                            }
+                            .padding(.top, m.px(gap))
+                            .measured(m)
                         }
                     }
                     Epilogue(
@@ -158,7 +166,7 @@ struct HourScreen: View {
     private func anchor(_ rows: [Row]) -> String? {
         let asked = UserDefaults.standard.string(forKey: "anchor")
         let at = rows.firstIndex { row in
-            guard case let .block(_, block, _) = row else { return false }
+            guard case let .block(_, block, _, _) = row else { return false }
             switch asked {
             case "hymn": return block.kind == .stanza
             case "psalm": return block.kind == .verse && block.dropCap
@@ -193,7 +201,13 @@ struct HourScreen: View {
                     gap = heading ? 12 : 0
                 }
                 afterClosed = false
-                out.append(.block(BlockAt(section: i, block: j), block, gap: gap))
+                // Between the office's parts, one small painted cross: before each heading of the
+                // office's own (the web's `.elements > .section-heading`) but the page's first. The
+                // Hymn's and the Chapter's headings open their element, its blocks following them.
+                let next = section.blocks.indices.contains(j + 1) ? section.blocks[j + 1] : nil
+                let part = (heading || block.kind == .commemorationHeading) && !section.collapsible
+                    && (!block.startsElement || next.map { $0.startsElement } ?? true)
+                out.append(.block(BlockAt(section: i, block: j), block, gap: gap, cross: part && !out.isEmpty))
                 prev = block
             }
         }
@@ -220,10 +234,11 @@ private struct HourTitle: View {
         let meta = [view.dateLabel, view.feast, view.seasonLabel].filter { !$0.isEmpty }
         VStack(spacing: 0) {
             VStack(spacing: 0) {
-                // The headpiece is set into the title's upper rule; the day's colour reaches the lower one's lozenge.
+                // The hour's sign is set into the title's upper rule, the rule itself its line; the
+                // day's colour reaches the lower one's lozenge.
                 ZStack {
-                    DoubleRule(gap: 132.8)
-                    Headpiece()
+                    DoubleRule(gap: 40, heavy: true)
+                    TitleSign(sign: HourSign(hour: view.hour))
                 }
                 Text(title).type(style).foregroundStyle(p.text)
                     .multilineTextAlignment(.center)
@@ -264,7 +279,7 @@ private struct HourTitle: View {
                     model.chooseForm(f)
                 }
             }
-            Hairline(color: p.border).padding(.top, m.px(7.2))
+            Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
         }
         .padding(.top, m.px(17.6))
         .measured(m)
@@ -283,7 +298,10 @@ private struct HourTitle: View {
     }
 }
 
-/// After the prayer: the other hours, the report link, and the foot. In Apse the vault fades in here.
+/**
+ * After the prayer: the consecration cross the hour ends on, the other hours, the report link,
+ * and the foot. In Apse the vault fades in here.
+ */
 private struct Epilogue: View {
     let previous: String?
     let next: String?
@@ -296,6 +314,9 @@ private struct Epilogue: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // One mark, as painted where the bishop anointed the walls: the links and foot below carry none.
+            PaintedMark(.consecration, size: m.px(40), color: p.lining)
+                .padding(.top, m.px(26.4))
             Continuation(
                 previousLabel: "Previous hour",
                 previous: previous.map(hourLabel),
@@ -307,7 +328,7 @@ private struct Epilogue: View {
                 onNext: { if let next { model.open(.hour(date, next)) } }
             )
             .measured(m)
-            .padding(.top, m.px(44))
+            .padding(.top, m.px(83.2))
             Button {
                 if let url = URL(string: reportUrl) { openURL(url) }
             } label: {
@@ -320,7 +341,7 @@ private struct Epilogue: View {
             .accessibilityHint("Opens the report form in your browser")
             .measured(m)
             .padding(.top, m.px(40))
-            Footer(diamond: !p.dark)
+            Footer(diamond: false)
         }
         .background(VaultField(fade: [(0, 0), (0.35, 0), (0.7, 0.8), (1, 1)]))
     }

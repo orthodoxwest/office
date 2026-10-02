@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}Divine Office — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+{% extends "layout.html" %}{% block title %}Divine Office — {{ date_str }}{% endblock %}{% block content %}
 <div class="home">
   <span class="sr-only">Liturgical color: {{ color }}</span>
   {# The source order is the frontispiece order at every width: day identity,
@@ -6,27 +6,13 @@
        and focus orders aligned makes the threshold equally clear by keyboard
        and screen reader. #}
   <div class="home-hero day-color-{{ color }}">
-    {# Corner tooling is decorative, outside the reading and focus order. #}
-    <svg class="home-frame-corner home-frame-corner-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <defs>
-        <path id="home-corner-rule" d="M3 29V3h26"/>
-        <path id="home-corner-leaf" d="M7 7c7 0 12 4 13 11C13 18 8 14 7 7Zm0 0 9 8"/>
-      </defs>
-      <use href="#home-corner-rule"/>
-      <use class="ornament-foliage" href="#home-corner-leaf"/>
-    </svg>
-    <svg class="home-frame-corner home-frame-corner-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
-    </svg>
-    <svg class="home-frame-corner home-frame-corner-bottom-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
-    </svg>
-    <svg class="home-frame-corner home-frame-corner-bottom-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
-    </svg>
+    {# The consecration cross opens the card (at the niche's crown on a
+         desktop): decorative, outside the reading and focus order. #}
+    <span class="home-crown" aria-hidden="true"></span>
     <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
+      {# A painted border on the niche's back wall, round its head. #}
+      <div class="home-lining" aria-hidden="true"></div>
       <header class="home-day-head">
-        {{ headpiece(true) }}
         <h1 id="home-date-heading">
           <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ date_str }}</a>
         </h1>
@@ -65,7 +51,7 @@
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
             <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <path d="M2 13h20M7 13a5 5 0 0 1 10 0M12 2v3M4.2 5.2l2.1 2.1M19.8 5.2l-2.1 2.1"/>
+              <path d="M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12ZM10.96,7.68L8.40,4.52L8.83,8.56ZM13.15,7.70L12.00,1.40L10.85,7.70ZM15.17,8.56L15.60,4.52L13.04,7.68ZM16.70,10.12L20.34,4.86L15.08,8.50ZM17.52,12.16L20.68,9.60L16.64,10.03Z"/>
             </svg>
             <span>Morning</span>
           </h3>
@@ -81,8 +67,7 @@
         <section class="home-hour-group home-hour-group-day" aria-labelledby="home-hours-day">
           <h3 class="home-hour-group-label" id="home-hours-day">
             <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <circle cx="12" cy="8" r="3.5"/>
-              <path d="M12 0.75v1.5M12 13.75v1.5M4.75 8h1.5M17.75 8h1.5M6.9 2.9l1.05 1.05M16.05 12.05l1.05 1.05M6.9 13.1l1.05-1.05M16.05 3.95l1.05-1.05"/>
+              <path d="M15.30,8.00A3.3,3.3 0 1,0 8.70,8.00A3.3,3.3 0 1,0 15.30,8.00ZM12.95,3.50L12.00,0.30L11.05,3.50ZM15.07,4.58L15.10,2.63L13.43,3.63ZM16.37,6.57L18.67,4.15L15.42,4.93ZM16.50,8.95L18.20,8.00L16.50,7.05ZM15.42,11.07L18.67,11.85L16.37,9.43ZM13.43,12.37L15.10,13.37L15.07,11.42ZM11.05,12.50L12.00,15.70L12.95,12.50ZM8.93,11.42L8.90,13.37L10.57,12.37ZM7.63,9.43L5.33,11.85L8.58,11.07ZM7.50,7.05L5.80,8.00L7.50,8.95ZM8.58,4.93L5.33,4.15L7.63,6.57ZM10.57,3.63L8.90,2.63L8.93,4.58Z"/>
             </svg>
             <span>Day</span>
           </h3>
@@ -98,7 +83,7 @@
         <section class="home-hour-group home-hour-group-evening" aria-labelledby="home-hours-evening">
           <h3 class="home-hour-group-label" id="home-hours-evening">
             <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <path d="m12 1 1.8 4.7L19 7.5l-5.2 1.8L12 14l-1.8-4.7L5 7.5l5.2-1.8Z"/>
+              <path d="M13.32 1.80A6.34 6.34 0 1 0 17.40 11.32A5.21 5.21 0 0 1 13.32 1.80Z"/>
             </svg>
             <span>Evening</span>
           </h3>

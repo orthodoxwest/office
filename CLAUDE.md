@@ -36,6 +36,7 @@ tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year sna
                            broken corpora for validation boundary tests
 tools/
   genicons.py              App icon (web, iOS, Android) generator; requires tools/requirements.txt
+  genornaments.py          Painted ornament masks (crosses, sun, moon, Apse vault tile) for the web
   genplaster.py            Texture generator; source photograph stays in ../resources/
 data/
   feasts/                  Feast definitions (INI-like format)

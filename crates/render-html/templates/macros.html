@@ -1,22 +1,11 @@
 {# Shared page macros: decorative ornaments and typography. #}
-{% macro headpiece(foliage) %}
-<div class="ornament-headpiece{% if not foliage %} ornament-headpiece-plain{% endif %}" aria-hidden="true">
-  <svg class="ornament-sprig" viewBox="0 0 56 20" focusable="false">
-    <defs>
-      <path id="headpiece-rule" d="M2 10h52"/>
-      {% if foliage %}<g id="headpiece-foliage">
-        <path class="ornament-sprig-stem" d="M2 15C20 15 34 11 54 5"/>
-        <path d="M14 14C8 14 7 9 6 6c6 0 9 3 8 8Zm12-2c-6-1-7-6-7-9 6 1 9 4 7 9Zm11-3c-5-2-5-6-4-9 5 3 7 5 4 9ZM16 14c-3 4-7 5-10 4 2-4 6-5 10-4Zm14-3c-2 5-6 7-10 7 1-4 5-7 10-7Zm14-4c-1 5-5 7-9 7 1-4 5-7 9-7Z"/>
-      </g>{% endif %}
-    </defs>
-    <use class="ornament-sprig-rule" href="#headpiece-rule"/>
-    {% if foliage %}<use class="ornament-foliage" href="#headpiece-foliage"/>{% endif %}
-  </svg>
-  <span>✠</span>
-  <svg class="ornament-sprig ornament-sprig-end" viewBox="0 0 56 20" focusable="false">
-    <use class="ornament-sprig-rule" href="#headpiece-rule"/>
-    {% if foliage %}<use class="ornament-foliage" href="#headpiece-foliage"/>{% endif %}
-  </svg>
+{# A painted cross between two short rules; `sign` sets the sun or the moon
+   in the cross's place (the hour headpieces of Lauds, Vespers and Compline). #}
+{% macro headpiece(sign="") %}
+<div class="ornament-headpiece" aria-hidden="true">
+  <svg class="ornament-sprig" viewBox="0 0 56 20" focusable="false"><path class="ornament-sprig-rule" d="M2 10h52"/></svg>
+  <span{% if sign %} data-sign="{{ sign }}"{% endif %}>✠</span>
+  <svg class="ornament-sprig ornament-sprig-end" viewBox="0 0 56 20" focusable="false"><path class="ornament-sprig-rule" d="M2 10h52"/></svg>
 </div>
 {% endmacro %}
 {% macro fish() %}<svg class="fish-flag" width="18" height="9" fill="currentColor" aria-hidden="true" focusable="false"><use href="#icon-fish"/></svg>{% endmacro %}
