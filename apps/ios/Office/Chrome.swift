@@ -29,14 +29,15 @@ struct Quiet: ButtonStyle {
     }
 }
 
-/// The disclosure caret, gold as the web's `▾`/`▴`: drawn, not read; the control says expanded or collapsed.
+/// The disclosure caret, the web's `▾`/`▴` in the ink of the words it opens, a little lighter: drawn, not read; the control says expanded or collapsed.
 struct Caret: View {
     let open: Bool
-    @Environment(\.palette) private var p
+    /// The label's colour.
+    let color: Color
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(open ? " ▴" : " ▾").font(.system(size: 9 * m.type)).foregroundStyle(p.goldLine).accessibilityHidden(true)
+        Text(open ? " ▴" : " ▾").font(.system(size: 9 * m.type)).foregroundStyle(color.opacity(0.7)).accessibilityHidden(true)
     }
 }
 
@@ -82,11 +83,10 @@ struct SiteNav {
     }
 }
 
-/// The header beam: "✠ Daily Office" home, and the menu, or on a wide screen the links themselves.
+/// The header beam: the brand's roundel and "Daily Office" home, and the menu, or on a wide screen the links themselves.
 struct SiteHeader: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
-    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
 
@@ -95,7 +95,9 @@ struct SiteHeader: View {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
                     HStack(spacing: 0) {
-                        Cross()
+                        // The consecration roundel that ends every hour, 1.15em of the brand's size.
+                        PaintedMark(.consecration, size: Scale.brand.size * 1.15 * m.type, color: p.lining)
+                            .padding(.trailing, m.px(6.08))
                         Text(" DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
                     }
                     .padding(.vertical, m.px(10))
@@ -109,7 +111,7 @@ struct SiteHeader: View {
                     Button { model.menuOpen.toggle() } label: {
                         HStack(spacing: 0) {
                             Text("MENU").type(Scale.menu).foregroundStyle(p.accent)
-                            Caret(open: model.menuOpen)
+                            Caret(open: model.menuOpen, color: p.accent)
                         }
                         .padding(.leading, m.px(12.8))
                         .padding(.trailing, m.px(3.2))
@@ -132,7 +134,7 @@ struct SiteHeader: View {
     }
 }
 
-/// The desktop header's links (`.site-menu nav`): the current one in ink over an accent rule; Reminders quieter.
+/// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders quieter.
 private struct InlineNav: View {
     let nav: SiteNav
     @EnvironmentObject private var model: AppModel
@@ -151,7 +153,7 @@ private struct InlineNav: View {
             Button { model.settingsOpen.toggle() } label: {
                 HStack(spacing: 0) {
                     Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
-                    Caret(open: model.settingsOpen)
+                    Caret(open: model.settingsOpen, color: p.muted)
                 }
                 .padding(.leading, m.px(8.8))
                 .padding(.trailing, m.px(3.2))
@@ -165,11 +167,10 @@ private struct InlineNav: View {
 
     private func link(_ label: String, _ current: Bool, secondary: Bool = false, action: @escaping () -> Void) -> some View {
         let style = secondary ? TextStyle.label(11.52, 0.04) : TextStyle.label(12.48, 0.06)
-        let ink = current ? p.text : secondary ? p.muted : p.accent
         return Button(action: action) {
-            Text(label.uppercased()).type(style).foregroundStyle(ink)
+            Text(label.uppercased()).type(style).foregroundStyle(current ? p.text : p.muted)
                 .overlay(alignment: .bottom) {
-                    if current { Rectangle().fill(secondary ? p.muted : p.accent).frame(height: 1).offset(y: m.px(4)) }
+                    if current { Rectangle().fill(p.lining).frame(height: 1.5).offset(y: m.px(4)) }
                 }
                 .padding(.horizontal, m.px(4.8))
                 .frame(minHeight: 44)
@@ -181,8 +182,9 @@ private struct InlineNav: View {
 
 /**
  * The site menu's panel: on an hour, the day's hours (2/3/2 as on home); the Ordo and
- * Reminders; then the Theme and Text rows, the current choice underlined in gold. `prefsOnly`
- * is the wide header's Settings: the Theme and Text rows alone.
+ * Reminders, the current page underlined in the lining's terracotta; then the Theme and Text
+ * rows, the current choice underlined in gold. `prefsOnly` is the wide header's Settings: the
+ * Theme and Text rows alone.
  */
 struct MenuPanel: View {
     var prefsOnly = false
@@ -197,7 +199,7 @@ struct MenuPanel: View {
             if let onHour = nav.onHour, !prefsOnly {
                 ForEach([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]], id: \.self) { row in
                     HStack(spacing: 0) {
-                        ForEach(row, id: \.self) { h in cell(hourLabel(h).uppercased(), h == nav.currentHour, style, p.accent) { onHour(h) } }
+                        ForEach(row, id: \.self) { h in link(hourLabel(h).uppercased(), h == nav.currentHour, style) { onHour(h) } }
                     }
                     .padding(.bottom, m.px(2.4))
                 }
@@ -205,9 +207,9 @@ struct MenuPanel: View {
             }
             if !prefsOnly {
                 HStack(spacing: 0) {
-                    cell("ORDO", nav.ordoCurrent, style, p.accent, action: nav.onOrdo)
+                    link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
                     // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                    cell("REMINDERS", nav.remindersCurrent, .label(12, 0.06), p.muted, action: nav.onReminders)
+                    link("REMINDERS", nav.remindersCurrent, .label(12, 0.06), action: nav.onReminders)
                 }
                 Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             }
@@ -228,7 +230,7 @@ struct MenuPanel: View {
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
         .background(p.surface)
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
-        .overlay(alignment: .top) { Rectangle().fill(p.goldLine).frame(height: 2) }
+        .overlay(alignment: .top) { Rectangle().fill(p.lining).frame(height: 2) }
         .shadow(color: .black.opacity(p.dark ? 0.4 : 0.12), radius: 12, y: 4)
     }
 
@@ -237,6 +239,20 @@ struct MenuPanel: View {
             .frame(width: m.px(54), alignment: .leading)
             .padding(.leading, m.px(10.4))
             .accessibilityHidden(true)
+    }
+
+    /// A link of the site's navigation: muted, the current page in ink over the lining's terracotta.
+    private func link(_ label: String, _ current: Bool, _ style: TextStyle, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label).type(style).foregroundStyle(current ? p.text : p.muted)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .overlay(alignment: .bottom) {
+                    if current { Rectangle().fill(p.lining).frame(height: 1.5) }
+                }
+        }
+        .buttonStyle(Quiet())
+        .accessibilityLabel(label.capitalized)
+        .accessibilityAddTraits(current ? .isSelected : [])
     }
 
     private func cell(_ label: String, _ current: Bool, _ style: TextStyle, _ color: Color, spoken: String? = nil, action: @escaping () -> Void) -> some View {
@@ -274,7 +290,7 @@ struct Disclosure: View {
                 (Text(label.uppercased()) + Text(value.map { " " + $0.uppercased() } ?? "").foregroundColor(p.text))
                     .type(Scale.control)
                     .foregroundStyle(p.muted)
-                Caret(open: open)
+                Caret(open: open, color: p.muted)
             }
             .padding(.horizontal, m.px(8))
             .frame(minHeight: 44)
@@ -334,7 +350,7 @@ struct DayPicker: View {
                 Button { months.toggle() } label: {
                     HStack(spacing: 0) {
                         Text(title.uppercased()).type(.label(12.8, 0.1)).foregroundStyle(p.text)
-                        Caret(open: months)
+                        Caret(open: months, color: p.text)
                     }
                     .frame(maxWidth: .infinity, minHeight: 44)
                 }
@@ -475,8 +491,8 @@ struct FormChooser: View {
 }
 
 /**
- * The continuation after a page's content: the diamond, then the previous item, the way back to
- * all of them, and the next item.
+ * The continuation after a page's content: the previous item, the way back to all of them, and
+ * the next item. It carries no ornament of its own; an hour ends on its consecration cross above it.
  */
 struct Continuation: View {
     let previousLabel: String
@@ -493,60 +509,61 @@ struct Continuation: View {
     var body: some View {
         let small = TextStyle.label(11.2, 0.08)
         let name = Scale.body.sized(16, line: 22)
-        VStack(spacing: 0) {
-            Diamond()
-            HStack(alignment: .center, spacing: 0) {
-                Group {
-                    if let previous {
-                        Button(action: onPrevious) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(previousLabel.uppercased()).type(small).foregroundStyle(p.muted)
-                                Text("← \(previous)").type(name).foregroundStyle(p.accent)
-                            }
+        HStack(alignment: .center, spacing: 0) {
+            Group {
+                if let previous {
+                    Button(action: onPrevious) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(previousLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text("← \(previous)").type(name).foregroundStyle(p.accent)
                         }
-                        .buttonStyle(Quiet())
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("\(previousLabel): \(previous)")
-                        .accessibilityAddTraits(.isButton)
                     }
+                    .buttonStyle(Quiet())
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(previousLabel): \(previous)")
+                    .accessibilityAddTraits(.isButton)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Button(action: onMiddle) {
-                    Text(middle.uppercased()).type(.label(12.16, 0.06)).foregroundStyle(p.muted)
-                        .padding(.horizontal, m.px(6.4)).padding(.vertical, m.px(12))
-                }
-                .buttonStyle(Quiet())
-                .accessibilityLabel(middle)
-                Group {
-                    if let next {
-                        Button(action: onNext) {
-                            VStack(alignment: .trailing, spacing: 0) {
-                                Text(nextLabel.uppercased()).type(small).foregroundStyle(p.muted)
-                                Text("\(next) →").type(name).foregroundStyle(p.accent)
-                            }
-                        }
-                        .buttonStyle(Quiet())
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("\(nextLabel): \(next)")
-                        .accessibilityAddTraits(.isButton)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .padding(.top, m.px(24))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: onMiddle) {
+                Text(middle.uppercased()).type(.label(12.16, 0.06)).foregroundStyle(p.muted)
+                    .padding(.horizontal, m.px(6.4)).padding(.vertical, m.px(12))
+            }
+            .buttonStyle(Quiet())
+            .accessibilityLabel(middle)
+            Group {
+                if let next {
+                    Button(action: onNext) {
+                        VStack(alignment: .trailing, spacing: 0) {
+                            Text(nextLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text("\(next) →").type(name).foregroundStyle(p.accent)
+                        }
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(nextLabel): \(next)")
+                    .accessibilityAddTraits(.isButton)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 }
 
-/// The page's foot: the diamond and the Office's name. The preferences are in the menu, or on a wide screen under Settings.
+/**
+ * The page's foot: the diamond, in the painted rules' colour, and the Office's name. Home and the
+ * hours already end on a cross, so theirs has no diamond. The preferences are in the menu, or on
+ * a wide screen under Settings.
+ */
 struct Footer: View {
     var diamond = true
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
         VStack(spacing: 0) {
-            if diamond { Diamond().padding(.bottom, m.px(16)) }
+            if diamond { Diamond(color: o.line).padding(.bottom, m.px(16)) }
             Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted)
         }
         .frame(maxWidth: .infinity)

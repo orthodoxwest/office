@@ -75,7 +75,7 @@ struct RemindersScreen: View {
                             HStack(spacing: 0) {
                                 Text(reminderLeads.first { $0.minutes == settings.lead }?.label ?? "").type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
                                 Spacer(minLength: 8)
-                                Caret(open: false)
+                                Caret(open: false, color: p.text)
                             }
                             .padding(.horizontal, m.px(12))
                             .padding(.vertical, m.px(8))

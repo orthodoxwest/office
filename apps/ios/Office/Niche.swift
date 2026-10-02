@@ -53,9 +53,10 @@ func nicheHead(_ screen: CGFloat) -> CGFloat { min(max(32 + screen * 0.06, 80), 
 
 /**
  * The niche's outline for a card of `size`, `outset` beyond it: a low elliptical head across the
- * whole width (border-radius: 50% 50% 0 0 / head head 0 0), square below.
+ * whole width (border-radius: 50% 50% 0 0 / head head 0 0), square below. `open` leaves the foot
+ * unclosed: the sides and head alone, as a lining painted round them.
  */
-func nichePath(_ size: CGSize, head: CGFloat, outset d: CGFloat, at origin: CGPoint = .zero) -> Path {
+func nichePath(_ size: CGSize, head: CGFloat, outset d: CGFloat, at origin: CGPoint = .zero, open: Bool = false) -> Path {
     let ry = max(0, head + d)
     let rx = size.width / 2 + d
     var p = Path()
@@ -66,7 +67,7 @@ func nichePath(_ size: CGSize, head: CGFloat, outset d: CGFloat, at origin: CGPo
     p.addArc(center: .zero, radius: 1, startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false,
              transform: CGAffineTransform(translationX: (left + right) / 2, y: top + ry).scaledBy(x: rx, y: max(ry, 0.001)))
     p.addLine(to: CGPoint(x: right, y: bottom))
-    p.closeSubpath()
+    if !open { p.closeSubpath() }
     return p
 }
 
@@ -76,14 +77,13 @@ private let reach: CGFloat = 96
 /**
  * The niche behind the frontispiece, in the order the web's box-shadows stack, bottom first: a
  * clearing of the Apse's ground, the shadow under the head, the moulding's edge and stone, the
- * day's colour; then the lit recess, its shadow under the head, the frame and the tooling.
+ * day's colour; then the lit recess, its shadow under the head, and the frame.
  */
 struct Niche: View {
     let t: NicheTokens
     let day: Color
     let head: CGFloat
     let frame: Color
-    let tooling: Color
     @Environment(\.palette) private var p
 
     var body: some View {
@@ -109,7 +109,8 @@ struct Niche: View {
             blurred(shape(-0.75 * rem, dy: 1.5 * rem), t.shade, 3 * rem)
             ctx.fill(shape(0.75 * rem + 1), with: .color(t.edge))
             ctx.fill(shape(0.75 * rem), with: .color(t.stone))
-            ctx.fill(shape(2), with: .color(day))
+            // The day's colour is a hint at the niche's edge, not a second frame.
+            ctx.fill(shape(1.5), with: .color(day))
             let recess = shape(0)
             ctx.fill(recess, with: .color(p.surface))
             ctx.drawLayer { inside in
@@ -137,12 +138,36 @@ struct Niche: View {
                 }
             }
             ctx.stroke(shape(-1), with: .color(frame), lineWidth: 2)
-            // The book-cover tooling, 0.35rem inside, its head following the arch.
-            let inset = 0.35 * rem
-            let tool = nichePath(CGSize(width: size.width - 2 * inset, height: size.height - 2 * inset), head: head - inset, outset: 0, at: CGPoint(x: o.x + inset, y: o.y + inset))
-            ctx.stroke(tool, with: .color(tooling), lineWidth: 1)
         }
         .padding(-reach)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * A border painted on the niche's back wall (`.home-lining`), round its head only and down to
+ * `bottom`, the inscription band: a 2px band of the lining's terracotta and a lighter line 5px
+ * inside it. 26pt of plain plaster lie between it and the 2pt frame, so it reads as paint on the
+ * wall, not another edge of the arch.
+ */
+struct NicheLining: View {
+    let head: CGFloat
+    let bottom: CGFloat
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        Canvas { ctx, size in
+            let inset: CGFloat = 2 + 26
+            // A line `d` inside the lining's outer edge, its head `ry` deep.
+            func line(_ d: CGFloat, ry: CGFloat, _ color: Color, width: CGFloat) {
+                let at = inset + d
+                let arch = nichePath(CGSize(width: size.width - 2 * at, height: bottom - at), head: ry, outset: 0, at: CGPoint(x: at, y: at), open: true)
+                ctx.stroke(arch, with: .color(color), lineWidth: width)
+            }
+            line(1, ry: head - 27, p.lining, width: 2)
+            line(7.5, ry: head - 26.5, p.lining.opacity(0.62), width: 1)
+        }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

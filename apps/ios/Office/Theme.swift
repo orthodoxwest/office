@@ -18,6 +18,14 @@ struct Palette: Equatable {
     let unsaid: Color
     let border: Color
     let rubric: Color
+    // The painted ornament, in the earth pigments of English wall painting: terracotta for rules,
+    // linings and crosses, opaque and the same in every season; red ochre for the tituli (section
+    // headings, psalm numbers, "Ant."), gilt on the Apse; slate blue for the ordo's doubles.
+    let lining: Color
+    let titulus: Color
+    let kalendarBlue: Color
+    /// The evening hours' moon: the gold on the Nave, silver on the Apse night.
+    let moonInk: Color
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
@@ -39,11 +47,15 @@ struct Palette: Equatable {
         unsaid: Color(hex: 0x786B62),
         border: Color(hex: 0xDCCFC3),
         rubric: Color(hex: 0x8B1A1A),
+        lining: Color(hex: 0xA85A48),
+        titulus: Color(hex: 0x93412C),
+        kalendarBlue: Color(hex: 0x34507A),
+        moonInk: Color(hex: 0x9A7328),
         surface: Color(hex: 0xF6EDDF),
         surfaceEdge: Color(rgb: 107, 58, 31, 0.12),
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
         oakLine: Color(rgb: 63, 55, 47, 0.34),
-        inscriptionGround: Color(hex: 0x34403A),
+        inscriptionGround: Color(hex: 0x545F54),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
         plaster: "plaster_nave.jpg"
@@ -51,7 +63,7 @@ struct Palette: Equatable {
 
     static let apse = Palette(
         dark: true,
-        text: Color(hex: 0xE8E2D0),
+        text: Color(hex: 0xDDD6C3),
         bg: Color(hex: 0x121C28),
         accent: Color(hex: 0xD0B06A),
         gold: Color(hex: 0xD8BC74),
@@ -60,6 +72,10 @@ struct Palette: Equatable {
         unsaid: Color(hex: 0x9AA4B0),
         border: Color(hex: 0x2A3648),
         rubric: Color(hex: 0xD47070),
+        lining: Color(hex: 0xCF8C6A),
+        titulus: Color(hex: 0xD8BC74),
+        kalendarBlue: Color(hex: 0xA9BEDF),
+        moonInk: Color(hex: 0xC9D0D9),
         surface: Color(hex: 0x172232),
         surfaceEdge: Color(rgb: 208, 176, 106, 0.18),
         pressedWash: Color(rgb: 208, 176, 106, 0.12),
@@ -84,7 +100,9 @@ extension Color {
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
  * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays `Palette.gold`.
+ * (controls, selections) stays `Palette.gold`. The painted rules are the lining's terracotta,
+ * so `line` is `Palette.lining` except where a season gilds or veils it; the church veils its
+ * images, not its walls.
  */
 struct Ornament: Equatable {
     let flat: Color
@@ -93,17 +111,14 @@ struct Ornament: Equatable {
     let lo: Color
     let ink: Color
 
-    /** The gilded initials' and lozenges' leaf, lit from above. */
-    var leaf: LinearGradient { LinearGradient(colors: [hi, lo], startPoint: .top, endPoint: .bottom) }
-
     static func of(_ p: Palette, season: String) -> Ornament {
         switch (season, p.dark) {
-        case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xB0A4C2))
-        case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xB0A4C2))
-        case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xE6CF8C))
-        case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xE6CF8C))
-        case (_, true): return Ornament(flat: p.gold, line: p.goldLine, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xD7B878))
-        default: return Ornament(flat: p.gold, line: p.goldLine, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xD7B878))
+        case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xDDD6E8))
+        case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xDDD6E8))
+        case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xF2E2B1))
+        case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xF2E2B1))
+        case (_, true): return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xECD9A0))
+        default: return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xECD9A0))
         }
     }
 }

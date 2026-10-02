@@ -66,7 +66,7 @@ final class ProseTests: XCTestCase {
         let font = Scale.body.uiFont()
         var s = ProseSpec(text: NSAttributedString(string: text, attributes: [.font: font]), font: font, line: 32)
         if initial {
-            s.initial = Initial(letter: "O", deep: garamond(61), raised: garamond(42), gap: 3.66, alwaysRaised: false, hi: .yellow, lo: .brown)
+            s.initial = Initial(letter: "O", deep: garamond(61), raised: garamond(42), gap: 3.66, alwaysRaised: false, color: .brown)
         }
         return s
     }
@@ -135,6 +135,29 @@ final class SVGTests: XCTestCase {
         let disc = svg("M8.5 8a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0").boundingRect
         XCTAssertEqual(disc.width, 7, accuracy: 0.05)
         XCTAssertEqual(disc.height, 7, accuracy: 0.05)
+    }
+
+    func testThePaintedMarksStandInTheirBoxes() {
+        // The consecration cross's ring, its arcs' flags set off by commas: radius 19.3 about the box's centre.
+        let ring = Mark.consecration.drawing.shapes[0].path.boundingRect
+        XCTAssertEqual(ring.minX, 0.7, accuracy: 0.05)
+        XCTAssertEqual(ring.maxX, 39.3, accuracy: 0.05)
+        XCTAssertEqual(ring.minY, 0.7, accuracy: 0.05)
+        XCTAssertEqual(ring.maxY, 39.3, accuracy: 0.05)
+        // The moon: its outer disc's left, top and foot, cut on the right by the inner arc.
+        let moon = Mark.moon.drawing.shapes[0].path.boundingRect
+        XCTAssertEqual(moon.minX, 2.4, accuracy: 0.05)
+        XCTAssertEqual(moon.minY, 2.4, accuracy: 0.05)
+        XCTAssertEqual(moon.maxX, 20.18, accuracy: 0.05)
+        XCTAssertEqual(moon.maxY, 21.6, accuracy: 0.05)
+        for mark in [Mark.consecration, .cross, .sun, .moon] {
+            let drawing = mark.drawing
+            for shape in drawing.shapes {
+                let bounds = shape.path.boundingRect
+                XCTAssertFalse(bounds.isEmpty, "\(mark)")
+                XCTAssertTrue(CGRect(x: 0, y: 0, width: drawing.box, height: drawing.box).contains(bounds), "\(mark)")
+            }
+        }
     }
 }
 
