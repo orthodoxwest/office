@@ -165,12 +165,13 @@ private struct Frontispiece: View {
             if !view.season.isEmpty {
                 Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(4.8))
             }
-            Disclosure(label: "Change date", open: picking) { picking.toggle() }
+            Disclosure(label: "Change date", open: picking) { withAnimation(unfolding) { picking.toggle() } }
             if picking {
                 DayPicker(shown: date, today: model.today) { d in
                     picking = false
                     model.open(.home(d))
                 }
+                .transition(.unfold)
             }
         }
         .padding(.horizontal, side)

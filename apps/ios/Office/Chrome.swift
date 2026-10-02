@@ -279,6 +279,19 @@ func textSizeName(_ s: TextSize) -> String {
     }
 }
 
+/// How a disclosure opens and closes, as on Android: over a quarter second, easing in and out.
+let unfolding = Animation.easeInOut(duration: 0.26)
+
+extension AnyTransition {
+    /// A disclosure's contents, fading in as they drop a little from their control, and back.
+    static var unfold: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.06)).combined(with: .offset(y: -6)),
+            removal: .opacity.animation(.easeIn(duration: 0.1)).combined(with: .offset(y: -6))
+        )
+    }
+}
+
 /// A small uppercase disclosure label with its caret ("Change date ▾").
 struct Disclosure: View {
     let label: String
@@ -320,8 +333,11 @@ struct DayPicker: View {
     @State private var year: Int
     @State private var month: Int
     @State private var months = false
+    /// Which way the days last turned: 1 to a later month, -1 to an earlier.
+    @State private var turn: CGFloat = 1
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(shown: CivilDate, today: CivilDate, pick: @escaping (CivilDate) -> Void) {
         self.shown = shown
@@ -351,7 +367,7 @@ struct DayPicker: View {
             HStack(spacing: 0) {
                 // A month's step in the days, a year's in the months; none past the picker's span.
                 step("‹", back, months ? "Previous year" : "Previous month")
-                Button { months.toggle() } label: {
+                Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
                     HStack(spacing: 0) {
                         Text(title.uppercased()).type(.label(12.8, 0.1)).foregroundStyle(p.text)
                         Caret(open: months, color: p.text)
@@ -365,15 +381,41 @@ struct DayPicker: View {
             .padding(.top, m.px(12))
             ZStack {
                 // The days always lay out, for the height both views share; the months cover them.
-                days.opacity(months ? 0 : 1).accessibilityHidden(months)
-                if months { monthGrid }
+                // A new month's days slide in the way it turned.
+                days
+                    .id(year * 12 + month)
+                    .transition(reduceMotion ? .opacity : .asymmetric(
+                        insertion: .offset(x: 60 * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
+                        removal: .offset(x: -60 * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
+                    ))
+                    .opacity(months ? 0 : 1)
+                    .accessibilityHidden(months)
+                if months { monthGrid.transition(.opacity) }
             }
+            .clipped()
             .padding(.horizontal, m.px(8))
+            // A swipe across the days turns the month, as the arrows do.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 24).onEnded { drag in
+                    guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2) else { return }
+                    turnTo(drag.translation.width < 0 ? forward : back)
+                }
+            )
         }
         .padding(.top, m.px(8))
     }
 
     private var title: String { months ? "\(year)" : "\(monthName(month)) \(year)" }
+
+    /// Shows another month's days (or year's months), moving the way it lies.
+    private func turnTo(_ to: (Int, Int)?) {
+        guard let to else { return }
+        turn = to.0 * 12 + to.1 > year * 12 + month ? 1 : -1
+        withAnimation(.easeInOut(duration: 0.26)) {
+            year = to.0
+            month = to.1
+        }
+    }
 
     private var back: (Int, Int)? {
         let (y, mo) = months ? (year - 1, month) : month == 1 ? (year - 1, 12) : (year, month - 1)
@@ -386,9 +428,7 @@ struct DayPicker: View {
     }
 
     private func step(_ glyph: String, _ to: (Int, Int)?, _ label: String) -> some View {
-        Button {
-            if let to { year = to.0; month = to.1 }
-        } label: {
+        Button { turnTo(to) } label: {
             Text(glyph).type(Scale.body.sized(22, line: 28)).foregroundStyle(to == nil ? p.muted.opacity(0.35) : p.accent)
                 .padding(.horizontal, m.px(24)).frame(minHeight: 44)
         }

@@ -120,7 +120,7 @@ struct OrdoScreen: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Section mark: fasting. Fish: abstinence.")
             Spacer()
-            Button { allDetails.toggle() } label: {
+            Button { withAnimation(unfolding) { allDetails.toggle() } } label: {
                 Text(allDetails ? "Hide office details" : "Show office details").type(Scale.small).foregroundStyle(p.accent).underline()
                     .padding(.vertical, m.px(12))
             }
@@ -387,16 +387,17 @@ private struct DayRow: View {
         HStack(spacing: m.px(9.6)) {
             if !d.commemorations.isEmpty {
                 let n = d.commemorations.count
-                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { comms.toggle() }
+                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { withAnimation(unfolding) { comms.toggle() } }
             }
-            if hasDetails { small("Office details", open) { details = !open } }
+            if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
         }
         if comms {
             ForEach(d.commemorations, id: \.self) { c in
                 Text(c).type(TextStyle(size: 13.6, line: 20.4, italic: true)).foregroundStyle(p.muted)
             }
+            .transition(.unfold)
         }
-        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers) }
+        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
     }
 
     private func small(_ label: String, _ open: Bool, toggle: @escaping () -> Void) -> some View {

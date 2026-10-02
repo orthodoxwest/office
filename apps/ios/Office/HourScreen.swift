@@ -151,7 +151,7 @@ struct HourScreen: View {
                     ForEach(rows) { row in
                         switch row {
                         case let .toggle(i, label, expanded):
-                            Button { open[i] = !expanded } label: {
+                            Button { withAnimation(unfolding) { open[i] = !expanded } } label: {
                                 HStack(spacing: 0) {
                                     Text(label).type(Scale.heading).foregroundStyle(p.titulus)
                                     Caret(open: expanded, color: p.titulus)
@@ -301,12 +301,14 @@ private struct HourTitle: View {
                     picking = false
                     model.open(.hour(d, view.hour))
                 }
+                .transition(.unfold)
             }
             if choosing {
                 FormChooser(form: model.form) { f in
-                    choosing = false
+                    withAnimation(unfolding) { choosing = false }
                     model.chooseForm(f)
                 }
+                .transition(.unfold)
             }
             Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
         }
@@ -317,12 +319,16 @@ private struct HourTitle: View {
 
     @ViewBuilder private var disclosures: some View {
         Disclosure(label: "Change date", open: picking) {
-            picking.toggle()
-            choosing = false
+            withAnimation(unfolding) {
+                picking.toggle()
+                choosing = false
+            }
         }
         Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label) {
-            choosing.toggle()
-            picking = false
+            withAnimation(unfolding) {
+                choosing.toggle()
+                picking = false
+            }
         }
     }
 }

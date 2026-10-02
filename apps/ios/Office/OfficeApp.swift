@@ -77,7 +77,7 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.horizontal, gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
                 if model.settingsOpen && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
@@ -88,7 +88,7 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
             }
             .animation(.easeOut(duration: 0.15), value: model.menuOpen)
