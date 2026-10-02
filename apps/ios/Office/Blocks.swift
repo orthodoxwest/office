@@ -32,6 +32,9 @@ func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     // The Gloria Patri after a psalm's last verse.
     if cur.kind == .gloriaPatri && prev.kind == .verse { return 13.6 }
     if cur.kind == .stanza && prev.kind == .stanza { return 12 }
+    // A hymn's rubric keeps a stanza's distance from the stanzas around it.
+    if cur.kind == .hymnRubric && prev.kind == .stanza { return 12 }
+    if cur.kind == .stanza && prev.kind == .hymnRubric { return 12 }
     if cur.startsElement { return 14 }
     return 4.8
 }
@@ -53,6 +56,8 @@ private func setting(_ kind: BlockKind) -> Setting {
     case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
     // Under an announcement, centred beneath its words.
     case .announcementNote: return Setting(style: Scale.rubric, color: \.rubric, alignment: .center)
+    // A rubric among a hymn's stanzas, centred in its column.
+    case .hymnRubric: return Setting(style: Scale.rubric, color: \.rubric, alignment: .center)
     case .speaker: return Setting(style: Scale.speaker, color: \.rubric)
     case .verse, .stanza, .gloriaPatri: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
@@ -263,8 +268,8 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
             spec.restIndent = sigil + m.px(6.4)
         }
     case .stanza:
-        // A wrapped line hangs beneath its own start.
-        spec.restIndent = 20 * m.type
+        // A wrapped line hangs beneath its own start (`.hymn-line`, 1.1rem).
+        spec.restIndent = 17.6 * m.type
         if block.dropCap { return opening(textStart: 0) }
     case .paragraph, .chantLine:
         if block.dropCap { return opening(textStart: 0) }
@@ -276,7 +281,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
 
 /**
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
- * stanzas are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
+ * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
  */
 struct BlockRow: View {
     let block: BlockView
@@ -290,7 +295,7 @@ struct BlockRow: View {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
         } else {
             let prose = Prose(spec: proseSpec(block, p, o, m), spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
-            if block.kind == .stanza {
+            if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)
@@ -304,8 +309,9 @@ struct BlockRow: View {
 /// The web's `.hymn-verses` max-width, 28rem.
 private let hymnMax: CGFloat = 448
 
-/// The web's `.hymn-line` hanging padding (1.1rem at a phone's width), which its fit-content column counts.
-private let hymnHang: CGFloat = 17.6
+/// Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
+/// hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.
+private let hymnSlack: CGFloat = 1
 
 /// Where a block is in an hour: its section, and its place there.
 struct BlockAt: Hashable {
@@ -354,8 +360,8 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
         var run: [Int] = []
         var widest: CGFloat = 0
         func close() {
-            let column = min((widest + m.px(hymnHang)).rounded(.up), m.px(hymnMax))
-            for b in run { out[BlockAt(section: si, block: b)] = column }
+            let column = min((widest + m.px(hymnSlack)).rounded(.up), m.px(hymnMax))
+            if widest > 0 { for b in run { out[BlockAt(section: si, block: b)] = column } }
             run = []
             widest = 0
         }
@@ -364,6 +370,9 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
             case .stanza:
                 run.append(bi)
                 widest = max(widest, stanzaWidth(b))
+            // A hymn's rubric takes its column without widening it (the web's width: 0; min-width: 100%).
+            case .hymnRubric:
+                run.append(bi)
             case .rubric, .gap:
                 break
             default:

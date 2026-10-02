@@ -570,6 +570,7 @@ pub enum BlockKind {
     All,
     Speaker,
     Stanza,
+    HymnRubric,
     Gap,
 }
 
@@ -598,6 +599,7 @@ impl From<render_blocks::BlockKind> for BlockKind {
             K::All => BlockKind::All,
             K::Speaker => BlockKind::Speaker,
             K::Stanza => BlockKind::Stanza,
+            K::HymnRubric => BlockKind::HymnRubric,
             K::Gap => BlockKind::Gap,
         }
     }

@@ -63,6 +63,9 @@ pub enum BlockKind {
     Speaker,
     /// A hymn stanza, its lines separated by `Break` runs.
     Stanza,
+    /// A rubric among a hymn's stanzas ("The following stanza is said
+    /// kneeling."), centred in the hymn's column, as the web's `.hymn-rubric`.
+    HymnRubric,
     /// Vertical space between groups of lines; it has no runs.
     Gap,
 }
@@ -651,7 +654,7 @@ fn hymn_stanzas(out: &mut Vec<Block>, text: &str) {
     let hymn = parse_hymn(text);
     if !hymn.title.is_empty() {
         match hymn_rubric_text(&hymn.title) {
-            Some(r) => out.push(Block::new(BlockKind::Rubric, text_runs(r))),
+            Some(r) => out.push(Block::new(BlockKind::HymnRubric, text_runs(r))),
             None => out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&hymn.title, RunStyle::Latin))),
         }
     }
@@ -661,7 +664,7 @@ fn hymn_stanzas(out: &mut Vec<Block>, text: &str) {
             continue;
         }
         if let Some(rubrics) = hymn_rubric_stanza(stanza) {
-            out.extend(rubrics.into_iter().map(|r| Block::new(BlockKind::Rubric, text_runs(r))));
+            out.extend(rubrics.into_iter().map(|r| Block::new(BlockKind::HymnRubric, text_runs(r))));
             continue;
         }
         let mut runs = join_lines(stanza.iter().map(|l| cross_runs(l, RunStyle::Plain)), true);

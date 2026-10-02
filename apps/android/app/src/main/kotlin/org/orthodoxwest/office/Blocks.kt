@@ -97,6 +97,9 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
         // The Gloria Patri after a psalm's last verse.
         cur.kind == BlockKind.GLORIA_PATRI && prev.kind == BlockKind.VERSE -> 13.6.dp
         cur.kind == BlockKind.STANZA && prev.kind == BlockKind.STANZA -> 12.dp
+        // A hymn's rubric keeps a stanza's distance from the stanzas around it.
+        cur.kind == BlockKind.HYMN_RUBRIC && prev.kind == BlockKind.STANZA -> 12.dp
+        cur.kind == BlockKind.STANZA && prev.kind == BlockKind.HYMN_RUBRIC -> 12.dp
         cur.startsElement -> 14.dp
         else -> 4.8.dp
     }
@@ -104,7 +107,7 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
 
 /**
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
- * stanzas are set in `column`, the width of the hymn's longest line (see [hymnColumns]). A
+ * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see [hymnColumns]). A
  * heading with `cross` stands under a small painted cross, between the office's parts.
  */
 @Composable
@@ -197,11 +200,16 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             }
         }
         // The hymn's column, centred: the rag balanced by an equal indent on the left, as the
-        // web's fit-content `.hymn-verses`. A wrapped line hangs beneath its own start.
+        // web's fit-content `.hymn-verses`. A wrapped line hangs beneath its own start (`.hymn-line`, 1.1rem).
         BlockKind.STANZA -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            val style = verse.copy(textIndent = TextIndent(restLine = 20.sp))
+            val style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp))
             val inColumn = if (column != null) Modifier.width(column) else Modifier
             if (block.dropCap) Opening(block, style, inColumn, textStart = 0.dp) else Text(runs(block), inColumn.fillMaxWidth(), style = style)
+        }
+        // A rubric among the stanzas, centred in the hymn's column.
+        BlockKind.HYMN_RUBRIC -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            val inColumn = if (column != null) Modifier.width(column) else Modifier
+            Text(runs(block), inColumn.fillMaxWidth(), style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center))
         }
         BlockKind.PARAGRAPH, BlockKind.CHANT_LINE -> {
             if (block.dropCap) Opening(block, text, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = text)
@@ -351,8 +359,11 @@ private const val CROSS_MARK = "\uE000"
 /** The web's `.hymn-verses` max-width, 28rem. */
 private val HymnMax: Dp = 448.dp
 
-/** The web's `.hymn-line` hanging padding (1.1rem at a phone's width), which its fit-content column counts. */
-private val HymnHang: Dp = 17.6.dp
+/**
+ * Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
+ * hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.
+ */
+private val HymnSlack: Dp = 1.dp
 
 /**
  * Each hymn's column width, by (section, block) index of its stanzas: its longest metrical line,
@@ -387,8 +398,8 @@ fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
             var run = mutableListOf<Int>()
             var widest = 0
             fun close() {
-                val col = with(density) { widest.toDp() + HymnHang }.coerceAtMost(HymnMax)
-                run.forEach { out[si to it] = col }
+                val col = with(density) { widest.toDp() + HymnSlack }.coerceAtMost(HymnMax)
+                if (widest > 0) run.forEach { out[si to it] = col }
                 run = mutableListOf()
                 widest = 0
             }
@@ -398,6 +409,8 @@ fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
                         run.add(bi)
                         widest = maxOf(widest, stanzaWidth(b, texts[si][bi]!!))
                     }
+                    // A hymn's rubric takes its column without widening it (the web's width: 0; min-width: 100%).
+                    BlockKind.HYMN_RUBRIC -> run.add(bi)
                     BlockKind.RUBRIC, BlockKind.GAP -> Unit
                     else -> close()
                 }
