@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, report_issue %}
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
@@ -91,10 +91,13 @@
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
       {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">Next hour</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
     </nav>
-    {# Each form's report names that form's page. #}
+  </div>
+</div>
+{% endblock %}
+{# The report line is footer matter, under the tailpiece. Each form's
+     report names that form's page. #}
+{% block footer_matter %}{% from "macros.html" import report_issue %}
     {% if leader_forms %}
     {% for f in leader_forms %}<div data-leaders="{{ f.form }}">{{ report_issue(f.report_url) }}</div>{% endfor %}
     {% else %}{{ report_issue(report_url) }}{% endif %}
-  </div>
-</div>
 {% endblock %}

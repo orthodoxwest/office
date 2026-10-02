@@ -79,7 +79,6 @@ var CORE_ASSETS = [
   assetURL("/static/ornaments/moon.svg"),
   assetURL("/static/ornaments/vault.svg"),
   assetURL("/static/ornaments/powder.svg"),
-  assetURL("/static/ornaments/star.svg"),
   assetURL("/static/ornaments/quatrefoil.svg"),
   assetURL("/static/ornaments/tailpiece.svg")
 ];

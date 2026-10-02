@@ -48,10 +48,13 @@ or impose a redesign on an unrelated change.
 - The starfield belongs to Apse home, the post-office epilogue, and, on
   screens 1680px and wider, the margins beside an hour's prayer, which run
   down into the epilogue's field. By day the same home and epilogue fields
-  carry the Nave's powdering instead: six-petal rosettes stencilled over
-  the limewash in the lining thinned almost to the ground (`--wall-field`,
-  `--wall-ink`; `ornaments/powder.svg`), veiling and gilding with
-  `--ornament-line`. The wide hours' margins stay plain by day.
+  carry the Nave's powdering instead: one six-petal rosette to each cell
+  of a quincunx lattice (`ornaments/powder.svg`, 96×84px cells, alternate
+  rows set half a cell over), in the rubrics' red at 12% (`--wall-field`,
+  `--wall-ink`), cut square under the beam rather than faded, with no
+  leaf; a scattered powdering in three sizes read as confetti. On the
+  hours it shows only below the hour navigation. The wide hours' margins
+  stay plain by day.
   For changes to those fields or their masks, read
   [references/apse-vault.md](references/apse-vault.md).
 
@@ -73,15 +76,23 @@ or impose a redesign on an unrelated change.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
-- On a phone home's frontispiece is a round-headed painted panel: a low
-  segmental head (`--panel-head`), the day's colour as a 1.5px ring at its
-  edge, the terracotta lining painted round the head (`--panel-inset`
-  inside the edge, with clear air above the cross: a tighter arch once
-  clipped it) ending at the inscription band, the consecration cross at
-  the crown, and a little recess shade under the head. Its shadows are a
-  token (`--panel-shadows`) that the Apse rules restate with their soft
-  erase. It must still fit a 375×667 viewport whole, so its cost was paid
-  by the header's margin, the footer gap and the page's bottom padding.
+- On a phone home's frontispiece is a round-headed painted panel: a
+  segmental head (`--panel-head`, 4.25rem; 3.5rem under 375px) with a
+  springing (the lining's curve starts 8px below the moulding's), the day's
+  colour as a 1.5px ring at its edge and again as the lining's inner
+  hairline (`--lining-day`; a white day takes `--gold-line` by day), so the
+  liturgical colour sits beside the cross on plaster; the terracotta lining
+  painted round the head (`--panel-inset` inside the edge, with clear air
+  above the cross: a tighter arch once clipped it) ending at the
+  inscription band, the consecration cross at the crown, and a little
+  recess shade under the head. Its shadows are a token (`--panel-shadows`,
+  ending in a soft `--bg` halo that keeps the powdering off the panel) that
+  the Apse rules restate with their soft erase. The panel's furniture is
+  ruled in the lining thinned (`--panel-rule`): the invitation's second
+  line 3px inside its border, the hour table's outer frame; the period
+  labels' cells take the frieze's green earth thinned. It must still fit a
+  375×667 viewport whole, so its cost was paid by the header's margin, the
+  footer's padding and gap, and the page's bottom padding.
   From 701px the same object widens into a niche set into the wall (round
   head, stone moulding, day-colour trim, recess shadow, the lining restated
   at the niche's scale), and the room is lit toward
@@ -98,13 +109,17 @@ or impose a redesign on an unrelated change.
 - Every page closes on the footer's tailpiece (`footer::before`, a
   quatrefoil between two painted rules, in the lining): the same geometry
   in both themes, so the footer never moves with the theme, and set in rem
-  so the wide hours' vault seam (`--apse-rest-seam`) holds. The header beam
-  shows two edges (`--oak-line` over `--oak-moulding`), as a chamfered
-  timber does. The ordo's month headings and the Tabula's are tituli; the
-  year's figures sit on a painted tablet with quatrefoil knops
-  (`.tabula-figures::before`, one mask of rules and knops); today takes a
-  gilt parish star at the day number's shoulder, placed absolutely so it
-  adds no height.
+  so the wide hours' vault seam (`--apse-rest-seam`) holds. The hours'
+  "Report a problem" line is footer matter under the tailpiece and the
+  colophon (`layout.html`'s `footer_matter` block), not part of the
+  epilogue. The header beam is a 4px course of oak (`--beam`) with
+  `--material-highlight` catching its upper edge. The ordo's month headings
+  and the Tabula's are tituli; the year's figures sit on a painted tablet
+  (`.tabula-figures`: the surface thinned, a frame ruled twice with
+  quatrefoil knops, one mask over one pseudo-element); today is a painted
+  band (the frieze's wash inset 8px from the phone's gutters, ruled in
+  `--gold-line`, the number in gold), not a selected row, and carries no
+  further mark.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's

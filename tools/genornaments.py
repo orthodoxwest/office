@@ -18,12 +18,13 @@ repository root.
                               eight-ray stars in three sizes, set by hand
                               rather than on a lattice, each catching its own
                               share of light
-  ornaments/powder.svg        one seamless tile of the Nave wall's powdering:
-                              six-petal rosettes stencilled by hand in three
-                              sizes, as the margins of English parish walls
-                              were powdered in the fourteenth and fifteenth
-                              centuries; the Nave's counterpart to the vault
-  ornaments/star.svg          one parish star alone (the ordo's mark for today)
+  ornaments/powder.svg        one cell of the Nave wall's powdering: a six-petal
+                              rosette stencilled on a quincunx lattice (96px
+                              across, 84px between rows, alternate rows set
+                              half a cell over), as the margins of English
+                              parish walls were powdered in the fourteenth and
+                              fifteenth centuries; the Nave's counterpart to
+                              the vault
   ornaments/quatrefoil.svg    the Gothic quatrefoil (corner knops of painted
                               frames)
   ornaments/tailpiece.svg     a quatrefoil between two painted rules that thin
@@ -157,9 +158,6 @@ def tailpiece():
     return svg(f"0 0 {w} {h}", f'<path d="{q}{left}{right}"/>')
 
 
-def single_star():
-    return svg("0 0 20 20", f'<path d="{star(random.Random(0), 10, 10, 9.4, 0, 0)}"/>')
-
 
 def rosette(cx, cy, r, rot, steps=10):
     """A six-petal rosette, the stencil's flower: petals as ellipses about a
@@ -178,34 +176,14 @@ def rosette(cx, cy, r, rot, steps=10):
     return "".join(parts)
 
 
-def powder(seed=1420, tile=528, count=27, attempts=40000):
-    """Rosettes powdered over the limewash, sparser than the vault's stars."""
-    rng = random.Random(seed)
-    placed = []
-    for _ in range(attempts):
-        if len(placed) >= count:
-            break
-        x, y = rng.uniform(0, tile), rng.uniform(0, tile)
-        size = rng.choices([3.6, 5.2, 7.0], weights=[0.45, 0.35, 0.2])[0]
-        clear = True
-        for px, py, ps in placed:
-            dx = min(abs(x - px), tile - abs(x - px))
-            dy = min(abs(y - py), tile - abs(y - py))
-            if dx * dx + dy * dy < (58 + 3 * (size + ps)) ** 2:
-                clear = False
-                break
-        if clear:
-            placed.append((x, y, size))
-    parts = []
-    for x, y, size in placed:
-        opacity = rng.uniform(0.5, 1.0)
-        rot = rng.uniform(0, math.pi / 3)
-        for ox in (-tile, 0, tile):
-            for oy in (-tile, 0, tile):
-                cx, cy = x + ox, y + oy
-                if -20 < cx < tile + 20 and -20 < cy < tile + 20:
-                    parts.append(f'<path d="{rosette(cx, cy, size, rot)}" fill-opacity="{opacity:.2f}"/>')
-    return svg(f"0 0 {tile} {tile}", "".join(parts)), len(placed)
+def powder(cell_w=96, cell_h=84, radius=7.0):
+    """Rosettes powdered over the limewash on a quincunx: one rosette to a
+    cell, alternate rows set half a cell over, so the tile is one cell wide
+    and two rows tall. Powdering was ordered, not sprinkled."""
+    tile_w, tile_h = cell_w, 2 * cell_h
+    rows = [(cell_w / 4, cell_h / 2), (3 * cell_w / 4, 3 * cell_h / 2)]
+    parts = [f'<path d="{rosette(x, y, radius, 0)}"/>' for x, y in rows]
+    return svg(f"0 0 {tile_w} {tile_h}", "".join(parts)), len(rows)
 
 
 def vault(seed=1120, tile=528, count=40, attempts=40000):
@@ -251,11 +229,11 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     tile, stars = vault()
     field, rosettes = powder()
-    counts = {"vault.svg": f"({stars} stars)", "powder.svg": f"({rosettes} rosettes)"}
+    counts = {"vault.svg": f"({stars} stars)", "powder.svg": f"({rosettes} rosettes a cell)"}
     for name, body in [("consecration.svg", consecration()), ("cross.svg", cross()),
                        ("sun.svg", sun()), ("moon.svg", moon()), ("vault.svg", tile),
-                       ("powder.svg", field), ("star.svg", single_star()),
-                       ("quatrefoil.svg", quatrefoil()), ("tailpiece.svg", tailpiece())]:
+                       ("powder.svg", field), ("quatrefoil.svg", quatrefoil()),
+                       ("tailpiece.svg", tailpiece())]:
         path = args.out / name
         path.write_text(body)
         print("wrote", path, counts.get(name, ""))
