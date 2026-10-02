@@ -108,9 +108,10 @@ private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
 /**
  * The niche behind the frontispiece, in the order the web's box-shadows stack, bottom first: a
  * clearing of the Apse's ground, the shadow under the head, the moulding's edge and stone, the
- * day's colour; then the lit recess, its shadow under the head, the frame and the tooling.
+ * day's colour; then the lit recess, its shadow under the head, and the frame. The painted
+ * lining ([nicheLining]) takes the place of the phone card's tooling.
  */
-fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: Color, tooling: Color) {
+fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: Color) {
     val rem = 16.dp.toPx()
     t.clear?.let {
         blurred(nichePath(size, head, 1.4f * rem), it, 1.8f * rem)
@@ -120,7 +121,8 @@ fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: 
     translate(0f, 1.5f * rem) { blurred(nichePath(size, head, -0.75f * rem), t.shade, 3f * rem) }
     drawPath(nichePath(size, head, 0.75f * rem + 1.dp.toPx()), t.edge)
     drawPath(nichePath(size, head, 0.75f * rem), t.stone)
-    drawPath(nichePath(size, head, 2.dp.toPx()), day)
+    // The day's colour is a hint at the niche's edge, not a second frame.
+    drawPath(nichePath(size, head, 1.5.dp.toPx()), day)
     val shape = nichePath(size, head, 0f)
     drawPath(shape, p.surface)
     clipPath(shape) {
@@ -142,10 +144,31 @@ fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: 
         blurred(Path.combine(PathOperation.Difference, all, hole), t.recess, 2.6f * rem)
     }
     drawPath(nichePath(size, head, -1.dp.toPx()), frame, style = Stroke(2.dp.toPx()))
-    // The book-cover tooling, 0.35rem inside, its head following the arch.
-    val inset = 0.35f * rem
-    val tool = nichePath(Size(size.width - 2 * inset, size.height - 2 * inset), head - inset, 0f)
-    translate(inset, inset) { drawPath(tool, tooling, style = Stroke(1.dp.toPx())) }
+}
+
+/**
+ * The lining painted on the niche's back wall: a 2dp band and a lighter line 5dp inside it,
+ * round the head only and open below, so it reads as paint on the wall rather than another edge
+ * of the arch. Drawn in this scope's width from `top` (its outer edge) to the scope's foot, its
+ * head an ellipse across the whole width with vertical radius `ry` at the outer edge.
+ */
+fun DrawScope.nicheLining(color: Color, top: Float, ry: Float) {
+    // One line `inset` inside the outer edge; CSS's inherited radius keeps `ry` for both.
+    fun line(inset: Float, weight: Float, ink: Color) {
+        val x = inset + weight / 2f
+        val y = top + inset + weight / 2f
+        val r = ry - weight / 2f
+        val path = Path().apply {
+            moveTo(x, size.height)
+            lineTo(x, y + r)
+            arcTo(Rect(x, y, size.width - x, y + 2 * r), 180f, 180f, false)
+            lineTo(size.width - x, size.height)
+        }
+        drawPath(path, ink, style = Stroke(weight))
+    }
+    val band = 2.dp.toPx()
+    line(0f, band, color)
+    line(band + 5.dp.toPx(), 1.dp.toPx(), color.copy(alpha = color.alpha * 0.62f))
 }
 
 /**

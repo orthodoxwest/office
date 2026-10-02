@@ -150,7 +150,7 @@ fun RemindersScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(REMINDER_LEADS.first { it.first == settings.lead }.second, Modifier.weight(1f), style = body.copy(fontFeatureSettings = "lnum"))
-                        Caret(open)
+                        Caret(open, p.text)
                     }
                     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
                         REMINDER_LEADS.forEach { (minutes, label) ->
@@ -185,14 +185,15 @@ fun RemindersScreen(
 
 private fun ReminderSettings.withHour(h: HourReminder) = copy(hours = hours.map { if (it.hour == h.hour) h else it })
 
-/** The web's plain headpiece: a short rule either side of the cross, set to the left. */
+/** The web's headpiece, set to the left: a painted cross between two short rules. */
 @Composable
 private fun PlainHeadpiece() {
-    val o = LocalOrnament.current
+    val ink = LocalPalette.current.lining
+    val rule = ink.copy(alpha = 0.55f)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(o.line) }
-        Text("✠", Modifier.padding(horizontal = 8.dp), style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = o.flat))
-        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(o.line) }
+        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
+        Text("✠", Modifier.padding(horizontal = 8.dp), style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = ink))
+        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
     }
 }
 

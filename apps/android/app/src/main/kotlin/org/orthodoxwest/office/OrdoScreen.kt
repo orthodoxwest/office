@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,11 +41,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.Month
@@ -233,10 +241,8 @@ private fun OrdoHeader(
         }
     }
     val rules = Modifier.drawBehind {
-        // The frontispiece's double rule above, a hairline below.
+        // A hairline below; the ordo opens like the hours, its headpiece alone with no rule above.
         val w = 1.dp.toPx()
-        drawLine(p.goldLine, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
-        drawLine(p.goldLine, Offset(0f, w * 2.5f), Offset(size.width, w * 2.5f), w)
         drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
     }
     if (wide) {
@@ -383,7 +389,12 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
             val w = 1.dp.toPx()
             drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
             drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
-            if (isTodaysMonth) lozenge(Offset(size.width / 2f, size.height - w * 1.5f), 4.dp.toPx(), o.flat, null)
+            if (isTodaysMonth) {
+                // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
+                val c = Offset(size.width / 2f, size.height - w * 1.5f)
+                lozenge(c, 7.07.dp.toPx(), p.bg, null)
+                lozenge(c, 4.24.dp.toPx(), p.lining, null)
+            }
         }.padding(vertical = 6.4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -432,11 +443,12 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.Top) {
                     // The date's stop already says the feast; the feast is a second target for the eye only.
-                    Text(d.feast, Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp, color = p.text))
+                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
                     Row(Modifier.padding(start = 8.dp, top = 2.dp).clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (d.fast) Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted))
                         if (d.abstinence) FishIcon(p.muted)
-                        if (d.rank.isNotEmpty()) Text(d.rank, Modifier.goldUnderline(true, p.goldLine), style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
+                        if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
                     }
                 }
                 body()
@@ -498,21 +510,57 @@ private fun DayTableRow(
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
                 // The date's stop already says the feast; the feast is a second target for the eye only.
-                Text(d.feast, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp, color = p.text))
+                FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp), Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
                 body()
             }
+            // Fasting and abstinence stay quiet, so red in a row means rank.
             Box(Modifier.width(FlagCol).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.fast) Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.rubric, fontWeight = FontWeight.Bold))
+                if (d.fast) Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.muted, fontWeight = FontWeight.Bold))
             }
             Box(Modifier.width(FlagCol).padding(top = 6.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.abstinence) FishIcon(p.rubric)
+                if (d.abstinence) FishIcon(p.muted)
             }
+            // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
             Box(Modifier.width(RankCol).padding(end = 7.2.dp, top = 3.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopEnd) {
-                if (d.rank.isNotEmpty()) Text(d.rank, Modifier.goldUnderline(true, p.goldLine), style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = p.text))
+                if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = rankInk(d.rank, p)))
             }
         }
         Hairline(p.border)
     }
+}
+
+/**
+ * A day's rank read from its ink, as in a Book of Hours: the great feasts red-letter, doubles
+ * slate blue, lesser days black.
+ */
+private fun rankInk(rank: String, p: Palette): Color = when (rank) {
+    "1cl", "2cl", "gd" -> p.rubric
+    "d" -> p.kalendarBlue
+    else -> p.text
+}
+
+/** A first-class feast's small painted cross, 0.62em with 0.32em after it, on the name's baseline. */
+private val FirstClassCross = mapOf(
+    "cross" to InlineTextContent(Placeholder(0.94.em, 0.62.em, PlaceholderVerticalAlign.AboveBaseline)) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) {
+            PaintedCross(Modifier.fillMaxHeight().aspectRatio(1f, matchHeightConstraintsFirst = true))
+        }
+    },
+)
+
+/** A feast's name in its rank's ink, a first-class feast's after a small painted cross. */
+@Composable
+private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
+    val first = d.rank == "1cl"
+    Text(
+        buildAnnotatedString {
+            if (first) appendInlineContent("cross", "✠")
+            append(d.feast)
+        },
+        modifier,
+        style = style.copy(color = rankInk(d.rank, LocalPalette.current)),
+        inlineContent = if (first) FirstClassCross else emptyMap(),
+    )
 }
 
 private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
@@ -522,7 +570,7 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
     Row(Modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = LocalPalette.current.muted))
-        Caret(open)
+        Caret(open, LocalPalette.current.muted)
     }
 }
 
