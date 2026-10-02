@@ -145,7 +145,7 @@ private struct OrdoHeader: View {
                     Spacer(minLength: 32)
                     yearNav
                 }
-                .padding(.top, m.px(13.4))
+                .padding(.top, m.px(10.4))
                 .padding(.bottom, m.px(16))
                 .background(rules)
                 strip.overlay(alignment: .bottom) { Rectangle().fill(p.border).frame(height: 1) }
@@ -157,18 +157,15 @@ private struct OrdoHeader: View {
                 Hairline(color: p.border).padding(.top, m.px(8))
                 strip
             }
-            .padding(.top, m.px(13.4))
+            .padding(.top, m.px(10.4))
             .padding(.bottom, m.px(16))
             .background(rules)
         }
     }
 
-    /// The frontispiece's double rule above, a hairline below.
+    /// The frontispiece's hairline below; it opens as the hours do, with its headpiece alone and no rule above.
     private var rules: some View {
         VStack(spacing: 0) {
-            Rectangle().fill(p.goldLine).frame(height: 1)
-            Spacer().frame(height: 1)
-            Rectangle().fill(p.goldLine).frame(height: 1)
             Spacer()
             Rectangle().fill(p.border).frame(height: 1)
         }
@@ -284,14 +281,19 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
-        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4 : nil, ring: nil) }
+        // Today's month takes the lozenge: a 6pt square of the lining's terracotta, ringed in the ground.
+        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4.24 : nil, ring: p.bg, ink: p.lining) }
     }
 }
 
-/// The ornament's double rule along a heading's foot, with a lozenge at its centre, ringed in the ground where `ring`.
+/**
+ * The ornament's double rule along a heading's foot, with a lozenge at its centre in the gilding
+ * or `ink`, ringed in the ground where `ring`.
+ */
 private struct OrnamentRule: View {
     let lozengeSize: CGFloat?
     let ring: Color?
+    var ink: Color?
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
@@ -304,8 +306,10 @@ private struct OrnamentRule: View {
                 ctx.stroke(line, with: .color(o.line), lineWidth: 1)
             }
             let c = CGPoint(x: size.width / 2, y: size.height - 1.5)
-            if let ring { ctx.fill(lozenge(c, m.px(4.5)), with: .color(ring)) }
-            if let lozengeSize { ctx.fill(lozenge(c, m.px(lozengeSize)), with: .color(o.flat)) }
+            if let lozengeSize {
+                if let ring { ctx.fill(lozenge(c, m.px(lozengeSize + 2)), with: .color(ring)) }
+                ctx.fill(lozenge(c, m.px(lozengeSize)), with: .color(ink ?? o.flat))
+            }
         }
         .frame(height: 12)
         .offset(y: 4.5)
@@ -348,6 +352,27 @@ private struct DayRow: View {
 
     private func openDay() { model.open(.home(d.date)) }
 
+    /// A day's rank is its ink, as in a Book of Hours: the great feasts red-letter, doubles slate blue, lesser days black.
+    private var rankInk: Color? {
+        switch d.rank {
+        case "1cl", "2cl", "gd": return p.rubric
+        case "d": return p.kalendarBlue
+        default: return nil
+        }
+    }
+
+    /// The feast's name in its rank's ink, a first-class feast's with a small painted cross before it.
+    private func feastName(_ style: TextStyle) -> some View {
+        let em = style.size * m.type
+        return HStack(alignment: .firstTextBaseline, spacing: 0) {
+            if d.rank == "1cl" {
+                PaintedMark(.cross, size: em * 0.62, color: p.lining).padding(.trailing, em * 0.32)
+            }
+            Text(d.feast).type(style).foregroundStyle(rankInk ?? p.text).multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     @ViewBuilder private var disclosures: some View {
         let open = details ?? allDetails
         HStack(spacing: m.px(9.6)) {
@@ -369,7 +394,7 @@ private struct DayRow: View {
         Button(action: toggle) {
             HStack(spacing: 0) {
                 Text(label).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted)
-                Caret(open: open)
+                Caret(open: open, color: p.muted)
             }
             .frame(minHeight: 44)
         }
@@ -397,16 +422,16 @@ private struct DayRow: View {
                     HStack(alignment: .top, spacing: 0) {
                         // The date's stop already says the feast; the feast is a second target for the eye only.
                         Button(action: openDay) {
-                            Text(d.feast).type(Scale.body.sized(16, line: 21.6)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            feastName(Scale.body.sized(16, line: 21.6))
                         }
                         .buttonStyle(Quiet())
                         .accessibilityHidden(true)
+                        // The card's marks stay quiet, as the web's: red in a row means rank.
                         HStack(spacing: m.px(6)) {
                             if d.fast { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) }
                             if d.abstinence { FishIcon(color: p.muted) }
                             if !d.rank.isEmpty {
-                                Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted).goldUnderline(true, p.goldLine)
+                                Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted)
                             }
                         }
                         .padding(.leading, m.px(8))
@@ -445,26 +470,27 @@ private struct DayRow: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
                     Button(action: openDay) {
-                        Text(d.feast).type(Scale.body.sized(16, line: 22.4)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        feastName(Scale.body.sized(16, line: 22.4))
                     }
                     .buttonStyle(Quiet())
                     .accessibilityHidden(true)
                     disclosures
                 }
                 .padding(.horizontal, 7.2)
+                // Fasting and abstinence stay quiet, so red in a row means rank.
                 Group {
-                    if d.fast { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.rubric) }
+                    if d.fast { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.muted) }
                 }
                 .frame(width: flagColumn)
                 .accessibilityHidden(true)
                 Group {
-                    if d.abstinence { FishIcon(color: p.rubric).padding(.top, 6) }
+                    if d.abstinence { FishIcon(color: p.muted).padding(.top, 6) }
                 }
                 .frame(width: flagColumn)
                 .accessibilityHidden(true)
+                // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
                 Group {
-                    if !d.rank.isEmpty { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(p.text).goldUnderline(true, p.goldLine) }
+                    if !d.rank.isEmpty { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(rankInk ?? p.text) }
                 }
                 .padding(.trailing, 7.2).padding(.top, 3)
                 .frame(width: rankColumn, alignment: .trailing)

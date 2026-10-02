@@ -43,8 +43,9 @@ private struct Setting {
 
 private func setting(_ kind: BlockKind) -> Setting {
     switch kind {
-    case .heading, .commemorationHeading: return Setting(style: Scale.heading, color: \.text, alignment: .center)
-    case .itemLabel: return Setting(style: Scale.itemLabel, color: \.muted, alignment: .center)
+    // The tituli, red ochre on the limewash and gilt on the Apse night, clear of the rubrics' red.
+    case .heading, .commemorationHeading: return Setting(style: Scale.heading, color: \.titulus, alignment: .center)
+    case .itemLabel: return Setting(style: Scale.itemLabel, color: \.titulus, alignment: .center)
     case .latinTitle, .canticleSection: return Setting(style: Scale.bodyItalic, color: \.muted, alignment: .center)
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
     case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
@@ -81,9 +82,10 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.foregroundColor] = UIColor(p.rubric)
             a[.font] = crossUIFont(size * 0.8)
         case .latin:
-            // Latin within a small-caps label is set in lower case italic, as the web's `.psalm-incipit`.
+            // Latin within a small-caps label is set in lower case italic and muted, as the web's `.psalm-incipit`.
             a[.font] = garamond(size, italic: true, smallCaps: false, lining: true)
             a[.kern] = 0.4 * k
+            a[.foregroundColor] = UIColor(p.muted)
         case .kicker:
             a[.font] = garamond(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.muted)
@@ -150,7 +152,7 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
     return (s.substring(with: letter), rest)
 }
 
-/// The initial for an opening in `style`: gilded, 3.05 times the text two lines deep, or 2.1 times raised.
+/// The initial for an opening in `style`: painted in the gilding, 3.05 times the text two lines deep, or 2.1 times raised.
 private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, raised: Bool) -> Initial {
     let size = style.size * m.type
     return Initial(
@@ -159,8 +161,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
         raised: garamond(size * 2.1),
         gap: size * 3.05 * 0.06,
         alwaysRaised: raised,
-        hi: UIColor(o.hi),
-        lo: UIColor(o.lo)
+        color: UIColor(o.flat)
     )
 }
 
@@ -204,7 +205,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
         var sigil = Scale.body
         sigil.smallCaps = true
         sigil.tracking = 1.4
-        let t = marked(block.marker, sigil, p.rubric)
+        let t = marked(block.marker, sigil, p.titulus)
         t.append(NSAttributedString(string: " ", attributes: [.font: font]))
         t.append(text)
         spec.text = t
