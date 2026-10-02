@@ -2,15 +2,30 @@ import SwiftUI
 import UIKit
 
 /**
- * An opening's initial: a painted capital two lines deep when the text wraps beside it, or raised
- * on the line when the text is short (the web's adaptive initial).
+ * An opening's initial, set as the web's adaptive initial sets it. A painted capital two lines deep
+ * stands beside the text as it wraps; a short responsory, or prose that fits on its line, takes a
+ * smaller capital raised on that line; a psalm keeps its full capital, raised over a single line
+ * (elevated), and may break after its mediant rather than leave a stub of a second line (divided).
+ * Hymns and the Marian antiphon always drop.
  */
 struct Initial: Equatable {
+    /// How an opening chooses its setting.
+    enum Adapt: Equatable {
+        /// Always raised: a short responsory.
+        case raised
+        /// Raised if the opening then fits its line, else dropped: a chapter, a collect.
+        case prose
+        /// Dropped, elevated or divided: a psalm or canticle.
+        case psalm
+        /// Always dropped: a hymn, the Marian antiphon.
+        case dropped
+    }
+
     let letter: String
     /// Two lines deep, as CSS `initial-letter: 2` sizes it: its cap height spans a line pitch and the text's cap height.
     let deep: UIFont
-    /// Raised on the first line: 2.1 times the text's size.
-    let raised: UIFont
+    /// A raised capital as a letter of its line (`.initial-raised`): its face, the brush's edge, the space after it.
+    let raised: NSAttributedString
     /// Where a deep capital's glyph starts from the measure's edge: its ink at the margin, moved by its hang.
     let left: CGFloat
     /// How far a deep capital's baseline stands below the first line's: its ink top meets that line's cap height.
@@ -21,8 +36,7 @@ struct Initial: Equatable {
     let tuck: CGFloat
     /// The lines beside a deep capital: two, or three past a descending tail.
     let rows: Int
-    /// A versicle's initial is always raised.
-    let alwaysRaised: Bool
+    let adapt: Adapt
     /// The gilding's flat ochre, which veils and brightens with the season.
     let color: UIColor
 }
@@ -79,41 +93,117 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
             measure()
             return
         }
-        if !initial.alwaysRaised {
-            // Two lines beside the capital (three past a descending tail); the remainder runs on at the
-            // text edge. As beside the web's float, a line never starts short of the text's own edge, and
-            // the first line's opening word moves by the capital's tuck from where its line starts.
-            let second = max(initial.edge, spec.restIndent)
-            let first = max(0, second + initial.tuck)
-            container.exclusionPaths = [
-                UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
-                UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
-            ]
-            // A line beside the capital starts with its word, as CSS drops a space at a line's start (after a lone O).
-            let lead = spec.text.string.prefix { $0.isWhitespace }.utf16.count
-            set(first: 0, rest: spec.restIndent, text: spec.text.attributedSubstring(from: NSRange(location: lead, length: spec.text.length - lead)))
-            if lines().count >= 2 {
-                capOrigin = CGPoint(x: initial.left, y: lines()[0].minY + baseline + initial.drop)
-                capFont = initial.deep
-                measure()
-                return
+        // A line beside a dropped capital starts with its word, as CSS drops a space at a line's start
+        // (after a lone O); a raised capital keeps the space, sharing its line.
+        let lead = spec.text.string.prefix { $0.isWhitespace }.utf16.count
+        let body = spec.text.attributedSubstring(from: NSRange(location: lead, length: spec.text.length - lead))
+        let divided = ProseLayout.divideAtMediant(body)
+        switch initial.adapt {
+        case .raised:
+            raise(initial)
+        case .prose:
+            if raise(initial).count > 1 { drop(initial, body) }
+        case .dropped:
+            drop(initial, body)
+        case .psalm:
+            let natural = drop(initial, body)
+            if natural.count < 2 {
+                // Raising can widen the line past the measure: two whole half-verses beside a dropped
+                // capital are then better than a new short tail.
+                if elevate(initial, body).count > 1, let divided, drop(initial, divided).count != 2 {
+                    elevate(initial, body)
+                }
+            } else if let divided, natural.count == 2, natural[1].words <= 2, natural[1].width < natural[0].width * 0.3 {
+                // A one- or two-word tail under less than 30% of the first line: break at the mediant
+                // instead, if that keeps two lines and clearly balances them.
+                let rows = drop(initial, divided)
+                if !(rows.count == 2 && ProseLayout.balance(rows) > ProseLayout.balance(natural) + 0.15) {
+                    drop(initial, body)
+                }
             }
-            container.exclusionPaths = []
         }
-        // Raised: the capital stands on the first line's baseline and rises above it; the text runs beside it.
-        let raisedWidth = ProseLayout.advance(initial.letter, initial.raised) + 2
-        set(first: raisedWidth, rest: raisedWidth)
-        let cap = initial.raised
-        let capLine = cap.pointSize
-        let above = (capLine - (cap.ascender - cap.descender)) / 2 + cap.ascender
-        top = max(0, above - baseline)
-        capOrigin = CGPoint(x: 0, y: top + baseline)
-        capFont = cap
         measure()
-        let below = capLine - above
-        let firstBottom = (lines().first?.maxY ?? spec.line) + top
-        let capBottom = top + baseline + below
-        height = max(height, capBottom.rounded(.up), firstBottom)
+    }
+
+    /// One line of a setting: how wide its words run, and how many there are.
+    private struct Row {
+        let width: CGFloat
+        let words: Int
+    }
+
+    /// Sets `text` beside a dropped capital: two lines (three past a descending tail), the remainder
+    /// running on at the text edge. As beside the web's float, a line never starts short of the text's
+    /// own edge, and the first line's opening word moves by the capital's tuck from where its line starts.
+    @discardableResult
+    private func drop(_ initial: Initial, _ text: NSAttributedString) -> [Row] {
+        let second = max(initial.edge, spec.restIndent)
+        let first = max(0, second + initial.tuck)
+        container.exclusionPaths = [
+            UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
+            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
+        ]
+        top = 0
+        set(first: 0, rest: spec.restIndent, text: text)
+        capOrigin = CGPoint(x: initial.left, y: (lines().first?.minY ?? 0) + baseline + initial.drop)
+        capFont = initial.deep
+        return rows()
+    }
+
+    /// Sets `text` on one line under its full capital, raised into a line pitch above it: the
+    /// capital's ink top meets that empty line's cap height, its foot the text's baseline, and the
+    /// text starts at its lower contour, untucked.
+    @discardableResult
+    private func elevate(_ initial: Initial, _ text: NSAttributedString) -> [Row] {
+        container.exclusionPaths = []
+        top = spec.line
+        set(first: max(initial.edge, spec.restIndent), rest: spec.restIndent, text: text)
+        capOrigin = CGPoint(x: initial.left, y: baseline + initial.drop)
+        capFont = initial.deep
+        return rows()
+    }
+
+    /// Sets the capital raised as a letter of the first line, its line's height unchanged.
+    @discardableResult
+    private func raise(_ initial: Initial) -> [Row] {
+        container.exclusionPaths = []
+        top = 0
+        let text = NSMutableAttributedString(attributedString: initial.raised)
+        text.append(spec.text)
+        set(first: spec.firstIndent, rest: spec.restIndent, text: text)
+        capOrigin = nil
+        capFont = nil
+        return rows()
+    }
+
+    private func rows() -> [Row] {
+        var out: [Row] = []
+        let glyphs = manager.glyphRange(for: container)
+        manager.enumerateLineFragments(forGlyphRange: glyphs) { _, used, _, range, _ in
+            let chars = self.manager.characterRange(forGlyphRange: range, actualGlyphRange: nil)
+            let words = (self.storage.string as NSString).substring(with: chars).split(whereSeparator: \.isWhitespace).count
+            out.append(Row(width: used.width, words: words))
+        }
+        return out
+    }
+
+    /// How evenly a two-line setting fills its lines: the shorter over the longer.
+    private static func balance(_ rows: [Row]) -> CGFloat {
+        guard rows.count == 2, let wide = rows.map(\.width).max(), wide > 0 else { return 0 }
+        return rows.map(\.width).min()! / wide
+    }
+
+    /// The opening with a break after its mediant (the web's `.initial-divided`), if it has one.
+    private static func divideAtMediant(_ text: NSAttributedString) -> NSAttributedString? {
+        let s = text.string as NSString
+        let at = s.range(of: "*")
+        guard at.location != NSNotFound else { return nil }
+        let head = at.location + at.length
+        let tail = s.substring(from: head)
+        let skip = (String(tail.prefix { $0.isWhitespace }) as NSString).length
+        let out = NSMutableAttributedString(attributedString: text.attributedSubstring(from: NSRange(location: 0, length: head)))
+        out.append(NSAttributedString(string: "\n", attributes: text.attributes(at: max(0, head - 1), effectiveRange: nil)))
+        out.append(text.attributedSubstring(from: NSRange(location: head + skip, length: text.length - head - skip)))
+        return out
     }
 
     private func set(first: CGFloat, rest: CGFloat, text source: NSAttributedString? = nil) {

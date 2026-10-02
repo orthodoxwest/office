@@ -82,8 +82,10 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
         case .prayed:
             a[.foregroundColor] = UIColor(p.text)
         case .mediant:
-            // The pointing asterisk is quiet.
+            // The pointing asterisk is quiet, and lowered 0.25em to the line's optical middle, as the
+            // web's `.mediant` (Garamond draws its asterisk high, as a footnote mark).
             a[.foregroundColor] = UIColor(p.muted)
+            a[.baselineOffset] = -0.25 * size
         case .secret:
             // Words not said aloud.
             a[.foregroundColor] = UIColor(p.unsaid)
@@ -164,25 +166,39 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
 /**
  * The initial for an opening in `style`, painted in the gilding: two lines deep as the web's
  * `initial-letter: 2` sets it, fitted by its ink and the capital's optical profile (see
- * `render_blocks::initials`), or 2.1 times the text raised.
+ * `render_blocks::initials`), or raised as a letter of its line.
  */
-private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, raised: Bool) -> Initial {
+private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, adapt: Initial.Adapt) -> Initial {
     let size = style.size * m.type
     let fit = initialFit(letter: letter)
     let em = size * CGFloat(initialSize(lineHeightEm: Float(style.line / style.size)))
     let deep = garamond(em)
     let ink = CTLineGetBoundsWithOptions(CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: deep])), .useGlyphPathBounds)
-    let left = CGFloat(fit.hang) * em
+    // The profiles are measured in the web's declared initial, not the size it is drawn at.
+    let profile = size * CGFloat(initialProfileEm())
+    let left = CGFloat(fit.hang) * profile
+    // Raised: the brush's edge a point below (the web's 1px text-shadow at 30%), and the space after.
+    let shadow = NSShadow()
+    shadow.shadowOffset = CGSize(width: 0, height: 1)
+    shadow.shadowBlurRadius = 0
+    shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
+    let raisedSize = size * CGFloat(raisedInitialSize())
+    let raised = NSAttributedString(string: letter, attributes: [
+        .font: garamond(raisedSize),
+        .foregroundColor: UIColor(o.flat),
+        .shadow: shadow,
+        .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,
+    ])
     return Initial(
         letter: letter,
         deep: deep,
-        raised: garamond(size * 2.1),
+        raised: raised,
         left: left - ink.minX,
         drop: ink.maxY - CGFloat(capHeight()) * size,
-        edge: left + ink.width + CGFloat(fit.gap) * em,
+        edge: left + ink.width + CGFloat(fit.gap) * profile,
         tuck: CGFloat(fit.tuck) * size,
         rows: fit.depth > 0 ? 3 : 2,
-        alwaysRaised: raised,
+        adapt: adapt,
         color: UIColor(o.flat)
     )
 }
@@ -209,7 +225,13 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
         var s = spec
         s.text = split.rest
         s.restIndent = max(s.restIndent, textStart)
-        s.initial = initial(split.letter, style, o, m, raised: raised)
+        let adapt: Initial.Adapt
+        switch block.kind {
+        case .verse: adapt = .psalm
+        case .stanza, .chantLine: adapt = .dropped
+        default: adapt = raised ? .raised : .prose
+        }
+        s.initial = initial(split.letter, style, o, m, adapt: adapt)
         return s
     }
 
@@ -355,7 +377,7 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
             if block.dropCap && i <= 1 && !line.trimmingCharacters(in: .whitespaces).isEmpty {
                 // The initial stands beside the first two lines, which start at its fitted edges.
                 let letter = String(line.trimmingCharacters(in: .whitespaces).prefix(1))
-                let cap = initial(letter, style, o, m, raised: false)
+                let cap = initial(letter, style, o, m, adapt: .dropped)
                 if i == 0 {
                     let after = line.drop { $0.isWhitespace }.dropFirst().drop { $0.isWhitespace }
                     let from = (line as NSString).length - (String(after) as NSString).length

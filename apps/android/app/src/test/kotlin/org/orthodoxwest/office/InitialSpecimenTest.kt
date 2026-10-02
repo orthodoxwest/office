@@ -47,6 +47,28 @@ class InitialSpecimenTest {
         compose.onRoot().captureRoboImage("build/screenshots/initials-psalm.png")
     }
 
+    /** The web's adaptive settings: elevated and divided psalms, a raised one-line chapter, a short responsory. */
+    @Test
+    fun adaptiveOpenings() {
+        val openings = listOf(
+            pointed(BlockKind.VERSE, "Praise the Lord", " all ye heathen."),
+            pointed(BlockKind.VERSE, "Lord thou hast been our refuge", " from one age."),
+            BlockView(BlockKind.PARAGRAPH, "", true, true, listOf(RunView("Be sober, be vigilant.", RunStyle.PLAIN))),
+            pointed(BlockKind.RESPONSE, "He shall deliver thee,", " From the snare of the hunter."),
+        )
+        compose.setContent {
+            OfficeTheme(choice = ThemeChoice.NAVE) {
+                Column(Modifier.fillMaxWidth().background(LocalPalette.current.bg).padding(horizontal = Gutter)) {
+                    openings.forEach { Box(Modifier.fillMaxWidth().height(120.dp).padding(top = 8.dp)) { Block(it) } }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/screenshots/initials-adaptive.png")
+    }
+
+    private fun pointed(kind: BlockKind, first: String, second: String) =
+        BlockView(kind, "", true, true, listOf(RunView(first, RunStyle.PLAIN), RunView("\u00a0*", RunStyle.MEDIANT), RunView(second, RunStyle.PLAIN)))
+
     private fun verse(word: String) = BlockView(
         BlockKind.VERSE, "", true, true,
         listOf(

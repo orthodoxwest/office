@@ -3,7 +3,6 @@ package org.orthodoxwest.office
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.layout
@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
@@ -55,7 +57,10 @@ import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.SectionView
 import org.orthodoxwest.office.core.capHeight
 import org.orthodoxwest.office.core.initialFit
+import org.orthodoxwest.office.core.initialProfileEm
 import org.orthodoxwest.office.core.initialSize
+import org.orthodoxwest.office.core.raisedInitialGap
+import org.orthodoxwest.office.core.raisedInitialSize
 import kotlin.math.roundToInt
 
 /** The verse gutter (`--verse-gutter`, 1.8rem): verse numbers and ℣/℟ sit in it, text beyond it. */
@@ -229,11 +234,14 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
 }
 
 /**
- * An opening with its initial: a painted capital two lines deep when the text wraps beside it,
- * or raised on the line when the text is short (the web's adaptive initial). The rest of the
- * first word, or the next word after a lone O or I, turns to small caps as the eye leaves the
- * capital. The capital stands at the measure's edge (a psalm's hangs into the verse gutter);
- * `textStart` places the lines that run on below it.
+ * An opening with its initial, set as the web's adaptive initial sets it. A painted capital two
+ * lines deep stands beside the text as it wraps; a short responsory, or prose that fits on its
+ * line, takes a smaller capital raised on that line; a psalm keeps its full capital, raised over
+ * a single line (elevated), and may break after its mediant rather than leave a stub of a second
+ * line (divided). Hymns and the Marian antiphon always drop. The rest of the first word, or the
+ * next word after a lone O or I, turns to small caps as the eye leaves the capital. The capital
+ * stands at the measure's edge (a psalm's hangs into the verse gutter); `textStart` places the
+ * lines that run on below it.
  */
 @Composable
 private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
@@ -253,49 +261,132 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
     val measurer = rememberTextMeasurer()
     val face = garamond()
     val plain = style.copy(textIndent = null)
+    // Raised, the capital is a letter of its line: 1.65 times the text, its line's height unchanged.
+    val fit = initialFit(letter)
+    val raisedText = with(density) {
+        buildAnnotatedString {
+            val shadow = Shadow(ochre.copy(alpha = 0.3f), Offset(0f, 1.dp.toPx()), 0f)
+            val after = raisedInitialGap() + fit.raisedTuck / raisedInitialSize()
+            withStyle(SpanStyle(color = ochre, fontSize = raisedInitialSize().em, letterSpacing = after.em, shadow = shadow)) { append(letter) }
+            append(rest)
+        }
+    }
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val width = constraints.maxWidth
+        val start = with(density) { textStart.toPx() }
         val cap = remember(letter, plain, density, face) { dropCap(letter, plain, measurer, density, face) }
         // The lines beside the capital start at its fitted edge, the first line's opening word tucked
         // in or out from there; the nearer of the two is the column's edge.
-        val (line1, line2) = cap.lines(with(density) { textStart.toPx() })
+        val (line1, line2) = cap.lines(start)
         val besideStart = minOf(line1, line2)
-        val besideStyle = with(density) { plain.copy(textIndent = TextIndent((line1 - besideStart).toSp(), (line2 - besideStart).toSp())) }
+        val (firstIndent, restIndent) = with(density) { (line1 - besideStart).toSp() to (line2 - besideStart).toSp() }
+        // The first line's indent holds to the first line only: a line after a forced break (a hymn's
+        // next metrical line, a divided psalm's second half) starts as the second line does.
+        fun indented(text: AnnotatedString): AnnotatedString = buildAnnotatedString {
+            val nl = text.text.indexOf('\n')
+            withStyle(ParagraphStyle(textIndent = TextIndent(firstIndent, restIndent))) { append(if (nl < 0) text else text.subSequence(0, nl)) }
+            if (nl >= 0) withStyle(ParagraphStyle(textIndent = TextIndent(restIndent, restIndent))) { append(text.subSequence(nl + 1, text.length)) }
+        }
+        // Over a single line, the capital rises above it: the text starts at its lower contour, untucked.
+        val elevatedStyle = with(density) { plain.copy(textIndent = TextIndent(firstLine = (maxOf(cap.edge, start) - start).toSp())) }
         // A line beside a dropped capital starts with its word, as CSS drops a space at a line's start
         // (after a lone O); a raised capital keeps the space, sharing its line.
         val body = rest.withoutLeadingSpace()
-        val beside = remember(body, besideStyle, width, besideStart) {
-            measurer.measure(body, besideStyle, constraints = Constraints(maxWidth = (width - besideStart.toInt()).coerceAtLeast(1)))
-        }
-        if (raised || beside.lineCount < 2) {
-            // Raised: the capital stands on the first line's baseline and rises above it.
-            val raisedStyle = plain.copy(fontSize = style.fontSize * 2.1f, lineHeight = style.fontSize * 2.1f)
-            val small = remember(letter, raisedStyle) { measurer.measure(letter, raisedStyle) }
-            val w = with(density) { small.size.width.toDp() + 2.dp }
-            val h = with(density) { small.size.height.toDp() }
-            Row {
-                Box(Modifier.size(w, h).alignBy { small.firstBaseline.toInt() }) {
-                    Canvas(Modifier.size(w, h)) { initial(small) }
+        val setting = remember(body, raisedText, firstIndent, restIndent, elevatedStyle, width, besideStart, raised, block.kind) {
+            fun beside(text: AnnotatedString) =
+                measurer.measure(indented(text), plain, constraints = Constraints(maxWidth = (width - besideStart.toInt()).coerceAtLeast(1)))
+            val natural = beside(body)
+            val divided = divideAtMediant(body)?.let { it to beside(it) }
+            val psalm = block.kind == BlockKind.VERSE
+            when {
+                raised -> OpeningSetting.Raised
+                psalm && natural.lineCount < 2 -> {
+                    val elevated = measurer.measure(body, elevatedStyle, constraints = Constraints(maxWidth = (width - start.toInt()).coerceAtLeast(1)))
+                    // Raising can widen the line past the measure: two whole half-verses beside a
+                    // dropped capital are then better than a new short tail.
+                    if (elevated.lineCount > 1 && divided != null && divided.second.lineCount == 2) {
+                        OpeningSetting.Dropped(divided.first, divided.second)
+                    } else {
+                        OpeningSetting.Elevated(elevated)
+                    }
                 }
-                Text(rest, Modifier.alignByBaseline(), style = plain)
+                // A one- or two-word tail under less than 30% of the first line: break at the mediant
+                // instead, if that keeps two lines and clearly balances them.
+                psalm && divided != null && natural.lineCount == 2 && words(natural, body, 1) <= 2 &&
+                    lineWidth(natural, 1) < lineWidth(natural, 0) * 0.3f &&
+                    divided.second.lineCount == 2 && balance(divided.second) > balance(natural) + 0.15f ->
+                    OpeningSetting.Dropped(divided.first, divided.second)
+                block.kind == BlockKind.PARAGRAPH &&
+                    measurer.measure(raisedText, plain, constraints = Constraints(maxWidth = (width - start.toInt()).coerceAtLeast(1))).lineCount < 2 ->
+                    OpeningSetting.Raised
+                else -> OpeningSetting.Dropped(body, natural)
             }
-            return@BoxWithConstraints
         }
-        // Two lines beside the capital (three past a descending tail); the remainder runs on at the text edge.
-        val split = beside.getLineEnd(minOf(cap.rows, beside.lineCount) - 1, visibleEnd = false)
-        // Two lines of a hymn end at the stanza's own line break: it belongs to neither part.
-        val first = body.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
-        val after = body.subSequence(split, body.length).let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
-        // The capital's ink top meets the first line's cap height; its foot then stands on the second baseline.
-        val capTop = (beside.getLineBaseline(0) + cap.drop - cap.glyph.firstBaseline).toInt()
-        Column {
-            // Painted behind the lines beside it, taking no room of its own: the lines set the height.
-            Box(Modifier.drawBehind { translate(cap.left, capTop.toFloat()) { initial(cap.glyph) } }) {
-                Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = besideStyle)
+        when (setting) {
+            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth().padding(start = textStart), style = plain)
+            is OpeningSetting.Elevated -> {
+                // One line pitch above the text, into which the capital rises; its ink top meets the
+                // cap height of that empty line, its foot the text's baseline.
+                val capTop = setting.layout.firstBaseline + cap.drop - cap.glyph.firstBaseline
+                Column(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
+                    Spacer(Modifier.height(with(density) { style.lineHeight.toDp() }))
+                    Text(body, Modifier.padding(start = textStart), style = elevatedStyle)
+                }
             }
-            if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
+            is OpeningSetting.Dropped -> {
+                val text = setting.text
+                val shown = indented(text)
+                val beside = setting.layout
+                // Two lines beside the capital (three past a descending tail); the remainder runs on at the text edge.
+                val split = beside.getLineEnd(minOf(cap.rows, beside.lineCount) - 1, visibleEnd = false)
+                // Two lines of a hymn end at the stanza's own line break: it belongs to neither part. The
+                // lines beside keep their indents; the remainder is the plain text after them (`shown`
+                // has no first break, its paragraphs split there instead).
+                val first = shown.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
+                val nl = text.text.indexOf('\n')
+                val after = text.subSequence(if (nl in 0 until split) split + 1 else split, text.length)
+                    .let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
+                // The capital's ink top meets the first line's cap height; its foot then stands on the second baseline.
+                val capTop = beside.getLineBaseline(0) + cap.drop - cap.glyph.firstBaseline
+                Column {
+                    // Painted behind the lines beside it, taking no room of its own: the lines set the height.
+                    Box(Modifier.drawBehind { translate(cap.left, capTop) { initial(cap.glyph) } }) {
+                        Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = plain)
+                    }
+                    if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
+                }
+            }
         }
     }
+}
+
+/** How an opening's initial is set (see [Opening]). */
+private sealed interface OpeningSetting {
+    data object Raised : OpeningSetting
+    class Elevated(val layout: TextLayoutResult) : OpeningSetting
+    class Dropped(val text: AnnotatedString, val layout: TextLayoutResult) : OpeningSetting
+}
+
+/** The opening with a break after its mediant (the web's `.initial-divided`), if it has one. */
+private fun divideAtMediant(text: AnnotatedString): AnnotatedString? {
+    val at = text.text.indexOf('*').takeIf { it >= 0 } ?: return null
+    return buildAnnotatedString {
+        append(text.subSequence(0, at + 1))
+        append("\n")
+        append(text.subSequence(at + 1, text.length).withoutLeadingSpace())
+    }
+}
+
+private fun lineWidth(layout: TextLayoutResult, line: Int) = layout.getLineRight(line) - layout.getLineLeft(line)
+
+private fun words(layout: TextLayoutResult, text: AnnotatedString, line: Int) =
+    text.text.substring(layout.getLineStart(line), layout.getLineEnd(line)).split(Regex("\\s+")).count { it.isNotEmpty() }
+
+/** How evenly a two-line setting fills its lines: the shorter over the longer. */
+private fun balance(layout: TextLayoutResult): Float {
+    if (layout.lineCount != 2) return 0f
+    val (a, b) = lineWidth(layout, 0) to lineWidth(layout, 1)
+    return minOf(a, b) / maxOf(a, b)
 }
 
 /**
@@ -326,8 +417,9 @@ private fun dropCap(letter: String, style: TextStyle, measurer: TextMeasurer, de
     val size = style.fontSize * initialSize(leading)
     val glyph = measurer.measure(letter, style.copy(textIndent = null, fontSize = size, lineHeight = size))
     return with(density) {
-        val em = size.toPx()
-        val ink = Rect().also { Paint().apply { typeface = face; textSize = em }.getTextBounds(letter, 0, letter.length, it) }
+        val ink = Rect().also { Paint().apply { typeface = face; textSize = size.toPx() }.getTextBounds(letter, 0, letter.length, it) }
+        // The profiles are measured in the web's declared initial, not the size it is drawn at.
+        val em = initialProfileEm() * style.fontSize.toPx()
         val left = fit.hang * em
         DropCap(
             glyph, left - ink.left, -capHeight() * style.fontSize.toPx() - ink.top,
@@ -495,7 +587,9 @@ fun runs(block: BlockView): AnnotatedString {
 private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.PLAIN, RunStyle.BREAK -> null
     // The pointing asterisk is quiet in psalms, antiphons and responsories.
-    RunStyle.MEDIANT -> SpanStyle(color = p.muted)
+    // Lowered 0.25em to the line's optical middle, as the web's `.mediant` (Garamond draws its
+    // asterisk high, as a footnote mark). Compose shifts by the face's ascent, 0.71em.
+    RunStyle.MEDIANT -> SpanStyle(color = p.muted, baselineShift = BaselineShift(-0.25f / 0.71f))
     RunStyle.CROSS -> SpanStyle(color = p.rubric, fontFamily = CrossFont, fontSize = 0.8.em)
     RunStyle.PRAYED -> SpanStyle(color = p.text)
     RunStyle.SECRET -> SpanStyle(color = p.unsaid)

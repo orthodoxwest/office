@@ -62,11 +62,14 @@ final class SpokenTests: XCTestCase {
 
 /// The typesetter keeps the web's line boxes and seats the initial as the web does.
 final class ProseTests: XCTestCase {
-    private func spec(_ text: String, initial: Bool) -> ProseSpec {
+    private func spec(_ text: String, initial: Bool, adapt: Initial.Adapt = .prose) -> ProseSpec {
         let font = Scale.body.uiFont()
         var s = ProseSpec(text: NSAttributedString(string: text, attributes: [.font: font]), font: font, line: 32)
         if initial {
-            s.initial = Initial(letter: "O", deep: garamond(61), raised: garamond(42), gap: 3.66, alwaysRaised: false, color: .brown)
+            let raised = NSAttributedString(string: "O", attributes: [.font: garamond(33)])
+            s.initial = Initial(
+                letter: "O", deep: garamond(69), raised: raised, left: 0, drop: 32, edge: 50, tuck: 0, rows: 2, adapt: adapt, color: .brown
+            )
         }
         return s
     }
@@ -90,8 +93,14 @@ final class ProseTests: XCTestCase {
 
     func testAShortOpeningRaisesItsInitial() {
         let opened = ProseLayout(spec: spec("men.", initial: true), width: 320)
-        // The raised capital stands taller than the one line beside it.
-        XCTAssertGreaterThan(opened.height, 32)
+        // The raised capital is a letter of its line, whose height it leaves as it was.
+        XCTAssertEqual(opened.height, 32)
+    }
+
+    func testAShortPsalmOpeningElevatesItsInitial() {
+        let opened = ProseLayout(spec: spec("men.", initial: true, adapt: .psalm), width: 320)
+        // The full capital rises into a line pitch above its one line.
+        XCTAssertEqual(opened.height, 64)
     }
 
     func testTheSmallCapsTakeTheRestOfTheFirstWord() throws {
