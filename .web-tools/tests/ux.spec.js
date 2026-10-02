@@ -195,12 +195,17 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's card sits close above the footer line, not above a band of wall.
+  // Home's colophon sits at the foot of the screen, as on desktop, with the
+  // card above it rather than the colophon floating under the card.
   const [card, footer] = await Promise.all([
     page.locator(".home").boundingBox(),
     page.locator("footer").boundingBox(),
   ]);
-  expect(footer.y - (card.y + card.height)).toBeLessThan(40);
+  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
+  const foot = await page.evaluate(
+    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
+  );
+  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
