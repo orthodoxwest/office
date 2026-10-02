@@ -58,6 +58,9 @@ struct RootView: View {
     /// The way back, kept for a return after iOS has closed the app in the background.
     @SceneStorage("way-back") private var wayBack = ""
     @State private var started = false
+    /// The clock, read every minute while the app is in front: a timer to the next hour stops
+    /// counting while the phone sleeps, so home could still highlight Sext at Vespers.
+    private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
@@ -112,6 +115,9 @@ struct RootView: View {
         .onChange(of: visit, initial: true) { _, v in
             guard v.active else { return }
             Usage.shared.record(v.page.usageEvent, dark: v.dark, form: v.form)
+        }
+        .onReceive(minute) { _ in
+            if phase == .active { model.refreshToday() }
         }
         .onChange(of: phase) { _, now in
             guard now == .active else { return }

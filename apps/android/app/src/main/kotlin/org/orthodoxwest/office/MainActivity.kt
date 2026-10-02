@@ -143,6 +143,8 @@ class MainActivity : ComponentActivity() {
         // Every visit keeps the alarm window running ahead, and the widget current.
         vm.syncReminders()
         vm.refreshWidgets()
+        // Home may have been left showing an hour that has since passed.
+        vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
     }

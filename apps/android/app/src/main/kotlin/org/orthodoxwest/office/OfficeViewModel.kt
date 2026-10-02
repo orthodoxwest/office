@@ -19,6 +19,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
@@ -175,7 +176,35 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     val today: LocalDate get() = LocalDate.now()
 
+    /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
+    private var homeClock: Pair<LocalDate, Int>? = null
+
     init {
+        load()
+        // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
+        // stops counting while the phone sleeps, and a return is not always announced.
+        viewModelScope.launch {
+            while (true) {
+                delay(60_000)
+                refreshClock()
+            }
+        }
+    }
+
+    /**
+     * Home composed again once the clock has passed into another hour or day, so a home opened at
+     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. Called
+     * every minute and on every return to the app.
+     */
+    fun refreshClock() {
+        val shownAt = homeClock ?: return
+        val home = page as? Page.Home ?: return
+        val now = LocalDateTime.now()
+        if (shownAt == now.toLocalDate() to now.hour) return
+        if (home.date == shownAt.first && now.toLocalDate() != shownAt.first) {
+            stack[stack.lastIndex] = Entry(entry.id, Page.Home(now.toLocalDate()))
+            saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
+        }
         load()
     }
 
@@ -300,6 +329,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     private fun load() {
         val visit = entry
+        val now = LocalDateTime.now()
+        homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
         loading?.cancel()
         loading = viewModelScope.launch {
             val content = try {
@@ -307,7 +338,6 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                 when (val page = visit.page) {
                     is Page.Home -> Content.Home(
                         withContext(Dispatchers.Default) {
-                            val now = LocalDateTime.now()
                             office.home(page.date.toCivil(), now.toLocalDate().toCivil(), now.hour)
                         },
                     )
