@@ -138,6 +138,16 @@ fn prayed_words_in_a_rubric_are_marked() {
 }
 
 #[test]
+fn a_hymn_s_rubrics_stand_in_its_column() {
+    let out = blocks(&elem(
+        ElementType::Hymn,
+        "/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\n\n/:Stand.:/\n\nVirgin thou immortal,\n",
+    ));
+    let kinds: Vec<BlockKind> = out.iter().map(|b| b.kind).collect();
+    assert_eq!(kinds, [BlockKind::Heading, BlockKind::HymnRubric, BlockKind::Stanza, BlockKind::HymnRubric, BlockKind::Stanza]);
+}
+
+#[test]
 fn a_hymn_folds_its_amen_into_the_last_stanza() {
     let out = blocks(&elem(ElementType::Hymn, "Now that the daylight fills the sky,\nWe lift our hearts to God on high,\n\nAmen."));
     assert_eq!(out[0].kind, BlockKind::Heading);
