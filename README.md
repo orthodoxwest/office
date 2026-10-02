@@ -92,10 +92,11 @@ make golden                      # update expected output after intentional chan
 make verify-psalms                # compare the psalter with its reference witness
 ```
 
-Each worktree has its own `target/`. When several worktrees are in use, set
-`RUSTC_WRAPPER = "sccache"` under `[build]` in `~/.cargo/config.toml`. A new
-worktree then reuses dependencies that other worktrees have already compiled,
-including bundled SQLite, which dominates a cold release build.
+Each worktree has its own `target/`. Compiling bundled SQLite takes most of a
+cold release build; to share it across worktrees, install sccache and set
+`CC = "sccache cc"` under `[env]` in `~/.cargo/config.toml`. Don't use
+sccache as `rustc-wrapper`: Rust cache keys include the `target/` path, so a
+new worktree misses on every crate and builds more slowly.
 `make sweep-targets` deletes `target/` in checkouts idle for `SWEEP_HOURS`
 (default 24).
 
