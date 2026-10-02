@@ -2,7 +2,8 @@ use std::path::Path;
 
 use calendar::{CalendarData, Date, MoveableDates};
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, VoiceRole, VoiceSpan,
+    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, Unrepeated,
+    VoiceRole, VoiceSpan,
 };
 use office::{Engine, HOUR_NAMES};
 use tools::fs::FsData;
@@ -73,6 +74,22 @@ fn an_announced_antiphon_is_its_own_kind() {
     let out = element_blocks(&[announced, full]);
     assert_eq!(out.iter().map(|b| b.kind).collect::<Vec<_>>(), [BlockKind::AnnouncedAntiphon, BlockKind::Antiphon]);
     assert_eq!(out[0].plain_text(), "Ant. Let my prayer.");
+}
+
+#[test]
+fn the_unrepeated_note_follows_its_antiphon_s_setting() {
+    let psalm = || {
+        let mut p = elem(ElementType::Psalm, "Psalm 144\n\nBLESSED be the Lord my strength * who teacheth my hands to war.\n");
+        p.unrepeated = Some(Unrepeated { words: 2, named: String::new() });
+        p
+    };
+    let note = |announce: bool| {
+        let mut antiphon = elem(ElementType::Antiphon, "Blessed be * the Lord my strength and my fortress.");
+        antiphon.announce = announce;
+        element_blocks(&[antiphon, psalm()])[1].kind
+    };
+    assert_eq!(note(true), BlockKind::AnnouncementNote);
+    assert_eq!(note(false), BlockKind::AntiphonNote);
 }
 
 #[test]

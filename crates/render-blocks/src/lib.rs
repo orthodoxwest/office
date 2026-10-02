@@ -36,6 +36,9 @@ pub enum BlockKind {
     /// that the antiphon has just said are not repeated): set as a rubric,
     /// close under the antiphon's words, past its marker.
     AntiphonNote,
+    /// The same note under an announced antiphon: centred beneath its words,
+    /// as the web's `.antiphon-announce + .unrepeated-note`.
+    AnnouncementNote,
     /// An antiphon; the marker is "Ant.".
     Antiphon,
     /// An antiphon only announced before its psalm (its opening words): set
@@ -216,7 +219,9 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Psalm | ElementType::Canticle => {
             let unrepeated = elem.unrepeated_rubric();
             if !unrepeated.is_empty() {
-                out.push(Block { kind: BlockKind::AntiphonNote, ..rubric_block(&unrepeated) });
+                let announced = out.last().is_some_and(|b| b.kind == BlockKind::AnnouncedAntiphon);
+                let kind = if announced { BlockKind::AnnouncementNote } else { BlockKind::AntiphonNote };
+                out.push(Block { kind, ..rubric_block(&unrepeated) });
             }
             if !elem.label.is_empty() {
                 let mut runs = text_runs(&elem.label);

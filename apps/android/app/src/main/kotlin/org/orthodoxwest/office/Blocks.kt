@@ -77,14 +77,15 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
     if (prev == null) return 0.dp
     val heading = { b: BlockView -> b.kind == BlockKind.HEADING || b.kind == BlockKind.COMMEMORATION_HEADING }
     val antiphon = { b: BlockView -> b.kind == BlockKind.ANTIPHON || b.kind == BlockKind.ANNOUNCED_ANTIPHON }
+    val note = { b: BlockView -> b.kind == BlockKind.ANTIPHON_NOTE || b.kind == BlockKind.ANNOUNCEMENT_NOTE }
     return when {
         heading(cur) -> 38.dp
         heading(prev) -> if (cur.kind == BlockKind.CHAPTER_REF) 24.dp else 27.dp
         cur.kind == BlockKind.GAP || prev.kind == BlockKind.GAP -> 4.8.dp
         prev.kind == BlockKind.ITEM_LABEL -> 9.dp
         // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-        cur.kind == BlockKind.ANTIPHON_NOTE -> 2.4.dp
-        cur.kind == BlockKind.ITEM_LABEL -> if (antiphon(prev) || prev.kind == BlockKind.ANTIPHON_NOTE) 10.dp else 30.dp
+        note(cur) -> 2.4.dp
+        cur.kind == BlockKind.ITEM_LABEL -> if (antiphon(prev) || note(prev)) 10.dp else 30.dp
         prev.kind == BlockKind.CHAPTER_REF -> 15.dp
         prev.kind == BlockKind.LATIN_TITLE -> 8.dp
         prev.kind == BlockKind.SPEAKER -> 3.2.dp
@@ -136,6 +137,12 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             runs(block),
             m.fillMaxWidth().padding(start = with(LocalDensity.current) { 21.6.sp.toDp() }),
             style = Type.rubric.copy(color = p.rubric),
+        )
+        // Under an announcement, centred beneath its words.
+        BlockKind.ANNOUNCEMENT_NOTE -> Text(
+            runs(block),
+            m.fillMaxWidth().padding(horizontal = 4.dp),
+            style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center),
         )
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's

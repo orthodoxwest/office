@@ -13,13 +13,14 @@ func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     guard let prev else { return 0 }
     let heading = { (b: BlockView) in b.kind == .heading || b.kind == .commemorationHeading }
     let antiphon = { (b: BlockView) in b.kind == .antiphon || b.kind == .announcedAntiphon }
+    let note = { (b: BlockView) in b.kind == .antiphonNote || b.kind == .announcementNote }
     if heading(cur) { return 38 }
     if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
     if cur.kind == .gap || prev.kind == .gap { return 4.8 }
     if prev.kind == .itemLabel { return 9 }
     // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-    if cur.kind == .antiphonNote { return 2.4 }
-    if cur.kind == .itemLabel { return antiphon(prev) || prev.kind == .antiphonNote ? 10 : 30 }
+    if note(cur) { return 2.4 }
+    if cur.kind == .itemLabel { return antiphon(prev) || note(prev) ? 10 : 30 }
     if prev.kind == .chapterRef { return 15 }
     if prev.kind == .latinTitle { return 8 }
     if prev.kind == .speaker { return 3.2 }
@@ -50,6 +51,8 @@ private func setting(_ kind: BlockKind) -> Setting {
     case .latinTitle, .canticleSection: return Setting(style: Scale.bodyItalic, color: \.muted, alignment: .center)
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
     case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
+    // Under an announcement, centred beneath its words.
+    case .announcementNote: return Setting(style: Scale.rubric, color: \.rubric, alignment: .center)
     case .speaker: return Setting(style: Scale.speaker, color: \.rubric)
     case .verse, .stanza, .gloriaPatri: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
