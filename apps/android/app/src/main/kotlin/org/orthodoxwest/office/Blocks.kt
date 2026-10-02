@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -25,6 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
@@ -99,10 +102,11 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
 
 /**
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
- * stanzas are set in `column`, the width of the hymn's longest line (see [hymnColumns]).
+ * stanzas are set in `column`, the width of the hymn's longest line (see [hymnColumns]). A
+ * heading with `cross` stands under a small painted cross, between the office's parts.
  */
 @Composable
-fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
+fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, cross: Boolean = false) {
     // One stop for a screen reader, in words (spoken): the drawn initial and gutter marks are for the eye.
     val m = if (block.kind == BlockKind.GAP) modifier else modifier.clearAndSetSemantics {
         contentDescription = spoken(block)
@@ -113,8 +117,12 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
     val verse = Type.verse.copy(color = p.text)
     when (block.kind) {
         BlockKind.GAP -> Spacer(m.height(8.dp))
-        BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Text(runs(block), m.fillMaxWidth(), style = Type.heading.copy(color = p.text))
-        BlockKind.ITEM_LABEL -> Text(runs(block), m.fillMaxWidth(), style = Type.itemLabel.copy(color = p.muted))
+        // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
+        BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (cross) PaintedCross(Modifier.padding(bottom = 11.2.dp).size(9.92.dp))
+            Text(runs(block), Modifier.fillMaxWidth(), style = Type.heading.copy(color = p.titulus))
+        }
+        BlockKind.ITEM_LABEL -> Text(runs(block), m.fillMaxWidth(), style = Type.itemLabel.copy(color = p.titulus))
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
             runs(block),
             m.fillMaxWidth(),
@@ -132,7 +140,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it.
         BlockKind.ANTIPHON -> Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.4.sp)) { append(block.marker) }
+                withStyle(SpanStyle(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.4.sp)) { append(block.marker) }
                 append(" ")
                 append(runs(block))
             },
@@ -183,7 +191,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
 }
 
 /**
- * An opening with its initial: a gilded capital two lines deep when the text wraps beside it,
+ * An opening with its initial: a painted capital two lines deep when the text wraps beside it,
  * or raised on the line when the text is short (the web's adaptive initial). The rest of the
  * first word, or the next word after a lone O or I, turns to small caps as the eye leaves the
  * capital. The capital stands at the measure's edge (a psalm's hangs into the verse gutter);
@@ -196,8 +204,14 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
         Text(rest, modifier.fillMaxWidth().padding(start = textStart), style = style)
         return
     }
-    val leaf = LocalOrnament.current.leaf
+    val ochre = LocalOrnament.current.flat
     val density = LocalDensity.current
+    // Flat ochre, as a painter laid it, with a hint of the brush's edge 1dp below; it veils and
+    // brightens with the season's gilding.
+    fun DrawScope.initial(letter: TextLayoutResult) {
+        drawText(letter, color = ochre.copy(alpha = 0.3f), topLeft = Offset(0f, 1.dp.toPx()))
+        drawText(letter, color = ochre)
+    }
     val measurer = rememberTextMeasurer()
     val plain = style.copy(textIndent = null)
     BoxWithConstraints(modifier.fillMaxWidth()) {
@@ -217,7 +231,7 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
             val h = with(density) { small.size.height.toDp() }
             Row {
                 Box(Modifier.size(w, h).alignBy { small.firstBaseline.toInt() }) {
-                    Canvas(Modifier.size(w, h)) { drawText(small, brush = leaf) }
+                    Canvas(Modifier.size(w, h)) { initial(small) }
                 }
                 Text(rest, Modifier.alignByBaseline(), style = plain)
             }
@@ -236,7 +250,7 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                     Modifier
                         .offset { IntOffset(0, capTop) }
                         .size(with(density) { cap.size.width.toDp() }, with(density) { cap.size.height.toDp() }),
-                ) { drawText(cap, brush = leaf) }
+                ) { initial(cap) }
                 Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = plain)
             }
             if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
@@ -394,7 +408,8 @@ private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.CROSS -> SpanStyle(color = p.rubric, fontFamily = CrossFont, fontSize = 0.8.em)
     RunStyle.PRAYED -> SpanStyle(color = p.text)
     RunStyle.SECRET -> SpanStyle(color = p.unsaid)
-    RunStyle.LATIN -> SpanStyle(fontStyle = FontStyle.Italic, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.4.sp)
+    // A psalm's Latin incipit is muted beside its titulus, as Latin titles are.
+    RunStyle.LATIN -> SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.4.sp)
     RunStyle.KICKER -> SpanStyle(fontSize = 0.7.em, color = p.muted, letterSpacing = 0.1.em)
     RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)
 }

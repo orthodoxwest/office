@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -49,6 +48,14 @@ data class Palette(
     val inscriptionGround: Color,
     val inscriptionEdge: Color,
     val inscriptionWash: Color,
+    /** Painted rules, linings and crosses: terracotta, opaque, and never veiled with the season. */
+    val lining: Color,
+    /** The tituli (section headings, psalm numbers, "Ant."): red ochre on Nave, gilt on Apse. */
+    val titulus: Color,
+    /** The ordo's doubles, slate blue beside the great feasts' red letter. */
+    val kalendarBlue: Color,
+    /** The moon in the Vespers and Compline headpieces: Nave's gold, Apse's silver. */
+    val moonInk: Color,
     @param:DrawableRes val plaster: Int,
 )
 
@@ -67,15 +74,19 @@ val Nave = Palette(
     surfaceEdge = Color(107, 58, 31).copy(alpha = 0.12f),
     pressedWash = Color(107, 58, 31).copy(alpha = 0.09f),
     oakLine = Color(63, 55, 47).copy(alpha = 0.34f),
-    inscriptionGround = Color(0xFF34403A),
+    inscriptionGround = Color(0xFF545F54),
     inscriptionEdge = Color(0xFF5E2A27),
     inscriptionWash = Color(87, 94, 65).copy(alpha = 0.055f),
+    lining = Color(0xFFA85A48),
+    titulus = Color(0xFF93412C),
+    kalendarBlue = Color(0xFF34507A),
+    moonInk = Color(0xFF9A7328),
     plaster = R.drawable.plaster_nave,
 )
 
 val Apse = Palette(
     dark = true,
-    text = Color(0xFFE8E2D0),
+    text = Color(0xFFDDD6C3),
     bg = Color(0xFF121C28),
     accent = Color(0xFFD0B06A),
     gold = Color(0xFFD8BC74),
@@ -91,27 +102,31 @@ val Apse = Palette(
     inscriptionGround = Color(0xFF263431),
     inscriptionEdge = Color(0xFF5C2B35),
     inscriptionWash = Color(208, 176, 106).copy(alpha = 0.04f),
+    lining = Color(0xFFCF8C6A),
+    titulus = Color(0xFFD8BC74),
+    kalendarBlue = Color(0xFFA9BEDF),
+    moonInk = Color(0xFFC9D0D9),
     plaster = R.drawable.plaster_apse,
 )
 
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
  * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays [Palette.gold].
+ * (controls, selections) stays [Palette.gold]. Out of season `line` is the painted lining, as
+ * the web's `--ornament-line` resolves to `--lining`. `hi` and `lo` are the leaf's two stops,
+ * which the web still lights the Apse vault with; the initials are flat.
  */
 @Immutable
-data class Ornament(val flat: Color, val line: Color, val hi: Color, val lo: Color, val ink: Color) {
-    /** The gilded initials' and lozenges' leaf, lit from above. */
-    val leaf: Brush get() = Brush.verticalGradient(listOf(hi, lo))
-}
+data class Ornament(val flat: Color, val line: Color, val hi: Color, val lo: Color, val ink: Color)
 
 fun ornament(palette: Palette, season: String): Ornament = when {
-    season == "passiontide" && palette.dark -> Ornament(Color(0xFFB0A4C2), Color(0xFF565070), Color(0xFFCAC1D7), Color(0xFF988AAD), Color(0xFFB0A4C2))
-    season == "passiontide" -> Ornament(Color(0xFF756A7E), Color(0xFFB5AABD), Color(0xFF8D8395), Color(0xFF605469), Color(0xFFB0A4C2))
-    season == "eastertide" && palette.dark -> Ornament(Color(0xFFE6CF8C), Color(0xFF7A6A44), Color(0xFFF2E2B1), Color(0xFFD3B86F), Color(0xFFE6CF8C))
-    season == "eastertide" -> Ornament(Color(0xFFA4731A), Color(0xFFD0B06C), Color(0xFFC8922D), Color(0xFF886011), Color(0xFFE6CF8C))
-    palette.dark -> Ornament(palette.gold, palette.goldLine, Color(0xFFE7D295), Color(0xFFC0A25A), Color(0xFFD7B878))
-    else -> Ornament(palette.gold, palette.goldLine, Color(0xFFB98D3C), Color(0xFF7D5C1C), Color(0xFFD7B878))
+    season == "passiontide" && palette.dark -> Ornament(Color(0xFFB0A4C2), Color(0xFF565070), Color(0xFFCAC1D7), Color(0xFF988AAD), Color(0xFFDDD6E8))
+    season == "passiontide" -> Ornament(Color(0xFF756A7E), Color(0xFFB5AABD), Color(0xFF8D8395), Color(0xFF605469), Color(0xFFDDD6E8))
+    season == "eastertide" && palette.dark -> Ornament(Color(0xFFE6CF8C), Color(0xFF7A6A44), Color(0xFFF2E2B1), Color(0xFFD3B86F), Color(0xFFF2E2B1))
+    season == "eastertide" -> Ornament(Color(0xFFA4731A), Color(0xFFD0B06C), Color(0xFFC8922D), Color(0xFF886011), Color(0xFFF2E2B1))
+    // Apse declares no inscription ink of its own: the band's letters are the root's pale gilt.
+    palette.dark -> Ornament(palette.gold, palette.lining, Color(0xFFE7D295), Color(0xFFC0A25A), Color(0xFFECD9A0))
+    else -> Ornament(palette.gold, palette.lining, Color(0xFFB98D3C), Color(0xFF7D5C1C), Color(0xFFECD9A0))
 }
 
 /** The liturgical colours of the ordo rails and the band across an hour's top (`.day-color-*`). */

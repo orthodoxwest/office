@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -105,7 +107,8 @@ fun HomeScreen(
                 } else {
                     Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
                 }
-                Footer(diamond = !LocalPalette.current.dark)
+                // Home already opens on the cross: its foot takes no diamond.
+                Footer(diamond = false)
             }
         }
     }
@@ -129,62 +132,82 @@ private fun Frontispiece(
     val day = dayColor(view.color)
     val desk = niche != null
     val side = if (desk) 28.dp else 16.dp
+    // The card's top padding: on a wide screen, room under the niche's head for the crown's cross
+    // and the lining's arch.
+    val top = if (desk) head * 0.62f + 33.6.dp else 18.2.dp
     Box(
         if (niche != null) {
             // The niche: a low round head, the stone moulding, the day's colour as its trim.
             val frame = if (p.dark) Color(208, 176, 106).copy(alpha = 0.34f) else Color(87, 52, 33).copy(alpha = 0.3f)
-            modifier.drawBehind { niche(niche, p, day, head.toPx(), frame, o.flat.copy(alpha = 0.18f)) }
+            modifier.drawBehind { niche(niche, p, day, head.toPx(), frame) }
         } else {
             modifier
                 .background(p.surface)
                 .border(1.dp, p.border)
-                // The day's colour as the frame's top edge, like a vestment's trim.
-                .drawBehind { drawRect(day, size = size.copy(height = 3.dp.toPx())) }
+                .drawBehind {
+                    // The day's colour as the frame's top edge, like a vestment's trim.
+                    drawRect(day, size = size.copy(height = 3.dp.toPx()))
+                    // Book-cover tooling 0.35rem inside the frame (the top's inside the trim).
+                    val w = 1.dp.toPx()
+                    val inset = 5.6.dp.toPx() + w * 1.5f
+                    val topInset = inset + 2.dp.toPx()
+                    drawRect(
+                        o.flat.copy(alpha = 0.18f),
+                        Offset(inset, topInset),
+                        Size(size.width - 2 * inset, size.height - topInset - inset),
+                        style = Stroke(w),
+                    )
+                }
         },
     ) {
-        // The niche's head takes the place of the upper corner tooling.
-        if (!desk) {
-            FrameCorner(Modifier.align(Alignment.TopStart).padding(3.2.dp), mirror = false, flip = false)
-            FrameCorner(Modifier.align(Alignment.TopEnd).padding(3.2.dp), mirror = true, flip = false)
-        }
-        FrameCorner(Modifier.align(Alignment.BottomStart).padding(3.2.dp), mirror = false, flip = true)
-        FrameCorner(Modifier.align(Alignment.BottomEnd).padding(3.2.dp), mirror = true, flip = true)
+        // The consecration cross crowns the niche's head; a phone's card opens with it below.
+        if (desk) ConsecrationCross(Modifier.align(Alignment.TopCenter).padding(top = head * 0.36f - 2.dp).size(36.dp))
         Column(
-            Modifier.fillMaxWidth().padding(start = side, end = side, top = if (desk) head * 0.5f + 17.6.dp else 18.2.dp, bottom = if (desk) 20.dp else 16.dp),
+            Modifier.fillMaxWidth().padding(start = side, end = side, top = top, bottom = if (desk) 20.dp else 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Headpiece()
-            Spacer(Modifier.height(10.dp))
-            Text(
-                view.dateLabel,
-                Modifier.semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay),
-                style = Type.body.copy(fontSize = if (desk) 25.92.sp else 22.08.sp, lineHeight = if (desk) 31.1.sp else 26.5.sp, letterSpacing = if (desk) 0.39.sp else 0.22.sp, color = p.text, textAlign = TextAlign.Center),
-            )
-            Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = if (desk) 18.72.sp else 17.28.sp, lineHeight = if (desk) 23.4.sp else 21.6.sp, color = p.accent, textAlign = TextAlign.Center))
-            if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
-            if (!view.isToday) {
+            if (!desk) {
+                ConsecrationCross(Modifier.size(30.4.dp))
+                Spacer(Modifier.height(8.8.dp))
+            }
+            // The day, down to the inscription band. On a wide screen a lining is painted round
+            // the niche's head on its back wall, 26dp inside the moulding, ending at the band.
+            Column(
+                Modifier.fillMaxWidth()
+                    .then(if (desk) Modifier.drawBehind { nicheLining(p.lining, 28.dp.toPx() - top.toPx(), head.toPx() - 26.dp.toPx()) } else Modifier)
+                    .padding(bottom = 11.2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Text(
-                    "GO TO TODAY",
-                    Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).goldUnderline(true, p.goldLine),
-                    style = Type.menu.copy(color = p.accent),
+                    view.dateLabel,
+                    Modifier.semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay),
+                    style = Type.body.copy(fontSize = if (desk) 25.92.sp else 22.08.sp, lineHeight = if (desk) 31.1.sp else 26.5.sp, letterSpacing = if (desk) 0.39.sp else 0.22.sp, color = p.text, textAlign = TextAlign.Center),
                 )
-            }
-            if (view.penitential.isNotEmpty()) {
-                Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
-                    view.penitential.forEach { Text(it, style = Type.small.copy(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
+                Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = if (desk) 18.72.sp else 17.28.sp, lineHeight = if (desk) 23.4.sp else 21.6.sp, color = p.accent, textAlign = TextAlign.Center))
+                if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
+                if (!view.isToday) {
+                    Text(
+                        "GO TO TODAY",
+                        Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).goldUnderline(true, p.goldLine),
+                        style = Type.menu.copy(color = p.accent),
+                    )
+                }
+                if (view.penitential.isNotEmpty()) {
+                    Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
+                        view.penitential.forEach { Text(it, style = Type.small.copy(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
+                    }
+                }
+                if (view.commemorations.isNotEmpty()) {
+                    Column(Modifier.padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("ALSO", style = Type.label(10.56f, 0.1f).copy(color = p.muted))
+                        view.commemorations.forEach { Text(it, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = 14.sp, lineHeight = 20.sp)) }
+                    }
                 }
             }
-            if (view.commemorations.isNotEmpty()) {
-                Column(Modifier.padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("ALSO", style = Type.label(10.56f, 0.1f).copy(color = p.muted))
-                    view.commemorations.forEach { Text(it, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = 14.sp, lineHeight = 20.sp)) }
-                }
-            }
-            Spacer(Modifier.height(8.8.dp))
-            // The inscription band: gilt letters on the frieze's sage course, between oxblood rules.
+            // The inscription band: gilt letters on the frieze's green earth, between oxblood
+            // rules, its phrase parted from the frame by gilt lozenges 5dp square.
             Row(
                 Modifier
-                    .padding(top = 2.4.dp)
                     .throughPadding(side)
                     .background(p.inscriptionGround)
                     .drawBehind {
@@ -195,9 +218,9 @@ private fun Frontispiece(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Canvas(Modifier.width(4.dp).height(4.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
-                Text("Pray the hours", Modifier.padding(horizontal = 12.dp), style = Type.label(12.8f, 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS))
-                Canvas(Modifier.width(4.dp).height(4.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
+                Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
+                Text("Pray the hours", Modifier.padding(horizontal = 12.dp), style = Type.label(12.8f, if (desk) 0.17f else 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS))
+                Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
             }
             Spacer(Modifier.height(13.6.dp))
             PrayNow(view.prayNowLabel, desk) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
@@ -219,27 +242,23 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
     layout(constraints.maxWidth, placeable.height) { placeable.place(-extra / 2, 0) }
 }
 
-/** The invitation: a double gold rule with gilt lozenges at its ends. */
+/** The invitation: a single painted line, which does not veil with the season. */
 @Composable
 private fun PrayNow(label: String, desk: Boolean, onClick: () -> Unit) {
     val p = LocalPalette.current
-    val o = LocalOrnament.current
     Box(
         Modifier
             .fillMaxWidth()
             .tap(onClick = onClick)
             .drawBehind {
                 val w = 1.dp.toPx()
-                for (inset in listOf(w / 2f, w * 2.5f)) {
-                    drawRect(p.goldLine, Offset(inset, inset), size.copy(width = size.width - 2 * inset, height = size.height - 2 * inset), style = Stroke(w))
-                }
-                lozenge(Offset(0f, size.height / 2f), 3.5.dp.toPx(), o.flat, null)
-                lozenge(Offset(size.width, size.height / 2f), 3.5.dp.toPx(), o.flat, null)
+                drawRect(p.lining, Offset(w / 2f, w / 2f), size.copy(width = size.width - w, height = size.height - w), style = Stroke(w))
             }
             .padding(vertical = if (desk) 12.dp else 13.9.dp, horizontal = 15.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = if (desk) 20.sp else 19.2.sp, lineHeight = if (desk) 26.sp else 24.96.sp, letterSpacing = 0.38.sp, color = p.accent))
+        // On Apse the words are ivory, so the frame carries the colour.
+        Text(label, style = Type.body.copy(fontSize = if (desk) 20.sp else 19.2.sp, lineHeight = if (desk) 26.sp else 24.96.sp, letterSpacing = 0.38.sp, color = if (p.dark) p.text else p.accent))
     }
 }
 
@@ -247,6 +266,7 @@ private fun PrayNow(label: String, desk: Boolean, onClick: () -> Unit) {
 @Composable
 private fun HourDirectory(current: String, desk: Boolean, onHour: (String) -> Unit) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     // The desktop's labels are in the accent, their column 5.25rem.
     val labelStyle = Type.label(11.52f, 0.08f).copy(color = if (desk) p.accent else p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
     // One width for the three period labels, widened past the web's 83dp only when the reader's
@@ -265,7 +285,7 @@ private fun HourDirectory(current: String, desk: Boolean, onHour: (String) -> Un
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, p.muted)
+                    PeriodIcon(period, o.flat)
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Box(Modifier.width(1.dp).fillMaxHeight().background(p.border))

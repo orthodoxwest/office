@@ -83,17 +83,17 @@ fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
 /** "Expanded" or "Collapsed", after a disclosure's name. */
 fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }
 
-/** The disclosure caret, gold as the web's `▾`/`▴`. */
+/** The disclosure caret, as the web's `▾`/`▴`: in the ink of the words it opens, a little lighter. */
 @Composable
-fun Caret(open: Boolean) {
+fun Caret(open: Boolean, ink: Color) {
     // Drawn, not read: the disclosure says expanded or collapsed.
-    Text(if (open) " ▴" else " ▾", Modifier.clearAndSetSemantics {}, style = TextStyle(fontSize = 9.sp, color = LocalPalette.current.goldLine))
+    Text(if (open) " ▴" else " ▾", Modifier.clearAndSetSemantics {}, style = TextStyle(fontSize = 9.sp, color = ink.copy(alpha = ink.alpha * 0.7f)))
 }
 
-/** A current control's gold underline. */
-fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp): Modifier = if (!on) this else this.drawBehind {
-    val y = size.height - 1.dp.toPx()
-    drawLine(color, Offset(inset.toPx(), y), Offset(size.width - inset.toPx(), y), 1.dp.toPx())
+/** A current control's underline: gold for a chosen setting, or `width` thick in the lining for the current page. */
+fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp, width: Dp = 1.dp): Modifier = if (!on) this else this.drawBehind {
+    val y = size.height - width.toPx()
+    drawLine(color, Offset(inset.toPx(), y), Offset(size.width - inset.toPx(), y), width.toPx())
 }
 
 /** The web's breakpoint (style.css `min-width: 701px`): the desktop composition from here up. */
@@ -124,11 +124,13 @@ class SiteNav(
     val onSettings: () -> Unit = {},
 )
 
-/** The header beam: "✠ Daily Office" home, and the menu, or on a wide screen the links themselves. */
+/** The header beam: the consecration cross and "Daily Office" home, and the menu, or on a wide screen the links themselves. */
 @Composable
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
+    // The brand's mark, 1.15em of the brand's capitals: the roundel that ends every hour.
+    val mark = with(LocalDensity.current) { (Type.brand.fontSize * 1.15f).toDp() }
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
@@ -136,21 +138,17 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                buildAnnotatedString {
-                    withStyle(SpanStyle(color = LocalOrnament.current.flat, fontFamily = CrossFont, fontSize = 11.sp)) { append("✠") }
-                    append(" DAILY OFFICE")
-                },
-                Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp),
-                style = Type.brand.copy(color = p.text),
-            )
+            Row(Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                ConsecrationCross(Modifier.size(mark))
+                Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
+            }
             Spacer(Modifier.weight(1f))
             if (wide) {
                 InlineNav(nav)
             } else {
                 Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))
-                    Caret(menuOpen)
+                    Caret(menuOpen, p.accent)
                 }
             }
         }
@@ -158,7 +156,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
     }
 }
 
-/** The desktop header's links (`.site-menu nav`): the current one in ink over an accent rule; Reminders quieter. */
+/** The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's rule; Reminders quieter. */
 @Composable
 private fun InlineNav(nav: SiteNav) {
     val p = LocalPalette.current
@@ -166,12 +164,12 @@ private fun InlineNav(nav: SiteNav) {
         @Composable
         fun link(label: String, current: Boolean, secondary: Boolean = false, onClick: () -> Unit) {
             val style = if (secondary) Type.label(11.52f, 0.04f) else Type.label(12.48f, 0.06f)
-            val ink = if (current) p.text else if (secondary) p.muted else p.accent
+            val ink = if (current) p.text else p.muted
             Box(Modifier.heightIn(min = 44.dp).tap(selected = current, onClick = onClick).padding(horizontal = 4.8.dp), contentAlignment = Alignment.Center) {
                 Text(
                     label.uppercase(),
                     Modifier.drawBehind {
-                        if (current) drawLine(if (secondary) p.muted else p.accent, Offset(0f, size.height + 4.dp.toPx()), Offset(size.width, size.height + 4.dp.toPx()), 1.dp.toPx())
+                        if (current) drawLine(p.lining, Offset(0f, size.height + 4.dp.toPx()), Offset(size.width, size.height + 4.dp.toPx()), 1.5.dp.toPx())
                     },
                     style = style.copy(color = ink),
                 )
@@ -190,7 +188,7 @@ private fun InlineNav(nav: SiteNav) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
-            Caret(nav.settingsOpen)
+            Caret(nav.settingsOpen, p.muted)
         }
     }
 }
@@ -201,19 +199,22 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
+/** A menu cell; a `page` (an hour, the Ordo, Reminders) is underlined in the lining when current, a chosen setting in gold. */
 @Composable
-private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, onClick: () -> Unit) {
+private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, page: Boolean = false, onClick: () -> Unit) {
     val p = LocalPalette.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current, onClick = onClick).goldUnderline(current, p.goldLine, inset = 0.dp),
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current, onClick = onClick)
+            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, p.goldLine)),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
 }
 
 /**
  * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme and Text rows, the current choice underlined in gold. `prefsOnly` is the wide
- * header's Settings: the Theme and Text rows alone, under the header's end at `end`.
+ * then the Theme and Text rows, the current choice underlined in gold. The pages are muted, the
+ * current one underlined in the lining. `prefsOnly` is the wide header's Settings: the Theme and
+ * Text rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -233,6 +234,7 @@ fun MenuPanel(
     end: Dp = Gutter,
 ) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
     Popup(
         alignment = Alignment.TopEnd,
@@ -245,21 +247,22 @@ fun MenuPanel(
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
                     .border(1.dp, p.border)
-                    .drawBehind { drawRect(p.goldLine, size = size.copy(height = 2.dp.toPx())) }
+                    // The panel's top edge is the painted line (`--ornament-line`).
+                    .drawBehind { drawRect(o.line, size = size.copy(height = 2.dp.toPx())) }
                     .padding(10.4.dp),
             ) {
                 if (onHour != null && !prefsOnly) {
                     listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEach { row ->
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, p.accent) { onHour(h) } } }
+                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, p.muted, page = true) { onHour(h) } } }
                         Spacer(Modifier.height(2.4.dp))
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
                 if (!prefsOnly) {
                     MenuRow {
-                        MenuCell("ORDO", onOrdoCurrent, nav, p.accent, onOrdo)
+                        MenuCell("ORDO", onOrdoCurrent, nav, p.muted, page = true, onClick = onOrdo)
                         // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, onReminders)
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, page = true, onClick = onReminders)
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
@@ -291,7 +294,7 @@ fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String
             },
             style = Type.control.copy(color = p.muted),
         )
-        Caret(open)
+        Caret(open, p.muted)
     }
 }
 
@@ -339,7 +342,7 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(title.uppercase(), style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
-                Caret(months)
+                Caret(months, p.text)
             }
             Text(
                 "›",
@@ -457,8 +460,8 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
 }
 
 /**
- * The continuation after a page's content: the diamond, then the previous item, the way back
- * to all of them, and the next item.
+ * The continuation after a page's content: the previous item, the way back to all of them, and
+ * the next item, with no ornament of its own.
  */
 @Composable
 fun Continuation(
@@ -476,8 +479,7 @@ fun Continuation(
     val small = Type.label(11.2f, 0.08f).copy(color = p.muted)
     val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.accent)
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Diamond(size = 7.dp)
-        Row(Modifier.fillMaxWidth().padding(top = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f).then(if (previous != null) Modifier.tap(label = "$previousLabel: $previous", onClick = onPrevious) else Modifier), horizontalAlignment = Alignment.Start) {
                 if (previous != null) {
                     Text(previousLabel.uppercase(), style = small)
@@ -495,7 +497,10 @@ fun Continuation(
     }
 }
 
-/** The page's foot: the diamond and the Office's name. The preferences are in the menu, or on a wide screen under Settings. */
+/**
+ * The page's foot: the diamond, where the page has not already ended on a cross, and the Office's
+ * name. The preferences are in the menu, or on a wide screen under Settings.
+ */
 @Composable
 fun Footer(modifier: Modifier = Modifier, diamond: Boolean = true) {
     val p = LocalPalette.current
