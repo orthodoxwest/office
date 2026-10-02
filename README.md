@@ -92,6 +92,13 @@ make golden                      # update expected output after intentional chan
 make verify-psalms                # compare the psalter with its reference witness
 ```
 
+Each worktree has its own `target/`. When several worktrees are in use, set
+`RUSTC_WRAPPER = "sccache"` under `[build]` in `~/.cargo/config.toml`. A new
+worktree then reuses dependencies that other worktrees have already compiled,
+including bundled SQLite, which dominates a cold release build.
+`make sweep-targets` deletes `target/` in checkouts idle for `SWEEP_HOURS`
+(default 24).
+
 Review changes under [tests/fixtures/golden/](tests/fixtures/golden/)
 (rendered hours, date-sensitive parity, text provenance) before committing.
 
