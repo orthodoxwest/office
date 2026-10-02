@@ -73,7 +73,11 @@ static MODERN_PRONOUN_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?-u:\b)(you|your|yours|yourself|yourselves)(?-u:\b)").expect("valid regex"));
 
 /// `feast-id → refs` from `data/audit-ok.txt`; `*` suppresses every ref.
+/// The [`REGISTER_OK`] line maps to corpus keys instead.
 pub type Suppressions = HashMap<String, HashSet<String>>;
+
+/// The `data/audit-ok.txt` line naming corpus keys whose mixed register is intended.
+const REGISTER_OK: &str = "register-ok";
 
 /// Reads `data/audit-ok.txt`; a missing file suppresses nothing.
 pub fn load_suppress_file(src: &dyn DataSource) -> Result<Suppressions, String> {
@@ -185,7 +189,7 @@ pub fn run(src: &dyn DataSource) -> Result<Report, String> {
         }
     }
 
-    let (modern_collects, mixed_register) = find_translation_review_entries(corpus);
+    let (modern_collects, mixed_register) = find_translation_review_entries(corpus, suppress.get(REGISTER_OK).unwrap_or(&none));
     Ok(Report {
         placeholders,
         gaps,
@@ -244,7 +248,7 @@ fn has_flat_indexed_psalm_antiphons(corpus: &Corpus, prefix: &str) -> bool {
     antiphons.iter().all(|t| *t == antiphons[0]) && antiphons[0] != ALLELUIA_ANTIPHON
 }
 
-fn find_translation_review_entries(corpus: &Corpus) -> (Vec<String>, Vec<String>) {
+fn find_translation_review_entries(corpus: &Corpus, register_ok: &HashSet<String>) -> (Vec<String>, Vec<String>) {
     let (mut modern_collects, mut mixed) = (Vec::new(), Vec::new());
     for (key, text) in corpus.entries() {
         if !["proper/", "commons/", "ordinary/", "seasonal/"].iter().any(|p| key.starts_with(p)) {
@@ -255,7 +259,7 @@ fn find_translation_review_entries(corpus: &Corpus) -> (Vec<String>, Vec<String>
         if has_modern && key.ends_with("/collect") {
             modern_collects.push(key.to_string());
         }
-        if has_modern && has_archaic && has_mixed_register_section(key) {
+        if has_modern && has_archaic && has_mixed_register_section(key) && !register_ok.contains(key) {
             mixed.push(key.to_string());
         }
     }
@@ -272,9 +276,17 @@ fn has_mixed_register_section(key: &str) -> bool {
     ) || section.starts_with("psalm-antiphon-")
 }
 
-/// Feasts of the two printed sources, grouped, each group by rank then name.
+/// Feasts grouped by source, the two printed sources first, each group by
+/// rank then name.
 fn print_gaps(w: &mut String, gaps: &[&FeastGap], format: impl Fn(&FeastGap) -> String) {
-    for src in ["base", "awrv"] {
+    let mut sources = vec!["base", "awrv"];
+    for g in gaps {
+        if !sources.contains(&source(&g.feast)) {
+            sources.push(source(&g.feast));
+        }
+    }
+    sources[2..].sort_unstable();
+    for src in sources {
         let mut gs: Vec<&&FeastGap> = gaps.iter().filter(|g| source(&g.feast) == src).collect();
         if gs.is_empty() {
             continue;
@@ -430,6 +442,24 @@ mod tests {
         assert_eq!(trim_index_suffix("x-"), "x-");
         assert_eq!(trim_index_suffix("-12"), "");
         assert_eq!(trim_index_suffix("12"), "12");
+    }
+
+    #[test]
+    fn gaps_from_other_sources_are_printed() {
+        let gap = |id: &str, src: &str| {
+            let mut f = calendar::Feast::synthetic(id, id, Rank::GreaterDouble, calendar::Color::White, calendar::Category::BlessedVirgin);
+            f.source = Some(src.to_string());
+            FeastGap {
+                feast: std::sync::Arc::new(f),
+                missing_refs: vec![],
+                commons_fallback_refs: vec!["collect"],
+                ph_fallback_refs: vec![],
+            }
+        };
+        let (a, b) = (gap("from-ordo", "2026 archdiocesan ordo"), gap("from-base", "base"));
+        let mut w = String::new();
+        print_gaps(&mut w, &[&a, &b], |g| format!("{}\n", g.feast.id));
+        assert_eq!(w, "\n  [base]\nfrom-base\n\n  [2026 archdiocesan ordo]\nfrom-ordo\n");
     }
 
     #[test]

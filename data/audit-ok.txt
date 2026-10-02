@@ -15,6 +15,9 @@
 # Example:
 #   st-raphael-of-brooklyn *
 #   some-martyr commemoration-antiphon commemoration-versicle
+#
+# A line beginning `register-ok` lists corpus keys to leave out of the
+# translation review's mixed-register list.
 
 # AWRV Eastern saints — no propers defined
 st-raphael-of-brooklyn *
@@ -196,3 +199,45 @@ st-mark hymn
 whit-ember-wednesday *
 whit-ember-friday *
 whit-ember-saturday *
+
+# Easter Sunday, Monday and Tuesday are never commemorated: nothing outranks
+# them, and the resolution inventory over 2026–2053 has no commemoration of
+# any of the three.
+easter-sunday commemoration-versicle
+easter-monday commemoration-versicle
+easter-tuesday commemoration-versicle
+
+# Holy Saturday's Vespers is I Vespers of Easter (Diurnal pp. 360–361,
+# "In the end of the sabbath"), owned by easter-sunday.
+holy-saturday magnificat-antiphon
+
+# Rogation Monday takes the V Sunday after Easter's office: its own Benedictus
+# and Magnificat antiphons are proper/easter-sunday-5/*-monday (Diurnal
+# pp. 386–387), reached through the weekday-temporal path.
+rogation-monday *
+
+# The Friday after the Octave of the Ascension repeats the Sunday within the
+# octave (Diurnal p. 394) through ProperID = ascension-sunday-within-octave.
+friday-after-ascension-octave *
+
+# Commemoration versicles taken from the Common: the composer derives the
+# commemoration versicle from the hour's own versicle, which these offices take
+# from their Common (the proper files cite no proper versicle).
+beheading-john-baptist commemoration-versicle
+st-agatha commemoration-versicle
+st-cecilia commemoration-versicle
+st-clement-i commemoration-versicle
+presentation-bvm benedictus-antiphon commemoration-versicle
+# St George: only the collect is proper (Diurnal p. 512); the rest is the Common
+# of a Martyr, in its Paschaltide form when it applies.
+st-george benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+# The Most Holy Name of Mary is not in the Diurnal. The 2026 ordo appoints
+# the Common of the B.V.M. with a proper collect; see
+# data/texts/proper/holy-name-mary.txt.
+holy-name-mary *
+
+# Translation review: texts whose "you" is the plural of address beside a
+# singular "thou", as in the Authorized Version, not mixed register.
+#   John 16:5 "none of you asketh me, Whither goest thou?"
+#   John 14:9 "so long time with you, and yet hast thou not known me, Philip?"
+register-ok proper/easter-sunday-4/benedictus-antiphon proper/ss-philip-james/psalm-antiphon-3

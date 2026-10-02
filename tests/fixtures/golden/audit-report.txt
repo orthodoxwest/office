@@ -1,50 +1,16 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 6 feast(s) ===
+=== Missing propers: 0 feast(s) ===
 
-  [base]
-  [1cl] Easter Monday (easter-monday)
-    missing: commemoration-versicle
-  [1cl] Easter Tuesday (easter-tuesday)
-    missing: commemoration-versicle
-  [1cl] Holy Saturday (holy-saturday)
-    missing: magnificat-antiphon
-  [1cl] Sunday of the Resurrection (easter-sunday)
-    missing: commemoration-versicle
-  [sd] Friday after the Octave of Ascension (friday-after-ascension-octave)
-    missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon
-  [f2] Rogation Monday (rogation-monday)
-    missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon
-
-=== Commons fallback: 7 feast(s) ===
-These refs are covered by the category commons, not feast-specific propers.
-Add to data/audit-ok.txt to acknowledge and suppress.
-
-  [base]
-  [1cl] St George (st-george)
-    commons: benedictus-antiphon, magnificat-antiphon, commemoration-antiphon, commemoration-versicle
-  [gd] Beheading of St John the Baptist (beheading-john-baptist)
-    commons: commemoration-versicle
-  [gd] Presentation of the Blessed Virgin Mary (presentation-bvm)
-    commons: benedictus-antiphon, commemoration-versicle
-  [gd] St Agatha (st-agatha)
-    commons: commemoration-versicle
-  [d] St Cecilia (st-cecilia)
-    commons: commemoration-versicle
-  [d] St Clement I, Bishop and Martyr (st-clement-i)
-    commons: commemoration-versicle
+=== Commons fallback: 0 feast(s) ===
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 
-=== Translation review: 2 mixed-register, 0 modern-pronoun collect(s) ===
-These entries are high-signal candidates for translation normalization.
-Mixed-register entries contain both thou/thee/thy and you/your language in the same text.
+=== Translation review: 0 mixed-register, 0 modern-pronoun collect(s) ===
 
-  [mixed-register]
-    proper/easter-sunday-4/benedictus-antiphon
-    proper/ss-philip-james/psalm-antiphon-3
-
-=== Suppressed: 79 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 82 feast(s) via data/audit-ok.txt ===
+  rogation-monday
+  friday-after-ascension-octave
   whit-ember-wednesday
   whit-ember-friday
   whit-ember-saturday
@@ -66,6 +32,7 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   our-lady-einsiedeln
   st-james-greater
   st-joachim
+  holy-name-mary
   seven-sorrows-bvm
   st-eustace-companions
   st-luke
