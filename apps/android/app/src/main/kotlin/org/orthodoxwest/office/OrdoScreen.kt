@@ -431,8 +431,8 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             }
             if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
         }
-        if (open["comms"] == true) d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) }
-        if (details && hasDetails) Digest(d)
+        Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
+        Unfold(details && hasDetails) { Digest(d) }
     }
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, body)
     Column(modifier.then(if (isToday) Modifier.background(p.pressedWash) else Modifier)) {

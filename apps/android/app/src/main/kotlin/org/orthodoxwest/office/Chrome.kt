@@ -1,17 +1,37 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -25,14 +45,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +95,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
@@ -289,17 +315,29 @@ fun MenuPanel(
     topOffset: Dp,
     prefsOnly: Boolean = false,
     end: Dp = Gutter,
+    visible: Boolean = true,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
+    // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
+    // window until it has gone.
+    val shown = remember { MutableTransitionState(false) }
+    shown.targetState = visible
+    if (!shown.currentState && !shown.targetState && shown.isIdle) return
     Popup(
         alignment = Alignment.TopEnd,
         offset = with(LocalDensity.current) { IntOffset(-end.roundToPx(), topOffset.roundToPx()) },
         onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true),
+        properties = PopupProperties(focusable = visible),
     ) {
-        Column(
+        val drop = with(LocalDensity.current) { 8.dp.roundToPx() }
+        AnimatedVisibility(
+            shown,
+            enter = fadeIn(tween(150, easing = LinearOutSlowInEasing)) + slideInVertically(tween(200, easing = FastOutSlowInEasing)) { -drop },
+            exit = fadeOut(tween(120, easing = FastOutLinearInEasing)) + slideOutVertically(tween(120, easing = FastOutLinearInEasing)) { -drop / 2 },
+        ) {
+            Column(
                 Modifier
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
@@ -336,6 +374,7 @@ fun MenuPanel(
                     }
                 }
             }
+        }
     }
 }
 
@@ -354,6 +393,32 @@ fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String
         Caret(open, p.muted)
     }
 }
+
+/**
+ * A disclosure's contents, unfolding down from its control and folding back up into it; once
+ * open, scrolled into view if it unfolded past the screen's edge.
+ */
+@Composable
+fun Unfold(visible: Boolean, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    val bring = remember { BringIntoViewRequester() }
+    AnimatedVisibility(
+        visible,
+        modifier.bringIntoViewRequester(bring),
+        enter = expandVertically(tween(UNFOLD_MS, easing = FastOutSlowInEasing), expandFrom = Alignment.Top) +
+            fadeIn(tween(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)),
+        exit = shrinkVertically(tween(FOLD_MS, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Top) +
+            fadeOut(tween(FOLD_MS / 2, easing = FastOutLinearInEasing)),
+    ) {
+        LaunchedEffect(Unit) {
+            snapshotFlow { transition.currentState }.first { it == EnterExitState.Visible }
+            bring.bringIntoView()
+        }
+        Column(content = content)
+    }
+}
+
+private const val UNFOLD_MS = 260
+private const val FOLD_MS = 200
 
 /** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
 private val PICKER_YEARS = 1950..2150
@@ -408,11 +473,35 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
                 style = if (forward != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
             )
         }
-        Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+        // A swipe across the days turns the month, as the arrows do.
+        val swipe = with(LocalDensity.current) { 48.dp.toPx() }
+        var dragged by remember { mutableFloatStateOf(0f) }
+        val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
+        Box(
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp).draggable(
+                rememberDraggableState { dragged += it },
+                Orientation.Horizontal,
+                enabled = !months,
+                onDragStarted = { dragged = 0f },
+                onDragStopped = {
+                    val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
+                    if (to != null && to.year in PICKER_YEARS) month = to
+                },
+            ),
+        ) {
             // The days always lay out, for the height both views share; the months cover them.
-            Column(Modifier.then(if (months) Modifier.alpha(0f).clearAndSetSemantics {} else Modifier)) { Days(month, shown, today, live = !months, onPick) }
-            if (months) {
-                MonthGrid(month.year, shown, today, Modifier.matchParentSize()) { m ->
+            AnimatedContent(
+                month,
+                Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
+                transitionSpec = {
+                    val on = if (targetState > initialState) 1 else -1
+                    (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
+                        (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
+                },
+                label = "month",
+            ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
+            if (months || daysAlpha < 1f) {
+                MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
                     month = YearMonth.of(month.year, m)
                     months = false
                 }
@@ -470,7 +559,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
 
 /** The year's months, three to a row: the chosen day's month underlined in gold, today's washed. */
 @Composable
-private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: Modifier, onMonth: (Int) -> Unit) {
+private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: Modifier, live: Boolean, onMonth: (Int) -> Unit) {
     val p = LocalPalette.current
     Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
         (1..12).chunked(3).forEach { row ->
@@ -483,7 +572,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
                                 .then(if (today.year == year && today.monthValue == m) Modifier.background(p.gold.copy(alpha = 0.1f)) else Modifier)
-                                .tap(label = "$name $year", selected = chosen) { onMonth(m) }
+                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
                                 .padding(horizontal = 14.4.dp, vertical = 13.dp),

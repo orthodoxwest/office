@@ -373,8 +373,9 @@ fun OfficeApp(
                 val chrome: @Composable () -> Unit = {
                     SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
                     // Only the page in front opens the menu: the one leaving keeps none.
-                    if (front && menu && !LocalWide.current) {
+                    if (front && !LocalWide.current) {
                         MenuPanel(
+                            visible = menu,
                             currentHour = nav.currentHour,
                             onHour = nav.onHour,
                             onOrdo = nav.onOrdo,
@@ -389,10 +390,11 @@ fun OfficeApp(
                             topOffset = insets.calculateTopPadding() + 52.dp,
                         )
                     }
-                    if (front && settings && LocalWide.current) {
+                    if (front && LocalWide.current) {
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         val width = LocalConfiguration.current.screenWidthDp.dp
                         MenuPanel(
+                            visible = settings,
                             currentHour = null,
                             onHour = null,
                             onOrdo = nav.onOrdo,

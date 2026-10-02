@@ -2,6 +2,9 @@ package org.orthodoxwest.office
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -103,7 +106,7 @@ fun HourScreen(
                 val expanded = open[i] == true
                 item(key = "toggle-$i") {
                     Row(
-                        Modifier.measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                        Modifier.animateItem().measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
                             .semantics { heading() }.tap { open[i] = !expanded }.disclosed(expanded),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
@@ -133,7 +136,7 @@ fun HourScreen(
                 val cross = part && begun
                 begun = true
                 afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap), column = columns[i to j], cross = cross) }
+                item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
                 prev = block
             }
         }
@@ -188,8 +191,8 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             Disclosure("Change date", picking, { picking = !picking; choosing = false })
             Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second)
         }
-        if (picking) DatePicker(date, today) { picking = false; onDate(it) }
-        if (choosing) FormChooser(form) { choosing = false; onForm(it) }
+        Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
+        Unfold(choosing) { FormChooser(form) { choosing = false; onForm(it) } }
         Spacer(Modifier.height(7.2.dp))
         Hairline(p.lining.copy(alpha = 0.3f))
     }
@@ -232,6 +235,10 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
         }
     }
 }
+
+/** A section's blocks fade in as it opens, the office below moving down to make room, and out as it closes. */
+private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOutSlowInEasing)
+private val FOLD_FADE = tween<Float>(120, easing = FastOutLinearInEasing)
 
 /** Which collapsible sections are open, as saved state can hold it. */
 private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
