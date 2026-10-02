@@ -39,6 +39,7 @@ class TokensTest {
         check(block, "gold", p.gold)
         check(block, "gold-line", p.goldLine)
         check(block, "muted", p.muted)
+        check(block, "unsaid", p.unsaid)
         check(block, "border", p.border)
         check(block, "rubric", p.rubric)
         check(block, "surface", p.surface)

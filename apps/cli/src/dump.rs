@@ -351,6 +351,7 @@ fn element(e: &OfficeElement) -> Value {
         "commemoration_owner_id": s(&e.commemoration_owner_id),
         "is_commemoration": e.is_commemoration,
         "announce": e.announce,
+        "unrepeated": e.unrepeated.as_ref().map(|u| json!({"words": u.words, "named": s(&u.named)})),
     })
 }
 

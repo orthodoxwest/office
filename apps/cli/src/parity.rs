@@ -103,6 +103,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
                 source_refs,
                 commemoration_owner_id,
                 is_commemoration,
+                unrepeated,
             } = e;
             content.str(kind.as_str());
             content.str(text);
@@ -111,6 +112,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
             content.str(rubric);
             presentation.str(&e.display_text());
             presentation.bool(*announce);
+            presentation.opt(unrepeated.as_ref().map(|u| format!("{}:{}", u.words, u.named)).as_deref());
             presentation.str(leader_slot);
             presentation.count(rubric_spans.len());
             for RubricSpan { text, prayed } in rubric_spans {

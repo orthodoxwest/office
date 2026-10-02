@@ -78,7 +78,9 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
         heading(prev) -> if (cur.kind == BlockKind.CHAPTER_REF) 24.dp else 27.dp
         cur.kind == BlockKind.GAP || prev.kind == BlockKind.GAP -> 4.8.dp
         prev.kind == BlockKind.ITEM_LABEL -> 9.dp
-        cur.kind == BlockKind.ITEM_LABEL -> if (prev.kind == BlockKind.ANTIPHON) 10.dp else 30.dp
+        // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
+        cur.kind == BlockKind.ANTIPHON_NOTE -> 2.4.dp
+        cur.kind == BlockKind.ITEM_LABEL -> if (prev.kind == BlockKind.ANTIPHON || prev.kind == BlockKind.ANTIPHON_NOTE) 10.dp else 30.dp
         prev.kind == BlockKind.CHAPTER_REF -> 15.dp
         prev.kind == BlockKind.LATIN_TITLE -> 8.dp
         prev.kind == BlockKind.SPEAKER -> 3.2.dp
@@ -120,6 +122,12 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
         )
         BlockKind.CHAPTER_REF, BlockKind.SCRIPTURE_REF -> Text(runs(block), m.fillMaxWidth(), style = Type.reference.copy(color = p.rubric))
         BlockKind.RUBRIC -> Text(runs(block), m.fillMaxWidth(), style = Type.rubric.copy(color = p.rubric))
+        // Under the antiphon's words, past its "Ant." (the antiphon's hanging indent, which scales with text).
+        BlockKind.ANTIPHON_NOTE -> Text(
+            runs(block),
+            m.fillMaxWidth().padding(start = with(LocalDensity.current) { 21.6.sp.toDp() }),
+            style = Type.rubric.copy(color = p.rubric),
+        )
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it.
         BlockKind.ANTIPHON -> Text(
@@ -240,10 +248,12 @@ private fun Char.inWord() = isLetter() || this == '\'' || this == '’' || this 
 
 /**
  * The opening letter and the text after it, with the small-caps transition applied. Only an
- * opening whose first run is ordinary spoken text takes an initial.
+ * opening whose first run is ordinary spoken text takes an initial, or a psalm's whose opening
+ * words go unsaid after its antiphon: the initial stays gilt, the words after it muted.
  */
 private fun splitInitial(block: BlockView, text: AnnotatedString): Pair<String?, AnnotatedString> {
-    if (block.runs.firstOrNull()?.style != RunStyle.PLAIN) return null to text
+    val first = block.runs.firstOrNull()?.style
+    if (first != RunStyle.PLAIN && !(first == RunStyle.SECRET && block.kind == BlockKind.VERSE)) return null to text
     val s = text.text
     val at = s.indexOfFirst { !it.isWhitespace() }
     if (at < 0 || !s[at].isLetter()) return null to text
@@ -383,7 +393,7 @@ private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.MEDIANT -> SpanStyle(color = p.muted)
     RunStyle.CROSS -> SpanStyle(color = p.rubric, fontFamily = CrossFont, fontSize = 0.8.em)
     RunStyle.PRAYED -> SpanStyle(color = p.text)
-    RunStyle.SECRET -> SpanStyle(color = p.muted)
+    RunStyle.SECRET -> SpanStyle(color = p.unsaid)
     RunStyle.LATIN -> SpanStyle(fontStyle = FontStyle.Italic, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.4.sp)
     RunStyle.KICKER -> SpanStyle(fontSize = 0.7.em, color = p.muted, letterSpacing = 0.1.em)
     RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)

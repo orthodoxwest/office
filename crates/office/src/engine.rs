@@ -107,6 +107,7 @@ impl Engine {
         mark_psalm_doxologies(&mut hour);
         crate::posture::mark_postures(&mut hour, day, hour_name);
         mark_announced_antiphons(&mut hour, day, hour_name);
+        crate::unrepeated::mark_unrepeated_openings(&mut hour);
         append_context_decisions(&mut hour, day, hour_name, moveable);
         // A missing corpus entry is a composition failure, never rendered text:
         // the 28-year golden digest then fails before a regression ships.
