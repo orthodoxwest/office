@@ -374,7 +374,7 @@ private struct Epilogue: View {
             // The field is phased from the seam where the ending's air (3.25rem) meets the footer.
             // By night it fades in over the first rem and thins down the footer.
             let air = m.px(52)
-            Footer(gap: 52 + 53.6) {
+            Footer(gap: 52 + 53.6, reserve: true) {
                 Button {
                     if let url = URL(string: reportUrl) { openURL(url) }
                 } label: {
@@ -386,6 +386,7 @@ private struct Epilogue: View {
                 .buttonStyle(Quiet())
                 .accessibilityHint("Opens the report form in your browser")
                 .measured(m)
+                .reserve(p.bg, m)
                 .padding(.top, m.px(4.8))
             }
             .background(

@@ -70,7 +70,7 @@ struct HomeScreen: View {
                                 .padding(.top, 40)
                                 .padding(.bottom, 12)
                             Spacer(minLength: 0)
-                            Footer()
+                            Footer(reserve: true)
                         } else {
                             Frontispiece(view: view, date: date, niche: nil, head: m.px(screen < 375 ? 56 : 68))
                                 .frame(maxWidth: m.px(576))
@@ -79,7 +79,7 @@ struct HomeScreen: View {
                             Spacer(minLength: 0)
                             // The phone's home fits its screen with nothing to spare: the head is
                             // paid for in the footer's gap and padding.
-                            Footer(gap: 29.6, bottom: 25.6)
+                            Footer(gap: 29.6, bottom: 25.6, reserve: true)
                         }
                     }
                     .frame(minHeight: geo.size.height)
@@ -145,10 +145,13 @@ private struct Frontispiece: View {
         let side = m.px(desk ? 28 : 16)
         // On a phone the lining stands this far inside the panel's edge, and the cross below it.
         let panelInset = m.px(9.6)
-        let crown = panelInset + m.px(13.6)
-        // Room under the head for the crown's cross and the lining's arch: on a phone the
-        // lining's inset, air, the cross, and its clearance before the date.
-        let top = desk ? head * 0.62 + m.px(33.6) : crown + m.px(30.4 + 20)
+        // Room under the head for the lining's arch, then the crown's cross, then air before the
+        // date. On a phone: the lining's inset, air, the cross, its clearance. In a niche the cross
+        // is measured down from the lining (2pt moulding, 26pt inset, 11pt + 0.55rem of air), not
+        // from the head's height: a head that flattens on a narrow screen once ran the lining's
+        // crown through the cross.
+        let crown = desk ? 2 + 26 + 11 + m.px(8.8) : panelInset + m.px(13.6)
+        let top = desk ? crown + m.px(36 + 21.6) : crown + m.px(30.4 + 20)
         VStack(spacing: 0) {
             Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
                 Text(view.dateLabel)
@@ -247,7 +250,7 @@ private struct Frontispiece: View {
         }
         .overlay(alignment: .top) {
             // The consecration cross at the crown of the head, with clear air round it.
-            PaintedMark(.consecration, size: m.px(desk ? 36 : 30.4), color: p.lining).padding(.top, desk ? head * 0.36 - 2 : crown)
+            PaintedMark(.consecration, size: m.px(desk ? 36 : 30.4), color: p.lining).padding(.top, crown)
         }
     }
 

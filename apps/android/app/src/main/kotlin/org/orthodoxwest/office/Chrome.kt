@@ -65,9 +65,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.node.DelegatableNode
@@ -197,6 +199,15 @@ val WideFrom: Dp = 701.dp
 /** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
 val LocalWide = staticCompositionLocalOf { false }
 
+/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`). */
+val RankedBelow: Dp = 960.dp
+
+/**
+ * Whether a wide page is narrower than the hours' header holds on one line (701–959dp): there an
+ * hour's links take a rank of their own under the brand and Settings.
+ */
+val LocalRanked = staticCompositionLocalOf { false }
+
 /** The reader's theme and text size, for the wide header's Settings (the phone's are in the menu). */
 class Prefs(val theme: ThemeChoice, val onTheme: (ThemeChoice) -> Unit, val textSize: TextSize, val onTextSize: (TextSize) -> Unit)
 
@@ -224,11 +235,15 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
+    // From 701 to 959dp an hour's links don't fit beside the brand and Settings: left in the row
+    // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
+    // running head over the page.
+    val rank = wide && LocalRanked.current && nav?.onHour != null
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = if (wide) 1088.dp else Dp.Infinity).fillMaxWidth()
-                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
+                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = if (rank) 0.dp else 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -237,13 +252,20 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
-            if (wide) {
-                InlineNav(nav)
+            if (rank) {
+                InlineNav(nav!!, links = false)
+            } else if (wide) {
+                InlineNav(nav!!)
             } else {
                 Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))
                     Caret(menuOpen, p.accent)
                 }
+            }
+        }
+        if (rank) {
+            Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
+                InlineNav(nav!!, settings = false)
             }
         }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
@@ -256,9 +278,13 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
     }
 }
 
-/** The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's rule; Reminders quieter. */
+/**
+ * The desktop header's links (`.site-menu nav`): muted, the current one in ink over the lining's
+ * rule; Reminders quieter. `links` and `settings` choose the pages' links and Settings after them,
+ * which a ranked header sets apart.
+ */
 @Composable
-private fun InlineNav(nav: SiteNav) {
+private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = true) {
     val p = LocalPalette.current
     Row(verticalAlignment = Alignment.CenterVertically) {
         @Composable
@@ -275,20 +301,24 @@ private fun InlineNav(nav: SiteNav) {
                 )
             }
         }
-        nav.onHour?.let { onHour ->
-            nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-            Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
+        if (links) {
+            nav.onHour?.let { onHour ->
+                nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
+                Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
+            }
+            link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
+            link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
         }
-        link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
-        link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
         // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
-        Row(
-            Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
-                .padding(start = 8.8.dp, end = 3.2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
-            Caret(nav.settingsOpen, p.muted)
+        if (settings) {
+            Row(
+                Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
+                    .padding(start = 8.8.dp, end = 3.2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
+                Caret(nav.settingsOpen, p.muted)
+            }
         }
     }
 }
@@ -675,16 +705,33 @@ fun Continuation(
 }
 
 /**
+ * A painter's reserve for an inscription: a feathered clearing of the wall's own colour behind a
+ * line of lettering, so the powdering and the vault never run under the letters (the web's
+ * `footer > p` on home and the hours: `radial-gradient(closest-side, var(--bg) 58%, transparent)`
+ * over 0.6rem × 1.75rem of padding the margin takes back). It draws outside the text's box, so the
+ * foot keeps its height.
+ */
+fun Modifier.reserve(ground: Color): Modifier = drawBehind {
+    val w = size.width + 2 * 28.dp.toPx()
+    val h = size.height + 2 * 9.6.dp.toPx()
+    // closest-side: an ellipse touching the padded box's sides, drawn as a circle squashed to it.
+    scale(scaleX = 1f, scaleY = h / w, pivot = center) {
+        drawCircle(Brush.radialGradient(0f to ground, 0.58f to ground, 1f to Color.Transparent, center = center, radius = w / 2), radius = w / 2, center = center)
+    }
+}
+
+/**
  * The page's foot: the tailpiece that closes every page, the Office's name, and any `matter` a page
- * adds under it (an hour's report line). `gap` stands above it and `bottom` below. The preferences
- * are in the menu, or on a wide screen under Settings.
+ * adds under it (an hour's report line). `gap` stands above it and `bottom` below. On a page with a
+ * field on its wall (home, the hours) the name stands on a `reserve`. The preferences are in the
+ * menu, or on a wide screen under Settings.
  */
 @Composable
-fun Footer(modifier: Modifier = Modifier, gap: Dp = 53.6.dp, bottom: Dp = 24.dp, matter: (@Composable () -> Unit)? = null) {
+fun Footer(modifier: Modifier = Modifier, gap: Dp = 53.6.dp, bottom: Dp = 24.dp, reserve: Boolean = false, matter: (@Composable () -> Unit)? = null) {
     val p = LocalPalette.current
     Column(modifier.fillMaxWidth().padding(top = gap, bottom = bottom), horizontalAlignment = Alignment.CenterHorizontally) {
         Tailpiece()
-        Text("Benedictine Divine Office", Modifier.padding(top = 8.8.dp), style = Type.small.copy(color = p.muted))
+        Text("Benedictine Divine Office", Modifier.padding(top = 8.8.dp).then(if (reserve) Modifier.reserve(p.bg) else Modifier), style = Type.small.copy(color = p.muted))
         matter?.invoke()
     }
 }

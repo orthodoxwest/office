@@ -114,7 +114,7 @@ fun HomeScreen(
                         niche = niche,
                         head = nicheHead(screen),
                     )
-                    Footer()
+                    Footer(reserve = true)
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         chrome()
@@ -126,7 +126,7 @@ fun HomeScreen(
                     }
                     // The phone's home fits its screen with nothing to spare: the head is paid for
                     // in the footer's gap and padding.
-                    Footer(gap = 29.6.dp, bottom = 25.6.dp)
+                    Footer(gap = 29.6.dp, bottom = 25.6.dp, reserve = true)
                 }
             }
         }
@@ -171,10 +171,13 @@ private fun Frontispiece(
     val liningDay = if (!p.dark && view.color == "white") p.goldLine else day
     val desk = niche != null
     val side = if (desk) 28.dp else 16.dp
-    // The card's top padding, room under the head for the crown's cross and the lining's arch: on
-    // a phone the lining's inset, air, the cross, and its clearance before the date.
-    val crown = PanelInset + 13.6.dp
-    val top = if (desk) head * 0.62f + 33.6.dp else crown + 30.4.dp + 20.dp
+    // The card's top padding, room under the head for the lining's arch, then the crown's cross,
+    // then air before the date. On a phone: the lining's inset, air, the cross, its clearance. In a
+    // niche the cross is measured down from the lining (2dp moulding, 26dp inset, 11dp + 8.8dp of
+    // air), not from the head's height: a head that flattens on a narrow screen once ran the
+    // lining's crown through the cross.
+    val crown = if (desk) 2.dp + 26.dp + 11.dp + 8.8.dp else PanelInset + 13.6.dp
+    val top = if (desk) crown + 36.dp + 21.6.dp else crown + 30.4.dp + 20.dp
     Box(
         modifier.drawBehind {
             if (niche != null) {
@@ -187,7 +190,7 @@ private fun Frontispiece(
         },
     ) {
         // The consecration cross at the crown of the head, with clear air round it.
-        ConsecrationCross(Modifier.align(Alignment.TopCenter).padding(top = if (desk) head * 0.36f - 2.dp else crown).size(if (desk) 36.dp else 30.4.dp))
+        ConsecrationCross(Modifier.align(Alignment.TopCenter).padding(top = crown).size(if (desk) 36.dp else 30.4.dp))
         Column(
             Modifier.fillMaxWidth().padding(start = side, end = side, top = top, bottom = if (desk) 20.dp else 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
