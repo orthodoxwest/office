@@ -315,9 +315,10 @@
   --muted: #6b5d54;
   /* Words not said aloud (secret prayers, a psalm's unrepeated opening) at
      body size: a step lighter than --muted so they read as set aside against
-     the warm text (4.7:1 on --bg, where --muted is 5.7:1). Apse uses --muted,
-     whose cool hue already separates it. */
-  --unsaid: color-mix(in oklab, var(--muted) 90%, var(--bg));
+     the warm text. It is --muted mixed 90% with --bg in oklab, 4.7:1 on --bg
+     where --muted is 5.7:1; a literal so the native apps' token tests can
+     read it. Apse uses --muted, whose cool hue already separates it. */
+  --unsaid: #786b62;
   --border: #dccfc3;
   --rubric: #8b1a1a;
   --white: #f8f4ec;
@@ -3328,7 +3329,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     --ornament-hi: #e7d295;
     --ornament-lo: #c0a25a;
     --muted: #9aa4b0;
-    --unsaid: var(--muted);
+    --unsaid: #9aa4b0;
     --border: #2a3648;
     --rubric: #d47070;
     --white: #1a2430;
@@ -3378,7 +3379,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   --ornament-hi: #e7d295;
   --ornament-lo: #c0a25a;
   --muted: #9aa4b0;
-  --unsaid: var(--muted);
+  --unsaid: #9aa4b0;
   --border: #2a3648;
   --rubric: #d47070;
   --white: #1a2430;

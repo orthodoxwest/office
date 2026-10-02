@@ -32,6 +32,10 @@ pub enum BlockKind {
     CanticleSection,
     /// Rubric text, red except for `Prayed` runs.
     Rubric,
+    /// A rubric that annotates the antiphon above it (a psalm's opening words
+    /// that the antiphon has just said are not repeated): set as a rubric,
+    /// close under the antiphon's words, past its marker.
+    AntiphonNote,
     /// An antiphon; the marker is "Ant.".
     Antiphon,
     /// A pointed psalm or canticle verse; the marker is its printed number, if any.
@@ -64,8 +68,8 @@ pub enum RunStyle {
     Cross,
     /// Words quoted in a rubric for recitation, set as prayer, not rubric.
     Prayed,
-    /// Words said silently, or a psalm's opening words not repeated after
-    /// its antiphon; both are set muted.
+    /// Words not said aloud: a secret prayer's silent part, or a psalm's
+    /// opening words that its antiphon has just said. Set in the `unsaid` tone.
     Secret,
     /// A Latin title or incipit.
     Latin,
@@ -205,7 +209,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Psalm | ElementType::Canticle => {
             let unrepeated = elem.unrepeated_rubric();
             if !unrepeated.is_empty() {
-                out.push(rubric_block(&unrepeated));
+                out.push(Block { kind: BlockKind::AntiphonNote, ..rubric_block(&unrepeated) });
             }
             if !elem.label.is_empty() {
                 let mut runs = text_runs(&elem.label);

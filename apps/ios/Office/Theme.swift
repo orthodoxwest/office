@@ -14,6 +14,8 @@ struct Palette: Equatable {
     let gold: Color
     let goldLine: Color
     let muted: Color
+    /** Words not said aloud: secret prayer, a psalm's opening its antiphon has just said. */
+    let unsaid: Color
     let border: Color
     let rubric: Color
     let surface: Color
@@ -34,6 +36,7 @@ struct Palette: Equatable {
         gold: Color(hex: 0x9A7328),
         goldLine: Color(hex: 0xC9AC72),
         muted: Color(hex: 0x6B5D54),
+        unsaid: Color(hex: 0x786B62),
         border: Color(hex: 0xDCCFC3),
         rubric: Color(hex: 0x8B1A1A),
         surface: Color(hex: 0xF6EDDF),
@@ -54,6 +57,7 @@ struct Palette: Equatable {
         gold: Color(hex: 0xD8BC74),
         goldLine: Color(hex: 0x6A5C3A),
         muted: Color(hex: 0x9AA4B0),
+        unsaid: Color(hex: 0x9AA4B0),
         border: Color(hex: 0x2A3648),
         rubric: Color(hex: 0xD47070),
         surface: Color(hex: 0x172232),

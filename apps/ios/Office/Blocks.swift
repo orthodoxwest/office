@@ -16,7 +16,9 @@ func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
     if cur.kind == .gap || prev.kind == .gap { return 4.8 }
     if prev.kind == .itemLabel { return 9 }
-    if cur.kind == .itemLabel { return prev.kind == .antiphon ? 10 : 30 }
+    // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
+    if cur.kind == .antiphonNote { return 2.4 }
+    if cur.kind == .itemLabel { return prev.kind == .antiphon || prev.kind == .antiphonNote ? 10 : 30 }
     if prev.kind == .chapterRef { return 15 }
     if prev.kind == .latinTitle { return 8 }
     if prev.kind == .speaker { return 3.2 }
@@ -45,7 +47,7 @@ private func setting(_ kind: BlockKind) -> Setting {
     case .itemLabel: return Setting(style: Scale.itemLabel, color: \.muted, alignment: .center)
     case .latinTitle, .canticleSection: return Setting(style: Scale.bodyItalic, color: \.muted, alignment: .center)
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
-    case .rubric: return Setting(style: Scale.rubric, color: \.rubric)
+    case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
     case .speaker: return Setting(style: Scale.speaker, color: \.rubric)
     case .verse, .stanza: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
@@ -69,9 +71,12 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             break
         case .prayed:
             a[.foregroundColor] = UIColor(p.text)
-        case .mediant, .secret:
-            // The pointing asterisk is quiet, as are words said silently.
+        case .mediant:
+            // The pointing asterisk is quiet.
             a[.foregroundColor] = UIColor(p.muted)
+        case .secret:
+            // Words not said aloud.
+            a[.foregroundColor] = UIColor(p.unsaid)
         case .cross:
             a[.foregroundColor] = UIColor(p.rubric)
             a[.font] = crossUIFont(size * 0.8)
@@ -109,10 +114,12 @@ private func inWord(_ c: unichar) -> Bool {
 /**
  * The opening letter and the text after it, with the small-caps transition applied: the rest of
  * the first word, or the next word after a lone O or I, as the eye leaves the capital. Only an
- * opening whose first run is ordinary spoken text takes an initial.
+ * opening whose first run is ordinary spoken text takes an initial, or a psalm's whose opening
+ * words go unsaid after its antiphon: the initial stays gilt, the words after it muted.
  */
 func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: String, rest: NSAttributedString)? {
-    guard block.runs.first?.style == .plain else { return nil }
+    let first = block.runs.first?.style
+    guard first == .plain || (first == .secret && block.kind == .verse) else { return nil }
     let s = text.string as NSString
     var at = 0
     while at < s.length && isSpace(s.character(at: at)) { at += 1 }
@@ -201,6 +208,10 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
         t.append(NSAttributedString(string: " ", attributes: [.font: font]))
         t.append(text)
         spec.text = t
+        spec.restIndent = 21.6 * m.type
+    case .antiphonNote:
+        // Under the antiphon's words, past its "Ant." (the antiphon's hanging indent).
+        spec.firstIndent = 21.6 * m.type
         spec.restIndent = 21.6 * m.type
     case .verse:
         if block.dropCap { return opening(textStart: gutter) }
