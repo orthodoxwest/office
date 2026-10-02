@@ -180,7 +180,7 @@ clean: ## Remove build artifacts
 	rm -f office
 	rm -rf output/
 
-SWEEP_HOURS ?= 72
+SWEEP_HOURS ?= 24
 
 sweep-targets: ## Delete target/ in checkouts idle for SWEEP_HOURS (DRY_RUN=1 to preview)
 	python3 scripts/sweep-targets.py --hours $(SWEEP_HOURS) $(if $(DRY_RUN),--dry-run)
