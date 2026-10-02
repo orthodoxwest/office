@@ -263,7 +263,8 @@ final class AppModel: ObservableObject {
         defaults.set(value.rawValue, forKey: "text-size")
     }
 
-    /// Called when the app comes forward: the date may have turned while it was away.
+    /// Called when the app comes forward, and every minute while it is in front: the hour or the
+    /// date may have turned since home was composed.
     func refreshToday() {
         let hour = civil.component(.hour, from: Date())
         if hour != clockHour {
