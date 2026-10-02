@@ -2,7 +2,11 @@ package org.orthodoxwest.office
 
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -27,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,11 +52,17 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.util.WeakHashMap
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.HourView
+
+/** How many hours hold each window awake. */
+private val hoursAwake = WeakHashMap<View, Int>()
 
 /** The Lauds, Prime and Vespers preparation opens, as on the web; the other hours' stays closed. */
 private val OPEN_PREPARATION = setOf("lauds", "prime", "vespers")
@@ -74,9 +85,15 @@ fun HourScreen(
     val p = LocalPalette.current
     // Like the web's wake lock: the screen stays on while an hour is open.
     val host = LocalView.current
+    // Counted, as one hour can still be leaving while the next comes in.
     DisposableEffect(host) {
+        hoursAwake[host] = (hoursAwake[host] ?: 0) + 1
         host.keepScreenOn = true
-        onDispose { host.keepScreenOn = false }
+        onDispose {
+            val left = (hoursAwake[host] ?: 1) - 1
+            hoursAwake[host] = left
+            if (left == 0) host.keepScreenOn = false
+        }
     }
     // Saved with the scroll position: an opened section moves everything below it.
     val open = rememberSaveable(view.hour, view.dateLabel, saver = OpenSections) {
@@ -85,6 +102,16 @@ fun HourScreen(
         }
     }
     val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
+    // The office below a section moves to make room only while the section opens or closes,
+    // not when a new text size or prayer form sets it again.
+    var unfolding by remember { mutableStateOf(false) }
+    LaunchedEffect(unfolding) {
+        if (unfolding) {
+            delay(600)
+            unfolding = false
+        }
+    }
+    val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
     val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
     LazyColumn(
@@ -106,8 +133,8 @@ fun HourScreen(
                 val expanded = open[i] == true
                 item(key = "toggle-$i") {
                     Row(
-                        Modifier.animateItem().measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
-                            .semantics { heading() }.tap { open[i] = !expanded }.disclosed(expanded),
+                        Modifier.animateItem(placementSpec = placement).measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                            .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -136,7 +163,7 @@ fun HourScreen(
                 val cross = part && begun
                 begun = true
                 afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
+                item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
                 prev = block
             }
         }
