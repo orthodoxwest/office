@@ -53,7 +53,7 @@ class TokensTest {
         check(block, "surface", p.surface)
         check(block, "surface-edge", p.surfaceEdge)
         check(block, "pressed-wash", p.pressedWash)
-        check(block, "oak-line", p.oakLine)
+        check(block, "material-highlight", p.materialHighlight)
         check(block, "inscription-ground", p.inscriptionGround)
         check(block, "inscription-edge", p.inscriptionEdge)
         check(block, "inscription-wash", p.inscriptionWash)
@@ -67,6 +67,7 @@ class TokensTest {
     @Test
     fun naveIsTheRoot() {
         checkPalette(root, Nave)
+        check(root, "oak", Nave.oak)
         // The moon is Nave's gold.
         alias(root, "moon-ink", "gold")
         assertEquals(Nave.gold, Nave.moonInk)
@@ -85,6 +86,9 @@ class TokensTest {
     fun apseIsTheDarkTheme() {
         val dark = rule(":root[data-theme=\"dark\"]")
         checkPalette(dark, Apse)
+        // The beam is the root's oak in both themes.
+        assertEquals(null, value(dark, "oak"))
+        check(root, "oak", Apse.oak)
         check(dark, "moon-ink", Apse.moonInk)
         val o = ornament(Apse, "")
         // The root's aliases resolve against Apse's own gold and lining.

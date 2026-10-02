@@ -39,12 +39,22 @@ struct HomeScreen: View {
             let screen = geo.size.width
             let niche = wide ? NicheTokens.of(p) : nil
             ZStack(alignment: .top) {
-                // Apse: one fixed field, anchored top centre, clearing the header.
-                VaultField(fade: [(0, 0), (0.09, 0), (0.16, 0.9), (0.6, 0.7), (1, 0.3)]).ignoresSafeArea()
+                // The wall's one field, fixed to the screen and phased from its top: by night the
+                // vault, clearing the header and thinning toward the foot; by day the powdering,
+                // cut square under the beam.
+                let top = geo.safeAreaInsets.top
+                WallField(seam: top) { h, dark in
+                    func at(_ d: CGFloat) -> CGFloat { (top + d) / h }
+                    return dark
+                        ? [(0, 0), (at(56), 0), (at(112), 1), (max(0.78, at(112)), 1), (1, 0.6)]
+                        : [(0, 0), (at(64), 0), (at(64), 1), (1, 1)]
+                }
+                .ignoresSafeArea()
                 // A wide screen sets the frontispiece in a niche, and lights the room toward it.
                 if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
                 ScrollViewReader { scroll in
                 ScrollView {
+                    // Home is at least a screen tall, its colophon at the foot.
                     VStack(spacing: 0) {
                         SiteHeader()
                         if let niche {
@@ -60,15 +70,19 @@ struct HomeScreen: View {
                                 .padding(.top, 40)
                                 .padding(.bottom, 12)
                             Spacer(minLength: 0)
+                            Footer()
                         } else {
-                            Frontispiece(view: view, date: date, niche: nil, head: 0)
+                            Frontispiece(view: view, date: date, niche: nil, head: m.px(screen < 375 ? 56 : 68))
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
-                                .padding(.top, m.px(16))
+                                .padding(.top, m.px(13.6))
+                            Spacer(minLength: 0)
+                            // The phone's home fits its screen with nothing to spare: the head is
+                            // paid for in the footer's gap and padding.
+                            Footer(gap: 29.6, bottom: 25.6)
                         }
-                        Footer(diamond: false)
                     }
-                    .frame(minHeight: niche == nil ? nil : geo.size.height)
+                    .frame(minHeight: geo.size.height)
                 }
                 .revealing(scroll)
                 }
@@ -91,6 +105,24 @@ private struct InscriptionKey: PreferenceKey {
     static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) { value = nextValue() ?? value }
 }
 
+/**
+ * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
+ * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
+ * rules, the lining thinned.
+ */
+private struct FrontispieceInk {
+    let frame: Color
+    let rule: Color
+    let band: Color
+    let panelRule: Color
+
+    static func of(_ p: Palette) -> FrontispieceInk {
+        p.dark
+            ? FrontispieceInk(frame: Color(rgb: 208, 176, 106, 0.34), rule: Color(rgb: 208, 176, 106, 0.24), band: Color(rgb: 208, 176, 106, 0.045), panelRule: p.lining.opacity(0.45))
+            : FrontispieceInk(frame: Color(rgb: 87, 52, 33, 0.3), rule: Color(rgb: 107, 58, 31, 0.22), band: p.inscriptionGround.opacity(0.09), panelRule: p.lining.opacity(0.45))
+    }
+}
+
 private struct Frontispiece: View {
     let view: HomeView
     let date: CivilDate
@@ -104,15 +136,20 @@ private struct Frontispiece: View {
     @Environment(\.reveal) private var reveal
 
     var body: some View {
-        let day = dayColor(view.color)
+        let day = dayColor(view.color, p)
+        // The lining's inner line is the day's colour, beside the cross on the plaster; a white
+        // day's would be tan there, and takes the gold line by day.
+        let liningDay = !p.dark && view.color == "white" ? p.goldLine : day
+        let ink = FrontispieceInk.of(p)
         let desk = niche != nil
         let side = m.px(desk ? 28 : 16)
+        // On a phone the lining stands this far inside the panel's edge, and the cross below it.
+        let panelInset = m.px(9.6)
+        let crown = panelInset + m.px(13.6)
+        // Room under the head for the crown's cross and the lining's arch: on a phone the
+        // lining's inset, air, the cross, and its clearance before the date.
+        let top = desk ? head * 0.62 + m.px(33.6) : crown + m.px(30.4 + 20)
         VStack(spacing: 0) {
-            // The consecration cross, the mark that ends every hour, opens the card; a niche
-            // carries it at its crown instead.
-            if !desk {
-                PaintedMark(.consecration, size: m.px(30.4), color: p.lining)
-            }
             Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
                 Text(view.dateLabel)
                     .type(desk ? Scale.body.sized(25.92, line: 31.1).tracked(0.39) : Scale.body.sized(22.08, line: 26.5).tracked(0.22))
@@ -122,7 +159,6 @@ private struct Frontispiece: View {
             .buttonStyle(Quiet())
             .accessibilityAddTraits(.isHeader)
             .accessibilityHint("Opens the ordo")
-            .padding(.top, desk ? 0 : m.px(8.8))
             Text(view.feast).type(desk ? Scale.body.sized(18.72, line: 23.4) : Scale.body.sized(17.28, line: 21.6))
                 .foregroundStyle(p.accent)
                 .multilineTextAlignment(.center)
@@ -157,17 +193,17 @@ private struct Frontispiece: View {
             }
             inscription(side: side, desk: desk)
                 .anchorPreference(key: InscriptionKey.self, value: .bounds) { $0 }
-                .padding(.top, m.px(8.8 + 2.4))
+                .padding(.top, m.px(9.6))
             PrayNow(label: view.prayNowLabel, desk: desk) {
                 model.open(.hour(view.prayNowDate, view.prayNowHour))
             }
-            .padding(.top, m.px(13.6))
+            .padding(.top, m.px(12))
             HourDirectory(current: view.currentHour, desk: desk) { h in model.open(.hour(date, h)) }
-                .padding(.top, m.px(12.8))
+                .padding(.top, m.px(11.2))
             // Season and date control share one line after the invitation.
-            Hairline(color: p.border).padding(.top, m.px(11.2))
+            Hairline(color: ink.rule).padding(.top, m.px(8.8))
             if !view.season.isEmpty {
-                Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(4.8))
+                Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
             }
             Disclosure(label: "Change date", open: picking) {
                 withAnimation(unfolding) { picking.toggle() }
@@ -183,42 +219,40 @@ private struct Frontispiece: View {
             }
         }
         .padding(.horizontal, side)
-        // A niche leaves room under its head for the crown's cross and the lining's arch.
-        .padding(.top, desk ? head * 0.62 + m.px(33.6) : m.px(18.2))
-        .padding(.bottom, m.px(desk ? 20 : 16))
+        .padding(.top, top)
+        .padding(.bottom, m.px(desk ? 20 : 12))
         .frame(maxWidth: .infinity)
         .backgroundPreferenceValue(InscriptionKey.self, alignment: .topLeading) { band in
             GeometryReader { g in
-                // A border painted on the niche's back wall, round its head, down to the inscription band.
-                if desk, let band { NicheLining(head: head, bottom: g[band].minY) }
+                // A border painted round the head on the back wall, down to the inscription band:
+                // on a phone its curve springs 8pt below the head's; on a wide screen it stands
+                // 26pt inside the moulding.
+                if let band {
+                    if desk {
+                        NicheLining(inset: 2 + 26, ry: head - 26, bottom: g[band].minY, hairline: liningDay)
+                    } else {
+                        NicheLining(inset: panelInset, ry: head - panelInset + m.px(8), bottom: g[band].minY, hairline: liningDay)
+                    }
+                }
             }
         }
         .background {
             if let niche {
                 // The niche: a low round head, the stone moulding, the day's colour as its trim.
-                let frame = p.dark ? Color(rgb: 208, 176, 106, 0.34) : Color(rgb: 87, 52, 33, 0.3)
-                Niche(t: niche, day: day, head: head, frame: frame)
+                Niche(t: niche, day: day, head: head, frame: ink.frame)
             } else {
-                ZStack(alignment: .top) {
-                    p.surface
-                    // The book-cover tooling, 0.35rem inside the frame.
-                    Rectangle().strokeBorder(o.flat.opacity(0.18), lineWidth: 1)
-                        .padding(EdgeInsets(top: 3 + m.px(5.6), leading: 1 + m.px(5.6), bottom: 1 + m.px(5.6), trailing: 1 + m.px(5.6)))
-                    // The day's colour as the frame's top edge, like a vestment's trim.
-                    Rectangle().fill(day).frame(height: 3)
-                }
-                .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+                // The panel: a segmental head, the day's colour as a ring at its edge.
+                Panel(day: day, frame: ink.frame, head: head)
             }
         }
         .overlay(alignment: .top) {
-            // The consecration cross at the niche's crown, as heavy as the one that ends each hour.
-            if desk {
-                PaintedMark(.consecration, size: m.px(36), color: p.lining).padding(.top, head * 0.36 - 2)
-            }
+            // The consecration cross at the crown of the head, with clear air round it.
+            PaintedMark(.consecration, size: m.px(desk ? 36 : 30.4), color: p.lining).padding(.top, desk ? head * 0.36 - 2 : crown)
         }
     }
 
-    /// The inscription band: pale gilt letters on the frieze's green earth, between oxblood rules, run through to the frame.
+    /// The inscription band: pale gilt letters on the frieze's green earth, between oxblood rules
+    /// each with a gilt fillet inside it, run through to the frame.
     private func inscription(side: CGFloat, desk: Bool) -> some View {
         // Gilt lozenges either side, 5pt squares on their points.
         HStack(spacing: m.px(12)) {
@@ -229,16 +263,27 @@ private struct Frontispiece: View {
         .padding(.vertical, m.px(3.2))
         .frame(maxWidth: .infinity)
         .background(p.inscriptionGround)
-        .overlay(alignment: .top) { Rectangle().fill(p.inscriptionEdge).frame(height: 1) }
-        .overlay(alignment: .bottom) { Rectangle().fill(p.inscriptionEdge).frame(height: 1) }
+        .overlay(alignment: .top) {
+            VStack(spacing: 0) {
+                Rectangle().fill(p.inscriptionEdge).frame(height: 1)
+                Rectangle().fill(o.ink.opacity(0.22)).frame(height: 1)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 0) {
+                Rectangle().fill(o.ink.opacity(0.22)).frame(height: 1)
+                Rectangle().fill(p.inscriptionEdge).frame(height: 1)
+            }
+        }
         .padding(.horizontal, -side)
         .accessibilityAddTraits(.isHeader)
     }
 }
 
 /**
- * The invitation: a single painted line of the lining's terracotta, which does not veil with the
- * season. On the Apse its words are ivory, so the frame carries the colour.
+ * The invitation: a painted line of the lining's terracotta with a thinner one 3pt inside it, as a
+ * panel's border is ruled twice; neither veils with the season. Its words are the tituli's red
+ * ochre, or by night the lining.
  */
 private struct PrayNow: View {
     let label: String
@@ -250,20 +295,27 @@ private struct PrayNow: View {
     var body: some View {
         Button(action: action) {
             Text(label).type((desk ? Scale.body.sized(20, line: 26) : Scale.body.sized(19.2, line: 24.96)).tracked(0.38))
-                .foregroundStyle(p.dark ? p.text : p.accent)
+                .foregroundStyle(p.dark ? p.lining : p.titulus)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, m.px(desk ? 12 : 11.9))
                 .padding(.horizontal, m.px(13.8))
                 .overlay {
-                    Rectangle().strokeBorder(p.lining, lineWidth: 1).allowsHitTesting(false)
+                    ZStack {
+                        Rectangle().strokeBorder(p.lining, lineWidth: 1)
+                        Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
+                    }
+                    .allowsHitTesting(false)
                 }
         }
         .buttonStyle(Quiet())
     }
 }
 
-/// The hours by period in horizontal bands, the current one underlined in gold.
+/**
+ * The hours by period in horizontal bands, the current one underlined in gold: framed in the
+ * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ */
 private struct HourDirectory: View {
     let current: String
     let desk: Bool
@@ -280,9 +332,10 @@ private struct HourDirectory: View {
         let font = label.uiFont(m)
         let widest = periods.map { ProseLayout.advance($0.label, font) + label.tracking * m.type * CGFloat($0.label.count) }.max() ?? 0
         let labelWidth = max(widest + m.px(8), m.px(desk ? 84 : 83))
+        let ink = FrontispieceInk.of(p)
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
-                if i > 0 { Hairline(color: p.border) }
+                if i > 0 { Hairline(color: ink.rule) }
                 HStack(spacing: 0) {
                     VStack(spacing: m.px(2)) {
                         PeriodIcon(period: row.period, color: o.flat)
@@ -291,14 +344,14 @@ private struct HourDirectory: View {
                     .padding(.vertical, m.px(6))
                     .frame(width: labelWidth)
                     .frame(maxHeight: .infinity)
-                    .background(p.inscriptionWash)
+                    .background(ink.band)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(row.label)
                     .accessibilityAddTraits(.isHeader)
-                    Rectangle().fill(p.border).frame(width: 1)
+                    Rectangle().fill(ink.rule).frame(width: 1)
                     HStack(spacing: 0) {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
-                            if j > 0 { VRule(color: p.border) }
+                            if j > 0 { VRule(color: ink.rule, height: 16) }
                             Button { open(h) } label: {
                                 // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                 Text(hourLabel(h))
@@ -319,6 +372,6 @@ private struct HourDirectory: View {
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+        .overlay(Rectangle().strokeBorder(ink.panelRule, lineWidth: 1).allowsHitTesting(false))
     }
 }

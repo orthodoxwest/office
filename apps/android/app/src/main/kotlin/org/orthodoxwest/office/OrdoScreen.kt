@@ -318,7 +318,7 @@ fun OrdoYearScreen(
     }
 }
 
-/** "Tabula Temporaria" in small capitals over the ornament's double rule, its lozenge at the centre. */
+/** "Tabula Temporaria", a titulus in small capitals over the ornament's double rule, its lozenge at the centre. */
 @Composable
 private fun TabulaHeading() {
     val p = LocalPalette.current
@@ -334,15 +334,40 @@ private fun TabulaHeading() {
             lozenge(c, 4.5.dp.toPx(), p.bg, null)
             lozenge(c, 2.5.dp.toPx(), o.flat, null)
         }.padding(vertical = 6.4.dp),
-        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
+        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
     )
 }
 
-/** The year's four figures, `perRow` to a row: the numeral large in the accent, its name beneath. */
+/**
+ * The year's four figures, `perRow` to a row, on a painted tablet: the surface thinned so the wall
+ * shows through, framed in the lining ruled twice (a thinner line 3dp inside the first), with a
+ * quatrefoil knop at each corner where the rules stop short. Each numeral large in the accent, its
+ * name beneath.
+ */
 @Composable
 private fun Figures(figures: List<TabulaRowView>, perRow: Int, modifier: Modifier) {
     val p = LocalPalette.current
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(
+        modifier.fillMaxWidth()
+            .background(p.surface.copy(alpha = p.surface.alpha * 0.6f))
+            .drawBehind {
+                val knop = 14.dp.toPx()
+                val w = 1.dp.toPx()
+                val inner = p.lining.copy(alpha = 0.4f)
+                for ((inset, ink) in listOf(0f to p.lining, 3.dp.toPx() to inner)) {
+                    val a = inset + w / 2f
+                    drawLine(ink, Offset(knop, a), Offset(size.width - knop, a), w)
+                    drawLine(ink, Offset(knop, size.height - a), Offset(size.width - knop, size.height - a), w)
+                    drawLine(ink, Offset(a, knop), Offset(a, size.height - knop), w)
+                    drawLine(ink, Offset(size.width - a, knop), Offset(size.width - a, size.height - knop), w)
+                }
+                for (x in listOf(0f, size.width - knop)) {
+                    for (y in listOf(0f, size.height - knop)) quatrefoil(Offset(x, y), knop, p.lining)
+                }
+            }
+            .padding(start = 6.4.dp, end = 6.4.dp, top = 17.6.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
         figures.chunked(perRow).forEach { pair ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 pair.forEach { f ->
@@ -384,6 +409,7 @@ private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalD
     }
 }
 
+/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule. */
 @Composable
 private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifier, onTop: () -> Unit) {
     val p = LocalPalette.current
@@ -402,7 +428,7 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
         }.padding(vertical = 6.4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
+        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
         Text("↑", Modifier.tap(label = "Back to the top", onClick = onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
     }
 }
@@ -436,12 +462,26 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
     }
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, body)
-    Column(modifier.then(if (isToday) Modifier.background(p.pressedWash) else Modifier)) {
+    // Today is painted, not selected: a ground of the frieze's wash ruled top and bottom in the gold
+    // line, inset 8dp from the gutters, the day's number in gold.
+    Column(
+        modifier.then(
+            if (!isToday) Modifier else Modifier.drawBehind {
+                val inset = 8.dp.toPx()
+                val w = 1.dp.toPx()
+                // Above the row's hairline.
+                val h = size.height - w
+                drawRect(p.inscriptionWash, Offset(inset, 0f), Size(size.width - 2 * inset, h))
+                drawRect(p.goldLine, Offset(inset, 0f), Size(size.width - 2 * inset, w))
+                drawRect(p.goldLine, Offset(inset, h - w), Size(size.width - 2 * inset, w))
+            },
+        ),
+    ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
             // The day's liturgical colour as a rail beside its date.
             Box(Modifier.width(3.dp).height(40.dp).background(dayColor(d.color)))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = p.accent, fontFeatureSettings = "lnum"))
+                Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
                 if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.sp, lineHeight = 14.sp, color = p.accent))
             }
@@ -500,7 +540,19 @@ private fun DayTableRow(
 ) {
     val p = LocalPalette.current
     val rail = dayColor(d.color)
-    Column(modifier.then(if (isToday) Modifier.background(p.gold.copy(alpha = 0.06f)) else Modifier)) {
+    // Today is painted, not selected: the frieze's wash, ruled top and bottom in the gold line
+    // across the row, the day's number in gold.
+    Column(
+        modifier.then(
+            if (!isToday) Modifier else Modifier.drawBehind {
+                val w = 1.dp.toPx()
+                val h = size.height - w
+                drawRect(p.inscriptionWash, size = Size(size.width, h))
+                drawRect(p.goldLine, size = Size(size.width, w))
+                drawRect(p.goldLine, Offset(0f, h - w), Size(size.width, w))
+            },
+        ),
+    ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 10.4.dp, bottom = 7.2.dp)) {
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
@@ -509,7 +561,7 @@ private fun DayTableRow(
                     .padding(start = 10.4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = p.accent, fontFeatureSettings = "lnum"))
+                Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.2.sp, lineHeight = 15.7.sp, color = p.accent))
             }
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))

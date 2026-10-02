@@ -224,8 +224,6 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // The brand's mark, 1.15em of the brand's capitals: the roundel that ends every hour.
-    val mark = with(LocalDensity.current) { (Type.brand.fontSize * 1.15f).toDp() }
     Column {
         Row(
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
@@ -234,7 +232,8 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                ConsecrationCross(Modifier.size(mark))
+                // The brand's mark, 18dp: the roundel that ends every hour.
+                ConsecrationCross(Modifier.size(18.dp))
                 Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
@@ -247,7 +246,13 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 }
             }
         }
-        Hairline(p.oakLine)
+        // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
+        Box(
+            Modifier.fillMaxWidth().height(5.dp).drawBehind {
+                drawRect(p.materialHighlight, size = size.copy(height = 1.dp.toPx()))
+                drawRect(p.oak.copy(alpha = 0.55f), Offset(0f, 1.dp.toPx()), size.copy(height = 4.dp.toPx()))
+            },
+        )
     }
 }
 
@@ -670,15 +675,17 @@ fun Continuation(
 }
 
 /**
- * The page's foot: the diamond, where the page has not already ended on a cross, and the Office's
- * name. The preferences are in the menu, or on a wide screen under Settings.
+ * The page's foot: the tailpiece that closes every page, the Office's name, and any `matter` a page
+ * adds under it (an hour's report line). `gap` stands above it and `bottom` below. The preferences
+ * are in the menu, or on a wide screen under Settings.
  */
 @Composable
-fun Footer(modifier: Modifier = Modifier, diamond: Boolean = true) {
+fun Footer(modifier: Modifier = Modifier, gap: Dp = 53.6.dp, bottom: Dp = 24.dp, matter: (@Composable () -> Unit)? = null) {
     val p = LocalPalette.current
-    Column(modifier.fillMaxWidth().padding(top = 40.dp, bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        if (diamond) Diamond(Modifier.padding(bottom = 16.dp), size = 7.dp)
-        Text("Benedictine Divine Office", style = Type.small.copy(color = p.muted))
+    Column(modifier.fillMaxWidth().padding(top = gap, bottom = bottom), horizontalAlignment = Alignment.CenterHorizontally) {
+        Tailpiece()
+        Text("Benedictine Divine Office", Modifier.padding(top = 8.8.dp), style = Type.small.copy(color = p.muted))
+        matter?.invoke()
     }
 }
 

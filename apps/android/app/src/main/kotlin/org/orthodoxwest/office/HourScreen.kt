@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.WeakHashMap
@@ -226,42 +227,56 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
 }
 
 /**
- * After the prayer: the consecration cross that ends the hour, the other hours, the report link,
- * and the foot. In Apse the vault fades in here.
+ * After the prayer: the consecration cross that ends the hour, the other hours, and the foot, with
+ * the report line under its colophon. The wall's field shows only below the hour navigation: the
+ * Apse vault by night, the Nave's powdering by day.
  */
 @Composable
 private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour: (String) -> Unit, onAllHours: () -> Unit) {
     val p = LocalPalette.current
     val context = LocalContext.current
-    Box(Modifier.fillMaxWidth()) {
-        VaultField(Modifier.matchParentSize(), listOf(0f to 0f, 0.35f to 0f, 0.7f to 0.8f, 1f to 1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            // The hour ends on one mark, as painted where the bishop anointed the walls; the links
-            // and the foot below carry no other.
-            ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
-            Continuation(
-                previousLabel = "Previous hour",
-                previous = previous?.let(::hourLabel),
-                onPrevious = { previous?.let(onHour) },
-                middle = "All hours",
-                onMiddle = onAllHours,
-                nextLabel = "Next hour",
-                next = next?.let(::hourLabel),
-                onNext = { next?.let(onHour) },
-                modifier = Modifier.measure().padding(top = 83.2.dp),
-            )
-            Text(
-                buildAnnotatedString {
-                    append("Spotted an error on this page? ")
-                    withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append("Report a problem") }
-                },
-                Modifier.measure().padding(top = 40.dp).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
-                style = Type.small.copy(color = p.muted, textAlign = TextAlign.Center),
-            )
-            Footer(diamond = false)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        // The hour ends on one mark, as painted where the bishop anointed the walls; the links
+        // and the foot below carry no other.
+        ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
+        Continuation(
+            previousLabel = "Previous hour",
+            previous = previous?.let(::hourLabel),
+            onPrevious = { previous?.let(onHour) },
+            middle = "All hours",
+            onMiddle = onAllHours,
+            nextLabel = "Next hour",
+            next = next?.let(::hourLabel),
+            onNext = { next?.let(onHour) },
+            modifier = Modifier.measure().padding(top = 83.2.dp),
+        )
+        Box(Modifier.fillMaxWidth()) {
+            // The field is phased from the seam where the ending's air (3.25rem) meets the
+            // footer. By night it fades in over the first rem and thins down the footer.
+            WallField(Modifier.matchParentSize(), seam = EndingAir) { dark ->
+                val seam = EndingAir.toPx() / size.height
+                if (dark) {
+                    listOf(0f to 0f, 16.dp.toPx() / size.height to 1f, seam + 0.45f * (1f - seam) to 1f, seam + 0.8f * (1f - seam) to 0.5f, 1f to 0.25f)
+                } else {
+                    listOf(0f to 1f, 1f to 1f)
+                }
+            }
+            Footer(Modifier.padding(top = EndingAir)) {
+                Text(
+                    buildAnnotatedString {
+                        append("Spotted an error on this page? ")
+                        withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append("Report a problem") }
+                    },
+                    Modifier.measure().padding(top = 4.8.dp).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
+                    style = Type.small.copy(fontSize = 11.84.sp, lineHeight = 18.9.sp, color = p.muted, textAlign = TextAlign.Center),
+                )
+            }
         }
     }
 }
+
+/** Air below the hour navigation (`.hour-epilogue`'s bottom padding), where the wall's field begins. */
+private val EndingAir = 52.dp
 
 /** A section's blocks fade in as it opens, the office below moving down to make room, and out as it closes. */
 private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOutSlowInEasing)

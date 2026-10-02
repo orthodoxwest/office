@@ -33,7 +33,7 @@ import kotlin.math.sin
 /**
  * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
  * frontispiece is set into the wall under a low round head, with a stone moulding, the day's
- * colour as a trim, and the room lit toward it. Phones keep the plain card.
+ * colour as a trim, and the room lit toward it. Phones set it in a round-headed panel ([panel]).
  */
 data class NicheTokens(
     val stone: Color,
@@ -109,7 +109,7 @@ private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
  * The niche behind the frontispiece, in the order the web's box-shadows stack, bottom first: a
  * clearing of the Apse's ground, the shadow under the head, the moulding's edge and stone, the
  * day's colour; then the lit recess, its shadow under the head, and the frame. The painted
- * lining ([nicheLining]) takes the place of the phone card's tooling.
+ * lining ([nicheLining]) is the phone panel's, restated at the niche's scale.
  */
 fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: Color) {
     val rem = 16.dp.toPx()
@@ -147,15 +147,16 @@ fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: 
 }
 
 /**
- * The lining painted on the niche's back wall: a 2dp band and a lighter line 5dp inside it,
- * round the head only and open below, so it reads as paint on the wall rather than another edge
- * of the arch. Drawn in this scope's width from `top` (its outer edge) to the scope's foot, its
- * head an ellipse across the whole width with vertical radius `ry` at the outer edge.
+ * The lining painted round the head on a panel's or niche's back wall: a 2dp band of the lining,
+ * and the day's colour (`hairline`) as a line 8dp inside it, round the head only and open below,
+ * so it reads as paint on the wall rather than another edge of the arch. Its outer edge stands
+ * `side` in from this scope's sides (less than nothing runs it out past them) and `top` down from
+ * its top, and runs to the scope's foot; its head is an ellipse across the whole width with
+ * vertical radius `ry`, which CSS's inherited radius keeps for both lines.
  */
-fun DrawScope.nicheLining(color: Color, top: Float, ry: Float) {
-    // One line `inset` inside the outer edge; CSS's inherited radius keeps `ry` for both.
+fun DrawScope.nicheLining(color: Color, hairline: Color, top: Float, side: Float, ry: Float) {
     fun line(inset: Float, weight: Float, ink: Color) {
-        val x = inset + weight / 2f
+        val x = side + inset + weight / 2f
         val y = top + inset + weight / 2f
         val r = ry - weight / 2f
         val path = Path().apply {
@@ -168,7 +169,34 @@ fun DrawScope.nicheLining(color: Color, top: Float, ry: Float) {
     }
     val band = 2.dp.toPx()
     line(0f, band, color)
-    line(band + 5.dp.toPx(), 1.dp.toPx(), color.copy(alpha = color.alpha * 0.62f))
+    line(band + 8.dp.toPx(), 1.dp.toPx(), hairline)
+}
+
+/**
+ * A phone's frontispiece: a round-headed painted panel in the niche's family (`.home-hero`), its
+ * shadows bottom first: a soft halo of the wall's ground that keeps the field off it, the day's
+ * colour as a ring at its edge, then the surface, a highlight along its top (by day), the shade
+ * under its head, and the frame.
+ */
+fun DrawScope.panel(p: Palette, day: Color, frame: Color, head: Float) {
+    val rem = 16.dp.toPx()
+    // 0 0 1.5rem 0.5rem by day, 0 0 1.25rem 0.35rem by night.
+    if (p.dark) blurred(nichePath(size, head, 0.35f * rem), p.bg, 1.25f * rem) else blurred(nichePath(size, head, 0.5f * rem), p.bg, 1.5f * rem)
+    drawPath(nichePath(size, head, 1.5.dp.toPx()), day)
+    val shape = nichePath(size, head, 0f)
+    drawPath(shape, p.surface)
+    clipPath(shape) {
+        // inset 0 1px 0: the light along the head, the shape less itself dropped a pixel.
+        if (!p.dark) {
+            val dropped = nichePath(size, head, 0f).apply { translate(Offset(0f, 1.dp.toPx())) }
+            drawPath(Path.combine(PathOperation.Difference, shape, dropped), Color.White.copy(alpha = 0.45f))
+        }
+        // inset 0 1.5rem 1.5rem -1.25rem: the shade under the head, as the niche's recess.
+        val hole = nichePath(size, head, 1.25f * rem).apply { translate(Offset(0f, 1.5f * rem)) }
+        val all = Path().apply { addRect(Rect(-4 * rem, -4 * rem, size.width + 4 * rem, size.height + 4 * rem)) }
+        blurred(Path.combine(PathOperation.Difference, all, hole), nicheTokens(p).recess, 1.5f * rem)
+    }
+    drawPath(nichePath(size, head, -0.5.dp.toPx()), frame, style = Stroke(1.dp.toPx()))
 }
 
 /**
