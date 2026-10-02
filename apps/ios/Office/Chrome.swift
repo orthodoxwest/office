@@ -100,8 +100,8 @@ struct SiteHeader: View {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
                     HStack(spacing: 0) {
-                        // The consecration roundel that ends every hour, 1.15em of the brand's size.
-                        PaintedMark(.consecration, size: Scale.brand.size * 1.15 * m.type, color: p.lining)
+                        // The consecration roundel that ends every hour, 18pt.
+                        PaintedMark(.consecration, size: m.px(18), color: p.lining)
                             .padding(.trailing, m.px(6.08))
                         Text(" DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
                     }
@@ -134,7 +134,12 @@ struct SiteHeader: View {
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             .frame(maxWidth: wide ? m.px(1088) : .infinity)
             .frame(maxWidth: .infinity)
-            Hairline(color: p.oakLine)
+            // The beam: a 4pt course of oak, its upper edge catching the light as a timber's arris does.
+            VStack(spacing: 0) {
+                Rectangle().fill(p.materialHighlight).frame(height: 1)
+                Rectangle().fill(p.oak.opacity(0.55)).frame(height: 4)
+            }
+            .accessibilityHidden(true)
         }
     }
 }
@@ -654,24 +659,38 @@ struct Continuation: View {
 }
 
 /**
- * The page's foot: the diamond, in the painted rules' colour, and the Office's name. Home and the
- * hours already end on a cross, so theirs has no diamond. The preferences are in the menu, or on
- * a wide screen under Settings.
+ * The page's foot: the tailpiece that closes every page, the Office's name, and any `matter` a page
+ * adds under it (an hour's report line). `gap` stands above it and `bottom` below, in the web's
+ * px. The preferences are in the menu, or on a wide screen under Settings.
  */
-struct Footer: View {
-    var diamond = true
+struct Footer<Matter: View>: View {
+    let gap: CGFloat
+    let bottom: CGFloat
+    let matter: Matter
     @Environment(\.palette) private var p
-    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
+
+    init(gap: CGFloat = 53.6, bottom: CGFloat = 24, @ViewBuilder matter: () -> Matter) {
+        self.gap = gap
+        self.bottom = bottom
+        self.matter = matter()
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            if diamond { Diamond(color: o.line).padding(.bottom, m.px(16)) }
-            Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted)
+            Tailpiece()
+            Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(8.8))
+            matter
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, m.px(40))
-        .padding(.bottom, m.px(24))
+        .padding(.top, m.px(gap))
+        .padding(.bottom, m.px(bottom))
+    }
+}
+
+extension Footer where Matter == EmptyView {
+    init(gap: CGFloat = 53.6, bottom: CGFloat = 24) {
+        self.init(gap: gap, bottom: bottom) { EmptyView() }
     }
 }
 

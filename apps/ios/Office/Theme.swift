@@ -29,7 +29,9 @@ struct Palette: Equatable {
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
-    let oakLine: Color
+    /// The header's beam, in both themes, and the light catching a timber's upper edge.
+    let oak: Color
+    let materialHighlight: Color
     let inscriptionGround: Color
     let inscriptionEdge: Color
     let inscriptionWash: Color
@@ -54,7 +56,8 @@ struct Palette: Equatable {
         surface: Color(hex: 0xF6EDDF),
         surfaceEdge: Color(rgb: 107, 58, 31, 0.12),
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
-        oakLine: Color(rgb: 63, 55, 47, 0.34),
+        oak: Color(hex: 0x3F372F),
+        materialHighlight: Color(rgb: 255, 255, 255, 0.38),
         inscriptionGround: Color(hex: 0x545F54),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
@@ -79,7 +82,8 @@ struct Palette: Equatable {
         surface: Color(hex: 0x172232),
         surfaceEdge: Color(rgb: 208, 176, 106, 0.18),
         pressedWash: Color(rgb: 208, 176, 106, 0.12),
-        oakLine: Color(rgb: 208, 176, 106, 0.16),
+        oak: Color(hex: 0x3F372F),
+        materialHighlight: Color(rgb: 208, 176, 106, 0.065),
         inscriptionGround: Color(hex: 0x263431),
         inscriptionEdge: Color(hex: 0x5C2B35),
         inscriptionWash: Color(rgb: 208, 176, 106, 0.04),
@@ -132,6 +136,15 @@ func dayColor(_ name: String) -> Color {
     case "black": return Color(hex: 0x3A3A3A)
     case "rose": return Color(hex: 0xC4607A)
     default: return Color(hex: 0xC9B896)
+    }
+}
+
+/// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*` is.
+func dayColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    default: return dayColor(name)
     }
 }
 

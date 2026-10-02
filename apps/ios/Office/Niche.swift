@@ -3,7 +3,7 @@ import SwiftUI
 /**
  * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
  * frontispiece is set into the wall under a low round head, with a stone moulding, the day's
- * colour as a trim, and the room lit toward it. Phones keep the plain card.
+ * colour as a trim, and the room lit toward it. Phones set it in a round-headed panel (`Panel`).
  */
 struct NicheTokens {
     let stone: Color
@@ -146,27 +146,85 @@ struct Niche: View {
 }
 
 /**
- * A border painted on the niche's back wall (`.home-lining`), round its head only and down to
- * `bottom`, the inscription band: a 2px band of the lining's terracotta and a lighter line 5px
- * inside it. 26pt of plain plaster lie between it and the 2pt frame, so it reads as paint on the
- * wall, not another edge of the arch.
+ * A phone's frontispiece: a round-headed painted panel in the niche's family (`.home-hero`), its
+ * shadows bottom first: a soft halo of the wall's ground that keeps the field off it, the day's
+ * colour as a ring at its edge, then the surface, a highlight along its head (by day), the shade
+ * under the head, and the frame.
+ */
+struct Panel: View {
+    let day: Color
+    let frame: Color
+    let head: CGFloat
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        Canvas { ctx, full in
+            let rem: CGFloat = 16
+            let o = CGPoint(x: reach, y: reach)
+            let size = CGSize(width: full.width - 2 * reach, height: full.height - 2 * reach)
+            func shape(_ outset: CGFloat, dy: CGFloat = 0) -> Path {
+                nichePath(size, head: head, outset: outset, at: CGPoint(x: o.x, y: o.y + dy))
+            }
+            func blurred(_ path: Path, _ color: Color, _ blur: CGFloat) {
+                ctx.drawLayer { layer in
+                    layer.addFilter(.blur(radius: blur / 2))
+                    layer.fill(path, with: .color(color))
+                }
+            }
+            // 0 0 1.5rem 0.5rem by day, 0 0 1.25rem 0.35rem by night.
+            if p.dark { blurred(shape(0.35 * rem), p.bg, 1.25 * rem) } else { blurred(shape(0.5 * rem), p.bg, 1.5 * rem) }
+            ctx.fill(shape(1.5), with: .color(day))
+            let face = shape(0)
+            ctx.fill(face, with: .color(p.surface))
+            ctx.drawLayer { inside in
+                inside.clip(to: face)
+                if !p.dark {
+                    // inset 0 1px 0: the light along the head, the face less itself dropped a point.
+                    var light = face
+                    light.addPath(shape(0, dy: 1))
+                    inside.fill(light, with: .color(.white.opacity(0.45)), style: FillStyle(eoFill: true))
+                }
+                // inset 0 1.5rem 1.5rem -1.25rem: the shade under the head, as the niche's recess.
+                var outside = Path(CGRect(origin: .zero, size: full))
+                outside.addPath(shape(1.25 * rem, dy: 1.5 * rem))
+                inside.drawLayer { shadow in
+                    shadow.addFilter(.blur(radius: 0.75 * rem))
+                    shadow.fill(outside, with: .color(NicheTokens.of(p).recess), style: FillStyle(eoFill: true))
+                }
+            }
+            ctx.stroke(shape(-0.5), with: .color(frame), lineWidth: 1)
+        }
+        .padding(-reach)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * A border painted round the head on the panel's or niche's back wall (`.home-lining`), down to
+ * `bottom`, the inscription band: a 2px band of the lining's terracotta and the day's colour
+ * (`hairline`) as a line 8px inside it. Its outer edge stands `inset` inside the card, its head
+ * `ry` deep, which CSS's inherited radius keeps for both lines, so the plaster between it and the
+ * edge reads as wall, not another edge of the arch.
  */
 struct NicheLining: View {
-    let head: CGFloat
+    let inset: CGFloat
+    let ry: CGFloat
     let bottom: CGFloat
+    let hairline: Color
     @Environment(\.palette) private var p
 
     var body: some View {
         Canvas { ctx, size in
-            let inset: CGFloat = 2 + 26
-            // A line `d` inside the lining's outer edge, its head `ry` deep.
-            func line(_ d: CGFloat, ry: CGFloat, _ color: Color, width: CGFloat) {
-                let at = inset + d
-                let arch = nichePath(CGSize(width: size.width - 2 * at, height: bottom - at), head: ry, outset: 0, at: CGPoint(x: at, y: at), open: true)
+            // A line `d` inside the lining's outer edge: its centre half its width further in,
+            // under a head of the same depth.
+            func line(_ d: CGFloat, _ color: Color, width: CGFloat) {
+                let at = inset + d + width / 2
+                let arch = nichePath(CGSize(width: size.width - 2 * at, height: bottom - at), head: ry - width / 2, outset: 0, at: CGPoint(x: at, y: at), open: true)
                 ctx.stroke(arch, with: .color(color), lineWidth: width)
             }
-            line(1, ry: head - 27, p.lining, width: 2)
-            line(7.5, ry: head - 26.5, p.lining.opacity(0.62), width: 1)
+            line(0, p.lining, width: 2)
+            line(2 + 8, hairline, width: 1)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)

@@ -340,8 +340,9 @@ private struct HourTitle: View {
 }
 
 /**
- * After the prayer: the consecration cross the hour ends on, the other hours, the report link,
- * and the foot. In Apse the vault fades in here.
+ * After the prayer: the consecration cross the hour ends on, the other hours, and the foot, with
+ * the report line under its colophon. The wall's field shows only below the hour navigation: the
+ * Apse vault by night, the Nave's powdering by day.
  */
 private struct Epilogue: View {
     let previous: String?
@@ -370,20 +371,31 @@ private struct Epilogue: View {
             )
             .measured(m)
             .padding(.top, m.px(83.2))
-            Button {
-                if let url = URL(string: reportUrl) { openURL(url) }
-            } label: {
-                (Text("Spotted an error on this page? ") + Text("Report a problem").foregroundColor(p.accent).underline())
-                    .type(Scale.small)
-                    .foregroundStyle(p.muted)
-                    .multilineTextAlignment(.center)
+            // The field is phased from the seam where the ending's air (3.25rem) meets the footer.
+            // By night it fades in over the first rem and thins down the footer.
+            let air = m.px(52)
+            Footer(gap: 52 + 53.6) {
+                Button {
+                    if let url = URL(string: reportUrl) { openURL(url) }
+                } label: {
+                    (Text("Spotted an error on this page? ") + Text("Report a problem").foregroundColor(p.accent).underline())
+                        .type(Scale.small.sized(11.84, line: 18.9))
+                        .foregroundStyle(p.muted)
+                        .multilineTextAlignment(.center)
+                }
+                .buttonStyle(Quiet())
+                .accessibilityHint("Opens the report form in your browser")
+                .measured(m)
+                .padding(.top, m.px(4.8))
             }
-            .buttonStyle(Quiet())
-            .accessibilityHint("Opens the report form in your browser")
-            .measured(m)
-            .padding(.top, m.px(40))
-            Footer(diamond: false)
+            .background(
+                WallField(seam: air) { h, dark in
+                    let seam = air / h
+                    return dark
+                        ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]
+                        : [(0, 1), (1, 1)]
+                }
+            )
         }
-        .background(VaultField(fade: [(0, 0), (0.35, 0), (0.7, 0.8), (1, 1)]))
     }
 }

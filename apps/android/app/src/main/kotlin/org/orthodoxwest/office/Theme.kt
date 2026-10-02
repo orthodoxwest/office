@@ -44,7 +44,10 @@ data class Palette(
     val surface: Color,
     val surfaceEdge: Color,
     val pressedWash: Color,
-    val oakLine: Color,
+    /** The header's beam, in both themes. */
+    val oak: Color,
+    /** The light catching a timber's upper edge. */
+    val materialHighlight: Color,
     val inscriptionGround: Color,
     val inscriptionEdge: Color,
     val inscriptionWash: Color,
@@ -73,7 +76,8 @@ val Nave = Palette(
     surface = Color(0xFFF6EDDF),
     surfaceEdge = Color(107, 58, 31).copy(alpha = 0.12f),
     pressedWash = Color(107, 58, 31).copy(alpha = 0.09f),
-    oakLine = Color(63, 55, 47).copy(alpha = 0.34f),
+    oak = Color(0xFF3F372F),
+    materialHighlight = Color.White.copy(alpha = 0.38f),
     inscriptionGround = Color(0xFF545F54),
     inscriptionEdge = Color(0xFF5E2A27),
     inscriptionWash = Color(87, 94, 65).copy(alpha = 0.055f),
@@ -98,7 +102,8 @@ val Apse = Palette(
     surface = Color(0xFF172232),
     surfaceEdge = Color(208, 176, 106).copy(alpha = 0.18f),
     pressedWash = Color(208, 176, 106).copy(alpha = 0.12f),
-    oakLine = Color(208, 176, 106).copy(alpha = 0.16f),
+    oak = Color(0xFF3F372F),
+    materialHighlight = Color(208, 176, 106).copy(alpha = 0.065f),
     inscriptionGround = Color(0xFF263431),
     inscriptionEdge = Color(0xFF5C2B35),
     inscriptionWash = Color(208, 176, 106).copy(alpha = 0.04f),
@@ -137,6 +142,13 @@ fun dayColor(name: String): Color = when (name) {
     "black" -> Color(0xFF3A3A3A)
     "rose" -> Color(0xFFC4607A)
     else -> Color(0xFFC9B896)
+}
+
+/** A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*` is. */
+fun dayColor(name: String, p: Palette): Color = when {
+    p.dark && name == "white" -> Color(0xFFD0B06A)
+    p.dark && name == "black" -> Color(0xFF8A94A0)
+    else -> dayColor(name)
 }
 
 /**

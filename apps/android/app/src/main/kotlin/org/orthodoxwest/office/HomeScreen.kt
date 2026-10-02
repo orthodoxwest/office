@@ -74,28 +74,38 @@ fun HomeScreen(
     var room by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var nicheBounds by remember { mutableStateOf<Rect?>(null) }
     BoxWithConstraints(Modifier.fillMaxSize().onGloballyPositioned { room = it }) {
-        // Apse: one fixed field, anchored top centre, clearing the header.
-        VaultField(Modifier.fillMaxSize(), listOf(0f to 0f, 0.09f to 0f, 0.16f to 0.9f, 0.6f to 0.7f, 1f to 0.3f))
+        val top = insets.calculateTopPadding()
+        val bottom = insets.calculateBottomPadding()
+        // The wall's one field, fixed to the screen and phased from its top: by night the vault,
+        // clearing the header and thinning toward the foot; by day the powdering, cut square under
+        // the beam.
+        WallField(Modifier.fillMaxSize(), seam = top) { dark ->
+            fun at(d: Dp) = (top + d).toPx() / size.height
+            if (dark) {
+                listOf(0f to 0f, at(56.dp) to 0f, at(112.dp) to 1f, maxOf(0.78f, at(112.dp)) to 1f, 1f to 0.6f)
+            } else {
+                listOf(0f to 0f, at(64.dp) to 0f, at(64.dp) to 1f, 1f to 1f)
+            }
+        }
         // A wide screen sets the frontispiece in a niche, and lights the room toward it.
         val screen = maxWidth
         val screenHeight = maxHeight
         val niche = if (LocalWide.current) nicheTokens(LocalPalette.current) else null
         if (niche != null) ChapelLight(niche, nicheBounds)
-        val top = insets.calculateTopPadding()
-        val bottom = insets.calculateBottomPadding()
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = top, bottom = bottom),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // A wide screen centres the niche between the header and the foot, as the web's desktop
-            // home does; a phone sets its card under the header.
+            // Home is at least a screen tall, its colophon at the foot. A wide screen centres the
+            // niche between the header and the foot, as the web's desktop home does; a phone sets
+            // its panel under the header.
             Column(
-                Modifier.fillMaxWidth().then(if (niche != null) Modifier.heightIn(min = screenHeight - top - bottom) else Modifier),
+                Modifier.fillMaxWidth().heightIn(min = screenHeight - top - bottom),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = if (niche != null) Arrangement.SpaceBetween else Arrangement.Top,
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                chrome()
                 if (niche != null) {
+                    chrome()
                     // The moulding stands 0.75rem out from the card; room for it below the header.
                     Frontispiece(
                         view, date, today, onDate, onHour, onOrdoDay,
@@ -104,15 +114,40 @@ fun HomeScreen(
                         niche = niche,
                         head = nicheHead(screen),
                     )
+                    Footer()
                 } else {
-                    Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        chrome()
+                        Frontispiece(
+                            view, date, today, onDate, onHour, onOrdoDay,
+                            Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
+                            head = if (screen < 375.dp) 56.dp else 68.dp,
+                        )
+                    }
+                    // The phone's home fits its screen with nothing to spare: the head is paid for
+                    // in the footer's gap and padding.
+                    Footer(gap = 29.6.dp, bottom = 25.6.dp)
                 }
-                // Home already opens on the cross: its foot takes no diamond.
-                Footer(diamond = false)
             }
         }
     }
 }
+
+/**
+ * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
+ * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
+ * rules, the lining thinned.
+ */
+private class FrontispieceInk(val frame: Color, val rule: Color, val band: Color, val panelRule: Color)
+
+private fun frontispieceInk(p: Palette): FrontispieceInk = if (p.dark) {
+    FrontispieceInk(Color(208, 176, 106).copy(alpha = 0.34f), Color(208, 176, 106).copy(alpha = 0.24f), Color(208, 176, 106).copy(alpha = 0.045f), p.lining.copy(alpha = 0.45f))
+} else {
+    FrontispieceInk(Color(87, 52, 33).copy(alpha = 0.3f), Color(107, 58, 31).copy(alpha = 0.22f), p.inscriptionGround.copy(alpha = 0.09f), p.lining.copy(alpha = 0.45f))
+}
+
+/** The phone panel's lining stands this far inside its edge. */
+private val PanelInset = 9.6.dp
 
 @Composable
 private fun Frontispiece(
@@ -128,54 +163,48 @@ private fun Frontispiece(
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
+    val ink = frontispieceInk(p)
     var picking by remember { mutableStateOf(false) }
-    val day = dayColor(view.color)
+    val day = dayColor(view.color, p)
+    // The lining's inner line is the day's colour, beside the cross on the plaster; a white day's
+    // would be tan there, and takes the gold line by day.
+    val liningDay = if (!p.dark && view.color == "white") p.goldLine else day
     val desk = niche != null
     val side = if (desk) 28.dp else 16.dp
-    // The card's top padding: on a wide screen, room under the niche's head for the crown's cross
-    // and the lining's arch.
-    val top = if (desk) head * 0.62f + 33.6.dp else 18.2.dp
+    // The card's top padding, room under the head for the crown's cross and the lining's arch: on
+    // a phone the lining's inset, air, the cross, and its clearance before the date.
+    val crown = PanelInset + 13.6.dp
+    val top = if (desk) head * 0.62f + 33.6.dp else crown + 30.4.dp + 20.dp
     Box(
-        if (niche != null) {
-            // The niche: a low round head, the stone moulding, the day's colour as its trim.
-            val frame = if (p.dark) Color(208, 176, 106).copy(alpha = 0.34f) else Color(87, 52, 33).copy(alpha = 0.3f)
-            modifier.drawBehind { niche(niche, p, day, head.toPx(), frame) }
-        } else {
-            modifier
-                .background(p.surface)
-                .border(1.dp, p.border)
-                .drawBehind {
-                    // The day's colour as the frame's top edge, like a vestment's trim.
-                    drawRect(day, size = size.copy(height = 3.dp.toPx()))
-                    // Book-cover tooling 0.35rem inside the frame (the top's inside the trim).
-                    val w = 1.dp.toPx()
-                    val inset = 5.6.dp.toPx() + w * 1.5f
-                    val topInset = inset + 2.dp.toPx()
-                    drawRect(
-                        o.flat.copy(alpha = 0.18f),
-                        Offset(inset, topInset),
-                        Size(size.width - 2 * inset, size.height - topInset - inset),
-                        style = Stroke(w),
-                    )
-                }
+        modifier.drawBehind {
+            if (niche != null) {
+                // The niche: a low round head, the stone moulding, the day's colour as its trim.
+                niche(niche, p, day, head.toPx(), ink.frame)
+            } else {
+                // The panel: a segmental head, the day's colour as a ring at its edge.
+                panel(p, day, ink.frame, head.toPx())
+            }
         },
     ) {
-        // The consecration cross crowns the niche's head; a phone's card opens with it below.
-        if (desk) ConsecrationCross(Modifier.align(Alignment.TopCenter).padding(top = head * 0.36f - 2.dp).size(36.dp))
+        // The consecration cross at the crown of the head, with clear air round it.
+        ConsecrationCross(Modifier.align(Alignment.TopCenter).padding(top = if (desk) head * 0.36f - 2.dp else crown).size(if (desk) 36.dp else 30.4.dp))
         Column(
-            Modifier.fillMaxWidth().padding(start = side, end = side, top = top, bottom = if (desk) 20.dp else 16.dp),
+            Modifier.fillMaxWidth().padding(start = side, end = side, top = top, bottom = if (desk) 20.dp else 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (!desk) {
-                ConsecrationCross(Modifier.size(30.4.dp))
-                Spacer(Modifier.height(8.8.dp))
-            }
-            // The day, down to the inscription band. On a wide screen a lining is painted round
-            // the niche's head on its back wall, 26dp inside the moulding, ending at the band.
+            // The day, down to the inscription band. A lining is painted round the head on the
+            // back wall, ending at the band: on a phone PanelInset inside the edge, its curve
+            // springing 8dp below the head's; on a wide screen 26dp inside the moulding.
             Column(
                 Modifier.fillMaxWidth()
-                    .then(if (desk) Modifier.drawBehind { nicheLining(p.lining, 28.dp.toPx() - top.toPx(), head.toPx() - 26.dp.toPx()) } else Modifier)
-                    .padding(bottom = 11.2.dp),
+                    .drawBehind {
+                        if (desk) {
+                            nicheLining(p.lining, liningDay, 28.dp.toPx() - top.toPx(), 0f, head.toPx() - 26.dp.toPx())
+                        } else {
+                            nicheLining(p.lining, liningDay, (PanelInset - top).toPx(), (PanelInset - side).toPx(), (head - PanelInset + 8.dp).toPx())
+                        }
+                    }
+                    .padding(bottom = 9.6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -205,7 +234,8 @@ private fun Frontispiece(
                 }
             }
             // The inscription band: gilt letters on the frieze's green earth, between oxblood
-            // rules, its phrase parted from the frame by gilt lozenges 5dp square.
+            // rules each with a gilt fillet inside it, its phrase parted from the frame by gilt
+            // lozenges 5dp square.
             Row(
                 Modifier
                     .throughPadding(side)
@@ -213,6 +243,9 @@ private fun Frontispiece(
                     .drawBehind {
                         drawLine(p.inscriptionEdge, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx())
                         drawLine(p.inscriptionEdge, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+                        val fillet = o.ink.copy(alpha = 0.22f)
+                        drawLine(fillet, Offset(0f, 1.5.dp.toPx()), Offset(size.width, 1.5.dp.toPx()), 1.dp.toPx())
+                        drawLine(fillet, Offset(0f, size.height - 1.5.dp.toPx()), Offset(size.width, size.height - 1.5.dp.toPx()), 1.dp.toPx())
                     }
                     .padding(vertical = 3.2.dp),
                 horizontalArrangement = Arrangement.Center,
@@ -222,13 +255,13 @@ private fun Frontispiece(
                 Text("Pray the hours", Modifier.padding(horizontal = 12.dp), style = Type.label(12.8f, if (desk) 0.17f else 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS))
                 Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
             }
-            Spacer(Modifier.height(13.6.dp))
+            Spacer(Modifier.height(12.dp))
             PrayNow(view.prayNowLabel, desk) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
-            Spacer(Modifier.height(12.8.dp))
+            Spacer(Modifier.height(11.2.dp))
             HourDirectory(view.currentHour, desk) { onHour(date, it) }
             // Season and date control share one line after the invitation.
-            Hairline(p.border, Modifier.padding(top = 11.2.dp))
-            if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
+            Hairline(ink.rule, Modifier.padding(top = 8.8.dp))
+            if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
             Disclosure("Change date", picking, { picking = !picking })
             Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
         }
@@ -242,10 +275,15 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
     layout(constraints.maxWidth, placeable.height) { placeable.place(-extra / 2, 0) }
 }
 
-/** The invitation: a single painted line, which does not veil with the season. */
+/**
+ * The invitation: a painted line with a thinner one 3dp inside it, as a panel's border is ruled
+ * twice; neither veils with the season. Its words are the tituli's red ochre, or by night the
+ * lining.
+ */
 @Composable
 private fun PrayNow(label: String, desk: Boolean, onClick: () -> Unit) {
     val p = LocalPalette.current
+    val inner = frontispieceInk(p).panelRule
     Box(
         Modifier
             .fillMaxWidth()
@@ -253,20 +291,25 @@ private fun PrayNow(label: String, desk: Boolean, onClick: () -> Unit) {
             .drawBehind {
                 val w = 1.dp.toPx()
                 drawRect(p.lining, Offset(w / 2f, w / 2f), size.copy(width = size.width - w, height = size.height - w), style = Stroke(w))
+                val i = w + 3.dp.toPx() + w / 2f
+                drawRect(inner, Offset(i, i), size.copy(width = size.width - 2 * i, height = size.height - 2 * i), style = Stroke(w))
             }
             .padding(vertical = if (desk) 12.dp else 13.9.dp, horizontal = 15.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        // On Apse the words are ivory, so the frame carries the colour.
-        Text(label, style = Type.body.copy(fontSize = if (desk) 20.sp else 19.2.sp, lineHeight = if (desk) 26.sp else 24.96.sp, letterSpacing = 0.38.sp, color = if (p.dark) p.text else p.accent))
+        Text(label, style = Type.body.copy(fontSize = if (desk) 20.sp else 19.2.sp, lineHeight = if (desk) 26.sp else 24.96.sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus))
     }
 }
 
-/** The hours by period in horizontal bands, the current one underlined in gold. */
+/**
+ * The hours by period in horizontal bands, the current one underlined in gold: framed in the
+ * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ */
 @Composable
 private fun HourDirectory(current: String, desk: Boolean, onHour: (String) -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
+    val ink = frontispieceInk(p)
     // The desktop's labels are in the accent, their column 5.25rem.
     val labelStyle = Type.label(11.52f, 0.08f).copy(color = if (desk) p.accent else p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
     // One width for the three period labels, widened past the web's 83dp only when the reader's
@@ -276,22 +319,27 @@ private fun HourDirectory(current: String, desk: Boolean, onHour: (String) -> Un
     val labelWidth = remember(labelStyle, density) {
         with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 84.dp else 83.dp)
     }
-    Column(Modifier.fillMaxWidth().border(1.dp, p.border)) {
+    Column(
+        Modifier.fillMaxWidth().drawBehind {
+            val w = 1.dp.toPx()
+            drawRect(ink.panelRule, Offset(w / 2f, w / 2f), size.copy(width = size.width - w, height = size.height - w), style = Stroke(w))
+        },
+    ) {
         PERIODS.forEachIndexed { i, (period, label, hours) ->
-            if (i > 0) Hairline(p.border)
+            if (i > 0) Hairline(ink.rule)
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 Column(
-                    Modifier.width(labelWidth).fillMaxHeight().background(p.inscriptionWash).padding(vertical = 6.dp),
+                    Modifier.width(labelWidth).fillMaxHeight().background(ink.band).padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     PeriodIcon(period, o.flat)
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
-                Box(Modifier.width(1.dp).fillMaxHeight().background(p.border))
+                Box(Modifier.width(1.dp).fillMaxHeight().background(ink.rule))
                 Row(Modifier.weight(1f).heightIn(min = if (desk) 46.dp else 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
-                        if (j > 0) Divider(p.border)
+                        if (j > 0) Divider(ink.rule, 16.dp)
                         Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (h == current) "${hourLabel(h)}, now" else null) { onHour(h) }, contentAlignment = Alignment.Center) {
                             val name = Type.body.copy(fontSize = if (desk) 16.sp else 15.68.sp, lineHeight = 18.8.sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text)
                             // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.

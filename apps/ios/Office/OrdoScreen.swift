@@ -269,7 +269,7 @@ private struct OrdoHeader: View {
     }
 }
 
-/// A month's name in small capitals over the ornament's double rule; the way back to the top.
+/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule; the way back to the top.
 private struct MonthHeading: View {
     let name: String
     let isTodaysMonth: Bool
@@ -280,7 +280,7 @@ private struct MonthHeading: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(name).type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.accent)
+            Text(name).type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityAddTraits(.isHeader)
             Button(action: top) {
@@ -419,7 +419,7 @@ private struct DayRow: View {
                 Rectangle().fill(dayColor(d.color)).frame(width: 3, height: m.px(40))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
-                        Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(p.accent)
+                        Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
                         Text(d.weekday.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 16.8)).foregroundStyle(p.muted)
                         if isToday { Text("Today").type(Scale.small.sized(11, line: 14)).foregroundStyle(p.accent) }
                     }
@@ -455,7 +455,8 @@ private struct DayRow: View {
             .padding(.bottom, m.px(6.4))
             Hairline(color: p.border)
         }
-        .background(isToday ? p.pressedWash : .clear)
+        // Today is painted, not selected: inset 8pt from the gutters.
+        .background { if isToday { TodayBand(inset: 8) } }
     }
 
     private var table: some View {
@@ -463,7 +464,7 @@ private struct DayRow: View {
             HStack(alignment: .top, spacing: 0) {
                 Button(action: openDay) {
                     VStack(spacing: 0) {
-                        Text("\(d.date.day)").type(TextStyle(size: 19.2, line: 23, lining: true)).foregroundStyle(p.accent)
+                        Text("\(d.date.day)").type(TextStyle(size: 19.2, line: 23, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
                         if isToday { Text("Today").type(Scale.small.sized(11.2, line: 15.7)).foregroundStyle(p.accent) }
                     }
                     .padding(.leading, dayColumnPad)
@@ -511,7 +512,28 @@ private struct DayRow: View {
             .padding(.bottom, 7.2)
             Hairline(color: p.border)
         }
-        .background(isToday ? p.gold.opacity(0.06) : .clear)
+        // Today is painted, not selected: the band runs on across the row.
+        .background { if isToday { TodayBand(inset: 0) } }
+    }
+}
+
+/**
+ * Today in the ordo: a ground of the frieze's wash ruled top and bottom in the gold line, above the
+ * row's hairline, `inset` from its sides.
+ */
+private struct TodayBand: View {
+    let inset: CGFloat
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(p.goldLine).frame(height: 1)
+            Rectangle().fill(p.inscriptionWash)
+            Rectangle().fill(p.goldLine).frame(height: 1)
+        }
+        .padding(.horizontal, inset)
+        .padding(.bottom, 1)
+        .accessibilityHidden(true)
     }
 }
 
@@ -633,13 +655,13 @@ struct OrdoYearScreen: View {
     }
 }
 
-/// "Tabula Temporaria" in small capitals over the ornament's double rule, its lozenge at the centre.
+/// "Tabula Temporaria", a titulus in small capitals over the ornament's double rule, its lozenge at the centre.
 private struct TabulaHeading: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.accent)
+        Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, m.px(6.4))
             // Ringed in the page's ground, as the web's box-shadow parts the rules around it.
@@ -648,7 +670,12 @@ private struct TabulaHeading: View {
     }
 }
 
-/// The year's four figures, `perRow` to a row: the numeral large in the accent, its name beneath.
+/**
+ * The year's four figures, `perRow` to a row, on a painted tablet: the surface thinned so the wall
+ * shows through, framed in the lining ruled twice (a thinner line 3pt inside the first), with a
+ * quatrefoil knop at each corner where the rules stop short. Each numeral large in the accent, its
+ * name beneath.
+ */
 private struct Figures: View {
     let figures: [TabulaRowView]
     let perRow: Int
@@ -672,6 +699,40 @@ private struct Figures: View {
                 }
             }
         }
+        .padding(.horizontal, m.px(6.4))
+        .padding(.top, m.px(17.6))
+        .padding(.bottom, m.px(16))
+        .background(p.surface.opacity(0.6))
+        .overlay { TabletFrame() }
+    }
+}
+
+/// The tablet's frame: two rules each side, stopping short of the corners, where the knops sit.
+private struct TabletFrame: View {
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let knop = m.px(14)
+        ZStack {
+            Canvas { ctx, size in
+                for (inset, ink) in [(CGFloat(0), p.lining), (3, p.lining.opacity(0.4))] {
+                    let a = inset + 0.5
+                    var rule = Path()
+                    rule.move(to: CGPoint(x: knop, y: a)); rule.addLine(to: CGPoint(x: size.width - knop, y: a))
+                    rule.move(to: CGPoint(x: knop, y: size.height - a)); rule.addLine(to: CGPoint(x: size.width - knop, y: size.height - a))
+                    rule.move(to: CGPoint(x: a, y: knop)); rule.addLine(to: CGPoint(x: a, y: size.height - knop))
+                    rule.move(to: CGPoint(x: size.width - a, y: knop)); rule.addLine(to: CGPoint(x: size.width - a, y: size.height - knop))
+                    ctx.stroke(rule, with: .color(ink), lineWidth: 1)
+                }
+            }
+            let corners: [Alignment] = [.topLeading, .topTrailing, .bottomLeading, .bottomTrailing]
+            ForEach(0..<corners.count, id: \.self) { i in
+                PaintedMark(.quatrefoil, size: knop, color: p.lining).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: corners[i])
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
