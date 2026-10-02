@@ -197,6 +197,18 @@ fn saturday_bvm_commemorated_at_friday_double_ii_vespers() {
 }
 
 #[test]
+fn saturday_bvm_not_commemorated_at_second_class_ii_vespers() {
+    // 2022 ordo 28 Oct: II Vespers of Ss Simon & Jude (D2) / No Comm. before
+    // the Saturday Office of Our Lady.
+    let apostles = f("simon-jude", Rank::Double2ndClass, Category::Apostle);
+    let bvm = f("saturday-office-bvm", Rank::Simple, Category::BlessedVirgin);
+    let r = resolve_concurrence(&day(Some(&apostles), &[]), &day(Some(&bvm), &[]));
+    assert_eq!(r.owner, IIOfPreceding);
+    assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
+    assert_trace_rule(&r.decisions, "commemoration:following-office-at-second-vespers-simple-or-memorial");
+}
+
+#[test]
 fn two_ferias() {
     let current = named("current-memorial", "Current Memorial", Rank::Commemoration, Category::Martyr);
     let incoming = named("incoming-memorial", "Incoming Memorial", Rank::Commemoration, Category::Martyr);

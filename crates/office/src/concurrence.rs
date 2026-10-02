@@ -220,14 +220,13 @@ fn following_office_commemorated_at_second_vespers(winner: Option<&Feast>, follo
         return (false, "commemoration:following-feria-not-at-second-vespers");
     }
     if matches!(feast.rank, Rank::Simple | Rank::Commemoration) {
-        // Saturday BVM is Simple and ends at None, but when a Double keeps
-        // Friday's II Vespers the AWRV ordo commemorates it (2026 ordo 2 Oct
-        // Comm. BVM "O blessed Mother"; same pattern across years whenever a
-        // Friday Double precedes a free Saturday Office of Our Lady). Diurnal
-        // §X's Simple exclusion covers ordinary Simple saints; concurrence
-        // already pairs Saturday BVM with days within octaves (rule 7), and
-        // the ordo commemorates it like those offices. Fixes #542.
-        if is_saturday_bvm(feast) {
+        // Saturday BVM is Simple, but the AWRV ordo commemorates it at II
+        // Vespers of a Friday Double or Greater Double (2026 ordo 2 Oct
+        // Guardian Angels, 2025 ordo 24 Oct Raphael, 2022 ordo 25 Nov
+        // Catherine; #542). Doubles of the 1st and 2nd class admit no
+        // commemoration of it (2022 ordo 28 Oct Simon & Jude, 2019 ordo 26
+        // July Anne, 2018 ordo 2 Feb Purification).
+        if is_saturday_bvm(feast) && winner.is_some_and(|w| w.rank.weight() < Rank::Double2ndClass.weight()) {
             return (true, "commemoration:following-office-at-second-vespers-saturday-bvm");
         }
         return (false, "commemoration:following-office-at-second-vespers-simple-or-memorial");
