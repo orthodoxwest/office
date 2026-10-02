@@ -68,9 +68,12 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -117,6 +120,15 @@ fun Modifier.tap(role: Role = Role.Button, label: String? = null, selected: Bool
 /** A checkbox row: the box and its words are one control, announced checked or not. */
 fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
     this.toggleable(checked, interactionSource = null, indication = Dim, role = Role.Checkbox, onValueChange = onChange)
+
+/**
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
+ * iOS app gives; never for a page opened. The phone's own touch-feedback setting governs it.
+ */
+fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTick)
+
+/** The tick of a checkbox turned on or off. */
+fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
 
 /** How far a pressed control dims, as the iOS app's (Quiet). */
 private const val PRESSED_ALPHA = 0.55f
@@ -286,8 +298,12 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
 @Composable
 private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, page: Boolean = false, onClick: () -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current, onClick = onClick)
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current) {
+            if (!page && !current) haptics.chose()
+            onClick()
+        }
             .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, p.goldLine)),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
@@ -520,6 +536,7 @@ private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
 @Composable
 private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boolean, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     val days = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
     // The weekday letters are for the eye; each day below names itself in full.
     Row(Modifier.fillMaxWidth().clearAndSetSemantics {}) {
@@ -541,7 +558,10 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
-                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) { onPick(day) } else Modifier),
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
+                            haptics.chose()
+                            onPick(day)
+                        } else Modifier),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (day != null) {
@@ -589,11 +609,15 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
 @Composable
 fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("How are you praying?", style = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.muted))
         Spacer(Modifier.height(4.dp))
         PRAYER_FORMS.forEach { (value, _, phrase) ->
-            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) { onForm(value) }, verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) {
+                if (value != form) haptics.chose()
+                onForm(value)
+            }, verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(16.dp).border(1.dp, if (value == form) p.gold else p.border, CircleShape), contentAlignment = Alignment.Center) {
                     if (value == form) Box(Modifier.size(8.dp).background(p.gold, CircleShape))
                 }

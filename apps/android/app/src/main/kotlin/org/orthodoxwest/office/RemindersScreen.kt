@@ -43,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -81,6 +82,7 @@ fun RemindersScreen(
     onAllowExact: () -> Unit,
 ) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
     val is24 = remember { DateFormat.is24HourFormat(context) }
     val clock = remember(is24) { DateTimeFormatter.ofPattern(if (is24) "HH:mm" else "h:mm a", Locale.getDefault()) }
@@ -106,7 +108,10 @@ fun RemindersScreen(
                     Row(Modifier.fillMaxWidth().heightIn(min = 46.dp), verticalAlignment = Alignment.CenterVertically) {
                         // The box and the hour's name are one checkbox; its time is a control of its own.
                         Row(
-                            Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) { onChange(settings.withHour(h.copy(chosen = it))) },
+                            Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) {
+                                haptics.toggled(it)
+                                onChange(settings.withHour(h.copy(chosen = it)))
+                            },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Tick(h.chosen)
@@ -131,7 +136,10 @@ fun RemindersScreen(
                     WEEK.forEach { d ->
                         val on = d in settings.days
                         Row(
-                            Modifier.heightIn(min = 44.dp).check(on) { onChange(settings.copy(days = if (it) settings.days + d else settings.days - d)) }
+                            Modifier.heightIn(min = 44.dp).check(on) {
+                                haptics.toggled(it)
+                                onChange(settings.copy(days = if (it) settings.days + d else settings.days - d))
+                            }
                                 .semantics { contentDescription = d.getDisplayName(JavaTextStyle.FULL, Locale.US) },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
