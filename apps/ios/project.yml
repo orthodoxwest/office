@@ -38,6 +38,11 @@ targets:
       path: build/Info.plist
       properties:
         CFBundleDisplayName: Divine Office
+        # XcodeGen would write 1.0 and 1; TestFlight reads these, and its workflow sets the build.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Only the system's own TLS, so no export-compliance question on each upload.
+        ITSAppUsesNonExemptEncryption: false
         # The Nave's ground, or the Apse's when the phone is dark.
         UILaunchScreen:
           UIColorName: LaunchBackground
@@ -61,8 +66,8 @@ targets:
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
-        # Beside the eventual store app, as the Android preview is.
-        PRODUCT_BUNDLE_IDENTIFIER: org.orthodoxwest.office.preview
+        # The store app's: a TestFlight build is a pre-release of it, not an app beside it.
+        PRODUCT_BUNDLE_IDENTIFIER: org.orthodoxwest.office
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
