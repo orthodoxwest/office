@@ -18,6 +18,18 @@ repository root.
                               eight-ray stars in three sizes, set by hand
                               rather than on a lattice, each catching its own
                               share of light
+  ornaments/powder.svg        one cell of the Nave wall's powdering: a six-petal
+                              rosette stencilled on a quincunx lattice (96px
+                              across, 84px between rows, alternate rows set
+                              half a cell over), as the margins of English
+                              parish walls were powdered in the fourteenth and
+                              fifteenth centuries; the Nave's counterpart to
+                              the vault
+  ornaments/quatrefoil.svg    the Gothic quatrefoil (corner knops of painted
+                              frames)
+  ornaments/tailpiece.svg     a quatrefoil between two painted rules that thin
+                              toward their ends: the footer's tailpiece, closing
+                              each page as the headpiece's cross opens it
 """
 import argparse
 import math
@@ -117,7 +129,64 @@ def star(rng, x, y, r, rot, irregular):
     return fmt(points)
 
 
-def vault(seed=1120, tile=528, count=40, attempts=40000):
+def disc(cx, cy, r, steps=20):
+    return fmt([(cx + r * math.cos(2 * math.pi * i / steps), cy + r * math.sin(2 * math.pi * i / steps))
+                for i in range(steps)])
+
+
+def quatrefoil_paths(cx, cy, r):
+    """Four lobes about a centre, as cut in tracery and painted in borders.
+    The lobes stand at 0.46r from the centre with radius 0.5r, so the cusps
+    between them fall well inside the lobes' tips."""
+    parts = [disc(cx, cy, 0.5 * r)]
+    for k in range(4):
+        a = k * math.pi / 2
+        parts.append(disc(cx + 0.46 * r * math.cos(a), cy + 0.46 * r * math.sin(a), 0.5 * r))
+    return "".join(parts)
+
+
+def quatrefoil():
+    return svg("0 0 20 20", f'<path d="{quatrefoil_paths(10, 10, 9.6)}"/>')
+
+
+def tailpiece():
+    """Two painted rules, each thinning as the brush lifts, meeting a quatrefoil."""
+    w, h, c = 120, 14, 7
+    q = quatrefoil_paths(w / 2, c, 6.2)
+    left = fmt([(5, c - 0.3), (50.5, c - 0.75), (50.5, c + 0.75), (5, c + 0.3)])
+    right = fmt([(w - 5, c - 0.3), (w - 50.5, c - 0.75), (w - 50.5, c + 0.75), (w - 5, c + 0.3)])
+    return svg(f"0 0 {w} {h}", f'<path d="{q}{left}{right}"/>')
+
+
+
+def rosette(cx, cy, r, rot, steps=10):
+    """A six-petal rosette, the stencil's flower: petals as ellipses about a
+    small centre, each petal's long axis on its own ray."""
+    parts = [disc(cx, cy, 0.2 * r, 12)]
+    for k in range(6):
+        a = rot + k * math.pi / 3
+        px, py = cx + 0.56 * r * math.cos(a), cy + 0.56 * r * math.sin(a)
+        ca, sa = math.cos(a), math.sin(a)
+        pts = []
+        for i in range(steps):
+            t = 2 * math.pi * i / steps
+            u, v = 0.44 * r * math.cos(t), 0.27 * r * math.sin(t)
+            pts.append((px + u * ca - v * sa, py + u * sa + v * ca))
+        parts.append(fmt(pts))
+    return "".join(parts)
+
+
+def powder(cell_w=96, cell_h=84, radius=7.0):
+    """Rosettes powdered over the limewash on a quincunx: one rosette to a
+    cell, alternate rows set half a cell over, so the tile is one cell wide
+    and two rows tall. Powdering was ordered, not sprinkled."""
+    tile_w, tile_h = cell_w, 2 * cell_h
+    rows = [(cell_w / 4, cell_h / 2), (3 * cell_w / 4, 3 * cell_h / 2)]
+    parts = [f'<path d="{rosette(x, y, radius, 0)}"/>' for x, y in rows]
+    return svg(f"0 0 {tile_w} {tile_h}", "".join(parts)), len(rows)
+
+
+def vault(seed=1120, tile=528, count=64, attempts=60000):
     rng = random.Random(seed)
     placed = []
     for _ in range(attempts):
@@ -129,14 +198,14 @@ def vault(seed=1120, tile=528, count=40, attempts=40000):
         for px, py, ps in placed:
             dx = min(abs(x - px), tile - abs(x - px))
             dy = min(abs(y - py), tile - abs(y - py))
-            if dx * dx + dy * dy < (46 + 3 * (size + ps)) ** 2:
+            if dx * dx + dy * dy < (26 + 3 * (size + ps)) ** 2:
                 clear = False
                 break
         if clear:
             placed.append((x, y, size))
     parts = []
     for x, y, size in placed:
-        opacity = rng.uniform(0.45, 0.85)
+        opacity = rng.uniform(0.6, 0.95)
         rot, irregular = rng.gauss(0, 0.06), 0.1
         shape = None
         # A star crossing the tile's edge is drawn again on the far side, so the repeat is seamless.
@@ -159,11 +228,15 @@ def main():
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     tile, stars = vault()
+    field, rosettes = powder()
+    counts = {"vault.svg": f"({stars} stars)", "powder.svg": f"({rosettes} rosettes a cell)"}
     for name, body in [("consecration.svg", consecration()), ("cross.svg", cross()),
-                       ("sun.svg", sun()), ("moon.svg", moon()), ("vault.svg", tile)]:
+                       ("sun.svg", sun()), ("moon.svg", moon()), ("vault.svg", tile),
+                       ("powder.svg", field), ("quatrefoil.svg", quatrefoil()),
+                       ("tailpiece.svg", tailpiece())]:
         path = args.out / name
         path.write_text(body)
-        print("wrote", path, f"({stars} stars)" if name == "vault.svg" else "")
+        print("wrote", path, counts.get(name, ""))
 
 
 if __name__ == "__main__":

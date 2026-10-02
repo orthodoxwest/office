@@ -538,9 +538,15 @@ summary:focus-visible {
    to a shell wider than the prose column so the whole link list fits on one
    line at every desktop width. */
 .site-header {
-  border-bottom: 1px solid var(--oak-line);
-  padding: 0.85rem 0 0.7rem;
+  /* The beam itself: a 4px course of oak along the header's foot, its
+     upper edge catching the light from above as a timber's arris does.
+     Two gradients, since a border and a shadow cannot stack this way. */
+  --beam: color-mix(in srgb, var(--oak) 55%, transparent);
+  padding: 0.85rem 0 calc(0.7rem + 5px);
   margin-bottom: 1.5rem;
+  background:
+    linear-gradient(var(--beam), var(--beam)) left bottom / 100% 4px no-repeat,
+    linear-gradient(var(--material-highlight), var(--material-highlight)) left bottom 4px / 100% 1px no-repeat;
 }
 
 .site-nav-shell {
@@ -572,8 +578,8 @@ summary:focus-visible {
    read without styles; the mask draws over it. */
 .site-brand span {
   display: inline-block;
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.125rem;
+  height: 1.125rem;
   margin-right: 0.38rem;
   color: transparent;
   background: var(--lining);
@@ -832,15 +838,32 @@ summary:focus-visible {
     display: none;
   }
 
-  /* The phone footer is one quiet line. Home's card is shorter than the
-     global 60vh floor, which left a tall empty band of wall between the card
-     and that line; desktop already releases the floor to centre its niche. */
+  /* The colophon sits at the foot of the screen, as on desktop, rather than
+     floating under the card: home is a column at least a screen tall whose
+     main takes the slack. The wall between card and colophon is powdered by
+     day and starred by night, so it reads as wall, not as an empty band.
+     svh, so the foot holds still as the browser's toolbars come and go. */
+  .page-home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
   .page-home main {
+    flex: 1 0 auto;
     min-height: 0;
   }
 
   .page-home footer {
-    --footer-gap: 1.75rem;
+    --footer-gap: 1.25rem;
+    padding-block: 0.6rem;
+  }
+
+  /* The phone's home fits its viewport with nothing to spare; the arched
+     head and the tailpiece are paid for here and in the header's margin. */
+  body.page-home {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   /* Match site menu / hour-chip touch floor (~44px). */
@@ -1007,14 +1030,19 @@ footer {
   align-items: center;
 }
 
-/* Diamond separator, after the lorica boards lining the nave roof */
+/* The tailpiece: a quatrefoil between two painted rules that thin as the
+   brush lifts, closing every page as the headpiece's cross opens the ordo
+   and the hours. Set in rem so the wide hours' vault seam (--apse-rest-seam)
+   holds at every text size. */
 footer::before {
-  content: "\2726";
+  content: "";
   display: block;
-  color: var(--ornament-line);
-  font-size: 0.8rem;
-  line-height: 1;
-  margin-bottom: 0.85rem;
+  width: 7.5rem;
+  height: 0.75rem;
+  margin-bottom: 0.55rem;
+  background: var(--lining);
+  -webkit-mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
+  mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
   user-select: none;
 }
 
@@ -1025,6 +1053,12 @@ footer::before {
   font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
+}
+
+/* On the hours it is footer matter, under the tailpiece and the colophon. */
+footer .report-issue {
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
 }
 
 .report-issue a {
@@ -1844,6 +1878,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .hour-epilogue {
   display: grid;
   gap: 1.25rem;
+  /* Air below the hour navigation, where the ending's field begins (the
+     Nave's powdering and the Apse vault show only below the nav). */
+  padding-bottom: 3.25rem;
 }
 
 /* "All hours" sits on the line of the hour names either side of it, not
@@ -2890,7 +2927,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-bottom: 0.35rem;
   padding: 0.4rem 0;
   background: var(--bg);
-  color: var(--accent);
+  /* A Kalendar's month is its rubricated heading: the titulus's red ochre,
+     gilt by night, clear of the rows' red-letter feasts. */
+  color: var(--titulus);
   border-bottom: 3px double var(--ornament-line);
   font-size: 1.35rem;
   font-weight: normal;
@@ -2936,7 +2975,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .tabula h2 {
   position: relative;
   padding: 0.4rem 0;
-  color: var(--accent);
+  color: var(--titulus);
   border-bottom: 3px double var(--ornament-line);
   font-size: 1.35rem;
   font-weight: normal;
@@ -2957,15 +2996,73 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   pointer-events: none;
 }
 .tabula-figures {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   margin: 0;
+  padding: 1.1rem 0.4rem 1rem;
+  /* The tablet's ground: the surface, thinned, so the wall shows through. */
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   text-align: center;
+}
+
+/* The year's figures on a painted tablet: a terracotta frame ruled twice
+   (a second, thinner line 3px inside the first) with a quatrefoil knop at
+   each corner, drawn as one mask over one pseudo-element so the frame stays
+   a token colour. The rules stop short of the corners where the knops sit;
+   mask layers add, so nothing has to meet exactly. Positions take the
+   four-value form; the three-value form is invalid for masks. */
+.tabula-figures::before {
+  --knop: 0.875rem;
+  --inner: rgba(0, 0, 0, 0.4);
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--lining);
+  -webkit-mask-image:
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
+    linear-gradient(var(--inner), var(--inner)), linear-gradient(var(--inner), var(--inner)),
+    linear-gradient(var(--inner), var(--inner)), linear-gradient(var(--inner), var(--inner)),
+    url("ornaments/quatrefoil.svg"), url("ornaments/quatrefoil.svg"),
+    url("ornaments/quatrefoil.svg"), url("ornaments/quatrefoil.svg");
+  mask-image:
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
+    linear-gradient(var(--inner), var(--inner)), linear-gradient(var(--inner), var(--inner)),
+    linear-gradient(var(--inner), var(--inner)), linear-gradient(var(--inner), var(--inner)),
+    url("ornaments/quatrefoil.svg"), url("ornaments/quatrefoil.svg"),
+    url("ornaments/quatrefoil.svg"), url("ornaments/quatrefoil.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size:
+    calc(100% - 2 * var(--knop)) 1px, calc(100% - 2 * var(--knop)) 1px,
+    1px calc(100% - 2 * var(--knop)), 1px calc(100% - 2 * var(--knop)),
+    calc(100% - 2 * var(--knop)) 1px, calc(100% - 2 * var(--knop)) 1px,
+    1px calc(100% - 2 * var(--knop)), 1px calc(100% - 2 * var(--knop)),
+    var(--knop) var(--knop), var(--knop) var(--knop), var(--knop) var(--knop), var(--knop) var(--knop);
+  mask-size:
+    calc(100% - 2 * var(--knop)) 1px, calc(100% - 2 * var(--knop)) 1px,
+    1px calc(100% - 2 * var(--knop)), 1px calc(100% - 2 * var(--knop)),
+    calc(100% - 2 * var(--knop)) 1px, calc(100% - 2 * var(--knop)) 1px,
+    1px calc(100% - 2 * var(--knop)), 1px calc(100% - 2 * var(--knop)),
+    var(--knop) var(--knop), var(--knop) var(--knop), var(--knop) var(--knop), var(--knop) var(--knop);
+  -webkit-mask-position:
+    left 50% top 0, left 50% bottom 0, left 0 top 50%, right 0 top 50%,
+    left 50% top 3px, left 50% bottom 3px, left 3px top 50%, right 3px top 50%,
+    left 0 top 0, right 0 top 0, left 0 bottom 0, right 0 bottom 0;
+  mask-position:
+    left 50% top 0, left 50% bottom 0, left 0 top 50%, right 0 top 50%,
+    left 50% top 3px, left 50% bottom 3px, left 3px top 50%, right 3px top 50%,
+    left 0 top 0, right 0 top 0, left 0 bottom 0, right 0 bottom 0;
 }
 .tabula-figures div {
   display: flex;
   flex-direction: column-reverse;
+  /* Figures keep one line across the tablet when a label wraps beneath. */
+  justify-content: flex-end;
   gap: 0.2rem;
 }
 .tabula-figures dt {
@@ -3069,9 +3166,24 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash));
   }
 }
-.month-table tr:target > td,
-.month-table tr.is-today > td {
+.month-table tr:target > td {
   background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+
+/* Today is painted, not selected: a ground of the frieze's wash ruled top
+   and bottom in the gold line, the day's number in gold. On the wide table
+   each cell carries the ground and the rules run on across the row; the
+   phone's card insets the ground 8px from the gutters (below). */
+.month-table tr.is-today > td {
+  background: var(--inscription-wash);
+  box-shadow:
+    inset 0 1px 0 var(--gold-line),
+    inset 0 -1px 0 var(--gold-line);
+}
+
+.month-table .is-today .day-num a,
+.is-today .day-mobile-num {
+  color: var(--gold);
 }
 
 /* The marker occupies an existing line in the date column. It never adds
@@ -3267,7 +3379,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 @media (max-width: 700px) {
-  .page-home .site-header { margin-bottom: 1rem; }
+  .page-home .site-header { margin-bottom: 0.85rem; }
   .calendar { gap: 0.65rem; }
   .calendar-header {
     grid-template-columns: 1fr;
@@ -3286,6 +3398,14 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   .month-table tr {
     position: relative;
     border-bottom: 1px solid var(--border);
+  }
+  /* Today's ground and its gold rules, inset 8px from the gutters. */
+  .month-table tr.is-today > td {
+    background:
+      linear-gradient(var(--gold-line), var(--gold-line)) 8px 0 / calc(100% - 16px) 1px no-repeat,
+      linear-gradient(var(--gold-line), var(--gold-line)) 8px 100% / calc(100% - 16px) 1px no-repeat,
+      linear-gradient(var(--inscription-wash), var(--inscription-wash)) 8px 0 / calc(100% - 16px) 100% no-repeat;
+    box-shadow: none;
   }
   .month-table tr::before {
     content: "";
@@ -3961,48 +4081,105 @@ body.season-eastertide {
 .page-home .home-hero {
   /* Parish vocabulary in miniature: rose plaster held by oak uprights, with
      a very quiet sage inscription band. These remain flat colour and rules,
-     not a photographic or simulated-material texture. */
-  --frontispiece-frame: var(--border);
-  --frontispiece-rule: var(--border);
-  --frontispiece-band: var(--inscription-wash);
+     not a photographic or simulated-material texture. The rules are the
+     niche's at every width, so the phone's table is drawn in the same ink. */
+  --frontispiece-frame: rgba(87, 52, 33, 0.3);
+  --frontispiece-rule: rgba(107, 58, 31, 0.22);
+  /* The period labels' cells take the frieze's green earth, thinned. */
+  --frontispiece-band: color-mix(in srgb, var(--inscription-ground) 9%, transparent);
+  /* The panel's furniture (the invitation's inner line, the table's outer
+     frame) is drawn in the lining, thinned. */
+  --panel-rule: color-mix(in srgb, var(--lining) 45%, transparent);
+  /* On a phone the frontispiece is a round-headed painted panel: a
+     segmental head with a springing (the lining's curve starts 8px below
+     the moulding's), the day's colour as a hairline ring at its edge and
+     again as the lining's inner hairline, so the liturgical colour sits
+     beside the cross on the plaster; the terracotta lining painted round
+     the head with the consecration cross at the crown, and a little shade
+     under the head so the panel sits in the wall. The desktop widens the
+     same object into the niche (see "Home niche"), which restates the
+     head, lining and shadows at its own scale. The lining keeps clear air
+     round the cross: a tighter arch once clipped it. */
+  --panel-head: 4.25rem;
+  --panel-inset: 0.6rem;
+  --lining-day: var(--day-color, var(--lining));
+  /* The last shadow is a soft halo of the wall's own colour, so the
+     powdering keeps about 24px clear of the panel. */
+  --panel-shadows:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
+    0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
+    0 0 1.5rem 0.5rem var(--bg);
   position: relative;
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
   gap: 0;
-  padding: 0.95rem 1rem 1rem;
+  /* Room in the head for the lining and the cross: inset, air, the cross,
+     then its clearance before the date, which the hairline's curve must
+     also clear at a long date's corners. */
+  padding: calc(var(--panel-inset) + 0.85rem + 1.9rem + 1.25rem) 1rem 0.75rem;
   border: 1px solid var(--frontispiece-frame);
-  border-top: 3px solid var(--day-color, var(--border));
+  border-radius: 50% 50% 0 0 / var(--panel-head) var(--panel-head) 0 0;
   background: var(--surface);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: var(--panel-shadows);
 }
 
-/* Book-cover tooling stays inside the existing margin, with no extra page
-   height or pointer targets. The outer rail still carries the day's colour. */
-.page-home .home-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0.35rem;
-  border: 1px solid color-mix(in srgb, var(--ornament) 18%, transparent);
-  pointer-events: none;
+/* A white day's hairline would be tan on the plaster: it takes the gold
+   line instead. Apse gives white days gold already and restates this. */
+.page-home .home-hero.day-color-white {
+  --lining-day: var(--gold-line);
+}
+
+@media (max-width: 374px) {
+  .page-home .home-hero {
+    --panel-head: 3.5rem;
+  }
 }
 
 /* The card opens with the consecration cross, the mark that ends every
-   hour. On a desktop it moves to the niche's crown (see "Home niche"). */
+   hour, set at the crown of the head. The desktop niche restates its place
+   (see "Home niche"). */
 .page-home .home-crown {
   display: block;
+  position: absolute;
+  top: calc(var(--panel-inset) + 0.85rem);
+  left: 50%;
   width: 1.9rem;
   height: 1.9rem;
-  margin: 0 auto 0.55rem;
+  margin: 0;
+  transform: translateX(-50%);
   background: var(--lining);
   -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
   mask: url("ornaments/consecration.svg") center / contain no-repeat;
 }
 
-/* The niche's painted lining exists only where the card has a head to
-   follow (see "Home niche"); a phone's card is a plain panel. */
+/* A border painted on the panel's back wall: a 2px band round the head
+   with the day's colour as a hairline 8px inside it, ending at the
+   inscription band. It is positioned from the day block, whose top is the
+   card's padding. Its curve springs 8px below the moulding's. */
 .page-home .home-lining {
-  display: none;
+  display: block;
+  position: absolute;
+  /* The card's padding less the inset, so the band sits --panel-inset
+     inside the card's edge. */
+  top: calc(-1 * (0.85rem + 1.9rem + 1.25rem));
+  right: calc(var(--panel-inset) - 1rem);
+  bottom: -0.15rem;
+  left: calc(var(--panel-inset) - 1rem);
+  border: 2px solid var(--lining);
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0 / calc(var(--panel-head) - var(--panel-inset) + 8px) calc(var(--panel-head) - var(--panel-inset) + 8px) 0 0;
+  pointer-events: none;
+}
+
+.page-home .home-lining::after {
+  content: "";
+  position: absolute;
+  inset: 8px 8px 0;
+  border: 1px solid var(--lining-day);
+  border-bottom: 0;
+  border-radius: inherit;
 }
 
 .page-home .home-summary {
@@ -4017,7 +4194,7 @@ body.season-eastertide {
 .page-home .home-day-head {
   align-items: center;
   gap: 0.12rem;
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.7rem;
 }
 
 .page-home .home h1 {
@@ -4067,17 +4244,20 @@ body.season-eastertide {
    stops short of the frame is a label, not a course. */
 .page-home .home-prayer-card h2 {
   display: block;
-  margin: 0.15rem -1rem 0.85rem;
+  margin: 0.15rem -1rem 0.75rem;
   /* Proportionally thin, as the course is on the wall. A taller band would
      out-shout "Pray {hour}", and the invitation has to lead the page. */
   padding: 0.16rem 1rem 0.12rem;
   background: var(--inscription-ground);
   /* The oxblood edges are painted inside the band, not added as borders: a
      phone's home fits its viewport with nothing to spare, and extra pixels
-     would make it scroll. */
+     would make it scroll. A thin fillet of the lettering's leaf lies just
+     inside each edge, as the frieze's course is gilt along its rules. */
   box-shadow:
     inset 0 1px 0 var(--inscription-edge),
-    inset 0 -1px 0 var(--inscription-edge);
+    inset 0 -1px 0 var(--inscription-edge),
+    inset 0 2px 0 color-mix(in srgb, var(--inscription-ink) 22%, transparent),
+    inset 0 -2px 0 color-mix(in srgb, var(--inscription-ink) 22%, transparent);
   color: var(--inscription-ink);
   font-size: 0.8rem;
   font-weight: normal;
@@ -4102,19 +4282,30 @@ body.season-eastertide {
 }
 
 .page-home .pray-now-wrap {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.7rem;
 }
 
 .page-home .pray-now,
 .page-home .pray-now:hover {
   position: relative;
   padding: 0.68rem 0.8rem 0.72rem;
-  /* A single painted line; it does not veil with the season. */
+  /* A painted line with a thinner one 3px inside it (below), as a panel's
+     border is ruled twice; neither veils with the season. The words are
+     the tituli's red ochre (the lining itself falls short of 4.5:1 on the
+     surface); by night the lining, which clears it. */
   border: 1px solid var(--lining);
   background: transparent;
-  color: var(--accent);
+  color: var(--titulus);
   font-size: 1.2rem;
   line-height: 1.3;
+}
+
+.page-home .pray-now::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--panel-rule);
+  pointer-events: none;
 }
 
 .page-home .pray-now:active {
@@ -4135,8 +4326,9 @@ body.season-eastertide {
   gap: 0;
   /* The tinted period labels form a quiet index column. Complete the outer
      frame at every width so that column reads as deliberate table structure,
-     rather than three highlighted tabs left open to the page. */
-  border-inline: 1px solid var(--frontispiece-rule);
+     rather than three highlighted tabs left open to the page. The outer
+     frame is the lining, thinned; the rules within keep the surface ink. */
+  border-inline: 1px solid var(--panel-rule);
 }
 
 /* 5.2rem, not 4.4rem: "Morning" is the longest label and at 4.4rem it filled
@@ -4149,8 +4341,12 @@ body.season-eastertide {
   border-top: 1px solid var(--frontispiece-rule);
 }
 
+.page-home .home-hour-group:first-child {
+  border-top-color: var(--panel-rule);
+}
+
 .page-home .home-hour-group:last-child {
-  border-bottom: 1px solid var(--frontispiece-rule);
+  border-bottom: 1px solid var(--panel-rule);
 }
 
 .page-home .home-hour-group-label {
@@ -4241,8 +4437,8 @@ body.season-eastertide {
 
 .page-home .home-day-meta {
   justify-content: center;
-  margin-top: 0.7rem;
-  padding-top: 0.3rem;
+  margin-top: 0.55rem;
+  padding-top: 0.2rem;
   border-top: 1px solid var(--frontispiece-rule);
 }
 
@@ -4277,9 +4473,6 @@ body.season-eastertide {
      Background and shadows are tokens because the Apse card rules below
      outrank this selector and must repeat them. */
   .page-home .home-hero {
-    --frontispiece-frame: rgba(87, 52, 33, 0.3);
-    --frontispiece-rule: rgba(107, 58, 31, 0.22);
-    --frontispiece-band: var(--inscription-wash);
     --niche-head: clamp(5rem, 2rem + 6vw, 8rem);
     --niche-background:
       radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
@@ -4379,12 +4572,21 @@ body.season-eastertide {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
+    --frontispiece-frame: rgba(208, 176, 106, 0.34);
+    --frontispiece-rule: rgba(208, 176, 106, 0.24);
+    --frontispiece-band: rgba(208, 176, 106, 0.045);
+    --lining-day: var(--day-color, var(--lining));
+    /* The day's ring and the shade under the head, then a soft erase: only
+       on phones, since a solid 0.5rem ring of --bg eats half a ~16px gutter
+       and reads as a matte disc against the graded night wash. Desktop
+       restores a firmer ring below. Unlike masking the page field, this
+       follows the card without changing the vault's fixed tile origin. */
+    --panel-shadows:
+      inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
+      0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
+      0 0 1.25rem 0.35rem var(--bg);
     background: var(--surface);
-    /* Soft erase only on phones: a solid 0.5rem ring of --bg eats half a
-       ~16px gutter and reads as a matte disc against the graded night wash.
-       Desktop restores a firmer ring below. Unlike masking the page field,
-       this follows the card without changing the vault's fixed tile origin. */
-    box-shadow: 0 0 1.25rem 0.35rem var(--bg);
+    box-shadow: var(--panel-shadows);
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -4399,8 +4601,7 @@ body.season-eastertide {
   :root:not([data-theme="light"]) .page-home .pray-now:hover {
     border-color: var(--lining);
     background: transparent;
-    /* Ivory words, so the frame carries the colour. */
-    color: var(--text);
+    color: var(--lining);
   }
 
   :root:not([data-theme="light"]) .page-home .pray-now:active {
@@ -4410,15 +4611,20 @@ body.season-eastertide {
 }
 
 :root[data-theme="dark"] .page-home .home-hero {
+  --frontispiece-frame: rgba(208, 176, 106, 0.34);
+  --frontispiece-rule: rgba(208, 176, 106, 0.24);
+  --frontispiece-band: rgba(208, 176, 106, 0.045);
+  --lining-day: var(--day-color, var(--lining));
+  --panel-shadows:
+    inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
+    0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
+    0 0 1.25rem 0.35rem var(--bg);
   background: var(--surface);
-  box-shadow: 0 0 1.25rem 0.35rem var(--bg);
+  box-shadow: var(--panel-shadows);
 }
 
 @media (min-width: 701px) and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
-    --frontispiece-frame: rgba(208, 176, 106, 0.34);
-    --frontispiece-rule: rgba(208, 176, 106, 0.24);
-    --frontispiece-band: rgba(208, 176, 106, 0.045);
     background: var(--niche-background);
     box-shadow: var(--niche-shadows);
   }
@@ -4426,9 +4632,6 @@ body.season-eastertide {
 
 @media (min-width: 701px) {
   :root[data-theme="dark"] .page-home .home-hero {
-    --frontispiece-frame: rgba(208, 176, 106, 0.34);
-    --frontispiece-rule: rgba(208, 176, 106, 0.24);
-    --frontispiece-band: rgba(208, 176, 106, 0.045);
     background: var(--niche-background);
     box-shadow: var(--niche-shadows);
   }
@@ -4446,7 +4649,7 @@ body.season-eastertide {
 :root[data-theme="dark"] .page-home .pray-now:hover {
   border-color: var(--lining);
   background: transparent;
-  color: var(--text);
+  color: var(--lining);
 }
 
 :root[data-theme="dark"] .page-home .pray-now:active {
@@ -5423,49 +5626,27 @@ html:where(:has(> body.page-hour))::before {
 }
 
 @media (min-width: 701px) {
-  /* The painted lining replaces the phone card's tooled frame. */
-  .page-home .home-hero::before {
-    display: none;
-  }
-
   /* The consecration cross at the niche's crown, as heavy as the one that
      ends each hour. */
   .page-home .home-crown {
-    position: absolute;
     top: calc(var(--niche-head) * 0.36 - 4px);
-    left: 50%;
     width: 2.25rem;
     height: 2.25rem;
-    margin: 0;
-    transform: translateX(-50%);
   }
 
-  /* A border painted on the niche's back wall: a 2px band and a lighter
-     hairline 5px inside it, round the head only, ending at the inscription
-     band. 26px of plain plaster lies between it and the moulding, so it
-     reads as paint on the wall, not another edge of the arch. */
+  /* The phone panel's lining, restated for the niche: a 2px band and a
+     lighter hairline 5px inside it, round the head only, ending at the
+     inscription band. 26px of plain plaster lies between it and the
+     moulding, so it reads as paint on the wall, not another edge of the
+     arch. */
   .page-home .home-lining {
     --lining-inset: 26px;
-    display: block;
-    position: absolute;
     top: calc(var(--lining-inset) - var(--niche-head) * 0.62 - 2.1rem);
     right: calc(var(--lining-inset) - 1.75rem);
-    bottom: -0.15rem;
     left: calc(var(--lining-inset) - 1.75rem);
-    border: 2px solid var(--lining);
-    border-bottom: 0;
     border-radius: 50% 50% 0 0 / calc(var(--niche-head) - var(--lining-inset)) calc(var(--niche-head) - var(--lining-inset)) 0 0;
-    pointer-events: none;
   }
 
-  .page-home .home-lining::after {
-    content: "";
-    position: absolute;
-    inset: 5px 5px 0;
-    border: 1px solid color-mix(in srgb, var(--lining) 62%, transparent);
-    border-bottom: 0;
-    border-radius: inherit;
-  }
 
   /* Chapel light: a warm pool where the niche stands and the room's edges
      in shade. One fixed layer over the wall (and the Apse vault), under the
@@ -5596,6 +5777,68 @@ body {
   --apse-gild: none;
   --apse-ink: transparent;
   --apse-copy-shadow: none;
+  /* The field each page's margins carry: home's full-page field and the
+     hours' ending read these. By night they are the vault; by day the
+     Nave wall is powdered instead (below). The wide hours' side fields
+     read --apse-vault directly, so the Nave's margins beside the prayer
+     stay plain. */
+  --wall-field: var(--apse-vault);
+  --wall-ink: var(--apse-ink);
+  /* The vault's tile, its leaf, and each field's fade: home clears the
+     beam and thins toward the foot with a fall-off toward the corners; the
+     hour's ending shows the field only below the hour navigation (in the
+     epilogue's bottom padding) and on through the footer. */
+  --wall-tile-size: var(--apse-tile) var(--apse-tile);
+  --wall-leaf: var(--apse-leaf);
+  --wall-home-fade: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 78%, rgba(0, 0, 0, 0.6) 100%);
+  --wall-home-light: radial-gradient(ellipse 75% 85% at 50% 42%, #000 50%, rgba(0, 0, 0, 0.72));
+  --wall-end-fade: linear-gradient(to top, #000 0 2.25rem, transparent 3.25rem);
+  --wall-foot-fade: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+/* The Nave's powdering: one six-petal rosette stencilled to each cell of a
+   quincunx (96px across, 84px between rows, alternate rows set half a cell
+   over), as the margins of English parish walls were powdered in the
+   fourteenth and fifteenth centuries. Powdering was ordered, not sprinkled:
+   the cell is one tile (tools/genornaments.py) that never scales with the
+   vault's, takes no leaf, and is cut square under the beam rather than
+   faded, so no row shows half. The ink is the rubrics' red thinned almost
+   to the ground, a wall colour that does not move with the season.
+   Declared on body like the vault's tokens. Gated like the vault: the
+   Default theme on a light device must powder, and on a dark one must not. */
+:root {
+  --nave-powder-tile: url("ornaments/powder.svg");
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) body:is(.page-home, .page-hour) {
+    --wall-field: var(--nave-powder-tile);
+    --wall-ink: color-mix(in srgb, var(--rubric) 12%, transparent);
+    --wall-tile-size: 96px 168px;
+    --wall-leaf: linear-gradient(#000, #000);
+    --wall-home-fade: linear-gradient(to bottom, transparent 0 4rem, #000 4rem);
+    --wall-home-light: linear-gradient(#000, #000);
+    --wall-end-fade: linear-gradient(to top, #000 0 3.25rem, transparent 3.25rem);
+    --wall-foot-fade: linear-gradient(#000, #000);
+    /* The footer's lettering clears its own glyphs of the powdering, as it
+       does of the vault by night. */
+    --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
+    /* The niche's clearing, so the lattice keeps off its moulding. */
+    --niche-clear: var(--bg);
+  }
+}
+
+:root[data-theme="light"] body:is(.page-home, .page-hour) {
+  --wall-field: var(--nave-powder-tile);
+  --wall-ink: color-mix(in srgb, var(--rubric) 12%, transparent);
+  --wall-tile-size: 96px 168px;
+  --wall-leaf: linear-gradient(#000, #000);
+  --wall-home-fade: linear-gradient(to bottom, transparent 0 4rem, #000 4rem);
+  --wall-home-light: linear-gradient(#000, #000);
+  --wall-end-fade: linear-gradient(to top, #000 0 3.25rem, transparent 3.25rem);
+  --wall-foot-fade: linear-gradient(#000, #000);
+  --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
+  --niche-clear: var(--bg);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -5671,11 +5914,11 @@ body.page-hour footer::after {
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--apse-ink);
+  background-color: var(--wall-ink);
   -webkit-mask-repeat: repeat, no-repeat, repeat;
   mask-repeat: repeat, no-repeat, repeat;
-  -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
-  mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
+  -webkit-mask-size: var(--wall-tile-size), 100% 100%, var(--apse-leaf-size);
+  mask-size: var(--wall-tile-size), 100% 100%, var(--apse-leaf-size);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
@@ -5687,16 +5930,16 @@ body.page-hour .hour-epilogue::before {
   inset: 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-right))) 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
   -webkit-mask-position: bottom center;
   mask-position: bottom center;
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%), var(--apse-leaf);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%), var(--apse-leaf);
+  -webkit-mask-image: var(--wall-field), var(--wall-end-fade), var(--wall-leaf);
+  mask-image: var(--wall-field), var(--wall-end-fade), var(--wall-leaf);
 }
 
 body.page-hour footer::after {
   inset: calc(-1 * var(--footer-gap)) 0 0;
   -webkit-mask-position: top center;
   mask-position: top center;
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
+  -webkit-mask-image: var(--wall-field), var(--wall-foot-fade), var(--wall-leaf);
+  mask-image: var(--wall-field), var(--wall-foot-fade), var(--wall-leaf);
 }
 
 /* A phone's ending is short: without the footer preferences the epilogue
@@ -5709,22 +5952,12 @@ body.page-hour footer::after {
    epilogue's height, and the footer only thins, running off the screen's
    foot as the vault continues past it. */
 @media (max-width: 700px) {
-  body.page-hour .report-issue {
-    margin-top: 4.5rem;
-  }
-
   body.page-hour footer {
     padding-bottom: 4.5rem;
   }
 
-  body.page-hour .hour-epilogue::before {
-    -webkit-mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
-    mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
-  }
-
-  body.page-hour footer::after {
-    -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
-    mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
+  body {
+    --wall-foot-fade: linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%);
   }
 }
 
@@ -5797,11 +6030,12 @@ body.page-hour .report-issue {
       mask-repeat: repeat, no-repeat, repeat;
       -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
-      /* Where the epilogue meets the footer at rest (the footer's height,
-         now that it is one line with no diamond above it): the scrolling
-         fields took their phase from that seam. Four values, since
-         mask-position has no three-value form. */
-      --apse-rest-seam: 6.97rem;
+      /* Where the epilogue meets the footer at rest (the footer's height:
+         its gap, the tailpiece and its margin, the colophon and the report
+         line, and the page's bottom padding): the scrolling fields took
+         their phase from that seam. Four values, since mask-position has
+         no three-value form. */
+      --apse-rest-seam: 9.72rem;
       -webkit-mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       -webkit-mask-composite: source-in;
@@ -5811,10 +6045,12 @@ body.page-hour .report-issue {
     }
 
     body.page-hour .office-hour::before {
-      /* Set from the seam: clear through the continuation links, full
-         around the report link, thinning to nothing at the screen's foot. */
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 6.27rem, rgba(0, 0, 0, 0.28) 8.57rem, transparent 12.57rem), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 6.27rem, rgba(0, 0, 0, 0.28) 8.57rem, transparent 12.57rem), var(--apse-leaf);
+      /* Set from the seam, following the scrolling fields it replaces:
+         full from the seam up through the epilogue's bottom padding and
+         gone above the hour navigation; below the seam the footer's fade,
+         thinning to nothing at the screen's foot. */
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 3.7rem, #000 9.72rem 11.97rem, transparent 12.97rem), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 3.7rem, #000 9.72rem 11.97rem, transparent 12.97rem), var(--apse-leaf);
       animation-range: calc(100% - 9rem) 100%;
     }
 
@@ -5831,13 +6067,6 @@ body.page-hour .report-issue {
   }
 }
 
-/* Home and the hours already end on a cross (the niche's crown, the hour's
-   consecration mark), so their footers carry no diamond in either theme;
-   the same in both, so switching Nave/Apse never moves the footer. */
-body:is(.page-home, .page-hour) footer::before {
-  display: none;
-}
-
 /* One viewport-anchored homepage vault at every width. A single fixed layer
    makes the diaper's phase independent of content height, footer geometry and
    mobile browser chrome; top centre is therefore the same origin on every
@@ -5849,7 +6078,7 @@ body.page-home::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--apse-ink);
+  background-color: var(--wall-ink);
   background-image: var(--apse-gild);
   /* Clear the header beam, carry the field behind the frontispiece, then thin
      the ornament toward the controls at the foot of the page. The fade is a
@@ -5857,12 +6086,12 @@ body.page-home::before {
      ribs without tinting the night itself. A third lets the light fall off
      toward the corners of a wide screen, so the vault has a centre and does
      not run to the edges as wallpaper. */
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%), radial-gradient(ellipse 75% 85% at 50% 42%, #000 45%, rgba(0, 0, 0, 0.5)), var(--apse-leaf);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%), radial-gradient(ellipse 75% 85% at 50% 42%, #000 45%, rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+  -webkit-mask-image: var(--wall-field), var(--wall-home-fade), var(--wall-home-light), var(--wall-leaf);
+  mask-image: var(--wall-field), var(--wall-home-fade), var(--wall-home-light), var(--wall-leaf);
   -webkit-mask-repeat: repeat, no-repeat, no-repeat, repeat;
   mask-repeat: repeat, no-repeat, no-repeat, repeat;
-  -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, 100% 100%, var(--apse-leaf-size);
-  mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, 100% 100%, var(--apse-leaf-size);
+  -webkit-mask-size: var(--wall-tile-size), 100% 100%, 100% 100%, var(--apse-leaf-size);
+  mask-size: var(--wall-tile-size), 100% 100%, 100% 100%, var(--apse-leaf-size);
   -webkit-mask-position: top center;
   mask-position: top center;
   -webkit-mask-composite: source-in;

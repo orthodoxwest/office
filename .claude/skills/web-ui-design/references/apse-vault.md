@@ -9,11 +9,26 @@ crossings came first and read as printed wallpaper.
 - The tile is `ornaments/vault.svg` (`--apse-star-tile`), written by
   `tools/genornaments.py` (seeded), used as a **mask**, never as a background
   image. The mask supplies only shape and alpha; the colour is the
-  pseudo-element's `background-color: var(--apse-ink)`, which is
-  `--ornament` in Apse and transparent in Nave. An SVG image cannot read
-  tokens, so painting it directly would freeze the stars through the seasons.
-  A star crossing the tile's edge is drawn again on the far side, so the
-  repeat is seamless.
+  pseudo-element's `background-color`, painted through it. An SVG image
+  cannot read tokens, so painting it directly would freeze the stars
+  through the seasons. A star crossing the tile's edge is drawn again on
+  the far side, so the repeat is seamless.
+- Home's field and the hours' ending read `--wall-field`, `--wall-ink`,
+  `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-home-fade`,
+  `--wall-home-light`, `--wall-end-fade`, `--wall-foot-fade`), declared on
+  `body`: by night the vault (`--apse-vault`, `--apse-ink`, the seasonal
+  `--ornament`, `--apse-tile`, the leaf, soft fades), by day the Nave's
+  powdering (`ornaments/powder.svg`, one rosette to each cell of a 96×168px
+  quincunx tile that never scales, in `--rubric` at 12%, no leaf, square
+  cuts: under the beam at home, and below the hour navigation at the
+  ending, which lives in the epilogue's 3.25rem bottom padding and the
+  footer). The Nave gate mirrors the Apse one (`prefers-color-scheme:
+  light` with `:root:not([data-theme="dark"])`, and
+  `:root[data-theme="light"]`), and by day also sets `--apse-copy-shadow`
+  (the footer lettering's clearing) and `--niche-clear` (the desktop
+  niche's halo). The wide hours' side and ending fields read `--apse-vault`
+  directly, so by day the margins beside the prayer stay plain.
+  `--apse-gild` stays `none` by day: the rosettes are flat paint.
 - Each field's fade is a second mask layer (`linear-gradient`, sized 100%),
   intersected with the tile (`mask-composite: intersect` plus
   `-webkit-mask-composite: source-in`). Give both layers the tile's position
@@ -44,8 +59,9 @@ crossings came first and read as printed wallpaper.
   phone gutters retain a hint of stars. Separate gap/footer pieces previously
   shifted the visible pattern as content and viewport heights changed.
 - Hours admit the vault only in `.hour-epilogue`, after prayer. Keep the field
-  transparent through continuation links, fade in around the report link, and align
-  its bottom with the footer continuation. On desktop these layers bleed to
+  transparent through the end mark and the continuation links (it begins in
+  the epilogue's bottom padding), and align its bottom with the footer
+  continuation, which carries the colophon and the report line. On desktop these layers bleed to
   viewport edges without widening `.elements`. The stars sit straight on
   the wall, as home's do. A flat night ground once eased in beneath them
   (each host's outset `border-image`), but its fade banded (see below).
@@ -68,8 +84,10 @@ crossings came first and read as printed wallpaper.
   plain and the ending scrolls. Below 1680px the margin holds a column of
   stars or less, which reads as an accident.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
-  band floating between blank margins. Keep the field static, and hide the
-  footer diamond where the vault already provides ornament.
+  band floating between blank margins. Keep the field static. The footer's
+  tailpiece (`footer::before`) sits on the field in both themes at one
+  geometry; `--apse-rest-seam` counts its height, so retune the seam if the
+  footer's height changes.
 - Software rasterization (headless Chromium, the snapshot tests, and any
   browser drawing without a GPU) truncates when it blends a feathered layer
   over a smooth dark field: a full-width fade steps down in one-level
