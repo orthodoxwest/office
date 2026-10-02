@@ -95,7 +95,10 @@ or impose a redesign on an unrelated change.
   footer's padding and gap, and the page's bottom padding.
   From 701px the same object widens into a niche set into the wall (round
   head, stone moulding, day-colour trim, recess shadow, the lining restated
-  at the niche's scale), and the room is lit toward
+  at the niche's scale; the cross and the day block are measured down from
+  the lining, not from the head's height, because a head that flattens on a
+  narrow window once ran the lining through the cross), and the room is lit
+  toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
   `--niche-zoom` steps gated on width and height. Its background and shadows
@@ -106,6 +109,21 @@ or impose a redesign on an unrelated change.
   mosaic conch, a painted sky, ochre voussoirs, glory rays) were tried too and
   read as stickers or sunbursts: keep the head plaster. The mosaic belongs to
   the app icon (`tools/genicons.py`), an object seen at one scale.
+- From 701px to 959px the hours' header sets its link list as a centred
+  rank of its own under the brand and Settings; left to wrap, it stranded
+  the last link on a line. Under a coarse pointer the header's links and
+  the ordo's day links answer to a touch-target box drawn by a
+  pseudo-element, so type and header height stay as the mouse has them.
+- The footer's colophon and report line stand on a reserve: a feathered
+  clearing of `--bg`, so no rosette or star runs under lettering. Its
+  padding is returned by a negative margin; the footer's height feeds the
+  wide hours' vault seam and must not change.
+- Notices (404 and other errors) are `page-notice`: the wall, the
+  headpiece, a title in the text's ink, the verse and its reference as red
+  work. Form controls are set by hand where the platform's would break the
+  theme (the prayer form's radios, Reminders' checkboxes): a ruled box
+  filled with oak inside a margin of ground, with `appearance: auto`
+  restored under forced colours.
 - Every page closes on the footer's tailpiece (`footer::before`, a
   quatrefoil between two painted rules, in the lining): the same geometry
   in both themes, so the footer never moves with the theme, and set in rem

@@ -572,6 +572,44 @@ test("parish material stays off the mobile prayer page", async ({
   expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
 });
 
+test("the niche's cross stands clear under the lining at every desktop width", async ({ page }) => {
+  // The cross was once placed from the head's height: where the head
+  // flattens (tablets, narrow windows) the lining ran through it.
+  for (const width of [701, 820, 1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1100 });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const air = await page.evaluate(() => {
+      const zoom = Number(getComputedStyle(document.querySelector(".home-hero")).zoom) || 1;
+      const lining = document.querySelector(".home-lining").getBoundingClientRect();
+      const crown = document.querySelector(".home-crown").getBoundingClientRect();
+      const heading = document.querySelector("#home-date-heading").getBoundingClientRect();
+      // The lining's band, its gap and its inner hairline take 11px.
+      return { above: (crown.top - lining.top) / zoom - 11, below: (heading.top - crown.bottom) / zoom };
+    });
+    expect(air.above, `${width}px: under the lining`).toBeGreaterThanOrEqual(6);
+    expect(air.below, `${width}px: over the date`).toBeGreaterThanOrEqual(12);
+  }
+});
+
+test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
+  for (const size of ["default", "large"]) {
+    for (const width of [701, 820, 959, 960, 1100]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+      await openDatedPage(page, `/vespers/${testDate}`);
+      const header = await page.evaluate(() => {
+        const links = [...document.querySelectorAll(".site-menu nav a")];
+        return {
+          rows: new Set(links.map((a) => Math.round(a.getBoundingClientRect().top))).size,
+          overflow: document.documentElement.scrollWidth - innerWidth,
+        };
+      });
+      expect(header.rows, `${width}px ${size} text`).toBe(1);
+      expect(header.overflow, `${width}px ${size} text`).toBe(0);
+    }
+  }
+});
+
 test("wide hour plaster softens the prayer without sideways scroll or stretching", async ({ page }) => {
   // The prayer's field once reached 10rem past the column; with Large text
   // at the 1000px threshold that ran past the viewport.
