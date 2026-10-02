@@ -19,6 +19,13 @@ native text, screen for screen:
   and offers "Remind me in 10 min".
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
+- **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
+  page of the same kind (the next hour, another day or month) changes in place, keeping the
+  page shown until the next is composed and then moving along Material's shared axis.
+  Disclosures unfold, the menu drops in, the picker's months slide and follow a swipe, and a
+  new theme or text size eases in. Reduce Motion turns the slides to fades. A pressed control
+  dims; a choice (a setting, a prayer form, a day) gives a selection tick, a checkbox a light
+  tap, and opening a page nothing.
 
 The Office's text is set with TextKit (`Prose.swift`), not SwiftUI's `Text`:
 
