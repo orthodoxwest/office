@@ -1573,34 +1573,64 @@ function usageBeaconBody(scope) {
   }
 
   // Home, Ordo, and an open office may remain visible across a time boundary
-  // without producing a visibility event. Schedule one refresh rather than
-  // polling: home uses the next office boundary; Ordo and an office only need
-  // midnight. Midnight is also a home boundary because Compline before 2am
-  // belongs to the previous liturgical day.
+  // without producing a visibility event. Home refreshes at the next office
+  // boundary; Ordo and an office only need midnight. Midnight is also a home
+  // boundary because Compline before 2am belongs to the previous liturgical
+  // day.
+  //
+  // The boundary is held as a wall-clock instant and checked in short steps,
+  // not awaited with one long timeout: timer delays stop counting while a
+  // phone sleeps or freezes a backgrounded PWA, and Android does not always
+  // deliver a visibility event on return, so a single timeout set at Sext
+  // could still be pending at Vespers.
+  var TIMED_REFRESH_STEP_MS = 60 * 1000;
   var timedChromeRefreshTimer = null;
-  function scheduleTimedChromeRefresh() {
-    var hasHomeCard = Boolean(document.querySelector(".home-prayer-card[data-date-slug]"));
-    var hasCalendar = Boolean(document.querySelector(".calendar"));
-    var hasOfficeHour = Boolean(document.querySelector(".office-hour"));
-    if (!hasHomeCard && !hasCalendar && !hasOfficeHour) {
-      return;
+  var timedChromeRefreshAt = null;
+  function timedChromeRefreshBoundary(now) {
+    if (document.querySelector(".home-prayer-card[data-date-slug]")) {
+      return nextOfficeBoundary(now);
     }
+    if (!document.querySelector(".calendar") && !document.querySelector(".office-hour")) {
+      return null;
+    }
+    var midnight = new Date(now.getTime());
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+    return midnight;
+  }
+  function scheduleTimedChromeRefresh() {
     if (timedChromeRefreshTimer) {
       clearTimeout(timedChromeRefreshTimer);
+      timedChromeRefreshTimer = null;
     }
     var now = new Date();
-    var next = hasHomeCard ? nextOfficeBoundary(now) : null;
-    if (next === null) {
-      next = new Date(now.getTime());
-      next.setDate(next.getDate() + 1);
-      next.setHours(0, 0, 0, 0);
+    if (timedChromeRefreshAt === null) {
+      var next = timedChromeRefreshBoundary(now);
+      if (next === null) {
+        return;
+      }
+      timedChromeRefreshAt = next.getTime() + 250;
     }
-    timedChromeRefreshTimer = setTimeout(function () {
-      timedChromeRefreshTimer = null;
-      syncChromeIfNeeded();
-      scheduleTimedChromeRefresh();
-    }, Math.max(0, next.getTime() - now.getTime()) + 250);
+    timedChromeRefreshTimer = setTimeout(
+      catchUpWithClock,
+      Math.min(TIMED_REFRESH_STEP_MS, Math.max(0, timedChromeRefreshAt - now.getTime())),
+    );
   }
+  // catchUpWithClock refreshes the chrome once the wall clock has passed the
+  // pending boundary, then schedules the next one.
+  function catchUpWithClock() {
+    timedChromeRefreshTimer = null;
+    if (timedChromeRefreshAt !== null && Date.now() >= timedChromeRefreshAt) {
+      timedChromeRefreshAt = null;
+      lastSyncedDay = localDateSlug(new Date());
+      syncChromeIfNeeded();
+    }
+    scheduleTimedChromeRefresh();
+  }
+  // Page Lifecycle resume (a frozen page thawing) and window focus are the
+  // other signals a returning PWA can give; check the clock on each.
+  document.addEventListener("resume", catchUpWithClock);
+  window.addEventListener("focus", catchUpWithClock);
   syncChromeIfNeeded();
   scheduleTimedChromeRefresh();
 
