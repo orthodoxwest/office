@@ -22,6 +22,23 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// Lays out the openings as a browser without initial-letter does (WebKit,
+// Firefox): the stylesheet's own fallback block, applied unconditionally,
+// with initial-letter turned off. Remove the returned tag to restore.
+async function fallbackInitials(page) {
+  const css = await page.evaluate(async () => (await fetch(document.querySelector('link[rel="stylesheet"][href*="style.css"]').href)).text());
+  const start = css.indexOf("@supports (not (initial-letter: 2))");
+  expect(start, "the stylesheet keeps a fallback for initial-letter").toBeGreaterThan(-1);
+  const open = css.indexOf("{", start);
+  let depth = 0;
+  let end = open;
+  for (; end < css.length; end++) {
+    if (css[end] === "{") depth++;
+    if (css[end] === "}" && --depth === 0) break;
+  }
+  return page.addStyleTag({ content: `*::first-letter { initial-letter: normal !important; }\n${css.slice(open + 1, end)}` });
+}
+
 // Phones reach Appearance and Text size from the foot of the site menu; wide
 // screens from the header's Settings. Open whichever is showing, choose, and
 // close it again so later measurements see the page.
@@ -2185,7 +2202,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} full-size O sits on the first baseline`, ".initial-word");
   await page.setViewportSize({ width: 768, height: 900 });
-  const fallback = await page.addStyleTag({ content: ".initial-elevated::first-letter { initial-letter: normal !important; }" });
+  const fallback = await fallbackInitials(page);
   await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
   await expect(opening).toHaveClass(/initial-elevated/);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} fallback O sits on the first baseline`, ".initial-word");
@@ -2231,9 +2248,7 @@ test("single-line initials clear the following verse across the alphabet and fal
   for (const size of ["normal", "large"]) {
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const fallback of [false, true]) {
-      const override = fallback ? await page.addStyleTag({ content:
-        ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
-      }) : null;
+      const override = fallback ? await fallbackInitials(page) : null;
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
       await expect.poll(() => page.locator(".verse:first-child").evaluateAll(els => els.map(el => el.className))).toEqual(
         Array(words.length).fill(expect.stringMatching(/^(?!.*\binitial-raised\b).*\binitial-elevated\b/)),
@@ -3653,9 +3668,7 @@ test("wide and narrow initials clear text in native and fallback layouts", async
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
       for (const fallback of [false, true]) {
-        const override = fallback ? await page.addStyleTag({ content:
-          ".psalm-verses .verse:first-child::first-letter { initial-letter: normal; margin-top: .05em; margin-bottom: -.1em; }",
-        }) : null;
+        const override = fallback ? await fallbackInitials(page) : null;
         for (const initial of ["W", "I"]) {
           const geometry = await page.locator(".psalm-verses").first().evaluate((psalm, letter) => {
             const opening = psalm.querySelector(".verse");

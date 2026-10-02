@@ -2487,7 +2487,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -2504,7 +2504,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -2621,7 +2621,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
+  margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(var(--initial-hang, 0) * 1em);
   color: var(--ornament);
 }
 
@@ -5221,48 +5221,110 @@ body.season-eastertide {
   .short-responsory-opening .sigil-text::first-letter {
     initial-letter: 2;
     margin-top: 0.1em;
-    margin-bottom: calc(-0.1em + var(--initial-depth, 0em));
+    margin-bottom: calc(-0.1em + var(--initial-depth, 0) * 1em);
+  }
+}
+
+/* Without initial-letter (WebKit, Firefox), the same two-line initial as a
+   float. Its cap height spans a line pitch and the text's cap height
+   (Garamond's 0.65em), as initial-letter: 2 sizes it, so with its cap top
+   on the first line's cap height its foot stands on the second baseline.
+   Engines size a floated first letter two ways: by its ink (Chromium,
+   Firefox), its cap top then the float's top, or by its line-height. At
+   0.88, 1 - 2 x (ascent 0.71 - cap height 0.65), the line-height box seats
+   the cap top there too, so one top margin serves both: the first line's
+   half-leading and the text's ascent above its caps. Either way -0.1em
+   below ends the float inside the second line, and Q's depth reaches the
+   third, at the leadings the openings use (32-35px on 20px text). The
+   letter reads its opening's leading and text size through registered
+   lengths, resolved on the opening itself; the profiles keep their
+   declared 3.05em, as initial-letter keeps it. Without lh or registered
+   lengths, the 3.05em float above stands. */
+@property --opening-line {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --opening-text {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@supports (not (initial-letter: 2)) and (width: 1lh) {
+  .psalm-verses .verse:first-child,
+  .chapter .liturgical-block .plain-line:first-child,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text,
+  .collect .liturgical-block .plain-line:first-child,
+  .hymn-stanza-opening .hymn-line:first-child,
+  .marian-antiphon .chant-line-opening,
+  .corporate-lord-prayer-officiant {
+    --opening-line: 1lh;
+    --opening-text: 1em;
+  }
+
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+  .collect .liturgical-block .plain-line:first-child::first-letter,
+  .hymn-stanza-opening .hymn-line:first-child::first-letter,
+  .marian-antiphon .chant-line-opening::first-letter,
+  .corporate-lord-prayer-officiant::first-letter {
+    --opening-em: calc(3.05 * var(--opening-text));
+    font-size: calc(var(--opening-text) + var(--opening-line) / 0.65);
+    line-height: 0.88;
+    margin-top: calc((var(--opening-line) - var(--opening-text)) / 2 + 0.06 * var(--opening-text));
+    margin-right: calc(var(--initial-gap, 0.06) * var(--opening-em));
+    margin-bottom: calc(-0.1em + var(--initial-depth, 0) * var(--opening-em));
+    margin-left: calc(var(--initial-hang, 0) * var(--opening-em));
+  }
+
+  .psalm-verses .verse:first-child::first-letter {
+    margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * var(--opening-em));
   }
 }
 
 /* Optical profiles for every Latin capital in the bundled EB Garamond.
    The float gap reserves space beside the lower line; the word adjustment
    independently fits the upper line. Both follow the painted glyph contour,
-   with a common breathing space. Gap/hang use the initial em; word uses the
-   body em. A negative gap lets text sit below a bowl or beside a narrow stem.
+   with a common breathing space. Gap/hang use the initial's declared em
+   (3.05em; initial-letter draws it larger without changing it); word uses
+   the body em. Each is a bare number, multiplied by its em where it is
+   used, so the fallback below keeps that em while drawing a larger letter. A negative gap lets text sit below a bowl or beside a narrow stem.
    Calibrated against two-line initials, then checked at other leading/sizes.
    Depth keeps a descending tail clear of a following row (notably Q).
    Recalibrate these values when changing the initial face. */
-.elements [data-initial="A"] { --initial-gap: 0.06em; --initial-tuck: -0.8em; --initial-hang: -0.02em; }
-.elements [data-initial="B"] { --initial-gap: 0.08em; --initial-tuck: -0.2em; }
-.elements [data-initial="C"] { --initial-gap: 0.08em; --initial-tuck: -0.05em; --initial-hang: -0.025em; }
-.elements [data-initial="D"] { --initial-gap: 0.03em; --initial-tuck: 0.1em; }
-.elements [data-initial="E"] { --initial-gap: 0.08em; --initial-tuck: -0.15em; }
-.elements [data-initial="F"] { --initial-gap: -0.135em; --initial-tuck: 0.65em; }
-.elements [data-initial="G"] { --initial-gap: -0.005em; --initial-tuck: 0em; --initial-hang: -0.025em; }
-.elements [data-initial="H"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="I"] { --initial-gap: 0.03em; --initial-tuck: 0em; }
-.elements [data-initial="J"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="K"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="L"] { --initial-gap: 0.06em; --initial-tuck: -0.9em; }
-.elements [data-initial="M"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
-.elements [data-initial="N"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="O"] { --initial-gap: 0.045em; --initial-tuck: 0em; --initial-hang: -0.025em; }
-.elements [data-initial="P"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; }
-.elements [data-initial="Q"] { --initial-gap: 0.06em; --initial-tuck: -0.2em; --initial-hang: -0.025em; --initial-depth: 0.1em; }
-.elements [data-initial="R"] { --initial-gap: 0.08em; --initial-tuck: -0.8em; }
-.elements [data-initial="S"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
-.elements [data-initial="T"] { --initial-gap: -0.15em; --initial-tuck: 0.65em; --initial-hang: -0.06em; }
-.elements [data-initial="U"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
-.elements [data-initial="V"] { --initial-gap: -0.265em; --initial-tuck: 1em; --initial-hang: -0.025em; }
-.elements [data-initial="W"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; --initial-hang: -0.025em; }
-.elements [data-initial="X"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
-.elements [data-initial="Y"] { --initial-gap: -0.1em; --initial-tuck: 0.6em; --initial-hang: -0.025em; }
-.elements [data-initial="Z"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
+.elements [data-initial="A"] { --initial-gap: 0.06; --initial-tuck: -0.8; --initial-hang: -0.02; }
+.elements [data-initial="B"] { --initial-gap: 0.08; --initial-tuck: -0.2; }
+.elements [data-initial="C"] { --initial-gap: 0.08; --initial-tuck: -0.05; --initial-hang: -0.025; }
+.elements [data-initial="D"] { --initial-gap: 0.03; --initial-tuck: 0.1; }
+.elements [data-initial="E"] { --initial-gap: 0.08; --initial-tuck: -0.15; }
+.elements [data-initial="F"] { --initial-gap: -0.135; --initial-tuck: 0.65; }
+.elements [data-initial="G"] { --initial-gap: -0.005; --initial-tuck: 0; --initial-hang: -0.025; }
+.elements [data-initial="H"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="I"] { --initial-gap: 0.03; --initial-tuck: 0; }
+.elements [data-initial="J"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="K"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="L"] { --initial-gap: 0.06; --initial-tuck: -0.9; }
+.elements [data-initial="M"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
+.elements [data-initial="N"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="O"] { --initial-gap: 0.045; --initial-tuck: 0; --initial-hang: -0.025; }
+.elements [data-initial="P"] { --initial-gap: -0.215; --initial-tuck: 0.85; }
+.elements [data-initial="Q"] { --initial-gap: 0.06; --initial-tuck: -0.2; --initial-hang: -0.025; --initial-depth: 0.1; }
+.elements [data-initial="R"] { --initial-gap: 0.08; --initial-tuck: -0.8; }
+.elements [data-initial="S"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
+.elements [data-initial="T"] { --initial-gap: -0.15; --initial-tuck: 0.65; --initial-hang: -0.06; }
+.elements [data-initial="U"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+.elements [data-initial="V"] { --initial-gap: -0.265; --initial-tuck: 1; --initial-hang: -0.025; }
+.elements [data-initial="W"] { --initial-gap: -0.215; --initial-tuck: 0.85; --initial-hang: -0.025; }
+.elements [data-initial="X"] { --initial-gap: 0.06; --initial-tuck: 0; }
+.elements [data-initial="Y"] { --initial-gap: -0.1; --initial-tuck: 0.6; --initial-hang: -0.025; }
+.elements [data-initial="Z"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
 
 /* A raised initial sits on one baseline; its join uses a much smaller fit. */
 .elements :is([data-initial="T"], [data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
-  --initial-raised-tuck: -0.04em;
+  --initial-raised-tuck: -0.04;
 }
 
 .opening-small-caps {
@@ -5275,12 +5337,12 @@ body.season-eastertide {
   font-variant-caps: all-small-caps;
   font-synthesis: none;
   letter-spacing: 0.025em;
-  margin-left: var(--initial-tuck, 0em);
+  margin-left: calc(var(--initial-tuck, 0) * 1em);
 }
 
 .initial-raised > .initial-word,
 .short-responsory-opening .initial-word {
-  margin-left: var(--initial-raised-tuck, 0em);
+  margin-left: calc(var(--initial-raised-tuck, 0) * 1em);
 }
 
 [data-initial-standalone] > .initial-word {
@@ -5303,7 +5365,7 @@ body.season-eastertide {
   float: none;
   font-size: 1.65em;
   line-height: 0;
-  margin: 0 0.035em 0 var(--initial-hang, 0em);
+  margin: 0 0.035em 0 calc(var(--initial-hang, 0) * 1em);
 }
 
 .psalm-verses .verse.initial-raised:first-child:not(.numbered) {
@@ -5319,7 +5381,7 @@ body.season-eastertide {
   float: none;
   line-height: 1;
   vertical-align: baseline;
-  margin: 0 var(--initial-gap, 0.06em) 0 calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+  margin: 0 calc(var(--initial-gap, 0.06) * 1em) 0 calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
 }
 .psalm-verses .verse.initial-elevated > .initial-word {
   margin-left: 0;
