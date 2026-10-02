@@ -92,7 +92,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
         ElementType::Psalm | ElementType::Canticle => {
             let unrepeated = elem.unrepeated_rubric();
             if !unrepeated.is_empty() {
-                sb.push_str(&render_rubric_spans(&unrepeated));
+                sb.push_str(&render_rubric_spans(&unrepeated, "rubric unrepeated-note"));
             }
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
             if !elem.label.is_empty() {
@@ -280,11 +280,11 @@ fn render_rubric(elem: &OfficeElement) -> String {
     if elem.rubric_spans.is_empty() {
         return format!("<p class=\"rubric\">{}</p>", esc_text(&elem.text));
     }
-    render_rubric_spans(&elem.rubric_spans)
+    render_rubric_spans(&elem.rubric_spans, "rubric")
 }
 
-fn render_rubric_spans(spans: &[RubricSpan]) -> String {
-    let mut sb = String::from("<p class=\"rubric\">");
+fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
+    let mut sb = format!("<p class=\"{class}\">");
     for span in spans {
         if span.prayed {
             sb.push_str(&format!("<span class=\"rubric-prayed\">{}</span>", esc_cross(&span.text)));

@@ -313,6 +313,11 @@
      where the old value fell to 4.05–4.47:1 — under AA at the small sizes it
      is used at. This value clears 4.5:1 on all four backgrounds. */
   --muted: #6b5d54;
+  /* Words not said aloud (secret prayers, a psalm's unrepeated opening) at
+     body size: a step lighter than --muted so they read as set aside against
+     the warm text (4.7:1 on --bg, where --muted is 5.7:1). Apse uses --muted,
+     whose cool hue already separates it. */
+  --unsaid: color-mix(in oklab, var(--muted) 90%, var(--bg));
   --border: #dccfc3;
   --rubric: #8b1a1a;
   --white: #f8f4ec;
@@ -2074,6 +2079,33 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: 1.2rem;
 }
 
+/* The rubric that names a psalm's unrepeated opening annotates the antiphon
+   above it, as the Diurnal sets it: tight under the antiphon's words (centred
+   under an announcement, hung past "Ant." under a full antiphon), with the
+   psalm's own air below. */
+.elements > .antiphon:has(+ .unrepeated-note) {
+  margin-top: 0.45rem;
+  margin-bottom: -0.75rem;
+}
+
+.elements > .unrepeated-note {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto -0.25rem;
+  padding: 0 0.25rem 0 1.35rem;
+  text-align: left;
+}
+
+.elements > .antiphon-announce + .unrepeated-note {
+  width: auto;
+  padding-left: 0.25rem;
+  text-align: center;
+}
+
+.elements > .antiphon + .antiphon:has(+ .unrepeated-note) {
+  margin-top: 1.2rem;
+}
+
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
    and the line reads as one even band rather than a cap followed by a dip. */
 .item-label {
@@ -2474,21 +2506,19 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 /* Secret prayers: spoken incipit (and optional tail) at full contrast;
-   silent body uses the secondary/muted token so the cue is obvious in
-   both light and dark themes (a mild color-mix was invisible in dark). */
+   silent body uses the --unsaid token so the cue is obvious in both light
+   and dark themes (a mild color-mix was invisible in dark, so Apse keeps
+   --muted). */
 .spoken-text {
   color: var(--text);
 }
 
-.secret-text {
-  color: var(--muted);
-}
-
 /* A psalm's opening words that its antiphon has just said are not repeated
-   (General Rubrics XXIV.8): kept in place so the verse reads whole, muted as
+   (General Rubrics XXIV.8): kept in place so the verse reads whole, set as
    the secret prayers are. The drop cap keeps its ornament colour. */
+.secret-text,
 .unrepeated {
-  color: var(--muted);
+  color: var(--unsaid);
 }
 
 /* Name each speaker, including the leader's replies to the people. These
@@ -3298,6 +3328,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     --ornament-hi: #e7d295;
     --ornament-lo: #c0a25a;
     --muted: #9aa4b0;
+    --unsaid: var(--muted);
     --border: #2a3648;
     --rubric: #d47070;
     --white: #1a2430;
@@ -3347,6 +3378,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   --ornament-hi: #e7d295;
   --ornament-lo: #c0a25a;
   --muted: #9aa4b0;
+  --unsaid: var(--muted);
   --border: #2a3648;
   --rubric: #d47070;
   --white: #1a2430;
@@ -5858,6 +5890,8 @@ body.page-home::before {
      the psalm's keep-together rule otherwise stranded "Ant. Out of the
      deep." alone at the foot of a page. */
   .elements > .antiphon-announce,
+  .elements > .antiphon:has(+ .unrepeated-note),
+  .unrepeated-note,
   .section-heading,
   .item-label,
   .hymn-title,

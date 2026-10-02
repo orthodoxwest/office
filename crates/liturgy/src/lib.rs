@@ -242,12 +242,13 @@ impl OfficeElement {
     }
 
     /// The rubric before a psalm or canticle whose opening words are not
-    /// repeated, worded as the Diurnal words it.
+    /// repeated, worded after the Diurnal. "These words", not its "This",
+    /// since the antiphon itself is repeated after the psalm.
     pub fn unrepeated_rubric(&self) -> Vec<RubricSpan> {
         let Some(u) = &self.unrepeated else { return Vec::new() };
         let item = if self.kind == ElementType::Canticle { "Canticle" } else { "Psalm" };
         if u.named.is_empty() {
-            return vec![RubricSpan { text: format!("This is not repeated in the {item}."), prayed: false }];
+            return vec![RubricSpan { text: format!("These words are not repeated in the {item}."), prayed: false }];
         }
         vec![
             RubricSpan { text: "The words ".to_string(), prayed: false },
