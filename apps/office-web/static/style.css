@@ -838,10 +838,20 @@ summary:focus-visible {
     display: none;
   }
 
-  /* The phone footer is one quiet line. Home's card is shorter than the
-     global 60vh floor, which left a tall empty band of wall between the card
-     and that line; desktop already releases the floor to centre its niche. */
+  /* The colophon sits at the foot of the screen, as on desktop, rather than
+     floating under the card: home is a column at least a screen tall whose
+     main takes the slack. The wall between card and colophon is powdered by
+     day and starred by night, so it reads as wall, not as an empty band.
+     svh, so the foot holds still as the browser's toolbars come and go. */
+  .page-home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
   .page-home main {
+    flex: 1 0 auto;
     min-height: 0;
   }
 
@@ -5780,8 +5790,8 @@ body {
      epilogue's bottom padding) and on through the footer. */
   --wall-tile-size: var(--apse-tile) var(--apse-tile);
   --wall-leaf: var(--apse-leaf);
-  --wall-home-fade: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-  --wall-home-light: radial-gradient(ellipse 75% 85% at 50% 42%, #000 45%, rgba(0, 0, 0, 0.5));
+  --wall-home-fade: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 78%, rgba(0, 0, 0, 0.6) 100%);
+  --wall-home-light: radial-gradient(ellipse 75% 85% at 50% 42%, #000 50%, rgba(0, 0, 0, 0.72));
   --wall-end-fade: linear-gradient(to top, #000 0 2.25rem, transparent 3.25rem);
   --wall-foot-fade: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
 }

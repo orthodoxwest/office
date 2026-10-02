@@ -186,7 +186,7 @@ def powder(cell_w=96, cell_h=84, radius=7.0):
     return svg(f"0 0 {tile_w} {tile_h}", "".join(parts)), len(rows)
 
 
-def vault(seed=1120, tile=528, count=40, attempts=40000):
+def vault(seed=1120, tile=528, count=64, attempts=60000):
     rng = random.Random(seed)
     placed = []
     for _ in range(attempts):
@@ -198,14 +198,14 @@ def vault(seed=1120, tile=528, count=40, attempts=40000):
         for px, py, ps in placed:
             dx = min(abs(x - px), tile - abs(x - px))
             dy = min(abs(y - py), tile - abs(y - py))
-            if dx * dx + dy * dy < (46 + 3 * (size + ps)) ** 2:
+            if dx * dx + dy * dy < (26 + 3 * (size + ps)) ** 2:
                 clear = False
                 break
         if clear:
             placed.append((x, y, size))
     parts = []
     for x, y, size in placed:
-        opacity = rng.uniform(0.45, 0.85)
+        opacity = rng.uniform(0.6, 0.95)
         rot, irregular = rng.gauss(0, 0.06), 0.1
         shape = None
         # A star crossing the tile's edge is drawn again on the far side, so the repeat is seamless.
