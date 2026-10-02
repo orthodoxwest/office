@@ -7,12 +7,20 @@ import UIKit
  */
 struct Initial: Equatable {
     let letter: String
-    /// Two lines deep: 3.05 times the text's size.
+    /// Two lines deep, as CSS `initial-letter: 2` sizes it: its cap height spans a line pitch and the text's cap height.
     let deep: UIFont
     /// Raised on the first line: 2.1 times the text's size.
     let raised: UIFont
-    /// The space between a deep capital and the text beside it.
-    let gap: CGFloat
+    /// Where a deep capital's glyph starts from the measure's edge: its ink at the margin, moved by its hang.
+    let left: CGFloat
+    /// How far a deep capital's baseline stands below the first line's: its ink top meets that line's cap height.
+    let drop: CGFloat
+    /// Where the lines beside a deep capital start: past its ink and its gap.
+    let edge: CGFloat
+    /// How far the first line's opening word moves from where its line starts.
+    let tuck: CGFloat
+    /// The lines beside a deep capital: two, or three past a descending tail.
+    let rows: Int
     /// A versicle's initial is always raised.
     let alwaysRaised: Bool
     /// The gilding's flat ochre, which veils and brightens with the season.
@@ -71,15 +79,21 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
             measure()
             return
         }
-        let capWidth = ProseLayout.advance(initial.letter, initial.deep)
-        let beside = capWidth + initial.gap
         if !initial.alwaysRaised {
-            // Two lines beside the capital; the remainder runs on at the text edge.
-            container.exclusionPaths = [UIBezierPath(rect: CGRect(x: 0, y: 0, width: beside, height: spec.line * 2 - 0.5))]
-            set(first: 0, rest: spec.restIndent)
+            // Two lines beside the capital (three past a descending tail); the remainder runs on at the
+            // text edge. As beside the web's float, a line never starts short of the text's own edge, and
+            // the first line's opening word moves by the capital's tuck from where its line starts.
+            let second = max(initial.edge, spec.restIndent)
+            let first = max(0, second + initial.tuck)
+            container.exclusionPaths = [
+                UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
+                UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
+            ]
+            // A line beside the capital starts with its word, as CSS drops a space at a line's start (after a lone O).
+            let lead = spec.text.string.prefix { $0.isWhitespace }.utf16.count
+            set(first: 0, rest: spec.restIndent, text: spec.text.attributedSubstring(from: NSRange(location: lead, length: spec.text.length - lead)))
             if lines().count >= 2 {
-                // Seat the capital's foot on the second line's baseline.
-                capOrigin = CGPoint(x: 0, y: lines()[1].minY + baseline)
+                capOrigin = CGPoint(x: initial.left, y: lines()[0].minY + baseline + initial.drop)
                 capFont = initial.deep
                 measure()
                 return
@@ -102,8 +116,8 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         height = max(height, capBottom.rounded(.up), firstBottom)
     }
 
-    private func set(first: CGFloat, rest: CGFloat) {
-        let text = NSMutableAttributedString(attributedString: spec.text)
+    private func set(first: CGFloat, rest: CGFloat, text source: NSAttributedString? = nil) {
+        let text = NSMutableAttributedString(attributedString: source ?? spec.text)
         let style = NSMutableParagraphStyle()
         style.alignment = spec.alignment
         style.firstLineHeadIndent = first

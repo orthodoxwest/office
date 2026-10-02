@@ -190,6 +190,35 @@ pub fn hour_names() -> Vec<String> {
     HOUR_NAMES.iter().map(|h| h.to_string()).collect()
 }
 
+/// How a dropped initial fits the text beside it (`render_blocks::InitialFit`): `gap`, `hang`
+/// and `depth` in the initial's em, `tuck` in the text's.
+#[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]
+pub struct InitialFit {
+    pub gap: f32,
+    pub tuck: f32,
+    pub hang: f32,
+    pub depth: f32,
+}
+
+/// The fit of a dropped initial's capital, as the web profiles it.
+#[uniffi::export]
+pub fn initial_fit(letter: String) -> InitialFit {
+    let f = render_blocks::initial_fit(letter.chars().next().unwrap_or(' '));
+    InitialFit { gap: f.gap, tuck: f.tuck, hang: f.hang, depth: f.depth }
+}
+
+/// The text face's cap height, in em: a two-line initial's ink top meets the first line's.
+#[uniffi::export]
+pub fn cap_height() -> f32 {
+    render_blocks::initials::CAP_HEIGHT
+}
+
+/// A two-line initial's size, in ems of the text beside it, for that text's line height in ems.
+#[uniffi::export]
+pub fn initial_size(line_height_em: f32) -> f32 {
+    render_blocks::initial_size(line_height_em)
+}
+
 /// The office being prayed at a clock hour, and the day it belongs to
 /// relative to the civil date (Compline after midnight is yesterday's).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]

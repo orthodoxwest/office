@@ -5,6 +5,10 @@
 //!
 //! Every run of display text passes through the same typography as the web and the booklet.
 
+pub mod initials;
+
+pub use initials::{InitialFit, initial_fit, initial_size};
+
 use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
 };

@@ -1,5 +1,8 @@
 package org.orthodoxwest.office
 
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -8,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -28,6 +33,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
@@ -37,15 +43,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.SectionView
+import org.orthodoxwest.office.core.capHeight
+import org.orthodoxwest.office.core.initialFit
+import org.orthodoxwest.office.core.initialSize
+import kotlin.math.roundToInt
 
 /** The verse gutter (`--verse-gutter`, 1.8rem): verse numbers and ℣/℟ sit in it, text beyond it. */
 val VerseGutter: Dp = 28.8.dp
@@ -240,15 +251,21 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
         drawText(letter, color = ochre)
     }
     val measurer = rememberTextMeasurer()
+    val face = garamond()
     val plain = style.copy(textIndent = null)
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val width = constraints.maxWidth
-        val capStyle = plain.copy(fontSize = style.fontSize * 3.05f, lineHeight = style.fontSize * 3.05f)
-        val cap = remember(letter, capStyle) { measurer.measure(letter, capStyle) }
-        val gap = with(density) { (style.fontSize * 3.05f * 0.06f).toPx() }
-        val besideStart = (cap.size.width + gap).toInt()
-        val beside = remember(rest, plain, width, besideStart) {
-            measurer.measure(rest, plain, constraints = Constraints(maxWidth = (width - besideStart).coerceAtLeast(1)))
+        val cap = remember(letter, plain, density, face) { dropCap(letter, plain, measurer, density, face) }
+        // The lines beside the capital start at its fitted edge, the first line's opening word tucked
+        // in or out from there; the nearer of the two is the column's edge.
+        val (line1, line2) = cap.lines(with(density) { textStart.toPx() })
+        val besideStart = minOf(line1, line2)
+        val besideStyle = with(density) { plain.copy(textIndent = TextIndent((line1 - besideStart).toSp(), (line2 - besideStart).toSp())) }
+        // A line beside a dropped capital starts with its word, as CSS drops a space at a line's start
+        // (after a lone O); a raised capital keeps the space, sharing its line.
+        val body = rest.withoutLeadingSpace()
+        val beside = remember(body, besideStyle, width, besideStart) {
+            measurer.measure(body, besideStyle, constraints = Constraints(maxWidth = (width - besideStart.toInt()).coerceAtLeast(1)))
         }
         if (raised || beside.lineCount < 2) {
             // Raised: the capital stands on the first line's baseline and rises above it.
@@ -264,26 +281,69 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
             }
             return@BoxWithConstraints
         }
-        // Two lines beside the capital; the remainder runs on at the text edge.
-        val split = beside.getLineEnd(1, visibleEnd = false)
+        // Two lines beside the capital (three past a descending tail); the remainder runs on at the text edge.
+        val split = beside.getLineEnd(minOf(cap.rows, beside.lineCount) - 1, visibleEnd = false)
         // Two lines of a hymn end at the stanza's own line break: it belongs to neither part.
-        val first = rest.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
-        val after = rest.subSequence(split, rest.length).let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
-        // Seat the capital's foot on the second line's baseline.
-        val capTop = (beside.getLineBaseline(1) - cap.firstBaseline).toInt()
+        val first = body.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
+        val after = body.subSequence(split, body.length).let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
+        // The capital's ink top meets the first line's cap height; its foot then stands on the second baseline.
+        val capTop = (beside.getLineBaseline(0) + cap.drop - cap.glyph.firstBaseline).toInt()
         Column {
-            Box {
-                Canvas(
-                    Modifier
-                        .offset { IntOffset(0, capTop) }
-                        .size(with(density) { cap.size.width.toDp() }, with(density) { cap.size.height.toDp() }),
-                ) { initial(cap) }
-                Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = plain)
+            // Painted behind the lines beside it, taking no room of its own: the lines set the height.
+            Box(Modifier.drawBehind { translate(cap.left, capTop.toFloat()) { initial(cap.glyph) } }) {
+                Text(first, Modifier.padding(start = with(density) { besideStart.toDp() }), style = besideStyle)
             }
             if (after.isNotEmpty()) Text(after, Modifier.padding(start = textStart), style = style)
         }
     }
 }
+
+/**
+ * A dropped initial's glyph and where it stands, in px: `left` places the glyph from the measure's
+ * edge, `drop` its baseline below the first line's. The lines beside it start at its `edge`, the
+ * first line's opening word moved by `tuck`.
+ */
+private class DropCap(val glyph: TextLayoutResult, val left: Float, val drop: Float, val edge: Float, val tuck: Float, val rows: Int) {
+    /**
+     * Where the first and second lines start, for text whose own edge is `textStart`: as beside the
+     * web's float, a line never starts short of the text's edge (an I or a V hanging into a psalm's
+     * gutter), and the tuck moves the first line's word from wherever its line starts.
+     */
+    fun lines(textStart: Float): Pair<Float, Float> {
+        val second = maxOf(edge, textStart)
+        return second + tuck to second
+    }
+}
+
+/**
+ * A two-line initial as the web's `initial-letter: 2` sets it: its cap height spans a line pitch and
+ * the text's cap height, and it is fitted by its ink (see `render_blocks::initials`) and the
+ * capital's optical profile.
+ */
+private fun dropCap(letter: String, style: TextStyle, measurer: TextMeasurer, density: Density, face: Typeface): DropCap {
+    val fit = initialFit(letter)
+    val leading = if (style.lineHeight.isSp) style.lineHeight.value / style.fontSize.value else 1.65f
+    val size = style.fontSize * initialSize(leading)
+    val glyph = measurer.measure(letter, style.copy(textIndent = null, fontSize = size, lineHeight = size))
+    return with(density) {
+        val em = size.toPx()
+        val ink = Rect().also { Paint().apply { typeface = face; textSize = em }.getTextBounds(letter, 0, letter.length, it) }
+        val left = fit.hang * em
+        DropCap(
+            glyph, left - ink.left, -capHeight() * style.fontSize.toPx() - ink.top,
+            left + ink.width() + fit.gap * em, fit.tuck * style.fontSize.toPx(), if (fit.depth > 0f) 3 else 2,
+        )
+    }
+}
+
+/** The text face, for an initial's ink. */
+@Composable
+private fun garamond(): Typeface {
+    val context = LocalContext.current
+    return remember(context) { ResourcesCompat.getFont(context, R.font.eb_garamond_regular) ?: Typeface.SERIF }
+}
+
+private fun AnnotatedString.withoutLeadingSpace() = subSequence(text.indexOfFirst { !it.isWhitespace() }.let { if (it < 0) length else it }, length)
 
 private fun Char.inWord() = isLetter() || this == '\'' || this == '’' || this == '-'
 
@@ -376,21 +436,20 @@ fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val style = Type.verse.copy(color = p.text)
+    val face = garamond()
     val texts = sections.map { s -> s.blocks.map { if (it.kind == BlockKind.STANZA) runs(it) else null } }
     return remember(sections, style, density) {
         fun width(t: AnnotatedString) = measurer.measure(t, style, softWrap = false).size.width
-        val cap = style.copy(fontSize = style.fontSize * 3.05f, lineHeight = style.fontSize * 3.05f)
-        val gap = with(density) { (style.fontSize * 3.05f * 0.06f).toPx() }
         fun stanzaWidth(block: BlockView, text: AnnotatedString): Int {
             var start = 0
             val lines = text.text.split('\n').map { line -> text.subSequence(start, start + line.length).also { start += line.length + 1 } }
             return lines.mapIndexed { i, line ->
                 val w = width(line)
                 if (!block.dropCap || i > 1 || line.text.isBlank()) return@mapIndexed w
-                // The initial stands beside the first two lines: its width and gap, less the letter it replaces.
+                // The initial stands beside the first two lines, which start at its fitted edges.
                 val letter = line.text.trimStart().take(1)
-                val beside = measurer.measure(letter, cap).size.width + gap.toInt()
-                if (i == 0) w - width(AnnotatedString(letter)) + beside else w + beside
+                val (line1, line2) = dropCap(letter, style, measurer, density, face).lines(0f)
+                if (i == 0) width(line.subSequence(line.text.indexOf(letter) + 1, line.length).withoutLeadingSpace()) + line1.roundToInt() else w + line2.roundToInt()
             }.maxOrNull() ?: 0
         }
         val out = mutableMapOf<Pair<Int, Int>, Dp>()

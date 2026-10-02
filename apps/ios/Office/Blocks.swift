@@ -161,14 +161,27 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
     return (s.substring(with: letter), rest)
 }
 
-/// The initial for an opening in `style`: painted in the gilding, 3.05 times the text two lines deep, or 2.1 times raised.
+/**
+ * The initial for an opening in `style`, painted in the gilding: two lines deep as the web's
+ * `initial-letter: 2` sets it, fitted by its ink and the capital's optical profile (see
+ * `render_blocks::initials`), or 2.1 times the text raised.
+ */
 private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, raised: Bool) -> Initial {
     let size = style.size * m.type
+    let fit = initialFit(letter: letter)
+    let em = size * CGFloat(initialSize(lineHeightEm: Float(style.line / style.size)))
+    let deep = garamond(em)
+    let ink = CTLineGetBoundsWithOptions(CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: deep])), .useGlyphPathBounds)
+    let left = CGFloat(fit.hang) * em
     return Initial(
         letter: letter,
-        deep: garamond(size * 3.05),
+        deep: deep,
         raised: garamond(size * 2.1),
-        gap: size * 3.05 * 0.06,
+        left: left - ink.minX,
+        drop: ink.maxY - CGFloat(capHeight()) * size,
+        edge: left + ink.width + CGFloat(fit.gap) * em,
+        tuck: CGFloat(fit.tuck) * size,
+        rows: fit.depth > 0 ? 3 : 2,
         alwaysRaised: raised,
         color: UIColor(o.flat)
     )
@@ -329,9 +342,6 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
         CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(t), nil, nil, nil))
     }
     let style = Scale.verse
-    let size = style.size * m.type
-    let cap = garamond(size * 3.05)
-    let gap = size * 3.05 * 0.06
     func stanzaWidth(_ block: BlockView) -> CGFloat {
         let text = runs(block, style, color: p.text, p, m)
         let s = text.string as NSString
@@ -343,10 +353,16 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
             let piece = text.attributedSubstring(from: NSRange(location: start, length: length))
             var w = width(piece)
             if block.dropCap && i <= 1 && !line.trimmingCharacters(in: .whitespaces).isEmpty {
-                // The initial stands beside the first two lines: its width and gap, less the letter it replaces.
+                // The initial stands beside the first two lines, which start at its fitted edges.
                 let letter = String(line.trimmingCharacters(in: .whitespaces).prefix(1))
-                let beside = ProseLayout.advance(letter, cap) + gap
-                w = i == 0 ? w - width(NSAttributedString(string: letter, attributes: [.font: style.uiFont(m)])) + beside : w + beside
+                let cap = initial(letter, style, o, m, raised: false)
+                if i == 0 {
+                    let after = line.drop { $0.isWhitespace }.dropFirst().drop { $0.isWhitespace }
+                    let from = (line as NSString).length - (String(after) as NSString).length
+                    w = width(piece.attributedSubstring(from: NSRange(location: from, length: length - from))) + cap.edge + cap.tuck
+                } else {
+                    w += cap.edge
+                }
             }
             widest = max(widest, w)
             start += length + 1
