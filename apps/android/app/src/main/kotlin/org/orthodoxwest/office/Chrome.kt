@@ -411,11 +411,12 @@ fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String
 }
 
 /**
- * A disclosure's contents, unfolding down from its control and folding back up into it; once
- * open, scrolled into view if it unfolded past the screen's edge.
+ * A disclosure's contents, unfolding down from its control and folding back up into it. With
+ * `reveal`, once unfolded it is scrolled into view if it opened past the screen's edge; never
+ * when it was open already, as a row scrolled into view would be.
  */
 @Composable
-fun Unfold(visible: Boolean, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
     val bring = remember { BringIntoViewRequester() }
     AnimatedVisibility(
         visible,
@@ -426,6 +427,7 @@ fun Unfold(visible: Boolean, modifier: Modifier = Modifier, content: @Composable
             fadeOut(tween(FOLD_MS / 2, easing = FastOutLinearInEasing)),
     ) {
         LaunchedEffect(Unit) {
+            if (!reveal || transition.currentState == EnterExitState.Visible) return@LaunchedEffect
             snapshotFlow { transition.currentState }.first { it == EnterExitState.Visible }
             bring.bringIntoView()
         }
