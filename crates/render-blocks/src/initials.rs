@@ -17,7 +17,18 @@ pub fn initial_size(line_height_em: f32) -> f32 {
     1.0 + line_height_em / CAP_HEIGHT
 }
 
-/// One capital's fit. `gap`, `hang` and `depth` are in the initial's em; `tuck` in the text's.
+/// The em of the profiles' `gap`, `hang` and `depth`, in ems of the text: the web's initial is
+/// declared at this size, and `initial-letter` draws it larger without changing its em.
+pub const PROFILE_EM: f32 = 3.05;
+
+/// The size of a raised initial, standing on its line's baseline, in ems of the text (`.initial-raised`).
+pub const RAISED_SIZE: f32 = 1.65;
+
+/// The space after a raised initial, in its own em.
+pub const RAISED_GAP: f32 = 0.035;
+
+/// One capital's fit. `gap`, `hang` and `depth` are in the declared initial's em ([`PROFILE_EM`]);
+/// `tuck` and `raised_tuck` in the text's.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct InitialFit {
     /// Space between the letter and the lines beside it; negative lets them run in under an
@@ -31,13 +42,17 @@ pub struct InitialFit {
     /// Extra clearance below the second line for a descending tail (Q): the next line too
     /// stands beside the letter.
     pub depth: f32,
+    /// How far the opening word moves beside a raised initial, which shares its line: in under
+    /// a high arm (T, V, W, Y).
+    pub raised_tuck: f32,
 }
 
-const PLAIN: InitialFit = InitialFit { gap: 0.06, tuck: 0.0, hang: 0.0, depth: 0.0 };
+const PLAIN: InitialFit = InitialFit { gap: 0.06, tuck: 0.0, hang: 0.0, depth: 0.0, raised_tuck: 0.0 };
 
 /// The fit for an initial; a letter outside the profiled capitals takes the plain fit.
 pub fn initial_fit(letter: char) -> InitialFit {
-    let fit = |gap, tuck, hang| InitialFit { gap, tuck, hang, depth: 0.0 };
+    let fit = |gap, tuck, hang| InitialFit { gap, tuck, hang, ..PLAIN };
+    let high = |fit: InitialFit| InitialFit { raised_tuck: -0.04, ..fit };
     match letter {
         'A' => fit(0.06, -0.8, -0.02),
         'B' => fit(0.08, -0.2, 0.0),
@@ -55,10 +70,10 @@ pub fn initial_fit(letter: char) -> InitialFit {
         'P' => fit(-0.215, 0.85, 0.0),
         'Q' => InitialFit { depth: 0.1, ..fit(0.06, -0.2, -0.025) },
         'R' => fit(0.08, -0.8, 0.0),
-        'T' => fit(-0.15, 0.65, -0.06),
-        'V' => fit(-0.265, 1.0, -0.025),
-        'W' => fit(-0.215, 0.85, -0.025),
-        'Y' => fit(-0.1, 0.6, -0.025),
+        'T' => high(fit(-0.15, 0.65, -0.06)),
+        'V' => high(fit(-0.265, 1.0, -0.025)),
+        'W' => high(fit(-0.215, 0.85, -0.025)),
+        'Y' => high(fit(-0.1, 0.6, -0.025)),
         _ => PLAIN,
     }
 }
@@ -80,11 +95,40 @@ mod tests {
                     .find_map(|decl| decl.trim().trim_start_matches(|c| c != '-').strip_prefix(&format!("--initial-{name}:")))
                     .map_or(0.0, |v| v.trim().trim_end_matches("em").parse::<f32>().unwrap())
             };
-            let web = InitialFit { gap: value("gap"), tuck: value("tuck"), hang: value("hang"), depth: value("depth") };
-            assert_eq!(initial_fit(letter), web, "{letter}");
+            let web = InitialFit { gap: value("gap"), tuck: value("tuck"), hang: value("hang"), depth: value("depth"), raised_tuck: 0.0 };
+            assert_eq!(InitialFit { raised_tuck: 0.0, ..initial_fit(letter) }, web, "{letter}");
             seen += 1;
         }
         assert_eq!(seen, 26);
+        // The raised tuck is one rule over the letters that take it.
+        let rule = css.split(":is(").find(|r| r.contains("--initial-raised-tuck")).expect("raised tuck rule");
+        let (letters, body) = rule.split_once(')').unwrap();
+        let tuck: f32 = body.split("--initial-raised-tuck:").nth(1).unwrap().split("em").next().unwrap().trim().parse().unwrap();
+        let raised: Vec<char> =
+            letters.split(',').map(|l| l.trim().trim_start_matches("[data-initial=\"").chars().next().unwrap()).collect();
+        for letter in 'A'..='Z' {
+            let want = if raised.contains(&letter) { tuck } else { 0.0 };
+            assert_eq!(initial_fit(letter).raised_tuck, want, "{letter}");
+        }
+    }
+
+    /// The em the profiles are measured in: the psalm initial's declared size.
+    #[test]
+    fn the_profile_em_is_the_declared_initial() {
+        let css = include_str!("../../../apps/office-web/static/style.css");
+        let rule = css.split(".psalm-verses .verse:first-child::first-letter {").nth(1).expect("psalm initial").split('}').next().unwrap();
+        let size: f32 = rule.split("font-size:").nth(1).unwrap().split("em").next().unwrap().trim().parse().unwrap();
+        assert_eq!(size, PROFILE_EM);
+    }
+
+    /// The raised initial's size and space, from the web's `.initial-raised` rule.
+    #[test]
+    fn the_raised_initial_matches_the_web() {
+        let css = include_str!("../../../apps/office-web/static/style.css");
+        let rule = css.split("initial-letter: normal;").nth(1).expect("raised rule").split('}').next().unwrap();
+        let value = |name: &str| rule.split(name).nth(1).unwrap().trim_start().split("em").next().unwrap().trim().parse::<f32>().unwrap();
+        assert_eq!(value("font-size:"), RAISED_SIZE);
+        assert_eq!(value("margin: 0"), RAISED_GAP);
     }
 
     #[test]

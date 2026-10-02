@@ -191,26 +191,45 @@ pub fn hour_names() -> Vec<String> {
 }
 
 /// How a dropped initial fits the text beside it (`render_blocks::InitialFit`): `gap`, `hang`
-/// and `depth` in the initial's em, `tuck` in the text's.
+/// and `depth` in the declared initial's em (`initial_profile_em`), the tucks in the text's.
 #[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]
 pub struct InitialFit {
     pub gap: f32,
     pub tuck: f32,
     pub hang: f32,
     pub depth: f32,
+    pub raised_tuck: f32,
+}
+
+/// The em of a fit's `gap`, `hang` and `depth`, in ems of the text.
+#[uniffi::export]
+pub fn initial_profile_em() -> f32 {
+    render_blocks::initials::PROFILE_EM
 }
 
 /// The fit of a dropped initial's capital, as the web profiles it.
 #[uniffi::export]
 pub fn initial_fit(letter: String) -> InitialFit {
     let f = render_blocks::initial_fit(letter.chars().next().unwrap_or(' '));
-    InitialFit { gap: f.gap, tuck: f.tuck, hang: f.hang, depth: f.depth }
+    InitialFit { gap: f.gap, tuck: f.tuck, hang: f.hang, depth: f.depth, raised_tuck: f.raised_tuck }
 }
 
 /// The text face's cap height, in em: a two-line initial's ink top meets the first line's.
 #[uniffi::export]
 pub fn cap_height() -> f32 {
     render_blocks::initials::CAP_HEIGHT
+}
+
+/// A raised initial's size, in ems of the text on its line.
+#[uniffi::export]
+pub fn raised_initial_size() -> f32 {
+    render_blocks::initials::RAISED_SIZE
+}
+
+/// The space after a raised initial, in its own em.
+#[uniffi::export]
+pub fn raised_initial_gap() -> f32 {
+    render_blocks::initials::RAISED_GAP
 }
 
 /// A two-line initial's size, in ems of the text beside it, for that text's line height in ems.
