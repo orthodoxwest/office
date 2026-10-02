@@ -203,6 +203,12 @@ class StaticContracts(unittest.TestCase):
         for path in [*(root / "crates/render-html/templates").glob("*.html"), root / "crates/render-html/src/html.rs",
                      STATIC / "app.js", STATIC / "leader.js"]:
             chrome |= set(path.read_text())
+        # A glyph cut into a face of its own (the leaf's ☞, tools/genmanicule.py)
+        # is set from that face, which heads its stack, and never reaches -ext.
+        cut = re.findall(r'font-family: "(?!EB Garamond")[^"]+";[^}]*?src: url\("fonts/eb-garamond-[a-z-]+\.woff2"\) format\("woff2"\);\n  unicode-range: ([^;]+);', css)
+        own = [span for ranges in cut for span in parse(ranges)]
+        self.assertTrue(own, "the manicule keeps a face of its own")
+        chrome = {c for c in chrome if not inside(ord(c), own)}
         for c in sorted(chrome):
             for name, spans in ext.items():
                 with self.subTest(char=c, face=name):

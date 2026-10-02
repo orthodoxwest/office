@@ -1,107 +1,67 @@
 {% extends "layout.html" %}{% block title %}Divine Office — {{ date_str }}{% endblock %}{% block content %}
 <div class="home">
   <span class="sr-only">Liturgical color: {{ color }}</span>
-  {# The source order is the frontispiece order at every width: day identity,
-       prayer invitation, then the secondary date control. Keeping the visual
-       and focus orders aligned makes the threshold equally clear by keyboard
-       and screen reader. #}
-  <div class="home-hero day-color-{{ color }}">
-    {# The consecration cross opens the card (at the niche's crown on a
-         desktop): decorative, outside the reading and focus order. #}
-    <span class="home-crown" aria-hidden="true"></span>
-    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
-      {# A painted border on the niche's back wall, round its head. #}
-      <div class="home-lining" aria-hidden="true"></div>
-      <header class="home-day-head">
-        <h1 id="home-date-heading">
-          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ date_str }}</a>
-        </h1>
-        {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
-        {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
-        {# Always visible when not local today — "Change date" keeps a secondary
-             Today control, but overnight PWA resume must not require opening it. #}
-        {# No role=status here: intentional archive browsing should not
-             announce on every load. Client-injected notices (midnight freeze)
-             use a live region because those appear without a navigation. #}
-        {% if show_today %}
-        <p class="not-today-notice">
-          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
-        </p>
-        {% endif %}
-        {% if penitential %}
-        <p class="penitential">
-          {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
-        </p>
-        {% endif %}
-        {% if commemorations %}
-        <div class="commemorations">
-          <span class="commemorations-label">Also</span>
-          <ul>
-            {% for name in commemorations %}<li>{{ name|typeset }}</li>{% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-      </header>
+  {# The day's leaf: a kalendar page for the day. Its rubric date and title,
+       the rank line, a double rule in the day's colour, the seven hours as a
+       ruled list with the present one pointed out, the day's collect, then
+       the season and the date control. Source, focus and visual order are
+       one. The title's initial is graded by rank (leaf-g0 to leaf-g4); a
+       black day (leaf-bare) takes none. The prayer card's selectors stay on
+       the leaf for app.js: data-date-slug, .home-hour-link[data-hour] and
+       .pray-now. #}
+  <article class="leaf home-prayer-card day-color-{{ color }} leaf-g{{ grade }}{% if color == "black" %} leaf-bare{% endif %}{% if numeral %} leaf-numeral{% endif %}" aria-labelledby="home-date-heading" data-date-slug="{{ date_slug }}">
+    {% if grade == 4 and color != "black" %}{# The penwork bar border down the leaf's margin, first class only. #}
+    <span class="leaf-bar" aria-hidden="true"><i></i></span>
+    {% endif %}
+    <header class="home-day-head leaf-head">
+      <h1 id="home-date-heading">
+        <a class="home-date-link leaf-kal" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ weekday }}<span class="sr-only">, </span><span class="leaf-dot" aria-hidden="true">·</span>{{ date_rest }}</a>
+        {% if title.rest %}<span class="feast leaf-title">{% if title.initial %}<span class="leaf-versal" data-vl="{{ title.initial }}"><span>{{ title.initial }}</span></span>{% endif %}{{ title.rest }}</span>{% endif %}
+      </h1>
+      <p class="leaf-rank"><span class="leaf-lozenge" aria-hidden="true"></span>{{ rank_label }}{% for label in penitential %}<span class="leaf-sep" aria-hidden="true">·</span><span class="penitential-badge">{{ label }}</span>{% endfor %}</p>
+      {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
+      {% if commemorations %}
+      <p class="commemorations"><span class="commemorations-label"><span aria-hidden="true">Com.</span><span class="sr-only">Commemorating</span></span> {% for name in commemorations %}{% if not loop.first %}; {% endif %}{{ name|typeset }}{% endfor %}</p>
+      {% endif %}
+      {# Always visible when not local today — "Change date" keeps a secondary
+           Today control, but overnight PWA resume must not require opening it.
+           No role=status here: intentional archive browsing should not
+           announce on every load. Client-injected notices (midnight freeze)
+           use a live region because those appear without a navigation. #}
+      {% if show_today %}
+      <p class="not-today-notice">
+        <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
+      </p>
+      {% endif %}
+      {# After midnight on today's leaf, yesterday's Compline is still the
+           hour, and no hour here is it: the invitation leads off the leaf. #}
+      {% if not hours|selectattr("is_now")|list %}
+      <p class="leaf-late"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
+      {% endif %}
+    </header>
+    <div class="leaf-rule" aria-hidden="true"></div>
+    {# The horarium: each hour with its time in the old reckoning. The present
+         hour (or, on another day, Lauds) is set large with a pointing hand and
+         "pray now" (or "begin here") in place of its time; app.js moves it
+         with the clock. Terce and Vespers open the day's and evening's groups. #}
+    <nav class="leaf-horarium home-hour-links" aria-label="Hours for the day">
+      {% for h in hours %}
+      <a class="leaf-hour home-hour-link{% if h.slug in ["terce", "vespers"] %} group-start{% endif %}{% if h.is_now %} is-now pray-now{% endif %}{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+        <span class="home-hour-link-name"><span class="leaf-hour-initial">{{ h.name[:1] }}</span>{{ h.name[1:] }}</span>
+        <span class="leaf-hour-time">{{ h.time }}</span>
+        {% if h.is_now %}<span class="leaf-hour-cue">{{ now_cue }}</span>{% endif %}
+        {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
+      </a>
+      {% endfor %}
+    </nav>
+    {% if collect.rest %}
+    <section class="leaf-collect" aria-labelledby="leaf-collect-heading">
+      <h2 id="leaf-collect-heading">The Collect</h2>
+      <p>{% if collect.initial %}<span class="leaf-versal" data-vl="{{ collect.initial }}">{{ collect.initial }}</span>{% endif %}{{ collect.rest }} <span class="leaf-amen">℟. Amen.</span></p>
     </section>
-
-    <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
-      <h2 id="home-pray-heading">Pray the hours</h2>
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
-      <nav class="home-hour-links" aria-label="Hours for the day">
-        <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
-          <h3 class="home-hour-group-label" id="home-hours-morning">
-            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <path d="M7.60,13.20A4.4,4.4 0 0,1 16.40,13.20ZM1.5,13.40h21v1.1h-21ZM7.36,10.03L3.32,9.60L6.48,12.16ZM8.92,8.50L3.66,4.86L7.30,10.12ZM10.96,7.68L8.40,4.52L8.83,8.56ZM13.15,7.70L12.00,1.40L10.85,7.70ZM15.17,8.56L15.60,4.52L13.04,7.68ZM16.70,10.12L20.34,4.86L15.08,8.50ZM17.52,12.16L20.68,9.60L16.64,10.03Z"/>
-            </svg>
-            <span>Morning</span>
-          </h3>
-          <div class="home-hour-group-links">
-            {% for h in hours %}{% if h.slug in ["lauds", "prime"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
-              <span class="home-hour-link-name">{{ h.name }}</span>
-              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
-            </a>
-            {% endif %}{% endfor %}
-          </div>
-        </section>
-        <section class="home-hour-group home-hour-group-day" aria-labelledby="home-hours-day">
-          <h3 class="home-hour-group-label" id="home-hours-day">
-            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <path d="M15.30,8.00A3.3,3.3 0 1,0 8.70,8.00A3.3,3.3 0 1,0 15.30,8.00ZM12.95,3.50L12.00,0.30L11.05,3.50ZM15.07,4.58L15.10,2.63L13.43,3.63ZM16.37,6.57L18.67,4.15L15.42,4.93ZM16.50,8.95L18.20,8.00L16.50,7.05ZM15.42,11.07L18.67,11.85L16.37,9.43ZM13.43,12.37L15.10,13.37L15.07,11.42ZM11.05,12.50L12.00,15.70L12.95,12.50ZM8.93,11.42L8.90,13.37L10.57,12.37ZM7.63,9.43L5.33,11.85L8.58,11.07ZM7.50,7.05L5.80,8.00L7.50,8.95ZM8.58,4.93L5.33,4.15L7.63,6.57ZM10.57,3.63L8.90,2.63L8.93,4.58Z"/>
-            </svg>
-            <span>Day</span>
-          </h3>
-          <div class="home-hour-group-links">
-            {% for h in hours %}{% if h.slug in ["terce", "sext", "none"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
-              <span class="home-hour-link-name">{{ h.name }}</span>
-              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
-            </a>
-            {% endif %}{% endfor %}
-          </div>
-        </section>
-        <section class="home-hour-group home-hour-group-evening" aria-labelledby="home-hours-evening">
-          <h3 class="home-hour-group-label" id="home-hours-evening">
-            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
-              <path d="M13.32 1.80A6.34 6.34 0 1 0 17.40 11.32A5.21 5.21 0 0 1 13.32 1.80Z"/>
-            </svg>
-            <span>Evening</span>
-          </h3>
-          <div class="home-hour-group-links">
-            {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
-              <span class="home-hour-link-name">{{ h.name }}</span>
-              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
-            </a>
-            {% endif %}{% endfor %}
-          </div>
-        </section>
-      </nav>
-    </section>
-
-    {# Season rides the secondary control row: context without interrupting
-         the date → prayer invitation reading order. #}
-    <div class="home-day-meta">
+    {% endif %}
+    {# The foot: the season on the left, the date control on the right. #}
+    <div class="leaf-foot home-day-meta">
       {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
       <details class="hour-date-nav home-date-nav">
         <summary>Change date</summary>
@@ -117,6 +77,6 @@
         </nav>
       </details>
     </div>
-  </div>
+  </article>
 </div>
 {% endblock %}

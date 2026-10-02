@@ -145,6 +145,97 @@ pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     Invitation { hour, label: format!("Pray {name}"), date: now.add_days(offset), current: if offset == 0 { hour } else { "" } }
 }
 
+/// The hour home's leaf points at, given the reader's own day and clock hour: the hour being
+/// prayed and `true` ("pray now") when the leaf is that office's day — yesterday's for Compline
+/// after midnight — or Lauds and `false` ("begin here") on any other day. `None` on today's leaf
+/// while yesterday's Compline is still the hour: no hour on the leaf is the one being prayed, and
+/// [`invitation`] leads off it. app.js mirrors it.
+pub fn leaf_pointer(shown: Date, now: Date, now_hour: i8) -> Option<(&'static str, bool)> {
+    let (hour, _, offset) = current_hour_entry(now_hour);
+    if shown == now.add_days(offset) {
+        Some((hour, true))
+    } else if shown == now {
+        None
+    } else {
+        Some(("lauds", false))
+    }
+}
+
+/// Each hour's time in the old reckoning, as home's horarium sets it beside the hour's name.
+pub const HOUR_TIMES: [(&str, &str); 7] = [
+    ("lauds", "at daybreak"),
+    ("prime", "the first hour"),
+    ("terce", "the third hour"),
+    ("sext", "the sixth hour"),
+    ("none", "the ninth hour"),
+    ("vespers", "at evening"),
+    ("compline", "at nightfall"),
+];
+
+/// An hour's time in the old reckoning ([`HOUR_TIMES`]), or nothing for an unknown slug.
+pub fn hour_time(slug: &str) -> &'static str {
+    HOUR_TIMES.iter().find(|(s, _)| *s == slug).map_or("", |(_, t)| t)
+}
+
+/// The light of the hour being prayed, which tints home's wall by day: dawn at Lauds and Prime,
+/// day through the little hours, dusk at Vespers, night at Compline (after midnight too). Only
+/// the ground moves; no ink changes with it. app.js mirrors it.
+pub fn time_of_day(hour: &str) -> &'static str {
+    match hour {
+        "lauds" | "prime" => "dawn",
+        "terce" | "sext" | "none" => "day",
+        "vespers" => "dusk",
+        _ => "night",
+    }
+}
+
+/// How home's leaf names a day's rank, and the grade of its title's initial: 0 a feria (no
+/// initial), 1 a simple or semidouble and 2 a double or greater double (a red initial in the
+/// line), 3 the second class (a gilt one), 4 the first class (a gilt woodcut initial in a square
+/// two lines tall, with a penwork border down the leaf).
+pub fn leaf_rank(day: &CalendarDay) -> (&'static str, u8) {
+    use calendar::Rank::*;
+    let Some(c) = &day.celebration else { return ("Feria", 0) };
+    let (label, grade) = match c.rank {
+        Double1stClass => ("Double of the first class", 4),
+        Double2ndClass => ("Double of the second class", 3),
+        GreaterDouble => ("Greater double", 2),
+        Double => ("Double", 2),
+        SemiDouble => ("Semidouble", 1),
+        Simple => ("Simple", 1),
+        PrivilegedFeria => ("Greater feria", 0),
+        Commemoration => ("Commemoration", 0),
+    };
+    match (day.is_ferial(), c.rank) {
+        (true, PrivilegedFeria) => (label, 0),
+        (true, _) => ("Feria", 0),
+        (false, _) => (label, grade),
+    }
+}
+
+/// The name opens with a Roman numeral ("III Sunday in Lent"), which a versal would split.
+pub fn opens_with_numeral(name: &str) -> bool {
+    name.split_whitespace().next().is_some_and(|w| w.len() < name.trim().len() && w.chars().all(|c| "IVXLC".contains(c)))
+}
+
+/// The day's collect as its Lauds says it, run together as one paragraph: the hour's first
+/// collect that is not a commemoration's, without the people's Amen, which the page sets as red
+/// work of its own. Empty when the hour has none.
+pub fn day_collect(hour: &OfficeHour) -> String {
+    let Some(collect) =
+        hour.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == liturgy::ElementType::Collect && !e.is_commemoration)
+    else {
+        return String::new();
+    };
+    collect
+        .text
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty() && !l.starts_with("R.") && !l.starts_with('℟'))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// The reminder page's hours, as the web offers them and the apps start from: slug, name, the
 /// suggested time (hour, minute), and whether it starts chosen.
 pub const REMINDER_DEFAULTS: [(&str, &str, u32, u32, bool); 7] = [
@@ -342,6 +433,40 @@ mod tests {
         assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
         assert_eq!(current_hour_entry(16), ("none", "None", 0));
         assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
+    }
+
+    #[test]
+    fn the_leaf_points_at_the_hour_being_prayed_on_its_own_day() {
+        let today = Date::new(2026, 3, 15);
+        assert_eq!(leaf_pointer(today, today, 10), Some(("terce", true)));
+        assert_eq!(leaf_pointer(today, today, 21), Some(("compline", true)));
+        // After midnight Compline is yesterday's: yesterday's leaf prays it, today's has none.
+        assert_eq!(leaf_pointer(today.add_days(-1), today, 1), Some(("compline", true)));
+        assert_eq!(leaf_pointer(today, today, 1), None);
+        // Any other day begins at Lauds.
+        assert_eq!(leaf_pointer(today.add_days(1), today, 10), Some(("lauds", false)));
+        assert_eq!(leaf_pointer(today.add_days(-1), today, 10), Some(("lauds", false)));
+    }
+
+    #[test]
+    fn a_numeral_keeps_its_title_whole() {
+        assert!(opens_with_numeral("III Sunday in Lent"));
+        assert!(opens_with_numeral("XVIII Sunday after Pentecost"));
+        assert!(!opens_with_numeral("St Placidus & companions, Martyrs"));
+        assert!(!opens_with_numeral("Lent feria"));
+        assert!(!opens_with_numeral("Ivo"));
+        assert!(!opens_with_numeral("V"));
+    }
+
+    #[test]
+    fn every_hour_has_its_old_time_and_its_light() {
+        for (slug, _, _, _, _) in REMINDER_DEFAULTS {
+            assert!(!hour_time(slug).is_empty(), "{slug}");
+        }
+        assert_eq!(hour_time("vespers"), "at evening");
+        assert_eq!(hour_time("matins"), "");
+        let lights: Vec<_> = HOUR_TIMES.iter().map(|(slug, _)| time_of_day(slug)).collect();
+        assert_eq!(lights, ["dawn", "dawn", "day", "day", "day", "dusk", "night"]);
     }
 
     #[test]

@@ -51,8 +51,10 @@
 </head>
 {# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
-     that do not stand on a single day. #}
-<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+     that do not stand on a single day. time-* is the light of the hour being
+     prayed, which tints home's wall ("Time of day" in style.css); app.js
+     keeps it with the clock. #}
+<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}{% if time_of_day %} time-{{ time_of_day }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
   {%- from "macros.html" import prefs %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">

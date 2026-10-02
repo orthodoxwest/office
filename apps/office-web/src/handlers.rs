@@ -12,14 +12,15 @@ use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
     CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
-    MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
+    MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow, Versal,
 };
 
 use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str,
+    MONTHS, REMINDER_DEFAULTS, date_slug, day_collect, day_heading, day_name, hour_time, invitation, leaf_pointer, leaf_rank, long_date,
+    month_name, opens_with_numeral, report_url, season_class, season_str, time_of_day,
 };
 
 /// What a page handler reads from the request.
@@ -43,14 +44,16 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Compline", "compline"),
 ];
 
-fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
+fn build_home_hours(date_slug: &str, current: &str, pointer: &str) -> Vec<HomeHourLink> {
     ORDERED_HOURS
         .iter()
         .map(|(name, slug)| HomeHourLink {
             name: name.to_string(),
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
+            time: hour_time(slug).to_string(),
             is_current: *slug == current,
+            is_now: *slug == pointer,
         })
         .collect()
 }
@@ -257,6 +260,18 @@ impl Server {
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
         let invite = invitation(date, now, now_hour);
+        let pointer = leaf_pointer(date, now, now_hour);
+        let (rank_label, grade) = leaf_rank(day);
+        let bare = day.color == calendar::Color::Black;
+        let numeral = opens_with_numeral(&heading.feast);
+        // The leaf ends on the day's collect, as its Lauds says it.
+        let collect = self
+            .engine
+            .compose_hour("lauds", day, &entry.moveable, PrayerForm::Private)
+            .map(|lauds| day_collect(&lauds))
+            .unwrap_or_default();
+        let date_str = long_date(date);
+        let (weekday, date_rest) = date_str.split_once(", ").unwrap_or(("", &date_str));
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -264,9 +279,19 @@ impl Server {
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
                 season_class: season_class(Some(day.season)).into(),
+                // The wall takes the light of the hour being prayed, whatever day the leaf shows.
+                time_of_day: time_of_day(presentation::current_hour_entry(now_hour).0).into(),
                 show_today: slug != now_slug,
             },
-            date_str: long_date(date),
+            weekday: weekday.to_string(),
+            date_rest: date_rest.to_string(),
+            title: Versal::new(&heading.feast, grade > 0 && !bare && !numeral),
+            rank_label: rank_label.into(),
+            grade,
+            numeral,
+            now_cue: if pointer.is_some_and(|(_, praying)| !praying) { "begin here" } else { "pray now" }.into(),
+            collect: Versal::new(&collect, !bare),
+            date_str: date_str.clone(),
             date_slug: slug.clone(),
             prev_link: home_link(&date_slug(date.add_days(-1))),
             next_link: home_link(&date_slug(date.add_days(1))),
@@ -280,7 +305,7 @@ impl Server {
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
-            hours: build_home_hours(&slug, invite.current),
+            hours: build_home_hours(&slug, invite.current, pointer.map_or("", |(hour, _)| hour)),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -344,6 +369,7 @@ impl Server {
                 // is unveiled while that day's Lauds is still veiled.
                 season_class: season_class(hour.season).into(),
                 show_today: date_str != today_slug,
+                ..Chrome::default()
             },
             leader_forms: composed
                 .iter()
@@ -544,6 +570,17 @@ mod tests {
         }
     }
 
+    // app.js mirrors the light each hour casts on home's wall.
+    #[test]
+    fn client_time_of_day_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let table = &src[src.find("var TIME_OF_DAY = {").unwrap()..];
+        let table = &table[..table.find("};").unwrap()];
+        for (slug, _) in presentation::HOUR_TIMES {
+            assert!(table.contains(&format!("{slug}: \"{}\",", time_of_day(slug))), "{slug}");
+        }
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;
@@ -572,6 +609,33 @@ mod tests {
         for unwanted in ["assurance", "Text dependencies", "Composition decisions", "SOURCE:", ".txt", "/home/", "../resources"] {
             assert!(!body.contains(unwanted) && !body.contains(&unwanted.replace('/', "&#x2f;")), "hour page contains {unwanted:?}");
         }
+    }
+
+    /// Home's leaf grades the title's initial by rank and ends on the day's Lauds collect.
+    #[test]
+    fn home_leaf_grades_the_title_and_carries_the_collect() {
+        let (status, _, christmas) = get("/?date=2026-12-25");
+        assert_eq!(status, StatusCode::OK);
+        for want in [
+            "leaf-g4",
+            r#"class="leaf-bar""#,
+            r#"<span class="leaf-versal" data-vl="N"><span>N</span></span>ativity"#,
+            "Double of the first class",
+            r#"<span class="leaf-versal" data-vl="G">G</span>rant, we beseech thee"#,
+            r#"<span class="leaf-hour-time">at daybreak</span>"#,
+        ] {
+            assert!(christmas.contains(want), "Christmas leaf missing {want:?}");
+        }
+        assert!(!christmas.contains("Let us pray") && !christmas.contains("R. Amen"), "the collect alone, its Amen set apart");
+        let (_, _, lent) = get("/?date=2026-03-15");
+        assert!(lent.contains("leaf-numeral") && lent.contains(">III Sunday in Lent<"), "a numeral keeps its title whole");
+        let (_, _, placidus) = get("/?date=2026-10-05");
+        assert!(placidus.contains("leaf-g2") && placidus.contains("Greater double") && !placidus.contains(r#"class="leaf-bar""#));
+        assert!(placidus.contains(r#"<span class="leaf-versal" data-vl="S"><span>S</span></span>t Placidus"#));
+        // Another day's leaf begins at Lauds; the body carries the light of the hour being prayed.
+        let (_, _, past) = get("/?date=2001-01-01");
+        assert!(past.contains(r#"<span class="leaf-hour-cue">begin here</span>"#));
+        assert!(["time-dawn", "time-day", "time-dusk", "time-night"].iter().any(|c| past.contains(&format!(" {c}\""))));
     }
 
     #[test]
@@ -711,7 +775,7 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Pentecost feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<span class="feast leaf-title">Pentecost feria</span>"#).expect("names the feria, with no versal");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");

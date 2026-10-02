@@ -40,15 +40,16 @@ or impose a redesign on an unrelated change.
   Apse, clear of the rubrics' red; gold for initials, lettering and the hour
   glyphs, never hardware on a rule. Shapes are masks in `static/ornaments/`
   (`tools/genornaments.py`), so colours stay tokens. The consecration cross
-  ends each hour, crowns home and is the brand mark; Lauds' headpiece carries
+  ends each hour and is the brand mark; Lauds' headpiece carries
   the sun and Vespers' and Compline's the moon. One mark per threshold.
 - Current controls use a gold underline (the header's current page takes the
   lining's terracotta); disclosure carets take their label's ink at 70%.
   Keep Default / Nave / Apse labels and visible keyboard focus.
-- The starfield belongs to Apse home, the post-office epilogue, and, on
-  screens 1680px and wider, the margins beside an hour's prayer, which run
-  down into the epilogue's field. By day the same home and epilogue fields
-  carry the Nave's powdering instead: one six-petal rosette to each cell
+- The starfield belongs to the post-office epilogue and, on screens 1680px
+  and wider, the margins beside an hour's prayer, which run down into the
+  epilogue's field. Home has neither stars nor powdering: its leaf is
+  lettering on the bare wall. By day the epilogue's field carries the
+  Nave's powdering instead: one six-petal rosette to each cell
   of a quincunx lattice (`ornaments/powder.svg`, 96×84px cells, alternate
   rows set half a cell over), in the rubrics' red at 12% (`--wall-field`,
   `--wall-ink`), cut square under the beam rather than faded, with no
@@ -71,44 +72,36 @@ or impose a redesign on an unrelated change.
   No theme query strings; keep service-worker page keys unthemed.
 - Static files and templates are embedded. Rebuild/restart before measuring;
   Playwright can otherwise reuse a stale listener.
-- Home's Pray-now selectors (`.home-prayer-card[data-date-slug]`, `.pray-now`,
+- Home's selectors (`.home-prayer-card[data-date-slug]`, `.pray-now`,
   `.home-hour-link[data-hour]`, `.home-hour-link-name`) are used by app.js.
-  Current-hour markup exists in both the template and `setHourCurrent()`;
-  keep both consistent. The hour directory has horizontal bands, not columns
-  across the unequal 2/3/2 groups.
-- On a phone home's frontispiece is a round-headed painted panel: a
-  segmental head (`--panel-head`, 4.25rem; 3.5rem under 375px) with a
-  springing (the lining's curve starts 8px below the moulding's), the day's
-  colour as a 1.5px ring at its edge and again as the lining's inner
-  hairline (`--lining-day`; a white day takes `--gold-line` by day), so the
-  liturgical colour sits beside the cross on plaster; the terracotta lining
-  painted round the head (`--panel-inset` inside the edge, with clear air
-  above the cross: a tighter arch once clipped it) ending at the
-  inscription band, the consecration cross at the crown, and a little
-  recess shade under the head. Its shadows are a token (`--panel-shadows`,
-  ending in a soft `--bg` halo that keeps the powdering off the panel) that
-  the Apse rules restate with their soft erase. The panel's furniture is
-  ruled in the lining thinned (`--panel-rule`): the invitation's second
-  line 3px inside its border, the hour table's outer frame; the period
-  labels' cells take the frieze's green earth thinned. It must still fit a
-  375×667 viewport whole, so its cost was paid by the header's margin, the
-  footer's padding and gap, and the page's bottom padding.
-  From 701px the same object widens into a niche set into the wall (round
-  head, stone moulding, day-colour trim, recess shadow, the lining restated
-  at the niche's scale; the cross and the day block are measured down from
-  the lining, not from the head's height, because a head that flattens on a
-  narrow window once ran the lining through the cross), and the room is lit
-  toward
-  it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
-  (a shaft from above). Large screens scale the whole niche with
-  `--niche-zoom` steps gated on width and height. Its background and shadows
-  are tokens (`--niche-background`, `--niche-shadows`) because the Apse card
-  rules outrank the base selector and must repeat them. Drawn architecture
-  around it (columns, sconces, sills, arches) has been tried and read as
-  illustration; prefer light and tone to objects. Fills in its head (a
-  mosaic conch, a painted sky, ochre voussoirs, glory rays) were tried too and
-  read as stickers or sunbursts: keep the head plaster. The mosaic belongs to
-  the app icon (`tools/genicons.py`), an object seen at one scale.
+  `.pray-now` is the hour row the leaf points at (`.is-now`), or, after
+  midnight while yesterday's Compline is still the hour, a `.leaf-late`
+  link in the leaf's head. Current-hour and pointer markup exists in both
+  the template and `updatePrayNow()` / `setHourCurrent()`; keep both
+  consistent, and keep the server's hour words in `presentation`.
+- Home is the day's leaf, a kalendar page lettered on the wall (no panel,
+  niche, powdering or vault; header beam and footer as everywhere): the
+  rubric date line (the ordo link), the title with a versal graded by rank
+  (`.leaf-g0`–`.leaf-g4` from `presentation::leaf_rank`: a feria none; simple
+  to double an IM Fell versal in the day's ink; the second class gilt; the
+  first class a gilt Goudy Initialen letter in a square two title lines
+  tall, with a penwork bar border, `.leaf-bar`, down the margin), the rank
+  line, a double rule in the day's colour, the horarium (each hour's
+  initial red and blue by turns, its time in the old reckoning; the
+  pointed hour 1.7rem with ☞ in the margin and "pray now", or "begin here"
+  on another day; stronger rules over Terce and Vespers), the Lauds collect
+  under a titulus, and the season with Change date at the foot. A title
+  opening with a numeral (`.leaf-numeral`) and a black day (`.leaf-bare`)
+  take no versal. Versals are fitted per letter from the faces' outlines
+  (`--vh/--vt/--vl/--vr`); recalibrate from outlines, not by eye. One
+  column at every width, 36rem centred from 1000px; on a phone the leaf
+  scrolls and the footer follows it. Apse keeps the night wall; red turns
+  gold and blue silver. The leaf's inks never change with the season or
+  the hour.
+- The time of day (`time-dawn`, `-day`, `-dusk`, `-night` on home's body,
+  set by the server and corrected by app.js) tints the Nave's wall only:
+  each pair of `--bg` / `--plaster-tint` is solved so the wall still
+  averages its `--bg`, and `main::before` adds a soft cast. Never in Apse.
 - From 701px to 959px the hours' header sets its link list as a centred
   rank of its own under the brand and Settings; left to wrap, it stranded
   the last link on a line. Under a coarse pointer the header's links and

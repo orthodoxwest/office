@@ -13,22 +13,22 @@ crossings came first and read as printed wallpaper.
   cannot read tokens, so painting it directly would freeze the stars
   through the seasons. A star crossing the tile's edge is drawn again on
   the far side, so the repeat is seamless.
-- Home's field and the hours' ending read `--wall-field`, `--wall-ink`,
-  `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-home-fade`,
-  `--wall-home-light`, `--wall-end-fade`, `--wall-foot-fade`), declared on
+- The hours' ending reads `--wall-field`, `--wall-ink`,
+  `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-end-fade`,
+  `--wall-foot-fade`), declared on
   `body`: by night the vault (`--apse-vault`, `--apse-ink`, the seasonal
   `--ornament`, `--apse-tile`, the leaf, soft fades), by day the Nave's
   powdering (`ornaments/powder.svg`, one rosette to each cell of a 96×168px
-  quincunx tile that never scales, in `--rubric` at 12%, no leaf, square
-  cuts: under the beam at home, and below the hour navigation at the
-  ending, which lives in the epilogue's 3.25rem bottom padding and the
+  quincunx tile that never scales, in `--rubric` at 12%, no leaf, cut
+  square below the hour navigation at the ending, which lives in the epilogue's 3.25rem bottom padding and the
   footer). The Nave gate mirrors the Apse one (`prefers-color-scheme:
   light` with `:root:not([data-theme="dark"])`, and
   `:root[data-theme="light"]`), and by day also sets `--apse-copy-shadow`
-  (the footer lettering's clearing) and `--niche-clear` (the desktop
-  niche's halo). The wide hours' side and ending fields read `--apse-vault`
+  (the footer lettering's clearing). The wide hours' side and ending fields read `--apse-vault`
   directly, so by day the margins beside the prayer stay plain.
-  `--apse-gild` stays `none` by day: the rosettes are flat paint.
+  Home has no field: its leaf is lettering on the bare wall in both themes
+  (an earlier home set its frontispiece under the vault, lit from the
+  altar, and on a powdered wall by day).
 - Each field's fade is a second mask layer (`linear-gradient`, sized 100%),
   intersected with the tile (`mask-composite: intersect` plus
   `-webkit-mask-composite: source-in`). Give both layers the tile's position
@@ -44,26 +44,17 @@ crossings came first and read as printed wallpaper.
   epilogue and footer continuous. An SVG `feTurbulence` mask gave the same
   look but cost about 50ms of first paint and most of a full scroll's raster
   time in software; the small image costs neither.
-- Home's field is lit from the altar: its background is `--apse-gild`, a
-  radial gradient over the seasonal `--ornament-hi/lo` pair centred on the
-  frontispiece, and a third mask layer lets the light fall off toward the
-  corners. `--apse-gild` is `none` outside Apse, like `--apse-vault`; a
-  background image without that gate would paint gold over the Nave.
 - Declare `--apse-ink` and `--apse-vault` on `body`. Custom properties
   resolve where declared; seasonal classes also live on `body`. A `none` on
   body overrides inheritance.
 - Default-theme gating needs `prefers-color-scheme: dark`. Selecting every
   root without `data-theme="light"` also catches light-mode default users.
-- Home uses one fixed field, anchored top centre, across viewport widths. Its
-  opaque frontispiece and soft background-coloured shadow clear the content;
-  phone gutters retain a hint of stars. Separate gap/footer pieces previously
-  shifted the visible pattern as content and viewport heights changed.
 - Hours admit the vault only in `.hour-epilogue`, after prayer. Keep the field
   transparent through the end mark and the continuation links (it begins in
   the epilogue's bottom padding), and align its bottom with the footer
   continuation, which carries the colophon and the report line. On desktop these layers bleed to
   viewport edges without widening `.elements`. The stars sit straight on
-  the wall, as home's do. A flat night ground once eased in beneath them
+  the wall. A flat night ground once eased in beneath them
   (each host's outset `border-image`), but its fade banded (see below).
 - From 1680px an hour also shows the vault in the margins beside the prayer,
   at half strength, running down to meet the ending. Both are fixed layers

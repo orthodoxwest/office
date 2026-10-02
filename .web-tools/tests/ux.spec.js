@@ -212,17 +212,20 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's colophon sits at the foot of the screen, as on desktop, with the
-  // card above it rather than the colophon floating under the card.
+  // Home's colophon follows the leaf and closes the page at the foot of the
+  // screen, as on desktop, rather than floating under it.
   const [card, footer] = await Promise.all([
     page.locator(".home").boundingBox(),
     page.locator("footer").boundingBox(),
   ]);
   expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const foot = await page.evaluate(
-    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
+    () =>
+      document.querySelector("footer").getBoundingClientRect().bottom -
+      (innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom)),
   );
-  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
+  expect(Math.abs(foot)).toBeLessThan(2);
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
@@ -311,54 +314,46 @@ test("hour progress completes with the prayer, before the administrative epilogu
   );
 });
 
-test("home frontispiece keeps source, focus, and visual order aligned", async ({ page }) => {
+test("the home leaf keeps source, focus, and visual order aligned", async ({ page }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Day", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  // A kalendar leaf: the day, its hours, its collect, then the foot.
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Sunday");
+  await expect(page.getByRole("navigation", { name: "Hours for the day" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The Collect", exact: true })).toBeVisible();
 
   const order = await page.evaluate(() => {
-    const day = document.querySelector(".home-summary");
-    const prayer = document.querySelector(".home-prayer-card");
-    const dateControl = document.querySelector(".home-day-meta");
-    const top = (selector) => document.querySelector(selector).getBoundingClientRect().top;
+    const parts = [".home-day-head", ".leaf-horarium", ".leaf-collect", ".home-day-meta"].map((s) =>
+      document.querySelector(s),
+    );
     return {
-      source:
-        Boolean(day.compareDocumentPosition(prayer) & Node.DOCUMENT_POSITION_FOLLOWING) &&
-        Boolean(prayer.compareDocumentPosition(dateControl) & Node.DOCUMENT_POSITION_FOLLOWING),
-      positions: {
-        day: top(".home-day-head"),
-        prayer: top(".home-prayer-card"),
-        dateControl: top(".home-day-meta"),
-      },
-      focusables: Array.from(
-        document.querySelectorAll(
-          ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
-        ),
-      )
-        // date + go-to-today (historical days) + pray + 7 hours + change-date.
-        .slice(0, 11)
+      source: parts.every(
+        (el, i) => i === 0 || Boolean(parts[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
+      ),
+      tops: parts.map((el) => el.getBoundingClientRect().top),
+      focusables: Array.from(document.querySelectorAll(".leaf a[href], .leaf summary, .leaf input, .leaf button"))
+        // date + go-to-today (historical days) + 7 hours + change-date.
+        .slice(0, 10)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
-          // Recovery chrome when the landing day is not local today — intentional
-          // after the stale-day fix; sits in the day identity, before Pray now.
+          // Recovery chrome when the landing day is not local today; it sits
+          // in the day's head, before the hours.
           if (element.matches(".not-today-link")) return "go-to-today";
-          if (element.matches(".pray-now")) return "pray";
           if (element.matches(".home-hour-link")) return element.getAttribute("data-hour");
+          if (element.matches(".pray-now")) return "pray";
           if (element.matches("summary")) return "change-date";
           return "unexpected";
         }),
     };
   });
   expect(order.source).toBe(true);
-  expect(order.positions.day).toBeLessThan(order.positions.prayer);
-  expect(order.positions.prayer).toBeLessThan(order.positions.dateControl);
-  // testDate is fixed in the past relative to "today", so Go to today is present.
+  expect([...order.tops].sort((a, b) => a - b)).toEqual(order.tops);
+  // testDate is fixed in the past relative to "today", so Go to today is
+  // present, and the pointer is an hour of the leaf rather than a link of
+  // its own.
   expect(order.focusables).toEqual([
     "date",
     "go-to-today",
-    "pray",
     "lauds",
     "prime",
     "terce",
@@ -368,9 +363,19 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
     "compline",
     "change-date",
   ]);
+
+  // Another day's leaf begins at Lauds, and claims no hour as the present.
+  const lauds = page.locator('.home-hour-link[data-hour="lauds"]');
+  await expect(page.locator(".pray-now")).toHaveCount(1);
+  await expect(lauds).toHaveClass(/\bpray-now\b/);
+  await expect(lauds.locator(".leaf-hour-cue")).toHaveText(/begin here/);
+  await expect(page.locator(".home-hour-link[aria-current]")).toHaveCount(0);
+  // "III Sunday in Lent" opens with its numeral, so it takes no versal.
+  await expect(page.locator(".leaf")).toHaveClass(/\bleaf-numeral\b/);
+  await expect(page.locator(".leaf-title .leaf-versal")).toHaveCount(0);
 });
 
-test("home hour directory fits thumb targets across phone widths and text sizes", async ({ page }) => {
+test("home hours fit thumb targets across phone widths and text sizes", async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem("office-text-size"));
 
   for (const width of [320, 390, 540]) {
@@ -384,29 +389,24 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
 
       const geometry = await page.evaluate(() => ({
         overflows: document.documentElement.scrollWidth > window.innerWidth + 1,
-        targetHeights: Array.from(document.querySelectorAll(".home-hour-link")).map(
-          (link) => link.getBoundingClientRect().height,
-        ),
-        directoryFrame: (() => {
-          const style = getComputedStyle(document.querySelector(".home-hour-links"));
+        rows: Array.from(document.querySelectorAll(".home-hour-link")).map((link) => {
+          const box = link.getBoundingClientRect();
+          const name = link.querySelector(".home-hour-link-name").getBoundingClientRect();
+          // The time in the old reckoning, or the pointer's cue in its place.
+          const side = [...link.querySelectorAll(".leaf-hour-cue, .leaf-hour-time")]
+            .map((el) => el.getBoundingClientRect())
+            .find((r) => r.width > 0);
           return {
-            left: [style.borderLeftWidth, style.borderLeftStyle],
-            right: [style.borderRightWidth, style.borderRightStyle],
+            height: box.height,
+            // Name on the left, time on the right, on one line inside the row.
+            besideName: side.left >= name.right - 0.5,
+            inside: name.left >= box.left - 0.5 && side.right <= box.right + 0.5,
           };
-        })(),
-        labelAlignment: getComputedStyle(
-          document.querySelector(".home-hour-group-label"),
-        ).justifyContent,
+        }),
       }));
       expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
-      expect(Math.min(...geometry.targetHeights), `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(
-        44,
-      );
-      expect(geometry.directoryFrame, `${width}px/${size} directory frame`).toEqual({
-        left: ["1px", "solid"],
-        right: ["1px", "solid"],
-      });
-      expect(geometry.labelAlignment, `${width}px/${size} label alignment`).toBe("center");
+      expect(Math.min(...geometry.rows.map((r) => r.height)), `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(44);
+      expect(geometry.rows.every((r) => r.besideName && r.inside), `${width}px/${size} name and time share a row`).toBe(true);
 
       if (size === "large") {
         await choosePreference(page, "Default text size");
@@ -415,37 +415,38 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
   }
 });
 
-test("current hour and frontispiece invitation update in Nave and Apse", async ({ page }) => {
+test("the present hour is pointed out on the leaf in Nave and Apse", async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
 
-  const invitation = page.locator(".pray-now");
+  const now = page.locator(".pray-now");
   const current = page.locator('.home-hour-link[aria-current="time"]');
-  await expect(invitation).toHaveText("Pray Terce");
-  await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
+  await expect(now).toHaveCount(1);
+  await expect(now).toHaveAttribute("data-hour", "terce");
+  await expect(now).toHaveAttribute("href", `/terce/${testDate}`);
+  await expect(now.locator(".leaf-hour-cue")).toHaveText(/pray now/);
   await expect(current).toHaveAttribute("data-hour", "terce");
-  // "Now" is announced, not drawn: the tinted cell and the invitation above
-  // carry it visually, so the word is sr-only rather than a chip beside the
-  // hour name. Assert it is in the accessibility tree and out of the picture.
+  // "Now" is announced, not drawn: the pointing hand and "pray now" carry it
+  // visually, so the word is sr-only. Assert it is in the accessibility tree
+  // and out of the picture.
   await expect(current.getByText("Now", { exact: true })).toBeAttached();
   await expect(current.getByText("Now", { exact: true })).not.toBeInViewport();
-  await expect(current.locator("xpath=ancestor::section[1]")).toContainText("Day");
 
-  const naveState = await invitation.evaluate((element) => ({
-    background: getComputedStyle(element).backgroundColor,
-    borderStyle: getComputedStyle(element).borderTopStyle,
-  }));
-  expect(naveState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(naveState.borderStyle).toBe("solid");
+  // Set larger than its neighbours (1.7rem against 1.2rem), with the hand in
+  // the margin, in both themes.
+  const read = () =>
+    now.evaluate((link) => {
+      const size = (el) => parseFloat(getComputedStyle(el.querySelector(".home-hour-link-name")).fontSize);
+      const other = link.parentElement.querySelector('[data-hour="lauds"]');
+      return { ratio: size(link) / size(other), hand: getComputedStyle(link, "::before").content };
+    });
+  const nave = await read();
+  expect(nave.ratio).toBeCloseTo(1.7 / 1.2, 2);
+  expect(nave.hand).toContain("☞");
 
   await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const apseState = await invitation.evaluate((element) => ({
-    background: getComputedStyle(element).backgroundColor,
-    borderStyle: getComputedStyle(element).borderTopStyle,
-  }));
-  expect(apseState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(apseState.borderStyle).toBe("solid");
+  expect(await read()).toEqual(nave);
 });
 
 test("the early-morning invitation opens the previous day's Compline", async ({ page }) => {
@@ -461,7 +462,7 @@ test("the foreground home invitation advances at the next office boundary", asyn
   await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "terce");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "terce",
@@ -469,7 +470,7 @@ test("the foreground home invitation advances at the next office boundary", asyn
 
   await page.clock.fastForward("02:00");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "sext");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
@@ -484,12 +485,12 @@ test("the home invitation catches up when the clock jumps past a sleeping timer"
   // timeout set at the previous hour.
   await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "sext");
 
   await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
   await page.clock.runFor("01:01");
 
-  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "vespers");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "vespers",
@@ -502,8 +503,10 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
   await openDatedPage(page, "/?date=2026-07-29");
 
+  // Before midnight Compline is the leaf's own hour; after it, yesterday's
+  // leaf still points there, though it is no longer the current hour.
   const invitation = page.locator(".pray-now");
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("data-hour", "compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
@@ -512,7 +515,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
 
   await page.clock.fastForward("02:00");
 
-  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("data-hour", "compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
@@ -533,13 +536,7 @@ test("parish material stays off the mobile prayer page", async ({
   const naveWall = await wall();
   expect(naveWall.image).toMatch(/plaster(-wide)?\.jpg/);
   expect(naveWall.position).toBe("fixed");
-  const naveMaterial = await page.evaluate(() => ({
-    page: getComputedStyle(document.body).backgroundImage,
-    inscriptionBand: getComputedStyle(
-      document.querySelector(".home-hour-group-label"),
-    ).backgroundColor,
-  }));
-  expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe("none");
 
   await choosePreference(page, "Apse");
   // The Apse vault is a background-image, which can only snap rather than
@@ -572,39 +569,40 @@ test("parish material stays off the mobile prayer page", async ({
   );
   expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
-  // Apse adds the vault over the wall.
+  // Apse sets the leaf on the same wall: home has no vault (the hours'
+  // ending keeps it).
   await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const readVault = () =>
-    page.evaluate(() => {
-      const style = getComputedStyle(document.body, "::before");
-      return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
-    });
-  // One tile of hand-set stars as a mask, intersected with the page fade,
-  // painted in the gilding. The ink crossfades in with the theme, so poll
-  // past its transparent start.
-  await expect.poll(async () => vaultPaints(await readVault())).toBe(true);
-  const vault = await readVault();
-  expect((vault.mask.match(/ornaments\/vault\.svg/g) || []).length).toBe(1);
-  expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
+  await expect.poll(readMaterial).toBe("dark");
+  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
+  const vault = await page.evaluate(() => {
+    const style = getComputedStyle(document.body, "::before");
+    return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
+  });
+  expect(vaultPaints(vault)).toBe(false);
 });
 
-test("the niche's cross stands clear under the lining at every desktop width", async ({ page }) => {
-  // The cross was once placed from the head's height: where the head
-  // flattens (tablets, narrow windows) the lining ran through it.
-  for (const width of [701, 820, 1024, 1280, 1440, 1920]) {
-    await page.setViewportSize({ width, height: 1100 });
-    await openDatedPage(page, `/?date=${testDate}`);
-    const air = await page.evaluate(() => {
-      const zoom = Number(getComputedStyle(document.querySelector(".home-hero")).zoom) || 1;
-      const lining = document.querySelector(".home-lining").getBoundingClientRect();
-      const crown = document.querySelector(".home-crown").getBoundingClientRect();
-      const heading = document.querySelector("#home-date-heading").getBoundingClientRect();
-      // The lining's band, its gap and its inner hairline take 11px.
-      return { above: (crown.top - lining.top) / zoom - 11, below: (heading.top - crown.bottom) / zoom };
+test("the leaf's pointing hand stands in its margin at every width", async ({ page }) => {
+  // The hand hangs left of the hour it points at; the leaf's margin must hold
+  // it on the narrowest phone and beside the first-class bar border.
+  for (const [width, date] of [
+    [320, testDate],
+    [390, "2026-12-25"],
+    [701, testDate],
+    [1024, "2026-12-25"],
+    [1280, testDate],
+  ]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, `/?date=${date}`);
+    const hand = await page.evaluate(() => {
+      const link = document.querySelector(".pray-now");
+      const style = getComputedStyle(link, "::before");
+      const left = link.getBoundingClientRect().left + parseFloat(style.left);
+      const bar = document.querySelector(".leaf-bar");
+      return { left, right: left + parseFloat(style.width), bar: bar ? bar.getBoundingClientRect().right : null };
     });
-    expect(air.above, `${width}px: under the lining`).toBeGreaterThanOrEqual(6);
-    expect(air.below, `${width}px: over the date`).toBeGreaterThanOrEqual(12);
+    expect(hand.left, `${width}px ${date}`).toBeGreaterThanOrEqual(0);
+    if (hand.bar !== null) expect(hand.left, `${width}px ${date}: clear of the bar`).toBeGreaterThanOrEqual(hand.bar - 1);
   }
 });
 
@@ -747,12 +745,23 @@ for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
       // Home, not the ordo: the wall is one fixed layer on every page, and
       // home loads in a fraction of the ordo's time.
       await openDatedPage(page, `/?date=${testDate}`, theme);
-      // body::after is the home niche's room light, not the wall.
+      // Only the wall: the leaf, and the hour's cast with it (main::before).
       await page.addStyleTag({ content: "body > * { visibility: hidden !important; } body::before, body::after { display: none !important; }" });
-      const wall = await sampleWall(page);
-      expect(wall.drift, `${width}px mean vs --bg`).toBeLessThan(1.5);
-      expect(wall.contrast, `${width}px contrast %`).toBeGreaterThan(minContrast);
-      expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
+      // Home's wall takes the light of the hour in the Nave; each light
+      // retunes --bg with the tint, so it must average its own --bg too.
+      for (const light of theme === "light" ? ["dawn", "day", "dusk", "night"] : [null]) {
+        if (light) {
+          await page.evaluate((light) => {
+            document.body.classList.remove("time-dawn", "time-day", "time-dusk", "time-night");
+            document.body.classList.add(`time-${light}`);
+          }, light);
+        }
+        const label = `${width}px${light ? ` ${light}` : ""}`;
+        const wall = await sampleWall(page);
+        expect(wall.drift, `${label} mean vs --bg`).toBeLessThan(1.5);
+        expect(wall.contrast, `${label} contrast %`).toBeGreaterThan(minContrast);
+        expect(wall.contrast, `${label} contrast %`).toBeLessThan(5);
+      }
     }
   });
 }
@@ -858,6 +867,9 @@ test("thresholds and usage share the hour wall in both themes", async ({ page })
     for (const theme of ["light", "dark"]) {
       const material = await page.evaluate((theme) => {
         document.documentElement.dataset.theme = theme;
+        // Home's wall takes the light of the hour, a retint of these same
+        // layers; compare the material itself.
+        document.body.classList.remove("time-dawn", "time-day", "time-dusk", "time-night");
         const wall = getComputedStyle(document.documentElement, "::before");
         const heading = document.querySelector(".month h2");
         const signature = (style) => [style.backgroundImage, style.backgroundBlendMode, style.backgroundSize, style.opacity];
@@ -937,10 +949,8 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
-test("the apse vault appears only over the night, and veils with the season", async ({
-  page,
-}) => {
-  const vault = async ({ width, theme, scheme, path }) => {
+test("the apse vault stays off the leaf and the working rooms", async ({ page }) => {
+  const field = async ({ width, theme, scheme, path }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height: 900 },
       colorScheme: scheme,
@@ -951,137 +961,60 @@ test("the apse vault appears only over the night, and veils with the season", as
     await sheet.goto(path);
     const read = await sheet.evaluate(() => {
       const style = getComputedStyle(document.body, "::before");
-      const rgb = getComputedStyle(document.documentElement)
-        .backgroundColor.match(/\d+/g)
-        .slice(0, 3)
-        .map(Number);
-      return {
-        // The vault has its own layer, so this cannot pick up
-        // --page-material's broad radials, which live on body and legitimately
-        // remain on the phone.
-        vault: { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor },
-        pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
-      };
+      return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
     });
     await context.close();
-    return { stars: vaultPaints(read.vault), pageIsDark: read.pageIsDark, ink: read.vault.ink };
+    return { stars: vaultPaints(read), powder: powderPaints(read) };
   };
 
+  // Home is a leaf lettered on the plain wall, as a painted kalendar is: no
+  // stars by night and no powdering by day, whatever the theme source. The
+  // hours' ending keeps the vault (see "the hour vault begins after prayer").
   const home = `/?date=${testDate}`;
-  // Gold stars must never land on plaster. The Default-theme/light-device case
-  // is the one that bites: :root:not([data-theme="light"]) matches when no
-  // choice has been stored, so without a prefers-color-scheme guard the vault
-  // would light up over the Nave.
-  for (const scheme of ["light", "dark"]) {
-    const seen = await vault({ width: 1280, theme: null, scheme, path: home });
-    if (!seen.pageIsDark) expect(seen.stars).toBe(false);
+  for (const width of [390, 1280]) {
+    for (const [theme, scheme] of [
+      [null, "light"],
+      [null, "dark"],
+      ["light", "dark"],
+      ["dark", "dark"],
+      ["dark", "light"],
+    ]) {
+      expect(await field({ width, theme, scheme, path: home }), `${width}px ${theme} on ${scheme}`).toEqual({
+        stars: false,
+        powder: false,
+      });
+    }
   }
-  expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(false);
-
-  // Present behind the Apse home at every width, absent in working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
-  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
   for (const path of ["/calendar/2026/03", "/calendar/2026", "/reminders"]) {
-    expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(false);
+    expect((await field({ width: 1280, theme: "dark", scheme: "dark", path })).stars, path).toBe(false);
   }
-
-  // Gold leaf is gilding, so the vault keeps the season. This only holds while
-  // --apse-ink is declared where the seasonal --ornament lands; hoisting it
-  // to :root freezes the stars gold through Passiontide.
-  const ink = {};
-  for (const [season, date] of [
-    ["ordinary", testDate],
-    ["passiontide", "2026-04-08"],
-    ["eastertide", "2026-04-20"],
-  ]) {
-    ink[season] = (
-      await vault({ width: 1280, theme: "dark", scheme: "dark", path: `/?date=${date}` })
-    ).ink;
-  }
-  expect(ink.ordinary).toBeTruthy();
-  expect(ink.passiontide).not.toBe(ink.ordinary);
-  expect(ink.eastertide).not.toBe(ink.ordinary);
-  expect(ink.eastertide).not.toBe(ink.passiontide);
-
-  // The stars must actually light pixels. Declaring the layers is not enough:
-  // `circle 0.6px` is a *radius*, so with the colour stop at 50% the solid core
-  // was 0.3px and antialiasing ate nearly all of it — 58 declared stars lit 13
-  // pixels across half the viewport and the vault was invisible. Measured on
-  // the clean field beside the frontispiece, where nothing else paints.
-  const context = await page.context().browser().newContext({
-    viewport: { width: 1280, height: 900 },
-    colorScheme: "dark",
-    deviceScaleFactor: 1,
-  });
-  const sheet = await context.newPage();
-  await sheet.addInitScript(() => localStorage.setItem("office-theme", "dark"));
-  await sheet.goto(home);
-  const cardLeft = await sheet.evaluate(() =>
-    Math.round(document.querySelector(".home-hero").getBoundingClientRect().left),
-  );
-  const shot = await sheet.screenshot({
-    clip: { x: 10, y: 110, width: cardLeft - 30, height: 500 },
-  });
-  const lit = await sheet.evaluate(async (data) => {
-    const img = new Image();
-    img.src = "data:image/png;base64," + data;
-    await img.decode();
-    const canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx2d = canvas.getContext("2d");
-    ctx2d.drawImage(img, 0, 0);
-    const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
-    const counts = {};
-    for (let i = 0; i < px.length; i += 4) {
-      const key = `${px[i]},${px[i + 1]},${px[i + 2]}`;
-      counts[key] = (counts[key] || 0) + 1;
-    }
-    const bg = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])[0][0]
-      .split(",")
-      .map(Number);
-    let n = 0;
-    for (let i = 0; i < px.length; i += 4) {
-      const dev =
-        Math.abs(px[i] - bg[0]) + Math.abs(px[i + 1] - bg[1]) + Math.abs(px[i + 2] - bg[2]);
-      if (dev > 20) n += 1;
-    }
-    return n;
-  }, shot.toString("base64"));
-  await context.close();
-  expect(lit).toBeGreaterThan(30);
 });
 
-test("the frontispiece holds its width whatever the day is called", async ({ page }) => {
+test("the leaf holds its width whatever the day is called", async ({ page }) => {
   // body is a column flex container, and an auto cross-axis margin suppresses
   // flex stretch — so main needs an explicit width:100% or it becomes
-  // shrink-to-fit and the measure caps nothing. Prose hides that (a
-  // paragraph's max-content exceeds the cap anyway); the frontispiece does
-  // not, and the card collapsed to the width of the day's feast name.
+  // shrink-to-fit and the measure caps nothing. A short feast name once
+  // collapsed home's card to its own width.
   const days = [
     "2026-08-10", // "St. Lawrence, Martyr"
     "2026-07-13", // no feast name at all
     "2026-11-03", // "Day III within the Octave of All Saints"
+    "2026-12-25", // the first class, with its bar border
   ];
-  for (const width of [1280, 1920]) {
+  for (const width of [1024, 1280, 1920]) {
     await page.setViewportSize({ width, height: 1000 });
-    const widths = [];
+    const boxes = [];
     for (const date of days) {
       await openDatedPage(page, `/?date=${date}`);
-      widths.push(
-        await page.evaluate(() =>
-          Math.round(document.querySelector(".home-hero").getBoundingClientRect().width),
-        ),
+      boxes.push(
+        await page.evaluate(() => {
+          const box = document.querySelector(".leaf").getBoundingClientRect();
+          return { width: Math.round(box.width), centre: Math.round(box.left + box.width / 2 - innerWidth / 2) };
+        }),
       );
     }
-    expect(new Set(widths).size).toBe(1);
-    // And it is the declared measure, not whatever the content happened to
-    // need: clamp(38rem, 10rem + 38vw, 48rem), scaled by the niche's zoom
-    // step (1.12 from 1700x1000).
-    const zoom = width >= 1700 ? 1.12 : 1;
-    const declared = Math.min(48 * 16, Math.max(38 * 16, 10 * 16 + 0.38 * width)) * zoom;
-    expect(Math.abs(widths[0] - declared)).toBeLessThanOrEqual(1);
+    // One column of 36rem on a laptop, centred, whatever the day.
+    for (const box of boxes) expect(box, `${width}px`).toEqual({ width: 36 * 16, centre: 0 });
   }
 });
 
@@ -1145,22 +1078,14 @@ function isBottomCenterPhase(phase) {
   return layers.length > 0 && layers.every(isBottomCenterLayer);
 }
 
-function tileEdgePx(size) {
-  // Take the first layer; all vault layers share one tile.
-  const first = String(size).split(",")[0].trim();
-  const m = first.match(/([\d.]+)px(?:\s+([\d.]+)px)?/);
-  if (!m) return null;
-  return { w: parseFloat(m[1]), h: parseFloat(m[2] || m[1]) };
-}
-
 function nearViewportEdge(value, expected, tol = 2) {
   return Math.abs(value - expected) <= tol;
 }
 
-test("the mobile home vault is one stable full-page layer without scroll", async ({
+test("the phone's leaf keeps one geometry on the bare wall in both themes", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
+  const read = async ({ width = 390, height, theme, scheme }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -1169,107 +1094,70 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     });
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(`/?date=${testDate}`);
-    const seen = await sheet.evaluate((asToday) => {
-      // The fixed test day is historical, so the server adds the recovery
-      // line that local today's home never carries; drop it to measure the
-      // layout a reader sees on the day itself.
-      if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
+    await sheet.goto(`/?date=2026-12-25`);
+    await sheet.evaluate(() => document.fonts.ready);
+    const seen = await sheet.evaluate(() => {
       const field = getComputedStyle(document.body, "::before");
-      const footerElement = document.querySelector("footer");
-      const tailpiece = getComputedStyle(footerElement, "::before");
-      const card = getComputedStyle(document.querySelector(".home-hero"));
+      const tailpiece = getComputedStyle(document.querySelector("footer"), "::before");
       return {
-        stars: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
-        position: field.position,
-        tileSize: field.maskSize || field.webkitMaskSize,
-        phase: field.maskPosition || field.webkitMaskPosition,
+        field: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
         // The footer closes on its painted tailpiece in both themes, with
         // the same geometry, so the footer never moves when the theme
         // changes.
         tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
         tailpieceShown: tailpiece.display !== "none",
-        // Probe the night token rather than hard-coding #121c28 — the halo must
-        // use whatever --bg is, not a particular hex.
-        pageBg: getComputedStyle(document.documentElement).backgroundColor,
-        cardShadow: card.boxShadow,
-        scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+        overflows: document.documentElement.scrollWidth > innerWidth + 1,
         scrollHeight: document.documentElement.scrollHeight,
       };
-    }, asToday);
+    });
     await context.close();
     return seen;
   };
 
-  const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
-  expect(vaultPaints(apse.stars)).toBe(true);
-  expect(apse.position).toBe("fixed");
-  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
-  expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.tailpieceShown).toBe(true);
-  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
-  expect(apse.cardShadow).toContain(apse.pageBg);
-  expect(apse.scrolls).toBe(false);
-  // The night carries no powdering: its field is the vault alone.
-  expect(powderPaints(apse.stars)).toBe(false);
-
-  // Nave keeps the same page geometry but paints no vault: its wall is
-  // powdered with rosettes instead, in the same fixed field.
-  for (const [theme, scheme] of [
-    ["light", "light"],
-    [null, "light"],
-  ]) {
-    const nave = await read({ height: 844, theme, scheme });
-    expect(vaultPaints(nave.stars)).toBe(false);
-    expect(powderPaints(nave.stars)).toBe(true);
-    expect(nave.position).toBe("fixed");
-    expect(nave.tailpieceShown).toBe(true);
-    expect(nave.scrolls).toBe(false);
-    expect(nave.scrollHeight).toBe(apse.scrollHeight);
-  }
-
-  // On the day itself a phone's home fits its viewport whole, every hour in
-  // reach without scrolling, on a 375x667 screen as well.
-  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
-  expect(small.scrolls).toBe(false);
-
-  // Representative phone corners (short, mid, tall). Tile size and top-centre
-  // origin must not depend on viewport; a full width×height matrix is CI cost
-  // without extra signal once those two invariants hold.
+  // Christmas: the first class, so the champ initial and the bar border, the
+  // tallest leaf the kalendar sets.
   for (const [width, height] of [
     [320, 667],
     [390, 844],
     [430, 932],
   ]) {
-    const field = await read({ width, height, theme: "dark", scheme: "dark" });
-    const bare = await read({ width, height, theme: "light", scheme: "light" });
-    expect(vaultPaints(field.stars)).toBe(true);
-    expect(field.position).toBe("fixed");
-    expect(tileEdgePx(field.tileSize)).toEqual({ w: 528, h: 528 });
-    expect(isTopCenterPhase(field.phase)).toBe(true);
-    expect(field.scrollHeight).toBe(bare.scrollHeight);
+    const apse = await read({ width, height, theme: "dark", scheme: "dark" });
+    expect(vaultPaints(apse.field)).toBe(false);
+    expect(powderPaints(apse.field)).toBe(false);
+    expect(apse.tailpieceShown).toBe(true);
+    expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+    expect(apse.overflows, `${width}px`).toBe(false);
+    for (const [theme, scheme] of [
+      ["light", "light"],
+      [null, "light"],
+    ]) {
+      const nave = await read({ width, height, theme, scheme });
+      expect(vaultPaints(nave.field)).toBe(false);
+      expect(powderPaints(nave.field)).toBe(false);
+      expect(nave.tailpieceShown).toBe(true);
+      expect(nave.overflows, `${width}px`).toBe(false);
+      expect(nave.scrollHeight, `${width}px: themes never move the leaf`).toBe(apse.scrollHeight);
+    }
   }
 });
 
-test("the mobile home vault survives browser-back viewport changes", async ({ page }) => {
-  await openDatedPage(page, `/?date=${testDate}`, "dark");
+test("the leaf keeps its hour and its light through browser-back viewport changes", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T18:30:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+  const body = page.locator("body");
+  await expect(body).toHaveClass(/\btime-dusk\b/);
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "vespers");
   await page.locator(".pray-now").click();
-  await expect(page.locator("body")).toHaveClass(/page-hour/);
+  await expect(body).toHaveClass(/page-hour/);
 
   // Mobile browser chrome can shorten the effective viewport before restoring
-  // a history entry. The vault must not be conditional on the 800px height the
-  // home page happened to have when it was first painted.
+  // a history entry; the leaf must come back as it was.
   await page.setViewportSize({ width: 390, height: 740 });
   await page.goBack();
-  await expect(page.locator("body")).toHaveClass(/page-home/);
-
-  const field = await page.evaluate(() => {
-    const style = getComputedStyle(document.body, "::before");
-    return [style.content, style.maskImage || style.webkitMaskImage, style.maskPosition || style.webkitMaskPosition];
-  });
-  expect(field[0]).not.toBe("none");
-  expect(field[1]).not.toBe("none");
-  expect(isTopCenterPhase(field[2])).toBe(true);
+  await expect(body).toHaveClass(/page-home/);
+  await expect(body).toHaveClass(/\btime-dusk\b/);
+  await expect(page.locator(".pray-now")).toHaveAttribute("data-hour", "vespers");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "vespers");
 });
 
 test("the hour vault begins after prayer, spans the footer, and does not move it", async ({ page }) => {
@@ -1463,19 +1351,43 @@ test("wide hours set a still vault beside the prayer that comes down to meet the
   expect(vaultPaints(narrower.footer)).toBe(true);
 });
 
-test("the home vault is lit from the frontispiece in Apse only", async ({ page }) => {
+test("the hour's light falls on the Nave's wall only, and never on the ink", async ({ page }) => {
+  // Dawn (Lauds, Prime), day (Terce to None), dusk (Vespers), night
+  // (Compline): app.js sets the class from the reader's clock, and the light
+  // retunes the wall's ground and casts over it. The Apse is already night.
   await page.setViewportSize({ width: 1280, height: 900 });
-  const gilding = () => page.evaluate(() => getComputedStyle(document.body, "::before").backgroundImage);
-  await openDatedPage(page, `/?date=${testDate}`, "dark");
-  expect(await gilding()).toContain("radial-gradient");
-  const field = await page.evaluate(() => {
-    const style = getComputedStyle(document.body, "::before");
-    return { mask: style.maskImage || style.webkitMaskImage, size: style.maskSize || style.webkitMaskSize };
-  });
-  expect(field.mask).toContain("leaf.png");
-  expect(field.size.startsWith("704px 704px")).toBe(true);
-  await openDatedPage(page, `/?date=${testDate}`, "light");
-  expect(await gilding()).toBe("none");
+  const states = [
+    ["06:30", "dawn"],
+    ["12:00", "day"],
+    ["18:30", "dusk"],
+    ["21:30", "night"],
+  ];
+  for (const theme of ["light", "dark"]) {
+    const seen = [];
+    for (const [time, light] of states) {
+      await page.clock.setFixedTime(new Date(`2026-03-15T${time}:00-04:00`));
+      await openDatedPage(page, `/?date=${testDate}`, theme);
+      await expect(page.locator("body"), `${theme} ${time}`).toHaveClass(new RegExp(`\\btime-${light}\\b`));
+      seen.push(
+        await page.evaluate(() => ({
+          ground: getComputedStyle(document.documentElement).backgroundColor,
+          cast: getComputedStyle(document.querySelector("main"), "::before").backgroundImage,
+          ink: getComputedStyle(document.querySelector(".leaf-head h1")).color,
+          rubric: getComputedStyle(document.querySelector(".leaf-kal")).color,
+        })),
+      );
+    }
+    const distinct = (key) => new Set(seen.map((s) => s[key])).size;
+    expect(distinct("ink"), theme).toBe(1);
+    expect(distinct("rubric"), theme).toBe(1);
+    if (theme === "light") {
+      expect(distinct("ground")).toBe(states.length);
+      for (const s of seen) expect(s.cast).toContain("gradient");
+    } else {
+      expect(distinct("ground")).toBe(1);
+      for (const s of seen) expect(s.cast).toBe("none");
+    }
+  }
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
@@ -1511,57 +1423,49 @@ test("the header beam holds one line and one geometry on every page", async ({ p
   expect(shellWidths[2]).toBe(shellWidths[3]);
 });
 
-test("the inscription band carries the frontispiece heading in both themes", async ({ page }) => {
-  await openDatedPage(page, `/?date=${testDate}`);
-
+test("the leaf's versals turn gold and silver by night", async ({ page }) => {
+  // St Placidus (a red double): the title's versal in the day's ink, the
+  // collect's in azure, the hours' initials red and blue by turns. By night
+  // red turns gold and blue a pale grey-blue.
+  await openDatedPage(page, "/?date=2026-10-05");
   const read = () =>
     page.evaluate(() => {
-      const h = document.querySelector(".home-prayer-card h2");
-      const card = document.querySelector(".home-hero");
-      const hs = getComputedStyle(h);
-      const hr = h.getBoundingClientRect();
-      const cr = card.getBoundingClientRect();
+      const color = (selector) => getComputedStyle(document.querySelector(selector)).color;
       return {
-        ground: hs.backgroundColor,
-        ink: hs.color,
-        // Full-bleed: the course reaches the frame, minus the card's border.
-        bleed: Math.round(cr.width - hr.width) <= 4,
+        title: color(".leaf-title .leaf-versal"),
+        collect: color(".leaf-collect .leaf-versal"),
+        hours: [...document.querySelectorAll(".leaf-hour-initial")].map((el) => getComputedStyle(el).color),
       };
     });
+  const turns = (hours) => hours.every((c, i) => c === hours[i % 2]) && hours[0] !== hours[1];
 
   const nave = await read();
-  expect(nave.ground).not.toBe("rgba(0, 0, 0, 0)");
-  expect(nave.bleed).toBe(true);
+  expect(nave.title).toBe("rgb(163, 48, 31)");
+  expect(nave.collect).toBe("rgb(47, 79, 127)");
+  expect(turns(nave.hours)).toBe(true);
+  expect(nave.hours.slice(0, 2)).toEqual([nave.title, nave.collect]);
 
   await choosePreference(page, "Apse");
-  // app.js dips the Apse vault invisible before it applies data-theme (so the
-  // vault's background-image swaps while unseen instead of popping), which
-  // holds this attribute back by ~100ms; the painted course then separately
-  // crossfades for 200ms once it lands. toHaveAttribute retries, so it
-  // covers the first wait; poll for the rendered colour below rather than
-  // sampling the Nave end of that second transition on a fast single-worker
-  // CI run.
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect.poll(async () => (await read()).ground).not.toBe(nave.ground);
-  const apse = await read();
-  expect(apse.ground).not.toBe("rgba(0, 0, 0, 0)");
-  expect(apse.ground).not.toBe(nave.ground);
-  expect(apse.bleed).toBe(true);
+  // The inks crossfade with the theme; poll past the transition.
+  await expect
+    .poll(async () => {
+      const { title, collect } = await read();
+      return { title, collect };
+    })
+    .toEqual({ title: "rgb(216, 188, 116)", collect: "rgb(201, 208, 217)" });
+  expect(turns((await read()).hours)).toBe(true);
 
-  // The band must never appear on a prayer page.
+  // The leaf is home's alone.
   await page.goto(`/lauds/${testDate}`);
-  expect(await page.locator(".elements .home-prayer-card").count()).toBe(0);
+  expect(await page.locator(".leaf").count()).toBe(0);
 });
 
-test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
-  // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦ and the drop caps. The timber course and the
-  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
-  // Both themes read one pair of leaf colours, because the ground is dark in
-  // each.
+test("rubrication keeps its colours through the seasons", async ({ page }) => {
+  // The church veils its images, not its rubrics: the leaf's minium and
+  // azure and the rubric-red ✠ hold through Passiontide and Paschaltide.
   for (const theme of ["light", "dark"]) {
-    const ink = {};
-    const ground = {};
+    const collect = {};
     const cross = {};
     for (const [season, date] of [
       ["ordinary", testDate],
@@ -1572,30 +1476,22 @@ test("the inscription band keeps the season with the rest of the gilding", async
       const sheet = await context.newPage();
       await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
       await sheet.goto(`/?date=${date}`);
-      const band = await sheet.evaluate(() => {
-        const style = getComputedStyle(document.querySelector(".home-prayer-card h2"));
-        return { ink: style.color, ground: style.backgroundColor };
-      });
-      ink[season] = band.ink;
-      ground[season] = band.ground;
+      collect[season] = await sheet.locator(".leaf-collect .leaf-versal").evaluate((node) => getComputedStyle(node).color);
       await sheet.goto(`/vespers/${date}`);
       cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
-    expect(ink.passiontide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.passiontide);
-    expect(ground.passiontide).toBe(ground.ordinary);
-    expect(ground.eastertide).toBe(ground.ordinary);
-    expect(cross.passiontide).toBe(cross.ordinary);
-    expect(cross.eastertide).toBe(cross.ordinary);
+    expect(collect.passiontide, theme).toBe(collect.ordinary);
+    expect(collect.eastertide, theme).toBe(collect.ordinary);
+    expect(cross.passiontide, theme).toBe(cross.ordinary);
+    expect(cross.eastertide, theme).toBe(cross.ordinary);
   }
 });
 
 for (const theme of ["light", "dark"]) {
-  test(`the painted headpiece keeps one form through the seasons without moving the invitation — ${theme}`, async ({ page }) => {
+  test(`the painted headpiece keeps one form through the seasons without moving the leaf — ${theme}`, async ({ page }) => {
     // The ordo, reminders and usage headpieces are a cross between two
-    // painted rules in every season; home opens on the consecration cross.
+    // painted rules in every season; home's leaf carries no headpiece.
     await page.goto("/calendar/2026/04");
     await expect(page.locator(".ornament-foliage")).toHaveCount(0);
     const rules = page.locator(".ornament-headpiece .ornament-sprig-rule");
@@ -1606,18 +1502,18 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator(".ornament-headpiece > span")).toBeVisible();
 
     await openDatedPage(page, "/?date=2026-04-08", theme);
-    await expect(page.locator(".home-crown")).toBeVisible();
-    const invitation = page.locator(".pray-now");
-    const veiledBox = await invitation.boundingBox();
-    const lining = await invitation.evaluate(el => getComputedStyle(el).borderTopColor);
+    await expect(page.locator(".home .ornament-headpiece")).toHaveCount(0);
+    const pointer = page.locator(".pray-now");
+    const veiledBox = await pointer.boundingBox();
+    const rule = await page.locator(".leaf-rule").evaluate(el => getComputedStyle(el).borderTopColor);
     // Hold the day's content constant to isolate ornament from different
     // feast names, notices, or commemorations changing the page height. The
-    // painted frame does not veil or gild with the season.
+    // leaf's rules are the day's colour, not the season's.
     await page.evaluate(() => {
       document.body.classList.replace("season-passiontide", "season-eastertide");
     });
-    expect(await invitation.boundingBox()).toEqual(veiledBox);
-    expect(await invitation.evaluate(el => getComputedStyle(el).borderTopColor)).toBe(lining);
+    expect(await pointer.boundingBox()).toEqual(veiledBox);
+    expect(await page.locator(".leaf-rule").evaluate(el => getComputedStyle(el).borderTopColor)).toBe(rule);
   });
 }
 
@@ -1656,12 +1552,12 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
-test("desktop navigation and frontispiece remain composed", async ({ page }) => {
+test("desktop navigation and the leaf remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
 
   await expect(page.locator(".site-menu")).toHaveAttribute("open", "");
-  // The frontispiece is home's hour directory; the header does not repeat it.
+  // The leaf's horarium is home's hour directory; the header does not repeat it.
   const primary = page.getByRole("navigation", { name: "Primary" });
   await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
   await expect(primary.locator('[data-nav="hour"]')).toHaveCount(0);
@@ -1677,7 +1573,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   // An overlay: a preference chosen inside leaves it open, a tap outside or Escape puts it away.
   await page.locator(".settings-prefs").getByRole("button", { name: "Nave", exact: true }).click();
   await expect(settings).toHaveAttribute("open", "");
-  // It opens below the header and lies over the page, not under the niche.
+  // It opens below the header and lies over the page, not under the leaf.
   const [header, panel] = await Promise.all([
     page.locator(".site-header").boundingBox(),
     page.locator(".settings-prefs").boundingBox(),
@@ -1694,68 +1590,42 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await page.keyboard.press("Escape");
   await expect(settings).not.toHaveAttribute("open", "");
   await expect(settings.locator("summary")).toBeFocused();
-  await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  // The horarium is a ruled list: a hairline under every hour, and a
+  // stronger rule over Terce and Vespers, which open the day's and the
+  // evening's hours. The leaf draws no frame round it.
   const rules = await page.evaluate(() => {
     const isVisibleRule = (width, style, color) => {
-      const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
-      const alphaValue = alpha === undefined ? 1 : Number.parseFloat(alpha);
-      return (
-        parseFloat(width) >= 1 &&
-        style === "solid" &&
-        color !== "transparent" &&
-        alphaValue > 0
-      );
+      const alpha = color.match(/\/\s*([\d.]+)\)$|^rgba\([^,]+,[^,]+,[^,]+,\s*([^)]+)\)$/);
+      const alphaValue = alpha ? Number.parseFloat(alpha[1] ?? alpha[2]) : 1;
+      return parseFloat(width) >= 1 && style === "solid" && color !== "transparent" && alphaValue > 0;
     };
     const directory = getComputedStyle(document.querySelector(".home-hour-links"));
-    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
-    const dividedHour = getComputedStyle(
-      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
-    );
-    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    const hours = [...document.querySelectorAll(".home-hour-link")];
     return {
-      directoryLeft: isVisibleRule(
-        directory.borderLeftWidth,
-        directory.borderLeftStyle,
-        directory.borderLeftColor,
-      ),
-      directoryRight: isVisibleRule(
-        directory.borderRightWidth,
-        directory.borderRightStyle,
-        directory.borderRightColor,
-      ),
-      labelRight: isVisibleRule(
-        label.borderRightWidth,
-        label.borderRightStyle,
-        label.borderRightColor,
-      ),
-      // Full-height borders remain absent between the unequal 2/3/2 groups.
-      // Short decorative hairlines separate neighbours within each band.
-      dividedHourLeft: isVisibleRule(
-        dividedHour.borderLeftWidth,
-        dividedHour.borderLeftStyle,
-        dividedHour.borderLeftColor,
-      ),
-      finalGroupBottom: isVisibleRule(
-        finalGroup.borderBottomWidth,
-        finalGroup.borderBottomStyle,
-        finalGroup.borderBottomColor,
-      ),
+      directoryLeft: isVisibleRule(directory.borderLeftWidth, directory.borderLeftStyle, directory.borderLeftColor),
+      directoryRight: isVisibleRule(directory.borderRightWidth, directory.borderRightStyle, directory.borderRightColor),
+      under: hours.map((link) => {
+        const style = getComputedStyle(link);
+        return isVisibleRule(style.borderBottomWidth, style.borderBottomStyle, style.borderBottomColor);
+      }),
+      over: hours.map((link) => {
+        const style = getComputedStyle(link);
+        return isVisibleRule(style.borderTopWidth, style.borderTopStyle, style.borderTopColor);
+      }),
     };
   });
   expect(rules).toEqual({
-    directoryLeft: true,
-    directoryRight: true,
-    labelRight: true,
-    dividedHourLeft: false,
-    finalGroupBottom: true,
+    directoryLeft: false,
+    directoryRight: false,
+    under: [true, true, true, true, true, true, true],
+    over: [false, false, true, false, false, true, false],
   });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
   ).toBe(false);
 });
 
-test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page }) => {
+test("the desktop leaf fits its breakpoint and reader sizes", async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem("office-text-size"));
 
   for (const width of [701, 1024, 1280]) {
@@ -1768,7 +1638,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
       }
 
       const geometry = await page.evaluate(() => {
-        const hero = document.querySelector(".home-hero").getBoundingClientRect();
+        const hero = document.querySelector(".leaf").getBoundingClientRect();
         const targetHeights = Array.from(document.querySelectorAll(".home-hour-link")).map(
           (link) => link.getBoundingClientRect().height,
         );
@@ -1779,7 +1649,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
         };
       });
       expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
-      expect(geometry.heroContained, `${width}px/${size} should contain the frame`).toBe(true);
+      expect(geometry.heroContained, `${width}px/${size} should contain the leaf`).toBe(true);
       expect(geometry.shortestTarget, `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(44);
 
       if (size === "large") {

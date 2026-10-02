@@ -643,12 +643,16 @@ function usageBeaconBody(scope) {
         }
       });
     } else {
-      var anchor =
-        document.querySelector(".hour-meta") ||
-        document.querySelector(".home-day-head .octave-note") ||
-        document.querySelector(".home-day-head .feast") ||
-        document.querySelector(".home-day-head h1") ||
-        document.querySelector(".home-day-head");
+      // On home the notice closes the leaf's heading, after the rank,
+      // octave and commemorations, as the server renders it.
+      var anchor = document.querySelector(".hour-meta");
+      var head = document.querySelector(".home-day-head");
+      if (!anchor && head) {
+        var parts = head.querySelectorAll(
+          ":scope > h1, :scope > .leaf-rank, :scope > .octave-note, :scope > .commemorations"
+        );
+        anchor = parts.length ? parts[parts.length - 1] : null;
+      }
       if (anchor) {
         var p = document.createElement("p");
         p.className = "not-today-notice";
@@ -1473,6 +1477,17 @@ function usageBeaconBody(scope) {
     names[entry.slug] = entry.label;
     return names;
   }, {});
+  // The light of the hour being prayed, which tints home's wall. Mirrors
+  // time_of_day in the presentation crate.
+  var TIME_OF_DAY = {
+    lauds: "dawn",
+    prime: "dawn",
+    terce: "day",
+    sext: "day",
+    none: "day",
+    vespers: "dusk",
+    compline: "night",
+  };
 
   function currentHourInfo(d) {
     var h = d.getHours();
@@ -1508,8 +1523,8 @@ function usageBeaconBody(scope) {
       link.setAttribute("aria-current", "time");
       if (!state) {
         state = document.createElement("span");
-        // sr-only to match the server-rendered marker in home.html: the tinted
-        // cell and the "Pray {hour}" invitation carry "now" visually.
+        // sr-only to match the server-rendered marker in home.html: the
+        // pointing hand and "pray now" carry "now" visually.
         state.className = "home-hour-link-state sr-only";
         state.textContent = "Now";
         link.appendChild(state);
@@ -1522,11 +1537,48 @@ function usageBeaconBody(scope) {
     }
   }
 
-  // updatePrayNow recomputes the "pray now" shortcut on the home page from the
-  // device clock. The same value is rendered server-side, but the home page is
-  // a cacheable document, so a cached copy would otherwise freeze whichever
-  // hour was current when it was fetched. Computing it here keeps the shortcut
-  // correct no matter how old the cached page is.
+  // The leaf's pointer: the hour set large with the pointing hand, and
+  // "pray now" (or "begin here") in place of its time. It is the leaf's
+  // invitation, so it carries .pray-now.
+  function setHourNow(link, isNow, cueText) {
+    link.classList.toggle("is-now", isNow);
+    link.classList.toggle("pray-now", isNow);
+    var cue = link.querySelector(".leaf-hour-cue");
+    if (isNow) {
+      if (!cue) {
+        cue = document.createElement("span");
+        cue.className = "leaf-hour-cue";
+        var time = link.querySelector(".leaf-hour-time");
+        if (time) {
+          time.insertAdjacentElement("afterend", cue);
+        } else {
+          link.appendChild(cue);
+        }
+      }
+      cue.textContent = cueText;
+    } else if (cue) {
+      cue.parentNode.removeChild(cue);
+    }
+  }
+
+  // The wall takes the light of the hour being prayed, by the reader's own
+  // clock: a time-* class on body (home's CSS reads it).
+  function setTimeOfDay(hour) {
+    var light = TIME_OF_DAY[hour] || "night";
+    ["dawn", "day", "dusk", "night"].forEach(function (name) {
+      document.body.classList.toggle("time-" + name, name === light);
+    });
+  }
+
+  // updatePrayNow recomputes home's leaf from the device clock: which hour
+  // is current, which the leaf points at, and the light on the wall. The
+  // same values are rendered server-side, but the home page is a cacheable
+  // document, so a cached copy would otherwise freeze whichever hour was
+  // current when it was fetched. Mirrors leaf_pointer in the presentation
+  // crate: the leaf of the office being prayed points at that hour ("pray
+  // now"); today's leaf after midnight, while yesterday's Compline is still
+  // the hour, points at none and leads off the leaf to it; any other day's
+  // leaf begins at Lauds ("begin here").
   function updatePrayNow() {
     var card = document.querySelector(".home-prayer-card[data-date-slug]");
     if (!card) {
@@ -1534,42 +1586,40 @@ function usageBeaconBody(scope) {
     }
     var dateSlug = card.getAttribute("data-date-slug");
     var now = new Date();
-    var currentInfo = currentHourInfo(now);
+    var info = currentHourInfo(now);
     var officeDate = new Date(now.getTime());
-    officeDate.setDate(officeDate.getDate() + currentInfo.offset);
-    var info =
-      dateSlug === localDateSlug(now) || dateSlug === localDateSlug(officeDate)
-        ? currentInfo
-        : null;
-    var prayNow = card.querySelector(".pray-now");
-    var matched = false;
+    officeDate.setDate(officeDate.getDate() + info.offset);
+    var todaySlug = localDateSlug(now);
+    var officeSlug = localDateSlug(officeDate);
+    var praying = dateSlug === officeSlug;
+    var pointer = praying ? info.slug : dateSlug === todaySlug ? null : "lauds";
+    setTimeOfDay(info.slug);
 
-    card.querySelectorAll(".home-hour-link").forEach(function (link) {
-      var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
-      setHourCurrent(link, isCurrent);
-      if (isCurrent && prayNow) {
-        var name = link.querySelector(".home-hour-link-name");
-        prayNow.setAttribute("href", link.getAttribute("href"));
-        prayNow.textContent = "Pray " + (name ? name.textContent : "Now");
-        matched = true;
-      }
+    card.querySelectorAll(".home-hour-link[data-hour]").forEach(function (link) {
+      var hour = link.getAttribute("data-hour");
+      setHourCurrent(link, info.offset === 0 && dateSlug === todaySlug && hour === info.slug);
+      setHourNow(link, hour === pointer, praying ? "pray now" : "begin here");
     });
 
-    if (!matched && info !== null && info.offset !== 0 && prayNow) {
-      var offsetDate = new Date(now.getTime());
-      offsetDate.setDate(offsetDate.getDate() + info.offset);
-      prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
-      prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
-      matched = true;
-    }
-
-    if (!matched && prayNow) {
-      var lauds = card.querySelector('.home-hour-link[data-hour="lauds"]');
-      if (lauds) {
-        prayNow.setAttribute("href", lauds.getAttribute("href"));
+    var late = card.querySelector(".leaf-late");
+    if (pointer !== null) {
+      if (late) {
+        late.parentNode.removeChild(late);
       }
-      prayNow.textContent = "Open Lauds";
+      return;
     }
+    if (!late) {
+      late = document.createElement("p");
+      late.className = "leaf-late";
+      late.appendChild(document.createElement("a")).className = "pray-now";
+      var head = card.querySelector(".home-day-head");
+      if (head) {
+        head.appendChild(late);
+      }
+    }
+    var invitation = late.querySelector(".pray-now");
+    invitation.setAttribute("href", "/" + info.slug + "/" + officeSlug);
+    invitation.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
   }
 
   // Home, Ordo, and an open office may remain visible across a time boundary
