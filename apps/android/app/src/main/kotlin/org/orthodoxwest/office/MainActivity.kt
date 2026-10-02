@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
@@ -417,66 +418,69 @@ fun OfficeApp(
                 }
                 visits.SaveableStateProvider(visit.entry.id) {
                     val content = visit.content
-                    when {
-                        content is Content.Failed -> Message(content.message, insets)
-                        page is Page.Home && content is Content.Home -> HomeScreen(
-                            view = content.view,
-                            date = page.date,
-                            today = today,
-                            chrome = chrome,
-                            insets = insets,
-                            onDate = { onOpen(Page.Home(it)) },
-                            onHour = { d, h -> onOpen(Page.Hour(d, h)) },
-                            onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
-                        )
-                        page is Page.Hour && content is Content.Hour -> HourScreen(
-                            view = content.view,
-                            date = page.date,
-                            today = today,
-                            hours = hours,
-                            form = form,
-                            chrome = chrome,
-                            insets = insets,
-                            onDate = { onOpen(Page.Hour(it, page.hour)) },
-                            onForm = onForm,
-                            onHour = { onOpen(Page.Hour(page.date, it)) },
-                            onAllHours = { onOpen(Page.Home(page.date)) },
-                        )
-                        page is Page.Ordo && content is Content.Ordo -> OrdoScreen(
-                            month = content.view,
-                            year = page.year,
-                            monthNumber = page.month,
-                            today = today,
-                            chrome = chrome,
-                            insets = insets,
-                            onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
-                            onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
-                            onYear = { onOpen(Page.Year(it)) },
-                            onDay = { onOpen(Page.Home(it)) },
-                            focusDay = page.day,
-                        )
-                        page is Page.Year -> OrdoYearScreen(
-                            view = remember(page.year) { ordoYear(page.year) },
-                            today = today,
-                            chrome = chrome,
-                            insets = insets,
-                            onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
-                            onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
-                            onYear = { onOpen(Page.Year(it)) },
-                            onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
-                        )
-                        page is Page.Reminders -> RemindersScreen(
-                            settings = reminders,
-                            status = reminderStatus,
-                            chrome = chrome,
-                            insets = insets,
-                            onChange = onReminders,
-                            onTurnOn = onTurnOn,
-                            onTurnOff = onTurnOff,
-                            onAllowNotifications = onAllowNotifications,
-                            onAllowExact = onAllowExact,
-                        )
-                        else -> Message("Preparing the office…", insets)
+                    // The page leaving is gone to a screen reader at once: it speaks the one coming in.
+                    Box(if (front) Modifier else Modifier.clearAndSetSemantics {}) {
+                        when {
+                            content is Content.Failed -> Message(content.message, insets)
+                            page is Page.Home && content is Content.Home -> HomeScreen(
+                                view = content.view,
+                                date = page.date,
+                                today = today,
+                                chrome = chrome,
+                                insets = insets,
+                                onDate = { onOpen(Page.Home(it)) },
+                                onHour = { d, h -> onOpen(Page.Hour(d, h)) },
+                                onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
+                            )
+                            page is Page.Hour && content is Content.Hour -> HourScreen(
+                                view = content.view,
+                                date = page.date,
+                                today = today,
+                                hours = hours,
+                                form = form,
+                                chrome = chrome,
+                                insets = insets,
+                                onDate = { onOpen(Page.Hour(it, page.hour)) },
+                                onForm = onForm,
+                                onHour = { onOpen(Page.Hour(page.date, it)) },
+                                onAllHours = { onOpen(Page.Home(page.date)) },
+                            )
+                            page is Page.Ordo && content is Content.Ordo -> OrdoScreen(
+                                month = content.view,
+                                year = page.year,
+                                monthNumber = page.month,
+                                today = today,
+                                chrome = chrome,
+                                insets = insets,
+                                onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                                onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                                onYear = { onOpen(Page.Year(it)) },
+                                onDay = { onOpen(Page.Home(it)) },
+                                focusDay = page.day,
+                            )
+                            page is Page.Year -> OrdoYearScreen(
+                                view = remember(page.year) { ordoYear(page.year) },
+                                today = today,
+                                chrome = chrome,
+                                insets = insets,
+                                onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                                onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                                onYear = { onOpen(Page.Year(it)) },
+                                onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
+                            )
+                            page is Page.Reminders -> RemindersScreen(
+                                settings = reminders,
+                                status = reminderStatus,
+                                chrome = chrome,
+                                insets = insets,
+                                onChange = onReminders,
+                                onTurnOn = onTurnOn,
+                                onTurnOff = onTurnOff,
+                                onAllowNotifications = onAllowNotifications,
+                                onAllowExact = onAllowExact,
+                            )
+                            else -> Message("Preparing the office…", insets)
+                        }
                     }
                 }
             }
