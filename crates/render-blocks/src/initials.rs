@@ -103,7 +103,8 @@ mod tests {
         // The raised tuck is one rule over the letters that take it.
         let rule = css.split(":is(").find(|r| r.contains("--initial-raised-tuck")).expect("raised tuck rule");
         let (letters, body) = rule.split_once(')').unwrap();
-        let tuck: f32 = body.split("--initial-raised-tuck:").nth(1).unwrap().split(';').next().unwrap().trim().trim_end_matches("em").parse().unwrap();
+        let tuck: f32 =
+            body.split("--initial-raised-tuck:").nth(1).unwrap().split(';').next().unwrap().trim().trim_end_matches("em").parse().unwrap();
         let raised: Vec<char> =
             letters.split(',').map(|l| l.trim().trim_start_matches("[data-initial=\"").chars().next().unwrap()).collect();
         for letter in 'A'..='Z' {
