@@ -19,7 +19,8 @@ crates/
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
                            word-for-word against render-html
   presentation/            Words every front shares: day, season and date names, the current-hour
-                           schedule (app.js mirrors it), home's invitation, the report-issue link,
+                           schedule (app.js mirrors it), home's leaf (rank grades, hour times, the
+                           time of day, the collect), the report-issue link,
                            the usage beacon's vocabulary (server, app.js and native apps)
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
@@ -37,7 +38,8 @@ tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year sna
 tools/
   genicons.py              App icon (web, iOS, Android) generator; requires tools/requirements.txt
   genornaments.py          Painted ornament masks (crosses, sun, moon, quatrefoil, tailpiece, the
-                           Apse vault tile and the Nave powdering cell) for the web
+                           Apse vault tile, the Nave powdering cell and the home leaf's ivy) for the web
+  genmanicule.py           The home leaf's one-glyph ☞ face, cut from EB Garamond's -ext file
   genplaster.py            Texture generator; source photograph stays in ../resources/
 data/
   feasts/                  Feast definitions (INI-like format)
