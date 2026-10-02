@@ -14,7 +14,7 @@ struct HomePage: View {
     var body: some View {
         let today = model.today
         let clock = model.clockHour
-        Loaded(key: "\(date.iso) \(today.iso) \(clock)") {
+        Loaded(key: "\(date.iso) \(today.iso) \(clock)", motion: model.motion(to: .home(date))) {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)

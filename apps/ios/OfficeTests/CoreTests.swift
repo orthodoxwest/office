@@ -176,8 +176,12 @@ final class PlaceTests: XCTestCase {
         let model = AppModel()
         model.path = []
         model.open(.hour(day, "lauds"))
+        let visit = model.path[0].id
         model.open(.hour(day, "prime"))
-        XCTAssertEqual(model.path, [.hour(day, "prime")])
+        // The same visit, so the stack changes it in place, moving on to the next hour.
+        XCTAssertEqual(model.path[0].id, visit)
+        XCTAssertEqual(model.motion(to: .hour(day, "prime")), .next)
+        XCTAssertEqual(model.pages, [.hour(day, "prime")])
         model.open(.ordo(year: 2026, month: 3, day: 0))
         XCTAssertEqual(model.path.count, 2)
         model.open(.home(day.adding(days: 1)))
@@ -185,7 +189,7 @@ final class PlaceTests: XCTestCase {
         let saved = model.saved
         let again = AppModel()
         again.restore(saved)
-        XCTAssertEqual(again.path, model.path)
+        XCTAssertEqual(again.pages, model.pages)
         XCTAssertEqual(again.root, model.root)
         model.goHome()
         XCTAssertTrue(model.path.isEmpty)

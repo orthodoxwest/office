@@ -6,25 +6,29 @@ private let openPreparation: Set<String> = ["lauds", "prime", "vespers"]
 
 /**
  * What a page shows once its content is composed. Composing reads the corpus, so it runs off
- * the main thread; the page keeps what it had until the new content is ready.
+ * the main thread; the page keeps what it had until the new content is ready, then moves to it
+ * as `motion` says, from the top of the new page.
  */
 struct Loaded<Value, Content: View>: View {
     let key: String
+    let motion: Motion
     let load: () throws -> Value
     let content: (Value) -> Content
-    @State private var value: Value?
+    @State private var shown: (key: String, value: Value)?
     @State private var failure: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(key: String, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    init(key: String, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
+        self.motion = motion
         self.load = load
         self.content = content
     }
 
     var body: some View {
         ZStack {
-            if let value {
-                content(value)
+            if let shown {
+                content(shown.value).id(shown.key).transition(transition)
             } else if let failure {
                 Message(text: failure)
             } else {
@@ -35,13 +39,38 @@ struct Loaded<Value, Content: View>: View {
             let result = await compose(load)
             switch result {
             case let .success(v):
-                value = v
                 failure = nil
+                // The first content simply appears (the stack's push brings it); later
+                // content replaces it in motion.
+                if shown == nil {
+                    shown = (key, v)
+                } else {
+                    withAnimation(.easeInOut(duration: 0.3)) { shown = (key, v) }
+                }
             case let .failure(e):
+                shown = nil
                 failure = "\(e)"
             }
         }
     }
+
+    private var transition: AnyTransition { inPlace(motion, reduceMotion: reduceMotion) }
+}
+
+/**
+ * How a page replaced in place moves, as the Android app's do along Material's shared axis:
+ * later from the trailing side, earlier from the leading, the leaving page gone before the
+ * coming one settles; a fade where there is no order, or the reader has asked for less motion.
+ */
+func inPlace(_ motion: Motion, reduceMotion: Bool) -> AnyTransition {
+    let fadeIn = AnyTransition.opacity.animation(.easeOut(duration: 0.21).delay(0.09))
+    let fadeOut = AnyTransition.opacity.animation(.easeIn(duration: 0.09))
+    guard motion != .fade, !reduceMotion else { return .asymmetric(insertion: fadeIn, removal: fadeOut) }
+    let on: CGFloat = motion == .next ? 1 : -1
+    return .asymmetric(
+        insertion: AnyTransition.offset(x: 30 * on).combined(with: fadeIn),
+        removal: AnyTransition.offset(x: -30 * on).combined(with: fadeOut)
+    )
 }
 
 /// Runs `load` on a background queue.
@@ -61,7 +90,7 @@ struct HourPage: View {
 
     var body: some View {
         let form = model.form
-        Loaded(key: "\(date.iso) \(hour) \(form)") {
+        Loaded(key: "\(date.iso) \(hour) \(form)", motion: model.motion(to: .hour(date, hour))) {
             try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form)
         } content: { view in
             HourScreen(view: view, date: date)

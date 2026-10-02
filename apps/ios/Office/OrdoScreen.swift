@@ -5,10 +5,11 @@ struct OrdoPage: View {
     let year: Int
     let month: Int
     let day: Int
+    @EnvironmentObject private var model: AppModel
 
     var body: some View {
         let (y, mo) = (year, month)
-        Loaded(key: "\(y)-\(mo)") {
+        Loaded(key: "\(y)-\(mo)", motion: model.motion(to: .ordo(year: y, month: mo, day: day))) {
             try Office.core.get().ordoMonth(year: Int32(y), month: Int32(mo))
         } content: { view in
             OrdoScreen(month: view, focusDay: day)
@@ -21,11 +22,19 @@ struct OrdoPage: View {
 /// A year's frontispiece: arithmetic, drawn at once.
 struct YearPage: View {
     let year: Int
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        OrdoYearScreen(view: ordoYear(year: Int32(year)))
-            .background(PlasterWall())
-            .toolbar(.hidden, for: .navigationBar)
+        // Drawn at once, so another year moves in as soon as it is asked for.
+        ZStack {
+            OrdoYearScreen(view: ordoYear(year: Int32(year)))
+                .id(year)
+                .transition(inPlace(model.motion(to: .year(year)), reduceMotion: reduceMotion))
+        }
+        .animation(.easeInOut(duration: 0.3), value: year)
+        .background(PlasterWall())
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

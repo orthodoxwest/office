@@ -20,12 +20,16 @@ extension View {
     }
 }
 
-/// The web's controls mark state, not touches; a pressed control only dims a little.
+/**
+ * The web's controls mark state, not touches; a pressed control only dims a little, at once,
+ * and comes back over a moment when let go, so even the briefest tap is seen to land.
+ */
 struct Quiet: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? 0.55 : 1)
+            .animation(configuration.isPressed ? nil : .easeOut(duration: 0.2), value: configuration.isPressed)
     }
 }
 
