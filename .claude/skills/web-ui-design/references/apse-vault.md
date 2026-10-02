@@ -9,11 +9,20 @@ crossings came first and read as printed wallpaper.
 - The tile is `ornaments/vault.svg` (`--apse-star-tile`), written by
   `tools/genornaments.py` (seeded), used as a **mask**, never as a background
   image. The mask supplies only shape and alpha; the colour is the
-  pseudo-element's `background-color: var(--apse-ink)`, which is
-  `--ornament` in Apse and transparent in Nave. An SVG image cannot read
-  tokens, so painting it directly would freeze the stars through the seasons.
-  A star crossing the tile's edge is drawn again on the far side, so the
-  repeat is seamless.
+  pseudo-element's `background-color`, painted through it. An SVG image
+  cannot read tokens, so painting it directly would freeze the stars
+  through the seasons. A star crossing the tile's edge is drawn again on
+  the far side, so the repeat is seamless.
+- Home's field and the hours' ending read `--wall-field` and `--wall-ink`,
+  declared on `body`: by night the vault (`--apse-vault`, `--apse-ink`, the
+  seasonal `--ornament`), by day the Nave's powdering (`ornaments/powder.svg`,
+  six-petal rosettes in three sizes set by hand on the same 528px tile, in
+  `--ornament-line` at 18%, so it veils and gilds with the season). Both
+  share `--apse-tile` and the leaf mask. The Nave gate mirrors the Apse one
+  (`prefers-color-scheme: light` with `:root:not([data-theme="dark"])`, and
+  `:root[data-theme="light"]`). The wide hours' side and ending fields read
+  `--apse-vault` directly, so by day the margins beside the prayer stay
+  plain. `--apse-gild` stays `none` by day: the rosettes are flat paint.
 - Each field's fade is a second mask layer (`linear-gradient`, sized 100%),
   intersected with the tile (`mask-composite: intersect` plus
   `-webkit-mask-composite: source-in`). Give both layers the tile's position
@@ -68,8 +77,10 @@ crossings came first and read as printed wallpaper.
   plain and the ending scrolls. Below 1680px the margin holds a column of
   stars or less, which reads as an accident.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
-  band floating between blank margins. Keep the field static, and hide the
-  footer diamond where the vault already provides ornament.
+  band floating between blank margins. Keep the field static. The footer's
+  tailpiece (`footer::before`) sits on the field in both themes at one
+  geometry; `--apse-rest-seam` counts its height, so retune the seam if the
+  footer's height changes.
 - Software rasterization (headless Chromium, the snapshot tests, and any
   browser drawing without a GPU) truncates when it blends a feathered layer
   over a smooth dark field: a full-width fade steps down in one-level

@@ -47,8 +47,12 @@ or impose a redesign on an unrelated change.
   Keep Default / Nave / Apse labels and visible keyboard focus.
 - The starfield belongs to Apse home, the post-office epilogue, and, on
   screens 1680px and wider, the margins beside an hour's prayer, which run
-  down into the epilogue's field.
-  For changes to that field or its masks, read
+  down into the epilogue's field. By day the same home and epilogue fields
+  carry the Nave's powdering instead: six-petal rosettes stencilled over
+  the limewash in the lining thinned almost to the ground (`--wall-field`,
+  `--wall-ink`; `ornaments/powder.svg`), veiling and gilding with
+  `--ornament-line`. The wide hours' margins stay plain by day.
+  For changes to those fields or their masks, read
   [references/apse-vault.md](references/apse-vault.md).
 
 ## Layout and behavior invariants
@@ -69,10 +73,18 @@ or impose a redesign on an unrelated change.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
-- From 701px home's frontispiece is a niche set into the wall (round head,
-  stone moulding, day-colour trim, recess shadow, a terracotta lining painted
-  on its back wall round the head with the consecration cross at the crown;
-  phones show the cross alone), and the room is lit toward
+- On a phone home's frontispiece is a round-headed painted panel: a low
+  segmental head (`--panel-head`), the day's colour as a 1.5px ring at its
+  edge, the terracotta lining painted round the head (`--panel-inset`
+  inside the edge, with clear air above the cross: a tighter arch once
+  clipped it) ending at the inscription band, the consecration cross at
+  the crown, and a little recess shade under the head. Its shadows are a
+  token (`--panel-shadows`) that the Apse rules restate with their soft
+  erase. It must still fit a 375×667 viewport whole, so its cost was paid
+  by the header's margin, the footer gap and the page's bottom padding.
+  From 701px the same object widens into a niche set into the wall (round
+  head, stone moulding, day-colour trim, recess shadow, the lining restated
+  at the niche's scale), and the room is lit toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
   `--niche-zoom` steps gated on width and height. Its background and shadows
@@ -83,6 +95,16 @@ or impose a redesign on an unrelated change.
   mosaic conch, a painted sky, ochre voussoirs, glory rays) were tried too and
   read as stickers or sunbursts: keep the head plaster. The mosaic belongs to
   the app icon (`tools/genicons.py`), an object seen at one scale.
+- Every page closes on the footer's tailpiece (`footer::before`, a
+  quatrefoil between two painted rules, in the lining): the same geometry
+  in both themes, so the footer never moves with the theme, and set in rem
+  so the wide hours' vault seam (`--apse-rest-seam`) holds. The header beam
+  shows two edges (`--oak-line` over `--oak-moulding`), as a chamfered
+  timber does. The ordo's month headings and the Tabula's are tituli; the
+  year's figures sit on a painted tablet with quatrefoil knops
+  (`.tabula-figures::before`, one mask of rules and knops); today takes a
+  gilt parish star at the day number's shoulder, placed absolutely so it
+  adds no height.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's

@@ -771,12 +771,12 @@ for (const theme of ["light", "dark"]) {
   test(`the ${theme} wide hour's layers leave no stripes where they fade`, async ({ page }) => {
     // The end of Lauds on a wide screen gathers every layer above the wall:
     // the prayer band, the side field and the ending's vault. Hide the
-    // text and the stars (which are meant to show), then hold the rest to
-    // the bare wall's own grain.
+    // text, the stars and the footer's painted tailpiece (which are meant
+    // to show), then hold the rest to the bare wall's own grain.
     await page.setViewportSize({ width: 1920, height: 1080 });
     await openDatedPage(page, `/lauds/${testDate}`, theme);
     await page.addStyleTag({
-      content: `.elements, .hour-header, .hour-epilogue > *, footer > *, header, .hour-scroll-progress { visibility: hidden !important; }
+      content: `.elements, .hour-header, .hour-epilogue > *, footer > *, footer::before, header, .hour-scroll-progress { visibility: hidden !important; }
         .hour-epilogue::before, footer::after, .office-hour::before, .office-hour::after { display: none !important; }`,
     });
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
@@ -1033,6 +1033,14 @@ function vaultPaints({ mask, ink }) {
   return String(mask).includes("ornaments/vault.svg") && !transparent;
 }
 
+// The Nave's wall is powdered with rosettes through the same fields, in the
+// lining thinned almost to the ground (a color() with a small alpha). A
+// field powders only when it has the rosette tile and some ink.
+function powderPaints({ mask, ink }) {
+  const transparent = /^transparent$|^rgba\(\d+, \d+, \d+, 0\)$|\/ 0\)$/.test(String(ink));
+  return String(mask).includes("ornaments/powder.svg") && !transparent;
+}
+
 // Multi-layer backgrounds serialize each layer's position/size (Chromium:
 // "50% 0%, 50% 0%, …"). Engines also differ on keywords vs percentages.
 // Compare every layer's components rather than the full string.
@@ -1092,7 +1100,7 @@ function nearViewportEdge(value, expected, tol = 2) {
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -1102,19 +1110,25 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(`/?date=${testDate}`);
-    const seen = await sheet.evaluate(() => {
+    const seen = await sheet.evaluate((asToday) => {
+      // The fixed test day is historical, so the server adds the recovery
+      // line that local today's home never carries; drop it to measure the
+      // layout a reader sees on the day itself.
+      if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const diamond = getComputedStyle(footerElement, "::before");
+      const tailpiece = getComputedStyle(footerElement, "::before");
       const card = getComputedStyle(document.querySelector(".home-hero"));
       return {
         stars: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        // Home already ends on the niche's cross: no footer diamond, in
-        // either theme, so the footer never moves when the theme changes.
-        diamondShown: diamond.display !== "none",
+        // The footer closes on its painted tailpiece in both themes, with
+        // the same geometry, so the footer never moves when the theme
+        // changes.
+        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
+        tailpieceShown: tailpiece.display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -1122,7 +1136,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,
       };
-    });
+    }, asToday);
     await context.close();
     return seen;
   };
@@ -1132,21 +1146,32 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.diamondShown).toBe(false);
+  expect(apse.tailpieceShown).toBe(true);
+  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
   expect(apse.cardShadow).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
+  // The night carries no powdering: its field is the vault alone.
+  expect(powderPaints(apse.stars)).toBe(false);
 
-  // Nave keeps the same page geometry but paints no vault.
+  // Nave keeps the same page geometry but paints no vault: its wall is
+  // powdered with rosettes instead, in the same fixed field.
   for (const [theme, scheme] of [
     ["light", "light"],
     [null, "light"],
   ]) {
     const nave = await read({ height: 844, theme, scheme });
     expect(vaultPaints(nave.stars)).toBe(false);
-    expect(nave.diamondShown).toBe(false);
+    expect(powderPaints(nave.stars)).toBe(true);
+    expect(nave.position).toBe("fixed");
+    expect(nave.tailpieceShown).toBe(true);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
+
+  // On the day itself a phone's home fits its viewport whole, every hour in
+  // reach without scrolling, on a 375x667 screen as well.
+  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
+  expect(small.scrolls).toBe(false);
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -1205,7 +1230,7 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
       const footerElement = document.querySelector("footer");
       const field = getComputedStyle(epilogue, "::before");
       const footerField = getComputedStyle(footerElement, "::after");
-      const diamond = getComputedStyle(footerElement, "::before");
+      const tailpiece = getComputedStyle(footerElement, "::before");
       const mainBox = main.getBoundingClientRect();
       const prayerBox = prayer.getBoundingClientRect();
       const epilogueBox = epilogue.getBoundingClientRect();
@@ -1232,7 +1257,7 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
           field.maskPosition || field.webkitMaskPosition,
           footerField.maskPosition || footerField.webkitMaskPosition,
         ],
-        diamondShown: diamond.display !== "none",
+        tailpiece: tailpiece.display === "none" ? "" : tailpiece.maskImage || tailpiece.webkitMaskImage,
         endMark: getComputedStyle(epilogue.querySelector(".hour-end-mark")).maskImage || "",
       };
     });
@@ -1257,16 +1282,24 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   expect(isBottomCenterPhase(apse.phase[0])).toBe(true);
   expect(isTopCenterPhase(apse.phase[1])).toBe(true);
   // The hour ends on one mark, the consecration cross, in both themes; the
-  // footer adds no diamond, so its height never moves when Nave/Apse toggles.
+  // footer closes on the same painted tailpiece in both, so its height
+  // never moves when Nave/Apse toggles.
   expect(apse.endMark).toContain("ornaments/consecration.svg");
-  expect(apse.diamondShown).toBe(false);
+  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(powderPaints(apse.fieldLayers)).toBe(false);
 
+  // By day the same fields after the prayer carry the Nave's powdering
+  // instead of the vault, on the same geometry.
   const nave = await read("light");
   expect(nave.prayerField).toBe("none");
   expect(vaultPaints(nave.fieldLayers)).toBe(false);
   expect(vaultPaints(nave.footerLayers)).toBe(false);
+  expect(powderPaints(nave.fieldLayers)).toBe(true);
+  expect(powderPaints(nave.footerLayers)).toBe(true);
+  expect(nave.startsAfterPrayer).toBe(true);
+  expect(nave.joinsFooter).toBe(true);
   expect(nave.endMark).toContain("ornaments/consecration.svg");
-  expect(nave.diamondShown).toBe(false);
+  expect(nave.tailpiece).toContain("ornaments/tailpiece.svg");
 
   const desktop = await read("dark", 1280);
   expect(desktop.prayerField).toBe("none");
