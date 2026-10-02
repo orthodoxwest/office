@@ -76,24 +76,26 @@ private const val NO_SMALL_CAPS = "'smcp' 0, 'c2sc' 0, lnum"
 fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
     if (prev == null) return 0.dp
     val heading = { b: BlockView -> b.kind == BlockKind.HEADING || b.kind == BlockKind.COMMEMORATION_HEADING }
+    val antiphon = { b: BlockView -> b.kind == BlockKind.ANTIPHON || b.kind == BlockKind.ANNOUNCED_ANTIPHON }
+    val note = { b: BlockView -> b.kind == BlockKind.ANTIPHON_NOTE || b.kind == BlockKind.ANNOUNCEMENT_NOTE }
     return when {
         heading(cur) -> 38.dp
         heading(prev) -> if (cur.kind == BlockKind.CHAPTER_REF) 24.dp else 27.dp
         cur.kind == BlockKind.GAP || prev.kind == BlockKind.GAP -> 4.8.dp
         prev.kind == BlockKind.ITEM_LABEL -> 9.dp
         // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-        cur.kind == BlockKind.ANTIPHON_NOTE -> 2.4.dp
-        cur.kind == BlockKind.ITEM_LABEL -> if (prev.kind == BlockKind.ANTIPHON || prev.kind == BlockKind.ANTIPHON_NOTE) 10.dp else 30.dp
+        note(cur) -> 2.4.dp
+        cur.kind == BlockKind.ITEM_LABEL -> if (antiphon(prev) || note(prev)) 10.dp else 30.dp
         prev.kind == BlockKind.CHAPTER_REF -> 15.dp
         prev.kind == BlockKind.LATIN_TITLE -> 8.dp
         prev.kind == BlockKind.SPEAKER -> 3.2.dp
         // A closing antiphon, then the next group's opening one: the threshold between groups.
-        cur.kind == BlockKind.ANTIPHON && prev.kind == BlockKind.ANTIPHON -> 49.dp
+        antiphon(cur) && prev.kind == BlockKind.ANTIPHON -> 49.dp
         // A closing antiphon sits close under its psalm's last verse or Gloria.
-        cur.kind == BlockKind.ANTIPHON && (prev.kind == BlockKind.VERSE || (prev.kind == BlockKind.PARAGRAPH && !prev.startsElement)) -> 6.dp
+        cur.kind == BlockKind.ANTIPHON && (prev.kind == BlockKind.VERSE || (prev.kind == BlockKind.GLORIA_PATRI && !prev.startsElement)) -> 6.dp
         cur.kind == BlockKind.VERSE && prev.kind == BlockKind.VERSE -> 4.8.dp
         // The Gloria Patri after a psalm's last verse.
-        cur.kind == BlockKind.PARAGRAPH && prev.kind == BlockKind.VERSE -> 13.6.dp
+        cur.kind == BlockKind.GLORIA_PATRI && prev.kind == BlockKind.VERSE -> 13.6.dp
         cur.kind == BlockKind.STANZA && prev.kind == BlockKind.STANZA -> 12.dp
         cur.startsElement -> 14.dp
         else -> 4.8.dp
@@ -136,16 +138,27 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             m.fillMaxWidth().padding(start = with(LocalDensity.current) { 21.6.sp.toDp() }),
             style = Type.rubric.copy(color = p.rubric),
         )
+        // Under an announcement, centred beneath its words.
+        BlockKind.ANNOUNCEMENT_NOTE -> Text(
+            runs(block),
+            m.fillMaxWidth().padding(horizontal = 4.dp),
+            style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center),
+        )
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
-        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it.
-        BlockKind.ANTIPHON -> Text(
+        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
+        // opening words stand centred over the psalm's label, as the web's `.antiphon-announce`.
+        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> Text(
             buildAnnotatedString {
                 withStyle(SpanStyle(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.4.sp)) { append(block.marker) }
                 append(" ")
                 append(runs(block))
             },
             m.fillMaxWidth(),
-            style = text.copy(textIndent = TextIndent(restLine = 21.6.sp)),
+            style = if (block.kind == BlockKind.ANNOUNCED_ANTIPHON) {
+                text.copy(textAlign = TextAlign.Center)
+            } else {
+                text.copy(textIndent = TextIndent(restLine = 21.6.sp))
+            },
         )
         BlockKind.VERSE -> when {
             block.dropCap -> Opening(block, verse, m, textStart = VerseGutter)
@@ -160,6 +173,12 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
                 Text(runs(block), Modifier.alignByBaseline(), style = verse)
             }
         }
+        // The Gloria Patri keeps the verses' edge; each line's wrap steps in (the web's `.source-line`, 1.1rem).
+        BlockKind.GLORIA_PATRI -> Text(
+            runs(block),
+            m.fillMaxWidth().padding(start = VerseGutter),
+            style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp)),
+        )
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
             block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth(), style = text)
@@ -319,7 +338,7 @@ fun spoken(block: BlockView): String {
         .removeSuffix(",")
         .replaceFirstChar { it.uppercase() }
     val marker = when (block.kind) {
-        BlockKind.ANTIPHON -> "Antiphon."
+        BlockKind.ANTIPHON, BlockKind.ANNOUNCED_ANTIPHON -> "Antiphon."
         BlockKind.VERSICLE, BlockKind.RESPONSE -> block.marker.replace("℣.", "Versicle.").replace("℟.", "Response.")
         BlockKind.VERSE -> ""
         else -> block.marker
