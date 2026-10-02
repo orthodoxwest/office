@@ -6,25 +6,29 @@ private let openPreparation: Set<String> = ["lauds", "prime", "vespers"]
 
 /**
  * What a page shows once its content is composed. Composing reads the corpus, so it runs off
- * the main thread; the page keeps what it had until the new content is ready.
+ * the main thread; the page keeps what it had until the new content is ready, then moves to it
+ * as `motion` says, from the top of the new page.
  */
 struct Loaded<Value, Content: View>: View {
     let key: String
+    let motion: Motion
     let load: () throws -> Value
     let content: (Value) -> Content
-    @State private var value: Value?
+    @State private var shown: (key: String, value: Value)?
     @State private var failure: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(key: String, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    init(key: String, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
+        self.motion = motion
         self.load = load
         self.content = content
     }
 
     var body: some View {
         ZStack {
-            if let value {
-                content(value)
+            if let shown {
+                content(shown.value).id(shown.key).transition(transition)
             } else if let failure {
                 Message(text: failure)
             } else {
@@ -35,13 +39,38 @@ struct Loaded<Value, Content: View>: View {
             let result = await compose(load)
             switch result {
             case let .success(v):
-                value = v
                 failure = nil
+                // The first content simply appears (the stack's push brings it); later
+                // content replaces it in motion.
+                if shown == nil {
+                    shown = (key, v)
+                } else {
+                    withAnimation(.easeInOut(duration: 0.3)) { shown = (key, v) }
+                }
             case let .failure(e):
+                shown = nil
                 failure = "\(e)"
             }
         }
     }
+
+    private var transition: AnyTransition { inPlace(motion, reduceMotion: reduceMotion) }
+}
+
+/**
+ * How a page replaced in place moves, as the Android app's do along Material's shared axis:
+ * later from the trailing side, earlier from the leading, the leaving page gone before the
+ * coming one settles; a fade where there is no order, or the reader has asked for less motion.
+ */
+func inPlace(_ motion: Motion, reduceMotion: Bool) -> AnyTransition {
+    let fadeIn = AnyTransition.opacity.animation(.easeOut(duration: 0.21).delay(0.09))
+    let fadeOut = AnyTransition.opacity.animation(.easeIn(duration: 0.09))
+    guard motion != .fade, !reduceMotion else { return .asymmetric(insertion: fadeIn, removal: fadeOut) }
+    let on: CGFloat = motion == .next ? 1 : -1
+    return .asymmetric(
+        insertion: AnyTransition.offset(x: 30 * on).combined(with: fadeIn),
+        removal: AnyTransition.offset(x: -30 * on).combined(with: fadeOut)
+    )
 }
 
 /// Runs `load` on a background queue.
@@ -61,7 +90,7 @@ struct HourPage: View {
 
     var body: some View {
         let form = model.form
-        Loaded(key: "\(date.iso) \(hour) \(form)") {
+        Loaded(key: "\(date.iso) \(hour) \(form)", motion: model.motion(to: .hour(date, hour))) {
             try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form)
         } content: { view in
             HourScreen(view: view, date: date)
@@ -122,7 +151,7 @@ struct HourScreen: View {
                     ForEach(rows) { row in
                         switch row {
                         case let .toggle(i, label, expanded):
-                            Button { open[i] = !expanded } label: {
+                            Button { withAnimation(unfolding) { open[i] = !expanded } } label: {
                                 HStack(spacing: 0) {
                                     Text(label).type(Scale.heading).foregroundStyle(p.titulus)
                                     Caret(open: expanded, color: p.titulus)
@@ -154,6 +183,7 @@ struct HourScreen: View {
                     )
                 }
             }
+            .revealing(scroll)
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
@@ -223,6 +253,7 @@ private struct HourTitle: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @State private var picking = false
+    @Environment(\.reveal) private var reveal
     @State private var choosing = false
 
     var body: some View {
@@ -272,12 +303,16 @@ private struct HourTitle: View {
                     picking = false
                     model.open(.hour(d, view.hour))
                 }
+                .id("disclosed")
+                .transition(.unfold)
             }
             if choosing {
                 FormChooser(form: model.form) { f in
-                    choosing = false
+                    withAnimation(unfolding) { choosing = false }
                     model.chooseForm(f)
                 }
+                .id("disclosed")
+                .transition(.unfold)
             }
             Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
         }
@@ -288,12 +323,18 @@ private struct HourTitle: View {
 
     @ViewBuilder private var disclosures: some View {
         Disclosure(label: "Change date", open: picking) {
-            picking.toggle()
-            choosing = false
+            withAnimation(unfolding) {
+                picking.toggle()
+                choosing = false
+            }
+            if picking { reveal("disclosed") }
         }
         Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label) {
-            choosing.toggle()
-            picking = false
+            withAnimation(unfolding) {
+                choosing.toggle()
+                picking = false
+            }
+            if choosing { reveal("disclosed") }
         }
     }
 }

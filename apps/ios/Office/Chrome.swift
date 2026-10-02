@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The reading measure's side gutter (`--page-gutter` on a phone).
 let gutter: CGFloat = 16
@@ -20,12 +21,16 @@ extension View {
     }
 }
 
-/// The web's controls mark state, not touches; a pressed control only dims a little.
+/**
+ * The web's controls mark state, not touches; a pressed control only dims a little, at once,
+ * and comes back over a moment when let go, so even the briefest tap is seen to land.
+ */
 struct Quiet: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? 0.55 : 1)
+            .animation(configuration.isPressed ? nil : .easeOut(duration: 0.2), value: configuration.isPressed)
     }
 }
 
@@ -216,13 +221,21 @@ struct MenuPanel: View {
             HStack(spacing: 0) {
                 rowLabel("THEME")
                 ForEach(ThemeChoice.allCases) { t in
-                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), p.accent, spoken: "\(t.label) theme") { model.chooseTheme(t) }
+                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), p.accent, spoken: "\(t.label) theme") {
+                        guard t != model.theme else { return }
+                        chose()
+                        withAnimation(restyling) { model.chooseTheme(t) }
+                    }
                 }
             }
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
-                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), p.muted, spoken: textSizeName(s)) { model.chooseTextSize(s) }
+                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), p.muted, spoken: textSizeName(s)) {
+                        guard s != model.textSize else { return }
+                        chose()
+                        withAnimation(restyling) { model.chooseTextSize(s) }
+                    }
                 }
             }
         }
@@ -275,6 +288,63 @@ func textSizeName(_ s: TextSize) -> String {
     }
 }
 
+/**
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
+ * Android app gives; never for a page opened. The phone's own haptics setting governs it.
+ */
+func chose() { UISelectionFeedbackGenerator().selectionChanged() }
+
+/// The tap of a checkbox turned on or off.
+func toggled() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+
+/// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does.
+let restyling = Animation.easeInOut(duration: 0.32)
+
+/**
+ * Brings what a disclosure unfolded into view, once it has unfolded, when it opened past the
+ * screen's edge: a page's scroll view sets it (`revealing`), and the disclosure names its
+ * contents' id.
+ */
+struct Reveal {
+    fileprivate let scroll: (String) -> Void
+    func callAsFunction(_ id: String) { scroll(id) }
+}
+
+private struct RevealKey: EnvironmentKey {
+    static let defaultValue = Reveal { _ in }
+}
+
+extension EnvironmentValues {
+    var reveal: Reveal {
+        get { self[RevealKey.self] }
+        set { self[RevealKey.self] = newValue }
+    }
+}
+
+extension View {
+    /// Lets the disclosures inside bring what they unfold into view through `proxy`.
+    func revealing(_ proxy: ScrollViewProxy) -> some View {
+        environment(\.reveal, Reveal { id in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(id, anchor: .bottom) }
+            }
+        })
+    }
+}
+
+/// How a disclosure opens and closes, as on Android: over a quarter second, easing in and out.
+let unfolding = Animation.easeInOut(duration: 0.26)
+
+extension AnyTransition {
+    /// A disclosure's contents, fading in as they drop a little from their control, and back.
+    static var unfold: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.06)).combined(with: .offset(y: -6)),
+            removal: .opacity.animation(.easeIn(duration: 0.1)).combined(with: .offset(y: -6))
+        )
+    }
+}
+
 /// A small uppercase disclosure label with its caret ("Change date ▾").
 struct Disclosure: View {
     let label: String
@@ -316,8 +386,11 @@ struct DayPicker: View {
     @State private var year: Int
     @State private var month: Int
     @State private var months = false
+    /// Which way the days last turned: 1 to a later month, -1 to an earlier.
+    @State private var turn: CGFloat = 1
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(shown: CivilDate, today: CivilDate, pick: @escaping (CivilDate) -> Void) {
         self.shown = shown
@@ -347,7 +420,7 @@ struct DayPicker: View {
             HStack(spacing: 0) {
                 // A month's step in the days, a year's in the months; none past the picker's span.
                 step("‹", back, months ? "Previous year" : "Previous month")
-                Button { months.toggle() } label: {
+                Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
                     HStack(spacing: 0) {
                         Text(title.uppercased()).type(.label(12.8, 0.1)).foregroundStyle(p.text)
                         Caret(open: months, color: p.text)
@@ -361,15 +434,41 @@ struct DayPicker: View {
             .padding(.top, m.px(12))
             ZStack {
                 // The days always lay out, for the height both views share; the months cover them.
-                days.opacity(months ? 0 : 1).accessibilityHidden(months)
-                if months { monthGrid }
+                // A new month's days slide in the way it turned.
+                days
+                    .id(year * 12 + month)
+                    .transition(reduceMotion ? .opacity : .asymmetric(
+                        insertion: .offset(x: 60 * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
+                        removal: .offset(x: -60 * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
+                    ))
+                    .opacity(months ? 0 : 1)
+                    .accessibilityHidden(months)
+                if months { monthGrid.transition(.opacity) }
             }
+            .clipped()
             .padding(.horizontal, m.px(8))
+            // A swipe across the days turns the month, as the arrows do.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 24).onEnded { drag in
+                    guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2) else { return }
+                    turnTo(drag.translation.width < 0 ? forward : back)
+                }
+            )
         }
         .padding(.top, m.px(8))
     }
 
     private var title: String { months ? "\(year)" : "\(monthName(month)) \(year)" }
+
+    /// Shows another month's days (or year's months), moving the way it lies.
+    private func turnTo(_ to: (Int, Int)?) {
+        guard let to else { return }
+        turn = to.0 * 12 + to.1 > year * 12 + month ? 1 : -1
+        withAnimation(.easeInOut(duration: 0.26)) {
+            year = to.0
+            month = to.1
+        }
+    }
 
     private var back: (Int, Int)? {
         let (y, mo) = months ? (year - 1, month) : month == 1 ? (year - 1, 12) : (year, month - 1)
@@ -382,9 +481,7 @@ struct DayPicker: View {
     }
 
     private func step(_ glyph: String, _ to: (Int, Int)?, _ label: String) -> some View {
-        Button {
-            if let to { year = to.0; month = to.1 }
-        } label: {
+        Button { turnTo(to) } label: {
             Text(glyph).type(Scale.body.sized(22, line: 28)).foregroundStyle(to == nil ? p.muted.opacity(0.35) : p.accent)
                 .padding(.horizontal, m.px(24)).frame(minHeight: 44)
         }
@@ -411,7 +508,10 @@ struct DayPicker: View {
                         let n = week * 7 + i - lead + 1
                         if (1...length).contains(n) {
                             let day = CivilDate(year: Int32(year), month: Int32(month), day: Int32(n))
-                            Button { pick(day) } label: {
+                            Button {
+                                chose()
+                                pick(day)
+                            } label: {
                                 Text("\(n)").type(TextStyle(size: 18, line: 30, lining: true))
                                     .foregroundStyle(i == 0 ? p.rubric : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
@@ -469,7 +569,10 @@ struct FormChooser: View {
         VStack(spacing: 0) {
             Text("How are you praying?").type(Scale.body.sized(16, line: 24)).foregroundStyle(p.muted).padding(.bottom, m.px(4))
             ForEach(prayerForms, id: \.value) { f in
-                Button { choose(f.value) } label: {
+                Button {
+                    if f.value != form { chose() }
+                    choose(f.value)
+                } label: {
                     HStack(spacing: m.px(10)) {
                         ZStack {
                             Circle().stroke(f.value == form ? p.gold : p.border, lineWidth: 1).frame(width: m.px(16), height: m.px(16))

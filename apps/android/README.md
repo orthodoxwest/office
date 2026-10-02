@@ -57,6 +57,15 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 - **The chosen theme throughout.** Nave or Apse colours the window from the first frame, the
   status and navigation bar icons, and (Android 13+) the next launch screen, whatever the
   phone's own light or dark (`WindowThemeTest`).
+- **Motion.** Quiet and brief, never decorative. A page comes in only once its content is
+  composed, so nothing flashes; it moves along Material's shared axis, deeper or later from
+  the end and back or earlier from the start, or fades through the wall where there is no
+  order (`MotionTest`). The back gesture draws the page behind in as it is made. Disclosures
+  unfold from their controls and, once open, scroll into view; the menu drops in; the date
+  picker's months slide, and a swipe turns them; a new theme or text size dissolves in
+  (`Dissolve.kt`). A pressed control dims, as on iOS. Remove animations shows each at once.
+- **Touch.** A light tick under a choice (a setting, a prayer form, a day) and a toggle's tick
+  on a checkbox; none for a page opened.
 - **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in
   the web's hairline glyphs. They open the day they are tapped; Compline in the small hours is
   the day before's, as "Pray now" reckons it (`ShortcutsTest`).

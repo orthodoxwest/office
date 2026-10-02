@@ -89,14 +89,18 @@ fun OrdoScreen(
     val p = LocalPalette.current
     val wide = LocalWide.current
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
-    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) { LazyListState() }
+    // A day asked for (the web's #d-date) is brought into view once, when the month is ready:
+    // from the first frame when it already is, so the page comes in at that day. After that
+    // the reader's own scroll position stands, restored or not.
+    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
+    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
+    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
+        LazyListState(if (focusDay != 0 && month != null) focusItem else 0)
+    }
     val scope = rememberCoroutineScope()
-    // A day asked for (the web's #d-date) is brought into view once, when the month is ready;
-    // after that the reader's own scroll position stands, restored or not.
-    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0) }
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
-            listState.scrollToItem(FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1)
+            listState.scrollToItem(focusItem)
             focused = true
         }
     }
@@ -427,8 +431,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             }
             if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
         }
-        if (open["comms"] == true) d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) }
-        if (details && hasDetails) Digest(d)
+        Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
+        // Shown for the whole month at once, the rows stay where they are.
+        Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
     }
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, body)
     Column(modifier.then(if (isToday) Modifier.background(p.pressedWash) else Modifier)) {

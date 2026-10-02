@@ -230,7 +230,7 @@ private fun Frontispiece(
             Hairline(p.border, Modifier.padding(top = 11.2.dp))
             if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
             Disclosure("Change date", picking, { picking = !picking })
-            if (picking) DatePicker(date, today) { picking = false; onDate(it) }
+            Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
         }
     }
 }

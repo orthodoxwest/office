@@ -65,15 +65,7 @@ struct RootView: View {
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
-                    .navigationDestination(for: Page.self) { page in
-                        switch page {
-                        case let .home(d): HomePage(date: d)
-                        case let .hour(d, h): HourPage(date: d, hour: h)
-                        case let .ordo(y, m, d): OrdoPage(year: y, month: m, day: d)
-                        case let .year(y): YearPage(year: y)
-                        case .reminders: RemindersPage()
-                        }
-                    }
+                    .navigationDestination(for: Entry.self) { entry in EntryPage(entry: entry.id) }
             }
             .overlay(alignment: .topTrailing) {
                 if model.menuOpen && geo.size.width < wideFrom {
@@ -85,7 +77,7 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.horizontal, gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
                 if model.settingsOpen && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
@@ -96,7 +88,7 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
             }
             .animation(.easeOut(duration: 0.15), value: model.menuOpen)
@@ -127,6 +119,27 @@ struct RootView: View {
             // Every visit keeps the reminders running ahead.
             ReminderScheduler.sync()
             ReminderScheduler.scheduleRefresh()
+        }
+    }
+}
+
+/**
+ * A visit's page, read from the way back as it is now: a page of the same kind replacing it
+ * changes it here, in place.
+ */
+private struct EntryPage: View {
+    let entry: Int
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        switch model.page(of: entry) {
+        case let .home(d)?: HomePage(date: d)
+        case let .hour(d, h)?: HourPage(date: d, hour: h)
+        case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
+        case let .year(y)?: YearPage(year: y)
+        case .reminders?: RemindersPage()
+        // Gone from the way back, while the stack lets it go.
+        case nil: Color.clear
         }
     }
 }

@@ -1,11 +1,37 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -19,22 +45,35 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -59,6 +98,8 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
 val Gutter: Dp = 16.dp
@@ -68,17 +109,71 @@ val Measure: Dp = 608.dp
 
 fun Modifier.measure(): Modifier = this.widthIn(max = Measure).fillMaxWidth().padding(horizontal = Gutter)
 
-/** A tap target with no ripple: the web's controls mark state, not touches. */
+/** A tap target with no ripple: the web's controls mark state, not touches; a pressed one only dims a little. */
 fun Modifier.tap(role: Role = Role.Button, label: String? = null, selected: Boolean? = null, action: String? = null, onClick: () -> Unit): Modifier =
     this.semantics {
         // What a screen reader says for a control drawn as a glyph ("‹", "↑"), in place of the glyph.
         if (label != null) contentDescription = label
         if (selected != null) this.selected = selected
-    }.clickable(interactionSource = null, indication = null, role = role, onClickLabel = action, onClick = onClick)
+    }.clickable(interactionSource = null, indication = Dim, role = role, onClickLabel = action, onClick = onClick)
 
 /** A checkbox row: the box and its words are one control, announced checked or not. */
 fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
-    this.toggleable(checked, interactionSource = null, indication = null, role = Role.Checkbox, onValueChange = onChange)
+    this.toggleable(checked, interactionSource = null, indication = Dim, role = Role.Checkbox, onValueChange = onChange)
+
+/**
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
+ * iOS app gives; never for a page opened. The phone's own touch-feedback setting governs it.
+ */
+fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTick)
+
+/** The tick of a checkbox turned on or off. */
+fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+
+/** How far a pressed control dims, as the iOS app's (Quiet). */
+private const val PRESSED_ALPHA = 0.55f
+
+/**
+ * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
+ * let go, so even the briefest tap is seen to land.
+ */
+private object Dim : IndicationNodeFactory {
+    override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
+    override fun equals(other: Any?) = other === this
+    override fun hashCode() = 0
+}
+
+private class DimNode(private val source: InteractionSource) : Modifier.Node(), DrawModifierNode {
+    private val alpha = Animatable(1f)
+    private val layer = Paint()
+
+    override fun onAttach() {
+        coroutineScope.launch {
+            val presses = mutableListOf<PressInteraction.Press>()
+            source.interactions.collect { interaction ->
+                when (interaction) {
+                    is PressInteraction.Press -> presses.add(interaction)
+                    is PressInteraction.Release -> presses.remove(interaction.press)
+                    is PressInteraction.Cancel -> presses.remove(interaction.press)
+                }
+                if (presses.isEmpty()) {
+                    launch { alpha.animateTo(1f, tween(200, easing = LinearOutSlowInEasing)) }
+                } else {
+                    launch { alpha.snapTo(PRESSED_ALPHA) }
+                }
+            }
+        }
+    }
+
+    override fun ContentDrawScope.draw() {
+        val a = alpha.value
+        if (a >= 1f) return drawContent()
+        layer.alpha = a
+        drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+        drawContent()
+        drawContext.canvas.restore()
+    }
+}
 
 /** "Expanded" or "Collapsed", after a disclosure's name. */
 fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }
@@ -203,8 +298,12 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
 @Composable
 private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, page: Boolean = false, onClick: () -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current, onClick = onClick)
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current) {
+            if (!page && !current) haptics.chose()
+            onClick()
+        }
             .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, p.goldLine)),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
@@ -232,17 +331,29 @@ fun MenuPanel(
     topOffset: Dp,
     prefsOnly: Boolean = false,
     end: Dp = Gutter,
+    visible: Boolean = true,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
+    // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
+    // window until it has gone.
+    val shown = remember { MutableTransitionState(false) }
+    shown.targetState = visible
+    if (!shown.currentState && !shown.targetState && shown.isIdle) return
     Popup(
         alignment = Alignment.TopEnd,
         offset = with(LocalDensity.current) { IntOffset(-end.roundToPx(), topOffset.roundToPx()) },
         onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true),
+        properties = PopupProperties(focusable = visible),
     ) {
-        Column(
+        val drop = with(LocalDensity.current) { 8.dp.roundToPx() }
+        AnimatedVisibility(
+            shown,
+            enter = fadeIn(tween(150, easing = LinearOutSlowInEasing)) + slideInVertically(tween(200, easing = FastOutSlowInEasing)) { -drop },
+            exit = fadeOut(tween(120, easing = FastOutLinearInEasing)) + slideOutVertically(tween(120, easing = FastOutLinearInEasing)) { -drop / 2 },
+        ) {
+            Column(
                 Modifier
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
@@ -279,6 +390,7 @@ fun MenuPanel(
                     }
                 }
             }
+        }
     }
 }
 
@@ -297,6 +409,34 @@ fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String
         Caret(open, p.muted)
     }
 }
+
+/**
+ * A disclosure's contents, unfolding down from its control and folding back up into it. With
+ * `reveal`, once unfolded it is scrolled into view if it opened past the screen's edge; never
+ * when it was open already, as a row scrolled into view would be.
+ */
+@Composable
+fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
+    val bring = remember { BringIntoViewRequester() }
+    AnimatedVisibility(
+        visible,
+        modifier.bringIntoViewRequester(bring),
+        enter = expandVertically(tween(UNFOLD_MS, easing = FastOutSlowInEasing), expandFrom = Alignment.Top) +
+            fadeIn(tween(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)),
+        exit = shrinkVertically(tween(FOLD_MS, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Top) +
+            fadeOut(tween(FOLD_MS / 2, easing = FastOutLinearInEasing)),
+    ) {
+        LaunchedEffect(Unit) {
+            if (!reveal || transition.currentState == EnterExitState.Visible) return@LaunchedEffect
+            snapshotFlow { transition.currentState }.first { it == EnterExitState.Visible }
+            bring.bringIntoView()
+        }
+        Column(content = content)
+    }
+}
+
+private const val UNFOLD_MS = 260
+private const val FOLD_MS = 200
 
 /** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
 private val PICKER_YEARS = 1950..2150
@@ -351,11 +491,35 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
                 style = if (forward != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
             )
         }
-        Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+        // A swipe across the days turns the month, as the arrows do.
+        val swipe = with(LocalDensity.current) { 48.dp.toPx() }
+        var dragged by remember { mutableFloatStateOf(0f) }
+        val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
+        Box(
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp).draggable(
+                rememberDraggableState { dragged += it },
+                Orientation.Horizontal,
+                enabled = !months,
+                onDragStarted = { dragged = 0f },
+                onDragStopped = {
+                    val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
+                    if (to != null && to.year in PICKER_YEARS) month = to
+                },
+            ),
+        ) {
             // The days always lay out, for the height both views share; the months cover them.
-            Column(Modifier.then(if (months) Modifier.alpha(0f).clearAndSetSemantics {} else Modifier)) { Days(month, shown, today, live = !months, onPick) }
-            if (months) {
-                MonthGrid(month.year, shown, today, Modifier.matchParentSize()) { m ->
+            AnimatedContent(
+                month,
+                Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
+                transitionSpec = {
+                    val on = if (targetState > initialState) 1 else -1
+                    (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
+                        (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
+                },
+                label = "month",
+            ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
+            if (months || daysAlpha < 1f) {
+                MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
                     month = YearMonth.of(month.year, m)
                     months = false
                 }
@@ -374,6 +538,7 @@ private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
 @Composable
 private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boolean, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     val days = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
     // The weekday letters are for the eye; each day below names itself in full.
     Row(Modifier.fillMaxWidth().clearAndSetSemantics {}) {
@@ -395,7 +560,10 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
-                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) { onPick(day) } else Modifier),
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
+                            haptics.chose()
+                            onPick(day)
+                        } else Modifier),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (day != null) {
@@ -413,7 +581,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
 
 /** The year's months, three to a row: the chosen day's month underlined in gold, today's washed. */
 @Composable
-private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: Modifier, onMonth: (Int) -> Unit) {
+private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: Modifier, live: Boolean, onMonth: (Int) -> Unit) {
     val p = LocalPalette.current
     Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
         (1..12).chunked(3).forEach { row ->
@@ -426,7 +594,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
                                 .then(if (today.year == year && today.monthValue == m) Modifier.background(p.gold.copy(alpha = 0.1f)) else Modifier)
-                                .tap(label = "$name $year", selected = chosen) { onMonth(m) }
+                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
                                 .padding(horizontal = 14.4.dp, vertical = 13.dp),
@@ -443,11 +611,15 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
 @Composable
 fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("How are you praying?", style = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.muted))
         Spacer(Modifier.height(4.dp))
         PRAYER_FORMS.forEach { (value, _, phrase) ->
-            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) { onForm(value) }, verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) {
+                if (value != form) haptics.chose()
+                onForm(value)
+            }, verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(16.dp).border(1.dp, if (value == form) p.gold else p.border, CircleShape), contentAlignment = Alignment.Center) {
                     if (value == form) Box(Modifier.size(8.dp).background(p.gold, CircleShape))
                 }

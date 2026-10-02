@@ -45,6 +45,7 @@ struct RemindersScreen: View {
                             ForEach(reminderWeek, id: \.self) { d in
                                 let on = settings.days.contains(d)
                                 Button {
+                                    toggled()
                                     var s = settings
                                     if on { s.days.remove(d) } else { s.days.insert(d) }
                                     change(s)
@@ -140,6 +141,7 @@ struct RemindersScreen: View {
         HStack(spacing: 0) {
             // The box and the hour's name are one checkbox; its time is a control of its own.
             Button {
+                toggled()
                 var changed = h
                 changed.chosen.toggle()
                 change(settings.with(changed))
