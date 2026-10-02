@@ -40,7 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -223,23 +223,31 @@ private fun Fieldset(legend: String, modifier: Modifier = Modifier, content: @Co
     }
 }
 
-/** A checkbox in the accent colour, as the web's `accent-color` sets them; the row around it is the control. */
+/**
+ * A checkbox set by hand, as the web's are: a ruled square, 0.95rem, that fills with oak inside a
+ * margin of the ground when chosen. The platform's own box belongs to no theme here. The row
+ * around it is the control.
+ */
 @Composable
 private fun Tick(checked: Boolean) {
     val p = LocalPalette.current
-    Canvas(Modifier.size(20.dp).padding(1.dp)) {
-        val r = 2.dp.toPx()
+    Canvas(Modifier.size(20.dp)) {
+        val side = 15.2.dp.toPx()
+        val corner = Offset((size.width - side) / 2, (size.height - side) / 2)
+        val box = Size(side, side)
+        val rule = 1.dp.toPx()
+        drawRect(p.bg, corner, box)
         if (checked) {
-            drawRoundRect(p.accent, cornerRadius = CornerRadius(r))
-            val tick = Path().apply {
-                moveTo(size.width * 0.24f, size.height * 0.52f)
-                lineTo(size.width * 0.42f, size.height * 0.70f)
-                lineTo(size.width * 0.78f, size.height * 0.32f)
-            }
-            drawPath(tick, p.bg, style = Stroke(2.dp.toPx()))
-        } else {
-            drawRoundRect(p.muted, cornerRadius = CornerRadius(r), style = Stroke(1.2.dp.toPx()))
+            val inset = rule + 3.dp.toPx()
+            drawRect(p.accent, corner + Offset(inset, inset), Size(side - 2 * inset, side - 2 * inset))
         }
+        drawRoundRect(
+            if (checked) p.accent else p.muted,
+            corner + Offset(rule / 2, rule / 2),
+            Size(side - rule, side - rule),
+            CornerRadius(1.dp.toPx()),
+            style = Stroke(rule),
+        )
     }
 }
 

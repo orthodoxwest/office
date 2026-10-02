@@ -310,6 +310,7 @@ private struct PaletteKey: EnvironmentKey { static let defaultValue = Palette.na
 private struct OrnamentKey: EnvironmentKey { static let defaultValue = Ornament.of(.nave, season: "") }
 private struct MetricsKey: EnvironmentKey { static let defaultValue = Metrics() }
 private struct WideKey: EnvironmentKey { static let defaultValue = false }
+private struct RankedKey: EnvironmentKey { static let defaultValue = false }
 
 extension EnvironmentValues {
     var palette: Palette {
@@ -332,10 +333,20 @@ extension EnvironmentValues {
         get { self[WideKey.self] }
         set { self[WideKey.self] = newValue }
     }
+
+    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
+    /// an hour's links take a rank of their own under the brand and Settings.
+    var ranked: Bool {
+        get { self[RankedKey.self] }
+        set { self[RankedKey.self] = newValue }
+    }
 }
 
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
+
+/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
+let rankedBelow: CGFloat = 960
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

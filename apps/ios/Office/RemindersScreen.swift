@@ -290,25 +290,26 @@ private struct Fieldset<Content: View>: View {
     }
 }
 
-/// A checkbox in the accent colour, as the web's `accent-color` sets them; the row around it is the control.
+/**
+ * A checkbox set by hand, as the web's are: a ruled square, 0.95rem, that fills with oak inside a
+ * margin of the ground when chosen. The platform's own box belongs to no theme here. The row
+ * around it is the control.
+ */
 private struct Tick: View {
     let checked: Bool
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let side = m.px(15.2)
         Canvas { ctx, size in
-            let box = Path(roundedRect: CGRect(origin: .zero, size: size).insetBy(dx: 1, dy: 1), cornerRadius: 2)
+            let rect = CGRect(x: (size.width - side) / 2, y: (size.height - side) / 2, width: side, height: side)
+            let box = Path(roundedRect: rect.insetBy(dx: 0.5, dy: 0.5), cornerRadius: 1)
+            ctx.fill(Path(rect), with: .color(p.bg))
             if checked {
-                ctx.fill(box, with: .color(p.accent))
-                var tick = Path()
-                tick.move(to: CGPoint(x: size.width * 0.24, y: size.height * 0.52))
-                tick.addLine(to: CGPoint(x: size.width * 0.42, y: size.height * 0.70))
-                tick.addLine(to: CGPoint(x: size.width * 0.78, y: size.height * 0.32))
-                ctx.stroke(tick, with: .color(p.bg), lineWidth: 2)
-            } else {
-                ctx.stroke(box, with: .color(p.muted), lineWidth: 1.2)
+                ctx.fill(Path(rect.insetBy(dx: 1 + 3, dy: 1 + 3)), with: .color(p.accent))
             }
+            ctx.stroke(box, with: .color(checked ? p.accent : p.muted), lineWidth: 1)
         }
         .frame(width: m.px(20), height: m.px(20))
         .accessibilityHidden(true)

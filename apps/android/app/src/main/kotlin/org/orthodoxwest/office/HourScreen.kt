@@ -261,13 +261,13 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
                     listOf(0f to 1f, 1f to 1f)
                 }
             }
-            Footer(Modifier.padding(top = EndingAir)) {
+            Footer(Modifier.padding(top = EndingAir), reserve = true) {
                 Text(
                     buildAnnotatedString {
                         append("Spotted an error on this page? ")
                         withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append("Report a problem") }
                     },
-                    Modifier.measure().padding(top = 4.8.dp).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
+                    Modifier.measure().padding(top = 4.8.dp).reserve(p.bg).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
                     style = Type.small.copy(fontSize = 11.84.sp, lineHeight = 18.9.sp, color = p.muted, textAlign = TextAlign.Center),
                 )
             }

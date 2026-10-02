@@ -94,8 +94,14 @@ struct SiteHeader: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
+    @Environment(\.ranked) private var ranked
 
     var body: some View {
+        let nav = SiteNav(model)
+        // From 701 to 959pt an hour's links don't fit beside the brand and Settings: left in the
+        // row they would crowd it, so they take a centred rank of their own beneath, as a book sets
+        // its running head over the page.
+        let rank = wide && ranked && nav.onHour != nil
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
@@ -110,8 +116,10 @@ struct SiteHeader: View {
                 .buttonStyle(Quiet())
                 .accessibilityLabel("Daily Office, home")
                 Spacer(minLength: m.px(8))
-                if wide {
-                    InlineNav(nav: SiteNav(model))
+                if rank {
+                    InlineNav(nav: nav, links: false)
+                } else if wide {
+                    InlineNav(nav: nav)
                 } else {
                     Button { model.menuOpen.toggle() } label: {
                         HStack(spacing: 0) {
@@ -129,11 +137,17 @@ struct SiteHeader: View {
             }
             .padding(.horizontal, m.px(gutter))
             .padding(.top, m.px(6.4))
-            .padding(.bottom, m.px(5.6))
+            .padding(.bottom, rank ? 0 : m.px(5.6))
             .frame(minHeight: 44)
             // The web's nav shell: held to 68rem, so the whole list fits on one line.
             .frame(maxWidth: wide ? m.px(1088) : .infinity)
             .frame(maxWidth: .infinity)
+            if rank {
+                InlineNav(nav: nav, settings: false)
+                    .padding(.top, m.px(2.4))
+                    .padding(.bottom, m.px(5.6))
+                    .frame(maxWidth: .infinity)
+            }
             // The beam: a 4pt course of oak, its upper edge catching the light as a timber's arris does.
             VStack(spacing: 0) {
                 Rectangle().fill(p.materialHighlight).frame(height: 1)
@@ -147,31 +161,38 @@ struct SiteHeader: View {
 /// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders quieter.
 private struct InlineNav: View {
     let nav: SiteNav
+    /// The pages' links, and Settings after them; a ranked header sets them apart.
+    var links = true
+    var settings = true
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         HStack(spacing: 0) {
-            if let onHour = nav.onHour {
-                ForEach(nav.hours, id: \.self) { h in link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
-                Rectangle().fill(p.border).frame(width: 1, height: m.px(24)).padding(.horizontal, m.px(2.4))
-            }
-            link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
-            link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
-            // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
-            Button { model.settingsOpen.toggle() } label: {
-                HStack(spacing: 0) {
-                    Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
-                    Caret(open: model.settingsOpen, color: p.muted)
+            if links {
+                if let onHour = nav.onHour {
+                    ForEach(nav.hours, id: \.self) { h in link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
+                    Rectangle().fill(p.border).frame(width: 1, height: m.px(24)).padding(.horizontal, m.px(2.4))
                 }
-                .padding(.leading, m.px(8.8))
-                .padding(.trailing, m.px(3.2))
-                .frame(minHeight: 44)
+                link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
+                link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
             }
-            .buttonStyle(Quiet())
-            .accessibilityLabel("Settings")
-            .accessibilityValue(model.settingsOpen ? "Expanded" : "Collapsed")
+            // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
+            if settings {
+                Button { model.settingsOpen.toggle() } label: {
+                    HStack(spacing: 0) {
+                        Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
+                        Caret(open: model.settingsOpen, color: p.muted)
+                    }
+                    .padding(.leading, m.px(8.8))
+                    .padding(.trailing, m.px(3.2))
+                    .frame(minHeight: 44)
+                }
+                .buttonStyle(Quiet())
+                .accessibilityLabel("Settings")
+                .accessibilityValue(model.settingsOpen ? "Expanded" : "Collapsed")
+            }
         }
     }
 
@@ -658,28 +679,51 @@ struct Continuation: View {
     }
 }
 
+extension View {
+    /**
+     * A painter's reserve for an inscription: a feathered clearing of the wall's own colour behind
+     * a line of lettering, so the powdering and the vault never run under the letters (the web's
+     * `footer > p` on home and the hours: `radial-gradient(closest-side, var(--bg) 58%,
+     * transparent)` over 0.6rem × 1.75rem of padding the margin takes back). It stands outside the
+     * text's frame, so the foot keeps its height.
+     */
+    func reserve(_ ground: Color, _ m: Metrics) -> some View {
+        background {
+            EllipticalGradient(stops: [.init(color: ground, location: 0.58), .init(color: ground.opacity(0), location: 1)], center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
+                .padding(.horizontal, -m.px(28))
+                .padding(.vertical, -m.px(9.6))
+                .accessibilityHidden(true)
+        }
+    }
+}
+
 /**
  * The page's foot: the tailpiece that closes every page, the Office's name, and any `matter` a page
  * adds under it (an hour's report line). `gap` stands above it and `bottom` below, in the web's
- * px. The preferences are in the menu, or on a wide screen under Settings.
+ * px. On a page with a field on its wall (home, the hours) the name stands on a `reserve`. The
+ * preferences are in the menu, or on a wide screen under Settings.
  */
 struct Footer<Matter: View>: View {
     let gap: CGFloat
     let bottom: CGFloat
+    let reserve: Bool
     let matter: Matter
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
-    init(gap: CGFloat = 53.6, bottom: CGFloat = 24, @ViewBuilder matter: () -> Matter) {
+    init(gap: CGFloat = 53.6, bottom: CGFloat = 24, reserve: Bool = false, @ViewBuilder matter: () -> Matter) {
         self.gap = gap
         self.bottom = bottom
+        self.reserve = reserve
         self.matter = matter()
     }
 
     var body: some View {
         VStack(spacing: 0) {
             Tailpiece()
-            Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(8.8))
+            Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted)
+                .background { if reserve { Color.clear.reserve(p.bg, m) } }
+                .padding(.top, m.px(8.8))
             matter
         }
         .frame(maxWidth: .infinity)
@@ -689,8 +733,8 @@ struct Footer<Matter: View>: View {
 }
 
 extension Footer where Matter == EmptyView {
-    init(gap: CGFloat = 53.6, bottom: CGFloat = 24) {
-        self.init(gap: gap, bottom: bottom) { EmptyView() }
+    init(gap: CGFloat = 53.6, bottom: CGFloat = 24, reserve: Bool = false) {
+        self.init(gap: gap, bottom: bottom, reserve: reserve) { EmptyView() }
     }
 }
 

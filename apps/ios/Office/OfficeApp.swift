@@ -94,6 +94,7 @@ struct RootView: View {
             .animation(.easeOut(duration: 0.15), value: model.menuOpen)
             .animation(.easeOut(duration: 0.15), value: model.settingsOpen)
             .environment(\.wide, geo.size.width >= wideFrom)
+            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
         }
         .environment(\.palette, palette)
         .environment(\.ornament, Ornament.of(palette, season: ""))

@@ -333,7 +333,7 @@ fun OfficeApp(
     }
     // The web's desktop composition from its breakpoint up: a tablet, or a phone on its side.
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalWide provides (maxWidth >= WideFrom), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
+        CompositionLocalProvider(LocalWide provides (maxWidth >= WideFrom), LocalRanked provides (maxWidth >= WideFrom && maxWidth < RankedBelow), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
             PlasterWall()
             // The wall runs under the bars; the page keeps clear of them at the sides (the screens
             // take the top and bottom themselves, so their backgrounds run under the bars).
