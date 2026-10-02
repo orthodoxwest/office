@@ -570,6 +570,17 @@ mod tests {
         }
     }
 
+    // app.js mirrors the light each hour casts on home's wall.
+    #[test]
+    fn client_time_of_day_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let table = &src[src.find("var TIME_OF_DAY = {").unwrap()..];
+        let table = &table[..table.find("};").unwrap()];
+        for (slug, _) in presentation::HOUR_TIMES {
+            assert!(table.contains(&format!("{slug}: \"{}\",", time_of_day(slug))), "{slug}");
+        }
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;

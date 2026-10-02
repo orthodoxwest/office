@@ -7,8 +7,7 @@ dependencies. Seeded, so it regenerates byte for byte. Run from the
 repository root.
 
   ornaments/consecration.svg  the consecration cross in its compass circle:
-                              the hour's end, the home niche's crown, the
-                              header's brand mark
+                              the hour's end and the header's brand mark
   ornaments/cross.svg         the same cross without its circle: section
                               breaks and the ordo's first-class feasts
   ornaments/sun.svg           a disc with alternating long and short rays
@@ -30,6 +29,9 @@ repository root.
   ornaments/tailpiece.svg     a quatrefoil between two painted rules that thin
                               toward their ends: the footer's tailpiece, closing
                               each page as the headpiece's cross opens it
+  ornaments/ivy.svg           an ivy spray of three leaves on a stem: the ends
+                              of the penwork bar border down home's leaf on a
+                              first-class feast
 """
 import argparse
 import math
@@ -222,6 +224,16 @@ def vault(seed=1120, tile=528, count=64, attempts=60000):
     return svg(f"0 0 {tile} {tile}", "".join(parts)), len(placed)
 
 
+def ivy():
+    """Three pointed leaves on a short stem, drawn with a pen's stroke round
+    them so the spray keeps its weight at the bar's small size."""
+    d = ("M12 23 C12 17 12 14 12 12 "
+         "M12 12 C8 12 4 10 3 5 C8 5 11 7 12 12 Z "
+         "M12 12 C16 12 20 10 21 5 C16 5 13 7 12 12 Z "
+         "M12 11 C10 7 11 3 12 1 C13 3 14 7 12 11 Z")
+    return svg("0 0 24 24", f'<path d="{d}" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, default=OUT)
@@ -233,7 +245,7 @@ def main():
     for name, body in [("consecration.svg", consecration()), ("cross.svg", cross()),
                        ("sun.svg", sun()), ("moon.svg", moon()), ("vault.svg", tile),
                        ("powder.svg", field), ("quatrefoil.svg", quatrefoil()),
-                       ("tailpiece.svg", tailpiece())]:
+                       ("tailpiece.svg", tailpiece()), ("ivy.svg", ivy())]:
         path = args.out / name
         path.write_text(body)
         print("wrote", path, counts.get(name, ""))

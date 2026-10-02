@@ -62,6 +62,11 @@ var CORE_ASSETS = [
   assetURL("/static/fonts/eb-garamond-italic.woff2"),
   assetURL("/static/fonts/eb-garamond-bold.woff2"),
   assetURL("/static/fonts/noto-sans-symbols-cross.woff2"),
+  // Home's leaf sets IM Fell's versals and EB Garamond's pointing hand on
+  // almost every day (a few KB each). The Goudy Initialen woodcut serves only
+  // first-class feasts and is 175 KB, so it is cached when first used.
+  assetURL("/static/fonts/im-fell-french-canon-caps.woff2"),
+  assetURL("/static/fonts/eb-garamond-manicule.woff2"),
   // The limewash wall (portrait for phones, wide crop for large screens), the
   // softened copies behind wide hours' prayer and the Apse vault's leaf mask;
   // precache them all so an installed app looks the same offline whatever it
@@ -80,7 +85,8 @@ var CORE_ASSETS = [
   assetURL("/static/ornaments/vault.svg"),
   assetURL("/static/ornaments/powder.svg"),
   assetURL("/static/ornaments/quatrefoil.svg"),
-  assetURL("/static/ornaments/tailpiece.svg")
+  assetURL("/static/ornaments/tailpiece.svg"),
+  assetURL("/static/ornaments/ivy.svg")
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always
