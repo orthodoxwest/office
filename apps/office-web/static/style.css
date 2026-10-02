@@ -879,6 +879,54 @@ summary:focus-visible {
   }
 }
 
+/* A finger needs the same floor on a tablet's header as in a phone's menu.
+   The links keep their type and the header its height: only the box each
+   answers to grows, through a pseudo-element centred on the word. */
+@media (min-width: 701px) and (pointer: coarse) {
+  .site-brand,
+  .site-menu nav a,
+  .site-settings > summary {
+    position: relative;
+  }
+
+  .site-brand::after,
+  .site-menu nav a::after,
+  .site-settings > summary::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--touch-target);
+    transform: translateY(-50%);
+  }
+}
+
+/* A tablet's width holds the hours' full list but not beside the brand and
+   Settings: left to wrap, it broke wherever it ran out and stranded
+   Reminders on a line of its own. There the list takes a rank to itself
+   under them, centred, as a book sets its running head over the page. The
+   upper bound is where the list fits on one line at Larger text. */
+@media (min-width: 701px) and (max-width: 959px) {
+  .page-hour .site-nav-shell {
+    flex-wrap: wrap;
+    row-gap: 0.15rem;
+  }
+
+  .page-hour .site-menu {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .page-hour .site-menu-panel {
+    justify-content: center;
+  }
+
+  .page-hour .site-menu nav {
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+}
+
 /* Narrow screens: collapse the full list into a compact menu so the office
    text starts high on the page and remains the visual focus. */
 @media (max-width: 700px) {
@@ -1046,6 +1094,23 @@ footer::before {
   user-select: none;
 }
 
+/* A painter leaves a reserve for an inscription: the powdering and the
+   vault stop short of the colophon and the report line and never run under
+   the letters (the lettering's own shadow clears a glyph's edge, not a
+   rosette). The clearing is the wall's own colour, feathered, on the pages
+   that carry a field; its padding is taken back by the margin, so the
+   footer keeps its height and the wide hours' seam holds. */
+body:is(.page-home, .page-hour) footer > p,
+body:is(.page-home, .page-hour) footer .report-issue {
+  --reserve-pad: 0.6rem;
+  padding: var(--reserve-pad) 1.75rem;
+  background: radial-gradient(closest-side, var(--bg) 58%, transparent);
+}
+
+body:is(.page-home, .page-hour) footer > p {
+  margin: calc(-1 * var(--reserve-pad)) 0;
+}
+
 /* ── Report a problem ── */
 
 .report-issue {
@@ -1059,6 +1124,10 @@ footer::before {
 footer .report-issue {
   margin-top: 0.3rem;
   font-size: 0.74rem;
+}
+
+body.page-hour footer .report-issue {
+  margin: calc(0.3rem - var(--reserve-pad)) 0 calc(-1 * var(--reserve-pad));
 }
 
 .report-issue a {
@@ -3113,8 +3182,28 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   white-space: nowrap;
 }
 .tabula-tables dd a {
+  position: relative;
   color: var(--accent);
   text-decoration: none;
+}
+
+/* The ordo's day links are a line of type in a taller row: each answers
+   to the row's height under a finger, not only to its letters. A feast's
+   name reaches up into its row's own padding and barely down, where the
+   day's disclosures begin. */
+.tabula-tables dd a::after,
+.day-feast-name::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: var(--touch-target);
+  transform: translateY(-50%);
+}
+
+.day-feast-name::after {
+  inset: -0.75rem 0 -0.2rem;
+  height: auto;
+  transform: none;
 }
 .tabula-tables dd a:hover {
   text-decoration: underline;
@@ -3204,6 +3293,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .month-table tr:target > td { border-bottom-color: var(--gold-line); }
 .day-mobile-head { display: none; }
 .day-feast-name {
+  position: relative;
   color: var(--text);
   text-decoration: none;
 }
@@ -4489,8 +4579,15 @@ body.season-eastertide {
       0 0 1.8rem 1.4rem var(--niche-clear);
     zoom: var(--niche-zoom);
     max-width: var(--card-w);
-    /* Room under the head for the crown's cross and the lining's arch. */
-    padding: calc(var(--niche-head) * 0.62 + 2.1rem) 1.75rem 1.25rem;
+    /* Room under the head for the lining's arch, then the crown's cross,
+       then air before the date. Measured down from the lining and not from
+       the head's height: a head that flattens on a narrow window once left
+       the lining's crown running through the cross. */
+    --lining-inset: 26px;
+    --crown-size: 2.25rem;
+    --crown-top: calc(var(--lining-inset) + 11px + 0.55rem);
+    --niche-pad-top: calc(var(--crown-top) + var(--crown-size) + 1.35rem);
+    padding: var(--niche-pad-top) 1.75rem 1.25rem;
     border-width: 2px;
     border-top-color: var(--frontispiece-frame);
     border-radius: 50% 50% 0 0 / var(--niche-head) var(--niche-head) 0 0;
@@ -4686,26 +4783,33 @@ body.season-eastertide {
 
 .not-found {
   text-align: center;
-  padding: 3rem 0 4rem;
+  padding: 2.25rem 0 4rem;
 }
 
+.not-found .ornament-headpiece {
+  margin: 0 auto 1.1rem;
+}
+
+/* A notice is set as the ordo's title is: the text's own ink at a title's
+   size, under the headpiece, with the verse as its matter. */
 .not-found h1 {
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: normal;
-  color: var(--accent);
-  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 1.6rem;
 }
 
 .not-found-quote {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-style: italic;
   color: var(--text);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
+/* A scripture reference is red work here as in the hours. */
 .not-found-ref {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--rubric);
   letter-spacing: 0.04em;
   margin-bottom: 2rem;
 }
@@ -4713,18 +4817,23 @@ body.season-eastertide {
 .not-found-msg {
   color: var(--muted);
   font-size: 0.95rem;
-  max-width: 36em;
-  margin: 0 auto 2rem;
+  max-width: 30em;
+  margin: 0 auto 1.6rem;
 }
 
 .not-found-home a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
   color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
 }
 
 .not-found-home a:hover {
-  border-bottom-color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 /* ── Reminders page ──
@@ -4798,6 +4907,42 @@ body.season-eastertide {
 .reminder-hour-name {
   color: var(--muted);
   transition: color 140ms ease;
+}
+
+/* The boxes are set by hand, as the prayer form's choices are: a ruled
+   square that fills with oak inside a margin of the ground when chosen.
+   The platform's own box (blue-tinted glass on some, a rounded tile on
+   others) belongs to no theme here. */
+.reminders input[type="checkbox"] {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0;
+  border: 1px solid var(--muted);
+  border-radius: 1px;
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.reminders input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+
+@media (forced-colors: active) {
+  .reminders input[type="checkbox"] { appearance: auto; }
+}
+
+/* The time field's clock is the platform's; it is quietened to the weight
+   of the caret beside the page's other controls. */
+.reminder-hour-row input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
 }
 
 .reminder-hour-row.is-selected .reminder-hour-name {
@@ -5442,7 +5587,7 @@ body.page-hour::before {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour))) {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice))) {
   background-color: var(--bg);
 }
 
@@ -5450,11 +5595,12 @@ body.page-home,
 body.page-calendar,
 body.page-reminders,
 body.page-usage,
-body.page-hour {
+body.page-hour,
+body.page-notice {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -5462,7 +5608,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before,
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
@@ -5629,9 +5775,9 @@ html:where(:has(> body.page-hour))::before {
   /* The consecration cross at the niche's crown, as heavy as the one that
      ends each hour. */
   .page-home .home-crown {
-    top: calc(var(--niche-head) * 0.36 - 4px);
-    width: 2.25rem;
-    height: 2.25rem;
+    top: var(--crown-top);
+    width: var(--crown-size);
+    height: var(--crown-size);
   }
 
   /* The phone panel's lining, restated for the niche: a 2px band and a
@@ -5640,8 +5786,7 @@ html:where(:has(> body.page-hour))::before {
      moulding, so it reads as paint on the wall, not another edge of the
      arch. */
   .page-home .home-lining {
-    --lining-inset: 26px;
-    top: calc(var(--lining-inset) - var(--niche-head) * 0.62 - 2.1rem);
+    top: calc(var(--lining-inset) - var(--niche-pad-top));
     right: calc(var(--lining-inset) - 1.75rem);
     left: calc(var(--lining-inset) - 1.75rem);
     border-radius: 50% 50% 0 0 / calc(var(--niche-head) - var(--lining-inset)) calc(var(--niche-head) - var(--lining-inset)) 0 0;
