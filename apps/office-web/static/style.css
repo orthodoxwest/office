@@ -4303,7 +4303,8 @@ body.season-eastertide {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
   column-gap: 1rem;
-  min-height: 2.9rem;
+  /* Never under the touch target, whatever the reader's text size. */
+  min-height: max(2.9rem, var(--touch-target));
   padding: 0.55rem 0.1rem 0.1rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
@@ -4584,14 +4585,16 @@ body.season-eastertide {
    night (Compline). Only the ground moves, a few percent of --bg and
    --plaster-tint and a soft cast over the wall; no ink changes, so the
    day's colour is never confused with the weather. The wall is painted on
-   html::before from :root tokens, so the hour retunes them there. Light
-   theme only: the Apse is already night. The server sets the class from its
+   html::before from :root tokens, so the hour retunes them there. Each
+   pair keeps the mock's average tone and is solved, as the Nave's own is,
+   so the wall still averages exactly --bg (wall mean = base x screen(tint,
+   texture), the texture's mean 0.78 at both sizes). Light theme only: the Apse is already night. The server sets the class from its
    notion of the hour and app.js keeps it with the reader's clock. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]):has(> body.page-home.time-dawn) { --bg: #fbefe4; --plaster-tint: #eccdb8; }
-  :root:not([data-theme="dark"]):has(> body.page-home.time-day) { --bg: #fbf5ed; --plaster-tint: #e8d7c8; }
-  :root:not([data-theme="dark"]):has(> body.page-home.time-dusk) { --bg: #f9ecdb; --plaster-tint: #e6c4a0; }
-  :root:not([data-theme="dark"]):has(> body.page-home.time-night) { --bg: #f3e9da; --plaster-tint: #dac0a4; }
+  :root:not([data-theme="dark"]):has(> body.page-home.time-dawn) { --bg: #fbf1e7; --plaster-tint: #edc8b4; }
+  :root:not([data-theme="dark"]):has(> body.page-home.time-day) { --bg: #faf4ec; --plaster-tint: #e8d6cb; }
+  :root:not([data-theme="dark"]):has(> body.page-home.time-dusk) { --bg: #f9efe0; --plaster-tint: #e4bf93; }
+  :root:not([data-theme="dark"]):has(> body.page-home.time-night) { --bg: #f6ede1; --plaster-tint: #d6b698; }
   :root:not([data-theme="dark"]) body.page-home main::before { content: ""; }
   :root:not([data-theme="dark"]) body.page-home.time-dawn main::before { background: var(--cast-dawn); }
   :root:not([data-theme="dark"]) body.page-home.time-day main::before { background: var(--cast-day); }
@@ -4599,10 +4602,10 @@ body.season-eastertide {
   :root:not([data-theme="dark"]) body.page-home.time-night main::before { background: var(--cast-night); }
 }
 
-:root[data-theme="light"]:has(> body.page-home.time-dawn) { --bg: #fbefe4; --plaster-tint: #eccdb8; }
-:root[data-theme="light"]:has(> body.page-home.time-day) { --bg: #fbf5ed; --plaster-tint: #e8d7c8; }
-:root[data-theme="light"]:has(> body.page-home.time-dusk) { --bg: #f9ecdb; --plaster-tint: #e6c4a0; }
-:root[data-theme="light"]:has(> body.page-home.time-night) { --bg: #f3e9da; --plaster-tint: #dac0a4; }
+:root[data-theme="light"]:has(> body.page-home.time-dawn) { --bg: #fbf1e7; --plaster-tint: #edc8b4; }
+:root[data-theme="light"]:has(> body.page-home.time-day) { --bg: #faf4ec; --plaster-tint: #e8d6cb; }
+:root[data-theme="light"]:has(> body.page-home.time-dusk) { --bg: #f9efe0; --plaster-tint: #e4bf93; }
+:root[data-theme="light"]:has(> body.page-home.time-night) { --bg: #f6ede1; --plaster-tint: #d6b698; }
 :root[data-theme="light"] body.page-home main::before { content: ""; }
 :root[data-theme="light"] body.page-home.time-dawn main::before { background: var(--cast-dawn); }
 :root[data-theme="light"] body.page-home.time-day main::before { background: var(--cast-day); }
