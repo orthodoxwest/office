@@ -434,6 +434,26 @@ test("the foreground home invitation advances at the next office boundary", asyn
   );
 });
 
+test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
+  page,
+}) => {
+  // A sleeping phone or frozen PWA stops timer delays without stopping the
+  // clock; the refresh must notice the wall clock rather than wait out a
+  // timeout set at the previous hour.
+  await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+
+  await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
+  await page.clock.runFor("01:01");
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "vespers",
+  );
+});
+
 test("the foreground home keeps previous-day Compline current across midnight", async ({
   page,
 }) => {
