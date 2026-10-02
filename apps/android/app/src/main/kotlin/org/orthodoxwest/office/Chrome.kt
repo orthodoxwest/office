@@ -1,8 +1,14 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -59,6 +70,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
 val Gutter: Dp = 16.dp
@@ -68,17 +80,62 @@ val Measure: Dp = 608.dp
 
 fun Modifier.measure(): Modifier = this.widthIn(max = Measure).fillMaxWidth().padding(horizontal = Gutter)
 
-/** A tap target with no ripple: the web's controls mark state, not touches. */
+/** A tap target with no ripple: the web's controls mark state, not touches; a pressed one only dims a little. */
 fun Modifier.tap(role: Role = Role.Button, label: String? = null, selected: Boolean? = null, action: String? = null, onClick: () -> Unit): Modifier =
     this.semantics {
         // What a screen reader says for a control drawn as a glyph ("‹", "↑"), in place of the glyph.
         if (label != null) contentDescription = label
         if (selected != null) this.selected = selected
-    }.clickable(interactionSource = null, indication = null, role = role, onClickLabel = action, onClick = onClick)
+    }.clickable(interactionSource = null, indication = Dim, role = role, onClickLabel = action, onClick = onClick)
 
 /** A checkbox row: the box and its words are one control, announced checked or not. */
 fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
-    this.toggleable(checked, interactionSource = null, indication = null, role = Role.Checkbox, onValueChange = onChange)
+    this.toggleable(checked, interactionSource = null, indication = Dim, role = Role.Checkbox, onValueChange = onChange)
+
+/** How far a pressed control dims, as the iOS app's (Quiet). */
+private const val PRESSED_ALPHA = 0.55f
+
+/**
+ * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
+ * let go, so even the briefest tap is seen to land.
+ */
+private object Dim : IndicationNodeFactory {
+    override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
+    override fun equals(other: Any?) = other === this
+    override fun hashCode() = 0
+}
+
+private class DimNode(private val source: InteractionSource) : Modifier.Node(), DrawModifierNode {
+    private val alpha = Animatable(1f)
+    private val layer = Paint()
+
+    override fun onAttach() {
+        coroutineScope.launch {
+            val presses = mutableListOf<PressInteraction.Press>()
+            source.interactions.collect { interaction ->
+                when (interaction) {
+                    is PressInteraction.Press -> presses.add(interaction)
+                    is PressInteraction.Release -> presses.remove(interaction.press)
+                    is PressInteraction.Cancel -> presses.remove(interaction.press)
+                }
+                if (presses.isEmpty()) {
+                    launch { alpha.animateTo(1f, tween(200, easing = LinearOutSlowInEasing)) }
+                } else {
+                    launch { alpha.snapTo(PRESSED_ALPHA) }
+                }
+            }
+        }
+    }
+
+    override fun ContentDrawScope.draw() {
+        val a = alpha.value
+        if (a >= 1f) return drawContent()
+        layer.alpha = a
+        drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+        drawContent()
+        drawContext.canvas.restore()
+    }
+}
 
 /** "Expanded" or "Collapsed", after a disclosure's name. */
 fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }

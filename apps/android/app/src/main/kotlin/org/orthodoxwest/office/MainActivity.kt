@@ -11,11 +11,25 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.SeekableTransitionState
+import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,16 +50,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
@@ -78,18 +97,14 @@ class MainActivity : ComponentActivity() {
             val vm = vm
             val dark = vm.theme.dark(isSystemInDarkTheme())
             LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
-            BackHandler(enabled = vm.canGoBack) { vm.back() }
             OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
                 OfficeApp(
-                    page = vm.page,
-                    entry = vm.entry.id,
-                    entries = vm.entries.map { it.id },
+                    shown = vm.shown,
+                    behind = vm.behind,
+                    motion = vm.motion,
+                    onBack = { vm.back() },
                     today = vm.today,
                     hours = vm.hours,
-                    home = vm.home,
-                    hour = vm.hour,
-                    ordo = vm.ordo,
-                    error = vm.error,
                     form = vm.form,
                     theme = vm.theme,
                     textSize = vm.textSize,
@@ -107,6 +122,7 @@ class MainActivity : ComponentActivity() {
                     onTurnOff = { vm.setRemindersOn(false) },
                     onAllowNotifications = ::openNotificationSettings,
                     onAllowExact = ::openExactAlarmSettings,
+                    entries = vm.entries.map { it.id },
                 )
             }
         }
@@ -175,7 +191,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** The app on its plaster wall: whichever page is open, under the shared header and menu. */
+/**
+ * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
+ * `hour` and `ordo` is its content, still.
+ */
 @Composable
 fun OfficeApp(
     page: Page,
@@ -204,6 +223,71 @@ fun OfficeApp(
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
 ) {
+    val content = when {
+        error != null -> Content.Failed(error)
+        page is Page.Home -> home?.let(Content::Home)
+        page is Page.Hour -> hour?.takeIf { it.hour == page.hour }?.let(Content::Hour)
+        page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
+        else -> Content.Drawn
+    }
+    OfficeApp(
+        shown = content?.let { Shown(Entry(entry, page), it) },
+        behind = null,
+        motion = Motion.FADE,
+        onBack = null,
+        today = today,
+        hours = hours,
+        form = form,
+        theme = theme,
+        textSize = textSize,
+        insets = insets,
+        onOpen = onOpen,
+        onHome = onHome,
+        onForm = onForm,
+        onTheme = onTheme,
+        onTextSize = onTextSize,
+        reminders = reminders,
+        reminderStatus = reminderStatus,
+        onReminders = onReminders,
+        onTurnOn = onTurnOn,
+        onTurnOff = onTurnOff,
+        onAllowNotifications = onAllowNotifications,
+        onAllowExact = onAllowExact,
+        entries = entries,
+    )
+}
+
+/**
+ * The app on its plaster wall: the page shown, under the shared header and menu. A new page
+ * comes in as `motion` says, over the wall, once its content is ready; until then the page
+ * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made.
+ */
+@Composable
+fun OfficeApp(
+    shown: Shown?,
+    behind: Shown?,
+    motion: Motion,
+    onBack: (() -> Unit)?,
+    today: LocalDate,
+    hours: List<String>,
+    form: String,
+    theme: ThemeChoice,
+    textSize: TextSize,
+    insets: PaddingValues,
+    onOpen: (Page) -> Unit,
+    onHome: () -> Unit,
+    onForm: (String) -> Unit,
+    onTheme: (ThemeChoice) -> Unit,
+    onTextSize: (TextSize) -> Unit,
+    reminders: ReminderSettings,
+    reminderStatus: ReminderStatus,
+    onReminders: (ReminderSettings) -> Unit,
+    onTurnOn: () -> Unit,
+    onTurnOff: () -> Unit,
+    onAllowNotifications: () -> Unit,
+    onAllowExact: () -> Unit,
+    entries: List<Long>,
+) {
     var menu by remember { mutableStateOf(false) }
     // The wide header's Settings panel: the theme and text size.
     var settings by remember { mutableStateOf(false) }
@@ -215,67 +299,32 @@ fun OfficeApp(
         (kept - entries.toSet()).forEach(visits::removeState)
         kept = entries
     }
-    val onHourPage = page as? Page.Hour
-    val nav = SiteNav(
-        hours = hours,
-        currentHour = onHourPage?.hour,
-        onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
-        onOrdo = {
-            menu = false
-            // The ordo at the day shown, as the web's /calendar opens at today's row.
-            onOpen(
-                when (page) {
-                    is Page.Home -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
-                    is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
-                    is Page.Ordo -> Page.Ordo(page.year, page.month)
-                    is Page.Year -> Page.Year(page.year)
-                    Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
-                },
-            )
-        },
-        ordoCurrent = page is Page.Ordo || page is Page.Year,
-        onReminders = { menu = false; onOpen(Page.Reminders) },
-        remindersCurrent = page is Page.Reminders,
-        settingsOpen = settings,
-        onSettings = { settings = !settings },
-    )
-    val chrome: @Composable () -> Unit = {
-        SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
-        if (menu && !LocalWide.current) {
-            MenuPanel(
-                currentHour = nav.currentHour,
-                onHour = nav.onHour,
-                onOrdo = nav.onOrdo,
-                onOrdoCurrent = nav.ordoCurrent,
-                onReminders = nav.onReminders,
-                onRemindersCurrent = nav.remindersCurrent,
-                theme = theme,
-                onTheme = onTheme,
-                textSize = textSize,
-                onTextSize = onTextSize,
-                onDismiss = { menu = false },
-                topOffset = insets.calculateTopPadding() + 52.dp,
-            )
-        }
-        if (settings && LocalWide.current) {
-            // Under the header's end: the nav shell is held to 68rem and centred.
-            val screen = LocalConfiguration.current.screenWidthDp.dp
-            MenuPanel(
-                currentHour = null,
-                onHour = null,
-                onOrdo = nav.onOrdo,
-                onOrdoCurrent = nav.ordoCurrent,
-                onReminders = nav.onReminders,
-                onRemindersCurrent = nav.remindersCurrent,
-                theme = theme,
-                onTheme = onTheme,
-                textSize = textSize,
-                onTextSize = onTextSize,
-                onDismiss = { settings = false },
-                topOffset = insets.calculateTopPadding() + 52.dp,
-                prefsOnly = true,
-                end = ((screen - 1088.dp) / 2).coerceAtLeast(0.dp) + Gutter,
-            )
+    // The page shown, moved to as each is ready; the back gesture seeks it toward the page behind.
+    val screen = remember { SeekableTransitionState(shown) }
+    val latest by rememberUpdatedState(shown)
+    var revealing by remember { mutableStateOf(false) }
+    LaunchedEffect(shown) { screen.animateTo(shown) }
+    val scope = rememberCoroutineScope()
+    if (onBack != null) {
+        PredictiveBackHandler(enabled = entries.size > 1) { progress ->
+            val under = behind
+            try {
+                menu = false
+                settings = false
+                if (under != null) {
+                    revealing = true
+                    progress.collect { screen.seekTo(it.progress, under) }
+                } else {
+                    progress.collect {}
+                }
+                onBack()
+            } catch (e: CancellationException) {
+                // Let go short of the edge: the page settles back where it was.
+                scope.launch { screen.animateTo(latest) }
+                throw e
+            } finally {
+                revealing = false
+            }
         }
     }
     // The web's desktop composition from its breakpoint up: a tablet, or a phone on its side.
@@ -285,12 +334,88 @@ fun OfficeApp(
             // The wall runs under the bars; the page keeps clear of them at the sides (the screens
             // take the top and bottom themselves, so their backgrounds run under the bars).
             val direction = LocalLayoutDirection.current
-            Box(Modifier.padding(start = insets.calculateStartPadding(direction), end = insets.calculateEndPadding(direction))) {
-                visits.SaveableStateProvider(entry) {
+            val travel = with(LocalDensity.current) { TRAVEL.roundToPx() }
+            rememberTransition(screen).AnimatedContent(
+                Modifier.padding(start = insets.calculateStartPadding(direction), end = insets.calculateEndPadding(direction)),
+                transitionSpec = { moving(if (revealing) Motion.BACK else motion, travel) },
+                contentKey = { it?.entry?.id },
+            ) { visit ->
+                if (visit == null) {
+                    Message("Preparing the office…", insets)
+                    return@AnimatedContent
+                }
+                val page = visit.entry.page
+                val front = visit.entry.id == screen.targetState?.entry?.id
+                val onHourPage = page as? Page.Hour
+                val nav = SiteNav(
+                    hours = hours,
+                    currentHour = onHourPage?.hour,
+                    onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
+                    onOrdo = {
+                        menu = false
+                        // The ordo at the day shown, as the web's /calendar opens at today's row.
+                        onOpen(
+                            when (page) {
+                                is Page.Home -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                                is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                                is Page.Ordo -> Page.Ordo(page.year, page.month)
+                                is Page.Year -> Page.Year(page.year)
+                                Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                            },
+                        )
+                    },
+                    ordoCurrent = page is Page.Ordo || page is Page.Year,
+                    onReminders = { menu = false; onOpen(Page.Reminders) },
+                    remindersCurrent = page is Page.Reminders,
+                    settingsOpen = settings,
+                    onSettings = { settings = !settings },
+                )
+                val chrome: @Composable () -> Unit = {
+                    SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
+                    // Only the page in front opens the menu: the one leaving keeps none.
+                    if (front && menu && !LocalWide.current) {
+                        MenuPanel(
+                            currentHour = nav.currentHour,
+                            onHour = nav.onHour,
+                            onOrdo = nav.onOrdo,
+                            onOrdoCurrent = nav.ordoCurrent,
+                            onReminders = nav.onReminders,
+                            onRemindersCurrent = nav.remindersCurrent,
+                            theme = theme,
+                            onTheme = onTheme,
+                            textSize = textSize,
+                            onTextSize = onTextSize,
+                            onDismiss = { menu = false },
+                            topOffset = insets.calculateTopPadding() + 52.dp,
+                        )
+                    }
+                    if (front && settings && LocalWide.current) {
+                        // Under the header's end: the nav shell is held to 68rem and centred.
+                        val width = LocalConfiguration.current.screenWidthDp.dp
+                        MenuPanel(
+                            currentHour = null,
+                            onHour = null,
+                            onOrdo = nav.onOrdo,
+                            onOrdoCurrent = nav.ordoCurrent,
+                            onReminders = nav.onReminders,
+                            onRemindersCurrent = nav.remindersCurrent,
+                            theme = theme,
+                            onTheme = onTheme,
+                            textSize = textSize,
+                            onTextSize = onTextSize,
+                            onDismiss = { settings = false },
+                            topOffset = insets.calculateTopPadding() + 52.dp,
+                            prefsOnly = true,
+                            end = ((width - 1088.dp) / 2).coerceAtLeast(0.dp) + Gutter,
+                        )
+                    }
+                }
+                visits.SaveableStateProvider(visit.entry.id) {
+                    val content = visit.content
                     when {
-                        error != null -> Message(error, insets)
-                        page is Page.Home && home != null -> HomeScreen(
-                            view = home,
+                        content is Content.Failed -> Message(content.message, insets)
+                        page is Page.Home && content is Content.Home -> HomeScreen(
+                            view = content.view,
                             date = page.date,
                             today = today,
                             chrome = chrome,
@@ -299,8 +424,8 @@ fun OfficeApp(
                             onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                             onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
                         )
-                        page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
-                            view = hour,
+                        page is Page.Hour && content is Content.Hour -> HourScreen(
+                            view = content.view,
                             date = page.date,
                             today = today,
                             hours = hours,
@@ -312,8 +437,8 @@ fun OfficeApp(
                             onHour = { onOpen(Page.Hour(page.date, it)) },
                             onAllHours = { onOpen(Page.Home(page.date)) },
                         )
-                        page is Page.Ordo -> OrdoScreen(
-                            month = ordo?.takeIf { it.year == page.year && it.month == page.month },
+                        page is Page.Ordo && content is Content.Ordo -> OrdoScreen(
+                            month = content.view,
                             year = page.year,
                             monthNumber = page.month,
                             today = today,
@@ -352,6 +477,28 @@ fun OfficeApp(
             }
         }
     }
+}
+
+/** How far a page travels as it comes in or leaves (Material's shared axis). */
+private val TRAVEL = 30.dp
+
+/**
+ * The page's motion: along the axis, deeper and later from the end, back and earlier from the
+ * start, the leaving page gone before the coming one settles, so the two never overlap for
+ * long; or, with no order between them, a fade through the wall. The system's animation scale
+ * governs it, so Remove animations shows each page at once.
+ */
+private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
+    val transform = when (motion) {
+        Motion.FADE -> fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing)) togetherWith
+            fadeOut(tween(90, easing = FastOutLinearInEasing))
+        else -> {
+            val on = if (motion == Motion.BACK || motion == Motion.PREVIOUS) -1 else 1
+            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing))) togetherWith
+                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(tween(90, easing = FastOutLinearInEasing)))
+        }
+    }
+    return transform using null
 }
 
 @Composable

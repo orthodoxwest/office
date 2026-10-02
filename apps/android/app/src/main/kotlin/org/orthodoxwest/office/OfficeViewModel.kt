@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -76,6 +77,43 @@ fun decodePage(s: String): Page? = runCatching {
 /** One place on the way back: its page, and an id no other visit shares, which keys its scroll position. */
 data class Entry(val id: Long, val page: Page)
 
+/** A page's composed content, ready to draw. */
+sealed interface Content {
+    data class Home(val view: HomeView) : Content
+    data class Hour(val view: HourView) : Content
+    data class Ordo(val view: OrdoMonthView) : Content
+
+    /** The year's frontispiece and the reminders, drawn from the page itself. */
+    data object Drawn : Content
+    data class Failed(val message: String) : Content
+}
+
+/** A visit with its content ready: what the screen shows. */
+data class Shown(val entry: Entry, val content: Content)
+
+/**
+ * How the screen moves to the page shown: deeper, or back; to the next or previous of the same
+ * kind (an hour, a day, a month); or, with no order between them, a fade.
+ */
+enum class Motion { FORWARD, BACK, NEXT, PREVIOUS, FADE }
+
+/** Where `next` stands after `page` of the same kind, in time: later, earlier, or neither. */
+fun stepBetween(page: Page, next: Page): Motion {
+    val order = when {
+        page is Page.Hour && next is Page.Hour ->
+            compareValuesBy(page, next, { it.date }, { hourNames().indexOf(it.hour) })
+        page is Page.Home && next is Page.Home -> page.date.compareTo(next.date)
+        page is Page.Ordo && next is Page.Ordo -> compareValuesBy(page, next, { it.year }, { it.month })
+        page is Page.Year && next is Page.Year -> page.year.compareTo(next.year)
+        else -> 0
+    }
+    return when {
+        order < 0 -> Motion.NEXT
+        order > 0 -> Motion.PREVIOUS
+        else -> Motion.FADE
+    }
+}
+
 /** What is shown, the reader's remembered choices, and the composed content once ready. */
 class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("office", Context.MODE_PRIVATE)
@@ -112,14 +150,23 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     var textSize: TextSize by mutableStateOf(enumValueOrDefault(prefs.getString("text-size", null), TextSize.DEFAULT))
         private set
 
-    var home: HomeView? by mutableStateOf(null)
+    /**
+     * Each visit on the way back with its content, once composed: the page shown keeps the
+     * screen until the next is ready, and Back has the page behind at hand to reveal.
+     */
+    private val contents = mutableStateMapOf<Long, Content>()
+
+    /** The visit on screen: the current one once its content is ready, until then the one before. */
+    var shown: Shown? by mutableStateOf(null)
         private set
-    var hour: HourView? by mutableStateOf(null)
+
+    /** How the screen moves to the next page shown. */
+    var motion: Motion by mutableStateOf(Motion.FADE)
         private set
-    var ordo: OrdoMonthView? by mutableStateOf(null)
-        private set
-    var error: String? by mutableStateOf(null)
-        private set
+
+    /** The page behind the current one, ready to draw, for the back gesture to reveal. */
+    val behind: Shown?
+        get() = stack.getOrNull(stack.lastIndex - 1)?.let { e -> contents[e.id]?.let { Shown(e, it) } }
 
     var reminders: ReminderSettings by mutableStateOf(reminderStore.load())
         private set
@@ -136,13 +183,20 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     fun open(next: Page) {
         if (next == page) return load()
         val e = Entry(nextId++, next)
-        if (page::class == next::class) stack[stack.lastIndex] = e else stack.add(e)
+        if (page::class == next::class) {
+            motion = stepBetween(page, next)
+            stack[stack.lastIndex] = e
+        } else {
+            motion = Motion.FORWARD
+            stack.add(e)
+        }
         moved()
     }
 
     /** Back: the previous page, or false when home is all that is left. */
     fun back(): Boolean {
         if (stack.size <= 1) return false
+        motion = Motion.BACK
         stack.removeAt(stack.lastIndex)
         moved()
         return true
@@ -150,6 +204,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
+        motion = if (stack.size > 1) Motion.BACK else stepBetween(page, Page.Home(today))
         stack.clear()
         stack.add(Entry(nextId++, Page.Home(today)))
         moved()
@@ -157,12 +212,18 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     private fun moved() {
         saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
+        // Content leaves with its visit; a page already composed is shown at once.
+        val kept = stack.map { it.id }.toSet()
+        contents.keys.retainAll(kept)
+        contents[entry.id]?.let { shown = Shown(entry, it) }
         load()
     }
 
     fun chooseForm(value: String) {
         form = value
         prefs.edit().putString("form", value).apply()
+        // Hours composed in the old form are composed again when next shown.
+        contents.keys.retainAll(setOf(entry.id))
         load()
     }
 
@@ -231,41 +292,46 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     }
 
     /** The ornament season of what is shown, which retints the gilding. */
-    val season: String get() = when (page) {
-        is Page.Home -> home?.ornament.orEmpty()
-        is Page.Hour -> hour?.ornament.orEmpty()
-        is Page.Ordo, is Page.Year, Page.Reminders -> ""
+    val season: String get() = when (val c = shown?.content) {
+        is Content.Home -> c.view.ornament
+        is Content.Hour -> c.view.ornament
+        else -> ""
     }
 
     private fun load() {
-        val shown = page
+        val visit = entry
         loading?.cancel()
         loading = viewModelScope.launch {
-            try {
+            val content = try {
                 val office = core.await()
-                when (shown) {
-                    is Page.Home -> home = withContext(Dispatchers.Default) {
-                        val now = LocalDateTime.now()
-                        office.home(shown.date.toCivil(), now.toLocalDate().toCivil(), now.hour)
-                    }
-                    is Page.Hour -> hour = withContext(Dispatchers.Default) {
-                        office.compose(shown.hour, shown.date.year, shown.date.monthValue, shown.date.dayOfMonth, form)
-                    }
-                    is Page.Ordo -> {
-                        if (ordo?.let { it.year != shown.year || it.month != shown.month } == true) ordo = null
-                        ordo = withContext(Dispatchers.Default) { office.ordoMonth(shown.year, shown.month) }
-                    }
+                when (val page = visit.page) {
+                    is Page.Home -> Content.Home(
+                        withContext(Dispatchers.Default) {
+                            val now = LocalDateTime.now()
+                            office.home(page.date.toCivil(), now.toLocalDate().toCivil(), now.hour)
+                        },
+                    )
+                    is Page.Hour -> Content.Hour(
+                        withContext(Dispatchers.Default) {
+                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form)
+                        },
+                    )
+                    is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })
                     // The frontispiece is arithmetic, drawn at once from the page itself.
-                    is Page.Year -> Unit
-                    Page.Reminders -> refreshReminderStatus()
+                    is Page.Year -> Content.Drawn
+                    Page.Reminders -> {
+                        refreshReminderStatus()
+                        Content.Drawn
+                    }
                 }
-                error = null
-                countVisit()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                error = e.message ?: e.toString()
+                Content.Failed(e.message ?: e.toString())
             }
+            contents[visit.id] = content
+            shown = Shown(visit, content)
+            if (content !is Content.Failed) countVisit()
         }
     }
 }

@@ -89,14 +89,18 @@ fun OrdoScreen(
     val p = LocalPalette.current
     val wide = LocalWide.current
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
-    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) { LazyListState() }
+    // A day asked for (the web's #d-date) is brought into view once, when the month is ready:
+    // from the first frame when it already is, so the page comes in at that day. After that
+    // the reader's own scroll position stands, restored or not.
+    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
+    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
+    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
+        LazyListState(if (focusDay != 0 && month != null) focusItem else 0)
+    }
     val scope = rememberCoroutineScope()
-    // A day asked for (the web's #d-date) is brought into view once, when the month is ready;
-    // after that the reader's own scroll position stands, restored or not.
-    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0) }
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
-            listState.scrollToItem(FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1)
+            listState.scrollToItem(focusItem)
             focused = true
         }
     }
