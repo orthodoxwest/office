@@ -12,23 +12,24 @@ let verseGutter: CGFloat = 28.8
 func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     guard let prev else { return 0 }
     let heading = { (b: BlockView) in b.kind == .heading || b.kind == .commemorationHeading }
+    let antiphon = { (b: BlockView) in b.kind == .antiphon || b.kind == .announcedAntiphon }
     if heading(cur) { return 38 }
     if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
     if cur.kind == .gap || prev.kind == .gap { return 4.8 }
     if prev.kind == .itemLabel { return 9 }
     // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
     if cur.kind == .antiphonNote { return 2.4 }
-    if cur.kind == .itemLabel { return prev.kind == .antiphon || prev.kind == .antiphonNote ? 10 : 30 }
+    if cur.kind == .itemLabel { return antiphon(prev) || prev.kind == .antiphonNote ? 10 : 30 }
     if prev.kind == .chapterRef { return 15 }
     if prev.kind == .latinTitle { return 8 }
     if prev.kind == .speaker { return 3.2 }
     // A closing antiphon, then the next group's opening one: the threshold between groups.
-    if cur.kind == .antiphon && prev.kind == .antiphon { return 49 }
+    if antiphon(cur) && prev.kind == .antiphon { return 49 }
     // A closing antiphon sits close under its psalm's last verse or Gloria.
-    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .paragraph && !prev.startsElement)) { return 6 }
+    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .gloriaPatri && !prev.startsElement)) { return 6 }
     if cur.kind == .verse && prev.kind == .verse { return 4.8 }
     // The Gloria Patri after a psalm's last verse.
-    if cur.kind == .paragraph && prev.kind == .verse { return 13.6 }
+    if cur.kind == .gloriaPatri && prev.kind == .verse { return 13.6 }
     if cur.kind == .stanza && prev.kind == .stanza { return 12 }
     if cur.startsElement { return 14 }
     return 4.8
@@ -50,7 +51,7 @@ private func setting(_ kind: BlockKind) -> Setting {
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
     case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
     case .speaker: return Setting(style: Scale.speaker, color: \.rubric)
-    case .verse, .stanza: return Setting(style: Scale.verse, color: \.text)
+    case .verse, .stanza, .gloriaPatri: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
     }
 }
@@ -200,8 +201,9 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
     }
 
     switch block.kind {
-    case .antiphon:
-        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it.
+    case .antiphon, .announcedAntiphon:
+        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
+        // opening words stand centred over the psalm's label, as the web's `.antiphon-announce`.
         var sigil = Scale.body
         sigil.smallCaps = true
         sigil.tracking = 1.4
@@ -209,7 +211,11 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
         t.append(NSAttributedString(string: " ", attributes: [.font: font]))
         t.append(text)
         spec.text = t
-        spec.restIndent = 21.6 * m.type
+        if block.kind == .announcedAntiphon {
+            spec.alignment = .center
+        } else {
+            spec.restIndent = 21.6 * m.type
+        }
     case .antiphonNote:
         // Under the antiphon's words, past its "Ant." (the antiphon's hanging indent).
         spec.firstIndent = 21.6 * m.type
@@ -228,6 +234,10 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
             spec.text = t
             spec.tabs = [NSTextTab(textAlignment: .right, location: gutter - m.px(8)), NSTextTab(textAlignment: .left, location: gutter)]
         }
+    case .gloriaPatri:
+        // The Gloria Patri keeps the verses' edge; each line's wrap steps in (the web's `.source-line`, 1.1rem).
+        spec.firstIndent = gutter
+        spec.restIndent = gutter + 17.6 * m.type
     case .versicle, .response, .all:
         if block.dropCap { return opening(textStart: 0, raised: true) }
         if block.marker.isEmpty { break }
@@ -404,7 +414,7 @@ func spoken(_ block: BlockView) -> String {
     if let first = words.first { words = first.uppercased() + words.dropFirst() }
     let marker: String
     switch block.kind {
-    case .antiphon: marker = "Antiphon."
+    case .antiphon, .announcedAntiphon: marker = "Antiphon."
     case .versicle, .response: marker = block.marker.replacingOccurrences(of: "℣.", with: "Versicle.").replacingOccurrences(of: "℟.", with: "Response.")
     case .verse: marker = ""
     default: marker = block.marker

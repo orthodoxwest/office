@@ -59,8 +59,20 @@ fn posture_cues_fall_at_their_anchors() {
     assert!(verses[0].plain_text().ends_with("\u{a0}* Sit. unto the Lord."), "{}", verses[0].plain_text());
     assert_eq!(cues(verses[1]), ["Stand."]);
     let gloria = out.last().unwrap();
+    assert_eq!(gloria.kind, BlockKind::GloriaPatri);
+    assert_eq!(styles(gloria).iter().filter(|s| **s == RunStyle::Break).count(), 1, "{gloria:#?}");
     assert_eq!(cues(gloria), ["Bow.", "Stand upright."]);
     assert!(gloria.plain_text().starts_with("Bow. Glory be"), "{}", gloria.plain_text());
+}
+
+#[test]
+fn an_announced_antiphon_is_its_own_kind() {
+    let mut announced = elem(ElementType::Antiphon, "Let my prayer * O Lord, enter into thy presence.");
+    announced.announce = true;
+    let full = elem(ElementType::Antiphon, "Let my prayer * O Lord, enter into thy presence.");
+    let out = element_blocks(&[announced, full]);
+    assert_eq!(out.iter().map(|b| b.kind).collect::<Vec<_>>(), [BlockKind::AnnouncedAntiphon, BlockKind::Antiphon]);
+    assert_eq!(out[0].plain_text(), "Ant. Let my prayer.");
 }
 
 #[test]
