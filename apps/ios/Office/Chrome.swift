@@ -300,6 +300,38 @@ func toggled() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
 /// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does.
 let restyling = Animation.easeInOut(duration: 0.32)
 
+/**
+ * Brings what a disclosure unfolded into view, once it has unfolded, when it opened past the
+ * screen's edge: a page's scroll view sets it (`revealing`), and the disclosure names its
+ * contents' id.
+ */
+struct Reveal {
+    fileprivate let scroll: (String) -> Void
+    func callAsFunction(_ id: String) { scroll(id) }
+}
+
+private struct RevealKey: EnvironmentKey {
+    static let defaultValue = Reveal { _ in }
+}
+
+extension EnvironmentValues {
+    var reveal: Reveal {
+        get { self[RevealKey.self] }
+        set { self[RevealKey.self] = newValue }
+    }
+}
+
+extension View {
+    /// Lets the disclosures inside bring what they unfold into view through `proxy`.
+    func revealing(_ proxy: ScrollViewProxy) -> some View {
+        environment(\.reveal, Reveal { id in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(id, anchor: .bottom) }
+            }
+        })
+    }
+}
+
 /// How a disclosure opens and closes, as on Android: over a quarter second, easing in and out.
 let unfolding = Animation.easeInOut(duration: 0.26)
 

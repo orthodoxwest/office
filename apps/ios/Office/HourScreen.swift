@@ -183,6 +183,7 @@ struct HourScreen: View {
                     )
                 }
             }
+            .revealing(scroll)
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
@@ -252,6 +253,7 @@ private struct HourTitle: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @State private var picking = false
+    @Environment(\.reveal) private var reveal
     @State private var choosing = false
 
     var body: some View {
@@ -301,6 +303,7 @@ private struct HourTitle: View {
                     picking = false
                     model.open(.hour(d, view.hour))
                 }
+                .id("disclosed")
                 .transition(.unfold)
             }
             if choosing {
@@ -308,6 +311,7 @@ private struct HourTitle: View {
                     withAnimation(unfolding) { choosing = false }
                     model.chooseForm(f)
                 }
+                .id("disclosed")
                 .transition(.unfold)
             }
             Hairline(color: p.lining.opacity(0.3)).padding(.top, m.px(7.2))
@@ -323,12 +327,14 @@ private struct HourTitle: View {
                 picking.toggle()
                 choosing = false
             }
+            if picking { reveal("disclosed") }
         }
         Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label) {
             withAnimation(unfolding) {
                 choosing.toggle()
                 picking = false
             }
+            if choosing { reveal("disclosed") }
         }
     }
 }

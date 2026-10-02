@@ -43,6 +43,7 @@ struct HomeScreen: View {
                 VaultField(fade: [(0, 0), (0.09, 0), (0.16, 0.9), (0.6, 0.7), (1, 0.3)]).ignoresSafeArea()
                 // A wide screen sets the frontispiece in a niche, and lights the room toward it.
                 if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
+                ScrollViewReader { scroll in
                 ScrollView {
                     VStack(spacing: 0) {
                         SiteHeader()
@@ -68,6 +69,8 @@ struct HomeScreen: View {
                         Footer(diamond: false)
                     }
                     .frame(minHeight: niche == nil ? nil : geo.size.height)
+                }
+                .revealing(scroll)
                 }
             }
         }
@@ -98,6 +101,7 @@ private struct Frontispiece: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var picking = false
+    @Environment(\.reveal) private var reveal
 
     var body: some View {
         let day = dayColor(view.color)
@@ -165,12 +169,16 @@ private struct Frontispiece: View {
             if !view.season.isEmpty {
                 Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(4.8))
             }
-            Disclosure(label: "Change date", open: picking) { withAnimation(unfolding) { picking.toggle() } }
+            Disclosure(label: "Change date", open: picking) {
+                withAnimation(unfolding) { picking.toggle() }
+                if picking { reveal("disclosed") }
+            }
             if picking {
                 DayPicker(shown: date, today: model.today) { d in
                     picking = false
                     model.open(.home(d))
                 }
+                .id("disclosed")
                 .transition(.unfold)
             }
         }
