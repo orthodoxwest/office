@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The reading measure's side gutter (`--page-gutter` on a phone).
 let gutter: CGFloat = 16
@@ -220,13 +221,21 @@ struct MenuPanel: View {
             HStack(spacing: 0) {
                 rowLabel("THEME")
                 ForEach(ThemeChoice.allCases) { t in
-                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), p.accent, spoken: "\(t.label) theme") { model.chooseTheme(t) }
+                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), p.accent, spoken: "\(t.label) theme") {
+                        guard t != model.theme else { return }
+                        chose()
+                        withAnimation(restyling) { model.chooseTheme(t) }
+                    }
                 }
             }
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
-                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), p.muted, spoken: textSizeName(s)) { model.chooseTextSize(s) }
+                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), p.muted, spoken: textSizeName(s)) {
+                        guard s != model.textSize else { return }
+                        chose()
+                        withAnimation(restyling) { model.chooseTextSize(s) }
+                    }
                 }
             }
         }
@@ -278,6 +287,18 @@ func textSizeName(_ s: TextSize) -> String {
     case .large: return "Larger text"
     }
 }
+
+/**
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
+ * Android app gives; never for a page opened. The phone's own haptics setting governs it.
+ */
+func chose() { UISelectionFeedbackGenerator().selectionChanged() }
+
+/// The tap of a checkbox turned on or off.
+func toggled() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+
+/// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does.
+let restyling = Animation.easeInOut(duration: 0.32)
 
 /// How a disclosure opens and closes, as on Android: over a quarter second, easing in and out.
 let unfolding = Animation.easeInOut(duration: 0.26)
@@ -455,7 +476,10 @@ struct DayPicker: View {
                         let n = week * 7 + i - lead + 1
                         if (1...length).contains(n) {
                             let day = CivilDate(year: Int32(year), month: Int32(month), day: Int32(n))
-                            Button { pick(day) } label: {
+                            Button {
+                                chose()
+                                pick(day)
+                            } label: {
                                 Text("\(n)").type(TextStyle(size: 18, line: 30, lining: true))
                                     .foregroundStyle(i == 0 ? p.rubric : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
@@ -513,7 +537,10 @@ struct FormChooser: View {
         VStack(spacing: 0) {
             Text("How are you praying?").type(Scale.body.sized(16, line: 24)).foregroundStyle(p.muted).padding(.bottom, m.px(4))
             ForEach(prayerForms, id: \.value) { f in
-                Button { choose(f.value) } label: {
+                Button {
+                    if f.value != form { chose() }
+                    choose(f.value)
+                } label: {
                     HStack(spacing: m.px(10)) {
                         ZStack {
                             Circle().stroke(f.value == form ? p.gold : p.border, lineWidth: 1).frame(width: m.px(16), height: m.px(16))
