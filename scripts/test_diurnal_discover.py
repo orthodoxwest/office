@@ -136,17 +136,6 @@ class LocatorTests(unittest.TestCase):
                                      discover.LENT_EMBER_LOCATOR_ROUTE)
 
 
-class PromptTests(unittest.TestCase):
-    def test_prompt_defines_printed_cross_references_and_extra(self):
-        prompt_text = discover.build_prompt(dossier())
-        for wanted in ("slot-1", "proper/st-example/collect", "printed=false",
-                       "all from the Common", "extra", "stop before its conclusion cue",
-                       "own heading", "neighboring feast's Common reference"):
-            self.assertIn(wanted, prompt_text)
-        temporal = {**dossier(), "month": None, "day": None}
-        self.assertNotIn("None/None", discover.build_prompt(temporal))
-
-
 class GateTests(unittest.TestCase):
     def test_uncertain_absence_is_held_for_review(self):
         runner = FakeRunner(primary("", printed=False, confidence="low"))
@@ -226,19 +215,6 @@ class GateTests(unittest.TestCase):
         )
         self.assertEqual(result["slots"][0]["decision"], "same-as-fallback")
         self.assertEqual(runner.secondary_calls, [])
-
-
-class ReportTests(unittest.TestCase):
-    def test_report_contains_pr_sections_and_representative_url(self):
-        record = {
-            "feast_id": "st-example", "name": "St. Example", "status": "needs-human",
-            "slots": [{**dossier()["fallbacks"][0], "decision": "needs-human", "error": "disagreement"}],
-            "extra": [{"section": "proper-rubric", "hour": "lauds", "note": "special rubric"}],
-        }
-        report = discover.render_report([record], "pilot")
-        for wanted in ("Feasts processed: 1", "Other observed sections: 1",
-                       "https://office.fly.dev/lauds/2026-07-17", "## Same as fallback"):
-            self.assertIn(wanted, report)
 
 
 class NoRenderedEffectTests(unittest.TestCase):

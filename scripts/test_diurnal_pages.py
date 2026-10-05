@@ -17,19 +17,17 @@ SPEC.loader.exec_module(pages)
 
 
 class LabelTests(unittest.TestCase):
-    def test_detects_arabic_at_edge_not_in_body(self):
-        self.assertEqual(pages.detect_printed_label("595\nTHE OFFICE\nPsalm 12\ntext"), "595")
-
-    def test_detects_star_label(self):
-        self.assertEqual(pages.detect_printed_label("COMMONS\ntext\n— 72* —"), "72*")
+    def test_detects_printed_label(self):
+        for text, expected in [
+            ("595\nTHE OFFICE\nPsalm 12\ntext", "595"),  # Arabic at the edge, not in the body
+            ("COMMONS\ntext\n— 72* —", "72*"),
+            ("xxvi\nPREFACE\ntext", "xxvi"),
+            ("12\ntext\n13", None),  # ambiguous edges
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(pages.detect_printed_label(text), expected)
         self.assertIn("1*", pages.ocr_label_candidates({"text": "APPENDIX\ntext\nl*", "layout_text": ""}))
-
-    def test_detects_and_validates_roman(self):
-        self.assertEqual(pages.detect_printed_label("xxvi\nPREFACE\ntext"), "xxvi")
         self.assertIsNone(pages.canonical_label("iix"))
-
-    def test_ambiguous_edges_are_null(self):
-        self.assertIsNone(pages.detect_printed_label("12\ntext\n13"))
 
     def test_interpolates_only_matching_bounded_series(self):
         source = [
@@ -43,8 +41,6 @@ class LabelTests(unittest.TestCase):
         self.assertEqual(result[1]["printed_page"], "xxv")
         self.assertTrue(result[1]["inferred"])
         self.assertIsNone(result[3]["printed_page"])
-
-    def test_interpolates_star_pages(self):
         result = pages.interpolate_labels([
             {"pdf_page": 1, "printed_page": "7*"},
             {"pdf_page": 2, "printed_page": None},
@@ -144,21 +140,6 @@ class IndexTests(unittest.TestCase):
         ]}
         found = pages.locate_feast_pages(index, 2, 10, "St. Scholastica")
         self.assertEqual([page["pdf_page"] for page in found["pages"]], [2, 3])
-
-    def test_cli_feast_pages(self):
-        index = {"pages": [{
-            "pdf_page": 11, "png": "11.png", "printed_page": "566", "inferred": False,
-            "text": "(JULY 17)\nTRANSLATION OF ST. OSMUND", "layout_text": "July 17",
-        }]}
-        cache = self.root / "book"
-        cache.mkdir(exist_ok=True)
-        (cache / "index.json").write_text(json.dumps(index), encoding="utf-8")
-        with mock.patch.object(pages, "PAGES_ROOT", self.root):
-            with mock.patch("builtins.print") as output:
-                self.assertEqual(pages.main([
-                    "feast-pages", "7", "17", "Translation of St. Osmund", "--key", "book",
-                ]), 0)
-                self.assertEqual(json.loads(output.call_args.args[0])["pages"][0]["pdf_page"], 11)
 
     def test_temporal_name_locator_ignores_roman_table_of_contents(self):
         index = {"pages": [

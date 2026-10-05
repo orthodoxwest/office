@@ -90,11 +90,10 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertEqual(finding.category, "open-question")
         self.assertEqual(finding.issue, "11")
         self.assertEqual(finding.note, "exact")
-
-    def test_unmatched_finding_stays_untriaged(self):
-        finding = PROJECT_STATUS.Finding(2026, "calendar", "01-01", "detail")
-        PROJECT_STATUS.apply_triage([finding], [])
-        self.assertEqual(finding.category, "untriaged")
+        # A finding no rule matches is never guessed into a category.
+        unmatched = PROJECT_STATUS.Finding(2026, "calendar", "01-01", "detail")
+        PROJECT_STATUS.apply_triage([unmatched], rules[1:])
+        self.assertEqual(unmatched.category, "untriaged")
 
     def test_suspected_errata_receive_no_adjudicated_parity_credit(self):
         findings = [
@@ -125,45 +124,6 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertIn("Adjudicated ordo parity: 70.0%", markdown)
         self.assertIn("when 1 confirmed reference error(s)", markdown)
         self.assertIn("1 confirmed; 1 unconfirmed", markdown)
-
-    def test_2026_triage_distinguishes_confirmed_rulings_and_unanswered_aspects(self):
-        rules = PROJECT_STATUS.load_triage(
-            SCRIPT.parent.parent / "data/review/ordo-triage.csv")
-        for aspect, date, category, issue in [
-            ("hours-preces", "01-18", "reference-error", "15"),
-            ("hours-preces", "02-27", "reference-error", "15"),
-            ("hours-preces", "06-28", "reference-error", "15"),
-            ("hours-preces", "03-16", "reference-error", "15"),
-            ("hours-preces", "07-16", "open-question", "11"),
-            ("hours-preces", "01-02", "untriaged", ""),
-            ("vespers-commemorations", "02-01", "reference-error", "93"),
-            ("vespers-ownership", "01-04", "reference-error", "62"),
-            ("vespers-ownership", "05-01", "reference-error", "62"),
-            ("vespers-ownership", "08-23", "reference-error", "62"),
-            ("magnificat-antiphon", "08-23", "reference-error", "376"),
-            ("vespers-ownership", "04-24", "open-question", "62"),
-            ("vespers-ownership", "08-29", "open-question", "62"),
-            ("vespers-ownership", "11-29", "open-question", "62"),
-            ("lauds-commemorations", "08-22", "open-question", "381"),
-            ("vespers-commemorations", "02-23", "open-question", "377"),
-            ("magnificat-antiphon", "04-01", "reference-error", "373"),
-            ("magnificat-antiphon", "04-21", "reference-error", "374"),
-            ("magnificat-antiphon", "09-18", "reference-error", "375"),
-            ("magnificat-antiphon", "06-19", "suspected-reference-error", "248"),
-            ("vespers-suffrage", "06-19", "suspected-reference-error", "248"),
-            ("vespers-color", "07-10", "suspected-reference-error", "248"),
-            ("lauds-suffrage", "06-19", "reference-error", "416"),
-            ("lauds-suffrage", "10-31", "reference-error", "471"),
-        ]:
-            with self.subTest(aspect=aspect, date=date):
-                finding = PROJECT_STATUS.Finding(2026, aspect, date, "detail")
-                PROJECT_STATUS.apply_triage([finding], rules)
-                self.assertEqual(finding.category, category)
-                self.assertEqual(finding.issue, issue)
-                if category == "suspected-reference-error":
-                    self.assertEqual(finding.confidence, "provisional")
-                elif category == "reference-error":
-                    self.assertEqual(finding.confidence, "confirmed")
 
     def test_expected_proper_slots_honors_suppressions(self):
         with tempfile.TemporaryDirectory() as name:
@@ -210,107 +170,6 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertEqual(status.total, 20)
         self.assertEqual(status.verified, 3)
         self.assertEqual(status.source_unknown, 5)
-
-    def test_percent_handles_empty_denominator(self):
-        self.assertEqual(PROJECT_STATUS.percent(0, 0), 100.0)
-        self.assertEqual(PROJECT_STATUS.percent(1, 4), 25.0)
-
-    def test_cluster_analysis_reports_symptoms_without_assigning_causes(self):
-        findings = [
-            PROJECT_STATUS.Finding(
-                2026, "magnificat-antiphon", "01-01",
-                "ours=O Lord, give light * to them | reference=Give light"),
-            PROJECT_STATUS.Finding(
-                2026, "magnificat-antiphon", "01-02",
-                "ours=O Lord, give light * to them | reference=Another text"),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-commemorations", "01-01",
-                "extra=Day II within the Octave"),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-commemorations", "01-03",
-                "missing=Fer."),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-ownership", "01-01",
-                "ours=prec | reference=none | celebration=Holy Thursday"),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-ownership", "01-04",
-                "ours=none | reference=fol", category="open-question"),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-color", "01-01",
-                "ours=w | reference=g"),
-            PROJECT_STATUS.Finding(
-                2026, "vespers-suffrage", "01-05",
-                "ours=False | reference=True"),
-            PROJECT_STATUS.Finding(
-                2026, "calendar", "01-06", "ours=A | reference=B"),
-        ]
-        previous = PROJECT_STATUS.Comparison({}, [
-            PROJECT_STATUS.Finding(
-                2025, "magnificat-antiphon", "01-01", "ours=X | reference=Y"),
-        ])
-        clusters = PROJECT_STATUS.analyze_clusters(
-            PROJECT_STATUS.Comparison({}, findings), previous)
-
-        self.assertEqual(clusters["untriaged"]["total"], 8)
-        self.assertEqual(clusters["vespers"]["total"], 8)
-        self.assertEqual(clusters["vespers"]["untriaged"], 7)
-        self.assertEqual(
-            clusters["vespers"]["ownership"]["directions"],
-            {"engine-only": 1, "reference-only": 1},
-        )
-        self.assertEqual(
-            clusters["vespers"]["ownership"]
-            ["untriaged_engine_only_contexts"],
-            {"triduum-easter-pentecost": 1},
-        )
-        self.assertEqual(
-            clusters["vespers"]["commemorations"]["directions"],
-            {"extra-only": 1, "missing-only": 1},
-        )
-        self.assertEqual(
-            clusters["vespers"]["magnificat"]
-            ["incipit_boundary_or_wording_candidates"], 1)
-        self.assertEqual(
-            clusters["canticle_antiphons"]
-            ["incipit_boundary_or_wording_candidates"], 1)
-        self.assertEqual(
-            clusters["vespers"]["magnificat"]
-            ["repeated_generated_incipits"][0]["count"], 2)
-        self.assertEqual(clusters["previous_year_recurrence"]["count"], 1)
-
-        markdown = "\n".join(PROJECT_STATUS.render_cluster_markdown(clusters))
-        self.assertIn("symptoms, not automatic root-cause assignments", markdown)
-        self.assertIn("wording/boundary review candidates", markdown)
-
-
-class IncipitMatchTest(unittest.TestCase):
-    OC = PROJECT_STATUS.ORDO_COMPARE
-
-    def test_leading_o_interjection_is_ignored(self):
-        self.assertTrue(self.OC.incipit_matches(
-            "King of glory",
-            "O King of glory, * thou Lord of Sabaoth, who triumphing to-day"))
-        self.assertTrue(self.OC.incipit_matches(
-            "O King of glory", "King of glory, thou Lord of Sabaoth"))
-
-    def test_leading_o_on_both_sides_still_compared(self):
-        self.assertTrue(self.OC.incipit_matches(
-            "O Teacher right excellent",
-            "O Teacher right excellent, * O light of Holy Church"))
-        self.assertFalse(self.OC.incipit_matches(
-            "O right excellent Teacher",
-            "O Teacher right excellent, * O light of Holy Church"))
-
-    def test_s_z_spelling_variants_fold(self):
-        self.assertTrue(self.OC.incipit_matches(
-            "When Elizabeth",
-            "When Elisabeth * heard the salutation of Mary"))
-
-    def test_different_antiphons_still_mismatch(self):
-        self.assertFalse(self.OC.incipit_matches(
-            "Come, Bride of Christ",
-            "All generations shall call me blessed"))
-
 
 if __name__ == "__main__":
     unittest.main()

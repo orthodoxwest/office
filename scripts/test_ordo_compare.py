@@ -15,90 +15,49 @@ SPEC.loader.exec_module(ORDO_COMPARE)
 
 
 class CommemorationComparisonTest(unittest.TestCase):
-    def test_extracts_repeated_and_unprefixed_commemorations(self):
-        section = (
-            'Lauds W / Ppr. / Comm. Innocents (“These are they” & Col. 202) '
-            '& Comm. Titus (“Well done” 3*; Col. 454) / No Suff.'
-        )
-        self.assertEqual(
-            ORDO_COMPARE.pdf_commemorations(section),
-            ["Innocents", "Titus"],
-        )
-
-        section = (
-            'Vespers V / Col. / Comm. Venantius (“O ye holy” 20*) '
-            '& Pudentiana (“Come thou Bride” 4*) / No Comm. HC'
-        )
-        self.assertEqual(
-            ORDO_COMPARE.pdf_commemorations(section),
-            ["Venantius", "Pudentiana"],
-        )
-
-        # Some pdftotext rows leave the outer parenthesis unbalanced; the
-        # inner page-reference close still separates the items.
-        section = (
-            'Vespers W / Comm. Innocents (“These are they” (221; Col. 202) '
-            '& Titus (“O thou priest” 3*; Col. 454) / No Suff.'
-        )
-        self.assertEqual(
-            ORDO_COMPARE.pdf_commemorations(section),
-            ["Innocents", "Titus"],
-        )
-
-    def test_stops_before_positive_suffrage_and_trailing_rubrics(self):
-        section = (
-            'Lauds V / Comm. Walburga (“The kingdom” 4*) / Suff. (42f) '
-            'Blessing & distribution of ashes (violet)'
-        )
-        self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), ["Walburga"])
-
-    def test_extracts_appointments_without_comm_prefix(self):
-        # Printed appointments: 2026 ordo pp. 32, 37, 56, 61. In particular,
-        # the HC flag must not hide the preceding named commemoration.
+    def test_pdf_commemorations(self):
+        cases = [
+            ('Lauds W / Ppr. / Comm. Innocents (“These are they” & Col. 202) '
+             '& Comm. Titus (“Well done” 3*; Col. 454) / No Suff.', ["Innocents", "Titus"]),
+            ('Vespers V / Col. / Comm. Venantius (“O ye holy” 20*) '
+             '& Pudentiana (“Come thou Bride” 4*) / No Comm. HC', ["Venantius", "Pudentiana"]),
+            # Some pdftotext rows leave the outer parenthesis unbalanced; the
+            # inner page-reference close still separates the items.
+            ('Vespers W / Comm. Innocents (“These are they” (221; Col. 202) '
+             '& Titus (“O thou priest” 3*; Col. 454) / No Suff.', ["Innocents", "Titus"]),
+            # Stops before a positive suffrage and trailing rubrics.
+            ('Lauds V / Comm. Walburga (“The kingdom” 4*) / Suff. (42f) '
+             'Blessing & distribution of ashes (violet)', ["Walburga"]),
+            # May 9, 2026: the second name is both unprefixed and abbreviated.
+            ('Vespers / Comm. Gregory (\u201cO Teacher\u201d 35*; Col. 37*) '
+             '/ Gordian &c. (\u201cLight perpetual\u201d 2*; Col. 526)/ Comm. HC (146f)', ["Gregory", "Gordian &c."]),
+            ('Vespers / Comm. Gregory (\u201cO Teacher\u201d 35*; Col. 37*) '
+             '/ Comm. Gordian &c. (\u201cLight perpetual\u201d 2*; Col. 526)/ Comm. HC (146f)', ["Gregory", "Gordian &c."]),
+            ('Lauds / Comm. Comm. Walburga (\u201cThe kingdom\u201d 4*) / Suff.', ["Walburga"]),
+            # The Holy Cross flag is not a name-column commemoration.
+            ('Lauds / Comm. HC (“O Cross” 12*) / No Suff.', []),
+            # Explicit "No Comm." is distinct from an unparsed row (None).
+            ("Lauds / No Comm. / No Suff.", []),
+            ("Lauds / Ppr. / No Suff.", None),
+            (None, None),
+            # An ordinary slot is never inferred to be a commemoration.
+            ('Lauds / Ben. Ant. \u201cThe Lord\u201d / Col. (371)', None),
+            ('Vespers / Ant. (\u201cThe Lord\u201d 2*; Col. suppl.)', None),
+            ('Lauds / Polycarp (32)', None),
+            ('Lauds / Polycarp (\u201cHe that hateth\u201d 1*)', None),
+        ]
+        # Printed appointments without a Comm. prefix: 2026 ordo pp. 32, 37,
+        # 56, 61. In particular, the HC flag must not hide the preceding name.
         for name, quotation, ending in [
             ("Polycarp", "He that hateth", "Suff. (42f)"),
             ("Martyrs", "For theirs", "Suff. (145f)"),
             ("Soter & Caius", "Daughters of Jerusalem", "Comm. HC (43)"),
             ("Boniface", "O thou Priest", "No Comm. HC"),
         ]:
-            with self.subTest(name=name):
-                section = f'Lauds W / Col. (371) / {name} (\u201c{quotation}\u201d 2*; Col. suppl.) / {ending}'
-                self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), [name])
-
-    def test_does_not_infer_commemoration_from_an_ordinary_slot(self):
-        for section in [
-            'Lauds / Ben. Ant. \u201cThe Lord\u201d / Col. (371)',
-            'Vespers / Ant. (\u201cThe Lord\u201d 2*; Col. suppl.)',
-            'Lauds / Polycarp (32)',
-            'Lauds / Polycarp (\u201cHe that hateth\u201d 1*)',
-        ]:
+            cases.append((f'Lauds W / Col. (371) / {name} (\u201c{quotation}\u201d 2*; Col. suppl.) / {ending}', [name]))
+        for section, expected in cases:
             with self.subTest(section=section):
-                self.assertIsNone(ORDO_COMPARE.pdf_commemorations(section))
-
-    def test_extracts_separate_slash_delimited_commemorations(self):
-        # May 9, 2026: the second name is both unprefixed and abbreviated.
-        section = ('Vespers / Comm. Gregory (\u201cO Teacher\u201d 35*; Col. 37*) '
-                   '/ Gordian &c. (\u201cLight perpetual\u201d 2*; Col. 526)/ Comm. HC (146f)')
-        self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), ["Gregory", "Gordian &c."])
-        self.assertEqual(
-            ORDO_COMPARE.pdf_commemorations(section.replace('/ Gordian', '/ Comm. Gordian')),
-            ["Gregory", "Gordian &c."],
-        )
-
-    def test_redundant_comm_prefix_does_not_duplicate_a_name(self):
-        self.assertEqual(
-            ORDO_COMPARE.pdf_commemorations('Lauds / Comm. Comm. Walburga (\u201cThe kingdom\u201d 4*) / Suff.'),
-            ["Walburga"],
-        )
-
-    def test_ignores_holy_cross_flag_not_present_in_name_column(self):
-        section = 'Lauds / Comm. HC (“O Cross” 12*) / No Suff.'
-        self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), [])
-
-    def test_distinguishes_explicit_none_from_unparsed(self):
-        self.assertEqual(ORDO_COMPARE.pdf_commemorations("Lauds / No Comm. / No Suff."), [])
-        self.assertIsNone(ORDO_COMPARE.pdf_commemorations("Lauds / Ppr. / No Suff."))
-        self.assertIsNone(ORDO_COMPARE.pdf_commemorations(None))
+                self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), expected)
 
     def test_normalizes_style_and_abbreviations(self):
         pairs = [
@@ -219,8 +178,21 @@ class ReferenceParsingTest(unittest.TestCase):
         for text in ['Vespers / Mag. Ant. “The king (123) / Col. Another',
                      'Vespers / Mag. Ant. (“The king” (123) / Col. Another']:
             self.assertEqual(ORDO_COMPARE.antiphon_incipit(text, "Mag"), "The king")
-        self.assertTrue(ORDO_COMPARE.incipit_matches("He remem- bered", "He remembered his mercy"))
-        self.assertFalse(ORDO_COMPARE.incipit_matches("Ask…a much longer fragment", "Ask now"))
+
+    def test_incipit_matching(self):
+        for printed, ours, expected in [
+            ("He remem- bered", "He remembered his mercy", True),
+            ("Ask…a much longer fragment", "Ask now", False),
+            # A leading "O" interjection is ignored on one side, compared on both.
+            ("King of glory", "O King of glory, * thou Lord of Sabaoth, who triumphing to-day", True),
+            ("O King of glory", "King of glory, thou Lord of Sabaoth", True),
+            ("O Teacher right excellent", "O Teacher right excellent, * O light of Holy Church", True),
+            ("O right excellent Teacher", "O Teacher right excellent, * O light of Holy Church", False),
+            ("When Elizabeth", "When Elisabeth * heard the salutation of Mary", True),
+            ("Come, Bride of Christ", "All generations shall call me blessed", False),
+        ]:
+            with self.subTest(printed=printed):
+                self.assertEqual(ORDO_COMPARE.incipit_matches(printed, ours), expected)
 
     def test_slash_ampersand_commemoration_and_specific_matching(self):
         names = ORDO_COMPARE.pdf_commemorations(
