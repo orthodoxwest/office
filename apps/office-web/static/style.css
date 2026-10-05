@@ -3744,22 +3744,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   background: rgba(208, 176, 106, 0.12);
 }
 
-/* The mobile-only day card regains a surface in apse mode (on desktop the
-   day block stays transparent/editorial, so it needs nothing here). */
-@media (max-width: 700px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .home-summary {
-    background: var(--surface);
-    box-shadow: none;
-  }
-}
-
-@media (max-width: 700px) {
-  :root[data-theme="dark"] .home-summary {
-    background: var(--surface);
-    box-shadow: none;
-  }
-}
-
 :root[data-theme="dark"] .pray-now {
   background: var(--accent);
   border-color: var(--accent);
@@ -4180,39 +4164,118 @@ body.season-eastertide {
   /* The panel's furniture (the invitation's inner line, the table's outer
      frame) is drawn in the lining, thinned. */
   --panel-rule: color-mix(in srgb, var(--lining) 45%, transparent);
-  /* On a phone the frontispiece is a round-headed painted panel: a
-     segmental head with a springing (the lining's curve starts 8px below
-     the moulding's), the day's colour as a hairline ring at its edge and
-     again as the lining's inner hairline, so the liturgical colour sits
-     beside the cross on the plaster; the terracotta lining painted round
-     the head with the consecration cross at the crown, and a little shade
-     under the head so the panel sits in the wall. The desktop widens the
-     same object into the niche (see "Home niche"), which restates the
-     head, lining and shadows at its own scale. The lining keeps clear air
-     round the cross: a tighter arch once clipped it. */
-  --panel-head: 4.25rem;
-  --panel-inset: 0.6rem;
+  /* On a phone the frontispiece is a painted panel with a pointed head: a
+     steep four-centred arch rising 0.44 of the card's width, its haunches
+     leaving the jambs without a kink (see tools/genarch.py). The day's
+     colour is a hairline ring at its edge and again as the lining's inner
+     hairline, so the liturgical colour sits beside the cross on the
+     plaster; the terracotta lining is painted round the head with the
+     consecration cross in its point, and a little shade under the head
+     sits the panel in the wall. The desktop widens the same object into the
+     niche (see "Home niche"), which restates the head, lining and shadows
+     at its own scale.
+
+     A box-shadow or border-radius cannot follow a pointed head, so each of
+     the panel's courses is its own layer clipped to the same arch offset by
+     its own distance (--arch-d), as a moulding's lines are: the day's ring
+     (the halo's source), the frame, the panel itself with the shade cast
+     under its head, and the lining and its hairline. The card is an
+     inline-size container so those layers can scale the head by its width
+     (--arch-w). The halo and shade are filters on the layers, as tokens the
+     Apse rules restate. */
+  --panel-inset: 0.75rem;
   --lining-day: var(--day-color, var(--lining));
-  /* The last shadow is a soft halo of the wall's own colour, so the
-     powdering keeps about 24px clear of the panel. */
-  --panel-shadows:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
-    0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
-    0 0 1.5rem 0.5rem var(--bg);
+  --pad-x: 1rem;
+  --arch-w: calc(100cqi + 2 * var(--pad-x));
+  --arch-lift: 2rem;
+  --arch-frame: 1px;
+  --arch-ground: var(--surface);
+  /* Room in the point for the cross, then the date set low enough that the
+     head is wide enough for it inside the lining. */
+  --crown-size: 1.9rem;
+  --crown-top: 2.1rem;
+  --head-pad: 5.4rem;
+  /* The halo is a soft field of the wall's own colour, so the powdering
+     keeps about 24px clear of the panel; the shade is a highlight under the
+     head's edge and the recess below it. */
+  --panel-halo: drop-shadow(0 0 0.5rem var(--bg)) drop-shadow(0 0 0.75rem var(--bg));
+  --panel-shade: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.45)) drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
+  --arch-halo: var(--panel-halo);
+  --arch-shade: var(--panel-shade);
   position: relative;
+  isolation: isolate;
+  container-type: inline-size;
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
   gap: 0;
-  /* Room in the head for the lining and the cross: inset, air, the cross,
-     then its clearance before the date, which the hairline's curve must
-     also clear at a long date's corners. */
-  padding: calc(var(--panel-inset) + 0.85rem + 1.9rem + 1.25rem) 1rem 0.75rem;
-  border: 1px solid var(--frontispiece-frame);
-  border-radius: 50% 50% 0 0 / var(--panel-head) var(--panel-head) 0 0;
+  padding: 0 var(--pad-x) 0.75rem;
+}
+
+/* The courses of the head, outermost first. Each layer's box is the card's
+   grown by its offset at the sides and foot, and lifted clear of its point;
+   tools/genarch.py's block below clips them all. */
+.page-home .home-arch,
+.page-home .home-arch-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page-home .home-arch {
+  z-index: -5;
+  filter: var(--arch-halo);
+}
+
+.page-home .home-arch-shade {
+  filter: var(--arch-shade);
+}
+
+.page-home .home-arch::before,
+.page-home .home-arch::after,
+.page-home .home-arch-edge,
+.page-home .home-hero::before,
+.page-home .home-hero::after,
+.page-home .home-arch-fill {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--arch-lift)) calc(-1 * var(--arch-d)) calc(-1 * var(--arch-d));
+  pointer-events: none;
+}
+
+/* The day's ring, the halo's source on a phone. */
+.page-home .home-arch::before {
+  --arch-d: 1.5px;
+  background: var(--day-color, var(--frontispiece-frame));
+}
+
+/* The niche's stone and its edges (see "Home niche"). */
+.page-home .home-arch::after,
+.page-home .home-arch-edge,
+.page-home .home-hero::before {
+  display: none;
+}
+
+/* The frame, the card's edge drawn in its rule over the panel. */
+.page-home .home-hero::after {
+  --arch-d: 0px;
+  z-index: -3;
+  background: linear-gradient(var(--frontispiece-frame), var(--frontispiece-frame)), var(--surface);
+}
+
+/* The panel, with the shade its head casts: the wall outside the arch,
+   drawn only for its shadow, which falls inside. */
+.page-home .home-arch-fill {
+  --arch-d: calc(-1 * var(--arch-frame));
+  z-index: -2;
+  background: var(--arch-ground);
+}
+
+.page-home .home-arch-shade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: var(--surface);
-  box-shadow: var(--panel-shadows);
 }
 
 /* A white day's hairline would be tan on the plaster: it takes the gold
@@ -4221,22 +4284,16 @@ body.season-eastertide {
   --lining-day: var(--gold-line);
 }
 
-@media (max-width: 374px) {
-  .page-home .home-hero {
-    --panel-head: 3.5rem;
-  }
-}
-
 /* The card opens with the consecration cross, the mark that ends every
    hour, set at the crown of the head. The desktop niche restates its place
    (see "Home niche"). */
 .page-home .home-crown {
   display: block;
   position: absolute;
-  top: calc(var(--panel-inset) + 0.85rem);
+  top: var(--crown-top);
   left: 50%;
-  width: 1.9rem;
-  height: 1.9rem;
+  width: var(--crown-size);
+  height: var(--crown-size);
   margin: 0;
   transform: translateX(-50%);
   background: var(--lining);
@@ -4246,35 +4303,383 @@ body.season-eastertide {
 
 /* A border painted on the panel's back wall: a 2px band round the head
    with the day's colour as a hairline 8px inside it, ending at the
-   inscription band. It is positioned from the day block, whose top is the
-   card's padding. Its curve springs 8px below the moulding's. */
+   inscription band: the arch again, offset --panel-inset in, open at its
+   foot. It is positioned from the day block, whose top is the card's. */
 .page-home .home-lining {
+  --arch-d: calc(-1 * var(--panel-inset));
   display: block;
   position: absolute;
-  /* The card's padding less the inset, so the band sits --panel-inset
-     inside the card's edge. */
-  top: calc(-1 * (0.85rem + 1.9rem + 1.25rem));
-  right: calc(var(--panel-inset) - 1rem);
+  top: calc(-1 * var(--arch-lift));
+  right: calc(-1 * var(--pad-x) - var(--arch-d));
   bottom: -0.15rem;
-  left: calc(var(--panel-inset) - 1rem);
-  border: 2px solid var(--lining);
-  border-bottom: 0;
-  border-radius: 50% 50% 0 0 / calc(var(--panel-head) - var(--panel-inset) + 8px) calc(var(--panel-head) - var(--panel-inset) + 8px) 0 0;
+  left: calc(-1 * var(--pad-x) - var(--arch-d));
   pointer-events: none;
 }
 
+.page-home .home-lining::before,
 .page-home .home-lining::after {
   content: "";
   position: absolute;
-  inset: 8px 8px 0;
-  border: 1px solid var(--lining-day);
-  border-bottom: 0;
-  border-radius: inherit;
+  inset: 0;
 }
+
+.page-home .home-lining::before {
+  --arch-t: 2px;
+  background: var(--lining);
+}
+
+.page-home .home-lining::after {
+  --arch-d: calc(-1 * var(--panel-inset) - 8px);
+  --arch-t: 1px;
+  left: 8px;
+  right: 8px;
+  background: var(--lining-day);
+}
+
+/* genarch:begin: tools/genarch.py writes this block; edit the script, not the polygons. */
+.page-home .home-hero {
+  --arch-rise: 0.44;
+}
+
+.page-home .home-arch::before,
+.page-home .home-arch::after,
+.page-home .home-arch-edge,
+.page-home .home-hero::before,
+.page-home .home-hero::after,
+.page-home .home-arch-fill {
+  clip-path: polygon(
+    0 100%,
+    calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    calc(0.236% + 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(0.937% + 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(2.085% + 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(3.65% + 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(6.939% + 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(10.448% + 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(14.166% + 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(18.083% - 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(22.186% - 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(26.464% - 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(30.903% - 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(35.491% - 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(40.212% - 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(45.053% - 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.053 * var(--arch-d)),
+    calc(54.947% + 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(59.788% + 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(64.509% + 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(69.097% + 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(73.536% + 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(77.814% + 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(81.917% + 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(85.834% - 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(89.552% - 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(93.061% - 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(96.35% - 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(97.915% - 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(99.063% - 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(99.764% - 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    100% 100%);
+}
+
+.page-home .home-arch-shade::before {
+  clip-path: polygon(evenodd,
+    -10% -10%,
+    110% -10%,
+    110% 110%,
+    -10% 110%,
+    -10% -10%,
+    0 100%,
+    calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    calc(0.236% + 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(0.937% + 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(2.085% + 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(3.65% + 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(6.939% + 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(10.448% + 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(14.166% + 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(18.083% - 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(22.186% - 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(26.464% - 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(30.903% - 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(35.491% - 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(40.212% - 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(45.053% - 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.053 * var(--arch-d)),
+    calc(54.947% + 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(59.788% + 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(64.509% + 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(69.097% + 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(73.536% + 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(77.814% + 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(81.917% + 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(85.834% - 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(89.552% - 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(93.061% - 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(96.35% - 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(97.915% - 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(99.063% - 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(99.764% - 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    100% 100%,
+    0 100%);
+}
+
+.page-home .home-lining::before,
+.page-home .home-lining::after {
+  clip-path: polygon(
+    0 100%,
+    calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    calc(0.236% + 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(0.937% + 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(2.085% + 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(3.65% + 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(6.939% + 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(10.448% + 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(14.166% + 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(18.083% - 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(22.186% - 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(26.464% - 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(30.903% - 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(35.491% - 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(40.212% - 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(45.053% - 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.053 * var(--arch-d)),
+    calc(54.947% + 0.266 * var(--arch-d)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d)),
+    calc(59.788% + 0.2197 * var(--arch-d)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d)),
+    calc(64.509% + 0.1746 * var(--arch-d)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d)),
+    calc(69.097% + 0.1307 * var(--arch-d)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d)),
+    calc(73.536% + 0.0883 * var(--arch-d)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d)),
+    calc(77.814% + 0.0474 * var(--arch-d)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d)),
+    calc(81.917% + 0.0082 * var(--arch-d)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d)),
+    calc(85.834% - 0.0293 * var(--arch-d)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d)),
+    calc(89.552% - 0.0648 * var(--arch-d)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d)),
+    calc(93.061% - 0.0984 * var(--arch-d)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d)),
+    calc(96.35% - 0.1298 * var(--arch-d)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d)),
+    calc(97.915% - 0.0741 * var(--arch-d)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d)),
+    calc(99.063% - 0.0333 * var(--arch-d)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d)),
+    calc(99.764% - 0.0084 * var(--arch-d)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d)),
+    calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    100% 100%,
+    calc(100% - var(--arch-t)) 100%,
+    calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    calc(99.764% - 0.0084 * var(--arch-d) - 0.9869 * var(--arch-t)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d) + 0.1613 * var(--arch-t)),
+    calc(99.063% - 0.0333 * var(--arch-d) - 0.9479 * var(--arch-t)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d) + 0.3184 * var(--arch-t)),
+    calc(97.915% - 0.0741 * var(--arch-d) - 0.8842 * var(--arch-t)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d) + 0.4672 * var(--arch-t)),
+    calc(96.35% - 0.1298 * var(--arch-d) - 0.7972 * var(--arch-t)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d) + 0.6037 * var(--arch-t)),
+    calc(93.061% - 0.0984 * var(--arch-d) - 0.7629 * var(--arch-t)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d) + 0.6466 * var(--arch-t)),
+    calc(89.552% - 0.0648 * var(--arch-d) - 0.7262 * var(--arch-t)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d) + 0.6875 * var(--arch-t)),
+    calc(85.834% - 0.0293 * var(--arch-d) - 0.6874 * var(--arch-t)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d) + 0.7263 * var(--arch-t)),
+    calc(81.917% + 0.0082 * var(--arch-d) - 0.6465 * var(--arch-t)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d) + 0.7629 * var(--arch-t)),
+    calc(77.814% + 0.0474 * var(--arch-d) - 0.6037 * var(--arch-t)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d) + 0.7972 * var(--arch-t)),
+    calc(73.536% + 0.0883 * var(--arch-d) - 0.559 * var(--arch-t)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d) + 0.8292 * var(--arch-t)),
+    calc(69.097% + 0.1307 * var(--arch-d) - 0.5126 * var(--arch-t)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d) + 0.8586 * var(--arch-t)),
+    calc(64.509% + 0.1746 * var(--arch-d) - 0.4647 * var(--arch-t)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d) + 0.8854 * var(--arch-t)),
+    calc(59.788% + 0.2197 * var(--arch-d) - 0.4154 * var(--arch-t)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d) + 0.9096 * var(--arch-t)),
+    calc(54.947% + 0.266 * var(--arch-d) - 0.3649 * var(--arch-t)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d) + 0.931 * var(--arch-t)),
+    calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.053 * var(--arch-d) + 1.053 * var(--arch-t)),
+    calc(45.053% - 0.266 * var(--arch-d) + 0.3649 * var(--arch-t)) calc(var(--arch-lift) + 0.0178 * var(--arch-w) - 0.931 * var(--arch-d) + 0.931 * var(--arch-t)),
+    calc(40.212% - 0.2197 * var(--arch-d) + 0.4154 * var(--arch-t)) calc(var(--arch-lift) + 0.0384 * var(--arch-w) - 0.9096 * var(--arch-d) + 0.9096 * var(--arch-t)),
+    calc(35.491% - 0.1746 * var(--arch-d) + 0.4647 * var(--arch-t)) calc(var(--arch-lift) + 0.0615 * var(--arch-w) - 0.8854 * var(--arch-d) + 0.8854 * var(--arch-t)),
+    calc(30.903% - 0.1307 * var(--arch-d) + 0.5126 * var(--arch-t)) calc(var(--arch-lift) + 0.0872 * var(--arch-w) - 0.8586 * var(--arch-d) + 0.8586 * var(--arch-t)),
+    calc(26.464% - 0.0883 * var(--arch-d) + 0.559 * var(--arch-t)) calc(var(--arch-lift) + 0.1154 * var(--arch-w) - 0.8292 * var(--arch-d) + 0.8292 * var(--arch-t)),
+    calc(22.186% - 0.0474 * var(--arch-d) + 0.6037 * var(--arch-t)) calc(var(--arch-lift) + 0.146 * var(--arch-w) - 0.7972 * var(--arch-d) + 0.7972 * var(--arch-t)),
+    calc(18.083% - 0.0082 * var(--arch-d) + 0.6465 * var(--arch-t)) calc(var(--arch-lift) + 0.1789 * var(--arch-w) - 0.7629 * var(--arch-d) + 0.7629 * var(--arch-t)),
+    calc(14.166% + 0.0293 * var(--arch-d) + 0.6874 * var(--arch-t)) calc(var(--arch-lift) + 0.214 * var(--arch-w) - 0.7263 * var(--arch-d) + 0.7263 * var(--arch-t)),
+    calc(10.448% + 0.0648 * var(--arch-d) + 0.7262 * var(--arch-t)) calc(var(--arch-lift) + 0.2511 * var(--arch-w) - 0.6875 * var(--arch-d) + 0.6875 * var(--arch-t)),
+    calc(6.939% + 0.0984 * var(--arch-d) + 0.7629 * var(--arch-t)) calc(var(--arch-lift) + 0.2903 * var(--arch-w) - 0.6466 * var(--arch-d) + 0.6466 * var(--arch-t)),
+    calc(3.65% + 0.1298 * var(--arch-d) + 0.7972 * var(--arch-t)) calc(var(--arch-lift) + 0.3313 * var(--arch-w) - 0.6037 * var(--arch-d) + 0.6037 * var(--arch-t)),
+    calc(2.085% + 0.0741 * var(--arch-d) + 0.8842 * var(--arch-t)) calc(var(--arch-lift) + 0.3559 * var(--arch-w) - 0.4672 * var(--arch-d) + 0.4672 * var(--arch-t)),
+    calc(0.937% + 0.0333 * var(--arch-d) + 0.9479 * var(--arch-t)) calc(var(--arch-lift) + 0.3827 * var(--arch-w) - 0.3184 * var(--arch-d) + 0.3184 * var(--arch-t)),
+    calc(0.236% + 0.0084 * var(--arch-d) + 0.9869 * var(--arch-t)) calc(var(--arch-lift) + 0.411 * var(--arch-w) - 0.1613 * var(--arch-d) + 0.1613 * var(--arch-t)),
+    calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+    var(--arch-t) 100%);
+}
+
+@media (min-width: 701px) {
+  .page-home .home-hero {
+    --arch-rise: 0.44;
+  }
+
+  .page-home .home-arch::before,
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge,
+  .page-home .home-hero::before,
+  .page-home .home-hero::after,
+  .page-home .home-arch-fill {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      calc(0.184% + 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(0.734% + 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(1.635% + 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(2.867% + 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(5.818% + 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(8.981% + 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(12.348% + 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(15.908% + 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(19.652% - 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(23.568% - 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(27.644% - 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(31.869% - 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(36.23% - 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(40.715% - 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(45.309% - 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0503 * var(--arch-d)),
+      calc(54.691% + 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(59.285% + 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(63.77% + 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(68.131% + 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(72.356% + 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(76.432% + 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(80.348% + 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(84.092% - 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(87.652% - 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(91.019% - 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(94.182% - 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(97.133% - 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(98.365% - 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(99.266% - 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(99.816% - 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      100% 100%);
+  }
+
+  .page-home .home-arch-shade::before {
+    clip-path: polygon(evenodd,
+      -10% -10%,
+      110% -10%,
+      110% 110%,
+      -10% 110%,
+      -10% -10%,
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      calc(0.184% + 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(0.734% + 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(1.635% + 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(2.867% + 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(5.818% + 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(8.981% + 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(12.348% + 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(15.908% + 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(19.652% - 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(23.568% - 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(27.644% - 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(31.869% - 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(36.23% - 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(40.715% - 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(45.309% - 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0503 * var(--arch-d)),
+      calc(54.691% + 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(59.285% + 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(63.77% + 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(68.131% + 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(72.356% + 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(76.432% + 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(80.348% + 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(84.092% - 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(87.652% - 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(91.019% - 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(94.182% - 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(97.133% - 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(98.365% - 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(99.266% - 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(99.816% - 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      100% 100%,
+      0 100%);
+  }
+
+  .page-home .home-lining::before,
+  .page-home .home-lining::after {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      calc(0.184% + 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(0.734% + 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(1.635% + 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(2.867% + 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(5.818% + 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(8.981% + 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(12.348% + 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(15.908% + 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(19.652% - 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(23.568% - 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(27.644% - 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(31.869% - 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(36.23% - 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(40.715% - 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(45.309% - 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0503 * var(--arch-d)),
+      calc(54.691% + 0.2633 * var(--arch-d)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d)),
+      calc(59.285% + 0.2216 * var(--arch-d)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d)),
+      calc(63.77% + 0.1809 * var(--arch-d)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d)),
+      calc(68.131% + 0.1413 * var(--arch-d)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d)),
+      calc(72.356% + 0.103 * var(--arch-d)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d)),
+      calc(76.432% + 0.066 * var(--arch-d)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d)),
+      calc(80.348% + 0.0305 * var(--arch-d)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d)),
+      calc(84.092% - 0.0035 * var(--arch-d)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d)),
+      calc(87.652% - 0.0358 * var(--arch-d)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d)),
+      calc(91.019% - 0.0664 * var(--arch-d)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d)),
+      calc(94.182% - 0.0951 * var(--arch-d)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d)),
+      calc(97.133% - 0.1219 * var(--arch-d)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d)),
+      calc(98.365% - 0.0695 * var(--arch-d)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d)),
+      calc(99.266% - 0.0312 * var(--arch-d)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d)),
+      calc(99.816% - 0.0078 * var(--arch-d)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      100% 100%,
+      calc(100% - var(--arch-t)) 100%,
+      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      calc(99.816% - 0.0078 * var(--arch-d) - 0.9885 * var(--arch-t)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d) + 0.1514 * var(--arch-t)),
+      calc(99.266% - 0.0312 * var(--arch-d) - 0.9541 * var(--arch-t)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d) + 0.2993 * var(--arch-t)),
+      calc(98.365% - 0.0695 * var(--arch-d) - 0.8978 * var(--arch-t)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d) + 0.4404 * var(--arch-t)),
+      calc(97.133% - 0.1219 * var(--arch-d) - 0.8208 * var(--arch-t)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d) + 0.5712 * var(--arch-t)),
+      calc(94.182% - 0.0951 * var(--arch-d) - 0.7886 * var(--arch-t)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d) + 0.615 * var(--arch-t)),
+      calc(91.019% - 0.0664 * var(--arch-d) - 0.754 * var(--arch-t)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d) + 0.6569 * var(--arch-t)),
+      calc(87.652% - 0.0358 * var(--arch-d) - 0.7172 * var(--arch-t)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d) + 0.6968 * var(--arch-t)),
+      calc(84.092% - 0.0035 * var(--arch-d) - 0.6783 * var(--arch-t)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d) + 0.7348 * var(--arch-t)),
+      calc(80.348% + 0.0305 * var(--arch-d) - 0.6374 * var(--arch-t)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d) + 0.7705 * var(--arch-t)),
+      calc(76.432% + 0.066 * var(--arch-d) - 0.5946 * var(--arch-t)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d) + 0.804 * var(--arch-t)),
+      calc(72.356% + 0.103 * var(--arch-d) - 0.5501 * var(--arch-t)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d) + 0.8351 * var(--arch-t)),
+      calc(68.131% + 0.1413 * var(--arch-d) - 0.504 * var(--arch-t)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d) + 0.8637 * var(--arch-t)),
+      calc(63.77% + 0.1809 * var(--arch-d) - 0.4563 * var(--arch-t)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d) + 0.8898 * var(--arch-t)),
+      calc(59.285% + 0.2216 * var(--arch-d) - 0.4073 * var(--arch-t)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d) + 0.9133 * var(--arch-t)),
+      calc(54.691% + 0.2633 * var(--arch-d) - 0.3571 * var(--arch-t)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d) + 0.9341 * var(--arch-t)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0503 * var(--arch-d) + 1.0503 * var(--arch-t)),
+      calc(45.309% - 0.2633 * var(--arch-d) + 0.3571 * var(--arch-t)) calc(var(--arch-lift) + 0.0165 * var(--arch-w) - 0.9341 * var(--arch-d) + 0.9341 * var(--arch-t)),
+      calc(40.715% - 0.2216 * var(--arch-d) + 0.4073 * var(--arch-t)) calc(var(--arch-lift) + 0.0355 * var(--arch-w) - 0.9133 * var(--arch-d) + 0.9133 * var(--arch-t)),
+      calc(36.23% - 0.1809 * var(--arch-d) + 0.4563 * var(--arch-t)) calc(var(--arch-lift) + 0.057 * var(--arch-w) - 0.8898 * var(--arch-d) + 0.8898 * var(--arch-t)),
+      calc(31.869% - 0.1413 * var(--arch-d) + 0.504 * var(--arch-t)) calc(var(--arch-lift) + 0.0809 * var(--arch-w) - 0.8637 * var(--arch-d) + 0.8637 * var(--arch-t)),
+      calc(27.644% - 0.103 * var(--arch-d) + 0.5501 * var(--arch-t)) calc(var(--arch-lift) + 0.1071 * var(--arch-w) - 0.8351 * var(--arch-d) + 0.8351 * var(--arch-t)),
+      calc(23.568% - 0.066 * var(--arch-d) + 0.5946 * var(--arch-t)) calc(var(--arch-lift) + 0.1355 * var(--arch-w) - 0.804 * var(--arch-d) + 0.804 * var(--arch-t)),
+      calc(19.652% - 0.0305 * var(--arch-d) + 0.6374 * var(--arch-t)) calc(var(--arch-lift) + 0.1662 * var(--arch-w) - 0.7705 * var(--arch-d) + 0.7705 * var(--arch-t)),
+      calc(15.908% + 0.0035 * var(--arch-d) + 0.6783 * var(--arch-t)) calc(var(--arch-lift) + 0.1989 * var(--arch-w) - 0.7348 * var(--arch-d) + 0.7348 * var(--arch-t)),
+      calc(12.348% + 0.0358 * var(--arch-d) + 0.7172 * var(--arch-t)) calc(var(--arch-lift) + 0.2336 * var(--arch-w) - 0.6968 * var(--arch-d) + 0.6968 * var(--arch-t)),
+      calc(8.981% + 0.0664 * var(--arch-d) + 0.754 * var(--arch-t)) calc(var(--arch-lift) + 0.2702 * var(--arch-w) - 0.6569 * var(--arch-d) + 0.6569 * var(--arch-t)),
+      calc(5.818% + 0.0951 * var(--arch-d) + 0.7886 * var(--arch-t)) calc(var(--arch-lift) + 0.3086 * var(--arch-w) - 0.615 * var(--arch-d) + 0.615 * var(--arch-t)),
+      calc(2.867% + 0.1219 * var(--arch-d) + 0.8208 * var(--arch-t)) calc(var(--arch-lift) + 0.3486 * var(--arch-w) - 0.5712 * var(--arch-d) + 0.5712 * var(--arch-t)),
+      calc(1.635% + 0.0695 * var(--arch-d) + 0.8978 * var(--arch-t)) calc(var(--arch-lift) + 0.3695 * var(--arch-w) - 0.4404 * var(--arch-d) + 0.4404 * var(--arch-t)),
+      calc(0.734% + 0.0312 * var(--arch-d) + 0.9541 * var(--arch-t)) calc(var(--arch-lift) + 0.3921 * var(--arch-w) - 0.2993 * var(--arch-d) + 0.2993 * var(--arch-t)),
+      calc(0.184% + 0.0078 * var(--arch-d) + 0.9885 * var(--arch-t)) calc(var(--arch-lift) + 0.4158 * var(--arch-w) - 0.1514 * var(--arch-d) + 0.1514 * var(--arch-t)),
+      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
+      var(--arch-t) 100%);
+  }
+}
+/* genarch:end */
 
 .page-home .home-summary {
   position: relative;
-  padding: 0;
+  padding: var(--head-pad) 0 0;
+  /* The inscription band starts no higher than the head's springing, so
+     it never crosses the arch. */
+  box-sizing: border-box;
+  min-height: calc(var(--arch-rise) * var(--arch-w));
+  /* Where the head is taller than the day block needs, the block sits in
+     the middle of what is left, low in the wider part of the head. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -4288,8 +4693,14 @@ body.season-eastertide {
 }
 
 .page-home .home h1 {
+  /* The head's width where the date's first line stands, less a little
+     air: a date too long for it breaks into two balanced lines, the second
+     lower where the head is wider. Fitted to tools/genarch.py's phone head
+     at --head-pad. */
+  max-width: calc(0.233 * var(--arch-w) + 139px);
   font-size: 1.38rem;
   line-height: 1.2;
+  text-wrap: balance;
 }
 
 .page-home .home .feast {
@@ -4557,45 +4968,63 @@ body.season-eastertide {
     max-width: calc(var(--card-w) * var(--niche-zoom) + 3rem);
   }
 
-  /* The niche: the frontispiece set into the wall. A low round head, a stone
+  /* The niche: the frontispiece set into the wall. A pointed head lower
+     than the phone's (so a laptop keeps "Pray" on screen), a stone
      moulding with dark edges, the day's colour as a trim just inside the
-     stone, and a shadow under the head so the panel reads as recessed.
-     Background and shadows are tokens because the Apse card rules below
-     outrank this selector and must repeat them. */
+     stone, and a shadow under the head so the panel reads as recessed. The
+     courses are the phone's layers, restated at the niche's scale; the
+     halo is the room's shade under the niche and a field of the wall's
+     colour round it. */
   .page-home .home-hero {
-    --niche-head: clamp(5rem, 2rem + 6vw, 8rem);
     --niche-background:
       radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
       linear-gradient(180deg, var(--niche-sheen), transparent 30%),
       var(--surface);
-    /* The day's colour is a hint at the niche's edge, not a second frame. */
-    --niche-shadows:
-      inset 0 2.6rem 2.6rem -2rem var(--niche-recess),
-      0 0 0 1.5px var(--day-color, var(--niche-edge)),
-      0 0 0 0.75rem var(--niche-stone),
-      0 0 0 calc(0.75rem + 1px) var(--niche-edge),
-      0 0 0 calc(0.75rem + 0.5rem) var(--niche-clear),
-      0 1.5rem 3rem -0.75rem var(--chapel-shade),
-      0 0 1.8rem 1.4rem var(--niche-clear);
+    --arch-ground: var(--niche-background);
+    --arch-frame: 2px;
+    --arch-halo: drop-shadow(0 1.25rem 1.25rem var(--chapel-shade)) drop-shadow(0 0 0.9rem var(--niche-clear));
+    --arch-shade: drop-shadow(0 0.55rem 0.9rem var(--niche-recess));
+    --pad-x: 1.75rem;
     zoom: var(--niche-zoom);
     max-width: var(--card-w);
-    /* Room under the head for the lining's arch, then the crown's cross,
-       then air before the date. Measured down from the lining and not from
-       the head's height: a head that flattens on a narrow window once left
-       the lining's crown running through the cross. */
+    /* The lining stands 26px inside the moulding; the cross sits in its
+       point and the date where the head has opened wide enough for it. */
     --lining-inset: 26px;
     --crown-size: 2.25rem;
-    --crown-top: calc(var(--lining-inset) + 11px + 0.55rem);
-    --niche-pad-top: calc(var(--crown-top) + var(--crown-size) + 1.35rem);
-    padding: var(--niche-pad-top) 1.75rem 1.25rem;
-    border-width: 2px;
-    border-top-color: var(--frontispiece-frame);
-    border-radius: 50% 50% 0 0 / var(--niche-head) var(--niche-head) 0 0;
-    background: var(--niche-background);
-    box-shadow: var(--niche-shadows);
+    --crown-top: 3.6rem;
+    --head-pad: 8.75rem;
+    padding: 0 var(--pad-x) 1.25rem;
+  }
+
+  /* The moulding, outermost first: a clearing of the wall's colour, the
+     stone's dark edge, the stone, then the day's colour as a trim inside
+     it. */
+  .page-home .home-arch::before {
+    --arch-d: calc(0.75rem + 0.5rem + 1px);
+    background: var(--niche-clear);
+  }
+
+  .page-home .home-arch-edge {
+    --arch-d: calc(0.75rem + 1px);
+    display: block;
+    background: linear-gradient(var(--niche-edge), var(--niche-edge)), var(--niche-clear);
+  }
+
+  .page-home .home-arch::after {
+    --arch-d: 0.75rem;
+    display: block;
+    background: var(--niche-stone);
+  }
+
+  .page-home .home-hero::before {
+    --arch-d: 1.5px;
+    display: block;
+    z-index: -4;
+    background: linear-gradient(var(--day-color, var(--niche-edge)), var(--day-color, var(--niche-edge))), var(--niche-stone);
   }
 
   .page-home .home h1 {
+    max-width: none;
     font-size: 1.62rem;
     letter-spacing: 0.015em;
   }
@@ -4673,17 +5102,14 @@ body.season-eastertide {
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
     --lining-day: var(--day-color, var(--lining));
-    /* The day's ring and the shade under the head, then a soft erase: only
-       on phones, since a solid 0.5rem ring of --bg eats half a ~16px gutter
-       and reads as a matte disc against the graded night wash. Desktop
-       restores a firmer ring below. Unlike masking the page field, this
-       follows the card without changing the vault's fixed tile origin. */
-    --panel-shadows:
-      inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
-      0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
-      0 0 1.25rem 0.35rem var(--bg);
-    background: var(--surface);
-    box-shadow: var(--panel-shadows);
+    /* The shade under the head without the day's highlight, then a soft
+       erase: only on phones, since a solid 0.5rem ring of --bg eats half a
+       ~16px gutter and reads as a matte disc against the graded night
+       wash. The niche keeps its own halo. Unlike masking the page field,
+       this follows the card without changing the vault's fixed tile
+       origin. */
+    --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
+    --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -4712,26 +5138,8 @@ body.season-eastertide {
   --frontispiece-rule: rgba(208, 176, 106, 0.24);
   --frontispiece-band: rgba(208, 176, 106, 0.045);
   --lining-day: var(--day-color, var(--lining));
-  --panel-shadows:
-    inset 0 1.5rem 1.5rem -1.25rem var(--niche-recess),
-    0 0 0 1.5px var(--day-color, var(--frontispiece-frame)),
-    0 0 1.25rem 0.35rem var(--bg);
-  background: var(--surface);
-  box-shadow: var(--panel-shadows);
-}
-
-@media (min-width: 701px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .page-home .home-hero {
-    background: var(--niche-background);
-    box-shadow: var(--niche-shadows);
-  }
-}
-
-@media (min-width: 701px) {
-  :root[data-theme="dark"] .page-home .home-hero {
-    background: var(--niche-background);
-    box-shadow: var(--niche-shadows);
-  }
+  --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
+  --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link {
@@ -5395,8 +5803,10 @@ body.season-eastertide {
 /* The phone's title stack keeps a compact cadence even with several
    commemorations. Text size and all date/prayer touch targets stay intact. */
 @media (max-width: 700px) {
+  /* The pointed head costs the frontispiece some height; part of it is
+     paid here, above the band. */
   .page-home .home-day-head {
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.2rem;
   }
 
   .page-home .home .commemorations {
@@ -5834,24 +6244,17 @@ html:where(:has(> body.page-hour))::before {
 }
 
 @media (min-width: 701px) {
-  /* The consecration cross at the niche's crown, as heavy as the one that
-     ends each hour. */
-  .page-home .home-crown {
-    top: var(--crown-top);
-    width: var(--crown-size);
-    height: var(--crown-size);
-  }
-
   /* The phone panel's lining, restated for the niche: a 2px band and a
-     lighter hairline 5px inside it, round the head only, ending at the
+     lighter hairline inside it, round the head only, ending at the
      inscription band. 26px of plain plaster lies between it and the
      moulding, so it reads as paint on the wall, not another edge of the
      arch. */
   .page-home .home-lining {
-    top: calc(var(--lining-inset) - var(--niche-pad-top));
-    right: calc(var(--lining-inset) - 1.75rem);
-    left: calc(var(--lining-inset) - 1.75rem);
-    border-radius: 50% 50% 0 0 / calc(var(--niche-head) - var(--lining-inset)) calc(var(--niche-head) - var(--lining-inset)) 0 0;
+    --arch-d: calc(-1 * var(--lining-inset));
+  }
+
+  .page-home .home-lining::after {
+    --arch-d: calc(-1 * var(--lining-inset) - 8px);
   }
 
 
@@ -6459,6 +6862,14 @@ body.page-home::before {
 
   details.session-prayers > .session-prayers-content {
     display: grid;
+  }
+
+  /* The home head's painted courses are screen furniture. */
+  .page-home .home-arch,
+  .page-home .home-arch-fill,
+  .page-home .home-hero::before,
+  .page-home .home-hero::after {
+    display: none;
   }
 
   body.page-home,

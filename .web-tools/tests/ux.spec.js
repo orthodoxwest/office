@@ -1178,7 +1178,8 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
       const tailpiece = getComputedStyle(footerElement, "::before");
-      const card = getComputedStyle(document.querySelector(".home-hero"));
+      // The pointed head's halo is a filter on its outer courses.
+      const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
         stars: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
         position: field.position,
@@ -1192,7 +1193,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
-        cardShadow: card.boxShadow,
+        cardHalo: halo.filter,
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,
       };
@@ -1208,7 +1209,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(isTopCenterPhase(apse.phase)).toBe(true);
   expect(apse.tailpieceShown).toBe(true);
   expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
-  expect(apse.cardShadow).toContain(apse.pageBg);
+  expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
   // The night carries no powdering: its field is the vault alone.
   expect(powderPaints(apse.stars)).toBe(false);

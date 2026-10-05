@@ -76,28 +76,37 @@ or impose a redesign on an unrelated change.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
-- On a phone home's frontispiece is a round-headed painted panel: a
-  segmental head (`--panel-head`, 4.25rem; 3.5rem under 375px) with a
-  springing (the lining's curve starts 8px below the moulding's), the day's
-  colour as a 1.5px ring at its edge and again as the lining's inner
-  hairline (`--lining-day`; a white day takes `--gold-line` by day), so the
-  liturgical colour sits beside the cross on plaster; the terracotta lining
-  painted round the head (`--panel-inset` inside the edge, with clear air
-  above the cross: a tighter arch once clipped it) ending at the
-  inscription band, the consecration cross at the crown, and a little
-  recess shade under the head. Its shadows are a token (`--panel-shadows`,
-  ending in a soft `--bg` halo that keeps the powdering off the panel) that
-  the Apse rules restate with their soft erase. The panel's furniture is
+- On a phone home's frontispiece is a painted panel with a pointed head:
+  a steep four-centred arch rising 0.44 of the card's width, its haunches
+  leaving the jambs without a kink. The head is drawn by
+  `tools/genarch.py`, which writes clip-path polygons into style.css's
+  `genarch` block; never edit them by hand. A box-shadow or border-radius
+  cannot follow a pointed head, so each course is its own layer clipped
+  to the same arch offset by its own distance (`--arch-d`): the day's
+  ring (`.home-arch::before`, the halo's source), the frame
+  (`.home-hero::after`), the panel (`.home-arch-fill`) with the shade its
+  head casts (`.home-arch-shade`, the wall outside the arch drawn only for
+  its drop-shadow), and the lining's band and hairline
+  (`.home-lining::before/::after`). The card is an inline-size container
+  so the layers can scale the head by its width (`--arch-w`). The day's
+  colour is the 1.5px ring and the lining's inner hairline
+  (`--lining-day`; a white day takes `--gold-line` by day); the terracotta
+  lining runs round the head `--panel-inset` inside the edge, ending at the
+  inscription band, the consecration cross sits in the point, and the day
+  block is set low enough that the head is wide enough for it
+  (`--head-pad`) and centred in what is left. The day block is at least
+  the head's rise tall, so the band never crosses the arch. Halo and
+  shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
+  rules restate. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a
   375×667 viewport whole, so its cost was paid by the header's margin, the
   footer's padding and gap, and the page's bottom padding.
-  From 701px the same object widens into a niche set into the wall (round
-  head, stone moulding, day-colour trim, recess shadow, the lining restated
-  at the niche's scale; the cross and the day block are measured down from
-  the lining, not from the head's height, because a head that flattens on a
-  narrow window once ran the lining through the cross), and the room is lit
+  From 701px the same object widens into a niche set into the wall (a
+  lower pointed head, stone moulding as further offset layers, day-colour
+  trim, recess shadow, the lining restated at the niche's scale), and the
+  room is lit
   toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
