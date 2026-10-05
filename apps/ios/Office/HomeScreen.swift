@@ -165,27 +165,43 @@ struct HomeTier {
     private func rise<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[step] }
 
     var arch: Arch { rise(Arch.niche, Arch.phone, Arch.tall, Arch.taller) }
-    /// The room under the point for the cross and air, before the date.
-    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) }
+    /**
+     * The room under the point for the cross and air, before the date. On a phone the date's tap
+     * box is a thumb's height with its line at the foot, so the room gives back the box's slack
+     * above the line: the date stands where it stood centred in the box, the feast closer under it.
+     */
+    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) - (desk ? 0 : (44 - date.line) / 2) }
     var crownTop: CGFloat { rise(48, 33.6, 49.6, 54.4) }
     var crownSize: CGFloat { rise(36, 30.4, 35.2, 40) }
     /// Spare height under the head is parted 2:3 above and below the day, else the day is centred in it.
     var split: Bool { !desk && step > 0 }
     var side: CGFloat { desk ? 28 : 16 }
+    private var lining: CGFloat { desk ? 26 : 12 }
     /**
      * How far in from the card's edge the day's words stand: inside the lining's hairline (its
      * inset, then 9pt) with 12pt of clear air, so a long feast name breaks rather than running
      * over the lining.
      */
-    var dayClear: CGFloat { (desk ? 26 : 12) + 9 + 12 }
+    var dayClear: CGFloat { lining + 9 + 12 }
     var bottom: CGFloat { desk ? 20 : 12 }
     var date: TextStyle { pick(Scale.body.sized(25.92, line: 31.1).tracked(0.39), Scale.body.sized(22.08, line: 26.5).tracked(0.22), Scale.body.sized(24.8, line: 29.76).tracked(0.25), Scale.body.sized(27.2, line: 32.64).tracked(0.27)) }
     /**
-     * The date's measure, the head's width where its first line stands less a little air: a date
-     * too long for it breaks after the weekday, its second line lower where the head is wider.
+     * The head's width `y` below the card's top inside the lining's hairline, less the day's 12pt
+     * of air each side: a line of the day set there clears the lining.
      */
-    var dateMeasure: CGFloat? { desk ? nil : card * pick(0, 0.233, 0.3) + 139 }
+    private func clear(_ y: CGFloat) -> CGFloat { archChord(arch, width: card, outset: -(lining + 9), at: y) - 24 }
+    /**
+     * The date's measure, the head's width where its first line stands, and no wider than a short
+     * phone's: a date too long for it breaks after the weekday, its second line lower where the
+     * head is wider.
+     */
+    var dateMeasure: CGFloat? { desk ? nil : min(card * pick(0, 0.233, 0.3) + 139, clear(headPad + 44 - date.line)) }
     var feast: TextStyle { pick(Scale.body.sized(18.72, line: 23.4), Scale.body.sized(17.28, line: 21.6), Scale.body.sized(18.56, line: 23.2), Scale.body.sized(20, line: 25)) }
+    /**
+     * The feast's measure, the head's width at its first line, when the day stands at the head's
+     * room: a long name breaks there rather than running over the lining further up the arch.
+     */
+    var feastMeasure: CGFloat? { desk ? nil : clear(headPad + 44 + 2) }
     /// A short phone's commemorations give way, so a past date with them still fits.
     var commemoration: TextStyle { short ? TextStyle(size: 13.6, line: 17.68) : pick(TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 16.32, line: 22.85)) }
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
@@ -315,15 +331,16 @@ private struct Frontispiece: View {
                         .type(tier.date)
                         .foregroundStyle(p.text)
                         .multilineTextAlignment(.center)
-                        // On a phone a full thumb's height, as the web's, its line centred in it.
-                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44))
+                        // On a phone a full thumb's height, as the web's, its line at the foot so
+                        // the feast stands close under it.
+                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44), alignment: .bottom)
                 }
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityHint("Opens the ordo")
-                Text(view.feast).type(tier.feast)
+                FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
                     .foregroundStyle(p.accent)
-                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
                     .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
                     Text(view.octaveNote).type(Scale.small).foregroundStyle(p.muted).multilineTextAlignment(.center)
@@ -452,6 +469,41 @@ private struct Frontispiece: View {
         }
         .padding(.horizontal, -side)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/**
+ * The feast's name, and its familiar name in italic: beside it where the line has room, else on a
+ * line of its own, never broken. A reader hears the two together.
+ */
+private struct FeastName: View {
+    let name: String
+    let alias: String
+    let style: TextStyle
+    @Environment(\.metrics) private var m
+
+    private var italic: TextStyle {
+        var s = style
+        s.italic = true
+        return s
+    }
+
+    var body: some View {
+        if alias.isEmpty {
+            Text(name).type(style).multilineTextAlignment(.center)
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: m.px(style.size * 0.25)) {
+                    Text(name).type(style)
+                    Text(alias).type(italic)
+                }
+                VStack(spacing: 0) {
+                    Text(name).type(style).multilineTextAlignment(.center)
+                    Text(alias).type(italic).fixedSize()
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
     }
 }
 

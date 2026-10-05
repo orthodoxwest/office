@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -188,28 +189,46 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
     private fun <T> rise(niche: T, vararg phone: T): T = if (desk) niche else phone[step]
 
     val arch = rise(NicheArch, PhoneArch, TallArch, TallerArch)
-    /** The room under the point for the cross and air, before the date. */
-    val headPad = rise(120.dp, 86.4.dp, 105.6.dp, 118.4.dp)
+    val date = pick(25.92f, 22.08f, 24.8f, 27.2f)
+    /** The date's line, its size and a fifth. */
+    private val dateLine = (date * 1.2f).dp
+    /**
+     * The room under the point for the cross and air, before the date. On a phone the date's tap
+     * box is a thumb's height with its line at the foot, so the room gives back the box's slack
+     * above the line: the date stands where it stood centred in the box, the feast closer under it.
+     */
+    val headPad = rise(120.dp, 86.4.dp, 105.6.dp, 118.4.dp) - if (desk) 0.dp else (44.dp - dateLine) / 2
     val crownTop = rise(48.dp, 33.6.dp, 49.6.dp, 54.4.dp)
     val crownSize = rise(36.dp, 30.4.dp, 35.2.dp, 40.dp)
     /** Spare height under the head is parted 2:3 above and below the day, else the day is centred in it. */
     val split = !desk && step > 0
     val side = if (desk) 28.dp else 16.dp
+    private val lining = if (desk) 26.dp else PanelInset
     /**
      * How far in from the card's edge the day's words stand: inside the lining's hairline (its
      * inset, then 9dp) with 12dp of clear air, so a long feast name breaks rather than running
      * over the lining.
      */
-    val dayClear = (if (desk) 26.dp else PanelInset) + 9.dp + 12.dp
+    val dayClear = lining + 9.dp + 12.dp
     val bottom = if (desk) 20.dp else 12.dp
-    val date = pick(25.92f, 22.08f, 24.8f, 27.2f)
     val dateTracking = pick(0.39f, 0.22f, 0.25f, 0.27f)
     /**
-     * The date's measure, the head's width where its first line stands less a little air: a date
-     * too long for it breaks after the weekday, its second line lower where the head is wider.
+     * The head's width `y` below the card's top inside the lining's hairline, less the day's 12dp
+     * of air each side: a line of the day set there clears the lining.
      */
-    val dateMeasure: Dp = if (desk) Dp.Unspecified else card * pick(0f, 0.233f, 0.3f) + 139.dp
+    private fun clear(card: Dp, y: Dp): Dp = (archChord(arch, card.value, -(lining + 9.dp).value, y.value) - 24f).dp
+    /**
+     * The date's measure, the head's width where its first line stands, and no wider than a short
+     * phone's: a date too long for it breaks after the weekday, its second line lower where the
+     * head is wider.
+     */
+    val dateMeasure: Dp = if (desk) Dp.Unspecified else minOf(card * pick(0f, 0.233f, 0.3f) + 139.dp, clear(card, headPad + 44.dp - dateLine))
     val feast = pick(18.72f, 17.28f, 18.56f, 20f)
+    /**
+     * The feast's measure, the head's width at its first line, when the day stands at the head's
+     * room: a long name breaks there rather than running over the lining further up the arch.
+     */
+    val feastMeasure: Dp = if (desk) Dp.Unspecified else clear(card, headPad + 44.dp + 2.dp)
     /** A short phone's commemorations give way, so a past date with them still fits. */
     val commemoration = if (!desk && tall <= 700.dp) 13.6f else pick(14f, 14f, 14f, 16.32f)
     val commemorationLine = if (!desk && tall <= 700.dp) 1.3f else 1.4f
@@ -299,17 +318,13 @@ private fun Frontispiece(
                 Column(Modifier.fillMaxWidth().padding(horizontal = tier.dayClear), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         unbroken(view.dateLabel),
-                        // On a phone a full thumb's height, as the web's, its line centred in it.
+                        // On a phone a full thumb's height, as the web's, its line at the foot so
+                        // the feast stands close under it.
                         Modifier.widthIn(max = tier.dateMeasure).semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
-                            .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(),
+                            .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(Alignment.Bottom),
                         style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
                     )
-                    // Broken into balanced lines, as the web's.
-                    Text(
-                        view.feast,
-                        Modifier.padding(top = 2.dp),
-                        style = Type.body.copy(fontSize = tier.feast.sp, lineHeight = (tier.feast * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading),
-                    )
+                    FeastName(view.feastName, view.feastAlias, tier.feast, Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure))
                     if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
@@ -428,6 +443,21 @@ private fun Frontispiece(
             back?.place(0, y)
             after.place(0, summary)
         }
+    }
+}
+
+/**
+ * The feast's name broken into balanced lines, as the web's, and its familiar name in italic: beside
+ * it where the line has room, else on a line of its own, never broken. A reader hears the two
+ * together.
+ */
+@Composable
+private fun FeastName(name: String, alias: String, size: Float, modifier: Modifier) {
+    val p = LocalPalette.current
+    val style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading)
+    FlowRow(modifier.semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy((size * 0.25f).dp, Alignment.CenterHorizontally)) {
+        Text(name, style = style)
+        if (alias.isNotEmpty()) Text(alias, style = style.copy(fontStyle = FontStyle.Italic), softWrap = false)
     }
 }
 

@@ -15,7 +15,7 @@ use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation,
-    long_date, reminder_description, reminder_summary, report_url, season_class, season_label, title_case,
+    long_date, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -102,9 +102,12 @@ impl OfficeCore {
         } else {
             None
         };
+        let (feast_name, feast_alias) = split_alias(&heading.feast);
         Ok(HomeView {
             date_label: long_date(shown),
             feast: typeset(&heading.feast),
+            feast_name: typeset(feast_name),
+            feast_alias: typeset(feast_alias),
             octave_note: heading.octave_note,
             season: heading.season,
             color: day.color.as_str().to_string(),
@@ -440,6 +443,11 @@ pub struct HomeView {
     pub date_label: String,
     /// The celebration, or the temporal title or feria when there is none.
     pub feast: String,
+    /// The feast parted from the familiar name the ordo gives after it in parentheses, which home
+    /// sets in italic on a line of its own when the two cannot share one: "The Feast of the Most
+    /// Holy Body of Christ" and "(Corpus Christi)". The alias is empty when there is none.
+    pub feast_name: String,
+    pub feast_alias: String,
     pub octave_note: String,
     /// The season's name, empty when the celebration already names it.
     pub season: String,
