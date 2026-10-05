@@ -4211,7 +4211,15 @@ body.season-eastertide {
      head is wide enough for it inside the lining. */
   --crown-size: 1.9rem;
   --crown-top: 2.1rem;
-  --head-pad: 5.4rem;
+  /* The date's tap box is a thumb's height, taller than its line: the
+     difference is air, and the box is set so that air lies above the date,
+     in the head, rather than under it between the date and the feast.
+     --head-pad is measured to the box, so it gives up that air (half the
+     box's slack) and a one-line date stands where it did; a two-line date
+     fills its box and rises by the same amount, where the head is still
+     wide enough for its short first line. */
+  --date-line: 1.656rem;
+  --head-pad: calc(5.4rem - (var(--touch-target) - var(--date-line)) / 2);
   /* The halo is a soft field of the wall's own colour, so the powdering
      keeps about 24px clear of the panel; the shade is a highlight under the
      head's edge and the recess below it. */
@@ -5189,14 +5197,64 @@ body.season-eastertide {
 }
 
 .page-home .home .feast {
-  max-width: none;
+  /* The head's width where the feast's first line stands when the day block
+     sits at --head-pad (under a one-line date's tap box), less 12px of air
+     from the lining's hairline, fitted to tools/genarch.py's phone head as
+     the date's measure is: a name wider than that breaks into balanced
+     lines rather than running up to the hairline. Two lines, since the
+     head's curve is not straight: the steeper one holds at narrow cards. */
+  max-width: min(calc(0.62 * var(--arch-w) + 57px), calc(0.9 * var(--arch-w) - 38px));
   font-size: 1.08rem;
   line-height: 1.25;
   text-wrap: balance;
 }
 
-.page-home .home .commemorations {
+/* A familiar name the ordo gives in parentheses after the day's ("… Body of
+   Christ (Corpus Christi)", "… (Sabbato in Albis)") is set in italic and
+   kept whole. The two share a line when both fit; when they cannot, the
+   alias takes the next line of its own and the name balances its lines
+   above it, rather than the pair breaking wherever the measure falls
+   ("Saturday before Low / Sunday (Sabbato in Albis)"). The name and alias
+   are the two items of a wrapping row, parted by a word space. */
+.page-home .home .feast.has-alias {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  column-gap: 0.25em;
+}
+
+.page-home .home .feast-name {
+  text-wrap: balance;
+}
+
+.page-home .home .feast-alias {
+  white-space: nowrap;
+  font-style: italic;
+}
+
+/* The date's line sits at the foot of its tap box, so the box's spare height
+   is above it (see --head-pad). */
+.page-home .home-date-link {
+  align-items: flex-end;
+}
+
+/* The commemorations are set as centred lines with "Also" leading the
+   first, so a name that wraps keeps its label beside it; as a column beside
+   the list the label was left at the card's edge when a name took two
+   lines. */
+.page-home .home .commemorations {
+  display: block;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.page-home .home .commemorations ul,
+.page-home .home .commemorations li:first-child {
+  display: inline;
+}
+
+.page-home .home .commemorations-label {
+  margin-right: 0.3em;
 }
 
 .page-home .home .penitential {
@@ -5567,7 +5625,10 @@ body.season-eastertide {
     letter-spacing: 0.015em;
   }
 
+  /* The niche's head is low and wide, and the day block sits deep in it:
+     the feast needs no fitted measure. */
   .page-home .home .feast {
+    max-width: none;
     font-size: 1.17rem;
   }
 
@@ -6361,7 +6422,6 @@ body.season-eastertide {
 
   .page-home .home .commemorations {
     line-height: 1.4;
-    column-gap: 0.45rem;
   }
 
   .page-home .home-day-head .not-today-notice {
@@ -6412,7 +6472,20 @@ body.season-eastertide {
   .page-home .home-hero {
     --crown-size: 2.2rem;
     --crown-top: 3.1rem;
-    --head-pad: 6.6rem;
+    --head-pad: calc(6.6rem - (var(--touch-target) - var(--date-line)) / 2);
+  }
+
+  /* The taller head is narrower where the day block begins than the small
+     one, so the date's and the feast's measures are refitted to it at
+     --head-pad: a date or name too wide for it breaks into balanced lines
+     up in the head, as the small head's long dates do, rather than running
+     to the hairline. */
+  .page-home .home h1 {
+    max-width: calc(0.236 * var(--arch-w) + 130px);
+  }
+
+  .page-home .home .feast {
+    max-width: min(calc(0.49 * var(--arch-w) + 87px), calc(0.82 * var(--arch-w) - 17px));
   }
 
   /* The spare height is shared two parts above the day block to three
@@ -6438,17 +6511,28 @@ body.season-eastertide {
   .page-home .home-hero {
     --crown-size: 2.5rem;
     --crown-top: 3.4rem;
-    --head-pad: 7.4rem;
+    --head-pad: calc(7.4rem - (var(--touch-target) - var(--date-line)) / 2);
+  }
+
+  /* Refitted again to the sharpest head (the date's measure follows the
+     larger type's rule below). */
+  .page-home .home .feast {
+    max-width: calc(0.42 * var(--arch-w) + 94px);
   }
 }
 
 /* Their larger type and rows, from 375px wide and 830px high: a narrower
    or shorter phone needs the height for the lines its day block wraps to. */
 @media (min-width: 375px) and (max-width: 700px) and (min-height: 830px) {
+  /* The larger date's line, for the tap box's slack (see --head-pad). */
+  .page-home .home-hero {
+    --date-line: 1.86rem;
+  }
+
   .page-home .home h1 {
     /* The larger date's fitted measure: still the head's width where its
        first line stands, so a long weekday takes a line of its own. */
-    max-width: calc(0.3 * var(--arch-w) + 139px);
+    max-width: calc(0.236 * var(--arch-w) + 130px);
     font-size: 1.55rem;
   }
 
@@ -6488,7 +6572,13 @@ body.season-eastertide {
 }
 
 @media (min-width: 375px) and (max-width: 700px) and (min-height: 880px) {
+  .page-home .home-hero {
+    --date-line: 2.04rem;
+  }
+
   .page-home .home h1 {
+    /* The sharpest head's fitted measure for the larger date. */
+    max-width: calc(0.255 * var(--arch-w) + 112px);
     font-size: 1.7rem;
   }
 

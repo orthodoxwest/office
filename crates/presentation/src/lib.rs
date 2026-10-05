@@ -56,6 +56,23 @@ pub fn day_name(day: &CalendarDay) -> String {
     format!("{} feria", title_case(day.season.as_str()))
 }
 
+/// A day's name parted from the familiar name the ordo gives after it in
+/// parentheses: "The Feast of the Most Holy Body of Christ (Corpus Christi)"
+/// is the name and "(Corpus Christi)". A parenthesis inside the name
+/// ("Ss Fabian (Bishop) & Sebastian, Martyrs") is a qualifier, not an
+/// alias, and stays put. The alias is empty when the name has none.
+pub fn split_alias(name: &str) -> (&str, &str) {
+    let name = name.trim_end();
+    let Some(open) = name.strip_suffix(')').and_then(|inner| inner.rfind(" (")) else {
+        return (name, "");
+    };
+    let alias = &name[open + 1..];
+    if alias[1..alias.len() - 1].contains(['(', ')']) {
+        return (name, "");
+    }
+    (&name[..open], alias)
+}
+
 /// Home's heading for a day.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DayHeading {
@@ -319,6 +336,26 @@ mod tests {
     #[test]
     fn query_escape_encodes_special_characters() {
         assert_eq!(query_escape("a b/c?d=é—*"), "a+b%2Fc%3Fd%3D%C3%A9%E2%80%94%2A");
+    }
+
+    #[test]
+    fn split_alias_parts_a_trailing_familiar_name_only() {
+        assert_eq!(
+            split_alias("The Feast of the Most Holy Body of Christ (Corpus Christi)"),
+            ("The Feast of the Most Holy Body of Christ", "(Corpus Christi)")
+        );
+        assert_eq!(split_alias("Saturday before Low Sunday (Sabbato in Albis)"), ("Saturday before Low Sunday", "(Sabbato in Albis)"));
+        assert_eq!(
+            split_alias("Commemoration of All the Faithful Departed (All Souls' Day)"),
+            ("Commemoration of All the Faithful Departed", "(All Souls' Day)")
+        );
+        assert_eq!(split_alias("Ss Fabian (Bishop) & Sebastian, Martyrs"), ("Ss Fabian (Bishop) & Sebastian, Martyrs", ""));
+        assert_eq!(
+            split_alias("Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs"),
+            ("Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs", "")
+        );
+        assert_eq!(split_alias("Christmas feria"), ("Christmas feria", ""));
+        assert_eq!(split_alias("(Resumed)"), ("(Resumed)", ""));
     }
 
     #[test]

@@ -106,7 +106,14 @@ or impose a redesign on an unrelated change.
   `--day-clear` in from the card's edge (the hairline, then 0.75rem of
   air; the native apps' `dayClear`), so a long name such as the ordo's
   "Commemoration of All the Faithful Departed (All Souls' Day)" breaks
-  into balanced lines rather than crossing the lining. The panel's furniture is
+  into balanced lines rather than crossing the lining. Higher up the head
+  the date's and feast's measures are fitted to the arch: the hairline's
+  width where each first line stands, less that air (the native apps take
+  it from `archChord`), and `ux.spec.js` probes the hairline itself. A
+  trailing familiar name in parentheses (`presentation::split_alias`) is
+  set in italic beside the name, or on a line of its own, never broken.
+  The date's tap box keeps its line at the foot, with `--head-pad` less
+  the box's slack, so the feast stands close under it. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a

@@ -21,7 +21,7 @@ use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation, long_date,
-    month_name, report_url, season_class, season_str,
+    month_name, report_url, season_class, season_str, split_alias,
 };
 
 /// What a page handler reads from the request.
@@ -265,6 +265,7 @@ impl Server {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
+        let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -279,7 +280,8 @@ impl Server {
             prev_link: home_link(&date_slug(date.add_days(-1))),
             next_link: home_link(&date_slug(date.add_days(1))),
             today_link: home_link(&now_slug),
-            feast_name: heading.feast,
+            feast_name: feast_name.into(),
+            feast_alias: feast_alias.into(),
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
             color: day.color.as_str().into(),
             season: heading.season,
