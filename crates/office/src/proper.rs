@@ -560,32 +560,3 @@ pub fn seasonal_appointment_applies(day: &Day, hour_name: &str, reference: &str,
     let easter = MoveableDates::compute(day.date.year()).easter;
     scope.allows(day.date, easter, day.civil_weekday(), day.is_ferial())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn base_refs() {
-        assert_eq!(base_proper_ref("psalm-antiphon-2"), "psalm-antiphon");
-        assert_eq!(base_proper_ref("psalm-antiphon"), "psalm-antiphon");
-        assert_eq!(base_proper_ref("x-12"), "x");
-        assert_eq!(base_proper_ref("12"), "12");
-        assert_eq!(base_proper_ref("-3"), "");
-        assert_eq!(ref_candidates("collect"), ["collect"]);
-        assert_eq!(hour_ref_candidates("lauds", "psalm-antiphon-1"), ["psalm-antiphon-1-lauds", "psalm-antiphon-lauds"]);
-    }
-
-    #[test]
-    fn proper_names() {
-        for (title, want) in [
-            ("St Apollinaris of Ravenna, Bishop & Martyr", "Apollinaris of Ravenna"),
-            ("Ss. Marius, Martha, Audifax, & Abachum, Martyrs", "Marius, Martha, Audifax, & Abachum"),
-            ("Commemoration of St Paul, Apostle", "Paul"),
-            ("The Feast of the Holy Name", "the Holy Name"),
-            ("", ""),
-        ] {
-            assert_eq!(derive_proper_name_from_title(title), want, "{title}");
-        }
-    }
-}

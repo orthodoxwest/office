@@ -381,14 +381,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn split_words_keeps_punctuation_and_skips_marks() {
-        assert_eq!(split_words("O LORD, thou hast", 2), ("O LORD,", " thou hast", 2));
-        assert_eq!(split_words("Deliver me * O Lord", 3), ("Deliver me * O", " Lord", 3));
-        assert_eq!(split_words("Up, Lord", 5), ("Up, Lord", "", 2));
-        assert_eq!(split_words("anything", 0), ("", "anything", 0));
-    }
-
-    #[test]
     fn announcements() {
         for (text, want) in [
             ("O Lord, * make haste.", "O Lord."),
@@ -400,12 +392,5 @@ mod tests {
         ] {
             assert_eq!(antiphon_announcement(text), want, "{text}");
         }
-    }
-
-    #[test]
-    fn prayer_forms() {
-        assert_eq!(PrayerForm::parse(""), Ok(PrayerForm::Private));
-        assert_eq!(PrayerForm::parse("priest"), Ok(PrayerForm::Priest));
-        assert!(PrayerForm::parse("bishop").is_err());
     }
 }

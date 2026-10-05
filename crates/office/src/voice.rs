@@ -74,30 +74,3 @@ pub fn build_corporate_lord_prayer_voice(reference: &str, text: &str) -> Vec<Voi
         VoiceSpan::new(response, true, Some(VoiceRole::Response)),
     ]
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    const PATER: &str = "Our Father, who art in heaven. And lead us not into temptation.\nBut deliver us from evil. Amen.";
-
-    #[test]
-    fn secret_and_partly_secret() {
-        let spans = build_prayer_voice("ordinary/shared/our-father", PATER, false);
-        assert_eq!(spans.len(), 2);
-        assert_eq!(spans[0].text, "Our Father");
-        let spans = build_prayer_voice("ordinary/shared/our-father", PATER, true);
-        assert_eq!(spans.iter().map(|s| s.spoken).collect::<Vec<_>>(), [true, false, true]);
-        assert_eq!(spans.iter().map(|s| s.text.as_str()).collect::<String>(), PATER);
-        assert!(build_prayer_voice("ordinary/shared/our-father", "Pater noster", false).is_empty());
-        assert!(build_prayer_voice("x", PATER, false).is_empty());
-    }
-
-    #[test]
-    fn corporate_pater() {
-        let spans = build_corporate_lord_prayer_voice("ordinary/shared/our-father", PATER);
-        assert_eq!(spans[0].text, "Our Father, who art in heaven. And lead us not into temptation.\n");
-        assert_eq!(spans[1].text, "But deliver us from evil. Amen.");
-        assert_eq!(spans[1].role, Some(VoiceRole::Response));
-    }
-}

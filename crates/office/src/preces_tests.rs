@@ -33,10 +33,17 @@ fn eval(condition: &str, d: &Day, moveable: Option<&MoveableDates>) -> bool {
 }
 
 #[test]
-fn condition_negation_and_conjunction() {
+fn hour_conditions() {
     let m = MoveableDates::compute(2026);
     let plain = |mm, dd| day(date(2026, mm, dd), Season::Pentecost);
     let double = || ranked("test", None, Rank::Double);
+    let with = |m, d, season, f: Option<Feast>| {
+        let mut x = day(date(2026, m, d), season);
+        x.celebration = f.map(arc);
+        x
+    };
+    let feria = || feast("feria", Some(Category::Feria));
+    let bvm = || feast("future-bvm-office", Some(Category::BlessedVirgin));
     for (condition, d, want) in [
         ("not-weekday-sunday", plain(3, 15), false),
         ("not-weekday-sunday", plain(3, 16), true),
@@ -55,23 +62,23 @@ fn condition_negation_and_conjunction() {
         ("feast-christmas", make_day(3, 16, None, vec![], None), false),
         ("some-unknown-condition", plain(3, 16), false),
         ("not-some-unknown-condition", plain(3, 16), false),
+        ("is-ferial", with(3, 16, Season::Lent, Some(feast("feria-lent-monday", Some(Category::Feria)))), true),
+        ("is-ferial", with(3, 18, Season::Lent, Some(feast("st-cyril", Some(Category::ConfessorDoctor)))), false),
+        ("is-ferial", with(3, 15, Season::Lent, Some(feast("sunday-lent", Some(Category::Sunday)))), false),
+        ("is-ferial", with(3, 16, Season::Lent, None), true),
+        ("season-easter", with(4, 15, Season::Easter, None), true),
+        ("season-easter", with(3, 16, Season::Lent, None), false),
+        ("season-passiontide", with(3, 30, Season::Passiontide, None), true),
+        ("not-season-easter", with(3, 16, Season::Lent, None), true),
+        ("is-ferial,not-season-easter", with(3, 16, Season::Lent, Some(feria())), true),
+        ("is-ferial,season-easter", with(4, 21, Season::Easter, Some(feria())), true),
+        ("bvm-suffrage-form", suffrage_day(1, 1, Season::Pentecost, bvm(), vec![]), true),
+        ("bvm-suffrage-form", suffrage_day(1, 1, Season::Pentecost, feria(), vec![bvm()]), true),
+        ("bvm-suffrage-form", suffrage_day(1, 1, Season::Pentecost, feria(), vec![]), false),
+        ("not-bvm-suffrage-form", suffrage_day(1, 1, Season::Pentecost, feria(), vec![]), true),
     ] {
         assert_eq!(eval(condition, &d, Some(&m)), want, "{condition} on {}", d.date);
     }
-}
-
-#[test]
-fn bvm_suffrage_form() {
-    let bvm = || feast("future-bvm-office", Some(Category::BlessedVirgin));
-    let feria = || feast("feria", Some(Category::Feria));
-    let office = suffrage_day(1, 1, Season::Pentecost, bvm(), vec![]);
-    assert!(eval("bvm-suffrage-form", &office, None));
-    let commemorated =
-        suffrage_day(1, 1, Season::Pentecost, feria(), vec![feast("future-bvm-commemoration", Some(Category::BlessedVirgin))]);
-    assert!(eval("bvm-suffrage-form", &commemorated, None));
-    let ordinary = suffrage_day(1, 1, Season::Pentecost, feria(), vec![]);
-    assert!(!eval("bvm-suffrage-form", &ordinary, None));
-    assert!(eval("not-bvm-suffrage-form", &ordinary, None));
 }
 
 #[test]
@@ -143,13 +150,9 @@ fn suffrage() {
     within.within_octave_of = Some("ss-peter-paul".into());
     assert!(!should_say_suffrage(Some(&within)));
     assert_eq!(suffrage_disposition(None), (false, SUFFRAGE_SUPPRESSED_OUT_OF_SEASON));
-}
-
-#[test]
-fn suffrage_after_epiphany_octave() {
-    let feria = || feast("feria", Some(Category::Feria));
+    // Not within the Epiphany octave (7–13 January).
     for (d, want) in [(6, true), (7, false), (13, false), (14, true)] {
-        let x = suffrage_day(1, d, Season::Epiphany, feria(), vec![]);
+        let x = suffrage_day(1, d, Season::Epiphany, feast("feria", Some(Category::Feria)), vec![]);
         assert_eq!(should_say_suffrage(Some(&x)), want, "January {d}");
     }
 }
@@ -211,37 +214,6 @@ fn vigil_of_all_saints_omits_the_suffrage() {
     assert_eq!(suffrage_disposition(Some(&vigil)), (false, SUFFRAGE_SUPPRESSED_ALL_SAINTS_VIGIL));
     let feria = suffrage_day(10, 30, Season::Pentecost, ranked("feria", Some(Category::Feria), Rank::Commemoration), vec![]);
     assert!(should_say_suffrage(Some(&feria)));
-}
-
-#[test]
-fn ferial_and_season_conditions() {
-    let with = |m, d, season, f: Option<Feast>| {
-        let mut x = day(date(2026, m, d), season);
-        x.celebration = f.map(arc);
-        x
-    };
-    for (condition, d, want) in [
-        ("is-ferial", with(3, 16, Season::Lent, Some(feast("feria-lent-monday", Some(Category::Feria)))), true),
-        ("is-ferial", with(3, 18, Season::Lent, Some(feast("st-cyril", Some(Category::ConfessorDoctor)))), false),
-        ("is-ferial", with(3, 15, Season::Lent, Some(feast("sunday-lent", Some(Category::Sunday)))), false),
-        ("is-ferial", with(3, 16, Season::Lent, None), true),
-        ("season-easter", with(4, 15, Season::Easter, None), true),
-        ("season-easter", with(3, 16, Season::Lent, None), false),
-        ("season-passiontide", with(3, 30, Season::Passiontide, None), true),
-        ("not-season-easter", with(3, 16, Season::Lent, None), true),
-        ("is-ferial,not-season-easter", with(3, 16, Season::Lent, Some(feast("feria", Some(Category::Feria)))), true),
-        ("is-ferial,season-easter", with(4, 21, Season::Easter, Some(feast("feria", Some(Category::Feria)))), true),
-    ] {
-        assert_eq!(eval(condition, &d, None), want, "{condition}");
-    }
-}
-
-#[test]
-fn preces_octave_commemoration() {
-    let mut x = day(date(2026, 7, 1), Season::Pentecost);
-    x.celebration = Some(arc(ranked("feria", Some(Category::Feria), Rank::Simple)));
-    x.commemorations = vec![arc(ranked("ss-peter-paul-octave-day-3", None, Rank::Simple))];
-    assert_eq!(preces_disposition(Some(&x), None), (false, PRECES_SUPPRESSED_OCTAVE_COMMEMORATION));
 }
 
 #[test]

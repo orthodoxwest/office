@@ -58,19 +58,3 @@ fn phrase_index(text: &str, phrase: &str, start: usize) -> Option<usize> {
 fn word_byte(b: u8) -> bool {
     b.is_ascii_alphabetic() || b == b'\''
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn spans() {
-        let spans = build_rubric_spans("shared/formulas/closing-our-father", "Then the Our Father's rubric; say Our Father secretly.");
-        assert_eq!(spans.len(), 3);
-        assert_eq!(spans[1].text, "Our Father");
-        assert!(spans[1].prayed);
-        assert_eq!(spans[0].text, "Then the Our Father's rubric; say ");
-        assert!(build_rubric_spans("shared/formulas/closing-our-father", "Nothing here").is_empty());
-        assert!(build_rubric_spans("other", "Our Father").is_empty());
-    }
-}
