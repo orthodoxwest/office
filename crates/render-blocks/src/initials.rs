@@ -82,7 +82,7 @@ pub fn initial_fit(letter: char) -> InitialFit {
 mod tests {
     use super::*;
 
-    /// The web's profiles, read from its stylesheet: the two tables must not drift apart.
+    /// The web's profiles and initial sizes, read from its stylesheet: the two must not drift apart.
     #[test]
     fn every_profile_matches_the_web() {
         let css = include_str!("../../../apps/office-web/static/style.css");
@@ -111,30 +111,14 @@ mod tests {
             let want = if raised.contains(&letter) { tuck } else { 0.0 };
             assert_eq!(initial_fit(letter).raised_tuck, want, "{letter}");
         }
-    }
-
-    /// The em the profiles are measured in: the psalm initial's declared size.
-    #[test]
-    fn the_profile_em_is_the_declared_initial() {
-        let css = include_str!("../../../apps/office-web/static/style.css");
+        // The em the profiles are measured in: the psalm initial's declared size.
         let rule = css.split(".psalm-verses .verse:first-child::first-letter {").nth(1).expect("psalm initial").split('}').next().unwrap();
         let size: f32 = rule.split("font-size:").nth(1).unwrap().split("em").next().unwrap().trim().parse().unwrap();
         assert_eq!(size, PROFILE_EM);
-    }
-
-    /// The raised initial's size and space, from the web's `.initial-raised` rule.
-    #[test]
-    fn the_raised_initial_matches_the_web() {
-        let css = include_str!("../../../apps/office-web/static/style.css");
+        // The raised initial's size and space, from the web's `.initial-raised` rule.
         let rule = css.split("initial-letter: normal;").nth(1).expect("raised rule").split('}').next().unwrap();
         let value = |name: &str| rule.split(name).nth(1).unwrap().trim_start().split("em").next().unwrap().trim().parse::<f32>().unwrap();
         assert_eq!(value("font-size:"), RAISED_SIZE);
         assert_eq!(value("margin: 0"), RAISED_GAP);
-    }
-
-    #[test]
-    fn a_two_line_initial_spans_a_line_pitch_and_a_cap_height() {
-        // 20px text on a 33px line: 20 + 33 / 0.65 px.
-        assert!((initial_size(1.65) * 20.0 - 70.77).abs() < 0.01);
     }
 }

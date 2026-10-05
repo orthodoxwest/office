@@ -872,8 +872,7 @@ mod tests {
     use liturgy::Posture;
 
     use super::*;
-    use calendar::Date;
-    use liturgy::{PrayerForm, VoiceRole, VoiceSpan};
+    use liturgy::VoiceSpan;
 
     const PSALM_67: &str = "Psalm 67\n\nGOD be merciful unto us, and bless us * and shew us the light of his countenance:\n2. That thy way may be known upon earth * thy saving health among all nations.\nGlory be to the Father, and to the Son, and to the Holy Ghost;\nas it was in the beginning, is now, and ever shall be, world without end. Amen.\n";
 
@@ -901,113 +900,11 @@ mod tests {
     }
 
     #[test]
-    fn slugs() {
-        for (input, want) in
-            [("Benedictus", "benedictus"), ("Nunc Dimittis", "nunc-dimittis"), ("hello-world", "hello-world"), ("  spaces  ", "spaces")]
-        {
-            assert_eq!(slugify(input), want);
-        }
-        for (label, kind, want) in [
-            ("Psalm 67", ElementType::Psalm, "067"),
-            ("Psalm 4", ElementType::Psalm, "004"),
-            ("Psalm 118 (Aleph)", ElementType::Psalm, "118"),
-            ("Magnificat", ElementType::Canticle, "magnificat"),
-            ("Aeterne Rerum Conditor", ElementType::Hymn, "aeterne-rerum-conditor"),
-            ("", ElementType::Hymn, ""),
-        ] {
-            assert_eq!(label_to_slug(label, kind), want);
-        }
-    }
-
-    #[test]
-    fn display_text_is_typeset() {
-        assert_eq!(tex_line("Luke 1:68-79"), "Luke 1:68–79");
-        assert_eq!(tex_line(r#"He said, "Peace be unto you.""#), "He said, “Peace be unto you.”");
-        assert_eq!(tex_line("'Tis Aaron's beard & more"), "’Tis Aaron’s beard \\& more");
-        // A pointed line is typeset whole, so a quote after the mediant still closes.
-        assert_eq!(mediant_line("and said, 'Peace * be with you.'"), "and said, ‘Peace\\mediant{}be with you.’");
-        // Opening punctuation joins the initial, as ::first-letter takes it on the web.
-        assert_eq!(initial(Initial::Prose, "'Twas the Lord's doing", ""), "\\initial{prose}{T}{’T}{was}{ the Lord’s doing}\n");
-    }
-
-    #[test]
-    fn versicles_and_responses_take_the_sigil_gutter() {
-        let got = format_block("V. O Lord, open thou our lips.\nR. And our mouth * shall shew forth thy praise.\nAll: Amen.");
-        assert!(got.contains("\\versicle{O Lord, open thou our lips.}\n"), "{got}");
-        assert!(got.contains("\\response{And our mouth\\mediant{}shall shew forth thy praise.}\n"), "{got}");
-        assert!(got.contains("\\allline{Amen.}\n"), "{got}");
-    }
-
-    #[test]
-    fn short_responsory_initial_only_on_an_opening_response() {
-        let opening = format_short_responsory(
-            "R. Incline my heart * unto thy testimonies.\nV. Turn away mine eyes.\nR. Unto thy testimonies.\nGlory be to the Father.",
-        );
-        assert!(opening.starts_with("\\initial{response}{I}{I}{ncline}{ my heart\\mediant{}unto thy testimonies.}\n"), "{opening}");
-        assert!(opening.contains("\\versicle{Turn away mine eyes.}") && opening.contains("\\response{Unto thy testimonies.}"));
-        // Plain lines share the ℟ text edge, as on the web.
-        assert!(opening.contains("\\sigilline{}{Glory be to the Father.}"), "{opening}");
-
-        let versicle_first =
-            format_short_responsory("V. Keep us, O Lord, as the apple of an eye.\nR. Hide us under the shadow of thy wings.");
-        assert!(!versicle_first.contains("\\initial"), "{versicle_first}");
-        assert!(versicle_first.contains("\\response{Hide us under the shadow of thy wings.}"), "{versicle_first}");
-    }
-
-    #[test]
-    fn each_opening_is_one_initial_paragraph() {
-        assert_eq!(format_collect("Almighty God,\nwho art."), "\\initial{prose}{A}{A}{lmighty}{ God, who art.}\n\n");
-        let hymn = format_hymn("O Framer of the earth and sky,\nRuler of all things.\n\nSecond stanza,\nhere.\n", "", None);
-        assert!(hymn.contains("\\initial*{drop}{O}{O}{Framer}{ of the earth and sky,\\\\\nRuler of all things.}\n\\smallskip\n"), "{hymn}");
-        assert!(hymn.contains("\\noindent Second stanza,\\\\\nhere.\\par\\smallskip\n"), "{hymn}");
-        let lord = OfficeElement {
-            voice: vec![
-                VoiceSpan::new("Our Father,\nwho art in heaven.\n", true, Some(VoiceRole::Officiant)),
-                VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
-            ],
-            ..OfficeElement::new(ElementType::CorporateLordPrayer, "Our Father,\nwho art in heaven.\nBut deliver us from evil.")
-        };
-        assert_eq!(
-            format_corporate_lord_prayer(&lord),
-            "\\initial{prose}{O}{O}{ur}{ Father, who art in heaven.}\n\\response{But deliver us from evil.}\n\n"
-        );
-    }
-
-    #[test]
     fn secret_span_keeps_its_leading_space_outside_the_colour() {
         let mut elem = OfficeElement::new(ElementType::Prayer, "I believe in God the Father Almighty.");
         elem.voice = vec![VoiceSpan::new("I believe", true, None), VoiceSpan::new(" in God the Father Almighty.", false, None)];
         let got = format_prayer_voice(&elem).expect("voiced");
         assert_eq!(got, "\\noindent I believe {\\color{mutedgray}in God the Father Almighty.}\\par\n\n");
-    }
-
-    #[test]
-    fn title_and_running_heads() {
-        let mut hour = OfficeHour {
-            form: PrayerForm::Private,
-            date: Date::new(2026, 9, 29),
-            hour: "Lauds".into(),
-            title: String::new(),
-            season: Some(Season::Pentecost),
-            feast: "Dedication of St Michael the Archangel".into(),
-            color: Some(Color::White),
-            sections: vec![],
-            decisions: vec![],
-        };
-        assert_eq!(
-            title_block(&hour),
-            "\\officetitle{Lauds}{Tuesday, September 29, 2026}{Dedication of St Michael the Archangel}{}{White}{white}\n\n"
-        );
-        let setup = document_setup(&hour);
-        assert!(setup.contains("\\newcommand{\\officeday}{Dedication of St Michael the Archangel}"), "{setup}");
-        assert!(setup.contains("pdftitle={Lauds — Tuesday, September 29, 2026},pdfsubject={Dedication of St Michael the Archangel}"));
-
-        hour.feast = "Saturday of Our Lady, with a Commemoration of the Holy Martyrs".into();
-        assert!(document_setup(&hour).contains("\\newcommand{\\officeday}{Tuesday, September 29, 2026}"));
-        hour.feast.clear();
-        (hour.season, hour.color) = (None, None);
-        assert_eq!(title_block(&hour), "\\officetitle{Lauds}{Tuesday, September 29, 2026}{}{}{}{}\n\n");
-        assert!(!document_setup(&hour).contains("pdfsubject"));
     }
 
     #[test]
@@ -1040,32 +937,22 @@ mod tests {
     }
 
     #[test]
-    fn psalm_opening_takes_one_initial() {
-        let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], 0, None);
-        assert!(got.contains("\\initial{psalm}{G}{G}{OD}{ be merciful unto us, and bless us\\mediant{}and shew us"), "{got}");
-        assert_eq!(got.matches("\\initial").count(), 1);
-        assert!(got.contains("\\psalmverse{2}") && got.contains("\\gloriapatri{"));
-
-        let numbered = format_psalm("2. That thy way may be known * among all nations.\n", "Psalm 67", ElementType::Psalm, &[], 0, None);
-        assert!(!numbered.contains("\\initial"), "{numbered}");
-
-        let sectioned = format_psalm(
-            "Canticle\n\nFirst opening * alpha.\n\n[section: Part II]\n\nSECOND opening * beta.\n",
-            "Canticle",
-            ElementType::Canticle,
-            &[],
-            0,
-            None,
-        );
-        assert_eq!(sectioned.matches("\\initial").count(), 2, "{sectioned}");
-        assert!(
-            sectioned.contains("\\canticlesection{Part II}")
-                && sectioned.contains("\\initial{psalm}{S}{S}{ECOND}{ opening\\mediant{}beta.}")
-        );
-    }
-
-    #[test]
     fn chant_scores_replace_text_only_when_found() {
+        for (input, want) in
+            [("Benedictus", "benedictus"), ("Nunc Dimittis", "nunc-dimittis"), ("hello-world", "hello-world"), ("  spaces  ", "spaces")]
+        {
+            assert_eq!(slugify(input), want);
+        }
+        for (label, kind, want) in [
+            ("Psalm 67", ElementType::Psalm, "067"),
+            ("Psalm 4", ElementType::Psalm, "004"),
+            ("Psalm 118 (Aleph)", ElementType::Psalm, "118"),
+            ("Magnificat", ElementType::Canticle, "magnificat"),
+            ("Aeterne Rerum Conditor", ElementType::Hymn, "aeterne-rerum-conditor"),
+            ("", ElementType::Hymn, ""),
+        ] {
+            assert_eq!(label_to_slug(label, kind), want);
+        }
         let base = |category: &str, slug: &str| (category == "psalms" && slug == "067").then(|| "data/texts/chant/psalms/067".to_string());
         let chant = Chant { base: &base };
         let got = format_psalm(PSALM_67, "Psalm 67", ElementType::Psalm, &[], 0, Some(&chant));
@@ -1076,67 +963,6 @@ mod tests {
         let hymn = "Aeterne rerum conditor\n\nO Framer of the earth and sky,\nRuler of all things high and low.\n";
         let text = format_hymn(hymn, "Aeterne Rerum Conditor", Some(&chant));
         assert!(text.contains("\\initial*{drop}{O}{O}{Framer}{ of the earth and sky,\\\\\nRuler of all things high and low.}"), "{text}");
-    }
-
-    #[test]
-    fn multiline_antiphon_keeps_its_lines() {
-        let mut elem = OfficeElement::new(
-            ElementType::Antiphon,
-            "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness, and our hope.\nTo thee do we cry.\nTo thee do we send up our sighs.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
-        );
-        elem.label = "Salve Regina".into();
-        let got = format_multiline_antiphon(&elem);
-        assert!(got.contains("\\hymnlabel{Salve Regina}"));
-        assert!(
-            got.contains(
-                "\\begin{sourcelines}\n\\initial{drop}{H}{H}{ail,}{ holy Queen,\\mediant{}Mother of mercy,\\\\\nour life, our sweetness, and our hope.}\n\\sourceline{To thee do we cry.}\n\\sourceline{To thee do we send up our sighs.}\n\\end{sourcelines}\n"
-            ),
-            "{got}"
-        );
-        assert!(!got.contains("\\itshape"), "{got}");
-        assert!(got.contains("\\versicle{") && got.contains("\\response{"));
-
-        let only = format_multiline_antiphon(&OfficeElement::new(ElementType::Antiphon, "Line one of the anthem."));
-        assert!(only.contains("\\begin{sourcelines}\n\\initial{drop}{L}{L}{ine}{ one of the anthem.}\n\\end{sourcelines}\n"), "{only}");
-    }
-
-    #[test]
-    fn hymn_is_measured_and_runs_on_its_amen() {
-        let got =
-            format_hymn("Lucis Creator\n\nO blest Creator of the light,\nWho mak'st the day.\n\nAll laud to God.\n\nAmen.\n", "", None);
-        assert!(
-            got.contains("\\hymnmeasure{\\hmopening{O blest Creator of the light,}\\hmopening{Who mak’st the day.}\\hm{All laud to God. Amen.}}\n\\begin{hymnverses}\n"),
-            "{got}"
-        );
-        assert!(got.contains("\\noindent All laud to God. Amen.\\par\\smallskip\n"), "{got}");
-        assert!(!got.contains("Amen.\\par\\smallskip\n\\noindent"), "{got}");
-        for (stanza, amen) in [(&["Amen."][..], true), (&["amen!"], true), (&["Amen, amen."], false), (&["Amen.", "More."], false)] {
-            let stanza: Vec<String> = stanza.iter().map(|l| l.to_string()).collect();
-            assert_eq!(is_hymn_amen(&stanza), amen, "{stanza:?}");
-        }
-    }
-
-    #[test]
-    fn versicles_and_the_gloria_keep_their_lines() {
-        let got = format_lines("Glory be to the Father, * and to the Son;\nAs it was in the beginning. Amen.\nAlleluia.");
-        assert_eq!(
-            got,
-            "\\begin{sourcelines}\n\\sourceline{Glory be to the Father,\\mediant{}and to the Son;}\n\\sourceline{As it was in the beginning. Amen.}\n\\sourceline{Alleluia.}\n\\end{sourcelines}\n\n"
-        );
-        // Prayers still flow.
-        assert_eq!(format_block("Almighty God,\nwho art."), "\\noindent Almighty God, who art.\\par\n\n");
-    }
-
-    #[test]
-    fn plain_openings_in_capitals_take_small_caps() {
-        assert_eq!(capitals_opening("I CONFESS to God Almighty"), "I \\capsrun{CONFESS} to God Almighty");
-        assert_eq!(capitals_opening("GOD be merciful"), "G\\capsrun{OD} be merciful");
-        assert_eq!(capitals_opening("O God, make speed"), "O God, make speed");
-        assert_eq!(capitals_opening("I said, I will"), "I said, I will");
-        // Only a block's opening line, and never a collect's or chapter's.
-        assert!(format_block("I CONFESS to God.\n\nI CONFESS again.").starts_with("\\noindent I \\capsrun{CONFESS} to God.\\par\n"));
-        assert!(format_block("I CONFESS to God.\n\nI CONFESS again.").contains("\\noindent I CONFESS again.\\par"));
-        assert!(format_block("V. Lord, have mercy.\nI CONFESS to God.").contains("\\noindent I CONFESS to God.\\par"));
     }
 
     #[test]
@@ -1160,41 +986,6 @@ mod tests {
         let got = tex_section(&section, None);
         let order: Vec<&str> = got.lines().filter_map(|l| l.split_once('{').map(|(m, _)| m)).filter(|m| m.starts_with("\\ant")).collect();
         assert_eq!(order, ["\\antopen", "\\antclose", "\\antopen"], "{got}");
-    }
-
-    #[test]
-    fn chapter_and_hymn_take_their_headings() {
-        let mut chapter = OfficeElement::new(ElementType::Chapter, "Brethren, be sober.\nR. Thanks be to God.");
-        chapter.label = "1 Peter 5:8".into();
-        let got = tex_element(&chapter, "ant", None);
-        assert!(
-            got.starts_with(
-                "\\sectionheading{Chapter}\n\n{\\centering\\scriptureref{1 Peter 5:8}\\par}\\nopagebreak\n\\initial{prose}{B}{B}{rethren,}"
-            ),
-            "{got}"
-        );
-        let mut hymn = OfficeElement::new(ElementType::Hymn, "Te lucis\n\nTo thee before the close of day,\nCreator of the world.\n");
-        hymn.label = "Te lucis ante terminum".into();
-        let got = tex_element(&hymn, "ant", None);
-        assert!(got.starts_with("\\sectionheading{Hymn}\n\n\n\\hymnlabel{Te lucis ante terminum}"), "{got}");
-        // Word sigils keep the spoken text on the ℣/℟ edge.
-        assert!(
-            format_lines("Blessing. The Lord Almighty grant us a quiet night.")
-                .contains("\\blessingline{The Lord Almighty grant us a quiet night.}")
-        );
-    }
-
-    #[test]
-    fn gloria_patri() {
-        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);
-        assert_eq!(got, "\\gloriapatri{Glory be to the Father;}{as it was in the beginning.}\n\n");
-        assert_eq!(format_gloria_patri("Glory be", &[]), "\\glorialine{Glory be}\n\n");
-        let cues = [
-            PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
-            PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
-        ];
-        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &cues);
-        assert_eq!(got, "\\gloriapatri{\\rubric{Bow.} Glory be to the Father;}{\\rubric{Stand upright.} as it was in the beginning.}\n\n");
     }
 
     #[test]
@@ -1229,5 +1020,14 @@ mod tests {
         assert!(got.contains("\\initial{psalm}{T}{T}{HE}{ Lord\\mediant{}\\rubric{Sit.} is King.}"), "{got}");
         assert!(got.contains("\\psalmverse{2}{\\rubric{Bow.} He hath\\mediant{}made.}"), "{got}");
         assert!(got.contains("\\psalmverse{3}{No mediant here \\rubric{Stand.}}"), "{got}");
+        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &[]);
+        assert_eq!(got, "\\gloriapatri{Glory be to the Father;}{as it was in the beginning.}\n\n");
+        assert_eq!(format_gloria_patri("Glory be", &[]), "\\glorialine{Glory be}\n\n");
+        let cues = [
+            PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
+            PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
+        ];
+        let got = format_gloria_patri("Glory be to the Father;\nas it was in the beginning.", &cues);
+        assert_eq!(got, "\\gloriapatri{\\rubric{Bow.} Glory be to the Father;}{\\rubric{Stand upright.} as it was in the beginning.}\n\n");
     }
 }

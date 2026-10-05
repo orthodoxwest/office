@@ -146,16 +146,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn events_validate_scopes_and_dimensions() {
-        assert_eq!(parse_event("lauds appearance:apse screen:mobile prayer-form:priest").unwrap().dimensions.len(), 3);
-        let e = parse_event("ordo prayer-form:priest appearance:nave appearance:apse future:x").unwrap();
-        assert_eq!(e.dimensions, vec!["appearance:nave".to_string()]);
-        assert!(parse_event("matins").is_none());
-        assert!(parse_event("").is_none());
-        assert!(parse_event(" lauds").is_none());
-    }
-
-    #[test]
     fn beacon_dimensions_parse() {
         let dims = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
         for (body, scope, want) in [
@@ -173,6 +163,13 @@ mod tests {
             ("prime martyrology:shown client:pwa", "prime", vec!["martyrology:shown", "client:pwa"]),
             ("lauds martyrology:shown", "lauds", vec![]),
             ("site martyrology:hidden", "site", vec![]),
+            // The prayer form belongs to the hours; unknown families are dropped.
+            (
+                "lauds appearance:apse screen:mobile prayer-form:priest",
+                "lauds",
+                vec!["appearance:apse", "screen:mobile", "prayer-form:priest"],
+            ),
+            ("ordo prayer-form:priest appearance:nave appearance:apse future:x", "ordo", vec!["appearance:nave"]),
         ] {
             let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
             assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");

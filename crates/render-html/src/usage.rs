@@ -280,10 +280,7 @@ mod tests {
         }
         let empty = usage_data(vec![row("2026-09-05", 0)], 7, None, &DIMENSIONS);
         assert!(empty.max == 0 && num(&empty.chart[0].height) == 0.0 && empty.peak_date.is_empty(), "empty report implies activity");
-    }
-
-    #[test]
-    fn dates_across_years() {
+        // A window reaching into last year names that year.
         let crossing = usage_data(vec![row("2026-01-02", 1), row("2025-12-31", 1)], 2, Some("2025-12-31"), &DIMENSIONS);
         assert_eq!((crossing.first_date.as_str(), crossing.last_date.as_str()), ("Dec 31, 2025", "Jan 2"));
     }
