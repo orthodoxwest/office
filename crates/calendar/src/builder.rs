@@ -273,6 +273,14 @@ fn vigil_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast>
     vigils
 }
 
+/// "From Ash Wednesday, all Octaves cease until Low Sunday inclusive"
+/// (every ordo 2017–2026; Diurnal VII.1, VII.3). Easter's own octave is the
+/// exception. A day omitted here keeps its number: St George's octave resumes
+/// after Low Sunday counting from April 23 (2025 ordo, 30 April).
+fn octave_ceases(feast: &Feast, date: Date, m: &MoveableDates) -> bool {
+    feast.id != "easter-sunday" && date >= m.ash_wednesday && date <= m.low_sunday
+}
+
 /// Days 2–8 of every octave.
 fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast> {
     use crate::model::OctaveClass;
@@ -286,6 +294,9 @@ fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast
             let date = parent.add_days(day_num - 1);
             if is_christmas && day_num == 8 {
                 continue; // Jan 1 has its own feast
+            }
+            if octave_ceases(feast, date, m) {
+                continue;
             }
             if is_privileged {
                 if feast.id == "easter-sunday" && matches!(day_num, 2 | 3 | 8) {
@@ -627,7 +638,11 @@ fn build_calendar_year(
     for f in all_base.iter().filter(|f| f.has_octave) {
         if let Some(parent) = resolve_feast_date(f, year, &m) {
             for n in 0..8 {
-                octave_ranges.insert(parent.add_days(n), f.id.clone());
+                let date = parent.add_days(n);
+                if octave_ceases(f, date, &m) {
+                    continue;
+                }
+                octave_ranges.insert(date, f.id.clone());
             }
         }
     }
