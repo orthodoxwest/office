@@ -24,7 +24,7 @@ Source = awrv
 Notes = Eastern saint added by the AWRV
 
 [st-tikhon-moscow]
-Name = St Tikhon of Moscow
+Name = St Tikhon of Moscow, Bishop & Confessor
 Rank = double-1st-class
 Color = white
 Category = confessor-bishop
