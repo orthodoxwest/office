@@ -153,7 +153,7 @@ pub fn derive_proper_name_from_title(name: &str) -> String {
             break;
         }
     }
-    const MARKERS: [&str; 17] = [
+    const MARKERS: [&str; 18] = [
         ", Bishop",
         ", Abbot",
         ", Priest",
@@ -171,6 +171,7 @@ pub fn derive_proper_name_from_title(name: &str) -> String {
         ", Deacon",
         ", Monk",
         ", Nun",
+        ", Penitent",
     ];
     if let Some(cut) = MARKERS.iter().filter_map(|m| name.find(m)).min() {
         name = &name[..cut];

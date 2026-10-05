@@ -56,6 +56,8 @@ Optional keys:
 |---|---|
 | `DateRule` | Moveable date, used instead of `Month`/`Day` |
 | `HasOctave = true` | Generate an octave |
+| `OctaveDays` | Names the generated days II–VII as the ordo prints them: `{n}` is the day's numeral, `{weekday}` its weekday (`{weekday} in Easter Week`). Default `Day {n} within the Octave of …` |
+| `OctaveDay2` … `OctaveDay8` | Names one generated octave day, over `OctaveDays` (`OctaveDay8 = The Octave of the Ascension`). Day VIII defaults to `Octave Day of …` |
 | `OctaveClass` | `privileged-first` (Easter, Pentecost), `privileged-second` (Epiphany, Corpus Christi), `privileged-third` (Nativity, Ascension, Sacred Heart) per General Rubrics VII.3; `simple` for simple octaves or explicit Simple octave days. Omitted means a common octave. Generated days inherit it; terminal days do not inherit weekday commemoration privilege. |
 | `CommemorationClass` | One of the two ferial ordering exceptions in XIV.14: `epiphany-vigil`, `post-ascension-feria` |
 | `HasVigil = true` | Generate a preceding vigil |

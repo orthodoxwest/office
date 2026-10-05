@@ -277,7 +277,7 @@ fn composition_structure_across_calendars() {
                     let mut expected = match day.celebration_id() {
                         Some("holy-thursday" | "good-friday") => 6,
                         Some("holy-saturday") => 1,
-                        _ if hour.feast == "All Souls' Day" => 5,
+                        _ if hour.feast == "Commemoration of All the Faithful Departed (All Souls' Day)" => 5,
                         _ => 4,
                     };
                     if hour.sections.iter().any(|s| s.label == "Vespers of the Dead") {

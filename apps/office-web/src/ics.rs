@@ -271,7 +271,7 @@ mod tests {
         assert!(body.starts_with("BEGIN:VCALENDAR\r\n") && body.ends_with("END:VCALENDAR\r\n"));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 7);
         for want in [
-            "SUMMARY:Lauds — Nativity of Our Lord Jesus Christ",
+            "SUMMARY:Lauds — The Nativity of Our Lord",
             // 06:45 EST is 11:45 UTC.
             "DTSTART:20261225T114500Z",
             "UID:lauds-2026-12-25@awrv-office",

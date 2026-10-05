@@ -7,7 +7,7 @@ use calendar::builder::seasonal_feria_commemoration;
 use calendar::commemoration::{
     OrderContext, apostle_kept_on_primary_feast, cap_commemorations, dedupe_commemorations, order_commemorations, ordered_commemorations,
 };
-use calendar::computus::julian_easter;
+use calendar::computus::MoveableDates;
 use calendar::model::FERIA_COMMEMORATION_ID;
 use calendar::occurrence::compare_feast_precedence;
 use calendar::traits::{
@@ -468,7 +468,7 @@ fn boundary_commemorations(
             && preceding.date.weekday() != Weekday::Sunday
             && is_penitential_feria_season(preceding.season)
         {
-            c = Some(Arc::new(seasonal_feria_commemoration(preceding, julian_easter(preceding.date.year()))));
+            c = Some(Arc::new(seasonal_feria_commemoration(preceding, &MoveableDates::compute(preceding.date.year()))));
         }
         if let Some(c) = c.filter(|c| {
             let saturday = saturday_feria_without_vespers(preceding, c);

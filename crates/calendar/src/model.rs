@@ -1,6 +1,7 @@
 //! Calendar types: ranks, colors, categories, seasons, feasts, and the
 //! resolved calendar day every product shares.
 
+use std::collections::BTreeMap;
 use std::fmt;
 use std::sync::Arc;
 
@@ -283,6 +284,11 @@ pub struct Feast {
     /// The octave this day continues when its ID does not say so (Easter
     /// Monday and Tuesday).
     pub octave_of: Option<String>,
+    /// The ordo's names for this feast's generated octave days: a pattern for
+    /// days II–VII ("{n}" the day's numeral, "{weekday}" its weekday), and
+    /// single days 2–8 by number.
+    pub octave_days: Option<String>,
+    pub octave_day_names: BTreeMap<i32, String>,
     pub companion_of: Option<String>,
     pub primary_of_our_lord: bool,
     pub only_with: Option<String>,
@@ -315,6 +321,8 @@ impl Feast {
             is_vigil: false,
             vigil_of: None,
             octave_of: None,
+            octave_days: None,
+            octave_day_names: BTreeMap::new(),
             companion_of: None,
             primary_of_our_lord: false,
             only_with: None,

@@ -88,7 +88,10 @@ fn valid_fixed_date(month: i64, day: i64) -> bool {
     i64::from(date.month()) == month && i64::from(date.day()) == day
 }
 
-const KNOWN_FEAST_KEYS: [&str; 22] = [
+/// Per-day octave name keys, `OctaveDay2` through `OctaveDay8`.
+const OCTAVE_DAY_KEYS: [&str; 7] = ["OctaveDay2", "OctaveDay3", "OctaveDay4", "OctaveDay5", "OctaveDay6", "OctaveDay7", "OctaveDay8"];
+
+const KNOWN_FEAST_KEYS: [&str; 23] = [
     "Name",
     "Rank",
     "Color",
@@ -103,6 +106,7 @@ const KNOWN_FEAST_KEYS: [&str; 22] = [
     "IsVigil",
     "VigilOf",
     "OctaveOf",
+    "OctaveDays",
     "CommemorationClass",
     "OctaveClass",
     "PrimaryOfOurLord",
@@ -183,6 +187,20 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     if m.get("OctaveOf").is_some() {
         f.octave_of = text("OctaveOf");
     }
+    if let Some(pattern) = text("OctaveDays") {
+        if pattern.replace("{n}", "").replace("{weekday}", "").contains(['{', '}']) {
+            return Err(fail(format!("OctaveDays: unknown placeholder in {}", quote(&pattern))));
+        }
+        f.octave_days = Some(pattern);
+    }
+    for (day, key) in (2..).zip(OCTAVE_DAY_KEYS) {
+        if let Some(name) = text(key) {
+            f.octave_day_names.insert(day, name);
+        }
+    }
+    if (f.octave_days.is_some() || !f.octave_day_names.is_empty()) && !f.has_octave {
+        return Err(fail("OctaveDays and OctaveDay2–OctaveDay8 require HasOctave = true".to_string()));
+    }
     if m.get("CompanionOf").is_some() {
         f.companion_of = text("CompanionOf");
     }
@@ -206,7 +224,7 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     }
 
     // Report the first unknown key in byte order.
-    if let Some(key) = m.values.keys().find(|k| !KNOWN_FEAST_KEYS.contains(&k.as_str())) {
+    if let Some(key) = m.values.keys().find(|k| !KNOWN_FEAST_KEYS.contains(&k.as_str()) && !OCTAVE_DAY_KEYS.contains(&k.as_str())) {
         return Err(fail(format!("unrecognized key {}", quote(key))));
     }
 
