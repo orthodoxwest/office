@@ -170,7 +170,10 @@ fn occurrence_commemorated_at_first_vespers(comm: &Feast) -> (bool, &'static str
 
 /// Whether a Lauds commemoration remains at II Vespers of the winning office.
 fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> (bool, &'static str) {
-    if comm.id == FERIA_COMMEMORATION_ID {
+    // XIV.9: Advent and Lenten ferias keep I and II Vespers as well as Lauds,
+    // even at a Double I Class (the Annunciation in Lent, 2018–2026 ordos;
+    // St Tikhon 2017 and 2023; St George 2021).
+    if comm.id == FERIA_COMMEMORATION_ID || comm.id == "privileged-lenten-feria" {
         return (true, "commemoration:second-vespers-seasonal-feria");
     }
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
@@ -191,6 +194,17 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
         // #379).
         if apostle_kept_on_primary_feast(w, comm) {
             return (true, "commemoration:second-vespers-apostle-on-primary-feast");
+        }
+        // XIV.5: a Double impeded by a Sunday or a privileged feria is
+        // commemorated at I and II Vespers and Lauds, also when that Sunday or
+        // feria is I Class (Patrick on Ash Wednesday 2021, Isidore and Leo on
+        // Lent Sundays 2021, Cuthbert 2022).
+        if w.rank == Rank::Double1stClass
+            && (w.is_category(Category::Sunday) || w.is_category(Category::Feria))
+            && comm.rank.weight() >= Rank::Double.weight()
+            && !is_day_within_octave(comm)
+        {
+            return (true, "commemoration:second-vespers-double-on-first-class-sunday-or-feria");
         }
         if w.rank == Rank::Double1stClass && !comm.is_category(Category::Sunday) {
             return (false, "commemoration:second-vespers-first-class-exclusion");
@@ -266,6 +280,12 @@ fn penitential_season_feria(f: &Feast) -> bool {
 
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
 fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast) -> (bool, &'static str) {
+    // A Sunday office anticipated on Saturday ends at None: its evening is the
+    // next Sunday's I Vespers, which do not commemorate it (2025 and 2026
+    // ordos, 7 February; 2021 ordo, 20 November).
+    if loser.id.ends_with("-anticipated") && loser.is_category(Category::Sunday) {
+        return (false, "commemoration:first-vespers-anticipated-sunday-exclusion");
+    }
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
     if first_class && penitential_season_feria(loser) {
         // Such a feria stays at I Vespers of a Double I Class (Diurnal §X; the

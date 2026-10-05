@@ -159,8 +159,14 @@ pub fn resolve_day(
     season_color: Color,
     transferred_in: &[FeastRef],
 ) -> (CalendarDay, Vec<FeastRef>) {
+    // XI.7: a transferred feast goes to the next day free of an occurrent
+    // Sunday, so on a Sunday it waits without competing (2021 ordo: the
+    // Visitation passes over the Sunday within the Corpus Christi octave).
+    let (held, transferred_in): (Vec<FeastRef>, Vec<FeastRef>) =
+        transferred_in.iter().cloned().partition(|_| date.weekday() == Weekday::Sunday);
+    let transferred_in = transferred_in.as_slice();
     let mut all: Vec<FeastRef> = candidates.iter().chain(transferred_in).cloned().collect();
-    let mut transfers_out = Vec::new();
+    let mut transfers_out = held.clone();
     let mut decisions = vec![Decision::new(
         "occurrence:resolution-mode",
         "start",
@@ -169,6 +175,9 @@ pub fn resolve_day(
     let (filtered, vigil_decisions) = exclude_seasonal_vigils(all, season);
     all = filtered;
     decisions.extend(vigil_decisions);
+    if !held.is_empty() {
+        decisions.push(Decision::new("occurrence:transfer-in", "held-over-sunday", feast_ids(&held)));
+    }
     if !transferred_in.is_empty() {
         decisions.push(Decision::new("occurrence:transfer-in", "considered", feast_ids(transferred_in)));
     }
@@ -205,9 +214,24 @@ pub fn resolve_day(
         decisions.push(Decision::new("occurrence:resolution-mode", "general-precedence", ""));
         &all
     };
+    let is_transferred = |f: &FeastRef| transferred_in.iter().any(|t| Arc::ptr_eq(t, f));
     let mut winner = pool[0].clone();
     for f in &pool[1..] {
-        let (wins, decision) = compare_feast_precedence_with_decision(f, &winner);
+        let (mut wins, mut decision) = compare_feast_precedence_with_decision(f, &winner);
+        // XI.7: a transferred feast waits for a day free of a I or II Class
+        // Double (2024 ordo: the Nativity of St John Baptist passes over the
+        // Visitation). XI.8: of equal transferred feasts the one whose own day
+        // comes first goes first (2019, 2021 and 2022 ordos: St Mark, then Ss
+        // Philip and James, then the Finding of the Holy Cross).
+        if wins && is_transferred(f) {
+            let occupied = !is_transferred(&winner) && winner.rank.weight() >= Rank::Double2ndClass.weight();
+            let earlier_equal = is_transferred(&winner) && sort_key(f)[0] == sort_key(&winner)[0];
+            if occupied || earlier_equal {
+                wins = false;
+                let outcome = if occupied { "day-occupied" } else { "earlier-own-day" };
+                decision = Decision::new("occurrence:transfer-order", outcome, format!("challenger={}; incumbent={}", f.id, winner.id));
+            }
+        }
         decisions.push(decision);
         if wins {
             winner = f.clone();

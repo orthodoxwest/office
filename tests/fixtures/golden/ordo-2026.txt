@@ -277,7 +277,6 @@ FEBRUARY
                Com. St Romuald, Abbot ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said · Suff.
-               Com. Office of the V Sunday after Epiphany ("God hath holpen")
   8  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. The kingdom · No Preces · Suff.
            Hours   Preces
@@ -556,6 +555,7 @@ MARCH
                Com. Wednesday after Lent IV ("Master")
            Hours   No Preces
            Vespers w · II prec. · Mag. The Angel Gabriel · No Suff.
+               Com. Wednesday after Lent IV ("A man")
  26  Thu  L§ Thursday after Lent IV                     [f2]  v
            Lauds   v · Ben. Jesus went · No Preces · Suff.
            Hours   Preces
@@ -1094,13 +1094,10 @@ JUNE
            Hours   No Preces
            Vespers r · I fol. (Ss John & Paul, Martyrs) · Mag. The righteous · No Suff.
                Com. Day II within the Octave of St John Baptist ("The child")
-               Com. Octave of the Compassion of Our Lord Jesus Christ ("I will liken him")
  26  Fri  L  Ss John & Paul, Martyrs                    [d]   r
            Day III within the Octave of St John Baptist (sd)
-           Octave of the Compassion of Our Lord Jesus Christ (com)
            Lauds   r · Ben. These are the holy ones · No Preces · No Suff.
                Com. Day III within the Octave of St John Baptist ("The mouth of Zacharias")
-               Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers r · II prec. · Mag. In the heavenly kingdom · No Suff.
                Com. Day III within the Octave of St John Baptist ("The child")

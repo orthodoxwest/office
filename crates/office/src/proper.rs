@@ -346,12 +346,15 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         }
     }
 
-    // 0.8. I Vespers of a Sunday takes the Saturday psalter.
+    // 0.8. I Vespers of a Sunday takes the Saturday psalter, unless a feast
+    // on the Sunday has its own Vespers psalmody (the Assumption, 2021 ordo,
+    // 14 August).
     if hour_name == "vespers"
         && day.is_sunday_first_vespers()
         && let Some(c) = celebration
         && reference.starts_with("psalm-antiphon")
         && !reference.ends_with("-first")
+        && !crate::psalmody::uses_festal_vespers_psalmody(day, t)
     {
         for feast_id in feast_proper_ids(c) {
             if day.season == Season::Easter {
