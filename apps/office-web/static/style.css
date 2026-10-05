@@ -4197,6 +4197,10 @@ body.season-eastertide {
      (--arch-w). The halo and shade are filters on the layers, as tokens the
      Apse rules restate. */
   --panel-inset: 0.75rem;
+  /* How far in from the card's edge the day's words stand: inside the
+     lining's hairline with clear air, so a long feast name breaks rather
+     than running over the lining. */
+  --day-clear: calc(var(--panel-inset) + 9px + 0.75rem);
   --lining-day: var(--day-color, var(--lining));
   --pad-x: 1rem;
   --arch-w: calc(100cqi + 2 * var(--pad-x));
@@ -5165,6 +5169,7 @@ body.season-eastertide {
   align-items: center;
   gap: 0.12rem;
   margin: 0 0 0.7rem;
+  padding-inline: calc(var(--day-clear) - var(--pad-x));
 }
 
 .page-home .home h1 {
@@ -5187,6 +5192,7 @@ body.season-eastertide {
   max-width: none;
   font-size: 1.08rem;
   line-height: 1.25;
+  text-wrap: balance;
 }
 
 .page-home .home .commemorations {
@@ -5496,6 +5502,7 @@ body.season-eastertide {
     /* The lining stands 26px inside the moulding; the cross sits in its
        point and the date where the head has opened wide enough for it. */
     --lining-inset: 26px;
+    --day-clear: calc(var(--lining-inset) + 9px + 0.75rem);
     --crown-size: 2.25rem;
     --crown-top: 3rem;
     --head-pad: 7.5rem;

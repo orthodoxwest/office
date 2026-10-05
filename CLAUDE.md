@@ -39,7 +39,8 @@ tools/
   genornaments.py          Painted ornament masks (crosses, sun, moon, quatrefoil, tailpiece, the
                            Apse vault tile and the Nave powdering cell) for the web
   genplaster.py            Texture generator; source photograph stays in ../resources/
-  genarch.py               Home frontispiece's pointed head as clip-path polygons in style.css
+  genarch.py               Home frontispiece's pointed head: clip-path polygons in style.css, and
+                           the arcs' figures for the native apps (Arch.kt, Arch.swift)
 data/
   feasts/                  Feast definitions (INI-like format)
   texts/                   Liturgical texts

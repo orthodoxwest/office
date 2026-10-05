@@ -80,7 +80,8 @@ or impose a redesign on an unrelated change.
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by
   `tools/genarch.py`, which writes clip-path polygons into style.css's
-  `genarch` block; never edit them by hand. A box-shadow or border-radius
+  `genarch` block, and the same shapes' arcs into the native apps'
+  `Arch.kt` and `Arch.swift`; never edit them by hand. A box-shadow or border-radius
   cannot follow a pointed head, so each course is its own layer clipped
   to the same arch offset by its own distance (`--arch-d`): the day's
   ring (`.home-arch::before`, the halo's source), the frame
@@ -101,7 +102,11 @@ or impose a redesign on an unrelated change.
   shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
   rules restate. The date's weekday and the rest of it are each kept
   whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
-  phone's flex touch target keeps their space. The panel's furniture is
+  phone's flex touch target keeps their space. The day's words stand
+  `--day-clear` in from the card's edge (the hairline, then 0.75rem of
+  air; the native apps' `dayClear`), so a long name such as the ordo's
+  "Commemoration of All the Faithful Departed (All Souls' Day)" breaks
+  into balanced lines rather than crossing the lining. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a

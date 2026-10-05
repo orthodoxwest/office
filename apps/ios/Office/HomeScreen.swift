@@ -54,35 +54,41 @@ struct HomeScreen: View {
                 if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
                 ScrollViewReader { scroll in
                 ScrollView {
-                    // Home is at least a screen tall, its colophon at the foot.
-                    VStack(spacing: 0) {
-                        SiteHeader()
-                        if let niche {
+                    // Home is at least a screen tall, its colophon at the foot. The tiers go by
+                    // the height home has and the screen's width, in the web's pixels.
+                    let tall = geo.size.height
+                    if let niche {
+                        let card = nicheWidth(screen)
+                        VStack(spacing: 0) {
+                            SiteHeader()
                             // Centred between the header and the foot, as the web's desktop home.
                             Spacer(minLength: 0)
                             // The moulding stands 0.75rem out from the card; room for it below the header.
-                            Frontispiece(view: view, date: date, niche: niche, head: nicheHead(screen))
+                            Frontispiece(view: view, date: date, tier: HomeTier(desk: true, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout), niche: niche)
                                 .background(GeometryReader { card in
                                     Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
                                 })
-                                .frame(maxWidth: nicheWidth(screen))
+                                .frame(maxWidth: card)
                                 .padding(.horizontal, 24)
                                 .padding(.top, 40)
                                 .padding(.bottom, 12)
                             Spacer(minLength: 0)
                             Footer(reserve: true)
-                        } else {
-                            Frontispiece(view: view, date: date, niche: nil, head: m.px(screen < 375 ? 56 : 68))
+                        }
+                        .frame(minHeight: tall)
+                    } else {
+                        // A phone's card stands from the header to a little above the footer:
+                        // whatever height home has beyond its own goes to the panel, above the band.
+                        let card = min(m.px(576), screen - 2 * m.px(gutter))
+                        PhoneHome(height: tall) {
+                            SiteHeader()
+                            Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout), niche: nil)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
-                            Spacer(minLength: 0)
-                            // The phone's home fits its screen with nothing to spare: the head is
-                            // paid for in the footer's gap and padding.
                             Footer(gap: 29.6, bottom: 25.6, reserve: true)
                         }
                     }
-                    .frame(minHeight: geo.size.height)
                 }
                 .revealing(scroll)
                 }
@@ -99,10 +105,145 @@ private struct NicheFrameKey: PreferenceKey {
     static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) { value = nextValue() ?? value }
 }
 
-/// The inscription band's bounds, where the niche's painted lining ends.
-private struct InscriptionKey: PreferenceKey {
-    static let defaultValue: Anchor<CGRect>? = nil
-    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) { value = nextValue() ?? value }
+/**
+ * A phone's home: the header, the card and the footer, at least `height` tall, the card offered
+ * the height left over as its least, so it stands from the header to a little above the footer.
+ */
+private struct PhoneHome: Layout {
+    let height: CGFloat
+
+    private func heights(_ width: CGFloat, _ subviews: Subviews) -> (header: CGFloat, card: CGFloat, footer: CGFloat, spare: CGFloat) {
+        let free = ProposedViewSize(width: width, height: nil)
+        let header = subviews[0].sizeThatFits(free).height
+        let footer = subviews[2].sizeThatFits(free).height
+        let spare = max(0, height - header - footer)
+        let card = subviews[1].sizeThatFits(ProposedViewSize(width: width, height: spare)).height
+        return (header, card, footer, spare)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 390
+        let h = heights(width, subviews)
+        return CGSize(width: width, height: max(h.header + h.card + h.footer, height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let h = heights(bounds.width, subviews)
+        let free = ProposedViewSize(width: bounds.width, height: nil)
+        subviews[0].place(at: bounds.origin, proposal: free)
+        subviews[1].place(at: CGPoint(x: bounds.minX, y: bounds.minY + h.header), proposal: ProposedViewSize(width: bounds.width, height: h.spare))
+        // The colophon at the foot of the screen.
+        subviews[2].place(at: CGPoint(x: bounds.minX, y: bounds.maxY - h.footer), proposal: free)
+    }
+}
+
+/**
+ * Home's measures at a size of screen, in the web's pixels, as style.css's home tiers set them.
+ * A phone's head, its cross and the room above the date go by the height home has (`tall`): from
+ * 800 high the card has height to spare, so the head rises further to a sharper point, the cross
+ * and the date stand lower in it, and the spare height is parted two to three above and below the
+ * day rather than centred about it; from 880 more so. Its larger type and rows go by width as
+ * well, from 375 wide and 830 or 880 high: a narrower or shorter phone needs the height for the
+ * lines its day wraps to. A wide screen's niche (`desk`) has its own. `card` is the card's width.
+ */
+struct HomeTier {
+    let desk: Bool
+    private let step: Int
+    private let type: Int
+    private let short: Bool
+    private let card: CGFloat
+
+    init(desk: Bool, screen: CGFloat, tall: CGFloat, card: CGFloat) {
+        self.desk = desk
+        step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
+        type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
+        short = !desk && tall <= 700
+        self.card = card
+    }
+
+    private func pick<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[min(type, phone.count - 1)] }
+    private func rise<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[step] }
+
+    var arch: Arch { rise(Arch.niche, Arch.phone, Arch.tall, Arch.taller) }
+    /// The room under the point for the cross and air, before the date.
+    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) }
+    var crownTop: CGFloat { rise(48, 33.6, 49.6, 54.4) }
+    var crownSize: CGFloat { rise(36, 30.4, 35.2, 40) }
+    /// Spare height under the head is parted 2:3 above and below the day, else the day is centred in it.
+    var split: Bool { !desk && step > 0 }
+    var side: CGFloat { desk ? 28 : 16 }
+    /**
+     * How far in from the card's edge the day's words stand: inside the lining's hairline (its
+     * inset, then 9pt) with 12pt of clear air, so a long feast name breaks rather than running
+     * over the lining.
+     */
+    var dayClear: CGFloat { (desk ? 26 : 12) + 9 + 12 }
+    var bottom: CGFloat { desk ? 20 : 12 }
+    var date: TextStyle { pick(Scale.body.sized(25.92, line: 31.1).tracked(0.39), Scale.body.sized(22.08, line: 26.5).tracked(0.22), Scale.body.sized(24.8, line: 29.76).tracked(0.25), Scale.body.sized(27.2, line: 32.64).tracked(0.27)) }
+    /**
+     * The date's measure, the head's width where its first line stands less a little air: a date
+     * too long for it breaks after the weekday, its second line lower where the head is wider.
+     */
+    var dateMeasure: CGFloat? { desk ? nil : card * pick(0, 0.233, 0.3) + 139 }
+    var feast: TextStyle { pick(Scale.body.sized(18.72, line: 23.4), Scale.body.sized(17.28, line: 21.6), Scale.body.sized(18.56, line: 23.2), Scale.body.sized(20, line: 25)) }
+    /// A short phone's commemorations give way, so a past date with them still fits.
+    var commemoration: TextStyle { short ? TextStyle(size: 13.6, line: 17.68) : pick(TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 16.32, line: 22.85)) }
+    /// Below the day, to the band.
+    var dayGap: CGFloat { pick(16.8, 5.6, 12) }
+    var band: CGFloat { pick(12.8, 12.8, 12.8, 13.6) }
+    var bandPad: CGFloat { pick(3.2, 3.2, 3.2, 3.84) }
+    var bandGap: CGFloat { pick(15.2, 12, 16, 20) }
+    var pray: TextStyle { pick(Scale.body.sized(23.2, line: 30.16), Scale.body.sized(19.2, line: 24.96), Scale.body.sized(22.4, line: 29.12), Scale.body.sized(24, line: 31.2)).tracked(0.38) }
+    var prayPad: CGFloat { pick(13.8, 11.9, 13.5, 15.9) }
+    var prayGap: CGFloat { pick(15.2, 11.2, 20, 24) }
+    var row: CGFloat { pick(46, 44, 54.4, 62.4) }
+    var hour: CGFloat { pick(17.6, 15.68) }
+    var metaGap: CGFloat { pick(14.4, 8.8, 16, 19.2) }
+}
+
+/// The date with its weekday and the rest each kept whole, so a break never parts a month from its day.
+private func unbroken(_ date: String) -> String {
+    guard let comma = date.range(of: ", ") else { return date }
+    let keep = { (s: Substring) in s.replacingOccurrences(of: " ", with: "\u{00A0}") }
+    return keep(date[..<comma.lowerBound]) + ", " + keep(date[comma.upperBound...])
+}
+
+/**
+ * The frontispiece's courses (`.home-hero`): the lining round the head, the cross in its point,
+ * the day under the head's room for them, then from the inscription band the invitation and the
+ * hours. The day's part (`.home-summary`) is never shorter than the head, so the band never
+ * crosses the arch, and takes whatever height the card is offered beyond its own, the day
+ * centred in it or set two parts to three.
+ */
+private struct FrontispieceLayout: Layout {
+    let tier: HomeTier
+    let m: Metrics
+
+    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, height: CGFloat) {
+        let free = ProposedViewSize(width: width, height: nil)
+        let facts = subviews[2].sizeThatFits(free).height
+        let after = subviews[3].sizeThatFits(free).height
+        let foot = m.px(tier.bottom)
+        let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
+        let summary = max(m.px(tier.headPad) + facts, tier.arch.rise * width, least - after - foot)
+        return (summary, facts, summary + after + foot)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 390
+        return CGSize(width: width, height: measure(width, proposal, subviews).height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let (summary, facts, _) = measure(bounds.width, proposal, subviews)
+        let free = ProposedViewSize(width: bounds.width, height: nil)
+        let pad = m.px(tier.headPad)
+        let spare = summary - pad - facts
+        subviews[0].place(at: bounds.origin, proposal: ProposedViewSize(width: bounds.width, height: summary))
+        subviews[1].place(at: CGPoint(x: bounds.midX, y: bounds.minY + m.px(tier.crownTop)), anchor: .top, proposal: .unspecified)
+        subviews[2].place(at: CGPoint(x: bounds.minX, y: bounds.minY + pad + (tier.split ? spare * 2 / 5 : spare / 2)), proposal: free)
+        subviews[3].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
+    }
 }
 
 /**
@@ -126,8 +267,8 @@ private struct FrontispieceInk {
 private struct Frontispiece: View {
     let view: HomeView
     let date: CivilDate
+    let tier: HomeTier
     let niche: NicheTokens?
-    let head: CGFloat
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -141,129 +282,116 @@ private struct Frontispiece: View {
         // day's would be tan there, and takes the gold line by day.
         let liningDay = !p.dark && view.color == "white" ? p.goldLine : day
         let ink = FrontispieceInk.of(p)
-        let desk = niche != nil
-        let side = m.px(desk ? 28 : 16)
-        // On a phone the lining stands this far inside the panel's edge, and the cross below it.
-        let panelInset = m.px(9.6)
-        // Room under the head for the lining's arch, then the crown's cross, then air before the
-        // date. On a phone: the lining's inset, air, the cross, its clearance. In a niche the cross
-        // is measured down from the lining (2pt moulding, 26pt inset, 11pt + 0.55rem of air), not
-        // from the head's height: a head that flattens on a narrow screen once ran the lining's
-        // crown through the cross.
-        let crown = desk ? 2 + 26 + 11 + m.px(8.8) : panelInset + m.px(13.6)
-        let top = desk ? crown + m.px(36 + 21.6) : crown + m.px(30.4 + 20)
-        VStack(spacing: 0) {
-            Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
-                Text(view.dateLabel)
-                    .type(desk ? Scale.body.sized(25.92, line: 31.1).tracked(0.39) : Scale.body.sized(22.08, line: 26.5).tracked(0.22))
-                    .foregroundStyle(p.text)
-                    .multilineTextAlignment(.center)
-            }
-            .buttonStyle(Quiet())
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityHint("Opens the ordo")
-            Text(view.feast).type(desk ? Scale.body.sized(18.72, line: 23.4) : Scale.body.sized(17.28, line: 21.6))
-                .foregroundStyle(p.accent)
-                .multilineTextAlignment(.center)
-                .padding(.top, m.px(2))
-            if !view.octaveNote.isEmpty {
-                Text(view.octaveNote).type(Scale.small).foregroundStyle(p.muted).multilineTextAlignment(.center)
-            }
-            if !view.isToday {
-                Button { model.open(.home(model.today)) } label: {
-                    Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
-                        .goldUnderline(true, p.goldLine)
-                        .padding(.vertical, m.px(12))
+        let desk = tier.desk
+        let side = m.px(tier.side)
+        FrontispieceLayout(tier: tier, m: m) {
+            // A lining painted round the head on the back wall, down to the inscription band:
+            // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding.
+            Lining(arch: tier.arch, inset: m.px(desk ? 26 : 12), hairline: liningDay)
+            // The consecration cross in the point of the head, with clear air round it.
+            PaintedMark(.consecration, size: m.px(tier.crownSize), color: p.lining)
+            // The day.
+            VStack(spacing: 0) {
+                Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
+                    Text(unbroken(view.dateLabel))
+                        .type(tier.date)
+                        .foregroundStyle(p.text)
+                        .multilineTextAlignment(.center)
+                        // On a phone a full thumb's height, as the web's, its line centred in it.
+                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44))
                 }
                 .buttonStyle(Quiet())
-            }
-            if !view.penitential.isEmpty {
-                HStack(spacing: m.px(9.6)) {
-                    ForEach(view.penitential, id: \.self) { t in
-                        Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(p.rubric)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityHint("Opens the ordo")
+                Text(view.feast).type(tier.feast)
+                    .foregroundStyle(p.accent)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, m.px(2))
+                if !view.octaveNote.isEmpty {
+                    Text(view.octaveNote).type(Scale.small).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                }
+                if !view.penitential.isEmpty {
+                    HStack(spacing: m.px(9.6)) {
+                        ForEach(view.penitential, id: \.self) { t in
+                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(p.rubric)
+                        }
                     }
+                    .padding(.top, m.px(12))
                 }
-                .padding(.top, m.px(12))
-            }
-            if !view.commemorations.isEmpty {
-                VStack(spacing: 0) {
-                    Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(p.muted)
-                    ForEach(view.commemorations, id: \.self) { c in
-                        Text(c).type(TextStyle(size: 14, line: 20)).foregroundStyle(p.text).multilineTextAlignment(.center)
+                if !view.commemorations.isEmpty {
+                    VStack(spacing: 0) {
+                        Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(p.muted)
+                        ForEach(view.commemorations, id: \.self) { c in
+                            Text(c).type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                        }
                     }
+                    .padding(.top, m.px(8))
                 }
-                .padding(.top, m.px(8))
-            }
-            inscription(side: side, desk: desk)
-                .anchorPreference(key: InscriptionKey.self, value: .bounds) { $0 }
-                .padding(.top, m.px(9.6))
-            PrayNow(label: view.prayNowLabel, desk: desk) {
-                model.open(.hour(view.prayNowDate, view.prayNowHour))
-            }
-            .padding(.top, m.px(12))
-            HourDirectory(current: view.currentHour, desk: desk) { h in model.open(.hour(date, h)) }
-                .padding(.top, m.px(11.2))
-            // Season and date control share one line after the invitation.
-            Hairline(color: ink.rule).padding(.top, m.px(8.8))
-            if !view.season.isEmpty {
-                Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
-            }
-            Disclosure(label: "Change date", open: picking) {
-                withAnimation(unfolding) { picking.toggle() }
-                if picking { reveal("disclosed") }
-            }
-            if picking {
-                DayPicker(shown: date, today: model.today) { d in
-                    picking = false
-                    model.open(.home(d))
-                }
-                .id("disclosed")
-                .transition(.unfold)
-            }
-        }
-        .padding(.horizontal, side)
-        .padding(.top, top)
-        .padding(.bottom, m.px(desk ? 20 : 12))
-        .frame(maxWidth: .infinity)
-        .backgroundPreferenceValue(InscriptionKey.self, alignment: .topLeading) { band in
-            GeometryReader { g in
-                // A border painted round the head on the back wall, down to the inscription band:
-                // on a phone its curve springs 8pt below the head's; on a wide screen it stands
-                // 26pt inside the moulding.
-                if let band {
-                    if desk {
-                        NicheLining(inset: 2 + 26, ry: head - 26, bottom: g[band].minY, hairline: liningDay)
-                    } else {
-                        NicheLining(inset: panelInset, ry: head - panelInset + m.px(8), bottom: g[band].minY, hairline: liningDay)
+                // After the day's facts, so they read together.
+                if !view.isToday {
+                    Button { model.open(.home(model.today)) } label: {
+                        Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
+                            .goldUnderline(true, p.goldLine)
+                            .padding(.vertical, m.px(12))
                     }
+                    .buttonStyle(Quiet())
                 }
             }
+            .padding(.horizontal, m.px(tier.dayClear))
+            .padding(.bottom, m.px(tier.dayGap))
+            .frame(maxWidth: .infinity)
+            // The invitation and the hours, from the inscription band.
+            VStack(spacing: 0) {
+                inscription(side: side)
+                PrayNow(label: view.prayNowLabel, tier: tier) {
+                    model.open(.hour(view.prayNowDate, view.prayNowHour))
+                }
+                .padding(.top, m.px(tier.bandGap))
+                HourDirectory(current: view.currentHour, tier: tier) { h in model.open(.hour(date, h)) }
+                    .padding(.top, m.px(tier.prayGap))
+                // Season and date control share one line after the invitation.
+                Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
+                if !view.season.isEmpty {
+                    Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
+                }
+                Disclosure(label: "Change date", open: picking) {
+                    withAnimation(unfolding) { picking.toggle() }
+                    if picking { reveal("disclosed") }
+                }
+                if picking {
+                    DayPicker(shown: date, today: model.today) { d in
+                        picking = false
+                        model.open(.home(d))
+                    }
+                    .id("disclosed")
+                    .transition(.unfold)
+                }
+            }
+            .padding(.horizontal, side)
+            .frame(maxWidth: .infinity)
         }
         .background {
             if let niche {
-                // The niche: a low round head, the stone moulding, the day's colour as its trim.
-                Niche(t: niche, day: day, head: head, frame: ink.frame)
+                // The niche: a pointed head, the stone moulding, the day's colour as its trim.
+                Niche(arch: tier.arch, t: niche, day: day, frame: ink.frame)
             } else {
-                // The panel: a segmental head, the day's colour as a ring at its edge.
-                Panel(day: day, frame: ink.frame, head: head)
+                // The panel: the day's colour a little toward the frame as a ring at its edge, so
+                // a red or green day edges the head without outshouting the cross.
+                Panel(arch: tier.arch, ring: mix(day, ink.frame, 0.7), frame: ink.frame)
             }
-        }
-        .overlay(alignment: .top) {
-            // The consecration cross at the crown of the head, with clear air round it.
-            PaintedMark(.consecration, size: m.px(desk ? 36 : 30.4), color: p.lining).padding(.top, crown)
         }
     }
 
     /// The inscription band: pale gilt letters on the frieze's green earth, between oxblood rules
     /// each with a gilt fillet inside it, run through to the frame.
-    private func inscription(side: CGFloat, desk: Bool) -> some View {
+    private func inscription(side: CGFloat) -> some View {
         // Gilt lozenges either side, 5pt squares on their points.
         HStack(spacing: m.px(12)) {
             Diamond(size: 7.07, color: o.ink)
-            Text("Pray the hours").type(TextStyle(size: 12.8, line: 20.48, tracking: 12.8 * (desk ? 0.17 : 0.16), smallCaps: true)).foregroundStyle(o.ink)
+            Text("Pray the hours").type(TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.16), smallCaps: true)).foregroundStyle(o.ink)
             Diamond(size: 7.07, color: o.ink)
         }
-        .padding(.vertical, m.px(3.2))
+        .padding(.vertical, m.px(tier.bandPad))
         .frame(maxWidth: .infinity)
         .background(p.inscriptionGround)
         .overlay(alignment: .top) {
@@ -290,18 +418,18 @@ private struct Frontispiece: View {
  */
 private struct PrayNow: View {
     let label: String
-    let desk: Bool
+    let tier: HomeTier
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         Button(action: action) {
-            Text(label).type((desk ? Scale.body.sized(20, line: 26) : Scale.body.sized(19.2, line: 24.96)).tracked(0.38))
+            Text(label).type(tier.pray)
                 .foregroundStyle(p.dark ? p.lining : p.titulus)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, m.px(desk ? 12 : 11.9))
+                .padding(.vertical, m.px(tier.prayPad))
                 .padding(.horizontal, m.px(13.8))
                 .overlay {
                     ZStack {
@@ -321,13 +449,14 @@ private struct PrayNow: View {
  */
 private struct HourDirectory: View {
     let current: String
-    let desk: Bool
+    let tier: HomeTier
     let open: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let desk = tier.desk
         // The desktop's labels are in the accent, their column 5.25rem.
         let label = TextStyle(size: 11.52, line: 18.43, tracking: 11.52 * 0.08, smallCaps: true)
         // One width for the three period labels, widened past the web's 83pt only when the
@@ -358,7 +487,7 @@ private struct HourDirectory: View {
                             Button { open(h) } label: {
                                 // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                 Text(hourLabel(h))
-                                    .type(TextStyle(size: desk ? 16 : 15.68, line: 18.8, tracking: 0.31))
+                                    .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
                                     .foregroundStyle(h == current ? p.accent : p.text)
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.7)
@@ -370,7 +499,7 @@ private struct HourDirectory: View {
                             .accessibilityLabel(h == current ? "\(hourLabel(h)), now" : hourLabel(h))
                         }
                     }
-                    .frame(minHeight: m.px(desk ? 46 : 44))
+                    .frame(minHeight: m.px(tier.row))
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }

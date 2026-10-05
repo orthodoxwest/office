@@ -144,10 +144,16 @@ fun dayColor(name: String): Color = when (name) {
     else -> Color(0xFFC9B896)
 }
 
-/** A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*` is. */
+/**
+ * A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
+ * is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
+ */
 fun dayColor(name: String, p: Palette): Color = when {
     p.dark && name == "white" -> Color(0xFFD0B06A)
     p.dark && name == "black" -> Color(0xFF8A94A0)
+    p.dark && name == "red" -> Color(0xFFC9503F)
+    p.dark && name == "green" -> Color(0xFF4F8A52)
+    p.dark && name == "violet" -> Color(0xFF8D62AD)
     else -> dayColor(name)
 }
 
