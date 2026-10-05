@@ -4,11 +4,16 @@ name: iOS
 # screenshots of the app at fixed dates. The screenshots and the build log are uploaded as an
 # artifact and also force-pushed to the branch ci/ios-screenshots/<branch>, one commit holding
 # the latest run's files, so they can be read with git where artifact downloads are not reachable.
+#
+# A pull request's paths filter looks at the whole pull request, so every push to one that ever
+# touched the app would run the whole job again. The `changes` job skips the build when the push
+# changed nothing the app is built from and the job passed on the commit before it.
 on:
   push:
     branches: [master]
     paths:
       - "apps/ios/**"
+      - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
       - "crates/**"
       - "apps/android/app/src/main/res/font/**"
@@ -21,6 +26,7 @@ on:
     branches: [master]
     paths:
       - "apps/ios/**"
+      - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
       - "crates/render-blocks/**"
       # The faces and plaster the iOS app shares with the Android app.
@@ -31,11 +37,51 @@ on:
 
 concurrency:
   group: ios-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # A newer push carries everything an older one did, so only the newest run matters.
+  cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Decide whether the app needs building
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+    steps:
+      - name: Compare the push with the last passing commit
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.pull_request.head.sha }}
+          # The pull_request paths above, as patterns on a changed file's path.
+          APP_PATHS: >-
+            ^apps/ios/|^apps/mobile-ffi/|^crates/render-blocks/|^apps/android/app/src/main/res/font/|^apps/android/app/src/main/res/drawable-nodpi/|^\.github/workflows/ios\.yml$
+        run: |
+          build() { echo "$1"; echo "build=true" >> "$GITHUB_OUTPUT"; exit 0; }
+          # Only a new push to an open pull request can be skipped; master and manual runs always build.
+          [ "$GITHUB_EVENT_NAME" = pull_request ] && [ "$ACTION" = synchronize ] || build "Building: $GITHUB_EVENT_NAME ${ACTION}."
+          # The previous head must have passed (built, or itself skipped on a passing parent).
+          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ios.yml/runs?head_sha=$BEFORE&status=success" --jq .total_count) \
+            || build "Building: could not look up the run for ${BEFORE::7}."
+          [ "$passed" -gt 0 ] || build "Building: the job has not passed on ${BEFORE::7}."
+          # What this push changed (after a force-push, everything since the merge base).
+          files=$(gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$AFTER" --jq '.files[].filename') \
+            || build "Building: could not compare ${BEFORE::7}...${AFTER::7}."
+          count=$(printf '%s\n' "$files" | grep -c . || true)
+          [ "$count" -lt 300 ] || build "Building: the comparison lists $count files, more than it can show."
+          app=$(printf '%s\n' "$files" | grep -E "$APP_PATHS" | grep -vx 'apps/ios/README.md' || true)
+          [ -z "$app" ] || build "Building: this push changed $(echo "$app" | tr '\n' ' ')"
+          echo "Skipping: ${BEFORE::7}...${AFTER::7} changed nothing the app is built from, and the job passed on ${BEFORE::7}."
+          echo "build=false" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build, test and screenshot (simulator)
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: macos-15
     permissions:
       # The screenshots branch.
@@ -43,6 +89,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Choose and boot the simulators
+        id: sim
+        run: |
+          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each.
+          xcrun simctl list devices available -j > devices.json
+          pick() {
+            python3 - "$1" "$2" <<'PY'
+          import json, sys
+          family, preferred = sys.argv[1], sys.argv[2]
+          devices = json.load(open("devices.json"))["devices"]
+          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")])
+          found = [d for d in devices[ios[-1]] if d["name"].startswith(family)]
+          exact = [d for d in found if d["name"] == preferred]
+          print((exact or [d for d in found if d["name"].startswith(preferred)] or found)[0]["udid"])
+          PY
+          }
+          phone=$(pick iPhone 'iPhone 16') ipad=$(pick iPad 'iPad Pro 11')
+          echo "udid=$phone" >> "$GITHUB_OUTPUT"
+          echo "ipad=$ipad" >> "$GITHUB_OUTPUT"
+          # A simulator's first boot takes minutes, so both start now, behind the builds, and the
+          # screenshots wait for them (simctl bootstatus).
+          for sim in "$phone" "$ipad"; do
+            nohup xcrun simctl boot "$sim" > "$RUNNER_TEMP/boot-$sim.log" 2>&1 &
+          done
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.94.1
@@ -61,25 +132,6 @@ jobs:
       - name: Generate the Xcode project
         working-directory: apps/ios
         run: xcodegen generate
-
-      - name: Choose the simulators
-        id: sim
-        run: |
-          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each.
-          xcrun simctl list devices available -j > devices.json
-          pick() {
-            python3 - "$1" "$2" <<'PY'
-          import json, sys
-          family, preferred = sys.argv[1], sys.argv[2]
-          devices = json.load(open("devices.json"))["devices"]
-          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")])
-          found = [d for d in devices[ios[-1]] if d["name"].startswith(family)]
-          exact = [d for d in found if d["name"] == preferred]
-          print((exact or [d for d in found if d["name"].startswith(preferred)] or found)[0]["udid"])
-          PY
-          }
-          echo "udid=$(pick iPhone 'iPhone 16')" >> "$GITHUB_OUTPUT"
-          echo "ipad=$(pick iPad 'iPad Pro 11')" >> "$GITHUB_OUTPUT"
 
       - name: Build and test
         working-directory: apps/ios
@@ -110,8 +162,9 @@ jobs:
             xcrun simctl io "$sim" screenshot "build/review/$name.png" > /dev/null
           }
           for sim in ${{ steps.sim.outputs.udid }} ${{ steps.sim.outputs.ipad }}; do
-            xcrun simctl boot "$sim" 2>/dev/null || true
+            echo "$(date +%T) waiting for $sim to boot"
             xcrun simctl bootstatus "$sim" -b > /dev/null
+            echo "$(date +%T) booted"
             xcrun simctl ui "$sim" appearance light
             xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
             xcrun simctl install "$sim" "$app"
