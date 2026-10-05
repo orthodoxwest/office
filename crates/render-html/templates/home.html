@@ -6,6 +6,11 @@
        and focus orders aligned makes the threshold equally clear by keyboard
        and screen reader. #}
   <div class="home-hero day-color-{{ color }}">
+    {# The pointed head's courses, each clipped to the arch at its own
+         offset: the moulding (with the halo), then the panel and the shade
+         its head casts. Decorative. #}
+    <span class="home-arch" aria-hidden="true"><span class="home-arch-edge"></span></span>
+    <span class="home-arch-fill" aria-hidden="true"><span class="home-arch-shade"></span></span>
     {# The consecration cross opens the card (at the niche's crown on a
          desktop): decorative, outside the reading and focus order. #}
     <span class="home-crown" aria-hidden="true"></span>
@@ -14,20 +19,12 @@
       <div class="home-lining" aria-hidden="true"></div>
       <header class="home-day-head">
         <h1 id="home-date-heading">
-          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ date_str }}</a>
+          {# The phone's link is a flex box for its touch target: the date
+             is one item inside it, so its words keep their spaces. #}
+          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{% set date_parts = date_str|split(", ", 1)|list %}{% if date_parts|length == 2 %}<span><span class="home-date-weekday">{{ date_parts[0] }},</span> <span class="home-date-rest">{{ date_parts[1] }}</span></span>{% else %}{{ date_str }}{% endif %}</a>
         </h1>
         {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
-        {# Always visible when not local today — "Change date" keeps a secondary
-             Today control, but overnight PWA resume must not require opening it. #}
-        {# No role=status here: intentional archive browsing should not
-             announce on every load. Client-injected notices (midnight freeze)
-             use a live region because those appear without a navigation. #}
-        {% if show_today %}
-        <p class="not-today-notice">
-          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
-        </p>
-        {% endif %}
         {% if penitential %}
         <p class="penitential">
           {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
@@ -40,6 +37,18 @@
             {% for name in commemorations %}<li>{{ name|typeset }}</li>{% endfor %}
           </ul>
         </div>
+        {% endif %}
+        {# After the day's facts (feast, fasts, commemorations), so they read
+             together. Always visible when not local today — "Change date"
+             keeps a secondary Today control, but overnight PWA resume must
+             not require opening it. #}
+        {# No role=status here: intentional archive browsing should not
+             announce on every load. Client-injected notices (midnight freeze)
+             use a live region because those appear without a navigation. #}
+        {% if show_today %}
+        <p class="not-today-notice">
+          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
+        </p>
         {% endif %}
       </header>
     </section>

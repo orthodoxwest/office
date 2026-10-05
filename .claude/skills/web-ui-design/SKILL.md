@@ -76,32 +76,59 @@ or impose a redesign on an unrelated change.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
-- On a phone home's frontispiece is a round-headed painted panel: a
-  segmental head (`--panel-head`, 4.25rem; 3.5rem under 375px) with a
-  springing (the lining's curve starts 8px below the moulding's), the day's
-  colour as a 1.5px ring at its edge and again as the lining's inner
-  hairline (`--lining-day`; a white day takes `--gold-line` by day), so the
-  liturgical colour sits beside the cross on plaster; the terracotta lining
-  painted round the head (`--panel-inset` inside the edge, with clear air
-  above the cross: a tighter arch once clipped it) ending at the
-  inscription band, the consecration cross at the crown, and a little
-  recess shade under the head. Its shadows are a token (`--panel-shadows`,
-  ending in a soft `--bg` halo that keeps the powdering off the panel) that
-  the Apse rules restate with their soft erase. The panel's furniture is
+- On a phone home's frontispiece is a painted panel with a pointed head:
+  a steep four-centred arch rising 0.44 of the card's width, its haunches
+  leaving the jambs without a kink. The head is drawn by
+  `tools/genarch.py`, which writes clip-path polygons into style.css's
+  `genarch` block; never edit them by hand. A box-shadow or border-radius
+  cannot follow a pointed head, so each course is its own layer clipped
+  to the same arch offset by its own distance (`--arch-d`): the day's
+  ring (`.home-arch::before`, the halo's source), the frame
+  (`.home-hero::after`), the panel (`.home-arch-fill`) with the shade its
+  head casts (`.home-arch-shade`, the wall outside the arch drawn only for
+  its drop-shadow), and the lining's band and hairline
+  (`.home-lining::before/::after`). The card is an inline-size container
+  so the layers can scale the head by its width (`--arch-w`). The day's
+  colour is the 1.5px ring (mixed 30% toward the frame, so a red or
+  green day edges the head without outshouting the cross) and the
+  lining's inner hairline
+  (`--lining-day`; a white day takes `--gold-line` by day); the terracotta
+  lining runs round the head `--panel-inset` inside the edge, ending at the
+  inscription band, the consecration cross sits in the point, and the day
+  block is set low enough that the head is wide enough for it
+  (`--head-pad`) and centred in what is left. The day block is at least
+  the head's rise tall, so the band never crosses the arch. Halo and
+  shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
+  rules restate. The date's weekday and the rest of it are each kept
+  whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
+  phone's flex touch target keeps their space. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a
   375×667 viewport whole, so its cost was paid by the header's margin, the
   footer's padding and gap, and the page's bottom padding.
-  From 701px the same object widens into a niche set into the wall (round
-  head, stone moulding, day-colour trim, recess shadow, the lining restated
-  at the niche's scale; the cross and the day block are measured down from
-  the lining, not from the head's height, because a head that flattens on a
-  narrow window once ran the lining through the cross), and the room is lit
+  Taller phones get a taller design, not the small one stretched: from
+  800px and 880px high the head rises further to a sharper point
+  (genarch's "tall" and "taller" shapes, 128° and 123°), the cross, date,
+  feast and invitation grow, the hours' rows get a fixed taller minimum
+  (never stretched), and the card stands down to just above the footer,
+  the spare height going to the head, two parts above the day block to
+  three below so the title reads with the cross. The larger type waits
+  for 375px wide and 830px high; narrower or shorter phones need the
+  height for wrapped lines. On a past date "Go to today" follows the
+  day's facts (feast, fasts, commemorations) rather than parting them.
+  The card's controls share the date's gold focus ring, and on Apse the
+  card lifts red, green and violet as the rails lift white and black.
+  From 701px the same object widens into a niche set into the wall (a
+  lower pointed head, rising 0.38 of its width so a laptop still shows
+  the hours, stone moulding as further offset layers, day-colour
+  trim, recess shadow, the lining restated at the niche's scale), and the
+  room is lit
   toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
-  `--niche-zoom` steps gated on width and height. Its background and shadows
+  `--niche-zoom` steps gated on width and height (and a short laptop
+  window, 820px high or less, steps it down to 0.9). Its background and shadows
   are tokens (`--niche-background`, `--niche-shadows`) because the Apse card
   rules outrank the base selector and must repeat them. Drawn architecture
   around it (columns, sconces, sills, arches) has been tried and read as
