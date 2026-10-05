@@ -150,6 +150,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         private set
     var textSize: TextSize by mutableStateOf(enumValueOrDefault(prefs.getString("text-size", null), TextSize.DEFAULT))
         private set
+    /** Whether Prime reads the next day's Martyrology; off by default. */
+    var martyrology: Boolean by mutableStateOf(prefs.getBoolean("martyrology", false))
+        private set
 
     /**
      * Each visit on the way back with its content, once composed: the page shown keeps the
@@ -256,6 +259,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
+    fun chooseMartyrology(value: Boolean) {
+        martyrology = value
+        prefs.edit().putBoolean("martyrology", value).apply()
+        // Prime composed with the old setting is composed again when next shown.
+        contents.keys.retainAll(setOf(entry.id))
+        load()
+    }
+
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
@@ -300,8 +311,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     }
 
     /**
-     * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme or its prayer
-     * form changes, and on every return to the app. Each is counted once a day.
+     * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme, its prayer
+     * form or the Martyrology setting changes, and on every return to the app. Each is counted
+     * once a day.
      */
     fun countVisit() {
         val event = when (val shown = page) {
@@ -311,7 +323,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             is Page.Year -> UsageEvent.Ordo(shown.year)
             Page.Reminders -> UsageEvent.RemindersPage
         }
-        usage.record(event, dark(), form)
+        // Prime reports whether its Martyrology was shown, once the hour on screen is this page's.
+        val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
+        usage.record(event, dark(), form, hour?.view?.martyrology)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */
@@ -343,7 +357,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {
-                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form)
+                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology)
                         },
                     )
                     is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })

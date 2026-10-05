@@ -103,22 +103,6 @@ function putIfOk(cache, req, resp) {
   return Promise.resolve(resp);
 }
 
-// Preview pages are deliberately network-only. In particular, an offline
-// preview must not silently turn into an older cached ordinary page.
-function previewOfflineResponse() {
-  return new Response(
-    "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Preview unavailable offline</title></head>" +
-    "<body><main><h1>Preview unavailable offline</h1><p>This preview requires a network connection.</p></main></body></html>",
-    { status: 503, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } }
-  );
-}
-
-function previewNetworkOnly(req) {
-  return fetch(req, { cache: "no-store" }).catch(function () {
-    return previewOfflineResponse();
-  });
-}
-
 function precacheURLs(cache, urls) {
   return Promise.all(urls.map(function (u) {
     return networkFetch(u).then(function (resp) {
@@ -489,14 +473,6 @@ self.addEventListener("fetch", function (event) {
   }
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  // Any preview query is an explicit request for fresh, uncached output.
-  // Keep this before static/page routing so no redirect, cache lookup, or
-  // cache write can consume the preview request.
-  if (url.searchParams.has("preview")) {
-    event.respondWith(previewNetworkOnly(req));
     return;
   }
 

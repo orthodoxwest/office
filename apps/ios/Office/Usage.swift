@@ -2,7 +2,8 @@ import Foundation
 
 /**
  * The daily usage counts, reported as the web reports them (README, "Usage metrics"): the page
- * shown, the appearance and prayer form it is read in, once a day. The beacon's words come from
+ * shown, the appearance and prayer form it is read in, and at Prime whether the Martyrology was
+ * shown, once a day. The beacon's words come from
  * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
  * (a day either side) count.
  *
@@ -37,10 +38,11 @@ final class Usage {
         self.post = post
     }
 
-    func record(_ event: UsageEvent, dark: Bool, form: String) {
+    /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one.
+    func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil) {
         guard enabled else { return }
         let date = now()
-        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios) else { return }
+        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology) else { return }
         let day = Usage.reportingDay(date)
         let key = day + " " + body
         lock.lock()

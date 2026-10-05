@@ -36,7 +36,7 @@ fn composes_what_the_web_composes() {
     let moveable = MoveableDates::compute(2026);
     for (month, day) in [(1, 6), (4, 3), (4, 5), (9, 30), (12, 25)] {
         for hour in hour_names() {
-            let view = core.compose(hour.clone(), 2026, month, day, "private".into()).unwrap();
+            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), false).unwrap();
             let date = Date::new(2026, month, day);
             let want = engine.compose_hour(&hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
             let want_sections: Vec<SectionView> = render_blocks::hour_sections(&want).into_iter().map(SectionView::from).collect();
@@ -49,18 +49,33 @@ fn composes_what_the_web_composes() {
 #[test]
 fn describes_the_day() {
     let core = OfficeCore::new().unwrap();
-    let view = core.compose("vespers".into(), 2026, 12, 25, "priest".into()).unwrap();
+    let view = core.compose("vespers".into(), 2026, 12, 25, "priest".into(), false).unwrap();
     assert_eq!(view.date_label, "Friday, December 25, 2026");
     assert_eq!(view.color, "white");
     assert!(!view.feast.is_empty());
 }
 
 #[test]
+fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
+    let core = OfficeCore::new().unwrap();
+    let text = |v: &HourView| format!("{:?}", v.sections);
+    let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false).unwrap();
+    let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true).unwrap();
+    assert_eq!((off.martyrology, on.martyrology), (Some(false), Some(true)));
+    assert!(!text(&off).contains("Martyrology — September 8") && text(&on).contains("Martyrology — September 8"));
+    // Another hour, and a Prime without the Martyrology (Good Friday), have nothing to show.
+    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true).unwrap().martyrology, None);
+    for setting in [false, true] {
+        assert_eq!(core.compose("prime".into(), 2026, 4, 10, "private".into(), setting).unwrap().martyrology, None);
+    }
+}
+
+#[test]
 fn rejects_bad_requests() {
     let core = OfficeCore::new().unwrap();
-    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into()).is_err());
-    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into()).is_err());
-    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into()).is_err());
+    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), false).is_err());
 }
 
 #[test]
@@ -166,7 +181,7 @@ fn the_ordo_year_sets_out_the_tabula() {
 #[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -176,7 +191,19 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
     assert_eq!(beacon(UsageEvent::RemindersPage).as_deref(), Some("site appearance:nave screen:mobile client:android"));
     assert_eq!(beacon(UsageEvent::RemindersOn).as_deref(), Some("reminders appearance:nave screen:mobile client:android"));
     assert_eq!(
-        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios).as_deref(),
+        usage_beacon(
+            UsageEvent::Hour { date: today, hour: "prime".into() },
+            today,
+            false,
+            "private".into(),
+            UsageClient::Android,
+            Some(true)
+        )
+        .as_deref(),
+        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown client:android")
+    );
+    assert_eq!(
+        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None).as_deref(),
         Some("site appearance:apse screen:mobile client:ios")
     );
     // The archive, and anything the server would refuse, are not counted.

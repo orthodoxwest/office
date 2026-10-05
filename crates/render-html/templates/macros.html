@@ -15,7 +15,7 @@
     </p>
 {% endmacro %}
 
-{# Appearance and text-size preferences. Rendered twice by layout.html (the
+{# Appearance, text-size and Martyrology preferences. Rendered twice by layout.html (the
    header's Settings panel on wide screens, the foot of the site menu on
    phones); CSS shows one copy per width and app.js keeps every copy's
    aria-pressed in sync. The group aria-labels carry the names; the visible
@@ -33,5 +33,12 @@
   <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
   <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
   <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+</div>
+{# Reading the next day's Martyrology at Prime; off by default. Worded
+   options set like the themes, under the last two of them. #}
+<div class="martyrology-switch" role="group" aria-label="Martyrology at Prime">
+  <span class="pref-label" aria-hidden="true">Martyrology</span>
+  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Off</button>
+  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
 </div>
 {% endmacro %}

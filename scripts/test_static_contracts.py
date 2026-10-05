@@ -102,6 +102,12 @@ class StaticContracts(unittest.TestCase):
             'data-text-size-choice',
             'data-text-size',
         ])
+        self.required(body, [
+            'office-martyrology',
+            'data-martyrology-choice',
+            'data-martyrology',
+            'officemartyrologychange',
+        ])
         self.forbidden(body, [
             'siteBannerDismissed',
             'banner-dismiss',
@@ -111,10 +117,6 @@ class StaticContracts(unittest.TestCase):
     def test_routing(self):
         body = (STATIC / "sw.js").read_text()
         self.required(body, [
-            'url.searchParams.has("preview")',
-            'event.respondWith(previewNetworkOnly(req))',
-            'fetch(req, { cache: "no-store" })',
-            'function previewOfflineResponse()',
             'if (path === "/")',
             'return "/?date=" + today',
             'if (qDate && DATE_RE.test(qDate))',
@@ -135,9 +137,8 @@ class StaticContracts(unittest.TestCase):
             'event.respondWith(staleWhileRevalidate(req, url))',
             'event.respondWith(redirectToDated(url, dated))',
         ])
-        self.assertLess(body.index('if (url.searchParams.has("preview"))'), body.index('// Static assets: cache-first'))
-        preview = body.split('function previewNetworkOnly', 1)[1].split('\n}\n', 1)[0]
-        self.assertNotIn('caches.', preview)
+        # Readers choose the Martyrology in Settings; no URL makes a page uncacheable.
+        self.forbidden(body, ['searchParams.has("preview")', 'previewNetworkOnly'])
         install, activate = body.split('self.addEventListener("install"', 1)[1].split('self.addEventListener("activate"', 1)
         self.assertNotIn('precacheUpcoming', install)
         self.assertIn('precacheUpcoming()', activate)

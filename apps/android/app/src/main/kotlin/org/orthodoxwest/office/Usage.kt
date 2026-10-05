@@ -17,7 +17,8 @@ import org.orthodoxwest.office.core.usageEndpoint
 
 /**
  * The daily usage counts, reported as the web reports them (README, "Usage metrics"): the page
- * shown, the appearance and prayer form it is read in, once a day. The beacon's words come from
+ * shown, the appearance and prayer form it is read in, and at Prime whether the Martyrology was
+ * shown, once a day. The beacon's words come from
  * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
  * (a day either side) count.
  *
@@ -37,9 +38,10 @@ class Usage(
     /** Beacons already counted today by this process, as "day body". */
     private val sent = mutableSetOf<String>()
 
-    fun record(event: UsageEvent, dark: Boolean, form: String) {
+    /** `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one. */
+    fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null) {
         if (!enabled) return
-        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID) ?: return
+        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology) ?: return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
         val key = "$day $body"
         synchronized(sent) {

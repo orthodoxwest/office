@@ -67,9 +67,32 @@ impl Pages {
 
     /// A composed hour. With leader forms, the forms' sections are aligned
     /// into one page.
-    pub fn hour(&self, data: &mut HourData, forms: &[(liturgy::PrayerForm, &liturgy::OfficeHour)]) -> Result<String, String> {
+    /// `martyrology` is the same hour composed with the Martyrology read at Prime, or empty when
+    /// there is none to read: a section it changes carries both readings, and the reader's
+    /// setting shows one of them, so the page itself never depends on the setting.
+    pub fn hour(
+        &self,
+        data: &mut HourData,
+        forms: &[(liturgy::PrayerForm, &liturgy::OfficeHour)],
+        martyrology: &[(liturgy::PrayerForm, &liturgy::OfficeHour)],
+    ) -> Result<String, String> {
         if !data.leader_forms.is_empty() {
-            data.leader_sections = leader_sections(forms)?;
+            let mut sections = leader_sections(forms)?;
+            if !martyrology.is_empty() {
+                let read = leader_sections(martyrology)?;
+                if read.len() != sections.len() {
+                    return Err("martyrology section mismatch".into());
+                }
+                for (section, read) in sections.iter_mut().zip(read) {
+                    if read.label != section.label || read.collapsible != section.collapsible {
+                        return Err("martyrology section mismatch".into());
+                    }
+                    if read.html != section.html {
+                        section.martyrology_html = read.html;
+                    }
+                }
+            }
+            data.leader_sections = sections;
         }
         self.render("hour.html", data)
     }

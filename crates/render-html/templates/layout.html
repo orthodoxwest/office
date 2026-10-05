@@ -6,7 +6,7 @@
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{% block title %}Divine Office{% endblock %}</title>
   {# Apply stored appearance before CSS to avoid a flash.
-       Keys: office-theme, office-text-size, office-prayer-form. #}
+       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
   <script>
     (function () {
       try {
@@ -28,6 +28,7 @@
         } else if (s === "default") {
           document.documentElement.removeAttribute("data-text-size");
         }
+        if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
       } catch (e) {}
     })();
   </script>

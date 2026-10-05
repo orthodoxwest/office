@@ -194,11 +194,12 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
 }
 
 /// Each family's breakdown: its heading and its values' labels, in the store's value order.
-pub const TREND_LABELS: [(&str, &str, &[&str]); 4] = [
+pub const TREND_LABELS: [(&str, &str, &[&str]); 5] = [
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
+    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
 ];
 
 fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> {
@@ -326,14 +327,20 @@ mod tests {
 
     #[test]
     fn trends_keep_scope_counts_and_chronological_dates() {
-        let dimensions =
-            [("appearance:nave", 4), ("appearance:apse", 5), ("screen:mobile", 8), ("prayer-form:priest", 2), ("client:ios", 3)]
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), v))
-                .collect();
+        let dimensions = [
+            ("appearance:nave", 4),
+            ("appearance:apse", 5),
+            ("screen:mobile", 8),
+            ("prayer-form:priest", 2),
+            ("client:ios", 3),
+            ("martyrology:hidden", 6),
+        ]
+        .into_iter()
+        .map(|(k, v)| (k.to_string(), v))
+        .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 4);
+        assert_eq!(groups.len(), 5);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
@@ -344,8 +351,14 @@ mod tests {
             assert!(group.points[0].counts.iter().all(|&c| c == 0), "missing observations invented: {group:?}");
         }
         assert_eq!(
-            (groups[0].points[1].counts[1], groups[1].points[1].counts[1], groups[2].points[1].counts[2], groups[3].points[1].counts[3]),
-            (5, 8, 2, 3)
+            (
+                groups[0].points[1].counts[1],
+                groups[1].points[1].counts[1],
+                groups[2].points[1].counts[2],
+                groups[3].points[1].counts[3],
+                groups[4].points[1].counts[1]
+            ),
+            (5, 8, 2, 3, 6)
         );
     }
 
@@ -358,7 +371,7 @@ mod tests {
             r#"[{"Key":"appearance","Label":"Appearance","Series":["Nave","Apse"],"Points":[{"Day":"2026-09-14","Counts":[0,0]}]},{"Key":"prayer-form","Label":"Prayer form","Series":["Private","Deacon","Priest"],"Points":[{"Day":"2026-09-14","Counts":[0,0,0]}]}]"#
         );
         assert_eq!(
-            trend_json(&trend_groups(&[], &DIMENSIONS[3..])),
+            trend_json(&trend_groups(&[], &DIMENSIONS[3..4])),
             r#"[{"Key":"client","Label":"Client","Series":["Browser","Web app","Android","iOS"],"Points":null}]"#
         );
     }
