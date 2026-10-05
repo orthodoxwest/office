@@ -1338,15 +1338,6 @@ Month = 6
 Day = 20
 Source = awrv
 
-[comm-extra-06-24-nativity-of-st-john-baptist]
-Name = Nativity of St John Baptist
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 6
-Day = 24
-Source = awrv
-
 [comm-extra-06-26-ss-john-and-paul-martyrs]
 Name = Ss John & Paul, Martyrs
 Rank = commemoration
@@ -1354,15 +1345,6 @@ Color = red
 Category = martyrs
 Month = 6
 Day = 26
-Source = awrv
-
-[comm-extra-06-29-ss-peter-and-paul]
-Name = Ss Peter & Paul
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 6
-Day = 29
 Source = awrv
 
 [comm-extra-06-30-commemoration-of-st-paul-apostle]
@@ -1772,15 +1754,6 @@ Color = white
 Category = virgin
 Month = 6
 Day = 23
-Source = awrv
-
-[comm-extra-06-26-octave-of-the-compassion-of-our-lord-jesus-christ]
-Name = Octave of the Compassion of Our Lord Jesus Christ
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 6
-Day = 26
 Source = awrv
 
 [comm-extra-06-30-commemoration-of-st-peter-apostle]
