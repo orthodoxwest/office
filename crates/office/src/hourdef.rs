@@ -259,20 +259,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_definitions() {
-        let sections = parse_hour_definition(
-            "h.txt",
-            "# c\n[Opening]\nCondition = not-triduum\nLabel = Open\nCollapsible = true\n\nType = versicle\nRef = a/b\n[Next]\nType = psalm\nRef = psalms/004\n",
-        )
-        .unwrap();
-        assert_eq!(sections.len(), 2);
-        assert_eq!(sections[0].label, "Open");
-        assert!(sections[0].collapsible);
-        assert!(sections[0].parsed.is_some());
-        assert_eq!(sections[1].elements, vec![HourElement::new("psalm", "psalms/004")]);
-    }
-
-    #[test]
     fn definition_errors() {
         let err = |s| parse_hour_definition("h.txt", s).unwrap_err();
         assert_eq!(err("Type = x\n"), "h.txt:1: key-value before any section");

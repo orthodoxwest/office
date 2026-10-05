@@ -62,11 +62,6 @@ pub fn celebrating(date: Date, season: Season, f: Feast) -> Day {
     d
 }
 
-/// A fixed Monday: 0001-01-01.
-pub fn zero_date() -> Date {
-    Date::new(1, 1, 1)
-}
-
 /// A test-only reader of the repository's `data/` directory.
 pub struct TestData(pub std::path::PathBuf);
 

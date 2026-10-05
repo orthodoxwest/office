@@ -169,7 +169,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn anchors() {
+    fn anchors_and_weekdays() {
         assert_eq!(split_anchor_offset("feast:easter-sunday@+5"), Ok(("feast:easter-sunday", 5)));
         assert_eq!(split_anchor_offset("feast:a@b@-2"), Ok(("feast:a@b", -2)));
         assert_eq!(split_anchor_offset("feast:x@5"), Ok(("feast:x@5", 0)));
@@ -178,10 +178,6 @@ mod tests {
         assert_eq!(resolve_anchor("feast:x@-1", 2026, &dates), Ok(Date::new(2026, 4, 11)));
         assert_eq!(resolve_anchor("date:02-30", 2026, &dates), Ok(Date::new(2026, 3, 2)));
         assert_eq!(resolve_anchor("feast:y", 2026, &dates), Err("unknown feast anchor \"y\"".to_string()));
-    }
-
-    #[test]
-    fn weekdays() {
         assert_eq!(parse_weekdays("Monday, friday,"), Ok(vec![Weekday::Monday, Weekday::Friday]));
         assert_eq!(parse_weekdays("funday"), Err("invalid weekday \"funday\"".to_string()));
         assert_eq!(parse_weekdays(" , "), Err("no valid weekdays configured".to_string()));

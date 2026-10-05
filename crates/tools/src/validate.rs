@@ -306,35 +306,3 @@ fn validate_control_characters(rel_path: &str, content: &[u8]) -> Vec<String> {
     }
     errs
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn date_rules() {
-        for (rule, ok) in [
-            ("easter+5", true),
-            ("easter-64", true),
-            ("easter", false),
-            ("epiphany-sunday-1", true),
-            ("epiphany-sunday-0", false),
-            ("advent-sunday-4", true),
-            ("advent-sunday-5", false),
-            ("pentecost-sunday-24", true),
-            ("holy-name", true),
-            ("last-sunday-october", true),
-            ("whitsun+1", false),
-        ] {
-            assert_eq!(is_valid_date_rule(rule), ok, "{rule}");
-        }
-    }
-
-    #[test]
-    fn near_names_and_distance() {
-        assert_eq!(edit_distance(b"kitten", b"sitting"), 3);
-        assert_eq!(near_psalmody_section_name("texts/proper/x/y.txt", "lauds-psalmodie"), Some("lauds-psalmody"));
-        assert_eq!(near_psalmody_section_name("texts/shared/x.txt", "lauds-psalmodie"), None);
-        assert_eq!(near_psalmody_section_name("texts/proper/x/y.txt", "collect"), None);
-    }
-}

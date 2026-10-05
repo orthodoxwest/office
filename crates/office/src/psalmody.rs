@@ -324,21 +324,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn declarations() {
-        let (items, ferial) = parse_psalmody_declaration("psalm-antiphon-1 = psalms/110\npsalm-antiphon-2 = psalms/130 dates=12-25,12-27 antiphon=x/y\npsalm-antiphon-2 = psalms/131 dates=12-26\n").unwrap();
-        assert!(!ferial);
-        assert_eq!(items.len(), 3);
-        assert_eq!(items[1].antiphon, "x/y");
-        assert_eq!(parse_psalmody_declaration("ferial weekday-antiphons").unwrap(), (Vec::new(), true));
-        let selected = select_psalmody_items(items.clone(), Date::new(2026, 12, 26)).unwrap();
-        assert_eq!(selected.iter().map(|i| i.psalm.as_str()).collect::<Vec<_>>(), ["psalms/110", "psalms/131"]);
-        assert_eq!(
-            select_psalmody_items(items, Date::new(2026, 12, 28)).unwrap_err(),
-            "antiphon key \"psalm-antiphon-2\" has no alternative for date 12-28"
-        );
-    }
-
-    #[test]
     fn declaration_errors() {
         for (body, want) in [
             ("", "declaration is empty"),

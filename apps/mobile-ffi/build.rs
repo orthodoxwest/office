@@ -34,7 +34,7 @@ fn main() {
     walk(&data, "", &mut files);
     let mut src = String::from("pub static FILES: &[(&str, &[u8])] = &[\n");
     for (rel, path) in &files {
-        writeln!(src, "    ({rel:?}, include_bytes!({:?})),", path.display().to_string()).unwrap();
+        writeln!(src, "    ({rel:?}, include_bytes!({:?})),", path.display().to_string()).expect("writing to a String cannot fail");
     }
     src.push_str("];\n");
     let out = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR")).join("data_files.rs");

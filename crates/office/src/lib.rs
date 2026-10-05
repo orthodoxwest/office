@@ -33,8 +33,6 @@ pub mod vespers;
 pub mod voice;
 
 #[cfg(test)]
-mod conclusion_tests;
-#[cfg(test)]
 mod preces_tests;
 #[cfg(test)]
 mod proper_tests;

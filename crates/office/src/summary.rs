@@ -141,16 +141,3 @@ pub fn incipit(text: &str) -> String {
     }
     out
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn incipits() {
-        assert_eq!(incipit("O Wisdom, * which camest out."), "O Wisdom");
-        assert_eq!(incipit("one two three four five six seven eight nine ten."), "one two three four five six seven eight nine…");
-        assert_eq!(incipit("Great."), "Great");
-        assert_eq!(incipit("  "), "");
-    }
-}

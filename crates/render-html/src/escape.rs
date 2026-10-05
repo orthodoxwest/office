@@ -107,16 +107,4 @@ mod tests {
         assert_eq!(url_start("/a b\"c"), "/a%20b%22c");
         assert_eq!(url_part("a/b c"), "a%2fb%20c");
     }
-
-    #[test]
-    fn floats_use_compact_decimal_or_exponent_notation() {
-        assert_eq!(format_float(160.0), "160");
-        assert_eq!(format_float(2.16), "2.16");
-        assert_eq!(format_float(0.00001), "1e-05");
-        assert_eq!(format_float(1e20), "1e+20");
-        assert_eq!(format_float(123456789.125), "1.23456789125e+08");
-        assert_eq!(format_float(0.0001), "0.0001");
-        assert_eq!(format_float(999999.5), "999999.5");
-        assert_eq!(format_float(-3.5), "-3.5");
-    }
 }

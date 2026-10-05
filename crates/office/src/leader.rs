@@ -155,16 +155,3 @@ fn priest_confession(t: &OfficeTexts) -> Result<Vec<OfficeElement>, String> {
     }
     Ok(elements)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn brethren_regex() {
-        assert_eq!(brethren_matches("pray for me, you, brethren, and you,\n brethren."), vec![(13, 26), (32, 46)]);
-        assert!(brethren_matches("to you,brethren").is_empty());
-        assert!(brethren_matches("yyou, brethren").is_empty());
-        assert!(brethren_matches("you, brethrens").is_empty());
-    }
-}

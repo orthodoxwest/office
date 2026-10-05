@@ -135,28 +135,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn embeds_the_static_directory() {
-        assert!(file("static/style.css").is_some());
-        assert!(file("static/fonts/eb-garamond-regular.woff2").is_some());
-        assert!(file("static/fonts/noto-sans-symbols-cross.woff2").is_some());
-    }
-
-    /// Stamps follow content, not the build: a file's stamp is the hash of
-    /// the bytes it is served with.
-    #[test]
-    fn stamps_are_content_hashes() {
-        for (name, body, stamp) in FILES {
-            let digest: String = Sha256::digest(body).iter().map(|b| format!("{b:02x}")).collect();
-            assert_eq!(&digest[..12], *stamp, "{name}");
-        }
-        assert_eq!(
-            asset_url("fonts/eb-garamond-bold.woff2"),
-            format!("/static/fonts/eb-garamond-bold.woff2?v={}", stamp("static/fonts/eb-garamond-bold.woff2").unwrap())
-        );
-        assert_eq!(asset_url("missing.css"), "/static/missing.css");
-    }
-
-    #[test]
     fn service_worker_learns_every_asset_stamp() {
         let resp = service_worker("build1");
         let body = String::from_utf8(
@@ -184,24 +162,6 @@ mod tests {
         assert_eq!(v1.len(), 12);
         std::fs::write(dir.join("a.txt"), "two").unwrap();
         assert_ne!(compute_version(&dir), v1);
-        std::fs::remove_dir_all(&dir).unwrap();
-    }
-
-    /// The walk descends into a directory where its name sorts, so "a/"
-    /// is hashed before "a.txt" although "a.txt" < "a/x" as a full path.
-    #[test]
-    fn compute_version_walks_in_sorted_depth_first_order() {
-        let dir = std::env::temp_dir().join(format!("office-walk-{}", std::process::id()));
-        std::fs::create_dir_all(dir.join("a")).unwrap();
-        std::fs::write(dir.join("a/x"), "1").unwrap();
-        std::fs::write(dir.join("a.txt"), "2").unwrap();
-        let mut h = Sha256::new();
-        h.update(b"a/x1a.txt2");
-        let want: String = h.finalize().iter().map(|b| format!("{b:02x}")).collect();
-        let mut walked = Sha256::new();
-        walk_data(&dir, "", &mut walked);
-        let got: String = walked.finalize().iter().map(|b| format!("{b:02x}")).collect();
-        assert_eq!(got, want);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

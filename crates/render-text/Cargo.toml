@@ -15,5 +15,5 @@ calendar.workspace = true
 office.workspace = true
 tools.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
+[lints]
+workspace = true

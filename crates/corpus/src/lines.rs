@@ -251,21 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn leading_verse_numbers() {
-        for (line, num, rest, ok) in [
-            ("2. That thy way may be known", "2", "That thy way may be known", true),
-            ("10. Make me a clean heart", "10", "Make me a clean heart", true),
-            ("2 O ye Angels of the Lord", "2", "O ye Angels of the Lord", true),
-            ("20 Blessed art thou, O Lord", "20", "Blessed art thou, O Lord", true),
-            ("O ALL ye Works of the Lord", "", "O ALL ye Works of the Lord", false),
-            ("2.No space after period", "", "2.No space after period", false),
-        ] {
-            assert_eq!(split_leading_verse_number(line), (num, rest, ok), "{line}");
-        }
-    }
-
-    #[test]
-    fn psalm_title_block_and_verses() {
+    fn psalms_and_canticles() {
         let psalm = parse_psalm(
             "Psalm 67\n!Deus misereatur\n\n1. God be merciful unto us * and bless us.\n2 O ye Angels of the Lord, bless ye the Lord.\n\
              An unnumbered line * with a mediant.\nGlory be to the Father, and to the Son,\n\
@@ -284,29 +270,13 @@ mod tests {
                 },
             ]
         );
-    }
-
-    #[test]
-    fn verse_lines() {
-        let text =
-            "Psalm 67\n!Deus\n\n1. God be merciful * and bless us.\n\n[section: Part II]\n2 O ye Angels.\nGlory be,\nas it was.\n3. After.";
-        assert_eq!(psalm_verse_lines(text), [3, 6, 9]);
-        let lines: Vec<&str> = text.split('\n').collect();
-        assert_eq!(lines[6], "2 O ye Angels.");
-    }
-
-    #[test]
-    fn canticle_sections() {
         let psalm = parse_psalm(
             "Song of the Three Children\n\n1. O all ye Works of the Lord.\n[section: The Second Part]\n2. O ye Angels of the Lord.\n",
         );
         assert_eq!(psalm.scripture_ref, "");
         assert_eq!(psalm.items.len(), 3);
         assert_eq!(psalm.items[1], PsalmItem::Section { heading: "The Second Part".into() });
-    }
-
-    #[test]
-    fn dangling_gloria_stays_in_place() {
+        // A dangling Gloria stays in place.
         let psalm = parse_psalm("Psalm 1\n\nGlory be to the Father,\n1. Blessed is the man.\n");
         assert_eq!(
             psalm.items,
@@ -318,7 +288,7 @@ mod tests {
     }
 
     #[test]
-    fn block_classifies_lines() {
+    fn block_lines_and_offsets() {
         let block = parse_block(
             "[Ad Laudes]\n!Romans 13\nProse one,\nprose two.\n\nV. O Lord, hear my prayer.\nR. And let my cry come unto thee.\n\
              All: Kyrie, eleison.\nBlessing. May the Lord bless us.\n",
@@ -330,10 +300,7 @@ mod tests {
         assert_eq!(block[4].text, "O Lord, hear my prayer.");
         assert_eq!(block[6].text, "Kyrie, eleison.");
         assert_eq!(block[7].text, "May the Lord bless us.");
-    }
-
-    #[test]
-    fn block_offsets_point_at_their_text() {
+        // Offsets point at their text in the source (voice spans depend on it).
         let source = "  Let us pray.\n\n\tV. O Lord, hear my prayer.\n!Psalm 102\n";
         for line in parse_block(source).iter().filter(|l| l.kind != BlockKind::Gap) {
             assert_eq!(&source[line.offset..line.offset + line.text.len()], line.text);
@@ -341,7 +308,7 @@ mod tests {
     }
 
     #[test]
-    fn hymn_title_only_when_it_stands_alone() {
+    fn hymn_titles_and_rubrics() {
         let titled = parse_hymn(
             "Te lucis ante terminum\n\nTo thee, before the close of day,\nCreator of the world, we pray.\n\nFrom all ill dreams defend our eyes.\n",
         );
@@ -355,10 +322,6 @@ mod tests {
         assert_eq!(peeled.stanzas[0][0], "To thee, before the close of day,");
         let single = parse_hymn("O Trinity of blessed light.\n");
         assert_eq!((single.title.as_str(), single.stanzas.len(), single.stanzas[0].len()), ("", 1, 1));
-    }
-
-    #[test]
-    fn hymn_rubrics() {
         for (line, want) in [
             (
                 "/:The first stanza of the following hymn is said kneeling.:/",

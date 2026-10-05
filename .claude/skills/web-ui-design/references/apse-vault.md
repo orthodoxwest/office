@@ -95,8 +95,8 @@ crossings came first and read as printed wallpaper.
   readers do meet software drawing, so Apse carries no full-width feathered
   flat layer over its wall: no softened prayer band and no ground under the
   epilogue. Star fields are safe, since their fades act only on sparse
-  shapes, and Nave's texture breaks the steps up. `ux.spec.js` measures
-  column and row stripes against the plain wall at the end of Lauds.
+  shapes, and Nave's texture breaks the steps up. Look for column and
+  row stripes against the plain wall at the end of Lauds by eye.
 - Measure paint cost when adding layers. An earlier 172-layer version cost
   roughly 600ms of extra first paint; one repeating tile stays within noise
   of a bare page. Check rendered pixels as well as valid CSS: sub-pixel

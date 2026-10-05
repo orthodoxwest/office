@@ -288,7 +288,7 @@ mod tests {
     const SAMPLE: &str = r#"[{"id":"sample","source":"test requirement","season":"lent","hours":["terce"],"slots":["chapter"],"require_ferial":true,"exclude_weekdays":["sunday"],"from_easter":-10,"until_easter":-2}]"#;
 
     #[test]
-    fn bounds_and_weekdays() {
+    fn bounds_weekdays_and_slot_families() {
         let scopes = AppointmentScopes::load("s.json", SAMPLE, &corpus()).unwrap();
         let scope = scopes.seasonal(Season::Lent, "terce", "chapter").unwrap();
         assert!(scopes.seasonal(Season::Lent, "sext", "chapter").is_none());
@@ -303,6 +303,12 @@ mod tests {
         ] {
             assert_eq!(scope.allows(easter.add_days(offset), easter, weekday, ferial), want, "{offset} {weekday}");
         }
+        // A trailing * selects a slot family.
+        let raw = r#"[{"id":"f","source":"s","season":"lent","hours":["terce"],"slots":["psalm-antiphon*","versicle"],"until_easter":0}]"#;
+        let scopes = AppointmentScopes::load("s.json", raw, &corpus()).unwrap();
+        assert!(scopes.seasonal(Season::Lent, "terce", "psalm-antiphon").is_some());
+        assert!(scopes.seasonal(Season::Lent, "terce", "versicle").is_some());
+        assert_eq!(scopes.list().len(), 1);
     }
 
     #[test]
@@ -336,14 +342,5 @@ mod tests {
         };
         let two = format!("[{},{}]", entry("x"), entry("y"));
         assert_eq!(err(&two), "s.json: scopes \"x\" and \"y\" overlap at lent/terce (chapter, chapter)");
-    }
-
-    #[test]
-    fn families_match_by_prefix() {
-        let raw = r#"[{"id":"f","source":"s","season":"lent","hours":["terce"],"slots":["psalm-antiphon*","versicle"],"until_easter":0}]"#;
-        let scopes = AppointmentScopes::load("s.json", raw, &corpus()).unwrap();
-        assert!(scopes.seasonal(Season::Lent, "terce", "psalm-antiphon").is_some());
-        assert!(scopes.seasonal(Season::Lent, "terce", "versicle").is_some());
-        assert_eq!(scopes.list().len(), 1);
     }
 }

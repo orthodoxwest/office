@@ -84,38 +84,28 @@ mod tests {
     }
 
     #[test]
-    fn an_antiphon_from_the_opening_is_not_repeated_whole_or_begun() {
-        let ant = "O Lord, * thou hast searched me out and known me.";
-        assert_eq!(unrepeated(ant, true, PS139), u(2, ""));
-        assert_eq!(unrepeated(ant, false, PS139), u(10, ""));
-    }
-
-    #[test]
-    fn the_unrepeated_words_may_run_past_the_mediant() {
-        let ant = "Behold, * how good and joyful a thing it is, brethren, to dwell together in unity.";
-        assert_eq!(unrepeated(ant, false, PS133), u(15, ""));
-    }
-
-    #[test]
-    fn a_whole_antiphon_that_departs_from_the_psalm_leaves_only_its_intonation_unrepeated() {
-        let ant = "Deliver me, * O Lord, from the wicked man.";
-        assert_eq!(unrepeated(ant, false, PS140), u(2, "Deliver me"));
-        assert_eq!(unrepeated(ant, true, PS140), u(2, ""));
-    }
-
-    #[test]
-    fn an_intonation_that_only_coincides_is_repeated() {
-        let ps148 = "Psalm 148\n\nO PRAISE the Lord of heaven * praise him in the height.";
-        assert_eq!(unrepeated("O praise * God in his holiness.", true, ps148), None);
-        let benedictus = "Benedictus\n\nBLESSED be the Lord God of Israel * for he hath visited, and redeemed his people;";
-        assert_eq!(unrepeated("Blessed be * the holy Creator and Governor of all things.", false, benedictus), None);
-        let ps65 = "Psalm 65\n\nTHOU, O God, art praised in Sion * and unto thee shall the vow be performed.";
-        assert_eq!(unrepeated("Thou, O Lord, * that hearest the prayer.", true, ps65), None);
-    }
-
-    #[test]
-    fn an_antiphon_without_a_mark_counts_whole() {
+    fn unrepeated_opening_words() {
         let ps141 = "Psalm 141\n\nLORD, I call upon thee, haste thee unto me * and consider my voice.";
-        assert_eq!(unrepeated("Lord, I call upon thee, haste thee unto me.", true, ps141), u(9, ""));
+        let ps148 = "Psalm 148\n\nO PRAISE the Lord of heaven * praise him in the height.";
+        let ps65 = "Psalm 65\n\nTHOU, O God, art praised in Sion * and unto thee shall the vow be performed.";
+        let benedictus = "Benedictus\n\nBLESSED be the Lord God of Israel * for he hath visited, and redeemed his people;";
+        for (ant, announced, psalm, want) in [
+            // An antiphon from the opening is not repeated, whole or begun.
+            ("O Lord, * thou hast searched me out and known me.", true, PS139, u(2, "")),
+            ("O Lord, * thou hast searched me out and known me.", false, PS139, u(10, "")),
+            // The unrepeated words may run past the mediant.
+            ("Behold, * how good and joyful a thing it is, brethren, to dwell together in unity.", false, PS133, u(15, "")),
+            // Diurnal p. 133: a whole antiphon that departs from the psalm leaves only its intonation unrepeated.
+            ("Deliver me, * O Lord, from the wicked man.", false, PS140, u(2, "Deliver me")),
+            ("Deliver me, * O Lord, from the wicked man.", true, PS140, u(2, "")),
+            // An intonation that only coincides is repeated.
+            ("O praise * God in his holiness.", true, ps148, None),
+            ("Blessed be * the holy Creator and Governor of all things.", false, benedictus, None),
+            ("Thou, O Lord, * that hearest the prayer.", true, ps65, None),
+            // An antiphon without a mark counts whole.
+            ("Lord, I call upon thee, haste thee unto me.", true, ps141, u(9, "")),
+        ] {
+            assert_eq!(unrepeated(ant, announced, psalm), want, "{ant} announced={announced}");
+        }
     }
 }

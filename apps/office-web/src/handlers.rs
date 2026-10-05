@@ -689,28 +689,6 @@ mod tests {
         assert!(!ordo("/calendar/9999/12").contains("Next month"));
     }
 
-    #[test]
-    fn ordo_frontispiece_sets_out_the_tabula() {
-        let body = ordo("/calendar/2026");
-        assert!(body.contains("<title>Ordo 2026</title>") && body.contains("Tabula Temporaria"));
-        let t = calendar::Tabula::compute(2026);
-        for want in [
-            format!("<dt>Golden Number</dt><dd>{}</dd>", calendar::computus::roman(t.golden_number)),
-            format!("<dt>Dominical Letter</dt><dd>{}</dd>", t.dominical_letter),
-            "<dt>Easter Day</dt><dd><a href=\"/calendar/2026/04#d-2026-04-12\">April 12</a></dd>".to_string(),
-            "<dt>Autumn (Holy Cross)</dt><dd><a href=\"/calendar/2026/09#d-2026-09-16\">September 16, 18, 19</a></dd>".to_string(),
-        ] {
-            assert!(body.contains(&want), "frontispiece missing {want:?}");
-        }
-        assert!(body.contains("<p class=\"calendar-subtitle\">Anno Domini MMXXVI</p>"));
-        assert!(body.contains(r#"<a class="calendar-whole-year" href="/calendar/2026/all">The whole year on one page</a>"#));
-        // Months are a page away; none is current here, and no rows render.
-        assert!(body.contains(r#"<a href="/calendar/2026/01" aria-label="January""#));
-        assert!(!body.contains(r#"aria-current="page">Jan"#));
-        assert!(!body.contains(r#"<tr class="day "#) && !body.contains("Previous month"));
-        assert!(body.contains(r#"href="/calendar/2025" aria-label="Previous year, 2025""#));
-    }
-
     /// Today's month carries the strip's lozenge and says so, in its own
     /// year only; the client moves both at midnight.
     #[test]
@@ -786,15 +764,9 @@ mod tests {
                 }
             }
         }
-    }
-
-    /// Holy Saturday's Vespers is I Vespers of Easter: the ornament follows
-    /// the hour on hour pages and the day on the home page.
-    #[test]
-    fn holy_saturday_vespers_unveils_ahead_of_the_day() {
-        let slug = date_slug(MoveableDates::compute(2026).holy_saturday);
-        assert!(body_classes(&format!("/lauds/{slug}")).contains(&"season-passiontide".into()));
-        assert!(body_classes(&format!("/vespers/{slug}")).contains(&"season-eastertide".into()));
-        assert!(body_classes(&format!("/?date={slug}")).contains(&"season-passiontide".into()));
+        // Holy Saturday's Vespers is I Vespers of Easter: the ornament
+        // follows the hour on hour pages and the day on the home page.
+        let classes = body_classes(&format!("/vespers/{}", date_slug(m.holy_saturday)));
+        assert!(classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
     }
 }

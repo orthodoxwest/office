@@ -34,6 +34,11 @@ tools.workspace = true
 
 # No workspace lint table: UniFFI's generated scaffolding is `unsafe` FFI glue,
 # which the workspace's `unsafe_code = "forbid"` would reject. This crate's own
-# code stays safe; every engine crate it wraps keeps the forbid.
+# code stays safe; every engine crate it wraps keeps the forbid. The clippy
+# lints below repeat [workspace.lints.clippy]; keep the two in step.
 [lints.clippy]
 wildcard_enum_match_arm = "deny"
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+unwrap_used = "warn"

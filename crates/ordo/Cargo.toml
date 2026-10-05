@@ -15,8 +15,5 @@ office.workspace = true
 [dev-dependencies]
 tools.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
-
-[lints.clippy]
-wildcard_enum_match_arm = "deny"
+[lints]
+workspace = true

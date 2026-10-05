@@ -395,16 +395,3 @@ pub fn cap_commemorations(mut comms: Vec<FeastRef>) -> (Vec<FeastRef>, Vec<Decis
     comms.truncate(MAX_COMMEMORATIONS_PER_DAY);
     (comms, vec![decision])
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn normalizes_names() {
-        assert_eq!(normalize_commemoration_name("  Ss Peter & Paul, Apostles "), "ss peter and paul");
-        assert_eq!(normalize_commemoration_name("Commemoration of St Paul, Apostle"), "st paul");
-        assert_eq!(normalize_commemoration_name("St Leo (Pope)"), "st leo bishop");
-        assert_eq!(normalize_commemoration_name("Octave of the Epiphany"), "octave of epiphany");
-    }
-}

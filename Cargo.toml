@@ -32,11 +32,19 @@ rusqlite = { version = "0.40", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 uniffi = "0.32"
 
-# Core crates add `wildcard_enum_match_arm = "deny"` in their own [lints]
-# configuration: adding a liturgical enum variant must break the build at
-# every match that has to consider it.
 [workspace.lints.rust]
 unsafe_code = "forbid"
+
+# Every crate inherits these (mobile-ffi repeats them; see its manifest).
+# Adding a liturgical enum variant must break the build at every match that
+# has to consider it. Debugging leftovers and unwrap stay out of shipped code;
+# tests may unwrap (clippy.toml), and invariants use expect with a reason.
+[workspace.lints.clippy]
+wildcard_enum_match_arm = "deny"
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+unwrap_used = "warn"
 
 # Backtraces keep file:line; full debug info would add ~40% to every target/.
 [profile.dev]
