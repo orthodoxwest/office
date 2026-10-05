@@ -38,15 +38,18 @@ BEGIN = "/* genarch:begin"
 END = "/* genarch:end */"
 
 # rise, haunch radius and the upper arc's centre across, all in card widths
-# from the left springing. Phone: a 143° point with bowed flanks; niche: a
-# fuller haunch. Changing the phone's shape means refitting the date's
+# from the left springing. The phone heads' haunches are generous (an upper
+# arc no more than about four times their radius), so the jamb eases into
+# the curve as a Gothic arch's does rather than turning on a tight shoulder;
+# the phone comes to a 144° point. The niche keeps a tighter haunch: its
+# head is too low for a generous one without flattening. Changing the phone's shape means refitting the date's
 # max-width in style.css (".page-home .home h1").
 # A taller phone has height to spare under the card, so its head rises
 # further: "tall" from 800px high, "taller" from 880px.
 SHAPES = {
-    "phone": dict(rise=0.44, haunch=0.18, centre=0.80, haunch_steps=4, upper_steps=11),
-    "tall": dict(rise=0.56, haunch=0.18, centre=0.95, haunch_steps=4, upper_steps=12),
-    "taller": dict(rise=0.64, haunch=0.18, centre=1.0, haunch_steps=4, upper_steps=13),
+    "phone": dict(rise=0.44, haunch=0.30, centre=0.90, haunch_steps=7, upper_steps=10),
+    "tall": dict(rise=0.56, haunch=0.40, centre=1.0, haunch_steps=8, upper_steps=10),
+    "taller": dict(rise=0.64, haunch=0.40, centre=1.05, haunch_steps=8, upper_steps=11),
     "niche": dict(rise=0.38, haunch=0.16, centre=0.80, haunch_steps=4, upper_steps=12),
 }
 # Where each shape applies, in order (later ones win).
