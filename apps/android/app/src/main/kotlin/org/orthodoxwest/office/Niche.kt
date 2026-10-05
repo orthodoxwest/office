@@ -156,8 +156,10 @@ fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, day: Color, frame: Colo
  * another edge of the arch. The scope is the card's width, its top the card's.
  */
 fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color) {
+    // A miter limit of 2 keeps the point sharp, and bevels the hair's-breadth step that may join
+    // the upper arcs there rather than drawing it out into a spike.
     fun line(d: Float, weight: Float, ink: Color) =
-        drawPath(archPath(a, size.width, d - weight / 2f, size.height, open = true), ink, style = Stroke(weight))
+        drawPath(archPath(a, size.width, d - weight / 2f, size.height, open = true), ink, style = Stroke(weight, miter = 2f))
     line(-inset, 2.dp.toPx(), color)
     line(-inset - 8.dp.toPx(), 1.dp.toPx(), hairline)
 }

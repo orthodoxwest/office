@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
@@ -284,7 +285,9 @@ private fun Frontispiece(
                 ) {
                     Text(
                         unbroken(view.dateLabel),
-                        Modifier.widthIn(max = tier.dateMeasure).semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay),
+                        // On a phone a full thumb's height, as the web's, its line centred in it.
+                        Modifier.widthIn(max = tier.dateMeasure).semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
+                            .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(),
                         style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
                     )
                     Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = tier.feast.sp, lineHeight = (tier.feast * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center))

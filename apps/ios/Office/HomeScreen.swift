@@ -291,7 +291,8 @@ private struct Frontispiece: View {
                         .type(tier.date)
                         .foregroundStyle(p.text)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) })
+                        // On a phone a full thumb's height, as the web's, its line centred in it.
+                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44))
                 }
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)

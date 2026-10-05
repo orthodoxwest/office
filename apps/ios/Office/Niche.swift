@@ -208,9 +208,11 @@ struct Lining: View {
 
     var body: some View {
         Canvas { ctx, size in
+            // A miter limit of 2 keeps the point sharp, and bevels the hair's-breadth step that
+            // may join the upper arcs there rather than drawing it out into a spike.
             func line(_ d: CGFloat, _ color: Color, width: CGFloat) {
                 let path = archPath(arch, width: size.width, outset: d - width / 2, foot: size.height, open: true)
-                ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: width, lineJoin: .miter))
+                ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: width, lineJoin: .miter, miterLimit: 2))
             }
             line(-inset, p.lining, width: 2)
             line(-inset - 8, hairline, width: 1)
