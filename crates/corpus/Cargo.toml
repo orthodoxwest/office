@@ -9,8 +9,5 @@ publish.workspace = true
 [dependencies]
 data-format.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
-
-[lints.clippy]
-wildcard_enum_match_arm = "deny"
+[lints]
+workspace = true
