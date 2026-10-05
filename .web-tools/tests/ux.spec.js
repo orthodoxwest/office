@@ -3152,6 +3152,30 @@ test("home keeps feast and octave above the recovery link, including after midni
   expect(await order()).toBe(true);
 });
 
+test("home's versicle takes only the height its head has to spare", async ({ page }) => {
+  // Each day is opened as the reader's today, so no recovery link joins the head.
+  const open = async (date, width, height) => {
+    await page.setViewportSize({ width, height });
+    await page.clock.setFixedTime(new Date(`${date}T15:56:00-04:00`));
+    await page.goto(`/?date=${date}`);
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    return page.evaluate(() => ({
+      shown: document.querySelector(".home-versicle")?.checkVisibility() ?? null,
+      scrolls: document.documentElement.scrollHeight > innerHeight,
+    }));
+  };
+  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
+  // A 667px phone has none to spare.
+  expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });
+  // A Lenten feria is stripped: no versicle at all.
+  expect((await open("2026-03-11", 412, 735)).shown).toBe(null);
+});
+
 test("Compline openings preserve words and align response columns around the blessing", async ({ page }) => {
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });

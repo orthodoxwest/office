@@ -42,6 +42,10 @@ pub struct HomeData {
     pub season: String,
     pub octave_note: String,
     pub penitential: Vec<String>,
+    /// The day's versicle from Lauds and its response, set in the head on a plain day; both
+    /// empty otherwise (`presentation::home_shows_versicle`).
+    pub versicle: String,
+    pub response: String,
     pub calendar_link: String,
     pub pray_now_label: String,
     pub pray_now_link: String,
