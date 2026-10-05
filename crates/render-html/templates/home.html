@@ -30,6 +30,12 @@
           {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
         </p>
         {% endif %}
+        {# The day's versicle from Lauds, on a day plain enough to have room
+           for it: never in Passiontide or on a violet day, when the head is
+           stripped (presentation::home_shows_versicle). #}
+        {% if versicle %}
+        <p class="home-versicle"><span class="home-versicle-line"><span class="home-versicle-sigil">℣.</span> {{ versicle|typeset }}</span> <span class="home-versicle-line"><span class="home-versicle-sigil">℟.</span> {{ response|typeset }}</span></p>
+        {% endif %}
         {% if commemorations %}
         <div class="commemorations">
           <span class="commemorations-label">Also</span>

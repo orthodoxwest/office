@@ -188,6 +188,10 @@ struct HomeTier {
     var feast: TextStyle { pick(Scale.body.sized(18.72, line: 23.4), Scale.body.sized(17.28, line: 21.6), Scale.body.sized(18.56, line: 23.2), Scale.body.sized(20, line: 25)) }
     /// A short phone's commemorations give way, so a past date with them still fits.
     var commemoration: TextStyle { short ? TextStyle(size: 13.6, line: 17.68) : pick(TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 16.32, line: 22.85)) }
+    /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
+    /// and inside the day's clearance of the lining.
+    var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }
+    var versicleMeasure: CGFloat { min(304, card - 2 * dayClear) }
     /// Below the day, to the band.
     var dayGap: CGFloat { pick(16.8, 5.6, 12) }
     var band: CGFloat { pick(12.8, 12.8, 12.8, 13.6) }
@@ -219,14 +223,21 @@ private struct FrontispieceLayout: Layout {
     let tier: HomeTier
     let m: Metrics
 
-    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, height: CGFloat) {
+    /// The head's height, the day's parts (its facts, the versicle when it fits, and "Go to
+    /// today"), and the whole. The versicle takes only the height the head has to spare: where it
+    /// would make the card taller, the head goes without it.
+    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, height: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let facts = subviews[2].sizeThatFits(free).height
-        let after = subviews[3].sizeThatFits(free).height
+        let versicle = subviews[3].sizeThatFits(free).height
+        let back = subviews[4].sizeThatFits(free).height
+        let after = subviews[5].sizeThatFits(free).height
         let foot = m.px(tier.bottom)
+        let day = facts + back + m.px(tier.dayGap)
         let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
-        let summary = max(m.px(tier.headPad) + facts, tier.arch.rise * width, least - after - foot)
-        return (summary, facts, summary + after + foot)
+        let summary = max(m.px(tier.headPad) + day, tier.arch.rise * width, least - after - foot)
+        let fits = versicle > 0 && m.px(tier.headPad) + day + versicle <= summary
+        return (summary, facts, fits ? versicle : nil, back, summary + after + foot)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -235,14 +246,21 @@ private struct FrontispieceLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let (summary, facts, _) = measure(bounds.width, proposal, subviews)
+        let (summary, facts, versicle, back, _) = measure(bounds.width, proposal, subviews)
         let free = ProposedViewSize(width: bounds.width, height: nil)
         let pad = m.px(tier.headPad)
-        let spare = summary - pad - facts
+        let spare = summary - pad - facts - (versicle ?? 0) - back - m.px(tier.dayGap)
         subviews[0].place(at: bounds.origin, proposal: ProposedViewSize(width: bounds.width, height: summary))
         subviews[1].place(at: CGPoint(x: bounds.midX, y: bounds.minY + m.px(tier.crownTop)), anchor: .top, proposal: .unspecified)
-        subviews[2].place(at: CGPoint(x: bounds.minX, y: bounds.minY + pad + (tier.split ? spare * 2 / 5 : spare / 2)), proposal: free)
-        subviews[3].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
+        var y = bounds.minY + pad + (tier.split ? spare * 2 / 5 : spare / 2)
+        subviews[2].place(at: CGPoint(x: bounds.minX, y: y), proposal: free)
+        y += facts
+        // Proposed no height, the versicle gives way to nothing; a point's grace keeps rounding
+        // from refusing it the height it asked for.
+        subviews[3].place(at: CGPoint(x: bounds.minX, y: y), proposal: ProposedViewSize(width: bounds.width, height: versicle.map { $0 + 1 } ?? 0))
+        y += versicle ?? 0
+        subviews[4].place(at: CGPoint(x: bounds.minX, y: y), proposal: free)
+        subviews[5].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
     }
 }
 
@@ -327,7 +345,25 @@ private struct Frontispiece: View {
                     }
                     .padding(.top, m.px(8))
                 }
-                // After the day's facts, so they read together.
+            }
+            .padding(.horizontal, m.px(tier.dayClear))
+            .frame(maxWidth: .infinity)
+            // The day's versicle, when the head has the height to spare for it: the layout
+            // proposes it no height where it would make the card taller, and it gives way.
+            ViewThatFits(in: .vertical) {
+                if let style = tier.versicle, !view.versicle.isEmpty {
+                    VStack(spacing: 0) {
+                        versicleLine("℣.", view.versicle, style)
+                        versicleLine("℟.", view.response, style)
+                    }
+                    .frame(maxWidth: m.px(tier.versicleMeasure))
+                    .padding(.top, m.px(12))
+                }
+                Color.clear.frame(height: 0)
+            }
+            .frame(maxWidth: .infinity)
+            // After the day's facts, so they read together.
+            VStack(spacing: 0) {
                 if !view.isToday {
                     Button { model.open(.home(model.today)) } label: {
                         Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
@@ -337,8 +373,6 @@ private struct Frontispiece: View {
                     .buttonStyle(Quiet())
                 }
             }
-            .padding(.horizontal, m.px(tier.dayClear))
-            .padding(.bottom, m.px(tier.dayGap))
             .frame(maxWidth: .infinity)
             // The invitation and the hours, from the inscription band.
             VStack(spacing: 0) {
@@ -380,6 +414,16 @@ private struct Frontispiece: View {
                 Panel(arch: tier.arch, ring: mix(day, ink.frame, 0.7), frame: ink.frame)
             }
         }
+    }
+
+    /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
+    /// text's ink a little withdrawn.
+    private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
+        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(p.rubric) + Text(" " + words))
+            .type(style)
+            .foregroundStyle(p.text.opacity(0.84))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     /// The inscription band: pale gilt letters on the frieze's green earth, between oxblood rules

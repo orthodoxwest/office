@@ -5203,6 +5203,31 @@ body.season-eastertide {
   margin-top: 0.3rem;
 }
 
+/* The day's versicle, set under the day as an epigraph on a plain day:
+   italic in the text's ink, a little withdrawn, its ℣ and ℟ upright in
+   the rubrics' red as the hours set them, each on a line of its own and
+   balanced when one runs over. The day head's padding keeps it clear of
+   the lining, as it does the feast. */
+.page-home .home-versicle {
+  max-width: 19rem;
+  margin: 0.75rem auto 0;
+  font-style: italic;
+  font-size: 0.96rem;
+  line-height: 1.32;
+  color: color-mix(in srgb, var(--text) 84%, transparent);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.page-home .home-versicle-line {
+  display: block;
+}
+
+.page-home .home-versicle-sigil {
+  font-style: normal;
+  color: var(--rubric);
+}
+
 /* In a service-book composition fasting discipline is red work, not a UI
    chip. The words retain their rubric colour and remain distinct without
    a rounded outline or extra box padding. */
@@ -6351,6 +6376,11 @@ body.season-eastertide {
   .page-home .home .commemorations {
     font-size: 0.85rem;
     line-height: 1.3;
+  }
+
+  /* Nor has it room for the versicle, which the head can go without. */
+  .page-home .home-versicle {
+    display: none;
   }
 }
 

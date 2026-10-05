@@ -6,8 +6,8 @@
 
 pub mod usage;
 
-use calendar::{CalendarDay, Date, Season};
-use liturgy::OfficeHour;
+use calendar::{CalendarDay, Color, Date, Season};
+use liturgy::{ElementType, OfficeHour};
 
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
@@ -80,6 +80,30 @@ pub fn day_heading(day: &CalendarDay) -> DayHeading {
         season.clear();
     }
     DayHeading { feast, octave_note, season }
+}
+
+/// Whether home's head carries the day's versicle. A church is stripped through Passiontide
+/// whatever the colour, and on the violet days of Advent, Septuagesima and Lent, the Ember days
+/// and vigils (and the black ones); a feast within those seasons keeps its versicle, as it keeps
+/// its flowers, and so do Gaudete and Laetare in rose. A day with commemorations already fills
+/// the head with them.
+pub fn home_shows_versicle(day: &CalendarDay) -> bool {
+    day.season != Season::Passiontide && !matches!(day.color, Color::Violet | Color::Black) && day.commemorations.is_empty()
+}
+
+/// A versicle and its response, without their ℣. and ℟.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Versicle {
+    pub versicle: String,
+    pub response: String,
+}
+
+/// The versicle after the hymn in a composed Lauds or Vespers.
+pub fn hour_versicle(hour: &OfficeHour) -> Option<Versicle> {
+    let el = hour.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle")?;
+    let line =
+        |sigil: &str| el.text.lines().find_map(|l| l.trim().strip_prefix(sigil).map(|t| t.trim().to_string())).filter(|t| !t.is_empty());
+    Some(Versicle { versicle: line("V.")?, response: line("R.")? })
 }
 
 pub const MONTHS: [&str; 12] =

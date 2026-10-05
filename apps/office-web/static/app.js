@@ -213,6 +213,31 @@ document.documentElement.classList.add("js");
   window.addEventListener("afterprint", refresh);
 })();
 
+// Home's versicle takes only the height the arch's head has to spare. Where
+// it would make the card taller, and so push the hours down the screen, the
+// head goes without it; measured again whenever the type, the window or the
+// head's other lines change.
+(function () {
+  var versicle = document.querySelector(".home-versicle");
+  var card = versicle && versicle.closest(".home-hero");
+  if (!card) return;
+  var frame = 0;
+  function fit() {
+    frame = 0;
+    versicle.hidden = true;
+    var without = card.getBoundingClientRect().height;
+    versicle.hidden = false;
+    versicle.hidden = card.getBoundingClientRect().height > without + 0.5;
+  }
+  function schedule() {
+    if (!frame) frame = window.requestAnimationFrame(fit);
+  }
+  fit();
+  if (document.fonts) document.fonts.ready.then(schedule);
+  window.addEventListener("resize", schedule);
+  if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(versicle.parentNode);
+})();
+
 // Appearance and screen dimensions accompany every usage beacon; office pages
 // also report the selected prayer form, and Prime whether its Martyrology is
 // shown. These describe how the page
@@ -693,6 +718,7 @@ function usageBeaconBody(scope) {
       var anchor =
         document.querySelector(".hour-meta") ||
         document.querySelector(".home-day-head .commemorations") ||
+        document.querySelector(".home-day-head .home-versicle") ||
         document.querySelector(".home-day-head .penitential") ||
         document.querySelector(".home-day-head .octave-note") ||
         document.querySelector(".home-day-head .feast") ||

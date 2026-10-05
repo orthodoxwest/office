@@ -20,7 +20,8 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation, long_date,
+    month_name, report_url, season_class, season_str,
 };
 
 /// What a page handler reads from the request.
@@ -258,6 +259,12 @@ impl Server {
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
         let invite = invitation(date, now, now_hour);
+        let versicle = if home_shows_versicle(day) {
+            self.engine.compose_hour("lauds", day, &entry.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
+        } else {
+            None
+        };
+        let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -278,6 +285,8 @@ impl Server {
             season: heading.season,
             octave_note: heading.octave_note,
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
+            versicle,
+            response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
@@ -568,6 +577,28 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Home's head carries the day's versicle from Lauds on a plain day, and is
+    // stripped on a violet day and through Passiontide; a day with
+    // commemorations has them there instead.
+    #[test]
+    fn home_sets_the_days_versicle_on_a_plain_day() {
+        let versicle = |date: &str| {
+            let (status, _, body) = get(&format!("/?date={date}"));
+            assert_eq!(status, StatusCode::OK, "{date}");
+            body.find("<p class=\"home-versicle\">").map(|at| body[at..at + body[at..].find("</p>").unwrap()].to_string())
+        };
+        // St Placidus: the martyrs' versicle, each half with its sigil.
+        let placidus = versicle("2026-10-05").expect("a plain day's versicle");
+        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
+        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℟.</span> Let them rejoice in their beds."), "{placidus}");
+        // Laetare, in rose, keeps it.
+        assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
+        // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.
+        for date in ["2026-03-11", "2026-03-29", "2026-04-09", "2026-10-12"] {
+            assert_eq!(versicle(date), None, "{date}");
+        }
     }
 
     // Prime carries both the rubric and tomorrow's reading for the reader's
