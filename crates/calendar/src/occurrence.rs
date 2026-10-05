@@ -214,9 +214,24 @@ pub fn resolve_day(
         decisions.push(Decision::new("occurrence:resolution-mode", "general-precedence", ""));
         &all
     };
+    let is_transferred = |f: &FeastRef| transferred_in.iter().any(|t| Arc::ptr_eq(t, f));
     let mut winner = pool[0].clone();
     for f in &pool[1..] {
-        let (wins, decision) = compare_feast_precedence_with_decision(f, &winner);
+        let (mut wins, mut decision) = compare_feast_precedence_with_decision(f, &winner);
+        // XI.7: a transferred feast waits for a day free of a I or II Class
+        // Double (2024 ordo: the Nativity of St John Baptist passes over the
+        // Visitation). XI.8: of equal transferred feasts the one whose own day
+        // comes first goes first (2019, 2021 and 2022 ordos: St Mark, then Ss
+        // Philip and James, then the Finding of the Holy Cross).
+        if wins && is_transferred(f) {
+            let occupied = !is_transferred(&winner) && winner.rank.weight() >= Rank::Double2ndClass.weight();
+            let earlier_equal = is_transferred(&winner) && sort_key(f)[0] == sort_key(&winner)[0];
+            if occupied || earlier_equal {
+                wins = false;
+                let outcome = if occupied { "day-occupied" } else { "earlier-own-day" };
+                decision = Decision::new("occurrence:transfer-order", outcome, format!("challenger={}; incumbent={}", f.id, winner.id));
+            }
+        }
         decisions.push(decision);
         if wins {
             winner = f.clone();

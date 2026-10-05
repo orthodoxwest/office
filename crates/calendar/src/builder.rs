@@ -619,14 +619,17 @@ fn push_candidate(candidates: &mut HashMap<Date, Vec<FeastRef>>, feast: &FeastRe
     }
 }
 
+/// A feast awaiting transfer, with the date it was impeded on its own day.
+type Transferred = (Date, FeastRef);
+
 /// Resolves occurrence for one civil year, taking and returning the transfer
 /// queue at its boundaries.
 fn build_calendar_year(
     year: i32,
     feasts: &[FeastRef],
     rules: &[PenitentialRule],
-    incoming: &[FeastRef],
-) -> Result<(Vec<CalendarDay>, Vec<FeastRef>), String> {
+    incoming: &[Transferred],
+) -> Result<(Vec<CalendarDay>, Vec<Transferred>), String> {
     let m = MoveableDates::compute(year);
 
     let mut computed = epiphany_sunday_feasts(year, m.septuagesima);
@@ -677,7 +680,7 @@ fn build_calendar_year(
 
     let end = Date::new(year, 12, 31);
     let mut days = Vec::with_capacity(366);
-    let mut pending: Vec<FeastRef> = incoming.to_vec();
+    let mut pending: Vec<Transferred> = incoming.to_vec();
     let mut week_id: Option<String> = None;
     // A Sunday office anticipated on Saturday still governs the week that follows.
     let mut anticipated_week: Option<String> = None;
@@ -699,9 +702,15 @@ fn build_calendar_year(
         {
             day_candidates.push(Arc::new(feria));
         }
-        let transferred_in = std::mem::take(&mut pending);
+        // XI.8: equal transferred feasts are kept in the order of their own days.
+        let queue = std::mem::take(&mut pending);
+        let transferred_in: Vec<FeastRef> = queue.iter().map(|(_, f)| f.clone()).collect();
         let (mut day, out) = resolve_day(current, &day_candidates, season, season.color(), &transferred_in);
-        pending.extend(out);
+        for f in out {
+            let own_day = queue.iter().find(|(_, q)| Arc::ptr_eq(q, &f)).map_or(current, |(d, _)| *d);
+            pending.push((own_day, f));
+        }
+        pending.sort_by_key(|(d, _)| *d);
         day.temporal_week_id = week_id.clone();
         if day.celebration.is_none() {
             day.tempora = seasonal_feria_name(current, &m, season);
