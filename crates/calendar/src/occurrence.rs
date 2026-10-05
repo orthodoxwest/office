@@ -159,8 +159,14 @@ pub fn resolve_day(
     season_color: Color,
     transferred_in: &[FeastRef],
 ) -> (CalendarDay, Vec<FeastRef>) {
+    // XI.7: a transferred feast goes to the next day free of an occurrent
+    // Sunday, so on a Sunday it waits without competing (2021 ordo: the
+    // Visitation passes over the Sunday within the Corpus Christi octave).
+    let (held, transferred_in): (Vec<FeastRef>, Vec<FeastRef>) =
+        transferred_in.iter().cloned().partition(|_| date.weekday() == Weekday::Sunday);
+    let transferred_in = transferred_in.as_slice();
     let mut all: Vec<FeastRef> = candidates.iter().chain(transferred_in).cloned().collect();
-    let mut transfers_out = Vec::new();
+    let mut transfers_out = held.clone();
     let mut decisions = vec![Decision::new(
         "occurrence:resolution-mode",
         "start",
@@ -169,6 +175,9 @@ pub fn resolve_day(
     let (filtered, vigil_decisions) = exclude_seasonal_vigils(all, season);
     all = filtered;
     decisions.extend(vigil_decisions);
+    if !held.is_empty() {
+        decisions.push(Decision::new("occurrence:transfer-in", "held-over-sunday", feast_ids(&held)));
+    }
     if !transferred_in.is_empty() {
         decisions.push(Decision::new("occurrence:transfer-in", "considered", feast_ids(transferred_in)));
     }
