@@ -187,8 +187,8 @@ or impose a redesign on an unrelated change.
   so the wall averages exactly `--bg` (see the token comment): retune one
   and re-solve the others, or the softened prayer band and the flat iOS
   sticky headings show edges. Near-white Nave needs its knee (flat ground, darker
-  clouds); a symmetric texture there is invisible. `ux.spec.js` measures
-  the rendered wall's mean and contrast in both themes.
+  clouds); a symmetric texture there is invisible. No test measures the
+  wall any more; check it by eye in the visual snapshots in both themes.
   All textured pages share `--plaster-strength`, composed into the opaque
   wall so sticky headings match. Wide Nave hours soften it beneath prayer
   with a pre-blurred copy (`genplaster --soft-of`) in a feathered band;

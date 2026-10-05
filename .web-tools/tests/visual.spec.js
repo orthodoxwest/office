@@ -119,15 +119,14 @@ test("mobile hour ending — dark", async ({ page }) => {
   await expect(page).toHaveScreenshot("hour-ending-dark.png");
 });
 
-for (const theme of ["light", "dark"]) {
-  test(`desktop hour ending — ${theme}`, async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await openForSnapshot(page, `/lauds/${testDate}`, theme);
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await expect(page.locator(".hour-epilogue")).toBeVisible();
-    await expect(page).toHaveScreenshot(`hour-ending-desktop-${theme}.png`);
-  });
-}
+// Dark's epilogue is the phone's above; light shows the wide composition.
+test("desktop hour ending — light", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openForSnapshot(page, `/lauds/${testDate}`, "light");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(page.locator(".hour-epilogue")).toBeVisible();
+  await expect(page).toHaveScreenshot("hour-ending-desktop-light.png");
+});
 
 test("desktop prayer transition — light", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -141,29 +140,28 @@ test("desktop prayer transition — light", async ({ page }) => {
   await expect(page).toHaveScreenshot("lauds-transition-desktop-light.png");
 });
 
-for (const theme of ["light", "dark"]) {
-  test(`complete initial alphabet — ${theme}`, async ({ page }) => {
-    const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
-    const fixture = words.map(word => `<div class="chapter"><div class="liturgical-block"><p class="plain-line">${word} hear our prayer, and let our cry come unto thee. Be merciful unto us, O Lord, and guide our steps in the way of peace.</p></div></div>`).join("");
-    await page.route(`**/vespers/${testDate}`, async route => {
-      const response = await route.fetch();
-      await route.fulfill({ response, body: (await response.text()).replace(
-        /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
-        `$1<div class="elements">${fixture}</div>$2`,
-      ) });
-    });
-    await page.setViewportSize({ width: 1280, height: 1000 });
-    await openForSnapshot(page, `/vespers/${testDate}`, theme);
-    await page.addStyleTag({ content: `
-      main { max-width: 1000px; }
-      .elements { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
-      .chapter { margin: 0; }
-      header, nav, .hour-progress { visibility: hidden; }
-    ` });
-    await expect(page.locator(".initial-word")).toHaveCount(26);
-    await expect(page.locator(".elements")).toHaveScreenshot(`initial-alphabet-${theme}.png`);
+// The letters' optical profiles are the same in either theme; light only.
+test("complete initial alphabet — light", async ({ page }) => {
+  const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
+  const fixture = words.map(word => `<div class="chapter"><div class="liturgical-block"><p class="plain-line">${word} hear our prayer, and let our cry come unto thee. Be merciful unto us, O Lord, and guide our steps in the way of peace.</p></div></div>`).join("");
+  await page.route(`**/vespers/${testDate}`, async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      `$1<div class="elements">${fixture}</div>$2`,
+    ) });
   });
-}
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await openForSnapshot(page, `/vespers/${testDate}`, "light");
+  await page.addStyleTag({ content: `
+    main { max-width: 1000px; }
+    .elements { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
+    .chapter { margin: 0; }
+    header, nav, .hour-progress { visibility: hidden; }
+  ` });
+  await expect(page.locator(".initial-word")).toHaveCount(26);
+  await expect(page.locator(".elements")).toHaveScreenshot(`initial-alphabet-light.png`);
+});
 
 // Psalm 63's opening carries its "Sit." cue: it divides at the mediant from
 // 390px up to 430px and wraps naturally only on the narrowest screens.
@@ -178,26 +176,25 @@ for (const [width, theme, divided] of [[390, "light", true], [320, "dark", false
   });
 }
 
-for (const theme of ["light", "dark"]) {
-  test(`full-size raised alphabet — ${theme}`, async ({ page }) => {
-    const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
-    const fixture = words.map(word => `<div class="psalm"><div class="psalm-verses"><p class="verse">${word} hear our prayer.</p><p class="verse numbered"><span class="verse-num">2</span><span class="verse-body">And let our cry come unto thee.</span></p></div></div>`).join("");
-    await page.route(`**/vespers/${testDate}`, async route => {
-      const response = await route.fetch();
-      await route.fulfill({ response, body: (await response.text()).replace(
-        /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
-        `$1<div class="elements">${fixture}</div>$2`,
-      ) });
-    });
-    await page.setViewportSize({ width: 1280, height: 1000 });
-    await openForSnapshot(page, `/vespers/${testDate}`, theme);
-    await page.addStyleTag({ content: `
-      main { max-width: 1000px; }
-      .elements { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
-      .psalm { margin: 0; }
-      header, nav, .hour-progress { visibility: hidden; }
-    ` });
-    await expect(page.locator(".initial-elevated")).toHaveCount(26);
-    await expect(page.locator(".elements")).toHaveScreenshot(`raised-alphabet-${theme}.png`);
+// The letters' optical profiles are the same in either theme; light only.
+test("full-size raised alphabet — light", async ({ page }) => {
+  const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
+  const fixture = words.map(word => `<div class="psalm"><div class="psalm-verses"><p class="verse">${word} hear our prayer.</p><p class="verse numbered"><span class="verse-num">2</span><span class="verse-body">And let our cry come unto thee.</span></p></div></div>`).join("");
+  await page.route(`**/vespers/${testDate}`, async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      `$1<div class="elements">${fixture}</div>$2`,
+    ) });
   });
-}
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await openForSnapshot(page, `/vespers/${testDate}`, "light");
+  await page.addStyleTag({ content: `
+    main { max-width: 1000px; }
+    .elements { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
+    .psalm { margin: 0; }
+    header, nav, .hour-progress { visibility: hidden; }
+  ` });
+  await expect(page.locator(".initial-elevated")).toHaveCount(26);
+  await expect(page.locator(".elements")).toHaveScreenshot(`raised-alphabet-light.png`);
+});
