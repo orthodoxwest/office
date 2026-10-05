@@ -146,7 +146,7 @@ fun dayColor(name: String): Color = when (name) {
 
 /**
  * A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
- * is, and red, green and violet, mixed for limewash, which would sink into the night.
+ * is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
  */
 fun dayColor(name: String, p: Palette): Color = when {
     p.dark && name == "white" -> Color(0xFFD0B06A)
