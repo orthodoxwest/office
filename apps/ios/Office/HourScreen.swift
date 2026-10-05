@@ -82,7 +82,7 @@ func compose<V>(_ load: @escaping () throws -> V) async -> Result<V, Error> {
     }
 }
 
-/// An hour of a day, in the reader's prayer form.
+/// An hour of a day, in the reader's prayer form, and Prime with the Martyrology when the reader reads it.
 struct HourPage: View {
     let date: CivilDate
     let hour: String
@@ -90,10 +90,12 @@ struct HourPage: View {
 
     var body: some View {
         let form = model.form
-        Loaded(key: "\(date.iso) \(hour) \(form)", motion: model.motion(to: .hour(date, hour))) {
-            try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form)
+        let martyrology = model.martyrology
+        Loaded(key: "\(date.iso) \(hour) \(form) \(martyrology)", motion: model.motion(to: .hour(date, hour))) {
+            try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
         } content: { view in
             HourScreen(view: view, date: date)
+                .onAppear { model.composed(view, page: .hour(date, hour)) }
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)

@@ -1842,14 +1842,23 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   const cells = await page.evaluate(() => {
     const rects = (sel) =>
       Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => el.getBoundingClientRect());
-    return { themes: rects(".theme-option"), sizes: rects(".text-size-option") };
+    return {
+      themes: rects(".theme-option[data-theme-choice]"),
+      sizes: rects(".text-size-option"),
+      martyrology: rects(".martyrology-option"),
+    };
   });
-  const all = [...cells.themes, ...cells.sizes];
-  expect(all).toHaveLength(6);
+  const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
+  expect(all).toHaveLength(8);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
   cells.themes.forEach((r, i) => {
     expect(Math.abs(r.left - cells.sizes[i].left)).toBeLessThan(1);
     expect(Math.abs(r.width - cells.sizes[i].width)).toBeLessThan(1);
+  });
+  // Off and On sit under the last two themes.
+  cells.martyrology.forEach((r, i) => {
+    expect(Math.abs(r.left - cells.themes[i + 1].left)).toBeLessThan(1);
+    expect(Math.abs(r.width - cells.themes[i + 1].width)).toBeLessThan(1);
   });
   expect(await overflows()).toBe(false);
   await page.locator(".site-menu > summary").click();
@@ -3561,17 +3570,18 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("Martyrology preview stays opt-in and cannot enter the offline office cache", async ({ browser, baseURL }) => {
+test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
     const page = await context.newPage();
-    // Keep the September 8 pilot reading, but visit its next occurrence:
+    // Keep the September 8 reading, but visit its next occurrence:
     // precache intentionally prunes historical pages as the real clock moves.
     const now = new Date();
     const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
-    const normal = `/prime/${year}-09-07`;
-    const preview = normal + "?preview=martyrology";
-    await page.goto(normal);
+    const prime = `/prime/${year}-09-07`;
+    const reading = page.getByRole("heading", { name: "Martyrology — September 8", exact: true });
+    const rubric = page.locator(".elements").getByText("this may laudably be done");
+    await page.goto(prime);
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
       if (!navigator.serviceWorker.controller) {
@@ -3579,28 +3589,27 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
       }
     });
     await page.reload();
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
-    await page.goto(preview);
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toBeVisible();
+    // Off by default: the rubric stands, and nothing is stored.
+    await expect(rubric).toBeVisible();
+    await expect(reading).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBeNull();
+    for (const button of await page.locator('.martyrology-option[data-martyrology-choice="off"]').all()) {
+      await expect(button).toHaveAttribute("aria-pressed", "true");
+    }
+
+    await choosePreference(page, "On");
+    await expect(reading).toBeVisible();
+    await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
-    expect(await page.evaluate(async (normal) => {
-      for (const name of await caches.keys()) {
-        const cache = await caches.open(name);
-        for (const key of await cache.keys()) {
-          if (new URL(key.url).searchParams.has("preview")) return false;
-          if (new URL(key.url).pathname === normal) {
-            if ((await (await cache.match(key)).text()).includes("Martyrology — September 8")) return false;
-          }
-        }
-      }
-      return true;
-    }, normal)).toBe(true);
+    // Remembered, and the same page serves both settings, offline too.
     await context.setOffline(true);
-    await page.goto(preview);
-    await expect(page.getByRole("heading", { name: "Preview unavailable offline" })).toBeVisible();
-    await page.goto(normal);
-    await expect(page.locator(".elements")).toContainText("this may laudably be done");
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
+    await expect(reading).toBeVisible();
+    await choosePreference(page, "Off");
+    await expect(rubric).toBeVisible();
+    await expect(reading).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
   } finally {
     await context.close();
   }

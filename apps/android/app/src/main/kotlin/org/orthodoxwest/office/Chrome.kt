@@ -213,6 +213,11 @@ class Prefs(val theme: ThemeChoice, val onTheme: (ThemeChoice) -> Unit, val text
 
 val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
 
+/** The reader's setting for reading the Martyrology at Prime (off by default), for the menu's last row. */
+class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
+
+val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
+
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
  * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
@@ -346,9 +351,9 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 
 /**
  * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme and Text rows, the current choice underlined in gold. The pages are muted, the
- * current one underlined in the lining. `prefsOnly` is the wide header's Settings: the Theme and
- * Text rows alone, under the header's end at `end`.
+ * then the Theme, Text and Martyrology rows, the current choice underlined in gold. The pages are
+ * muted, the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
+ * preference rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -422,6 +427,24 @@ fun MenuPanel(
                     TextSize.entries.forEach { s ->
                         val size = when (s) { TextSize.SMALL -> 13f; TextSize.DEFAULT -> 16f; TextSize.LARGE -> 20f }
                         MenuCell("A", s == textSize, Type.label(size, 0f), p.muted) { onTextSize(s) }
+                    }
+                }
+                // The Martyrology at Prime: Off and On under the last two themes, the longer label
+                // taking the first theme's cell, as on the web.
+                val martyrology = LocalMartyrology.current
+                MenuRow {
+                    Row(Modifier.width(54.dp)) {
+                        Text(
+                            "MARTYROLOGY",
+                            Modifier.padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
+                            style = Type.label(10.56f, 0.08f).copy(color = p.muted),
+                            maxLines = 1,
+                            softWrap = false,
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
+                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), p.accent) { martyrology.onChange(on) }
                     }
                 }
             }

@@ -64,7 +64,10 @@ struct RootView: View {
 
     var body: some View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
-        let visit = Visit(page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active)
+        let visit = Visit(
+            page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
+            martyrology: model.martyrologyShown(on: model.page)
+        )
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
@@ -111,11 +114,12 @@ struct RootView: View {
             if !model.openFromLaunch() && !wayBack.isEmpty { model.restore(wayBack) }
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
-        // The page shown counts in the day's usage whenever it, how it is read, or the day
-        // changes while the app is in front; each once a day (Usage.swift).
+        // The page shown counts in the day's usage whenever it, how it is read (Prime's
+        // Martyrology included), or the day changes while the app is in front; each once a day
+        // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
             guard v.active else { return }
-            Usage.shared.record(v.page.usageEvent, dark: v.dark, form: v.form)
+            Usage.shared.record(v.page.usageEvent, dark: v.dark, form: v.form, martyrology: v.martyrology)
         }
         .onReceive(minute) { _ in
             if phase == .active { model.refreshToday() }
@@ -158,6 +162,8 @@ private struct Visit: Equatable {
     let dark: Bool
     let today: CivilDate
     let active: Bool
+    /// At Prime, whether its Martyrology was shown, once composed.
+    let martyrology: Bool?
 }
 
 /// The pages hide the navigation bar, as the web has none; the edge swipe back stays.

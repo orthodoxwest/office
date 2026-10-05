@@ -675,6 +675,19 @@ summary:focus-visible {
   border-top: 1px solid var(--surface-edge);
 }
 
+/* Off and On sit under the last two themes; the longer label takes the
+   first theme's cell. */
+.site-prefs .martyrology-switch {
+  display: grid;
+  grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  border-top: 1px solid var(--surface-edge);
+}
+
+.site-prefs .martyrology-switch .pref-label {
+  grid-column: 1 / 3;
+}
+
 .pref-label {
   display: flex;
   align-items: center;
@@ -7563,6 +7576,12 @@ body.page-home::before {
   .usage-table-wrap { max-height: none; overflow: visible; }
   .usage-table th { position: static !important; }
 }
+
+/* Prime carries the Martyrology section twice, as the rubric and as the
+   reading; the reader's setting (off by default) shows one, before first
+   paint, as the prayer forms are chosen. */
+:root:not([data-martyrology="on"]) [data-martyrology-variant="on"],
+:root[data-martyrology="on"] [data-martyrology-variant="off"] { display: none !important; }
 
 /* The cached hour contains every officiant form. Select before first paint;
    display:none also removes inactive words from print and accessibility. */

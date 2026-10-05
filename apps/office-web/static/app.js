@@ -205,6 +205,7 @@ document.documentElement.classList.add("js");
   }
   window.addEventListener("resize", schedule);
   window.addEventListener("officeleaderchange", refresh);
+  window.addEventListener("officemartyrologychange", refresh);
   window.addEventListener("beforeprint", function () {
     measures = new WeakMap();
     typeset();
@@ -213,7 +214,8 @@ document.documentElement.classList.add("js");
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
-// also report the selected prayer form. These describe how the page
+// also report the selected prayer form, and Prime whether its Martyrology is
+// shown. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
@@ -232,6 +234,12 @@ function usageBeaconBody(scope) {
   var installed = navigator.standalone === true ||
     (!!window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   var clientToken = installed ? " client:pwa" : " client:browser";
+  // Prime, on a day with a Martyrology reading: whether the reader's setting
+  // shows it or leaves the rubric in its place.
+  var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
+    ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
+    : "";
+  clientToken = martyrologyToken + clientToken;
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }
@@ -471,6 +479,45 @@ function usageBeaconBody(scope) {
       if (choice) {
         applyTextSizeChoice(choice);
       }
+    });
+  });
+
+  // Martyrology at Prime: Off (the default) / On. The same contract as the
+  // text size: localStorage only, so every reader's Prime page (and its
+  // offline copy) is the same; the pre-paint script in layout.html sets
+  // data-martyrology, and style.css shows the rubric or the reading.
+  var MARTYROLOGY_KEY = "office-martyrology";
+
+  var paintMartyrologyChoice = function (choice) {
+    if (choice === "on") {
+      document.documentElement.setAttribute("data-martyrology", "on");
+    } else {
+      document.documentElement.removeAttribute("data-martyrology");
+    }
+    document.querySelectorAll(".martyrology-option[data-martyrology-choice]").forEach(function (btn) {
+      btn.setAttribute("aria-pressed", btn.getAttribute("data-martyrology-choice") === choice ? "true" : "false");
+    });
+  };
+
+  var storedMartyrology = null;
+  try {
+    storedMartyrology = localStorage.getItem(MARTYROLOGY_KEY);
+  } catch {
+    // Blocked storage: the Martyrology stays off.
+  }
+  paintMartyrologyChoice(storedMartyrology === "on" ? "on" : "off");
+
+  document.querySelectorAll(".martyrology-option[data-martyrology-choice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var choice = btn.getAttribute("data-martyrology-choice") === "on" ? "on" : "off";
+      paintMartyrologyChoice(choice);
+      try {
+        localStorage.setItem(MARTYROLOGY_KEY, choice);
+      } catch {
+        // Private mode / blocked storage — the choice still applies for this page.
+      }
+      // Prime's usage beacon reports what is now on the page.
+      window.dispatchEvent(new Event("officemartyrologychange"));
     });
   });
 
@@ -1909,6 +1956,7 @@ function usageBeaconBody(scope) {
   window.addEventListener("pageshow", function () { resume(); record(); });
   window.addEventListener("online", record);
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
+  window.addEventListener("officemartyrologychange", function () { engage(); record(); });
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();

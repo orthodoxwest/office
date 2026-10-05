@@ -10,8 +10,9 @@ use std::sync::{Arc, Mutex};
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
 use corpus::typography::typeset;
 use liturgy::{OfficeHour, PrayerForm};
+use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
-use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
+use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, invitation, long_date, reminder_description,
     reminder_summary, report_url, season_class, season_label, title_case,
@@ -67,15 +68,24 @@ impl OfficeCore {
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
-    /// prayer form "private", "deacon", or "priest".
-    pub fn compose(&self, hour: String, year: i32, month: i32, day: i32, form: String) -> Result<HourView, OfficeError> {
+    /// prayer form "private", "deacon", or "priest"; `martyrology` is the
+    /// reader's setting for reading the Martyrology at Prime.
+    #[uniffi::method(default(martyrology = false))]
+    pub fn compose(&self, hour: String, year: i32, month: i32, day: i32, form: String, martyrology: bool) -> Result<HourView, OfficeError> {
         let date =
             Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))?;
         let form = PrayerForm::parse(&form).map_err(failed)?;
         let year = self.year(date.year())?;
         let office_day = year.days.get(date.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {date}")))?;
-        let composed = self.engine.compose_hour(&hour, office_day, &year.moveable, form).map_err(failed)?;
-        Ok(HourView::new(&hour, &composed))
+        let compose = |martyrology| {
+            self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, martyrology }).map_err(failed)
+        };
+        let composed = compose(martyrology)?;
+        let mut view = HourView::new(&hour, &composed);
+        // Whether the setting had a reading to show or hide, as the usage beacon reports it.
+        let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
+        view.martyrology = has_reading.then_some(martyrology);
+        Ok(view)
     }
 
     /// Home for a civil date, as the web's home handler builds it. `today`
@@ -274,9 +284,17 @@ pub enum UsageEvent {
 
 /// The usage beacon for `event`, or none when it does not count: as on the web, only a page
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
-/// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form.
-#[uniffi::export]
-pub fn usage_beacon(event: UsageEvent, today: CivilDate, dark: bool, form: String, client: UsageClient) -> Option<String> {
+/// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
+/// `martyrology` the hour's `HourView::martyrology`.
+#[uniffi::export(default(martyrology = None))]
+pub fn usage_beacon(
+    event: UsageEvent,
+    today: CivilDate,
+    dark: bool,
+    form: String,
+    client: UsageClient,
+    martyrology: Option<bool>,
+) -> Option<String> {
     use presentation::usage::{App, app_beacon, current_day, current_year};
     let today = today.parse().ok()?;
     let scope = match &event {
@@ -290,7 +308,7 @@ pub fn usage_beacon(event: UsageEvent, today: CivilDate, dark: bool, form: Strin
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form)
+    app_beacon(scope, app, dark, &form, martyrology)
 }
 
 /// Where a release build of the apps posts its beacons.
@@ -534,6 +552,9 @@ pub struct HourView {
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
+    /// Prime's Martyrology: whether the reader's setting shows the day's reading, or none when
+    /// there is no reading to show (another hour, the Triduum, a date not yet transcribed).
+    pub martyrology: Option<bool>,
 }
 
 impl HourView {
@@ -550,6 +571,7 @@ impl HourView {
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
+            martyrology: None,
         }
     }
 }

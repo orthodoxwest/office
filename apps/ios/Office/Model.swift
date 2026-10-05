@@ -183,6 +183,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
+    /// Whether Prime reads the next day's Martyrology; off by default.
+    @Published private(set) var martyrology: Bool
+    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
+    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
     /// Today, read again whenever the app comes forward; a screenshot run can fix it.
     @Published private(set) var today: CivilDate
     /// The hour of the clock, which chooses home's invitation.
@@ -202,6 +206,7 @@ final class AppModel: ObservableObject {
         form = UserDefaults.standard.string(forKey: "form").flatMap { f in prayerForms.contains { $0.value == f } ? f : nil } ?? "private"
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
+        martyrology = UserDefaults.standard.bool(forKey: "martyrology")
     }
 
     /// The page shown.
@@ -261,6 +266,24 @@ final class AppModel: ObservableObject {
     func chooseTextSize(_ value: TextSize) {
         textSize = value
         defaults.set(value.rawValue, forKey: "text-size")
+    }
+
+    func chooseMartyrology(_ value: Bool) {
+        step = nil
+        martyrology = value
+        defaults.set(value, forKey: "martyrology")
+    }
+
+    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    func composed(_ view: HourView, page: Page) {
+        guard view.hour == "prime" else { return }
+        primeMartyrology = (page, view.martyrology)
+    }
+
+    /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
+    func martyrologyShown(on page: Page) -> Bool? {
+        guard let prime = primeMartyrology, prime.page == page else { return nil }
+        return prime.shown
     }
 
     /// Called when the app comes forward, and every minute while it is in front: the hour or the

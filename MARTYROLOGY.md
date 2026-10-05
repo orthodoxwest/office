@@ -1,28 +1,37 @@
 # Prime Martyrology pilot
 
-Prime normally ends with a rubric pointing to the Martyrology. With
-`?preview=martyrology` in the URL, it instead reads the reviewed announcement
-for the **following civil date**, if one exists along with the common
-conclusion and response. Otherwise, and in all CLI output, the rubric stays.
-The Triduum still suppresses the whole section. Readings follow civil dates
-regardless of feast transfers; nothing else in the calendar or other hours
-changes.
+Prime normally ends with a rubric pointing to the Martyrology. A reader who
+turns **Martyrology** on in Settings (off by default; web, Android and iOS)
+instead hears the reviewed announcement for the **following civil date**, if
+one exists, along with the common conclusion and response. Otherwise, and in
+all CLI output, the rubric stays. The Triduum still suppresses the whole
+section. Readings follow civil dates regardless of feast transfers; nothing
+else in the calendar or other hours changes.
 
 The trial covers the whole civil year except the held days below, read at
-Prime on the preceding day; try `/prime/2026-09-07?preview=martyrology`. These
+Prime on the preceding day; try `/prime/2026-09-07` with the setting on. These
 days hold a notice with no usable chronology: January 2, 14 and 28; February 7;
 March 12 and 24; April 26; May 5, 16, 22 and 29; June 30; July 5, 28 and 29;
 August 1 and 27; September 12, 22 and 26; October 8 and 12; November 6, 10 and 30;
 and December 2. February 24–28 are held because the source moves those
 announcements by a day in leap years and the corpus is keyed by month and day
 (the source has no February 29 entry). December 8, 15 and 25 await clergy review
-of their announcements. Held days keep the rubric. It is an unlinked review feature, not
-authentication: the parameter isn't persisted, previews bypass the service
-worker and send `Cache-Control: private, no-store` and
-`X-Robots-Tag: noindex, nofollow`. Programmatic review uses
+of their announcements. Held days keep the rubric.
+
+On the web the setting lives in the browser (`office-martyrology` in
+localStorage, like the theme), so the page never varies by reader: Prime carries
+the Martyrology section twice, as the rubric and as the reading
+(`data-martyrology-variant`), and the root's `data-martyrology` shows one before
+first paint. The offline copy therefore serves either setting. The native apps
+compose Prime again when the setting changes. Programmatic use goes through
 `Engine::compose_hour_with_options` with
-`ComposeOptions { martyrology_preview: true, ..Default::default() }`. The flag can go once
-clergy approve; making the section collapsible is a separate decision.
+`ComposeOptions { martyrology: true, ..Default::default() }`. The earlier
+`?preview=martyrology` URL flag is retired and ignored. Making the section
+collapsible is a separate decision.
+
+The usage report's **Martyrology at Prime** breakdown (`martyrology:shown|hidden`)
+counts Prime readers on days with a reading, by whether the setting showed it;
+see README, "Usage metrics".
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
 DST, missing-text fallback, and the Triduum.

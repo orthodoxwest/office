@@ -101,32 +101,34 @@ class MainActivity : ComponentActivity() {
             val dissolve = rememberDissolve()
             Box(Modifier.fillMaxSize().dissolving(dissolve)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
-                    OfficeApp(
-                        shown = vm.shown,
-                        behind = vm.behind,
-                        motion = vm.motion,
-                        onBack = { vm.back() },
-                        today = vm.today,
-                        hours = vm.hours,
-                        form = vm.form,
-                        theme = vm.theme,
-                        textSize = vm.textSize,
-                        // The bars and any camera cutout: above and below on a phone upright, at the sides on its side.
-                        insets = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues(),
-                        onOpen = vm::open,
-                        onHome = vm::goHome,
-                        onForm = vm::chooseForm,
-                        onTheme = { t -> if (t != vm.theme) dissolve.change { vm.chooseTheme(t) } },
-                        onTextSize = { t -> if (t != vm.textSize) dissolve.change { vm.chooseTextSize(t) } },
-                        reminders = vm.reminders,
-                        reminderStatus = vm.reminderStatus,
-                        onReminders = vm::changeReminders,
-                        onTurnOn = ::turnOnReminders,
-                        onTurnOff = { vm.setRemindersOn(false) },
-                        onAllowNotifications = ::openNotificationSettings,
-                        onAllowExact = ::openExactAlarmSettings,
-                        entries = vm.entries.map { it.id },
-                    )
+                    CompositionLocalProvider(LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) }) {
+                        OfficeApp(
+                            shown = vm.shown,
+                            behind = vm.behind,
+                            motion = vm.motion,
+                            onBack = { vm.back() },
+                            today = vm.today,
+                            hours = vm.hours,
+                            form = vm.form,
+                            theme = vm.theme,
+                            textSize = vm.textSize,
+                            // The bars and any camera cutout: above and below on a phone upright, at the sides on its side.
+                            insets = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues(),
+                            onOpen = vm::open,
+                            onHome = vm::goHome,
+                            onForm = vm::chooseForm,
+                            onTheme = { t -> if (t != vm.theme) dissolve.change { vm.chooseTheme(t) } },
+                            onTextSize = { t -> if (t != vm.textSize) dissolve.change { vm.chooseTextSize(t) } },
+                            reminders = vm.reminders,
+                            reminderStatus = vm.reminderStatus,
+                            onReminders = vm::changeReminders,
+                            onTurnOn = ::turnOnReminders,
+                            onTurnOff = { vm.setRemindersOn(false) },
+                            onAllowNotifications = ::openNotificationSettings,
+                            onAllowExact = ::openExactAlarmSettings,
+                            entries = vm.entries.map { it.id },
+                        )
+                    }
                 }
             }
         }
