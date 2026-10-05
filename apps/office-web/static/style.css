@@ -4499,6 +4499,354 @@ body.season-eastertide {
     var(--arch-t) 100%);
 }
 
+@media (max-width: 700px) and (min-height: 800px) {
+  .page-home .home-hero {
+    --arch-rise: 0.56;
+  }
+
+  .page-home .home-arch::before,
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge,
+  .page-home .home-hero::before,
+  .page-home .home-hero::after,
+  .page-home .home-arch-fill {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      calc(0.081% + 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(0.323% + 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(0.723% + 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(1.279% + 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(3.658% + 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(6.394% + 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(9.475% - 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(12.886% - 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(16.613% - 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(20.64% - 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(24.948% - 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(29.518% - 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(34.33% - 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(39.363% - 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(44.594% - 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.082 * var(--arch-d)),
+      calc(55.406% + 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(60.637% + 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(65.67% + 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(70.482% + 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(75.052% + 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(79.36% + 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(83.387% + 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(87.114% + 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(90.525% + 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(93.606% - 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(96.342% - 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(98.721% - 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(99.277% - 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(99.677% - 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(99.919% - 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      100% 100%);
+  }
+
+  .page-home .home-arch-shade::before {
+    clip-path: polygon(evenodd,
+      -10% -10%,
+      110% -10%,
+      110% 110%,
+      -10% 110%,
+      -10% -10%,
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      calc(0.081% + 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(0.323% + 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(0.723% + 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(1.279% + 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(3.658% + 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(6.394% + 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(9.475% - 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(12.886% - 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(16.613% - 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(20.64% - 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(24.948% - 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(29.518% - 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(34.33% - 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(39.363% - 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(44.594% - 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.082 * var(--arch-d)),
+      calc(55.406% + 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(60.637% + 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(65.67% + 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(70.482% + 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(75.052% + 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(79.36% + 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(83.387% + 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(87.114% + 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(90.525% + 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(93.606% - 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(96.342% - 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(98.721% - 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(99.277% - 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(99.677% - 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(99.919% - 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      100% 100%,
+      0 100%);
+  }
+
+  .page-home .home-lining::before,
+  .page-home .home-lining::after {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      calc(0.081% + 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(0.323% + 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(0.723% + 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(1.279% + 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(3.658% + 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(6.394% + 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(9.475% - 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(12.886% - 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(16.613% - 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(20.64% - 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(24.948% - 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(29.518% - 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(34.33% - 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(39.363% - 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(44.594% - 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.082 * var(--arch-d)),
+      calc(55.406% + 0.3344 * var(--arch-d)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d)),
+      calc(60.637% + 0.2885 * var(--arch-d)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d)),
+      calc(65.67% + 0.2444 * var(--arch-d)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d)),
+      calc(70.482% + 0.2022 * var(--arch-d)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d)),
+      calc(75.052% + 0.1621 * var(--arch-d)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d)),
+      calc(79.36% + 0.1243 * var(--arch-d)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d)),
+      calc(83.387% + 0.089 * var(--arch-d)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d)),
+      calc(87.114% + 0.0563 * var(--arch-d)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d)),
+      calc(90.525% + 0.0264 * var(--arch-d)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d)),
+      calc(93.606% - 0.0006 * var(--arch-d)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d)),
+      calc(96.342% - 0.0246 * var(--arch-d)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d)),
+      calc(98.721% - 0.0455 * var(--arch-d)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d)),
+      calc(99.277% - 0.0257 * var(--arch-d)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d)),
+      calc(99.677% - 0.0115 * var(--arch-d)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d)),
+      calc(99.919% - 0.0029 * var(--arch-d)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      100% 100%,
+      calc(100% - var(--arch-t)) 100%,
+      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      calc(99.919% - 0.0029 * var(--arch-d) - 0.9955 * var(--arch-t)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d) + 0.0947 * var(--arch-t)),
+      calc(99.677% - 0.0115 * var(--arch-d) - 0.9821 * var(--arch-t)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d) + 0.1885 * var(--arch-t)),
+      calc(99.277% - 0.0257 * var(--arch-d) - 0.9598 * var(--arch-t)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d) + 0.2806 * var(--arch-t)),
+      calc(98.721% - 0.0455 * var(--arch-d) - 0.929 * var(--arch-t)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d) + 0.3702 * var(--arch-t)),
+      calc(96.342% - 0.0246 * var(--arch-d) - 0.9022 * var(--arch-t)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d) + 0.4312 * var(--arch-t)),
+      calc(93.606% - 0.0006 * var(--arch-d) - 0.8715 * var(--arch-t)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d) + 0.4904 * var(--arch-t)),
+      calc(90.525% + 0.0264 * var(--arch-d) - 0.8369 * var(--arch-t)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d) + 0.5473 * var(--arch-t)),
+      calc(87.114% + 0.0563 * var(--arch-d) - 0.7986 * var(--arch-t)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d) + 0.6019 * var(--arch-t)),
+      calc(83.387% + 0.089 * var(--arch-d) - 0.7567 * var(--arch-t)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d) + 0.6537 * var(--arch-t)),
+      calc(79.36% + 0.1243 * var(--arch-d) - 0.7115 * var(--arch-t)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d) + 0.7027 * var(--arch-t)),
+      calc(75.052% + 0.1621 * var(--arch-d) - 0.6632 * var(--arch-t)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d) + 0.7485 * var(--arch-t)),
+      calc(70.482% + 0.2022 * var(--arch-d) - 0.6118 * var(--arch-t)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d) + 0.791 * var(--arch-t)),
+      calc(65.67% + 0.2444 * var(--arch-d) - 0.5578 * var(--arch-t)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d) + 0.83 * var(--arch-t)),
+      calc(60.637% + 0.2885 * var(--arch-d) - 0.5013 * var(--arch-t)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d) + 0.8653 * var(--arch-t)),
+      calc(55.406% + 0.3344 * var(--arch-d) - 0.4425 * var(--arch-t)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d) + 0.8968 * var(--arch-t)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.082 * var(--arch-d) + 1.082 * var(--arch-t)),
+      calc(44.594% - 0.3344 * var(--arch-d) + 0.4425 * var(--arch-t)) calc(var(--arch-lift) + 0.0245 * var(--arch-w) - 0.8968 * var(--arch-d) + 0.8968 * var(--arch-t)),
+      calc(39.363% - 0.2885 * var(--arch-d) + 0.5013 * var(--arch-t)) calc(var(--arch-lift) + 0.0525 * var(--arch-w) - 0.8653 * var(--arch-d) + 0.8653 * var(--arch-t)),
+      calc(34.33% - 0.2444 * var(--arch-d) + 0.5578 * var(--arch-t)) calc(var(--arch-lift) + 0.0839 * var(--arch-w) - 0.83 * var(--arch-d) + 0.83 * var(--arch-t)),
+      calc(29.518% - 0.2022 * var(--arch-d) + 0.6118 * var(--arch-t)) calc(var(--arch-lift) + 0.1187 * var(--arch-w) - 0.791 * var(--arch-d) + 0.791 * var(--arch-t)),
+      calc(24.948% - 0.1621 * var(--arch-d) + 0.6632 * var(--arch-t)) calc(var(--arch-lift) + 0.1565 * var(--arch-w) - 0.7485 * var(--arch-d) + 0.7485 * var(--arch-t)),
+      calc(20.64% - 0.1243 * var(--arch-d) + 0.7115 * var(--arch-t)) calc(var(--arch-lift) + 0.1973 * var(--arch-w) - 0.7027 * var(--arch-d) + 0.7027 * var(--arch-t)),
+      calc(16.613% - 0.089 * var(--arch-d) + 0.7567 * var(--arch-t)) calc(var(--arch-lift) + 0.2409 * var(--arch-w) - 0.6537 * var(--arch-d) + 0.6537 * var(--arch-t)),
+      calc(12.886% - 0.0563 * var(--arch-d) + 0.7986 * var(--arch-t)) calc(var(--arch-lift) + 0.2871 * var(--arch-w) - 0.6019 * var(--arch-d) + 0.6019 * var(--arch-t)),
+      calc(9.475% - 0.0264 * var(--arch-d) + 0.8369 * var(--arch-t)) calc(var(--arch-lift) + 0.3356 * var(--arch-w) - 0.5473 * var(--arch-d) + 0.5473 * var(--arch-t)),
+      calc(6.394% + 0.0006 * var(--arch-d) + 0.8715 * var(--arch-t)) calc(var(--arch-lift) + 0.3863 * var(--arch-w) - 0.4904 * var(--arch-d) + 0.4904 * var(--arch-t)),
+      calc(3.658% + 0.0246 * var(--arch-d) + 0.9022 * var(--arch-t)) calc(var(--arch-lift) + 0.439 * var(--arch-w) - 0.4312 * var(--arch-d) + 0.4312 * var(--arch-t)),
+      calc(1.279% + 0.0455 * var(--arch-d) + 0.929 * var(--arch-t)) calc(var(--arch-lift) + 0.4934 * var(--arch-w) - 0.3702 * var(--arch-d) + 0.3702 * var(--arch-t)),
+      calc(0.723% + 0.0257 * var(--arch-d) + 0.9598 * var(--arch-t)) calc(var(--arch-lift) + 0.5095 * var(--arch-w) - 0.2806 * var(--arch-d) + 0.2806 * var(--arch-t)),
+      calc(0.323% + 0.0115 * var(--arch-d) + 0.9821 * var(--arch-t)) calc(var(--arch-lift) + 0.5261 * var(--arch-w) - 0.1885 * var(--arch-d) + 0.1885 * var(--arch-t)),
+      calc(0.081% + 0.0029 * var(--arch-d) + 0.9955 * var(--arch-t)) calc(var(--arch-lift) + 0.543 * var(--arch-w) - 0.0947 * var(--arch-d) + 0.0947 * var(--arch-t)),
+      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
+      var(--arch-t) 100%);
+  }
+}
+
+@media (max-width: 700px) and (min-height: 880px) {
+  .page-home .home-hero {
+    --arch-rise: 0.66;
+  }
+
+  .page-home .home-arch::before,
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge,
+  .page-home .home-hero::before,
+  .page-home .home-hero::after,
+  .page-home .home-arch-fill {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      calc(0.022% + 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(0.087% + 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(0.196% + 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(0.348% + 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(1.824% - 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(3.747% - 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(6.109% - 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(8.896% - 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(12.093% - 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(15.685% - 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(19.65% - 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(23.969% - 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(28.618% - 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(33.573% - 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(38.807% - 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(44.293% - 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0976 * var(--arch-d)),
+      calc(55.707% + 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(61.193% + 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(66.427% + 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(71.382% + 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(76.031% + 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(80.35% + 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(84.315% + 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(87.907% + 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(91.104% + 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(93.891% + 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(96.253% + 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(98.176% + 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(99.652% - 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(99.804% - 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(99.913% - 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(99.978% - 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      100% 100%);
+  }
+
+  .page-home .home-arch-shade::before {
+    clip-path: polygon(evenodd,
+      -10% -10%,
+      110% -10%,
+      110% 110%,
+      -10% 110%,
+      -10% -10%,
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      calc(0.022% + 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(0.087% + 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(0.196% + 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(0.348% + 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(1.824% - 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(3.747% - 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(6.109% - 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(8.896% - 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(12.093% - 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(15.685% - 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(19.65% - 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(23.969% - 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(28.618% - 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(33.573% - 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(38.807% - 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(44.293% - 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0976 * var(--arch-d)),
+      calc(55.707% + 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(61.193% + 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(66.427% + 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(71.382% + 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(76.031% + 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(80.35% + 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(84.315% + 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(87.907% + 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(91.104% + 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(93.891% + 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(96.253% + 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(98.176% + 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(99.652% - 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(99.804% - 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(99.913% - 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(99.978% - 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      100% 100%,
+      0 100%);
+  }
+
+  .page-home .home-lining::before,
+  .page-home .home-lining::after {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      calc(0.022% + 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(0.087% + 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(0.196% + 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(0.348% + 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(1.824% - 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(3.747% - 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(6.109% - 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(8.896% - 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(12.093% - 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(15.685% - 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(19.65% - 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(23.969% - 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(28.618% - 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(33.573% - 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(38.807% - 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(44.293% - 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0976 * var(--arch-d)),
+      calc(55.707% + 0.3634 * var(--arch-d)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d)),
+      calc(61.193% + 0.3165 * var(--arch-d)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d)),
+      calc(66.427% + 0.2717 * var(--arch-d)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d)),
+      calc(71.382% + 0.2293 * var(--arch-d)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d)),
+      calc(76.031% + 0.1896 * var(--arch-d)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d)),
+      calc(80.35% + 0.1527 * var(--arch-d)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d)),
+      calc(84.315% + 0.1187 * var(--arch-d)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d)),
+      calc(87.907% + 0.088 * var(--arch-d)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d)),
+      calc(91.104% + 0.0607 * var(--arch-d)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d)),
+      calc(93.891% + 0.0369 * var(--arch-d)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d)),
+      calc(96.253% + 0.0167 * var(--arch-d)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d)),
+      calc(98.176% + 0.0002 * var(--arch-d)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d)),
+      calc(99.652% - 0.0124 * var(--arch-d)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d)),
+      calc(99.804% - 0.007 * var(--arch-d)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d)),
+      calc(99.913% - 0.0031 * var(--arch-d)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d)),
+      calc(99.978% - 0.0008 * var(--arch-d)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      100% 100%,
+      calc(100% - var(--arch-t)) 100%,
+      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      calc(99.978% - 0.0008 * var(--arch-d) - 0.9988 * var(--arch-t)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d) + 0.0493 * var(--arch-t)),
+      calc(99.913% - 0.0031 * var(--arch-d) - 0.9951 * var(--arch-t)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d) + 0.0984 * var(--arch-t)),
+      calc(99.804% - 0.007 * var(--arch-d) - 0.9891 * var(--arch-t)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d) + 0.1473 * var(--arch-t)),
+      calc(99.652% - 0.0124 * var(--arch-d) - 0.9806 * var(--arch-t)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d) + 0.1958 * var(--arch-t)),
+      calc(98.176% + 0.0002 * var(--arch-d) - 0.9638 * var(--arch-t)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d) + 0.2668 * var(--arch-t)),
+      calc(96.253% + 0.0167 * var(--arch-d) - 0.9417 * var(--arch-t)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d) + 0.3364 * var(--arch-t)),
+      calc(93.891% + 0.0369 * var(--arch-d) - 0.9147 * var(--arch-t)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d) + 0.4042 * var(--arch-t)),
+      calc(91.104% + 0.0607 * var(--arch-d) - 0.8828 * var(--arch-t)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d) + 0.4698 * var(--arch-t)),
+      calc(87.907% + 0.088 * var(--arch-d) - 0.8462 * var(--arch-t)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d) + 0.5329 * var(--arch-t)),
+      calc(84.315% + 0.1187 * var(--arch-d) - 0.8051 * var(--arch-t)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d) + 0.5932 * var(--arch-t)),
+      calc(80.35% + 0.1527 * var(--arch-d) - 0.7597 * var(--arch-t)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d) + 0.6503 * var(--arch-t)),
+      calc(76.031% + 0.1896 * var(--arch-d) - 0.7102 * var(--arch-t)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d) + 0.704 * var(--arch-t)),
+      calc(71.382% + 0.2293 * var(--arch-d) - 0.657 * var(--arch-t)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d) + 0.7539 * var(--arch-t)),
+      calc(66.427% + 0.2717 * var(--arch-d) - 0.6002 * var(--arch-t)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d) + 0.7998 * var(--arch-t)),
+      calc(61.193% + 0.3165 * var(--arch-d) - 0.5403 * var(--arch-t)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d) + 0.8415 * var(--arch-t)),
+      calc(55.707% + 0.3634 * var(--arch-d) - 0.4775 * var(--arch-t)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d) + 0.8786 * var(--arch-t)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0976 * var(--arch-d) + 1.0976 * var(--arch-t)),
+      calc(44.293% - 0.3634 * var(--arch-d) + 0.4775 * var(--arch-t)) calc(var(--arch-lift) + 0.0284 * var(--arch-w) - 0.8786 * var(--arch-d) + 0.8786 * var(--arch-t)),
+      calc(38.807% - 0.3165 * var(--arch-d) + 0.5403 * var(--arch-t)) calc(var(--arch-lift) + 0.0608 * var(--arch-w) - 0.8415 * var(--arch-d) + 0.8415 * var(--arch-t)),
+      calc(33.573% - 0.2717 * var(--arch-d) + 0.6002 * var(--arch-t)) calc(var(--arch-lift) + 0.0972 * var(--arch-w) - 0.7998 * var(--arch-d) + 0.7998 * var(--arch-t)),
+      calc(28.618% - 0.2293 * var(--arch-d) + 0.657 * var(--arch-t)) calc(var(--arch-lift) + 0.1373 * var(--arch-w) - 0.7539 * var(--arch-d) + 0.7539 * var(--arch-t)),
+      calc(23.969% - 0.1896 * var(--arch-d) + 0.7102 * var(--arch-t)) calc(var(--arch-lift) + 0.1809 * var(--arch-w) - 0.704 * var(--arch-d) + 0.704 * var(--arch-t)),
+      calc(19.65% - 0.1527 * var(--arch-d) + 0.7597 * var(--arch-t)) calc(var(--arch-lift) + 0.2278 * var(--arch-w) - 0.6503 * var(--arch-d) + 0.6503 * var(--arch-t)),
+      calc(15.685% - 0.1187 * var(--arch-d) + 0.8051 * var(--arch-t)) calc(var(--arch-lift) + 0.2777 * var(--arch-w) - 0.5932 * var(--arch-d) + 0.5932 * var(--arch-t)),
+      calc(12.093% - 0.088 * var(--arch-d) + 0.8462 * var(--arch-t)) calc(var(--arch-lift) + 0.3303 * var(--arch-w) - 0.5329 * var(--arch-d) + 0.5329 * var(--arch-t)),
+      calc(8.896% - 0.0607 * var(--arch-d) + 0.8828 * var(--arch-t)) calc(var(--arch-lift) + 0.3855 * var(--arch-w) - 0.4698 * var(--arch-d) + 0.4698 * var(--arch-t)),
+      calc(6.109% - 0.0369 * var(--arch-d) + 0.9147 * var(--arch-t)) calc(var(--arch-lift) + 0.4428 * var(--arch-w) - 0.4042 * var(--arch-d) + 0.4042 * var(--arch-t)),
+      calc(3.747% - 0.0167 * var(--arch-d) + 0.9417 * var(--arch-t)) calc(var(--arch-lift) + 0.502 * var(--arch-w) - 0.3364 * var(--arch-d) + 0.3364 * var(--arch-t)),
+      calc(1.824% - 0.0002 * var(--arch-d) + 0.9638 * var(--arch-t)) calc(var(--arch-lift) + 0.5627 * var(--arch-w) - 0.2668 * var(--arch-d) + 0.2668 * var(--arch-t)),
+      calc(0.348% + 0.0124 * var(--arch-d) + 0.9806 * var(--arch-t)) calc(var(--arch-lift) + 0.6248 * var(--arch-w) - 0.1958 * var(--arch-d) + 0.1958 * var(--arch-t)),
+      calc(0.196% + 0.007 * var(--arch-d) + 0.9891 * var(--arch-t)) calc(var(--arch-lift) + 0.6335 * var(--arch-w) - 0.1473 * var(--arch-d) + 0.1473 * var(--arch-t)),
+      calc(0.087% + 0.0031 * var(--arch-d) + 0.9951 * var(--arch-t)) calc(var(--arch-lift) + 0.6423 * var(--arch-w) - 0.0984 * var(--arch-d) + 0.0984 * var(--arch-t)),
+      calc(0.022% + 0.0008 * var(--arch-d) + 0.9988 * var(--arch-t)) calc(var(--arch-lift) + 0.6511 * var(--arch-w) - 0.0493 * var(--arch-d) + 0.0493 * var(--arch-t)),
+      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.66 * var(--arch-w)),
+      var(--arch-t) 100%);
+  }
+}
+
 @media (min-width: 701px) {
   .page-home .home-hero {
     --arch-rise: 0.38;
@@ -5823,6 +6171,88 @@ body.season-eastertide {
 
   .page-home .home-day-head .not-today-notice {
     margin-block: 0 0.15rem;
+  }
+}
+
+/* A taller phone has height to spare under the card. Rather than leave it
+   as bare wall, the card takes it: the head rises further (tools/genarch.py's
+   "tall" and "taller" shapes, at the same breakpoints), the cross and date
+   go down into it in proportion, and the invitation and the hours get the
+   air a 667px screen cannot afford. */
+@media (max-width: 700px) {
+  /* Whatever height the card does not need goes to the card, so it
+     stands from the header to a little above the footer's tailpiece (the
+     header, footer and that air are about 10.9rem). A 667px screen has
+     none to give. Half goes to the panel above the band, with the day
+     block centred under the head. */
+  .page-home .home-hero {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100svh - 10.9rem);
+    box-sizing: border-box;
+  }
+
+  .page-home .home-summary {
+    flex: 1 0 auto;
+  }
+
+  /* Half of it, so the head does not stand empty: the hours' bands take
+     the rest in equal shares. */
+  .page-home .home-prayer-card {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-home .home-hour-links {
+    flex: 1 0 auto;
+    grid-auto-rows: 1fr;
+  }
+}
+
+@media (max-width: 700px) and (min-height: 800px) {
+  .page-home .home-hero {
+    --crown-top: 3.1rem;
+    --head-pad: 6.7rem;
+  }
+
+  .page-home .home-day-head {
+    margin-bottom: 0.6rem;
+  }
+
+  .page-home .home-prayer-card h2 {
+    margin-bottom: 1rem;
+  }
+
+  .page-home .pray-now-wrap {
+    margin-bottom: 1rem;
+  }
+
+  .page-home .home-hour-link {
+    min-height: 3.3rem;
+  }
+
+  .page-home .home-day-meta {
+    margin-top: 0.8rem;
+  }
+}
+
+@media (max-width: 700px) and (min-height: 880px) {
+  .page-home .home-hero {
+    --crown-top: 3.6rem;
+    --head-pad: 7.8rem;
+  }
+
+  .page-home .home-prayer-card h2 {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-home .pray-now-wrap {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-home .home-hour-link {
+    min-height: 3.75rem;
   }
 }
 

@@ -41,14 +41,25 @@ END = "/* genarch:end */"
 # from the left springing. Phone: a 143° point with bowed flanks; niche: a
 # fuller haunch. Changing the phone's shape means refitting the date's
 # max-width in style.css (".page-home .home h1").
+# A taller phone has height to spare under the card, so its head rises
+# further: "tall" from 800px high, "taller" from 880px.
 SHAPES = {
     "phone": dict(rise=0.44, haunch=0.18, centre=0.80, haunch_steps=4, upper_steps=11),
+    "tall": dict(rise=0.56, haunch=0.18, centre=0.84, haunch_steps=4, upper_steps=12),
+    "taller": dict(rise=0.66, haunch=0.18, centre=0.86, haunch_steps=4, upper_steps=13),
     "niche": dict(rise=0.38, haunch=0.16, centre=0.80, haunch_steps=4, upper_steps=12),
+}
+# Where each shape applies, in order (later ones win).
+MEDIA = {
+    "phone": None,
+    "tall": "(max-width: 700px) and (min-height: 800px)",
+    "taller": "(max-width: 700px) and (min-height: 880px)",
+    "niche": "(min-width: 701px)",
 }
 # The deepest inward layer each shape draws (the lining's hairline), in card
 # widths at the narrowest card: the samples next to the point must not cross
 # the centre line at that depth.
-DEEPEST = {"phone": 22 / 288, "niche": 40 / 600}
+DEEPEST = {"phone": 22 / 288, "tall": 22 / 288, "taller": 22 / 288, "niche": 40 / 600}
 
 
 def solve(rise, haunch, centre, **_):
@@ -172,12 +183,14 @@ def indent(block):
 
 
 def main():
+    blocks = []
+    for name, shape in SHAPES.items():
+        media = MEDIA[name]
+        block = rules(name, shape)
+        blocks.append(block if media is None else f"@media {media} {{\n{indent(block)}}}\n")
     generated = (
         f"{BEGIN}: tools/genarch.py writes this block; edit the script, not the polygons. */\n"
-        + rules("phone", SHAPES["phone"])
-        + "\n@media (min-width: 701px) {\n"
-        + indent(rules("niche", SHAPES["niche"]))
-        + "}\n"
+        + "\n".join(blocks)
         + END
     )
     text = CSS.read_text()
