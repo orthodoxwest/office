@@ -283,19 +283,12 @@ mod tests {
         for (i, line) in body.split("\r\n").enumerate() {
             assert!(line.len() <= 75, "line {} exceeds 75 octets: {line:?}", i + 1);
         }
-    }
-
-    #[test]
-    fn day_filter_and_no_alarm() {
-        // 2026-06-08 is a Monday.
+        // A day filter and no alarm; 2026-06-08 is a Monday.
         let body = ics("vespers=18:00&days=sun&alarm=none&horizon=14", at(&TimeZone::UTC, 2026, 6, 8, 12, 0));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 2);
         assert!(!body.contains("BEGIN:VALARM"));
         assert!(body.contains("DTSTART:20260614T180000Z"));
-    }
-
-    #[test]
-    fn spans_year_boundary() {
+        // Across the year's end.
         let body = ics("compline=21:00&horizon=10", at(&TimeZone::UTC, 2026, 12, 28, 12, 0));
         assert!(body.contains("UID:compline-2027-01-03@awrv-office"));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 10);
