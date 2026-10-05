@@ -107,11 +107,13 @@ or impose a redesign on an unrelated change.
   labels' cells take the frieze's green earth thinned. It must still fit a
   375×667 viewport whole, so its cost was paid by the header's margin, the
   footer's padding and gap, and the page's bottom padding.
-  Taller phones don't leave bare wall under it: from 800px and 880px
-  high the head rises further (genarch's "tall" and "taller" shapes) with
-  the cross and date lowered to keep clear of the point, and the card
-  stands down to just above the footer, its spare height shared between
-  the panel above the band and the hours' bands.
+  Taller phones get a taller design, not the small one stretched: from
+  800px and 880px high the head rises further to a sharper point
+  (genarch's "tall" and "taller" shapes, 128° and 123°), the cross, date,
+  feast and invitation grow, the hours' rows get a fixed taller minimum
+  (never stretched), and the card stands down to just above the footer,
+  the spare height going to the head, three parts above the day block to
+  two below so it sits optically under the point.
   From 701px the same object widens into a niche set into the wall (a
   lower pointed head, rising 0.38 of its width so a laptop still shows
   the hours, stone moulding as further offset layers, day-colour

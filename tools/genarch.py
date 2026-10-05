@@ -45,8 +45,8 @@ END = "/* genarch:end */"
 # further: "tall" from 800px high, "taller" from 880px.
 SHAPES = {
     "phone": dict(rise=0.44, haunch=0.18, centre=0.80, haunch_steps=4, upper_steps=11),
-    "tall": dict(rise=0.56, haunch=0.18, centre=0.84, haunch_steps=4, upper_steps=12),
-    "taller": dict(rise=0.66, haunch=0.18, centre=0.86, haunch_steps=4, upper_steps=13),
+    "tall": dict(rise=0.56, haunch=0.18, centre=0.95, haunch_steps=4, upper_steps=12),
+    "taller": dict(rise=0.64, haunch=0.18, centre=1.0, haunch_steps=4, upper_steps=13),
     "niche": dict(rise=0.38, haunch=0.16, centre=0.80, haunch_steps=4, upper_steps=12),
 }
 # Where each shape applies, in order (later ones win).
