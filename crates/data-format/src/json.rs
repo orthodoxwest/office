@@ -182,15 +182,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn compact_like_marshal() {
+    fn encodes_compact_and_indented_json() {
         let v = Json::Arr(vec![
             Obj::new().str("Key", "a<b").field("Points", Json::Null).field("N", Json::Arr(vec![Json::Int(1), Json::Int(2)])).build(),
         ]);
         assert_eq!(encode_compact(&v), "[{\"Key\":\"a\\u003cb\",\"Points\":null,\"N\":[1,2]}]");
-    }
-
-    #[test]
-    fn encodes_report_json() {
         let v = Obj::new()
             .str("a", "x<y>&\u{2028}\u{1}\u{8}é")
             .field("empty", Json::Arr(Vec::new()))

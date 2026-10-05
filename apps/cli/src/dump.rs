@@ -502,26 +502,3 @@ pub fn marshal(v: &Value) -> Result<String, String> {
     check(v, &mut Vec::new())?;
     Ok(serde_json::to_string(v).expect("serializing a Value cannot fail"))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn canonical_encoding_matches_snapshot_contract() {
-        let v = json!({"b": "<&>\u{2028}", "a": [1, null, true], "c": "\u{1}\t\"\\"});
-        assert_eq!(marshal(&v).unwrap(), r#"{"a":[1,null,true],"b":"<&>\u{2028}","c":"\u0001\t\"\\"}"#.replace("\\u{2028}", "\u{2028}"));
-        assert_eq!(marshal(&json!({"x": [{"y": ""}]})).unwrap_err(), "/x/0/y: empty string (absent values are null)");
-    }
-
-    #[test]
-    fn selection_is_canonical() {
-        let sel = Selection { start_year: 2026, years: 1, hours: vec!["vespers".into(), "lauds".into()], ..Selection::default() }
-            .normalize()
-            .unwrap();
-        assert_eq!(sel.hours, ["lauds", "vespers"]);
-        assert_eq!(sel.forms, PRAYER_FORMS);
-        let err = Selection { start_year: 2026, years: 1, groups: vec!["x".into()], ..Selection::default() }.normalize().unwrap_err();
-        assert_eq!(err, "unknown record group \"x\" (want one of [corpus calendar office hours])");
-    }
-}

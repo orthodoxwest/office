@@ -144,6 +144,18 @@ fn companions_stay_grouped_and_concurrent_office_precedes_the_cap() {
     let (ordered, _) = ordered_commemorations(None, &input, OrderContext::default());
     assert_eq!(ordered.len(), MAX_COMMEMORATIONS_PER_DAY);
     assert_eq!(ordered[0].id, "sunday");
+    // A principal's companion precedes a greater double, both through the
+    // ordering entry point and at Lauds.
+    let parent = feast("apostolic-office", Rank::Double, Category::Apostle);
+    let mut companion = (*feast("companion", Rank::Commemoration, Category::Apostle)).clone();
+    companion.companion_of = Some(parent.id.clone());
+    let input = vec![feast("greater", Rank::GreaterDouble, Category::Confessor), Arc::new(companion)];
+    let (ordered, _) = ordered_commemorations(Some(&parent), &input, OrderContext::default());
+    assert_eq!(ids(&ordered), ["companion", "greater"]);
+    let (mut day, _) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
+    day.celebration = Some(parent);
+    day.commemorations = input;
+    assert_eq!(ids(&lauds_commemorations(&day)), ["companion", "greater"]);
 }
 
 #[test]
@@ -254,22 +266,6 @@ fn transfers_continue_through_a_blocked_year_boundary() {
     for (index, rule) in [(0, "occurrence:transfer-in"), (0, "occurrence:transfer-out"), (1, "occurrence:transfer-in")] {
         assert!(cal.days[index].occurrence_decisions.iter().any(|d| d.rule == rule), "{index}: {rule}");
     }
-}
-
-#[test]
-fn commemoration_callers_preserve_principal_companion_priority() {
-    let parent = feast("apostolic-office", Rank::Double, Category::Apostle);
-    let mut companion = (*feast("companion", Rank::Commemoration, Category::Apostle)).clone();
-    companion.companion_of = Some(parent.id.clone());
-    let companion = Arc::new(companion);
-    let greater = feast("greater", Rank::GreaterDouble, Category::Confessor);
-    let input = vec![greater, companion];
-    let (ordered, _) = ordered_commemorations(Some(&parent), &input, OrderContext::default());
-    assert_eq!(ids(&ordered), ["companion", "greater"]);
-    let (mut day, _) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
-    day.celebration = Some(parent);
-    day.commemorations = input;
-    assert_eq!(ids(&lauds_commemorations(&day)), ["companion", "greater"]);
 }
 
 #[test]

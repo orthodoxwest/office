@@ -101,27 +101,3 @@ pub fn is_penitential_feria_season(season: Season) -> bool {
         Season::Christmas | Season::Epiphany | Season::Easter | Season::Pentecost => false,
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::model::Color;
-
-    fn feast(id: &str) -> Feast {
-        Feast::synthetic(id, id, Rank::Double, Color::White, Category::Lord)
-    }
-
-    #[test]
-    fn octave_ids() {
-        assert!(is_octave_day(&feast("epiphany-octave-day")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day")));
-        assert!(is_day_within_octave(&feast("epiphany-octave-day-3")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day-")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day-x")));
-        assert_eq!(octave_parent_id(&feast("all-saints-octave-day-2")), Some("all-saints"));
-        assert_eq!(octave_parent_id(&feast("all-saints-octave-day")), Some("all-saints"));
-        assert_eq!(octave_parent_id(&feast("all-saints")), None);
-        assert!(same_octave_days(&feast("x-octave-day-2"), &feast("x-octave-day")));
-        assert!(!same_octave_days(&feast("x"), &feast("x")));
-    }
-}

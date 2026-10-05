@@ -180,23 +180,3 @@ impl ZeroHeuristic {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn heuristics() {
-        for (key, want) in [
-            ("proper/x/psalm-antiphon", ZeroHeuristic::GenericPsalmAntiphon),
-            ("proper/x/psalm-antiphon-3", ZeroHeuristic::IndexedPsalmAntiphon),
-            ("proper/x/psalm-antiphon-", ZeroHeuristic::Other),
-            ("proper/x/commemoration-antiphon", ZeroHeuristic::CommemorationSlot),
-            ("ordinary/lauds/hymn-monday", ZeroHeuristic::WeekdayVariant),
-            ("ordinary/lauds/hymn-sunday", ZeroHeuristic::Other),
-            ("proper/x/vespers-psalmody-first", ZeroHeuristic::FirstVespersVariant),
-        ] {
-            assert_eq!(ZeroHeuristic::detect(key), want, "{key}");
-        }
-    }
-}

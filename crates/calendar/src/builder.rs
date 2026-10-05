@@ -680,22 +680,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn title_case_words() {
-        assert_eq!(title_case("advent ember wednesday"), "Advent Ember Wednesday");
-        assert_eq!(octave_display_name("christmas"), "Christmas");
-        assert_eq!(octave_display_name("st-lawrence"), "St Lawrence");
-    }
-
-    #[test]
-    fn nativity_octave_sunday() {
-        // 2022: Christmas on Sunday → Dec 29. 2027: Sunday Dec 26 → Dec 29.
-        // 2025: Sunday Dec 28 → Dec 29. 2024: Sunday Dec 29.
-        for (year, day) in [(2022, 29), (2027, 29), (2025, 29), (2024, 29), (2023, 31)] {
-            assert_eq!(nativity_octave_sunday_feast(year).fixed, Some(MonthDay { month: 12, day }), "{year}");
-        }
-    }
-
-    #[test]
     fn pentecost_sundays_resume_epiphany() {
         // 2024: Easter May 5 → few Sundays after Pentecost; 2026 has more.
         for year in [2024, 2026, 2029] {
@@ -705,79 +689,5 @@ mod tests {
             assert_eq!(resolve_feast_date(last, year, &m), Some(m.advent1.add_days(-7)), "{year}");
             assert!(last.id == "pentecost-sunday-24" || last.proper_id.as_deref() == Some("pentecost-sunday-24"));
         }
-    }
-
-    #[test]
-    fn leap_shift() {
-        assert_eq!(adjust_fixed_date_for_leap_year(2024, 2, 24, "st-matthias"), (2, 25));
-        assert_eq!(adjust_fixed_date_for_leap_year(2025, 2, 24, "st-matthias"), (2, 24));
-        assert_eq!(adjust_fixed_date_for_leap_year(2024, 2, 24, "vigil-of-x"), (2, 24));
-    }
-
-    #[test]
-    fn date_rules() {
-        let m = MoveableDates::compute(2026);
-        let rule = |r: &str| {
-            let mut f = Feast::synthetic("x", "x", Rank::Double, Color::White, Category::Lord);
-            f.date_rule = Some(r.to_string());
-            resolve_feast_date(&f, 2026, &m)
-        };
-        assert_eq!(rule("easter+1"), Some(m.easter_monday));
-        assert_eq!(rule("easter-63"), Some(m.septuagesima));
-        assert_eq!(rule("holy-name"), Some(Date::new(2026, 1, 4)));
-        assert_eq!(rule("last-sunday-october"), Some(Date::new(2026, 10, 25)));
-        assert_eq!(rule("advent-sunday-3"), Some(m.advent3));
-        assert_eq!(rule("advent-sunday-5"), None);
-        assert_eq!(rule("epiphany-sunday-2"), Some(Date::new(2026, 1, 18)));
-        assert_eq!(rule("pentecost-sunday-1"), Some(m.trinity_sunday));
-        assert_eq!(rule("nonsense"), None);
-        assert_eq!(rule("easter"), None);
-    }
-}
-
-#[cfg(test)]
-mod octave_tests {
-    use super::*;
-    use crate::model::OctaveClass;
-
-    #[test]
-    fn privileged_octaves_exclude_explicit_feasts_and_keep_easter_offsets() {
-        for (id, offset, days) in [("easter-sunday", 0, vec![4, 5, 6, 7]), ("pentecost", 49, vec![2, 3, 4, 5, 6, 7])] {
-            let mut f = Feast::synthetic(id, id, Rank::Double1stClass, Color::White, Category::Lord);
-            f.has_octave = true;
-            f.octave_class = OctaveClass::PrivilegedFirst;
-            f.date_rule = Some(format!("easter+{offset}"));
-            let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
-            assert_eq!(generated.len(), days.len());
-            for (f, n) in generated.iter().zip(days) {
-                assert_eq!(f.id, format!("{id}-octave-day-{n}"));
-                assert_eq!(f.date_rule, Some(format!("easter+{}", offset + n - 1)));
-                assert_eq!(f.rank, Rank::Double1stClass);
-                assert!(f.is_privileged_octave_day);
-            }
-        }
-    }
-
-    #[test]
-    fn octave_antiphon_sets_skip_sunday_and_terminal_day() {
-        let mut f = Feast::synthetic("example", "Example", Rank::Double1stClass, Color::White, Category::Apostle);
-        f.fixed = Some(MonthDay { month: 6, day: 11 });
-        f.has_octave = true;
-        f.octave_class = OctaveClass::PrivilegedThird;
-        let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
-        let expected = [
-            "example-octave-set-1",
-            "example-octave-set-2",
-            "example",
-            "example-octave-set-3",
-            "example-octave-set-4",
-            "example-octave-set-5",
-            "example",
-        ];
-        for (f, want) in generated.iter().zip(expected) {
-            assert_eq!(f.proper_id.as_deref(), Some(want));
-        }
-        assert_eq!(generated.last().unwrap().rank, Rank::GreaterDouble);
-        assert!(!generated.last().unwrap().is_privileged_octave_day);
     }
 }

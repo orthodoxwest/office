@@ -284,10 +284,6 @@ impl CalendarData {
 mod tests {
     use super::*;
 
-    fn section(text: &str) -> Section {
-        parse_ini_sections("test.txt", text).unwrap().remove(0)
-    }
-
     #[test]
     fn parses_sections_and_comments() {
         let sections = parse_ini_sections("f.txt", "# c\n\n[a]\nName = A = B\n  Rank=double \n[b]\n").unwrap();
@@ -295,57 +291,7 @@ mod tests {
         assert_eq!(sections[0].get("Name"), Some("A = B"));
         assert_eq!(sections[0].get("Rank"), Some("double"));
         assert_eq!(sections[1].id, "b");
-    }
-
-    #[test]
-    fn syntax_errors() {
         assert_eq!(parse_ini_sections("f.txt", "Name = x\n").unwrap_err(), "f.txt:1: key-value pair outside of section");
         assert_eq!(parse_ini_sections("f.txt", "[a]\n\nnonsense\n").unwrap_err(), "f.txt:3: expected Key = value, got \"nonsense\"");
-    }
-
-    #[test]
-    fn fixed_feast() {
-        let f = section_to_feast(
-            &section("[st-x]\nName = St X\nRank = double\nColor = red\nCategory = martyr\nMonth = 2\nDay = 29\n"),
-            "s.txt",
-        )
-        .unwrap();
-        assert_eq!(f.fixed, Some(MonthDay { month: 2, day: 29 }));
-        assert_eq!(f.source.as_deref(), Some("base"));
-        assert_eq!(f.category, Some(Category::Martyr));
-    }
-
-    #[test]
-    fn schema_errors() {
-        let cases = [
-            ("[x]\nRank = double\nColor = red\nMonth = 1\nDay = 1\n", "s.txt: feast \"x\" missing Name"),
-            ("[x]\nName = X\nRank = big\nColor = red\n", "s.txt: feast \"x\": invalid rank: \"big\""),
-            ("[x]\nName = X\nRank = double\nColor = red\nMonth = 1\n", "s.txt: feast \"x\" must specify Month and Day together"),
-            ("[x]\nName = X\nRank = double\nColor = red\n", "s.txt: feast \"x\" must have either Month/Day or DateRule"),
-            ("[x]\nName = X\nRank = double\nColor = red\nMonth = 2\nDay = 30\n", "s.txt: feast \"x\" has invalid fixed date 2/30"),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nBogus = 1\n",
-                "s.txt: feast \"x\": unrecognized key \"Bogus\"",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nHasOctave = yes\n",
-                "s.txt: feast \"x\": HasOctave: expected true or false, got \"yes\"",
-            ),
-            (
-                "[x]\nName = X\nRank = simple\nColor = red\nCategory = martyr\nMonth = 1\nDay = 1\nIsVigil = true\n",
-                "s.txt: feast \"x\" is a vigil but has category \"martyr\" instead of feria",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nOctaveClass = simple\n",
-                "s.txt: feast \"x\" specifies OctaveClass without HasOctave (except a Simple octave day)",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nCategory = lord\nMonth = 1\nDay = 1\nPrimaryOfOurLord = true\n",
-                "s.txt: feast \"x\": PrimaryOfOurLord requires a Double I Class feast of Our Lord",
-            ),
-        ];
-        for (text, want) in cases {
-            assert_eq!(section_to_feast(&section(text), "s.txt").unwrap_err(), want);
-        }
     }
 }

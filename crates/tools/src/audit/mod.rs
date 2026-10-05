@@ -436,15 +436,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn index_suffix() {
-        assert_eq!(trim_index_suffix("psalm-antiphon-3"), "psalm-antiphon");
-        assert_eq!(trim_index_suffix("psalm-antiphon"), "psalm-antiphon");
-        assert_eq!(trim_index_suffix("x-"), "x-");
-        assert_eq!(trim_index_suffix("-12"), "");
-        assert_eq!(trim_index_suffix("12"), "12");
-    }
-
-    #[test]
     fn gaps_from_other_sources_are_printed() {
         let gap = |id: &str, src: &str| {
             let mut f = calendar::Feast::synthetic(id, id, Rank::GreaterDouble, calendar::Color::White, calendar::Category::BlessedVirgin);

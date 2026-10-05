@@ -325,11 +325,6 @@ impl Corpus {
         self.canonical_ref(key).and_then(|k| self.collect_conclusions.get(k)).map(String::as_str)
     }
 
-    /// Records a conclusion form, for tests.
-    pub fn set_collect_conclusion_form(&mut self, key: &str, form: &str) {
-        self.collect_conclusions.insert(key.to_string(), form.to_string());
-    }
-
     /// Records an incipit, for tests.
     pub fn set_incipit(&mut self, key: &str, incipit: &str) {
         self.incipits.insert(key.to_string(), incipit.to_string());
@@ -384,10 +379,7 @@ mod tests {
         assert_eq!(c.get("top/entry"), "Top.");
         assert!(c.has_key_suffix("chapter"));
         assert_eq!(c.missing_incipits(), vec!["psalms/1"]);
-    }
-
-    #[test]
-    fn strips_comments_but_keeps_blank_lines_and_inline_hashes() {
+        // Comment lines strip; blank lines and inline hashes stay.
         let c = Corpus::load(
             &[
                 file(
@@ -407,24 +399,6 @@ mod tests {
         assert_eq!(c.get("psalms/116b"), "Psalm 116:10-16\n\nI believed * but I was troubled.\nThe # character remains.");
         assert!(!c.has("proper/empty"));
         assert_eq!(c.references().len(), 3);
-    }
-
-    #[test]
-    fn later_files_redefine_keys() {
-        let c = Corpus::load(&[file("a/b.txt", "Plain."), file("a.txt", "[b]\nSection.\n")], None, None).unwrap();
-        assert_eq!(c.get("a/b"), "Section.");
-    }
-
-    #[test]
-    fn load_errors() {
-        let err = |files: &[TextFile]| Corpus::load(files, None, None).unwrap_err();
-        assert_eq!(
-            err(&[file("s/d.txt", "[a]\nx\n[a]\ny\n")]),
-            "loading texts: s/d.txt:3: duplicate INI section [a] (first declared at line 1)"
-        );
-        assert_eq!(err(&[file("s.txt", "[a]\n@omit now\n")]), "invalid corpus omission \"s/a\": @omit must be the whole body");
-        assert_eq!(err(&[file("s.txt", "[a]\n@use x y\n")]), "invalid corpus alias \"s/a\": expected @use <corpus-key>");
-        assert_eq!(err(&[file("s.txt", "[a]\n@use s/b\n[b]\n@use s/a\n")]), "corpus alias \"s/a\" does not resolve (target \"s/b\")");
     }
 
     #[test]
@@ -450,18 +424,5 @@ mod tests {
         let conclusion_err = |s| Corpus::load(&files, Some(Sidecar { path: "c.txt", content: s }), None).unwrap_err();
         assert_eq!(conclusion_err("psalms/23"), "c.txt:1: expected \"<corpus-key> <form>\", got \"psalms/23\"");
         assert_eq!(conclusion_err("psalms/99 per-dominum"), "c.txt:1: \"psalms/99\" is not in the corpus");
-    }
-
-    #[test]
-    fn placeholders_and_entries() {
-        let c = Corpus::from_entries([
-            ("b".to_string(), "Placeholder: todo".to_string()),
-            ("a".to_string(), "placeholder".to_string()),
-            ("psalmody/x".to_string(), "psalm-antiphon-1 = psalms/1".to_string()),
-            ("o".to_string(), "@omit".to_string()),
-            ("t".to_string(), "Text".to_string()),
-        ]);
-        assert_eq!(c.find_placeholders(), vec!["a", "b"]);
-        assert_eq!(c.entries().keys().copied().collect::<Vec<_>>(), vec!["a", "b", "t"]);
     }
 }

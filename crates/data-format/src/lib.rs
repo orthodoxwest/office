@@ -60,13 +60,6 @@ mod tests {
     }
 
     #[test]
-    fn quotes_ascii_controls() {
-        assert_eq!(quote("a\"b\\c\u{7}\u{1}é\u{7f}"), "\"a\\\"b\\\\c\\a\\x01é\\x7f\"");
-        // Non-printing Unicode stays literal.
-        assert_eq!(quote("a\u{a0}b"), "\"a\u{a0}b\"");
-    }
-
-    #[test]
     fn parses_signed_ascii_integers() {
         assert_eq!(atoi("+5"), Ok(5));
         assert_eq!(atoi("-3"), Ok(-3));

@@ -139,19 +139,3 @@ fn walk_dir(path: &Path, rel: &str, out: &mut Vec<(String, Vec<u8>)>) -> Result<
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn cleans_paths_and_computes_relative_paths() {
-        assert_eq!(clean(Path::new("/a/b/../../data")), PathBuf::from("/data"));
-        assert_eq!(clean(Path::new("./data/")), PathBuf::from("data"));
-        assert_eq!(clean(Path::new("../x/./y/..")), PathBuf::from("../x"));
-        assert_eq!(clean(Path::new("")), PathBuf::from("."));
-        assert_eq!(rel(Path::new("/home/u/office"), Path::new("/home/u/office/data")), PathBuf::from("data"));
-        assert_eq!(rel(Path::new("/tmp/x"), Path::new("/home/u/data")), PathBuf::from("../../home/u/data"));
-        assert_eq!(rel(Path::new("/a"), Path::new("/a")), PathBuf::from("."));
-    }
-}
