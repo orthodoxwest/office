@@ -93,6 +93,21 @@ fn home_invites_to_the_current_office_only_today() {
 }
 
 #[test]
+fn home_sets_the_days_versicle_on_a_plain_day() {
+    let core = OfficeCore::new().unwrap();
+    let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 15).unwrap();
+    assert_eq!(
+        (placidus.versicle.as_str(), placidus.response.as_str()),
+        ("Let the Saints be joyful with glory.", "Let them rejoice in their beds.")
+    );
+    // A Lenten feria, Passiontide, and a day with a commemoration go without.
+    for (m, d) in [(3, 11), (3, 30), (10, 12)] {
+        let home = core.home(civil(2026, m, d), civil(2026, m, d), 9).unwrap();
+        assert_eq!((home.versicle.as_str(), home.response.as_str()), ("", ""), "{m}-{d}");
+    }
+}
+
+#[test]
 fn the_ordo_month_matches_the_web_rows() {
     let core = OfficeCore::new().unwrap();
     let march = core.ordo_month(2026, 3).unwrap();

@@ -46,9 +46,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -209,6 +213,12 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
     /** A short phone's commemorations give way, so a past date with them still fits. */
     val commemoration = if (!desk && tall <= 700.dp) 13.6f else pick(14f, 14f, 14f, 16.32f)
     val commemorationLine = if (!desk && tall <= 700.dp) 1.3f else 1.4f
+    /**
+     * The day's versicle's size, set only where a phone is over 700 high, and its measure, at most
+     * 19rem wide and inside the day's clearance of the lining.
+     */
+    val versicle: Float? = if (!desk && tall <= 700.dp) null else 15.36f
+    val versicleMeasure = minOf(304.dp, card - dayClear * 2)
     /** Below the day, to the band. */
     val dayGap = pick(16.8.dp, 5.6.dp, 12.dp)
     val band = pick(12.8f, 12.8f, 12.8f, 13.6f)
@@ -286,10 +296,7 @@ private fun Frontispiece(
             { Spacer(Modifier.drawBehind { lining(tier.arch, (if (desk) 26.dp else PanelInset).toPx(), p.lining, liningDay) }) },
             // The day.
             {
-                Column(
-                    Modifier.fillMaxWidth().padding(start = tier.dayClear, end = tier.dayClear, bottom = tier.dayGap),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = tier.dayClear), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         unbroken(view.dateLabel),
                         // On a phone a full thumb's height, as the web's, its line centred in it.
@@ -317,8 +324,24 @@ private fun Frontispiece(
                             }
                         }
                     }
-                    // After the day's facts, so they read together.
-                    if (!view.isToday) {
+                }
+            },
+            // The day's versicle, when the head has the height to spare for it.
+            {
+                val style = tier.versicle
+                if (style != null && view.versicle.isNotEmpty()) {
+                    Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
+                        Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
+                            VersicleLine("℣.", view.versicle, style)
+                            VersicleLine("℟.", view.response, style)
+                        }
+                    }
+                }
+            },
+            // After the day's facts, so they read together.
+            {
+                if (!view.isToday) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                         Text(
                             "GO TO TODAY",
                             Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).goldUnderline(true, p.goldLine),
@@ -374,27 +397,59 @@ private fun Frontispiece(
                 panel(tier.arch, p, mix(day, ink.frame, 0.7f), ink.frame)
             }
         },
-    ) { (cross, walls, dayBlock, rest), constraints ->
+    ) { slots, constraints ->
+        val (cross, walls, dayBlock, verses, backs) = slots
         val width = constraints.maxWidth
         val full = Constraints.fixedWidth(width)
         val mark = cross.first().measure(Constraints())
         val facts = dayBlock.first().measure(full)
-        val after = rest.first().measure(full)
+        val versicle = verses.firstOrNull()?.measure(full)
+        val back = backs.firstOrNull()?.measure(full)
+        val after = slots[5].first().measure(full)
         val headPad = tier.headPad.roundToPx()
         val foot = tier.bottom.roundToPx()
+        val day = facts.height + (back?.height ?: 0) + tier.dayGap.roundToPx()
         // The day under the head's room for the cross, and the band no higher than the springing,
         // so it never crosses the arch; on a phone, the height the card is given beyond its own.
-        val summary = maxOf(headPad + facts.height, (tier.arch.rise * width).roundToInt(), constraints.minHeight - after.height - foot)
-        val spare = summary - headPad - facts.height
+        val summary = maxOf(headPad + day, (tier.arch.rise * width).roundToInt(), constraints.minHeight - after.height - foot)
+        // The versicle takes only the height the head has to spare: where it would make the card
+        // taller, the head goes without it.
+        val verse = versicle?.takeIf { headPad + day + it.height <= summary }
+        val spare = summary - headPad - day - (verse?.height ?: 0)
         val wall = walls.first().measure(Constraints.fixed(width, summary))
         val height = summary + after.height + foot
         layout(width, height) {
             wall.place(0, 0)
             mark.place((width - mark.width) / 2, tier.crownTop.roundToPx())
-            facts.place(0, headPad + if (tier.split) spare * 2 / 5 else spare / 2)
+            var y = headPad + if (tier.split) spare * 2 / 5 else spare / 2
+            facts.place(0, y)
+            y += facts.height
+            verse?.let { it.place(0, y); y += it.height }
+            back?.place(0, y)
             after.place(0, summary)
         }
     }
+}
+
+/** A line of the day's versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the text's ink a little withdrawn. */
+@Composable
+private fun VersicleLine(sigil: String, words: String, size: Float) {
+    val p = LocalPalette.current
+    Text(
+        buildAnnotatedString {
+            withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = p.rubric)) { append(sigil) }
+            append(" ")
+            append(words)
+        },
+        style = Type.body.copy(
+            fontSize = size.sp,
+            lineHeight = (size * 1.32f).sp,
+            fontStyle = FontStyle.Italic,
+            color = p.text.copy(alpha = p.text.alpha * 0.84f),
+            textAlign = TextAlign.Center,
+            lineBreak = LineBreak.Heading,
+        ),
+    )
 }
 
 /** Runs through the card's side padding to the frame's inner edges, as the inscription band does. */

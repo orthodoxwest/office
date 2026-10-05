@@ -14,8 +14,8 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, invitation, long_date, reminder_description,
-    reminder_summary, report_url, season_class, season_label, title_case,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation,
+    long_date, reminder_description, reminder_summary, report_url, season_class, season_label, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -97,6 +97,11 @@ impl OfficeCore {
         let day = year.days.get(shown.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {shown}")))?;
         let heading = day_heading(day);
         let invite = invitation(shown, now, clock_hour_i8(clock_hour));
+        let versicle = if home_shows_versicle(day) {
+            self.engine.compose_hour("lauds", day, &year.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
+        } else {
+            None
+        };
         Ok(HomeView {
             date_label: long_date(shown),
             feast: typeset(&heading.feast),
@@ -106,6 +111,8 @@ impl OfficeCore {
             ornament: ornament(Some(day.season)),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
+            versicle: versicle.as_ref().map(|v| typeset(&v.versicle)).unwrap_or_default(),
+            response: versicle.as_ref().map(|v| typeset(&v.response)).unwrap_or_default(),
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
@@ -441,6 +448,10 @@ pub struct HomeView {
     /// "Fasting", "Abstinence" and the like, set as red work.
     pub penitential: Vec<String>,
     pub commemorations: Vec<String>,
+    /// The day's versicle from Lauds and its response, without ℣. and ℟., for the head on a plain
+    /// day; both empty otherwise.
+    pub versicle: String,
+    pub response: String,
     pub is_today: bool,
     /// "Pray Vespers" today; "Open Lauds" on another day.
     pub pray_now_label: String,
