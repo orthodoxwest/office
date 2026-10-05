@@ -56,15 +56,18 @@
   </div>
   <div class="elements">
     {% if leader_forms %}
+    {#- A section the Martyrology changes carries both readings; the reader's
+         Settings choice (data-martyrology on the root) shows one. #}
+    {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
       <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
         <summary>{{ section.label }}</summary>
-        <div class="session-prayers-content">{{ section.html|safe }}</div>
+        <div class="session-prayers-content">{{ leader_section_html(section) }}</div>
       </details>
       {% else %}
       {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
-      {{ section.html|safe }}
+      {{ leader_section_html(section) }}
       {% endif %}
     {% endfor %}
     {% else %}

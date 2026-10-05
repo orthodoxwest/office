@@ -264,6 +264,23 @@ struct MenuPanel: View {
                     }
                 }
             }
+            // The Martyrology at Prime: Off and On under the last two themes, the longer label
+            // taking the first theme's cell, as on the web.
+            HStack(spacing: 0) {
+                Text("MARTYROLOGY").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
+                    .lineLimit(1).fixedSize()
+                    .padding(.leading, m.px(10.4))
+                    .frame(width: m.px(54), alignment: .leading)
+                    .accessibilityHidden(true)
+                Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                ForEach([false, true], id: \.self) { on in
+                    cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), p.accent, spoken: "Martyrology at Prime \(on ? "on" : "off")") {
+                        guard on != model.martyrology else { return }
+                        chose()
+                        model.chooseMartyrology(on)
+                    }
+                }
+            }
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))

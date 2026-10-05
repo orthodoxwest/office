@@ -2,11 +2,12 @@
 //! models.
 
 use axum::body::Body;
-use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
+use axum::http::{HeaderMap, Method, Response, StatusCode, header};
 use calendar::MoveableDates;
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
+use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
@@ -317,19 +318,32 @@ impl Server {
         let Some(day) = entry.days.get(date.ordinal() as usize - 1) else {
             return self.error_page(req, StatusCode::BAD_REQUEST, "That date is outside the supported range.");
         };
-        let preview = req.query.get("preview") == "martyrology" && hour_name == "prime";
-        let compose = |form| {
-            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, martyrology_preview: preview })
+        let compose = |form, martyrology| {
+            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, martyrology })
         };
-        let hour = match compose(PrayerForm::Private) {
+        let hour = match compose(PrayerForm::Private, false) {
             Ok(h) => h,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error composing hour: {e}")),
         };
         let mut composed = vec![(PrayerForm::Private, hour.clone())];
         for form in [PrayerForm::Deacon, PrayerForm::Priest] {
-            match compose(form) {
+            match compose(form, false) {
                 Ok(h) => composed.push((form, h)),
                 Err(_) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form."),
+            }
+        }
+        // Prime also carries the Martyrology for readers who turned it on in
+        // Settings, so the page (and the offline copy) is the same for everyone.
+        let mut martyrology = Vec::new();
+        if hour_name == "prime" {
+            for form in PrayerForm::ALL {
+                match compose(form, true) {
+                    Ok(h) if reads_martyrology(&h) => martyrology.push((form, h)),
+                    Ok(_) => break,
+                    Err(_) => {
+                        return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form.");
+                    }
+                }
             }
         }
 
@@ -374,15 +388,12 @@ impl Server {
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
-        let mut resp = match self.pages.hour(&mut data, &forms) {
+        let martyrology: Vec<(PrayerForm, &OfficeHour)> =
+            if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
+        match self.pages.hour(&mut data, &forms, &martyrology) {
             Ok(body) => html(StatusCode::OK, body),
-            Err(e) => return render_failed(&e),
-        };
-        if req.query.has("preview") {
-            set(&mut resp, header::CACHE_CONTROL, "private, no-store");
-            resp.headers_mut().insert("x-robots-tag", HeaderValue::from_static("noindex, nofollow"));
+            Err(e) => render_failed(&e),
         }
-        resp
     }
 
     /// The ordo: "/calendar" leads to today's month; "/calendar/{year}" is
@@ -557,6 +568,26 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Prime carries both the rubric and tomorrow's reading for the reader's
+    // setting to choose between; nothing in the URL changes the page.
+    #[test]
+    fn prime_carries_the_martyrology_for_the_setting() {
+        let (status, _, body) = get("/prime/2026-09-07");
+        assert_eq!(status, StatusCode::OK);
+        let off =
+            body.find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the Martyrology is read").expect("rubric variant");
+        let on = body
+            .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology — September 8</h2>")
+            .expect("reading");
+        assert!(off < on);
+        assert_eq!(body.matches("data-martyrology-variant=").count(), 2, "only the Martyrology section varies");
+        assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
+        // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
+        for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {
+            assert!(!get(path).2.contains("data-martyrology-variant"), "{path}");
+        }
     }
 
     /// The page ends with the continuation links and each form's report

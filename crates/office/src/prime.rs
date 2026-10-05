@@ -11,15 +11,15 @@ use crate::preces::SATURDAY_OFFICE_BVM_ID;
 use crate::proper::{advent_ferial_psalm_antiphon_ref, lookup_feast_proper_text, resolve_proper_text};
 use crate::texts::OfficeTexts;
 
-/// Composes Prime. `martyrology_preview` substitutes the next day's
-/// reviewed Martyrology entry for the static rubric; it is only ever an
-/// explicit request, never part of the published office.
+/// Composes Prime. `martyrology` substitutes the next day's reviewed
+/// Martyrology entry for the static rubric; readers turn it on in Settings,
+/// and it is off by default.
 pub fn compose_prime(
     day: &Day,
     sections: &[HourSection],
     t: &OfficeTexts,
     moveable: Option<&MoveableDates>,
-    martyrology_preview: bool,
+    martyrology: bool,
 ) -> OfficeHour {
     let mut hour = new_hour("Prime", day);
     for section in sections {
@@ -32,7 +32,7 @@ pub fn compose_prime(
         }
         let mut elems = Vec::new();
         for elem in &section.elements {
-            if martyrology_preview && section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
+            if martyrology && section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
                 elems.extend(resolve_prime_martyrology(day, t));
                 continue;
             }
@@ -48,6 +48,12 @@ pub fn compose_prime(
 }
 
 const MARTYROLOGY_RUBRIC: &str = "ordinary/prime/martyrology-rubric";
+
+/// Whether a composed Prime reads a day's Martyrology entry, rather than
+/// the rubric that stands in for it.
+pub fn reads_martyrology(hour: &OfficeHour) -> bool {
+    hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref.starts_with("ordinary/martyrology/"))
+}
 
 const MONTH_NAMES: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -174,7 +180,7 @@ mod tests {
     use calendar::Rank;
 
     #[test]
-    fn martyrology_preview_uses_next_civil_date_and_keeps_missing_day_rubric() {
+    fn martyrology_uses_next_civil_date_and_keeps_missing_day_rubric() {
         let sections = crate::hourdef::parse_hour_definition("prime", include_str!("../../../data/office/prime.txt")).unwrap();
         for (current, key, title) in [
             (date(2026, 9, 7), "09-08", "September 8"),
