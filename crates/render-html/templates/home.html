@@ -19,7 +19,9 @@
       <div class="home-lining" aria-hidden="true"></div>
       <header class="home-day-head">
         <h1 id="home-date-heading">
-          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ date_str }}</a>
+          {# The phone's link is a flex box for its touch target: the date
+             is one item inside it, so its words keep their spaces. #}
+          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{% set date_parts = date_str|split(", ", 1)|list %}{% if date_parts|length == 2 %}<span><span class="home-date-weekday">{{ date_parts[0] }},</span> <span class="home-date-rest">{{ date_parts[1] }}</span></span>{% else %}{{ date_str }}{% endif %}</a>
         </h1>
         {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}

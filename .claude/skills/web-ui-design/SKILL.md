@@ -89,7 +89,9 @@ or impose a redesign on an unrelated change.
   its drop-shadow), and the lining's band and hairline
   (`.home-lining::before/::after`). The card is an inline-size container
   so the layers can scale the head by its width (`--arch-w`). The day's
-  colour is the 1.5px ring and the lining's inner hairline
+  colour is the 1.5px ring (mixed 30% toward the frame, so a red or
+  green day edges the head without outshouting the cross) and the
+  lining's inner hairline
   (`--lining-day`; a white day takes `--gold-line` by day); the terracotta
   lining runs round the head `--panel-inset` inside the edge, ending at the
   inscription band, the consecration cross sits in the point, and the day
@@ -97,14 +99,17 @@ or impose a redesign on an unrelated change.
   (`--head-pad`) and centred in what is left. The day block is at least
   the head's rise tall, so the band never crosses the arch. Halo and
   shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
-  rules restate. The panel's furniture is
+  rules restate. The date's weekday and the rest of it are each kept
+  whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
+  phone's flex touch target keeps their space. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a
   375×667 viewport whole, so its cost was paid by the header's margin, the
   footer's padding and gap, and the page's bottom padding.
   From 701px the same object widens into a niche set into the wall (a
-  lower pointed head, stone moulding as further offset layers, day-colour
+  lower pointed head, rising 0.38 of its width so a laptop still shows
+  the hours, stone moulding as further offset layers, day-colour
   trim, recess shadow, the lining restated at the niche's scale), and the
   room is lit
   toward

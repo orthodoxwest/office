@@ -3,9 +3,10 @@
 
 The head is a steep four-centred arch: short haunch arcs centred on the
 springing line, so the head leaves the jambs without a kink, then long upper
-arcs centred below it, meeting at the point. Both heads rise 0.44 of the
-card's width; the date sits where the phone's head has opened wide enough
-for it, and the stylesheet's fitted date measure assumes this phone shape.
+arcs centred below it, meeting at the point. The phone's head rises 0.44 of
+the card's width, the wider niche's 0.38 so a laptop still shows the hours;
+the date sits where the phone's head has opened wide enough for it, and the
+stylesheet's fitted date measure assumes this phone shape.
 
 Every layer of the frontispiece (the day's ring, the stone, the panel, the
 lining and its hairline) is the same arch offset by its own distance, as a
@@ -42,7 +43,7 @@ END = "/* genarch:end */"
 # max-width in style.css (".page-home .home h1").
 SHAPES = {
     "phone": dict(rise=0.44, haunch=0.18, centre=0.80, haunch_steps=4, upper_steps=11),
-    "niche": dict(rise=0.44, haunch=0.16, centre=0.78, haunch_steps=4, upper_steps=12),
+    "niche": dict(rise=0.38, haunch=0.16, centre=0.80, haunch_steps=4, upper_steps=12),
 }
 # The deepest inward layer each shape draws (the lining's hairline), in card
 # widths at the narrowest card: the samples next to the point must not cross
