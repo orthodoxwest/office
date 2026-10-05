@@ -280,6 +280,12 @@ fn penitential_season_feria(f: &Feast) -> bool {
 
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
 fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast) -> (bool, &'static str) {
+    // A Sunday office anticipated on Saturday ends at None: its evening is the
+    // next Sunday's I Vespers, which do not commemorate it (2025 and 2026
+    // ordos, 7 February; 2021 ordo, 20 November).
+    if loser.id.ends_with("-anticipated") && loser.is_category(Category::Sunday) {
+        return (false, "commemoration:first-vespers-anticipated-sunday-exclusion");
+    }
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
     if first_class && penitential_season_feria(loser) {
         // Such a feria stays at I Vespers of a Double I Class (Diurnal §X; the

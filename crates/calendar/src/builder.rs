@@ -137,6 +137,32 @@ fn anticipated_epiphany_sunday_feast(m: &MoveableDates) -> Option<Feast> {
     Some(f)
 }
 
+/// A Sunday after Pentecost left over before the last Sunday, anticipated on
+/// the preceding Saturday (General Rubrics, Sundays 4): the XXIII when there
+/// are 23 Sundays after Pentecost (2022 ordo, 19 November), or the XXII when
+/// there are 22 and the VII Sunday after Epiphany already took the XXIII
+/// (2021 ordo, 20 November). None when Epiphany VII/VIII used them all.
+fn anticipated_pentecost_sunday_feast(m: &MoveableDates, epiphany_sundays: usize) -> Option<Feast> {
+    let trinity = m.easter.add_days(56);
+    let total = m.advent1.days_since(trinity) / 7;
+    let used_after_epiphany: &[i32] = match epiphany_sundays {
+        7 => &[23],
+        8 => &[22, 23],
+        _ => &[],
+    };
+    let n = (total..=23).rev().find(|n| !used_after_epiphany.contains(n))?;
+    let saturday = m.advent1.add_days(-8);
+    let mut f = sunday(
+        format!("pentecost-sunday-{n}-anticipated"),
+        format!("Office of the {} Sunday after Pentecost", roman(n)),
+        Rank::SemiDouble,
+        Color::Green,
+    );
+    f.proper_id = Some(format!("pentecost-sunday-{n}"));
+    f.date_rule = Some(format!("easter+{}", saturday.days_since(m.easter)));
+    Some(f)
+}
+
 /// The Sundays after Easter through Trinity.
 fn eastertide_sunday_feasts() -> Vec<Feast> {
     [
@@ -604,7 +630,9 @@ fn build_calendar_year(
     let m = MoveableDates::compute(year);
 
     let mut computed = epiphany_sunday_feasts(year, m.septuagesima);
+    let epiphany_sundays = computed.len();
     computed.extend(anticipated_epiphany_sunday_feast(&m));
+    computed.extend(anticipated_pentecost_sunday_feast(&m, epiphany_sundays));
     computed.extend(advent_sunday_feasts());
     computed.extend(eastertide_sunday_feasts());
     computed.extend(pentecost_sunday_feasts(m.easter, m.advent1));
