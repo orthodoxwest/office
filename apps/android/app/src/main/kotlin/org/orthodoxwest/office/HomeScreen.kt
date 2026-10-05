@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -190,6 +191,12 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
     /** Spare height under the head is parted 2:3 above and below the day, else the day is centred in it. */
     val split = !desk && step > 0
     val side = if (desk) 28.dp else 16.dp
+    /**
+     * How far in from the card's edge the day's words stand: inside the lining's hairline (its
+     * inset, then 9dp) with 12dp of clear air, so a long feast name breaks rather than running
+     * over the lining.
+     */
+    val dayClear = (if (desk) 26.dp else PanelInset) + 9.dp + 12.dp
     val bottom = if (desk) 20.dp else 12.dp
     val date = pick(25.92f, 22.08f, 24.8f, 27.2f)
     val dateTracking = pick(0.39f, 0.22f, 0.25f, 0.27f)
@@ -280,7 +287,7 @@ private fun Frontispiece(
             // The day.
             {
                 Column(
-                    Modifier.fillMaxWidth().padding(start = side, end = side, bottom = tier.dayGap),
+                    Modifier.fillMaxWidth().padding(start = tier.dayClear, end = tier.dayClear, bottom = tier.dayGap),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
@@ -290,7 +297,12 @@ private fun Frontispiece(
                             .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(),
                         style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
                     )
-                    Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = tier.feast.sp, lineHeight = (tier.feast * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center))
+                    // Broken into balanced lines, as the web's.
+                    Text(
+                        view.feast,
+                        Modifier.padding(top = 2.dp),
+                        style = Type.body.copy(fontSize = tier.feast.sp, lineHeight = (tier.feast * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading),
+                    )
                     if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {

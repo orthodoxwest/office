@@ -172,6 +172,12 @@ struct HomeTier {
     /// Spare height under the head is parted 2:3 above and below the day, else the day is centred in it.
     var split: Bool { !desk && step > 0 }
     var side: CGFloat { desk ? 28 : 16 }
+    /**
+     * How far in from the card's edge the day's words stand: inside the lining's hairline (its
+     * inset, then 9pt) with 12pt of clear air, so a long feast name breaks rather than running
+     * over the lining.
+     */
+    var dayClear: CGFloat { (desk ? 26 : 12) + 9 + 12 }
     var bottom: CGFloat { desk ? 20 : 12 }
     var date: TextStyle { pick(Scale.body.sized(25.92, line: 31.1).tracked(0.39), Scale.body.sized(22.08, line: 26.5).tracked(0.22), Scale.body.sized(24.8, line: 29.76).tracked(0.25), Scale.body.sized(27.2, line: 32.64).tracked(0.27)) }
     /**
@@ -331,7 +337,7 @@ private struct Frontispiece: View {
                     .buttonStyle(Quiet())
                 }
             }
-            .padding(.horizontal, side)
+            .padding(.horizontal, m.px(tier.dayClear))
             .padding(.bottom, m.px(tier.dayGap))
             .frame(maxWidth: .infinity)
             // The invitation and the hours, from the inscription band.

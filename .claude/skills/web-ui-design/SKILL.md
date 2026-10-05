@@ -102,7 +102,11 @@ or impose a redesign on an unrelated change.
   shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
   rules restate. The date's weekday and the rest of it are each kept
   whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
-  phone's flex touch target keeps their space. The panel's furniture is
+  phone's flex touch target keeps their space. The day's words stand
+  `--day-clear` in from the card's edge (the hairline, then 0.75rem of
+  air; the native apps' `dayClear`), so a long name such as the ordo's
+  "Commemoration of All the Faithful Departed (All Souls' Day)" breaks
+  into balanced lines rather than crossing the lining. The panel's furniture is
   ruled in the lining thinned (`--panel-rule`): the invitation's second
   line 3px inside its border, the hour table's outer frame; the period
   labels' cells take the frieze's green earth thinned. It must still fit a

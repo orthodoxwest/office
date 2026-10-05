@@ -537,6 +537,24 @@ test("the niche's cross stands clear under the lining at every desktop width", a
   }
 });
 
+test("a long feast name breaks inside the phone's lining rather than crossing it", async ({ page }) => {
+  // The ordo's names are long: these once ran a line over the lining's
+  // hairline, which stands 21px in from the card's edge.
+  for (const [width, height] of [[320, 740], [390, 844], [430, 932]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of ["2026-11-02", "2026-04-18", "2026-06-11"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const air = await page.evaluate(() => {
+        const card = document.querySelector(".home-hero").getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector(".home .feast"));
+        return Math.min(...[...range.getClientRects()].map((line) => Math.min(line.left - card.left, card.right - line.right)));
+      });
+      expect(air, `${width}x${height} ${date}`).toBeGreaterThanOrEqual(21 + 8);
+    }
+  }
+});
+
 test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
   // Wide widths hold the same: the prayer's softened field once reached past
   // the column and, with Large text at the 1000px threshold, past the viewport.
