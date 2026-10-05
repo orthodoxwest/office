@@ -119,7 +119,7 @@ fn diff(left: impl BufRead, right: impl BufRead, out: &mut dyn Write, max_record
             (l, r) => {
                 diverged = true;
                 let side = if l.is_none() { "left" } else { "right" };
-                let next = key(&parse(l.as_deref().or(r.as_deref()).unwrap(), false)?);
+                let next = key(&parse(l.as_deref().or(r.as_deref()).expect("one dump continues"), false)?);
                 writeln!(out, "line {line}: {side} dump ended; the other continues with {next}").map_err(|e| e.to_string())?;
                 break;
             }

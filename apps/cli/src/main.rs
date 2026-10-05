@@ -1,5 +1,8 @@
 //! `office`: the command-line front end and web-server entry point.
 
+// The CLI matches serde_json values, not liturgical enums.
+#![allow(clippy::wildcard_enum_match_arm)]
+
 mod args;
 mod checks;
 mod commands;

@@ -10,8 +10,5 @@ publish.workspace = true
 data-format.workspace = true
 calendar.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
-
-[lints.clippy]
-wildcard_enum_match_arm = "deny"
+[lints]
+workspace = true
