@@ -139,13 +139,30 @@ func dayColor(_ name: String) -> Color {
     }
 }
 
-/// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*` is.
+/// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
+/// is, and red, green and violet, mixed for limewash, which would sink into the night.
 func dayColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
     case ("white", true): return Color(hex: 0xD0B06A)
     case ("black", true): return Color(hex: 0x8A94A0)
+    case ("red", true): return Color(hex: 0xC9503F)
+    case ("green", true): return Color(hex: 0x4F8A52)
+    case ("violet", true): return Color(hex: 0x8D62AD)
     default: return dayColor(name)
     }
+}
+
+/// CSS's color-mix in sRGB: `a` at `share` and `b` the rest, premultiplied, as CSS mixes
+/// translucent colours.
+func mix(_ a: Color, _ b: Color, _ share: CGFloat) -> Color {
+    var (ar, ag, ab, aa): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+    var (br, bg, bb, ba): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+    _ = UIColor(a).getRed(&ar, green: &ag, blue: &ab, alpha: &aa)
+    _ = UIColor(b).getRed(&br, green: &bg, blue: &bb, alpha: &ba)
+    let alpha = aa * share + ba * (1 - share)
+    guard alpha > 0 else { return .clear }
+    func channel(_ x: CGFloat, _ y: CGFloat) -> Double { Double((x * aa * share + y * ba * (1 - share)) / alpha) }
+    return Color(.sRGB, red: channel(ar, br), green: channel(ag, bg), blue: channel(ab, bb), opacity: Double(alpha))
 }
 
 /// The menu's Theme row: Default follows the device; Nave and Apse are the web's names.

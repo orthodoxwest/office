@@ -80,7 +80,8 @@ or impose a redesign on an unrelated change.
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by
   `tools/genarch.py`, which writes clip-path polygons into style.css's
-  `genarch` block; never edit them by hand. A box-shadow or border-radius
+  `genarch` block, and the same shapes' arcs into the native apps'
+  `Arch.kt` and `Arch.swift`; never edit them by hand. A box-shadow or border-radius
   cannot follow a pointed head, so each course is its own layer clipped
   to the same arch offset by its own distance (`--arch-d`): the day's
   ring (`.home-arch::before`, the halo's source), the frame

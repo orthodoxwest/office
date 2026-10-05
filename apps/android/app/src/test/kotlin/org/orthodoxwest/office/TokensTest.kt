@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import androidx.compose.ui.graphics.Color
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.hypot
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -122,6 +123,19 @@ class TokensTest {
             // The season's inscription ink is set on the body in both themes.
             assertEquals(null, value(dark, "inscription-ink"))
             check(block, "inscription-ink", d.ink)
+        }
+    }
+
+    /** Home's pointed heads are the web's, as tools/genarch.py writes them for both, in its order. */
+    @Test
+    fun arches() {
+        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch)
+        val rises = Regex("--arch-rise: ([0-9.]+);").findAll(css).map { it.groupValues[1].toFloat() }.toList()
+        assertEquals(rises, arches.map { it.rise })
+        for (a in arches) {
+            // Each upper arc leaves its haunch at a tangent and passes through the point.
+            assertEquals(a.radius, a.haunch + hypot(a.centre - a.haunch, a.depth), 1e-5f)
+            assertEquals(a.radius, hypot(a.centre - 0.5f, a.rise + a.depth), 1e-5f)
         }
     }
 }

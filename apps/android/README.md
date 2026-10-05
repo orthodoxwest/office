@@ -31,7 +31,7 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
-  theme and text size; home's frontispiece set in the niche, with its round head, stone
+  theme and text size; home's frontispiece set in the niche, with its pointed head, stone
   moulding and day-coloured trim, centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
   Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them

@@ -26,8 +26,14 @@ stylesheet sets per layer:
 
 The head scales with the card's width, so its points are a percentage of the
 layer's width plus multiples of --arch-d across, and multiples of --arch-w
-and --arch-d down. Plain Python, no dependencies; rewrites the marked block
-in style.css. Run from the repository root.
+and --arch-d down.
+
+The native apps draw the same heads with true arcs rather than polygons, so
+they take each shape's figures (its arcs' centres and radii, in card widths)
+and offset the arcs themselves: Arch.kt for Android, Arch.swift for iOS.
+
+Plain Python, no dependencies; rewrites the marked blocks in style.css,
+Arch.kt and Arch.swift. Run from the repository root.
 """
 import math
 import re
@@ -36,6 +42,10 @@ from pathlib import Path
 CSS = Path("apps/office-web/static/style.css")
 BEGIN = "/* genarch:begin"
 END = "/* genarch:end */"
+KOTLIN = Path("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Arch.kt")
+SWIFT = Path("apps/ios/Office/Arch.swift")
+NATIVE_BEGIN = "// genarch:begin"
+NATIVE_END = "// genarch:end"
 
 # rise, haunch radius and the upper arc's centre across, all in card widths
 # from the left springing. The haunches are generous (an upper arc no more
@@ -186,26 +196,79 @@ def indent(block):
     return "".join("  " + line if line.strip() else line for line in block.splitlines(True))
 
 
+def point_angle(shape):
+    cy, _ = solve(**shape)
+    slope = math.degrees(math.atan2(abs(0.5 - shape["centre"]), shape["rise"] - cy))
+    return 180 - 2 * slope
+
+
+def figures(shape):
+    """A shape's arcs for the native apps: the upper arcs' centre depth below
+    the springing and their radius, with the shape's own figures."""
+    cy, radius = solve(**shape)
+    return dict(rise=shape["rise"], haunch=shape["haunch"], centre=shape["centre"], depth=-cy, radius=radius)
+
+
+# Where the native apps use each shape: a phone's by the height it has for
+# home, as the web's by its viewport's.
+NATIVE_WHERE = {
+    "phone": "a phone",
+    "tall": "a phone from 800 high",
+    "taller": "a phone from 880 high",
+    "niche": "a wide screen's niche",
+}
+
+
+def kotlin():
+    lines = []
+    for name, shape in SHAPES.items():
+        f = {k: num(v, 6) for k, v in figures(shape).items()}
+        lines.append(f"/** The {name} head, for {NATIVE_WHERE[name]}: a {point_angle(shape):.0f}° point. */")
+        lines.append(
+            f"val {name.capitalize()}Arch = Arch(rise = {f['rise']}f, haunch = {f['haunch']}f, "
+            f"centre = {f['centre']}f, depth = {f['depth']}f, radius = {f['radius']}f)"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def swift():
+    lines = ["extension Arch {"]
+    for name, shape in SHAPES.items():
+        f = {k: num(v, 6) for k, v in figures(shape).items()}
+        lines.append(f"    /// The {name} head, for {NATIVE_WHERE[name]}: a {point_angle(shape):.0f}° point.")
+        lines.append(
+            f"    static let {name} = Arch(rise: {f['rise']}, haunch: {f['haunch']}, "
+            f"centre: {f['centre']}, depth: {f['depth']}, radius: {f['radius']})"
+        )
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def rewrite(path, begin, end, generated):
+    text = path.read_text()
+    pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.S)
+    if not pattern.search(text):
+        raise SystemExit(f"{path}: no genarch block to replace")
+    path.write_text(pattern.sub(lambda _: generated, text, count=1))
+
+
 def main():
     blocks = []
     for name, shape in SHAPES.items():
         media = MEDIA[name]
         block = rules(name, shape)
         blocks.append(block if media is None else f"@media {media} {{\n{indent(block)}}}\n")
-    generated = (
+    rewrite(CSS, BEGIN, END, (
         f"{BEGIN}: tools/genarch.py writes this block; edit the script, not the polygons. */\n"
         + "\n".join(blocks)
         + END
-    )
-    text = CSS.read_text()
-    pattern = re.compile(re.escape(BEGIN) + r".*?" + re.escape(END), re.S)
-    if not pattern.search(text):
-        raise SystemExit(f"{CSS}: no genarch block to replace")
-    CSS.write_text(pattern.sub(lambda _: generated, text, count=1))
+    ))
+    native = f"{NATIVE_BEGIN}: tools/genarch.py writes this block; edit the script, not the figures.\n"
+    rewrite(KOTLIN, NATIVE_BEGIN, NATIVE_END, native + kotlin() + NATIVE_END)
+    rewrite(SWIFT, NATIVE_BEGIN, NATIVE_END, native + swift() + NATIVE_END)
     for name, shape in SHAPES.items():
         cy, radius = solve(**shape)
-        slope = math.degrees(math.atan2(abs(0.5 - shape["centre"]), shape["rise"] - cy))
-        print(f"{name}: point {180 - 2 * slope:.0f}°, upper radius {radius:.3f}, centre {cy:.3f} below")
+        print(f"{name}: point {point_angle(shape):.0f}°, upper radius {radius:.3f}, centre {cy:.3f} below")
 
 
 if __name__ == "__main__":
