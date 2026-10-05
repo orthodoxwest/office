@@ -30,9 +30,9 @@ JANUARY
   2  Sat     Octave Day of St Stephen                   [s]   r
            Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Holy Name of Jesus) · Mag. For he that is mighty · No Suff.
+           Vespers w · I fol. (Most Holy Name of Jesus) · Mag. For he that is mighty · No Suff.
                Com. Octave Day of St John, Apostle & Evangelist ("This is the same John")
-  3  Sun     Holy Name of Jesus                         [2cl] w
+  3  Sun     Most Holy Name of Jesus                    [2cl] w
            Octave Day of St John, Apostle & Evangelist (s)
            Lauds   w · Ben. He gave himself · No Preces · No Suff.
                Com. Octave Day of St John, Apostle & Evangelist ("This is the same John")
@@ -117,16 +117,16 @@ JANUARY
                Com. St Marcellus I of Rome, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers g · I fol. (II Sunday after Epiphany) · Mag. God hath holpen · No Suff.
-               Com. St Anthony of Egypt ("I will liken him")
+               Com. St Anthony, Abbot ("I will liken him")
  17  Sun     II Sunday after Epiphany                   [sd]  g
-           St Anthony of Egypt (d)
+           St Anthony, Abbot (d)
            Lauds   g · Ben. There was a marriage · No Preces · No Suff.
-               Com. St Anthony of Egypt ("Well done, good and faithful servant")
+               Com. St Anthony, Abbot ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers g · II prec. · Mag. And when they wanted wine · No Suff.
                Com. Chair of St Peter in Rome ("Thou art the shepherd of the sheep")
                Com. St Paul ("O holy Apostle Paul")
-               Com. St Anthony of Egypt ("The world, and all things earthly")
+               Com. St Anthony, Abbot ("The world, and all things earthly")
                Com. St Prisca of Rome, Virgin Martyr ("Come, thou Bride of Christ")
  18  Mon     Chair of St Peter in Rome                  [gd]  w
            St Paul (com)
@@ -252,8 +252,8 @@ FEBRUARY
                Com. St Joseph of Aleppo, Martyr ("He that hateth his life")
                Com. The New Martyrs of Russia ("The very hairs of your head")
            Hours   Preces
-           Vespers r · I fol. (St Agatha) · Mag. The blessed Agatha · No Suff.
-  5  Fri  L  St Agatha                                  [gd]  r
+           Vespers r · I fol. (St Agatha, Virgin & Martyr) · Mag. The blessed Agatha · No Suff.
+  5  Fri  L  St Agatha, Virgin & Martyr                 [gd]  r
            Lauds   r · Ben. The multitude · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. The blessed Agatha · No Suff.
@@ -390,38 +390,38 @@ FEBRUARY
 
 MARCH
 ------------------------------------------------------------
-  1  Mon     Feria                                            v
+  1  Mon     Monday after Septuagesima                        v
            St David of Wales, Bishop & Confessor (com)
            Lauds   v · Ben. Blessed · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Well done")
            Hours   Preces
            Vespers v · Mag. These last · Suff.
                Com. St Chad, Bishop & Confessor ("O thou Priest and Bishop")
-  2  Tue     Feria                                            v
+  2  Tue     Tuesday after Septuagesima                       v
            St Chad, Bishop & Confessor (com)
            Lauds   v · Ben. The Lord hath raised up for us · No Preces · Suff.
                Com. St Chad, Bishop & Confessor ("Well done")
            Hours   Preces
            Vespers v · Mag. The householder answered and said · Suff.
-  3  Wed     Feria                                            v
+  3  Wed     Wednesday after Septuagesima                     v
            Lauds   v · Ben. From the hand of all · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. Take that thine is · Suff.
                Com. St Lucius I, Bishop & Martyr ("This is a Martyr")
-  4  Thu     Feria                                            v
+  4  Thu     Thursday after Septuagesima                      v
            St Lucius I, Bishop & Martyr (com)
            Lauds   v · Ben. Let us serve · No Preces · Suff.
                Com. St Lucius I, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers v · Mag. Is it not lawful · Suff.
-  5  Fri  L  Feria                                            v
+  5  Fri  L  Friday after Septuagesima                        v
            Lauds   v · Ben. Through the tender mercy · No Preces · Suff.
            Hours   Preces
            Vespers r · I fol. (St Perpetua & Felicitas, Martyrs) · Mag. For theirs is the kingdom of heaven · No Suff.
                Com. Friday after Septuagesima ("So the last")
   6  Sat     St Perpetua & Felicitas, Martyrs           [d]   r
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
-               Com. Saturday after Septuagesima ("Give light, O Lord")
+               Com. Saturday before Sexagesima ("Give light, O Lord")
            Hours   No Preces
            Vespers v · I fol. (Sexagesima Sunday) · Mag. The Lord · No Suff.
                Com. St Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
@@ -429,36 +429,36 @@ MARCH
            Lauds   v · Ben. When much people · No Preces · Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. Unto you it is given · Suff.
-  8  Mon     Feria                                            v
+  8  Mon     Monday after Sexagesima                          v
            Lauds   v · Ben. Blessed · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. If ye seek · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("O Teacher right excellent")
-  9  Tue     Feria                                            v
+  9  Tue     Tuesday after Sexagesima                         v
            St Gregory of Nyssa, Bishop, Confessor & Doctor (com)
            Lauds   v · Ben. The Lord hath raised up for us · No Preces · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("Well done")
            Hours   Preces
            Vespers v · Mag. The seed · Suff.
                Com. The Forty Holy Martyrs ("For theirs is the kingdom of heaven")
- 10  Wed     Feria                                            v
+ 10  Wed     Wednesday after Sexagesima                       v
            The Forty Holy Martyrs (com)
            Lauds   v · Ben. From the hand of all · No Preces · Suff.
                Com. The Forty Holy Martyrs ("The very hairs of your head")
            Hours   Preces
            Vespers v · Mag. But that · Suff.
- 11  Thu     Feria                                            v
+ 11  Thu     Thursday after Sexagesima                        v
            Lauds   v · Ben. Let us serve · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Gregory the Great) · Mag. O Teacher right excellent · No Suff.
+           Vespers w · I fol. (St Gregory the Great, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. Thursday after Sexagesima ("Some seed")
- 12  Fri  L  St Gregory the Great                       [2cl] w
+ 12  Fri  L  St Gregory the Great, Bishop, Confessor & Doctor [2cl] w
            Lauds   w · Ben. Gregory · No Preces · No Suff.
                Com. Friday after Sexagesima ("Through the tender mercy")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
                Com. Friday after Sexagesima ("They who keep the word of God")
- 13  Sat     Feria                                            v
+ 13  Sat     Saturday before Quinquagesima                    v
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
            Hours   Preces
            Vespers v · I fol. (Quinquagesima Sunday) · Mag. Mighty Abraham · Suff.
@@ -466,11 +466,11 @@ MARCH
            Lauds   v · Ben. Behold, we go up · No Preces · Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. And Jesus stood · Suff.
- 15  Mon     Feria                                            v
+ 15  Mon     Monday after Quinquagesima                       v
            Lauds   v · Ben. Blessed · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. And they which went before · Suff.
- 16  Tue     Feria                                            v
+ 16  Tue     Tuesday after Quinquagesima                      v
            Lauds   v · Ben. The Lord hath raised up for us · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. Have mercy on me · No Suff.
@@ -512,9 +512,9 @@ MARCH
  21  Sun  L  I SUNDAY IN LENT                           [1cl] v
            Lauds   v · Ben. Then was Jesus · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Benedict) · Mag. Let all the multitude · No Suff.
+           Vespers w · I fol. (St Benedict, Abbot) · Mag. Let all the multitude · No Suff.
                Com. I Sunday in Lent ("Behold, now")
- 22  Mon  L§ St Benedict                                [2cl] w
+ 22  Mon  L§ St Benedict, Abbot                         [2cl] w
            Monday after Lent I (f2)
            Lauds   w · Ben. Benedict · No Preces · No Suff.
                Com. Monday after Lent I ("Come, ye blessed")
@@ -526,13 +526,13 @@ MARCH
            Hours   Preces
            Vespers v · Mag. Truly it is written · No Suff.
                Com. St Gabriel the Archangel ("The Angel Gabriel")
- 24  Wed  L§ Lent Ember Wednesday                       [f2]  v
+ 24  Wed  L§ Ember Wednesday in Lent                    [f2]  v
            St Gabriel the Archangel (gd)
            Lauds   v · Ben. This crooked · No Preces · No Suff.
                Com. St Gabriel the Archangel ("The Angel Gabriel")
            Hours   No Preces
            Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Holy Ghost · No Suff.
-               Com. Lent Ember Wednesday ("For as Jonas")
+               Com. Ember Wednesday in Lent ("For as Jonas")
                Com. St Gabriel the Archangel ("The Archangel Gabriel")
  25  Thu  L§ ANNUNCIATION OF THE BLESSED VIRGIN MARY    [1cl] w
            Thursday after Lent I (f2)
@@ -540,12 +540,12 @@ MARCH
                Com. Thursday after Lent I ("Jesus went thence")
            Hours   No Preces
            Vespers w · II prec. · Mag. The Angel Gabriel · No Suff.
- 26  Fri  L§ Lent Ember Friday                          [f2]  v
+ 26  Fri  L§ Ember Friday in Lent                       [f2]  v
            Lauds   v · Ben. An Angel of the Lord · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. He that made me whole · No Suff.
                Com. St John Damascene, Confessor & Doctor ("O Teacher right excellent")
- 27  Sat  L§ Lent Ember Saturday                        [f2]  v
+ 27  Sat  L§ Ember Saturday in Lent                     [f2]  v
            St John Damascene, Confessor & Doctor (d)
            Lauds   v · Ben. And Jesus taketh his disciples · No Preces · No Suff.
                Com. St John Damascene, Confessor & Doctor ("Well done, good and faithful servant")
@@ -602,9 +602,9 @@ APRIL
   6  Tue  L§ Tuesday after Lent III                     [f2]  v
            Lauds   v · Ben. If two of you · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Tikhon of Moscow) · Mag. O thou Priest and Bishop · No Suff.
+           Vespers w · I fol. (St Tikhon of Moscow, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
                Com. Tuesday after Lent III ("Where two or three")
-  7  Wed  L§ ST TIKHON OF MOSCOW                        [1cl] w
+  7  Wed  L§ ST TIKHON OF MOSCOW, BISHOP & CONFESSOR    [1cl] w
            Wednesday after Lent III (f2)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. Wednesday after Lent III ("Hearken")
@@ -687,10 +687,10 @@ APRIL
            Lauds   v · Ben. The Master saith · No Preces · No Suff.
                Com. Ss Soter & Caius, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers r · I fol. (St George) · Mag. This is a Martyr · No Suff.
+           Vespers r · I fol. (St George, Martyr) · Mag. This is a Martyr · No Suff.
                Com. Thursday after Passion Sunday ("With desire")
                Com. Our Lady of Sorrows ("O holy Mary")
- 23  Fri  L§ ST GEORGE                                  [1cl] r
+ 23  Fri  L§ ST GEORGE, MARTYR                          [1cl] r
            Friday after Passion Sunday (f2)
            Our Lady of Sorrows (gd)
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
@@ -709,29 +709,29 @@ APRIL
            Hours   No Preces
            Vespers v · II prec. · Mag. For it is written · No Suff.
                Com. St Cletus & Marcellinus, Martyrs ("For theirs is the kingdom of heaven")
- 26  Mon  L§ HOLY MONDAY                                [1cl] v
+ 26  Mon  L§ MONDAY IN HOLY WEEK                        [1cl] v
            St Cletus & Marcellinus, Martyrs (com)
            Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
                Com. St Cletus & Marcellinus, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers v · Mag. Thou couldest have no power · No Suff.
- 27  Tue  L§ HOLY TUESDAY                               [1cl] v
+ 27  Tue  L§ TUESDAY IN HOLY WEEK                       [1cl] v
            Lauds   v · Ben. Now before the feast · No Preces · No Suff.
            Hours   No Preces
            Vespers v · Mag. I have power · No Suff.
                Com. St Vitalis, Martyr ("This is a Martyr")
- 28  Wed  L§ HOLY WEDNESDAY                             [1cl] v
+ 28  Wed  L§ WEDNESDAY IN HOLY WEEK                     [1cl] v
            St Vitalis, Martyr (com)
            Lauds   v · Ben. Simon, sleepest thou? · No Preces · No Suff.
                Com. St Vitalis, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers v · Mag. A maid said unto Peter · No Suff.
- 29  Thu  L§ HOLY THURSDAY                              [1cl] w
+ 29  Thu  L§ THURSDAY OF THE LORD'S SUPPER              [1cl] w
            Thursday after Palm Sunday (f2)
            Lauds   w · Ben. Now he that betrayed him · No Preces · No Suff.
            Hours   No Preces
            Vespers v · II prec. · Mag. As they were eating · No Suff.
- 30  Fri  L§ GOOD FRIDAY                                [1cl] b
+ 30  Fri  L§ FRIDAY OF THE PREPARATION (GOOD FRIDAY)    [1cl] b
            Friday after Palm Sunday (f2)
            Lauds   b · Ben. They set up · No Preces · No Suff.
            Hours   No Preces
@@ -748,47 +748,47 @@ MAY
            Lauds   w · Ben. And very early in the morning · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. And when they looked · No Suff.
-  3  Mon     EASTER MONDAY                              [1cl] w
+  3  Mon     MONDAY IN EASTER WEEK                      [1cl] w
            Lauds   w · Ben. Jesus himself · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. What manner of communications · No Suff.
-  4  Tue     EASTER TUESDAY                             [1cl] w
+  4  Tue     TUESDAY IN EASTER WEEK                     [1cl] w
            Lauds   w · Ben. Jesus stood · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Behold My Hands · No Suff.
-  5  Wed     Day IV within the Octave of Easter         [sd]  w
+  5  Wed     Wednesday in Easter Week                   [sd]  w
            Lauds   w · Ben. Cast the net · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Jesus saith unto his disciples · No Suff.
-  6  Thu     Day V within the Octave of Easter          [sd]  w
+  6  Thu     Thursday in Easter Week                    [sd]  w
            St John before the Latin Gate (gd)
            Lauds   w · Ben. Mary stood · No Preces · No Suff.
                Com. St John before the Latin Gate ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers w · II prec. · Mag. They have taken · No Suff.
-  7  Fri     Day VI within the Octave of Easter         [sd]  w
+  7  Fri     Friday in Easter Week                      [sd]  w
            St Alexis Toth, Priest & Confessor (com)
            Lauds   w · Ben. The eleven disciples · No Preces · No Suff.
                Com. St Alexis Toth, Priest & Confessor ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. All power · No Suff.
-  8  Sat     Day VII within the Octave of Easter        [sd]  w
+  8  Sat     Saturday before Low Sunday (Sabbato in Albis) [sd]  w
            Apparition of St Michael the Archangel (gd)
            St Boniface IV, Bishop & Confessor (com)
            Lauds   w · Ben. They ran both together · No Preces · No Suff.
                Com. Apparition of St Michael the Archangel ("There was silence in heaven")
                Com. St Boniface IV, Bishop & Confessor ("Well done")
            Hours   No Preces
-           Vespers w · I fol. (Low Sunday (Octave of Easter)) · Mag. The same day · No Suff.
+           Vespers w · I fol. (The Octave of Easter (Low Sunday)) · Mag. The same day · No Suff.
                Com. Apparition of St Michael the Archangel ("O Prince most glorious")
                Com. St Gregory Nazianzen, Bishop, Confessor & Doctor ("O Teacher right excellent")
-  9  Sun     LOW SUNDAY (OCTAVE OF EASTER)              [1cl] w
+  9  Sun     THE OCTAVE OF EASTER (LOW SUNDAY)          [1cl] w
            St Gregory Nazianzen, Bishop, Confessor & Doctor (d)
            Lauds   w · Ben. The same day · No Preces · No Suff.
                Com. St Gregory Nazianzen, Bishop, Confessor & Doctor ("Well done")
            Hours   No Preces
            Vespers r · I fol. (Finding of the Holy Cross) · Mag. O Cross · No Suff.
-               Com. Low Sunday (Octave of Easter) ("After eight days")
+               Com. The Octave of Easter (Low Sunday) ("After eight days")
                Com. Ss Gordian & Epimachus, Martyrs ("Light perpetual")
  10  Mon     Finding of the Holy Cross                  [2cl] r
            Ss Gordian & Epimachus, Martyrs (com)
@@ -1007,8 +1007,8 @@ JUNE
  16  Wed     Day VII within the Octave of the Ascension [sd]  w
            Lauds   w · Ben. I ascend · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Octave Day of the Ascension) · Mag. Father · No Suff.
- 17  Thu     Octave Day of the Ascension                [gd]  w
+           Vespers w · I fol. (The Octave of the Ascension) · Mag. Father · No Suff.
+ 17  Thu     The Octave of the Ascension                [gd]  w
            Lauds   w · Ben. I ascend · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. O King of glory · No Suff.
@@ -1029,47 +1029,47 @@ JUNE
            Lauds   w · Ben. When the Comforter is come · No Preces · No Suff.
                Com. Ss Gervase & Protase, Martyrs ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers r · I fol. (Whitsunday — Pentecost) · Mag. I will not leave you · No Suff.
- 20  Sun     WHITSUNDAY — PENTECOST                     [1cl] r
+           Vespers r · I fol. (Pentecost Sunday) · Mag. I will not leave you · No Suff.
+ 20  Sun     PENTECOST SUNDAY                           [1cl] r
            Lauds   r · Ben. Receive ye · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. To-day · No Suff.
- 21  Mon     DAY II WITHIN THE OCTAVE OF PENTECOST      [1cl] r
+ 21  Mon     MONDAY WITHIN THE OCTAVE OF PENTECOST      [1cl] r
            Lauds   r · Ben. God so loved the world · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. If a man love me · No Suff.
- 22  Tue     DAY III WITHIN THE OCTAVE OF PENTECOST     [1cl] r
+ 22  Tue     TUESDAY WITHIN THE OCTAVE OF PENTECOST     [1cl] r
            St Alban, Protomartyr of England (d)
            Lauds   r · Ben. I am the door · No Preces · No Suff.
                Com. St Alban, Protomartyr of England ("He that hateth his life")
            Hours   No Preces
            Vespers r · II prec. · Mag. Peace · No Suff.
- 23  Wed  L§ Day IV within the Octave of Pentecost      [sd]  r
+ 23  Wed  L§ Ember Wednesday in Pentecost               [sd]  r
            St Etheldreda, Queen & Virgin (com)
            Lauds   r · Ben. I am the living bread · No Preces · No Suff.
                Com. St Etheldreda, Queen & Virgin ("The kingdom of heaven")
            Hours   No Preces
            Vespers r · II prec. · Mag. I am the living bread · No Suff.
- 24  Thu     Day V within the Octave of Pentecost       [sd]  r
+ 24  Thu     Thursday within the Octave of Pentecost    [sd]  r
            Nativity of St John Baptist (com)
            Lauds   r · Ben. Jesus called unto him · No Preces · No Suff.
                Com. Nativity of St John Baptist ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers r · II prec. · Mag. The Spirit · No Suff.
- 25  Fri  L§ Day VI within the Octave of Pentecost      [sd]  r
+ 25  Fri  L§ Ember Friday in Pentecost                  [sd]  r
            Lauds   r · Ben. Jesus said · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. But the Comforter · No Suff.
- 26  Sat  L§ Day VII within the Octave of Pentecost     [sd]  r
+ 26  Sat  L§ Ember Saturday in Pentecost                [sd]  r
            Ss John & Paul, Martyrs (d)
            Octave of the Compassion of Our Lord Jesus Christ (com)
            Lauds   r · Ben. The love of God is shed · No Preces · No Suff.
                Com. Ss John & Paul, Martyrs ("These are the holy ones")
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers w · I fol. (Trinity Sunday) · Mag. Thanks, O God · No Suff.
+           Vespers w · I fol. (The Feast of the Most Holy Trinity) · Mag. Thanks, O God · No Suff.
                Com. I Sunday after Pentecost ("Speak, Lord")
- 27  Sun     TRINITY SUNDAY                             [1cl] w
+ 27  Sun     THE FEAST OF THE MOST HOLY TRINITY         [1cl] w
            I Sunday after Pentecost (sd)
            Lauds   w · Ben. Blessed be · No Preces · No Suff.
                Com. I Sunday after Pentecost ("Be ye therefore")
@@ -1098,14 +1098,14 @@ JUNE
                Com. Day VII within the Octave of St John Baptist ("The mouth of Zacharias")
                Com. Day II within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
-           Vespers w · I fol. (Corpus Christi) · Mag. O how sweet · No Suff.
+           Vespers w · I fol. (The Feast of the Most Holy Body of Christ (Corpus Christi)) · Mag. O how sweet · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Octave of St John Baptist ("When Zacharias")
 
 JULY
 ------------------------------------------------------------
-  1  Thu     CORPUS CHRISTI                             [1cl] w
+  1  Thu     THE FEAST OF THE MOST HOLY BODY OF CHRIST (CORPUS CHRISTI) [1cl] w
            Octave of St John Baptist (gd)
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. Octave of St John Baptist ("The mouth of Zacharias")
@@ -1121,13 +1121,13 @@ JULY
                Com. St John of San Francisco, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers w · II prec. · Mag. O how sweet · No Suff.
-               Com. St Irenaeus of Lyons, Bishop & Martyr ("This is a Martyr")
+               Com. St Irenaeus of Lyon, Bishop & Martyr ("This is a Martyr")
                Com. Day IV within the Octave of Ss Peter & Paul ("Peter the Apostle")
   3  Sat     Day III within the Octave of Corpus Christi [sd]  w
-           St Irenaeus of Lyons, Bishop & Martyr (d)
+           St Irenaeus of Lyon, Bishop & Martyr (d)
            Day V within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
-               Com. St Irenaeus of Lyons, Bishop & Martyr ("He that hateth his life")
+               Com. St Irenaeus of Lyon, Bishop & Martyr ("He that hateth his life")
                Com. Day V within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
@@ -1167,8 +1167,8 @@ JULY
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. Ss Cyril and Methodius, Bishops & Confessors ("In holiness")
            Hours   No Preces
-           Vespers w · I fol. (Octave Day of Corpus Christi) · Mag. O sacred banquet · No Suff.
-  8  Thu     Octave Day of Corpus Christi               [gd]  w
+           Vespers w · I fol. (Octave of Corpus Christi) · Mag. O sacred banquet · No Suff.
+  8  Thu     Octave of Corpus Christi                   [gd]  w
            Lauds   w · Ben. I am · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. O sacred banquet · No Suff.
@@ -1265,8 +1265,8 @@ JULY
            Lauds   g · Ben. From the hand of all · No Preces · Suff.
                Com. St Praxedes, Virgin ("The kingdom of heaven")
            Hours   Preces
-           Vespers w · I fol. (St Mary Magdalene) · Mag. A woman · No Suff.
- 22  Thu     St Mary Magdalene                          [gd]  w
+           Vespers w · I fol. (St Mary Magdalene, Penitent) · Mag. A woman · No Suff.
+ 22  Thu     St Mary Magdalene, Penitent                [gd]  w
            Lauds   w · Ben. Mary therefore · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. A woman · No Suff.
@@ -1284,15 +1284,15 @@ JULY
            Hours   Preces
            Vespers g · Mag. He hath put down the mighty · Suff.
                Com. St Christina, Virgin & Martyr ("Come, thou Bride of Christ")
- 24  Sat     Vigil of St James the Greater, Apostle     [s]   v
+ 24  Sat     Vigil of St James                          [s]   v
            St Christina, Virgin & Martyr (com)
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
                Com. St Christina, Virgin & Martyr ("The kingdom of heaven")
            Hours   Preces
-           Vespers r · I fol. (St James the Greater, Apostle) · Mag. They will deliver you up · No Suff.
+           Vespers r · I fol. (St James, Apostle) · Mag. They will deliver you up · No Suff.
                Com. V Sunday after Pentecost ("Ye mountains")
                Com. St Christopher, Martyr ("This is a Martyr")
- 25  Sun     St James the Greater, Apostle              [2cl] r
+ 25  Sun     St James, Apostle                          [2cl] r
            V Sunday after Pentecost (sd)
            St Christopher, Martyr (com)
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
@@ -1376,10 +1376,10 @@ AUGUST
            Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
                Com. St Oswald, King & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · I fol. (Transfiguration of Our Lord) · Mag. Christ Jesus · No Suff.
+           Vespers w · I fol. (The Transfiguration of Our Lord Jesus Christ) · Mag. Christ Jesus · No Suff.
                Com. Dedication of Our Lady of the Snows ("O holy Mary")
                Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("This is a Martyr")
-  6  Fri  L  Transfiguration of Our Lord                [2cl] w
+  6  Fri  L  The Transfiguration of Our Lord Jesus Christ [2cl] w
            Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (com)
            Lauds   w · Ben. And behold a voice · No Preces · No Suff.
                Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("He that hateth his life")
@@ -1399,13 +1399,13 @@ AUGUST
            Hours   Preces
            Vespers g · II prec. · Mag. A good tree · Suff.
                Com. St Romanus, Martyr ("This is a Martyr")
-  9  Mon     Vigil of St Lawrence, Martyr               [s]   v
+  9  Mon     Vigil of St Laurence                       [s]   v
            St Romanus, Martyr (com)
            Lauds   v · Ben. Blessed · No Preces · Suff.
                Com. St Romanus, Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers r · I fol. (St Lawrence, Martyr) · Mag. Laurence the Deacon · No Suff.
- 10  Tue     St Lawrence, Martyr                        [2cl] r
+           Vespers r · I fol. (St Laurence, Deacon & Martyr) · Mag. Laurence the Deacon · No Suff.
+ 10  Tue     St Laurence, Deacon & Martyr               [2cl] r
            Lauds   r · Ben. On the iron grate · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. Blessed Laurence · No Suff.
@@ -1479,14 +1479,14 @@ AUGUST
                Com. Day VII within the Octave of the Assumption ("On this day")
                Com. Ss Timothy (Bishop), Hippolytus & Symphorian, Mm ("For theirs is the kingdom of heaven")
  22  Sun     IX Sunday after Pentecost                  [sd]  g
-           Octave Day of the Assumption (gd)
+           Octave of the Assumption (gd)
            Ss Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
            Lauds   g · Ben. When the Lord was come near to Jerusalem · No Preces · No Suff.
-               Com. Octave Day of the Assumption ("Who is she")
+               Com. Octave of the Assumption ("Who is she")
                Com. Ss Timothy (Bishop), Hippolytus & Symphorian, Mm ("The very hairs of your head")
            Hours   No Preces
            Vespers g · II prec. · Mag. Is it not written · No Suff.
-               Com. Octave Day of the Assumption ("On this day")
+               Com. Octave of the Assumption ("On this day")
  23  Mon     Vigil of St Bartholomew                    [s]   v
            Lauds   v · Ben. Blessed · No Preces · Suff.
            Hours   Preces
@@ -1627,10 +1627,10 @@ SEPTEMBER
                Com. Exaltation of the Holy Cross ("O Cross")
                Com. St Nicomedes, Martyr ("This is a Martyr")
  15  Wed  L§ Seven Sorrows of the B.V.M.                [2cl] w
-           September Ember Wednesday (f2)
+           Ember Wednesday in September (f2)
            St Nicomedes, Martyr (com)
            Lauds   w · Ben. Come ye · No Preces · No Suff.
-               Com. September Ember Wednesday ("This kind")
+               Com. Ember Wednesday in September ("This kind")
                Com. St Nicomedes, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Sorrow oppresseth me · No Suff.
@@ -1641,11 +1641,11 @@ SEPTEMBER
                Com. Ss Euphemia, Lucy & Geminian, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers r · II prec. · Mag. In the heavenly kingdom · No Suff.
- 17  Fri  L§ September Ember Friday                     [f2]  v
+ 17  Fri  L§ Ember Friday in September                  [f2]  v
            Lauds   v · Ben. A woman · No Preces · Suff.
            Hours   Preces
            Vespers g · Mag. He hath put down the mighty · Suff.
- 18  Sat  L§ September Ember Saturday                   [f2]  v
+ 18  Sat  L§ Ember Saturday in September                [f2]  v
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
            Hours   Preces
            Vespers g · I fol. (XIII Sunday after Pentecost) · Mag. Adonai · No Suff.
@@ -1662,9 +1662,9 @@ SEPTEMBER
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
                Com. St Januarius & companions, Martyrs ("In the heavenly kingdom")
  20  Mon     St Eustace & companions, Martyrs           [d]   r
-           Vigil of St Matthew, Apostle and Evangelist (s)
+           Vigil of St Matthew (s)
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
-               Com. Vigil of St Matthew, Apostle and Evangelist ("Blessed")
+               Com. Vigil of St Matthew ("Blessed")
            Hours   No Preces
            Vespers r · I fol. (St Matthew, Apostle and Evangelist) · Mag. They will deliver you up · No Suff.
                Com. St Eustace & companions, Martyrs ("In the heavenly kingdom")
@@ -1875,11 +1875,11 @@ OCTOBER
                Com. St Evaristus, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers g · Mag. Let my spirit rejoice · Suff.
- 27  Wed     Vigil of Ss Simon and Jude, Apostles       [s]   v
+ 27  Wed     Vigil of Ss Simon & Jude                   [s]   v
            Lauds   v · Ben. From the hand of all · No Preces · Suff.
            Hours   Preces
-           Vespers r · I fol. (Ss Simon and Jude, Apostles) · Mag. They will deliver you up · No Suff.
- 28  Thu     Ss Simon and Jude, Apostles                [2cl] r
+           Vespers r · I fol. (Ss Simon & Jude, Apostles) · Mag. They will deliver you up · No Suff.
+ 28  Thu     Ss Simon & Jude, Apostles                  [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
@@ -1890,9 +1890,9 @@ OCTOBER
  30  Sat  L§ Vigil of All Saints                        [s]   v
            Lauds   v · Ben. Give light, O Lord · No Preces · No Suff.
            Hours   Preces
-           Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. The Lord God shall give unto him · No Suff.
+           Vespers w · I fol. (The Feast of Our Lord Jesus Christ the King) · Mag. The Lord God shall give unto him · No Suff.
                Com. XIX Sunday after Pentecost ("I saw the Lord also")
- 31  Sun     THE FEAST OF O..J.C. THE KING              [1cl] w
+ 31  Sun     THE FEAST OF OUR LORD JESUS CHRIST THE KING [1cl] w
            XIX Sunday after Pentecost (sd)
            Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
                Com. XIX Sunday after Pentecost ("Tell them which are bidden")
@@ -1909,7 +1909,7 @@ NOVEMBER
            Vespers w · II prec. · Mag. O how glorious · No Suff.
            Vespers of the Dead after Let us bless the Lord
            Compline of the Dead
-  2  Tue     All Souls' Day                             [d]   b
+  2  Tue     Commemoration of All the Faithful Departed (All Souls' Day) [d]   b
            Day II within the Octave of All Saints (sd)
            Lauds   b · Ben. I am the resurrection · No Preces · No Suff.
            Hours   No Preces
@@ -1972,9 +1972,9 @@ NOVEMBER
            Lauds   g · Ben. From the hand of all · No Preces · Suff.
                Com. Ss Tryphon, Respicius & Nympha, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · I fol. (St Martin of Tours) · Mag. O blessed Martin · No Suff.
+           Vespers w · I fol. (St Martin of Tours, Bishop & Confessor) · Mag. O blessed Martin · No Suff.
                Com. St Mennas, Martyr ("This is a Martyr")
- 11  Thu     St Martin of Tours                         [gd]  w
+ 11  Thu     St Martin of Tours, Bishop & Confessor     [gd]  w
            St Mennas, Martyr (com)
            Lauds   w · Ben. O blessed Martin · No Preces · No Suff.
                Com. St Mennas, Martyr ("He that hateth his life")
@@ -2089,42 +2089,42 @@ NOVEMBER
            Hours   Preces
            Vespers v · II prec. · Mag. Fear not, Mary · No Suff.
                Com. St Saturninus, Bishop & Martyr ("This is a Martyr")
- 29  Mon  L§ Feria                                            v
+ 29  Mon  L§ Monday after Advent I                            v
            St Saturninus, Bishop & Martyr (com)
            Lauds   v · Ben. The Angel of the Lord · No Preces · No Suff.
                Com. St Saturninus, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers r · I fol. (St Andrew, Apostle) · Mag. One of the two · No Suff.
-               Com. Monday after Advent Sunday 1 ("Lift up thine eyes")
+               Com. Monday after Advent I ("Lift up thine eyes")
  30  Tue  L  St Andrew, Apostle                         [2cl] r
            Lauds   r · Ben. Yield up to us · No Preces · No Suff.
-               Com. Tuesday after Advent Sunday 1 ("Before they came together")
+               Com. Tuesday after Advent I ("Before they came together")
            Hours   No Preces
            Vespers r · II prec. · Mag. When blessed Andrew · No Suff.
-               Com. Tuesday after Advent Sunday 1 ("Seek ye the Lord")
+               Com. Tuesday after Advent I ("Seek ye the Lord")
 
 DECEMBER
 ------------------------------------------------------------
-  1  Wed  L§ Feria                                            v
+  1  Wed  L§ Wednesday after Advent I                         v
            Lauds   v · Ben. Out of Sion · No Preces · No Suff.
            Hours   Preces
            Vespers w · I fol. (St Peter Chrysologus, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
-               Com. Wednesday after Advent Sunday 1 ("After me")
+               Com. Wednesday after Advent I ("After me")
                Com. St Bibiana, Virgin & Martyr ("Come, thou Bride of Christ")
   2  Thu  L  St Peter Chrysologus, Bishop, Confessor & Doctor [d]   w
            St Bibiana, Virgin & Martyr (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Thursday after Advent Sunday 1 ("Blessed art thou")
+               Com. Thursday after Advent I ("Blessed art thou")
                Com. St Bibiana, Virgin & Martyr ("The kingdom of heaven")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
-               Com. Thursday after Advent Sunday 1 ("I will wait")
-  3  Fri  L§ Feria                                            v
+               Com. Thursday after Advent I ("I will wait")
+  3  Fri  L§ Friday after Advent I                            v
            Lauds   v · Ben. Lo, there cometh one · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. Out of Egypt · No Suff.
                Com. St Barbara, Virgin & Martyr ("Come, thou Bride of Christ")
-  4  Sat  L  Feria                                            v
+  4  Sat  L  Saturday before Advent II                        v
            St Barbara, Virgin & Martyr (com)
            Lauds   v · Ben. Fear not · No Preces · No Suff.
                Com. St Barbara, Virgin & Martyr ("The kingdom of heaven")
@@ -2140,44 +2140,44 @@ DECEMBER
                Com. St Nicholas ("O thou Priest and Bishop")
   6  Mon  L§ St Nicholas                                [d]   w
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Monday after Advent Sunday 2 ("From heaven there cometh")
+               Com. Monday after Advent II ("From heaven there cometh")
            Hours   No Preces
-           Vespers w · I fol. (St Ambrose) · Mag. O Teacher right excellent · No Suff.
+           Vespers w · I fol. (St Ambrose of Milan, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Nicholas ("The Lord loved him")
-               Com. Monday after Advent Sunday 2 ("Behold the King shall come")
-  7  Tue  L  St Ambrose                                 [gd]  w
+               Com. Monday after Advent II ("Behold the King shall come")
+  7  Tue  L  St Ambrose of Milan, Bishop, Confessor & Doctor [gd]  w
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Tuesday after Advent Sunday 2 ("The Lord shall arise upon thee")
+               Com. Tuesday after Advent II ("The Lord shall arise upon thee")
            Hours   No Preces
            Vespers w · I fol. (Conception of the Blessed Virgin Mary) · Mag. All generations · No Suff.
-               Com. St Ambrose ("O Teacher right excellent")
-               Com. Tuesday after Advent Sunday 2 ("The voice of one crying")
+               Com. St Ambrose of Milan, Bishop, Confessor & Doctor ("O Teacher right excellent")
+               Com. Tuesday after Advent II ("The voice of one crying")
   8  Wed  L§ Conception of the Blessed Virgin Mary      [2cl] w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Wednesday after Advent Sunday 2 ("Behold I send my messenger")
+               Com. Wednesday after Advent II ("Behold I send my messenger")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
-               Com. Wednesday after Advent Sunday 2 ("Sion")
+               Com. Wednesday after Advent II ("Sion")
   9  Thu  L  Day II within Conception Octave            [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Thursday after Advent Sunday 2 ("Thou, O Lord")
+               Com. Thursday after Advent II ("Thou, O Lord")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
-               Com. Thursday after Advent Sunday 2 ("He that cometh after me")
+               Com. Thursday after Advent II ("He that cometh after me")
                Com. St Melchiades, Bishop & Martyr ("This is a Martyr")
  10  Fri  L§ Day III within Conception Octave           [sd]  w
            St Melchiades, Bishop & Martyr (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Friday after Advent Sunday 2 ("Say to them")
+               Com. Friday after Advent II ("Say to them")
                Com. St Melchiades, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
-               Com. Friday after Advent Sunday 2 ("Sing unto the Lord")
+               Com. Friday after Advent II ("Sing unto the Lord")
                Com. St Damasus, Bishop & Confessor ("O thou Priest and Bishop")
  11  Sat  L  Day IV within Conception Octave            [sd]  w
            St Damasus, Bishop & Confessor (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Saturday after Advent Sunday 2 ("The Lord shall set up an ensign")
+               Com. Saturday before Advent III ("The Lord shall set up an ensign")
                Com. St Damasus, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
@@ -2196,38 +2196,38 @@ DECEMBER
            St Herman of Alaska, Priest & Confessor (com)
            Lauds   r · Ben. A pillar art thou · No Preces · No Suff.
                Com. Day VI within Conception Octave ("The Lord God said")
-               Com. Monday after Advent Sunday 3 ("There shall come forth")
+               Com. Monday after Advent III ("There shall come forth")
                Com. St Herman of Alaska, Priest & Confessor ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers r · II prec. · Mag. With such gravity · No Suff.
                Com. Day VI within Conception Octave ("Let us celebrate")
-               Com. Monday after Advent Sunday 3 ("All generations")
+               Com. Monday after Advent III ("All generations")
  14  Tue  L  Day VII within Conception Octave           [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Tuesday after Advent Sunday 3 ("Thou, Bethlehem")
+               Com. Tuesday after Advent III ("Thou, Bethlehem")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
-               Com. Tuesday after Advent Sunday 3 ("Awake, awake")
+               Com. Tuesday after Advent III ("Awake, awake")
                Com. Octave of the Conception of the B.V.M. ("O holy Mary")
- 15  Wed  L§ Advent Ember Wednesday                     [f2]  v
+ 15  Wed  L§ Ember Wednesday in Advent                  [f2]  v
            Octave of the Conception of the B.V.M. (com)
            Lauds   v · Ben. The Angel · No Preces · No Suff.
                Com. Octave of the Conception of the B.V.M. ("Blessed art thou")
            Hours   No Preces
            Vespers v · Mag. Behold the handmaid of the Lord · No Suff.
                Com. St Eusebius of Vercelli, Bishop & Martyr ("This is a Martyr")
- 16  Thu  L  Feria                                            v
+ 16  Thu  L  Thursday after Advent III                        v
            St Eusebius of Vercelli, Bishop & Martyr (com)
            Lauds   v · Ben. Be ye watchful · No Preces · No Suff.
                Com. St Eusebius of Vercelli, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers v · Mag. Rejoice ye · No Suff.
- 17  Fri  L§ Advent Ember Friday                        [f2]  v
+ 17  Fri  L§ Ember Friday in Advent                     [f2]  v
            Lauds   v · Ben. For lo, as soon · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O Wisdom · No Suff.
                Com. Expectation of the B.V.M. ("The Holy Ghost")
- 18  Sat  L§ Advent Ember Saturday                      [f2]  v
+ 18  Sat  L§ Ember Saturday in Advent                   [f2]  v
            Expectation of the B.V.M. (gd)
            Lauds   v · Ben. How shall this be · No Preces · No Suff.
                Com. Expectation of the B.V.M. ("He shall sit upon the throne")
@@ -2238,30 +2238,30 @@ DECEMBER
            Lauds   v · Ben. Hail, Mary · No Preces · No Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. O Root of Jesse · No Suff.
- 20  Mon  L§ Feria                                            v
+ 20  Mon  L§ Monday after Advent IV                           v
            Lauds   v · Ben. Thus saith the Lord · No Preces · No Suff.
            Hours   Preces
            Vespers r · I fol. (St Thomas, Apostle) · Mag. Because thou hast seen me · No Suff.
-               Com. Monday after Advent Sunday 4 ("O Key of David")
+               Com. Monday after Advent IV ("O Key of David")
  21  Tue  L  St Thomas, Apostle                         [2cl] r
            Lauds   r · Ben. Because thou hast seen me · No Preces · No Suff.
-               Com. Tuesday after Advent Sunday 4 ("Be not afraid")
+               Com. Tuesday after Advent IV ("Be not afraid")
            Hours   No Preces
            Vespers r · II prec. · Mag. Because thou hast seen me · No Suff.
-               Com. Tuesday after Advent Sunday 4 ("O Day-spring")
- 22  Wed  L§ Feria                                            v
+               Com. Tuesday after Advent IV ("O Day-spring")
+ 22  Wed  L§ Wednesday after Advent IV                        v
            Lauds   v · Ben. I will place salvation · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O King of Nations · No Suff.
- 23  Thu  L  Feria                                            v
+ 23  Thu  L  Thursday after Advent IV                         v
            Lauds   v · Ben. Behold all things are fulfilled · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O Emmanuel · No Suff.
  24  Fri  L§ VIGIL OF THE NATIVITY OF OUR LORD          [1cl] v
            Lauds   v · Ben. The Saviour · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Nativity of Our Lord Jesus Christ) · Mag. When the sun hath risen · No Suff.
- 25  Sat     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
+           Vespers w · I fol. (The Nativity of Our Lord) · Mag. When the sun hath risen · No Suff.
+ 25  Sat     THE NATIVITY OF OUR LORD                   [1cl] w
            Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. To-day · No Suff.
@@ -2280,9 +2280,9 @@ DECEMBER
                Com. Day III within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers w · II prec. · Mag. There went this saying abroad · No Suff.
-               Com. Holy Innocents ("These are they")
+               Com. The Holy Innocents, Martyrs ("These are they")
                Com. Day III within the Nativity Octave ("To-day")
- 28  Tue     Holy Innocents                             [2cl] r
+ 28  Tue     The Holy Innocents, Martyrs                [2cl] r
            Day IV within the Nativity Octave (sd)
            Lauds   r · Ben. These are they · No Preces · No Suff.
                Com. Day IV within the Nativity Octave ("Glory")
@@ -2300,12 +2300,12 @@ DECEMBER
  30  Thu     Day VI within the Nativity Octave          [sd]  w
            Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (St Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
+           Vespers w · I fol. (St Sylvester, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
                Com. Day VI within the Nativity Octave ("To-day")
- 31  Fri  L  St Sylvester I, Bishop                     [d]   w
+ 31  Fri  L  St Sylvester, Bishop & Confessor           [d]   w
            Day VII within the Nativity Octave (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. Day VII within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers w · I fol. (Circumcision of Our Lord) · Mag. God · No Suff.
-               Com. St Sylvester I, Bishop ("The Lord loved him")
+               Com. St Sylvester, Bishop & Confessor ("The Lord loved him")
