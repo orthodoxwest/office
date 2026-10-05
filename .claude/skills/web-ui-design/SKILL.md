@@ -112,8 +112,13 @@ or impose a redesign on an unrelated change.
   (genarch's "tall" and "taller" shapes, 128° and 123°), the cross, date,
   feast and invitation grow, the hours' rows get a fixed taller minimum
   (never stretched), and the card stands down to just above the footer,
-  the spare height going to the head, three parts above the day block to
-  two below so it sits optically under the point.
+  the spare height going to the head, two parts above the day block to
+  three below so the title reads with the cross. The larger type waits
+  for 375px wide and 830px high; narrower or shorter phones need the
+  height for wrapped lines. On a past date "Go to today" follows the
+  day's facts (feast, fasts, commemorations) rather than parting them.
+  The card's controls share the date's gold focus ring, and on Apse the
+  card lifts red, green and violet as the rails lift white and black.
   From 701px the same object widens into a niche set into the wall (a
   lower pointed head, rising 0.38 of its width so a laptop still shows
   the hours, stone moulding as further offset layers, day-colour
@@ -122,7 +127,8 @@ or impose a redesign on an unrelated change.
   toward
   it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
   (a shaft from above). Large screens scale the whole niche with
-  `--niche-zoom` steps gated on width and height. Its background and shadows
+  `--niche-zoom` steps gated on width and height (and a short laptop
+  window, 820px high or less, steps it down to 0.9). Its background and shadows
   are tokens (`--niche-background`, `--niche-shadows`) because the Apse card
   rules outrank the base selector and must repeat them. Drawn architecture
   around it (columns, sconces, sills, arches) has been tried and read as

@@ -25,16 +25,6 @@
         </h1>
         {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
-        {# Always visible when not local today — "Change date" keeps a secondary
-             Today control, but overnight PWA resume must not require opening it. #}
-        {# No role=status here: intentional archive browsing should not
-             announce on every load. Client-injected notices (midnight freeze)
-             use a live region because those appear without a navigation. #}
-        {% if show_today %}
-        <p class="not-today-notice">
-          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
-        </p>
-        {% endif %}
         {% if penitential %}
         <p class="penitential">
           {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
@@ -47,6 +37,18 @@
             {% for name in commemorations %}<li>{{ name|typeset }}</li>{% endfor %}
           </ul>
         </div>
+        {% endif %}
+        {# After the day's facts (feast, fasts, commemorations), so they read
+             together. Always visible when not local today — "Change date"
+             keeps a secondary Today control, but overnight PWA resume must
+             not require opening it. #}
+        {# No role=status here: intentional archive browsing should not
+             announce on every load. Client-injected notices (midnight freeze)
+             use a live region because those appear without a navigation. #}
+        {% if show_today %}
+        <p class="not-today-notice">
+          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
+        </p>
         {% endif %}
       </header>
     </section>

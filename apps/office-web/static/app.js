@@ -692,6 +692,8 @@ function usageBeaconBody(scope) {
     } else {
       var anchor =
         document.querySelector(".hour-meta") ||
+        document.querySelector(".home-day-head .commemorations") ||
+        document.querySelector(".home-day-head .penitential") ||
         document.querySelector(".home-day-head .octave-note") ||
         document.querySelector(".home-day-head .feast") ||
         document.querySelector(".home-day-head h1") ||
