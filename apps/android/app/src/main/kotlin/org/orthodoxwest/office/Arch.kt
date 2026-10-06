@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
 import kotlin.math.PI
 import kotlin.math.atan2
+import kotlin.math.hypot
 import kotlin.math.sqrt
 
 /**
@@ -58,4 +59,29 @@ fun archPath(a: Arch, width: Float, d: Float, foot: Float, open: Boolean = false
         lineTo(width + d, foot)
         if (!open) close()
     }
+}
+
+/**
+ * How wide the head of a card `width` wide stands `y` below the card's top, between lines `d`
+ * beyond its edges (inside them when negative) as [archPath] draws them: the jambs below the
+ * springing, the haunches above it, then the upper arcs, and nothing above the point.
+ */
+fun archChord(a: Arch, width: Float, d: Float, y: Float): Float {
+    val spring = a.rise * width
+    val haunch = a.haunch * width
+    val centre = a.centre * width
+    val below = spring + a.depth * width
+    // The haunch gives way to the upper arc on the line through their centres.
+    val join = spring - (haunch + d) * a.depth / hypot(a.depth, a.centre - a.haunch)
+    val left = when {
+        y >= spring -> -d
+        y >= join -> haunch - sqrt((haunch + d) * (haunch + d) - (spring - y) * (spring - y))
+        else -> {
+            val radius = a.radius * width + d
+            val up = below - y
+            if (up >= radius) return 0f
+            centre - sqrt(radius * radius - up * up)
+        }
+    }
+    return maxOf(0f, width - 2f * left)
 }

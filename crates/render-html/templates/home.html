@@ -23,7 +23,10 @@
              is one item inside it, so its words keep their spaces. #}
           <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{% set date_parts = date_str|split(", ", 1)|list %}{% if date_parts|length == 2 %}<span><span class="home-date-weekday">{{ date_parts[0] }},</span> <span class="home-date-rest">{{ date_parts[1] }}</span></span>{% else %}{{ date_str }}{% endif %}</a>
         </h1>
-        {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
+        {# A familiar name the ordo gives in parentheses ("(Corpus Christi)")
+           is set apart from the name, so it is kept whole and, when the two
+           cannot share a line, takes the next line of its own. #}
+        {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}</p>{% endif %}
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
         {% if penitential %}
         <p class="penitential">

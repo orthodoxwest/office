@@ -108,6 +108,19 @@ fn home_sets_the_days_versicle_on_a_plain_day() {
 }
 
 #[test]
+fn home_parts_a_feast_from_its_familiar_name() {
+    let core = OfficeCore::new().unwrap();
+    let corpus = core.home(civil(2026, 6, 11), civil(2026, 6, 11), 9).unwrap();
+    assert_eq!(
+        (corpus.feast_name.as_str(), corpus.feast_alias.as_str()),
+        ("The Feast of the Most Holy Body of Christ", "(Corpus Christi)")
+    );
+    assert_eq!(corpus.feast, "The Feast of the Most Holy Body of Christ (Corpus Christi)");
+    let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 9).unwrap();
+    assert_eq!((placidus.feast_name.as_str(), placidus.feast_alias.as_str()), (placidus.feast.as_str(), ""));
+}
+
+#[test]
 fn the_ordo_month_matches_the_web_rows() {
     let core = OfficeCore::new().unwrap();
     let march = core.ordo_month(2026, 3).unwrap();

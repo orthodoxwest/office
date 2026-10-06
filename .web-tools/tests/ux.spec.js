@@ -537,22 +537,69 @@ test("the niche's cross stands clear under the lining at every desktop width", a
   }
 });
 
-test("a long feast name breaks inside the phone's lining rather than crossing it", async ({ page }) => {
-  // The ordo's names are long: these once ran a line over the lining's
-  // hairline, which stands 21px in from the card's edge.
-  for (const [width, height] of [[320, 740], [390, 844], [430, 932]]) {
+test("home's day stands clear of the lining's hairline, up the head as at its sides", async ({ page }) => {
+  // The ordo's names are long and the head narrows as it rises: a name once
+  // ran over the hairline at the jambs and, on tall phones with the versicle
+  // under the feast, a date or a name crossed it further up the arch. A probe
+  // clipped as the hairline is finds where it runs, so the test holds no
+  // figures of the arch.
+  for (const [width, height, dates] of [
+    [320, 740, ["2026-11-02", "2026-04-18", "2026-06-11"]],
+    [390, 844, ["2026-11-02", "2026-04-18", "2026-06-11"]],
+    [412, 915, ["2026-10-02", "2026-06-11"]],
+    [430, 932, ["2026-11-02", "2026-06-12"]],
+  ]) {
     await page.setViewportSize({ width, height });
-    for (const date of ["2026-11-02", "2026-04-18", "2026-06-11"]) {
+    for (const date of dates) {
+      // Opened as today, so the versicle takes the head's spare height.
+      await page.clock.setFixedTime(new Date(`${date}T15:56:00-04:00`));
       await openDatedPage(page, `/?date=${date}`);
-      const air = await page.evaluate(() => {
-        const card = document.querySelector(".home-hero").getBoundingClientRect();
-        const range = document.createRange();
-        range.selectNodeContents(document.querySelector(".home .feast"));
-        return Math.min(...[...range.getClientRects()].map((line) => Math.min(line.left - card.left, card.right - line.right)));
+      const crossing = await page.evaluate(() => {
+        const lining = document.querySelector(".home-lining");
+        const hairline = getComputedStyle(lining, "::after");
+        const probe = document.createElement("div");
+        Object.assign(probe.style, { position: "absolute", top: hairline.top, right: hairline.right, bottom: hairline.bottom, left: hairline.left, clipPath: hairline.clipPath, pointerEvents: "auto" });
+        lining.append(probe);
+        const on = (x, y) => document.elementsFromPoint(x, y).includes(probe);
+        // Each line of the day, grown by its clear air, must not reach the hairline.
+        const air = 8;
+        const crossing = [];
+        const words = document.createTreeWalker(document.querySelector(".home-day-head"), NodeFilter.SHOW_TEXT);
+        for (let node = words.nextNode(); node; node = words.nextNode()) {
+          if (!node.textContent.trim() || !node.parentElement.checkVisibility()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const line of range.getClientRects()) {
+            const [left, right, top] = [line.left - air, line.right + air, line.top - air];
+            let touches = false;
+            for (let x = left; x <= right && !touches; x += 0.5) touches = on(x, top);
+            for (let y = top; y <= line.bottom && !touches; y += 0.5) touches = on(left, y) || on(right, y);
+            if (touches) crossing.push(node.textContent.trim());
+          }
+        }
+        probe.remove();
+        return crossing;
       });
-      expect(air, `${width}x${height} ${date}`).toBeGreaterThanOrEqual(21 + 8);
+      expect(crossing, `${width}x${height} ${date}`).toEqual([]);
     }
   }
+});
+
+test("a feast's familiar name is set apart in italic and never broken", async ({ page }) => {
+  // A break inside it would leave half the parenthesis at a line's end.
+  for (const [width, height] of [[320, 740], [390, 844], [430, 932]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, "/?date=2026-11-02");
+    const alias = await page.locator(".home .feast-alias").evaluate((node) => ({
+      text: node.textContent,
+      italic: getComputedStyle(node).fontStyle,
+      lines: node.getClientRects().length,
+    }));
+    expect(alias, `${width}x${height}`).toEqual({ text: "(All Souls\u2019 Day)", italic: "italic", lines: 1 });
+  }
+  // A name without one is set whole.
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect(page.locator(".home .feast-alias")).toHaveCount(0);
 });
 
 test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {

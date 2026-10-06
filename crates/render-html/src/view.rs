@@ -36,7 +36,10 @@ pub struct HomeData {
     pub prev_link: String,
     pub next_link: String,
     pub today_link: String,
+    /// The day's name without its alias, and the alias in its parentheses
+    /// ("(Corpus Christi)") or empty (`presentation::split_alias`).
     pub feast_name: String,
+    pub feast_alias: String,
     pub commemorations: Vec<String>,
     pub color: String,
     pub season: String,

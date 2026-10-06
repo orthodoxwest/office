@@ -62,3 +62,29 @@ func archPath(_ a: Arch, width: CGFloat, outset d: CGFloat, foot: CGFloat, at or
     if !open { p.closeSubpath() }
     return p
 }
+
+/**
+ * How wide the head of a card `width` wide stands `y` below the card's top, between lines `d`
+ * beyond its edges (inside them when negative) as `archPath` draws them: the jambs below the
+ * springing, the haunches above it, then the upper arcs, and nothing above the point.
+ */
+func archChord(_ a: Arch, width: CGFloat, outset d: CGFloat, at y: CGFloat) -> CGFloat {
+    let spring = a.rise * width
+    let haunch = a.haunch * width
+    let centre = a.centre * width
+    let below = spring + a.depth * width
+    // The haunch gives way to the upper arc on the line through their centres.
+    let join = spring - (haunch + d) * a.depth / (a.depth * a.depth + (a.centre - a.haunch) * (a.centre - a.haunch)).squareRoot()
+    let left: CGFloat
+    if y >= spring {
+        left = -d
+    } else if y >= join {
+        left = haunch - ((haunch + d) * (haunch + d) - (spring - y) * (spring - y)).squareRoot()
+    } else {
+        let radius = a.radius * width + d
+        let up = below - y
+        if up >= radius { return 0 }
+        left = centre - (radius * radius - up * up).squareRoot()
+    }
+    return max(0, width - 2 * left)
+}
