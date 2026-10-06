@@ -160,7 +160,11 @@ and unregisters. Unset, every host is served as itself.
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from
 the service-worker cache) of daily unique browsers, overall and per office,
-ordo, and reminder feed, over 7/30/90/366 days. Days are America/New_York.
+ordo, and reminder feed, over 7/30/90/365 days. Days are America/New_York.
+Its headline is the last seven completed days' average against the seven
+before, and the chart draws a trailing seven-day average, so a launch isn't
+averaged in with the quiet months before it. `/admin/usage.csv` downloads every
+stored daily count (`day,scope,browsers`) for a backup or a spreadsheet.
 
 **What counts.** Visible pages, not completed prayers. A browser counts once
 overall and once in each hour it opens. Ordo counts a viewed calendar page;

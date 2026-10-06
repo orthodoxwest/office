@@ -13,7 +13,8 @@
   <dl class="usage-summary">
     <div><dt>Today</dt><dd>{{ today }}</dd><dd class="usage-stat-note">Unique browsers so far</dd></div>
     <div><dt>Yesterday</dt><dd>{{ yesterday }}</dd><dd class="usage-stat-note">Unique browsers</dd></div>
-    <div><dt>Daily average</dt><dd>{% if complete_days %}{{ daily_average }}{% else %}—{% endif %}</dd><dd class="usage-stat-note">{% if complete_days %}Over {{ complete_days }} completed day{% if complete_days != 1 %}s{% endif %}{% else %}No completed days yet{% endif %}</dd></div>
+    {# The last week rather than the whole period, so a launch is not averaged in with quiet months. #}
+    <div><dt>Last 7 days</dt><dd>{% if week_days %}{{ week_average }}{% else %}—{% endif %}</dd><dd class="usage-stat-note">{{ week_note }}</dd></div>
     <div><dt>Busiest day</dt><dd>{{ max }}</dd><dd class="usage-stat-note">{% if peak_date %}{{ peak_date }}{% else %}No visits recorded yet{% endif %}</dd></div>
   </dl>
   <nav class="usage-jump" aria-label="Report sections"><a href="#usage-explore-title" class="usage-explore-link" hidden>Explore trends</a><a href="#usage-offices-title">Daily counts</a><a href="#usage-notes-title">About the counts</a></nav>
@@ -22,18 +23,17 @@
     <div class="usage-section-heading"><div><h2 id="usage-trend-title">Daily visitors</h2><p>Unique browsers per day</p></div><span class="usage-period">{{ recorded_days }} day{% if recorded_days != 1 %}s{% endif %}</span></div>
     <figure class="usage-trend">
       <div class="usage-plot">
-      {# The average's axis label stands in for an end label it would crowd. #}
-      <div class="usage-chart-scale" aria-hidden="true"><span{% if average_top and average_top|float < 12 %} hidden{% endif %}>{{ max }}</span><span{% if average_top and average_top|float > 88 %} hidden{% endif %}>0</span></div>
+      <div class="usage-chart-scale" aria-hidden="true"><span>{{ max }}</span><span>0</span></div>
       <svg class="usage-chart" viewBox="0 0 720 160" preserveAspectRatio="none" role="img" aria-labelledby="usage-chart-title usage-chart-desc">
         <title id="usage-chart-title">Daily unique browsers</title>
         <desc id="usage-chart-desc">{{ recorded_days }} days, from {{ first_date }} to {{ last_date }}. Highest daily count: {{ max }}. Exact counts appear in the table below.</desc>
         <path class="usage-grid" d="M0 0H720 M0 80H720 M0 160H720"/>
         {% for bar in chart %}<rect class="usage-bar{% if bar.today %} usage-bar-today{% endif %}" x="{{ bar.x }}" y="{{ bar.y }}" width="{{ bar.width }}" height="{{ bar.height }}"><title>{{ bar.day }}: {{ bar.users }} browsers</title></rect>{% endfor %}
+        {% if rolling_path %}<path class="usage-rolling" d="{{ rolling_path }}" vector-effect="non-scaling-stroke"/>{% endif %}
       </svg>
-      {% if average_top %}<div class="usage-average" style="top: {{ average_top }}%" aria-hidden="true"><span>{{ daily_average }}</span></div>{% endif %}
       </div>
       {% if not max %}<p class="usage-empty">No visits recorded in this period.<br><span>Counts will appear as readers open the app.</span></p>{% endif %}
-      <figcaption><span>{{ first_date }}</span>{% if average_top %}<span class="usage-average-key">Daily average</span>{% endif %}<span>Today</span></figcaption>
+      <figcaption><span>{{ first_date }}</span>{% if rolling_path %}<span class="usage-average-key">7-day average</span>{% endif %}<span>Today</span></figcaption>
     </figure>
     <p class="usage-splits-note"><strong>{{ browser_days }} browser-days</strong> in this period. A returning browser counts again each day.</p>
   </section>
@@ -68,7 +68,7 @@
       <p id="usage-explore-empty" class="usage-empty" hidden>No observations in this period.</p>
       <figcaption><span id="usage-explore-first"></span><span id="usage-explore-last"></span></figcaption>
     </figure>
-    <p class="usage-explore-help">Tap the chart or move the date slider for exact values.</p>
+    <p class="usage-explore-help">Tap the chart or move the date slider for exact values. A count standing apart at the end is still in progress.</p>
     <div class="usage-inspector-controls"><label for="usage-explore-date" class="sr-only">Inspect time period</label><input id="usage-explore-date" type="range" min="0" max="0" value="0" step="1"></div>
     <div class="usage-inspector" aria-live="polite" aria-atomic="true"><p id="usage-inspect-date"></p><dl id="usage-inspect-values"></dl><p id="usage-inspect-note"></p></div>
     <p class="usage-splits-note">Counts are browser-days. Categories can overlap. <a href="#usage-notes-title">How counting works</a>.</p>
@@ -93,7 +93,7 @@
     <details><summary>What is counted?</summary>
       <p>A browser counts once per day in each category it uses. Home contributes to all visitors; office counts overlap. Ordo counts a calendar page view. Reminders counts a generated feed link.</p>
       <p>Only today&rsquo;s Office counts, after someone interacts with the page or lingers on it; in the apps, when a page is shown. Dated archives, preloads and self-identifying crawlers are excluded. Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again. In the apps, Reminders counts turning reminders on.</p>
-      <p>The report begins with the first day any visit was recorded; a longer period shows only the days since. The daily average covers those completed days, including quiet ones, and excludes today.</p>
+      <p>The report begins with the first day any visit was recorded; a longer period shows only the days since. Last 7 days, and the chart&rsquo;s line, average the completed days before today, quiet ones included; the line begins once a day has seven recorded days behind it. All the daily counts since the first day can be <a href="/admin/usage.csv">downloaded as CSV</a>.</p>
     </details>
     <details><summary>How are breakdowns measured?</summary>
       <p>Each browser using a category on three days contributes three browser-days. Percentages divide each category&rsquo;s count by the sum for that breakdown. Weekly totals cover Monday–Sunday; weekly percentages use summed counts, not averages of daily percentages. Today and its week are still in progress. Gaps mean no observations.</p>
