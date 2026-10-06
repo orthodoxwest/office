@@ -330,7 +330,25 @@ struct BlockRow: View {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
         } else {
             let prose = Prose(spec: proseSpec(block, p, o, m), spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
-            if block.kind == .stanza || block.kind == .hymnRubric {
+            if block.kind == .itemLabel, let latin = block.runs.firstIndex(where: { $0.style == .latin }), latin > 0 {
+                // A psalm's number and its Latin incipit share a line, a dot between them. When the
+                // line cannot hold both, the incipit stands on its own line beneath and the dot goes
+                // (the web's `.item-label.stacked`): a separator ending a line alone separates nothing.
+                var title = block
+                title.runs = Array(block.runs[..<(latin - 1)])
+                var incipit = block
+                incipit.runs = Array(block.runs[latin...])
+                ViewThatFits(in: .horizontal) {
+                    prose.fixedSize(horizontal: true, vertical: false)
+                    VStack(spacing: 0) {
+                        Prose(spec: proseSpec(title, p, o, m))
+                        Prose(spec: proseSpec(incipit, p, o, m))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(spoken(block))
+            } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)

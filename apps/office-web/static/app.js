@@ -1,5 +1,35 @@
 document.documentElement.classList.add("js");
 
+// A psalm's number and its Latin incipit share a line, a dot between them.
+// When the line cannot hold both, the incipit stands on its own line beneath
+// and the dot goes: a separator ending a line alone separates nothing. CSS
+// cannot see where a line broke, so the labels are measured with the dot in
+// place, and re-measured when the measure or the text size changes.
+(function () {
+  var labels = Array.from(document.querySelectorAll(".item-label > .label-sep")).map(function (sep) { return sep.parentNode; });
+  if (!labels.length) return;
+  var scheduled = false;
+  function measure() {
+    scheduled = false;
+    labels.forEach(function (label) { label.classList.remove("stacked"); });
+    var stacked = labels.filter(function (label) {
+      var sep = label.querySelector(".label-sep");
+      var incipit = label.querySelector(".psalm-incipit");
+      return incipit.getBoundingClientRect().top - sep.getBoundingClientRect().top > 2;
+    });
+    stacked.forEach(function (label) { label.classList.add("stacked"); });
+  }
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(measure);
+  }
+  measure();
+  window.addEventListener("resize", schedule);
+  if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(labels[0].closest(".elements") || document.body);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+})();
+
 // Source capitals at prose openings use real small caps, preserving the text.
 // The first letter stays a full capital ("I CONFESS"), the setting a service
 // book gives an opening without an ornamented initial; the rest of the run
