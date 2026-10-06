@@ -75,7 +75,11 @@ fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
         ..OfficeElement::new(kind, text)
     };
     vec![
-        sourced(ElementType::Heading, format!("Martyrology — {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()), &reference),
+        sourced(
+            ElementType::Heading,
+            format!("Martyrology for tomorrow, {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()),
+            &reference,
+        ),
         sourced(ElementType::Reading, text.to_string(), &reference),
         sourced(ElementType::Reading, conclusion.to_string(), CONCLUSION),
         sourced(ElementType::Response, format!("R. {response}"), RESPONSE),
@@ -205,7 +209,7 @@ mod tests {
                 .filter(|e| e.source_ref.starts_with("ordinary/martyrology/") || e.kind == ElementType::Heading)
                 .collect();
             assert_eq!(elements.len(), 4);
-            assert_eq!(elements[0].text, format!("Martyrology — {title}"));
+            assert_eq!(elements[0].text, format!("Martyrology for tomorrow, {title}"));
             assert_eq!(elements[1].kind, ElementType::Reading);
             assert_eq!(elements[1].text, "Reviewed entry.");
             assert_eq!(elements[1].source_ref, reference);

@@ -53,7 +53,7 @@ fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false).unwrap();
     let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true).unwrap();
     assert_eq!((off.martyrology, on.martyrology), (Some(false), Some(true)));
-    assert!(!text(&off).contains("Martyrology — September 8") && text(&on).contains("Martyrology — September 8"));
+    assert!(!text(&off).contains("Martyrology for tomorrow, September 8") && text(&on).contains("Martyrology for tomorrow, September 8"));
     // Another hour, and a Prime without the Martyrology (Good Friday), have nothing to show.
     assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true).unwrap().martyrology, None);
     for setting in [false, true] {
