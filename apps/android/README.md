@@ -22,8 +22,9 @@ possible without distracting from a reverent experience. The app is the web's de
 native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 
 - **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
-  invitation, the hour directory by period, "Change date"), each hour (colour band, framed
-  title, "Change date" and "Prayer form", the office, its continuation and report link), and
+  invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
+  hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
+  office, its continuation and report link), and
   the ordo's month (year and month navigation, day rows with colour rails, ranks,
   commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo). The site menu carries the day's hours, the Ordo, and
