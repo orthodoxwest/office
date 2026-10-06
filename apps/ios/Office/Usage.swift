@@ -9,14 +9,19 @@ import Foundation
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
- * sends ties one day to the next. Best effort: nothing is queued while offline, retried, or
- * shown to the reader. Only Release builds report (`OfficeCountsUsage`, set in project.yml);
- * Debug builds, and so the tests and the simulator screenshots, never do.
+ * sends ties one day to the next. The app also keeps the day it was first counted, and says
+ * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
+ * offline, retried, or shown to the reader. Only Release builds report (`OfficeCountsUsage`,
+ * set in project.yml); Debug builds, and so the tests and the simulator screenshots, never do.
+ *
+ * Beacons go to the production server until a reply names the site's new address
+ * (`usageEndpointHeader`); the app keeps that and posts there from then on.
  */
 final class Usage {
     static let shared = Usage()
 
-    typealias Post = (_ id: String, _ body: String, _ done: @escaping (Bool) -> Void) -> Void
+    /// Posts `body` to `endpoint`, then reports whether it counted and the endpoint the reply named.
+    typealias Post = (_ endpoint: String, _ id: String, _ body: String, _ done: @escaping (Bool, String?) -> Void) -> Void
 
     private let enabled: Bool
     private let defaults: UserDefaults
@@ -42,20 +47,34 @@ final class Usage {
     func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil) {
         guard enabled else { return }
         let date = now()
-        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology) else { return }
         let day = Usage.reportingDay(date)
+        let first = firstDay(day) == day
+        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first) else { return }
         let key = day + " " + body
         lock.lock()
         let fresh = sent.insert(key).inserted
         lock.unlock()
         guard fresh else { return }
-        post(identifier(for: day), body) { ok in
+        let endpoint = defaults.string(forKey: "usage-endpoint") ?? usageEndpoint()
+        post(endpoint, identifier(for: day), body) { ok, advertised in
+            if let next = advertised.flatMap({ usageAdvertisedEndpoint(value: $0) }) {
+                self.defaults.set(next, forKey: "usage-endpoint")
+            }
             // A failure is forgotten, so the next visit tries again.
             guard !ok else { return }
             self.lock.lock()
             self.sent.remove(key)
             self.lock.unlock()
         }
+    }
+
+    /// The reporting day the app was first counted. An installation that reported before this
+    /// was kept (it holds a day's identifier) is from an earlier day.
+    private func firstDay(_ day: String) -> String {
+        if let first = defaults.string(forKey: "usage-first") { return first }
+        let first = defaults.string(forKey: "usage-day") == nil ? day : "before"
+        defaults.set(first, forKey: "usage-first")
+        return first
     }
 
     /// The reporting day's identifier: kept all day, replaced the next.
@@ -99,8 +118,8 @@ final class Usage {
      * Posts one beacon as the web's page does: the header that marks it as a beacon, and the
      * day's identifier as the cookie the server would otherwise have set.
      */
-    static func send(id: String, body: String, done: @escaping (Bool) -> Void) {
-        guard let url = URL(string: usageEndpoint()) else { return done(false) }
+    static func send(endpoint: String, id: String, body: String, done: @escaping (Bool, String?) -> Void) {
+        guard let url = URL(string: endpoint) else { return done(false, nil) }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("1", forHTTPHeaderField: "X-Office-Usage")
@@ -109,8 +128,9 @@ final class Usage {
         request.setValue(agent, forHTTPHeaderField: "User-Agent")
         request.httpBody = Data(body.utf8)
         session.dataTask(with: request) { _, response, error in
-            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-            done(error == nil && (200..<300).contains(status))
+            let http = response as? HTTPURLResponse
+            let status = http?.statusCode ?? 0
+            done(error == nil && (200..<300).contains(status), http?.value(forHTTPHeaderField: usageEndpointHeader()))
         }.resume()
     }
 }

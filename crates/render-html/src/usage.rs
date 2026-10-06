@@ -19,6 +19,8 @@ pub struct UsageDay {
     pub hours: [i64; 7],
     pub ordo: i64,
     pub reminders: i64,
+    /// Readers counted for the first time that day, filled by the view model.
+    pub new_readers: i64,
     /// Display date and short weekday, filled by the view model.
     pub label: String,
     pub weekday: String,
@@ -88,6 +90,9 @@ pub struct UsageData {
     /// The trailing seven-day average across the chart, as an SVG path in its
     /// coordinates; empty when fewer than two days have one.
     pub rolling_path: String,
+    /// Readers first counted over `week_days`, and the note beneath it.
+    pub week_new: i64,
+    pub week_new_note: String,
     pub office_totals: Vec<UsageOffice>,
     pub ordo_total: i64,
     pub reminders_total: i64,
@@ -116,12 +121,18 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
     rows.truncate(recorded.max(1));
     // Completed days, newest first, including any before the window.
     let history: Vec<i64> = rows.iter().skip(1).map(|r| r.users).collect();
+    let first = |r: &UsageDay| r.dimensions.get("visit:first").copied().unwrap_or(0);
+    let week_new = rows.iter().skip(1).take(7).map(first).sum::<i64>();
+    for row in &mut rows {
+        row.new_readers = first(row);
+    }
     rows.truncate(days.max(1) as usize);
     let mut d = UsageData {
         chrome: Chrome { page: "usage".into(), ..Chrome::default() },
         days,
         recorded_days: rows.len() as i64,
         hours: HOURS.iter().map(|h| h.to_string()).collect(),
+        week_new,
         ..UsageData::default()
     };
     d.trend_groups = trend_groups(&rows, dimensions);
@@ -150,6 +161,11 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
     let week = &history[..history.len().min(7)];
     d.week_days = week.len() as i64;
     d.week_average = if week.is_empty() { String::new() } else { format!("{:.1}", mean(week)) };
+    d.week_new_note = match week.len() {
+        0 => "No completed days yet".into(),
+        7 => "First counted in the last 7 days".into(),
+        n => format!("First counted in {n} completed day{}", if n == 1 { "" } else { "s" }),
+    };
     d.week_note = match week.len() {
         0 => "No completed days yet".into(),
         1 => "Over 1 completed day".into(),
@@ -234,12 +250,13 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
 }
 
 /// Each family's breakdown: its heading and its values' labels, in the store's value order.
-pub const TREND_LABELS: [(&str, &str, &[&str]); 5] = [
+pub const TREND_LABELS: [(&str, &str, &[&str]); 6] = [
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
     ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
+    ("visit", "New or returning", &["New", "Returning"]),
 ];
 
 fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> {
@@ -398,6 +415,20 @@ mod tests {
     }
 
     #[test]
+    fn new_readers_over_the_last_week() {
+        let mut rows = days(0, &[1; 9]);
+        for (i, n) in [(0, 5), (1, 2), (7, 3), (8, 40)] {
+            rows[i].dimensions.insert("visit:first".into(), n);
+        }
+        let d = usage_data(rows, 7, Some("2026-01-01"), &DIMENSIONS);
+        // Today is in progress; the eighth completed day is the week before.
+        assert_eq!((d.week_new, d.week_new_note.as_str()), (5, "First counted in the last 7 days"));
+        assert_eq!(d.rows.iter().map(|r| r.new_readers).collect::<Vec<_>>(), [5, 2, 0, 0, 0, 0, 0]);
+        let d = usage_data(days(0, &[1, 1]), 7, Some("2026-01-01"), &DIMENSIONS);
+        assert_eq!((d.week_new, d.week_new_note.as_str()), (0, "First counted in 2 completed days"));
+    }
+
+    #[test]
     fn seven_day_line_follows_the_bars() {
         // Thirty days of 7, then a step to 14: the line rises over the week after it.
         let mut completed = vec![14; 7];
@@ -438,7 +469,7 @@ mod tests {
         .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 5);
+        assert_eq!(groups.len(), 6);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"

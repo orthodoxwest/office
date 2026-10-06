@@ -9,7 +9,7 @@ use std::time::Duration;
 use axum::body::Body;
 use axum::http::{HeaderMap, Method, Response, StatusCode, Uri, header};
 use calendar::Date;
-use presentation::usage::{DIMENSIONS, HOURS, dimension_key, parse_event, valid_scope};
+use presentation::usage::{DIMENSIONS, ENDPOINT_HEADER, HOURS, advertised_endpoint, dimension_key, endpoint_for, parse_event, valid_scope};
 use render_html::usage::UsageDay;
 use rusqlite::{Connection, params};
 use sha2::{Digest, Sha256};
@@ -201,22 +201,6 @@ CREATE TABLE IF NOT EXISTS seen (
         conn.query_row("SELECT MIN(day) FROM totals WHERE scope = 'site'", [], |r| r.get(0)).map_err(|e| e.to_string())
     }
 
-    /// Every stored daily count as CSV, oldest first: the whole report's data,
-    /// for a backup or a spreadsheet.
-    pub fn export_csv(&self) -> Result<String, String> {
-        let conn = self.conn.lock().map_err(|e| e.to_string())?;
-        let mut stmt = conn.prepare("SELECT day, scope, users FROM totals ORDER BY day, scope").map_err(|e| e.to_string())?;
-        let rows =
-            stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, i64>(2)?))).map_err(|e| e.to_string())?;
-        // Days and scopes come from a fixed vocabulary, so nothing needs quoting.
-        let mut csv = String::from("day,scope,browsers\n");
-        for row in rows {
-            let (day, scope, n) = row.map_err(|e| e.to_string())?;
-            csv.push_str(&format!("{day},{scope},{n}\n"));
-        }
-        Ok(csv)
-    }
-
     /// A zero-filled window of `days`, newest first.
     pub fn daily(&self, now: jiff::Timestamp, days: usize) -> Result<Vec<UsageDay>, String> {
         if !(1..=400).contains(&days) {
@@ -295,8 +279,23 @@ pub use presentation::usage::MAX_BEACON;
 /// The beacon body, or `None` when it exceeded the 96-byte limit.
 pub type BeaconBody = Option<Vec<u8>>;
 
-/// `POST /api/usage`: one page view's beacon.
-pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap, host: &str, body: BeaconBody) -> Response<Body> {
+/// Names the canonical host's endpoint on a counted beacon, so the native apps, which post to a
+/// fixed address, move to the new one (see `presentation::usage::ENDPOINT_HEADER`).
+fn advertise(resp: &mut Response<Body>, canonical: Option<&str>) {
+    if let Some(endpoint) = canonical.and_then(|c| advertised_endpoint(&endpoint_for(c))) {
+        set(resp, header::HeaderName::from_static(ENDPOINT_HEADER), &endpoint);
+    }
+}
+
+/// `POST /api/usage`: one page view's beacon. `canonical` is the site's canonical host, if set.
+pub fn handle_event(
+    store: Option<&Store>,
+    method: &Method,
+    headers: &HeaderMap,
+    host: &str,
+    canonical: Option<&str>,
+    body: BeaconBody,
+) -> Response<Body> {
     if method != Method::POST {
         let mut resp = with_usage_headers(http_error("Method not allowed", StatusCode::METHOD_NOT_ALLOWED));
         set(&mut resp, header::ALLOW, "POST");
@@ -324,7 +323,9 @@ pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap,
         return with_usage_headers(http_error("Invalid office", StatusCode::BAD_REQUEST));
     };
     let Some(store) = store else {
-        return with_usage_headers(response(StatusCode::NO_CONTENT, Body::empty()));
+        let mut resp = with_usage_headers(response(StatusCode::NO_CONTENT, Body::empty()));
+        advertise(&mut resp, canonical);
+        return resp;
     };
     const COOKIE: &str = "office-usage";
     let mut resp = response(StatusCode::NO_CONTENT, Body::empty());
@@ -347,6 +348,7 @@ pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap,
         }
         return with_usage_headers(failed);
     }
+    advertise(&mut resp, canonical);
     with_usage_headers(resp)
 }
 
@@ -376,23 +378,6 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
     };
     let mut resp = response(StatusCode::OK, body);
     set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
-    with_usage_headers(resp)
-}
-
-/// `GET /admin/usage.csv`: every daily count, for a backup or a spreadsheet.
-pub fn handle_export(store: Option<&Store>, method: &Method) -> Response<Body> {
-    if method != Method::GET && method != Method::HEAD {
-        let mut resp = with_usage_headers(http_error("Method not allowed", StatusCode::METHOD_NOT_ALLOWED));
-        set(&mut resp, header::ALLOW, "GET, HEAD");
-        return resp;
-    }
-    let Some(store) = store else { return with_usage_headers(not_found()) };
-    let Ok(csv) = store.export_csv() else {
-        return with_usage_headers(http_error("Usage temporarily unavailable", StatusCode::SERVICE_UNAVAILABLE));
-    };
-    let mut resp = response(StatusCode::OK, csv);
-    set(&mut resp, header::CONTENT_TYPE, "text/csv; charset=utf-8");
-    set(&mut resp, header::CONTENT_DISPOSITION, "attachment; filename=\"usage.csv\"");
     with_usage_headers(resp)
 }
 
@@ -427,7 +412,7 @@ mod tests {
             let mut headers = HeaderMap::new();
             headers.insert("x-office-usage", "1".parse().unwrap());
             headers.insert(header::ORIGIN, origin.parse().unwrap());
-            let response = handle_event(None, &Method::POST, &headers, host, Some(b"lauds".to_vec()));
+            let response = handle_event(None, &Method::POST, &headers, host, None, Some(b"lauds".to_vec()));
             let expected = if allowed { StatusCode::NO_CONTENT } else { StatusCode::FORBIDDEN };
             assert_eq!(response.status(), expected, "host={host}, origin={origin}");
         }
@@ -550,26 +535,6 @@ mod tests {
         assert_eq!(rows[4].users, 5, "retention lost totals");
     }
 
-    // The export holds the report's counts and nothing that could tell one reader from another.
-    #[test]
-    fn csv_export_is_the_daily_totals() {
-        let db = TempDb::new("export");
-        let store = db.open();
-        store.record(eastern_at(2026, 9, 3, 9, 0), "browser-a", "lauds", &dims(&["screen:mobile"])).unwrap();
-        for id in ["browser-a", "browser-b"] {
-            store.record(eastern_at(2026, 9, 4, 9, 0), id, "vespers", &[]).unwrap();
-        }
-        assert_eq!(
-            store.export_csv().unwrap(),
-            "day,scope,browsers\n2026-09-03,lauds,1\n2026-09-03,screen:mobile,1\n2026-09-03,site,1\n2026-09-04,site,2\n2026-09-04,vespers,2\n"
-        );
-        let resp = handle_export(Some(&store), &Method::GET);
-        assert_eq!(resp.headers().get(header::CONTENT_TYPE).unwrap(), "text/csv; charset=utf-8");
-        assert_eq!(resp.headers().get(header::CACHE_CONTROL).unwrap(), "no-store");
-        assert_eq!(handle_export(None, &Method::GET).status(), StatusCode::NOT_FOUND);
-        assert_eq!(handle_export(Some(&store), &Method::POST).status(), StatusCode::METHOD_NOT_ALLOWED);
-    }
-
     #[test]
     fn reporting_day_across_dst() {
         for (value, utc_day) in [("2026-03-08T04:59:00Z", "2026-03-08"), ("2026-11-01T03:59:00Z", "2026-11-01")] {
@@ -643,15 +608,26 @@ mod tests {
             headers.insert("x-office-usage", "1".parse().unwrap());
             headers.insert(header::USER_AGENT, agent.parse().unwrap());
             headers.insert(header::COOKIE, format!("office-usage={id}").parse().unwrap());
-            let body = app_beacon("lauds", app, false, "priest", None).unwrap().into_bytes();
-            let response = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", Some(body));
+            let body = app_beacon("lauds", app, false, "priest", None, Some(true)).unwrap().into_bytes();
+            let response = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", None, Some(body.clone()));
             assert_eq!(response.status(), StatusCode::NO_CONTENT, "{agent}");
             assert!(response.headers().get(header::SET_COOKIE).is_none(), "{agent} was given a cookie");
+            assert!(response.headers().get(ENDPOINT_HEADER).is_none(), "{agent} told to move with nowhere to go");
+            // Once the site has a canonical host, the old one tells each app where to report.
+            let moved = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", Some("example.org"), Some(body));
+            assert_eq!(moved.status(), StatusCode::NO_CONTENT, "{agent}");
+            assert_eq!(moved.headers()[ENDPOINT_HEADER], "https://example.org/api/usage", "{agent}");
         }
         let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
-        for (scope, n) in
-            [("site", 2), ("lauds", 2), ("client:android", 1), ("client:ios", 1), ("screen:mobile", 2), ("prayer-form:priest", 2)]
-        {
+        for (scope, n) in [
+            ("site", 2),
+            ("lauds", 2),
+            ("client:android", 1),
+            ("client:ios", 1),
+            ("screen:mobile", 2),
+            ("prayer-form:priest", 2),
+            ("visit:first", 2),
+        ] {
             assert_eq!(sum(scope), n, "{scope}");
         }
     }

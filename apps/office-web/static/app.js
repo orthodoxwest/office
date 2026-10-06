@@ -253,6 +253,32 @@ document.documentElement.classList.add("js");
 // belongs to exactly one family and a family retired later cannot be confused
 // with a value name reused by a different one (see presentation::usage, whose
 // app_beacon writes the native apps' beacons in the same order).
+// Whether this browser first opened the Office today. It keeps that reporting day locally (a
+// browser that used the Office before this was recorded, shown by a stored setting or the
+// offline copy, keeps "before"); only first or returning is sent, so nothing links one day's
+// beacon to another's. The mark is made on the first page load, counted or not, so a later page
+// served by the offline copy is not mistaken for an old reader. Without storage nothing is said.
+var USAGE_FIRST_KEY = "office-first-counted";
+function usageVisitToken() {
+  try {
+    var parts = {};
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date()).forEach(function (part) { parts[part.type] = part.value; });
+    var day = parts.year + "-" + parts.month + "-" + parts.day;
+    var first = localStorage.getItem(USAGE_FIRST_KEY);
+    if (!first) {
+      var used = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+      for (var i = 0; !used && i < localStorage.length; i++) used = /^office-/.test(localStorage.key(i) || "");
+      first = used ? "before" : day;
+      localStorage.setItem(USAGE_FIRST_KEY, first);
+    }
+    return first === day ? " visit:first" : " visit:returning";
+  } catch {
+    return "";
+  }
+}
+usageVisitToken();
+
 function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
@@ -264,7 +290,7 @@ function usageBeaconBody(scope) {
   var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
     ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
     : "";
-  clientToken = martyrologyToken + clientToken;
+  clientToken = martyrologyToken + usageVisitToken() + clientToken;
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }

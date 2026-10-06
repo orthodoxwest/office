@@ -7,11 +7,17 @@
 
 use calendar::Date;
 
-/// Where the native apps report: the production server's usage endpoint.
+/// Where the native apps report until the server names another: the production server's
+/// usage endpoint, which keeps answering after the site moves (see [`ENDPOINT_HEADER`]).
 pub const ENDPOINT: &str = "https://office.fly.dev/api/usage";
 
+/// The response header naming where the apps should report from now on: the canonical host's
+/// endpoint, sent once the server has one (`OFFICE_CANONICAL_HOST`). An app stores it and
+/// posts there next time, so builds already installed follow the site to its new address.
+pub const ENDPOINT_HEADER: &str = "office-usage-endpoint";
+
 /// The longest beacon body the server reads.
-pub const MAX_BEACON: usize = 96;
+pub const MAX_BEACON: usize = 128;
 
 /// The seven hours, as the usage store names its office scopes.
 pub const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
@@ -32,7 +38,7 @@ pub struct Dimension<'a> {
 /// Families of mutually exclusive values describing how a page was
 /// rendered. Stored as "<key>:<value>"; a written key or value is never
 /// redefined.
-pub const DIMENSIONS: [Dimension<'static>; 5] = [
+pub const DIMENSIONS: [Dimension<'static>; 6] = [
     Dimension { key: "appearance", values: &["nave", "apse"] },
     Dimension { key: "screen", values: &["desktop", "mobile"] },
     Dimension { key: "prayer-form", values: PRAYER_FORMS },
@@ -41,7 +47,13 @@ pub const DIMENSIONS: [Dimension<'static>; 5] = [
     // Prime only, on a day with a Martyrology reading: whether the reader's
     // setting showed it or left the rubric in its place.
     Dimension { key: "martyrology", values: MARTYROLOGY },
+    // Whether this browser or installation is counted for the first time today. The device
+    // remembers the day it was first counted; nothing sent links one day to another.
+    Dimension { key: "visit", values: VISITS },
 ];
+
+/// The `visit` family's values: a first day, then every day after.
+pub const VISITS: &[&str] = &["first", "returning"];
 
 /// The `martyrology` family's values, shown first.
 pub const MARTYROLOGY: &[&str] = &["shown", "hidden"];
@@ -111,8 +123,9 @@ impl App {
 /// A native app's beacon for `scope`, or `None` for a scope the server would refuse. The apps
 /// run on phones and tablets, which the web's screen family counts as mobile (a touch-primary
 /// pointer); an office page adds the prayer form it was read in, and Prime whether the reader's
-/// setting showed its Martyrology (`None` on a day without one).
-pub fn app_beacon(scope: &str, app: App, dark: bool, form: &str, martyrology: Option<bool>) -> Option<String> {
+/// setting showed its Martyrology (`None` on a day without one). `first` is whether the
+/// installation is counted for the first time today (`None` when it cannot tell).
+pub fn app_beacon(scope: &str, app: App, dark: bool, form: &str, martyrology: Option<bool>, first: Option<bool>) -> Option<String> {
     if !valid_scope(scope) {
         return None;
     }
@@ -125,8 +138,32 @@ pub fn app_beacon(scope: &str, app: App, dark: bool, form: &str, martyrology: Op
         body.push(' ');
         body.push_str(&martyrology_token(shown));
     }
+    if let Some(first) = first {
+        body.push_str(&format!(" visit:{}", VISITS[usize::from(!first)]));
+    }
     body.push_str(&format!(" client:{}", app.as_str()));
     Some(body)
+}
+
+/// The endpoint an [`ENDPOINT_HEADER`] names, if it is one an app may post to: the usage path
+/// on a plain HTTPS host name, so a garbled or hostile value can only be ignored.
+pub fn advertised_endpoint(value: &str) -> Option<String> {
+    let host = value.trim().strip_prefix("https://")?.strip_suffix("/api/usage")?;
+    let labels: Vec<&str> = host.split('.').collect();
+    let valid = host.len() <= 253
+        && labels.len() >= 2
+        && labels.iter().all(|l| {
+            (1..=63).contains(&l.len())
+                && l.bytes().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
+                && !l.starts_with('-')
+                && !l.ends_with('-')
+        });
+    valid.then(|| format!("https://{host}/api/usage"))
+}
+
+/// The header value naming `host`'s endpoint, for [`advertised_endpoint`] to read back.
+pub fn endpoint_for(host: &str) -> String {
+    format!("https://{host}/api/usage")
 }
 
 /// Whether a page dated `day` is current enough to count: today, or a day either side, which
@@ -170,6 +207,9 @@ mod tests {
                 vec!["appearance:apse", "screen:mobile", "prayer-form:priest"],
             ),
             ("ordo prayer-form:priest appearance:nave appearance:apse future:x", "ordo", vec!["appearance:nave"]),
+            // Any page can say whether the reader is new.
+            ("site visit:first client:browser", "site", vec!["visit:first", "client:browser"]),
+            ("vespers visit:returning visit:first", "vespers", vec!["visit:returning"]),
         ] {
             let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
             assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
@@ -208,36 +248,65 @@ mod tests {
             for scope in ["site", "ordo", "reminders"].iter().chain(HOURS.iter()) {
                 for dark in [false, true] {
                     for form in PRAYER_FORMS {
-                        for martyrology in [None, Some(true), Some(false)] {
-                            let body = app_beacon(scope, app, dark, form, martyrology).unwrap();
+                        for (martyrology, first) in
+                            [None, Some(true), Some(false)].into_iter().flat_map(|m| [(m, None), (m, Some(true)), (m, Some(false))])
+                        {
+                            let body = app_beacon(scope, app, dark, form, martyrology, first).unwrap();
                             assert!(body.len() <= MAX_BEACON, "{body:?} is too long");
                             let event = parse_event(&body).unwrap();
                             assert_eq!(event.scope, *scope);
                             assert_eq!(event.dimensions.len(), body.split(' ').count() - 1, "{body:?} lost a token");
                             assert_eq!(body.contains("prayer-form:"), HOURS.contains(scope), "{body:?}");
                             assert_eq!(body.contains("martyrology:"), *scope == "prime" && martyrology.is_some(), "{body:?}");
+                            assert_eq!(body.contains("visit:"), first.is_some(), "{body:?}");
                         }
                     }
                 }
             }
         }
         assert_eq!(
-            app_beacon("compline", App::Android, false, "priest", None).as_deref(),
+            app_beacon("compline", App::Android, false, "priest", None, None).as_deref(),
             Some("compline appearance:nave screen:mobile prayer-form:priest client:android")
         );
         assert_eq!(
-            app_beacon("site", App::Ios, true, "priest", Some(true)).as_deref(),
-            Some("site appearance:apse screen:mobile client:ios")
+            app_beacon("site", App::Ios, true, "priest", Some(true), Some(true)).as_deref(),
+            Some("site appearance:apse screen:mobile visit:first client:ios")
         );
         assert_eq!(
-            app_beacon("vespers", App::Ios, false, "cantor", None).as_deref(),
+            app_beacon("vespers", App::Ios, false, "cantor", None, None).as_deref(),
             Some("vespers appearance:nave screen:mobile client:ios")
         );
         assert_eq!(
-            app_beacon("prime", App::Android, true, "private", Some(false)).as_deref(),
-            Some("prime appearance:apse screen:mobile prayer-form:private martyrology:hidden client:android")
+            app_beacon("prime", App::Android, true, "private", Some(false), Some(false)).as_deref(),
+            Some("prime appearance:apse screen:mobile prayer-form:private martyrology:hidden visit:returning client:android")
         );
-        assert!(app_beacon("matins", App::Android, false, "private", None).is_none());
+        assert!(app_beacon("matins", App::Android, false, "private", None, None).is_none());
+    }
+
+    #[test]
+    fn apps_follow_only_a_plain_https_endpoint() {
+        for host in ["office.fly.dev", "example.org", "office.example-parish.org"] {
+            assert_eq!(advertised_endpoint(&endpoint_for(host)), Some(endpoint_for(host)), "{host}");
+        }
+        assert_eq!(advertised_endpoint(&endpoint_for("example.org")).as_deref(), Some("https://example.org/api/usage"));
+        for value in [
+            "",
+            "example.org",
+            "http://example.org/api/usage",
+            "https://example.org/api/usage/",
+            "https://example.org/other",
+            "https://localhost/api/usage",
+            "https://example.org:8443/api/usage",
+            "https://user@example.org/api/usage",
+            "https://Example.org/api/usage",
+            "https://-bad.example.org/api/usage",
+            "https://example..org/api/usage",
+            "https://example.org/api/usage?x=1",
+            "https://example.org/x/api/usage",
+        ] {
+            assert_eq!(advertised_endpoint(value), None, "{value:?}");
+        }
+        assert_eq!(advertised_endpoint(ENDPOINT).as_deref(), Some(ENDPOINT));
     }
 
     #[test]

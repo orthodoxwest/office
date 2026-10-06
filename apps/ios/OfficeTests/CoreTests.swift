@@ -264,7 +264,9 @@ final class ReminderTests: XCTestCase {
 final class UsageTests: XCTestCase {
     private let suite = "usage-tests"
     private var posted: [(id: String, body: String)] = []
+    private var endpoints: [String] = []
     private var online = true
+    private var advertised: String?
     // 15 March 2026, mid-morning in New York.
     private var now = Date(timeIntervalSince1970: 1_773_586_800)
     private let today = CivilDate(year: 2026, month: 3, day: 15)
@@ -272,13 +274,18 @@ final class UsageTests: XCTestCase {
     override func setUp() {
         UserDefaults().removePersistentDomain(forName: suite)
         posted = []
+        endpoints = []
         online = true
+        advertised = nil
     }
 
     private func usage() -> Usage {
-        Usage(enabled: true, defaults: UserDefaults(suiteName: suite)!, now: { [unowned self] in self.now }) { [unowned self] id, body, done in
-            if self.online { self.posted.append((id, body)) }
-            done(self.online)
+        Usage(enabled: true, defaults: UserDefaults(suiteName: suite)!, now: { [unowned self] in self.now }) { [unowned self] endpoint, id, body, done in
+            if self.online {
+                self.posted.append((id, body))
+                self.endpoints.append(endpoint)
+            }
+            done(self.online, self.online ? self.advertised : nil)
         }
     }
 
@@ -289,9 +296,9 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: today, hour: "vespers"), dark: true, form: "priest")
         usage.record(.remindersOn, dark: true, form: "priest")
         XCTAssertEqual(posted.map { $0.body }, [
-            "site appearance:nave screen:mobile client:ios",
-            "vespers appearance:apse screen:mobile prayer-form:priest client:ios",
-            "reminders appearance:apse screen:mobile client:ios",
+            "site appearance:nave screen:mobile visit:first client:ios",
+            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios",
+            "reminders appearance:apse screen:mobile visit:first client:ios",
         ])
         XCTAssertEqual(Set(posted.map { $0.id }).count, 1)
         XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
@@ -302,7 +309,7 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
         usage.record(.ordo(year: 2031), dark: false, form: "private")
         usage.record(Page.year(2026).usageEvent, dark: false, form: "private")
-        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
     }
 
     func testTheIdentifierLastsOneReportingDay() {
@@ -325,6 +332,37 @@ final class UsageTests: XCTestCase {
         online = true
         usage.record(.home(date: today), dark: false, form: "private")
         XCTAssertEqual(posted.count, 1)
+    }
+
+    func testAnInstallationIsNewOnItsFirstDayOnly() {
+        usage().record(.home(date: today), dark: false, form: "private")
+        now = now.addingTimeInterval(86_400)
+        usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body.contains("visit:first") }, [true, false])
+        XCTAssertTrue(posted[1].body.contains("visit:returning"))
+    }
+
+    func testAnInstallationThatReportedBeforeIsReturning() {
+        // An app updated from a build that counted readers but not new ones.
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.set("2026-03-10", forKey: "usage-day")
+        defaults.set(String(repeating: "0", count: 32), forKey: "usage-id")
+        usage().record(.home(date: today), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 1)
+        XCTAssertTrue(posted[0].body.contains("visit:returning"))
+    }
+
+    func testBeaconsFollowTheSiteToTheAddressItNames() {
+        advertised = "https://example.org/api/usage"
+        let usage = usage()
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.hour(date: today, hour: "lauds"), dark: false, form: "private")
+        // Anything but a plain HTTPS usage endpoint is ignored.
+        advertised = "http://elsewhere.example/api/usage"
+        usage.record(.hour(date: today, hour: "vespers"), dark: false, form: "private")
+        self.usage().record(.hour(date: today, hour: "compline"), dark: false, form: "private")
+        let moved = "https://example.org/api/usage"
+        XCTAssertEqual(endpoints, [usageEndpoint(), moved, moved, moved])
     }
 
     func testDebugBuildsNeverReport() {

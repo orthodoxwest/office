@@ -163,8 +163,7 @@ the service-worker cache) of daily unique browsers, overall and per office,
 ordo, and reminder feed, over 7/30/90/365 days. Days are America/New_York.
 Its headline is the last seven completed days' average against the seven
 before, and the chart draws a trailing seven-day average, so a launch isn't
-averaged in with the quiet months before it. `/admin/usage.csv` downloads every
-stored daily count (`day,scope,browsers`) for a backup or a spreadsheet.
+averaged in with the quiet months before it.
 
 **What counts.** Visible pages, not completed prayers. A browser counts once
 overall and once in each hour it opens. Ordo counts a viewed calendar page;
@@ -176,7 +175,11 @@ browsers are missed; multiple devices or cleared cookies inflate the count.
 rendered, chosen or inherited) and `screen:desktop|mobile` (mobile means under
 the 700px breakpoint or a touch-primary pointer). Office pages also report
 `prayer-form:private|deacon|priest`, which measures the prayers read, not the
-reader's ordination. `client:browser|pwa|android|ios` separates a browser tab,
+reader's ordination. `visit:first|returning` says whether this browser or installation first opened the Office
+today: each keeps that day on the device (`office-first-counted` in localStorage, `usage-first`
+in the apps) and sends only the word, so nothing links one day to the next. Browsers that used
+the Office before it existed count as returning when they hold a setting or the service
+worker; apps, when they had reported before. `client:browser|pwa|android|ios` separates a browser tab,
 the web app installed to a home screen, and the native apps. Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which
@@ -194,7 +197,11 @@ tokens from newer or older cached clients are dropped and the page still counts.
 
 **The native apps.** Release builds of the Android and iOS apps post the same
 beacon to `https://office.fly.dev/api/usage` (`presentation::usage::ENDPOINT`)
-when a page is shown: home and the reminders page count toward the total, each
+until the server names another: once `OFFICE_CANONICAL_HOST` is set, every
+counted beacon's reply carries `Office-Usage-Endpoint: https://<host>/api/usage`,
+and the apps keep it and post there from then on (only a plain HTTPS host is
+accepted). The browser's beacon is relative, so it follows the site by itself.
+Apps post when a page is shown: home and the reminders page count toward the total, each
 hour and the ordo in their columns, and turning reminders on counts as
 Reminders. The same current-page window applies (`current_day`, `current_year`);
 there is no engagement gate, since nothing crawls an app. Instead of a cookie the
