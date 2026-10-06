@@ -131,6 +131,15 @@ fn fold_line(out: &mut String, line: &str) {
     out.push_str("\r\n");
 }
 
+/// The external base URL of a request, honoring the proxy's X-Forwarded-Proto.
+pub fn base_url(headers: &HeaderMap, host: &str) -> String {
+    let scheme = match header_value(headers, "x-forwarded-proto") {
+        "" => "http",
+        s => s,
+    };
+    format!("{scheme}://{host}")
+}
+
 impl Server {
     fn build_ics(&self, cfg: &IcsConfig, base_url: &str, now: Timestamp) -> Result<String, String> {
         let mut out = String::new();
@@ -187,18 +196,13 @@ impl Server {
         Ok(out)
     }
 
-    /// `/office.ics`.
-    pub fn ics(&self, query: &Query, headers: &HeaderMap, host: &str) -> Response<Body> {
+    /// `/office.ics`, with links into the site at `base`.
+    pub fn ics(&self, query: &Query, base: &str) -> Response<Body> {
         let cfg = match parse_config(query) {
             Ok(c) => c,
             Err(e) => return http_error(&e, StatusCode::BAD_REQUEST),
         };
-        // The external base URL, honoring the proxy's X-Forwarded-Proto.
-        let scheme = match header_value(headers, "x-forwarded-proto") {
-            "" => "http",
-            s => s,
-        };
-        let body = match self.build_ics(&cfg, &format!("{scheme}://{host}"), Timestamp::now()) {
+        let body = match self.build_ics(&cfg, base, Timestamp::now()) {
             Ok(b) => b,
             Err(e) => return http_error(&format!("error building calendar: {e}"), StatusCode::INTERNAL_SERVER_ERROR),
         };
