@@ -49,8 +49,11 @@ class MotionTest {
         val home = vm.shown!!
         vm.open(Page.Hour(lent, "vespers"))
         assertEquals(Motion.FORWARD, vm.motion)
-        // Home stays on screen until Vespers is composed.
-        assertEquals(home.entry, vm.shown!!.entry)
+        // Home stays on screen until Vespers is composed, and Vespers never appears without its
+        // content. Vespers composes off the main thread and may already be ready here, so either
+        // page may be the one shown, but nothing else.
+        val opening = vm.shown!!
+        assertTrue(opening == home || (opening.entry == vm.entry && opening.content is Content.Hour))
         settle(vm)
         assertEquals(Page.Hour(lent, "vespers"), vm.shown!!.entry.page)
         // Home is at hand behind it, and Back shows it at once.
