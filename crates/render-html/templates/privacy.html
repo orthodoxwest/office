@@ -1,0 +1,54 @@
+{% extends "layout.html" %}{% block title %}Privacy — Divine Office{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+<div class="privacy">
+  {{ headpiece() }}
+  <h1>Privacy</h1>
+  <p class="privacy-intro">
+    The Divine Office has no accounts, no advertising and no third-party
+    trackers. The website and the apps count how many people pray each day,
+    and nothing more.
+  </p>
+
+  <h2>What is counted</h2>
+  <p>
+    When a page is shown, the website or app sends our server a short note
+    naming the page (the day, one of the hours, the ordo or the reminders page)
+    and how it was shown: the light or dark appearance, a phone or a larger
+    screen, a browser, the installed web app or a native app, the prayer form,
+    and at Prime whether the Martyrology was read. The server adds one to that
+    day's totals. Each page counts once a day.
+  </p>
+  <p>
+    To count a reader once rather than at every page, the website keeps a random
+    identifier in a cookie used for nothing else and sent only with these notes,
+    and each app makes a fresh random identifier every day. The server stores
+    only a fingerprint of that identifier combined with the date, deletes those
+    after two days, and keeps only the daily totals, so nothing it keeps ties one
+    day's reading to another's. Your browser's ordinary description of itself is
+    checked so that search-engine crawlers are not counted, and is not stored.
+  </p>
+
+  <h2>What is not collected</h2>
+  <p>
+    No names, email addresses, location, contacts, network addresses or
+    advertising identifiers are recorded, and nothing is sold or shared with
+    anyone. The site keeps no log of visits.
+  </p>
+
+  <h2>What stays on your device</h2>
+  <p>
+    Your settings (appearance, text size, prayer form and the Martyrology) and
+    your time zone, which picks the day to show, are kept in your browser or the
+    app. A reminder schedule lives entirely in the calendar link you make, or in
+    the app on your phone; the server builds the calendar from that link each
+    time and keeps no copy.
+  </p>
+
+  <h2>Questions</h2>
+  <p>
+    Ask, or tell us of a problem, through the
+    <a href="https://github.com/orthodoxwest/office/issues/new">project's issue tracker</a>.
+    If this policy changes, this page will say so.
+  </p>
+  <p class="privacy-updated">Last updated 6 October 2026.</p>
+</div>
+{% endblock %}

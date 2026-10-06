@@ -9,16 +9,17 @@ use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
-use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
+use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
 use presentation::{season_label, title_case};
 
-const TEMPLATES: [(&str, &str); 9] = [
+const TEMPLATES: [(&str, &str); 10] = [
     ("layout.html", include_str!("../templates/layout.html")),
     ("macros.html", include_str!("../templates/macros.html")),
     ("home.html", include_str!("../templates/home.html")),
     ("hour.html", include_str!("../templates/hour.html")),
     ("calendar.html", include_str!("../templates/calendar.html")),
     ("reminders.html", include_str!("../templates/reminders.html")),
+    ("privacy.html", include_str!("../templates/privacy.html")),
     ("404.html", include_str!("../templates/404.html")),
     ("error.html", include_str!("../templates/error.html")),
     ("usage.html", include_str!("../templates/usage.html")),
@@ -103,6 +104,10 @@ impl Pages {
 
     pub fn reminders(&self, data: &RemindersData) -> Result<String, String> {
         self.render("reminders.html", data)
+    }
+
+    pub fn privacy(&self, data: &PrivacyData) -> Result<String, String> {
+        self.render("privacy.html", data)
     }
 
     pub fn not_found(&self, data: &NotFoundData) -> Result<String, String> {

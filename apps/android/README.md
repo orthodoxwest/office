@@ -165,6 +165,27 @@ the eventual store app rather than replace it. It is signed with `app/preview.ke
 deliberately public key (like Android's debug key) whose only job is letting every
 preview, from CI or a laptop, update the last. Store releases will use Play App Signing.
 
+## Store bundles
+
+Google Play takes a signed `.aab`. The `release` build signs with the upload key named by the
+environment; the key never enters the repository, and Play App Signing re-signs each upload
+with the app signing key Google holds.
+
+```bash
+export OFFICE_UPLOAD_KEYSTORE=~/keys/office-upload.jks
+export OFFICE_UPLOAD_STORE_PASSWORD=...
+export OFFICE_UPLOAD_KEY_PASSWORD=...
+export OFFICE_UPLOAD_KEY_ALIAS=upload   # the default
+
+make android-bundle        # → apps/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+Without the key, `bundleRelease` stops before building. A manual run of the Android workflow
+builds the same bundle when the repository has the `ANDROID_UPLOAD_KEYSTORE_BASE64`,
+`ANDROID_UPLOAD_STORE_PASSWORD` and `ANDROID_UPLOAD_KEY_PASSWORD` secrets, and attaches it as
+the `office-release-aab` artifact. The version code is the commit count, so build from a full
+clone of `master`.
+
 ## Building locally
 
 Needs: the Rust toolchain with the Android targets, `cargo-ndk`, JDK 21, and the Android
