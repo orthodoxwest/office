@@ -349,9 +349,7 @@ At Novara, St. Gaudentius, bishop and confessor.
 At Sora, the abbot St. Dominic, renowned for miracles.
 
 [01-23]
-# SOURCE: Roman Martyrology (1916), January-June, p. 6; complete entry
-At Barcelona, St. Raymond of Pennafort. His birthday is the 7th of January.
-
+# SOURCE: Roman Martyrology (1916), January-June, p. 6; selected notices; deaths after 1200 omitted
 At Rome, the holy virgin and martyr Emerentiana. Being yet only a catechumen, she was stoned to death by the Gentiles, whilst praying at the tomb of St. Agnes, her foster-sister.
 
 At Philippi, in Macedonia, St. Parmenas, one of the first seven deacons, who by the grace of God faithfully discharging the office of preaching committed to him, obtained the glory of martyrdom in the time of Trajan.
@@ -472,8 +470,6 @@ At Milan, St. Savina, a most religious woman, who went to rest in the Lord whils
 
 [01-31]
 # SOURCE: Roman Martyrology (1916), January-June, pp. 8-9; selected notices; deaths after 1200 omitted
-At Barcelona, in Spain, St. Peter Nolasco, confessor, who slept in the Lord on the 25th of December.
-
 At Rome, on the road to Ostia, the holy martyrs Cyrus and John, who were beheaded after suffering many torments for the name of Christ.
 
 At Alexandria, in the time of the emperor Decius, the birthday of St. Metran, martyr, who, because he refused to utter blasphemous words at the bidding of the Pagans, was scourged until he was covered with bruises, and pierced through the face and eyes with sharp-pointed reeds. He was then driven out of the city, overwhelmed with stones and killed.
@@ -749,7 +745,7 @@ After them, St. Porphyry, servant of the martyr Pamphilus, and St. Seleucus, a C
 At Brescia, St. Faustinus, bishop and confessor.
 
 [02-17]
-# SOURCE: Roman Martyrology (1916), January-June, p. 13; complete entry
+# SOURCE: Roman Martyrology (1916), January-June, p. 13; selected notices; deaths after 1200 omitted
 At Rome, the passion of St. Faustinus, whom forty-four others followed to receive the crown of martyrdom.
 
 In Persia, during the persecution of Decius, the birthday of blessed Polychronius, bishop of Babylon, who, being struck in the mouth with stones, stretched out his hands, lifted up his eyes to heaven, and expired.
@@ -763,8 +759,6 @@ In the same place, St. Julian, a Cappadocian, who, because he had kissed the rel
 In the territory of Térouanne, St. Silvinus, bishop of Toulouse.
 
 In Ireland, St. Fintan, priest and confessor.
-
-At Florence, blessed Alexius Falconieri, confessor, one of the seven Founders of the Order of the Servites of the blessed Virgin Mary, who, in the one hundred and tenth year of his age, terminated his blessed career in the consoling presence of Jesus Christ and the angels.
 
 [02-18]
 # SOURCE: Roman Martyrology (1916), January-June, pp. 13-14; complete entry
@@ -860,9 +854,7 @@ At Seville, in Spain, St. Florentius, confessor.
 
 At Todi, St. Romana, virgin, who was baptized by pope St. Sylvester. She led a heavenly life in caves and dens, and wrought glorious miracles.
 
-In England, St. Milburga, virgin, daughter of the king of Mercia. (In leap-year, the 24th of February is announced in this manner: "The twenty-fourth day of February.
-
-Also, the commemoration of many holy martyrs, confessors and virgins." On the 25th, read: "The twenty-fifth day of February," and then: "In Judea, etc.," as marked for the 24th.)
+In England, St. Milburga, virgin, daughter of the king of Mercia.
 
 [03-01]
 # SOURCE: Roman Martyrology (1916), January-June, pp. 16-17; complete entry
@@ -1380,7 +1372,7 @@ At Tyre, the martyr St. Vulpian, who was sewed up in a sack with a serpent and a
 
 In the monastery of Medicion, in the East, the abbot St. Nicetas, who suffered much for the worship of holy images, in the time of Leo the Armenian.
 
-In the same country, St. Burgundofora, abbess and virgin.
+In England, St. Burgundofora, abbess and virgin.
 
 [04-04]
 # SOURCE: Roman Martyrology (1916), January-June, p. 24; complete entry
@@ -1995,8 +1987,6 @@ At Varennes, St. Gangulpus, martyr.
 At Vienne, St. Mamertus, bishop, who, to avert an impending calamity, instituted in that city the three days' Litanies immediately before the Ascension of our Lord. This rite was afterwards received and approved by the universal Church.
 
 At Souvigny, the decease of St. Maieul, abbot of Cluny, whose life was distinguished for merits and holiness.
-
-At San Severino, in the March of Ancona, St. Illuminatus, confessor.
 
 [05-12]
 # SOURCE: Roman Martyrology (1916), January-June, p. 35; complete entry
@@ -4348,7 +4338,7 @@ The same day, St. Gregory, bishop of Greater Armenia, who after many sufferings 
 
 At Canterbury, in England, St. Honorius, bishop and confessor.
 
-In the same city, St. Sophia, widow, mother of the holy virgins Faith, Hope, and Charity.
+At Rome, St. Sophia, widow, mother of the holy virgins Faith, Hope, and Charity.
 
 [10-01]
 # SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 31; complete entry
@@ -5224,7 +5214,9 @@ At Cæsarea, in Palestine, in the time of the emperor Galerius Maximian, the hol
 
 In Persia, the martyrdom of the holy bishop Nersas and his companions.
 
-At Dorostorum, in Mysia, St. Dasius, bishop, who, for refusing to consent to the impurities practised on the feast of Saturn, was put to death, under the governor Bassus. At Nicæa, in Bithynia, the holy martyrs Eustachius, Thespesius and Anatolius, in the persecution of Maximinus.
+At Dorostorum, in Mysia, St. Dasius, bishop, who, for refusing to consent to the impurities practised on the feast of Saturn, was put to death, under the governor Bassus.
+
+At Nicæa, in Bithynia, the holy martyrs Eustachius, Thespesius and Anatolius, in the persecution of Maximinus.
 
 At Heraclea, in Thrace, the holy martyrs Bassus, Denis, Agapitus and forty others.
 
@@ -5844,7 +5836,7 @@ The same day, St. Zoticus, Roman priest, who went to Constantinople, and took up
 
 At Ravenna, St. Barbatian, priest and confessor.
 
-The same day, St. Melania the Younger, who withdrew from Rome with her husband Pinian, and went to Jerusalem, where both embraced the religious life, she among the women consecrated to God, and he among the monks, and ended their career in peace. And in other places, many other holy martyrs, confessors, and virgins Answer: Thanks be to God.
+The same day, St. Melania the Younger, who withdrew from Rome with her husband Pinian, and went to Jerusalem, where both embraced the religious life, she among the women consecrated to God, and he among the monks, and ended their career in peace.
 
 [conclusion]
 # SOURCE: Roman Martyrology (1916), January-June, p. 1; common ending
