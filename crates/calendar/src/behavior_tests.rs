@@ -191,9 +191,9 @@ fn memorial_suppression_keeps_protected_scopes() {
 
 #[test]
 fn first_class_feasts_admit_only_privileged_octaves() {
-    // Diurnal X and General Rubrics XIV.4 (#378): no St George octave on St
-    // Joseph's Solemnity, no St John Baptist octave on Ss Peter and Paul; a
-    // Double II Class (St Mark) and a Sunday keep the common octave.
+    // General Rubrics XIV.4 (#378, #573): no St George octave on St Joseph's
+    // Solemnity or St Mark, no St John Baptist octave on Ss Peter and Paul, no
+    // Assumption octave on St Joachim; a Sunday keeps the common octave.
     let common = feast("st-george-octave-day-7", Rank::SemiDouble, Category::Martyr);
     let mut privileged = (*feast("corpus-christi-octave-day-3", Rank::SemiDouble, Category::Lord)).clone();
     privileged.is_privileged_octave_day = true;
@@ -202,8 +202,9 @@ fn first_class_feasts_admit_only_privileged_octaves() {
         (feast("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor), &common, false),
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &common, false),
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &privileged, true),
-        (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, true),
-        // The Visitation's own rubric (Diurnal p. 557) drops the octave.
+        (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, false),
+        (feast("st-joachim", Rank::Double2ndClass, Category::Confessor), &common, false),
+        // The Visitation's own rubric (Diurnal p. 557) agrees.
         (feast("visitation-bvm", Rank::Double2ndClass, Category::BlessedVirgin), &common, false),
         (feast("some-sunday", Rank::Double1stClass, Category::Sunday), &common, true),
     ] {

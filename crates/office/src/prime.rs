@@ -1,6 +1,7 @@
 //! Prime.
 
-use calendar::{Category, MoveableDates, Season};
+use calendar::date::is_leap_year;
+use calendar::{Category, Date, MoveableDates, Season, Weekday};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};
 
 use crate::day::Day;
@@ -62,7 +63,7 @@ const MONTH_NAMES: [&str; 12] =
 /// fallback while the per-date corpus is being populated.
 fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
     let next = day.date.add_days(1);
-    let reference = format!("ordinary/martyrology/{:02}-{:02}", next.month(), next.day());
+    let reference = martyrology_entry_key(next);
     const CONCLUSION: &str = "ordinary/martyrology/conclusion";
     const RESPONSE: &str = "ordinary/martyrology/response";
     let (text, conclusion, response) = (t.get(&reference), t.get(CONCLUSION), t.get(RESPONSE));
@@ -74,16 +75,72 @@ fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
         source_refs: vec![key.to_string()],
         ..OfficeElement::new(kind, text)
     };
-    vec![
-        sourced(
-            ElementType::Heading,
-            format!("Martyrology for tomorrow, {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()),
-            &reference,
-        ),
+    let mut elements = vec![sourced(
+        ElementType::Heading,
+        format!("Martyrology for tomorrow, {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()),
+        &reference,
+    )];
+    // Announcements the AWRV keeps on this date come first.
+    for key in martyrology_announcement_keys(next) {
+        let announcement = t.get(&key);
+        if !announcement.is_empty() {
+            elements.push(sourced(ElementType::Reading, announcement.to_string(), &key));
+        }
+    }
+    elements.extend([
         sourced(ElementType::Reading, text.to_string(), &reference),
         sourced(ElementType::Reading, conclusion.to_string(), CONCLUSION),
         sourced(ElementType::Response, format!("R. {response}"), RESPONSE),
-    ]
+    ]);
+    elements
+}
+
+/// The printed day read for `date`. In a leap year the Martyrology keeps
+/// February 24 for the bissextile day and reads each printed February 24–28
+/// one civil day later (1916 ed., January–June, p. 15), as the calendar moves
+/// those feasts.
+fn martyrology_entry_key(date: Date) -> String {
+    let (month, day) = (date.month(), date.day());
+    match (month, day) {
+        (2, 24) if is_leap_year(date.year()) => "ordinary/martyrology/02-24-bissextile".to_string(),
+        (2, 25..=29) if is_leap_year(date.year()) => format!("ordinary/martyrology/02-{:02}", day - 1),
+        _ => format!("ordinary/martyrology/{month:02}-{day:02}"),
+    }
+}
+
+/// Moveable announcements and vigils read on `date`, in order. Holy Name
+/// follows the calendar's rule (the Sunday of January 2–5, else January 2);
+/// every ordo since 2021 has it read "in the 1st place". A vigil is read on
+/// the day the calendar keeps it: printed the day before its feast, moved to
+/// Saturday from Sunday (except the Epiphany's, which keeps January 5), and,
+/// for St Matthias in a leap year, to February 24 (1916 ed., p. 14).
+fn martyrology_announcement_keys(date: Date) -> Vec<String> {
+    let mut keys = Vec::new();
+    let jan2 = Date::new(date.year(), 1, 2);
+    let holy_name = (0..=3).map(|i| jan2.add_days(i)).find(|d| d.weekday() == Weekday::Sunday).unwrap_or(jan2);
+    if date == holy_name {
+        keys.push("ordinary/martyrology/holy-name".to_string());
+    }
+    // In a leap year the printed 23rd moves to the 24th, so nothing is read
+    // from it on the 23rd.
+    let printed_vigil = |d: Date| match (d.month(), d.day()) {
+        (2, 23) if is_leap_year(d.year()) => None,
+        (2, day @ 24..=29) if is_leap_year(d.year()) => Some(format!("ordinary/martyrology/vigil-02-{:02}", day - 1)),
+        (month, day) => Some(format!("ordinary/martyrology/vigil-{month:02}-{day:02}")),
+    };
+    const KEPT_ON_SUNDAY: [&str; 1] = ["ordinary/martyrology/vigil-01-05"];
+    if let Some(own) = printed_vigil(date)
+        && (date.weekday() != Weekday::Sunday || KEPT_ON_SUNDAY.contains(&own.as_str()))
+    {
+        keys.push(own);
+    }
+    if date.weekday() == Weekday::Saturday
+        && let Some(sunday) = printed_vigil(date.add_days(1))
+        && !KEPT_ON_SUNDAY.contains(&sunday.as_str())
+    {
+        keys.push(sunday);
+    }
+    keys
 }
 
 /// An hour titled `name` for the day's own office.
@@ -190,7 +247,13 @@ mod tests {
             (date(2026, 9, 7), "09-08", "September 8"),
             (date(2026, 12, 31), "01-01", "January 1"),
             (date(2027, 2, 28), "03-01", "March 1"),
-            (date(2028, 2, 28), "02-29", "February 29"),
+            // Leap years read the bissextile day on the 24th, then each
+            // printed February day one civil day late (#475).
+            (date(2027, 2, 23), "02-24", "February 24"),
+            (date(2028, 2, 23), "02-24-bissextile", "February 24"),
+            (date(2028, 2, 24), "02-24", "February 25"),
+            (date(2028, 2, 28), "02-28", "February 29"),
+            (date(2028, 2, 29), "03-01", "March 1"),
             (date(2026, 3, 7), "03-08", "March 8"),
         ] {
             let reference = format!("ordinary/martyrology/{key}");

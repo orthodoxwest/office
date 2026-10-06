@@ -401,7 +401,7 @@ fn major_collects_have_invitations_and_only_first_and_last_conclusions() {
     for (date, name, comms, final_ref) in [
         ("2026-01-01", "lauds", 0, ""),
         ("2026-01-01", "vespers", 0, ""),
-        ("2026-01-03", "vespers", 2, ""),
+        ("2026-01-04", "vespers", 2, ""),
         ("2026-01-04", "lauds", 2, ""),
         ("2026-01-05", "lauds", 1, ""),
         ("2026-01-17", "vespers", 4, ""),
@@ -508,4 +508,56 @@ fn psalmody_posture_cues_follow_the_parish_booklets() {
     for hour in ["prime", "terce", "compline"] {
         assert!(cues(hour, Date::new(2026, 10, 4)).iter().all(|(_, _, got)| got.is_empty()), "{hour}");
     }
+}
+
+/// #475/#477: the Martyrology announces Holy Name and each vigil on the day
+/// the calendar keeps it, including Sunday anticipation and St Matthias's
+/// leap-year move, whether or not the vigil has an office that day.
+#[test]
+fn martyrology_announcements_follow_the_calendar() {
+    let vigils = [
+        ("vigil-01-05", "vigil-epiphany"),
+        ("vigil-02-23", "vigil-of-st-matthias"),
+        ("vigil-06-23", "vigil-of-nativity-john-baptist"),
+        ("vigil-06-28", "vigil-of-ss-peter-paul"),
+        ("vigil-07-24", "vigil-of-st-james-greater"),
+        ("vigil-08-09", "vigil-of-st-lawrence"),
+        ("vigil-08-14", "vigil-of-assumption-bvm"),
+        ("vigil-08-23", "vigil-of-st-bartholomew"),
+        ("vigil-09-20", "vigil-of-st-matthew"),
+        ("vigil-10-27", "vigil-of-ss-simon-jude"),
+        ("vigil-10-31", "vigil-of-all-saints"),
+        ("vigil-11-29", "vigil-of-st-andrew"),
+    ];
+    let options = crate::ComposeOptions { martyrology: true, ..Default::default() };
+    let mut announced = HashSet::new();
+    for y in 2026..=2053 {
+        let (days, moveable) = year(y);
+        for pair in days.windows(2) {
+            let (today, tomorrow) = (&pair[0], &pair[1]);
+            let prime = engine().compose_hour_with_options("prime", today, &moveable, &options).unwrap();
+            if !crate::prime::reads_martyrology(&prime) {
+                continue;
+            }
+            let refs: HashSet<&str> = prime.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+            let details = tomorrow.occurrence_decisions.iter().filter_map(|d| d.detail.as_deref());
+            let named: HashSet<&str> = tomorrow
+                .celebration
+                .iter()
+                .chain(&tomorrow.commemorations)
+                .map(|f| f.id.as_str())
+                .chain(details.flat_map(|d| d.split(|c: char| !(c.is_ascii_alphanumeric() || c == '-'))))
+                .collect();
+            for (key, id) in vigils {
+                let read = refs.contains(format!("ordinary/martyrology/{key}").as_str());
+                assert_eq!(read, named.contains(id), "{}: {key} vs calendar {id}", tomorrow.date);
+                if read {
+                    announced.insert(key);
+                }
+            }
+            let holy_name = refs.contains("ordinary/martyrology/holy-name");
+            assert_eq!(holy_name, tomorrow.celebration_is("holy-name-jesus"), "{}: Holy Name", tomorrow.date);
+        }
+    }
+    assert_eq!(announced.len(), vigils.len(), "every vigil is announced in some year");
 }

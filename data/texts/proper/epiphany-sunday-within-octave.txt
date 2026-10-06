@@ -37,6 +37,30 @@ R. Thanks be to God.
 [chapter-first-vespers]
 @use proper/epiphany-sunday-within-octave/chapter-lauds
 
+[chapter-terce]
+# Diurnal p. 230: At Terce, "Chapter as above at Lauds" (#361).
+@use proper/epiphany-sunday-within-octave/chapter-lauds
+
+[chapter-sext]
+!Rom 12:3
+For I say, through the grace given unto me, to every man that is among you, not to think of himself more highly than he ought to think; but to think soberly.
+R. Thanks be to God.
+
+[chapter-none]
+!Rom 12:4-5
+For as we have many members in one body, and all members have not the same office; so we, being many, are one body in Christ, and every one members one of another.
+R. Thanks be to God.
+
+[versicle-terce]
+# Diurnal pp. 230-231: the little-hour versicles are the Epiphany's (#361).
+@use proper/epiphany/versicle-terce
+
+[versicle-sext]
+@use proper/epiphany/versicle-sext
+
+[versicle-none]
+@use proper/epiphany/versicle-none
+
 [short-responsory-lauds]
 @use proper/epiphany/short-responsory-lauds
 

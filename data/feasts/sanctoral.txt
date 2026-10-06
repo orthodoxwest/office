@@ -13,6 +13,7 @@ Name = Most Holy Name of Jesus
 Rank = double-2nd-class
 Color = white
 Category = lord
+Secondary = true
 DateRule = holy-name
 
 [octave-day-st-stephen]
@@ -198,6 +199,7 @@ Name = Finding of the Holy Cross
 Rank = double-2nd-class
 Color = red
 Category = lord
+Secondary = true
 Month = 5
 Day = 3
 
@@ -312,13 +314,11 @@ Month = 6
 Day = 30
 CompanionOf = commemoration-st-paul-apostle
 
-[our-lady-einsiedeln]
-Name = Our Lady of Einsiedeln
-Rank = greater-double
-Color = white
-Category = blessed-virgin
-Month = 7
-Day = 16
+# Our Lady of Einsiedeln (16 July, Gd) is not in the default calendar: the 2026
+# ordo brackets it "Monastics & Oblates Only", the 2025 ordo omits it, and the
+# Vicariate missal's kalendar brackets it; the parish office is the feria with
+# Ss Nicholas & Habib Khasha commemorated (#11). Its texts stay in
+# data/texts/proper/our-lady-einsiedeln.txt for an optional monastic calendar.
 
 [st-mary-magdalene]
 Name = St Mary Magdalene, Penitent
@@ -422,6 +422,7 @@ Name = Exaltation of the Holy Cross
 Rank = greater-double
 Color = red
 Category = lord
+Secondary = true
 Month = 9
 Day = 14
 

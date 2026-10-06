@@ -91,7 +91,7 @@ fn valid_fixed_date(month: i64, day: i64) -> bool {
 /// Per-day octave name keys, `OctaveDay2` through `OctaveDay8`.
 const OCTAVE_DAY_KEYS: [&str; 7] = ["OctaveDay2", "OctaveDay3", "OctaveDay4", "OctaveDay5", "OctaveDay6", "OctaveDay7", "OctaveDay8"];
 
-const KNOWN_FEAST_KEYS: [&str; 23] = [
+const KNOWN_FEAST_KEYS: [&str; 24] = [
     "Name",
     "Rank",
     "Color",
@@ -110,6 +110,7 @@ const KNOWN_FEAST_KEYS: [&str; 23] = [
     "CommemorationClass",
     "OctaveClass",
     "PrimaryOfOurLord",
+    "Secondary",
     "CompanionOf",
     "OnlyWith",
     "SkipRomanLeapShift",
@@ -175,6 +176,12 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
         f.primary_of_our_lord = v;
         if v && (f.rank != Rank::Double1stClass || !f.is_category(Category::Lord)) {
             return Err(fail("PrimaryOfOurLord requires a Double I Class feast of Our Lord".to_string()));
+        }
+    }
+    if let Some(v) = flag("Secondary")? {
+        f.secondary = v;
+        if v && f.primary_of_our_lord {
+            return Err(fail("Secondary contradicts PrimaryOfOurLord".to_string()));
         }
     }
     if let Some(v) = flag("IsVigil")? {

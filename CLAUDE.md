@@ -133,7 +133,7 @@ Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly e
 
 - **`bug`** — the Rust code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrence_winner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
 - **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not the Rust engine.
-- **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and a decision from clergy is required before any fix can be written. Don't guess an implementation here; file the question and wait for a ruling.
+- **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and only clergy can settle it. File the question, then make the app give the most likely answer (the newest ordo breaks ties between ordos unless its line is a carried-over template) and keep the issue open until clergy rule. Keep each guess easy to flip: one `data/review/ordo-triage.csv` row and one test date naming the issue.
 
 These aren't mutually exclusive — an issue can need a ruling *and* turn into a bug/data-validation fix once the ruling lands (see #13, #15). Use the other labels (`enhancement`, `question`, `documentation`, `duplicate`, `invalid`, `wontfix`, `good first issue`, `help wanted`, `update-golden`) only when none of the three above fit.
 
@@ -217,4 +217,4 @@ Month = 12
 Day = 25
 ```
 
-Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.
+Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.

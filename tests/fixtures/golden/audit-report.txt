@@ -8,7 +8,7 @@
 
 === Translation review: 0 mixed-register, 0 modern-pronoun collect(s) ===
 
-=== Suppressed: 82 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 81 feast(s) via data/audit-ok.txt ===
   rogation-monday
   friday-after-ascension-octave
   whit-ember-wednesday
@@ -29,7 +29,6 @@
   st-alban
   st-augustine-canterbury
   st-irenaeus
-  our-lady-einsiedeln
   st-james-greater
   st-joachim
   holy-name-mary
