@@ -1,112 +1,119 @@
 #!/usr/bin/env python3
 """Render the app icon for the web, iOS and Android.
 
-The icon is a mosaic clipeus after the apse of Sant'Apollinare in Classe
-(c. 549): a gemmed gold cross in a starry blue medallion with a jewelled red
-rim, set in a ground of gold tesserae. Each tessera is tilted a little, as the
-Ravenna mosaicists set them, so the gold catches light unevenly; the stars
-stand on rings as on the Galla Placidia vault.
+The icon is the consecration cross in its compass ring, the mark that ends
+every hour in the app, laid in matte gold leaf on the blue-green limewash of
+the parish apse. The geometry is genornaments' (flared arms, one ring), at the
+proportions the icon needs to survive 48px: the ring's outer edge at 0.78 of
+the tile's radius, nothing but plain wall outside it. A second rendering, for
+iOS's light appearance only, scribes the same mark in red ochre on the Nave's
+rose limewash.
 
-One render feeds every platform. The ground and the medallion are separate
-layers, so the medallion can sit inside each platform's mask: whole on iOS,
-within the maskable safe circle on the web, within the 66dp safe zone of an
-Android adaptive icon. Small and one-colour uses (favicon, Android's themed
-icon and notification) get flat vectors of the same ring and cross.
+One scene feeds every platform. It is rendered on a 1536 canvas that is an
+Android adaptive layer (108dp); the central 1024 is the 72dp a launcher shows
+and is the iOS, web and Play Store tile. Small one-colour uses (favicon,
+Android's themed icon and notification) are flat vectors of the same ring and
+cross.
 
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
-Run from the repository root.
+Run from the repository root; it checks its own output (ring width, contrast
+and overall darkness at launcher size) and fails if the icon stops reading.
 """
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import genornaments as orn  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "apps/office-web/static"
 IOS = ROOT / "apps/ios/Office/Assets.xcassets/AppIcon.appiconset"
 ANDROID = ROOT / "apps/android/app/src/main/res"
 
-N = 1024                 # design canvas
+N = 1536                       # the canvas: an adaptive icon's 108dp layer
 C = N / 2
-R_IN, R_OUT = 382, 452   # starry field, outer edge of the jewelled rim
-SS = 4                   # mask supersampling
+TILE = 1024                    # the visible 72dp, cropped from the centre
+K = N / TILE                   # noise cell counts scale with the canvas, so the wall's clouds keep their size
+SS = 4                         # mask supersampling
 Y, X = np.mgrid[0:N, 0:N].astype(np.float32)
-LIGHT = np.array([-0.45, -0.75, 0.85]) / np.linalg.norm([-0.45, -0.75, 0.85])
+R = np.sqrt((X - C) ** 2 + (Y - C) ** 2)
+LIGHT = np.array([-0.55, -0.65, 0.75]) / np.linalg.norm([-0.55, -0.65, 0.75])
 
-SKY = ["#1b2a66", "#22337a", "#16224f", "#2b3f8a", "#1e2d5c", "#262a62", "#1a3270"]
-RIM = ["#8c2a22", "#7a2320", "#9a3426", "#6e1e1c", "#86301f"]
-GEMS = ["#1f6a46", "#2a3f8f", "#8f1d2a"]
+# The mark, in pixels of the 1024 tile (ring outer 400 = 0.78 R, so every launcher mask keeps it with room):
+# ring 352..400; arms reach 286 (gap 66 to the ring, 3px at 48) from a root 68 wide, flaring to 17.5 degrees.
+RING_OUT, RING_W = 400, 48
+RING_IN = RING_OUT - RING_W
+REACH, ROOT_HALF, CENTRE_HALF, HALF_ANGLE = 286, 34, 34, 17.5
 
-
-# ---------------------------------------------------------------- geometry
-def qbez(p0, p1, p2, n):
-    t = np.linspace(0, 1, n)[:, None]
-    p0, p1, p2 = map(np.array, (p0, p1, p2))
-    return list(map(tuple, (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t ** 2 * p2))
-
-
-def cross_poly(cx, cy, arms=(215, 205, 290, 205), a=36, b=70, straight=0.55, bulge=5, n=40):
-    """Latin cross with gently flared terminals; arms are (top, right, bottom, left)."""
-    pts = []
-    for k, reach in enumerate(arms):
-        stem = -a - (reach - a) * straight
-        arm = [(-a, -a), (-a, stem)]
-        arm += qbez((-a, stem), (-a, -reach + (reach - a) * 0.08), (-b, -reach), n)[1:]
-        arm += qbez((-b, -reach), (0, -reach - bulge * 2), (b, -reach), n)[1:]
-        arm += qbez((b, -reach), (a, -reach + (reach - a) * 0.08), (a, stem), n)[1:]
-        arm += [(a, -a)]
-        c, s = math.cos(k * math.pi / 2), math.sin(k * math.pi / 2)
-        pts += [(cx + x * c - y * s, cy + x * s + y * c) for x, y in arm[:-1]]
-    return pts
+# Colours.
+APSE_LO, APSE_HI = "#223b47", "#2c4b57"          # the parish apse's blue-green limewash
+LEAF = (0.90, 0.75, 0.44)                        # matte leaf, #d6b062 at rest
+NAVE_BASE, NAVE_TINT = "#efe1d0", "#dcc6b0"      # the Nave's rose-buff limewash
+OCHRE_DARK, OCHRE_LIGHT = "#733a2a", "#8f4838"   # red ochre, dark where the brush pooled
+GILT_THREAD = "#c9a24e"                          # the mordant-gilt thread on the groove's wall
 
 
-CROSS_Y = C - 22
+# ---------------------------------------------------------------- helpers
+def rgb(h):
+    return np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)], np.float32) / 255
 
 
-def star_poly(x, y, r, long=1.0, short=0.62, valley=0.32):
-    """The parish star: four long rays and four short diagonals."""
-    pts = []
-    for i in range(16):
-        a = i * math.pi / 8 - math.pi / 2
-        rr = long if i % 4 == 0 else short if i % 4 == 2 else valley
-        pts.append((x + r * rr * math.cos(a), y + r * rr * math.sin(a)))
-    return pts
+def fill(h):
+    return np.ones((N, N, 3), np.float32) * rgb(h)
 
 
-def circle_poly(x, y, r, n=48):
-    return [(x + r * math.cos(t), y + r * math.sin(t)) for t in np.linspace(0, 2 * math.pi, n, endpoint=False)]
+def lin(c):
+    c = np.asarray(c, np.float32)
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
 
 
-def mask(polys):
-    """Anti-aliased union of polygons, in canvas pixels."""
-    im = Image.new("L", (N * SS, N * SS), 0)
-    draw = ImageDraw.Draw(im)
-    for p in polys:
-        draw.polygon([(x * SS, y * SS) for x, y in p], fill=255)
-    a = np.asarray(im, np.float32) / 255
-    return a.reshape(N, SS, N, SS).mean(axis=(1, 3))
+def srgb(c):
+    c = np.clip(np.asarray(c, np.float32), 0, 1)
+    return np.where(c <= 0.0031308, c * 12.92, 1.055 * c ** (1 / 2.4) - 0.055)
 
 
-# ---------------------------------------------------------------- noise and light
-def fbm(octaves, base, seed):
-    rng = np.random.default_rng(seed)
-    out = np.zeros((N, N), np.float32)
-    amp, total = 1.0, 0.0
-    for o in range(octaves):
-        cells = base * 2 ** o
-        z = ndi.zoom(rng.standard_normal((cells + 3, cells + 3)).astype(np.float32), N / cells, order=3)[:N, :N]
-        out += amp * z
-        total += amp
-        amp *= 0.55
-    out /= total
-    return (out - out.mean()) / (out.std() + 1e-6)
+def luma(img):
+    c = lin(img)
+    return 0.2126 * c[..., 0] + 0.7152 * c[..., 1] + 0.0722 * c[..., 2]
 
 
-WARP_U, WARP_V = fbm(3, 3, 91), fbm(3, 3, 92)
+def lerp(a, b, t):
+    t = np.asarray(t, np.float32)
+    if t.ndim == 2:
+        t = t[..., None]
+    return a * (1 - t) + b * t
+
+
+def over(base, top, alpha):
+    return lerp(base, top, np.clip(alpha, 0, 1))
+
+
+_fbm_cache = {}
+
+
+def fbm(octaves, base, seed, falloff=0.55):
+    """Fractal noise, zero mean and unit variance; `base` is the cell count across a 1024 tile."""
+    key = (octaves, base, seed, falloff)
+    if key not in _fbm_cache:
+        rng = np.random.default_rng(seed)
+        out = np.zeros((N, N), np.float32)
+        amp, total = 1.0, 0.0
+        for o in range(octaves):
+            cells = int(round(base * K)) * 2 ** o
+            z = ndi.zoom(rng.standard_normal((cells + 3, cells + 3)).astype(np.float32), N / cells, order=3)[:N, :N]
+            out += amp * z
+            total += amp
+            amp *= falloff
+        out /= total
+        _fbm_cache[key] = (out - out.mean()) / (out.std() + 1e-6)
+    return _fbm_cache[key]
 
 
 def hash2(a, b, salt):
@@ -132,238 +139,273 @@ def spec(n, power):
     return np.clip((n * half).sum(2), 0, 1) ** power
 
 
-def rgb(hexs):
-    return np.array([int(hexs[i:i + 2], 16) for i in (1, 3, 5)], np.float32) / 255
+def sdf(m):
+    """Signed distance (px) from the mask's edge; positive outside."""
+    inside = m > 0.5
+    return ndi.distance_transform_edt(~inside) - ndi.distance_transform_edt(inside)
 
 
-def fill(hexs):
-    return np.ones((N, N, 3), np.float32) * rgb(hexs)
+# ---------------------------------------------------------------- the mark
+def mask(polys):
+    im = Image.new("L", (N * SS, N * SS), 0)
+    d = ImageDraw.Draw(im)
+    for p in polys:
+        d.polygon([(x * SS, y * SS) for x, y in p], fill=255)
+    a = np.asarray(im, np.float32) / 255
+    return a.reshape(N, SS, N, SS).mean(axis=(1, 3))
 
 
-def over(base, top, alpha):
-    a = alpha[..., None]
-    return base * (1 - a) + top * a
+def ring_mask(r_in, r_out):
+    return np.clip(r_out - R + 0.5, 0, 1) * np.clip(R - r_in + 0.5, 0, 1)
 
 
-def vignette():
-    d = np.sqrt((X / N - 0.45) ** 2 + (Y / N - 0.4) ** 2)
-    return np.clip(1 - 0.25 * d ** 2, 0, 1)[..., None]
+def cross_polys(c=C):
+    arms = [orn.rotate(orn.flared_arm(c, REACH, HALF_ANGLE, ROOT_HALF, steps=40), k, c) for k in range(4)]
+    box = [(c - CENTRE_HALF, c - CENTRE_HALF), (c + CENTRE_HALF, c - CENTRE_HALF),
+           (c + CENTRE_HALF, c + CENTRE_HALF), (c - CENTRE_HALF, c + CENTRE_HALF)]
+    return arms + [box]
 
 
-# ---------------------------------------------------------------- tesserae
-def grid_tiles(t, salt):
-    """Rows of tesserae, offset by half a tile, drifting as hand-set rows do."""
-    u = (X + WARP_U * t * 0.10) / t
-    v = (Y + WARP_V * t * 0.09) / t
-    row = np.floor(v)
-    u = u + (row % 2) * 0.5 + (hash2(row, row * 0 + 3, salt) - 0.5) * 0.6
-    col = np.floor(u)
-    return u - col, v - row, col, row
+_marks = {}
 
 
-def polar_tiles(t, salt):
-    """Rings of tesserae round the centre, as a medallion is laid."""
-    dx, dy = X - C + WARP_U * t * 0.07, Y - C + WARP_V * t * 0.07
-    r = np.sqrt(dx ** 2 + dy ** 2)
-    th = np.arctan2(dy, dx) + math.pi
-    ring = np.floor(r / t)
-    segments = np.maximum(np.round(2 * math.pi * (ring + 0.5)), 1)
-    a = th / (2 * math.pi) * segments + hash2(ring, ring * 0 + 7, salt)
-    seg = np.floor(a)
-    return a - seg, r / t - ring, seg, ring
+def marks(ring_w=RING_W):
+    if ring_w not in _marks:
+        _marks[ring_w] = (ring_mask(RING_OUT - ring_w, RING_OUT), mask(cross_polys()))
+    return _marks[ring_w]
 
 
-def tessellate(fu, fv, ia, ib, salt, tilt=0.22, grout=0.11):
-    """Grout coverage, a tilted pillowed normal per tessera, and a random value per tessera."""
-    edge = np.minimum(np.minimum(fu, 1 - fu), np.minimum(fv, 1 - fv))
-    g = grout * (0.8 + 0.5 * hash2(ia, ib, salt + 11))
-    is_grout = np.clip((g - edge) / 0.04 + 0.5, 0, 1)
-    tx = (hash2(ia, ib, salt + 21) - 0.5) * 2 * tilt
-    ty = (hash2(ia, ib, salt + 31) - 0.5) * 2 * tilt
-    ex = np.where(fu < 0.5, -1, 1) * (1 - np.clip(np.minimum(fu, 1 - fu) / 0.16, 0, 1))
-    ey = np.where(fv < 0.5, -1, 1) * (1 - np.clip(np.minimum(fv, 1 - fv) / 0.16, 0, 1))
-    n = np.dstack([tx + 0.35 * ex, ty + 0.35 * ey, np.ones_like(tx)])
-    n /= np.linalg.norm(n, axis=2, keepdims=True)
-    return is_grout, n, hash2(ia, ib, salt + 41)
+def chipped(m, seed, frac, depth, rmin=0):
+    """Flake chips along the leaf's stop edge: small bites of a few px where the leaf did not take."""
+    rng = np.random.default_rng(seed)
+    band = np.clip(m - ndi.binary_erosion(m > 0.5, iterations=depth).astype(np.float32), 0, 1)
+    cells = int(150 * K)
+    z = ndi.zoom(rng.standard_normal((cells, cells)).astype(np.float32), N / cells, order=3)[:N, :N]
+    z = ndi.gaussian_filter(z, 1.5)
+    thr = np.quantile(z[band > 0.5], 1 - frac)
+    chips = (z > thr) & (band > 0.5) & (R > rmin)
+    d = ndi.distance_transform_edt(~chips)
+    return m * np.clip(d - 0.5, 0, 1)
 
 
-def gold(n, rnd):
-    """Gold-leaf glass: a soft burnished reflection, a few glints, a few dull cubes."""
-    v = np.array([0, 0, 1.0])
-    r = 2 * (n * v).sum(2, keepdims=True) * n - v
-    e = 0.62 + 0.30 * np.clip(-r[..., 1] * 0.8 - r[..., 0] * 0.5, -1, 1)
-    e += 0.22 * np.exp(-((r[..., 0] + 0.35) ** 2 + (r[..., 1] + 0.45) ** 2) / 0.12)
-    e += (rnd - 0.5) * 0.12 - 0.04
-    stops = [0.0, 0.35, 0.6, 0.85, 1.05, 1.4]
-    ramp = np.array([[70, 44, 14], [140, 100, 38], [196, 156, 74], [226, 192, 112], [242, 218, 150], [252, 240, 200]], np.float32) / 255
-    col = np.dstack([np.interp(e, stops, ramp[:, c]) for c in range(3)]) * 0.92
-    col *= (1 - 0.35 * np.clip((0.1 - rnd) / 0.1, 0, 1))[..., None]
-    return col + (np.clip((rnd - 0.88) / 0.12, 0, 1) * 0.35)[..., None] * np.array([1.0, 0.92, 0.7])
+# ---------------------------------------------------------------- the apse by night
+def limewash(c_lo, c_hi, seed, sponge=0.06, cloud=0.8, fine=0.012):
+    """Sponge-applied limewash: broad clouds of thicker and thinner wash between two tints, the sponge's
+    dabs as a mid-scale mottle, and a whisper of grain that vanishes under 96px."""
+    clouds = fbm(3, 2, seed, 0.6)
+    dabs = ndi.gaussian_filter(fbm(3, 10, seed + 1, 0.6), 1.5)
+    grain = fbm(2, 90, seed + 2, 0.5)
+    t = np.clip(0.5 + 0.18 * clouds * cloud + 0.22 * dabs, 0, 1)
+    lo, hi = lin(rgb(c_lo)), lin(rgb(c_hi))
+    col = lo * (1 - t)[..., None] + hi * t[..., None]
+    col = col * (1 + sponge * dabs + fine * grain)[..., None]
+    return srgb(col)
 
 
-def glass(palette, n, rnd):
-    pal = np.stack([rgb(c) for c in palette])
-    col = pal[np.floor(rnd * len(palette) * 0.999).astype(int)]
-    col = col * (0.9 + 0.2 * hash2(rnd * 7e3, rnd * 1e3, 9))[..., None]
-    return col * (0.8 + 0.3 * lambert(n))[..., None] + (spec(n, 60) * 0.35)[..., None]
+def gold_leaf(seed, cell=92, angle=6.0, base=LEAF, spread=0.09, lap=0.055, burnish=0.06):
+    """Hand-laid matte leaf: squares a shade apart, a lap of double thickness where sheets overlap,
+    soft burnish streaks, no gradient and no crumple."""
+    a = math.radians(angle)
+    u = ((X - C) * math.cos(a) - (Y - C) * math.sin(a)) / cell
+    v = ((X - C) * math.sin(a) + (Y - C) * math.cos(a)) / cell
+    iu, iv = np.floor(u), np.floor(v)
+    fu, fv = u - iu, v - iv
+    tone = (hash2(iu, iv, seed) - 0.5) * 2 * spread
+    lapw = 7.0 / cell
+    lapm = np.clip((lapw - fu) / (lapw * 0.4) + 0.5, 0, 1) + np.clip((lapw - fv) / (lapw * 0.4) + 0.5, 0, 1)
+    lapm = np.clip(lapm, 0, 1)
+    streak = fbm(3, 3, seed + 7, 0.5)
+    s2 = ndi.gaussian_filter(streak, (2, 24))
+    s2 = (s2 - s2.mean()) / (s2.std() + 1e-6)
+    tooth = fbm(2, 64, seed + 9)
+    sheen = ndi.gaussian_filter(fbm(2, 2, seed + 5), 8)
+    sheen = (sheen - sheen.mean()) / (sheen.std() + 1e-6)
+    per = (hash2(iu, iv, seed + 3) - 0.5) * 0.06   # each sheet was burnished separately
+    e = 1 + tone + lap * lapm + burnish * 0.5 * s2 * (1 + 4 * per) + 0.05 * sheen + per + 0.012 * tooth
+    col = lin(np.array(base, np.float32))[None, None, :] * e[..., None]
+    return srgb(col)
 
 
-def cabochon(m, colour, soft, strength, spec_power, spec_amount, lit=(0.55, 0.55)):
-    n = normals(ndi.gaussian_filter(m, soft) * m, strength)
-    return colour * (lit[0] + lit[1] * lambert(n))[..., None] + (spec(n, spec_power) * spec_amount)[..., None]
+def relief(m, soft=1.0, strength=2.0, amount=0.10, spec_amount=0.03, spec_power=40):
+    """Light the raised mark only, from the upper left: the gesso build-up under the leaf."""
+    h = ndi.gaussian_filter(m, soft)
+    n = normals(h, strength)
+    flat = normals(np.zeros_like(m), 1)
+    f = (1 - amount) + amount * lambert(n) / max(lambert(flat).max(), 1e-6)
+    return f + spec(n, spec_power) * spec_amount - spec(flat, spec_power).max() * spec_amount
 
 
-# ---------------------------------------------------------------- the icon
-def ground(tile):
-    g, n, rnd = tessellate(*grid_tiles(tile, 1), salt=1, tilt=0.14)
-    return over(gold(n, rnd), fill("#3b3226"), g * 0.85) * vignette()
+def apse():
+    """Matte gold leaf on the apse's blue-green sponge limewash. Returns (scene, ground)."""
+    ring, cross = marks()
+    ring = chipped(ring, 81, 0.04, 5)
+    cross = chipped(cross, 82, 0.035, 5, rmin=0.6 * REACH)
+    vault = limewash(APSE_LO, APSE_HI, seed=5)
+    leaf_ring = gold_leaf(seed=3, cell=92, angle=22)
+    leaf_cross = gold_leaf(seed=11, cell=92, angle=-5)
+    m_all = np.clip(ring + cross, 0, 1)
+    lit = relief(m_all)
+    gold = over(leaf_ring, leaf_cross, cross)
+    gold = srgb(lin(gold) * lit[..., None])
+    return np.clip(over(vault, gold, m_all), 0, 1), vault
 
 
-def medallion():
-    """The clipeus as an RGB layer and its coverage."""
-    r = np.sqrt((X - C) ** 2 + (Y - C) ** 2)
-    disc = np.clip(R_IN - r + 0.5, 0, 1)
-    rim = np.clip(R_OUT - r + 0.5, 0, 1) - disc
-    cross = mask([cross_poly(C, CROSS_Y)])
-    keep = ndi.binary_dilation(cross > 0.5, iterations=34)
-    stars = []
-    for radius, count, offset, size in ((185, 8, 0.5, 34), (300, 16, 0.25, 36)):
-        for k in range(count):
-            a = (k + offset) * 2 * math.pi / count
-            x, y = C + radius * math.cos(a), C + radius * math.sin(a)
-            if not keep[int(y), int(x)]:
-                stars.append(star_poly(x, y, size))
-    stars = mask(stars)
-
-    sg, sn, sr = tessellate(*polar_tiles(12.5, 2), salt=2)
-    cg, cn, cr = tessellate(*grid_tiles(13, 3), salt=3, tilt=0.16)
-    rg, rn, rr = tessellate(*polar_tiles(11, 4), salt=4)
-
-    sky = glass(SKY, sn, sr) * (0.75 + 0.35 * np.clip(1 - r / R_IN, 0, 1) ** 0.6)[..., None]
-    sky = over(sky, gold(sn, sr), stars)
-    sky = over(sky, fill("#141a2c"), sg * 0.8)
-    col = over(fill("#3b3226"), sky, disc)
-    col = over(col, over(glass(RIM, rn, rr), fill("#2c1a14"), rg * 0.8), rim)
-    fillets = np.clip(np.clip(1 - np.abs(r - R_IN) / 6, 0, 1) + np.clip(1 - np.abs(r - R_OUT) / 6, 0, 1), 0, 1)
-    col = over(col, gold(rn, rr), fillets * (1 - rg * 0.6))
-
-    # Jewels and pearls alternate round the rim.
-    jewels, pearls, colours = [], [], []
-    for k in range(24):
-        a = k * 2 * math.pi / 24 + math.pi / 24
-        x, y = C + (R_IN + R_OUT) / 2 * math.cos(a), C + (R_IN + R_OUT) / 2 * math.sin(a)
-        if k % 2 == 0:
-            jewels.append(circle_poly(x, y, 15))
-            colours.append(GEMS[(k // 2) % 3])
-        else:
-            pearls.append(circle_poly(x, y, 9, 40))
-    jm = mask(jewels)
-    tint = np.zeros((N, N, 3), np.float32)
-    for poly, c in zip(jewels, colours):
-        tint = over(tint, fill(c), mask([poly]))
-    col = over(col, cabochon(jm, tint, 6, 60, 120, 0.55), jm)
-    pm = mask(pearls)
-    col = over(col, cabochon(pm, rgb("#e9dfcb"), 4, 60, 60, 0.25, (0.6, 0.45)), pm)
-
-    # The cross, outlined in a row of dark tesserae as the mosaicists drew it.
-    outline = np.clip(ndi.binary_dilation(cross > 0.5, iterations=9).astype(np.float32) - cross, 0, 1)
-    dark = fill("#5a2a1c") * (0.82 + 0.3 * cr)[..., None] * (0.8 + 0.3 * lambert(cn))[..., None] + (spec(cn, 60) * 0.35)[..., None]
-    col = over(col, over(dark, fill("#20160f"), cg * 0.8), ndi.gaussian_filter(outline, 0.7) * disc)
-    col = over(col, over(gold(cn, cr), fill("#3b3226"), cg * 0.8), cross)
-    gem = mask([circle_poly(C, CROSS_Y, 24, 64)])
-    col = over(col, cabochon(gem, rgb("#a3202a"), 7, 70, 90, 0.9, (0.55, 0.5)), gem)
-
-    coverage = np.clip(R_OUT + 5 - r + 0.5, 0, 1)
-    return col * vignette(), coverage
+# ---------------------------------------------------------------- the nave by day
+def plaster_field():
+    """The site's own limewash clouds (static/plaster.jpg), zero mean and unit variance."""
+    im = Image.open(WEB / "plaster.jpg").convert("L")
+    side = min(im.size)
+    box = ((im.width - side) // 2, (im.height - side) // 2)
+    im = im.crop((box[0], box[1], box[0] + side, box[1] + side)).resize((N, N), Image.LANCZOS)
+    p = np.asarray(im, np.float32)
+    return (p - p.mean()) / p.std()
 
 
-# ---------------------------------------------------------------- composition
-def resize(arr, size):
-    """Lanczos resize of a float image, channel by channel."""
-    if arr.ndim == 2:
-        return np.asarray(Image.fromarray(arr.astype(np.float32), "F").resize((size, size), Image.LANCZOS))
-    return np.dstack([resize(arr[..., c], size) for c in range(arr.shape[2])])
+def aniso(cells_y, cells_x, seed):
+    rng = np.random.default_rng(seed)
+    cells_y, cells_x = int(round(cells_y * K)), int(round(cells_x * K))
+    z = rng.standard_normal((cells_y + 3, cells_x + 3)).astype(np.float32)
+    out = ndi.zoom(z, (N / cells_y, N / cells_x), order=3)[:N, :N]
+    return (out - out.mean()) / (out.std() + 1e-6)
 
 
-def placed(layer, alpha, scale):
-    """The medallion scaled about the centre of the canvas (premultiplied, so its edge stays clean)."""
-    size = int(round(N * scale / 2)) * 2
-    pre = resize(np.dstack([layer * alpha[..., None], alpha]), size)
-    out = np.zeros((N, N, 4), np.float32)
-    o = (N - size) // 2
-    out[o:o + size, o:o + size] = pre
-    return out[..., :3], np.clip(out[..., 3], 0, 1)
+def streaks(seed=41):
+    """The brush's direction: along the arms and round the ring."""
+    vert = 0.7 * aniso(5, 72, seed) + 0.3 * aniso(12, 160, seed + 1)
+    horiz = 0.7 * aniso(72, 5, seed + 2) + 0.3 * aniso(160, 12, seed + 3)
+    rng = np.random.default_rng(seed + 4)
+    gy, gx = int(64 * K), int(28 * K)
+    grid = ndi.zoom(rng.standard_normal((gy + 3, gx)).astype(np.float32), (N / gy, N / gx), order=3)[:N, :N]
+    grid = (grid - grid.mean()) / grid.std()
+    th = (np.arctan2(Y - C, X - C) / (2 * math.pi) % 1.0) * (N - 1)
+    rr = np.clip((R + 18 * fbm(2, 6, seed + 5)) / C * (N - 1), 0, N - 1)
+    ring = ndi.map_coordinates(grid, [rr, th], order=1, mode="wrap")
+    arm = np.where(np.abs(X - C) < np.abs(Y - C), vert, horiz)
+    return np.where(R > RING_OUT - RING_W / 2 - RING_W * 1.5, ring, arm)
 
 
-def flatten(ground_rgb, pre_rgb, alpha):
-    return ground_rgb * (1 - alpha[..., None]) + pre_rgb
+def brushed(m, strokes, bleed=2.2, bleed_seed=23, load_seed=31, halo=0.0, streak_weight=0.13):
+    """Coverage of a pigment brushed onto lime: the edge wanders a little as it bleeds into the wash,
+    and the loading is uneven where the brush ran dry. Returns (coverage, loading)."""
+    d = sdf(m)
+    wander = fbm(2, 12, bleed_seed, 0.5) * bleed + 0.45 * fbm(2, 160, bleed_seed + 3, 0.5)
+    edge = np.clip(0.5 - (d + wander) / 2.0, 0, 1)
+    feather = halo * np.clip(1 - np.maximum(d + wander, 0) / 5, 0, 1) * np.clip(fbm(3, 24, bleed_seed + 1) * 0.6 + 0.5, 0, 1)
+    cov = np.clip(edge + feather * (1 - edge), 0, 1)
+    load = fbm(4, 7, load_seed, 0.5)
+    load = np.clip(0.5 + 0.26 * load + streak_weight * strokes + 0.06 * fbm(3, 40, load_seed + 1), 0, 1)
+    return cov, load
+
+
+def nave():
+    """The scribed wall by day: the mark in red ochre on rose-buff limewash, the compass's groove round the
+    ring catching the light, a mordant-gilt thread on the groove's inner wall. Returns (scene, ground)."""
+    field = ndi.gaussian_filter(plaster_field(), 2.5)
+    field = (field - field.mean()) / field.std()
+    trowel = fbm(4, 10, 17, 0.5)
+    soft = ndi.gaussian_filter(trowel, 3)
+    clouds = np.clip(-field * 0.11, 0, 1)
+    wall = lerp(fill(NAVE_BASE), fill(NAVE_TINT), clouds) * (1 + 0.012 * soft)[..., None]
+    h = field * 0.8 + 0.4 * soft
+    strokes = streaks()
+
+    ring, cross = marks(RING_W + 4)              # the ochre fills the groove a hair past the scribe
+    m = np.clip(ring + cross, 0, 1)
+    cov, load = brushed(m, strokes, halo=0.10)
+    pig = lerp(fill(OCHRE_DARK), fill(OCHRE_LIGHT), load)
+    pig = pig * (1 + 0.05 * field + 0.02 * strokes)[..., None]
+    d = sdf(m)
+    pig = pig * (1 - np.clip(1 - np.abs(d + 2.5) / 4, 0, 1) * 0.12)[..., None]   # darker where it pooled
+    col = over(wall, pig, cov * 0.96)
+
+    # the compass's shallow V groove, lit from the upper left; the ring only, nothing on the tile
+    d_ring = np.abs(R - (RING_OUT - RING_W / 2))
+    groove = -np.clip(1 - d_ring / (RING_W / 2 + 6), 0, 1) ** 1.3 * 6.0 + h * 0.5
+    n = normals(ndi.gaussian_filter(groove, 1.2), 1.6)
+    shade = 0.86 + 0.24 * lambert(n)
+    where = np.clip(1 - np.maximum(d_ring - RING_W / 2 - 6, 0) / 10, 0, 1)
+    col = col * lerp(np.ones_like(col), shade[..., None] * np.ones_like(col), where)
+    # the pigment's own thickness on the cross
+    cov_x, _ = brushed(cross, strokes)
+    n2 = normals(ndi.gaussian_filter(cov_x, 1.5) * 3.0 + h * 0.5, 1.0)
+    lit = ndi.binary_dilation(cross > 0.5, iterations=4).astype(np.float32)
+    col = col * lerp(np.ones_like(col), (0.84 + 0.16 * lambert(n2))[..., None] * np.ones_like(col), lit)
+    # the gilt thread, 3px, on the groove's inner wall
+    lip = ring_mask(RING_IN + 1.5, RING_IN + 4.5)
+    gold = fill(GILT_THREAD) * (0.94 + 0.08 * lambert(n))[..., None]
+    return np.clip(over(col, gold, lip * 0.95), 0, 1), wall
+
+
+def tinted(scene, ground):
+    """Grayscale for iOS's tinted appearance: the mark light, the wall dark, nothing else."""
+    ring, cross = marks()
+    m = np.clip(ring + cross, 0, 1)
+    lum = luma(scene)
+    lum = np.where(m > 0.02, 0.72 + 0.28 * np.clip((lum - 0.35) / 0.35, 0, 1), 0.10)
+    return np.repeat(srgb(lum)[..., None], 3, axis=2)
+
+
+# ---------------------------------------------------------------- outputs
+def tile(arr):
+    """The central 1024 of the canvas: what a launcher shows."""
+    o = (N - TILE) // 2
+    return arr[o:o + TILE, o:o + TILE]
+
+
+def to_image(arr):
+    return Image.fromarray((np.clip(arr, 0, 1) * 255 + 0.5).astype(np.uint8), "RGB")
 
 
 def save(img, path, palette):
-    """Mosaic is noise to PNG's filters; a 256-colour palette costs nothing visible and
-    a fifth to a half of the bytes. iOS keeps full colour for its App Store artwork."""
+    """Limewash is noise to PNG's filters; a 256-colour palette costs nothing visible and halves the bytes.
+    iOS keeps full colour for its App Store artwork."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if palette:
-        method = Image.Quantize.FASTOCTREE if img.mode == "RGBA" else Image.Quantize.MEDIANCUT
-        img = img.quantize(256, method=method, dither=Image.Dither.FLOYDSTEINBERG)
+        img = img.quantize(256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.FLOYDSTEINBERG)
     img.save(path, optimize=True)
     print("wrote", path.relative_to(ROOT))
 
 
 def save_rgb(arr, path, size, palette=True):
-    img = Image.fromarray((np.clip(arr, 0, 1) * 255 + 0.5).astype(np.uint8), "RGB")
-    save(img.resize((size, size), Image.LANCZOS), path, palette)
-
-
-def save_rgba(pre_rgb, alpha, path, size, palette=True):
-    pre = resize(np.dstack([pre_rgb, alpha]), size)
-    a = np.clip(pre[..., 3], 0, 1)
-    rgb_ = np.where(a[..., None] > 1e-4, pre[..., :3] / np.maximum(a[..., None], 1e-4), 0)
-    img = np.dstack([np.clip(rgb_, 0, 1), a])
-    save(Image.fromarray((img * 255 + 0.5).astype(np.uint8), "RGBA"), path, palette)
-
-
-def tinted(pre_rgb, alpha):
-    """Grayscale for iOS's tinted appearance: gold reads light, the sky dark."""
-    lum = (pre_rgb * np.array([0.3, 0.59, 0.11])).sum(2)
-    lum = np.clip((lum - 0.05 * alpha) / 0.5, 0, 1) ** 0.85
-    return np.repeat(lum[..., None], 3, axis=2)
+    save(to_image(arr).resize((size, size), Image.LANCZOS), path, palette)
 
 
 # ---------------------------------------------------------------- vectors
-def path_data(points, scale, cx, cy, ox, oy):
-    pts = [(ox + (x - cx) * scale, oy + (y - cy) * scale) for x, y in points]
+def path_data(points, scale, mid):
+    pts = [(mid + (x - C) * scale, mid + (y - C) * scale) for x, y in points]
     return "M" + " ".join(f"{x:.2f},{y:.2f}" for x, y in pts) + "Z"
 
 
-def circle_path(cx, cy, r):
-    return f"M{cx - r:.2f},{cy:.2f}a{r:.2f},{r:.2f} 0 1,0 {2 * r:.2f},0a{r:.2f},{r:.2f} 0 1,0 {-2 * r:.2f},0Z"
+def circle_path(mid, r):
+    return f"M{mid - r:.2f},{mid:.2f}a{r:.2f},{r:.2f} 0 1,0 {2 * r:.2f},0a{r:.2f},{r:.2f} 0 1,0 {-2 * r:.2f},0Z"
 
 
-def bold_cross():
-    """The cross with heavier limbs, for sizes where the mosaic's would vanish."""
-    return cross_poly(C, CROSS_Y, a=52, b=92, n=10)
+def mark_paths(viewport, outer, ring_w=None):
+    """The ring (even-odd) and the cross, scaled so the ring's outer edge sits at `outer` from the centre."""
+    s = outer / RING_OUT
+    mid = viewport / 2
+    w = ring_w if ring_w is not None else RING_W * s
+    ring = circle_path(mid, outer) + circle_path(mid, outer - w)
+    cross = "".join(path_data(p, s, mid) for p in cross_polys())
+    return ring, cross
 
 
 def favicon():
-    s = 15.2 / R_OUT
-    cross = path_data(bold_cross(), s, C, C, 16, 16)
+    ring, cross = mark_paths(32, 15.0, ring_w=2.0)
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <circle cx="16" cy="16" r="15.2" fill="#d8bc74"/>
-  <circle cx="16" cy="16" r="14.4" fill="#8c2a22"/>
-  <circle cx="16" cy="16" r="{R_IN * s + 0.35:.2f}" fill="#d8bc74"/>
-  <circle cx="16" cy="16" r="{R_IN * s:.2f}" fill="#1f2f6a"/>
-  <path d="{cross}" fill="#e6c77e"/>
+  <circle cx="16" cy="16" r="16" fill="{APSE_LO}"/>
+  <path fill-rule="evenodd" d="{ring}" fill="#d6b062"/>
+  <path d="{cross}" fill="#d6b062"/>
 </svg>
 '''
 
 
 def vector_drawable(size_dp, viewport, paths, comment):
     body = "\n".join(
-        f'    <path\n        android:fillColor="{colour}"\n'
+        f'    <path\n        android:fillColor="#FFFFFFFF"\n'
         + ('        android:fillType="evenOdd"\n' if even_odd else "")
         + f'        android:pathData="{d}" />'
-        for d, colour, even_odd in paths
+        for d, even_odd in paths
     )
     return f'''<?xml version="1.0" encoding="utf-8"?>
 <!-- {comment} Generated by tools/genicons.py. -->
@@ -377,69 +419,70 @@ def vector_drawable(size_dp, viewport, paths, comment):
 '''
 
 
-def medallion_stars():
-    """The medallion's stars, kept clear of the bold cross."""
-    keep = ndi.binary_dilation(mask([bold_cross()]) > 0.5, iterations=40)
-    stars = []
-    for radius, count, offset, size in ((185, 8, 0.5, 40), (300, 16, 0.25, 40)):
-        for k in range(count):
-            a = (k + offset) * 2 * math.pi / count
-            x, y = C + radius * math.cos(a), C + radius * math.sin(a)
-            if not keep[int(y), int(x)]:
-                stars.append(star_poly(x, y, size, 1.0, 0.5, 0.3))
-    return stars
+# ---------------------------------------------------------------- checks
+def contrast(a, b):
+    hi, lo = max(a, b), min(a, b)
+    return (hi + 0.05) / (lo + 0.05)
 
 
-def themed_medallion(viewport, outer, thickness):
-    """Ring, stars and cross: the medallion in one colour. The stars keep it from reading as a plus in a circle."""
-    s = outer / R_OUT
-    mid = viewport / 2
-    ring = circle_path(mid, mid, outer) + circle_path(mid, mid, outer - thickness)
-    stars = "".join(path_data(p, s, C, C, mid, mid) for p in medallion_stars())
-    return [(ring, "#FFFFFFFF", True), (stars, "#FFFFFFFF", False),
-            (path_data(bold_cross(), s, C, C, mid, mid), "#FFFFFFFF", False)]
+def check(name, scene, dark):
+    """Measure the tile as a launcher shows it, after Lanczos to 48px: the ring must still be 2px wide, ring and
+    cross at least 4.5:1 against the wall, and (by night) the tile dark enough to sit beside flat icons."""
+    t = tile(scene)
+    small = np.asarray(to_image(t).resize((48, 48), Image.LANCZOS), np.float32) / 255
+    y48 = luma(small)
+    yy, xx = np.mgrid[0:48, 0:48]
+    r = np.hypot(yy - 23.5, xx - 23.5) / 24
+    ang = np.arctan2(yy - 23.5, xx - 23.5)
+    off_axis = np.abs(np.sin(2 * ang)) > 0.85
+    ground = float(np.median(y48[(r > 0.46) & (r < 0.62) & off_axis]))
+    cross = float(np.median(y48[r < 0.07]))
+    prof = [float(np.median(y48[(r >= i / 24) & (r < (i + 1) / 24) & off_axis])) if ((r >= i / 24) & (r < (i + 1) / 24) & off_axis).any() else ground for i in range(24)]
+    ring = max(prof[14:22], key=lambda v: abs(v - ground))
+    width = sum(abs(v - ground) > 0.5 * abs(ring - ground) for v in prof[14:22])
+    mean = float(luma(t).mean())
+    report = (f"{name}: ring {width}px @48, ring {contrast(ring, ground):.1f}:1, cross {contrast(cross, ground):.1f}:1, "
+              f"mean Y {mean:.3f}")
+    fails = []
+    if width < 2:
+        fails.append("ring under 2px at 48")
+    if contrast(ring, ground) < 4.5 or contrast(cross, ground) < 4.5:
+        fails.append("contrast under 4.5:1 at 48")
+    if dark and not 0.12 <= mean <= 0.22:
+        fails.append("mean luminance outside 0.12..0.22")
+    print(report + ("" if not fails else "  FAIL: " + "; ".join(fails)))
+    return not fails
 
 
-def notification_cross(viewport):
-    """The cross alone, filling the status-bar square: a ring round it would read as "add"."""
-    pts = bold_cross()
-    ys = [y for _, y in pts]
-    s = (viewport - 3) / (max(ys) - min(ys))
-    return [(path_data(pts, s, C, (max(ys) + min(ys)) / 2, viewport / 2, viewport / 2), "#FFFFFFFF", False)]
-
-
-# ---------------------------------------------------------------- outputs
+# ---------------------------------------------------------------- main
 ANDROID_DENSITIES = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
-# An adaptive icon's layers are 108dp; any mask keeps a 66dp circle. The rim sits just inside it.
-ANDROID_SCALE = (32.6 / 54) * (C / (R_OUT + 5))
-# A maskable web icon keeps the circle of 40% radius.
-MASKABLE_SCALE = 0.4 * N / (R_OUT + 5)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.parse_args()
-    layer, alpha = medallion()
-    wide = ground(16)
+    parser.add_argument("--out", type=Path, help="also write the 1024 tiles here (e.g. the Play Store's 512 is "
+                        "icon-512.png scaled from it); nothing else changes")
+    args = parser.parse_args()
 
-    whole_rgb, whole_a = placed(layer, alpha, 1.0)
-    full = flatten(wide, whole_rgb, whole_a)
+    night, vault = apse()
+    day, _ = nave()
+    ok = check("apse", night, dark=True) & check("nave", day, dark=False)
+    if not ok:
+        sys.exit("the icon no longer reads at launcher size; see above")
+    night_tile, day_tile = tile(night), tile(day)
 
-    # Web: a round icon on transparency for "any", the full tile for maskable and iOS home screens.
+    # Web: the tile for "any" and "maskable" alike (the ring sits inside the maskable safe circle).
     for size in (192, 512):
-        save_rgba(whole_rgb, whole_a, WEB / f"icons/icon-{size}.png", size)
-    m_rgb, m_a = placed(layer, alpha, MASKABLE_SCALE)
-    maskable = flatten(ground(16 * MASKABLE_SCALE), m_rgb, m_a)
-    for size in (192, 512):
-        save_rgb(maskable, WEB / f"icons/icon-maskable-{size}.png", size)
-    save_rgb(full, WEB / "icons/apple-touch-icon.png", 180)
+        save_rgb(night_tile, WEB / f"icons/icon-{size}.png", size)
+        save_rgb(night_tile, WEB / f"icons/icon-maskable-{size}.png", size)
+    save_rgb(night_tile, WEB / "icons/apple-touch-icon.png", 180)
     (WEB / "favicon.svg").write_text(favicon())
     print("wrote", (WEB / "favicon.svg").relative_to(ROOT))
 
-    # iOS: the full tile, the medallion alone for the dark appearance, and a grayscale for tinting.
-    save_rgb(full, IOS / "icon-1024.png", 1024, palette=False)
-    save_rgba(whole_rgb, whole_a, IOS / "icon-1024-dark.png", 1024, palette=False)
-    save_rgb(tinted(whole_rgb, whole_a), IOS / "icon-1024-tinted.png", 1024, palette=False)
+    # iOS: the nave by day for the light appearance, the apse for dark, and a grayscale for tinting.
+    save_rgb(day_tile, IOS / "icon-1024.png", TILE, palette=False)
+    save_rgb(night_tile, IOS / "icon-1024-dark.png", TILE, palette=False)
+    save_rgb(tile(tinted(night, vault)), IOS / "icon-1024-tinted.png", TILE, palette=False)
     images = [{"filename": "icon-1024.png", "idiom": "universal", "platform": "ios", "size": "1024x1024"}]
     for look in ("dark", "tinted"):
         images.append({"appearances": [{"appearance": "luminosity", "value": look}],
@@ -447,21 +490,28 @@ def main():
     (IOS / "Contents.json").write_text(json.dumps({"images": images, "info": {"author": "xcode", "version": 1}}, indent=2) + "\n")
     print("wrote", (IOS / "Contents.json").relative_to(ROOT))
 
-    # Android: adaptive layers at every density, and vectors for the themed icon and notifications.
-    a_rgb, a_a = placed(layer, alpha, ANDROID_SCALE)
-    a_ground = ground(16 * ANDROID_SCALE)
+    # Android: the whole 108dp canvas as the foreground, the bare wall behind it for launchers that
+    # parallax the layers, and vectors for the themed icon and notifications.
     for dpi, size in ANDROID_DENSITIES.items():
-        save_rgba(a_rgb, a_a, ANDROID / f"mipmap-{dpi}/ic_launcher_foreground.png", size)
-        save_rgb(a_ground, ANDROID / f"mipmap-{dpi}/ic_launcher_background.png", size)
-    outer = (R_OUT + 5) * ANDROID_SCALE * 108 / N
-    mono = vector_drawable(108, 108, themed_medallion(108, outer, outer * (R_OUT - R_IN) / R_OUT),
-                           "The launcher medallion's ring, stars and cross, for themed icons.")
+        save_rgb(night, ANDROID / f"mipmap-{dpi}/ic_launcher_foreground.png", size)
+        save_rgb(vault, ANDROID / f"mipmap-{dpi}/ic_launcher_background.png", size)
+    ring, cross = mark_paths(108, RING_OUT * 72 / TILE)
+    mono = vector_drawable(108, 108, [(ring, True), (cross, False)],
+                           "The launcher's ring and cross, for themed icons.")
     (ANDROID / "drawable/ic_launcher_monochrome.xml").write_text(mono)
-    note = vector_drawable(24, 24, notification_cross(24),
-                           "The medallion's cross as a status-bar silhouette: a notification icon is drawn in one colour.")
+    ring, cross = mark_paths(24, 11.5, ring_w=1.6)
+    note = vector_drawable(24, 24, [(ring, True), (cross, False)],
+                           "The launcher's ring and cross as a status-bar silhouette: a notification icon is drawn in one colour.")
     (ANDROID / "drawable/ic_notification.xml").write_text(note)
     print("wrote", (ANDROID / "drawable/ic_launcher_monochrome.xml").relative_to(ROOT))
     print("wrote", (ANDROID / "drawable/ic_notification.xml").relative_to(ROOT))
+
+    if args.out:
+        args.out.mkdir(parents=True, exist_ok=True)
+        to_image(night_tile).save(args.out / "apse-1024.png")
+        to_image(day_tile).save(args.out / "nave-1024.png")
+        to_image(night_tile).resize((512, 512), Image.LANCZOS).save(args.out / "play-store-512.png")
+        print("wrote", args.out)
 
 
 if __name__ == "__main__":
