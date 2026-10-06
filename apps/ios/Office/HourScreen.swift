@@ -1,3 +1,4 @@
+import Observation
 import SwiftUI
 import UIKit
 
@@ -130,6 +131,8 @@ struct HourScreen: View {
     @Environment(\.metrics) private var m
     /// The collapsible sections, open or not.
     @State private var open: [Int: Bool]
+    /// How far through the office, for the hairline across the top.
+    @State private var reading = Reading()
 
     init(view: HourView, date: CivilDate) {
         self.view = view
@@ -150,32 +153,35 @@ struct HourScreen: View {
                     Rectangle().fill(dayColor(view.color)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                     HourTitle(view: view, date: date)
-                    ForEach(rows) { row in
-                        switch row {
-                        case let .toggle(i, label, expanded):
-                            Button { withAnimation(unfolding) { open[i] = !expanded } } label: {
-                                HStack(spacing: 0) {
-                                    Text(label).type(Scale.heading).foregroundStyle(p.titulus)
-                                    Caret(open: expanded, color: p.titulus)
+                    ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
+                        Group {
+                            switch row {
+                            case let .toggle(i, label, expanded):
+                                Button { withAnimation(unfolding) { open[i] = !expanded } } label: {
+                                    HStack(spacing: 0) {
+                                        Text(label).type(Scale.heading).foregroundStyle(p.titulus)
+                                        Caret(open: expanded, color: p.titulus)
+                                    }
+                                    .frame(maxWidth: .infinity, minHeight: 44)
                                 }
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                            }
-                            .buttonStyle(Quiet())
-                            .accessibilityAddTraits(.isHeader)
-                            .accessibilityValue(expanded ? "Expanded" : "Collapsed")
-                            .padding(.top, m.px(5.6))
-                            .padding(.bottom, expanded ? m.px(12.8) : 0)
-                            .measured(m)
-                        case let .block(at, block, gap, cross):
-                            VStack(spacing: 0) {
-                                if cross {
-                                    PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
+                                .buttonStyle(Quiet())
+                                .accessibilityAddTraits(.isHeader)
+                                .accessibilityValue(expanded ? "Expanded" : "Collapsed")
+                                .padding(.top, m.px(5.6))
+                                .padding(.bottom, expanded ? m.px(12.8) : 0)
+                                .measured(m)
+                            case let .block(at, block, gap, cross):
+                                VStack(spacing: 0) {
+                                    if cross {
+                                        PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
+                                    }
+                                    BlockRow(block: block, column: columns[at])
                                 }
-                                BlockRow(block: block, column: columns[at])
+                                .padding(.top, m.px(gap))
+                                .measured(m)
                             }
-                            .padding(.top, m.px(gap))
-                            .measured(m)
                         }
+                        .read(n, into: reading)
                     }
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
@@ -183,8 +189,13 @@ struct HourScreen: View {
                         reportUrl: view.reportUrl,
                         date: date
                     )
+                    .read(rows.count, into: reading)
                 }
             }
+            .coordinateSpace(name: Reading.space)
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0 }
+            .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
+            .overlay(alignment: .top) { ProgressHairline(reading: reading) }
             .revealing(scroll)
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
@@ -244,6 +255,91 @@ struct HourScreen: View {
             }
         }
         return out
+    }
+}
+
+/**
+ * How far the reader has come through the office, as the web's `.hour-scroll-progress`: nothing
+ * while the band, header and title pass, then the office as it reaches the top of the screen,
+ * and all of it once the office's end reaches the bottom; the hour's ending keeps it full. Each
+ * row reports where it stands as it is laid out; rows not yet laid out are taken at the average
+ * height of those that have been.
+ */
+@Observable
+final class Reading {
+    /// The scroll view's coordinates, from the top of the screen below the status bar.
+    static let space = "hour"
+    /// How much of the office has passed, from 0 to 1; the only thing the hairline watches.
+    private(set) var ratio: CGFloat = 0
+    /// The office's rows in number; the ending stands at this index. A section opened or closed
+    /// moves every row after it, so the heights are learned again.
+    @ObservationIgnored var rows = 0 {
+        didSet { if rows != oldValue { heights = [:] } }
+    }
+    @ObservationIgnored var viewport: CGSize = .zero {
+        didSet { if viewport.width != oldValue.width { heights = [:] }; update() }
+    }
+    /// Each row's height as last laid out, by index, and where those on screen now stand.
+    @ObservationIgnored private var heights: [Int: CGFloat] = [:]
+    @ObservationIgnored private var frames: [Int: CGRect] = [:]
+
+    func place(_ row: Int, _ frame: CGRect?) {
+        if let frame {
+            frames[row] = frame
+            heights[row] = frame.height
+        } else {
+            frames[row] = nil
+        }
+        update()
+    }
+
+    private func update() {
+        let now = read()
+        if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
+    }
+
+    private func read() -> CGFloat {
+        let end = rows
+        guard end > 0 else { return 0 }
+        let bottom = viewport.height
+        let ending = frames[end]
+        if let ending, ending.minY <= bottom { return 1 }
+        guard let top = frames.filter({ $0.value.minY <= 0 }).max(by: { $0.key < $1.key }), top.key < end else { return 0 }
+        let known = (0..<end).compactMap { heights[$0] }
+        let average = known.isEmpty ? 1 : known.reduce(0, +) / CGFloat(known.count)
+        func height(_ i: Int) -> CGFloat { heights[i] ?? average }
+        let passed = (0..<top.key).reduce(0) { $0 + height($1) } - top.value.minY
+        // Once the ending is in sight its distance is known exactly.
+        let left = ending.map { $0.minY - bottom } ?? ((0..<end).reduce(0) { $0 + height($1) } - bottom - passed)
+        return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
+    }
+}
+
+private extension View {
+    /// Reports this row's place on screen to `reading`, and its leaving.
+    func read(_ row: Int, into reading: Reading) -> some View {
+        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Reading.space)) } action: { reading.place(row, $0) }
+            .onDisappear { reading.place(row, nil) }
+    }
+}
+
+/**
+ * The gold hairline across the top, in the season's ornament gold. The band scrolls away with
+ * the page here, so the line hangs just below the status bar.
+ */
+private struct ProgressHairline: View {
+    let reading: Reading
+    @Environment(\.ornament) private var o
+
+    var body: some View {
+        GeometryReader { geo in
+            Rectangle().fill(o.flat).frame(width: geo.size.width * reading.ratio)
+        }
+        .frame(height: 2)
+        .allowsHitTesting(false)
+        .accessibilityElement()
+        .accessibilityLabel("Progress through the prayer text")
+        .accessibilityValue("\(Int((reading.ratio * 100).rounded())) percent")
     }
 }
 
