@@ -69,6 +69,8 @@ class CommemorationComparisonTest(unittest.TestCase):
             ("Khashas", "Ss Nicholas & Habib Khasha, Martyrs"),
             ("Dorothea", "St Dorothy, Virgin & Martyr"),
             ("Alexius", "St Alexis Toth, Priest & Confessor"),
+            ("Fer.", "IV Sunday of Advent"),
+            ("Sun.", "Monday after Advent IV"),
             ("Sa- turinus", "St Saturninus, Bishop & Martyr"),
             ("Mechiades", "St Melchiades, Bishop & Martyr"),
             ("Tibertius &c.", "Ss Tiburtius & Susanna, Martyrs"),
@@ -89,6 +91,7 @@ class CommemorationComparisonTest(unittest.TestCase):
             ORDO_COMPARE.commemoration_similarity("BVM", "Annunciation of the B.V.M."),
             0.6,
         )
+        self.assertLess(ORDO_COMPARE.commemoration_similarity("Sun.", "Monday after Advent III"), 0.6)
 
     def test_reports_missing_and_extra_names(self):
         missing, extra = ORDO_COMPARE.match_commemorations(
