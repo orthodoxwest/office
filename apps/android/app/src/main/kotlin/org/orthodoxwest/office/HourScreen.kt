@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,18 +35,23 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -115,69 +121,137 @@ fun HourScreen(
     val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
     val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        state = listState,
-        contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(dayColor(view.color))) }
-        item(key = "chrome") { chrome() }
-        item(key = "title") { HourTitle(view, date, today, form, onDate, onForm) }
-        // Each block's space depends on the one before it, across sections.
-        var prev: BlockView? = null
-        var afterClosed = false
-        // Whether anything of the office stands above: its first part takes no cross.
-        var begun = false
-        view.sections.forEachIndexed { i, section ->
-            if (section.collapsible) {
-                val expanded = open[i] == true
-                item(key = "toggle-$i") {
-                    Row(
-                        Modifier.animateItem(placementSpec = placement).measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
-                            .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(section.label, style = Type.heading.copy(color = p.titulus))
-                        Caret(expanded, p.titulus)
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            state = listState,
+            contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(dayColor(view.color))) }
+            item(key = "chrome") { chrome() }
+            item(key = "title") { HourTitle(view, date, today, form, onDate, onForm) }
+            // Each block's space depends on the one before it, across sections.
+            var prev: BlockView? = null
+            var afterClosed = false
+            // Whether anything of the office stands above: its first part takes no cross.
+            var begun = false
+            view.sections.forEachIndexed { i, section ->
+                if (section.collapsible) {
+                    val expanded = open[i] == true
+                    item(key = "toggle-$i") {
+                        Row(
+                            Modifier.animateItem(placementSpec = placement).measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                                .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(section.label, style = Type.heading.copy(color = p.titulus))
+                            Caret(expanded, p.titulus)
+                        }
                     }
+                    prev = null
+                    afterClosed = !expanded
+                    begun = true
+                    if (!expanded) return@forEachIndexed
                 }
-                prev = null
-                afterClosed = !expanded
-                begun = true
-                if (!expanded) return@forEachIndexed
+                section.blocks.forEachIndexed { j, block ->
+                    val heading = block.kind == BlockKind.HEADING
+                    val gap = when {
+                        prev != null -> gapBefore(prev, block)
+                        afterClosed -> if (heading) 23.2.dp else 14.dp
+                        else -> if (heading) 12.dp else 0.dp
+                    }
+                    // A small painted cross before each of the office's parts after the first, as the
+                    // web's `.elements > .section-heading`: a section's heading, or a heading standing
+                    // as an element of its own; not the hymn's or the chapter's, which open their
+                    // element's other blocks, nor any in the preparation.
+                    val part = (heading || block.kind == BlockKind.COMMEMORATION_HEADING) && !section.collapsible &&
+                        (!block.startsElement || section.blocks.getOrNull(j + 1)?.startsElement != false)
+                    val cross = part && begun
+                    begun = true
+                    afterClosed = false
+                    item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
+                    prev = block
+                }
             }
-            section.blocks.forEachIndexed { j, block ->
-                val heading = block.kind == BlockKind.HEADING
-                val gap = when {
-                    prev != null -> gapBefore(prev, block)
-                    afterClosed -> if (heading) 23.2.dp else 14.dp
-                    else -> if (heading) 12.dp else 0.dp
-                }
-                // A small painted cross before each of the office's parts after the first, as the
-                // web's `.elements > .section-heading`: a section's heading, or a heading standing
-                // as an element of its own; not the hymn's or the chapter's, which open their
-                // element's other blocks, nor any in the preparation.
-                val part = (heading || block.kind == BlockKind.COMMEMORATION_HEADING) && !section.collapsible &&
-                    (!block.startsElement || section.blocks.getOrNull(j + 1)?.startsElement != false)
-                val cross = part && begun
-                begun = true
-                afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
-                prev = block
+            item(key = "epilogue") {
+                Epilogue(
+                    previous = hours.getOrNull(index - 1),
+                    next = hours.getOrNull(index + 1),
+                    reportUrl = view.reportUrl,
+                    onHour = onHour,
+                    onAllHours = onAllHours,
+                )
             }
         }
-        item(key = "epilogue") {
-            Epilogue(
-                previous = hours.getOrNull(index - 1),
-                next = hours.getOrNull(index + 1),
-                reportUrl = view.reportUrl,
-                onHour = onHour,
-                onAllHours = onAllHours,
-            )
+        ProgressHairline(listState, Modifier.padding(top = insets.calculateTopPadding()))
+    }
+}
+
+/** The items above the office: the colour band, the header and the title. */
+private const val BEFORE_OFFICE = 3
+
+/**
+ * The gold hairline across the top, as the web's `.hour-scroll-progress`: how far through the
+ * prayer itself. It stays empty through the band, header and title, starts as the office reaches
+ * the top of the screen, and is full once the office's end reaches the bottom; the hour's ending
+ * keeps it full. The band scrolls away with the page here, so the line hangs just below the status
+ * bar. Rows not yet laid out are taken at the average height of those that have been.
+ */
+@Composable
+private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier) {
+    val color = LocalOrnament.current.flat
+    // Each row's height as last laid out, by index; begun again when the rows change in number
+    // (a section opened or closed) or in width.
+    val heights = remember { HashMap<Int, Int>() }
+    val shape = remember { IntArray(2) }
+    var ratio by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(list) {
+        snapshotFlow { list.layoutInfo }.collect { info ->
+            if (info.totalItemsCount != shape[0] || info.viewportSize.width != shape[1]) {
+                heights.clear()
+                shape[0] = info.totalItemsCount
+                shape[1] = info.viewportSize.width
+            }
+            info.visibleItemsInfo.forEach { heights[it.index] = it.size }
+            ratio = officeRead(info, heights)
         }
     }
+    Box(
+        modifier.fillMaxWidth().height(2.dp)
+            .semantics {
+                progressBarRangeInfo = ProgressBarRangeInfo(ratio, 0f..1f)
+                contentDescription = "Progress through the prayer text"
+            }
+            .drawBehind { drawRect(color, size = size.copy(width = size.width * ratio)) },
+    )
+}
+
+/** How much of the office has passed the screen, from 0 to 1. */
+private fun officeRead(info: LazyListLayoutInfo, heights: Map<Int, Int>): Float {
+    val start = BEFORE_OFFICE
+    // The hour's ending, the last row.
+    val end = info.totalItemsCount - 1
+    if (end <= start) return 0f
+    val items = info.visibleItemsInfo
+    // Offsets run from the top of the screen below the status bar.
+    val bottom = info.viewportEndOffset - info.afterContentPadding
+    val ending = items.firstOrNull { it.index == end }
+    if (ending != null && ending.offset <= bottom) return 1f
+    val top = items.lastOrNull { it.offset <= 0 } ?: return 0f
+    if (top.index < start) return 0f
+    val known = (start until end).mapNotNull { heights[it] }
+    val average = if (known.isEmpty()) 1f else known.average().toFloat()
+    fun height(i: Int) = heights[i]?.toFloat() ?: average
+    val passed = (start until top.index).sumOf { height(it).toDouble() }.toFloat() - top.offset
+    // Once the ending is in sight its distance is known exactly.
+    val left = if (ending != null) {
+        (ending.offset - bottom).toFloat()
+    } else {
+        (start until end).sumOf { height(it).toDouble() }.toFloat() - bottom - passed
+    }
+    return if (passed + left <= 0f) 1f else (passed / (passed + left)).coerceIn(0f, 1f)
 }
 
 @Composable
