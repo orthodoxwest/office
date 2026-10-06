@@ -2307,13 +2307,24 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    it. Italic and un-small-capped so it reads as the Latin title rather than
    as more of the label. On a narrow screen it moves to its own line whole
    ("Psalm 110 ·" / "Dixit Dominus Domino meo") instead of breaking inside
-   the title; a title longer than the line still wraps within itself. */
+   the title; a title longer than the line still wraps within itself. When it
+   does move down, app.js marks the label stacked: the dot, which joined the
+   two on one line, would otherwise end the first line alone, so it goes, and
+   the Latin title keeps the line of its own it was measured on. */
 .psalm-incipit {
   display: inline-block;
   color: var(--muted);
   font-variant: normal;
   font-style: italic;
   letter-spacing: 0.02em;
+}
+
+.item-label.stacked > .label-sep {
+  display: none;
+}
+
+.item-label.stacked > .psalm-incipit {
+  display: block;
 }
 
 /* lang="la" is for pronunciation, not an epigraphic style. EB Garamond's

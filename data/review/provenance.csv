@@ -2760,7 +2760,7 @@ psalms/102,be4fc9f4837e,Coverdale Psalter,Psalm 102,,verified,codex,2026-07-10,M
 psalms/103,de3264072aa3,Coverdale Psalter,Psalm 103,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/104,0f9b9c9314fe,Coverdale Psalter,Psalm 104,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/105,78c509a07b8f,Coverdale Psalter,Psalm 105,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/106,0b2e820fca39,Coverdale Psalter,Psalm 106,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/106,47921fb09cad,Coverdale Psalter,Psalm 106,,verified,claude,2026-10-06,"Case of the divine name in verse 25 restored (LORD, as the 1662 Psalter prints it); wording unchanged."
 psalms/107,89e72a7a5986,Coverdale Psalter,Psalm 107,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/108,0458c545456c,Coverdale Psalter,Psalm 108,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/109,e9e1998e5ef4,Coverdale Psalter,Psalm 109,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2816,7 +2816,7 @@ psalms/134,f9f958b5f1ae,Coverdale Psalter,Psalm 134,,verified,codex,2026-07-10,M
 psalms/135,cd1874d224e7,Coverdale Psalter,Psalm 135,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/136,111b27d55637,Coverdale Psalter,Psalm 136,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/137,d04b91b4b0cd,Coverdale Psalter,Psalm 137,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/138,6b0353f9230a,Coverdale Psalter,Psalm 138,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/138,aa3e49d2d915,Coverdale Psalter,Psalm 138,,verified,claude,2026-10-06,"Case of the divine name in verse 8 restored (LORD, as the 1662 Psalter prints it); wording unchanged."
 psalms/139,456446354166,Coverdale Psalter,Psalm 139,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/139a,e1823ee01ffc,Coverdale Psalter,Psalm 139:1-9,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
 psalms/139b,3ed0433ba095,Coverdale Psalter,Psalm 139:10-24,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."

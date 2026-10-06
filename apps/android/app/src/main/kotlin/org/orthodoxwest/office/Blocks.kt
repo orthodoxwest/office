@@ -143,7 +143,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             if (cross) PaintedCross(Modifier.padding(bottom = 11.2.dp).size(9.92.dp))
             Text(runs(block), Modifier.fillMaxWidth(), style = Type.heading.copy(color = p.titulus))
         }
-        BlockKind.ITEM_LABEL -> Text(runs(block), m.fillMaxWidth(), style = Type.itemLabel.copy(color = p.titulus))
+        BlockKind.ITEM_LABEL -> ItemLabel(block, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
             runs(block),
             m.fillMaxWidth(),
@@ -569,6 +569,36 @@ fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
             close()
         }
         out
+    }
+}
+
+/**
+ * A psalm's number and its Latin incipit share a line, a dot between them. When the line cannot
+ * hold both, the incipit stands on its own line beneath and the dot goes (the web's
+ * `.item-label.stacked`): a separator ending a line alone separates nothing.
+ */
+@Composable
+private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
+    val latin = block.runs.indexOfFirst { it.style == RunStyle.LATIN }
+    if (latin < 1) {
+        Text(runs(block), modifier, style = style)
+        return
+    }
+    val whole = runs(block)
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints(modifier) {
+        val width = constraints.maxWidth
+        val fits = remember(whole, style, width) {
+            !measurer.measure(whole, style, softWrap = false, maxLines = 1, constraints = Constraints(maxWidth = width)).didOverflowWidth
+        }
+        if (fits) {
+            Text(whole, Modifier.fillMaxWidth(), style = style)
+        } else {
+            Column(Modifier.fillMaxWidth()) {
+                Text(runs(block.copy(runs = block.runs.subList(0, latin - 1))), Modifier.fillMaxWidth(), style = style)
+                Text(runs(block.copy(runs = block.runs.subList(latin, block.runs.size))), Modifier.fillMaxWidth(), style = style)
+            }
+        }
     }
 }
 
