@@ -162,7 +162,7 @@ fn reminders_name_each_office_on_the_chosen_days() {
 #[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -178,14 +178,15 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             false,
             "private".into(),
             UsageClient::Android,
-            Some(true)
+            Some(true),
+            Some(false)
         )
         .as_deref(),
-        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown client:android")
+        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown visit:returning client:android")
     );
     assert_eq!(
-        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None).as_deref(),
-        Some("site appearance:apse screen:mobile client:ios")
+        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true)).as_deref(),
+        Some("site appearance:apse screen:mobile visit:first client:ios")
     );
     // The archive, and anything the server would refuse, are not counted.
     for event in [
@@ -198,4 +199,6 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
         assert_eq!(beacon(event.clone()), None, "{event:?}");
     }
     assert!(usage_endpoint().starts_with("https://") && usage_endpoint().ends_with("/api/usage"));
+    assert_eq!(usage_advertised_endpoint(usage_endpoint()), Some(usage_endpoint()));
+    assert_eq!(usage_advertised_endpoint("http://example.org/api/usage".into()), None);
 }

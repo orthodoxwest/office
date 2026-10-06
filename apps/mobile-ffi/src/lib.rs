@@ -295,8 +295,9 @@ pub enum UsageEvent {
 /// The usage beacon for `event`, or none when it does not count: as on the web, only a page
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
-/// `martyrology` the hour's `HourView::martyrology`.
-#[uniffi::export(default(martyrology = None))]
+/// `martyrology` the hour's `HourView::martyrology`; `first` whether the installation is counted
+/// for the first time today.
+#[uniffi::export(default(martyrology = None, first = None))]
 pub fn usage_beacon(
     event: UsageEvent,
     today: CivilDate,
@@ -304,6 +305,7 @@ pub fn usage_beacon(
     form: String,
     client: UsageClient,
     martyrology: Option<bool>,
+    first: Option<bool>,
 ) -> Option<String> {
     use presentation::usage::{App, app_beacon, current_day, current_year};
     let today = today.parse().ok()?;
@@ -318,13 +320,25 @@ pub fn usage_beacon(
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form, martyrology)
+    app_beacon(scope, app, dark, &form, martyrology, first)
 }
 
-/// Where a release build of the apps posts its beacons.
+/// Where a release build of the apps posts its beacons until the server names another.
 #[uniffi::export]
 pub fn usage_endpoint() -> String {
     presentation::usage::ENDPOINT.to_string()
+}
+
+/// The response header that names where to post from now on.
+#[uniffi::export]
+pub fn usage_endpoint_header() -> String {
+    presentation::usage::ENDPOINT_HEADER.to_string()
+}
+
+/// The endpoint a beacon response's header names, if the app may post there.
+#[uniffi::export]
+pub fn usage_advertised_endpoint(value: String) -> Option<String> {
+    presentation::usage::advertised_endpoint(&value)
 }
 
 /// An hour the reader asks to be reminded of, at a time of day.

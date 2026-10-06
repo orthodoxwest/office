@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.orthodoxwest.office.core.CivilDate
 import org.orthodoxwest.office.core.UsageEvent
+import org.orthodoxwest.office.core.usageEndpoint
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -25,7 +26,9 @@ class UsageTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val prefs = app.getSharedPreferences("usage-test", Context.MODE_PRIVATE)
     private val posted = mutableListOf<Pair<String, String>>()
+    private val endpoints = mutableListOf<String>()
     private var online = true
+    private var advertised: String? = null
 
     // A reader in California, early on 15 March 2026.
     private var now = Instant.parse("2026-03-15T15:00:00Z")
@@ -36,9 +39,12 @@ class UsageTest {
         override fun instant(): Instant = now
     }
 
-    private fun usage() = Usage(prefs, enabled = true, clock = clock, executor = { it.run() }) { id, body ->
-        if (online) posted += id to body
-        online
+    private fun usage() = Usage(prefs, enabled = true, clock = clock, executor = { it.run() }) { endpoint, id, body ->
+        if (online) {
+            posted += id to body
+            endpoints += endpoint
+        }
+        Usage.Reply(online, advertised.takeIf { online })
     }
 
     private val today = CivilDate(2026, 3, 15)
@@ -57,9 +63,9 @@ class UsageTest {
         usage.record(UsageEvent.RemindersOn, dark = true, form = "priest")
         assertEquals(
             listOf(
-                "site appearance:nave screen:mobile client:android",
-                "vespers appearance:apse screen:mobile prayer-form:priest client:android",
-                "reminders appearance:apse screen:mobile client:android",
+                "site appearance:nave screen:mobile visit:first client:android",
+                "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:android",
+                "reminders appearance:apse screen:mobile visit:first client:android",
             ),
             posted.map { it.second },
         )
@@ -92,6 +98,38 @@ class UsageTest {
     }
 
     @Test
+    fun anInstallationIsNewOnItsFirstDayOnly() {
+        usage().record(UsageEvent.Home(today), dark = false, form = "private")
+        now = Instant.parse("2026-03-16T15:00:00Z")
+        usage().record(UsageEvent.Home(CivilDate(2026, 3, 16)), dark = false, form = "private")
+        assertEquals(listOf("visit:first", "visit:returning"), posted.map { Regex("visit:\\w+").find(it.second)!!.value })
+    }
+
+    @Test
+    fun anInstallationThatReportedBeforeIsReturning() {
+        // An app updated from a build that counted readers but not new ones.
+        prefs.edit().putString("usage-day", "2026-03-10").putString("usage-id", "0".repeat(32)).commit()
+        usage().record(UsageEvent.Home(today), dark = false, form = "private")
+        assertTrue(posted.single().second.contains("visit:returning"))
+    }
+
+    @Test
+    fun beaconsFollowTheSiteToTheAddressItNames() {
+        advertised = "https://example.org/api/usage"
+        val usage = usage()
+        usage.record(UsageEvent.Home(today), dark = false, form = "private")
+        usage.record(UsageEvent.Hour(today, "lauds"), dark = false, form = "private")
+        // Anything but a plain HTTPS usage endpoint is ignored.
+        advertised = "http://elsewhere.example/api/usage"
+        usage.record(UsageEvent.Hour(today, "vespers"), dark = false, form = "private")
+        usage().record(UsageEvent.Hour(today, "compline"), dark = false, form = "private")
+        assertEquals(
+            listOf(usageEndpoint(), "https://example.org/api/usage", "https://example.org/api/usage", "https://example.org/api/usage"),
+            endpoints,
+        )
+    }
+
+    @Test
     fun aFailedBeaconIsTriedAgainOnTheNextVisit() {
         val usage = usage()
         online = false
@@ -104,7 +142,7 @@ class UsageTest {
     @Test
     fun debugBuildsNeverReport() {
         assertFalse(BuildConfig.COUNT_USAGE)
-        Usage(prefs, clock = clock, executor = { it.run() }) { id, body -> posted += id to body; true }
+        Usage(prefs, clock = clock, executor = { it.run() }) { _, id, body -> posted += id to body; Usage.Reply(true) }
             .record(UsageEvent.Home(today), dark = false, form = "private")
         assertTrue(posted.isEmpty())
     }

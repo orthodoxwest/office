@@ -488,7 +488,7 @@ self.addEventListener("fetch", function (event) {
   }
 
   // Metrics and the unlinked report must never enter Cache Storage.
-  if (url.pathname === "/api/usage" || url.pathname === "/admin/usage" || url.pathname === "/admin/usage.csv") {
+  if (url.pathname === "/api/usage" || url.pathname === "/admin/usage") {
     return;
   }
 
