@@ -201,9 +201,25 @@ CREATE TABLE IF NOT EXISTS seen (
         conn.query_row("SELECT MIN(day) FROM totals WHERE scope = 'site'", [], |r| r.get(0)).map_err(|e| e.to_string())
     }
 
+    /// Every stored daily count as CSV, oldest first: the whole report's data,
+    /// for a backup or a spreadsheet.
+    pub fn export_csv(&self) -> Result<String, String> {
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        let mut stmt = conn.prepare("SELECT day, scope, users FROM totals ORDER BY day, scope").map_err(|e| e.to_string())?;
+        let rows =
+            stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, i64>(2)?))).map_err(|e| e.to_string())?;
+        // Days and scopes come from a fixed vocabulary, so nothing needs quoting.
+        let mut csv = String::from("day,scope,browsers\n");
+        for row in rows {
+            let (day, scope, n) = row.map_err(|e| e.to_string())?;
+            csv.push_str(&format!("{day},{scope},{n}\n"));
+        }
+        Ok(csv)
+    }
+
     /// A zero-filled window of `days`, newest first.
     pub fn daily(&self, now: jiff::Timestamp, days: usize) -> Result<Vec<UsageDay>, String> {
-        if !(1..=366).contains(&days) {
+        if !(1..=400).contains(&days) {
             return Err("invalid day window".into());
         }
         let today = eastern_day(now);
@@ -350,7 +366,8 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
             _ => return with_usage_headers(http_error("Choose 7, 30, 90 or 365 days", StatusCode::BAD_REQUEST)),
         }
     }
-    let (Ok(rows), Ok(since)) = (store.daily(jiff::Timestamp::now(), days as usize), store.first_day()) else {
+    let lookback = days as usize + render_html::usage::LOOKBACK;
+    let (Ok(rows), Ok(since)) = (store.daily(jiff::Timestamp::now(), lookback), store.first_day()) else {
         return with_usage_headers(http_error("Usage temporarily unavailable", StatusCode::SERVICE_UNAVAILABLE));
     };
     let data = render_html::usage::usage_data(rows, days, since.as_deref(), &DIMENSIONS);
@@ -359,6 +376,23 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
     };
     let mut resp = response(StatusCode::OK, body);
     set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
+    with_usage_headers(resp)
+}
+
+/// `GET /admin/usage.csv`: every daily count, for a backup or a spreadsheet.
+pub fn handle_export(store: Option<&Store>, method: &Method) -> Response<Body> {
+    if method != Method::GET && method != Method::HEAD {
+        let mut resp = with_usage_headers(http_error("Method not allowed", StatusCode::METHOD_NOT_ALLOWED));
+        set(&mut resp, header::ALLOW, "GET, HEAD");
+        return resp;
+    }
+    let Some(store) = store else { return with_usage_headers(not_found()) };
+    let Ok(csv) = store.export_csv() else {
+        return with_usage_headers(http_error("Usage temporarily unavailable", StatusCode::SERVICE_UNAVAILABLE));
+    };
+    let mut resp = response(StatusCode::OK, csv);
+    set(&mut resp, header::CONTENT_TYPE, "text/csv; charset=utf-8");
+    set(&mut resp, header::CONTENT_DISPOSITION, "attachment; filename=\"usage.csv\"");
     with_usage_headers(resp)
 }
 
@@ -514,6 +548,26 @@ mod tests {
         let rows = store.daily(future, 7).unwrap();
         assert_eq!(count(&store, "SELECT COUNT(*) FROM seen"), 0, "retention kept identifiers");
         assert_eq!(rows[4].users, 5, "retention lost totals");
+    }
+
+    // The export holds the report's counts and nothing that could tell one reader from another.
+    #[test]
+    fn csv_export_is_the_daily_totals() {
+        let db = TempDb::new("export");
+        let store = db.open();
+        store.record(eastern_at(2026, 9, 3, 9, 0), "browser-a", "lauds", &dims(&["screen:mobile"])).unwrap();
+        for id in ["browser-a", "browser-b"] {
+            store.record(eastern_at(2026, 9, 4, 9, 0), id, "vespers", &[]).unwrap();
+        }
+        assert_eq!(
+            store.export_csv().unwrap(),
+            "day,scope,browsers\n2026-09-03,lauds,1\n2026-09-03,screen:mobile,1\n2026-09-03,site,1\n2026-09-04,site,2\n2026-09-04,vespers,2\n"
+        );
+        let resp = handle_export(Some(&store), &Method::GET);
+        assert_eq!(resp.headers().get(header::CONTENT_TYPE).unwrap(), "text/csv; charset=utf-8");
+        assert_eq!(resp.headers().get(header::CACHE_CONTROL).unwrap(), "no-store");
+        assert_eq!(handle_export(None, &Method::GET).status(), StatusCode::NOT_FOUND);
+        assert_eq!(handle_export(Some(&store), &Method::POST).status(), StatusCode::METHOD_NOT_ALLOWED);
     }
 
     #[test]

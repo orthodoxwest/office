@@ -7747,13 +7747,10 @@ body.page-home::before {
 .usage-grid { fill: none; stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .usage-bar { fill: var(--accent); opacity: .8; }
 .usage-bar-today { fill: var(--gold); opacity: 1; }
-.usage-chart-scale [hidden] { visibility: hidden; }
 .usage-chart-scale { position: absolute; right: 100%; margin-right: .5rem; top: -.45rem; bottom: -.45rem; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; color: var(--muted); font-size: .8rem; font-variant-numeric: lining-nums tabular-nums; }
-/* The average is marked on the axis, where it cannot cover a bar. */
-.usage-average { position: absolute; left: -.3rem; right: 0; border-top: 1px dashed color-mix(in srgb, var(--text) 60%, transparent); pointer-events: none; }
-.usage-average span { position: absolute; right: calc(100% + .2rem); top: 0; transform: translateY(-50%); color: var(--text); font-size: .8rem; font-variant-numeric: lining-nums tabular-nums; line-height: 1; white-space: nowrap; }
+.usage-rolling { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .usage-average-key { display: inline-flex; align-items: center; gap: .4rem; }
-.usage-average-key::before { content: ""; width: 1.2rem; border-top: 1px dashed color-mix(in srgb, var(--text) 60%, transparent); }
+.usage-average-key::before { content: ""; width: 1.2rem; border-top: 1.5px solid var(--text); }
 .usage-trend figcaption { display: flex; justify-content: space-between; gap: 1rem; margin: .7rem 0 0 2.4rem; color: var(--muted); font-size: .85rem; }
 .usage-empty { position: absolute; inset: 2.3rem 0 auto 2.4rem; text-align: center; color: var(--text); background: var(--surface); padding-block: .7rem; }
 .usage-empty span { font-size: .9rem; color: var(--muted); }

@@ -149,6 +149,9 @@
     const y = value => 210 - 200 * value / ceiling;
     const lines = get("explore-lines");
     lines.replaceChildren();
+    // Today, or this week, is still filling: as a count it would read as a fall,
+    // so it stands apart as a lone point. A share is fair at any hour.
+    const today = group.Points[group.Points.length - 1].Day;
     group.Series.forEach((label, series) => {
       let path = "", connected = false;
       const dots = [];
@@ -157,10 +160,11 @@
         if (!sum) { connected = false; return; }
         const value = shares ? 100 * bucket.counts[series] / sum : bucket.counts[series];
         const px = x(index), py = y(value);
-        path += `${connected ? "L" : "M"}${px.toFixed(2)},${py.toFixed(2)} `;
+        const apart = !shares && bucket.last === today;
+        path += `${connected && !apart ? "L" : "M"}${px.toFixed(2)},${py.toFixed(2)} `;
         connected = true;
         // Isolated observations remain visible even on a long window.
-        if (buckets.length <= 60 || !index || !total(buckets[index - 1].counts) || index === buckets.length - 1 || !total(buckets[index + 1].counts)) {
+        if (apart || buckets.length <= 60 || !index || !total(buckets[index - 1].counts) || index === buckets.length - 1 || !total(buckets[index + 1].counts)) {
           dots.push(svg("circle", { cx: px, cy: py, r: 3, class: `usage-series-${series}` }));
         }
       });

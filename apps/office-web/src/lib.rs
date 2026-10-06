@@ -48,6 +48,7 @@ pub struct Server {
 enum Route {
     UsageEvent,
     UsageDashboard,
+    UsageExport,
     Static,
     ServiceWorker,
     Ics,
@@ -106,7 +107,7 @@ impl Server {
                 Route::UsageEvent | Route::Static => {}
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
-                Route::UsageDashboard | Route::Reminders | Route::Calendar | Route::Root => {
+                Route::UsageDashboard | Route::UsageExport | Route::Reminders | Route::Calendar | Route::Root => {
                     let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
                     return moved::forward(canonical, method, headers, target);
                 }
@@ -115,6 +116,7 @@ impl Server {
         match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
+            Route::UsageExport => usage::handle_export(self.usage.as_ref(), method),
             Route::Static => pwa::serve_static(&path, query.get("v")),
             Route::ServiceWorker => pwa::service_worker(&self.version),
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
@@ -140,6 +142,7 @@ impl Server {
         Router::new()
             .route("/api/usage", endpoint(Route::UsageEvent))
             .route("/admin/usage", endpoint(Route::UsageDashboard))
+            .route("/admin/usage.csv", endpoint(Route::UsageExport))
             .route("/static", endpoint(Route::Static))
             .route("/static/", endpoint(Route::Static))
             .route("/static/{*path}", endpoint(Route::Static))
