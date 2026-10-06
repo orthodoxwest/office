@@ -2797,7 +2797,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     const now = new Date();
     const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
     const prime = `/prime/${year}-09-07`;
-    const reading = page.getByRole("heading", { name: "Martyrology — September 8", exact: true });
+    const reading = page.getByRole("heading", { name: "Martyrology for tomorrow, September 8", exact: true });
     const rubric = page.locator(".elements").getByText("this may laudably be done");
     await page.goto(prime);
     await page.evaluate(async () => {

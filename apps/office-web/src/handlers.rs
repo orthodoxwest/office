@@ -612,7 +612,7 @@ mod tests {
         let off =
             body.find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the Martyrology is read").expect("rubric variant");
         let on = body
-            .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology — September 8</h2>")
+            .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
             .expect("reading");
         assert!(off < on);
         assert_eq!(body.matches("data-martyrology-variant=").count(), 2, "only the Martyrology section varies");
