@@ -245,11 +245,9 @@ struct HourScreen: View {
                 }
                 afterClosed = false
                 // Between the office's parts, one small painted cross: before each heading of the
-                // office's own (the web's `.elements > .section-heading`) but the page's first. The
-                // Hymn's and the Chapter's headings open their element, its blocks following them.
-                let next = section.blocks.indices.contains(j + 1) ? section.blocks[j + 1] : nil
+                // office's own (the web's `.elements > .section-heading`), the Hymn's and the
+                // Chapter's included, but the page's first.
                 let part = (heading || block.kind == .commemorationHeading) && !section.collapsible
-                    && (!block.startsElement || next.map { $0.startsElement } ?? true)
                 out.append(.block(BlockAt(section: i, block: j), block, gap: gap, cross: part && !out.isEmpty))
                 prev = block
             }
@@ -351,6 +349,7 @@ private struct HourTitle: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.wide) private var wide
     @State private var picking = false
     @Environment(\.reveal) private var reveal
     @State private var choosing = false
@@ -366,10 +365,13 @@ private struct HourTitle: View {
             VStack(spacing: 0) {
                 // The hour's sign is set into the title's upper rule, the rule itself its line; the
                 // day's colour reaches the lower one's lozenge.
+                // One height whatever the sign (the web's 1.05rem headpiece), so the title stands
+                // at the same place on every hour.
                 ZStack {
                     DoubleRule(gap: 40, heavy: true)
                     TitleSign(sign: HourSign(hour: view.hour))
                 }
+                .frame(height: m.px(16.8))
                 Text(title).type(style).foregroundStyle(p.text)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, m.px(20.8))
@@ -378,10 +380,20 @@ private struct HourTitle: View {
                 DoubleRule(lozengeColor: dayColor(view.color))
             }
             .frame(maxWidth: max(m.px(384), titleWidth))
-            Text(meta.joined(separator: "\u{00a0}· ")).type(Scale.meta).foregroundStyle(p.muted)
-                .multilineTextAlignment(.center)
-                .padding(.top, m.px(2))
-                .accessibilityLabel(meta.joined(separator: ". "))
+            // On a phone the date stands on its own line above the day's name, so a line never
+            // ends on the separator (the web's `.hour-meta-part:first-child` to 700px); a wide
+            // screen keeps one line.
+            let metaLines = wide || meta.count < 2
+                ? [meta.joined(separator: "\u{00a0}· ")]
+                : [meta[0], meta.dropFirst().joined(separator: "\u{00a0}· ")]
+            VStack(spacing: 0) {
+                ForEach(metaLines, id: \.self) { line in
+                    Text(line).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                }
+            }
+            .padding(.top, m.px(2))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(meta.joined(separator: ". "))
             if date != model.today {
                 Button { model.open(.hour(model.today, view.hour)) } label: {
                     Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)

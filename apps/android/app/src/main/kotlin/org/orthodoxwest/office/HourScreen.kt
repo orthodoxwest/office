@@ -164,10 +164,9 @@ fun HourScreen(
                     }
                     // A small painted cross before each of the office's parts after the first, as the
                     // web's `.elements > .section-heading`: a section's heading, or a heading standing
-                    // as an element of its own; not the hymn's or the chapter's, which open their
-                    // element's other blocks, nor any in the preparation.
-                    val part = (heading || block.kind == BlockKind.COMMEMORATION_HEADING) && !section.collapsible &&
-                        (!block.startsElement || section.blocks.getOrNull(j + 1)?.startsElement != false)
+                    // as an element of its own, the hymn's and the chapter's included; none in the
+                    // preparation.
+                    val part = (heading || block.kind == BlockKind.COMMEMORATION_HEADING) && !section.collapsible
                     val cross = part && begun
                     begun = true
                     afterClosed = false
@@ -265,7 +264,9 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         // broken only for it; the day's colour reaches the lower one's lozenge. The rules take
         // the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            // One height whatever the sign (the web's 1.05rem headpiece), so the title stands at
+            // the same place on every hour.
+            Box(Modifier.fillMaxWidth().height(16.8.dp), contentAlignment = Alignment.Center) {
                 DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
                 HourSign(view.hour)
             }
@@ -277,11 +278,12 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             DoubleRule(lozenge = dayColor(view.color), color = p.lining)
         }
         val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
-        Text(
-            meta.joinToString(" · "),
-            Modifier.padding(top = 2.dp).semantics { contentDescription = meta.joinToString(". ") },
-            style = Type.meta.copy(color = p.muted),
-        )
+        // On a phone the date stands on its own line above the day's name, so a line never ends on
+        // the separator (the web's `.hour-meta-part:first-child` to 700px); wide screens keep one line.
+        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta.joinToString(" · ")) else listOf(meta[0], meta.drop(1).joinToString(" · "))
+        Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = meta.joinToString(". ") }, horizontalAlignment = Alignment.CenterHorizontally) {
+            for (line in metaLines) Text(line, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+        }
         if (date != today) {
             Text(
                 "GO TO TODAY",

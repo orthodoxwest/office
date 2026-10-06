@@ -45,6 +45,10 @@ document.documentElement.classList.add("js");
 
   openings.forEach(function (opening) {
     var node = opening.firstChild;
+    // A psalm whose antiphon has just said its opening words begins inside
+    // the span that mutes them; the letter and its word are still the first
+    // text, and the initial keeps its ornament colour over the muted run.
+    while (node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains("unrepeated")) node = node.firstChild;
     if (!node || node.nodeType !== Node.TEXT_NODE) return;
     var match = /^(\s*)([\p{L}][\p{L}\p{M}'’-]*)/u.exec(node.textContent);
     if (!match) return;
