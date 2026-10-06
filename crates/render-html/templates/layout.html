@@ -9,6 +9,16 @@
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
   <script>
     (function () {
+      {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
+      try {
+        var carry = /^#office-carry=(.*)$/.exec(location.hash);
+        if (carry) {
+          new URLSearchParams(decodeURIComponent(carry[1])).forEach(function (value, key) {
+            if (/^office-(theme|text-size|prayer-form|martyrology)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
+          });
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+      } catch (e) {}
       try {
         var leaders = ["private", "deacon", "priest"];
         var requestedLeader = new URLSearchParams(location.search).get("form");

@@ -147,6 +147,15 @@ and `data/` into a Debian slim runtime image. CI smoke-tests that image.
 Maintainers with Fly access deploy with `fly deploy`. To roll back a change,
 revert its PR, merge the revert, and deploy it.
 
+**Changing address.** `OFFICE_CANONICAL_HOST` (a bare host such as
+`example.org`) makes every other host forward there: browser navigations get a
+page that carries the reader's settings across, and other requests a 301 (308
+for non-GET). The usage beacon, `/office.ics` and `/static/*` keep answering on
+the old host, since native builds post beacons without following redirects and
+subscribed calendars keep polling their feed URL; the feed's links name the
+canonical host. The old host's `/sw.js` becomes a worker that clears its caches
+and unregisters. Unset, every host is served as itself.
+
 ### Usage metrics
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from
