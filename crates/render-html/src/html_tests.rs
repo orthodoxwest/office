@@ -31,16 +31,21 @@ fn soften_drop_cap_opening_cases() {
         ("HAVE mercy upon me, O God", "Have mercy upon me, O God"),
         ("BLESSED are those", "Blessed are those"),
         ("WHEREWITHAL shall a young man", "Wherewithal shall a young man"),
-        ("MY SOUL cleaveth to the dust", "My Soul cleaveth to the dust"),
-        ("O GIVE thanks unto the Lord", "O Give thanks unto the Lord"),
-        ("O ALL ye Works of the Lord", "O All ye Works of the Lord"),
+        ("MY SOUL cleaveth to the dust", "My soul cleaveth to the dust"),
+        ("IT IS a good thing", "It is a good thing"),
+        ("BE MERCIFUL unto me, O God", "Be merciful unto me, O God"),
+        ("MY GOD, my God, look upon me", "My God, my God, look upon me"),
+        ("IN JEWRY is God known", "In Jewry is God known"),
+        ("O LORD GOD of hosts", "O Lord God of hosts"),
+        ("O GIVE thanks unto the Lord", "O give thanks unto the Lord"),
+        ("O ALL ye Works of the Lord", "O all ye Works of the Lord"),
         // Single-letter capitals are left alone.
         ("O God", "O God"),
         ("I will magnify thee", "I will magnify thee"),
         // Trailing punctuation is stripped from the letter run, then restored.
         ("GOD, be merciful", "God, be merciful"),
         ("BLESSED!", "Blessed!"),
-        ("MY SOUL,", "My Soul,"),
+        ("MY SOUL,", "My soul,"),
         // Leading and trailing whitespace is preserved exactly.
         ("  GOD be merciful", "  God be merciful"),
         ("GOD be merciful  ", "God be merciful  "),
@@ -104,8 +109,8 @@ fn psalm_softens_drop_cap_after_section_break() {
         &[],
         0,
     );
-    has(&html, "O All ye Works of the Lord");
-    has(&html, "O Let the Earth bless the Lord");
+    has(&html, "O all ye Works of the Lord");
+    has(&html, "O let the Earth bless the Lord");
     lacks(&html, "O LET the Earth");
     lacks(&html, "O ALL ye Works");
     has(&html, "O ye Mountains and Hills");

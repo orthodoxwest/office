@@ -1430,17 +1430,28 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   position: relative;
   z-index: 1;
   width: auto;
-  /* Centred on the 6px rule below it: half its own 0.9rem height, plus half
+  /* One height whatever the sign, so the title stands at the same place on
+     every hour: left to its contents, the box was the cross's 0.8rem line at
+     the little hours, the sun's 0.92rem at Lauds and the moon's 1.04rem at
+     Vespers and Compline, and the title stepped down 2-4px between them. */
+  height: 1.05rem;
+  /* Centred on the 6px rule below it: half its own height, plus half
      the rule. */
-  margin: 0 auto calc(-0.45rem - 3px);
+  margin: 0 auto calc(-0.525rem - 3px);
 }
 
 /* The cross's ink sits high in its line box (measured 3px at the default
-   size); lowered so it centres on the rule. The sun and moon are drawn
-   centred in their boxes and need only a nudge. */
+   size); lowered so it centres on the rule. Set a step larger than the
+   shared headpiece's 0.8rem, nearer the sun's and moon's weight, since at
+   that size it left most of the rule's break empty. The sun and moon are
+   drawn centred in their boxes and need only a nudge. */
 .hour-header .ornament-headpiece > span {
   position: relative;
   top: 0.23em;
+}
+
+.hour-header .ornament-headpiece > span:not([data-sign]) {
+  font-size: 1rem;
 }
 
 .hour-header .ornament-headpiece > span[data-sign] {
@@ -1517,6 +1528,21 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    A part longer than the line still wraps within itself. */
 .hour-meta-part {
   display: inline-block;
+}
+
+/* On a phone the date stands on its own line above the day's name, so a
+   line never ends on the separator: with the parts kept whole, a third of
+   the hours' pages broke after the date and left its dot stranded at the
+   line's end ("Tuesday, March 31, 2026 ·"). A feria has only the date and
+   loses nothing; wider screens keep the one line. */
+@media (max-width: 700px) {
+  .hour-meta-part:first-child:not(:only-child) {
+    display: block;
+  }
+
+  .hour-meta-part:first-child + .hour-meta-sep {
+    display: none;
+  }
 }
 
 /* Recovery when the open document is not local today (historical browse, or a
@@ -2082,8 +2108,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: 0;
 }
 
-/* Between the office's parts, one small painted cross as well as air. */
-.elements > .section-heading:not(:first-child)::before {
+/* Between the office's parts, one small painted cross as well as air. The
+   Chapter's and the Hymn's headings open their own element rather than the
+   list, and take the same cross: a threshold is a threshold wherever the
+   markup nests it. */
+.elements > .section-heading:not(:first-child)::before,
+.elements > :is(.chapter, .hymn):not(:first-child) > .section-heading:first-child::before {
   content: "";
   display: block;
   width: 0.62rem;

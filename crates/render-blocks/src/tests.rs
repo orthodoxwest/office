@@ -35,7 +35,7 @@ fn pointed_verses_mark_the_mediant_and_number_the_gutter() {
     assert!(verses[0].drop_cap && !verses[1].drop_cap);
     assert_eq!(verses[1].marker, "2");
     // The drop-cap opening is softened, as on the web.
-    assert!(verses[0].plain_text().starts_with("O All ye Works"), "{}", verses[0].plain_text());
+    assert!(verses[0].plain_text().starts_with("O all ye Works"), "{}", verses[0].plain_text());
     assert_eq!(styles(verses[1]), [RunStyle::Plain, RunStyle::Mediant, RunStyle::Plain, RunStyle::Plain]);
     assert_eq!(verses[1].runs[1].text, "\u{a0}*");
 }

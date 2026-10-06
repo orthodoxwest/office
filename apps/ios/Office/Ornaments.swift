@@ -245,7 +245,9 @@ struct TitleSign: View {
     var body: some View {
         Group {
             switch sign {
-            case .cross: Cross(color: p.lining)
+            // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem),
+            // nearer the sun's and moon's weight in the rule's break.
+            case .cross: Cross(size: 13.75, color: p.lining)
             // 1.15em and 1.3em of the headpiece's 0.8rem.
             case .sun: PaintedMark(.sun, size: 14.72 * m.type, color: p.gold)
             case .moon: PaintedMark(.moon, size: 16.64 * m.type, color: p.moonInk)

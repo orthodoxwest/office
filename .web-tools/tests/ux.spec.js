@@ -1005,6 +1005,58 @@ test("hour titles set their sign in the rule and the day's colour in the lozenge
   await expect(page.locator(".hour-header .ornament-headpiece > span")).toBeVisible();
 });
 
+// The headpiece's box is one height whatever sign it carries, so the title
+// stands at the same place on every hour of a day.
+test("hour titles stand at one height under the sun, the moon and the cross", async ({ page }) => {
+  const titleTop = async (hour) => {
+    await openDatedPage(page, `/${hour}/2026-03-31`);
+    return page.evaluate(() => document.querySelector(".hour-header h1").getBoundingClientRect().top);
+  };
+  const lauds = await titleTop("lauds");
+  expect(Math.abs((await titleTop("terce")) - lauds)).toBeLessThan(0.5);
+  expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
+});
+
+// On a phone the date takes its own line above the day's name, so the
+// separator never ends a line; on a wide screen the parts share one line.
+test("the hour's date line never strands its separator", async ({ page }) => {
+  await openDatedPage(page, "/lauds/2026-03-31");
+  const parts = page.locator(".hour-meta-part");
+  await expect(parts).toHaveCount(3);
+  const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  const phone = await rows();
+  expect(phone[0]).toBeLessThan(phone[1]);
+  expect(phone[1]).toBe(phone[2]);
+  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
+  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const laptop = await rows();
+  expect(new Set(laptop).size).toBe(1);
+  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+});
+
+// Every threshold between the office's parts carries the painted cross,
+// including the Chapter's and the Hymn's headings, which open their own
+// element rather than the list.
+test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
+  await openDatedPage(page, "/lauds/2026-03-31");
+  const marks = await page.evaluate(() => {
+    const mark = (sel) => {
+      const el = document.querySelector(sel);
+      const cs = getComputedStyle(el, "::before");
+      return { height: parseFloat(cs.height), mask: cs.maskImage || cs.webkitMaskImage };
+    };
+    return {
+      responsory: mark(".elements > .section-heading:not(:first-child)"),
+      chapter: mark(".elements > .chapter > .section-heading"),
+      hymn: mark(".elements > .hymn > .section-heading"),
+    };
+  });
+  expect(marks.chapter.height).toBeGreaterThan(5);
+  expect(marks.chapter).toEqual(marks.responsory);
+  expect(marks.hymn).toEqual(marks.responsory);
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
