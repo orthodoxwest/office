@@ -301,6 +301,7 @@ Color = white
 Category = apostle
 Month = 6
 Day = 30
+OctaveOf = ss-peter-paul
 
 [commemoration-st-peter-apostle]
 Name = Commemoration of St Peter, Apostle

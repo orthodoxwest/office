@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::model::{CalendarDay, Category, CommemorationClass, Decision, Feast, FeastRef, OctaveClass, Rank, Season};
 use crate::traits::{
     is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day, is_rogation_day,
-    is_sunday, is_sunday_first_class, is_vigil,
+    is_sunday, is_sunday_first_class, is_vigil, same_octave_days,
 };
 
 /// The Lauds commemorations: the occurrence commemorations plus the displaced
@@ -299,9 +299,14 @@ fn suppresses_like_primary_feast(w: &Feast) -> bool {
 /// commemoration of a privileged octave only, not a day within a common one
 /// (St George's octave on St Joseph's Solemnity, St John Baptist's on Ss Peter
 /// and Paul: 2018–2026 ordos; #378). Doubles II Class keep it (St George's
-/// octave on St Mark, 2026 ordo 25 April).
+/// octave on St Mark, 2026 ordo 25 April), except the Visitation, whose Lauds
+/// rubric reads "No Commemoration is made of the day within the Octave"
+/// (Diurnal p. 557; 2017–2026 ordos).
 fn suppresses_common_octave(w: &Feast, comm: &Feast) -> bool {
-    w.rank == Rank::Double1stClass && !w.is_category(Category::Sunday) && is_day_within_octave(comm) && !comm.is_privileged_octave_day
+    (w.rank == Rank::Double1stClass || w.id == "visitation-bvm")
+        && !w.is_category(Category::Sunday)
+        && is_day_within_octave(comm)
+        && !comm.is_privileged_octave_day
 }
 
 fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Decision> {
@@ -325,6 +330,11 @@ fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Dec
     }
     if suppresses_st_george_octave(Some(w)) && comm.id.starts_with("st-george-octave-day") {
         return Some(Decision::new("commemoration:st-george-octave", "suppressed", comm.id.as_str()));
+    }
+    // XI.10 / XII.5: a feast of the same Person within its octave (St Paul on
+    // 30 June) omits the commemoration of that octave (Diurnal p. 549).
+    if is_day_within_octave(comm) && !is_day_within_octave(w) && same_octave_days(w, comm) {
+        return Some(Decision::new("commemoration:same-person-octave", "suppressed", comm.id.as_str()));
     }
     if suppresses_common_octave(w, comm) {
         return Some(Decision::new("commemoration:common-octave-under-first-class-feast", "suppressed", comm.id.as_str()));

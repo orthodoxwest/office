@@ -68,6 +68,10 @@ class CommemorationComparisonTest(unittest.TestCase):
             ("Oct.", "Day IV within the Octave of Easter"),
             ("Khashas", "Ss Nicholas & Habib Khasha, Martyrs"),
             ("Dorothea", "St Dorothy, Virgin & Martyr"),
+            ("Alexius", "St Alexis Toth, Priest & Confessor"),
+            ("Sa- turinus", "St Saturninus, Bishop & Martyr"),
+            ("Mechiades", "St Melchiades, Bishop & Martyr"),
+            ("Tibertius &c.", "Ss Tiburtius & Susanna, Martyrs"),
             ("St Savior", "Dedication of the Basilica of St Saviour"),
             ("Alexan- der &c.", "Ss. Alexander, Eventius & Theodulus, Martyrs"),
             ("BVM", "Saturday Office of the B.V.M."),
@@ -198,6 +202,9 @@ class ReferenceParsingTest(unittest.TestCase):
         names = ORDO_COMPARE.pdf_commemorations(
             'Vespers / Comm. Oct. (“Today” 123) / & Damasus (“Well done” 4*) / No Suff.')
         self.assertEqual(names, ["Oct.", "Damasus"])
+        self.assertEqual(ORDO_COMPARE.pdf_commemorations(
+            'Vespers / Comm. Oct. (“All they” 228; Col. 225) &. Hyginus (“This is” 1*) / No Suff.'),
+            ["Oct.", "Hyginus"])
         self.assertEqual(ORDO_COMPARE.match_commemorations(
             ["Oct.", "Sun."], ["Sunday within the Nativity Octave"]), (["Oct."], []))
         self.assertEqual(ORDO_COMPARE.match_commemorations(

@@ -299,7 +299,8 @@ def pdf_commemorations(section, day_title=""):
         block = re.split(r"\s*/\s*(?:No Comm\.|(?:No )?Suff\.)", block, maxsplit=1)[0]
         # A closing page-reference parenthesis followed by "&" remains
         # an item boundary even when extracted parentheses are unbalanced.
-        parts = re.split(r"\)\s*(?:/\s*)?&\s*(?=[A-Z])", block)
+        # "&." is a printed slip for "&" (2026: Jan 10).
+        parts = re.split(r"\)\s*(?:/\s*)?&\.?\s*(?=[A-Z])", block)
         for part in parts:
             name = re.split(r'[(/“"]', part, maxsplit=1)[0]
             name = re.sub(r"^[\s&;/]+", "", name).strip()
@@ -339,6 +340,11 @@ def commemoration_tokens(name):
     generic_bvm = bool(re.fullmatch(r"(?:the\s+)?" + BVM_RE, text.strip()))
     text = re.sub(r"\b" + BVM_RE, " blessed virgin mary ", text)
     text = re.sub(r"\bdorothea\b", "dorothy", text)
+    # Spellings the printed ordos use for saints the app names otherwise
+    # (Alexius Toth; the 2026 misprints Saturinus, Mechiades, Tibertius).
+    for printed, spelled in (("alexius", "alexis"), ("saturinus", "saturninus"),
+                             ("mechiades", "melchiades"), ("tibertius", "tiburtius")):
+        text = re.sub(rf"\b{printed}\b", spelled, text)
     text = re.sub(r"\bsavior\b", "saviour", text)
     text = re.sub(r"\bcommemoration of\b", " ", text)
     text = re.sub(r"\b(?:ss?|st)\.?(?=\s)", " saint ", text)

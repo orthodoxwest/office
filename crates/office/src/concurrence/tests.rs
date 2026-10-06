@@ -336,7 +336,7 @@ fn outgoing_at_first_vespers() {
         ),
         (&circumcision, sunday.clone(), false),
         (&circumcision, feast("greater-double", Rank::GreaterDouble, Category::Martyr), false),
-        (&circumcision, double.clone(), true),
+        (&circumcision, double.clone(), false),
         (&second, double.clone(), true),
     ] {
         assert_eq!(outgoing_commemorated_at_first_vespers(Some(w), &loser).0, want, "{} under {}", loser.id, w.id);
