@@ -84,6 +84,8 @@ class WidgetTest {
         Widgets.refresh(app, LocalDateTime.of(2026, 3, 15, 13, 40))
         assertEquals(0, alarms.scheduledAlarms.size)
         shadowOf(AppWidgetManager.getInstance(app)).createWidget(OfficeWidget::class.java, R.layout.widget_office)
+        // Placing it refreshes in the background; let that finish so it cannot re-set the alarm after stop.
+        Widgets.worker.submit {}.get()
         Widgets.refresh(app, LocalDateTime.of(2026, 3, 15, 13, 40))
         // Never waking the phone for it.
         assertEquals(AlarmManager.RTC, alarms.scheduledAlarms.single().getType())
