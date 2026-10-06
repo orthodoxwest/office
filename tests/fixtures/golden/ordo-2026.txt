@@ -668,6 +668,7 @@ APRIL
            Lauds   w · Ben. Mary stood · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. They have taken · No Suff.
+               Com. St Anicetus, Bishop & Martyr ("Light perpetual")
  17  Fri     Friday in Easter Week                      [sd]  w
            St Anicetus, Bishop & Martyr (com)
            Lauds   w · Ben. The eleven disciples · No Preces · No Suff.
@@ -701,7 +702,7 @@ APRIL
  23  Thu     ST GEORGE, MARTYR                          [1cl] r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Light perpetual · No Suff.
+           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
  24  Fri  L  Day II within the Octave of St George      [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
@@ -711,7 +712,7 @@ APRIL
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
                Com. Day III within the Octave of St George ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Light perpetual · No Suff.
+           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
                Com. II Sunday after Easter ("I am")
  26  Sun     II Sunday after Easter                     [sd]  w
            Day IV within the Octave of St George (sd)
@@ -721,11 +722,11 @@ APRIL
                Com. St Cletus & Marcellinus, Martyrs ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers w · II prec. · Mag. I am · No Suff.
-               Com. Day IV within the Octave of St George ("Light perpetual")
+               Com. Day IV within the Octave of St George ("O ye holy and righteous")
  27  Mon     Day V within the Octave of St George       [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Light perpetual · No Suff.
+           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
                Com. St Vitalis, Martyr ("Light perpetual")
  28  Tue     Day VI within the Octave of St George      [sd]  r
            St Vitalis, Martyr (com)
@@ -742,7 +743,7 @@ APRIL
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
            Vespers r · I fol. (Ss Philip and James, Apostles) · Mag. Let not your heart · No Suff.
-               Com. Octave Day of St George ("Light perpetual")
+               Com. Octave Day of St George ("O ye holy and righteous")
 
 MAY
 ------------------------------------------------------------
@@ -852,7 +853,7 @@ MAY
                Com. St Venantius, Martyr ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers w · Mag. For the Father · No Suff.
-               Com. St Venantius, Martyr ("Light perpetual")
+               Com. St Venantius, Martyr ("O ye holy and righteous")
                Com. St Pudentiana, Virgin ("Come, thou Bride of Christ")
  19  Tue     Feria                                            w
            St Pudentiana, Virgin (com)
@@ -956,12 +957,14 @@ JUNE
            Lauds   r · Ben. Jesus called unto him · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. The Spirit · No Suff.
+               Com. St Boniface, Bishop & Martyr ("This is a Martyr")
   5  Fri  L§ Ember Friday in Pentecost                  [sd]  r
            St Boniface, Bishop & Martyr (d)
            Lauds   r · Ben. Jesus said · No Preces · No Suff.
                Com. St Boniface, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers r · II prec. · Mag. But the Comforter · No Suff.
+               Com. St Boniface, Bishop & Martyr ("Whosoever will come after me")
   6  Sat  L§ Ember Saturday in Pentecost                [sd]  r
            Lauds   r · Ben. The love of God is shed · No Preces · No Suff.
            Hours   No Preces
@@ -1122,20 +1125,16 @@ JUNE
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. To-day · No Suff.
-               Com. St Paul, Apostle ("O holy Apostle Paul")
  30  Tue     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)
            Day VII within the Octave of St John Baptist (sd)
-           Day II within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Day VII within the Octave of St John Baptist ("The mouth of Zacharias")
-               Com. Day II within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Octave of St John Baptist) · Mag. When Zacharias · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
-               Com. Day III within the Octave of Ss Peter & Paul ("Thou art the shepherd of the sheep")
 
 JULY
 ------------------------------------------------------------
@@ -1149,11 +1148,9 @@ JULY
                Com. Ss Processus & Martinian, Martyrs ("For theirs is the kingdom of heaven")
                Com. St John of San Francisco, Bishop & Confessor ("O thou Priest and Bishop")
   2  Thu     Visitation of the Blessed Virgin Mary      [2cl] w
-           Day IV within the Octave of Ss Peter & Paul (sd)
            Ss Processus & Martinian, Martyrs (com)
            St John of San Francisco, Bishop & Confessor (com)
            Lauds   w · Ben. When Elisabeth · No Preces · No Suff.
-               Com. Day IV within the Octave of Ss Peter & Paul ("Glorious princes")
                Com. Ss Processus & Martinian, Martyrs ("The very hairs of your head")
                Com. St John of San Francisco, Bishop & Confessor ("Well done")
            Hours   No Preces
@@ -1178,7 +1175,6 @@ JULY
            Hours   No Preces
            Vespers g · II prec. · Mag. If thou bring · No Suff.
                Com. The Octave of Ss Peter & Paul ("Peter the Apostle")
-               Com. Day VII within the Octave of Ss Peter & Paul ("Peter the Apostle")
   6  Mon     The Octave of Ss Peter & Paul              [gd]  r
            Lauds   r · Ben. Glorious princes · No Preces · No Suff.
            Hours   No Preces
@@ -2320,4 +2316,3 @@ DECEMBER
                Com. Day VII within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers w · I fol. (Circumcision of Our Lord) · Mag. God · No Suff.
-               Com. St Sylvester, Bishop & Confessor ("The Lord loved him")

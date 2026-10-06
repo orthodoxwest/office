@@ -168,6 +168,17 @@ fn occurrence_commemorated_at_first_vespers(comm: &Feast) -> (bool, &'static str
     (true, "commemoration:first-vespers-occurrence-included")
 }
 
+/// Wednesday to Saturday within the Octaves of Easter and Pentecost: days
+/// within a I Class privileged octave, semidouble (General Rubrics II.1,
+/// VII.3), not Doubles I Class. Other feasts are commemorated on them
+/// (Diurnal VII), Memorials at I Vespers and Lauds, Doubles at both Vespers
+/// and Lauds (XIV.9; Diurnal VIII): every ordo 2017–2026.
+fn semidouble_privileged_octave_day(w: &Feast) -> bool {
+    is_day_within_octave(w)
+        && w.rank == Rank::Double1stClass
+        && !matches!(w.id.as_str(), "pentecost-octave-day-2" | "pentecost-octave-day-3")
+}
+
 /// Whether a Lauds commemoration remains at II Vespers of the winning office.
 fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> (bool, &'static str) {
     // XIV.9: Advent and Lenten ferias keep I and II Vespers as well as Lauds,
@@ -194,6 +205,9 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
         // #379).
         if apostle_kept_on_primary_feast(w, comm) {
             return (true, "commemoration:second-vespers-apostle-on-primary-feast");
+        }
+        if semidouble_privileged_octave_day(w) && comm.rank.weight() >= Rank::Double.weight() {
+            return (true, "commemoration:second-vespers-double-within-easter-pentecost-octave");
         }
         // XIV.5: a Double impeded by a Sunday or a privileged feria is
         // commemorated at I and II Vespers and Lauds, also when that Sunday or
@@ -361,7 +375,9 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
         // Paul. It stays pending a ruling.
     }
     if w.rank == Rank::Double2ndClass {
-        if w.id == "circumcision" && (loser.is_category(Category::Sunday) || loser.rank.weight() >= Rank::GreaterDouble.weight()) {
+        // XIV.8: "on the Feast of the Circumcision, of a Sunday or any Greater
+        // or Lesser Double" (St Sylvester, every ordo 2017-2026).
+        if w.id == "circumcision" && (loser.is_category(Category::Sunday) || loser.rank.is_double()) {
             return (false, "commemoration:first-vespers-circumcision-exclusion");
         }
         if is_day_within_octave(loser) {
@@ -449,7 +465,9 @@ fn boundary_commemorations(
 ) -> (Vec<FeastRef>, Vec<Decision>) {
     let w = winner.map(|w| &**w);
     let suppress_incoming = second_vespers
-        && w.is_some_and(|w| w.rank.weight() >= Rank::Double2ndClass.weight() && !w.is_category(Category::Sunday))
+        && w.is_some_and(|w| {
+            w.rank.weight() >= Rank::Double2ndClass.weight() && !w.is_category(Category::Sunday) && !semidouble_privileged_octave_day(w)
+        })
         && loser.is_none_or(|l| l.id != "vigil-epiphany");
     let suppressed = |c: &Feast| {
         if !suppress_incoming || c.is_category(Category::Sunday) || c.is_category(Category::Feria) {
@@ -618,6 +636,13 @@ fn second_vespers_commemorations(
         comms.push(c.clone());
     }
     for comm in &occurrence {
+        // The following octave day supersedes today's day within the same
+        // octave (XIII.16; 2026 ordo 5 July, 2018 ordo 29 April, 2021 ordo
+        // 7 November).
+        if is_day_within_octave(comm) && boundary.iter().any(|b| is_octave_day(b) && same_octave_days(b, comm)) {
+            decisions.push(decision("commemoration:octave-day-supersedes-day-within", "suppressed", &comm.id));
+            continue;
+        }
         if saturday_feria_without_vespers(day, comm) {
             decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &comm.id));
             continue;

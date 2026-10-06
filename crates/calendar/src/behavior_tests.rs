@@ -203,6 +203,8 @@ fn first_class_feasts_admit_only_privileged_octaves() {
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &common, false),
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &privileged, true),
         (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, true),
+        // The Visitation's own rubric (Diurnal p. 557) drops the octave.
+        (feast("visitation-bvm", Rank::Double2ndClass, Category::BlessedVirgin), &common, false),
         (feast("some-sunday", Rank::Double1stClass, Category::Sunday), &common, true),
     ] {
         let (out, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(comm), OrderContext::default());
