@@ -195,7 +195,7 @@ struct HourScreen: View {
             .coordinateSpace(name: Reading.space)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0 }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
-            .overlay(alignment: .top) { ProgressHairline(reading: reading) }
+            .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
@@ -325,7 +325,8 @@ private extension View {
 
 /**
  * The gold hairline across the top, in the season's ornament gold. The band scrolls away with
- * the page here, so the line hangs just below the status bar.
+ * the page here, so the line runs along the screen's top edge, above the status bar: just below
+ * it the line would strike through the text passing under the bar.
  */
 private struct ProgressHairline: View {
     let reading: Reading

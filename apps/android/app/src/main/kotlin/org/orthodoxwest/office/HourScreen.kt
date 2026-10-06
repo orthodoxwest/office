@@ -185,7 +185,7 @@ fun HourScreen(
                 )
             }
         }
-        ProgressHairline(listState, Modifier.padding(top = insets.calculateTopPadding()))
+        ProgressHairline(listState)
     }
 }
 
@@ -196,8 +196,9 @@ private const val BEFORE_OFFICE = 3
  * The gold hairline across the top, as the web's `.hour-scroll-progress`: how far through the
  * prayer itself. It stays empty through the band, header and title, starts as the office reaches
  * the top of the screen, and is full once the office's end reaches the bottom; the hour's ending
- * keeps it full. The band scrolls away with the page here, so the line hangs just below the status
- * bar. Rows not yet laid out are taken at the average height of those that have been.
+ * keeps it full. The band scrolls away with the page here, so the line runs along the screen's top
+ * edge, above the status bar's icons: just below them it would strike through the text passing
+ * under the bar. Rows not yet laid out are taken at the average height of those that have been.
  */
 @Composable
 private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier) {
