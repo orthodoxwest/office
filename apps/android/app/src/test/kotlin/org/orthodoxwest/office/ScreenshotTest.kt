@@ -96,6 +96,13 @@ class ScreenshotTest {
     @Test
     fun laudsApse() { show(Page.Hour(lent, "lauds"), ThemeChoice.APSE, today = lent.plusDays(3)); shoot("lauds-apse") }
 
+    /** A first-class day's hour stands in its frame. */
+    @Test
+    fun laudsChristmasNave() { show(Page.Hour(LocalDate.of(2026, 12, 25), "lauds"), ThemeChoice.NAVE); shoot("lauds-christmas-nave") }
+
+    @Test
+    fun laudsChristmasApse() { show(Page.Hour(LocalDate.of(2026, 12, 25), "lauds"), ThemeChoice.APSE); shoot("lauds-christmas-apse") }
+
     @Test
     @Config(qualifiers = "w390dp-h6000dp-xxhdpi")
     fun laudsTall() { show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE); shoot("lauds-tall") }

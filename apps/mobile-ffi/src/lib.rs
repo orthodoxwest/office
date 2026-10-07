@@ -15,7 +15,7 @@ use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation,
-    long_date, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias, title_case,
+    long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -582,6 +582,9 @@ pub struct HourView {
     pub ornament: String,
     /// The liturgical color ("green"), empty when none.
     pub color: String,
+    /// Whether the hour belongs to a first-class day (a following feast's at its I Vespers), which
+    /// the web frames between two painted lines (`rank-first-class`).
+    pub first_class: bool,
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
@@ -602,6 +605,7 @@ impl HourView {
             season_label: hour.season.map(|s| season_label(s.as_str())).unwrap_or_default(),
             ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            first_class: !rank_class(hour.rank).is_empty(),
             sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,

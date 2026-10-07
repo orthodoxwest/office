@@ -37,6 +37,8 @@ struct Palette: Equatable {
     let inscriptionWash: Color
     /** The plaster wall behind every page, baked from the web's layers (apps/android/tools/bake-plaster.py). */
     let plaster: String
+    /** The phone home panel's plaster: the texture as soft light on the surface, veiled on the Apse (bake-plaster.py). */
+    let panel: String
 
     static let nave = Palette(
         dark: false,
@@ -61,7 +63,8 @@ struct Palette: Equatable {
         inscriptionGround: Color(hex: 0x545F54),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
-        plaster: "plaster_nave.jpg"
+        plaster: "plaster_nave.jpg",
+        panel: "panel_nave.jpg"
     )
 
     static let apse = Palette(
@@ -87,7 +90,8 @@ struct Palette: Equatable {
         inscriptionGround: Color(hex: 0x263431),
         inscriptionEdge: Color(hex: 0x5C2B35),
         inscriptionWash: Color(rgb: 208, 176, 106, 0.04),
-        plaster: "plaster_apse.jpg"
+        plaster: "plaster_apse.jpg",
+        panel: "panel_apse.jpg"
     )
 }
 

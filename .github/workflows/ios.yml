@@ -183,6 +183,10 @@ jobs:
           done
           # Eastertide's warmer gilding.
           DATE=2026-04-12 shoot "$phone" "easter-nave" -page hour -hour lauds -theme nave
+          # A first-class day's hour in its frame.
+          for theme in nave apse; do
+            DATE=2026-12-25 shoot "$phone" "christmas-$theme" -page hour -hour lauds -theme "$theme"
+          done
           # The desktop composition on an iPad.
           ipad=${{ steps.sim.outputs.ipad }}
           for theme in nave apse; do

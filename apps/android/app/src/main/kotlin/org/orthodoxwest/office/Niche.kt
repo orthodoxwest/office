@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.asAndroidPath
@@ -25,9 +26,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -170,7 +174,7 @@ fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color) {
  * field off it, the day's colour as a ring at its edge (`ring`), the frame, then the panel with
  * the shade its head casts and, by day, the light caught under the head's edge.
  */
-fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color) {
+fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: ImageBitmap) {
     val rem = 16.dp.toPx()
     val px = 1.dp.toPx()
     fun shape(d: Float) = archPath(a, size.width, d, size.height + d)
@@ -187,6 +191,10 @@ fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color) {
     val face = shape(-px)
     drawPath(face, p.surface)
     clipPath(face) {
+        // The plaster under the day's words, cover-fitted to the panel as the web's `.home-arch-fill`.
+        val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
+        val fitted = IntSize((plaster.width * scale).roundToInt(), (plaster.height * scale).roundToInt())
+        drawImage(plaster, dstOffset = IntOffset((size.width.roundToInt() - fitted.width) / 2, (size.height.roundToInt() - fitted.height) / 2), dstSize = fitted)
         val wall = outside(face)
         // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
         translate(0f, 0.3f * rem) { blurred(wall, nicheTokens(p).recess, 0.4f * rem) }

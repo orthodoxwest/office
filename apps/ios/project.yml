@@ -31,6 +31,11 @@ targets:
         buildPhase: resources
       - path: ../android/app/src/main/res/drawable-nodpi/plaster_apse.jpg
         buildPhase: resources
+      # The phone home panel's plaster, from the same bake.
+      - path: ../android/app/src/main/res/drawable-nodpi/panel_nave.jpg
+        buildPhase: resources
+      - path: ../android/app/src/main/res/drawable-nodpi/panel_apse.jpg
+        buildPhase: resources
     dependencies:
       - framework: build/OfficeCore.xcframework
         embed: false
