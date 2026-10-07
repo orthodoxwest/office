@@ -136,8 +136,8 @@ mod tests {
     fn the_served_stylesheet_is_trimmed_and_stamped() {
         let css = std::str::from_utf8(crate::pwa::file("static/style.css").unwrap()).unwrap();
         assert!(!css.contains("/*"), "style.css is served with its comments");
-        let font = crate::pwa::stamp("static/fonts/eb-garamond-regular.woff2").unwrap();
-        assert!(css.contains(&format!("url(\"fonts/eb-garamond-regular.woff2?v={font}\")")));
+        let font = crate::pwa::stamp("static/fonts/junicode-regular.woff2").unwrap();
+        assert!(css.contains(&format!("url(\"fonts/junicode-regular.woff2?v={font}\")")));
         assert!(!css.contains(".woff2\")") && !css.contains(".jpg\")"), "an asset url is unstamped");
     }
 }

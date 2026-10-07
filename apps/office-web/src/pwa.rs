@@ -148,8 +148,8 @@ mod tests {
         .unwrap();
         assert!(body.contains(r#"var VERSION = "build1";"#));
         assert!(!body.contains("__ASSET_STAMPS__"));
-        let font = stamp("static/fonts/eb-garamond-regular.woff2").unwrap();
-        assert!(body.contains(&format!(r#""/static/fonts/eb-garamond-regular.woff2": "{font}""#)));
+        let font = stamp("static/fonts/junicode-regular.woff2").unwrap();
+        assert!(body.contains(&format!(r#""/static/fonts/junicode-regular.woff2": "{font}""#)));
     }
 
     #[test]

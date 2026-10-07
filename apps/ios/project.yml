@@ -20,9 +20,9 @@ targets:
       - path: Office
       - path: build/generated/office_mobile.swift
       # The web's faces, shared with the Android app.
-      - path: ../android/app/src/main/res/font/eb_garamond_regular.otf
+      - path: ../android/app/src/main/res/font/junicode_regular.ttf
         buildPhase: resources
-      - path: ../android/app/src/main/res/font/eb_garamond_italic.otf
+      - path: ../android/app/src/main/res/font/junicode_italic.ttf
         buildPhase: resources
       - path: ../android/app/src/main/res/font/noto_sans_symbols_cross.ttf
         buildPhase: resources
@@ -49,8 +49,8 @@ targets:
         # Whether this build reports the daily usage count (Usage.swift): Release only.
         OfficeCountsUsage: $(OFFICE_COUNTS_USAGE)
         UIAppFonts:
-          - eb_garamond_regular.otf
-          - eb_garamond_italic.otf
+          - junicode_regular.ttf
+          - junicode_italic.ttf
           - noto_sans_symbols_cross.ttf
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

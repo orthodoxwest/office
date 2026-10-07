@@ -1548,13 +1548,26 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
       // With its "Sit." cue the opening no longer fits one wide line in
-      // large type either, so both sizes divide at the mediant.
-      const divided = width === 1280;
-      const elevated = width >= 768 && !divided;
+      // large type either, so both sizes divide at the mediant. At 768 the
+      // same words stand on one line beside the dropped initial with a few
+      // pixels to spare, so browsers' shaping decides whether the verse is
+      // elevated on that line or divided at the mediant; the test accepts
+      // either there and holds the rest of the geometry to the choice.
+      // Polling for exactly one of the two classes waits out the re-typeset.
+      const expected = width === 1280 ? true : width === 768 ? null : false;
       await expect.poll(() => opening.evaluate(el => ({
         divided: el.classList.contains("initial-divided"),
+        elevated: el.classList.contains("initial-elevated"),
         raised: el.classList.contains("initial-raised"),
-      }))).toEqual({ divided, raised: false });
+      }))).toEqual(expected === null
+        ? expect.objectContaining({ raised: false })
+        : { divided: expected, elevated: !expected && width >= 768, raised: false });
+      if (expected === null) {
+        await expect.poll(() => opening.evaluate(el =>
+          el.classList.contains("initial-divided") !== el.classList.contains("initial-elevated"))).toBe(true);
+      }
+      const divided = await opening.evaluate(el => el.classList.contains("initial-divided"));
+      const elevated = width >= 768 && !divided;
       await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
       const geometry = await opening.evaluate(el => {
         const cap = getComputedStyle(el, "::first-letter");

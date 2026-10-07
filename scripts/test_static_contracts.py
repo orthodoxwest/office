@@ -10,9 +10,9 @@ STATIC = Path(__file__).resolve().parent.parent / "apps/office-web/static"
 class StaticContracts(unittest.TestCase):
     def test_font_ranges_keep_every_page_on_the_core_files(self):
         """The -ext faces must load only for rare characters: none the site's
-        own chrome sets may fall in their ranges (tools/gengaramond.py)."""
+        own chrome sets may fall in their ranges (tools/genjunicode.py)."""
         css = (STATIC / "style.css").read_text()
-        faces = re.findall(r'src: url\("fonts/(eb-garamond-[a-z-]+)\.woff2"\) format\("woff2"\);\n  unicode-range: ([^;]+);', css)
+        faces = re.findall(r'src: url\("fonts/(junicode-[a-z-]+)\.woff2"\) format\("woff2"\);\n  unicode-range: ([^;]+);', css)
 
         def parse(ranges):
             spans = []
@@ -23,7 +23,7 @@ class StaticContracts(unittest.TestCase):
 
         core = {name: parse(r) for name, r in faces if not name.endswith("-ext")}
         ext = {name: parse(r) for name, r in faces if name.endswith("-ext")}
-        self.assertEqual(sorted(ext), ["eb-garamond-italic-ext", "eb-garamond-regular-ext"])
+        self.assertEqual(sorted(ext), ["junicode-italic-ext", "junicode-regular-ext"])
         inside = lambda cp, spans: any(lo <= cp <= hi for lo, hi in spans)
         for name, spans in ext.items():
             base = core[name[:-len("-ext")]]
@@ -40,7 +40,7 @@ class StaticContracts(unittest.TestCase):
         for c in sorted(chrome):
             for name, spans in ext.items():
                 with self.subTest(char=c, face=name):
-                    self.assertFalse(inside(ord(c), spans), f"U+{ord(c):04X} would fetch {name} on every page; add it to CORE in tools/gengaramond.py")
+                    self.assertFalse(inside(ord(c), spans), f"U+{ord(c):04X} would fetch {name} on every page; add it to CORE in tools/genjunicode.py")
 
 
 if __name__ == '__main__':

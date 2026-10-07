@@ -117,7 +117,7 @@ class ScreenshotTest {
 
     /**
      * Android's Bold text setting (and Samsung's font weight) adds 300 to every weight. The page
-     * must keep Garamond's small caps and ℣/℟ with a heavier stroke, not fall to a partial face.
+     * must keep Junicode's small caps and ℣/℟ with a heavier stroke, not fall to a partial face.
      */
     @Test
     @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
