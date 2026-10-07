@@ -1,0 +1,145 @@
+name: Publish to Play
+
+# Builds the signed store bundle from master and uploads it to a Google Play track. Started by
+# hand only, from the Actions tab. The job runs in the `play` environment, so give that
+# environment a required reviewer and nothing ships without approval. Setup and the secrets it
+# reads are in apps/android/README.md ("Publishing from CI").
+#
+# Google's API can't create the app or take its very first bundle: upload one by hand in Play
+# Console first (a manual run of the Android workflow builds it).
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: "Play track (alpha is Closed testing)"
+        type: choice
+        options: [internal, alpha, production]
+        default: alpha
+      rollout:
+        description: "Share of users to roll out to, from 0 to 1 (below 1 is a staged rollout)"
+        type: string
+        default: "1"
+      notes:
+        description: "Release notes (what's new), optional"
+        type: string
+        default: ""
+
+concurrency:
+  group: play
+  cancel-in-progress: false
+
+env:
+  NDK_VERSION: 28.2.13676358
+
+jobs:
+  publish:
+    name: Build and upload to ${{ inputs.track }}
+    runs-on: ubuntu-latest
+    environment: play
+    permissions:
+      contents: read
+
+    steps:
+      - name: Release from master only
+        if: github.ref != 'refs/heads/master'
+        run: |
+          echo "::error::Publish from master, not ${GITHUB_REF}"
+          exit 1
+
+      - name: Check the rollout
+        id: rollout
+        env:
+          ROLLOUT: ${{ inputs.rollout }}
+        run: |
+          if ! python3 -c 'import sys; f = float(sys.argv[1]); sys.exit(0 if 0 < f <= 1 else 1)' "$ROLLOUT"; then
+            echo "::error::rollout must be a number above 0 and at most 1, not '$ROLLOUT'"
+            exit 1
+          fi
+          if python3 -c 'import sys; sys.exit(0 if float(sys.argv[1]) < 1 else 1)' "$ROLLOUT"; then
+            echo "status=inProgress" >> "$GITHUB_OUTPUT"
+            echo "fraction=$ROLLOUT" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=completed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          # The version code counts commits, so the bundle needs full history.
+          fetch-depth: 0
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install the Android NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" "platforms;android-36" > /dev/null
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build the store bundle
+        working-directory: apps/android
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          OFFICE_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          OFFICE_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          export OFFICE_UPLOAD_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          trap 'rm -f "$OFFICE_UPLOAD_KEYSTORE"' EXIT
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$OFFICE_UPLOAD_KEYSTORE"
+          ./gradlew --console=plain bundleRelease
+
+      - name: Write the release notes
+        if: inputs.notes != ''
+        env:
+          NOTES: ${{ inputs.notes }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/whatsnew"
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+
+      - name: Upload to Google Play
+        if: steps.rollout.outputs.status == 'completed'
+        # v1.1.5, pinned by commit.
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: org.orthodoxwest.office
+          releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
+          mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
+          track: ${{ inputs.track }}
+          status: completed
+          whatsNewDirectory: ${{ inputs.notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
+
+      - name: Upload to Google Play (staged rollout)
+        if: steps.rollout.outputs.status == 'inProgress'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: org.orthodoxwest.office
+          releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
+          mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
+          track: ${{ inputs.track }}
+          status: inProgress
+          userFraction: ${{ steps.rollout.outputs.fraction }}
+          whatsNewDirectory: ${{ inputs.notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: office-release-aab
+          path: apps/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
