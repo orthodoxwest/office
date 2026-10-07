@@ -152,6 +152,7 @@ pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
         title: name.to_string(),
         season: Some(day.season),
         feast: day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
+        rank: day.celebration.as_deref().map(|c| c.rank),
         color: Some(day.color),
         sections: Vec::new(),
         decisions: Vec::new(),

@@ -59,7 +59,7 @@ impl Hash {
 /// the encoding is unambiguous; the date is part of every group and the section and element
 /// structure of every group but decisions.
 fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
-    let OfficeHour { form: _, date, hour: label, title, season, feast, color, sections, decisions } = h;
+    let OfficeHour { form: _, date, hour: label, title, season, feast, rank: _, color, sections, decisions } = h;
     let [content, presentation, sources, rules] = hashes;
     let date = date.to_string();
     for hash in [&mut *content, &mut *presentation, &mut *sources, &mut *rules] {
@@ -339,6 +339,7 @@ mod tests {
             title: String::new(),
             season: None,
             feast: String::new(),
+            rank: None,
             color: None,
             sections: vec![OfficeSection { label: String::new(), collapsible: false, elements: vec![e] }],
             decisions: Vec::new(),

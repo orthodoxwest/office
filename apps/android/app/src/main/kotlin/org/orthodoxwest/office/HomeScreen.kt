@@ -39,11 +39,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -301,6 +303,7 @@ private fun Frontispiece(
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val ink = frontispieceInk(p)
+    val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
     val day = dayColor(view.color, p)
     // The lining's inner line is the day's colour, beside the cross on the plaster; a white day's
@@ -416,7 +419,7 @@ private fun Frontispiece(
             } else {
                 // The panel: the day's colour a little toward the frame as a ring at its edge, so
                 // a red or green day edges the head without outshouting the cross.
-                panel(tier.arch, p, mix(day, ink.frame, 0.7f), ink.frame)
+                panel(tier.arch, p, mix(day, ink.frame, 0.7f), ink.frame, panelPlaster)
             }
         },
     ) { slots, constraints ->

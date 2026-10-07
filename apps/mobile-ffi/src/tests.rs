@@ -62,6 +62,22 @@ fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
 }
 
 #[test]
+fn an_hour_of_a_first_class_day_is_framed() {
+    let core = OfficeCore::new().unwrap();
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false).unwrap().first_class;
+    assert!(hour("lauds", 12, 25));
+    // I Vespers takes the feast's rank; the Vigil's own Lauds is first class but violet.
+    assert!(hour("vespers", 12, 24));
+    assert!(!hour("lauds", 12, 24));
+    assert!(!hour("lauds", 12, 23));
+    assert!(!hour("lauds", 10, 7));
+    // First class for precedence, but violet or black: a Sunday in Lent, Ash Wednesday, Good Friday.
+    assert!(!hour("lauds", 3, 15));
+    assert!(!hour("lauds", 2, 25));
+    assert!(!hour("lauds", 4, 10));
+}
+
+#[test]
 fn rejects_bad_requests() {
     let core = OfficeCore::new().unwrap();
     assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false).is_err());

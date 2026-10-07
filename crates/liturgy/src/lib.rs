@@ -2,7 +2,7 @@
 //! spans. Every composer produces it and every renderer consumes it. Empty text fields represent
 //! absence; the dump serializes them as null.
 
-use calendar::{Color, Date, Decision, Season};
+use calendar::{Color, Date, Decision, Rank, Season};
 
 /// The kind of a liturgical element.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -371,6 +371,9 @@ pub struct OfficeHour {
     pub title: String,
     pub season: Option<Season>,
     pub feast: String,
+    /// The rank of the celebration the hour belongs to (a following feast's
+    /// at its I Vespers), or none on a feria.
+    pub rank: Option<Rank>,
     pub color: Option<Color>,
     pub sections: Vec<OfficeSection>,
     pub decisions: Vec<Decision>,

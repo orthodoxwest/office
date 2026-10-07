@@ -178,10 +178,17 @@
 
 /* EB Garamond has no ✠, so every platform once substituted its own dingbat:
    a heavy sans cross here, a different one there. This face holds only that
-   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
-   each text stack. unicode-range keeps it from touching any other letter.
-   Block, not swap: a cross that appears a moment late is quieter than one
-   that changes shape as the page settles. */
+   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and stands
+   in each text stack after the text faces, before the platform's own serifs,
+   none of which carry the glyph. unicode-range keeps it from touching any
+   other letter, but not from setting the line: WebKit takes the stack's first
+   available face as the primary font whose ascent and descent place every
+   baseline, whatever its range, where Chromium passes over a face that
+   cannot set a space. Headed by this face, whose ascent is 1.48em against
+   Garamond's 0.71, Safari sank every line's text 5px in its leading and the
+   dropped initials 17px, so a psalm's T hung under its second line and the
+   psalm titles stacked. Block, not swap: a cross that appears a moment late
+   is quieter than one that changes shape as the page settles. */
 @font-face {
   font-family: "Office Cross";
   font-style: normal;
@@ -432,7 +439,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -477,7 +484,7 @@ footer {
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 
 main {
@@ -1746,7 +1753,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -2020,6 +2027,62 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   /* Air below the hour navigation, where the ending's field begins (the
      Nave's powdering and the Apse vault show only below the nav). */
   padding-bottom: 3.25rem;
+}
+
+/* A first-class day's hour is framed: a double lining in the lining's
+   terracotta down both margins, from the title's rule to the end of the
+   prayer, where the consecration cross closes it; the epilogue stands
+   outside the frame. The hour's grid has three rows in flow (the header,
+   the prayer and the epilogue; the colour band and the progress hairline
+   are fixed), and the lines are its pseudo-elements, each in a side column
+   of its own and spanning the first two rows, so they end with the prayer
+   whatever the epilogue's height. On a phone the side columns step the
+   prayer 12px in from the gutter and the lines stand 20px outside it, 5px
+   from the screen's edge: 24px of a 358px measure, about three characters
+   a line. From 920px the measure is untouched and the lines stand 0.5rem
+   in from the hour's edges, in the margin beside the 37rem prayer. */
+.page-hour.rank-first-class .office-hour {
+  --frame-side: 12px;
+  grid-template-columns: var(--frame-side) minmax(0, 1fr) var(--frame-side);
+  /* The hour's gap is for its rows; between the side columns and the
+     prayer it would cost the measure another 40px. */
+  column-gap: 0;
+}
+
+.page-hour.rank-first-class .office-hour > * {
+  grid-column: 2;
+}
+
+.page-hour.rank-first-class .office-hour::before,
+.page-hour.rank-first-class .office-hour::after {
+  content: "";
+  grid-row: 1 / 3;
+  width: 0;
+  border-left: 3px double color-mix(in srgb, var(--lining) 60%, transparent);
+  pointer-events: none;
+}
+
+.page-hour.rank-first-class .office-hour::before {
+  grid-column: 1;
+  justify-self: end;
+  translate: -20px;
+}
+
+.page-hour.rank-first-class .office-hour::after {
+  grid-column: 3;
+  justify-self: start;
+  translate: 20px;
+}
+
+@media screen and (min-width: 920px) {
+  .page-hour.rank-first-class .office-hour {
+    --frame-side: 0.5rem;
+  }
+
+  .page-hour.rank-first-class .office-hour::before,
+  .page-hour.rank-first-class .office-hour::after {
+    translate: none;
+  }
 }
 
 /* "All hours" sits on the line of the hour names either side of it, not
@@ -2448,7 +2511,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -2770,7 +2833,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 @media screen and (min-width: 920px) {
   .elements {
     max-width: 37rem;
-    font-size: 1.25rem;
+    /* 21px: at 20px the prayer read a touch small on a laptop. */
+    font-size: 1.3125rem;
   }
 
   .hour-header {
@@ -2898,7 +2962,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Ordo Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Garamond", Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -2981,7 +3045,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .day-mobile-flags,
 .day-wk,
 .day-rank {
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 .month-jump {
   display: grid;
@@ -3367,7 +3431,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   content: "Today";
   display: block;
   visibility: hidden;
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
   font-size: 0.7rem;
   font-weight: normal;
   line-height: 1.4;
@@ -3513,7 +3577,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
   flex: 0 0 4.4rem;
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -4314,7 +4378,8 @@ body.season-eastertide {
      fills its box and rises by the same amount, where the head is still
      wide enough for its short first line. */
   --date-line: 1.656rem;
-  --head-pad: calc(5.4rem - (var(--touch-target) - var(--date-line)) / 2);
+  --head-pad-to: 5.4rem;
+  --head-pad: calc(var(--head-pad-to) - (var(--touch-target) - var(--date-line)) / 2);
   /* The halo is a soft field of the wall's own colour, so the powdering
      keeps about 24px clear of the panel; the shade is a highlight under the
      head's edge and the recess below it. */
@@ -5813,6 +5878,9 @@ body.season-eastertide {
        origin. */
     --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
     --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
+    /* The night panel's plaster reads as cloud at full strength: veiled to
+       a little under half. */
+    --panel-plaster-veil: 45%;
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -5849,6 +5917,7 @@ body.season-eastertide {
   --lining-day: var(--day-color, var(--lining));
   --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
   --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
+  --panel-plaster-veil: 45%;
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link {
@@ -6610,8 +6679,77 @@ body.season-eastertide {
     box-sizing: border-box;
   }
 
+  /* The panel is cut from the wall: the limewash shows through it, drawn
+     into the surface's colour with soft light so the day's warm field and
+     the night's blue keep their tone and only the trowel marks come
+     through. A veil of the surface over it, --panel-plaster-veil, eases
+     the marks where they read as weather rather than plaster (the Apse
+     restates it); the desktop niche paints its own head and is untouched.
+     Named layers blend onto the ground one by one: the veil normally, the
+     plaster as soft light, over the flat ground. */
+  .page-home .home-hero {
+    --panel-plaster-veil: 0%;
+  }
+
+  .page-home .home-arch-fill {
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent),
+        color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent)
+      ),
+      var(--plaster-image) center / cover no-repeat,
+      var(--arch-ground);
+    background-blend-mode: normal, soft-light, normal;
+  }
+
   .page-home .home-summary {
     flex: 1 0 auto;
+    /* The head's type is fitted to the panel, not to the root font. The
+       head's height is the card's width (the arch's rise) plus whatever the
+       screen has to spare, so type set in rem floats in it on a phone whose
+       system font is set small, and would crowd it set large. The date is
+       7% of the card's inline size or 2.92% of the screen's height, whichever
+       is more, within bounds; the feast and the commemorations follow in
+       proportion. The usual 16px root at 375×667 gives the sizes the head
+       had before (22, 17 and 14px) and the tall tiers the sizes they had
+       (25 and 27px for the date); a 14px root now gives the same head the
+       same type. The date's line, and the head's padding measured against
+       its tap box, follow the fluid size; cqi resolves against the card,
+       which is this element's container, so these cannot sit on the card
+       itself. */
+    --date-size: clamp(1.2rem, max(7cqi, 2.92svh), 2rem);
+    --date-line: calc(1.2 * var(--date-size));
+    --head-pad: calc(var(--head-pad-to) - (var(--touch-target) - var(--date-line)) / 2);
+    /* The spare height is shared two parts above the day block to three
+       below, so the title reads with the cross and the empty plaster falls
+       low, where the head is wide and reads as margin. Spacers, not padding,
+       so they cost nothing when there is none. */
+    justify-content: flex-start;
+  }
+
+  .page-home .home-summary::before,
+  .page-home .home-summary::after {
+    content: "";
+    flex: 2 1 0;
+  }
+
+  .page-home .home-summary::after {
+    flex-grow: 3;
+  }
+
+  .page-home .home h1 {
+    font-size: var(--date-size);
+  }
+
+  .page-home .home .feast {
+    font-size: clamp(0.95rem, max(5.5cqi, 2.15svh), 1.5rem);
+  }
+
+  /* A short phone's commemorations give way instead (above). */
+  @media (min-height: 701px) {
+    .page-home .home .commemorations {
+      font-size: clamp(0.8rem, max(4.6cqi, 1.75svh), 1.1rem);
+    }
   }
 }
 
@@ -6620,7 +6758,7 @@ body.season-eastertide {
   .page-home .home-hero {
     --crown-size: 2.2rem;
     --crown-top: 3.1rem;
-    --head-pad: calc(6.6rem - (var(--touch-target) - var(--date-line)) / 2);
+    --head-pad-to: 6.6rem;
   }
 
   /* The taller head is narrower where the day block begins than the small
@@ -6636,30 +6774,13 @@ body.season-eastertide {
     max-width: min(calc(0.49 * var(--arch-w) + 87px), calc(0.82 * var(--arch-w) - 17px));
   }
 
-  /* The spare height is shared two parts above the day block to three
-     below, so the title reads with the cross and the empty plaster falls
-     low, where the head is wide and reads as margin. Spacers, not padding,
-     so they cost nothing when there is none. */
-  .page-home .home-summary {
-    justify-content: flex-start;
-  }
-
-  .page-home .home-summary::before,
-  .page-home .home-summary::after {
-    content: "";
-    flex: 2 1 0;
-  }
-
-  .page-home .home-summary::after {
-    flex-grow: 3;
-  }
 }
 
 @media (max-width: 700px) and (min-height: 880px) {
   .page-home .home-hero {
     --crown-size: 2.5rem;
     --crown-top: 3.4rem;
-    --head-pad: calc(7.4rem - (var(--touch-target) - var(--date-line)) / 2);
+    --head-pad-to: 7.4rem;
   }
 
   /* Refitted again to the sharpest head (the date's measure follows the
@@ -6669,23 +6790,14 @@ body.season-eastertide {
   }
 }
 
-/* Their larger type and rows, from 375px wide and 830px high: a narrower
-   or shorter phone needs the height for the lines its day block wraps to. */
+/* Their larger rows and controls, from 375px wide and 830px high (the head's
+   type grows with the screen on its own, above): a narrower or shorter phone
+   needs the height for the lines its day block wraps to. */
 @media (min-width: 375px) and (max-width: 700px) and (min-height: 830px) {
-  /* The larger date's line, for the tap box's slack (see --head-pad). */
-  .page-home .home-hero {
-    --date-line: 1.86rem;
-  }
-
   .page-home .home h1 {
     /* The larger date's fitted measure: still the head's width where its
        first line stands, so a long weekday takes a line of its own. */
     max-width: calc(0.236 * var(--arch-w) + 130px);
-    font-size: 1.55rem;
-  }
-
-  .page-home .home .feast {
-    font-size: 1.16rem;
   }
 
   .page-home .home-day-head {
@@ -6720,22 +6832,9 @@ body.season-eastertide {
 }
 
 @media (min-width: 375px) and (max-width: 700px) and (min-height: 880px) {
-  .page-home .home-hero {
-    --date-line: 2.04rem;
-  }
-
   .page-home .home h1 {
     /* The sharpest head's fitted measure for the larger date. */
     max-width: calc(0.255 * var(--arch-w) + 112px);
-    font-size: 1.7rem;
-  }
-
-  .page-home .home .feast {
-    font-size: 1.25rem;
-  }
-
-  .page-home .home .commemorations {
-    font-size: 1.02rem;
   }
 
   .page-home .home-prayer-card h2 {
@@ -7678,6 +7777,8 @@ body.page-home::before {
    the gradient is required because color alone would leave clipped glyphs
    transparent. */
 @media print {
+  .page-hour.rank-first-class .office-hour::before,
+  .page-hour.rank-first-class .office-hour::after,
   header,
   footer,
   .day-nav,

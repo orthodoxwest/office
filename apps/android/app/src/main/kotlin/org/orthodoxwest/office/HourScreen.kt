@@ -12,6 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
@@ -46,6 +48,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -121,16 +126,19 @@ fun HourScreen(
     val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
     val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
-    Box(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // A first-class day's frame takes a little of a phone's measure (the web's 12px side
+        // columns under 920px); where the lines stand outside the measure, the text keeps it.
+        val inset = if (view.firstClass && maxWidth < FrameClear) FrameInset else 0.dp
         LazyColumn(
-            Modifier.fillMaxSize(),
+            Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
             state = listState,
             contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(dayColor(view.color))) }
             item(key = "chrome") { chrome() }
-            item(key = "title") { HourTitle(view, date, today, form, onDate, onForm) }
+            item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
             // Each block's space depends on the one before it, across sections.
             var prev: BlockView? = null
             var afterClosed = false
@@ -141,7 +149,7 @@ fun HourScreen(
                     val expanded = open[i] == true
                     item(key = "toggle-$i") {
                         Row(
-                            Modifier.animateItem(placementSpec = placement).measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                            Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
@@ -170,7 +178,7 @@ fun HourScreen(
                     val cross = part && begun
                     begun = true
                     afterClosed = false
-                    item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(top = gap), column = columns[i to j], cross = cross) }
+                    item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross) }
                     prev = block
                 }
             }
@@ -187,6 +195,47 @@ fun HourScreen(
         ProgressHairline(listState)
     }
 }
+
+/**
+ * The frame of a first-class day's hour, as the web's `.rank-first-class`: a thin double line in
+ * the lining down each side, from the hour's title to 20dp above the epilogue, where the
+ * consecration cross closes the hour. On a phone the lines stand 5dp from the screen's edges and
+ * the text gives them [FrameInset]; on a wide screen they stand 40dp outside the measure, as the
+ * web's from 920px. Drawn from the list's layout, so the frame scrolls with the page and runs
+ * the whole screen while the title is above it and the epilogue below.
+ */
+private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: Color): Modifier {
+    if (!on) return this
+    return drawBehind {
+        val info = state.layoutInfo
+        val items = info.visibleItemsInfo
+        if (items.isEmpty()) return@drawBehind
+        fun y(item: LazyListItemInfo) = (item.offset - info.viewportStartOffset).toFloat()
+        val title = items.firstOrNull { it.key == "title" }
+        val top = when {
+            title != null -> y(title)
+            // The title has scrolled past: the frame runs in from the top of the screen.
+            items.first().key.let { it != "band" && it != "chrome" } -> 0f
+            else -> return@drawBehind
+        }
+        val epilogue = items.firstOrNull { it.key == "epilogue" }
+        val bottom = if (epilogue != null) y(epilogue) - 20.dp.toPx() else size.height
+        if (bottom <= top) return@drawBehind
+        val side = if (size.width < FrameClear.toPx()) 5.dp.toPx() else (size.width - Measure.toPx()) / 2f - 24.dp.toPx()
+        val px = 1.dp.toPx()
+        val ink = lining.copy(alpha = 0.6f)
+        for (x in listOf(side, size.width - side - 3 * px)) {
+            drawRect(ink, Offset(x, top), Size(px, bottom - top))
+            drawRect(ink, Offset(x + 2 * px, top), Size(px, bottom - top))
+        }
+    }
+}
+
+/** What the office's text gives a first-class frame on a phone, each side (the web's 12px side columns). */
+private val FrameInset = 12.dp
+
+/** The width from which a first-class frame stands clear of the measure: room for 40dp outside the text each side. */
+private val FrameClear = Measure + 80.dp
 
 /** The items above the office: the colour band, the header and the title. */
 private const val BEFORE_OFFICE = 3

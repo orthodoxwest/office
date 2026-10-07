@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /**
  * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
@@ -179,6 +180,14 @@ struct Panel: View {
             ctx.fill(face, with: .color(p.surface))
             ctx.drawLayer { inside in
                 inside.clip(to: face)
+                // The plaster under the day's words, cover-fitted to the panel as the web's `.home-arch-fill`.
+                if let plaster = UIImage(named: p.panel) {
+                    let image = inside.resolve(Image(uiImage: plaster))
+                    let scale = max(card.size.width / image.size.width, card.size.height / image.size.height)
+                    let fitted = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+                    let at = CGPoint(x: card.origin.x + (card.size.width - fitted.width) / 2, y: card.origin.y + (card.size.height - fitted.height) / 2)
+                    inside.draw(image, in: CGRect(origin: at, size: fitted))
+                }
                 // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
                 blurred(inside, card.outside(-1, dy: 0.3 * rem), NicheTokens.of(p).recess, 0.4 * rem, eoFill: true)
                 if !p.dark {

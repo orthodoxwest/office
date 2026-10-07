@@ -133,6 +133,10 @@ struct HourScreen: View {
     @State private var open: [Int: Bool]
     /// How far through the office, for the hairline across the top.
     @State private var reading = Reading()
+    /// The page's width, and the heights of what stands above and below a first-class day's frame.
+    @State private var width: CGFloat = 0
+    @State private var headerHeight: CGFloat = 0
+    @State private var epilogueHeight: CGFloat = 0
 
     init(view: HourView, date: CivilDate) {
         self.view = view
@@ -147,12 +151,17 @@ struct HourScreen: View {
         let columns = hymnColumns(view.sections, p, o, m)
         let index = model.hours.firstIndex(of: view.hour) ?? 0
         let rows = self.rows
+        // A first-class day's frame takes a little of a phone's measure (the web's 12px side
+        // columns under 920px); where the lines stand outside the measure, the text keeps it.
+        let inset: CGFloat = view.firstClass && width < m.px(frameClear) ? m.px(12) : 0
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
                     Rectangle().fill(dayColor(view.color)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                     HourTitle(view: view, date: date)
+                        .padding(.horizontal, inset)
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
                             switch row {
@@ -170,6 +179,7 @@ struct HourScreen: View {
                                 .padding(.top, m.px(5.6))
                                 .padding(.bottom, expanded ? m.px(12.8) : 0)
                                 .measured(m)
+                                .padding(.horizontal, inset)
                             case let .block(at, block, gap, cross):
                                 VStack(spacing: 0) {
                                     if cross {
@@ -179,6 +189,7 @@ struct HourScreen: View {
                                 }
                                 .padding(.top, m.px(gap))
                                 .measured(m)
+                                .padding(.horizontal, inset)
                             }
                         }
                         .read(n, into: reading)
@@ -190,10 +201,16 @@ struct HourScreen: View {
                         date: date
                     )
                     .read(rows.count, into: reading)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
+                }
+                .background(alignment: .top) {
+                    if view.firstClass {
+                        FirstClassFrame(top: 3 + headerHeight, bottom: epilogueHeight + m.px(20))
+                    }
                 }
             }
             .coordinateSpace(name: Reading.space)
-            .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0 }
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
@@ -320,6 +337,38 @@ private extension View {
             .onDisappear { reading.place(row, nil) }
     }
 }
+
+/**
+ * The frame of a first-class day's hour, as the web's `.rank-first-class`: a thin double line in
+ * the lining down each side, from the hour's title (`top` below the page's head) to 20pt above
+ * the epilogue (`bottom` from the page's foot), where the consecration cross closes the hour. On
+ * a phone the lines stand 5pt from the screen's edges and the text gives them 12pt; on a wide
+ * screen they stand 40pt outside the measure, as the web's from 920px.
+ */
+private struct FirstClassFrame: View {
+    let top: CGFloat
+    let bottom: CGFloat
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        Canvas { ctx, size in
+            let height = size.height - top - bottom
+            guard height > 0 else { return }
+            let side = size.width < m.px(frameClear) ? m.px(5) : (size.width - m.px(measure)) / 2 - m.px(24)
+            let ink = GraphicsContext.Shading.color(p.lining.opacity(0.6))
+            for x in [side, size.width - side - 3] {
+                ctx.fill(Path(CGRect(x: x, y: top, width: 1, height: height)), with: ink)
+                ctx.fill(Path(CGRect(x: x + 2, y: top, width: 1, height: height)), with: ink)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The width from which a first-class frame stands clear of the measure: room for 40pt outside the text each side.
+private let frameClear: CGFloat = measure + 80
 
 /**
  * The gold hairline across the top, in the season's ornament gold. The band scrolls away with

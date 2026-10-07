@@ -21,7 +21,7 @@ use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation, long_date,
-    month_name, report_url, season_class, season_str, split_alias,
+    month_name, rank_class, report_url, season_class, season_str, split_alias,
 };
 
 /// What a page handler reads from the request.
@@ -281,6 +281,7 @@ impl Server {
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
                 season_class: season_class(Some(day.season)).into(),
+                rank_class: String::new(),
                 show_today: slug != now_slug,
             },
             date_str: long_date(date),
@@ -376,6 +377,7 @@ impl Server {
                 // The hour's own season: I Vespers of Easter on Holy Saturday
                 // is unveiled while that day's Lauds is still veiled.
                 season_class: season_class(hour.season).into(),
+                rank_class: rank_class(hour.rank, hour.color).into(),
                 show_today: date_str != today_slug,
             },
             leader_forms: composed

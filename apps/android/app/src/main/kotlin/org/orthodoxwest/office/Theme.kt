@@ -60,6 +60,8 @@ data class Palette(
     /** The moon in the Vespers and Compline headpieces: Nave's gold, Apse's silver. */
     val moonInk: Color,
     @param:DrawableRes val plaster: Int,
+    /** The phone home panel's plaster: the texture as soft light on the surface, veiled on the Apse (bake-plaster.py). */
+    @param:DrawableRes val panel: Int,
 )
 
 val Nave = Palette(
@@ -86,6 +88,7 @@ val Nave = Palette(
     kalendarBlue = Color(0xFF34507A),
     moonInk = Color(0xFF9A7328),
     plaster = R.drawable.plaster_nave,
+    panel = R.drawable.panel_nave,
 )
 
 val Apse = Palette(
@@ -112,6 +115,7 @@ val Apse = Palette(
     kalendarBlue = Color(0xFFA9BEDF),
     moonInk = Color(0xFFC9D0D9),
     plaster = R.drawable.plaster_apse,
+    panel = R.drawable.panel_apse,
 )
 
 /**
