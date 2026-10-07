@@ -17,7 +17,7 @@ use office::day::Day;
 use sha2::{Digest, Sha256};
 
 /// The deployed site, prefixed to review links.
-pub const DEFAULT_BASE_URL: &str = "https://office.fly.dev";
+pub const DEFAULT_BASE_URL: &str = "https://orthodoxwestbreviary.com";
 
 /// The hour's place in liturgical order.
 pub fn hour_order(hour: &str) -> usize {
