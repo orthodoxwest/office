@@ -1,0 +1,227 @@
+name: iOS TestFlight
+
+# Builds the iOS app for release with the current Xcode. Pushes to master (and manual runs)
+# also sign it and upload it to TestFlight, where it goes to the external group named below:
+# anyone who joined through the group's public link gets each new build in the TestFlight app,
+# as the Android preview's link always serves the newest APK.
+#
+# Pull requests, and master until the signing secrets exist, build the archive unsigned, so a
+# change that breaks the release build is caught before it reaches master. Setting the secrets
+# up from a Linux machine is in apps/ios/README.md ("TestFlight").
+#
+# The version stays MARKETING_VERSION (project.yml); the build number counts commits, as the
+# Android version code does. Apple reviews the first build of each version before external
+# testers can install it, so only a release raises MARKETING_VERSION.
+on:
+  push:
+    branches: [master]
+    # The app embeds the corpus, so a text fix on master is a new build.
+    paths:
+      - "apps/ios/**"
+      - "apps/mobile-ffi/**"
+      - "crates/**"
+      - "apps/android/app/src/main/res/font/**"
+      - "apps/android/app/src/main/res/drawable-nodpi/**"
+      - "data/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/testflight.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "apps/ios/**"
+      - "apps/mobile-ffi/**"
+      - "crates/render-blocks/**"
+      - ".github/workflows/testflight.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: testflight-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The TestFlight external group each build is given to.
+  TESTFLIGHT_GROUP: Testers
+
+jobs:
+  build:
+    name: Archive and upload to TestFlight
+    # App Store Connect takes only builds from a current Xcode; this image's default is one.
+    runs-on: macos-26
+    timeout-minutes: 90
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build number counts commits, so it needs full history.
+          fetch-depth: 0
+
+      - name: Decide whether to upload
+        id: mode
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
+          IOS_APPSTORE_PROFILE: ${{ secrets.IOS_APPSTORE_PROFILE }}
+        run: |
+          echo "build=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+          xcodebuild -version
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          elif [ -n "$ASC_KEY_ID" ] && [ -n "$IOS_DIST_CERT_P12" ] && [ -n "$IOS_APPSTORE_PROFILE" ]; then
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The TestFlight secrets are not set, so this build is archived unsigned and not uploaded (apps/ios/README.md)."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build the Rust core and its Swift bindings
+        run: apps/ios/build-core.sh
+
+      - name: Generate the Xcode project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      - name: Install the signing certificate and profile
+        id: signing
+        if: steps.mode.outputs.upload == 'true'
+        env:
+          IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          IOS_APPSTORE_PROFILE: ${{ secrets.IOS_APPSTORE_PROFILE }}
+        run: |
+          # A keychain of its own for the run, removed at the end.
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(openssl rand -base64 24)"
+          printf '%s' "$IOS_DIST_CERT_P12" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/dist.p12" -P "$IOS_DIST_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain"
+          rm "$RUNNER_TEMP/dist.p12"
+
+          # The profile names its own UUID and team, so neither needs a secret.
+          profile="$RUNNER_TEMP/appstore.mobileprovision"
+          printf '%s' "$IOS_APPSTORE_PROFILE" | base64 --decode > "$profile"
+          security cms -D -i "$profile" > "$RUNNER_TEMP/profile.plist"
+          uuid="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")"
+          team="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")"
+          for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" \
+                     "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            cp "$profile" "$dir/$uuid.mobileprovision"
+          done
+          { echo "keychain=$keychain"; echo "profile=$uuid"; echo "team=$team"; } >> "$GITHUB_OUTPUT"
+
+      - name: Archive
+        working-directory: apps/ios
+        env:
+          UPLOAD: ${{ steps.mode.outputs.upload }}
+          BUILD: ${{ steps.mode.outputs.build }}
+          TEAM: ${{ steps.signing.outputs.team }}
+          PROFILE: ${{ steps.signing.outputs.profile }}
+        run: |
+          if [ "$UPLOAD" = true ]; then
+            signing=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$TEAM" "CODE_SIGN_IDENTITY=Apple Distribution"
+                     "PROVISIONING_PROFILE_SPECIFIER=$PROFILE")
+          else
+            signing=(CODE_SIGNING_ALLOWED=NO)
+          fi
+          mkdir -p build/release
+          if ! xcodebuild archive -project Office.xcodeproj -scheme Office -configuration Release \
+            -destination generic/platform=iOS -archivePath build/release/Office.xcarchive \
+            -derivedDataPath build/dd-release "CURRENT_PROJECT_VERSION=$BUILD" "${signing[@]}" \
+            > build/release/archive.log 2>&1; then
+            grep -E "error:|: error|FAILED|failed|Undefined symbol|No profile|No signing" build/release/archive.log | head -n 120
+            tail -n 40 build/release/archive.log
+            exit 1
+          fi
+          /usr/libexec/PlistBuddy -c 'Print :ApplicationProperties' build/release/Office.xcarchive/Info.plist
+
+      - name: Export the IPA
+        if: steps.mode.outputs.upload == 'true'
+        working-directory: apps/ios
+        env:
+          TEAM: ${{ steps.signing.outputs.team }}
+          PROFILE: ${{ steps.signing.outputs.profile }}
+        run: |
+          cat > build/release/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>provisioningProfiles</key>
+            <dict><key>org.orthodoxwest.office</key><string>$PROFILE</string></dict>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath build/release/Office.xcarchive \
+            -exportOptionsPlist build/release/ExportOptions.plist -exportPath build/release/export
+          ls -l build/release/export
+
+      - name: Upload to TestFlight
+        if: steps.mode.outputs.upload == 'true'
+        working-directory: apps/ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          BUILD: ${{ steps.mode.outputs.build }}
+          FASTLANE_SKIP_UPDATE_CHECK: "1"
+          FASTLANE_HIDE_TIMESTAMP: "1"
+          LC_ALL: en_US.UTF-8
+          LANG: en_US.UTF-8
+        run: |
+          python3 - > "$RUNNER_TEMP/asc.json" <<'PY'
+          import json, os
+          print(json.dumps({"key_id": os.environ["ASC_KEY_ID"], "issuer_id": os.environ["ASC_ISSUER_ID"],
+                            "key": os.environ["ASC_KEY"], "in_house": False}))
+          PY
+          # What to Test, as the tester sees it in TestFlight.
+          notes="Build $BUILD, from ${GITHUB_SHA::7}: $(git log -1 --format=%s)"
+          # Waits for App Store Connect to process the build, gives it to the group, and
+          # submits it for beta review when its version needs one. A build number already
+          # uploaded (a re-run of the same commit) is refused here.
+          fastlane pilot upload \
+            --ipa "$(ls build/release/export/*.ipa)" \
+            --api_key_path "$RUNNER_TEMP/asc.json" \
+            --distribute_external true \
+            --groups "$TESTFLIGHT_GROUP" \
+            --notify_external_testers true \
+            --changelog "$notes"
+
+      - name: Remove the signing keychain
+        if: always() && steps.signing.outputs.keychain != ''
+        env:
+          KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+        run: |
+          security delete-keychain "$KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/asc.json" "$RUNNER_TEMP/appstore.mobileprovision"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-release-log
+          path: apps/ios/build/release/*.log
+          if-no-files-found: ignore
