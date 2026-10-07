@@ -189,15 +189,27 @@ clone of `master`.
 ### Publishing from CI
 
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
-and uploads it to a track you pick (`internal`, `alpha` for Closed testing, or `production`),
-with an optional staged rollout and release notes. You start it by hand from the Actions tab.
+and uploads it to Google Play.
+
+- **Every merge to `master` that changes the app** goes to Internal testing, with the pull
+  request's title as the release notes. Internal testing skips Google's review and reaches its
+  testers (the maintainers) within minutes, so their phones always run `master`.
+- **Testers and the public** get a build when you promote it in Play Console (*Internal
+  testing → Promote release → Closed testing*, and later on to Production), which ships the
+  exact build you have been running. A manual run from the Actions tab can also upload to any
+  track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
+  notes, but only for a commit that isn't already in Play: each build's version code is its
+  commit count, and Play takes each version code once.
+
 It needs:
 
 - the three upload-key secrets above;
 - `PLAY_SERVICE_ACCOUNT_JSON`: the JSON key of a Google Cloud service account that has been
-  invited under Play Console's *Users and permissions* with release rights for this app;
+  invited under Play Console's *Users and permissions* with release rights for this app. Until
+  it is set, merges skip the upload;
 - a `play` environment (Settings → Environments) with you as required reviewer, so every
-  run waits for approval.
+  manual run waits for approval. Merges run in `play-internal`, which GitHub creates on first
+  use and which needs no reviewer.
 
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
