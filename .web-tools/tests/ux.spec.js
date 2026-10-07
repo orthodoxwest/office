@@ -612,8 +612,11 @@ test("a tablet's hour header sets the hours as one rank, with no link stranded",
       await openDatedPage(page, `/vespers/${testDate}`);
       const header = await page.evaluate(() => {
         const links = [...document.querySelectorAll(".site-menu nav a")];
+        // Links on one baseline have boxes a pixel or two apart in height
+        // (Reminders is set smaller); a new row begins a whole line lower.
+        const tops = links.map((a) => a.getBoundingClientRect().top).sort((a, b) => a - b);
         return {
-          rows: new Set(links.map((a) => Math.round(a.getBoundingClientRect().top))).size,
+          rows: tops.filter((top, i) => i === 0 || top - tops[i - 1] > 8).length,
           overflow: document.documentElement.scrollWidth - innerWidth,
         };
       });

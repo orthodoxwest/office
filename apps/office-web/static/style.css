@@ -583,7 +583,7 @@ summary:focus-visible {
   flex: 0 0 auto;
   color: var(--text);
   text-decoration: none;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -601,7 +601,10 @@ summary:focus-visible {
   background: var(--lining);
   -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
   mask: url("ornaments/consecration.svg") center / contain no-repeat;
-  vertical-align: -0.2em;
+  /* The roundel's centre on the capitals' centre: the type's cap height is
+     0.64em, so the centre stands 0.32em up, and the roundel's foot sits its
+     half-height (0.5625em) below that. */
+  vertical-align: -0.3em;
 }
 
 .site-menu {
@@ -620,6 +623,10 @@ summary:focus-visible {
 .site-menu nav {
   display: flex;
   flex-wrap: wrap;
+  /* Reminders and Settings are set a step smaller than the hours and the
+     ordo; on one baseline the smaller words read as a quieter rank, where
+     centred boxes left them standing a pixel or two high. */
+  align-items: baseline;
   gap: 0.1rem 0.35rem;
   justify-content: flex-end;
 }
@@ -660,6 +667,8 @@ summary:focus-visible {
 
 .nav-divider {
   width: 1px;
+  /* An empty span has no baseline; it fills the row's height instead. */
+  align-self: stretch;
   margin: 0.45rem 0.15rem;
   background: var(--border);
 }
@@ -911,6 +920,14 @@ summary:focus-visible {
 /* A finger needs the same floor on a tablet's header as in a phone's menu.
    The links keep their type and the header its height: only the box each
    answers to grows, through a pseudo-element centred on the word. */
+/* Wide screens set the brand, the links and Settings on one baseline (the
+   phone's header centres its taller tap boxes instead). */
+@media (min-width: 701px) {
+  .site-nav-shell {
+    align-items: baseline;
+  }
+}
+
 @media (min-width: 701px) and (pointer: coarse) {
   .site-brand,
   .site-menu nav a,
@@ -2749,15 +2766,17 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* The phone already gives the prayer a generous 20px book face. On a true
    desktop the historical 19px / 38rem pairing looked slightly slight against
    the wide still field and produced lines at the long edge of comfortable
-   prose. Give the prayer—not the surrounding navigation or metadata—the same
-   20px scale on a modestly narrower 37rem measure. Because both values are
-   rem-based, Small/Large reader choices preserve the intended characters per
-   line rather than changing the composition. Tablets retain the denser 19px
+   prose. Give the prayer—not the surrounding navigation or metadata—a larger
+   scale on a modestly narrower 37rem measure: 20px with EB Garamond, and a
+   step more (21px) in Junicode, whose shorter capitals and extenders read a
+   touch smaller at the same x-height. Because both values are rem-based,
+   Small/Large reader choices preserve the intended characters per line
+   rather than changing the composition. Tablets retain the denser 19px
    setting until there is enough surrounding ground to frame the larger page. */
 @media screen and (min-width: 920px) {
   .elements {
     max-width: 37rem;
-    font-size: 1.25rem;
+    font-size: 1.3125rem;
   }
 
   .hour-header {
