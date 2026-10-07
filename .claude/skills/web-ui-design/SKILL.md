@@ -13,7 +13,7 @@ description: >-
 Prayer is the product. Most readers are lay people on phones: keep the text
 central, navigation quiet, and administrative material after the office.
 Use the parish's material palette—warm plaster, oak, gold, and a blue night
-sky—with EB Garamond, restrained rules, and generous reading space. Ornament
+sky—with Junicode, restrained rules, and generous reading space. Ornament
 is English wall painting on that limewash: earth pigments drawn thinly on a
 pale ground, painted into the wall rather than laid on it. Avoid playful
 rewards, motion for its own sake, and decorative layers behind prayer.

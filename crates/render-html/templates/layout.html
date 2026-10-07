@@ -45,7 +45,7 @@
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
   {# Start the ordo font fetch early to reduce reflow in the long year table. #}
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
-  {% if page == "calendar" %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {% if page == "calendar" %}<link rel="preload" href="{{ static("fonts/junicode-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
   {# Report filters should refresh immediately. A cross-document snapshot
        can hold a dense report's controls while its new view is rendering. #}

@@ -1,71 +1,85 @@
 /* AWRV Divine Office — typography-focused stylesheet */
 
-/* Self-hosted EB Garamond (OFL-1.1). Paths are relative to this stylesheet
-   (/static/style.css → /static/fonts/…). No third-party font CDN.
+/* Self-hosted Junicode (Peter S. Baker, OFL-1.1). Paths are relative to this
+   stylesheet (/static/style.css → /static/fonts/…). No third-party font CDN.
 
-   Each face is split by tools/gengaramond.py: the core file holds Latin-1,
-   the punctuation, and ℟ ℣ — every letter the office sets, at under a third
-   of the full face's bytes — and an -ext file holds the rest (Greek,
-   Cyrillic, extended Latin). The unicode-ranges come from that tool; a
-   browser fetches an -ext file only for a page that sets one of its
-   characters. Bold covers ASCII alone and is not split. */
+   tools/genjunicode.py cuts these from Junicode 2's variable fonts: static
+   instances a step above the face's 400 (wght 440: EB Garamond set thin on a
+   phone, and Junicode's 400 still a little light), at normal width, the Q
+   given its long tail and old-style figures made the default (as EB
+   Garamond's were; lining-nums still reaches the lining ones). They are
+   drawn on EB Garamond's body: an em of 1034 units where Junicode draws on
+   1000, so its x-height is EB Garamond's 0.40em and its lines set to the
+   same length, and every size and measure below keeps the proportions it was
+   tuned to; ascent and descent are EB Garamond's 0.71/0.29em. Each face is
+   split in two: the core file holds Latin-1, the punctuation, and ℟ ℣ —
+   every letter the office sets, in 46-51 KB — and an -ext file holds the
+   rest (Greek, extended Latin, the medieval letters Junicode exists for).
+   The unicode-ranges come from that tool; a browser fetches an -ext file
+   only for a page that sets one of its characters. Bold is set only by the
+   ordo's fasting mark and the usage page, so it is the core alone, without
+   features, and is not split. */
 @font-face {
-  font-family: "EB Garamond";
+  font-family: "Junicode";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  src: url("fonts/junicode-regular.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond";
+  font-family: "Junicode";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
-  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
+  src: url("fonts/junicode-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-03F5, U+044A-044C, U+10FB, U+16A0-16F0, U+1ACB-1ACE, U+1D00-1FFE, U+20B0, U+20DD, U+2108-2114, U+211E, U+2125-2189, U+21A9, U+2202-2211, U+2219-2265, U+22D7, U+2308-232A, U+23D1-23D4, U+2460-24FF, U+25AA-25AB, U+25B9, U+25C3, U+25CA-25CC, U+2619-261F, U+271D, U+2740, U+2766-277F, U+27E6-27E9, U+2AFD, U+2C65-2C7D, U+2E00-2E5D, U+A71B-A787, U+A7BA-A7D9, U+A7FB-A7FF, U+AB52-AB57, U+E004-E044, U+E066-E168, U+E19E-E1DC, U+E208-E288, U+E2E2-E39F, U+E3D3-E568, U+E58C-E6A3, U+E6E2-E7E7, U+E8A1-E8F3, U+EAD0-EAF3, U+EBA0-EBFF, U+EEC2-EF2D, U+EF90-F0AE, U+F106-F23F, U+F2E0-F2FF, U+F4F7-F4FF, U+F700-F71C, U+F7B2-F7B6, U+FB00-FB06, U+FE5F-FE6A, U+10190-1019A, U+10330-1034A, U+1F100-1F129, U+E0030-E0039, U+E0061-E007F, U+F0000-F0021;
 }
 
 @font-face {
-  font-family: "EB Garamond";
+  font-family: "Junicode";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  src: url("fonts/junicode-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond";
+  font-family: "Junicode";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
-  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
+  src: url("fonts/junicode-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-03F5, U+044A-044C, U+10FB, U+16A0-16F0, U+1ACB-1ACE, U+1D00-1FFE, U+20B0, U+20DD, U+2108-2114, U+211E, U+2125-2189, U+21A9, U+2202-2211, U+2219-2265, U+22D7, U+2308-232A, U+23D1-23D4, U+2460-24FF, U+25AA-25AB, U+25B9, U+25C3, U+25CA-25CC, U+2619-261F, U+271D, U+2740, U+2766-277F, U+27E6-27E9, U+2AFD, U+2C65-2C7D, U+2E00-2E5D, U+A71B-A787, U+A7BA-A7D9, U+A7FB-A7FF, U+AB52-AB57, U+E004-E044, U+E066-E168, U+E19E-E1DC, U+E208-E288, U+E2E2-E39F, U+E3D3-E568, U+E58C-E6A3, U+E6E2-E7E7, U+E8A1-E8F3, U+EAD0-EAF3, U+EBA0-EBFF, U+EEC2-EF2D, U+EF90-F0AE, U+F106-F23F, U+F2E0-F2FF, U+F4F7-F4FF, U+F700-F71C, U+F7B2-F7B6, U+FB00-FB06, U+FE5F-FE6A, U+10190-1019A, U+10330-1034A, U+1F100-1F129, U+E0030-E0039, U+E0061-E007F, U+F0000-F0021;
 }
 
 @font-face {
-  font-family: "EB Garamond";
+  font-family: "Junicode";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+  src: url("fonts/junicode-bold.woff2") format("woff2");
 }
 
-/* Until EB Garamond arrives, text is set in a system serif scaled to its
+/* Until Junicode arrives, text is set in a system serif scaled to its
    measure, so the swap barely rewraps a line: without this the hour header
    and the prayer below it jumped ~20px when the face landed (CLS 0.25 on a
    first visit). Each family scales one platform's serif — Georgia (Apple,
    Windows), Noto Serif (Android), Times New Roman or its metric twin
    Liberation Serif — by the ratio of letter-frequency-weighted average
-   widths: EB Garamond 12 measured with @capsizecss/unpack (383, italic 379,
-   bold 393 per 1000), the system faces from @capsizecss/metrics. Ascent and
-   descent carry EB Garamond's 710/290, divided by the same ratio. Only the
-   core range is claimed, so symbols fall through to the platform unscaled. */
+   widths, from @capsizecss/metrics for the system faces. Junicode's were
+   measured against EB Garamond's (383, italic 379, bold 393 per 1000, by
+   @capsizecss/unpack) over the corpus's text: on its 1034-unit em the
+   roman sets to EB Garamond's width within 0.01%, so its fallbacks are
+   EB Garamond's; the italic runs 4.7% narrower and the bold 0.8% wider.
+   Ascent and descent carry the instances' 0.71/0.29em, divided by the same
+   ratio. Only the core range is claimed, so symbols fall through to the
+   platform unscaled. */
 
 @font-face {
-  font-family: "EB Garamond Georgia";
+  font-family: "Junicode Georgia";
   font-style: normal;
   font-weight: 400;
   src: local("Georgia");
@@ -77,67 +91,67 @@
 }
 
 @font-face {
-  font-family: "EB Garamond Georgia";
+  font-family: "Junicode Georgia";
   font-style: italic;
   font-weight: 400;
   src: local("Georgia Italic"), local("Georgia-Italic");
-  size-adjust: 83.37%;
-  ascent-override: 85.16%;
-  descent-override: 34.78%;
+  size-adjust: 79.43%;
+  ascent-override: 89.39%;
+  descent-override: 36.51%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Georgia";
+  font-family: "Junicode Georgia";
   font-style: normal;
   font-weight: 700;
   src: local("Georgia Bold"), local("Georgia-Bold");
-  size-adjust: 75.79%;
-  ascent-override: 93.68%;
-  descent-override: 38.26%;
+  size-adjust: 76.41%;
+  ascent-override: 92.92%;
+  descent-override: 37.95%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Noto";
+  font-family: "Junicode Noto";
   font-style: normal;
   font-weight: 400;
   src: local("Noto Serif"), local("Noto Serif Regular"), local("NotoSerif-Regular");
   size-adjust: 79.63%;
-  ascent-override: 89.17%;
+  ascent-override: 89.16%;
   descent-override: 36.42%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Noto";
+  font-family: "Junicode Noto";
   font-style: italic;
   font-weight: 400;
   src: local("Noto Serif Italic"), local("NotoSerif-Italic");
-  size-adjust: 80.81%;
-  ascent-override: 87.86%;
-  descent-override: 35.89%;
+  size-adjust: 76.99%;
+  ascent-override: 92.22%;
+  descent-override: 37.67%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Noto";
+  font-family: "Junicode Noto";
   font-style: normal;
   font-weight: 700;
   src: local("Noto Serif Bold"), local("NotoSerif-Bold");
-  size-adjust: 76.76%;
-  ascent-override: 92.50%;
-  descent-override: 37.78%;
+  size-adjust: 77.39%;
+  ascent-override: 91.74%;
+  descent-override: 37.47%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Times";
+  font-family: "Junicode Times";
   font-style: normal;
   font-weight: 400;
   src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif");
@@ -149,35 +163,37 @@
 }
 
 @font-face {
-  font-family: "EB Garamond Times";
+  font-family: "Junicode Times";
   font-style: italic;
   font-weight: 400;
   src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic");
-  size-adjust: 92.85%;
-  ascent-override: 76.47%;
-  descent-override: 31.23%;
+  size-adjust: 88.46%;
+  ascent-override: 80.26%;
+  descent-override: 32.78%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "EB Garamond Times";
+  font-family: "Junicode Times";
   font-style: normal;
   font-weight: 700;
   src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold");
-  size-adjust: 90.84%;
-  ascent-override: 78.16%;
-  descent-override: 31.92%;
+  size-adjust: 91.58%;
+  ascent-override: 77.53%;
+  descent-override: 31.67%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* EB Garamond has no ✠, so every platform once substituted its own dingbat:
-   a heavy sans cross here, a different one there. This face holds only that
-   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
-   each text stack. unicode-range keeps it from touching any other letter.
-   Block, not swap: a cross that appears a moment late is quieter than one
-   that changes shape as the page settles. */
+/* One ✠ on every platform: EB Garamond had none, so each platform once
+   substituted its own dingbat, a heavy sans cross here, a different one
+   there. Junicode draws one, but a slight pen cross that reads as a dagger at
+   text size; the booklet's heavier cross stays. This face holds only that
+   glyph (760 bytes, Noto Sans Symbols Bold) and heads each text stack.
+   unicode-range keeps it from touching any other letter. Block, not swap: a
+   cross that appears a moment late is quieter than one that changes shape as
+   the page settles. */
 @font-face {
   font-family: "Office Cross";
   font-style: normal;
@@ -199,50 +215,50 @@
 
 /* The long ordo keeps its first font choice for the entire visit. A late
    download must not rewrap hundreds of rows above a day anchor. The preload
-   and the existing offline font cache still give ready visits EB Garamond.
+   and the existing offline font cache still give ready visits Junicode.
    These faces share the same files as prayer pages, which retain swap. */
 @font-face {
-  font-family: "Ordo Garamond";
+  font-family: "Ordo Junicode";
   font-style: normal;
   font-weight: 400;
   font-display: optional;
-  src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  src: url("fonts/junicode-regular.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "Ordo Garamond";
+  font-family: "Ordo Junicode";
   font-style: normal;
   font-weight: 400;
   font-display: optional;
-  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
-  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
+  src: url("fonts/junicode-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-03F5, U+044A-044C, U+10FB, U+16A0-16F0, U+1ACB-1ACE, U+1D00-1FFE, U+20B0, U+20DD, U+2108-2114, U+211E, U+2125-2189, U+21A9, U+2202-2211, U+2219-2265, U+22D7, U+2308-232A, U+23D1-23D4, U+2460-24FF, U+25AA-25AB, U+25B9, U+25C3, U+25CA-25CC, U+2619-261F, U+271D, U+2740, U+2766-277F, U+27E6-27E9, U+2AFD, U+2C65-2C7D, U+2E00-2E5D, U+A71B-A787, U+A7BA-A7D9, U+A7FB-A7FF, U+AB52-AB57, U+E004-E044, U+E066-E168, U+E19E-E1DC, U+E208-E288, U+E2E2-E39F, U+E3D3-E568, U+E58C-E6A3, U+E6E2-E7E7, U+E8A1-E8F3, U+EAD0-EAF3, U+EBA0-EBFF, U+EEC2-EF2D, U+EF90-F0AE, U+F106-F23F, U+F2E0-F2FF, U+F4F7-F4FF, U+F700-F71C, U+F7B2-F7B6, U+FB00-FB06, U+FE5F-FE6A, U+10190-1019A, U+10330-1034A, U+1F100-1F129, U+E0030-E0039, U+E0061-E007F, U+F0000-F0021;
 }
 
 @font-face {
-  font-family: "Ordo Garamond";
+  font-family: "Ordo Junicode";
   font-style: italic;
   font-weight: 400;
   font-display: optional;
-  src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  src: url("fonts/junicode-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: "Ordo Garamond";
+  font-family: "Ordo Junicode";
   font-style: italic;
   font-weight: 400;
   font-display: optional;
-  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
-  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
+  src: url("fonts/junicode-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-03F5, U+044A-044C, U+10FB, U+16A0-16F0, U+1ACB-1ACE, U+1D00-1FFE, U+20B0, U+20DD, U+2108-2114, U+211E, U+2125-2189, U+21A9, U+2202-2211, U+2219-2265, U+22D7, U+2308-232A, U+23D1-23D4, U+2460-24FF, U+25AA-25AB, U+25B9, U+25C3, U+25CA-25CC, U+2619-261F, U+271D, U+2740, U+2766-277F, U+27E6-27E9, U+2AFD, U+2C65-2C7D, U+2E00-2E5D, U+A71B-A787, U+A7BA-A7D9, U+A7FB-A7FF, U+AB52-AB57, U+E004-E044, U+E066-E168, U+E19E-E1DC, U+E208-E288, U+E2E2-E39F, U+E3D3-E568, U+E58C-E6A3, U+E6E2-E7E7, U+E8A1-E8F3, U+EAD0-EAF3, U+EBA0-EBFF, U+EEC2-EF2D, U+EF90-F0AE, U+F106-F23F, U+F2E0-F2FF, U+F4F7-F4FF, U+F700-F71C, U+F7B2-F7B6, U+FB00-FB06, U+FE5F-FE6A, U+10190-1019A, U+10330-1034A, U+1F100-1F129, U+E0030-E0039, U+E0061-E007F, U+F0000-F0021;
 }
 
 @font-face {
-  font-family: "Ordo Garamond";
+  font-family: "Ordo Junicode";
   font-style: normal;
   font-weight: 700;
   font-display: optional;
-  src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+  src: url("fonts/junicode-bold.woff2") format("woff2");
 }
 
 /* The ordo's cross keeps the same first-choice rule: if the glyph is not
@@ -428,7 +444,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "Junicode", "Junicode Georgia", "Junicode Noto", "Junicode Times", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -464,7 +480,7 @@ footer {
 
 /* The ordo's compact detail lines use system Georgia, which stays legible at
    their small working-page sizes. Prayer pages do not: rubrics, scripture
-   references and home labels keep EB Garamond, as a printed diurnal sets its
+   references and home labels keep the text face, as a printed diurnal sets its
    red rubrics in the text face. Georgia is absent on Android and Linux, where
    this stack falls through to the platform serif (Noto/DejaVu), and a second
    face inside the prayer reads as a mistake rather than as an instruction. */
@@ -1715,7 +1731,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "Junicode", "Junicode Georgia", "Junicode Noto", "Junicode Times", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -2067,7 +2083,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-bottom: 0;
 }
 
-/* Real small caps from EB Garamond's own smcp/c2sc glyphs. `text-transform:
+/* Real small caps from Junicode's own smcp/c2sc glyphs. `text-transform:
    uppercase` used to sit alongside `font-variant: small-caps` and silently
    defeated it — the shaper only ever saw capitals, so nothing was left to
    shrink and the heading rendered as full caps. `all-small-caps` engages both
@@ -2130,7 +2146,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   /* Rubrics are instructions within the prayer, not miniature chrome. This
      follows the printed convention of red roman type, while the em sizing
      keeps the instruction subordinate and honors reader text-size choices.
-     0.9em, not Georgia's 0.85em: Garamond's smaller x-height needs the step. */
+     0.9em, not Georgia's 0.85em: the text face's smaller x-height (0.40em)
+     needs the step. */
   font-size: 0.9em;
   line-height: 1.5;
 }
@@ -2328,11 +2345,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 /* lang="la" is for pronunciation, not an epigraphic style. EB Garamond's
-   Latin localized forms swap u for v ("De profvndis", "Dominvm"), which a lay
-   reader takes for a typo, so the tag must not reach the shaper as locl. */
-:lang(la) {
-  font-feature-settings: "locl" 0;
-}
+   Latin localized forms swapped u for v ("De profvndis"), and a rule here
+   switched locl off for Latin. Junicode has no Latin localized forms (its
+   locl serves Turkish, Romanian, Greek and Old English), so the tag reaches
+   the shaper untouched and needs no rule. */
 
 .hymn-title {
   font-style: italic;
@@ -2409,15 +2425,16 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Amen is nested in the last hymn-line span and follows the verse after an
    ordinary word space, as printed diurnals set it; it stays roman like the
-   prayer. The earlier 0.35em sat beside Garamond's narrow 0.2em space and
-   read as a stray double space rather than a deliberate pause. */
+   prayer. The earlier 0.35em sat beside EB Garamond's narrow 0.2em space and
+   read as a stray double space rather than a deliberate pause; Junicode's
+   0.235em space keeps the sum near a wide word space. */
 .hymn-amen {
   font-style: normal;
   margin-left: 0.25em;
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "Junicode", "Junicode Georgia", "Junicode Noto", "Junicode Times", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -2479,16 +2496,17 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 /* Pointing mediant (*) — muted in psalms, canticles, antiphons, responsories, etc.
-   EB Garamond draws an "upper" asterisk: its ink runs from 0.35em to 0.70em
-   above the baseline, so its centre of mass sits at 0.525em — higher than even
-   cap height's centre (0.325em). Undropped it hangs level with the ascenders
-   and reads as a footnote mark rather than a pointing mark in the middle of
-   the verse.
+   The text face draws an "upper" asterisk: Junicode's ink runs from 0.33em to
+   0.65em above the baseline (EB Garamond's, for which this was set, from 0.35em
+   to 0.70em), so its centre of mass sits near 0.49em — higher than even cap
+   height's centre (0.32em). Undropped it hangs level with the ascenders and
+   reads as a footnote mark rather than a pointing mark in the middle of the
+   verse.
 
-   0.25em lands the ink centre at 0.275em, between the x-height centre (0.2em)
-   and the cap-height centre — the optical middle of a mixed-case line. A full
-   drop to the x-height centre (0.325em) sits too low against a line this full
-   of ascenders. Shifted with position, not vertical-align, so the mediant
+   0.25em lands the ink centre at 0.24em, just above the x-height centre
+   (0.2em) and below the cap-height centre — the optical middle of a
+   mixed-case line. A drop of 0.29em, to the x-height centre itself, sits too
+   low against a line this full of ascenders. Shifted with position, not vertical-align, so the mediant
    cannot grow the line box and disturb the psalm's rhythm. */
 .mediant {
   color: var(--muted);
@@ -2533,10 +2551,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 /* Drop cap on the unnumbered opening verse of each psalm/canticle.
-   Sized for EB Garamond: line-height 1 + a small top margin seats the cap top
-   on the first line's cap-height and its foot on the second line's baseline
-   (a clean two-line cap); the small right margin closes EB Garamond's wide
-   capital side-bearing so the following text tucks in. */
+   Sized first for EB Garamond, whose body Junicode is cut to: line-height 1 +
+   a small top margin seats the cap top on the first line's cap-height and its
+   foot on the second line's baseline (a clean two-line cap); the small right
+   margin closes the capital's side-bearing so the following text tucks in. */
 .psalm-verses .verse:first-child::first-letter {
   font-size: 3.05em;
   line-height: 1;
@@ -2867,7 +2885,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Ordo Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", "Ordo Junicode", Georgia, "Times New Roman", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -5378,7 +5396,7 @@ body.season-eastertide {
 }
 
 /* Gilt lozenges either side, as between the frieze's phrases. Empty boxes
-   rather than a glyph: ◆ is not in EB Garamond, and a fallback face would
+   rather than a glyph: ◆ is not in the text face, and a fallback face would
    set it at its own weight and height. */
 .page-home .home-prayer-card h2::before,
 .page-home .home-prayer-card h2::after {
