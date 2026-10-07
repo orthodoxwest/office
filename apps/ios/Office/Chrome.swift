@@ -106,8 +106,13 @@ struct SiteHeader: View {
             HStack(spacing: 0) {
                 Button(action: model.goHome) {
                     HStack(spacing: 0) {
-                        // The consecration roundel that ends every hour, 18pt.
+                        // The consecration roundel that ends every hour, 18pt. Centred on the
+                        // row it sits on the text box's middle, 0.21em above the baseline
+                        // (0.71em ascent, 0.29em descent); the capitals' middle is 0.325em
+                        // above it. Raised by the difference, as the web's phone header
+                        // raises it, it centres on the caps.
                         PaintedMark(.consecration, size: m.px(18), color: p.lining)
+                            .offset(y: -m.px(13.12 * 0.115))
                             .padding(.trailing, m.px(6.08))
                         Text(" DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
                     }
