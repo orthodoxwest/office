@@ -356,8 +356,11 @@ private struct Frontispiece: View {
                 if !view.commemorations.isEmpty {
                     VStack(spacing: 0) {
                         Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(p.muted)
-                        ForEach(view.commemorations, id: \.self) { c in
-                            Text(c).type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                        // A second commemoration is joined to the first with "and", as the web's
+                        // `.commemorations li + li::before`, so the list reads as a sentence.
+                        ForEach(Array(view.commemorations.enumerated()), id: \.offset) { i, c in
+                            (i == 0 ? Text(c) : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true))) + Text(c))
+                                .type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
                         }
                     }
                     .padding(.top, m.px(8))

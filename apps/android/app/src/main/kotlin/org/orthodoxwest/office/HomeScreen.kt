@@ -47,6 +47,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -334,8 +335,14 @@ private fun Frontispiece(
                     if (view.commemorations.isNotEmpty()) {
                         Column(Modifier.padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("ALSO", style = Type.label(10.56f, 0.1f).copy(color = p.muted))
-                            view.commemorations.forEach {
-                                Text(it, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp))
+                            // A second commemoration is joined to the first with "and", as the web's
+                            // `.commemorations li + li::before`, so the list reads as a sentence.
+                            view.commemorations.forEachIndexed { i, name ->
+                                val text = if (i == 0) AnnotatedString(name) else buildAnnotatedString {
+                                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("and ") }
+                                    append(name)
+                                }
+                                Text(text, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp))
                             }
                         }
                     }
