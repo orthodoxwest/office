@@ -5926,6 +5926,52 @@ body.season-eastertide {
   line-height: 1.5;
 }
 
+/* The privacy policy: the reminders page's measure and headings, set as prose. */
+.privacy {
+  max-width: 38rem;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.privacy .ornament-headpiece {
+  width: 5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+}
+
+.privacy h1 {
+  margin-bottom: 0.55rem;
+  color: var(--text);
+  font-size: 1.8rem;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.privacy h2 {
+  margin: 1.6rem 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.privacy p {
+  margin-bottom: 0.8rem;
+}
+
+.privacy a {
+  color: var(--accent);
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.privacy-intro,
+.privacy-updated {
+  color: var(--muted);
+}
+
 .reminders fieldset {
   margin-bottom: 1.1rem;
   padding: 0.55rem 0.85rem 0.75rem;

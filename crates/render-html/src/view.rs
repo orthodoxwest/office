@@ -239,6 +239,13 @@ pub struct NotFoundData {
     pub chrome: Chrome,
 }
 
+/// The privacy policy.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct PrivacyData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+}
+
 /// The styled page for other 4xx and 5xx conditions.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct ErrorData {

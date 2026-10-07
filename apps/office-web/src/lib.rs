@@ -52,6 +52,7 @@ enum Route {
     ServiceWorker,
     Ics,
     Reminders,
+    Privacy,
     Calendar,
     Root,
 }
@@ -106,7 +107,7 @@ impl Server {
                 Route::UsageEvent | Route::Static => {}
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
-                Route::UsageDashboard | Route::Reminders | Route::Calendar | Route::Root => {
+                Route::UsageDashboard | Route::Reminders | Route::Privacy | Route::Calendar | Route::Root => {
                     let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
                     return moved::forward(canonical, method, headers, target);
                 }
@@ -119,6 +120,7 @@ impl Server {
             Route::ServiceWorker => pwa::service_worker(&self.version),
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
+            Route::Privacy => self.privacy(&req),
             Route::Calendar => self.calendar(&req),
             Route::Root => self.root(&req),
         }
@@ -146,6 +148,7 @@ impl Server {
             .route("/sw.js", endpoint(Route::ServiceWorker))
             .route("/office.ics", endpoint(Route::Ics))
             .route("/reminders", endpoint(Route::Reminders))
+            .route("/privacy", endpoint(Route::Privacy))
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
             .route("/calendar/{*path}", endpoint(Route::Calendar))
@@ -231,7 +234,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");

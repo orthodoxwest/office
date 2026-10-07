@@ -167,6 +167,10 @@ android: ## Build the sideloadable Android preview APK (needs Android SDK/NDK an
 	cd apps/android && ./gradlew assemblePreview
 	@echo "APK: apps/android/app/build/outputs/apk/preview/app-preview.apk"
 
+android-bundle: ## Build the signed Play Store bundle (needs the upload key in OFFICE_UPLOAD_*; see apps/android/README.md)
+	cd apps/android && ./gradlew bundleRelease
+	@echo "Bundle: apps/android/app/build/outputs/bundle/release/app-release.aab"
+
 android-screenshots: ## Render Android screens from the Rust core into apps/android/app/build/screenshots/
 	cd apps/android && ./gradlew testDebugUnitTest
 
