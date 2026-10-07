@@ -19,6 +19,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -181,11 +183,27 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
 /** "Expanded" or "Collapsed", after a disclosure's name. */
 fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }
 
-/** The disclosure caret, as the web's `▾`/`▴`: in the ink of the words it opens, a little lighter. */
+/**
+ * The disclosure caret, as the web's `▾`/`▴`: in the ink of the words it opens, a little lighter. Drawn as the web's glyph
+ * measures beside a label (5.5 by 4.5 at 0.85em, centred on the capitals) and scaled with the reader's text size, rather
+ * than left to whichever face sets `▾`.
+ */
 @Composable
 fun Caret(open: Boolean, ink: Color) {
+    val (gap, w, h) = with(LocalDensity.current) { Triple(5.5.sp.toDp(), 5.5.sp.toDp(), 4.5.sp.toDp()) }
+    val fill = ink.copy(alpha = ink.alpha * 0.7f)
     // Drawn, not read: the disclosure says expanded or collapsed.
-    Text(if (open) " ▴" else " ▾", Modifier.clearAndSetSemantics {}, style = TextStyle(fontSize = 9.sp, color = ink.copy(alpha = ink.alpha * 0.7f)))
+    Canvas(Modifier.padding(start = gap).size(w, h).clearAndSetSemantics {}) {
+        val path = Path().apply {
+            if (open) {
+                moveTo(0f, size.height); lineTo(size.width, size.height); lineTo(size.width / 2, 0f)
+            } else {
+                moveTo(0f, 0f); lineTo(size.width, 0f); lineTo(size.width / 2, size.height)
+            }
+            close()
+        }
+        drawPath(path, fill)
+    }
 }
 
 /** A current control's underline: gold for a chosen setting, or `width` thick in the lining for the current page. */

@@ -537,6 +537,23 @@ test("the niche's cross stands clear under the lining at every desktop width", a
   }
 });
 
+test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
+  // At a laptop's size it took two-thirds of an iPad's width and left a third
+  // of the screen bare below it.
+  for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const niche = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero").getBoundingClientRect();
+      const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
+      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
+    expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
 test("home's day stands clear of the lining's hairline, up the head as at its sides", async ({ page }) => {
   // The ordo's names are long and the head narrows as it rises: a name once
   // ran over the hairline at the jambs and, on tall phones with the versicle

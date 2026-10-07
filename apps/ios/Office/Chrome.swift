@@ -35,6 +35,7 @@ struct Quiet: ButtonStyle {
 }
 
 /// The disclosure caret, the web's `▾`/`▴` in the ink of the words it opens, a little lighter: drawn, not read; the control says expanded or collapsed.
+/// Drawn as the web's glyph measures beside a label (5.5 by 4.5 at 0.85em, centred on the capitals), since the system face sets `▾` as a speck on the baseline.
 struct Caret: View {
     let open: Bool
     /// The label's colour.
@@ -42,7 +43,31 @@ struct Caret: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(open ? " ▴" : " ▾").font(.system(size: 9 * m.type)).foregroundStyle(color.opacity(0.7)).accessibilityHidden(true)
+        CaretShape(open: open)
+            .fill(color.opacity(0.7))
+            .frame(width: 5.5 * m.type, height: 4.5 * m.type)
+            .padding(.leading, 5.5 * m.type)
+            .accessibilityHidden(true)
+    }
+}
+
+/// A solid triangle pointing down, or up when open.
+struct CaretShape: Shape {
+    let open: Bool
+
+    func path(in r: CGRect) -> Path {
+        var path = Path()
+        if open {
+            path.move(to: CGPoint(x: r.minX, y: r.maxY))
+            path.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+            path.addLine(to: CGPoint(x: r.midX, y: r.minY))
+        } else {
+            path.move(to: CGPoint(x: r.minX, y: r.minY))
+            path.addLine(to: CGPoint(x: r.maxX, y: r.minY))
+            path.addLine(to: CGPoint(x: r.midX, y: r.maxY))
+        }
+        path.closeSubpath()
+        return path
     }
 }
 

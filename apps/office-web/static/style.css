@@ -7352,6 +7352,18 @@ html:where(:has(> body.page-hour))::before {
   .page-home main { --niche-zoom: 0.9; }
 }
 
+/* A tablet held upright (an iPad's 768–1024px by 1024–1366px) left the
+   niche at a laptop's size, two-thirds of the width with a third of the
+   screen bare below it; it grows to fill the page the way the phone's
+   panel does, the steps leaving the hours and "Change date" in view. */
+@media (min-width: 760px) and (max-width: 1699px) and (min-height: 1060px) and (orientation: portrait) {
+  .page-home main { --niche-zoom: 1.18; }
+}
+
+@media (min-width: 960px) and (max-width: 1699px) and (min-height: 1260px) and (orientation: portrait) {
+  .page-home main { --niche-zoom: 1.38; }
+}
+
 @media (min-width: 1700px) and (min-height: 1000px) {
   .page-home main { --niche-zoom: 1.12; }
 }
