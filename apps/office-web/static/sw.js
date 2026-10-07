@@ -58,9 +58,9 @@ var CORE_ASSETS = [
   // style.css requests these with the same stamps (the server stamps its
   // url()s at build). The -ext faces load only for rare characters, so they
   // are cached when first used rather than precached.
-  assetURL("/static/fonts/junicode-regular.woff2"),
-  assetURL("/static/fonts/junicode-italic.woff2"),
-  assetURL("/static/fonts/junicode-bold.woff2"),
+  assetURL("/static/fonts/eb-garamond-regular.woff2"),
+  assetURL("/static/fonts/eb-garamond-italic.woff2"),
+  assetURL("/static/fonts/eb-garamond-bold.woff2"),
   assetURL("/static/fonts/noto-sans-symbols-cross.woff2"),
   // The limewash wall (portrait for phones, wide crop for large screens), the
   // softened copies behind wide hours' prayer and the Apse vault's leaf mask;

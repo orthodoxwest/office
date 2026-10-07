@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Subset the ✠ (U+2720) glyph the web pages set in text.
 
-EB Garamond had no Maltese cross, so each platform substituted its own
-dingbat, and Junicode's is a slight pen cross that reads as a dagger at
-text size. This keeps one glyph everywhere, drawn from Noto Sans Symbols like
+EB Garamond has no Maltese cross, so each platform substituted its own
+dingbat. This keeps one glyph everywhere, drawn from Noto Sans Symbols like
 the LuaLaTeX booklet's cross. Requires fontTools and brotli
 (tools/requirements.txt). The source may be a TTF/OTF or a WOFF2, e.g.
 Fontsource's noto-sans-symbols-symbols-700-normal.woff2.

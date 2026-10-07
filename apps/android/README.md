@@ -243,11 +243,9 @@ CI uploads them as the `android-screenshots` artifact.
 
 ## Fonts
 
-`res/font/` holds Junicode Regular and Italic and the ✠ glyph from Noto Sans Symbols, under
-the SIL Open Font License (`FONTS-OFL-1.1.txt`). `tools/genjunicode.py` writes the Junicode
-files with the web's faces, from the same variable-font instances: the Latin core and the rest
-of the Latin script, with the web's OpenType features, on EB Garamond's body (a 1034-unit em),
-so the type scale tuned for EB Garamond holds. The iOS app bundles the same files. There is
-deliberately no Bold, since the app sets nothing bold: under Android's Bold text setting Compose
-synthesizes weight from Regular, keeping small caps, ℣/℟ and old-style figures
-(`ScreenshotTest.boldTextSetting`).
+`res/font/` holds EB Garamond Regular and Italic and the ✠ glyph from Noto Sans Symbols,
+under the SIL Open Font License (`FONTS-OFL-1.1.txt`). The Garamond files are the web's own
+instances (`tools/gengaramond.py`: the variable fonts pinned a step heavier than Regular, cut to
+Latin), so the apps set the very glyphs the web does. There is deliberately no Bold: the app
+sets nothing bold, so under Android's Bold text setting Compose synthesizes weight from Regular
+and small caps, sigils and ligatures stay (`ScreenshotTest.boldTextSetting`).

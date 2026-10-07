@@ -60,9 +60,9 @@ final class ProseTests: XCTestCase {
         let font = Scale.body.uiFont()
         var s = ProseSpec(text: NSAttributedString(string: text, attributes: [.font: font]), font: font, line: 32)
         if initial {
-            let raised = NSAttributedString(string: "O", attributes: [.font: junicode(33)])
+            let raised = NSAttributedString(string: "O", attributes: [.font: garamond(33)])
             s.initial = Initial(
-                letter: "O", deep: junicode(69), raised: raised, left: 0, drop: 32, edge: 50, tuck: 0, rows: 2, adapt: adapt, color: .brown
+                letter: "O", deep: garamond(69), raised: raised, left: 0, drop: 32, edge: 50, tuck: 0, rows: 2, adapt: adapt, color: .brown
             )
         }
         return s
