@@ -103,6 +103,14 @@ fn concurrence_winner_table() {
     assert_eq!(winner(&feast("holy-name-jesus", Rank::Double2ndClass, Category::Lord), &lesser_sunday), IIOfPreceding);
     // XIII.12: Double vs day within an octave.
     assert_eq!(winner(&double, &feast("epiphany-octave-day-3", Rank::SemiDouble, Category::Lord)), IIOfPreceding);
+    // A day within a common octave keeps II Vespers before a II Class Double
+    // (2026 ordo 24 April, St George's octave before St Mark; #62), not
+    // before a I Class one or a lesser Double.
+    let george_octave = feast("st-george-octave-day-2", Rank::SemiDouble, Category::Martyr);
+    let mark = feast("st-mark", Rank::Double2ndClass, Category::Apostle);
+    assert_eq!(winner(&george_octave, &mark), IIOfPreceding);
+    assert_eq!(winner(&george_octave, &first_class), IOfFollowing);
+    assert_eq!(winner(&george_octave, &double), IOfFollowing);
     // XIII.9 with X.1(c): a primary II Class Double is worthier than a
     // secondary one of the Lord, either way round (2021, 2022, 2024 ordos; #557).
     let mut cross = feast("finding-holy-cross", Rank::Double2ndClass, Category::Lord);
@@ -226,30 +234,6 @@ fn whitsun_and_easter_vespers_commemorate_the_next_days_double() {
     let primary = with("first-class", Rank::Double1stClass, Category::Lord, |x| x.primary_of_our_lord = true);
     let r = resolve_concurrence(&day(Some(&primary), &[]), &day(Some(&whit_monday), &[&boniface]));
     assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
-}
-
-#[test]
-fn ordo_2026_second_vespers_as_printed() {
-    // #62: the 2026 ordo keeps II Vespers on 24 April and 29 August, with the
-    // following office commemorated. Year-bound: the same pairs in another
-    // year keep the table of concurrence's I Vespers of the following office.
-    let george = f("st-george-octave-day-2", Rank::SemiDouble, Category::Martyr);
-    let mark = f("st-mark", Rank::Double2ndClass, Category::Evangelist);
-    let beheading = f("beheading-john-baptist", Rank::GreaterDouble, Category::Martyr);
-    let sunday = f("pentecost-sunday-13", Rank::SemiDouble, Category::Sunday);
-    let on = |date: &str, c: &FeastRef| CalendarDay { date: Date::parse(date).unwrap(), ..day(Some(c), &[]) };
-    for (prec, fol, date, next, owner) in [
-        (&george, &mark, "2026-04-24", "2026-04-25", IIOfPreceding),
-        (&george, &mark, "2031-04-24", "2031-04-25", IOfFollowing),
-        (&beheading, &sunday, "2026-08-29", "2026-08-30", IIOfPreceding),
-        (&beheading, &sunday, "2037-08-29", "2037-08-30", IOfFollowing),
-    ] {
-        let r = resolve_concurrence(&on(date, prec), &on(next, fol));
-        assert_eq!(r.owner, owner, "{date}");
-        if owner == IIOfPreceding {
-            assert!(same_list(&r.commemorations, &[fol]), "{date}: {:?}", ids(&r.commemorations));
-        }
-    }
 }
 
 #[test]

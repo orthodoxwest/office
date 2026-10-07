@@ -537,6 +537,15 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
     if is_double_or_above(prec) && (is_day_within_octave(fol) || is_saturday_bvm(fol)) {
         return (IIOfPreceding, "concurrence:double-vs-octave-or-saturday-bvm");
     }
+    // A day within a common octave keeps its II Vespers before a Double II
+    // Class, commemorating it (2026 ordo 24 April, Day II of St George's
+    // octave before St Mark; Fr Jason's direction on #62, which reads the
+    // Revised Table as refusing I Vespers to a following II Class feast).
+    // The only such evening in the 2017-2026 ordos; the original Table
+    // (Diurnal p. xlv) gives the following office.
+    if fol.rank == Rank::Double2ndClass && !is_sunday(fol) && is_day_within_octave(prec) && !is_privileged_octave_commemoration(prec) {
+        return (IIOfPreceding, "concurrence:common-octave-day-vs-class-ii");
+    }
     if is_double_or_above(fol) && (is_day_within_octave(prec) || is_saturday_bvm(prec)) {
         return (IOfFollowing, "concurrence:double-vs-octave-or-saturday-bvm");
     }
@@ -916,11 +925,7 @@ fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -
 
     match (prec, fol) {
         (Some(p), Some(f)) if prec_has_ii && fol_has_i => {
-            let (winner, rule) = if ordo_2026_keeps_second_vespers(preceding, p, f) {
-                (VespersOwner::IIOfPreceding, "concurrence:ordo-2026-as-printed")
-            } else {
-                concurrence_winner(p, f)
-            };
+            let (winner, rule) = concurrence_winner(p, f);
             match winner {
                 VespersOwner::IIOfPreceding => {
                     let mut d = second_vespers(rule, p);
@@ -941,22 +946,6 @@ fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -
             d.decisions = decisions;
             d
         }
-    }
-}
-
-/// The 2026 ordo keeps II Vespers, commemorating the following office, on
-/// 24 April (Day II of St George's octave before St Mark) and 29 August (the
-/// Beheading before XIII Sunday after Pentecost); Fr Jason directed following
-/// it as printed (#62). Year-bound: no standing rule fits. The table of
-/// concurrence (Diurnal p. xlv) and every other ordo 2017-2026 give the
-/// following office I Vespers in both pairs (a day within an octave yields to
-/// any Double; Greater Doubles printed I of following before a lesser Sunday
-/// 27 times, II of preceding 3), and both 2026 lines copy earlier templates.
-fn ordo_2026_keeps_second_vespers(preceding: &CalendarDay, prec: &Feast, fol: &Feast) -> bool {
-    match (preceding.date.year(), preceding.date.month(), preceding.date.day()) {
-        (2026, 4, 24) => prec.id == "st-george-octave-day-2" && fol.id == "st-mark",
-        (2026, 8, 29) => prec.id == "beheading-john-baptist" && is_sunday(fol),
-        _ => false,
     }
 }
 
