@@ -518,6 +518,34 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
+
+      # The Dockerfile's cache mounts live only inside this runner's Docker,
+      # so without this every run compiled every crate from scratch. They are
+      # saved like Swatinem/rust-cache's: keyed on the lockfile, refreshed
+      # when it changes, and restored by every branch.
+      - name: Cache the image's Cargo directories
+        id: cargo-cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            ${{ runner.temp }}/docker-cargo/registry
+            ${{ runner.temp }}/docker-cargo/git
+            ${{ runner.temp }}/docker-cargo/target
+          key: docker-cargo-${{ hashFiles('Cargo.lock', 'Dockerfile') }}
+          restore-keys: docker-cargo-
+
+      - name: Load the cache into Docker's cache mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          cache-map: |
+            {
+              "${{ runner.temp }}/docker-cargo/registry": "/usr/local/cargo/registry",
+              "${{ runner.temp }}/docker-cargo/git": "/usr/local/cargo/git",
+              "${{ runner.temp }}/docker-cargo/target": "/usr/src/app/target"
+            }
+          scratch-dir: ${{ runner.temp }}/docker-cargo-scratch
+          skip-extraction: ${{ steps.cargo-cache.outputs.cache-hit }}
+
       - name: Build runtime image
         run: docker build -t office-smoke .
       - name: Validate the packaged corpus and serve pages with usage enabled
