@@ -41,7 +41,7 @@ def dossier():
             "id": "slot-1", "hour": "lauds", "hours": ["lauds"], "slot": "collect",
             "target_section": "collect", "target_key": "proper/st-example/collect",
             "current_tier": "common", "current_key": "commons/confessor/collect",
-            "date": "2026-07-17", "representative_url": "https://office.fly.dev/lauds/2026-07-17",
+            "date": "2026-07-17", "representative_url": "https://orthodoxwestbreviary.com/lauds/2026-07-17",
         }],
     }
 

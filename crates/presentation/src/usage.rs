@@ -7,9 +7,10 @@
 
 use calendar::Date;
 
-/// Where the native apps report until the server names another: the production server's
-/// usage endpoint, which keeps answering after the site moves (see [`ENDPOINT_HEADER`]).
-pub const ENDPOINT: &str = "https://office.fly.dev/api/usage";
+/// Where the native apps report until the server names another: the canonical host's usage
+/// endpoint. Builds from before the move post to office.fly.dev, which keeps answering and tells
+/// them the new address (see [`ENDPOINT_HEADER`]).
+pub const ENDPOINT: &str = "https://orthodoxwestbreviary.com/api/usage";
 
 /// The response header naming where the apps should report from now on: the canonical host's
 /// endpoint, sent once the server has one (`OFFICE_CANONICAL_HOST`). An app stores it and

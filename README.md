@@ -1,6 +1,6 @@
 # AWRV Benedictine Divine Office
 
-[Pray the Office](https://office.fly.dev) — the English Benedictine daily
+[Pray the Office](https://orthodoxwestbreviary.com) — the English Benedictine daily
 office for Antiochian Western Rite Vicariate use, with each hour's prayers,
 psalms, and propers assembled on one page.
 
@@ -196,11 +196,12 @@ an old series ends where its meaning ended. The vocabulary lives in
 tokens from newer or older cached clients are dropped and the page still counts.
 
 **The native apps.** Release builds of the Android and iOS apps post the same
-beacon to `https://office.fly.dev/api/usage` (`presentation::usage::ENDPOINT`)
-until the server names another: once `OFFICE_CANONICAL_HOST` is set, every
-counted beacon's reply carries `Office-Usage-Endpoint: https://<host>/api/usage`,
-and the apps keep it and post there from then on (only a plain HTTPS host is
-accepted). The browser's beacon is relative, so it follows the site by itself.
+beacon to `https://orthodoxwestbreviary.com/api/usage` (`presentation::usage::ENDPOINT`)
+until the server names another: every counted beacon's reply carries
+`Office-Usage-Endpoint: https://<canonical host>/api/usage`, and the apps keep it
+and post there from then on (only a plain HTTPS host is accepted). Builds from
+before the move post to `https://office.fly.dev/api/usage`, which keeps
+answering, and follow the header the same way. The browser's beacon is relative, so it follows the site by itself.
 Apps post when a page is shown: home and the reminders page count toward the total, each
 hour and the ordo in their columns, and turning reminders on counts as
 Reminders. The same current-page window applies (`current_day`, `current_year`);
