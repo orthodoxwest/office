@@ -28,10 +28,14 @@ pub fn season_class(season: Option<Season>) -> &'static str {
     }
 }
 
-/// The body class that frames a first-class day's hour, or nothing.
-pub fn rank_class(rank: Option<Rank>) -> &'static str {
-    match rank {
-        Some(Rank::Double1stClass) => "rank-first-class",
+/// The body class that frames a first-class feast's hour, or nothing. The ranking gives the
+/// penitential days of the first class the same rank for precedence (the Sundays of Lent, Ash
+/// Wednesday, Holy Week, the vigils), so the frame goes by the day's colour as well: a violet or
+/// black first-class day is kept, not kept festival.
+pub fn rank_class(rank: Option<Rank>, color: Option<Color>) -> &'static str {
+    match (rank, color) {
+        (Some(Rank::Double1stClass), Some(Color::Violet | Color::Black)) => "",
+        (Some(Rank::Double1stClass), _) => "rank-first-class",
         _ => "",
     }
 }
@@ -390,11 +394,15 @@ mod tests {
     }
 
     #[test]
-    fn rank_class_frames_only_first_class_days() {
-        assert_eq!(rank_class(Some(Rank::Double1stClass)), "rank-first-class");
-        assert_eq!(rank_class(Some(Rank::Double2ndClass)), "");
-        assert_eq!(rank_class(Some(Rank::Simple)), "");
-        assert_eq!(rank_class(None), "");
+    fn rank_class_frames_only_first_class_feasts() {
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::White)), "rank-first-class");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Red)), "rank-first-class");
+        // The penitential first-class days (Lent's Sundays, Ash Wednesday, Good Friday) are not framed.
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Violet)), "");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Black)), "");
+        assert_eq!(rank_class(Some(Rank::Double2ndClass), Some(Color::White)), "");
+        assert_eq!(rank_class(Some(Rank::Simple), Some(Color::White)), "");
+        assert_eq!(rank_class(None, None), "");
     }
 
     #[test]

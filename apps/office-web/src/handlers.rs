@@ -377,7 +377,7 @@ impl Server {
                 // The hour's own season: I Vespers of Easter on Holy Saturday
                 // is unveiled while that day's Lauds is still veiled.
                 season_class: season_class(hour.season).into(),
-                rank_class: rank_class(hour.rank).into(),
+                rank_class: rank_class(hour.rank, hour.color).into(),
                 show_today: date_str != today_slug,
             },
             leader_forms: composed
