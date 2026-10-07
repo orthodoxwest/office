@@ -5,7 +5,8 @@ Font Name. See OFL-1.1.txt in this directory.
 
 Source: https://github.com/psb1558/Junicode-font (Junicode 2, version
 2.003: JunicodeVF-Roman and JunicodeVF-Italic). tools/genjunicode.py pins
-the variable axes (wght 440, bold 700; wdth 100; ENLA 0), names the
+the variable axes (wght 440, bold 700; wdth 100, the small capitals from
+wdth 120 so they set as wide as EB Garamond's did; ENLA 0), names the
 instances "Junicode", draws Q with the face's long-tailed alternate, makes
 old-style figures the default, enlarges the em to 1034 units so the face
 sets at EB Garamond's x-height and width, sets compact vertical metrics
