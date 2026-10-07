@@ -257,7 +257,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 // row it sits on the text box's middle, 0.21em above the baseline (0.71em
                 // ascent, 0.29em descent); the capitals' middle is 0.325em above it. Raised by
                 // the difference, as the web's phone header raises it, it centres on the caps.
-                ConsecrationCross(Modifier.offset(y = -(13.12f * 0.115f).dp).size(18.dp))
+                ConsecrationCross(Modifier.offset(y = -(14.4f * 0.115f).dp).size(18.dp))
                 Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))

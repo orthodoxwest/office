@@ -112,7 +112,7 @@ struct SiteHeader: View {
                         // above it. Raised by the difference, as the web's phone header
                         // raises it, it centres on the caps.
                         PaintedMark(.consecration, size: m.px(18), color: p.lining)
-                            .offset(y: -m.px(13.12 * 0.115))
+                            .offset(y: -m.px(14.4 * 0.115))
                             .padding(.trailing, m.px(6.08))
                         Text(" DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
                     }

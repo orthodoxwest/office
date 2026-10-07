@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -523,10 +525,12 @@ private val HymnSlack: Dp = 1.dp
  * measure (`width: fit-content`). A hymn is a run of stanzas, with any rubric or gap among them.
  */
 @Composable
-fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
+fun hymnColumns(sections: List<SectionView>, density: Density = LocalDensity.current): Map<Pair<Int, Int>, Dp> {
     val p = LocalPalette.current
-    val measurer = rememberTextMeasurer()
-    val density = LocalDensity.current
+    val fontFamilyResolver = LocalFontFamilyResolver.current
+    val layoutDirection = LocalLayoutDirection.current
+    // At `density`, which the wide hour scales for its larger prayer type, not the composition's own.
+    val measurer = remember(density, fontFamilyResolver, layoutDirection) { TextMeasurer(fontFamilyResolver, density, layoutDirection) }
     val style = Type.verse.copy(color = p.text)
     val face = garamond()
     val texts = sections.map { s -> s.blocks.map { if (it.kind == BlockKind.STANZA) runs(it) else null } }

@@ -231,7 +231,7 @@ object Type {
     /** Uppercase working labels: "Change date", "Menu", continuation labels. */
     fun label(size: Float, tracking: Float) = face(size, size * 1.6f).copy(letterSpacing = (size * tracking).sp)
 
-    val brand = label(13.12f, 0.08f)
+    val brand = label(14.4f, 0.08f)
     val menu = label(12.48f, 0.08f)
     val control = label(11.52f, 0.1f)
     val small = face(12.48f, 19.97f)

@@ -64,7 +64,7 @@ struct HomeScreen: View {
                             // Centred between the header and the foot, as the web's desktop home.
                             Spacer(minLength: 0)
                             // The moulding stands 0.75rem out from the card; room for it below the header.
-                            Frontispiece(view: view, date: date, tier: HomeTier(desk: true, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout), niche: niche)
+                            Frontispiece(view: view, date: date, tier: HomeTier(desk: true, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: niche)
                                 .background(GeometryReader { card in
                                     Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
                                 })
@@ -82,7 +82,7 @@ struct HomeScreen: View {
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
                         PhoneHome(height: tall) {
                             SiteHeader()
-                            Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout), niche: nil)
+                            Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
@@ -142,9 +142,10 @@ private struct PhoneHome: Layout {
  * A phone's head, its cross and the room above the date go by the height home has (`tall`): from
  * 800 high the card has height to spare, so the head rises further to a sharper point, the cross
  * and the date stand lower in it, and the spare height is parted two to three above and below the
- * day rather than centred about it; from 880 more so. Its larger type and rows go by width as
+ * day rather than centred about it; from 880 more so. Its larger rows and controls go by width as
  * well, from 375 wide and 830 or 880 high: a narrower or shorter phone needs the height for the
- * lines its day wraps to. A wide screen's niche (`desk`) has its own. `card` is the card's width.
+ * lines its day wraps to. A wide screen's niche (`desk`) has its own. `card` is the card's width;
+ * `dyn` the reader's Dynamic Type size over the text size's own scale, which `Metrics.type` carries.
  */
 struct HomeTier {
     let desk: Bool
@@ -152,14 +153,34 @@ struct HomeTier {
     private let type: Int
     private let short: Bool
     private let card: CGFloat
+    private let tall: CGFloat
+    private let dyn: CGFloat
 
-    init(desk: Bool, screen: CGFloat, tall: CGFloat, card: CGFloat) {
+    init(desk: Bool, screen: CGFloat, tall: CGFloat, card: CGFloat, dyn: CGFloat = 1) {
         self.desk = desk
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
         short = !desk && tall <= 700
         self.card = card
+        self.tall = tall
+        self.dyn = dyn
     }
+
+    /**
+     * The head's type is fitted to the panel, not to Dynamic Type (the web's `--date-size`). The
+     * head is as tall as the arch's rise, a share of the card's width, plus whatever height home
+     * has to spare, so type set by the reader's size floats in it set small and crowds it set
+     * large. The date is 7% of the card's inline size (its width inside 16pt of padding) or 2.92%
+     * of home's height, whichever is more, within bounds that keep Dynamic Type; the feast and the
+     * commemorations follow in proportion. A style's size is scaled by `Metrics.type` when set, so
+     * Dynamic Type is divided out of the fitted size here. The usual size at 375×667 gives the
+     * sizes the head had (22, 17 and 14px), a tall phone the sizes its tier had (25 and 27px for
+     * the date). A niche keeps its own sizes.
+     */
+    private func fitted(_ inline: CGFloat, _ height: CGFloat, _ lo: CGFloat, _ hi: CGFloat) -> CGFloat {
+        min(max(max(inline, height) / dyn, lo), hi)
+    }
+    private var inline: CGFloat { card - 32 }
 
     private func pick<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[min(type, phone.count - 1)] }
     private func rise<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[step] }
@@ -170,7 +191,7 @@ struct HomeTier {
      * box is a thumb's height with its line at the foot, so the room gives back the box's slack
      * above the line: the date stands where it stood centred in the box, the feast closer under it.
      */
-    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) - (desk ? 0 : (44 - date.line) / 2) }
+    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) - (desk ? 0 : (44 - date.line * dyn) / 2) }
     var crownTop: CGFloat { rise(48, 33.6, 49.6, 54.4) }
     var crownSize: CGFloat { rise(36, 30.4, 35.2, 40) }
     /// Spare height under the head is parted 2:3 above and below the day, else the day is centred in it.
@@ -184,7 +205,11 @@ struct HomeTier {
      */
     var dayClear: CGFloat { lining + 9 + 12 }
     var bottom: CGFloat { desk ? 20 : 12 }
-    var date: TextStyle { pick(Scale.body.sized(25.92, line: 31.1).tracked(0.39), Scale.body.sized(22.08, line: 26.5).tracked(0.22), Scale.body.sized(24.8, line: 29.76).tracked(0.25), Scale.body.sized(27.2, line: 32.64).tracked(0.27)) }
+    var date: TextStyle {
+        if desk { return Scale.body.sized(25.92, line: 31.1).tracked(0.39) }
+        let size = fitted(0.07 * inline, 0.0292 * tall, 19.2, 32)
+        return Scale.body.sized(size, line: size * 1.2).tracked(size * 0.01)
+    }
     /**
      * The head's width `y` below the card's top inside the lining's hairline, less the day's 12pt
      * of air each side: a line of the day set there clears the lining.
@@ -195,15 +220,24 @@ struct HomeTier {
      * phone's: a date too long for it breaks after the weekday, its second line lower where the
      * head is wider.
      */
-    var dateMeasure: CGFloat? { desk ? nil : min(card * pick(0, 0.233, 0.3) + 139, clear(headPad + 44 - date.line)) }
-    var feast: TextStyle { pick(Scale.body.sized(18.72, line: 23.4), Scale.body.sized(17.28, line: 21.6), Scale.body.sized(18.56, line: 23.2), Scale.body.sized(20, line: 25)) }
+    var dateMeasure: CGFloat? { desk ? nil : min(card * pick(0, 0.233, 0.3) + 139, clear(headPad + 44 - date.line * dyn)) }
+    var feast: TextStyle {
+        if desk { return Scale.body.sized(18.72, line: 23.4) }
+        let size = fitted(0.055 * inline, 0.0215 * tall, 15.2, 24)
+        return Scale.body.sized(size, line: size * 1.25)
+    }
     /**
      * The feast's measure, the head's width at its first line, when the day stands at the head's
      * room: a long name breaks there rather than running over the lining further up the arch.
      */
     var feastMeasure: CGFloat? { desk ? nil : clear(headPad + 44 + 2) }
     /// A short phone's commemorations give way, so a past date with them still fits.
-    var commemoration: TextStyle { short ? TextStyle(size: 13.6, line: 17.68) : pick(TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 14, line: 20), TextStyle(size: 16.32, line: 22.85)) }
+    var commemoration: TextStyle {
+        if short { return TextStyle(size: 13.6, line: 17.68) }
+        if desk { return TextStyle(size: 14, line: 20) }
+        let size = fitted(0.046 * inline, 0.0175 * tall, 12.8, 17.6)
+        return TextStyle(size: size, line: size * 1.4)
+    }
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
     /// and inside the day's clearance of the lining.
     var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }

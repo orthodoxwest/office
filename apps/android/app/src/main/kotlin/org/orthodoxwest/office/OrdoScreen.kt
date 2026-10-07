@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -449,19 +450,24 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         "abstinence".takeIf { d.abstinence },
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
-    val body: @Composable ColumnScope.() -> Unit = {
-        Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
-            if (d.commemorations.isNotEmpty()) {
-                val n = d.commemorations.size
-                SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
-            }
-            if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
+    val buttons: @Composable RowScope.() -> Unit = {
+        if (d.commemorations.isNotEmpty()) {
+            val n = d.commemorations.size
+            SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
         }
+        if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
+    }
+    val unfolded: @Composable ColumnScope.() -> Unit = {
         Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
         // Shown for the whole month at once, the rows stay where they are.
         Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
     }
-    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, body)
+    val anyOpen = open["comms"] == true || (details && hasDetails)
+    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
+    val body: @Composable ColumnScope.() -> Unit = {
+        Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+        unfolded()
+    }
     // Today is painted, not selected: a ground of the frieze's wash ruled top and bottom in the gold
     // line, inset 8dp from the gutters, the day's number in gold.
     Column(
@@ -527,7 +533,12 @@ private fun DayColumns(modifier: Modifier) {
     }
 }
 
-/** A day as a row of the desktop table: its colour as a rail beside the date, then the columns. */
+/**
+ * A day as a row of the desktop table: its colour as a rail beside the date, then the columns. The
+ * disclosures share the feast's line, 1.25rem after the name (the web's inline `.day-disclosures`
+ * from 701px), so a month reads as one line per day; one that is open (`anyOpen`) drops below the
+ * name at the column's full width, with what it unfolds.
+ */
 @Composable
 private fun DayTableRow(
     d: OrdoDayView,
@@ -536,7 +547,9 @@ private fun DayTableRow(
     spoken: String,
     onDay: (LocalDate) -> Unit,
     modifier: Modifier,
-    body: @Composable ColumnScope.() -> Unit,
+    anyOpen: Boolean,
+    buttons: @Composable RowScope.() -> Unit,
+    unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
     val rail = dayColor(d.color)
@@ -553,7 +566,8 @@ private fun DayTableRow(
             },
         ),
     ) {
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 10.4.dp, bottom = 7.2.dp)) {
+        // The web's `.month-table td`: 0.5rem above and below, from 701px.
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
                     .drawBehind { drawRect(rail, Offset(0f, 1.6.dp.toPx()), Size(3.dp.toPx(), size.height - 1.6.dp.toPx())) }
@@ -567,8 +581,17 @@ private fun DayTableRow(
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
                 // The date's stop already says the feast; the feast is a second target for the eye only.
-                FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp), Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
-                body()
+                val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
+                if (anyOpen) {
+                    FeastName(d, name, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                } else {
+                    Row {
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap { onDay(date) }.semantics { hideFromAccessibility() })
+                        Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                    }
+                }
+                unfolded()
             }
             // Fasting and abstinence stay quiet, so red in a row means rank.
             Box(Modifier.width(FlagCol).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {

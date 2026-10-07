@@ -148,7 +148,15 @@ struct HourScreen: View {
 
     var body: some View {
         let o = Ornament.of(p, season: view.ornament)
-        let columns = hymnColumns(view.sections, p, o, m)
+        // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
+        // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
+        // keep their type. Only `type` steps, so the office's own spacing stands.
+        let prayer: Metrics = {
+            var scaled = m
+            if width >= m.px(widePrayerFrom) { scaled.type *= widePrayerStep }
+            return scaled
+        }()
+        let columns = hymnColumns(view.sections, p, o, prayer)
         let index = model.hours.firstIndex(of: view.hour) ?? 0
         let rows = self.rows
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
@@ -180,6 +188,7 @@ struct HourScreen: View {
                                 .padding(.bottom, expanded ? m.px(12.8) : 0)
                                 .measured(m)
                                 .padding(.horizontal, inset)
+                                .environment(\.metrics, prayer)
                             case let .block(at, block, gap, cross):
                                 VStack(spacing: 0) {
                                     if cross {
@@ -190,6 +199,7 @@ struct HourScreen: View {
                                 .padding(.top, m.px(gap))
                                 .measured(m)
                                 .padding(.horizontal, inset)
+                                .environment(\.metrics, prayer)
                             }
                         }
                         .read(n, into: reading)
@@ -366,6 +376,10 @@ private struct FirstClassFrame: View {
         .accessibilityHidden(true)
     }
 }
+
+/// Where the prayer's text steps up to 21px, and by how much (the web's `.elements` from 920px).
+private let widePrayerFrom: CGFloat = 920
+private let widePrayerStep: CGFloat = 1.05
 
 /// The width from which a first-class frame stands clear of the measure: room for 40pt outside the text each side.
 private let frameClear: CGFloat = measure + 80

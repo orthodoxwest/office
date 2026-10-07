@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
@@ -63,6 +65,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,12 +128,18 @@ fun HourScreen(
         }
     }
     val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
-    val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
         val inset = if (view.firstClass && maxWidth < FrameClear) FrameInset else 0.dp
+        // From 920dp the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
+        // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
+        // keep their type. sp carries the step, so the office's own spacing in dp stands.
+        val base = LocalDensity.current
+        val wide = maxWidth >= WidePrayerFrom
+        val prayer = remember(base, wide) { if (wide) Density(base.density, base.fontScale * WidePrayerStep) else base }
+        val columns = hymnColumns(view.sections, prayer)
         LazyColumn(
             Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
             state = listState,
@@ -148,7 +158,7 @@ fun HourScreen(
                 if (section.collapsible) {
                     val expanded = open[i] == true
                     item(key = "toggle-$i") {
-                        Row(
+                        CompositionLocalProvider(LocalDensity provides prayer) { Row(
                             Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
                             horizontalArrangement = Arrangement.Center,
@@ -156,7 +166,7 @@ fun HourScreen(
                         ) {
                             Text(section.label, style = Type.heading.copy(color = p.titulus))
                             Caret(expanded, p.titulus)
-                        }
+                        } }
                     }
                     prev = null
                     afterClosed = !expanded
@@ -178,7 +188,11 @@ fun HourScreen(
                     val cross = part && begun
                     begun = true
                     afterClosed = false
-                    item(key = "$i-$j") { Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross) }
+                    item(key = "$i-$j") {
+                        CompositionLocalProvider(LocalDensity provides prayer) {
+                            Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross)
+                        }
+                    }
                     prev = block
                 }
             }
@@ -230,6 +244,10 @@ private fun Modifier.firstClassFrame(on: Boolean, state: LazyListState, lining: 
         }
     }
 }
+
+/** Where the prayer's text steps up to 21px, and by how much (the web's `.elements` from 920px). */
+private val WidePrayerFrom: Dp = 920.dp
+private const val WidePrayerStep = 1.05f
 
 /** What the office's text gives a first-class frame on a phone, each side (the web's 12px side columns). */
 private val FrameInset = 12.dp
