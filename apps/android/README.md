@@ -186,6 +186,22 @@ builds the same bundle when the repository has the `ANDROID_UPLOAD_KEYSTORE_BASE
 the `office-release-aab` artifact. The version code is the commit count, so build from a full
 clone of `master`.
 
+### Publishing from CI
+
+The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
+and uploads it to a track you pick (`internal`, `alpha` for Closed testing, or `production`),
+with an optional staged rollout and release notes. You start it by hand from the Actions tab.
+It needs:
+
+- the three upload-key secrets above;
+- `PLAY_SERVICE_ACCOUNT_JSON`: the JSON key of a Google Cloud service account that has been
+  invited under Play Console's *Users and permissions* with release rights for this app;
+- a `play` environment (Settings → Environments) with you as required reviewer, so every
+  run waits for approval.
+
+Google's API can't create the app or take its first bundle, so the very first upload is
+done by hand in Play Console.
+
 ## Building locally
 
 Needs: the Rust toolchain with the Android targets, `cargo-ndk`, JDK 21, and the Android
