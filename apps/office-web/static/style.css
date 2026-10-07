@@ -6331,9 +6331,10 @@ body.season-eastertide {
 }
 
 /* Native initial sizing follows the local leading (prose, psalm, or chant).
-   EB Garamond's initial sits optically high in that box: lower its ink without
-   extending the exclusion into a third row, except where a long tail needs
-   additional clearance. Both margins scale with the type. */
+   The initial sits optically high in that box (a trait of EB Garamond's that
+   Junicode shares): lower its ink without extending the exclusion into a
+   third row, except where a long tail needs additional clearance. Both
+   margins scale with the type. */
 @supports (initial-letter: 2) {
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
@@ -6351,15 +6352,15 @@ body.season-eastertide {
 
 /* Without initial-letter (WebKit, Firefox), the same two-line initial as a
    float. Its cap height spans a line pitch and the text's cap height
-   (Garamond's 0.65em), as initial-letter: 2 sizes it, so with its cap top
+   (Junicode's 0.641em), as initial-letter: 2 sizes it, so with its cap top
    on the first line's cap height its foot stands on the second baseline.
    Engines size a floated first letter two ways: by its ink (Chromium,
    Firefox), its cap top then the float's top, or by its line-height. At
-   0.88, 1 - 2 x (ascent 0.71 - cap height 0.65), the line-height box seats
+   0.862, 1 - 2 x (ascent 0.71 - cap height 0.641), the line-height box seats
    the cap top there too, so one top margin serves both: the first line's
    half-leading and the text's ascent above its caps. Either way -0.1em
-   below ends the float inside the second line, and Q's depth reaches the
-   third, at the leadings the openings use (32-35px on 20px text). The
+   below ends the float inside the second line, and a profile's depth
+   reaches the third, at the leadings the openings use (32-35px on 20px text). The
    letter reads its opening's leading and text size through registered
    lengths, resolved on the opening itself; the profiles keep their
    declared 3.05em, as initial-letter keeps it. Without lh or registered
@@ -6396,9 +6397,9 @@ body.season-eastertide {
   .marian-antiphon .chant-line-opening::first-letter,
   .corporate-lord-prayer-officiant::first-letter {
     --opening-em: calc(3.05 * var(--opening-text));
-    font-size: calc(var(--opening-text) + var(--opening-line) / 0.65);
-    line-height: 0.88;
-    margin-top: calc((var(--opening-line) - var(--opening-text)) / 2 + 0.06 * var(--opening-text));
+    font-size: calc(var(--opening-text) + var(--opening-line) / 0.641);
+    line-height: 0.862;
+    margin-top: calc((var(--opening-line) - var(--opening-text)) / 2 + 0.069 * var(--opening-text));
     margin-right: calc(var(--initial-gap, 0.06) * var(--opening-em));
     margin-bottom: calc(-0.1em + var(--initial-depth, 0) * var(--opening-em));
     margin-left: calc(var(--initial-hang, 0) * var(--opening-em));
@@ -6407,44 +6408,68 @@ body.season-eastertide {
   .psalm-verses .verse:first-child::first-letter {
     margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * var(--opening-em));
   }
+
+  /* The floated Q is fitted to its advance, which ends at the bowl, so the
+     second line already runs over its tail and only the first needs to
+     clear the bowl (see the profiles below). */
+  :root .elements [data-initial="Q"] {
+    --initial-gap: 0.095;
+    --initial-tuck: -0.3;
+  }
 }
 
-/* Optical profiles for every Latin capital in the bundled EB Garamond.
+/* Optical profiles for every Latin capital in the bundled Junicode.
    The float gap reserves space beside the lower line; the word adjustment
    independently fits the upper line. Both follow the painted glyph contour,
    with a common breathing space. Gap/hang use the initial's declared em
    (3.05em; initial-letter draws it larger without changing it); word uses
    the body em. Each is a bare number, multiplied by its em where it is
-   used, so the fallback below keeps that em while drawing a larger letter. A negative gap lets text sit below a bowl or beside a narrow stem.
-   Calibrated against two-line initials, then checked at other leading/sizes.
-   Depth keeps a descending tail clear of a following row (notably Q).
-   Recalibrate these values when changing the initial face. */
-.elements [data-initial="A"] { --initial-gap: 0.06; --initial-tuck: -0.8; --initial-hang: -0.02; }
-.elements [data-initial="B"] { --initial-gap: 0.08; --initial-tuck: -0.2; }
-.elements [data-initial="C"] { --initial-gap: 0.08; --initial-tuck: -0.05; --initial-hang: -0.025; }
-.elements [data-initial="D"] { --initial-gap: 0.03; --initial-tuck: 0.1; }
-.elements [data-initial="E"] { --initial-gap: 0.08; --initial-tuck: -0.15; }
-.elements [data-initial="F"] { --initial-gap: -0.135; --initial-tuck: 0.65; }
-.elements [data-initial="G"] { --initial-gap: -0.005; --initial-tuck: 0; --initial-hang: -0.025; }
-.elements [data-initial="H"] { --initial-gap: 0.06; --initial-tuck: 0; }
-.elements [data-initial="I"] { --initial-gap: 0.03; --initial-tuck: 0; }
-.elements [data-initial="J"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
-.elements [data-initial="K"] { --initial-gap: 0.06; --initial-tuck: 0; }
-.elements [data-initial="L"] { --initial-gap: 0.06; --initial-tuck: -0.9; }
-.elements [data-initial="M"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
-.elements [data-initial="N"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
+   used, so the fallback below keeps that em while drawing a larger letter.
+   A negative gap lets text sit below a bowl or beside a narrow stem.
+   Depth keeps a descending tail clear of a following row; no capital now
+   needs it, but the rules still read it.
+
+   They were first calibrated by eye for EB Garamond, then carried to
+   Junicode by measurement: each capital was set as a psalm's two-line
+   initial, both faces, both engines, and the nearest distance between the
+   painted letter and each line's ink was taken from the rendered pixels.
+   Junicode's gap and tuck are those that give each line the clearance it
+   had beside EB Garamond's letter, so the fit keeps the eye's judgement
+   while following the new contours, and were then checked on the hours.
+   Recalibrate them the same way when changing the initial face.
+
+   Q is the exception. Its long tail sweeps nearly half an em past its body,
+   and initial-letter (as the native apps) keeps the second line clear of
+   the letter's ink, which would leave a hole beside the bowl; its negative
+   gap brings that line in over the tail, as a scribe writes beside a
+   flourished Q. The float fallback keeps clear of the advance, which ends
+   at the bowl, so it takes its own fit in the fallback above. */
+.elements [data-initial="A"] { --initial-gap: 0.065; --initial-tuck: -0.7; --initial-hang: -0.02; }
+.elements [data-initial="B"] { --initial-gap: 0.06; --initial-tuck: -0.15; }
+.elements [data-initial="C"] { --initial-gap: 0.07; --initial-tuck: -0.05; --initial-hang: -0.025; }
+.elements [data-initial="D"] { --initial-gap: 0.05; --initial-tuck: 0.05; }
+.elements [data-initial="E"] { --initial-gap: 0.075; --initial-tuck: -0.15; }
+.elements [data-initial="F"] { --initial-gap: -0.035; --initial-tuck: 0.5; }
+.elements [data-initial="G"] { --initial-gap: 0.005; --initial-tuck: 0.1; --initial-hang: -0.025; }
+.elements [data-initial="H"] { --initial-gap: 0.05; --initial-tuck: 0.1; }
+.elements [data-initial="I"] { --initial-gap: -0.01; --initial-tuck: 0; }
+.elements [data-initial="J"] { --initial-gap: -0.005; --initial-tuck: 0.4; }
+.elements [data-initial="K"] { --initial-gap: 0.065; --initial-tuck: -0.15; }
+.elements [data-initial="L"] { --initial-gap: 0.055; --initial-tuck: -0.8; }
+.elements [data-initial="M"] { --initial-gap: 0.07; --initial-tuck: 0.05; }
+.elements [data-initial="N"] { --initial-gap: -0.035; --initial-tuck: 0.3; }
 .elements [data-initial="O"] { --initial-gap: 0.045; --initial-tuck: 0; --initial-hang: -0.025; }
-.elements [data-initial="P"] { --initial-gap: -0.215; --initial-tuck: 0.85; }
-.elements [data-initial="Q"] { --initial-gap: 0.06; --initial-tuck: -0.2; --initial-hang: -0.025; --initial-depth: 0.1; }
-.elements [data-initial="R"] { --initial-gap: 0.08; --initial-tuck: -0.8; }
-.elements [data-initial="S"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
-.elements [data-initial="T"] { --initial-gap: -0.15; --initial-tuck: 0.65; --initial-hang: -0.06; }
-.elements [data-initial="U"] { --initial-gap: -0.055; --initial-tuck: 0.35; }
-.elements [data-initial="V"] { --initial-gap: -0.265; --initial-tuck: 1; --initial-hang: -0.025; }
-.elements [data-initial="W"] { --initial-gap: -0.215; --initial-tuck: 0.85; --initial-hang: -0.025; }
-.elements [data-initial="X"] { --initial-gap: 0.06; --initial-tuck: 0; }
-.elements [data-initial="Y"] { --initial-gap: -0.1; --initial-tuck: 0.6; --initial-hang: -0.025; }
-.elements [data-initial="Z"] { --initial-gap: 0.06; --initial-tuck: -0.05; }
+.elements [data-initial="P"] { --initial-gap: -0.15; --initial-tuck: 0.85; }
+.elements [data-initial="Q"] { --initial-gap: -0.45; --initial-tuck: -0.05; --initial-hang: -0.025; }
+.elements [data-initial="R"] { --initial-gap: 0.085; --initial-tuck: -0.5; }
+.elements [data-initial="S"] { --initial-gap: 0.055; --initial-tuck: -0.05; }
+.elements [data-initial="T"] { --initial-gap: -0.1; --initial-tuck: 0.5; --initial-hang: -0.06; }
+.elements [data-initial="U"] { --initial-gap: -0.045; --initial-tuck: 0.35; }
+.elements [data-initial="V"] { --initial-gap: -0.205; --initial-tuck: 0.85; --initial-hang: -0.025; }
+.elements [data-initial="W"] { --initial-gap: -0.23; --initial-tuck: 0.9; --initial-hang: -0.025; }
+.elements [data-initial="X"] { --initial-gap: 0.08; --initial-tuck: -0.05; }
+.elements [data-initial="Y"] { --initial-gap: -0.135; --initial-tuck: 0.65; --initial-hang: -0.025; }
+.elements [data-initial="Z"] { --initial-gap: 0.07; --initial-tuck: -0.1; }
 
 /* A raised initial sits on one baseline; its join uses a much smaller fit. */
 .elements :is([data-initial="T"], [data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
