@@ -318,6 +318,14 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
  * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
  */
+/// The label with only these of its runs: a psalm title's number, or its incipit, set on a line
+/// of its own. (A statement that mutates a copy cannot stand inside a view builder.)
+private func labelPart(_ block: BlockView, _ runs: ArraySlice<RunView>) -> BlockView {
+    var part = block
+    part.runs = Array(runs)
+    return part
+}
+
 struct BlockRow: View {
     let block: BlockView
     var column: CGFloat?
@@ -334,10 +342,8 @@ struct BlockRow: View {
                 // A psalm's number and its Latin incipit share a line, a dot between them. When the
                 // line cannot hold both, the incipit stands on its own line beneath and the dot goes
                 // (the web's `.item-label.stacked`): a separator ending a line alone separates nothing.
-                var title = block
-                title.runs = Array(block.runs[..<(latin - 1)])
-                var incipit = block
-                incipit.runs = Array(block.runs[latin...])
+                let title = labelPart(block, block.runs[..<(latin - 1)])
+                let incipit = labelPart(block, block.runs[latin...])
                 ViewThatFits(in: .horizontal) {
                     prose.fixedSize(horizontal: true, vertical: false)
                     VStack(spacing: 0) {
