@@ -229,6 +229,20 @@ fn whitsun_and_easter_vespers_commemorate_the_next_days_double() {
 }
 
 #[test]
+fn first_class_second_vespers_keep_only_todays_double() {
+    // 2019 and 2022 ordos 29 June: II Vespers of Ss Peter & Paul without the
+    // following Commemoration of St Paul. The #558 allowance keeps today's
+    // simplified Double, not the following day's.
+    let peter_paul = f("ss-peter-paul", Rank::Double1stClass, Category::Apostle);
+    let paul =
+        with("commemoration-st-paul-apostle", Rank::GreaterDouble, Category::Apostle, |x| x.octave_of = Some("ss-peter-paul".to_string()));
+    let sunday = f("pentecost-sunday-2", Rank::SemiDouble, Category::Sunday);
+    let r = resolve_concurrence(&day(Some(&peter_paul), &[]), &day(Some(&sunday), &[&paul]));
+    assert_eq!(r.owner, IIOfPreceding);
+    assert!(same_list(&r.commemorations, &[&sunday]), "{:?}", ids(&r.commemorations));
+}
+
+#[test]
 fn simple_preceding_and_nil_days() {
     let simple = f("some-simple", Rank::Simple, Category::Confessor);
     let double = f("some-double", Rank::Double, Category::Martyr);
@@ -286,6 +300,7 @@ fn occurrence_at_second_vespers() {
         (&first, feast("double", Rank::Double, Category::Martyr), true),
         (&primary, feast("double", Rank::Double, Category::Martyr), false),
         (&joseph, feast("double", Rank::Double, Category::Martyr), false),
+        (&first, feast("st-george-octave-day", Rank::Double, Category::Martyr), false),
         // An Apostle stays through II Vespers of Trinity and Corpus Christi
         // only (Barnabas and St Paul; #379), not of other Primary Feasts.
         (&primary, feast("st-barnabas", Rank::GreaterDouble, Category::Apostle), true),
@@ -419,6 +434,7 @@ fn first_vespers_retains_free_seasonal_feria() {
 
 #[test]
 fn impeded_lesser_double_at_first_vespers() {
+    // #556: the ordo cases are listed on impeded_double_at_first_vespers.
     let double = f("impeded-double", Rank::Double, Category::Confessor);
     let lent_saturday = f("privileged-lenten-feria", Rank::PrivilegedFeria, Category::Feria);
     let anticipated = f("pentecost-sunday-23-anticipated", Rank::SemiDouble, Category::Sunday);
@@ -444,6 +460,8 @@ fn impeded_lesser_double_at_first_vespers() {
 
 #[test]
 fn memorial_not_at_first_vespers_of_second_class_double() {
+    // #390: Diurnal §VIII and §X; 2026 ordo 2 May, 1 July, 5 August and
+    // 14 September (but not 24 July, 7 September or 3 January).
     let memorial = f("memorial", Rank::Commemoration, Category::Martyr);
     let simple = f("simple", Rank::Simple, Category::Martyr);
     let companion =

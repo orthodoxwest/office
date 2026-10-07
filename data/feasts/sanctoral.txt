@@ -317,8 +317,8 @@ CompanionOf = commemoration-st-paul-apostle
 # Our Lady of Einsiedeln (16 July, Gd) is not in the default calendar: the 2026
 # ordo brackets it "Monastics & Oblates Only", the 2025 ordo omits it, and the
 # Vicariate missal's kalendar brackets it; the parish office is the feria with
-# Ss Nicholas & Habib Khasha commemorated (#11). Its texts stay in
-# data/texts/proper/our-lady-einsiedeln.txt for an optional monastic calendar.
+# Ss Nicholas & Habib Khasha commemorated (#11). Its proper file,
+# data/texts/proper/our-lady-einsiedeln.txt, is still an unfilled scaffold.
 
 [st-mary-magdalene]
 Name = St Mary Magdalene, Penitent

@@ -198,6 +198,17 @@ fn incoming_double_at_second_vespers(w: &Feast) -> bool {
 
 /// Whether a Lauds commemoration remains at II Vespers of the winning office.
 fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> (bool, &'static str) {
+    second_vespers_commemoration(winner, comm, false)
+}
+
+/// Whether one of the following day's commemorations survives at II Vespers
+/// of a Double II Class or above: the occurrence rules, without the #558
+/// allowance, which keeps only today's simplified Doubles.
+fn incoming_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> bool {
+    second_vespers_commemoration(winner, comm, true).0
+}
+
+fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: bool) -> (bool, &'static str) {
     // XIV.9: Advent and Lenten ferias keep I and II Vespers as well as Lauds,
     // even at a Double I Class (the Annunciation in Lent, 2018–2026 ordos;
     // St Tikhon 2017 and 2023; St George 2021).
@@ -239,16 +250,21 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
         }
         // XIV.9 keeps a simplified Double at both Vespers "except on all I
         // Class Doubles", and Diurnal §X keeps it at Lauds only; but the
-        // ordos commemorate it at Vespers of every Double I Class except the
-        // Primary Feasts of Our Lord and St Joseph's Solemnity (#378): Our
-        // Lady of Sorrows at St Tikhon 2017 and 2023 and St George 2021,
-        // Athanasius at St George 2022, Damascene at the Annunciation 2018,
-        // and the Doubles within Easter and Pentecost weeks 2017-2025 (#558).
-        if w.rank == Rank::Double1stClass
+        // ordos commemorate today's Double at II Vespers of a Double I Class
+        // other than the Primary Feasts of Our Lord and St Joseph's Solemnity
+        // (#378): Our Lady of Sorrows at St Tikhon 2017 and 2023 and St
+        // George 2021, Athanasius at St George 2022, and the Doubles within
+        // Easter and Pentecost weeks 2017-2025 (#558). Not the following
+        // day's Doubles (no St Paul at Ss Peter & Paul, 2019 and 2022) nor an
+        // octave day.
+        if !incoming
+            && w.rank == Rank::Double1stClass
             && !w.primary_of_our_lord
             && w.id != "solemnity-st-joseph"
             && matches!(comm.rank, Rank::Double | Rank::GreaterDouble)
             && !is_day_within_octave(comm)
+            && !is_octave_day(comm)
+            && comm.octave_of.is_none()
         {
             return (true, "commemoration:second-vespers-simplified-double-on-first-class-feast");
         }
@@ -430,8 +446,8 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
 /// commemoration at the following office's I Vespers. XIV.9 keeps simplified
 /// Doubles at both Vespers "except on all I Class Doubles", but the ordos
 /// keep them only where the evening's office admits them (#556):
-/// - not before a Double I or II Class: Pentecost and Trinity every year;
-///   St Joseph and St Benedict 2025-2026; St Matthew 2017-2026;
+/// - not before a Double I or II Class: Pentecost and Trinity; St Joseph
+///   and St Benedict 2025-2026; St Matthew 2017, 2019 and 2023-2026;
 /// - not before a Sunday when today's office ended at None (XIII.17-18): an
 ///   anticipated Sunday (Clement 2019, Romuald 2026; Edmund 2021 dissents),
 ///   an Ember Saturday (Januarius 2026) or a vigil (Alban 2024);
@@ -554,7 +570,7 @@ fn boundary_commemorations(
         if !suppress_incoming || c.is_category(Category::Sunday) || c.is_category(Category::Feria) {
             return false;
         }
-        !occurrence_commemorated_at_second_vespers(w, c).0
+        !incoming_commemorated_at_second_vespers(w, c)
     };
 
     let mut comms: Vec<FeastRef> = Vec::new();
@@ -650,8 +666,10 @@ fn boundary_commemorations(
         // Diurnal §VIII and §X (pp. xxix-xxx), XIV.8-9: a Simple Office,
         // Memorial or Simple Octave Day is "not commemorated at I Vespers" of
         // a Double II Class (#138 ruling item 2; 2026 ordo 2 May, 1 July,
-        // 5 August, 14 September). The 2026 lines that keep one (24 July,
-        // 7 September, 3 January) reprint earlier years' lines; #390.
+        // 5 August, 14 September). The 2026 ordo keeps one on 24 July (St
+        // Christopher, printed in every ordo but 2024), 7 September (Hadrian,
+        // 2023's line word for word) and 3 January; the app follows the
+        // rubric until clergy rule (#390).
         if !second_vespers
             && matches!(c.rank, Rank::Simple | Rank::Commemoration)
             && !is_apostolic_companion_commemoration(c)
