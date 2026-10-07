@@ -82,9 +82,45 @@ jobs:
             }
             core.notice('No CI snapshot candidates for this head; regenerating them.');
 
+  # Built on a bare runner as in CI's UX server build: the browser image has
+  # no C toolchain, and the runner stays on its Ubuntu release (jammy) so the
+  # binary links against the same glibc.
+  generate-server:
+    name: Build the server without write access
+    needs: authorize
+    if: >-
+      needs.authorize.result == 'success' &&
+      needs.authorize.outputs.candidates_run == '' &&
+      github.event.label.name == 'update-ux-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@1.94.1
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build Rust server
+        run: make build
+
+      - name: Upload the server
+        uses: actions/upload-artifact@v7
+        with:
+          name: ux-server
+          path: target/release/office
+          if-no-files-found: error
+          retention-days: 1
+
   generate:
     name: Generate snapshots without write access
-    needs: authorize
+    needs: [authorize, generate-server]
     if: >-
       needs.authorize.result == 'success' &&
       needs.authorize.outputs.candidates_run == '' &&
@@ -102,15 +138,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
-      - name: Install Rust build tools
-        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
+      - name: Download the Rust server
+        uses: actions/download-artifact@v8
+        with:
+          name: ux-server
+          path: target/release
 
-      - uses: dtolnay/rust-toolchain@1.94.1
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Build Rust server
-        run: make build
+      - name: Make the server executable
+        run: chmod +x target/release/office
 
       - name: Set up Node
         uses: actions/setup-node@v7
