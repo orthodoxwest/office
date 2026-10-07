@@ -601,7 +601,7 @@ private struct Digest: View {
         if suffrage { rubric.append("Suffrage") }
         if !rubric.isEmpty {
             let lead = antiphon == nil ? "" : "  "
-            marks = marks + Text(lead + rubric.joined(separator: "  ")).font(Font(garamond(13.6 * m.type))).foregroundColor(p.rubric)
+            marks = marks + Text(lead + rubric.joined(separator: "  ")).font(Font(junicode(13.6 * m.type))).foregroundColor(p.rubric)
         }
         return VStack(alignment: .leading, spacing: 0) {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))

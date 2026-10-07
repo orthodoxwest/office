@@ -83,7 +83,7 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.foregroundColor] = UIColor(p.text)
         case .mediant:
             // The pointing asterisk is quiet, and lowered 0.25em to the line's optical middle, as the
-            // web's `.mediant` (Garamond draws its asterisk high, as a footnote mark).
+            // web's `.mediant` (the text face draws its asterisk high, as a footnote mark).
             a[.foregroundColor] = UIColor(p.muted)
             a[.baselineOffset] = -0.25 * size
         case .secret:
@@ -94,15 +94,15 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.font] = crossUIFont(size * 0.8)
         case .latin:
             // Latin within a small-caps label is set in lower case italic and muted, as the web's `.psalm-incipit`.
-            a[.font] = garamond(size, italic: true, smallCaps: false, lining: true)
+            a[.font] = junicode(size, italic: true, smallCaps: false, lining: true)
             a[.kern] = 0.4 * k
             a[.foregroundColor] = UIColor(p.muted)
         case .kicker:
-            a[.font] = garamond(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
+            a[.font] = junicode(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.muted)
             a[.kern] = size * 0.7 * 0.1
         case .posture:
-            a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
+            a[.font] = junicode(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.rubric)
         }
         out.append(NSAttributedString(string: run.text, attributes: a))
@@ -156,7 +156,7 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
         let range = NSRange(location: start, length: end - start)
         rest.enumerateAttribute(.font, in: range) { value, sub, _ in
             guard let font = value as? UIFont else { return }
-            rest.addAttribute(.font, value: garamond(font.pointSize, italic: font.fontName.contains("Italic"), smallCaps: true), range: sub)
+            rest.addAttribute(.font, value: junicode(font.pointSize, italic: font.fontName.contains("Italic"), smallCaps: true), range: sub)
             rest.addAttribute(.kern, value: font.pointSize * 0.04, range: sub)
         }
     }
@@ -172,7 +172,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     let size = style.size * m.type
     let fit = initialFit(letter: letter)
     let em = size * CGFloat(initialSize(lineHeightEm: Float(style.line / style.size)))
-    let deep = garamond(em)
+    let deep = junicode(em)
     let ink = CTLineGetBoundsWithOptions(CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: deep])), .useGlyphPathBounds)
     // The profiles are measured in the web's declared initial, not the size it is drawn at.
     let profile = size * CGFloat(initialProfileEm())
@@ -184,7 +184,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
     let raisedSize = size * CGFloat(raisedInitialSize())
     let raised = NSAttributedString(string: letter, attributes: [
-        .font: garamond(raisedSize),
+        .font: junicode(raisedSize),
         .foregroundColor: UIColor(o.flat),
         .shadow: shadow,
         .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,

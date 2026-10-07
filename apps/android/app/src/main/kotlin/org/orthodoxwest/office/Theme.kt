@@ -186,19 +186,20 @@ enum class ThemeChoice(val label: String, @StyleRes val window: Int) {
 enum class TextSize(val scale: Float) { SMALL(0.93f), DEFAULT(1f), LARGE(1.1f) }
 
 /**
- * Regular and Italic only. EB Garamond 12's Bold was never finished (128 glyphs, no small caps,
- * no ℣/℟), and the app sets nothing bold. When Android's Bold text setting raises every weight,
- * Compose synthesizes the heavier stroke from Regular, so small caps, sigils and ligatures stay.
+ * Junicode, as the web sets it (tools/genjunicode.py): Regular and Italic only, since the app sets
+ * nothing bold. The web's Bold is a featureless core for the ordo's fasting mark; when Android's
+ * Bold text setting raises every weight, Compose synthesizes the heavier stroke from Regular, so
+ * small caps, sigils, ligatures and old-style figures stay.
  */
-val Garamond = FontFamily(
-    Font(R.font.eb_garamond_regular, FontWeight.Normal, FontStyle.Normal),
-    Font(R.font.eb_garamond_italic, FontWeight.Normal, FontStyle.Italic),
+val Junicode = FontFamily(
+    Font(R.font.junicode_regular, FontWeight.Normal, FontStyle.Normal),
+    Font(R.font.junicode_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
-/** Only ✠: the Garamond cut has no cross. */
+/** Only ✠: Junicode's own is a slight pen cross that reads as a dagger at text size. */
 val CrossFont = FontFamily(Font(R.font.noto_sans_symbols_cross, FontWeight.Bold))
 
-/** Garamond's own small caps for lower and upper case, as `font-variant-caps: all-small-caps`. */
+/** Junicode's own small caps for lower and upper case, as `font-variant-caps: all-small-caps`. */
 const val ALL_SMALL_CAPS = "smcp, c2sc"
 
 val LocalPalette = staticCompositionLocalOf { Nave }
@@ -210,7 +211,7 @@ val LocalOrnament = staticCompositionLocalOf { ornament(Nave, "") }
  */
 object Type {
     private val trim = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
-    private fun face(size: Float, line: Float) = TextStyle(fontFamily = Garamond, fontSize = size.sp, lineHeight = line.sp, lineHeightStyle = trim)
+    private fun face(size: Float, line: Float) = TextStyle(fontFamily = Junicode, fontSize = size.sp, lineHeight = line.sp, lineHeightStyle = trim)
 
     val body = face(20f, 32f)
     val verse = face(20f, 33f)
