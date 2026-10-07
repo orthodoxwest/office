@@ -249,7 +249,7 @@ private struct TimeSheet: View {
                 }
                 .foregroundStyle(p.accent)
             }
-            .font(Font(junicode(18 * m.type)))
+            .font(Font(garamond(18 * m.type)))
             .padding(.horizontal, 20)
             .padding(.top, 18)
             DatePicker(hour.name, selection: $time, displayedComponents: .hourAndMinute)

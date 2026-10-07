@@ -259,7 +259,7 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
         drawText(letter, color = ochre)
     }
     val measurer = rememberTextMeasurer()
-    val face = junicode()
+    val face = garamond()
     val plain = style.copy(textIndent = null)
     // Raised, the capital is a letter of its line: 1.65 times the text, its line's height unchanged.
     val fit = initialFit(letter)
@@ -430,9 +430,9 @@ private fun dropCap(letter: String, style: TextStyle, measurer: TextMeasurer, de
 
 /** The text face, for an initial's ink. */
 @Composable
-private fun junicode(): Typeface {
+private fun garamond(): Typeface {
     val context = LocalContext.current
-    return remember(context) { ResourcesCompat.getFont(context, R.font.junicode_regular) ?: Typeface.SERIF }
+    return remember(context) { ResourcesCompat.getFont(context, R.font.eb_garamond_regular) ?: Typeface.SERIF }
 }
 
 private fun AnnotatedString.withoutLeadingSpace() = subSequence(text.indexOfFirst { !it.isWhitespace() }.let { if (it < 0) length else it }, length)
@@ -528,7 +528,7 @@ fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val style = Type.verse.copy(color = p.text)
-    val face = junicode()
+    val face = garamond()
     val texts = sections.map { s -> s.blocks.map { if (it.kind == BlockKind.STANZA) runs(it) else null } }
     return remember(sections, style, density) {
         fun width(t: AnnotatedString) = measurer.measure(t, style, softWrap = false).size.width
@@ -617,7 +617,7 @@ fun runs(block: BlockView): AnnotatedString {
 private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.PLAIN, RunStyle.BREAK -> null
     // The pointing asterisk is quiet in psalms, antiphons and responsories.
-    // Lowered 0.25em to the line's optical middle, as the web's `.mediant` (the text face draws its
+    // Lowered 0.25em to the line's optical middle, as the web's `.mediant` (Garamond draws its
     // asterisk high, as a footnote mark). Compose shifts by the face's ascent, 0.71em.
     RunStyle.MEDIANT -> SpanStyle(color = p.muted, baselineShift = BaselineShift(-0.25f / 0.71f))
     RunStyle.CROSS -> SpanStyle(color = p.rubric, fontFamily = CrossFont, fontSize = 0.8.em)

@@ -436,7 +436,7 @@ private struct Frontispiece: View {
     /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
     /// text's ink a little withdrawn.
     private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
-        (Text(sigil).font(Font(junicode(style.size * m.type))).foregroundColor(p.rubric) + Text(" " + words))
+        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(p.rubric) + Text(" " + words))
             .type(style)
             .foregroundStyle(p.text.opacity(0.84))
             .multilineTextAlignment(.center)

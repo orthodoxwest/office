@@ -83,7 +83,7 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.foregroundColor] = UIColor(p.text)
         case .mediant:
             // The pointing asterisk is quiet, and lowered 0.25em to the line's optical middle, as the
-            // web's `.mediant` (the text face draws its asterisk high, as a footnote mark).
+            // web's `.mediant` (Garamond draws its asterisk high, as a footnote mark).
             a[.foregroundColor] = UIColor(p.muted)
             a[.baselineOffset] = -0.25 * size
         case .secret:
@@ -94,15 +94,15 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.font] = crossUIFont(size * 0.8)
         case .latin:
             // Latin within a small-caps label is set in lower case italic and muted, as the web's `.psalm-incipit`.
-            a[.font] = junicode(size, italic: true, smallCaps: false, lining: true)
+            a[.font] = garamond(size, italic: true, smallCaps: false, lining: true)
             a[.kern] = 0.4 * k
             a[.foregroundColor] = UIColor(p.muted)
         case .kicker:
-            a[.font] = junicode(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
+            a[.font] = garamond(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.muted)
             a[.kern] = size * 0.7 * 0.1
         case .posture:
-            a[.font] = junicode(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
+            a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.rubric)
         }
         out.append(NSAttributedString(string: run.text, attributes: a))
@@ -156,7 +156,7 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
         let range = NSRange(location: start, length: end - start)
         rest.enumerateAttribute(.font, in: range) { value, sub, _ in
             guard let font = value as? UIFont else { return }
-            rest.addAttribute(.font, value: junicode(font.pointSize, italic: font.fontName.contains("Italic"), smallCaps: true), range: sub)
+            rest.addAttribute(.font, value: garamond(font.pointSize, italic: font.fontName.contains("Italic"), smallCaps: true), range: sub)
             rest.addAttribute(.kern, value: font.pointSize * 0.04, range: sub)
         }
     }
@@ -172,7 +172,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     let size = style.size * m.type
     let fit = initialFit(letter: letter)
     let em = size * CGFloat(initialSize(lineHeightEm: Float(style.line / style.size)))
-    let deep = junicode(em)
+    let deep = garamond(em)
     let ink = CTLineGetBoundsWithOptions(CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: deep])), .useGlyphPathBounds)
     // The profiles are measured in the web's declared initial, not the size it is drawn at.
     let profile = size * CGFloat(initialProfileEm())
@@ -184,7 +184,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
     let raisedSize = size * CGFloat(raisedInitialSize())
     let raised = NSAttributedString(string: letter, attributes: [
-        .font: junicode(raisedSize),
+        .font: garamond(raisedSize),
         .foregroundColor: UIColor(o.flat),
         .shadow: shadow,
         .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,
@@ -314,18 +314,17 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
     return spec
 }
 
-/**
- * One block of a composed hour, styled after the web's classes for the same text. A hymn's
- * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
- */
-/// The label with only these of its runs: a psalm title's number, or its incipit, set on a line
-/// of its own. (A statement that mutates a copy cannot stand inside a view builder.)
+/// A psalm label's part (its title, or its Latin incipit) as a block of its own.
 private func labelPart(_ block: BlockView, _ runs: ArraySlice<RunView>) -> BlockView {
     var part = block
     part.runs = Array(runs)
     return part
 }
 
+/**
+ * One block of a composed hour, styled after the web's classes for the same text. A hymn's
+ * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
+ */
 struct BlockRow: View {
     let block: BlockView
     var column: CGFloat?

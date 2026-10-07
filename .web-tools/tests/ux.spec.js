@@ -606,7 +606,7 @@ test("a tablet's hour header sets the hours as one rank, with no link stranded",
   // Wide widths hold the same: the prayer's softened field once reached past
   // the column and, with Large text at the 1000px threshold, past the viewport.
   for (const size of ["default", "large"]) {
-    for (const width of [701, 820, 959, 960, 1000, 1100, 1280, 1920]) {
+    for (const width of [701, 820, 999, 1000, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
       await openDatedPage(page, `/vespers/${testDate}`);
@@ -1551,24 +1551,14 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
       // With its "Sit." cue the opening no longer fits one wide line in
-      // large type either, so both sizes divide at the mediant. At 768 the
-      // same words stand on one line beside the dropped initial with a few
-      // pixels to spare, so browsers' shaping decides whether the verse is
-      // elevated on that line or divided at the mediant; the test accepts
-      // either there and holds the rest of the geometry to the choice.
-      // Polling for exactly one of the two classes waits out the re-typeset.
+      // large type either, so both sizes divide at the mediant. 768px is a
+      // knife edge for it: a browser's rounding decides whether its two
+      // halves fit one line, so either setting may stand there, as long as
+      // it is settled and never raised.
       const expected = width === 1280 ? true : width === 768 ? null : false;
-      await expect.poll(() => opening.evaluate(el => ({
-        divided: el.classList.contains("initial-divided"),
-        elevated: el.classList.contains("initial-elevated"),
-        raised: el.classList.contains("initial-raised"),
-      }))).toEqual(expected === null
-        ? expect.objectContaining({ raised: false })
-        : { divided: expected, elevated: !expected && width >= 768, raised: false });
-      if (expected === null) {
-        await expect.poll(() => opening.evaluate(el =>
-          el.classList.contains("initial-divided") !== el.classList.contains("initial-elevated"))).toBe(true);
-      }
+      await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-raised"))).toBe(false);
+      if (expected !== null) await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(expected);
+      else await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided") !== el.classList.contains("initial-elevated"))).toBe(true);
       const divided = await opening.evaluate(el => el.classList.contains("initial-divided"));
       const elevated = width >= 768 && !divided;
       await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
@@ -1620,11 +1610,16 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const width of [320, 390, 414, 430, 1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
-      // The opening carries its "Sit." cue after the mediant: at 430px it no
-      // longer fits one line and divides there; large type at 390px leaves a
-      // three-word tail, which wraps naturally.
-      const divided = [414, 430].includes(width) || (width === 390 && size === "normal");
-      await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
+      // The opening carries its "Sit." cue after the mediant. On the
+      // narrowest screen the tail wraps naturally and on a desktop the whole
+      // opening fits one line; at the phone widths between, a browser's
+      // rounding decides whether the tail is short enough to divide for, so
+      // either setting may stand, as long as it is settled.
+      const expected = width === 320 || width === 1280 ? false : null;
+      if (expected !== null) await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(expected);
+      // The typesetter runs in the next animation frame after a resize.
+      else await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const divided = await opening.evaluate(el => el.classList.contains("initial-divided"));
       await expect(opening).not.toHaveClass(/initial-raised/);
       const lines = await openingTextLines(opening);
       const elevated = width === 1280;

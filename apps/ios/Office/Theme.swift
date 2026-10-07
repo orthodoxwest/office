@@ -239,13 +239,13 @@ struct Metrics: Equatable {
         case .accessibility5: body = 53
         @unknown default: body = 17
         }
-        // Junicode at 20px is already a large face; past twice that the measure breaks every line.
+        // Garamond at 20px is already a large face; past twice that the measure breaks every line.
         return min(body / 17, 2)
     }
 }
 
 /**
- * A text style from the type scale, in the web's CSS pixels at a phone's width: Junicode,
+ * A text style from the type scale, in the web's CSS pixels at a phone's width: EB Garamond 12,
  * with small capitals, lining figures and tracking where the web sets them.
  */
 struct TextStyle: Equatable {
@@ -258,7 +258,7 @@ struct TextStyle: Equatable {
 
     /// The face at `k` times its size, with its OpenType features turned on.
     func uiFont(_ k: CGFloat = 1) -> UIFont {
-        junicode(size * k, italic: italic, smallCaps: smallCaps, lining: lining)
+        garamond(size * k, italic: italic, smallCaps: smallCaps, lining: lining)
     }
 
     func uiFont(_ m: Metrics) -> UIFont { uiFont(m.type) }
@@ -283,10 +283,9 @@ struct TextStyle: Equatable {
     }
 }
 
-/// Junicode at `size`, as tools/genjunicode.py cuts it for the web: old-style figures and the long-tailed Q by default.
-/// Regular and Italic only: the Office sets nothing bold.
-func junicode(_ size: CGFloat, italic: Bool = false, smallCaps: Bool = false, lining: Bool = false) -> UIFont {
-    let base = UIFont(name: italic ? "Junicode-Italic" : "Junicode-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+/// EB Garamond at `size`, the web's own instances (tools/gengaramond.py). Regular and Italic only: the Office sets nothing bold.
+func garamond(_ size: CGFloat, italic: Bool = false, smallCaps: Bool = false, lining: Bool = false) -> UIFont {
+    let base = UIFont(name: italic ? "EBGaramond-Italic" : "EBGaramond-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
     var features: [[UIFontDescriptor.FeatureKey: Int]] = []
     if smallCaps {
         features.append([.type: kLowerCaseType, .selector: kLowerCaseSmallCapsSelector])
@@ -299,7 +298,7 @@ func junicode(_ size: CGFloat, italic: Bool = false, smallCaps: Bool = false, li
     return UIFont(descriptor: base.fontDescriptor.addingAttributes([.featureSettings: features]), size: size)
 }
 
-/// The ✠, from the Noto Sans Symbols subset the web and the Android app use: Junicode's own reads as a dagger at text size.
+/// The ✠, from the Noto Sans Symbols subset the web and the Android app use: the Garamond cut has no cross.
 func crossUIFont(_ size: CGFloat) -> UIFont {
     UIFont(name: "NotoSansSymbols-Bold", size: size) ?? UIFont.systemFont(ofSize: size)
 }

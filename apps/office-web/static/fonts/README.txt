@@ -1,21 +1,19 @@
-Junicode (Peter S. Baker)
-Copyright 2025 by Peter S. Baker
-Licensed under the SIL Open Font License, Version 1.1, with no Reserved
-Font Name. See OFL-1.1.txt in this directory.
+EB Garamond (Georg Duffner, Octavio Pardo)
+Copyright 2017 The EB Garamond Project Authors
+(https://github.com/octaviopardo/EBGaramond12)
+Licensed under the SIL Open Font License, Version 1.1.
+See OFL-1.1.txt in this directory.
 
-Source: https://github.com/psb1558/Junicode-font (Junicode 2, version
-2.003: JunicodeVF-Roman and JunicodeVF-Italic). tools/genjunicode.py pins
-the variable axes (wght 440, bold 700; wdth 100, the small capitals from
-wdth 120 so they set as wide as EB Garamond's did; ENLA 0), names the
-instances "Junicode", draws Q with the face's long-tailed alternate, makes
-old-style figures the default, enlarges the em to 1034 units so the face
-sets at EB Garamond's x-height and width, sets compact vertical metrics
-(0.71/0.29em), and splits each face:
-junicode-{regular,italic,bold}.woff2 hold the Latin core every page sets;
-junicode-{regular,italic}-ext.woff2 hold the remaining glyphs, which
-style.css loads only for pages that use them. The same tool writes the
-native apps' junicode_{regular,italic}.ttf. Regenerate them all from the
-variable fonts, never from these files.
+Source: the variable fonts from Google Fonts (github.com/google/fonts,
+ofl/ebgaramond: EBGaramond[wght].ttf and EBGaramond-Italic[wght].ttf,
+version 1.003). tools/gengaramond.py pins the weight axis a step heavier
+than Regular (480; Bold 700), names the instances "EB Garamond", sets
+compact vertical metrics (0.71/0.29em, as Duffner's cut), drops the
+TrueType hints, and splits each face: eb-garamond-{regular,italic,bold}.woff2
+hold the Latin core every page sets; eb-garamond-{regular,italic}-ext.woff2
+hold the remaining glyphs, which style.css loads only for pages that use
+them. The same tool writes the native apps' eb_garamond_{regular,italic}.ttf.
+Regenerate them all from the variable fonts, never from these files.
 
 Noto Sans Symbols (The Noto Project Authors)
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/symbols)

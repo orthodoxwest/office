@@ -13,7 +13,7 @@ description: >-
 Prayer is the product. Most readers are lay people on phones: keep the text
 central, navigation quiet, and administrative material after the office.
 Use the parish's material palette—warm plaster, oak, gold, and a blue night
-sky—with Junicode, restrained rules, and generous reading space. Ornament
+sky—with EB Garamond, restrained rules, and generous reading space. Ornament
 is English wall painting on that limewash: earth pigments drawn thinly on a
 pale ground, painted into the wall rather than laid on it. Avoid playful
 rewards, motion for its own sake, and decorative layers behind prayer.
@@ -148,7 +148,7 @@ or impose a redesign on an unrelated change.
   mosaic conch, a painted sky, ochre voussoirs, glory rays) were tried too and
   read as stickers or sunbursts: keep the head plaster. The mosaic belongs to
   the app icon (`tools/genicons.py`), an object seen at one scale.
-- From 701px to 959px the hours' header sets its link list as a centred
+- From 701px to 999px the hours' header sets its link list as a centred
   rank of its own under the brand and Settings; left to wrap, it stranded
   the last link on a line. Under a coarse pointer the header's links and
   the ordo's day links answer to a touch-target box drawn by a
