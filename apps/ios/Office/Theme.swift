@@ -321,7 +321,7 @@ enum Scale {
     static let hourTitle = TextStyle(size: 24.8, line: 39.68, tracking: 1.984)
     static let meta = TextStyle(size: 14.4, line: 20.88)
     static let small = TextStyle(size: 12.48, line: 19.97)
-    static let brand = TextStyle.label(13.12, 0.08)
+    static let brand = TextStyle.label(14.4, 0.08)
     static let menu = TextStyle.label(12.48, 0.08)
     static let control = TextStyle.label(11.52, 0.1)
 }

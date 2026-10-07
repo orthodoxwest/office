@@ -125,7 +125,7 @@ fun HomeScreen(
                         view, date, today, onDate, onHour, onOrdoDay,
                         Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 12.dp).widthIn(max = cardWidth).fillMaxWidth()
                             .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
-                        HomeTier(desk = true, screen = screen, tall = tall, card = cardWidth),
+                        HomeTier(desk = true, screen = screen, tall = tall, card = cardWidth, dyn = LocalDensity.current.fontScale),
                         niche = niche,
                     )
                     Footer(reserve = true)
@@ -141,7 +141,7 @@ fun HomeScreen(
                         Frontispiece(
                             view, date, today, onDate, onHour, onOrdoDay,
                             Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
-                            HomeTier(desk = false, screen = screen, tall = tall, card = card),
+                            HomeTier(desk = false, screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                         )
                     },
                     footer = { Footer(gap = 29.6.dp, bottom = 25.6.dp, reserve = true) },
@@ -181,20 +181,34 @@ private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composa
  * cross and the room above the date go by the height home has (`tall`): from 800 high the card
  * has height to spare, so the head rises further to a sharper point, the cross and the date stand
  * lower in it, and the spare height is parted two to three above and below the day rather than
- * centred about it; from 880 more so. Its larger type and rows go by width as well, from 375 wide
- * and 830 or 880 high: a narrower or shorter phone needs the height for the lines its day wraps
- * to. A wide screen's niche (`desk`) has its own. `card` is the card's width.
+ * centred about it; from 880 more so. Its larger rows and controls go by width as well, from 375
+ * wide and 830 or 880 high: a narrower or shorter phone needs the height for the lines its day
+ * wraps to. A wide screen's niche (`desk`) has its own. `card` is the card's width; `dyn` the
+ * system's font scale, which sp carries.
  */
-private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
+private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp, private val dyn: Float) {
     private val step = if (desk) 0 else if (tall >= 880.dp) 2 else if (tall >= 800.dp) 1 else 0
     private val type = if (desk || screen < 375.dp) 0 else if (tall >= 880.dp) 2 else if (tall >= 830.dp) 1 else 0
     private fun <T> pick(niche: T, vararg phone: T): T = if (desk) niche else phone[minOf(type, phone.size - 1)]
     private fun <T> rise(niche: T, vararg phone: T): T = if (desk) niche else phone[step]
 
     val arch = rise(NicheArch, PhoneArch, TallArch, TallerArch)
-    val date = pick(25.92f, 22.08f, 24.8f, 27.2f)
-    /** The date's line, its size and a fifth. */
-    private val dateLine = (date * 1.2f).dp
+    /**
+     * The head's type is fitted to the panel, not to the system's font scale (the web's
+     * `--date-size`). The head is as tall as the arch's rise, a share of the card's width, plus
+     * whatever height home has to spare, so type set by the font scale floats in it on a phone
+     * whose text is set small and crowds it set large. The date is 7% of the card's inline size
+     * (its width inside 16dp of padding) or 2.92% of home's height, whichever is more, within
+     * bounds that keep the font scale; the feast and the commemorations follow in proportion.
+     * The fitted size is in dp, so the font scale sp carries is divided out of it. The usual
+     * scale at 375×667 gives the sizes the head had (22, 17 and 14sp), a tall phone the sizes its
+     * tier had (25 and 27sp for the date). A niche keeps its own sizes.
+     */
+    private fun fitted(inline: Float, height: Float, lo: Float, hi: Float) = (maxOf(inline, height) / dyn).coerceIn(lo, hi)
+    private val inline = (card - 32.dp).value
+    val date = if (desk) 25.92f else fitted(0.07f * inline, 0.0292f * tall.value, 19.2f, 32f)
+    /** The date's line, its size and a fifth, in dp. */
+    private val dateLine = (date * dyn * 1.2f).dp
     /**
      * The room under the point for the cross and air, before the date. On a phone the date's tap
      * box is a thumb's height with its line at the foot, so the room gives back the box's slack
@@ -214,7 +228,7 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
      */
     val dayClear = lining + 9.dp + 12.dp
     val bottom = if (desk) 20.dp else 12.dp
-    val dateTracking = pick(0.39f, 0.22f, 0.25f, 0.27f)
+    val dateTracking = date * (if (desk) 0.015f else 0.01f)
     /**
      * The head's width `y` below the card's top inside the lining's hairline, less the day's 12dp
      * of air each side: a line of the day set there clears the lining.
@@ -226,14 +240,14 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp) {
      * head is wider.
      */
     val dateMeasure: Dp = if (desk) Dp.Unspecified else minOf(card * pick(0f, 0.233f, 0.3f) + 139.dp, clear(card, headPad + 44.dp - dateLine))
-    val feast = pick(18.72f, 17.28f, 18.56f, 20f)
+    val feast = if (desk) 18.72f else fitted(0.055f * inline, 0.0215f * tall.value, 15.2f, 24f)
     /**
      * The feast's measure, the head's width at its first line, when the day stands at the head's
      * room: a long name breaks there rather than running over the lining further up the arch.
      */
     val feastMeasure: Dp = if (desk) Dp.Unspecified else clear(card, headPad + 44.dp + 2.dp)
     /** A short phone's commemorations give way, so a past date with them still fits. */
-    val commemoration = if (!desk && tall <= 700.dp) 13.6f else pick(14f, 14f, 14f, 16.32f)
+    val commemoration = if (!desk && tall <= 700.dp) 13.6f else if (desk) 14f else fitted(0.046f * inline, 0.0175f * tall.value, 12.8f, 17.6f)
     val commemorationLine = if (!desk && tall <= 700.dp) 1.3f else 1.4f
     /**
      * The day's versicle's size, set only where a phone is over 700 high, and its measure, at most

@@ -103,6 +103,20 @@ class ScreenshotTest {
     @Test
     fun laudsChristmasApse() { show(Page.Hour(LocalDate.of(2026, 12, 25), "lauds"), ThemeChoice.APSE); shoot("lauds-christmas-apse") }
 
+    // The head's type is fitted to the panel: a small system font scale leaves it as it is.
+    @Test
+    @Config(fontScale = 0.85f)
+    fun homeSmallSystemText() { show(Page.Home(lent), ThemeChoice.NAVE); shoot("home-small-system-text") }
+
+    // A tablet: the prayer a step larger from 920dp, and the ordo's days one line each.
+    @Test
+    @Config(qualifiers = "w1024dp-h3000dp-xhdpi")
+    fun vespersTablet() { show(Page.Hour(lent, "vespers"), ThemeChoice.NAVE); shoot("vespers-tablet") }
+
+    @Test
+    @Config(qualifiers = "w1024dp-h1366dp-xhdpi")
+    fun ordoTablet() { show(Page.Ordo(2026, 3), ThemeChoice.NAVE); shoot("ordo-tablet") }
+
     @Test
     @Config(qualifiers = "w390dp-h6000dp-xxhdpi")
     fun laudsTall() { show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE); shoot("lauds-tall") }

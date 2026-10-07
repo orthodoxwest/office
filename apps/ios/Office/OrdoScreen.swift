@@ -370,8 +370,9 @@ private struct DayRow: View {
         }
     }
 
-    /// The feast's name in its rank's ink, a first-class feast's with a small painted cross before it.
-    private func feastName(_ style: TextStyle) -> some View {
+    /// The feast's name in its rank's ink, a first-class feast's with a small painted cross before it;
+    /// `fill` takes the column's width, else the name's own, wrapped to what it is given.
+    private func feastName(_ style: TextStyle, fill: Bool = true) -> some View {
         let em = style.size * m.type
         return HStack(alignment: .firstTextBaseline, spacing: 0) {
             if d.rank == "1cl" {
@@ -379,18 +380,31 @@ private struct DayRow: View {
             }
             Text(d.feast).type(style).foregroundStyle(rankInk ?? p.text).multilineTextAlignment(.leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
     }
 
-    @ViewBuilder private var disclosures: some View {
+    private var anyOpen: Bool { comms || ((details ?? allDetails) && hasDetails) }
+
+    /// The disclosures' buttons: the commemorations' count and "Office details".
+    private var disclosureButtons: some View {
         let open = details ?? allDetails
-        HStack(spacing: m.px(9.6)) {
+        return HStack(spacing: m.px(9.6)) {
             if !d.commemorations.isEmpty {
                 let n = d.commemorations.count
                 small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { withAnimation(unfolding) { comms.toggle() } }
             }
             if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
         }
+    }
+
+    @ViewBuilder private var disclosures: some View {
+        disclosureButtons
+        disclosed
+    }
+
+    /// What the open disclosures unfold: the commemorations, and the office digest.
+    @ViewBuilder private var disclosed: some View {
+        let open = details ?? allDetails
         if comms {
             ForEach(d.commemorations, id: \.self) { c in
                 Text(c).type(TextStyle(size: 13.6, line: 20.4, italic: true)).foregroundStyle(p.muted)
@@ -480,12 +494,26 @@ private struct DayRow: View {
                     .frame(width: weekColumn, alignment: .leading)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
-                    Button(action: openDay) {
-                        feastName(Scale.body.sized(16, line: 22.4))
+                    // The disclosures share the feast's line, 1.25rem after the name (the web's
+                    // inline `.day-disclosures` from 701px), so a month reads as one line per
+                    // day; one that is open drops below the name at the column's full width.
+                    let name = Scale.body.sized(16, line: 22.4)
+                    if anyOpen {
+                        Button(action: openDay) { feastName(name) }
+                            .buttonStyle(Quiet())
+                            .accessibilityHidden(true)
+                        disclosureButtons
+                    } else {
+                        HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
+                            Button(action: openDay) { feastName(name, fill: false) }
+                                .buttonStyle(Quiet())
+                                .accessibilityHidden(true)
+                                .layoutPriority(1)
+                            disclosureButtons.fixedSize()
+                            Spacer(minLength: 0)
+                        }
                     }
-                    .buttonStyle(Quiet())
-                    .accessibilityHidden(true)
-                    disclosures
+                    disclosed
                 }
                 .padding(.horizontal, 7.2)
                 // Fasting and abstinence stay quiet, so red in a row means rank.
@@ -508,8 +536,8 @@ private struct DayRow: View {
                 .accessibilityHidden(true)
             }
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 10.4)
-            .padding(.bottom, 7.2)
+            // The web's `.month-table td`: 0.5rem above and below, from 701px.
+            .padding(.vertical, 8)
             Hairline(color: p.border)
         }
         // Today is painted, not selected: the band runs on across the row.
