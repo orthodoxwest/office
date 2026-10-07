@@ -1,13 +1,29 @@
 name: Publish to Play
 
-# Builds the signed store bundle from master and uploads it to a Google Play track. Started by
-# hand only, from the Actions tab. The job runs in the `play` environment, so give that
-# environment a required reviewer and nothing ships without approval. Setup and the secrets it
-# reads are in apps/android/README.md ("Publishing from CI").
+# Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
+# secrets it reads are in apps/android/README.md ("Publishing from CI").
+#
+# Every merge to master that changes the app goes to Internal testing, which only the maintainers
+# are testers of and which Google doesn't review. Those runs use the `play-internal` environment,
+# with no reviewer, and skip quietly until PLAY_SERVICE_ACCOUNT_JSON is set. Testers and the public
+# get a build only when it is promoted in Play Console, or uploaded by a manual run from the
+# Actions tab; manual runs use the `play` environment, so give it a required reviewer and nothing
+# else ships without approval.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).
 on:
+  push:
+    branches: [master]
+    # What goes into the bundle, as in android.yml.
+    paths:
+      - "apps/android/**"
+      - "apps/mobile-ffi/**"
+      - "crates/**"
+      - "data/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/play.yml"
   workflow_dispatch:
     inputs:
       track:
@@ -24,20 +40,39 @@ on:
         type: string
         default: ""
 
+# A merge waiting behind another replaces it, so Internal testing gets the newest build; a
+# manual run has its own queue and is never replaced by a merge.
 concurrency:
-  group: play
+  group: play-${{ github.event_name }}
   cancel-in-progress: false
 
 env:
   NDK_VERSION: 28.2.13676358
 
 jobs:
-  publish:
-    name: Build and upload to ${{ inputs.track }}
+  ready:
+    name: Check for the Play credentials
     runs-on: ubuntu-latest
-    environment: play
+    permissions: {}
+    outputs:
+      play: ${{ steps.check.outputs.play }}
+    steps:
+      - id: check
+        env:
+          HAS_PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Build and upload to ${{ inputs.track || 'internal' }}
+    needs: ready
+    # A manual run without the credentials still fails, at the upload, so the missing secret shows.
+    if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'play-internal' || 'play' }}
     permissions:
       contents: read
+    env:
+      TRACK: ${{ inputs.track || 'internal' }}
 
     steps:
       - name: Release from master only
@@ -49,7 +84,7 @@ jobs:
       - name: Check the rollout
         id: rollout
         env:
-          ROLLOUT: ${{ inputs.rollout }}
+          ROLLOUT: ${{ inputs.rollout || '1' }}
         run: |
           if ! python3 -c 'import sys; f = float(sys.argv[1]); sys.exit(0 if 0 < f <= 1 else 1)' "$ROLLOUT"; then
             echo "::error::rollout must be a number above 0 and at most 1, not '$ROLLOUT'"
@@ -104,13 +139,22 @@ jobs:
           echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$OFFICE_UPLOAD_KEYSTORE"
           ./gradlew --console=plain bundleRelease
 
+      # A merge's notes are its pull request's title, the first line of the merge commit's body.
       - name: Write the release notes
-        if: inputs.notes != ''
+        id: notes
         env:
           NOTES: ${{ inputs.notes }}
         run: |
-          mkdir -p "$RUNNER_TEMP/whatsnew"
-          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            NOTES=$(git log -1 --format=%b | sed '/^$/d' | head -n 1)
+            [ -n "$NOTES" ] || NOTES=$(git log -1 --format=%s)
+          fi
+          if [ -n "$NOTES" ]; then
+            mkdir -p "$RUNNER_TEMP/whatsnew"
+            # Play takes at most 500 characters.
+            printf '%s\n' "$NOTES" | head -c 500 > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Upload to Google Play
         if: steps.rollout.outputs.status == 'completed'
@@ -121,9 +165,9 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ inputs.track }}
+          track: ${{ env.TRACK }}
           status: completed
-          whatsNewDirectory: ${{ inputs.notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
+          whatsNewDirectory: ${{ steps.notes.outputs.dir }}
 
       - name: Upload to Google Play (staged rollout)
         if: steps.rollout.outputs.status == 'inProgress'
@@ -133,10 +177,10 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ inputs.track }}
+          track: ${{ env.TRACK }}
           status: inProgress
           userFraction: ${{ steps.rollout.outputs.fraction }}
-          whatsNewDirectory: ${{ inputs.notes != '' && format('{0}/whatsnew', runner.temp) || '' }}
+          whatsNewDirectory: ${{ steps.notes.outputs.dir }}
 
       - uses: actions/upload-artifact@v7
         with:
