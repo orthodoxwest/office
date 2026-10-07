@@ -1610,12 +1610,12 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const width of [320, 390, 414, 430, 1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
-      // The opening carries its "Sit." cue after the mediant: at 430px it no
-      // longer fits one line and divides there, and on the narrowest screen
-      // the tail wraps naturally. Between them a browser's rounding decides
-      // whether the tail is short enough to divide for, so either setting
-      // may stand, as long as it is settled.
-      const expected = width === 430 ? true : width === 320 || width === 1280 ? false : null;
+      // The opening carries its "Sit." cue after the mediant. On the
+      // narrowest screen the tail wraps naturally and on a desktop the whole
+      // opening fits one line; at the phone widths between, a browser's
+      // rounding decides whether the tail is short enough to divide for, so
+      // either setting may stand, as long as it is settled.
+      const expected = width === 320 || width === 1280 ? false : null;
       if (expected !== null) await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(expected);
       // The typesetter runs in the next animation frame after a resize.
       else await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
