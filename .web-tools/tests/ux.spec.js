@@ -1534,6 +1534,41 @@ test("short prose openings keep one baseline and adapt to the reading measure", 
   expect(await opening.textContent()).toBe(originalText);
 });
 
+// WebKit takes the stack's first available face as the primary font whose
+// ascent and descent place every baseline, even a face whose unicode-range
+// holds the one glyph ✠; headed by the cross face, Safari sank each line's
+// text in its leading and hung the dropped initials under their second line.
+// The cross face follows the text faces, and still supplies the cross.
+test("the cross face follows the text faces in every stack and still sets the cross", async ({ page }) => {
+  const families = (selector) => page.evaluate((sel) => getComputedStyle(document.querySelector(sel)).fontFamily
+    .split(",").map((family) => family.trim().replace(/^"|"$/g, "")), selector);
+  const crossWidth = (family) => page.evaluate((f) => {
+    const span = document.createElement("span");
+    span.textContent = "\u2720";
+    if (f) span.style.fontFamily = f;
+    document.body.appendChild(span);
+    const width = span.getBoundingClientRect().width;
+    span.remove();
+    return width;
+  }, family);
+  await openDatedPage(page, "/vespers/2026-10-07");
+  const prayer = await families("body");
+  expect(prayer[0]).toBe("EB Garamond");
+  expect(prayer.indexOf("Office Cross")).toBeGreaterThan(0);
+  expect(prayer.indexOf("Office Cross")).toBeLessThan(prayer.indexOf("Georgia"));
+  expect(await page.evaluate(() => document.fonts.check('1em "Office Cross"', "\u2720"))).toBe(true);
+  const inherited = await crossWidth("");
+  expect(inherited).toBeCloseTo(await crossWidth('"Office Cross"'), 1);
+  expect(inherited).not.toBeCloseTo(await crossWidth('"EB Garamond", serif'), 1);
+  await openDatedPage(page, "/calendar/2026/10");
+  const ordo = await families(".page-calendar");
+  expect(ordo[0]).toBe("Ordo Garamond");
+  expect(ordo.indexOf("Ordo Cross")).toBe(ordo.length - 2);
+  const detail = await families(".day-office-incipit");
+  expect(detail[0]).toBe("Georgia");
+  expect(detail.indexOf("Ordo Cross")).toBe(detail.length - 2);
+});
+
 test("short psalm openings keep the same initial rank as adjacent psalms", async ({ page }) => {
   // Light only: themes share one geometry, held page-wide by "themes never change layout".
   const theme = "light";

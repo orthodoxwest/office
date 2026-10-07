@@ -178,10 +178,17 @@
 
 /* EB Garamond has no ✠, so every platform once substituted its own dingbat:
    a heavy sans cross here, a different one there. This face holds only that
-   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
-   each text stack. unicode-range keeps it from touching any other letter.
-   Block, not swap: a cross that appears a moment late is quieter than one
-   that changes shape as the page settles. */
+   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and stands
+   in each text stack after the text faces, before the platform's own serifs,
+   none of which carry the glyph. unicode-range keeps it from touching any
+   other letter, but not from setting the line: WebKit takes the stack's first
+   available face as the primary font whose ascent and descent place every
+   baseline, whatever its range, where Chromium passes over a face that
+   cannot set a space. Headed by this face, whose ascent is 1.48em against
+   Garamond's 0.71, Safari sank every line's text 5px in its leading and the
+   dropped initials 17px, so a psalm's T hung under its second line and the
+   psalm titles stacked. Block, not swap: a cross that appears a moment late
+   is quieter than one that changes shape as the page settles. */
 @font-face {
   font-family: "Office Cross";
   font-style: normal;
@@ -432,7 +439,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -477,7 +484,7 @@ footer {
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 
 main {
@@ -1746,7 +1753,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -2504,7 +2511,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
+  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -2955,7 +2962,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Ordo Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Garamond", Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -3038,7 +3045,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .day-mobile-flags,
 .day-wk,
 .day-rank {
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 .month-jump {
   display: grid;
@@ -3424,7 +3431,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   content: "Today";
   display: block;
   visibility: hidden;
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
   font-size: 0.7rem;
   font-weight: normal;
   line-height: 1.4;
@@ -3570,7 +3577,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
   flex: 0 0 4.4rem;
-  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
