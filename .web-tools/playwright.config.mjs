@@ -13,7 +13,8 @@ export default defineConfig({
   outputDir: `${outputRoot}/test-results`,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
+  // A test that only passes on a retry is a flake to fix, not a pass.
+  retries: 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ["line"],
