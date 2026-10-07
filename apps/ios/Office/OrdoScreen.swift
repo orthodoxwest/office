@@ -70,6 +70,7 @@ struct OrdoScreen: View {
                     SiteHeader().id("top")
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
+                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(5.6))
                     MonthHeading(name: monthName(number), isTodaysMonth: Int(model.today.year) == year && Int(model.today.month) == number) {
                         withAnimation { scroll.scrollTo("top", anchor: .top) }
                     }
@@ -107,6 +108,26 @@ struct OrdoScreen: View {
                 }
             }
         }
+    }
+
+    /// The ranks spelled out, each abbreviation in its days' ink, as the web's key: a phone has no titles to hover.
+    private static let rankNames = [
+        ("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"),
+        ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria"),
+    ]
+
+    private var rankKey: some View {
+        // No-break spaces keep each abbreviation with its name when the line wraps.
+        let key = Self.rankNames.enumerated().reduce(Text("")) { line, entry in
+            let (i, (abbr, name)) = entry
+            let ink: Color = ["1cl", "2cl", "gd"].contains(abbr) ? p.rubric : abbr == "d" ? p.kalendarBlue : p.text
+            return line + Text(i > 0 ? " · " : "") + Text(abbr).foregroundColor(ink)
+                + Text("\u{00A0}" + name.replacingOccurrences(of: " ", with: "\u{00A0}"))
+        }
+        return key.type(Scale.small.sized(12, line: 17.4)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Ranks: " + Self.rankNames.map(\.1).joined(separator: ", "))
     }
 
     private var tools: some View {

@@ -189,6 +189,44 @@ pub struct Invitation {
     pub current: &'static str,
 }
 
+/// Whether home, inviting to `invite`, also says tomorrow's fast or abstinence: from today's
+/// Vespers, when the evening's supper and the morrow's shopping are being thought of.
+pub fn tells_tomorrow(invite: &Invitation) -> bool {
+    matches!(invite.current, "vespers" | "compline")
+}
+
+/// What an hour is, for a newcomer reading home's invitation: "Evening prayer".
+pub fn hour_gloss(slug: &str) -> &'static str {
+    match slug {
+        "lauds" => "Morning praise",
+        "prime" => "Prayer as work begins",
+        "terce" => "Mid-morning prayer",
+        "sext" => "Midday prayer",
+        "none" => "Afternoon prayer",
+        "vespers" => "Evening prayer",
+        "compline" => "Prayer before sleep",
+        _ => "",
+    }
+}
+
+/// Roughly how long a composed hour takes to say: its words at a steady spoken pace (150 a
+/// minute), to the nearest five minutes and never under five. Rubrics are not counted.
+pub fn minutes_to_say(hour: &OfficeHour) -> u32 {
+    let words: usize = hour
+        .sections
+        .iter()
+        .flat_map(|s| &s.elements)
+        .map(|e| e.text.split_whitespace().filter(|w| w.chars().any(char::is_alphanumeric)).count())
+        .sum();
+    let minutes = words as f64 / 150.0;
+    ((minutes / 5.0).round() as u32 * 5).max(5)
+}
+
+/// The line under home's invitation: "Evening prayer · about 15 minutes".
+pub fn hour_note(slug: &str, minutes: u32) -> String {
+    format!("{} · about {minutes} minutes", hour_gloss(slug))
+}
+
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
@@ -430,6 +468,12 @@ mod tests {
     }
 
     #[test]
+    fn an_hours_note_says_what_it_is_and_how_long_it_takes() {
+        assert_eq!(hour_note("vespers", 15), "Evening prayer · about 15 minutes");
+        assert!(["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].iter().all(|h| !hour_gloss(h).is_empty()));
+    }
+
+    #[test]
     fn the_invitation_is_to_the_hour_being_prayed_only_today() {
         let today = Date::new(2026, 3, 15);
         let evening = invitation(today, today, 18);
@@ -438,5 +482,8 @@ mod tests {
         assert_eq!((late.hour, late.date, late.current), ("compline", Date::new(2026, 3, 14), ""));
         let other = invitation(today.add_days(1), today, 18);
         assert_eq!((other.hour, other.label.as_str(), other.date, other.current), ("lauds", "Open Lauds", today.add_days(1), ""));
+        // Tomorrow's fast is told from Vespers until midnight, and only on today's home.
+        assert!(tells_tomorrow(&evening) && tells_tomorrow(&invitation(today, today, 23)));
+        assert!(!tells_tomorrow(&invitation(today, today, 16)) && !tells_tomorrow(&late) && !tells_tomorrow(&other));
     }
 }

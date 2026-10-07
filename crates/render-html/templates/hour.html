@@ -92,7 +92,7 @@
     <nav class="hour-continuation" aria-label="Other hours for this day">
       {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
-      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">Next hour</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">{{ "Tomorrow" if hour_name == "compline" else "Next hour" }}</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
     </nav>
   </div>
 </div>

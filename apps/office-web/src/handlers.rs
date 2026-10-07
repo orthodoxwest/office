@@ -20,8 +20,8 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation, long_date,
-    month_name, rank_class, report_url, season_class, season_str, split_alias,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_note, hour_versicle, invitation,
+    long_date, minutes_to_say, month_name, rank_class, report_url, season_class, season_str, split_alias, tells_tomorrow,
 };
 
 /// What a page handler reads from the request.
@@ -45,7 +45,7 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Compline", "compline"),
 ];
 
-fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
+fn build_home_hours(date_slug: &str, current: &str, note: impl Fn(&str) -> String) -> Vec<HomeHourLink> {
     ORDERED_HOURS
         .iter()
         .map(|(name, slug)| HomeHourLink {
@@ -53,11 +53,14 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
+            note: note(slug),
         })
         .collect()
 }
 
-fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
+/// The hours either side of `hour`. Compline's next is the morrow's Lauds, so the last
+/// page of the day does not end in a blank.
+fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, String, String) {
     let mut out = (String::new(), String::new(), String::new(), String::new());
     if let Some(i) = ORDERED_HOURS.iter().position(|(_, slug)| *slug == hour) {
         if i > 0 {
@@ -67,6 +70,9 @@ fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
         if i + 1 < ORDERED_HOURS.len() {
             out.2 = ORDERED_HOURS[i + 1].0.to_string();
             out.3 = hour_link(ORDERED_HOURS[i + 1].1, date);
+        } else {
+            out.2 = ORDERED_HOURS[0].0.to_string();
+            out.3 = hour_link(ORDERED_HOURS[0].1, tomorrow);
         }
     }
     out
@@ -273,6 +279,21 @@ impl Server {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
+        // Each hour's note from the shown day's own text: home is cached and app.js moves the
+        // invitation from hour to hour, so every hour carries one.
+        let note = |hour: &str| {
+            let minutes = self.engine.compose_hour(hour, day, &entry.moveable, PrayerForm::Private).map(|h| minutes_to_say(&h));
+            minutes.map(|m| hour_note(hour, m)).unwrap_or_default()
+        };
+        let hours = build_home_hours(&slug, invite.current, note);
+        let pray_now_note = hours.iter().find(|h| h.slug == invite.hour).map(|h| h.note.clone()).unwrap_or_default();
+        let tells_tomorrow = tells_tomorrow(&invite);
+        let morrow = date.add_days(1);
+        let tomorrow_penitential = match self.cache.get(morrow.year()) {
+            Ok(e) => e.days.get(morrow.ordinal() as usize - 1).map(|d| d.penitential.labels().into_iter().map(String::from).collect()),
+            Err(_) => None,
+        }
+        .unwrap_or_default();
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
@@ -301,7 +322,10 @@ impl Server {
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
-            hours: build_home_hours(&slug, invite.current),
+            pray_now_note,
+            tomorrow_penitential,
+            tells_tomorrow,
+            hours,
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -367,7 +391,8 @@ impl Server {
             }
         }
 
-        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) = adjacent_hours(hour_name, &date_str);
+        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) =
+            adjacent_hours(hour_name, &date_str, &date_slug(date.add_days(1)));
         let today_slug = date_slug(now_in(&loc).0);
         let mut data = HourData {
             chrome: Chrome {
@@ -652,13 +677,13 @@ mod tests {
     fn adjacent_hours_keep_date() {
         let s = |v: (String, String, String, String)| v;
         assert_eq!(
-            s(adjacent_hours("sext", "2026-06-07")),
+            s(adjacent_hours("sext", "2026-06-07", "2026-06-08")),
             ("Terce".into(), "/terce/2026-06-07".into(), "None".into(), "/none/2026-06-07".into())
         );
-        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07");
+        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07", "2026-06-08");
         assert!(prev.is_empty() && prev_link.is_empty());
-        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
-        assert!(next.is_empty() && next_link.is_empty());
+        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07", "2026-06-08");
+        assert_eq!((next.as_str(), next_link.as_str()), ("Lauds", "/lauds/2026-06-08"));
     }
 
     #[test]

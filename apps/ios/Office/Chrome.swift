@@ -284,6 +284,8 @@ struct MenuPanel: View {
                     }
                 }
             }
+            // The names are the church's, so a line says what they are, as on the web.
+            hint("Nave is the church by day, Apse its vault by night. Default follows your device.")
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
@@ -311,6 +313,7 @@ struct MenuPanel: View {
                     }
                 }
             }
+            hint("On reads the saints of the coming day at Prime.")
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
@@ -318,6 +321,15 @@ struct MenuPanel: View {
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         .overlay(alignment: .top) { Rectangle().fill(p.lining).frame(height: 2) }
         .shadow(color: .black.opacity(p.dark ? 0.4 : 0.12), radius: 12, y: 4)
+    }
+
+    /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
+    private func hint(_ s: String) -> some View {
+        Text(s).type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, m.px(10.4))
+            .padding(.top, m.px(7.2))
+            .padding(.bottom, m.px(9.6))
     }
 
     private func rowLabel(_ s: String) -> some View {

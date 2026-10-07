@@ -207,6 +207,8 @@ struct HourScreen: View {
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
                         next: index + 1 < model.hours.count ? model.hours[index + 1] : nil,
+                        // Compline's next is the morrow's Lauds, as on the web.
+                        morrow: index + 1 == model.hours.count ? model.hours.first : nil,
                         reportUrl: view.reportUrl,
                         date: date
                     )
@@ -521,6 +523,7 @@ private struct HourTitle: View {
 private struct Epilogue: View {
     let previous: String?
     let next: String?
+    let morrow: String?
     let reportUrl: String
     let date: CivilDate
     @EnvironmentObject private var model: AppModel
@@ -539,9 +542,11 @@ private struct Epilogue: View {
                 onPrevious: { if let previous { model.open(.hour(date, previous)) } },
                 middle: "All hours",
                 onMiddle: { model.open(.home(date)) },
-                nextLabel: "Next hour",
-                next: next.map(hourLabel),
-                onNext: { if let next { model.open(.hour(date, next)) } }
+                nextLabel: morrow == nil ? "Next hour" : "Tomorrow",
+                next: (next ?? morrow).map(hourLabel),
+                onNext: {
+                    if let next { model.open(.hour(date, next)) } else if let morrow { model.open(.hour(date.adding(days: 1), morrow)) }
+                }
             )
             .measured(m)
             .padding(.top, m.px(83.2))

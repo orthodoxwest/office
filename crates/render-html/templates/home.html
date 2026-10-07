@@ -47,6 +47,11 @@
           </ul>
         </div>
         {% endif %}
+        {# Tomorrow's fast or abstinence, told the evening before: from
+             Vespers on today's home (app.js keeps a cached page in step). #}
+        {% if tomorrow_penitential %}
+        <p class="home-tomorrow"{% if not tells_tomorrow %} hidden{% endif %}><span class="home-tomorrow-label">Tomorrow</span> {% for label in tomorrow_penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}</p>
+        {% endif %}
         {# After the day's facts (feast, fasts, commemorations), so they read
              together. Always visible when not local today — "Change date"
              keeps a secondary Today control, but overnight PWA resume must
@@ -64,7 +69,7 @@
 
     <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
       <h2 id="home-pray-heading">Pray the hours</h2>
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span>{% if pray_now_note %}<span class="pray-now-note">{{ pray_now_note }}</span>{% endif %}</a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -75,7 +80,7 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["lauds", "prime"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
@@ -91,7 +96,7 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["terce", "sext", "none"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
@@ -107,7 +112,7 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>

@@ -241,6 +241,8 @@ struct HomeTier {
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
     /// and inside the day's clearance of the lining.
     var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }
+    /// The invitation's note needs height a short phone lacks, as on the web.
+    var prayNote: Bool { !short }
     var versicleMeasure: CGFloat { min(304, card - 2 * dayClear) }
     /// Below the day, to the band.
     var dayGap: CGFloat { pick(16.8, 5.6, 12) }
@@ -399,13 +401,24 @@ private struct Frontispiece: View {
                     }
                     .padding(.top, m.px(8))
                 }
+                // Tomorrow's fast or abstinence, told from Vespers: "Tomorrow" in the Also's quiet
+                // italic, the mark as today's is set. It takes the versicle's place.
+                if !view.tomorrowPenitential.isEmpty {
+                    HStack(spacing: m.px(9.6)) {
+                        Text("Tomorrow").type(TextStyle(size: 14.4, line: 19.97, italic: true)).foregroundStyle(p.muted)
+                        ForEach(view.tomorrowPenitential, id: \.self) { t in
+                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(p.rubric)
+                        }
+                    }
+                    .padding(.top, m.px(12))
+                }
             }
             .padding(.horizontal, m.px(tier.dayClear))
             .frame(maxWidth: .infinity)
             // The day's versicle, when the head has the height to spare for it: the layout
             // proposes it no height where it would make the card taller, and it gives way.
             ViewThatFits(in: .vertical) {
-                if let style = tier.versicle, !view.versicle.isEmpty {
+                if let style = tier.versicle, !view.versicle.isEmpty, view.tomorrowPenitential.isEmpty {
                     VStack(spacing: 0) {
                         versicleLine("℣.", view.versicle, style)
                         versicleLine("℟.", view.response, style)
@@ -431,7 +444,7 @@ private struct Frontispiece: View {
             // The invitation and the hours, from the inscription band.
             VStack(spacing: 0) {
                 inscription(side: side)
-                PrayNow(label: view.prayNowLabel, tier: tier) {
+                PrayNow(label: view.prayNowLabel, note: tier.prayNote ? view.prayNowNote : "", tier: tier) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
@@ -551,26 +564,39 @@ private struct FeastName: View {
  */
 private struct PrayNow: View {
     let label: String
+    let note: String
     let tier: HomeTier
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let size = tier.pray.size
         Button(action: action) {
-            Text(label).type(tier.pray)
-                .foregroundStyle(p.dark ? p.lining : p.titulus)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, m.px(tier.prayPad))
-                .padding(.horizontal, m.px(13.8))
-                .overlay {
-                    ZStack {
-                        Rectangle().strokeBorder(p.lining, lineWidth: 1)
-                        Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
-                    }
-                    .allowsHitTesting(false)
+            VStack(spacing: 0) {
+                Text(label).type(tier.pray)
+                    .foregroundStyle(p.dark ? p.lining : p.titulus)
+                // What the hour is and how long it takes, so a newcomer knows what they are opening.
+                if !note.isEmpty {
+                    let noteSize = max(12.8, size * 0.58)
+                    Text(note).type(TextStyle(size: noteSize, line: noteSize * 1.25, italic: true))
+                        .foregroundStyle(p.muted)
+                        .padding(.top, m.px(size * 0.1))
                 }
+            }
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, m.px(tier.prayPad))
+            // The note takes some of the box's lower air rather than a line of the panel's height.
+            .padding(.bottom, m.px(note.isEmpty ? tier.prayPad : max(tier.prayPad - size * 0.3, 2)))
+            .padding(.horizontal, m.px(13.8))
+            .overlay {
+                ZStack {
+                    Rectangle().strokeBorder(p.lining, lineWidth: 1)
+                    Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
+                }
+                .allowsHitTesting(false)
+            }
         }
         .buttonStyle(Quiet())
     }

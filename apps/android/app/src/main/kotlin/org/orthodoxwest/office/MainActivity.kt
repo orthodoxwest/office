@@ -446,7 +446,7 @@ fun OfficeApp(
                                 insets = insets,
                                 onDate = { onOpen(Page.Hour(it, page.hour)) },
                                 onForm = onForm,
-                                onHour = { onOpen(Page.Hour(page.date, it)) },
+                                onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onAllHours = { onOpen(Page.Home(page.date)) },
                             )
                             page is Page.Ordo && content is Content.Ordo -> OrdoScreen(

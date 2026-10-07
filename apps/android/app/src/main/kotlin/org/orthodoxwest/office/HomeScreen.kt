@@ -254,6 +254,8 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp, privat
      * 19rem wide and inside the day's clearance of the lining.
      */
     val versicle: Float? = if (!desk && tall <= 700.dp) null else 15.36f
+    /** The invitation's note needs height a short phone lacks, as on the web. */
+    val prayNote = desk || tall > 700.dp
     val versicleMeasure = minOf(304.dp, card - dayClear * 2)
     /** Below the day, to the band. */
     val dayGap = pick(16.8.dp, 5.6.dp, 12.dp)
@@ -363,12 +365,20 @@ private fun Frontispiece(
                             }
                         }
                     }
+                    // Tomorrow's fast or abstinence, told from Vespers: "Tomorrow" in the Also's
+                    // quiet italic, the mark as today's is set. It takes the versicle's place.
+                    if (view.tomorrowPenitential.isNotEmpty()) {
+                        Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text("Tomorrow", style = Type.small.copy(fontSize = 14.4.sp, color = p.muted, fontStyle = FontStyle.Italic))
+                            view.tomorrowPenitential.forEach { Text(it, style = Type.small.copy(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
+                        }
+                    }
                 }
             },
             // The day's versicle, when the head has the height to spare for it.
             {
                 val style = tier.versicle
-                if (style != null && view.versicle.isNotEmpty()) {
+                if (style != null && view.versicle.isNotEmpty() && view.tomorrowPenitential.isEmpty()) {
                     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
                             VersicleLine("℣.", view.versicle, style)
@@ -415,7 +425,7 @@ private fun Frontispiece(
                         Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
                     }
                     Spacer(Modifier.height(tier.bandGap))
-                    PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    PrayNow(view.prayNowLabel, if (tier.prayNote) view.prayNowNote else "", tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(view.currentHour, tier) { onHour(date, it) }
                     // Season and date control share one line after the invitation.
@@ -519,7 +529,7 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
  * lining.
  */
 @Composable
-private fun PrayNow(label: String, tier: HomeTier, onClick: () -> Unit) {
+private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> Unit) {
     val p = LocalPalette.current
     val inner = frontispieceInk(p).panelRule
     Box(
@@ -532,10 +542,22 @@ private fun PrayNow(label: String, tier: HomeTier, onClick: () -> Unit) {
                 val i = w + 3.dp.toPx() + w / 2f
                 drawRect(inner, Offset(i, i), size.copy(width = size.width - 2 * i, height = size.height - 2 * i), style = Stroke(w))
             }
-            .padding(vertical = tier.prayPad, horizontal = 15.8.dp),
+            // The note takes some of the box's lower air rather than a line of the panel's height.
+            .padding(top = tier.prayPad, bottom = if (note.isEmpty()) tier.prayPad else (tier.prayPad - (tier.pray * 0.3f).dp).coerceAtLeast(2.dp), start = 15.8.dp, end = 15.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+            // What the hour is and how long it takes, so a newcomer knows what they are opening.
+            if (note.isNotEmpty()) {
+                val size = maxOf(12.8f, tier.pray * 0.58f)
+                Text(
+                    note,
+                    Modifier.padding(top = (tier.pray * 0.1f).dp),
+                    style = Type.small.copy(fontSize = size.sp, lineHeight = (size * 1.25f).sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
+                )
+            }
+        }
     }
 }
 

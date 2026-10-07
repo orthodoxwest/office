@@ -14,8 +14,9 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation,
-    long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias, title_case,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_note, hour_versicle,
+    invitation, long_date, minutes_to_say, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label,
+    split_alias, tells_tomorrow, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -102,6 +103,22 @@ impl OfficeCore {
         } else {
             None
         };
+        // As on the web, from the shown day's own text (Compline after midnight included).
+        let pray_now_note = self
+            .engine
+            .compose_hour(invite.hour, day, &year.moveable, PrayerForm::Private)
+            .map(|h| hour_note(invite.hour, minutes_to_say(&h)))
+            .unwrap_or_default();
+        let morrow = shown.add_days(1);
+        let tomorrow_penitential = if tells_tomorrow(&invite) {
+            let next = self.year(morrow.year())?;
+            next.days
+                .get(morrow.ordinal() as usize - 1)
+                .map(|d| d.penitential.labels().into_iter().map(String::from).collect())
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        };
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         Ok(HomeView {
             date_label: long_date(shown),
@@ -119,6 +136,8 @@ impl OfficeCore {
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
+            pray_now_note,
+            tomorrow_penitential,
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -478,6 +497,10 @@ pub struct HomeView {
     /// "Pray Vespers" today; "Open Lauds" on another day.
     pub pray_now_label: String,
     pub pray_now_hour: String,
+    /// What that hour is and how long it takes: "Evening prayer · about 15 minutes".
+    pub pray_now_note: String,
+    /// Tomorrow's "Fasting" or "Abstinence", told on today's home from Vespers; empty otherwise.
+    pub tomorrow_penitential: Vec<String>,
     /// The day the invitation opens: yesterday for Compline after midnight.
     pub pray_now_date: CivilDate,
     /// The hour the directory marks as now, or empty.

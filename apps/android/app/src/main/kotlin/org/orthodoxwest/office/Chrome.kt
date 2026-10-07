@@ -88,6 +88,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -444,6 +445,8 @@ fun MenuPanel(
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                     ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), p.accent) { onTheme(t) } }
                 }
+                // The names are the church's, so a line says what they are, as on the web.
+                PrefHint("Nave is the church by day, Apse its vault by night. Default follows your device.")
                 MenuRow {
                     Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                     TextSize.entries.forEach { s ->
@@ -469,9 +472,21 @@ fun MenuPanel(
                         MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), p.accent) { martyrology.onChange(on) }
                     }
                 }
+                PrefHint("On reads the saints of the coming day at Prime.")
             }
         }
     }
+}
+
+/** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
+@Composable
+private fun PrefHint(text: String) {
+    val p = LocalPalette.current
+    Text(
+        text,
+        Modifier.fillMaxWidth().padding(start = 10.4.dp, end = 10.4.dp, top = 7.2.dp, bottom = 9.6.dp),
+        style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 17.3.sp, color = p.muted, fontStyle = FontStyle.Italic),
+    )
 }
 
 /** A small uppercase disclosure label with its caret ("Change date ▾"). */
