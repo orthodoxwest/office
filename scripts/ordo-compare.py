@@ -366,6 +366,12 @@ def commemoration_tokens(name):
         normalized.add("feria")
     if generic_bvm:
         normalized.update(("saturday", "office"))
+    # Every day of Advent IV falls on or after 18 December, when the Sunday
+    # and the feria are commemorated with the same O antiphon and the
+    # Sunday's collect; the ordos label that commemoration "Sun." or "Fer."
+    # without regard to the weekday (2026: 20 and 21 December).
+    if re.search(r"\biv sunday of advent\b|\bafter advent iv\b", text):
+        normalized.update(("sunday", "feria"))
     return normalized
 
 
