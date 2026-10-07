@@ -291,6 +291,9 @@ pub struct Feast {
     pub octave_day_names: BTreeMap<i32, String>,
     pub companion_of: Option<String>,
     pub primary_of_our_lord: bool,
+    /// A secondary feast in the Diurnal's Table of the Rank of Feasts (General
+    /// Rubrics X.1(c)); only the secondary feasts of Our Lord are marked so far.
+    pub secondary: bool,
     pub only_with: Option<String>,
     pub skip_roman_leap_shift: bool,
     /// Free text in the data files ("base" unless given).
@@ -325,6 +328,7 @@ impl Feast {
             octave_day_names: BTreeMap::new(),
             companion_of: None,
             primary_of_our_lord: false,
+            secondary: false,
             only_with: None,
             skip_roman_leap_shift: false,
             source: None,

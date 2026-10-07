@@ -32,7 +32,8 @@ R. Amen.
 May all the Saints * intercede for us to the Lord.
 
 [suffrage-collect-bvm]
-# SOURCE: diurnal p. 68*
+# SOURCE: diurnal p. 68*; Monastic Diurnal.pdf Suffrage on Feasts of the B.V.M., printed p. 146 (PDF p. 192)
+# "of blessed N. and of" is left out: p. 146's rubric omits the Titular in several cases, and the app has no parish Titular (#492).
 Defend us, we beseech thee, O Lord, from all perils of mind and body: and at the
 intercession of blessed Joseph, of thy blessed Apostles Peter and Paul, of our
 blessed Father Benedict and all Saints, graciously bestow upon us both peace and

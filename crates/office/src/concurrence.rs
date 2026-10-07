@@ -179,8 +179,36 @@ fn semidouble_privileged_octave_day(w: &Feast) -> bool {
         && !matches!(w.id.as_str(), "pentecost-octave-day-2" | "pentecost-octave-day-3")
 }
 
+/// Easter and Pentecost Monday and Tuesday keep an occurring Double at Lauds
+/// (Fr Jason's #138 ruling), and the ordos give it both Vespers too: Boniface
+/// 2017 and 2023, Ephrem 2019, Alban 2021, Basil 2022, St John before the Latin
+/// Gate 2024. Columba's Monday Vespers 2025 is the one line without it (#380).
+fn double_kept_at_second_vespers(w: &Feast) -> bool {
+    semidouble_privileged_octave_day(w)
+        || matches!(w.id.as_str(), "easter-monday" | "easter-tuesday" | "pentecost-octave-day-2" | "pentecost-octave-day-3")
+}
+
+/// II Vespers that commemorate the following day's Double: those days, and the
+/// feast itself on the eve of its Monday (Boniface 2017 and 2023, Columba 2025
+/// and St John before the Latin Gate 2024 at Whitsun and Easter Vespers; Leo
+/// 2018, Michael 2024 and Barnabas 2025 at the Tuesday's; #380).
+fn incoming_double_at_second_vespers(w: &Feast) -> bool {
+    double_kept_at_second_vespers(w) || matches!(w.id.as_str(), "easter-sunday" | "pentecost")
+}
+
 /// Whether a Lauds commemoration remains at II Vespers of the winning office.
 fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> (bool, &'static str) {
+    second_vespers_commemoration(winner, comm, false)
+}
+
+/// Whether one of the following day's commemorations survives at II Vespers
+/// of a Double II Class or above: the occurrence rules, without the #558
+/// allowance, which keeps only today's simplified Doubles.
+fn incoming_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feast) -> bool {
+    second_vespers_commemoration(winner, comm, true).0
+}
+
+fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: bool) -> (bool, &'static str) {
     // XIV.9: Advent and Lenten ferias keep I and II Vespers as well as Lauds,
     // even at a Double I Class (the Annunciation in Lent, 2018–2026 ordos;
     // St Tikhon 2017 and 2023; St George 2021).
@@ -206,7 +234,7 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
         if apostle_kept_on_primary_feast(w, comm) {
             return (true, "commemoration:second-vespers-apostle-on-primary-feast");
         }
-        if semidouble_privileged_octave_day(w) && comm.rank.weight() >= Rank::Double.weight() {
+        if double_kept_at_second_vespers(w) && comm.rank.weight() >= Rank::Double.weight() {
             return (true, "commemoration:second-vespers-double-within-easter-pentecost-octave");
         }
         // XIV.5: a Double impeded by a Sunday or a privileged feria is
@@ -219,6 +247,26 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
             && !is_day_within_octave(comm)
         {
             return (true, "commemoration:second-vespers-double-on-first-class-sunday-or-feria");
+        }
+        // XIV.9 keeps a simplified Double at both Vespers "except on all I
+        // Class Doubles", and Diurnal §X keeps it at Lauds only; but the
+        // ordos commemorate today's Double at II Vespers of a Double I Class
+        // other than the Primary Feasts of Our Lord and St Joseph's Solemnity
+        // (#378): Our Lady of Sorrows at St Tikhon 2017 and 2023 and St
+        // George 2021, Athanasius at St George 2022, and the Doubles within
+        // Easter and Pentecost weeks 2017-2025 (#558). Not the following
+        // day's Doubles (no St Paul at Ss Peter & Paul, 2019 and 2022) nor an
+        // octave day.
+        if !incoming
+            && w.rank == Rank::Double1stClass
+            && !w.primary_of_our_lord
+            && w.id != "solemnity-st-joseph"
+            && matches!(comm.rank, Rank::Double | Rank::GreaterDouble)
+            && !is_day_within_octave(comm)
+            && !is_octave_day(comm)
+            && comm.octave_of.is_none()
+        {
+            return (true, "commemoration:second-vespers-simplified-double-on-first-class-feast");
         }
         if w.rank == Rank::Double1stClass && !comm.is_category(Category::Sunday) {
             return (false, "commemoration:second-vespers-first-class-exclusion");
@@ -236,6 +284,13 @@ fn following_office_commemorated_at_second_vespers(winner: Option<&Feast>, follo
     let Some(feast) = following.celebration.as_deref() else {
         return (false, "commemoration:following-office-at-second-vespers-nil");
     };
+    // XIII.16: two offices of the same mystery of the Lord admit no
+    // commemoration of the less worthy: the Holy Name, given at the
+    // Circumcision (Luke 2:21), at its II Vespers (2017-2024 ordos, "No
+    // Comm."; #557).
+    if winner.is_some_and(|w| w.id == "circumcision") && feast.id == "holy-name-jesus" {
+        return (false, "commemoration:same-mystery-at-second-vespers");
+    }
     if let Some(w) = winner
         && w.rank.weight() >= Rank::Double2ndClass.weight()
         && !w.is_category(Category::Sunday)
@@ -387,12 +442,54 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
     (true, "commemoration:first-vespers-concurrence")
 }
 
+/// Whether a Lesser Double, impeded today and commemorated at Lauds, keeps its
+/// commemoration at the following office's I Vespers. XIV.9 keeps simplified
+/// Doubles at both Vespers "except on all I Class Doubles", but the ordos
+/// keep them only where the evening's office admits them (#556):
+/// - not before a Double I or II Class: Pentecost and Trinity; St Joseph
+///   and St Benedict 2025-2026; St Matthew 2017, 2019 and 2023-2026;
+/// - not before a Sunday when today's office ended at None (XIII.17-18): an
+///   anticipated Sunday (Clement 2019, Romuald 2026; Edmund 2021 dissents),
+///   an Ember Saturday (Januarius 2026) or a vigil (Alban 2024);
+/// - otherwise kept: Lent Saturdays before the Sunday (Patrick 2018,
+///   Cuthbert 2021, Cyril 2023, Isidore 2026; Cyril 2017 dissents), the
+///   Corpus Christi octave (2018, 2021), and an Ember or Rogation day before
+///   a Double (Januarius 2018, Augustine 2025).
+fn impeded_double_at_first_vespers(winner: Option<&Feast>, impeder: Option<&Feast>) -> (bool, &'static str) {
+    let Some(w) = winner else {
+        return (false, "commemoration:outgoing-below-greater-double");
+    };
+    if impeder.is_some_and(|p| p.rank == Rank::Double1stClass && !p.is_category(Category::Sunday) && !p.is_category(Category::Feria)) {
+        return (false, "commemoration:impeded-double-first-class-lauds-only");
+    }
+    if w.is_category(Category::Sunday) {
+        let ended_at_none = impeder.is_some_and(|p| {
+            (p.id.ends_with("-anticipated") && p.is_category(Category::Sunday)) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p)
+        });
+        if ended_at_none {
+            return (false, "commemoration:impeded-double-office-ended-at-none");
+        }
+    } else if w.rank.weight() >= Rank::Double2ndClass.weight() {
+        return (false, "commemoration:impeded-double-before-first-or-second-class");
+    }
+    (true, "commemoration:impeded-double-at-first-vespers")
+}
+
 /// Which office wins when II Vespers of `prec` concurs with I Vespers of
 /// `fol` (XIII.2-17, with the parish ordo's resolutions).
 pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static str) {
     use VespersOwner::{IIOfPreceding, IOfFollowing};
     // 1. Greater Sundays of the I Class.
     if is_sunday_first_class(prec) {
+        // Advent I keeps its II Vespers before St Andrew, commemorating him
+        // (2025 and 2026 ordos; Fr Jason's 2026 direction on #62), as the
+        // Revised Table of Concurrence (Diurnal pp. xlvi-xlvii) gives a
+        // following II Class feast no I Vespers. The original Table (p. xlv)
+        // and XIII.6 say otherwise, and the ordos are split for the Lent and
+        // Low Sundays, which stay on the original Table.
+        if prec.id == "advent-sunday-1" && fol.rank.weight() < Rank::Double1stClass.weight() {
+            return (IIOfPreceding, "concurrence:advent-sunday-1-vs-class-ii");
+        }
         if fol.rank.weight() >= Rank::Double2ndClass.weight() && !fol.is_moveable() && prec.id != "easter-sunday" && prec.id != "pentecost"
         {
             return (IOfFollowing, "concurrence:greater-sunday-vs-class-i-ii");
@@ -440,6 +537,15 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
     if is_double_or_above(prec) && (is_day_within_octave(fol) || is_saturday_bvm(fol)) {
         return (IIOfPreceding, "concurrence:double-vs-octave-or-saturday-bvm");
     }
+    // A day within a common octave keeps its II Vespers before a Double II
+    // Class, commemorating it (2026 ordo 24 April, Day II of St George's
+    // octave before St Mark; Fr Jason's direction on #62, which reads the
+    // Revised Table as refusing I Vespers to a following II Class feast).
+    // The only such evening in the 2017-2026 ordos; the original Table
+    // (Diurnal p. xlv) gives the following office.
+    if fol.rank == Rank::Double2ndClass && !is_sunday(fol) && is_day_within_octave(prec) && !is_privileged_octave_commemoration(prec) {
+        return (IIOfPreceding, "concurrence:common-octave-day-vs-class-ii");
+    }
     if is_double_or_above(fol) && (is_day_within_octave(prec) || is_saturday_bvm(prec)) {
         return (IOfFollowing, "concurrence:double-vs-octave-or-saturday-bvm");
     }
@@ -466,14 +572,14 @@ fn boundary_commemorations(
     let w = winner.map(|w| &**w);
     let suppress_incoming = second_vespers
         && w.is_some_and(|w| {
-            w.rank.weight() >= Rank::Double2ndClass.weight() && !w.is_category(Category::Sunday) && !semidouble_privileged_octave_day(w)
+            w.rank.weight() >= Rank::Double2ndClass.weight() && !w.is_category(Category::Sunday) && !incoming_double_at_second_vespers(w)
         })
         && loser.is_none_or(|l| l.id != "vigil-epiphany");
     let suppressed = |c: &Feast| {
         if !suppress_incoming || c.is_category(Category::Sunday) || c.is_category(Category::Feria) {
             return false;
         }
-        !occurrence_commemorated_at_second_vespers(w, c).0
+        !incoming_commemorated_at_second_vespers(w, c)
     };
 
     let mut comms: Vec<FeastRef> = Vec::new();
@@ -533,7 +639,13 @@ fn boundary_commemorations(
                 decisions.push(decision("commemoration:outgoing-apostolic-companion", "included", &c.id));
                 continue;
             }
-            if c.rank.weight() < Rank::GreaterDouble.weight() {
+            if c.rank == Rank::Double {
+                let (kept, rule) = impeded_double_at_first_vespers(w, preceding.celebration.as_deref());
+                if !kept {
+                    decisions.push(decision(rule, "suppressed", &c.id));
+                    continue;
+                }
+            } else if c.rank.weight() < Rank::GreaterDouble.weight() {
                 decisions.push(decision("commemoration:outgoing-below-greater-double", "suppressed", &c.id));
                 continue;
             }
@@ -558,6 +670,21 @@ fn boundary_commemorations(
             && w.is_some_and(|w| w.rank.weight() >= Rank::Double2ndClass.weight() && !w.is_category(Category::Sunday))
         {
             decisions.push(decision("commemoration:first-vespers-day-within-octave-exclusion", "suppressed", &c.id));
+            continue;
+        }
+        // Diurnal §VIII and §X (pp. xxix-xxx), XIV.8-9: a Simple Office,
+        // Memorial or Simple Octave Day is "not commemorated at I Vespers" of
+        // a Double II Class (#138 ruling item 2; 2026 ordo 2 May, 1 July,
+        // 5 August, 14 September). The 2026 ordo keeps one on 24 July (St
+        // Christopher, printed in every ordo but 2024), 7 September (Hadrian,
+        // 2023's line word for word) and 3 January; the app follows the
+        // rubric until clergy rule (#390).
+        if !second_vespers
+            && matches!(c.rank, Rank::Simple | Rank::Commemoration)
+            && !is_apostolic_companion_commemoration(c)
+            && w.is_some_and(|w| w.rank == Rank::Double2ndClass && !w.is_category(Category::Sunday))
+        {
+            decisions.push(decision("commemoration:first-vespers-second-class-memorial-exclusion", "suppressed", &c.id));
             continue;
         }
         if !second_vespers && loser_included && loser.is_some_and(|l| same_octave_days(l, c)) {

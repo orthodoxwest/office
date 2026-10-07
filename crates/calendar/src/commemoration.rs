@@ -295,15 +295,17 @@ fn suppresses_like_primary_feast(w: &Feast) -> bool {
     w.primary_of_our_lord || w.id == "solemnity-st-joseph"
 }
 
-/// Diurnal X and General Rubrics XIV.4: a Double I Class admits the
-/// commemoration of a privileged octave only, not a day within a common one
-/// (St George's octave on St Joseph's Solemnity, St John Baptist's on Ss Peter
-/// and Paul: 2018–2026 ordos; #378). Doubles II Class keep it (St George's
-/// octave on St Mark, 2026 ordo 25 April), except the Visitation, whose Lauds
-/// rubric reads "No Commemoration is made of the day within the Octave"
-/// (Diurnal p. 557; 2017–2026 ordos).
+/// General Rubrics XIV.4: "if the Double Feast is of the I or II Class, no
+/// Commemoration may be made of a day within an Octave, unless the Octave is a
+/// privileged one" (St George's octave on St Joseph's Solemnity, St John
+/// Baptist's on Ss Peter and Paul: 2018–2026 ordos; #378). Doubles II Class
+/// follow it too (#573): St George's octave on St Mark (No Comm. 2017, 2018,
+/// 2023, 2025), the Assumption's on St Joachim (No Comm. 2017–2019 and 2026),
+/// and the Visitation's own rubric (Diurnal p. 557). The 2026 St Mark and
+/// 2021–2025 St Joachim Lauds lines that commemorate the octave are the
+/// exceptions.
 fn suppresses_common_octave(w: &Feast, comm: &Feast) -> bool {
-    (w.rank == Rank::Double1stClass || w.id == "visitation-bvm")
+    matches!(w.rank, Rank::Double1stClass | Rank::Double2ndClass)
         && !w.is_category(Category::Sunday)
         && is_day_within_octave(comm)
         && !comm.is_privileged_octave_day

@@ -9,14 +9,22 @@ section. Readings follow civil dates regardless of feast transfers; nothing
 else in the calendar or other hours changes.
 
 The trial covers the whole civil year except the held days below, read at
-Prime on the preceding day; try `/prime/2026-09-07` with the setting on. These
-days hold a notice with no usable chronology: January 2, 14 and 28; February 7;
-March 12 and 24; April 26; May 5, 16, 22 and 29; June 30; July 5, 28 and 29;
-August 1 and 27; September 12, 22 and 26; October 8 and 12; November 6, 10 and 30;
-and December 2. February 24–28 are held because the source moves those
-announcements by a day in leap years and the corpus is keyed by month and day
-(the source has no February 29 entry). December 8, 15 and 25 await clergy review
-of their announcements. Held days keep the rubric.
+Prime on the preceding day; try `/prime/2026-09-07` with the setting on. Terse
+early-layer notices with no later claim are kept without an exact chronology
+(proposed answer to #476, awaiting confirmation). May 29 (Eleutherius at Arce),
+July 5 (Philomena at San Severino) and July 29 (Seraphina at Mamia) stay held:
+the place is no ancient see or cannot be identified. December 8, 15 and 25 await
+clergy review of their announcements. Held days keep the rubric.
+
+Leap years follow the source's bissextile rule (January–June, p. 15), as the
+calendar does for the feasts: February 24 reads `02-24-bissextile`, and
+February 25–29 read the printed 24th–28th. Holy Name (`holy-name`, worded as
+every ordo since 2021 prints it) and the vigils (`vigil-MM-DD`, keyed by
+printed date) are read in the first place on the day the calendar keeps them:
+a common vigil falling on Sunday on the Saturday before, the Epiphany's on
+January 5, and St Matthias's on February 24 in leap years. Only vigils the AWRV
+keeps are listed. Both rules are proposed answers awaiting clergy confirmation
+(#475, #477).
 
 On the web the setting lives in the browser (`office-martyrology` in
 localStorage, like the theme), so the page never varies by reader: Prime carries
@@ -34,7 +42,8 @@ counts Prime readers on days with a reading, by whether the setting showed it;
 see README, "Usage metrics".
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
-DST, missing-text fallback, and the Triduum.
+DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name and
+every vigil are announced exactly on the days the calendar keeps them.
 
 ## Eligibility
 
@@ -44,8 +53,9 @@ dates and order; retained wording is not edited.
 - Judge each person by death, never canonization, relic translation, or a
   feast's institution. Keep a notice whose whole plausible death range is at
   or before 1200 (an exact year is unnecessary: "under Diocletian" or "fourth
-  century" suffices). Omit it if the range reaches past 1200. Flag it for
-  human review only when there is no usable chronology at all.
+  century" suffices). Omit it if the range reaches past 1200. A terse notice
+  from the early layers (a name at an ancient church, no later claim) counts
+  as early; flag for human review only a notice that is neither.
 - Identify by name, place, companions, and date together; homonyms are common.
 - When a retained notice mentions a later saint, omit the smallest clause that
   still reads correctly. Never invent a revised companion count; send
@@ -53,8 +63,9 @@ dates and order; retained wording is not edited.
 - Feast announcements, octaves, vigils, and translations are not people.
   Review their AWRV observance and wording separately.
   A feast, octave or devotion announced on its Roman date stays only when the
-  AWRV calendar keeps that observance on that date; vigils always wait until
-  their placement is modelled.
+  AWRV calendar keeps that observance on that date. Vigil lines are left out
+  of the day's entry; Prime adds them from `vigil-MM-DD` on the day the
+  calendar keeps the vigil.
 - Absence from the AWRV office calendar is no reason to omit an eligible
   notice, and presence in it is no exception to the cutoff.
 
@@ -71,7 +82,6 @@ dates and order; retained wording is not edited.
 4. Check Prime on the preceding civil date and add tests. Any dated entry
    becomes live in the preview; the corpus is curated, not filtered at runtime.
 
-A full year also needs the moveable-feast announcements (checked against the
-current ordo), the source's leap-year conventions, the special Christmas
-announcement, and reviewed December 8 wording. The rollover tests exercise
-lookup only, not those rules.
+A full year also needs any further moveable-feast announcements (checked
+against the current ordo), the special Christmas announcement, and reviewed
+December 8 wording.

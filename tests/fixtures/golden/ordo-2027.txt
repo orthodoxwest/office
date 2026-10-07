@@ -31,7 +31,6 @@ JANUARY
            Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Most Holy Name of Jesus) · Mag. For he that is mighty · No Suff.
-               Com. Octave Day of St John, Apostle & Evangelist ("This is the same John")
   3  Sun     Most Holy Name of Jesus                    [2cl] w
            Octave Day of St John, Apostle & Evangelist (s)
            Lauds   w · Ben. He gave himself · No Preces · No Suff.
@@ -509,7 +508,8 @@ MARCH
            Lauds   v · Ben. Yet they seek me daily · No Preces · No Suff.
                Com. St Cuthbert, Bishop & Confessor ("Well done")
            Hours   No Preces
-           Vespers v · I fol. (I Sunday in Lent) · Mag. Then shalt thou call · Suff.
+           Vespers v · I fol. (I Sunday in Lent) · Mag. Then shalt thou call · No Suff.
+               Com. St Cuthbert, Bishop & Confessor ("The Lord loved him")
  21  Sun  L  I SUNDAY IN LENT                           [1cl] v
            Lauds   v · Ben. Then was Jesus · No Preces · Suff.
            Hours   Preces
@@ -704,6 +704,7 @@ APRIL
            Hours   No Preces
            Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
                Com. Friday after Passion Sunday ("The chief priests")
+               Com. Our Lady of Sorrows ("All generations")
  24  Sat  L§ Saturday after Passion Sunday              [f2]  v
            Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
            Hours   Preces
@@ -798,7 +799,6 @@ MAY
            Hours   No Preces
            Vespers r · I fol. (St Mark, Evangelist) · Mag. Light perpetual · No Suff.
                Com. The Octave of Easter (Low Sunday) ("After eight days")
-               Com. Ss Gordian & Epimachus, Martyrs ("Light perpetual")
  10  Mon     St Mark, Evangelist                        [2cl] r
            Ss Gordian & Epimachus, Martyrs (com)
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
@@ -809,9 +809,8 @@ MAY
  11  Tue     Ss Philip and James, Apostles              [2cl] r
            Lauds   r · Ben. I am the way · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (Finding of the Holy Cross) · Mag. O Cross · No Suff.
-               Com. Ss Philip and James, Apostles ("If ye abide in me")
-               Com. Ss Nereus, Achilles, Domitilla & Pancras, Martyrs ("Light perpetual")
+           Vespers r · II prec. · Mag. If ye abide in me · No Suff.
+               Com. Finding of the Holy Cross ("O Cross")
  12  Wed     Finding of the Holy Cross                  [2cl] r
            Ss Nereus, Achilles, Domitilla & Pancras, Martyrs (com)
            Lauds   r · Ben. Thou alone · No Preces · No Suff.
@@ -1048,12 +1047,14 @@ JUNE
            Lauds   r · Ben. God so loved the world · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. If a man love me · No Suff.
+               Com. St Alban, Protomartyr of England ("This is a Martyr")
  22  Tue     TUESDAY WITHIN THE OCTAVE OF PENTECOST     [1cl] r
            St Alban, Protomartyr of England (d)
            Lauds   r · Ben. I am the door · No Preces · No Suff.
                Com. St Alban, Protomartyr of England ("He that hateth his life")
            Hours   No Preces
            Vespers r · II prec. · Mag. Peace · No Suff.
+               Com. St Alban, Protomartyr of England ("Whosoever will come after me")
  23  Wed  L§ Ember Wednesday in Pentecost               [sd]  r
            St Etheldreda, Queen & Virgin (com)
            Lauds   r · Ben. I am the living bread · No Preces · No Suff.
@@ -1136,6 +1137,7 @@ JULY
            Hours   No Preces
            Vespers w · I fol. (Sunday within the Octave of Corpus Christi) · Mag. The child Samuel · No Suff.
                Com. Day III within the Octave of Corpus Christi ("O sacred banquet")
+               Com. St Irenaeus of Lyon, Bishop & Martyr ("Whosoever will come after me")
                Com. Day VI within the Octave of Ss Peter & Paul ("Thou art the shepherd of the sheep")
                Com. All Saints of Antioch ("I will liken him")
   4  Sun     Sunday within the Octave of Corpus Christi [sd]  w
@@ -1172,6 +1174,7 @@ JULY
                Com. Ss Cyril and Methodius, Bishops & Confessors ("In holiness")
            Hours   No Preces
            Vespers w · I fol. (Octave of Corpus Christi) · Mag. O sacred banquet · No Suff.
+               Com. Ss Cyril and Methodius, Bishops & Confessors ("These are holy men")
   8  Thu     Octave of Corpus Christi                   [gd]  w
            Lauds   w · Ben. I am · No Preces · No Suff.
            Hours   No Preces
@@ -1217,16 +1220,14 @@ JULY
  15  Thu     St Vladimir of Kiev, King & Confessor      [d]   w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Our Lady of Einsiedeln) · Mag. O holy Mary · No Suff.
-               Com. St Vladimir of Kiev, King & Confessor ("The world, and all things earthly")
+           Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
                Com. Ss Nicholas & Habib Khasha, Martyrs ("For theirs is the kingdom of heaven")
- 16  Fri  L  Our Lady of Einsiedeln                     [gd]  w
+ 16  Fri  L  Feria                                            g
            Ss Nicholas & Habib Khasha, Martyrs (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
+           Lauds   g · Ben. Through the tender mercy · No Preces · Suff.
                Com. Ss Nicholas & Habib Khasha, Martyrs ("The very hairs of your head")
-           Hours   No Preces
-           Vespers w · II prec. · Mag. All generations · No Suff.
-               Com. Saturday Office of the B.V.M. ("O blessed Mother")
+           Hours   Preces
+           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O blessed Mother · Suff.
                Com. St Alexius, Confessor ("I will liken him")
  17  Sat     Saturday Office of the B.V.M.              [s]   w
            St Alexius, Confessor (com)
@@ -1294,7 +1295,6 @@ JULY
            Hours   Preces
            Vespers r · I fol. (St James, Apostle) · Mag. They will deliver you up · No Suff.
                Com. V Sunday after Pentecost ("Ye mountains")
-               Com. St Christopher, Martyr ("This is a Martyr")
  25  Sun     St James, Apostle                          [2cl] r
            V Sunday after Pentecost (sd)
            St Christopher, Martyr (com)
@@ -1381,7 +1381,6 @@ AUGUST
            Hours   No Preces
            Vespers w · I fol. (The Transfiguration of Our Lord Jesus Christ) · Mag. Christ Jesus · No Suff.
                Com. Dedication of Our Lady of the Snows ("O holy Mary")
-               Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("This is a Martyr")
   6  Fri  L  The Transfiguration of Our Lord Jesus Christ [2cl] w
            Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (com)
            Lauds   w · Ben. And behold a voice · No Preces · No Suff.
@@ -1446,9 +1445,7 @@ AUGUST
                Com. St Joachim, Father of the B.V.M. ("Let us praise a man famous")
                Com. VIII Sunday after Pentecost ("What shall I do?")
  16  Mon     St Joachim, Father of the B.V.M.           [2cl] w
-           Day II within the Octave of the Assumption (sd)
            Lauds   w · Ben. Let us praise a man famous · No Preces · No Suff.
-               Com. Day II within the Octave of the Assumption ("Who is she")
            Hours   No Preces
            Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
  17  Tue     Day III within the Octave of the Assumption [sd]  w
@@ -1587,7 +1584,6 @@ SEPTEMBER
            Lauds   g · Ben. The Lord hath raised up for us · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Nativity of the Blessed Virgin Mary) · Mag. Let us celebrate · No Suff.
-               Com. St Hadrian, Martyr ("This is a Martyr")
   8  Wed     Nativity of the Blessed Virgin Mary        [2cl] w
            St Hadrian, Martyr (com)
            Lauds   w · Ben. To-day let us celebrate · No Preces · No Suff.
@@ -1628,7 +1624,6 @@ SEPTEMBER
            Hours   No Preces
            Vespers w · I fol. (Seven Sorrows of the B.V.M.) · Mag. Look not · No Suff.
                Com. Exaltation of the Holy Cross ("O Cross")
-               Com. St Nicomedes, Martyr ("This is a Martyr")
  15  Wed  L§ Seven Sorrows of the B.V.M.                [2cl] w
            Ember Wednesday in September (f2)
            St Nicomedes, Martyr (com)

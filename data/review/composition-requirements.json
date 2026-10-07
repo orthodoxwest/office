@@ -2759,5 +2759,50 @@
         "contains": "beholding the star"
       }
     ]
+  },
+  {
+    "id": "epiphany-sunday-little-hour-chapters",
+    "source": "Monastic Diurnal pp. 230-231 (Sunday within the Octave of the Epiphany, At Sext and At None). Best guess for #361: the 2021-2026 ordos print \"Hours Of Feast (226)\", the octave's daily formula.",
+    "cases": [
+      {
+        "date": "2026-01-11",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/epiphany-sunday-within-octave/chapter-sext",
+        "contains": "not to think of himself more highly"
+      },
+      {
+        "date": "2026-01-11",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/epiphany-sunday-within-octave/chapter-none",
+        "contains": "many members in one body"
+      }
+    ]
+  },
+  {
+    "id": "nativity-collect-diurnal-translation",
+    "source": "Monastic Diurnal p. 187 (Nativity, At Lauds); #498.",
+    "cases": [
+      {
+        "date": "2026-12-25",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/christmas/collect",
+        "contains": "the new birth in the flesh of thine only-begotten Son"
+      }
+    ]
+  },
+  {
+    "id": "einsiedeln-outside-default-calendar",
+    "source": "2026 ordo 16 July (Our Lady of Einsiedeln bracketed \"Monastics & Oblates Only\"; the feria with Ss Nicholas & Habib Khasha commemorated). Best guess for #11.",
+    "cases": [
+      {
+        "date": "2026-07-16",
+        "hour": "lauds",
+        "slot": "benedictus-antiphon",
+        "contains": "Let us serve"
+      }
+    ]
   }
 ]

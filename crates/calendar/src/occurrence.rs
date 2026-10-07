@@ -10,12 +10,16 @@ use crate::traits::{is_ember_day, is_privileged_feria};
 
 /// The precedence key (higher wins). Sundays below Greater Double are
 /// boosted to Greater Double.
-fn sort_key(f: &Feast) -> [i32; 3] {
+fn sort_key(f: &Feast) -> [i32; 4] {
     let mut weight = f.rank.weight();
     if f.is_category(Category::Sunday) && weight < Rank::GreaterDouble.weight() {
         weight = Rank::GreaterDouble.weight();
     }
-    [weight, i32::from(f.is_moveable()), i32::from(f.is_category(Category::Lord))]
+    // X.1(c): a primary feast before a secondary one of the same rite, ahead
+    // of the Lord's personal dignity (X.1(d)): Ss Philip and James before the
+    // Finding of the Holy Cross (2021 and 2024 ordos), St Mark after it (2022),
+    // the Circumcision before the Holy Name (2017-2024 ordos); #557.
+    [weight, i32::from(!f.secondary), i32::from(f.is_moveable()), i32::from(f.is_category(Category::Lord))]
 }
 
 fn is_corpus_octave_day(f: &Feast) -> bool {
@@ -68,10 +72,13 @@ pub fn compare_feast_precedence_with_decision(a: &Feast, b: &Feast) -> (bool, De
         return decision(rule, ak[0] > bk[0]);
     }
     if ak[1] != bk[1] {
-        return decision("occurrence:temporal-tiebreak", ak[1] > bk[1]);
+        return decision("occurrence:primary-tiebreak", ak[1] > bk[1]);
     }
     if ak[2] != bk[2] {
-        return decision("occurrence:lord-tiebreak", ak[2] > bk[2]);
+        return decision("occurrence:temporal-tiebreak", ak[2] > bk[2]);
+    }
+    if ak[3] != bk[3] {
+        return decision("occurrence:lord-tiebreak", ak[3] > bk[3]);
     }
     decision("occurrence:equal-precedence-possession", false)
 }
