@@ -1435,7 +1435,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .hour-header {
   width: 100%;
   max-width: 38rem;
-  margin: 0 auto 1.1rem;
+  /* The air under the closing rule matches a section heading's margin
+     below, so the first heading stands as near the rule as its text stands
+     to it. */
+  margin: 0 auto 0.6rem;
   padding: 0 0 0.45rem;
   text-align: center;
   border-bottom: 1px solid color-mix(in srgb, var(--lining) 30%, transparent);
@@ -3464,6 +3467,29 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 0.85em;
 }
 .day-disclosures details[open] > summary::after { content: "▴"; }
+/* From a tablet up the feast and its disclosures share one line, so a month
+   reads as a list of days rather than a stack of cards and the page is near
+   half as long; an opened disclosure drops below the name at full width. On
+   the phone the cell is a grid of its own (below). With a mouse the summaries
+   need no thumb box, so the row is as tall as its type. */
+@media (min-width: 701px) {
+  /* Inline beside the name, not a flex cell: a td given display: flex stops
+     being a table cell and its border leaves the row's. */
+  .day-disclosures {
+    display: inline-flex;
+    vertical-align: baseline;
+    margin-left: 1.25rem;
+    column-gap: 0.9rem;
+  }
+  .day-disclosures:has(> details[open]) {
+    display: flex;
+    margin-left: 0;
+  }
+  .month-table td { padding: 0.5rem 0.45rem; }
+}
+@media (min-width: 701px) and (pointer: fine) {
+  .day-disclosures summary { min-height: 0; }
+}
 .day-commemoration {
   display: block;
   font-size: 0.85rem;
@@ -5324,6 +5350,13 @@ body.season-eastertide {
 
 .page-home .home .commemorations-label {
   margin-right: 0.3em;
+}
+
+/* A second commemoration is joined to the first by "and", so two saints on
+   their own lines read as the day's two commemorations, not one long title. */
+.page-home .home .commemorations li + li::before {
+  content: "and ";
+  font-style: italic;
 }
 
 .page-home .home .penitential {
