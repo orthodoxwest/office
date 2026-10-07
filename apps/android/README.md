@@ -202,6 +202,13 @@ It needs:
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
 
+### Listing screenshots
+
+`StoreScreenshotTest` renders the listing's phone screenshots at 1080×1920 into
+`app/build/screenshots/store/` (`make android-screenshots`; CI's `android-screenshots`
+artifact carries them). Re-shoot after a visible change and replace them under *Main store
+listing*.
+
 ## Building locally
 
 Needs: the Rust toolchain with the Android targets, `cargo-ndk`, JDK 21, and the Android
