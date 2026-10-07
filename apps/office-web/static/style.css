@@ -590,9 +590,16 @@ summary:focus-visible {
   -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
   mask: url("ornaments/consecration.svg") center / contain no-repeat;
   /* The roundel's centre on the capitals' centre: the type's cap height is
-     0.64em, so the centre stands 0.32em up, and the roundel's foot sits its
-     half-height (0.5625em) below that. */
-  vertical-align: -0.3em;
+     0.65em, so the centre stands 0.325em up, and the roundel's foot sits its
+     half-height (0.625em at the brand's size) below that. That sum places
+     the box's foot only if the box's baseline is its foot, which an
+     inline-block holding text does not have: its baseline is the hidden
+     ✠'s, inside a line box taller than the roundel, and the roundel rode
+     some 4px low. Clipping the box gives it its foot as its baseline. The
+     mask's ring stands a hair high in its box, so the box sits a hair
+     lower than the sum. */
+  overflow: hidden;
+  vertical-align: -0.275em;
 }
 
 .site-menu {
@@ -6882,6 +6889,15 @@ body.season-eastertide {
     display: inline-flex;
     align-items: center;
     min-height: var(--touch-target);
+  }
+
+  /* As a flex item the roundel is centred on the brand's line box, whose
+     middle is 0.21em above the baseline (0.71em ascent); the capitals'
+     middle is 0.325em above it. Raise the roundel by the difference, and
+     the hair the ring stands high in its mask. */
+  .site-brand span {
+    position: relative;
+    top: -0.16em;
   }
 
   /* A session-prayer summary is a section heading that opens. Shrunk to an

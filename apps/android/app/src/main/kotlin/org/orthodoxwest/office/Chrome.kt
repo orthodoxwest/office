@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -252,8 +253,11 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                // The brand's mark, 18dp: the roundel that ends every hour.
-                ConsecrationCross(Modifier.size(18.dp))
+                // The brand's mark, 18dp: the roundel that ends every hour. Centred on the
+                // row it sits on the text box's middle, 0.21em above the baseline (0.71em
+                // ascent, 0.29em descent); the capitals' middle is 0.325em above it. Raised by
+                // the difference, as the web's phone header raises it, it centres on the caps.
+                ConsecrationCross(Modifier.offset(y = -(13.12f * 0.115f).dp).size(18.dp))
                 Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
