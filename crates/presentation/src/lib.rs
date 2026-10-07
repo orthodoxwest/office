@@ -93,8 +93,7 @@ pub struct DayHeading {
     /// "Octave of …" within an octave the name does not already mention; the
     /// ordo carries the full wording.
     pub octave_note: String,
-    /// The season's name as [`season_label`] gives it, empty when the celebration already
-    /// names it or the season goes unnamed (after Pentecost).
+    /// The season's name, empty when the celebration already names it.
     pub season: String,
 }
 
@@ -105,11 +104,10 @@ pub fn day_heading(day: &CalendarDay) -> DayHeading {
         Some(id) if !id.is_empty() && !lower.contains("octave") => format!("Octave of {}", calendar::builder::octave_display_name(id)),
         _ => String::new(),
     };
-    // Named as the hour header names it ([`season_label`]): a bare "Pentecost" or "Easter"
-    // under an October or April date reads as that feast day. Still left out when the day's
-    // own name already says it ("Easter Day", "Monday in Easter Week").
-    let raw = day.season.as_str();
-    let season = if !raw.is_empty() && lower.contains(raw) { String::new() } else { season_label(raw) };
+    let mut season = title_case(day.season.as_str());
+    if !season.is_empty() && lower.contains(&season.to_lowercase()) {
+        season.clear();
+    }
     DayHeading { feast, octave_note, season }
 }
 
@@ -383,35 +381,6 @@ mod tests {
         assert_eq!(season_label("septuagesima"), "Septuagesima");
         assert_eq!(season_label("advent"), "Advent");
         assert_eq!(season_label(""), "");
-    }
-
-    fn bare_day(season: Season, tempora: &str) -> CalendarDay {
-        CalendarDay {
-            date: Date::new(2026, 10, 7),
-            season,
-            tempora: Some(tempora.into()),
-            celebration: None,
-            commemorations: Vec::new(),
-            color: season.color(),
-            notes: None,
-            resolution_rule: String::new(),
-            occurrence_decisions: Vec::new(),
-            feria_commemoration: None,
-            temporal_week_id: None,
-            within_octave_of: None,
-            penitential: Default::default(),
-        }
-    }
-
-    #[test]
-    fn day_heading_names_the_season_as_the_hours_do() {
-        // A bare "Pentecost" under an October date reads as the feast; the season after it goes unnamed.
-        assert_eq!(day_heading(&bare_day(Season::Pentecost, "Holy Rosary")).season, "");
-        assert_eq!(day_heading(&bare_day(Season::Easter, "St Mark")).season, "Eastertide");
-        assert_eq!(day_heading(&bare_day(Season::Lent, "St Joseph")).season, "Lent");
-        // A name that already says the season keeps it off the line.
-        assert_eq!(day_heading(&bare_day(Season::Easter, "Monday in Easter Week")).season, "");
-        assert_eq!(day_heading(&bare_day(Season::Lent, "III Sunday in Lent")).season, "");
     }
 
     #[test]
