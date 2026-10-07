@@ -19,7 +19,7 @@ this tool pins the axes, gives each instance a plain family name, and writes:
     project also bundles), Regular and Italic as TrueType: the core and the
     rest of the Latin script (NATIVE), with the core's features.
 
-Five changes to the instances, each for the app's sake:
+Six changes to the instances, each for the app's sake:
 
   * The text weight is a step above Junicode's 400 (`--weight`): the reason
     for leaving EB Garamond was its thin colour on a phone, and 400 still
@@ -52,6 +52,16 @@ Five changes to the instances, each for the app's sake:
     those (lnum to zero.lf, tnum to zero.tosf, both to zero), and every
     other single substitution from a default digit (small caps, sups, numr)
     is extended to them. The bold, without features, keeps lining figures.
+  * The small capitals come from a wider instance (SMALL_CAP_WIDTH, wdth
+    120) of the same weight. Junicode's small caps at normal width are drawn
+    some 15% narrower than EB Garamond's, on the same stems, and at the 11-12px
+    of the home's period labels and the ordo's fasting marks their counters
+    close up and the word reads muddy. At wdth 120 their advances meet EB
+    Garamond's (o 580 against 616, n 583 against 600, a 546 against 549 per
+    1000) and the counters open; only the glyphs smcp and c2sc reach are
+    exchanged, the lower case and capitals staying at normal width, so the
+    text's measure holds. The wide glyphs are decomposed as they are copied,
+    since their accented composites point at wide bases and marks.
   * The vertical metrics are EB Garamond's 0.71/0.29em. Junicode's own
     860/410 units make room for stacked medieval diacritics the office never
     sets, and the apps' line boxes (an iOS single-line Text is the font's own
@@ -69,6 +79,8 @@ import argparse
 from pathlib import Path
 
 from fontTools import subset
+from fontTools.pens.recordingPen import DecomposingRecordingPen
+from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 
@@ -114,6 +126,10 @@ NATIVE = CORE + [(0x0100, 0x024F), (0x0300, 0x036F), (0x1E00, 0x1EFF), (0x2100, 
 UPEM = 1034
 ASCENT, DESCENT = 734, 300
 
+# The width-axis position the small capitals are taken from (see the module
+# docstring); the rest of the face stays at 100.
+SMALL_CAP_WIDTH = 120
+
 # The long-tailed Q each face draws by default.
 LONG_Q = {"roman": "Q.alt2", "italic": "Q.swash"}
 
@@ -156,6 +172,42 @@ def swap_glyphs(font, a, b):
         raise ValueError("swap the glyphs of an instance, not a variable font")
 
 
+def small_cap_map(font):
+    """Every base glyph smcp or c2sc substitutes, with the small capital it
+    becomes."""
+    mapping = {}
+    gsub = font["GSUB"].table
+    for record in gsub.FeatureList.FeatureRecord:
+        if record.FeatureTag not in ("smcp", "c2sc"):
+            continue
+        for index in record.Feature.LookupListIndex:
+            for sub in gsub.LookupList.Lookup[index].SubTable:
+                if sub.LookupType == 7:
+                    sub = sub.ExtSubTable
+                if sub.LookupType == 1:
+                    mapping.update(sub.mapping)
+    return mapping
+
+
+def widen_small_caps(font, source, weight):
+    """Replaces the small capitals' outlines and advances with those of the
+    same face at SMALL_CAP_WIDTH, decomposed (see the module docstring)."""
+    wide = TTFont(str(source))
+    wide = instancer.instantiateVariableFont(wide, {"wght": weight, "wdth": SMALL_CAP_WIDTH, "ENLA": 0}, updateFontNames=False)
+    wide_glyphs = wide.getGlyphSet()
+    wide_map = small_cap_map(wide)
+    glyf, hmtx = font["glyf"], font["hmtx"]
+    for base, small in small_cap_map(font).items():
+        if base not in wide_map:
+            continue
+        recording = DecomposingRecordingPen(wide_glyphs)
+        wide_glyphs[wide_map[base]].draw(recording)
+        pen = TTGlyphPen({})
+        recording.replay(pen)
+        glyf[small] = pen.glyph()
+        hmtx[small] = wide["hmtx"][wide_map[base]]
+
+
 DIGITS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 
 
@@ -193,6 +245,7 @@ def instance(source, weight, style):
     if style != "bold":
         swap_glyphs(font, "Q", LONG_Q["italic" if style == "italic" else "roman"])
         oldstyle_default(font)
+        widen_small_caps(font, source, weight)
 
     subfamily = {"regular": "Regular", "italic": "Italic", "bold": "Bold"}[style]
     postscript = f"{FAMILY}-{subfamily}"
