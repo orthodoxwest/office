@@ -705,7 +705,8 @@ APRIL
  24  Fri  L  Day II within the Octave of St George      [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (St Mark, Evangelist) · Mag. Light perpetual · No Suff.
+           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+               Com. St Mark, Evangelist ("Light perpetual")
  25  Sat     St Mark, Evangelist                        [2cl] r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
@@ -1525,8 +1526,8 @@ AUGUST
            Lauds   r · Ben. Herod sent · No Preces · No Suff.
                Com. St Sabina, Martyr ("Give her")
            Hours   No Preces
-           Vespers g · I fol. (XIII Sunday after Pentecost) · Mag. Now when Job had heard · No Suff.
-               Com. Beheading of St John the Baptist ("The king, the unbeliever")
+           Vespers r · II prec. · Mag. The king, the unbeliever · No Suff.
+               Com. XIII Sunday after Pentecost ("Now when Job had heard")
                Com. Ss Felix & Adauctus, Martyrs ("For theirs is the kingdom of heaven")
  30  Sun     XIII Sunday after Pentecost                [sd]  g
            Ss Felix & Adauctus, Martyrs (com)

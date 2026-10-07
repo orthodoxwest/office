@@ -229,6 +229,30 @@ fn whitsun_and_easter_vespers_commemorate_the_next_days_double() {
 }
 
 #[test]
+fn ordo_2026_second_vespers_as_printed() {
+    // #62: the 2026 ordo keeps II Vespers on 24 April and 29 August, with the
+    // following office commemorated. Year-bound: the same pairs in another
+    // year keep the table of concurrence's I Vespers of the following office.
+    let george = f("st-george-octave-day-2", Rank::SemiDouble, Category::Martyr);
+    let mark = f("st-mark", Rank::Double2ndClass, Category::Evangelist);
+    let beheading = f("beheading-john-baptist", Rank::GreaterDouble, Category::Martyr);
+    let sunday = f("pentecost-sunday-13", Rank::SemiDouble, Category::Sunday);
+    let on = |date: &str, c: &FeastRef| CalendarDay { date: Date::parse(date).unwrap(), ..day(Some(c), &[]) };
+    for (prec, fol, date, next, owner) in [
+        (&george, &mark, "2026-04-24", "2026-04-25", IIOfPreceding),
+        (&george, &mark, "2031-04-24", "2031-04-25", IOfFollowing),
+        (&beheading, &sunday, "2026-08-29", "2026-08-30", IIOfPreceding),
+        (&beheading, &sunday, "2037-08-29", "2037-08-30", IOfFollowing),
+    ] {
+        let r = resolve_concurrence(&on(date, prec), &on(next, fol));
+        assert_eq!(r.owner, owner, "{date}");
+        if owner == IIOfPreceding {
+            assert!(same_list(&r.commemorations, &[fol]), "{date}: {:?}", ids(&r.commemorations));
+        }
+    }
+}
+
+#[test]
 fn first_class_second_vespers_keep_only_todays_double() {
     // 2019 and 2022 ordos 29 June: II Vespers of Ss Peter & Paul without the
     // following Commemoration of St Paul. The #558 allowance keeps today's
