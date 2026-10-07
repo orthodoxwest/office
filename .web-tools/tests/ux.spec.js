@@ -3335,6 +3335,50 @@ test("home's versicle takes only the height its head has to spare", async ({ pag
   expect((await open("2026-03-11", 412, 735)).shown).toBe(null);
 });
 
+test("first-class hours stand in a frame that leaves the measure and ends at the prayer", async ({ page }) => {
+  for (const [width, height] of [[390, 844], [1280, 900]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, "/lauds/2026-12-25");
+    await expect(page.locator("body")).toHaveClass(/rank-first-class/);
+    const frame = await page.locator(".office-hour").evaluate(el => {
+      const before = getComputedStyle(el, "::before");
+      const after = getComputedStyle(el, "::after");
+      const elements = el.querySelector(".elements").getBoundingClientRect();
+      const epilogue = el.querySelector(".hour-epilogue").getBoundingClientRect();
+      const grid = getComputedStyle(el).gridTemplateColumns.split(" ").map(parseFloat);
+      return {
+        drawn: before.borderLeftStyle === "double" && after.borderLeftStyle === "double",
+        // Each line sits in its own grid column, and the inner column is the full measure.
+        side: grid[0], measure: grid[1], elementsWidth: elements.width,
+        gap: getComputedStyle(el).columnGap,
+        epilogueTop: epilogue.top, elementsBottom: elements.bottom,
+      };
+    });
+    expect(frame.drawn).toBe(true);
+    expect(frame.gap).toBe("0px");
+    // The phone gives the frame a little of its measure; the desktop's measure stays untouched.
+    expect(frame.elementsWidth).toBeLessThanOrEqual(frame.measure + 0.5);
+    expect(frame.side).toBe(width < 920 ? 12 : 8);
+    await openDatedPage(page, "/lauds/2026-10-07");
+    const feria = await page.locator(".elements").evaluate(el => el.getBoundingClientRect().width);
+    expect(frame.elementsWidth).toBeCloseTo(width < 920 ? feria - 24 : feria, 0);
+    await openDatedPage(page, "/lauds/2026-12-25");
+    // The phone's lines are drawn out past their columns to the screen's edge.
+    const lines = await page.locator(".office-hour").evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const before = getComputedStyle(el, "::before");
+      const after = getComputedStyle(el, "::after");
+      return { left: before.translate, right: after.translate, width: r.width };
+    });
+    expect(lines.left).toBe(width < 920 ? "-20px" : "none");
+    expect(lines.right).toBe(width < 920 ? "20px" : "none");
+  }
+  // A feria has no frame.
+  await openDatedPage(page, "/lauds/2026-10-07");
+  await expect(page.locator("body")).not.toHaveClass(/rank-first-class/);
+  expect(await page.locator(".office-hour").evaluate(el => getComputedStyle(el, "::before").content)).toBe("none");
+});
+
 test("Compline openings preserve words and align response columns around the blessing", async ({ page }) => {
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });

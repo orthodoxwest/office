@@ -2022,6 +2022,62 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   padding-bottom: 3.25rem;
 }
 
+/* A first-class day's hour is framed: a double lining in the lining's
+   terracotta down both margins, from the title's rule to the end of the
+   prayer, where the consecration cross closes it; the epilogue stands
+   outside the frame. The hour's grid has three rows in flow (the header,
+   the prayer and the epilogue; the colour band and the progress hairline
+   are fixed), and the lines are its pseudo-elements, each in a side column
+   of its own and spanning the first two rows, so they end with the prayer
+   whatever the epilogue's height. On a phone the side columns step the
+   prayer 12px in from the gutter and the lines stand 20px outside it, 5px
+   from the screen's edge: 24px of a 358px measure, about three characters
+   a line. From 920px the measure is untouched and the lines stand 0.5rem
+   in from the hour's edges, in the margin beside the 37rem prayer. */
+.page-hour.rank-first-class .office-hour {
+  --frame-side: 12px;
+  grid-template-columns: var(--frame-side) minmax(0, 1fr) var(--frame-side);
+  /* The hour's gap is for its rows; between the side columns and the
+     prayer it would cost the measure another 40px. */
+  column-gap: 0;
+}
+
+.page-hour.rank-first-class .office-hour > * {
+  grid-column: 2;
+}
+
+.page-hour.rank-first-class .office-hour::before,
+.page-hour.rank-first-class .office-hour::after {
+  content: "";
+  grid-row: 1 / 3;
+  width: 0;
+  border-left: 3px double color-mix(in srgb, var(--lining) 60%, transparent);
+  pointer-events: none;
+}
+
+.page-hour.rank-first-class .office-hour::before {
+  grid-column: 1;
+  justify-self: end;
+  translate: -20px;
+}
+
+.page-hour.rank-first-class .office-hour::after {
+  grid-column: 3;
+  justify-self: start;
+  translate: 20px;
+}
+
+@media screen and (min-width: 920px) {
+  .page-hour.rank-first-class .office-hour {
+    --frame-side: 0.5rem;
+  }
+
+  .page-hour.rank-first-class .office-hour::before,
+  .page-hour.rank-first-class .office-hour::after {
+    translate: none;
+  }
+}
+
 /* "All hours" sits on the line of the hour names either side of it, not
    midway between their small-cap labels and the names themselves. */
 .hour-continuation {
@@ -5815,6 +5871,9 @@ body.season-eastertide {
        origin. */
     --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
     --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
+    /* The night panel's plaster reads as cloud at full strength: veiled to
+       a little under half. */
+    --panel-plaster-veil: 45%;
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -5851,6 +5910,7 @@ body.season-eastertide {
   --lining-day: var(--day-color, var(--lining));
   --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
   --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
+  --panel-plaster-veil: 45%;
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link {
@@ -6610,6 +6670,29 @@ body.season-eastertide {
     flex-direction: column;
     min-height: calc(100svh - 10.9rem);
     box-sizing: border-box;
+  }
+
+  /* The panel is cut from the wall: the limewash shows through it, drawn
+     into the surface's colour with soft light so the day's warm field and
+     the night's blue keep their tone and only the trowel marks come
+     through. A veil of the surface over it, --panel-plaster-veil, eases
+     the marks where they read as weather rather than plaster (the Apse
+     restates it); the desktop niche paints its own head and is untouched.
+     Named layers blend onto the ground one by one: the veil normally, the
+     plaster as soft light, over the flat ground. */
+  .page-home .home-hero {
+    --panel-plaster-veil: 0%;
+  }
+
+  .page-home .home-arch-fill {
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent),
+        color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent)
+      ),
+      var(--plaster-image) center / cover no-repeat,
+      var(--arch-ground);
+    background-blend-mode: normal, soft-light, normal;
   }
 
   .page-home .home-summary {
@@ -7687,6 +7770,8 @@ body.page-home::before {
    the gradient is required because color alone would leave clipped glyphs
    transparent. */
 @media print {
+  .page-hour.rank-first-class .office-hour::before,
+  .page-hour.rank-first-class .office-hour::after,
   header,
   footer,
   .day-nav,

@@ -130,6 +130,7 @@ fn compline_opens_with_a_heading_and_collapsible_sections_do_not() {
         title: "Compline".into(),
         season: None,
         feast: String::new(),
+        rank: None,
         color: None,
         sections: vec![
             OfficeSection { label: String::new(), collapsible: false, elements: vec![elem(ElementType::Prayer, "Pray, Father.")] },

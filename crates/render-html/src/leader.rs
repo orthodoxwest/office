@@ -139,6 +139,7 @@ mod tests {
             title: String::new(),
             season: None,
             feast: String::new(),
+            rank: None,
             color: None,
             sections: vec![OfficeSection { label: String::new(), collapsible: false, elements }],
             decisions: Vec::new(),

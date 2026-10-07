@@ -63,7 +63,7 @@
 {# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
      that do not stand on a single day. #}
-<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}{% if rank_class %} {{ rank_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
   {%- from "macros.html" import prefs %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">

@@ -6,7 +6,7 @@
 
 pub mod usage;
 
-use calendar::{CalendarDay, Color, Date, Season};
+use calendar::{CalendarDay, Color, Date, Rank, Season};
 use liturgy::{ElementType, OfficeHour};
 
 /// Capitalizes the first letter ("advent" → "Advent").
@@ -25,6 +25,14 @@ pub fn season_class(season: Option<Season>) -> &'static str {
         Some(Season::Passiontide) => "season-passiontide",
         Some(Season::Easter) => "season-eastertide",
         Some(Season::Advent | Season::Christmas | Season::Epiphany | Season::Septuagesima | Season::Lent | Season::Pentecost) | None => "",
+    }
+}
+
+/// The body class that frames a first-class day's hour, or nothing.
+pub fn rank_class(rank: Option<Rank>) -> &'static str {
+    match rank {
+        Some(Rank::Double1stClass) => "rank-first-class",
+        _ => "",
     }
 }
 
@@ -379,6 +387,14 @@ mod tests {
             assert_eq!(season_class(Some(s)), "", "{s:?}");
         }
         assert_eq!(season_class(None), "");
+    }
+
+    #[test]
+    fn rank_class_frames_only_first_class_days() {
+        assert_eq!(rank_class(Some(Rank::Double1stClass)), "rank-first-class");
+        assert_eq!(rank_class(Some(Rank::Double2ndClass)), "");
+        assert_eq!(rank_class(Some(Rank::Simple)), "");
+        assert_eq!(rank_class(None), "");
     }
 
     #[test]

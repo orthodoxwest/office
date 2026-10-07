@@ -15,6 +15,8 @@ pub struct Chrome {
     /// ordo, or empty when the page is always current.
     pub usage_when: String,
     pub season_class: String,
+    /// `rank-first-class` on a first-class day's hour, which is framed; empty otherwise.
+    pub rank_class: String,
     pub show_today: bool,
 }
 

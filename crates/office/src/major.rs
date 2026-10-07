@@ -42,6 +42,7 @@ pub fn compose_major_hour(
         title: opts.title.to_string(),
         season: Some(office_day.season),
         feast: office_day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
+        rank: office_day.celebration.as_deref().map(|c| c.rank),
         color: Some(office_day.color),
         sections: Vec::new(),
         decisions: Vec::new(),
