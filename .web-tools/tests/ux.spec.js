@@ -1302,15 +1302,29 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   // Every menu preference keeps a thumb-sized target at the largest setting,
   // and the two rows share columns so each theme sits over a text size.
   await page.locator(".site-menu > summary").click();
-  const cells = await page.evaluate(() => {
-    const rects = (sel) =>
-      Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => el.getBoundingClientRect());
-    return {
-      themes: rects(".theme-option[data-theme-choice]"),
-      sizes: rects(".text-size-option"),
-      martyrology: rects(".martyrology-option"),
-    };
-  });
+  await expect(page.locator(".site-menu")).toHaveAttribute("open", "");
+  const measure = () =>
+    page.evaluate(() => {
+      const rects = (sel) =>
+        Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => {
+          const r = el.getBoundingClientRect();
+          return { left: r.left, width: r.width, height: r.height };
+        });
+      return {
+        themes: rects(".theme-option[data-theme-choice]"),
+        sizes: rects(".text-size-option"),
+        martyrology: rects(".martyrology-option"),
+      };
+    });
+  // The panel is laid out once the menu has opened (it settles in from a
+  // closing transition); measure it then.
+  await expect
+    .poll(async () => {
+      const c = await measure();
+      return Math.min(...[...c.themes, ...c.sizes, ...c.martyrology].map((r) => r.height));
+    })
+    .toBeGreaterThanOrEqual(44);
+  const cells = await measure();
   const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
   expect(all).toHaveLength(8);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
