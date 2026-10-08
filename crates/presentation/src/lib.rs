@@ -57,13 +57,17 @@ pub fn season_label(season: &str) -> String {
 }
 
 /// The day's display name, as home and the ordo name it: its celebration,
-/// else its temporal title, else the season's feria.
+/// else its temporal title, else the season's feria. After Pentecost it is plain "Feria", as the
+/// ordo prints it: "Pentecost feria" under an October date reads as the feast's week.
 pub fn day_name(day: &CalendarDay) -> String {
     if let Some(c) = &day.celebration {
         return c.name.clone();
     }
     if let Some(t) = &day.tempora {
         return t.clone();
+    }
+    if day.season == Season::Pentecost {
+        return "Feria".into();
     }
     format!("{} feria", title_case(day.season.as_str()))
 }
@@ -452,6 +456,15 @@ mod tests {
             penitential: Default::default(),
             monastic: Vec::new(),
         }
+    }
+
+    #[test]
+    fn day_name_leaves_pentecost_off_a_plain_feria() {
+        let mut day = bare_day(Season::Pentecost, "");
+        day.tempora = None;
+        assert_eq!(day_name(&day), "Feria");
+        day.season = Season::Advent;
+        assert_eq!(day_name(&day), "Advent feria");
     }
 
     #[test]

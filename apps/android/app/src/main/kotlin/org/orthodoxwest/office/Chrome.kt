@@ -654,7 +654,8 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
-                        .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
+                        // Today in Apse takes the vault's blue lifted, as the web's --apse-lift: gold reads grey on the night.
+                        .then(if (day == today) Modifier.background(if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.pressedWash) else Modifier)
                         .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
                             haptics.chose()
                             onPick(day)
