@@ -5,13 +5,17 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use crate::date::Date;
-use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonthDay, OctaveClass, Rank};
+use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonasticObservance, MonthDay, OctaveClass, Rank};
 use crate::penitential::{PenitentialRule, section_to_penitential_rule};
 use data_format::atoi;
 use data_format::quote;
 
 /// The feast definition files, in load order.
 pub const FEAST_FILES: [&str; 4] = ["temporal.txt", "sanctoral.txt", "awrv.txt", "commemorations.txt"];
+
+/// Observances the ordo brackets for monastics and oblates. Not a feast file: nothing in it
+/// enters occurrence.
+pub const MONASTIC_FILE: &str = "feasts/monastic.txt";
 
 /// The penitential rules file at the data root.
 pub const PENITENTIAL_RULES_FILE: &str = "penitential.txt";
@@ -282,6 +286,44 @@ pub fn load_feasts(src: &dyn DataSource) -> Result<Vec<FeastRef>, String> {
     Ok(feasts)
 }
 
+const KNOWN_MONASTIC_KEYS: [&str; 7] = ["Name", "Rank", "Month", "Day", "Office", "Source", "Notes"];
+
+/// Converts a parsed section into a monastic observance.
+pub fn section_to_monastic(m: &Section, source_file: &str) -> Result<MonasticObservance, String> {
+    let qid = quote(&m.id);
+    let fail = |e: String| format!("{source_file}: observance {qid}: {e}");
+    if m.id.is_empty() {
+        return Err(format!("{source_file}: section missing ID"));
+    }
+    if let Some(key) = m.values.keys().find(|k| !KNOWN_MONASTIC_KEYS.contains(&k.as_str())) {
+        return Err(fail(format!("unrecognized key {}", quote(key))));
+    }
+    let name = m.value("Name").to_string();
+    if name.is_empty() {
+        return Err(fail("missing Name".to_string()));
+    }
+    let rank = Rank::parse(m.value("Rank")).map_err(fail)?;
+    let month = atoi(m.value("Month")).map_err(|e| fail(format!("invalid Month: {e}")))?;
+    let day = atoi(m.value("Day")).map_err(|e| fail(format!("invalid Day: {e}")))?;
+    if !valid_fixed_date(month, day) {
+        return Err(fail(format!("invalid fixed date {month}/{day}")));
+    }
+    Ok(MonasticObservance {
+        id: m.id.clone(),
+        name,
+        rank,
+        fixed: MonthDay { month: month as u32, day: day as u32 },
+        office: m.get("Office").and_then(crate::model::non_empty),
+    })
+}
+
+/// Loads the monastic observances, none when the file is absent.
+pub fn load_monastic(src: &dyn DataSource) -> Result<Vec<MonasticObservance>, String> {
+    let Some(content) = src.read(MONASTIC_FILE)? else { return Ok(Vec::new()) };
+    let sections = parse_ini_sections(&src.display_path(MONASTIC_FILE), &content).map_err(|e| format!("parsing {MONASTIC_FILE}: {e}"))?;
+    sections.iter().map(|s| section_to_monastic(s, MONASTIC_FILE)).collect()
+}
+
 /// Loads the penitential rules file, which must exist.
 pub fn load_penitential_rules(src: &dyn DataSource) -> Result<Vec<PenitentialRule>, String> {
     let path = src.display_path(PENITENTIAL_RULES_FILE);
@@ -295,13 +337,15 @@ pub fn load_penitential_rules(src: &dyn DataSource) -> Result<Vec<PenitentialRul
 pub struct CalendarData {
     pub feasts: Vec<FeastRef>,
     pub penitential_rules: Vec<PenitentialRule>,
+    pub monastic: Vec<MonasticObservance>,
 }
 
 impl CalendarData {
     pub fn load(src: &dyn DataSource) -> Result<CalendarData, String> {
         let feasts = load_feasts(src).map_err(|e| format!("loading feasts: {e}"))?;
         let penitential_rules = load_penitential_rules(src).map_err(|e| format!("loading penitential rules: {e}"))?;
-        Ok(CalendarData { feasts, penitential_rules })
+        let monastic = load_monastic(src).map_err(|e| format!("loading monastic observances: {e}"))?;
+        Ok(CalendarData { feasts, penitential_rules, monastic })
     }
 }
 
@@ -318,5 +362,22 @@ mod tests {
         assert_eq!(sections[1].id, "b");
         assert_eq!(parse_ini_sections("f.txt", "Name = x\n").unwrap_err(), "f.txt:1: key-value pair outside of section");
         assert_eq!(parse_ini_sections("f.txt", "[a]\n\nnonsense\n").unwrap_err(), "f.txt:3: expected Key = value, got \"nonsense\"");
+    }
+
+    #[test]
+    fn monastic_observances_parse_and_reject_feast_keys() {
+        let parse = |raw: &str| section_to_monastic(&parse_ini_sections("m.txt", raw).unwrap()[0], "m.txt");
+        let o =
+            parse("[x]\nName = Solemnity of St Benedict\nRank = greater-double\nMonth = 7\nDay = 11\nOffice = Proper Office\n").unwrap();
+        assert_eq!(o.heading(), "Solemnity of St Benedict (Monastics & Oblates Only)");
+        assert_eq!((o.rank, o.fixed, o.office.as_deref()), (Rank::GreaterDouble, MonthDay { month: 7, day: 11 }, Some("Proper Office")));
+        assert_eq!(
+            parse("[x]\nName = X\nRank = double\nMonth = 7\nDay = 32\n").unwrap_err(),
+            "m.txt: observance \"x\": invalid fixed date 7/32"
+        );
+        assert_eq!(
+            parse("[x]\nName = X\nRank = double\nMonth = 7\nDay = 1\nHasOctave = true\n").unwrap_err(),
+            "m.txt: observance \"x\": unrecognized key \"HasOctave\""
+        );
     }
 }

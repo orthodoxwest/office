@@ -36,6 +36,7 @@ pub fn day(date: Date, season: Season) -> Day {
             temporal_week_id: None,
             within_octave_of: None,
             penitential: Penitential::default(),
+            monastic: Vec::new(),
         },
         marian_antiphon: String::new(),
         vespers: VespersDesignation::unowned(),

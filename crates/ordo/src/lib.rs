@@ -103,6 +103,12 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
     if let Some(subtitle) = ordo_subtitle(day.celebration.as_deref()) {
         lines.push(format!("{INDENT}{subtitle}"));
     }
+    for o in &day.monastic {
+        lines.push(format!("{INDENT}[{}] ({})", o.heading(), o.rank.abbrev()));
+        if let Some(office) = &o.office {
+            lines.push(format!("{INDENT}    {office}"));
+        }
+    }
     for comm in &day.commemorations {
         lines.push(format!("{INDENT}{} ({})", comm.commemoration_name(), comm.rank.abbrev()));
     }

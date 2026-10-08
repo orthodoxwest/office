@@ -498,6 +498,17 @@ pub struct CommemorationView {
     pub incipit: String,
 }
 
+/// An observance the ordo brackets for monastics and oblates (the web's `.day-monastic`).
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct MonasticView {
+    /// "Solemnity of St Benedict (Monastics & Oblates Only)", without the brackets.
+    pub heading: String,
+    pub rank: String,
+    pub rank_full: String,
+    /// Where its office is found, or empty.
+    pub office: String,
+}
+
 /// One ordo row, as the web's month page sets it.
 #[derive(Clone, Debug, uniffi::Record)]
 pub struct OrdoDayView {
@@ -511,6 +522,7 @@ pub struct OrdoDayView {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    pub monastic: Vec<MonasticView>,
     pub benedictus_antiphon: String,
     pub lauds_preces: bool,
     pub lauds_suffrage: bool,
@@ -539,6 +551,16 @@ impl OrdoDayView {
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),
+            monastic: d
+                .monastic
+                .iter()
+                .map(|m| MonasticView {
+                    heading: typeset(&m.heading()),
+                    rank: m.rank.abbrev().to_string(),
+                    rank_full: m.rank.display_name().to_string(),
+                    office: m.office.as_deref().map(typeset).unwrap_or_default(),
+                })
+                .collect(),
             benedictus_antiphon: lauds.gospel_ant.clone(),
             lauds_preces: lauds.preces,
             lauds_suffrage: lauds.suffrage,

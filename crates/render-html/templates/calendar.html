@@ -109,6 +109,8 @@
               </span>
             </div>
             <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
+            {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
+            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# On cards both disclosures share one line; see .day-disclosures. #}
             <div class="day-disclosures">
             {% if d.commemorations %}<details class="day-commemorations"><summary>{{ d.commemorations|length }} commemoration{% if d.commemorations|length > 1 %}s{% endif %}</summary>{% for c in d.commemorations %}<span class="day-commemoration">{{ c|typeset }}</span>{% endfor %}</details>{% endif %}

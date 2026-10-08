@@ -113,6 +113,17 @@ pub struct CommemorationRow {
     pub incipit: String,
 }
 
+/// An observance the ordo brackets for monastics and oblates, printed under the day's office.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct MonasticRow {
+    /// "Solemnity of St Benedict (Monastics & Oblates Only)", without the brackets.
+    pub heading: String,
+    pub rank: String,
+    pub rank_full: String,
+    /// Where its office is found, or empty.
+    pub office: String,
+}
+
 /// One day of the year calendar, with its office digest.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct DayRow {
@@ -127,6 +138,7 @@ pub struct DayRow {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    pub monastic: Vec<MonasticRow>,
     pub benedictus_antiphon: String,
     pub magnificat_antiphon: String,
     pub lauds_preces: bool,
