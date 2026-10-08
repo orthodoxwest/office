@@ -106,13 +106,28 @@ fn color_name(color: Color) -> &'static str {
     }
 }
 
+/// The preamble's macros (`\\ant`, `\\psalmverse`, `\\versicle`, …) that
+/// [`format_elements_tex`] output relies on, for a caller that assembles its
+/// own document around composed elements.
+pub fn preamble() -> &'static str {
+    PREAMBLE
+}
+
 fn tex_section(section: &OfficeSection, chant: Option<&Chant<'_>>) -> String {
     let mut b = String::new();
     if !section.label.is_empty() {
         b.push_str(&format!("\\sectionheading{{{}}}\n\n", tex_line(&section.label)));
     }
-    let kinds: Vec<ElementType> = section.elements.iter().map(|e| e.kind).collect();
-    for (i, elem) in section.elements.iter().enumerate() {
+    b.push_str(&format_elements_tex(&section.elements, chant));
+    b
+}
+
+/// A run of composed elements as TeX body text, set exactly as within a
+/// section of [`format_office_hour_tex`].
+pub fn format_elements_tex(elements: &[OfficeElement], chant: Option<&Chant<'_>>) -> String {
+    let mut b = String::new();
+    let kinds: Vec<ElementType> = elements.iter().map(|e| e.kind).collect();
+    for (i, elem) in elements.iter().enumerate() {
         let after_psalm = i > 0 && (kinds[i - 1].is_psalmody() || kinds[i - 1] == ElementType::PsalmDoxology);
         let before_psalm = kinds.get(i + 1).is_some_and(|k| k.is_psalmody());
         b.push_str(&tex_element(elem, antiphon_macro(after_psalm, before_psalm), chant));
@@ -897,6 +912,19 @@ mod tests {
         assert_eq!(tex_line("God & ✠"), "God \\& \\crux{}");
         assert_eq!(mediant_line("God be * merciful"), "God be\\mediant{}merciful");
         assert_eq!(mediant_line("Hail *"), "Hail\\mediant{}");
+    }
+
+    #[test]
+    fn elements_set_as_within_a_section() {
+        let ant = OfficeElement::new(ElementType::Antiphon, "Have mercy * upon me.");
+        let psalm = OfficeElement::new(ElementType::Psalm, PSALM_67);
+        let elements = vec![ant.clone(), psalm, ant];
+        let section = OfficeSection { label: String::new(), collapsible: false, elements: elements.clone() };
+        let body = format_elements_tex(&elements, None);
+        assert!(body.starts_with("\\antopen{"), "{body}");
+        assert!(body.contains("\\antclose{"), "{body}");
+        assert_eq!(tex_section(&section, None), body);
+        assert!(preamble().contains("\\newcommand{\\antopen}"));
     }
 
     #[test]
