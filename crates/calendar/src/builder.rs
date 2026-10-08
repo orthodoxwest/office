@@ -524,8 +524,10 @@ fn seasonal_feria_name(date: Date, m: &MoveableDates, season: Season) -> Option<
 }
 
 /// The F2 feria that takes the office on weekdays in Lent and Passiontide.
+/// Maundy Thursday, Good Friday and Holy Saturday are themselves the ferias
+/// of their days, so no feria stands beside them to be commemorated.
 fn privileged_lenten_feria(date: Date, m: &MoveableDates, season: Season, week_id: Option<&str>) -> Option<Feast> {
-    if date.weekday() == Weekday::Sunday || !matches!(season, Season::Lent | Season::Passiontide) {
+    if date.weekday() == Weekday::Sunday || !matches!(season, Season::Lent | Season::Passiontide) || m.easter.days_since(date) <= 3 {
         return None;
     }
     let mut f = Feast::synthetic(

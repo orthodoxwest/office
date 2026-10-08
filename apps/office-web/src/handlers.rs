@@ -794,6 +794,15 @@ mod tests {
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");
     }
 
+    /// The Triduum's days are their own ferias: home lists no feria beside them.
+    #[test]
+    fn triduum_commemorates_no_feria() {
+        for date in ["2026-04-09", "2026-04-10", "2026-04-11"] {
+            let (_, _, body) = get(&format!("/?date={date}"));
+            assert!(!body.contains("after Palm Sunday"), "{date}");
+        }
+    }
+
     fn body_classes(path: &str) -> Vec<String> {
         let (status, _, body) = get(path);
         assert_eq!(status, StatusCode::OK, "{path}");

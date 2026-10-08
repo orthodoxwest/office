@@ -51,6 +51,9 @@ const LATIN_WORDS: [&str; 21] = [
 ];
 
 static WORD_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[A-Za-z]+").expect("valid regex"));
+/// A word, a space, then punctuation that closes a clause: a transcription slip
+/// ("vex my soul ; for"). An ellipsis ("thee ... liveth") is not one.
+static SPACED_PUNCTUATION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[\w’”)] [,;:.?!](\s|$)").expect("valid regex"));
 static INDEXED_ANTIPHON_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"/psalm-antiphon(-[0-9]+)?$").expect("valid regex"));
 
 /// Scans the corpus (and the chant scores) for formatting and content
@@ -107,6 +110,9 @@ fn lint_mechanical(r: &mut LintReport, key: &str, text: &str) {
     }
     if let Some(i) = text.split('\n').position(|l| l != l.trim_end_matches([' ', '\t'])) {
         add("trailing-space", format!("line {} has trailing whitespace", i + 1));
+    }
+    if let Some(m) = SPACED_PUNCTUATION_RE.find(text) {
+        add("space-before-punctuation", format!("space before punctuation in {}", quote(m.as_str().trim_end())));
     }
     if text.contains("**") {
         add("asterisk", "contains doubled asterisk".into());
@@ -234,4 +240,24 @@ pub fn format_lint(r: &LintReport) -> (String, bool) {
     }
     w.push('\n');
     (w, !r.mechanical.is_empty())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn mechanical(text: &str) -> Vec<&'static str> {
+        let mut r = LintReport::default();
+        lint_mechanical(&mut r, "k", text);
+        r.mechanical.iter().map(|f| f.class).collect()
+    }
+
+    #[test]
+    fn space_before_punctuation_is_mechanical() {
+        assert_eq!(mechanical("vex my soul ; for I am thy servant."), ["space-before-punctuation"]);
+        assert_eq!(mechanical("and we are delivered ."), ["space-before-punctuation"]);
+        assert!(mechanical("vex my soul; for I am thy servant.").is_empty());
+        assert!(mechanical("Who with thee ... liveth").is_empty());
+        assert!(mechanical("bless ye the Lord: * praise him").is_empty());
+    }
 }
