@@ -48,7 +48,7 @@ pub fn forward(canonical: &str, method: &Method, headers: &HeaderMap, path_and_q
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <link rel="canonical" href="{link}">
-<title>Divine Office has moved</title>
+<title>Daily Office has moved</title>
 <noscript><meta http-equiv="refresh" content="0; url={link}"></noscript>
 <script>
   (function () {{
@@ -65,7 +65,7 @@ pub fn forward(canonical: &str, method: &Method, headers: &HeaderMap, path_and_q
 </script>
 </head>
 <body>
-<p>The Divine Office has moved to <a href="{link}">{canonical}</a>.</p>
+<p>The Daily Office has moved to <a href="{link}">{canonical}</a>.</p>
 </body>
 </html>
 "##

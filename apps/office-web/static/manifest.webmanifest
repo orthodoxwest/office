@@ -1,6 +1,6 @@
 {
   "name": "Benedictine Divine Office",
-  "short_name": "Divine Office",
+  "short_name": "Daily Office",
   "description": "The hours of the Benedictine Office, with ordo and liturgical calendar.",
   "start_url": "/",
   "scope": "/",

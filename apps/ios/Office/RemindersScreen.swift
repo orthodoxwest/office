@@ -122,7 +122,7 @@ struct RemindersScreen: View {
             .buttonStyle(Quiet())
             .padding(.top, m.px(12))
             if permission == .denied {
-                Note(text: "Notifications are off for the Divine Office, so reminders cannot appear.", action: "Allow notifications") {
+                Note(text: "Notifications are off for the Daily Office, so reminders cannot appear.", action: "Allow notifications") {
                     if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
                 }
             }

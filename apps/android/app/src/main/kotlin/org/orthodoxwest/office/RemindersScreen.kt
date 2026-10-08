@@ -177,7 +177,7 @@ fun RemindersScreen(
                 )
                 OutlineButton("Turn off reminders", Modifier.padding(top = 12.dp), onTurnOff)
                 if (!status.notificationsAllowed) {
-                    Note("Notifications are off for the Divine Office, so reminders cannot appear.", "Allow notifications", onAllowNotifications)
+                    Note("Notifications are off for the Daily Office, so reminders cannot appear.", "Allow notifications", onAllowNotifications)
                 }
                 if (!status.exactAllowed) {
                     Note("Reminders may come a few minutes late. For the exact minute, allow alarms and reminders.", "Allow alarms", onAllowExact)

@@ -348,7 +348,7 @@ function offlineResponse() {
     "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">" +
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
     "<meta name=\"description\" content=\"Benedictine Divine Office offline page.\">" +
-    "<title>Offline - Divine Office</title>" +
+    "<title>Offline - Daily Office</title>" +
     "<link rel=\"stylesheet\" href=\"" + assetURL("/static/style.css") + "\">" +
     "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" + assetURL("/static/favicon.svg") + "\">" +
     "<link rel=\"manifest\" href=\"" + assetURL("/static/manifest.webmanifest") + "\">" +
