@@ -2725,11 +2725,11 @@ psalms/023,ac3476de6a24,Coverdale Psalter,Psalm 23,,verified,codex,2026-07-10,Ma
 psalms/024,f433ccd3c0b0,Coverdale Psalter,Psalm 24,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/025,71fe1d42be0a,Coverdale Psalter,Psalm 25,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/026,2b6f41f65833,Coverdale Psalter,Psalm 26,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/027,5874ae5b12a8,Coverdale Psalter,Psalm 27,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/028,ce2c98fba26c,Coverdale Psalter,Psalm 28,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/027,9ec7e33206e7,Coverdale Psalter,Psalm 27,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
+psalms/028,3202d7edc299,Coverdale Psalter,Psalm 28,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/029,6d9808965274,Coverdale Psalter,Psalm 29,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/030,163cc992bd17,Coverdale Psalter,Psalm 30,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/031,ef645ae9687c,Coverdale Psalter,Psalm 31,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/031,57021f1f7029,Coverdale Psalter,Psalm 31,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/032,37e5ca8af7fa,Coverdale Psalter,Psalm 32,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/033,c3e33f8f20f8,Coverdale Psalter,Psalm 33,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/034,277785234f82,Coverdale Psalter,Psalm 34,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2743,7 +2743,7 @@ psalms/041,ee9284ff7220,Coverdale Psalter,Psalm 41,,verified,codex,2026-07-10,Ma
 psalms/042,6c053a09bc1b,Coverdale Psalter,Psalm 42,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/043,991e55200626,Coverdale Psalter,Psalm 43,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/044,7298e58f5712,Coverdale Psalter,Psalm 44,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/045,c032c621fa72,Coverdale Psalter,Psalm 45,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/045,963aa028643d,Coverdale Psalter,Psalm 45,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/046,c16531ee6384,Coverdale Psalter,Psalm 46,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/047,bc79d2ca8544,Coverdale Psalter,Psalm 47,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/048,39f964d13cff,Coverdale Psalter,Psalm 48,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2775,9 +2775,9 @@ psalms/073,0bb2a5cc599b,Coverdale Psalter,Psalm 73,,verified,codex,2026-07-10,Ma
 psalms/074,2b058097548f,Coverdale Psalter,Psalm 74,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/075,c6a82f9d66f0,Coverdale Psalter,Psalm 75,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/076,de58e6c9b86e,Coverdale Psalter,Psalm 76,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/077,7bef588e530d,Coverdale Psalter,Psalm 77,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/077,d63a6a5ca90c,Coverdale Psalter,Psalm 77,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/078,7c2caf96640a,Coverdale Psalter,Psalm 78,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/079,e5704162d0bf,Coverdale Psalter,Psalm 79,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/079,315e7875883b,Coverdale Psalter,Psalm 79,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/080,efaa2842e9c8,Coverdale Psalter,Psalm 80,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/081,2a25eafc1a87,Coverdale Psalter,Psalm 81,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/082,981b5f5fa328,Coverdale Psalter,Psalm 82,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2805,7 +2805,7 @@ psalms/103,de3264072aa3,Coverdale Psalter,Psalm 103,,verified,codex,2026-07-10,M
 psalms/104,0f9b9c9314fe,Coverdale Psalter,Psalm 104,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/105,78c509a07b8f,Coverdale Psalter,Psalm 105,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/106,47921fb09cad,Coverdale Psalter,Psalm 106,,verified,claude,2026-10-06,"Case of the divine name in verse 25 restored (LORD, as the 1662 Psalter prints it); wording unchanged."
-psalms/107,89e72a7a5986,Coverdale Psalter,Psalm 107,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/107,7a3c4353642e,Coverdale Psalter,Psalm 107,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/108,0458c545456c,Coverdale Psalter,Psalm 108,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/109,e9e1998e5ef4,Coverdale Psalter,Psalm 109,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/110,eb6719f2bfd5,Coverdale Psalter,Psalm 110,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2818,7 +2818,7 @@ psalms/116,43e5bc403367,Coverdale Psalter,Psalm 116,,verified,codex,2026-07-10,M
 psalms/116a,787067eb29d0,diurnal,,119-120,verified,claude,2026-09-30,Direct page-image review (PDF pages 165-166); identical to psalms/116 vv. 1-9.
 psalms/116b,381b821a03e6,Coverdale Psalter,Psalm 116:10-16,,verified,codex,2026-07-18,"Machine-verified against attested psalms/116 (1662 BCP); printed as Vulgate 115 Credidi in draft Commons Vespers book pp. 11, 27, 45, 61, 79"
 psalms/117,4ca37f9f33e0,Coverdale Psalter,Psalm 117,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/118,582d574649c2,Coverdale Psalter,Psalm 118,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/118,892d8ed80f36,Coverdale Psalter,Psalm 118,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/119,e1f63709450c,Coverdale Psalter,Psalm 119,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/119-i,9b6eb4d436d8,Coverdale Psalter,Psalm 119:1-8,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/119-ii,acf39266295b,Coverdale Psalter,Psalm 119:9-16,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2846,7 +2846,7 @@ psalms/120,a29928f603f9,Coverdale Psalter,Psalm 120,,verified,codex,2026-07-10,M
 psalms/121,3048887dc9df,Coverdale Psalter,Psalm 121,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/122,8541c4ac2d30,Coverdale Psalter,Psalm 122,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/123,8f6ab1e7d3d2,Coverdale Psalter,Psalm 123,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/124,c47602a02816,Coverdale Psalter,Psalm 124,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/124,2ec6e969f222,Coverdale Psalter,Psalm 124,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/125,8f2f709969fd,Coverdale Psalter,Psalm 125,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/126,d0830f90c787,Coverdale Psalter,Psalm 126,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/127,b457a96d68f8,Coverdale Psalter,Psalm 127,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2859,15 +2859,15 @@ psalms/133,62fad58c15a1,Coverdale Psalter,Psalm 133,,verified,codex,2026-07-10,M
 psalms/134,f9f958b5f1ae,Coverdale Psalter,Psalm 134,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/135,cd1874d224e7,Coverdale Psalter,Psalm 135,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/136,111b27d55637,Coverdale Psalter,Psalm 136,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/137,d04b91b4b0cd,Coverdale Psalter,Psalm 137,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/137,0fd0baa9ef9d,Coverdale Psalter,Psalm 137,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/138,aa3e49d2d915,Coverdale Psalter,Psalm 138,,verified,claude,2026-10-06,"Case of the divine name in verse 8 restored (LORD, as the 1662 Psalter prints it); wording unchanged."
 psalms/139,456446354166,Coverdale Psalter,Psalm 139,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/139a,e1823ee01ffc,Coverdale Psalter,Psalm 139:1-9,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
 psalms/139b,3ed0433ba095,Coverdale Psalter,Psalm 139:10-24,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
 psalms/140,b55807026c26,Coverdale Psalter,Psalm 140,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/141,77a1a6ca5b46,Coverdale Psalter,Psalm 141,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/141,3121e1944895,Coverdale Psalter,Psalm 141,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/142,e854bfb34c28,Coverdale Psalter,Psalm 142,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/143,d0fb449bf6fb,Coverdale Psalter,Psalm 143,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/143,a7c3c65009b1,Coverdale Psalter,Psalm 143,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/143a,33145c1a1678,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 125","73, 74, 79",verified,codex,2026-09-27,Direct page-image comparison; corpus unchanged.
 psalms/143b,45de3027d12c,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 121, 125","73–75, 79",verified,codex,2026-09-27,Direct page-image comparison; corpus unchanged.
 psalms/144,7fdb26042ce6,Coverdale Psalter,Psalm 144,,verified,codex,2026-07-10,Machine-verified against 1662 BCP

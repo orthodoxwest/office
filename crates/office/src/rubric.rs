@@ -11,6 +11,8 @@ fn phrases(reference: &str) -> &'static [&'static str] {
         "ordinary/session/closing-rubric" => &["Our Father", "Hail Mary"],
         "shared/formulas/closing-our-father" => &["Our Father"],
         "ordinary/compline/confiteor-rubric" => &["Our Father"],
+        "shared/formulas/triduum-compline-opening-rubric" => &["Sir, ask a blessing", "Our help"],
+        "shared/formulas/triduum-collect-rubric" => &["Let us pray", "Who with thee ... liveth"],
         _ => &[],
     }
 }
@@ -57,4 +59,21 @@ fn phrase_index(text: &str, phrase: &str, start: usize) -> Option<usize> {
 
 fn word_byte(b: u8) -> bool {
     b.is_ascii_alphabetic() || b == b'\''
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn prayed(reference: &str, text: &str) -> Vec<String> {
+        build_rubric_spans(reference, text).into_iter().filter(|s| s.prayed).map(|s| s.text).collect()
+    }
+
+    #[test]
+    fn triduum_rubrics_mark_the_incipits_they_quote() {
+        let opening = "Sir, ask a blessing is not said, nor the Short Lesson, nor Our help, nor the Lord's Prayer; but the Officiant begins the Confession immediately.";
+        assert_eq!(prayed("shared/formulas/triduum-compline-opening-rubric", opening), ["Sir, ask a blessing", "Our help"]);
+        let collect = "The Psalm being ended, there is said, without Let us pray, in a low voice, the Collect of the day, its conclusion Who with thee ... liveth being said in silence.";
+        assert_eq!(prayed("shared/formulas/triduum-collect-rubric", collect), ["Let us pray", "Who with thee ... liveth"]);
+    }
 }
