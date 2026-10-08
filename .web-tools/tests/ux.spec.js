@@ -2876,6 +2876,9 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     await page.goto(`/vespers/${easternDay()}`);
     await engage(page);
     await expect.poll(() => events.length, { message: label }).toBe(1);
+    // Leave for a page that never reports before changing the device: a
+    // beacon still settling would otherwise re-report in the new appearance.
+    await page.goto("/privacy");
     return events[0];
   };
 
@@ -2943,6 +2946,9 @@ test.describe("on a screen with a mouse", () => {
       await page.goto(`/vespers/${easternDay()}`);
       await engage(page);
       await expect.poll(() => events.length, { message: label }).toBe(1);
+      // Leave for a page that never reports before changing the device: a
+      // beacon still settling would otherwise re-report in the new appearance.
+      await page.goto("/privacy");
       return events[0];
     };
 
