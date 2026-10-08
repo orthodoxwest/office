@@ -450,6 +450,7 @@ mod tests {
             temporal_week_id: None,
             within_octave_of: None,
             penitential: Default::default(),
+            monastic: Vec::new(),
         }
     }
 
