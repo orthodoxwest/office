@@ -258,6 +258,31 @@ pub struct MonthDay {
     pub day: u32,
 }
 
+/// The qualifier the ordo prints inside the brackets after an observance kept only by monastics
+/// and oblates.
+pub const MONASTIC_QUALIFIER: &str = "Monastics & Oblates Only";
+
+/// An observance the ordo brackets "(Monastics & Oblates Only)": printed under the day's office
+/// as a notation, never part of the parish calendar. The app does not compose its office; its rank
+/// and office note are the ordo's words, carried for the reader who prays it from the Diurnal.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MonasticObservance {
+    pub id: String,
+    pub name: String,
+    pub rank: Rank,
+    pub fixed: MonthDay,
+    /// Where its office is found, e.g. "Proper Office, Monastic Diurnal pp. 560–564".
+    pub office: Option<String>,
+}
+
+impl MonasticObservance {
+    /// The bracketed line as the ordo prints it, without the brackets:
+    /// "Solemnity of St Benedict (Monastics & Oblates Only)".
+    pub fn heading(&self) -> String {
+        format!("{} ({MONASTIC_QUALIFIER})", self.name)
+    }
+}
+
 /// A liturgical feast or observance and its rubrical attributes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Feast {
@@ -438,6 +463,8 @@ pub struct CalendarDay {
     /// The parent feast ID when this day falls within an octave (days 1-8).
     pub within_octave_of: Option<String>,
     pub penitential: Penitential,
+    /// Observances the ordo brackets for monastics and oblates on this date; notation only.
+    pub monastic: Vec<MonasticObservance>,
 }
 
 impl CalendarDay {

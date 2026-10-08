@@ -502,10 +502,24 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
                         if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
                     }
                 }
+                Monastic(d)
                 body()
             }
         }
         Hairline(p.border)
+    }
+}
+
+/**
+ * The ordo's bracketed line for an observance kept by monastics and oblates only (the web's
+ * `.day-monastic`): quiet like a commemoration, never read as the day.
+ */
+@Composable
+private fun Monastic(d: OrdoDayView) {
+    val style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = LocalPalette.current.muted, fontStyle = FontStyle.Italic)
+    d.monastic.forEach { m ->
+        Text("[${m.heading}] ${m.rank}", Modifier.padding(top = 2.4.dp), style = style)
+        if (m.office.isNotEmpty()) Text(m.office, style = style)
     }
 }
 
@@ -582,8 +596,10 @@ private fun DayTableRow(
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
                 // The date's stop already says the feast; the feast is a second target for the eye only.
                 val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
-                if (anyOpen) {
+                // A bracketed line sits under the name, so the disclosures drop below it as on the web.
+                if (anyOpen || d.monastic.isNotEmpty()) {
                     FeastName(d, name, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    Monastic(d)
                     Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                 } else {
                     Row {

@@ -608,10 +608,14 @@ pub struct YearCalendar {
 pub fn build_calendar(year: i32, data: &CalendarData) -> Result<YearCalendar, String> {
     let (_, incoming) = build_calendar_year(year - 1, &data.feasts, &data.penitential_rules, &[])
         .map_err(|e| format!("building previous-year padding: {e}"))?;
-    let (days, outgoing) = build_calendar_year(year, &data.feasts, &data.penitential_rules, &incoming)?;
+    let (mut days, outgoing) = build_calendar_year(year, &data.feasts, &data.penitential_rules, &incoming)?;
     let (next, _) = build_calendar_year(year + 1, &data.feasts, &data.penitential_rules, &outgoing)
         .map_err(|e| format!("building following-year padding: {e}"))?;
-    let following_jan1 = next.into_iter().next().ok_or_else(|| format!("following-year padding for {} is empty", year + 1))?;
+    let mut following_jan1 = next.into_iter().next().ok_or_else(|| format!("following-year padding for {} is empty", year + 1))?;
+    for day in days.iter_mut().chain(std::iter::once(&mut following_jan1)) {
+        let on = MonthDay { month: day.date.month(), day: day.date.day() };
+        day.monastic = data.monastic.iter().filter(|o| o.fixed == on).cloned().collect();
+    }
     Ok(YearCalendar { year, days, following_jan1 })
 }
 

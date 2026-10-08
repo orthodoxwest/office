@@ -162,6 +162,8 @@ def our_ordo_days(path):
             continue
         if key and s.startswith("Com."):
             days[key]["coms"].append(s[4:].strip())
+        if key and s.startswith("["):
+            days[key].setdefault("monastic", []).append(s)
         # Vespers stanza line: "Vespers <color> · <owner> · Mag. ... · <suff>".
         # Owner (I fol./II prec.) is absent when Vespers is not designated.
         mv = re.match(r"^\s*Vespers\s+([wrgvbp])\b", ln)
@@ -240,6 +242,27 @@ def cmd_calendar(pdf_path, ours_path):
             print(f"{k[0]:02d}-{k[1]:02d}  ours: {o_title}")
             print(f"        pdf: {p_title}")
     print(f"-- {n} headline mismatches")
+    n = 0
+    for k in sorted(set(pdf) & set(ours)):
+        p_names = monastic_names(pdf[k].get("", ""))
+        o_names = monastic_names("\n".join(ours[k].get("monastic", [])))
+        missing = [p for p in p_names if not any(similar(p, o) >= 0.5 for o in o_names)]
+        extra = [o for o in o_names if not any(similar(p, o) >= 0.5 for p in p_names)]
+        if missing or extra:
+            n += 1
+            print(f"{k[0]:02d}-{k[1]:02d}  ours: {'; '.join(o_names) or '(none)'}")
+            print(f"        pdf: {'; '.join(p_names) or '(none)'}")
+    print(f"-- {n} monastic & oblate notation mismatches")
+
+
+# The ordo's bracketed line for an observance kept by monastics and oblates
+# only, e.g. "[Solemnity of St. Benedict (Monastics & Oblates Only)]"; the
+# text layer collapses spaces from 2024 on.
+MONASTIC_RE = re.compile(r"\[([^\]]*?)\s*\(\s*monastics\s*&\s*oblates\s*only\s*\)\s*\]", re.I)
+
+
+def monastic_names(text):
+    return [m.group(1).strip() for m in MONASTIC_RE.finditer(text)]
 
 
 def read_rubrics(path):

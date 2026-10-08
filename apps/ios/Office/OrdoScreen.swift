@@ -383,6 +383,16 @@ private struct DayRow: View {
         .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
     }
 
+    /// The ordo's bracketed line for an observance kept by monastics and oblates only (the web's
+    /// `.day-monastic`): quiet like a commemoration, never read as the day.
+    @ViewBuilder private var monastic: some View {
+        let style = TextStyle(size: 13.6, line: 20.4, italic: true)
+        ForEach(d.monastic, id: \.heading) { o in
+            Text("[\(o.heading)] \(o.rank)").type(style).foregroundStyle(p.muted).padding(.top, m.px(2.4))
+            if !o.office.isEmpty { Text(o.office).type(style).foregroundStyle(p.muted) }
+        }
+    }
+
     private var anyOpen: Bool { comms || ((details ?? allDetails) && hasDetails) }
 
     /// The disclosures' buttons: the commemorations' count and "Office details".
@@ -462,6 +472,7 @@ private struct DayRow: View {
                         .padding(.top, m.px(2))
                         .accessibilityHidden(true)
                     }
+                    monastic
                     disclosures
                 }
             }
@@ -498,10 +509,12 @@ private struct DayRow: View {
                     // inline `.day-disclosures` from 701px), so a month reads as one line per
                     // day; one that is open drops below the name at the column's full width.
                     let name = Scale.body.sized(16, line: 22.4)
-                    if anyOpen {
+                    // A bracketed line sits under the name, so the disclosures drop below it as on the web.
+                    if anyOpen || !d.monastic.isEmpty {
                         Button(action: openDay) { feastName(name) }
                             .buttonStyle(Quiet())
                             .accessibilityHidden(true)
+                        monastic
                         disclosureButtons
                     } else {
                         HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {

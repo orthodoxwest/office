@@ -262,6 +262,7 @@ fn transfers_continue_through_a_blocked_year_boundary() {
             fixed("jan1-blocker", Rank::Double1stClass, Color::White, Category::Lord, 1, 1),
         ],
         penitential_rules: vec![],
+        monastic: vec![],
     };
     let cal = build_calendar(2027, &data).unwrap();
     assert_eq!(cal.days[0].celebration.as_ref().unwrap().id, "jan1-blocker");

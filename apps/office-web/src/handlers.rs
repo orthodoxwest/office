@@ -12,8 +12,8 @@ use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
-    CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
-    MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
+    CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonasticRow,
+    MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;
@@ -107,6 +107,16 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations,
+            monastic: d
+                .monastic
+                .iter()
+                .map(|m| MonasticRow {
+                    heading: m.heading(),
+                    rank: m.rank.abbrev().to_string(),
+                    rank_full: m.rank.display_name().to_string(),
+                    office: m.office.clone().unwrap_or_default(),
+                })
+                .collect(),
             hours_preces: o.hours_preces,
             vespers_note: o.vespers_note,
             ..DayRow::default()
@@ -730,6 +740,19 @@ mod tests {
         ));
         assert!(!ordo("/calendar/0001/01").contains("Previous month"));
         assert!(!ordo("/calendar/9999/12").contains("Next month"));
+    }
+
+    /// An observance kept by monastics and oblates only is the ordo's bracketed line under the
+    /// parish office, never the day itself.
+    #[test]
+    fn ordo_brackets_monastic_observances_under_the_day() {
+        let body = ordo("/calendar/2026/07");
+        let row = |slug: &str| body.split(&format!(r#"id="d-{slug}""#)).nth(1).and_then(|r| r.split("</tr>").next()).unwrap().to_string();
+        let benedict = row("2026-07-11");
+        assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
+        assert!(benedict.contains(r#"<div class="day-monastic"><p>[Solemnity of St Benedict (Monastics &amp; Oblates Only)] <abbr tabindex="0" title="Greater Double">gd</abbr><span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
+        assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }
 
     /// Today's month carries the strip's lozenge and says so, in its own

@@ -433,6 +433,7 @@ fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
             temporal_week_id: None,
             within_octave_of: None,
             penitential: Default::default(),
+            monastic: Vec::new(),
         },
         marian_antiphon: "salve-regina".to_string(),
         vespers: office::concurrence::VespersDesignation::unowned(),

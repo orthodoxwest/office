@@ -154,6 +154,7 @@ fn day(date: Date, season: Season) -> CalendarDay {
         temporal_week_id: None,
         within_octave_of: None,
         penitential: Penitential::default(),
+        monastic: Vec::new(),
     }
 }
 

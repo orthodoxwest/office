@@ -3549,6 +3549,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     display: flex;
     margin-left: 0;
   }
+  /* Under a bracketed line the disclosures start their own line. */
+  .day-monastic + .day-disclosures { margin-left: 0; }
   .month-table td { padding: 0.5rem 0.45rem; }
 }
 @media (min-width: 701px) and (pointer: fine) {
@@ -3562,6 +3564,18 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   line-height: 1.5;
 }
 .day-commemoration::before { content: "Com. "; }
+/* The ordo's bracketed line for an observance kept by monastics and oblates
+   only: under the name, quiet like a commemoration, never read as the day. */
+.day-monastic {
+  font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.day-monastic p { margin: 0.15rem 0 0; }
+.day-monastic abbr { font-style: normal; }
+.day-monastic-office { display: block; }
 .day-office-digest {
   margin: 0 0 0.5rem;
   padding: 0.6rem 0.75rem;
@@ -3732,6 +3746,11 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     grid-column: 2 / -1;
     grid-row: 2;
   }
+  .day-monastic {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+  .day-monastic + .day-disclosures { grid-row: 3; }
   .day-disclosures summary { font-size: 0.75rem; }
   .day-office-digest { padding: 0.5rem; }
   .day-office-hour { display: block; }

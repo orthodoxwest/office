@@ -1,0 +1,27 @@
+# Observances the ordo brackets "(Monastics & Oblates Only)". They are notation, not feasts:
+# nothing here enters occurrence or composes an office. The ordo page and the text ordo print
+# each as a bracketed line under the parish office of its date, with its rank and, where the
+# ordo gives one, where its office is found. Monastics and oblates pray it from the Diurnal.
+#
+# Keys: Name, Rank, Month, Day, Office (where the office is found), Source, Notes.
+#
+# Rank is the ordo's printed letter. How the observance ranks against the parish day it falls
+# on (concurrence with the Sunday, an octave, its own octave) is not settled here: the app
+# composes no monastic office.
+
+[solemnity-st-benedict]
+Name = Solemnity of St Benedict
+Rank = greater-double
+Month = 7
+Day = 11
+Office = Proper Office, Monastic Diurnal pp. 560–564
+Source = 2026 archdiocesan ordo, July 11; bracketed in every ordo 2022–2026
+Notes = The 2021 ordo kept it unbracketed for everyone; 2017–2019 omit it. The Diurnal gives it an octave, which no ordo prints.
+
+[our-lady-einsiedeln]
+Name = Our Lady of Einsiedeln
+Rank = greater-double
+Month = 7
+Day = 16
+Source = 2026 archdiocesan ordo, July 16
+Notes = Bracketed in 2026 only, with no office printed; the 2025 ordo omits it. The parish default for July 16 awaits a ruling (#11).

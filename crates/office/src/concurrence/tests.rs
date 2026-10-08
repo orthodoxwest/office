@@ -45,6 +45,7 @@ fn day(celebration: Option<&FeastRef>, commemorations: &[&FeastRef]) -> Calendar
         temporal_week_id: None,
         within_octave_of: None,
         penitential: Penitential::default(),
+        monastic: Vec::new(),
     }
 }
 
