@@ -5854,6 +5854,24 @@ body.season-eastertide {
     padding: 0 var(--pad-x) 1.25rem;
   }
 
+  /* The niche's panel carries the phone's plaster under its glow and
+     sheen, veiled as the phone's is (--panel-plaster-veil, none by day).
+     The field runs down from the top at the card's width, taller than the
+     closed card, so opening Change date uncovers more wall rather than
+     stretching it; the mirrored tile repeats without a seam. */
+  .page-home .home-arch-fill {
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
+      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
+      linear-gradient(
+        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent),
+        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent)
+      ),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      var(--surface);
+    background-blend-mode: normal, normal, normal, soft-light, normal;
+  }
+
   /* The moulding, outermost first: a clearing of the wall's colour, the
      stone's dark edge, the stone, then the day's colour as a trim inside
      it. */
@@ -5974,8 +5992,8 @@ body.season-eastertide {
     --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
     --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
     /* The night panel's plaster reads as cloud at full strength: veiled to
-       a little under half. */
-    --panel-plaster-veil: 45%;
+       a soft mottle. */
+    --panel-plaster-veil: 60%;
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -6012,7 +6030,7 @@ body.season-eastertide {
   --lining-day: var(--day-color, var(--lining));
   --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
   --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
-  --panel-plaster-veil: 45%;
+  --panel-plaster-veil: 60%;
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link {
@@ -6779,7 +6797,7 @@ body.season-eastertide {
      the night's blue keep their tone and only the trowel marks come
      through. A veil of the surface over it, --panel-plaster-veil, eases
      the marks where they read as weather rather than plaster (the Apse
-     restates it); the desktop niche paints its own head and is untouched.
+     restates it); the desktop niche lays the same plaster under its glow.
      Named layers blend onto the ground one by one: the veil normally, the
      plaster as soft light, over the flat ground.
      The plaster keeps one scale whatever the card's height, so opening

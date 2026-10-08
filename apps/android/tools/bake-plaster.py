@@ -14,7 +14,7 @@ texture or any --plaster-* token:
 
 The phone home's panel (style.css, ".home-arch-fill" under 700px) lays the same grey texture as
 soft light over the panel's ground (--arch-ground, the surface), then a veil of that ground
-(--panel-plaster-veil: none by day, 45% on the Apse, whose night plaster read as cloud at full
+(--panel-plaster-veil: none by day, 60% on the Apse, whose night plaster read as cloud at full
 strength). That is baked here too, as panel_<theme>.jpg, for the apps to clip to the arch.
 
 Requires Pillow and numpy (tools/requirements.txt).
@@ -37,7 +37,7 @@ THEMES = {
 # The panel's ground (--surface) and veil (--panel-plaster-veil) of each theme.
 PANELS = {
     "nave": dict(ground="#f6eddf", veil=0.0),
-    "apse": dict(ground="#172232", veil=0.45),
+    "apse": dict(ground="#172232", veil=0.60),
 }
 
 
