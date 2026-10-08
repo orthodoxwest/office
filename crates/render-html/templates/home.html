@@ -64,7 +64,7 @@
 
     <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
       <h2 id="home-pray-heading">Pray the hours</h2>
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span>{% if pray_now_note %}<span class="pray-now-note">{{ pray_now_note }}</span>{% endif %}</a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -75,8 +75,9 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["lauds", "prime"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}
@@ -91,8 +92,9 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["terce", "sext", "none"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}
@@ -107,8 +109,9 @@
           </h3>
           <div class="home-hour-group-links">
             {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
-            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.note %} data-note="{{ h.note }}"{% endif %}{% if h.is_current %} aria-current="time"{% endif %}>
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}

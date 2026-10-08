@@ -5563,24 +5563,6 @@ body.season-eastertide {
   border-radius: 0;
 }
 
-/* What the hour is, a quiet italic line inside the
-   invitation, so a newcomer knows what they are opening. It takes some of
-   the box's lower air, and only height the card has to spare (app.js). */
-.page-home .pray-now-note {
-  display: block;
-  margin: 0.1em 0 -0.3em;
-  color: var(--muted);
-  font-size: max(0.8rem, 0.58em);
-  font-style: italic;
-  letter-spacing: 0;
-  line-height: 1.25;
-}
-
-/* app.js leaves it out where the card has no height to spare for it. */
-.page-home .pray-now-note[hidden] {
-  display: none;
-}
-
 .page-home .pray-now::after {
   content: "";
   position: absolute;
@@ -5737,23 +5719,45 @@ body.season-eastertide {
   margin-left: 0;
 }
 
+/* What the current hour is, for a newcomer: a quiet italic line under its
+   name. The others carry theirs unseen, for app.js to show as the hours turn. */
+.page-home .home-hour-link {
+  flex-direction: column;
+  gap: 0;
+}
+
+.page-home .home-hour-link-note {
+  display: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+.page-home .home-hour-link.is-current .home-hour-link-note {
+  display: block;
+}
+
 /* An hour prayed today (app.js): its name withdraws to the muted ink and a
-   small gilt cross stands at its shoulder. The cross takes no width, so the
-   name stays centred in its cell. */
+   small gilt cross stands at its shoulder, clear of the name's centring. */
 .page-home .home-hour-link.is-prayed .home-hour-link-name {
   color: var(--muted);
 }
 
+.page-home .home-hour-link-name {
+  position: relative;
+}
+
 .page-home .home-hour-prayed {
-  flex: 0 0 0;
-  width: 0;
-  margin-inline-start: -0.25rem;
-  overflow: visible;
+  position: absolute;
+  top: 0.1em;
+  left: 100%;
+  margin-left: 0.3em;
   color: var(--gold);
-  font-size: 0.62em;
+  font-size: 0.7em;
   line-height: 1;
   white-space: nowrap;
-  transform: translate(0.5em, -0.45em);
 }
 
 .page-home .home-day-meta {

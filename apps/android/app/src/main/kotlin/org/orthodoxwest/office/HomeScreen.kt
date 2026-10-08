@@ -256,8 +256,6 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp, privat
      * 19rem wide and inside the day's clearance of the lining.
      */
     val versicle: Float? = if (!desk && tall <= 700.dp) null else 15.36f
-    /** The invitation's note needs height a short phone lacks, as on the web. */
-    val prayNote = desk || tall > 700.dp
     val versicleMeasure = minOf(304.dp, card - dayClear * 2)
     /** Below the day, to the band. */
     val dayGap = pick(16.8.dp, 5.6.dp, 12.dp)
@@ -422,9 +420,9 @@ private fun Frontispiece(
                         Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
                     }
                     Spacer(Modifier.height(tier.bandGap))
-                    PrayNow(view.prayNowLabel, if (tier.prayNote) view.prayNowNote else "", tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
-                    HourDirectory(view.currentHour, prayed, tier) { onHour(date, it) }
+                    HourDirectory(view.currentHour, view.currentHourNote, prayed, tier) { onHour(date, it) }
                     // Season and date control share one line after the invitation.
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
                     if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
@@ -526,7 +524,7 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
  * lining.
  */
 @Composable
-private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> Unit) {
+private fun PrayNow(label: String, tier: HomeTier, onClick: () -> Unit) {
     val p = LocalPalette.current
     val inner = frontispieceInk(p).panelRule
     Box(
@@ -539,22 +537,10 @@ private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> 
                 val i = w + 3.dp.toPx() + w / 2f
                 drawRect(inner, Offset(i, i), size.copy(width = size.width - 2 * i, height = size.height - 2 * i), style = Stroke(w))
             }
-            // The note takes some of the box's lower air rather than a line of the panel's height.
-            .padding(top = tier.prayPad, bottom = if (note.isEmpty()) tier.prayPad else (tier.prayPad - (tier.pray * 0.3f).dp).coerceAtLeast(2.dp), start = 15.8.dp, end = 15.8.dp),
+            .padding(vertical = tier.prayPad, horizontal = 15.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
-            // What the hour is, so a newcomer knows what they are opening.
-            if (note.isNotEmpty()) {
-                val size = maxOf(12.8f, tier.pray * 0.58f)
-                Text(
-                    note,
-                    Modifier.padding(top = (tier.pray * 0.1f).dp),
-                    style = Type.small.copy(fontSize = size.sp, lineHeight = (size * 1.25f).sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
-                )
-            }
-        }
+        Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
     }
 }
 
@@ -563,7 +549,7 @@ private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> 
  * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
  */
 @Composable
-private fun HourDirectory(current: String, prayed: Set<String>, tier: HomeTier, onHour: (String) -> Unit) {
+private fun HourDirectory(current: String, note: String, prayed: Set<String>, tier: HomeTier, onHour: (String) -> Unit) {
     val desk = tier.desk
     val p = LocalPalette.current
     val o = LocalOrnament.current
@@ -599,7 +585,8 @@ private fun HourDirectory(current: String, prayed: Set<String>, tier: HomeTier, 
                     hours.forEachIndexed { j, h ->
                         if (j > 0) Divider(ink.rule, 16.dp)
                         val done = h in prayed
-                        val said = listOfNotNull(hourLabel(h), "now".takeIf { h == current }, "prayed".takeIf { done })
+                        val gloss = if (h == current) note else ""
+                        val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { h == current }, "prayed".takeIf { done })
                         Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) }, contentAlignment = Alignment.Center) {
                             // An hour prayed today withdraws to the muted ink, a small gilt cross at its
                             // shoulder, as the web's `.is-prayed`; the cross takes no width.
@@ -609,16 +596,22 @@ private fun HourDirectory(current: String, prayed: Set<String>, tier: HomeTier, 
                                 else -> p.text
                             }
                             val name = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = ink)
-                            Box {
-                                // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
-                                BasicText(
-                                    hourLabel(h),
-                                    Modifier.padding(horizontal = 2.dp).goldUnderline(h == current, p.goldLine),
-                                    style = name,
-                                    maxLines = 1,
-                                    autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = name.fontSize),
-                                )
-                                if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = 9.dp, y = 2.dp).size(7.dp), ink = p.gold)
+                            Column(Modifier.goldUnderline(h == current, p.goldLine), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box {
+                                    // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
+                                    BasicText(
+                                        hourLabel(h),
+                                        Modifier.padding(horizontal = 2.dp),
+                                        style = name,
+                                        maxLines = 1,
+                                        autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = name.fontSize),
+                                    )
+                                    if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = 9.dp, y = 2.dp).size(7.dp), ink = p.gold)
+                                }
+                                // What the current hour is, for a newcomer, as the web's `.home-hour-link-note`.
+                                if (gloss.isNotEmpty()) {
+                                    Text(gloss, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 14.35.sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1)
+                                }
                             }
                         }
                     }

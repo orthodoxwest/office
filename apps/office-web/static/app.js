@@ -247,39 +247,21 @@ document.documentElement.classList.add("js");
   window.addEventListener("afterprint", refresh);
 })();
 
-// Home's versicle takes only the height the arch's head has to spare: where
+// Home's versicle takes only the height the arch's head has to spare. Where
 // it would make the card taller, and so push the hours down the screen, the
-// head goes without it. The invitation's note comes after it, and gives way
-// only where it would make the page scroll: a phone's card already fills the
-// screen, while a wide screen's niche has room round it. Measured again
-// whenever the type, the window or the head's other lines change.
+// head goes without it; measured again whenever the type, the window or the
+// head's other lines change.
 (function () {
-  var card = document.querySelector(".home-hero");
+  var versicle = document.querySelector(".home-versicle");
+  var card = versicle && versicle.closest(".home-hero");
   if (!card) return;
-  var versicle = card.querySelector(".home-versicle");
-  var invitation = card.querySelector(".pray-now");
-  if (!versicle && !invitation) return;
   var frame = 0;
-  function spare(element, measure) {
-    if (!element) return;
-    element.hidden = true;
-    var without = measure();
-    element.hidden = false;
-    element.hidden = measure() > without + 0.5;
-  }
-  function cardHeight() {
-    return card.getBoundingClientRect().height;
-  }
-  function overflow() {
-    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-  }
   function fit() {
     frame = 0;
-    // updatePrayNow rewords the note as the hours turn, so it is found afresh.
-    var note = invitation && invitation.querySelector(".pray-now-note");
-    if (note) note.hidden = true;
-    spare(versicle, cardHeight);
-    spare(note, overflow);
+    versicle.hidden = true;
+    var without = card.getBoundingClientRect().height;
+    versicle.hidden = false;
+    versicle.hidden = card.getBoundingClientRect().height > without + 0.5;
   }
   function schedule() {
     if (!frame) frame = window.requestAnimationFrame(fit);
@@ -287,12 +269,7 @@ document.documentElement.classList.add("js");
   fit();
   if (document.fonts) document.fonts.ready.then(schedule);
   window.addEventListener("resize", schedule);
-  if ("ResizeObserver" in window) {
-    var watch = new ResizeObserver(schedule);
-    var head = card.querySelector(".home-day-head");
-    if (head) watch.observe(head);
-    if (invitation) watch.observe(invitation);
-  }
+  if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(versicle.parentNode);
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
@@ -1706,9 +1683,8 @@ function usageBeaconBody(scope) {
       var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
       setHourCurrent(link, isCurrent);
       if (isCurrent && prayNow) {
-        var name = link.querySelector(".home-hour-link-name");
         prayNow.setAttribute("href", link.getAttribute("href"));
-        setPrayNow(prayNow, "Pray " + (name ? name.textContent : "Now"), info.slug);
+        prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
         matched = true;
       }
     });
@@ -1717,7 +1693,7 @@ function usageBeaconBody(scope) {
       var offsetDate = new Date(now.getTime());
       offsetDate.setDate(offsetDate.getDate() + info.offset);
       prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
-      setPrayNow(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug), info.slug);
+      prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
       matched = true;
     }
 
@@ -1726,34 +1702,8 @@ function usageBeaconBody(scope) {
       if (lauds) {
         prayNow.setAttribute("href", lauds.getAttribute("href"));
       }
-      setPrayNow(prayNow, "Open Lauds", "lauds");
+      prayNow.textContent = "Open Lauds";
     }
-  }
-
-  // setPrayNow words the invitation and its note, what the hour is, carried
-  // on that hour's link.
-  function setPrayNow(prayNow, label, slug) {
-    var labelEl = prayNow.querySelector(".pray-now-label");
-    if (labelEl) {
-      labelEl.textContent = label;
-    } else {
-      prayNow.textContent = label;
-    }
-    var link = document.querySelector('.home-hour-link[data-hour="' + slug + '"]');
-    var note = link ? link.getAttribute("data-note") : null;
-    var noteEl = prayNow.querySelector(".pray-now-note");
-    if (!note) {
-      if (noteEl) {
-        noteEl.parentNode.removeChild(noteEl);
-      }
-      return;
-    }
-    if (!noteEl) {
-      noteEl = document.createElement("span");
-      noteEl.className = "pray-now-note";
-      prayNow.appendChild(noteEl);
-    }
-    noteEl.textContent = note;
   }
 
   // Home, Ordo, and an open office may remain visible across a time boundary
@@ -2147,8 +2097,8 @@ function usageBeaconBody(scope) {
     }
   }
 
-  // Home: each hour prayed on the shown day carries a small gilt cross, and
-  // says "Prayed" to a screen reader.
+  // Home: each hour prayed on the shown day carries a small gilt cross at its
+  // name's shoulder, and says "Prayed" to a screen reader.
   if (document.body.classList.contains("page-home")) {
     var paint = function () {
       var list = load()[day];
@@ -2160,8 +2110,7 @@ function usageBeaconBody(scope) {
           mark = document.createElement("span");
           mark.className = "home-hour-prayed";
           mark.innerHTML = '<span aria-hidden="true">✠</span><span class="sr-only">Prayed</span>';
-          var name = link.querySelector(".home-hour-link-name");
-          link.insertBefore(mark, name ? name.nextSibling : null);
+          (link.querySelector(".home-hour-link-name") || link).appendChild(mark);
         } else if (!isPrayed && mark) {
           mark.remove();
         }

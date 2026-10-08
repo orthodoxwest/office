@@ -421,7 +421,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
 
   const invitation = page.locator(".pray-now");
   const current = page.locator('.home-hour-link[aria-current="time"]');
-  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Terce");
+  await expect(invitation).toHaveText("Pray Terce");
   await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
   await expect(current).toHaveAttribute("data-hour", "terce");
   // "Now" is announced, not drawn: the tinted cell and the invitation above
@@ -452,7 +452,7 @@ test("the early-morning invitation opens the previous day's Compline", async ({ 
   await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now-label")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
   await expect(page.locator(".pray-now")).toHaveAttribute("href", "/compline/2026-03-14");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
 });
@@ -461,19 +461,21 @@ test("the foreground home invitation advances at the next office boundary", asyn
   await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "terce",
   );
 
-  // The note under the invitation says what the hour is, and moves with it.
-  await expect(page.locator(".pray-now-note")).toHaveText("Mid-morning prayer");
+  // The current hour says what it is under its name, and the line moves with it.
+  const note = page.locator(".home-hour-link-note:visible");
+  await expect(note).toHaveCount(1);
+  await expect(note).toHaveText("Mid-morning prayer");
 
   await page.clock.fastForward("02:00");
 
-  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
-  await expect(page.locator(".pray-now-note")).toHaveText("Midday prayer");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(note).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
@@ -532,12 +534,12 @@ test("the home invitation catches up when the clock jumps past a sleeping timer"
   // timeout set at the previous hour.
   await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
   await openDatedPage(page, `/?date=${testDate}`);
-  await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
 
   await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
   await page.clock.runFor("01:01");
 
-  await expect(page.locator(".pray-now-label")).toHaveText("Pray Vespers");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "vespers",
@@ -551,7 +553,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await openDatedPage(page, "/?date=2026-07-29");
 
   const invitation = page.locator(".pray-now");
-  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
+  await expect(invitation).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
@@ -560,7 +562,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
 
   await page.clock.fastForward("02:00");
 
-  await expect(invitation.locator(".pray-now-label")).toHaveText("Pray Compline");
+  await expect(invitation).toHaveText("Pray Compline");
   await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();

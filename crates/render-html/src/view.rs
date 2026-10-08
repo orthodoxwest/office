@@ -26,7 +26,7 @@ pub struct HomeHourLink {
     pub slug: String,
     pub url: String,
     pub is_current: bool,
-    /// What the hour is ("Evening prayer"), for the invitation when it opens this hour.
+    /// What the hour is ("Evening prayer"), shown under its name while it is the current hour.
     pub note: String,
 }
 
@@ -56,7 +56,6 @@ pub struct HomeData {
     pub calendar_link: String,
     pub pray_now_label: String,
     pub pray_now_link: String,
-    pub pray_now_note: String,
     pub hours: Vec<HomeHourLink>,
 }
 

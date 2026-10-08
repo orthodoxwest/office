@@ -241,8 +241,6 @@ struct HomeTier {
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
     /// and inside the day's clearance of the lining.
     var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }
-    /// The invitation's note needs height a short phone lacks, as on the web.
-    var prayNote: Bool { !short }
     var versicleMeasure: CGFloat { min(304, card - 2 * dayClear) }
     /// Below the day, to the band.
     var dayGap: CGFloat { pick(16.8, 5.6, 12) }
@@ -433,11 +431,11 @@ private struct Frontispiece: View {
             // The invitation and the hours, from the inscription band.
             VStack(spacing: 0) {
                 inscription(side: side)
-                PrayNow(label: view.prayNowLabel, note: tier.prayNote ? view.prayNowNote : "", tier: tier) {
+                PrayNow(label: view.prayNowLabel, tier: tier) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
-                HourDirectory(current: view.currentHour, prayed: model.hoursPrayed(on: date), tier: tier) { h in model.open(.hour(date, h)) }
+                HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
                 // Season and date control share one line after the invitation.
                 Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
@@ -553,39 +551,26 @@ private struct FeastName: View {
  */
 private struct PrayNow: View {
     let label: String
-    let note: String
     let tier: HomeTier
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        let size = tier.pray.size
         Button(action: action) {
-            VStack(spacing: 0) {
-                Text(label).type(tier.pray)
-                    .foregroundStyle(p.dark ? p.lining : p.titulus)
-                // What the hour is, so a newcomer knows what they are opening.
-                if !note.isEmpty {
-                    let noteSize = max(12.8, size * 0.58)
-                    Text(note).type(TextStyle(size: noteSize, line: noteSize * 1.25, italic: true))
-                        .foregroundStyle(p.muted)
-                        .padding(.top, m.px(size * 0.1))
+            Text(label).type(tier.pray)
+                .foregroundStyle(p.dark ? p.lining : p.titulus)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, m.px(tier.prayPad))
+                .padding(.horizontal, m.px(13.8))
+                .overlay {
+                    ZStack {
+                        Rectangle().strokeBorder(p.lining, lineWidth: 1)
+                        Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
+                    }
+                    .allowsHitTesting(false)
                 }
-            }
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .padding(.top, m.px(tier.prayPad))
-            // The note takes some of the box's lower air rather than a line of the panel's height.
-            .padding(.bottom, m.px(note.isEmpty ? tier.prayPad : max(tier.prayPad - size * 0.3, 2)))
-            .padding(.horizontal, m.px(13.8))
-            .overlay {
-                ZStack {
-                    Rectangle().strokeBorder(p.lining, lineWidth: 1)
-                    Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
-                }
-                .allowsHitTesting(false)
-            }
         }
         .buttonStyle(Quiet())
     }
@@ -597,6 +582,8 @@ private struct PrayNow: View {
  */
 private struct HourDirectory: View {
     let current: String
+    /// What the current hour is, set under its name for a newcomer.
+    let note: String
     /// The hours prayed on this day.
     let prayed: Set<String>
     let tier: HomeTier
@@ -635,27 +622,38 @@ private struct HourDirectory: View {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
                             if j > 0 { VRule(color: ink.rule, height: 16) }
                             let done = prayed.contains(h)
+                            let gloss = h == current ? note : ""
                             Button { open(h) } label: {
-                                // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
-                                Text(hourLabel(h))
-                                    .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                    .foregroundStyle(done ? p.muted : h == current ? p.accent : p.text)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.7)
-                                    .goldUnderline(h == current, p.goldLine)
-                                    .padding(.horizontal, m.px(2))
-                                    // An hour prayed today withdraws to the muted ink, a small gilt cross
-                                    // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
-                                    .overlay(alignment: .topTrailing) {
-                                        if done {
-                                            PaintedMark(.cross, size: m.px(7), color: p.gold)
-                                                .offset(x: m.px(9), y: m.px(2))
+                                VStack(spacing: 0) {
+                                    // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
+                                    Text(hourLabel(h))
+                                        .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
+                                        .foregroundStyle(done ? p.muted : h == current ? p.accent : p.text)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                        // An hour prayed today withdraws to the muted ink, a small gilt cross
+                                        // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
+                                        .overlay(alignment: .topTrailing) {
+                                            if done {
+                                                PaintedMark(.cross, size: m.px(7), color: p.gold)
+                                                    .offset(x: m.px(9), y: m.px(2))
+                                            }
                                         }
+                                    // What the current hour is, for a newcomer, as the web's `.home-hour-link-note`.
+                                    if !gloss.isEmpty {
+                                        Text(gloss)
+                                            .type(TextStyle(size: 12.48, line: 14.35, italic: true))
+                                            .foregroundStyle(p.muted)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
                                     }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
+                                .goldUnderline(h == current, p.goldLine)
+                                .padding(.horizontal, m.px(2))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
                             .buttonStyle(Quiet())
-                            .accessibilityLabel([hourLabel(h), h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+                            .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
                         }
                     }
                     .frame(minHeight: m.px(tier.row))

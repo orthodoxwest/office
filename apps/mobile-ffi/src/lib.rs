@@ -103,7 +103,7 @@ impl OfficeCore {
         } else {
             None
         };
-        let pray_now_note = hour_gloss(invite.hour).to_string();
+        let current_hour_note = hour_gloss(invite.current).to_string();
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         Ok(HomeView {
             date_label: long_date(shown),
@@ -121,7 +121,7 @@ impl OfficeCore {
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
-            pray_now_note,
+            current_hour_note,
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -511,10 +511,11 @@ pub struct HomeView {
     /// "Pray Vespers" today; "Open Lauds" on another day.
     pub pray_now_label: String,
     pub pray_now_hour: String,
-    /// What that hour is, for a newcomer: "Evening prayer".
-    pub pray_now_note: String,
     /// The day the invitation opens: yesterday for Compline after midnight.
     pub pray_now_date: CivilDate,
+    /// What the current hour is, for a newcomer, set under its name: "Evening prayer"; empty
+    /// when no hour is current.
+    pub current_hour_note: String,
     /// The hour the directory marks as now, or empty.
     pub current_hour: String,
 }

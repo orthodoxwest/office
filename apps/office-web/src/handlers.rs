@@ -280,7 +280,6 @@ impl Server {
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
         let hours = build_home_hours(&slug, invite.current);
-        let pray_now_note = hour_gloss(invite.hour).to_string();
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
@@ -309,7 +308,6 @@ impl Server {
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
-            pray_now_note,
             hours,
         };
         match self.pages.home(&data) {
