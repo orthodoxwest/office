@@ -1948,6 +1948,16 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   background: color-mix(in srgb, var(--gold) 10%, transparent);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.date-picker-day, .date-picker-month)[aria-current="date"] {
+    background: var(--apse-lift);
+  }
+}
+
+:root[data-theme="dark"] :is(.date-picker-day, .date-picker-month)[aria-current="date"] {
+  background: var(--apse-lift);
+}
+
 /* The chosen day reads as the chosen prayer form does: oak ink on a gold
    rule. Cut to the figures, so a single digit gets a short rule. */
 .date-picker-days [aria-selected="true"] .date-picker-day,
@@ -3820,6 +3830,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     --surface: #172232;
     --surface-edge: rgba(208, 176, 106, 0.18);
     --pressed-wash: rgba(208, 176, 106, 0.12);
+    /* The current hour and today, marked on the vault in its own blue lifted:
+       the gold wash reads grey on the night. */
+    --apse-lift: rgba(132, 160, 204, 0.13);
     --page-material:
       radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
       radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
@@ -3874,6 +3887,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   --surface: #172232;
   --surface-edge: rgba(208, 176, 106, 0.18);
   --pressed-wash: rgba(208, 176, 106, 0.12);
+  --apse-lift: rgba(132, 160, 204, 0.13);
   --page-material:
     radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
     radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
@@ -3916,7 +3930,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   }
 
   :root:not([data-theme="light"]) .home-hour-link.is-current {
-    background: rgba(208, 176, 106, 0.12);
+    background: var(--apse-lift);
   }
 
   :root:not([data-theme="light"]) .pray-now {
@@ -3953,7 +3967,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 :root[data-theme="dark"] .home-hour-link.is-current {
-  background: rgba(208, 176, 106, 0.12);
+  background: var(--apse-lift);
 }
 
 :root[data-theme="dark"] .pray-now {
@@ -5969,7 +5983,7 @@ body.season-eastertide {
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link.is-current {
-    background: rgba(208, 176, 106, 0.12);
+    background: var(--apse-lift);
   }
 
   /* Red, green and violet are mixed for limewash and sink into the night;
@@ -6006,7 +6020,7 @@ body.season-eastertide {
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link.is-current {
-  background: rgba(208, 176, 106, 0.12);
+  background: var(--apse-lift);
 }
 
 :root[data-theme="dark"] .page-home :is(.home-hero, .home-summary).day-color-red { --day-color: #c9503f; }
@@ -8242,6 +8256,29 @@ body.page-home::before {
 :root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
 .hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
 .hour-context-controls > .hour-date-nav { margin: 0; }
+/* Change date and Prayer form keep their row while either is open: the
+   disclosures give their parts to one grid, the two summaries side by side
+   and the open panel across the row beneath them, so opening one never moves
+   the other. The outer columns take the slack, so a wide panel does not push
+   the summaries apart. Without ::details-content (older Safari) the row
+   wraps as before. Screen only, so print still hides the picker. */
+@media screen { @supports selector(::details-content) {
+  .hour-context-controls:has(> .leader-selector) {
+    display: grid;
+    grid-template-columns: 1fr auto auto 1fr;
+    column-gap: .75rem;
+    align-items: start;
+  }
+  .hour-context-controls:has(> .leader-selector) > details { display: contents; }
+  .hour-context-controls:has(> .leader-selector) > .hour-date-nav > summary { grid-area: 1 / 2; }
+  .hour-context-controls:has(> .leader-selector) > .leader-selector > summary { grid-area: 1 / 3; }
+  .hour-context-controls:has(> .leader-selector) > details::details-content {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    width: min(100%, 34rem);
+  }
+} }
 .leader-selector { max-width: 100%; color: var(--text); font-size: .9rem; }
 /* Match the adjacent date disclosure. The chosen form remains legible while
    the shared heading, rather than a preference label, leads the prayer. */

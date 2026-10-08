@@ -42,7 +42,7 @@ targets:
     info:
       path: build/Info.plist
       properties:
-        CFBundleDisplayName: Divine Office
+        CFBundleDisplayName: Daily Office
         # The Nave's ground, or the Apse's when the phone is dark.
         UILaunchScreen:
           UIColorName: LaunchBackground

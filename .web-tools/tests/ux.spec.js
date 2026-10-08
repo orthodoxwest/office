@@ -3315,7 +3315,8 @@ test('prayer-form controls fit both themes and narrow or wide reading', async ({
       for (const name of ['Praying privately', 'With others, led by a deacon', 'With others, led by a priest']) {
         await expect(selector.getByRole('radio', { name, exact: true })).toBeVisible();
       }
-      const bounds = await selector.boundingBox();
+      // The picker lends its parts to the controls' grid, so its open panel is what is measured.
+      const bounds = await selector.locator('fieldset').boundingBox();
       expect(bounds.x).toBeGreaterThanOrEqual(0);
       expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
       const labels = await selector.locator('label').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().height));

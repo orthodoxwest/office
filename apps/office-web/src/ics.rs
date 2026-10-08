@@ -150,7 +150,7 @@ impl Server {
             "PRODID:-//AWRV Divine Office//office//EN",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
-            "X-WR-CALNAME:Divine Office",
+            "X-WR-CALNAME:Daily Office",
             "X-WR-CALDESC:Hours of the Benedictine Office",
             "REFRESH-INTERVAL;VALUE=DURATION:P1D",
             "X-PUBLISHED-TTL:P1D",

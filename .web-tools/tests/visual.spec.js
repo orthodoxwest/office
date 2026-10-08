@@ -37,7 +37,8 @@ for (const theme of ["light", "dark"]) {
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
     await page.getByText("Change date", { exact: true }).click();
     await expect(page.locator(".date-picker")).toBeVisible();
-    await expect(page.locator(".hour-date-nav")).toHaveScreenshot(`date-picker-${theme}.png`);
+    // The picker lends its parts to the controls' grid, so the row and its open panel are shot.
+    await expect(page.locator(".hour-context-controls")).toHaveScreenshot(`date-picker-${theme}.png`);
   });
 
   test(`desktop Lauds — ${theme}`, async ({ page }) => {

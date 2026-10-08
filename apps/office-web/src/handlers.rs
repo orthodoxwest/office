@@ -807,7 +807,7 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Pentecost feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<p class="feast">Feria</p>"#).expect("names the feria");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");

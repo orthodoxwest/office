@@ -601,7 +601,8 @@ struct DayPicker: View {
                                     .foregroundStyle(i == 0 ? p.rubric : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    .background(day == today ? p.pressedWash : .clear)
+                                    // Today in Apse takes the vault's blue lifted, as the web's --apse-lift.
+                                    .background(day == today ? (p.dark ? Color(hex: 0x84A0CC).opacity(0.13) : p.pressedWash) : .clear)
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel(spokenDay(day, today: today))
