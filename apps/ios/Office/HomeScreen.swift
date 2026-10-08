@@ -401,24 +401,13 @@ private struct Frontispiece: View {
                     }
                     .padding(.top, m.px(8))
                 }
-                // Tomorrow's fast or abstinence, told from Vespers: "Tomorrow" in the Also's quiet
-                // italic, the mark as today's is set. It takes the versicle's place.
-                if !view.tomorrowPenitential.isEmpty {
-                    HStack(spacing: m.px(9.6)) {
-                        Text("Tomorrow").type(TextStyle(size: 14.4, line: 19.97, italic: true)).foregroundStyle(p.muted)
-                        ForEach(view.tomorrowPenitential, id: \.self) { t in
-                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(p.rubric)
-                        }
-                    }
-                    .padding(.top, m.px(12))
-                }
             }
             .padding(.horizontal, m.px(tier.dayClear))
             .frame(maxWidth: .infinity)
             // The day's versicle, when the head has the height to spare for it: the layout
             // proposes it no height where it would make the card taller, and it gives way.
             ViewThatFits(in: .vertical) {
-                if let style = tier.versicle, !view.versicle.isEmpty, view.tomorrowPenitential.isEmpty {
+                if let style = tier.versicle, !view.versicle.isEmpty {
                     VStack(spacing: 0) {
                         versicleLine("℣.", view.versicle, style)
                         versicleLine("℟.", view.response, style)
@@ -576,7 +565,7 @@ private struct PrayNow: View {
             VStack(spacing: 0) {
                 Text(label).type(tier.pray)
                     .foregroundStyle(p.dark ? p.lining : p.titulus)
-                // What the hour is and how long it takes, so a newcomer knows what they are opening.
+                // What the hour is, so a newcomer knows what they are opening.
                 if !note.isEmpty {
                     let noteSize = max(12.8, size * 0.58)
                     Text(note).type(TextStyle(size: noteSize, line: noteSize * 1.25, italic: true))

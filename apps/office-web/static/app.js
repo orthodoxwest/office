@@ -1702,18 +1702,6 @@ function usageBeaconBody(scope) {
     var prayNow = card.querySelector(".pray-now");
     var matched = false;
 
-    // Tomorrow's fast is told from Vespers on today's home
-    // (presentation::tells_tomorrow).
-    var tomorrow = document.querySelector(".home-tomorrow");
-    if (tomorrow) {
-      tomorrow.hidden = !(
-        info !== null &&
-        info.offset === 0 &&
-        dateSlug === localDateSlug(now) &&
-        (info.slug === "vespers" || info.slug === "compline")
-      );
-    }
-
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
       var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
       setHourCurrent(link, isCurrent);
@@ -1742,8 +1730,8 @@ function usageBeaconBody(scope) {
     }
   }
 
-  // setPrayNow words the invitation and its note: what the hour is and how long it takes,
-  // carried on that hour's link (the shown day's, also for Compline after midnight).
+  // setPrayNow words the invitation and its note, what the hour is, carried
+  // on that hour's link.
   function setPrayNow(prayNow, label, slug) {
     var labelEl = prayNow.querySelector(".pray-now-label");
     if (labelEl) {

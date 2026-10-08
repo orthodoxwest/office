@@ -365,20 +365,12 @@ private fun Frontispiece(
                             }
                         }
                     }
-                    // Tomorrow's fast or abstinence, told from Vespers: "Tomorrow" in the Also's
-                    // quiet italic, the mark as today's is set. It takes the versicle's place.
-                    if (view.tomorrowPenitential.isNotEmpty()) {
-                        Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text("Tomorrow", style = Type.small.copy(fontSize = 14.4.sp, color = p.muted, fontStyle = FontStyle.Italic))
-                            view.tomorrowPenitential.forEach { Text(it, style = Type.small.copy(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
-                        }
-                    }
                 }
             },
             // The day's versicle, when the head has the height to spare for it.
             {
                 val style = tier.versicle
-                if (style != null && view.versicle.isNotEmpty() && view.tomorrowPenitential.isEmpty()) {
+                if (style != null && view.versicle.isNotEmpty()) {
                     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
                             VersicleLine("℣.", view.versicle, style)
@@ -548,7 +540,7 @@ private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
-            // What the hour is and how long it takes, so a newcomer knows what they are opening.
+            // What the hour is, so a newcomer knows what they are opening.
             if (note.isNotEmpty()) {
                 val size = maxOf(12.8f, tier.pray * 0.58f)
                 Text(

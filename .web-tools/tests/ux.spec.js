@@ -467,31 +467,17 @@ test("the foreground home invitation advances at the next office boundary", asyn
     "terce",
   );
 
-  // The note under the invitation says what the hour is and how long it
-  // takes, and moves with it.
-  await expect(page.locator(".pray-now-note")).toHaveText(/^Mid-morning prayer · about \d+ minutes$/);
+  // The note under the invitation says what the hour is, and moves with it.
+  await expect(page.locator(".pray-now-note")).toHaveText("Mid-morning prayer");
 
   await page.clock.fastForward("02:00");
 
   await expect(page.locator(".pray-now-label")).toHaveText("Pray Sext");
-  await expect(page.locator(".pray-now-note")).toHaveText(/^Midday prayer · about \d+ minutes$/);
+  await expect(page.locator(".pray-now-note")).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
   );
-});
-
-test("today's home tells tomorrow's abstinence from Vespers", async ({ page }) => {
-  // Thursday before a Friday of abstinence: the line waits for Vespers.
-  await page.clock.install({ time: new Date("2026-10-08T16:59:00-04:00") });
-  await openDatedPage(page, "/?date=2026-10-08");
-  const tomorrow = page.locator(".home-tomorrow");
-  await expect(tomorrow).toBeHidden();
-
-  await page.clock.fastForward("02:00");
-
-  await expect(tomorrow).toBeVisible();
-  await expect(tomorrow).toHaveText("Tomorrow Abstinence");
 });
 
 test("Compline hands on to tomorrow's Lauds", async ({ page }) => {

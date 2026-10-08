@@ -26,8 +26,7 @@ pub struct HomeHourLink {
     pub slug: String,
     pub url: String,
     pub is_current: bool,
-    /// What the hour is and how long it takes ("Evening prayer · about 15 minutes"), for the
-    /// invitation when it opens this hour.
+    /// What the hour is ("Evening prayer"), for the invitation when it opens this hour.
     pub note: String,
 }
 
@@ -58,10 +57,6 @@ pub struct HomeData {
     pub pray_now_label: String,
     pub pray_now_link: String,
     pub pray_now_note: String,
-    /// Tomorrow's "Fasting" or "Abstinence", told on today's home from Vespers; app.js shows
-    /// the line at that hour on a cached page.
-    pub tomorrow_penitential: Vec<String>,
-    pub tells_tomorrow: bool,
     pub hours: Vec<HomeHourLink>,
 }
 

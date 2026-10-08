@@ -100,22 +100,13 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(home.season, "");
     assert_eq!(home.color, "violet");
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
-    assert!(home.pray_now_note.starts_with("Evening prayer · about "), "{}", home.pray_now_note);
+    assert_eq!(home.pray_now_note, "Evening prayer");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
     let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
     assert_eq!((other.pray_now_label.as_str(), other.is_today), ("Open Lauds", false));
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
-}
-
-#[test]
-fn home_tells_tomorrows_abstinence_from_vespers() {
-    let core = OfficeCore::new().unwrap();
-    let thursday = civil(2026, 10, 8);
-    assert_eq!(core.home(thursday, thursday, 18).unwrap().tomorrow_penitential, ["Abstinence"]);
-    assert!(core.home(thursday, thursday, 12).unwrap().tomorrow_penitential.is_empty());
-    assert!(core.home(thursday, civil(2026, 10, 7), 18).unwrap().tomorrow_penitential.is_empty());
 }
 
 #[test]

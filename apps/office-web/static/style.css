@@ -5449,23 +5449,6 @@ body.season-eastertide {
   margin-top: 0.3rem;
 }
 
-/* Tomorrow's fast, told the evening before: "Tomorrow" in the Also's quiet
-   italic, the mark as today's is set. */
-.page-home .home .home-tomorrow {
-  margin: 0.45rem 0 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.page-home .home .home-tomorrow[hidden] {
-  display: none;
-}
-
-.page-home .home .home-tomorrow-label {
-  font-style: italic;
-}
-
 /* The day's versicle, set under the day as an epigraph on a plain day:
    italic in the text's ink, a little withdrawn, its ℣ and ℟ upright in
    the rubrics' red as the hours set them, each on a line of its own and
@@ -5580,7 +5563,7 @@ body.season-eastertide {
   border-radius: 0;
 }
 
-/* What the hour is and how long it takes, a quiet italic line inside the
+/* What the hour is, a quiet italic line inside the
    invitation, so a newcomer knows what they are opening. It takes some of
    the box's lower air, and only height the card has to spare (app.js). */
 .page-home .pray-now-note {

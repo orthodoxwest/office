@@ -20,8 +20,8 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_note, hour_versicle, invitation,
-    long_date, minutes_to_say, month_name, rank_class, report_url, season_class, season_str, split_alias, tells_tomorrow,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
+    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias,
 };
 
 /// What a page handler reads from the request.
@@ -45,7 +45,7 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Compline", "compline"),
 ];
 
-fn build_home_hours(date_slug: &str, current: &str, note: impl Fn(&str) -> String) -> Vec<HomeHourLink> {
+fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
     ORDERED_HOURS
         .iter()
         .map(|(name, slug)| HomeHourLink {
@@ -53,7 +53,7 @@ fn build_home_hours(date_slug: &str, current: &str, note: impl Fn(&str) -> Strin
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
-            note: note(slug),
+            note: hour_gloss(slug).to_string(),
         })
         .collect()
 }
@@ -279,21 +279,8 @@ impl Server {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
-        // Each hour's note from the shown day's own text: home is cached and app.js moves the
-        // invitation from hour to hour, so every hour carries one.
-        let note = |hour: &str| {
-            let minutes = self.engine.compose_hour(hour, day, &entry.moveable, PrayerForm::Private).map(|h| minutes_to_say(&h));
-            minutes.map(|m| hour_note(hour, m)).unwrap_or_default()
-        };
-        let hours = build_home_hours(&slug, invite.current, note);
-        let pray_now_note = hours.iter().find(|h| h.slug == invite.hour).map(|h| h.note.clone()).unwrap_or_default();
-        let tells_tomorrow = tells_tomorrow(&invite);
-        let morrow = date.add_days(1);
-        let tomorrow_penitential = match self.cache.get(morrow.year()) {
-            Ok(e) => e.days.get(morrow.ordinal() as usize - 1).map(|d| d.penitential.labels().into_iter().map(String::from).collect()),
-            Err(_) => None,
-        }
-        .unwrap_or_default();
+        let hours = build_home_hours(&slug, invite.current);
+        let pray_now_note = hour_gloss(invite.hour).to_string();
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
@@ -323,8 +310,6 @@ impl Server {
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
             pray_now_note,
-            tomorrow_penitential,
-            tells_tomorrow,
             hours,
         };
         match self.pages.home(&data) {
