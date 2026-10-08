@@ -191,6 +191,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var today: CivilDate
     /// The hour of the clock, which chooses home's invitation.
     @Published private(set) var clockHour = civil.component(.hour, from: Date())
+    /// The hours prayed, for home's marks, as the web's `office-prayed`: "2026-10-07/lauds", kept
+    /// on this device a week.
+    @Published private(set) var prayed: Set<String>
 
     private let defaults = UserDefaults.standard
     private let pinnedToday: CivilDate?
@@ -207,6 +210,21 @@ final class AppModel: ObservableObject {
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
         martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
+    }
+
+    /// The hours prayed on `date`.
+    func hoursPrayed(on date: CivilDate) -> Set<String> {
+        Set(prayed.filter { $0.hasPrefix(date.iso + "/") }.map { String($0.dropFirst(date.iso.count + 1)) })
+    }
+
+    /// Marks `hour` of `date` prayed, letting marks older than a week go.
+    func markPrayed(_ date: CivilDate, _ hour: String) {
+        let oldest = CivilDate.of(Date()).adding(days: -7)
+        var kept = prayed.filter { CivilDate.parse(String($0.prefix(10))).map { $0.compare(oldest) >= 0 } ?? false }
+        kept.insert("\(date.iso)/\(hour)")
+        prayed = kept
+        defaults.set(Array(kept).sorted(), forKey: "prayed")
     }
 
     /// The page shown.

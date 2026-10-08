@@ -44,6 +44,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
@@ -129,6 +130,7 @@ fun OrdoScreen(
                 )
             }
         }
+        item(key = "ranks") { RankKey(ordoColumn().padding(bottom = 5.6.dp)) }
         item(key = "month") {
             MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), today.year == year && today.monthValue == monthNumber, ordoColumn().padding(top = 10.dp)) {
                 scope.launch { listState.animateScrollToItem(0) }
@@ -623,6 +625,35 @@ private fun DayTableRow(
         }
         Hairline(p.border)
     }
+}
+
+/** The ranks spelled out, each abbreviation in its days' ink, as the web's key: a phone has no titles to hover. */
+private val RankNames = listOf(
+    "1cl" to "first class",
+    "2cl" to "second class",
+    "gd" to "greater double",
+    "d" to "double",
+    "sd" to "semi-double",
+    "s" to "simple",
+    "f2" to "privileged feria",
+)
+
+@Composable
+private fun RankKey(modifier: Modifier) {
+    val p = LocalPalette.current
+    // No-break spaces keep each abbreviation with its name when the line wraps.
+    val key = buildAnnotatedString {
+        RankNames.forEachIndexed { i, (abbr, name) ->
+            if (i > 0) append(" · ")
+            withStyle(SpanStyle(color = rankInk(abbr, p))) { append(abbr) }
+            append("\u00A0" + name.replace(' ', '\u00A0'))
+        }
+    }
+    Text(
+        key,
+        modifier.clearAndSetSemantics { contentDescription = "Ranks: " + RankNames.joinToString(", ") { it.second } },
+        style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted),
+    )
 }
 
 /**

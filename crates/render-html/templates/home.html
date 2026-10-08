@@ -77,6 +77,7 @@
             {% for h in hours %}{% if h.slug in ["lauds", "prime"] %}
             <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}
@@ -93,6 +94,7 @@
             {% for h in hours %}{% if h.slug in ["terce", "sext", "none"] %}
             <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}
@@ -109,6 +111,7 @@
             {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
             <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
               <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.note %}<span class="home-hour-link-note">{{ h.note }}</span>{% endif %}
               {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
             </a>
             {% endif %}{% endfor %}

@@ -467,13 +467,63 @@ test("the foreground home invitation advances at the next office boundary", asyn
     "terce",
   );
 
+  // The current hour says what it is under its name, and the line moves with it.
+  const note = page.locator(".home-hour-link-note:visible");
+  await expect(note).toHaveCount(1);
+  await expect(note).toHaveText("Mid-morning prayer");
+
   await page.clock.fastForward("02:00");
 
   await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(note).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
   );
+});
+
+test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
+  await page.goto("/compline/2026-10-07");
+  const next = page.locator(".next-hour");
+  await expect(next).toHaveAttribute("href", "/lauds/2026-10-08");
+  await expect(next.locator(".continuation-label")).toHaveText("Tomorrow");
+});
+
+// The end of the hour's text reaches the screen.
+async function atHourEnd(page) {
+  return page.evaluate(() => document.querySelector(".hour-end-mark").getBoundingClientRect().top < innerHeight);
+}
+
+test("scrolling through an hour in seconds does not mark it prayed", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
+    await page.mouse.wheel(0, 3000);
+    await page.clock.runFor(1000);
+  }
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  // Waiting at the end reads only the end.
+  await page.clock.runFor(120_000);
+  await page.goto("/?date=2026-10-07");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
+});
+
+test("an hour read through at a praying pace is marked prayed on home", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
+    await page.clock.runFor(20_000);
+    await page.mouse.wheel(0, 400);
+  }
+  await page.clock.runFor(2000);
+  await page.goto("/?date=2026-10-07");
+  const compline = page.locator('.home-hour-link[data-hour="compline"]');
+  await expect(compline).toHaveClass(/is-prayed/);
+  await expect(compline.locator(".home-hour-prayed .sr-only")).toHaveText("Prayed");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(1);
+  // Another day's home is not marked.
+  await page.goto("/?date=2026-10-06");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
 });
 
 test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
@@ -534,6 +584,23 @@ test("the niche's cross stands clear under the lining at every desktop width", a
     });
     expect(air.above, `${width}px: under the lining`).toBeGreaterThanOrEqual(6);
     expect(air.below, `${width}px: over the date`).toBeGreaterThanOrEqual(12);
+  }
+});
+
+test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
+  // At a laptop's size it took two-thirds of an iPad's width and left a third
+  // of the screen bare below it.
+  for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const niche = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero").getBoundingClientRect();
+      const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
+      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
+    expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
   }
 });
 
@@ -1260,15 +1327,29 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   // Every menu preference keeps a thumb-sized target at the largest setting,
   // and the two rows share columns so each theme sits over a text size.
   await page.locator(".site-menu > summary").click();
-  const cells = await page.evaluate(() => {
-    const rects = (sel) =>
-      Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => el.getBoundingClientRect());
-    return {
-      themes: rects(".theme-option[data-theme-choice]"),
-      sizes: rects(".text-size-option"),
-      martyrology: rects(".martyrology-option"),
-    };
-  });
+  await expect(page.locator(".site-menu")).toHaveAttribute("open", "");
+  const measure = () =>
+    page.evaluate(() => {
+      const rects = (sel) =>
+        Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => {
+          const r = el.getBoundingClientRect();
+          return { left: r.left, width: r.width, height: r.height };
+        });
+      return {
+        themes: rects(".theme-option[data-theme-choice]"),
+        sizes: rects(".text-size-option"),
+        martyrology: rects(".martyrology-option"),
+      };
+    });
+  // The panel is laid out once the menu has opened (it settles in from a
+  // closing transition); measure it then.
+  await expect
+    .poll(async () => {
+      const c = await measure();
+      return Math.min(...[...c.themes, ...c.sizes, ...c.martyrology].map((r) => r.height));
+    })
+    .toBeGreaterThanOrEqual(44);
+  const cells = await measure();
   const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
   expect(all).toHaveLength(8);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);

@@ -26,6 +26,8 @@ pub struct HomeHourLink {
     pub slug: String,
     pub url: String,
     pub is_current: bool,
+    /// What the hour is ("Evening prayer"), shown under its name while it is the current hour.
+    pub note: String,
 }
 
 /// The day-landing page.

@@ -71,6 +71,9 @@
   <div class="calendar-tools">
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
   <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
+  {# A phone never shows the rank cells' titles, so the key spells them out,
+       each in the ink its days are set in. #}
+  <p class="calendar-legend calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
   </div>
   {% for m in months %}
   <section class="month" id="{{ m.slug }}">

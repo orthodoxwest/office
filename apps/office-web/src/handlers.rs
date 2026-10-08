@@ -20,8 +20,8 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation, long_date,
-    month_name, rank_class, report_url, season_class, season_str, split_alias,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
+    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias,
 };
 
 /// What a page handler reads from the request.
@@ -53,11 +53,14 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
+            note: hour_gloss(slug).to_string(),
         })
         .collect()
 }
 
-fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
+/// The hours either side of `hour`. Compline's next is the morrow's Lauds, so the last
+/// page of the day does not end in a blank.
+fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, String, String) {
     let mut out = (String::new(), String::new(), String::new(), String::new());
     if let Some(i) = ORDERED_HOURS.iter().position(|(_, slug)| *slug == hour) {
         if i > 0 {
@@ -67,6 +70,9 @@ fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
         if i + 1 < ORDERED_HOURS.len() {
             out.2 = ORDERED_HOURS[i + 1].0.to_string();
             out.3 = hour_link(ORDERED_HOURS[i + 1].1, date);
+        } else {
+            out.2 = ORDERED_HOURS[0].0.to_string();
+            out.3 = hour_link(ORDERED_HOURS[0].1, tomorrow);
         }
     }
     out
@@ -283,6 +289,7 @@ impl Server {
             None
         };
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
+        let hours = build_home_hours(&slug, invite.current);
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
@@ -311,7 +318,7 @@ impl Server {
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
-            hours: build_home_hours(&slug, invite.current),
+            hours,
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -377,7 +384,8 @@ impl Server {
             }
         }
 
-        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) = adjacent_hours(hour_name, &date_str);
+        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) =
+            adjacent_hours(hour_name, &date_str, &date_slug(date.add_days(1)));
         let today_slug = date_slug(now_in(&loc).0);
         let mut data = HourData {
             chrome: Chrome {
@@ -586,6 +594,19 @@ mod tests {
         }
     }
 
+    // app.js reads an hour at presentation::Reading's pace before home marks it prayed.
+    #[test]
+    fn client_prayed_pace_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let constant = |name: &str| -> f64 {
+            let at = src.find(&format!("var {name} = ")).unwrap() + name.len() + 7;
+            src[at..].split(';').next().unwrap().parse().unwrap()
+        };
+        assert_eq!(constant("PRAYED_WORDS_PER_SECOND"), presentation::PRAYED_WORDS_PER_SECOND);
+        assert_eq!(constant("PRAYED_SHARE"), presentation::PRAYED_SHARE);
+        assert_eq!(constant("PRAYED_LONGEST_STEP"), presentation::PRAYED_LONGEST_STEP);
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;
@@ -662,13 +683,13 @@ mod tests {
     fn adjacent_hours_keep_date() {
         let s = |v: (String, String, String, String)| v;
         assert_eq!(
-            s(adjacent_hours("sext", "2026-06-07")),
+            s(adjacent_hours("sext", "2026-06-07", "2026-06-08")),
             ("Terce".into(), "/terce/2026-06-07".into(), "None".into(), "/none/2026-06-07".into())
         );
-        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07");
+        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07", "2026-06-08");
         assert!(prev.is_empty() && prev_link.is_empty());
-        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
-        assert!(next.is_empty() && next_link.is_empty());
+        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07", "2026-06-08");
+        assert_eq!((next.as_str(), next_link.as_str()), ("Lauds", "/lauds/2026-06-08"));
     }
 
     #[test]

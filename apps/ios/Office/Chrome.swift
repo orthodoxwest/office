@@ -35,6 +35,7 @@ struct Quiet: ButtonStyle {
 }
 
 /// The disclosure caret, the web's `▾`/`▴` in the ink of the words it opens, a little lighter: drawn, not read; the control says expanded or collapsed.
+/// Drawn as the web's glyph measures beside a label (5.5 by 4.5 at 0.85em, centred on the capitals), since the system face sets `▾` as a speck on the baseline.
 struct Caret: View {
     let open: Bool
     /// The label's colour.
@@ -42,7 +43,31 @@ struct Caret: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(open ? " ▴" : " ▾").font(.system(size: 9 * m.type)).foregroundStyle(color.opacity(0.7)).accessibilityHidden(true)
+        CaretShape(open: open)
+            .fill(color.opacity(0.7))
+            .frame(width: 5.5 * m.type, height: 4.5 * m.type)
+            .padding(.leading, 5.5 * m.type)
+            .accessibilityHidden(true)
+    }
+}
+
+/// A solid triangle pointing down, or up when open.
+struct CaretShape: Shape {
+    let open: Bool
+
+    func path(in r: CGRect) -> Path {
+        var path = Path()
+        if open {
+            path.move(to: CGPoint(x: r.minX, y: r.maxY))
+            path.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+            path.addLine(to: CGPoint(x: r.midX, y: r.minY))
+        } else {
+            path.move(to: CGPoint(x: r.minX, y: r.minY))
+            path.addLine(to: CGPoint(x: r.maxX, y: r.minY))
+            path.addLine(to: CGPoint(x: r.midX, y: r.maxY))
+        }
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -259,6 +284,8 @@ struct MenuPanel: View {
                     }
                 }
             }
+            // The names are the church's, so a line says what they are, as on the web.
+            hint("Nave is the church by day, Apse its vault by night. Default follows your device.")
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
@@ -286,6 +313,7 @@ struct MenuPanel: View {
                     }
                 }
             }
+            hint("On reads the saints of the coming day at Prime.")
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
@@ -293,6 +321,15 @@ struct MenuPanel: View {
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         .overlay(alignment: .top) { Rectangle().fill(p.lining).frame(height: 2) }
         .shadow(color: .black.opacity(p.dark ? 0.4 : 0.12), radius: 12, y: 4)
+    }
+
+    /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
+    private func hint(_ s: String) -> some View {
+        Text(s).type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, m.px(10.4))
+            .padding(.top, m.px(7.2))
+            .padding(.bottom, m.px(9.6))
     }
 
     private func rowLabel(_ s: String) -> some View {

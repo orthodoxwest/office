@@ -76,6 +76,7 @@ import java.util.WeakHashMap
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.HourView
+import org.orthodoxwest.office.core.blockWords
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
@@ -95,7 +96,7 @@ fun HourScreen(
     insets: PaddingValues,
     onDate: (LocalDate) -> Unit,
     onForm: (String) -> Unit,
-    onHour: (String) -> Unit,
+    onHour: (LocalDate, String) -> Unit,
     onAllHours: () -> Unit,
 ) {
     val p = LocalPalette.current
@@ -129,6 +130,16 @@ fun HourScreen(
     }
     val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
     val index = hours.indexOf(view.hour)
+    // Each shown block's words, from and to, for home's mark of the hours prayed.
+    val wordsOf = remember(view) { view.sections.map { s -> s.blocks.map { blockWords(it).toDouble() } } }
+    val shown = view.sections.indices.filter { !view.sections[it].collapsible || open[it] == true }
+    val spans = remember(wordsOf, shown) {
+        var at = 0.0
+        buildMap<Any, Pair<Double, Double>> {
+            shown.forEach { i -> wordsOf[i].forEachIndexed { j, w -> put("$i-$j", at to at + w); at += w } }
+        }
+    }
+    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
@@ -197,11 +208,17 @@ fun HourScreen(
                 }
             }
             item(key = "epilogue") {
+                // Compline's next is the morrow's Lauds, as on the web.
+                val morrow = index >= 0 && index + 1 == hours.size
+                val next = if (morrow) hours.firstOrNull() else hours.getOrNull(index + 1)
+                val nextDate = if (morrow) date.plusDays(1) else date
                 Epilogue(
                     previous = hours.getOrNull(index - 1),
-                    next = hours.getOrNull(index + 1),
+                    next = next,
+                    nextLabel = if (morrow) "Tomorrow" else "Next hour",
                     reportUrl = view.reportUrl,
-                    onHour = onHour,
+                    onPrevious = { onHour(date, it) },
+                    onNext = { onHour(nextDate, it) },
                     onAllHours = onAllHours,
                 )
             }
@@ -376,7 +393,15 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
  * Apse vault by night, the Nave's powdering by day.
  */
 @Composable
-private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour: (String) -> Unit, onAllHours: () -> Unit) {
+private fun Epilogue(
+    previous: String?,
+    next: String?,
+    nextLabel: String,
+    reportUrl: String,
+    onPrevious: (String) -> Unit,
+    onNext: (String) -> Unit,
+    onAllHours: () -> Unit,
+) {
     val p = LocalPalette.current
     val context = LocalContext.current
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -386,12 +411,12 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
         Continuation(
             previousLabel = "Previous hour",
             previous = previous?.let(::hourLabel),
-            onPrevious = { previous?.let(onHour) },
+            onPrevious = { previous?.let(onPrevious) },
             middle = "All hours",
             onMiddle = onAllHours,
-            nextLabel = "Next hour",
+            nextLabel = nextLabel,
             next = next?.let(::hourLabel),
-            onNext = { next?.let(onHour) },
+            onNext = { next?.let(onNext) },
             modifier = Modifier.measure().padding(top = 83.2.dp),
         )
         Box(Modifier.fillMaxWidth()) {

@@ -302,8 +302,7 @@ fun ConsecrationCross(modifier: Modifier) {
 
 /** The same cross without its circle: between the office's parts, and before a first-class feast. */
 @Composable
-fun PaintedCross(modifier: Modifier) {
-    val ink = LocalPalette.current.lining
+fun PaintedCross(modifier: Modifier, ink: Color = LocalPalette.current.lining) {
     Canvas(modifier) { fitted(20f, 20f) { drawPath(CrossArms, ink) } }
 }
 

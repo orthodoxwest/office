@@ -14,8 +14,9 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_versicle, invitation,
-    long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias, title_case,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle,
+    invitation, long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias,
+    title_case,
 };
 
 pub use data::EmbeddedData;
@@ -102,6 +103,7 @@ impl OfficeCore {
         } else {
             None
         };
+        let current_hour_note = hour_gloss(invite.current).to_string();
         let (feast_name, feast_alias) = split_alias(&heading.feast);
         Ok(HomeView {
             date_label: long_date(shown),
@@ -119,6 +121,7 @@ impl OfficeCore {
             is_today: shown == now,
             pray_now_label: invite.label,
             pray_now_hour: invite.hour.to_string(),
+            current_hour_note,
             pray_now_date: CivilDate::from(invite.date),
             current_hour: invite.current.to_string(),
         })
@@ -208,6 +211,36 @@ impl OfficeCore {
 #[uniffi::export]
 pub fn hour_names() -> Vec<String> {
     HOUR_NAMES.iter().map(|h| h.to_string()).collect()
+}
+
+/// A reader's way through an hour's words, for home's mark of the hours prayed
+/// (`presentation::Reading`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]
+pub struct PrayedReading {
+    pub cursor: f64,
+    pub read: f64,
+}
+
+/// The reading after `seconds` more on the page, with the hour's words from `first` to
+/// `through` on screen.
+#[uniffi::export]
+pub fn prayed_reading_advance(reading: PrayedReading, first: f64, through: f64, seconds: f64) -> PrayedReading {
+    let next = presentation::Reading { cursor: reading.cursor, read: reading.read }.advance(first, through, seconds);
+    PrayedReading { cursor: next.cursor, read: next.read }
+}
+
+/// Whether the reader, now at the hour's end (`at_end`), has prayed its `total` words.
+#[uniffi::export]
+pub fn prayed_reading_done(reading: PrayedReading, total: f64, at_end: bool) -> bool {
+    presentation::Reading { cursor: reading.cursor, read: reading.read }.prayed(total, at_end)
+}
+
+/// The words of a block, as home's mark of the hours prayed counts them: those with a letter
+/// or a figure.
+#[uniffi::export]
+pub fn block_words(block: BlockView) -> u32 {
+    let text: String = block.runs.iter().map(|r| r.text.as_str()).collect();
+    text.split_whitespace().filter(|w| w.chars().any(char::is_alphanumeric)).count() as u32
 }
 
 /// How a dropped initial fits the text beside it (`render_blocks::InitialFit`): `gap`, `hang`
@@ -480,6 +513,9 @@ pub struct HomeView {
     pub pray_now_hour: String,
     /// The day the invitation opens: yesterday for Compline after midnight.
     pub pray_now_date: CivilDate,
+    /// What the current hour is, for a newcomer, set under its name: "Evening prayer"; empty
+    /// when no hour is current.
+    pub current_hour_note: String,
     /// The hour the directory marks as now, or empty.
     pub current_hour: String,
 }

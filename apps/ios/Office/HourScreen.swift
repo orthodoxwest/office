@@ -207,6 +207,8 @@ struct HourScreen: View {
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
                         next: index + 1 < model.hours.count ? model.hours[index + 1] : nil,
+                        // Compline's next is the morrow's Lauds, as on the web.
+                        morrow: index + 1 == model.hours.count ? model.hours.first : nil,
                         reportUrl: view.reportUrl,
                         date: date
                     )
@@ -224,6 +226,7 @@ struct HourScreen: View {
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
+            .task(id: "\(date.iso)/\(view.hour)") { await watchPrayed() }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
@@ -231,6 +234,40 @@ struct HourScreen: View {
             }
         }
         .environment(\.ornament, o)
+    }
+
+    /**
+     * Marks the hour prayed once its end is reached after its words were read on screen at a
+     * praying pace (the core's `PrayedReading`, as the web's): a quick scroll to the end, or a
+     * wait there, does not.
+     */
+    @MainActor private func watchPrayed() async {
+        var sofar = PrayedReading(cursor: 0, read: 0)
+        var last = Date()
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(1))
+            let now = Date()
+            let seconds = now.timeIntervalSince(last)
+            last = now
+            guard UIApplication.shared.applicationState == .active else { continue }
+            var spans: [(from: Double, to: Double)] = []
+            var total = 0.0
+            for row in rows {
+                var words = 0.0
+                if case let .block(_, block, _, _) = row { words = Double(blockWords(block: block)) }
+                spans.append((total, total + words))
+                total += words
+            }
+            let seen = reading.onScreen()
+            let shown = seen.rows.filter { $0 < spans.count }.map { spans[$0] }
+            let first = shown.map(\.from).min() ?? (seen.ending ? total : 0)
+            let through = shown.map(\.to).max() ?? first
+            sofar = prayedReadingAdvance(reading: sofar, first: first, through: through, seconds: seconds)
+            if prayedReadingDone(reading: sofar, total: total, atEnd: seen.ending) {
+                model.markPrayed(date, view.hour)
+                return
+            }
+        }
     }
 
     private func anchor(_ rows: [Row]) -> String? {
@@ -316,6 +353,12 @@ final class Reading {
             frames[row] = nil
         }
         update()
+    }
+
+    /// The rows on screen now, and whether the office's ending is.
+    func onScreen() -> (rows: [Int], ending: Bool) {
+        let shown = frames.filter { $0.value.maxY > 0 && $0.value.minY < viewport.height }.map(\.key)
+        return (shown.filter { $0 < rows }, shown.contains(rows))
     }
 
     private func update() {
@@ -521,6 +564,7 @@ private struct HourTitle: View {
 private struct Epilogue: View {
     let previous: String?
     let next: String?
+    let morrow: String?
     let reportUrl: String
     let date: CivilDate
     @EnvironmentObject private var model: AppModel
@@ -539,9 +583,11 @@ private struct Epilogue: View {
                 onPrevious: { if let previous { model.open(.hour(date, previous)) } },
                 middle: "All hours",
                 onMiddle: { model.open(.home(date)) },
-                nextLabel: "Next hour",
-                next: next.map(hourLabel),
-                onNext: { if let next { model.open(.hour(date, next)) } }
+                nextLabel: morrow == nil ? "Next hour" : "Tomorrow",
+                next: (next ?? morrow).map(hourLabel),
+                onNext: {
+                    if let next { model.open(.hour(date, next)) } else if let morrow { model.open(.hour(date.adding(days: 1), morrow)) }
+                }
             )
             .measured(m)
             .padding(.top, m.px(83.2))
