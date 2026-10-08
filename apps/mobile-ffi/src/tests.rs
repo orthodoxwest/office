@@ -219,3 +219,25 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
     assert_eq!(usage_advertised_endpoint(usage_endpoint()), Some(usage_endpoint()));
     assert_eq!(usage_advertised_endpoint("http://example.org/api/usage".into()), None);
 }
+
+#[test]
+fn a_quick_scroll_does_not_pray_an_hour() {
+    let core = OfficeCore::new().unwrap();
+    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), false).unwrap();
+    let words: Vec<f64> = hour.sections.iter().flat_map(|s| &s.blocks).map(|b| f64::from(block_words(b.clone()))).collect();
+    let total: f64 = words.iter().sum();
+    assert!(total > 300.0, "{total}");
+    let quick = (0..3)
+        .fold(PrayedReading::default(), |r, i| prayed_reading_advance(r, total * f64::from(i) / 3.0, total * f64::from(i + 1) / 3.0, 1.0));
+    assert!(!prayed_reading_done(quick, total, true));
+    let mut slow = PrayedReading::default();
+    let mut at = 0.0;
+    // A block at a time, each on screen until it has been read.
+    for w in &words {
+        while slow.cursor < at + w {
+            slow = prayed_reading_advance(slow, at, at + w, 5.0);
+        }
+        at += w;
+    }
+    assert!(prayed_reading_done(slow, total, true) && !prayed_reading_done(slow, total, false));
+}

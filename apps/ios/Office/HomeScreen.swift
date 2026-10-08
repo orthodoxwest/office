@@ -437,7 +437,7 @@ private struct Frontispiece: View {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
-                HourDirectory(current: view.currentHour, tier: tier) { h in model.open(.hour(date, h)) }
+                HourDirectory(current: view.currentHour, prayed: model.hoursPrayed(on: date), tier: tier) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
                 // Season and date control share one line after the invitation.
                 Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
@@ -597,6 +597,8 @@ private struct PrayNow: View {
  */
 private struct HourDirectory: View {
     let current: String
+    /// The hours prayed on this day.
+    let prayed: Set<String>
     let tier: HomeTier
     let open: (String) -> Void
     @Environment(\.palette) private var p
@@ -632,19 +634,28 @@ private struct HourDirectory: View {
                     HStack(spacing: 0) {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
                             if j > 0 { VRule(color: ink.rule, height: 16) }
+                            let done = prayed.contains(h)
                             Button { open(h) } label: {
                                 // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                 Text(hourLabel(h))
                                     .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                    .foregroundStyle(h == current ? p.accent : p.text)
+                                    .foregroundStyle(done ? p.muted : h == current ? p.accent : p.text)
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.7)
                                     .goldUnderline(h == current, p.goldLine)
                                     .padding(.horizontal, m.px(2))
+                                    // An hour prayed today withdraws to the muted ink, a small gilt cross
+                                    // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
+                                    .overlay(alignment: .topTrailing) {
+                                        if done {
+                                            PaintedMark(.cross, size: m.px(7), color: p.gold)
+                                                .offset(x: m.px(9), y: m.px(2))
+                                        }
+                                    }
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
                             .buttonStyle(Quiet())
-                            .accessibilityLabel(h == current ? "\(hourLabel(h)), now" : hourLabel(h))
+                            .accessibilityLabel([hourLabel(h), h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
                         }
                     }
                     .frame(minHeight: m.px(tier.row))

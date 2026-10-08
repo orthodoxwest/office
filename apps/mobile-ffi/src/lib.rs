@@ -213,6 +213,36 @@ pub fn hour_names() -> Vec<String> {
     HOUR_NAMES.iter().map(|h| h.to_string()).collect()
 }
 
+/// A reader's way through an hour's words, for home's mark of the hours prayed
+/// (`presentation::Reading`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]
+pub struct PrayedReading {
+    pub cursor: f64,
+    pub read: f64,
+}
+
+/// The reading after `seconds` more on the page, with the hour's words from `first` to
+/// `through` on screen.
+#[uniffi::export]
+pub fn prayed_reading_advance(reading: PrayedReading, first: f64, through: f64, seconds: f64) -> PrayedReading {
+    let next = presentation::Reading { cursor: reading.cursor, read: reading.read }.advance(first, through, seconds);
+    PrayedReading { cursor: next.cursor, read: next.read }
+}
+
+/// Whether the reader, now at the hour's end (`at_end`), has prayed its `total` words.
+#[uniffi::export]
+pub fn prayed_reading_done(reading: PrayedReading, total: f64, at_end: bool) -> bool {
+    presentation::Reading { cursor: reading.cursor, read: reading.read }.prayed(total, at_end)
+}
+
+/// The words of a block, as home's mark of the hours prayed counts them: those with a letter
+/// or a figure.
+#[uniffi::export]
+pub fn block_words(block: BlockView) -> u32 {
+    let text: String = block.runs.iter().map(|r| r.text.as_str()).collect();
+    text.split_whitespace().filter(|w| w.chars().any(char::is_alphanumeric)).count() as u32
+}
+
 /// How a dropped initial fits the text beside it (`render_blocks::InitialFit`): `gap`, `hang`
 /// and `depth` in the declared initial's em (`initial_profile_em`), the tucks in the text's.
 #[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]

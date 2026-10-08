@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -46,6 +47,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -321,6 +323,9 @@ private fun Frontispiece(
     val ink = frontispieceInk(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
+    // The hours prayed on this day, marked again when one is prayed.
+    val context = LocalContext.current
+    val prayed = remember(date, Prayed.version) { Prayed.hours(context, date) }
     val day = dayColor(view.color, p)
     // The lining's inner line is the day's colour, beside the cross on the plaster; a white day's
     // would be tan there, and takes the gold line by day.
@@ -419,7 +424,7 @@ private fun Frontispiece(
                     Spacer(Modifier.height(tier.bandGap))
                     PrayNow(view.prayNowLabel, if (tier.prayNote) view.prayNowNote else "", tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
-                    HourDirectory(view.currentHour, tier) { onHour(date, it) }
+                    HourDirectory(view.currentHour, prayed, tier) { onHour(date, it) }
                     // Season and date control share one line after the invitation.
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
                     if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
@@ -558,7 +563,7 @@ private fun PrayNow(label: String, note: String, tier: HomeTier, onClick: () -> 
  * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
  */
 @Composable
-private fun HourDirectory(current: String, tier: HomeTier, onHour: (String) -> Unit) {
+private fun HourDirectory(current: String, prayed: Set<String>, tier: HomeTier, onHour: (String) -> Unit) {
     val desk = tier.desk
     val p = LocalPalette.current
     val o = LocalOrnament.current
@@ -593,16 +598,28 @@ private fun HourDirectory(current: String, tier: HomeTier, onHour: (String) -> U
                 Row(Modifier.weight(1f).heightIn(min = tier.row), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
                         if (j > 0) Divider(ink.rule, 16.dp)
-                        Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (h == current) "${hourLabel(h)}, now" else null) { onHour(h) }, contentAlignment = Alignment.Center) {
-                            val name = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text)
-                            // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
-                            BasicText(
-                                hourLabel(h),
-                                Modifier.padding(horizontal = 2.dp).goldUnderline(h == current, p.goldLine),
-                                style = name,
-                                maxLines = 1,
-                                autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = name.fontSize),
-                            )
+                        val done = h in prayed
+                        val said = listOfNotNull(hourLabel(h), "now".takeIf { h == current }, "prayed".takeIf { done })
+                        Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) }, contentAlignment = Alignment.Center) {
+                            // An hour prayed today withdraws to the muted ink, a small gilt cross at its
+                            // shoulder, as the web's `.is-prayed`; the cross takes no width.
+                            val ink = when {
+                                done -> p.muted
+                                h == current -> p.accent
+                                else -> p.text
+                            }
+                            val name = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = ink)
+                            Box {
+                                // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
+                                BasicText(
+                                    hourLabel(h),
+                                    Modifier.padding(horizontal = 2.dp).goldUnderline(h == current, p.goldLine),
+                                    style = name,
+                                    maxLines = 1,
+                                    autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = name.fontSize),
+                                )
+                                if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = 9.dp, y = 2.dp).size(7.dp), ink = p.gold)
+                            }
                         }
                     }
                 }

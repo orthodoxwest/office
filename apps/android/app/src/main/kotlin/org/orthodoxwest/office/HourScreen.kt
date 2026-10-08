@@ -76,6 +76,7 @@ import java.util.WeakHashMap
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.HourView
+import org.orthodoxwest.office.core.blockWords
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
@@ -129,6 +130,16 @@ fun HourScreen(
     }
     val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
     val index = hours.indexOf(view.hour)
+    // Each shown block's words, from and to, for home's mark of the hours prayed.
+    val wordsOf = remember(view) { view.sections.map { s -> s.blocks.map { blockWords(it).toDouble() } } }
+    val shown = view.sections.indices.filter { !view.sections[it].collapsible || open[it] == true }
+    val spans = remember(wordsOf, shown) {
+        var at = 0.0
+        buildMap<Any, Pair<Double, Double>> {
+            shown.forEach { i -> wordsOf[i].forEachIndexed { j, w -> put("$i-$j", at to at + w); at += w } }
+        }
+    }
+    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
