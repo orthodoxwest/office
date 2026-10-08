@@ -6781,7 +6781,13 @@ body.season-eastertide {
      the marks where they read as weather rather than plaster (the Apse
      restates it); the desktop niche paints its own head and is untouched.
      Named layers blend onto the ground one by one: the veil normally, the
-     plaster as soft light, over the flat ground. */
+     plaster as soft light, over the flat ground.
+     The plaster keeps one scale whatever the card's height, so opening
+     Change date uncovers more wall rather than stretching it: the field is
+     as tall as the card a screen leaves before anything opens (or as wide
+     as the card, if that is more) and runs down from the top. Its tile is
+     the field above its reflection (tools/genplaster.py), so the run
+     repeats without a seam. */
   .page-home .home-hero {
     --panel-plaster-veil: 0%;
   }
@@ -6792,7 +6798,7 @@ body.season-eastertide {
         color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent),
         color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent)
       ),
-      var(--plaster-image) center / cover no-repeat,
+      url("plaster-panel.jpg") center top / max(100%, calc((100svh - 10.9rem) * 800 / 1063)) auto repeat-y,
       var(--arch-ground);
     background-blend-mode: normal, soft-light, normal;
   }

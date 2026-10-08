@@ -11,6 +11,12 @@ generated field, not the photograph, so it keeps that field's clouds exactly:
 .../plaster-wide-soft.jpg, and likewise plaster.jpg -> plaster-soft.jpg. The
 smooth gradients need the higher quality; the files stay under 3 KB.
 
+Home's phone panel shows the wall through it at a fixed scale, so opening Change
+date reveals more plaster instead of stretching it. It repeats down the panel,
+so it is stored mirrored, the field above its reflection, which tiles without
+a seam: --mirror-of apps/office-web/static/plaster.jpg --out
+.../plaster-panel.jpg.
+
 The Apse vault's gold leaf varies star by star through a small tileable alpha
 mask: --leaf --out apps/office-web/static/leaf.png. Seeded, so it regenerates
 byte for byte.
@@ -82,6 +88,16 @@ def soft_field(field, radius, scale):
     return grey.resize((max(1, round(w / scale)), max(1, round(h / scale))), Image.BOX)
 
 
+def mirrored_field(field):
+    """The field above its own reflection: repeated down a page, every join
+    meets its mirror image, so the tile has no seam."""
+    w, h = field.size
+    tile = Image.new(field.mode, (w, 2 * h))
+    tile.paste(field, (0, 0))
+    tile.paste(field.transpose(Image.FLIP_TOP_BOTTOM), (0, h))
+    return tile
+
+
 def leaf_field(size=64, feature=5.5, seed=11, levels=64):
     """Smooth periodic noise as an alpha mask: each star of the vault catches
     its own share of light (mean 85%, clipped to 55-100%). Band-limited in the
@@ -110,12 +126,19 @@ def main():
         parser.add_argument("--" + name, type=kind, default=default)
     parser.add_argument("--leaf", action="store_true", help="write the vault's gold-leaf variation mask")
     parser.add_argument("--soft-of", type=Path, help="derive the softened field from this generated field")
+    parser.add_argument("--mirror-of", type=Path, help="stack this generated field above its reflection")
     parser.add_argument("--soft-radius", type=int, default=20, help="blur radius in field pixels")
     parser.add_argument("--soft-scale", type=int, default=8, help="downscale factor for the stored copy")
     args = parser.parse_args()
     if args.leaf:
         leaf_field().save(args.out, optimize=True)
         print("wrote", args.out)
+        return
+    if args.mirror_of:
+        with Image.open(args.mirror_of) as field:
+            result = mirrored_field(field)
+        result.save(args.out, quality=args.quality)
+        print("wrote", args.out, result.size)
         return
     if args.soft_of:
         if args.soft_radius < 1 or args.soft_scale < 1:

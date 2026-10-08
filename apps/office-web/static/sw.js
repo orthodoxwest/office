@@ -63,10 +63,12 @@ var CORE_ASSETS = [
   assetURL("/static/fonts/eb-garamond-bold.woff2"),
   assetURL("/static/fonts/noto-sans-symbols-cross.woff2"),
   // The limewash wall (portrait for phones, wide crop for large screens), the
-  // softened copies behind wide hours' prayer and the Apse vault's leaf mask;
+  // phone panel's mirrored tile of it, the softened copies behind wide hours'
+  // prayer and the Apse vault's leaf mask;
   // precache them all so an installed app looks the same offline whatever it
   // is opened on.
   assetURL("/static/plaster.jpg"),
+  assetURL("/static/plaster-panel.jpg"),
   assetURL("/static/plaster-wide.jpg"),
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
