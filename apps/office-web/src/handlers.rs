@@ -586,6 +586,19 @@ mod tests {
         }
     }
 
+    // app.js reads an hour at presentation::Reading's pace before home marks it prayed.
+    #[test]
+    fn client_prayed_pace_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let constant = |name: &str| -> f64 {
+            let at = src.find(&format!("var {name} = ")).unwrap() + name.len() + 7;
+            src[at..].split(';').next().unwrap().parse().unwrap()
+        };
+        assert_eq!(constant("PRAYED_WORDS_PER_SECOND"), presentation::PRAYED_WORDS_PER_SECOND);
+        assert_eq!(constant("PRAYED_SHARE"), presentation::PRAYED_SHARE);
+        assert_eq!(constant("PRAYED_LONGEST_STEP"), presentation::PRAYED_LONGEST_STEP);
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;

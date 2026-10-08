@@ -2098,3 +2098,142 @@ function usageBeaconBody(scope) {
   window.setInterval(record, 60000);
   resume();
 })();
+
+// Home marks the hours prayed: an hour counts once its end is reached after
+// its words were read on screen at a praying pace, so scrolling through in a
+// few seconds, or waiting at the end, does not mark it. presentation::Reading
+// is the rule; these three mirror its constants (office-web tests they agree).
+// The marks stay on this device a week, in localStorage only.
+(function () {
+  var PRAYED_WORDS_PER_SECOND = 8;
+  var PRAYED_SHARE = 0.7;
+  var PRAYED_LONGEST_STEP = 5;
+  var PRAYED_KEY = "office-prayed";
+  var KEEP_DAYS = 7;
+  var hours = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+  var day = document.body.getAttribute("data-usage-when") || "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+
+  function load() {
+    try {
+      var stored = JSON.parse(localStorage.getItem(PRAYED_KEY) || "{}");
+      return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function slugDaysAgo(days) {
+    var d = new Date();
+    d.setDate(d.getDate() - days);
+    var m = String(d.getMonth() + 1);
+    var dd = String(d.getDate());
+    return d.getFullYear() + "-" + (m.length < 2 ? "0" + m : m) + "-" + (dd.length < 2 ? "0" + dd : dd);
+  }
+
+  function markPrayed(hour) {
+    var prayed = load();
+    var oldest = slugDaysAgo(KEEP_DAYS);
+    Object.keys(prayed).forEach(function (d) {
+      if (d < oldest || !Array.isArray(prayed[d])) delete prayed[d];
+    });
+    var list = prayed[day] || [];
+    if (list.indexOf(hour) < 0) list.push(hour);
+    prayed[day] = list;
+    try {
+      localStorage.setItem(PRAYED_KEY, JSON.stringify(prayed));
+    } catch {
+      /* Storage refused: the hour simply goes unmarked. */
+    }
+  }
+
+  // Home: each hour prayed on the shown day carries a small gilt cross, and
+  // says "Prayed" to a screen reader.
+  if (document.body.classList.contains("page-home")) {
+    var paint = function () {
+      var list = load()[day];
+      document.querySelectorAll(".home-hour-link[data-hour]").forEach(function (link) {
+        var isPrayed = Array.isArray(list) && list.indexOf(link.getAttribute("data-hour")) >= 0;
+        var mark = link.querySelector(".home-hour-prayed");
+        link.classList.toggle("is-prayed", isPrayed);
+        if (isPrayed && !mark) {
+          mark = document.createElement("span");
+          mark.className = "home-hour-prayed";
+          mark.innerHTML = '<span aria-hidden="true">✠</span><span class="sr-only">Prayed</span>';
+          var name = link.querySelector(".home-hour-link-name");
+          link.insertBefore(mark, name ? name.nextSibling : null);
+        } else if (!isPrayed && mark) {
+          mark.remove();
+        }
+      });
+    };
+    paint();
+    window.addEventListener("pageshow", paint);
+    window.addEventListener("storage", function (e) {
+      if (e.key === PRAYED_KEY || e.key === null) paint();
+    });
+    return;
+  }
+
+  var hour = hours.find(function (name) { return document.body.classList.contains("page-" + name); });
+  var content = document.querySelector(".office-hour .elements");
+  var end = document.querySelector(".hour-end-mark");
+  if (!hour || !content || !end) return;
+
+  var cursor = 0;
+  var read = 0;
+  var done = false;
+  var last = Date.now();
+
+  // The words of the shown text, in order: each text node's count and box.
+  // A form or reading hidden by the reader's settings has no box and no words.
+  function wordsOnScreen() {
+    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    var range = document.createRange();
+    var total = 0;
+    var first = -1;
+    var through = 0;
+    var bottom = window.innerHeight;
+    for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+      var words = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
+      if (!words) continue;
+      range.selectNodeContents(node);
+      var rects = range.getClientRects();
+      if (!rects.length) continue;
+      var top = rects[0].top;
+      var low = rects[rects.length - 1].bottom;
+      if (low > 0 && top < bottom) {
+        if (first < 0) first = total;
+        through = total + words;
+      }
+      total += words;
+    }
+    // Nothing on screen: above the text, none of it is passed; below, all of it.
+    if (first < 0) first = through = content.getBoundingClientRect().bottom <= 0 ? total : 0;
+    return { total: total, first: first, through: through };
+  }
+
+  function tick() {
+    var now = Date.now();
+    var seconds = (now - last) / 1000;
+    last = now;
+    if (done || document.visibilityState !== "visible") return;
+    var seen = wordsOnScreen();
+    // presentation::Reading::advance
+    cursor = Math.max(cursor, seen.first);
+    var pace = Math.min(Math.max(seconds, 0), PRAYED_LONGEST_STEP) * PRAYED_WORDS_PER_SECOND;
+    var step = Math.max(0, Math.min(pace, seen.through - cursor));
+    cursor += step;
+    read += step;
+    var atEnd = end.getBoundingClientRect().top < window.innerHeight;
+    if (atEnd && seen.total > 0 && read >= seen.total * PRAYED_SHARE) {
+      done = true;
+      markPrayed(hour);
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    last = Date.now();
+  });
+  window.setInterval(tick, 1000);
+})();

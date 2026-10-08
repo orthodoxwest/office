@@ -5737,6 +5737,25 @@ body.season-eastertide {
   margin-left: 0;
 }
 
+/* An hour prayed today (app.js): its name withdraws to the muted ink and a
+   small gilt cross stands at its shoulder. The cross takes no width, so the
+   name stays centred in its cell. */
+.page-home .home-hour-link.is-prayed .home-hour-link-name {
+  color: var(--muted);
+}
+
+.page-home .home-hour-prayed {
+  flex: 0 0 0;
+  width: 0;
+  margin-inline-start: -0.25rem;
+  overflow: visible;
+  color: var(--gold);
+  font-size: 0.62em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(0.5em, -0.45em);
+}
+
 .page-home .home-day-meta {
   justify-content: center;
   margin-top: 0.55rem;

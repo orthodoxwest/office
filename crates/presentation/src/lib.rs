@@ -203,6 +203,42 @@ pub fn hour_gloss(slug: &str) -> &'static str {
     }
 }
 
+/// How fast home's mark of an hour prayed lets a reader go: words a second, a quick silent
+/// reading (480 a minute), so a reader praying at any pace earns it and one scrolling through
+/// in seconds does not. app.js mirrors these three; office-web tests the two agree.
+pub const PRAYED_WORDS_PER_SECOND: f64 = 8.0;
+/// The share of an hour's words that must be read on screen: a reader may skip a psalm said
+/// by heart and still have prayed the hour.
+pub const PRAYED_SHARE: f64 = 0.7;
+/// The most one step of a reading counts, in seconds: a device that slept does not read.
+pub const PRAYED_LONGEST_STEP: f64 = 5.0;
+
+/// A reader's way through an hour's words, for home's mark of the hours prayed. Words are
+/// read in order, at no more than [`PRAYED_WORDS_PER_SECOND`], and only while on screen:
+/// words scrolled past unread stay unread, and time spent at the end does not read the
+/// beginning.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Reading {
+    /// How far through the hour's words reading has come.
+    pub cursor: f64,
+    /// How many words have been read.
+    pub read: f64,
+}
+
+impl Reading {
+    /// `seconds` more on the page, with the hour's words from `first` to `end` on screen.
+    pub fn advance(self, first: f64, end: f64, seconds: f64) -> Reading {
+        let cursor = self.cursor.max(first);
+        let step = (seconds.clamp(0.0, PRAYED_LONGEST_STEP) * PRAYED_WORDS_PER_SECOND).min(end - cursor).max(0.0);
+        Reading { cursor: cursor + step, read: self.read + step }
+    }
+
+    /// Whether the reader, now at the hour's end, has prayed its `total` words.
+    pub fn prayed(self, total: f64, at_end: bool) -> bool {
+        at_end && total > 0.0 && self.read >= total * PRAYED_SHARE
+    }
+}
+
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
@@ -441,6 +477,32 @@ mod tests {
         assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
         assert_eq!(current_hour_entry(16), ("none", "None", 0));
         assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
+    }
+
+    #[test]
+    fn an_hour_is_prayed_only_when_read_at_a_praying_pace() {
+        let total = 1200.0;
+        // Scrolled to the end in three seconds, the first screen and the last read.
+        let quick = Reading::default().advance(0.0, 80.0, 1.0).advance(500.0, 600.0, 1.0).advance(1130.0, 1200.0, 1.0);
+        assert!(!quick.prayed(total, true));
+        // Left at the end: only the end's own words are read, however long.
+        let parked = (0..60).fold(Reading::default().advance(1130.0, 1200.0, 1.0), |r, _| r.advance(1130.0, 1200.0, 5.0));
+        assert_eq!(parked.read, 70.0);
+        assert!(!parked.prayed(total, true));
+        // A screen at a time, with a minute on each: prayed, but only once at the end.
+        let mut slow = Reading::default();
+        for screen in 0..12 {
+            let first = f64::from(screen) * 100.0;
+            for _ in 0..12 {
+                slow = slow.advance(first, first + 100.0, 5.0);
+            }
+        }
+        assert_eq!(slow.read, total);
+        assert!(slow.prayed(total, true) && !slow.prayed(total, false));
+        // A whole hour on one screen still takes reading time; a sleeping device counts five seconds.
+        let tall = Reading::default().advance(0.0, total, 3600.0);
+        assert_eq!(tall.read, PRAYED_LONGEST_STEP * PRAYED_WORDS_PER_SECOND);
+        assert!(!Reading::default().prayed(0.0, true));
     }
 
     #[test]

@@ -487,6 +487,43 @@ test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
   await expect(next.locator(".continuation-label")).toHaveText("Tomorrow");
 });
 
+// The end of the hour's text reaches the screen.
+async function atHourEnd(page) {
+  return page.evaluate(() => document.querySelector(".hour-end-mark").getBoundingClientRect().top < innerHeight);
+}
+
+test("scrolling through an hour in seconds does not mark it prayed", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
+    await page.mouse.wheel(0, 3000);
+    await page.clock.runFor(1000);
+  }
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  // Waiting at the end reads only the end.
+  await page.clock.runFor(120_000);
+  await page.goto("/?date=2026-10-07");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
+});
+
+test("an hour read through at a praying pace is marked prayed on home", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
+    await page.clock.runFor(20_000);
+    await page.mouse.wheel(0, 400);
+  }
+  await page.clock.runFor(2000);
+  await page.goto("/?date=2026-10-07");
+  const compline = page.locator('.home-hour-link[data-hour="compline"]');
+  await expect(compline).toHaveClass(/is-prayed/);
+  await expect(compline.locator(".home-hour-prayed .sr-only")).toHaveText("Prayed");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(1);
+  // Another day's home is not marked.
+  await page.goto("/?date=2026-10-06");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
+});
+
 test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
   page,
 }) => {
