@@ -29,15 +29,18 @@ O most blessed of men! * who, rejecting this world, bore the yoke of Holy Rule f
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
+[psalm-antiphon-1]
+# SOURCE: diurnal pp. 456-457
+The blessed Maurus, * born of a renowned and noble house, from his boyhood esteemed the reproach of Christ greater riches than the treasures of the world.
+
+[psalm-antiphon-2]
+# SOURCE: diurnal p. 457
+Upheld by wings of obedience, * he walked upon the waters; and borne by the Spirit of God, he was saved from sinking in the flood.
+
+[psalm-antiphon-3]
+# SOURCE: diurnal p. 457
+The blessed Maurus, * a disciple of holy Benedict from tender years, stood forth as a zealous follower of his master's excellence.
+
 [psalm-antiphon-4]
 # SOURCE: diurnal p. 457
 From the house of prayer * he passed over unto the place of the wondrous tabernacle, even unto the house of God, with exceeding love of whom he burned.
@@ -99,8 +102,11 @@ He was chosen * by the Lord to be an example to the cloistered, and a chief obse
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+[psalm-antiphon-4-vespers]
+# Diurnal p. 455: I Vespers takes the "Ants. of Lauds, omitting 4th"; II Vespers is
+# "All as at I Vespers" except the versicle and Magnificat antiphon (p. 458).
+@use proper/st-maurus/psalm-antiphon-5
+
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

@@ -17,9 +17,10 @@ Almighty and everlasting God, who as on this day didst release thy most venerabl
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
+[psalm-antiphon-1]
+# SOURCE: diurnal p. 495
+There was a man of venerable life, * Benedict by grace and by name, who, from his younger years, carried always the mind of an old man; overpassing age by virtue, he denied himself all vain delights.
+
 [psalm-antiphon-2]
 # SOURCE: diurnal p. 495
 The blessed man Benedict * desired rather the miseries of the world than perpetual praises; to be wearied with labour for God's sake, than to be exalted with transitory favour.
@@ -151,8 +152,11 @@ Amen.
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+[psalm-antiphon-4-vespers]
+# Diurnal p. 493: I Vespers takes the "Ants. of Lauds, omitting the fourth"; II Vespers
+# "All as at I Vespers, p. 493" (p. 497); 2026 ordo 21 Mar: Ant.(495).
+@use proper/st-benedict/psalm-antiphon-5
+
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

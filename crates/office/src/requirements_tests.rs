@@ -580,6 +580,56 @@ fn all_saints_fast_follows_the_vigil() {
 }
 
 #[test]
+fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
+    // #633. Diurnal pp. 455–458 (St Maurus) and 493–497 (St Benedict): proper
+    // Lauds antiphons 1–5; I Vespers takes the "Ants. of Lauds, omitting the
+    // fourth", and II Vespers is "All as at I Vespers" save the versicle and
+    // Magnificat antiphon. 2026 ordo 14–15 Jan "Ant.(456f)", 21 Mar "Ant.(495)".
+    // Years in which neither feast nor its eve falls on a Sunday.
+    for y in [2026, 2030, 2031] {
+        let (days, moveable) = year(y);
+        let antiphons = |name: &str, date: Date| -> Vec<String> {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect();
+            (1..=5).filter_map(|n| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).map(|e| e.text.clone())).collect()
+        };
+        for (feast, eve, day, lauds) in [
+            (
+                "Maurus",
+                Date::new(y, 1, 14),
+                Date::new(y, 1, 15),
+                ["The blessed Maurus, * born", "Upheld by wings", "The blessed Maurus, * a disciple", "From the house", "He was chosen"],
+            ),
+            (
+                "Benedict",
+                Date::new(y, 3, 20),
+                Date::new(y, 3, 21),
+                [
+                    "There was a man of venerable life",
+                    "The blessed man Benedict",
+                    "The glorious",
+                    "Benedict * the man of the Lord",
+                    "Benedict, the man of God",
+                ],
+            ),
+        ] {
+            let got = antiphons("lauds", day);
+            assert_eq!(got.len(), 5, "{feast} {day} lauds");
+            for (text, want) in got.iter().zip(lauds) {
+                assert!(text.starts_with(want), "{feast} {day} lauds: {text}");
+            }
+            for date in [eve, day] {
+                let got = antiphons("vespers", date);
+                assert_eq!(got.len(), 4, "{feast} {date} vespers");
+                for (text, want) in got.iter().zip([lauds[0], lauds[1], lauds[2], lauds[4]]) {
+                    assert!(text.starts_with(want), "{feast} {date} vespers: {text}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
     // #608. Diurnal pp. 363–367: Easter Day Vespers takes the "Ants. of
     // Lauds, omitting the fourth. Psalms of Sunday", the Lauds chapter and
