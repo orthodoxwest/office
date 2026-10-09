@@ -1,3 +1,8 @@
+[vespers-psalmody]
+# Diurnal p. 229: at I Vespers "All is said as on the Feast", whose psalms
+# are of Sunday (p. 223); 2026 ordo, 10 January: "Ps. (111)" (#626).
+@use proper/epiphany/vespers-psalmody
+
 [psalm-antiphon]
 @use proper/epiphany/psalm-antiphon-1
 
@@ -25,7 +30,9 @@
 [psalm-antiphon-3-first-vespers]
 @use proper/epiphany/psalm-antiphon-3
 
-[psalm-antiphon-4-first-vespers]
+[psalm-antiphon-4-vespers]
+# Both Vespers are as on the Feast (Diurnal pp. 229, 231), omitting Lauds'
+# fourth antiphon (#625).
 @use proper/epiphany/psalm-antiphon-5
 
 [chapter-lauds]

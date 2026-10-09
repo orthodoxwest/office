@@ -687,9 +687,20 @@ fn boundary_commemorations(
             decisions.push(decision("commemoration:first-vespers-second-class-memorial-exclusion", "suppressed", &c.id));
             continue;
         }
-        if !second_vespers && loser_included && loser.is_some_and(|l| same_octave_days(l, c)) {
-            decisions.push(decision("commemoration:first-vespers-duplicate-octave-day", "suppressed", &c.id));
-            continue;
+        if !second_vespers
+            && loser_included
+            && let Some(l) = loser.filter(|l| same_octave_days(l, c))
+        {
+            // The following octave day supersedes today's day within the
+            // octave (XIII.16; 2025 ordo 5 July, "Comm. Oct. ('Peter the
+            // Apostle' 558; Col. 560)"; #622).
+            if !(is_octave_day(c) && is_day_within_octave(l)) {
+                decisions.push(decision("commemoration:first-vespers-duplicate-octave-day", "suppressed", &c.id));
+                continue;
+            }
+            comms.retain(|x| x.id != l.id);
+            loser_included = false;
+            decisions.push(decision("commemoration:octave-day-supersedes-day-within", "suppressed", &l.id));
         }
         let (included, rule) = occurrence_commemorated_at_first_vespers(c);
         if !included {

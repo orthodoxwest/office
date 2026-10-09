@@ -2,6 +2,23 @@
 # SOURCE: diurnal p. 208
 Grant, we beseech thee, Almighty God: that the reverend solemnity of blessed Sylvester, thy Confessor and Bishop, may both increase our devotion and set forward our salvation.
 
+[vespers-psalmody-first]
+# Diurnal p. 208, I Vespers: "Ants. and Psalms of the Nativity, p. 188, Ant.
+# 4 Of the fruit" (2026 ordo, 30 December), not the weekday's (#632).
+@use proper/christmas/vespers-psalmody
+
+[psalm-antiphon-1-vespers]
+@use proper/christmas/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+@use proper/christmas/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+@use proper/christmas/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-alternate-vespers]
+@use proper/christmas/psalm-antiphon-4-alternate-vespers
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

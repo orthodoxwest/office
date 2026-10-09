@@ -2255,6 +2255,7 @@ proper/seven-sorrows-bvm/benedictus-antiphon,f4e276363451,diurnal,"Seven Sorrows
 proper/seven-sorrows-bvm/chapter-lauds,1b24d5a324ee,diurnal,"Seven Sorrows of the B.V.M., At Lauds",603,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/chapter-none,6d34f8dbf745,diurnal,,605,verified,codex,2026-09-03,Word-for-word after normalization
 proper/seven-sorrows-bvm/collect,029569ba9282,diurnal,"Seven Sorrows of the B.V.M., At Lauds",604,verified,codex,2026-09-08,Word-for-word after normalization
+proper/seven-sorrows-bvm/hymn-doxology,7c032b61b182,Monastic Diurnal.pdf,"Seven Sorrows of the B.V.M., I Vespers, At the Hours the Hymns end; PDF page 646",602,verified,claude,2026-10-09,Direct page-image review; wording confirmed.
 proper/seven-sorrows-bvm/hymn-lauds,21ae601c7411,diurnal,"Seven Sorrows of the B.V.M., At Lauds",603,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/hymn-vespers,7ad4ac316d18,diurnal,"Seven Sorrows of the B.V.M., At I Vespers",601,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/magnificat-antiphon,1a7906136904,diurnal,"Seven Sorrows of the B.V.M., At II Vespers",605,verified,codex,2026-09-08,Word-for-word after normalization
@@ -2398,15 +2399,18 @@ proper/st-bede-venerable/collect,c3ee8aef7130,diurnal,,528,verified,codex,2026-0
 proper/st-benedict/benedictus-antiphon,5eea5a137011,diurnal,"St Benedict, At Lauds, Ant. on Benedictus",496,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/chapter-lauds,da3ca2245297,diurnal,"St Benedict, At Lauds, Chapter",495,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/chapter-none,dcd2be32a3f5,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-benedict/chapter-sext,b6715627a5bd,diurnal,"March 21 St Benedict, At Sext, Chapter Ecclus. 50:3",497,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-benedict/collect,d44d2c5ecc2b,Monastic Diurnal.pdf,proper/st-benedict/collect; PDF pages 542,496,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording.
 proper/st-benedict/hymn-lauds,9cf85218b14f,diurnal,"St Benedict, At Lauds, Inter aeternas",495-496,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/hymn-vespers,ce8291584f07,diurnal,"St Benedict, At I Vespers, Laudibus cives",494,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/magnificat-antiphon,17bcef63e637,Monastic Diurnal.pdf,"March 21 Passing of St Benedict, At II Vespers, Ant. on Magnificat; PDF pages 543",497,verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes claude attestation citing draft archdiocesan Vespers book p. 351.
 proper/st-benedict/magnificat-antiphon-first,83df2153ca05,Monastic Diurnal.pdf,"March 21 Passing of St Benedict, At I Vespers, Ant. on Magnificat; PDF pages 540, 541","494, 495",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes claude attestation citing draft archdiocesan Vespers book p. 351.
+proper/st-benedict/psalm-antiphon-1,cd9db1a54107,diurnal,"March 21 St Benedict, At Lauds and the Hours, Ant. 1",495,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-benedict/psalm-antiphon-3,11b76cedfadb,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-benedict/psalm-antiphon-4,c1ebf0c51296,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-benedict/psalm-antiphon-5,01022ce96162,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-benedict/short-responsory-vespers,d8f91e1f7937,diurnal,"March 21 St Benedict, At I Vespers, Short R.",493,verified,claude,2026-10-09,word-for-word from printed page image; abbreviated repeats as printed
 proper/st-callistus/collect,990f8895f35b,diurnal,,624,verified,codex,2026-09-05,Word-for-word after normalization
 proper/st-catherine-alexandria/collect,ff4bffd9b5a3,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 832",PDF p. 20,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; corrected from the Vicariate Missal draft wording. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 820.
 proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,Monastic Diurnal.pdf,"Nov 22 St Cecilia, At Lauds, Ant. on Benedictus; PDF pages 710",666,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 666.
@@ -2585,9 +2589,16 @@ proper/st-mary-magdalene/versicle-lauds,d2b53af6a56a,Monastic Diurnal,"St Mary M
 proper/st-mary-magdalene/versicle-vespers,9cef917b4788,Monastic Diurnal.pdf,"July 22, St Mary Magdalene, At II Vespers, versicle; PDF pages 614",570,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 570.
 proper/st-matthew/collect,fdf162962ed1,diurnal,"St Matthew, Apostle and Evangelist",606,verified,codex,2026-09-08,Word-for-word after normalization
 proper/st-matthias/collect,8fa2bf601bcd,Monastic Diurnal.pdf,proper/st-matthias/collect; PDF pages 527,481,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
+proper/st-maurus/chapter-lauds,38fb86c0b661,diurnal,"Jan 15 St Maurus, At Lauds, Chapter Isaiah 43:1-3",457,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/chapter-none,e40e5b37c23b,diurnal,"Jan 15 St Maurus, At None, Chapter Heb. 11:9,10",458,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/chapter-sext,7b50f86db26f,diurnal,"Jan 15 St Maurus, At Sext, Chapter Prov. 4:3,4",457-458,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-maurus/collect,b409933e0370,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-maurus/hymn-vespers,577f44f6cbd0,diurnal,"Jan 15 St Maurus, At I Vespers, Hymn Qui te, posthabitis",455-456,verified,claude,2026-10-09,word-for-word from printed page image; printed column-wrapped lines rejoined at the hanging indents
 proper/st-maurus/magnificat-antiphon,abc34ab09fd5,diurnal,,458,verified,codex,2026-09-10,Word-for-word after normalization
 proper/st-maurus/magnificat-antiphon-first,1d349bf4eaeb,diurnal,,456,verified,codex,2026-09-10,Word-for-word after normalization
+proper/st-maurus/psalm-antiphon-1,4b3ab256eb1d,diurnal,"Jan 15 St Maurus, At Lauds and the Hours, Ant. 1",456-457,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/psalm-antiphon-2,25e8898d2998,diurnal,"Jan 15 St Maurus, At Lauds and the Hours, Ant. 2",457,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/psalm-antiphon-3,dd7519f3fbb6,diurnal,"Jan 15 St Maurus, At Lauds and the Hours, Ant. 3",457,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-maurus/psalm-antiphon-4,f0188bcb29e7,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-maurus/psalm-antiphon-5,741f866aacaa,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-maurus/short-responsory-first-vespers,76db5a052506,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization
@@ -2671,6 +2682,7 @@ proper/transfiguration/chapter-lauds,88988824d5dd,Monastic Diurnal.pdf,proper/tr
 proper/transfiguration/chapter-none,408d1df78447,diurnal,,584,verified,codex,2026-09-14,Word-for-word after normalization
 proper/transfiguration/chapter-sext,6e5d2e539e66,Monastic Diurnal.pdf,proper/transfiguration/chapter-sext,"584, 39",verified,codex,2026-09-26,Direct page-image reading; normalized wording matches the existing corpus. Chapter body and scripture reference read on the cited feast page; printed p.39 explicitly supplies the response after every Chapter.
 proper/transfiguration/collect,55802e4274d6,Monastic Diurnal.pdf,"Aug 6, Transfiguration, At Lauds, Collect; PDF pages 627",583,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 583.
+proper/transfiguration/hymn-doxology,4ccb3425819b,Monastic Diurnal.pdf,"Transfiguration, I Vespers, The Hymns end thus at all the Hours; PDF page 626",582,verified,claude,2026-10-09,Direct page-image review; wording confirmed.
 proper/transfiguration/hymn-lauds,27b101b16fb7,Monastic Diurnal.pdf,proper/transfiguration/hymn-lauds,583,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
 proper/transfiguration/hymn-vespers,34cc68ff9a4b,Monastic Diurnal.pdf,proper/transfiguration/hymn-vespers,"581, 582",verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
 proper/transfiguration/magnificat-antiphon,947254a44f6d,Monastic Diurnal.pdf,proper/transfiguration/magnificat-antiphon,584,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
