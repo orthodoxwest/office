@@ -749,6 +749,38 @@ fn epiphany_vespers_are_as_on_the_feast() {
     }
 }
 
+/// General Rubrics XXV.4: a Double of III Lessons without proper antiphons
+/// says the weekday's psalms at Vespers, also within another feast's octave
+/// (2026 ordo: Ss John & Paul "Thu. Ps." and "Fri. Ps.", St Irenaeus "Fri.
+/// Ps.", St Augustine of Canterbury "Mon. Ps.") (#632). St Sylvester's I
+/// Vespers keep the Nativity's, as printed (Diurnal p. 208).
+#[test]
+fn lesser_doubles_within_octaves_say_the_weekday_psalms_at_vespers() {
+    const THURSDAY: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
+    const FRIDAY: [&str; 4] = ["psalms/142", "psalms/144a", "psalms/144b", "psalms/145a"];
+    const MONDAY: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
+    const SYLVESTER: [&str; 4] = ["psalms/110", "psalms/111", "psalms/112", "psalms/132"];
+    for (date, want) in [
+        ("2026-06-25", THURSDAY),
+        ("2026-06-26", FRIDAY),
+        ("2026-07-03", FRIDAY),
+        ("2026-05-25", MONDAY),
+        ("2026-12-30", SYLVESTER),
+        ("2027-12-30", SYLVESTER),
+    ] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| !e.is_commemoration).collect();
+        let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+        assert_eq!(psalms[..4], want, "{date}");
+        if want == SYLVESTER {
+            let antiphon = elements.iter().find(|e| e.slot_ref.starts_with("psalm-antiphon-4")).unwrap();
+            assert!(antiphon.text.starts_with("Of the fruit"), "{date}");
+        }
+    }
+}
+
 /// Commemorations whose feast definition chooses their texts: the Common is
 /// the right one for who they are (#617), "N." is a name (#607), and the
 /// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).
