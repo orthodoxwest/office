@@ -1236,6 +1236,7 @@ proper/comm-01-25-commemoration-of-st-peter/commemoration-antiphon-vespers,b8b37
 proper/comm-01-25-commemoration-of-st-peter/commemoration-collect,f468a5336263,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-01-25-commemoration-of-st-peter/commemoration-versicle-vespers,ea9cc7f6ba65,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-01-28-the-second-feast-of-st-agnes-virgin-martyr/commemoration-collect,0bed1ee0685c,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 525",PDF p. 8,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; corrected from the Vicariate Missal draft wording. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 624.
+proper/comm-03-10-the-forty-holy-martyrs/commemoration-collect,04340797f970,diurnal,,484,verified,claude,2026-10-09,Read from the page image of p. 484
 proper/comm-06-10-st-margaret-of-scotland-queen-and-widow/commemoration-collect,0827d9854ae3,diurnal,,535,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-06-12-ss-basilides-cyrinus-nabor-and-nazarius-martyrs/commemoration-collect,c2a4a4bce73a,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 642",PDF p. 11,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; wording confirmed. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 689.
 proper/comm-06-15-ss-vitus-modestus-and-crescentia-martyrs/commemoration-collect,154b984e23ad,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 692,,verified,claude,2026-09-28,"Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day for ordo ""Col. suppl."")."
@@ -1453,7 +1454,7 @@ proper/easter-sunday/easter-antiphon-3,af5e24c72d5d,diurnal,,363,verified,codex,
 proper/easter-sunday/easter-antiphon-4,520571fe3063,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization
 proper/easter-sunday/easter-antiphon-5,50efa59c4ed7,diurnal,,363,verified,codex,2026-09-09,Word-for-word after normalization
 proper/easter-sunday/hymn-lauds,fefd8c838e89,Monastic Diurnal.pdf,proper/easter-sunday/hymn-lauds; PDF pages 419,373,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording.
-proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
+proper/easter-sunday/hymn-vespers,b566605a130b,Monastic Diurnal.pdf,"Easter Day, At Vespers, Hymn Ad cenam Agni providi; PDF pages 412, 413",366-367,verified,claude,2026-10-09,Direct page-image review; 'Body' capitalized and the comma after 'To thee' removed to match the printed text.
 proper/easter-sunday/magnificat-antiphon,157a3af20a00,diurnal,,367,verified,codex,2026-09-11,Word-for-word after normalization
 proper/easter-sunday/versicle-terce,ad2ba3365887,diurnal,,365,verified,codex,2026-09-13,Word-for-word after normalization
 proper/easter-tuesday/benedictus-antiphon,e54412b41854,diurnal,,368,verified,codex,2026-09-22,Word-for-word after normalization
