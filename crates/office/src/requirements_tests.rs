@@ -561,3 +561,20 @@ fn martyrology_announcements_follow_the_calendar() {
     }
     assert_eq!(announced.len(), vigils.len(), "every vigil is announced in some year");
 }
+
+/// The All Saints fast falls on the vigil only, anticipated with it to
+/// Saturday when 31 October is a Sunday (2017–2025 ordos; 2021, 30 October).
+/// The 2026 ordo's extra fast on Friday 30 October is triaged as a reference
+/// error in data/review/ordo-triage.csv.
+#[test]
+fn all_saints_fast_follows_the_vigil() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, fast_day) in [(2021, 30), (2025, 31), (2026, 31), (2027, 30)] {
+        let cal = build_calendar(y, &data).unwrap();
+        for day in cal.days.iter().filter(|d| d.date.month() == 10 && d.date.day() >= 29) {
+            let vigil = day.celebration.as_deref().is_some_and(|c| c.id == "vigil-of-all-saints");
+            assert_eq!(vigil, day.date.day() == fast_day, "{}: vigil", day.date);
+            assert_eq!(day.penitential.fast, vigil, "{}: fast", day.date);
+        }
+    }
+}
