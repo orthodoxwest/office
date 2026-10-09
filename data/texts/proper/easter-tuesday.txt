@@ -54,12 +54,12 @@ O God, who dost continually multiply thy Church with new offspring: grant unto t
 # [hymn-vespers]
 # Hymn at Vespers.
 #
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
+[versicle-lauds]
+@use proper/easter-sunday/versicle-lauds
+
+[versicle-vespers]
+@use proper/easter-sunday/versicle-vespers
+
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
 #

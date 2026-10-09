@@ -154,12 +154,14 @@ R. Thanks be to God.
 # Diurnal p. 366: "Chapter as above at Lauds."
 @use proper/easter-sunday/chapter-lauds
 
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
+[versicle-lauds]
+# Diurnal p. 364: "This is the day" after the hymn at Lauds, and at Vespers
+# (p. 367); "The Chapters and VV. are said as above at the Hours during the Octave."
+@use proper/easter-sunday/versicle-terce
+
+[versicle-vespers]
+@use proper/easter-sunday/versicle-terce
+
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
 #

@@ -605,6 +605,11 @@ fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
             assert!(responsory.text.contains("hath appeared to Simon"), "{date}");
             let lauds = compose("lauds", date);
             assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "I Cor. 5:7", "{date} lauds");
+            // Diurnal pp. 364, 367: "This is the day" after the hymn at both.
+            for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
+                let versicle = hour.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+                assert!(versicle.text.starts_with("V. This is the day"), "{date} {name}");
+            }
             // Diurnal p. 365: the double-Alleluia dismissal at Lauds and Vespers.
             for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
                 assert!(hour.iter().any(|e| e.source_ref == "shared/formulas/benedicamus-domino-alleluia"), "{date} {name}");
@@ -620,10 +625,16 @@ fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
         }
         for offset in 0..6 {
             let date = moveable.pentecost.add_days(offset);
-            let psalms: Vec<_> =
-                compose("vespers", date).into_iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref).collect();
+            let vespers = compose("vespers", date);
+            let psalms: Vec<_> = vespers.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
             assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+            // Diurnal p. 398: II Vespers "All as at I Vespers, except" this versicle.
+            let versicle = vespers.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+            assert!(versicle.text.starts_with("V. The Apostles did speak"), "{date}");
         }
+        let eve = compose("vespers", moveable.pentecost.add_days(-1));
+        let versicle = eve.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+        assert!(versicle.text.starts_with("V. They were all filled"), "{y} I Vespers");
     }
 }
 
@@ -672,5 +683,48 @@ fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
         let trinity_eve = moveable.pentecost.add_days(6);
         assert!(hymn("compline", trinity_eve).text.contains("Shall live and reign eternally"), "{y}");
         assert!(hymn("prime", trinity_eve.add_days(2)).text.contains("To God the Holy Paraclete"), "{y}");
+        // The Ascension hymn's "Ending is never changed" (p. 389).
+        for date in [moveable.ascension, moveable.ascension.add_days(3)] {
+            for name in ["lauds", "vespers"] {
+                let h = hymn(name, date);
+                assert!(h.text.contains("Be thou our joy") && !h.text.contains("Ascending o'er"), "{date} {name}");
+            }
+        }
+    }
+    // Hymns of the metre at Lauds and Vespers take the seasonal ending too:
+    // Jesu, corona celsior (St Bede) and the Saturday Office of Our Lady in
+    // Eastertide (2026 ordo p. 64, "Of BVM ... Easter dox."). The sapphic
+    // Iste Confessor keeps its own, before and after the Ascension.
+    let check = |y: i32, m: i32, d: i32, name: &str, has: &str, lacks: &str| {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, m, d);
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let h = hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap();
+        assert!(h.text.contains(has) && !h.text.contains(lacks), "{date} {name}: {}", h.text);
+    };
+    check(2027, 5, 27, "lauds", "To thee who, dead, again dost live", "Glory to thee, O Father, Lord");
+    check(2026, 5, 16, "lauds", "To thee who, dead, again dost live", "Virgin-born");
+    check(2026, 5, 26, "vespers", "Only and Trinal", "Ascending o'er");
+    check(2026, 1, 14, "vespers", "Only and Trinal", "For thine Epiphany");
+}
+
+/// General Rubrics VI.2 (#616): a Vigil on a Solemnity has not even a
+/// Commemoration. The 2021, 2022 and 2024 ordos print none; 2033 and 2035 are
+/// the issue's later Corpus Christi cases.
+#[test]
+fn no_vigil_commemoration_on_a_solemnity() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, m, d, celebration, vigil) in [
+        (2021, 6, 28, "nativity-john-baptist", "vigil-of-ss-peter-paul"),
+        (2022, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2024, 6, 22, "vigil-pentecost", "vigil-of-nativity-john-baptist"),
+        (2033, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2035, 6, 28, "corpus-christi", "vigil-of-ss-peter-paul"),
+    ] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(day.celebration.as_deref().map(|c| c.id.as_str()), Some(celebration), "{}", day.date);
+        assert!(day.commemorations.iter().all(|c| c.id != vigil), "{}: {vigil} commemorated", day.date);
+        assert!(day.occurrence_decisions.iter().any(|x| x.rule == "commemoration:vigil-on-first-class-double"), "{}", day.date);
     }
 }

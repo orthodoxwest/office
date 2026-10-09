@@ -162,8 +162,13 @@ Amen.
 V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
-[versicle-vespers]
+[versicle-first-vespers]
 @use proper/pentecost/versicle-lauds
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 398 (At II Vespers, "All as at I Vespers, except the following")
+V. The Apostles did speak with other tongues, alleluia.
+R. The wonderful works of God, alleluia.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
@@ -211,9 +216,6 @@ R. And began to speak, alleluia.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

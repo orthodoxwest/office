@@ -477,10 +477,16 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                 return element(ElementType::Hymn, text, r, &src);
             }
             let mut refs = vec![src.clone()];
-            let (dox, dox_ref) = resolve_proper_text(day, hour_name, hymn_doxology_ref(day, hour_name), t);
-            if dox_ref.starts_with("seasonal/") {
-                text = substitute_hymn_doxology(&text, &dox);
-                refs.push(dox_ref);
+            // A proper `hymn-doxology` entry (usually @omit) marks a hymn whose
+            // ending "is never changed".
+            let (_, own_ending) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
+            let keeps_own_ending = own_ending.starts_with("proper/");
+            if !keeps_own_ending && has_common_metre_ending(&text) {
+                let (dox, dox_ref) = resolve_proper_text(day, hour_name, hymn_doxology_ref(day), t);
+                if dox_ref.starts_with("seasonal/") {
+                    text = substitute_hymn_doxology(&text, &dox);
+                    refs.push(dox_ref);
+                }
             }
             let (title, body) = corpus::lines::split_hymn_title(&text);
             let mut e = OfficeElement::new(ElementType::Hymn, body);
@@ -529,29 +535,60 @@ fn says_paschal_benedicamus(day: &Day, hour_name: &str) -> bool {
 }
 
 /// The seasonal hymn ending (Diurnal p. 3). Eastertide's "To thee who, dead,
-/// again dost live" runs through None of the Vigil of the Ascension (p. 364),
-/// the Ascensiontide ending until Pentecost, and the Pentecost ending through
-/// its Octave. I Vespers and Compline belong to the following day's office.
-/// The Easter and Pentecost endings are appointed for the Hours (2026 ordo,
-/// "Easter dox.", "Pentecost dox."), whose hymns are always of the metre; at
-/// Lauds and Vespers the proper hymns print the ending, and a feast's hymn of
-/// another metre keeps its own.
-fn hymn_doxology_ref(day: &Day, hour_name: &str) -> &'static str {
+/// again dost live" ends "all Hymns of the same metre through None of the
+/// Vigil of the Ascension, except those which have a proper Ending" (p. 364),
+/// then the Ascensiontide ending until Pentecost, and the Pentecost ending
+/// through its Octave. I Vespers and Compline belong to the following day's
+/// office.
+fn hymn_doxology_ref(day: &Day) -> &'static str {
     let dates = MoveableDates::compute(day.date.year());
-    let hours = matches!(hour_name, "prime" | "terce" | "sext" | "none" | "compline");
     match day.season {
         Season::Easter if day.date >= dates.ascension => "hymn-doxology-ascension",
-        Season::Easter if hours => "hymn-doxology-easter",
-        Season::Pentecost if hours && day.date < dates.pentecost.add_days(7) => "hymn-doxology-pentecost",
+        Season::Easter => "hymn-doxology-easter",
+        Season::Pentecost if day.date < dates.pentecost.add_days(7) => "hymn-doxology-pentecost",
         Season::Advent
         | Season::Christmas
         | Season::Epiphany
         | Season::Septuagesima
         | Season::Lent
         | Season::Passiontide
-        | Season::Easter
         | Season::Pentecost => "hymn-doxology",
     }
+}
+
+/// The seasonal endings are iambic dimeter quatrains and replace only an
+/// ending of that metre: four lines of about eight syllables. Sapphic
+/// (11.11.11.5), trochaic (8.7.8.7.8.7) and shorter-lined hymns keep theirs.
+fn has_common_metre_ending(hymn: &str) -> bool {
+    let Some(body) = hymn.trim().strip_suffix("Amen.") else { return false };
+    let Some(stanza) = body.trim_end().rsplit("\n\n").next() else { return false };
+    let lines: Vec<&str> = stanza.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+    lines.len() == 4 && lines.iter().all(|l| (7..=9).contains(&syllables(l)))
+}
+
+/// A rough English syllable count: vowel groups per word, less a silent
+/// final "e", "es" or "ed". Close enough to tell 8 from 6 or 11.
+fn syllables(line: &str) -> usize {
+    line.split(|c: char| !c.is_ascii_alphabetic() && c != '\'' && c != '\u{2019}')
+        .map(|w| w.to_ascii_lowercase().replace(['\'', '\u{2019}'], ""))
+        .filter(|w| !w.is_empty())
+        .map(|w| {
+            let is_vowel = |c: char| "aeiouy".contains(c);
+            let mut groups = 0;
+            let mut prev = false;
+            for c in w.chars() {
+                let v = is_vowel(c);
+                if v && !prev {
+                    groups += 1;
+                }
+                prev = v;
+            }
+            let silent = (w.ends_with('e') && !w.ends_with("le") && !w.ends_with("ee"))
+                || (w.ends_with("es") && !["ses", "xes", "zes", "ches", "shes", "ces", "ges"].iter().any(|s| w.ends_with(s)))
+                || (w.ends_with("ed") && !w.ends_with("ted") && !w.ends_with("ded"));
+            if silent && groups > 1 { groups - 1 } else { groups.max(1) }
+        })
+        .sum()
 }
 
 /// De-duplicates refs, dropping empty ones, keeping first occurrences.
