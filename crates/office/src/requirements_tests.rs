@@ -752,10 +752,13 @@ fn epiphany_vespers_are_as_on_the_feast() {
 /// General Rubrics XXV.4: a Double of III Lessons without proper antiphons
 /// says the weekday's psalms at Vespers, also within another feast's octave
 /// (2026 ordo: Ss John & Paul "Thu. Ps." and "Fri. Ps.", St Irenaeus "Fri.
-/// Ps.", St Augustine of Canterbury "Mon. Ps.") (#632). St Sylvester's I
+/// Ps.", St Augustine of Canterbury "Mon. Ps.", St Bede "Tue. Ps.") (#632).
+/// St Bede has no proper psalms (Diurnal p. 528) and keeps the weekday's
+/// outside the octave too (2024 ordo "Mon. Ps.", 2025 "Tue. Ps."). St Sylvester's I
 /// Vespers keep the Nativity's, as printed (Diurnal p. 208).
 #[test]
 fn lesser_doubles_within_octaves_say_the_weekday_psalms_at_vespers() {
+    const TUESDAY: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
     const THURSDAY: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
     const FRIDAY: [&str; 4] = ["psalms/142", "psalms/144a", "psalms/144b", "psalms/145a"];
     const MONDAY: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
@@ -765,6 +768,9 @@ fn lesser_doubles_within_octaves_say_the_weekday_psalms_at_vespers() {
         ("2026-06-26", FRIDAY),
         ("2026-07-03", FRIDAY),
         ("2026-05-25", MONDAY),
+        ("2026-05-26", TUESDAY),
+        ("2025-05-27", TUESDAY),
+        ("2024-05-27", MONDAY),
         ("2026-12-30", SYLVESTER),
         ("2027-12-30", SYLVESTER),
     ] {
