@@ -1,6 +1,8 @@
-//! The public read-only JSON API: the ordo's month as data, for other sites
-//! to lay out in their own way. Paths carry a version, `/api/v1/…`, and a field
-//! once published keeps its name and meaning within that version.
+//! The public read-only JSON API, for other sites to lay out the Office in their
+//! own way; API.md is its reference. Resources hang from the civil date:
+//! `/api/v1/days/{date}` and a month of them at `/api/v1/calendar/{year}/{month}`.
+//! Paths carry a version, and a field once published keeps its name and meaning
+//! within it; new fields and new resources beneath a day may be added.
 
 use axum::body::Body;
 use axum::http::{Response, StatusCode, header};
@@ -12,7 +14,7 @@ use crate::Server;
 use crate::handlers::{ORDERED_HOURS, Req};
 use crate::http::{response, set};
 
-/// `GET /api/v1/ordo/{year}/{month}`.
+/// `GET /api/v1/calendar/{year}/{month}`.
 #[derive(Debug, Serialize)]
 struct MonthBody {
     year: i32,
@@ -151,28 +153,47 @@ fn error(status: StatusCode, message: &str) -> Response<Body> {
     json(status, serde_json::json!({ "error": message }).to_string())
 }
 
+fn year(s: &str) -> Option<i32> {
+    s.parse().ok().filter(|y| s.len() == 4 && (1..=9999).contains(y))
+}
+
+fn month(s: &str) -> Option<u32> {
+    s.parse().ok().filter(|m| s.len() == 2 && (1..=12).contains(m))
+}
+
+fn ok<T: Serialize>(body: &T) -> Response<Body> {
+    match serde_json::to_string(body) {
+        Ok(s) => json(StatusCode::OK, s),
+        Err(e) => error(StatusCode::INTERNAL_SERVER_ERROR, &e.to_string()),
+    }
+}
+
 impl Server {
     pub(crate) fn api(&self, req: &Req) -> Response<Body> {
         let parts: Vec<&str> = req.path.trim_matches('/').split('/').collect();
-        let ["api", "v1", "ordo", year, month] = parts[..] else {
-            return error(StatusCode::NOT_FOUND, "No such endpoint. Try /api/v1/ordo/YYYY/MM.");
-        };
-        let year = match year.parse::<i32>() {
-            Ok(y) if year.len() == 4 && (1..=9999).contains(&y) => y,
-            _ => return error(StatusCode::NOT_FOUND, "The year must be four digits."),
-        };
-        let month = match month.parse::<u32>() {
-            Ok(m) if month.len() == 2 && (1..=12).contains(&m) => m,
-            _ => return error(StatusCode::NOT_FOUND, "The month must be two digits, 01 to 12."),
-        };
-        let data = match self.cache.month(year, month, &self.engine) {
-            Ok(m) => m,
-            Err(e) => return error(StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
-        };
-        let body = MonthBody { year, month, days: data.days.iter().map(|d| api_day(d, req.site)).collect() };
-        match serde_json::to_string(&body) {
-            Ok(s) => json(StatusCode::OK, s),
-            Err(e) => error(StatusCode::INTERNAL_SERVER_ERROR, &e.to_string()),
+        match parts[..] {
+            ["api", "v1", "calendar", y, m] => {
+                let (Some(year), Some(month)) = (year(y), month(m)) else {
+                    return error(StatusCode::NOT_FOUND, "Use /api/v1/calendar/YYYY/MM, with a four-digit year and a two-digit month.");
+                };
+                match self.cache.month(year, month, &self.engine) {
+                    Ok(data) => ok(&MonthBody { year, month, days: data.days.iter().map(|d| api_day(d, req.site)).collect() }),
+                    Err(e) => error(StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
+                }
+            }
+            ["api", "v1", "days", date] => {
+                let Some(d) = calendar::Date::parse(date).filter(|d| (1..=9999).contains(&d.year())) else {
+                    return error(StatusCode::NOT_FOUND, "Use /api/v1/days/YYYY-MM-DD.");
+                };
+                match self.cache.month(d.year(), d.month(), &self.engine) {
+                    Ok(data) => match data.days.get(d.day() as usize - 1) {
+                        Some(row) => ok(&api_day(row, req.site)),
+                        None => error(StatusCode::NOT_FOUND, "No such day."),
+                    },
+                    Err(e) => error(StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
+                }
+            }
+            _ => error(StatusCode::NOT_FOUND, "No such endpoint. See /api/v1/days/YYYY-MM-DD and /api/v1/calendar/YYYY/MM."),
         }
     }
 }
@@ -198,7 +219,7 @@ mod tests {
     /// A month carries every day, each with its office and links back to the site.
     #[test]
     fn month_lists_each_day() {
-        let (status, headers, body) = get("/api/v1/ordo/2026/12");
+        let (status, headers, body) = get("/api/v1/calendar/2026/12");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::ACCESS_CONTROL_ALLOW_ORIGIN], "*");
         assert!(headers[header::CONTENT_TYPE].to_str().unwrap().starts_with("application/json"));
@@ -213,9 +234,26 @@ mod tests {
         assert!(christmas["links"]["vespers"].as_str().unwrap().ends_with("/vespers/2026-12-25"));
     }
 
+    /// A day on its own is the same object as its entry in the month.
+    #[test]
+    fn day_matches_its_month_entry() {
+        let (status, _, day) = get("/api/v1/days/2026-12-25");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(day, get("/api/v1/calendar/2026/12").2["days"][24]);
+    }
+
     #[test]
     fn rejects_malformed_paths() {
-        for path in ["/api/v1/ordo/2026/13", "/api/v1/ordo/2026/9", "/api/v1/ordo/26/09", "/api/v1/ordo/2026", "/api/v2/ordo/2026/09"] {
+        for path in [
+            "/api/v1/calendar/2026/13",
+            "/api/v1/calendar/2026/9",
+            "/api/v1/calendar/26/09",
+            "/api/v1/calendar/2026",
+            "/api/v1/days/2026-02-30",
+            "/api/v1/days/2026-2-3",
+            "/api/v1/days/2026-12-25/collect",
+            "/api/v2/days/2026-12-25",
+        ] {
             let (status, headers, body) = get(path);
             assert_eq!(status, StatusCode::NOT_FOUND, "{path}");
             assert_eq!(headers[header::ACCESS_CONTROL_ALLOW_ORIGIN], "*", "{path}");

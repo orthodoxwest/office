@@ -164,15 +164,9 @@ other than this one and the next, and error pages are `noindex`.
 
 ### Public API
 
-`GET /api/v1/ordo/YYYY/MM` returns a month of the ordo as JSON, for other sites
-to lay out themselves: per day the date, weekday, office name, rank, colour,
-fast and abstinence, commemorations, monastic observances, the Benedictus and
-Magnificat antiphon incipits, preces and suffrage at Lauds, the Hours and
-Vespers, Vespers' precedence note, and absolute links to the day's ordo row and
-each hour on the canonical host. Any origin may read it (`Access-Control-Allow-Origin: *`),
-caches may keep it an hour, and it answers on every host without forwarding.
-Fields keep their names and meanings within `v1`; a change that would break a
-reader goes in `v2`. Errors are JSON `{"error": "…"}`.
+`/api/v1/…` serves days and months of the ordo as JSON for other sites to lay
+out themselves; [API.md](API.md) is the reference. It answers on every host
+without forwarding, and any origin may read it.
 
 ### Usage metrics
 
