@@ -1,0 +1,11 @@
+# Proper for [comm-extra-02-26-st-alexander-of-alexandria-bishop-and-confessor]
+# Name: St Alexander of Alexandria, Bishop & Confessor
+# Rank: commemoration  Category: confessor-bishop
+#
+# 2026 ordo (25-26 Feb) cites Col. "O Lord" (36*) — the Exaudi form from
+# the Common of a Confessor and Bishop — not the default Grant/"reverend
+# solemnity" form. Same Exaudi wording as Athanasius (p. 566) and Basil (p. 536).
+
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 36* (Another Collect, Common of a Confessor and Bishop; ordo Col. "O Lord")
+O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed Alexander, thy Bishop and Confessor: and by the interceding merits of him who worthily attained to serve thee, absolve us from all our sins.
