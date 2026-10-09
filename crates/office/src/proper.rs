@@ -116,10 +116,38 @@ pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str
     for list in [season_ref_candidates(&hour_candidates, season), season_ref_candidates(&ref_cands, season), hour_candidates] {
         let found = first_text(t, prefix, &list);
         if !found.0.is_empty() {
-            return found;
+            return paschal_common_form(found, season, t);
         }
     }
-    first_text(t, prefix, &ref_cands)
+    paschal_common_form(first_text(t, prefix, &ref_cands), season, t)
+}
+
+/// In Paschaltide an `@use` into a Common reads that Common's paschal form
+/// when it has one, as the Common tier itself does (Diurnal p. 6*, §3): the
+/// first hop of the alias chain into `commons/{cat}/{key}` that has a
+/// `commons/{cat}-paschal/{key}` takes it. A key already in a paschal tier
+/// is left alone.
+fn paschal_common_form(found: (String, String), season: Option<Season>, t: &OfficeTexts) -> (String, String) {
+    if season != Some(Season::Easter) {
+        return found;
+    }
+    let is_paschal = |key: &str| key.split('/').any(|seg| seg.ends_with("-paschal"));
+    let mut key = found.1.as_str();
+    while !is_paschal(key)
+        && let Some(target) = t.alias_target(key)
+    {
+        if let Some((cat, rest)) = target.strip_prefix("commons/").and_then(|r| r.split_once('/'))
+            && !cat.ends_with("-paschal")
+        {
+            let paschal = format!("commons/{cat}-paschal/{rest}");
+            let text = t.get(&paschal);
+            if !text.is_empty() {
+                return (text.to_string(), paschal);
+            }
+        }
+        key = target;
+    }
+    found
 }
 
 /// Replaces the placeholder "N." with the saint's name.
@@ -230,8 +258,9 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
     if ferial_vespers_antiphon(day, hour_name, reference, t) || celebration.id.is_empty() || is_synthesized_feria(celebration) {
         return (String::new(), String::new());
     }
+    let season = day.saints_season(hour_name);
     for feast_id in feast_proper_ids(celebration) {
-        if day.season == Season::Easter {
+        if season == Season::Easter {
             let prefix = format!("proper/{feast_id}-paschal/");
             for list in [&hour_candidates, &ref_cands] {
                 let (text, resolved) = first_text(t, &prefix, list);
@@ -240,7 +269,7 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
                 }
             }
         }
-        let (text, resolved) = lookup_section_text(&format!("proper/{feast_id}/"), Some(day.season), hour_name, reference, t);
+        let (text, resolved) = lookup_section_text(&format!("proper/{feast_id}/"), Some(season), hour_name, reference, t);
         if !text.is_empty() {
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
@@ -403,7 +432,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         && let Some(c) = celebration
         && !is_synthesized_feria(c)
     {
-        let (text, resolved) = lookup_commons_text(c.category, day.season, hour_name, reference, t);
+        let (text, resolved) = lookup_commons_text(c.category, day.saints_season(hour_name), hour_name, reference, t);
         if !text.is_empty() {
             return (substitute_proper_name(&text, &proper_name), resolved);
         }

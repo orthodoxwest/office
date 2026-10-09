@@ -8,14 +8,6 @@ O God, who by the learning of blessed Bede, thy Confessor and Doctor, hast made 
 [magnificat-antiphon-first]
 @use commons/confessor/magnificat-antiphon-doctor
 
-# Under the Julian paschalion 27 May always falls in Paschaltide, when the Common of
-# Confessors adds one Alleluia to each antiphon (Diurnal p. 6*, §3; #640).
-[magnificat-antiphon-easter]
-@use commons/confessor-doctor-paschal/magnificat-antiphon
-
-[magnificat-antiphon-first-easter]
-@use commons/confessor-doctor-paschal/magnificat-antiphon
-
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

@@ -29,7 +29,7 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
     // A saint commemorated within the Octave of Pentecost keeps its Common's
     // Paschaltide forms (2026 ordo, 4-5 June: Boniface "Light perpetual",
     // "Daughters"; #631).
-    let season = if day.is_paschaltide(hour_name) { Season::Easter } else { day.season };
+    let season = day.saints_season(hour_name);
     let mut elems = Vec::new();
     for (i, comm) in comms.iter().enumerate() {
         let lookup = |reference: &str| -> (String, String) {

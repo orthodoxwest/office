@@ -1963,7 +1963,8 @@
         "date": "2026-05-16",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "commons/blessed-virgin/versicle-terce",
+        "ref": "commons/virgin-martyr-paschal/versicle-first-vespers",
+        "contains": "and reign, alleluia.",
         "before_slot": "collect"
       },
       {
@@ -3186,14 +3187,14 @@
         "date": "2026-05-26",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
-        "ref": "proper/st-bede-venerable/magnificat-antiphon-first-easter",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
         "contains": "Son of God. Alleluia."
       },
       {
         "date": "2027-06-18",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
-        "ref": "proper/st-ephrem-syrian/magnificat-antiphon-easter",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
         "contains": "Son of God. Alleluia."
       },
       {
@@ -3201,6 +3202,38 @@
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      }
+    ]
+  },
+  {
+    "id": "apostles-first-vespers-antiphons-in-paschaltide",
+    "source": "Monastic Diurnal p. 16* (Common of Apostles and Evangelists in Paschaltide, At I Vespers: 'Ants. of Lauds, omitting the fourth. Psalms as at I Vespers of the Common of Apostles, p. 7*') and p. 17* (the Lauds antiphons). 2026 ordo, 5 May: 'I of fol. / Ant.(17*) / Ps.(7*)'. Out of Paschaltide the Common's own I Vespers antiphons (p. 7*). Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle-paschal/psalm-antiphon-1",
+        "contains": "shall blossom as the lily, alleluia"
+      },
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle-paschal/psalm-antiphon-4-first-vespers",
+        "contains": "Then shall the righteous"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle/psalm-antiphon-1-first-vespers"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
       }
     ]
   }
