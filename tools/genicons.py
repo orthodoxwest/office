@@ -13,20 +13,23 @@ One scene feeds every platform. It is rendered on a 1536 canvas that is an
 Android adaptive layer (108dp); the central 1024 is the 72dp a launcher shows
 and is the iOS, web and Play Store tile. Small one-colour uses (favicon,
 Android's themed icon and notification) are flat vectors of the same ring and
-cross.
+cross. The web's link-preview card sets the same gilt mark on a wide stretch of
+the apse wall beside the app's name in its own EB Garamond.
 
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
 Run from the repository root; it checks its own output (ring width, contrast
 and overall darkness at launcher size) and fails if the icon stops reading.
 """
 import argparse
+import io
 import json
 import math
 import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFont
 from scipy import ndimage as ndi
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -458,6 +461,40 @@ def check(name, scene, dark):
 ANDROID_DENSITIES = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
 
 
+def font(name, size):
+    """One of the site's own faces: PIL reads TrueType, not the WOFF2 the site serves."""
+    face = TTFont(WEB / f"fonts/{name}.woff2")
+    face.flavor = None
+    ttf = io.BytesIO()
+    face.save(ttf)
+    ttf.seek(0)
+    return ImageFont.truetype(ttf, size)
+
+
+def share_card(scene, ground):
+    """The 1200x630 picture a shared link previews with (og:image): the apse's mark on a wide stretch
+    of its bare wall, the name and what it is set beside it."""
+    w, h = 1200, 630
+    band = round(N * h / w)
+    o = (N - band) // 2
+    card = to_image(ground[o:o + band]).resize((w, h), Image.LANCZOS)
+    ring, cross = marks()
+    side = 2 * (RING_OUT + 8)
+    c0 = (N - side) // 2
+    crop = (slice(c0, c0 + side), slice(c0, c0 + side))
+    alpha = Image.fromarray((np.clip(ring + cross, 0, 1)[crop] * 255 + 0.5).astype(np.uint8), "L")
+    d, left = 400, 115
+    top = (h - d) // 2
+    card.paste(to_image(scene[crop]).resize((d, d), Image.LANCZOS), (left, top), alpha.resize((d, d), Image.LANCZOS))
+    draw = ImageDraw.Draw(card)
+    x, gold, wash = left + d + 70, (214, 176, 98), (226, 214, 190)   # the leaf at rest; a limewash pale
+    draw.text((x, h / 2 - 18), "Daily Office", font=font("eb-garamond-regular", 108), fill=gold, anchor="ls")
+    italic = font("eb-garamond-italic", 44)
+    draw.text((x, h / 2 + 52), "The Benedictine Divine Office", font=italic, fill=wash, anchor="ls")
+    draw.text((x, h / 2 + 106), "of the Western Rite", font=italic, fill=wash, anchor="ls")
+    return card
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, help="also write the 1024 tiles here (e.g. the Play Store's 512 is "
@@ -476,6 +513,7 @@ def main():
         save_rgb(night_tile, WEB / f"icons/icon-{size}.png", size)
         save_rgb(night_tile, WEB / f"icons/icon-maskable-{size}.png", size)
     save_rgb(night_tile, WEB / "icons/apple-touch-icon.png", 180)
+    save(share_card(night, vault), WEB / "icons/share-card.png", palette=True)
     (WEB / "favicon.svg").write_text(favicon())
     print("wrote", (WEB / "favicon.svg").relative_to(ROOT))
 
