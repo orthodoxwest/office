@@ -2282,6 +2282,38 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
 });
 
+// The fasting, abstinence and rank marks each spell themselves out, under a
+// mouse and under a finger alike, without the tap opening the day.
+test("ordo marks name themselves on hover and on a tap", async ({ browser, baseURL }) => {
+  const tipOf = (locator) => locator.evaluate((el) => {
+    const tip = getComputedStyle(el, "::after");
+    if (tip.display === "none") return null;
+    const box = el.getBoundingClientRect();
+    return { text: tip.content.replace(/^"|"$/g, ""), left: box.right - parseFloat(tip.width), width: document.documentElement.clientWidth };
+  });
+  // Ash Wednesday 2026 (Julian paschalion) fasts, abstains and ranks first class.
+  for (const hasTouch of [true, false]) {
+    const viewport = hasTouch ? { width: 320, height: 700 } : { width: 1280, height: 900 };
+    const context = await browser.newContext({ baseURL, hasTouch, isMobile: hasTouch, viewport });
+    const page = await context.newPage();
+    await openDatedPage(page, "/calendar/2026/02");
+    const row = page.locator("#d-2026-02-25");
+    const scope = hasTouch ? row.locator(".day-mobile-flags") : row.locator("td.day-penitential-flag, td.day-rank");
+    const marks = scope.locator("abbr");
+    await expect(marks).toHaveCount(3);
+    const expected = ["Day of Fasting", "Day of Abstinence", "Double of the 1st Class"];
+    for (let i = 0; i < 3; i++) {
+      const mark = marks.nth(i);
+      if (hasTouch) await mark.tap(); else await mark.hover();
+      const tip = await tipOf(mark);
+      expect(tip?.text, `${hasTouch ? "tap" : "hover"} ${expected[i]}`).toBe(expected[i]);
+      expect(tip.left).toBeGreaterThanOrEqual(0);
+    }
+    await expect(page).toHaveURL(/\/calendar\/2026\/02$/);
+    await context.close();
+  }
+});
+
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
 // the title and every feast above a deep link. All geometric readings happen
 // in-page, so Playwright's font-waiting screenshot helper cannot mask the swap.

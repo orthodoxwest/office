@@ -104,10 +104,11 @@
                 <span class="day-mobile-weekday">{{ d.weekday }}</span>
               </a>
               <span class="day-mobile-flags">
-                {# aria-label is not allowed on a bare span; name these the
-                     way the wide-table cells below do. #}
-                {% if d.fast %}<span class="day-mobile-flag"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></span>{% endif %}
-                {% if d.abstinence %}<span class="day-mobile-flag">{{ fish() }}<span class="sr-only">Abstinence</span></span>{% endif %}
+                {# aria-label is not allowed on an abbr; name these the way
+                     the wide-table cells below do. Each mark, like the rank,
+                     spells itself out on hover, focus or a tap. #}
+                {% if d.fast %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}
+                {% if d.abstinence %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
@@ -155,8 +156,8 @@
             {% endif %}
             </div>
           </td>
-          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{% endif %}</td>
-          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}{{ fish() }}<span class="sr-only">Abstinence</span>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<abbr tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}<abbr tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}</td>
           <td class="day-rank" data-label="Rank">{% if d.rank_full %}<abbr tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}{{ d.rank }}{% endif %}</td>
         </tr>
         {% endfor %}
