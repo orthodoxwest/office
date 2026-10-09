@@ -255,7 +255,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/about", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");
@@ -335,7 +335,7 @@ mod routing_tests {
         assert_eq!(status, StatusCode::OK);
         assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
         let (_, sitemap) = get("example.org", "/sitemap.xml").await;
-        for page in ["/", "/lauds", "/compline", "/privacy"] {
+        for page in ["/", "/lauds", "/compline", "/privacy", "/about"] {
             assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
         }
         assert!(!sitemap.contains("<loc>https://example.org/calendar</loc>"), "the bare ordo address only redirects");

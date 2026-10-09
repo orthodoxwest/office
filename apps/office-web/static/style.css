@@ -667,6 +667,14 @@ summary:focus-visible {
   color: var(--text);
 }
 
+/* A wide hour's header is already full with the seven hours; About stays in
+   the header of every other page and in the phone's menu everywhere. */
+@media (min-width: 701px) {
+  .page-hour .site-menu nav a[data-nav="about"] {
+    display: none;
+  }
+}
+
 .nav-divider {
   width: 1px;
   /* An empty span has no baseline; it fills the row's height instead. */
@@ -1722,6 +1730,37 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+/* The introduction for a reader's first week, set beside Change date as its
+   twin: the same small capitals, ink and touch height. layout.html's
+   pre-paint script sets data-newcomer, so it never appears late. */
+.home-introduction {
+  display: none;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0.35rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+html[data-newcomer] .home-introduction {
+  display: flex;
+}
+
+/* The row holds two labels on a small phone, so for that week the
+   introduction takes the season's place (each hour's header still names it). */
+html[data-newcomer] .home-season {
+  display: none;
+}
+
+@media (hover: hover) {
+  .home-introduction:hover {
+    color: var(--accent);
+  }
 }
 
 /* Home reuses the hour "Change date" disclosure — after the title stack, not
@@ -5739,7 +5778,7 @@ body.season-eastertide {
 
 /* One focus ring for the card's controls: the date's gold, not the
    browser's or the oak. */
-.page-home :is(.pray-now, .home-hour-link, .home-date-nav > summary, .not-today-link):focus-visible {
+.page-home :is(.pray-now, .home-hour-link, .home-date-nav > summary, .home-introduction, .not-today-link):focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
