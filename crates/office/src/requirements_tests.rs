@@ -605,6 +605,18 @@ fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
             assert!(responsory.text.contains("hath appeared to Simon"), "{date}");
             let lauds = compose("lauds", date);
             assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "I Cor. 5:7", "{date} lauds");
+            // Diurnal p. 365: the double-Alleluia dismissal at Lauds and Vespers.
+            for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
+                assert!(hour.iter().any(|e| e.source_ref == "shared/formulas/benedicamus-domino-alleluia"), "{date} {name}");
+            }
+        }
+        // "Only through Lauds of Saturday before Low Sunday": its Vespers and
+        // the Little Hours keep the plain dismissal.
+        let saturday = moveable.easter.add_days(6);
+        assert!(compose("lauds", saturday).iter().any(|e| e.source_ref == "shared/formulas/benedicamus-domino-alleluia"), "{y}");
+        for name in ["vespers", "prime"] {
+            let hour = compose(name, if name == "prime" { moveable.easter } else { saturday });
+            assert!(hour.iter().all(|e| e.source_ref != "shared/formulas/benedicamus-domino-alleluia"), "{y} {name}");
         }
         for offset in 0..6 {
             let date = moveable.pentecost.add_days(offset);

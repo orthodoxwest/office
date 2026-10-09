@@ -509,8 +509,23 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             e.label = label;
             e
         }
+        "versicle" if r == BENEDICAMUS_REF && says_paschal_benedicamus(day, hour_name) => {
+            resolve_element(&HourElement::new(&elem.kind, BENEDICAMUS_ALLELUIA_REF), t)
+        }
         _ => resolve_element(elem, t),
     }
+}
+
+const BENEDICAMUS_REF: &str = "shared/leader/benedicamus-domino";
+const BENEDICAMUS_ALLELUIA_REF: &str = "shared/formulas/benedicamus-domino-alleluia";
+
+/// Diurnal p. 365: "Let us bless the Lord, alleluia, alleluia" at Lauds and
+/// Vespers from Easter Day "only through Lauds of Saturday before Low
+/// Sunday"; that Saturday's Vespers are I Vespers of Low Sunday (2026 ordo
+/// p. 18).
+fn says_paschal_benedicamus(day: &Day, hour_name: &str) -> bool {
+    let easter = MoveableDates::compute(day.date.year()).easter;
+    matches!(hour_name, "lauds" | "vespers") && day.date >= easter && day.date < easter.add_days(7)
 }
 
 /// The seasonal hymn ending (Diurnal p. 3). Eastertide's "To thee who, dead,
