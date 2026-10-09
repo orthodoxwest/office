@@ -3,7 +3,8 @@
 
 use std::collections::{HashMap, HashSet};
 
-use calendar::{DataSource, Decision, MoveableDates, Season};
+use calendar::traits::octave_parent_id;
+use calendar::{Category, DataSource, Decision, Feast, MoveableDates, Season};
 use liturgy::{ElementType, OfficeElement, OfficeHour, PrayerForm, VoiceSpan};
 
 use crate::conclusion::apply_conclusion;
@@ -490,16 +491,18 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                 return element(ElementType::Hymn, text, r, &src);
             }
             let mut refs = vec![src.clone()];
-            // A proper `hymn-doxology` entry (usually @omit) marks a hymn whose
-            // ending "is never changed".
-            let (_, own_ending) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
-            let keeps_own_ending = own_ending.starts_with("proper/");
-            if !keeps_own_ending && has_common_metre_ending(&text) {
-                let (dox, dox_ref) = resolve_proper_text(day, hour_name, hymn_doxology_ref(day), t);
-                if dox_ref.starts_with("seasonal/") {
-                    text = substitute_hymn_doxology(&text, &dox);
-                    refs.push(dox_ref);
-                }
+            // A proper `hymn-doxology` entry is the feast's own ending for
+            // hymns of the metre (Our Lady of Sorrows, Diurnal pp. 505, 602);
+            // @omit marks a hymn whose ending "is never changed".
+            let (own_dox, own_ref) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
+            let (dox, dox_ref) = match own_ref.starts_with("proper/") {
+                true => (own_dox, own_ref),
+                false => hymn_doxology(day, hour_name, t),
+            };
+            let found = dox_ref.starts_with("seasonal/") || dox_ref.starts_with("proper/");
+            if found && !corpus::is_omitted(&dox) && has_common_metre_ending(&text) {
+                text = substitute_hymn_doxology(&text, &dox);
+                refs.push(dox_ref);
             }
             let (title, body) = corpus::lines::split_hymn_title(&text);
             let mut e = OfficeElement::new(ElementType::Hymn, body);
@@ -567,6 +570,33 @@ fn hymn_doxology_ref(day: &Day) -> &'static str {
         | Season::Passiontide
         | Season::Pentecost => "hymn-doxology",
     }
+}
+
+/// General Rubrics XXIII.4: "All honour, laud, and glory be, O Jesu,
+/// Virgin-born, to thee" ends the hymns (b) on Corpus Christi and throughout
+/// its Octave, and (c) "whenever the Office is of Blessed Mary", as the
+/// Diurnal repeats on her feasts and at the Saturday Office (pp. 414, 448,
+/// 69*). Paschaltide keeps its own ending (2026 ordo p. 64, the Saturday
+/// Office "Easter dox."), and so does Advent, when the Office is of the
+/// Season (XXIII.10; Diurnal p. 448), which the owner's category already
+/// excludes. A saint's feast within these Octaves keeps the ordinary ending,
+/// as the ordos print it (St Joachim, 2023–2026; #628).
+fn hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String) {
+    const NATIVITY: &str = "seasonal/christmas/hymn-doxology";
+    let reference = hymn_doxology_ref(day);
+    if reference == "hymn-doxology" && day.celebration.as_deref().is_some_and(is_of_our_lady_or_corpus_christi) {
+        return (t.get(NATIVITY).to_string(), NATIVITY.to_string());
+    }
+    resolve_proper_text(day, hour_name, reference, t)
+}
+
+/// The Sunday within the Octave of Corpus Christi is always the II Sunday
+/// after Pentecost, whose octave context may name SS Peter and Paul instead.
+fn is_of_our_lady_or_corpus_christi(c: &Feast) -> bool {
+    const CORPUS_CHRISTI: &str = "corpus-christi";
+    c.is_category(Category::BlessedVirgin)
+        || [CORPUS_CHRISTI, "pentecost-sunday-2"].contains(&c.id.as_str())
+        || octave_parent_id(c) == Some(CORPUS_CHRISTI)
 }
 
 /// The seasonal endings are iambic dimeter quatrains and replace only an

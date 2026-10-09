@@ -121,6 +121,10 @@ In our true native land with thee.
 
 Amen.
 
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 416: "The following Ending is never changed."
+@use proper/corpus-christi/hymn-doxology-lauds
+
 [hymn-first-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 413, 414, 418
 Pange lingua gloriosi

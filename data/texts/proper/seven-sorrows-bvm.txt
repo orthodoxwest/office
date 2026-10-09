@@ -157,6 +157,16 @@ The strength do thou impart
 That erst upheld the Virgin's heart!
 
 Amen.
+
+[hymn-doxology]
+# SOURCE: Monastic Diurnal.pdf, p. 602: "At the Hours the Hymns end:" (2026 ordo, "Ppr. dox. (602)")
+Glory to thee, O Lord, we give,
+Who died to make thy servants live;
+Whom with the Father we adore
+And Holy Spirit evermore.
+
+Amen.
+
 [versicle-lauds]
 # SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 V. O Virgin Mary, by thy sorrow's might.
