@@ -748,8 +748,9 @@ fn commemoration_definitions_choose_fitting_texts() {
     // #617: Diurnal p. 465, St Peter at Lauds of 25 January "as above at I Vespers".
     let peter = commemorated(Date::new(2027, 1, 25), "lauds", "comm-01-25-commemoration-of-st-peter");
     assert!(has(&peter, "Thou art the shepherd of the sheep") && has(&peter, "Thou art Peter."), "{peter:?}");
-    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts.
-    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "comm-extra-07-06-the-octave-of-ss-peter-and-paul");
+    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts
+    // (the generated octave day, not its dated duplicate: #622).
+    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "ss-peter-paul-octave-day");
     assert!(has(&octave, "Glorious princes") && has(&octave, "whose right hand upheld blessed Peter"), "{octave:?}");
     for found in [&peter, &octave] {
         assert!(!has(found, "good and faithful servant") && !has(found, "Confessor"), "{found:?}");
@@ -843,4 +844,31 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
     assert!(saturday.is_paschaltide("none") && !saturday.is_paschaltide("vespers"));
     let sunday = commemorated(Date::new(2019, 6, 22), "vespers", "pentecost-sunday-1");
     assert!(sunday.iter().all(|(_, t)| !t.contains("alleluia")), "{sunday:?}");
+}
+
+/// #622: on the eve of an impeded octave day, Vespers commemorate the octave
+/// once, by the Octave Day's I Vespers, not also Day VII (XIII.16). 5 July
+/// under Corpus Christi's octave (2024, 2027), and under a Sunday's I Vespers:
+/// 2025 ordo 5 July, "Comm. Oct. ('Peter the Apostle' 558; Col. 560)"; 2026
+/// ordo 7 Nov., "Comm. Oct. ('O ye Angels' 638; Col. 640)"; 2021 ordo 21 Aug.,
+/// "Comm. Oct. ('O most prudent Virgin')".
+#[test]
+fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
+    for (y, m, d, octave_day) in [
+        (2024, 7, 5, "ss-peter-paul-octave-day"),
+        (2027, 7, 5, "ss-peter-paul-octave-day"),
+        (2025, 7, 5, "ss-peter-paul-octave-day"),
+        (2026, 11, 7, "all-saints-octave-day"),
+        (2021, 8, 21, "assumption-bvm-octave-day"),
+    ] {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        let ids: Vec<_> = day.vespers.commemorations.iter().map(|c| c.id.as_str()).collect();
+        assert!(ids.contains(&octave_day), "{}: {ids:?}", day.date);
+        assert!(!ids.contains(&format!("{octave_day}-7").as_str()), "{}: {ids:?}", day.date);
+    }
+    // The impeded Octave Day itself is commemorated at Lauds of 6 July.
+    let (days, _) = year(2027);
+    let sixth = &days[Date::new(2027, 7, 6).ordinal() as usize - 1];
+    assert!(sixth.commemorations.iter().any(|c| c.id == "ss-peter-paul-octave-day"));
 }
