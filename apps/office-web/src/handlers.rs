@@ -12,9 +12,9 @@ use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
-    AboutData, AboutHour, AboutPeriod, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData,
-    HourHeader, LeaderForm, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour,
-    RemindersData, TabulaData, TabulaRow,
+    AboutData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
+    MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
+    TabulaRow,
 };
 
 use crate::Server;
@@ -233,30 +233,13 @@ impl Server {
     }
 
     pub fn about(&self, req: &Req) -> Response<Body> {
-        let hour = |slug: &str, name: &str, time: &str| AboutHour {
-            name: name.into(),
-            url: format!("/{slug}"),
-            gloss: presentation::hour_gloss(slug).into(),
-            time: time.into(),
-        };
-        let period = |label: &str, hours: Vec<AboutHour>| AboutPeriod { label: label.into(), hours };
-        let data = AboutData {
-            chrome: Chrome {
-                page: "about".into(),
-                nav_date: self.nav_date_now(req),
-                site: req.site.into(),
-                canonical: "/about".into(),
-                ..Chrome::default()
-            },
-            about_hours: vec![
-                period("Morning", vec![hour("lauds", "Lauds", "at daybreak"), hour("prime", "Prime", "about 6 am")]),
-                period(
-                    "Day",
-                    vec![hour("terce", "Terce", "about 9 am"), hour("sext", "Sext", "at noon"), hour("none", "None", "about 3 pm")],
-                ),
-                period("Evening", vec![hour("vespers", "Vespers", "toward sunset"), hour("compline", "Compline", "at bedtime")]),
-            ],
-        };
+        let data = AboutData::new(Chrome {
+            page: "about".into(),
+            nav_date: self.nav_date_now(req),
+            site: req.site.into(),
+            canonical: "/about".into(),
+            ..Chrome::default()
+        });
         match self.pages.about(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),

@@ -6393,11 +6393,7 @@ body.season-eastertide {
   margin-bottom: 0.55rem;
 }
 
-.about-key-rubric {
-  color: var(--rubric);
-}
-
-.about-key-sigil {
+.about-key-red {
   color: var(--rubric);
 }
 

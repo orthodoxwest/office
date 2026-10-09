@@ -453,6 +453,110 @@ pub fn reminder_defaults() -> Vec<ReminderDefault> {
         .collect()
 }
 
+/// A piece of an About paragraph: plain words, or a link's words and its target (a site path
+/// such as `/calendar`, or an `https://` address). `link` is empty for plain words.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutRunView {
+    pub text: String,
+    pub link: String,
+}
+
+/// One block of the About page, as `presentation::about` words it: `kind` is intro, verse,
+/// heading, paragraph, hours, note or key. A paragraph's words are its `runs`.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutBlockView {
+    pub kind: String,
+    pub text: String,
+    pub runs: Vec<AboutRunView>,
+    pub cite: String,
+    pub mark: String,
+    pub red: bool,
+}
+
+/// An hour on the About page's table: its slug, name, what it is and when it is said.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutHourView {
+    pub hour: String,
+    pub name: String,
+    pub gloss: String,
+    pub time: String,
+}
+
+/// One of the table's periods (Morning, Day, Evening).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutPeriodView {
+    pub label: String,
+    pub hours: Vec<AboutHourView>,
+}
+
+/// The About page: its title, blocks, the hours' table, and the menu's and home's names for it.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutView {
+    pub title: String,
+    pub menu: String,
+    pub introduction: String,
+    pub blocks: Vec<AboutBlockView>,
+    pub periods: Vec<AboutPeriodView>,
+}
+
+/// The page for newcomers, as the web's /about.
+#[uniffi::export]
+pub fn about() -> AboutView {
+    use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_MENU, ABOUT_TITLE, AboutBlock, AboutRun, about_runs};
+    let block = |kind: &str| AboutBlockView {
+        kind: kind.into(),
+        text: String::new(),
+        runs: Vec::new(),
+        cite: String::new(),
+        mark: String::new(),
+        red: false,
+    };
+    let blocks = ABOUT
+        .iter()
+        .map(|b| match *b {
+            AboutBlock::Intro(text) => AboutBlockView { text: text.into(), ..block("intro") },
+            AboutBlock::Verse { text, cite } => AboutBlockView { text: text.into(), cite: cite.into(), ..block("verse") },
+            AboutBlock::Heading(text) => AboutBlockView { text: text.into(), ..block("heading") },
+            AboutBlock::Paragraph(text) => AboutBlockView {
+                runs: about_runs(text)
+                    .into_iter()
+                    .map(|run| match run {
+                        AboutRun::Text(text) => AboutRunView { text, link: String::new() },
+                        AboutRun::Link { text, target } => AboutRunView { text, link: target },
+                    })
+                    .collect(),
+                ..block("paragraph")
+            },
+            AboutBlock::Hours => block("hours"),
+            AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
+            AboutBlock::Key { mark, red, text } => AboutBlockView { text: text.into(), mark: mark.into(), red, ..block("key") },
+        })
+        .collect();
+    let periods = ABOUT_HOURS
+        .iter()
+        .map(|(label, hours)| AboutPeriodView {
+            label: (*label).into(),
+            hours: hours
+                .iter()
+                .map(|(slug, time)| AboutHourView {
+                    hour: (*slug).into(),
+                    name: presentation::title_case(slug),
+                    gloss: presentation::hour_gloss(slug).into(),
+                    time: (*time).into(),
+                })
+                .collect(),
+        })
+        .collect();
+    AboutView { title: ABOUT_TITLE.into(), menu: ABOUT_MENU.into(), introduction: ABOUT_INTRODUCTION.into(), blocks, periods }
+}
+
+/// Whether home offers the introduction: the app's first day is within the newcomer week.
+/// `days_since_first` is negative for an installation from before first days were kept.
+#[uniffi::export]
+pub fn about_newcomer(days_since_first: i32) -> bool {
+    presentation::about::about_newcomer((days_since_first >= 0).then_some(days_since_first.into()))
+}
+
 /// A device's clock hour, held to 0–23.
 fn clock_hour_i8(hour: i32) -> i8 {
     hour.clamp(0, 23) as i8

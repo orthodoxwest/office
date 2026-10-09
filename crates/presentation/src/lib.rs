@@ -4,6 +4,7 @@
 //! problem" issue; and the usage beacon's vocabulary ([`usage`]). Pure functions of the calendar
 //! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
+pub mod about;
 pub mod usage;
 
 use calendar::{CalendarDay, Color, Date, Rank, Season};
