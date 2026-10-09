@@ -626,6 +626,29 @@ fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
                 }
             }
         }
+        // Diurnal pp. 455–458: St Maurus's proper chapters (I and II Vespers
+        // and Terce "as at Lauds") and his Vespers hymn; Lauds keeps the
+        // Common's hymn ("Short R., Hymn, and V. as in the Common").
+        let elements = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        let (eve, day) = (Date::new(y, 1, 14), Date::new(y, 1, 15));
+        for (name, date, chapter) in [
+            ("vespers", eve, "Isa 43:1-3"),
+            ("lauds", day, "Isa 43:1-3"),
+            ("terce", day, "Isa 43:1-3"),
+            ("sext", day, "Prov 4:3-4"),
+            ("none", day, "Heb 11:9-10"),
+            ("vespers", day, "Isa 43:1-3"),
+        ] {
+            let hour = elements(name, date);
+            assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
+            if name == "vespers" || name == "lauds" {
+                let hymn = hour.iter().find(|e| e.kind == ElementType::Hymn).unwrap();
+                assert_eq!(hymn.source_ref == "proper/st-maurus/hymn-vespers", name == "vespers", "{date} {name}");
+            }
+        }
     }
 }
 
@@ -744,7 +767,8 @@ fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     // Hymns of the metre at Lauds and Vespers take the seasonal ending too:
     // Jesu, corona celsior (St Bede) and the Saturday Office of Our Lady in
     // Eastertide (2026 ordo p. 64, "Of BVM ... Easter dox."). The sapphic
-    // Iste Confessor keeps its own, before and after the Ascension.
+    // Iste Confessor (I Vespers of St Antony) keeps its own, before and after
+    // the Ascension, as does St Maurus's Qui te, posthabitis (#633).
     let check = |y: i32, m: i32, d: i32, name: &str, has: &str, lacks: &str| {
         let (days, moveable) = year(y);
         let date = Date::new(y, m, d);
@@ -755,7 +779,8 @@ fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     check(2027, 5, 27, "lauds", "To thee who, dead, again dost live", "Glory to thee, O Father, Lord");
     check(2026, 5, 16, "lauds", "To thee who, dead, again dost live", "Virgin-born");
     check(2026, 5, 26, "vespers", "Only and Trinal", "Ascending o'er");
-    check(2026, 1, 14, "vespers", "Only and Trinal", "For thine Epiphany");
+    check(2026, 1, 16, "vespers", "Only and Trinal", "For thine Epiphany");
+    check(2026, 1, 14, "vespers", "The prize of Maurus to attain", "For thine Epiphany");
 }
 
 /// Diurnal p. 235: Vespers of the Saturday before Septuagesima end "Let us

@@ -2586,7 +2586,11 @@ proper/st-mary-magdalene/versicle-lauds,d2b53af6a56a,Monastic Diurnal,"St Mary M
 proper/st-mary-magdalene/versicle-vespers,9cef917b4788,Monastic Diurnal.pdf,"July 22, St Mary Magdalene, At II Vespers, versicle; PDF pages 614",570,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 570.
 proper/st-matthew/collect,fdf162962ed1,diurnal,"St Matthew, Apostle and Evangelist",606,verified,codex,2026-09-08,Word-for-word after normalization
 proper/st-matthias/collect,8fa2bf601bcd,Monastic Diurnal.pdf,proper/st-matthias/collect; PDF pages 527,481,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
+proper/st-maurus/chapter-lauds,38fb86c0b661,diurnal,"Jan 15 St Maurus, At Lauds, Chapter Isaiah 43:1-3",457,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/chapter-none,e40e5b37c23b,diurnal,"Jan 15 St Maurus, At None, Chapter Heb. 11:9,10",458,verified,claude,2026-10-09,word-for-word from printed page image
+proper/st-maurus/chapter-sext,7b50f86db26f,diurnal,"Jan 15 St Maurus, At Sext, Chapter Prov. 4:3,4",457-458,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-maurus/collect,b409933e0370,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-maurus/hymn-vespers,577f44f6cbd0,diurnal,"Jan 15 St Maurus, At I Vespers, Hymn Qui te, posthabitis",455-456,verified,claude,2026-10-09,word-for-word from printed page image; printed column-wrapped lines rejoined at the hanging indents
 proper/st-maurus/magnificat-antiphon,abc34ab09fd5,diurnal,,458,verified,codex,2026-09-10,Word-for-word after normalization
 proper/st-maurus/magnificat-antiphon-first,1d349bf4eaeb,diurnal,,456,verified,codex,2026-09-10,Word-for-word after normalization
 proper/st-maurus/psalm-antiphon-1,4b3ab256eb1d,diurnal,"Jan 15 St Maurus, At Lauds and the Hours, Ant. 1",456-457,verified,claude,2026-10-09,word-for-word from printed page image
