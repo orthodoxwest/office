@@ -923,6 +923,85 @@ fn septuagesima_eve_dismissal_keeps_the_alleluias() {
     }
 }
 
+/// Diurnal p. 223: I Vespers of the Epiphany take the "Ants. of Lauds,
+/// omitting the fourth"; II Vespers are "All as at I Vespers" (p. 226), and
+/// every Vespers of the Octave is as on the Feast (pp. 227, 229, 231; 2026
+/// ordo, 5–13 January: "Ant. (224)") (#625), with the Feast's psalms of
+/// Sunday at I Vespers of the Sunday within the Octave too (p. 229; 2026
+/// ordo, 10 January: "Ps. (111)"), also when it is anticipated on the
+/// Saturday (2030) (#626).
+#[test]
+fn epiphany_vespers_are_as_on_the_feast() {
+    for y in 2026..=2033 {
+        let (days, moveable) = year(y);
+        for d in 5..=13 {
+            let date = Date::new(y, 1, d);
+            let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| !e.is_commemoration).collect();
+            let antiphon = |n: u32| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
+            assert!(antiphon(1).starts_with("Before the morning star"), "{date}");
+            assert!(antiphon(4).starts_with("Like a flame of fire"), "{date}: {}", antiphon(4));
+            let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+        }
+    }
+}
+
+const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
+const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
+const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
+const FRIDAY_VESPERS: [&str; 4] = ["psalms/142", "psalms/144a", "psalms/144b", "psalms/145a"];
+
+/// The office's own Vespers elements on the civil evening of `date`.
+fn vespers_elements(date: &str) -> Vec<liturgy::OfficeElement> {
+    let date = Date::parse(date).unwrap();
+    let (days, moveable) = year(date.year());
+    let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+    hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect()
+}
+
+fn first_four_psalms(elements: &[liturgy::OfficeElement]) -> Vec<&str> {
+    elements.iter().filter(|e| e.kind == ElementType::Psalm).take(4).map(|e| e.source_ref.as_str()).collect()
+}
+
+/// General Rubrics XXV.4: a Double of III Lessons without proper antiphons
+/// says the weekday's psalms at Vespers, also within another feast's octave
+/// (2026 ordo: Ss John & Paul "Thu. Ps." and "Fri. Ps.", St Irenaeus "Fri.
+/// Ps.", St Augustine of Canterbury "Mon. Ps.", St Bede "Tue. Ps.") (#632).
+/// St Sylvester's I Vespers keep the Nativity's, as printed (Diurnal p. 208).
+#[test]
+fn lesser_doubles_within_octaves_say_the_weekday_psalms_at_vespers() {
+    const SYLVESTER: [&str; 4] = ["psalms/110", "psalms/111", "psalms/112", "psalms/132"];
+    for (date, want) in [
+        ("2026-06-25", THURSDAY_VESPERS),
+        ("2026-06-26", FRIDAY_VESPERS),
+        ("2026-07-03", FRIDAY_VESPERS),
+        ("2026-05-25", MONDAY_VESPERS),
+        ("2026-05-26", TUESDAY_VESPERS),
+        ("2026-12-30", SYLVESTER),
+        ("2027-12-30", SYLVESTER),
+    ] {
+        let elements = vespers_elements(date);
+        assert_eq!(first_four_psalms(&elements), want, "{date}");
+        if want == SYLVESTER {
+            let antiphon = elements.iter().find(|e| e.slot_ref.starts_with("psalm-antiphon-4")).unwrap();
+            assert!(antiphon.text.starts_with("Of the fruit"), "{date}");
+        }
+    }
+}
+
+/// Doctors of III Lessons whose Diurnal entry gives no psalms say the
+/// weekday's at Vespers (XXV.4): St Bede (p. 528; 2024 ordo "Mon. Ps.", 2025
+/// "Tue. Ps.") and St Ephrem (p. 536; 2018 and 2021 ordos "Fer. Pss.") (#632).
+#[test]
+fn lesser_doubles_without_proper_psalms_say_the_weekday_psalms_at_vespers() {
+    for (date, want) in
+        [("2024-05-27", MONDAY_VESPERS), ("2025-05-27", TUESDAY_VESPERS), ("2018-06-18", MONDAY_VESPERS), ("2021-06-18", FRIDAY_VESPERS)]
+    {
+        assert_eq!(first_four_psalms(&vespers_elements(date)), want, "{date}");
+    }
+}
+
 /// Commemorations whose feast definition chooses their texts: the Common is
 /// the right one for who they are (#617), "N." is a name (#607), and the
 /// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).
