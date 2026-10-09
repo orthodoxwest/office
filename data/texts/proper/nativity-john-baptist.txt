@@ -162,6 +162,15 @@ R. Sent from God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. There was a man * sent from God.
 
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 539 (Nativity of St John Baptist, I & II Vespers Short R.; 2026 ordo Short R &c. 539)
+R. Among them that are born of women * there hath not risen a greater.
+R. Among them that are born of women * there hath not risen a greater.
+V. Than John the Baptist.
+R. There hath not risen a greater.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Among them that are born of women * there hath not risen a greater.
+
 [versicle-sext]
 # SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)
 V. Among them that are born of women there hath not risen a greater.
