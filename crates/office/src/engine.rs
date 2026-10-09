@@ -477,8 +477,7 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                 return element(ElementType::Hymn, text, r, &src);
             }
             let mut refs = vec![src.clone()];
-            let doxology_ref = if uses_ascension_hymn_doxology(day) { "hymn-doxology-ascension" } else { "hymn-doxology" };
-            let (dox, dox_ref) = resolve_proper_text(day, hour_name, doxology_ref, t);
+            let (dox, dox_ref) = resolve_proper_text(day, hour_name, hymn_doxology_ref(day, hour_name), t);
             if dox_ref.starts_with("seasonal/") {
                 text = substitute_hymn_doxology(&text, &dox);
                 refs.push(dox_ref);
@@ -514,9 +513,30 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
     }
 }
 
-/// The Ascensiontide hymn ending, from the Ascension until Pentecost.
-fn uses_ascension_hymn_doxology(day: &Day) -> bool {
-    day.season == Season::Easter && day.date >= MoveableDates::compute(day.date.year()).ascension
+/// The seasonal hymn ending (Diurnal p. 3). Eastertide's "To thee who, dead,
+/// again dost live" runs through None of the Vigil of the Ascension (p. 364),
+/// the Ascensiontide ending until Pentecost, and the Pentecost ending through
+/// its Octave. I Vespers and Compline belong to the following day's office.
+/// The Easter and Pentecost endings are appointed for the Hours (2026 ordo,
+/// "Easter dox.", "Pentecost dox."), whose hymns are always of the metre; at
+/// Lauds and Vespers the proper hymns print the ending, and a feast's hymn of
+/// another metre keeps its own.
+fn hymn_doxology_ref(day: &Day, hour_name: &str) -> &'static str {
+    let dates = MoveableDates::compute(day.date.year());
+    let hours = matches!(hour_name, "prime" | "terce" | "sext" | "none" | "compline");
+    match day.season {
+        Season::Easter if day.date >= dates.ascension => "hymn-doxology-ascension",
+        Season::Easter if hours => "hymn-doxology-easter",
+        Season::Pentecost if hours && day.date < dates.pentecost.add_days(7) => "hymn-doxology-pentecost",
+        Season::Advent
+        | Season::Christmas
+        | Season::Epiphany
+        | Season::Septuagesima
+        | Season::Lent
+        | Season::Passiontide
+        | Season::Easter
+        | Season::Pentecost => "hymn-doxology",
+    }
 }
 
 /// De-duplicates refs, dropping empty ones, keeping first occurrences.

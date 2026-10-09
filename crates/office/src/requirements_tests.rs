@@ -578,3 +578,87 @@ fn all_saints_fast_follows_the_vigil() {
         }
     }
 }
+
+#[test]
+fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
+    // #608. Diurnal pp. 363–367: Easter Day Vespers takes the "Ants. of
+    // Lauds, omitting the fourth. Psalms of Sunday", the Lauds chapter and
+    // "The Lord is risen indeed"; "The Chapters and VV. are said as above at
+    // the Hours during the Octave". Diurnal p. 398 and the 2026 ordo pp.
+    // 54, 68–69 keep the Psalms of Sunday through both Octaves.
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let compose = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        for offset in 0..6 {
+            let date = moveable.easter.add_days(offset);
+            let vespers = compose("vespers", date);
+            let psalms: Vec<_> = vespers.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+            let antiphon = |n| vespers.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
+            assert!(antiphon(4).starts_with("And the Angel answered"), "{date}");
+            let chapter = vespers.iter().find(|e| e.kind == ElementType::Chapter).unwrap();
+            assert_eq!(chapter.label, "I Cor. 5:7", "{date}");
+            let responsory = vespers.iter().find(|e| e.kind == ElementType::ShortResponsory).unwrap();
+            assert!(responsory.text.contains("hath appeared to Simon"), "{date}");
+            let lauds = compose("lauds", date);
+            assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "I Cor. 5:7", "{date} lauds");
+        }
+        for offset in 0..6 {
+            let date = moveable.pentecost.add_days(offset);
+            let psalms: Vec<_> =
+                compose("vespers", date).into_iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+        }
+    }
+}
+
+#[test]
+fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
+    // #609. Diurnal p. 3 and p. 364: "To thee who, dead, again dost live"
+    // ends the hymns of the metre through None of the Vigil of the Ascension;
+    // the Pentecost ending runs through the Octave, and Veni Creator replaces
+    // Nunc Sancte at Terce (p. 398). 2026 ordo pp. 54–69: "Easter dox.",
+    // "Ascension dox.", "Pentecost dox. / Veni Creator at Terce".
+    const EASTER: &str = "All glory, as is ever meet,\nTo Father and to Paraclete.";
+    const PENTECOST: &str = "Whom with the Father we adore\nAnd Holy Ghost for evermore.";
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let hymn = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        let paschal = |date: Date, name: &str| {
+            let h = hymn(name, date);
+            assert!(h.text.contains("To thee who, dead, again dost live") && h.text.contains(EASTER), "{date} {name}: {}", h.text);
+        };
+        for date in [moveable.easter, moveable.easter.add_days(1), moveable.easter.add_days(8), moveable.ascension.add_days(-1)] {
+            for name in ["prime", "terce", "sext", "none", "compline"] {
+                // Compline of the Vigil follows I Vespers of the Ascension.
+                if date == moveable.ascension.add_days(-1) && name == "compline" {
+                    assert!(hymn(name, date).text.contains("Ascending o'er the stars"), "{date} {name}");
+                } else {
+                    paschal(date, name);
+                }
+            }
+        }
+        assert!(hymn("prime", moveable.ascension).text.contains("Ascending o'er the stars"), "{y}");
+        for offset in 0..6 {
+            let date = moveable.pentecost.add_days(offset);
+            for name in ["prime", "terce", "sext", "none", "compline"] {
+                assert!(hymn(name, date).text.contains(PENTECOST), "{date} {name}");
+            }
+            let terce = hymn("terce", date);
+            assert_eq!(terce.source_ref, "proper/pentecost/hymn-terce", "{date}");
+            assert_eq!(terce.label, "Veni, Creator Spiritus", "{date}");
+        }
+        // Compline of the Pentecost Vigil follows I Vespers of Pentecost;
+        // that of Ember Saturday follows I Vespers of Trinity Sunday.
+        assert!(hymn("compline", moveable.pentecost.add_days(-1)).text.contains(PENTECOST), "{y}");
+        let trinity_eve = moveable.pentecost.add_days(6);
+        assert!(hymn("compline", trinity_eve).text.contains("Shall live and reign eternally"), "{y}");
+        assert!(hymn("prime", trinity_eve.add_days(2)).text.contains("To God the Holy Paraclete"), "{y}");
+    }
+}

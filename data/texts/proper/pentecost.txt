@@ -2,8 +2,9 @@
 @use ordinary/vespers/festal-psalmody
 
 [vespers-psalmody]
-# SOURCE: draft Temporal Cycle Vespers book, pp. 181–188 (The Feast of Pentecost) — only I Vespers is printed
-@use psalmody/vespers/ferial
+# Diurnal p. 398: II Vespers "All as at I Vespers", the Psalms of Sunday; the
+# 2026 ordo keeps "Ps. (111)" at Vespers through the Octave (#608).
+@use psalmody/vespers/festal
 
 [psalm-antiphon]
 @use proper/pentecost/psalm-antiphon-1
@@ -202,6 +203,11 @@ R. And began to speak, alleluia.
 
 [chapter-terce]
 @use proper/pentecost/chapter-lauds
+
+[hymn-terce]
+# Diurnal p. 398: Veni Creator "is said at Terce throughout the whole Octave,
+# instead of Nunc Sancte nobis Spiritus" (#609).
+@use proper/pentecost/hymn-vespers
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

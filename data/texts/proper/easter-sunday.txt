@@ -1,6 +1,10 @@
 [vespers-psalmody]
-# The generic Lord profile is not evidence for this unprinted Paschal office.
-@use psalmody/vespers/ferial
+# Diurnal p. 366: "Psalms of Sunday, p. 111" (110-113); the Octave days inherit it (#608).
+@use psalmody/vespers/festal
+
+[psalm-antiphon-4-vespers]
+# Diurnal p. 366: at Vespers the "Ants. of Lauds, omitting the fourth".
+@use proper/easter-sunday/easter-antiphon-5
 
 [easter-antiphon-1]
 # SOURCE: diurnal p. 363
@@ -146,9 +150,10 @@ Amen.
 Brethren: Purge out therefore the old leaven, * that ye may be a new lump, as ye are unleavened. * For even Christ our passover is sacrificed for us. *
 R. Thanks be to God.
 
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
+[chapter-vespers]
+# Diurnal p. 366: "Chapter as above at Lauds."
+@use proper/easter-sunday/chapter-lauds
+
 # [versicle-lauds]
 # Versicle after the hymn at Lauds (V. … / R. …).
 #
@@ -161,9 +166,11 @@ R. Thanks be to God.
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
+[short-responsory-vespers]
+# Diurnal p. 366: "The Lord is risen indeed ... And hath appeared to Simon", the
+# Paschaltide Saturday responsory.
+@use seasonal/easter/short-responsory-first-vespers
+
 # [vespers-psalmody-first]
 # I Vespers psalmody table when it differs from II Vespers.
 #
