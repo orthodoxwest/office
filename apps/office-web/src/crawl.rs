@@ -12,7 +12,7 @@ use render_html::links::calendar_year_link;
 use crate::http::{response, set};
 
 /// The undated pages; the ordo's year is added per request.
-const PAGES: [&str; 10] = ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy"];
+const PAGES: [&str; 11] = ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy", "/about"];
 
 /// Crawl everything a reader sees; skip the usage report, the beacon and the reminder feed.
 pub fn robots(site: &str) -> Response<Body> {

@@ -1,0 +1,70 @@
+{% extends "layout.html" %}{% block title %}About the Office — Daily Office{% endblock %}{% block description %}What the Divine Office is, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
+<div class="about">
+  {{ headpiece() }}
+  <h1>About the Office</h1>
+  <p class="about-intro">
+    The Divine Office is the Church’s prayer through the day: psalms, hymns,
+    Scripture and prayers said at set hours, morning to night. This is the
+    Benedictine Office as the Antiochian Western Rite Vicariate prays it.
+    Each hour here is already put together for its day, with the feast, the
+    season and the psalms in place, so you need only begin.
+  </p>
+  <blockquote class="about-verse">
+    <p>“Seven times a day do I praise thee.”</p>
+    <cite>Psalm 119:164</cite>
+  </blockquote>
+
+  <h2 id="about-hours">The seven hours</h2>
+  <div class="about-hours">
+    {% for period in about_hours %}
+    <section class="about-hour-group" aria-label="{{ period.label }}">
+      <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
+      <dl>
+        {% for h in period.hours %}
+        <div class="about-hour">
+          <dt><a href="{{ h.url|url }}">{{ h.name }}</a></dt>
+          <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
+        </div>
+        {% endfor %}
+      </dl>
+    </section>
+    {% endfor %}
+  </div>
+  <p class="about-note">The night office, Matins, is not yet included.</p>
+
+  <h2>Where to begin</h2>
+  <p>
+    No one is expected to keep every hour at once. Many begin with one,
+    Lauds in the morning or Compline at night, and add others as they can.
+    If you belong to a parish, your priest can help you choose. The button
+    on the home page always opens the hour for the time of day.
+  </p>
+
+  <h2>Reading the page</h2>
+  <ul class="about-keys">
+    <li><span class="about-key about-key-rubric">Red words</span> are rubrics, directions for the one praying, and are not read aloud.</li>
+    <li><span class="about-key about-key-sigil">℣. ℟.</span> mark a versicle and its response. Praying alone, you say both.</li>
+    <li><span class="about-key about-key-sigil">✠</span> marks where to make the sign of the cross.</li>
+    <li><span class="about-key">Prayer form</span>, at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.</li>
+  </ul>
+
+  <h2>The calendar</h2>
+  <p>
+    Each day keeps a feast or the office of its season, as the
+    archdiocesan ordo appoints, and the home page wears the day’s
+    liturgical color. The <a href="/calendar">Ordo</a> sets out every day
+    of the year.
+  </p>
+
+  <h2>This app</h2>
+  <p>
+    The psalms are Coverdale’s, from the Book of Common Prayer, and the
+    texts are checked against the printed diurnal. Installed on a phone, the
+    Office works without a connection, and <a href="/reminders">Reminders</a>
+    can call you to the hours you keep. There are no accounts and no
+    advertising; see <a href="/privacy">Privacy</a>. If you find a mistake,
+    please tell us through the
+    <a href="https://github.com/orthodoxwest/office/issues/new">issue tracker</a>.
+  </p>
+</div>
+{% endblock %}

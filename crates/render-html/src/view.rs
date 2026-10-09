@@ -262,6 +262,31 @@ pub struct NotFoundData {
     pub chrome: Chrome,
 }
 
+/// The page for newcomers: what the Office is and how to pray it.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+    /// The seven hours in home's three bands.
+    pub about_hours: Vec<AboutPeriod>,
+}
+
+/// One of home's bands of hours (Morning, Day, Evening) on the about page.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutPeriod {
+    pub label: String,
+    pub hours: Vec<AboutHour>,
+}
+
+/// An hour on the about page: its name, what it is, and when it is said.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutHour {
+    pub name: String,
+    pub url: String,
+    pub gloss: String,
+    pub time: String,
+}
+
 /// The privacy policy.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct PrivacyData {
