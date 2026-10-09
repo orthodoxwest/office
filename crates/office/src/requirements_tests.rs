@@ -636,3 +636,24 @@ fn expectation_of_the_bvm_is_white() {
         assert_eq!(lauds.color, Some(color), "{date}: {}", lauds.feast);
     }
 }
+
+/// General Rubrics VI.2 (#616): a Vigil on a Solemnity has not even a
+/// Commemoration. The 2021, 2022 and 2024 ordos print none; 2033 and 2035 are
+/// the issue's later Corpus Christi cases.
+#[test]
+fn no_vigil_commemoration_on_a_solemnity() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, m, d, celebration, vigil) in [
+        (2021, 6, 28, "nativity-john-baptist", "vigil-of-ss-peter-paul"),
+        (2022, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2024, 6, 22, "vigil-pentecost", "vigil-of-nativity-john-baptist"),
+        (2033, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2035, 6, 28, "corpus-christi", "vigil-of-ss-peter-paul"),
+    ] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(day.celebration.as_deref().map(|c| c.id.as_str()), Some(celebration), "{}", day.date);
+        assert!(day.commemorations.iter().all(|c| c.id != vigil), "{}: {vigil} commemorated", day.date);
+        assert!(day.occurrence_decisions.iter().any(|x| x.rule == "commemoration:vigil-on-first-class-double"), "{}", day.date);
+    }
+}
