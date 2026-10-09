@@ -9,8 +9,9 @@ import Foundation
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
- * sends ties one day to the next. The app also keeps the day it was first counted, and says
- * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
+ * sends ties one day to the next. The app also keeps the day it was first opened, and says
+ * only whether today is that day (new) or not (returning); home offers the About page for that
+ * day's first week. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only Release builds report (`OfficeCountsUsage`,
  * set in project.yml); Debug builds, and so the tests and the simulator screenshots, never do.
  *
@@ -48,7 +49,7 @@ final class Usage {
         guard enabled else { return }
         let date = now()
         let day = Usage.reportingDay(date)
-        let first = firstDay(day) == day
+        let first = Usage.firstDay(day, defaults) == day
         guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first) else { return }
         let key = day + " " + body
         lock.lock()
@@ -68,13 +69,31 @@ final class Usage {
         }
     }
 
-    /// The reporting day the app was first counted. An installation that reported before this
-    /// was kept (it holds a day's identifier) is from an earlier day.
-    private func firstDay(_ day: String) -> String {
+    /// The reporting day the app was first opened, kept in every build (it is never sent), as
+    /// the web's `office-first-counted` is kept whether or not a beacon goes. An installation
+    /// that reported before this was kept (it holds a day's identifier) is from an earlier day.
+    private static func firstDay(_ day: String, _ defaults: UserDefaults) -> String {
         if let first = defaults.string(forKey: "usage-first") { return first }
         let first = defaults.string(forKey: "usage-day") == nil ? day : "before"
         defaults.set(first, forKey: "usage-first")
         return first
+    }
+
+    /// Reporting days since the app was first opened, as `aboutNewcomer` reads them: -1 for an
+    /// installation from before first days were kept.
+    static func daysSinceFirst(defaults: UserDefaults = .standard, now: Date = Date()) -> Int32 {
+        let today = reportingDay(now)
+        guard let first = CivilDate.parse(firstDay(today, defaults)), let day = CivilDate.parse(today) else { return -1 }
+        return Int32(civil.dateComponents([.day], from: first.date, to: day.date).day ?? -1)
+    }
+
+    /// A page of the site the beacons go to: the production site, or the new address a reply
+    /// named. "/privacy" → "https://orthodoxwestbreviary.com/privacy".
+    static func siteURL(_ path: String, defaults: UserDefaults = .standard) -> URL? {
+        let endpoint = defaults.string(forKey: "usage-endpoint") ?? usageEndpoint()
+        let api = "/api/usage"
+        guard endpoint.hasSuffix(api) else { return nil }
+        return URL(string: String(endpoint.dropLast(api.count)) + path)
     }
 
     /// The reporting day's identifier: kept all day, replaced the next.
@@ -136,14 +155,16 @@ final class Usage {
 }
 
 extension Page {
-    /// The page as the usage count names it: the year's frontispiece is part of the ordo.
-    var usageEvent: UsageEvent {
+    /// The page as the usage count names it: the year's frontispiece is part of the ordo. About
+    /// is not counted, as the web counts only home, the hours, the ordo and the reminders.
+    var usageEvent: UsageEvent? {
         switch self {
         case let .home(d): return .home(date: d)
         case let .hour(d, h): return .hour(date: d, hour: h)
         case let .ordo(y, _, _): return .ordo(year: Int32(y))
         case let .year(y): return .ordo(year: Int32(y))
         case .reminders: return .remindersPage
+        case .about: return nil
         }
     }
 }

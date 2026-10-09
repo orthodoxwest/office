@@ -6,7 +6,7 @@ import UserNotifications
  * The Divine Office on the shared Rust core, set as the web sets it.
  *
  * Launch arguments open a page at a date, for the simulator screenshots:
- * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`;
+ * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`, `about`;
  * `-today 2026-03-15` fixes today, and `-theme apse` or `-text-size large` choose the look.
  */
 @main
@@ -118,8 +118,8 @@ struct RootView: View {
         // Martyrology included), or the day changes while the app is in front; each once a day
         // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
-            guard v.active else { return }
-            Usage.shared.record(v.page.usageEvent, dark: v.dark, form: v.form, martyrology: v.martyrology)
+            guard v.active, let event = v.page.usageEvent else { return }
+            Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology)
         }
         .onReceive(minute) { _ in
             if phase == .active { model.refreshToday() }
@@ -149,6 +149,7 @@ private struct EntryPage: View {
         case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
         case let .year(y)?: YearPage(year: y)
         case .reminders?: RemindersPage()
+        case .about?: AboutPage()
         // Gone from the way back, while the stack lets it go.
         case nil: Color.clear
         }

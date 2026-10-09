@@ -55,6 +55,7 @@ class ScreenshotTest {
         form: String = "private",
         reminders: ReminderSettings = ReminderStore(ApplicationProvider.getApplicationContext()).load(),
         status: ReminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
+        newcomer: Boolean = false,
     ) {
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
@@ -66,6 +67,7 @@ class ScreenshotTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = status,
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    newcomer = newcomer,
                 )
             }
         }
@@ -78,6 +80,10 @@ class ScreenshotTest {
 
     @Test
     fun homeApse() { show(Page.Home(lent), ThemeChoice.APSE); shoot("home-apse") }
+
+    /** A reader's first week: the introduction before Change date, in the season's place. */
+    @Test
+    fun homeNewcomer() { show(Page.Home(lent), ThemeChoice.NAVE, newcomer = true); shoot("home-newcomer-nave") }
 
     @Test
     fun homeAnotherDay() { show(Page.Home(LocalDate.of(2026, 12, 25)), ThemeChoice.NAVE); shoot("home-christmas") }
@@ -199,6 +205,23 @@ class ScreenshotTest {
         val on = ReminderStore(ApplicationProvider.getApplicationContext()).load().copy(on = true)
         show(Page.Reminders, ThemeChoice.APSE, reminders = on, status = ReminderStatus(notificationsAllowed = true, exactAllowed = false))
         shoot("reminders-on-apse")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutNave() { show(Page.About, ThemeChoice.NAVE); shoot("about-nave") }
+
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutApse() { show(Page.About, ThemeChoice.APSE); shoot("about-apse") }
+
+    /** About closes the phone's menu on every page, an hour's included. */
+    @Test
+    fun menuOnAbout() {
+        show(Page.About, ThemeChoice.NAVE)
+        compose.onNodeWithText("MENU").performClick()
+        compose.waitForIdle()
+        captureScreenRoboImage("build/screenshots/menu-about-nave.png")
     }
 
     companion object {

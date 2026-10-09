@@ -27,8 +27,11 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   office, its continuation and report link), and
   the ordo's month (year and month navigation, day rows with colour rails, ranks,
   commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
-  date leading to its day in the ordo). The site menu carries the day's hours, the Ordo, and
-  the Theme (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
+  date leading to its day in the ordo), and About the Office (`AboutScreen.kt`: the core's
+  `about()` words, the seven hours as home's table of periods; home offers it as "Introduction"
+  beside Change date in a reader's first week). The site menu carries the day's hours, the Ordo,
+  Reminders and About (left out of a wide hour's header, as on the web), and the Theme
+  (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the

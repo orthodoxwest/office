@@ -41,7 +41,7 @@ class AccessibilityTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val lent = LocalDate.of(2026, 3, 15)
 
-    private fun show(page: Page, reminders: ReminderSettings = ReminderStore(app).load()) {
+    private fun show(page: Page, reminders: ReminderSettings = ReminderStore(app).load(), newcomer: Boolean = false) {
         val core = Office.core
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), lent.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, "private") }
@@ -53,6 +53,7 @@ class AccessibilityTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    newcomer = newcomer,
                 )
             }
         }
@@ -97,6 +98,22 @@ class AccessibilityTest {
         compose.onNode(hasContentDescription("Sunday, March 1. I Sunday in Lent. liturgical color: violet", substring = true)).assert(role(Role.Button))
     }
 
+    @Test
+    @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
+    fun aboutHasHeadingsAndOpensEachHour() {
+        show(Page.About)
+        compose.onNodeWithText("About the Office").assert(isHeading())
+        compose.onNodeWithText("The seven hours").assert(isHeading())
+        compose.onNodeWithText("Lauds").assert(role(Role.Button))
+        compose.onNodeWithText("Compline").assert(role(Role.Button))
+    }
+
+    @Test
+    fun aNewcomerIsOfferedTheIntroduction() {
+        show(Page.Home(lent), newcomer = true)
+        compose.onNodeWithText("INTRODUCTION").assert(role(Role.Button))
+    }
+
     /** Android's largest font size (200%), for review beside the default captures. */
     @Test
     @Config(fontScale = 2.0f, qualifiers = "w390dp-h2400dp-xxhdpi")
@@ -110,6 +127,13 @@ class AccessibilityTest {
     fun largestFontHome() {
         show(Page.Home(lent))
         compose.onRoot().captureRoboImage("build/screenshots/font-200-home.png")
+    }
+
+    @Test
+    @Config(fontScale = 2.0f, qualifiers = "w390dp-h4800dp-xxhdpi")
+    fun largestFontAbout() {
+        show(Page.About)
+        compose.onRoot().captureRoboImage("build/screenshots/font-200-about.png")
     }
 
     @Test
