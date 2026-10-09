@@ -803,3 +803,44 @@ fn no_vigil_commemoration_on_a_solemnity() {
         assert!(day.occurrence_decisions.iter().any(|x| x.rule == "commemoration:vigil-on-first-class-double"), "{}", day.date);
     }
 }
+
+/// #631: Paschaltide runs until None of the Saturday after Pentecost (General
+/// Rubrics XXIV.3, XXXI.5; 2019, 2021 and 2026 ordos: "Paschaltide ends with
+/// None of Saturday"), so a saint commemorated within the Octave of Pentecost
+/// keeps the Paschaltide Common and its alleluias.
+#[test]
+fn pentecost_week_commemorations_keep_paschaltide_forms() {
+    let commemorated = |date: Date, hour: &str, owner: &str| -> Vec<(ElementType, String)> {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let found: Vec<_> = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.is_commemoration && e.commemoration_owner_id == owner)
+            .map(|e| (e.kind, e.text.clone()))
+            .collect();
+        assert!(!found.is_empty(), "{date} {hour}: {owner} not commemorated");
+        found
+    };
+    let text = |found: &[(ElementType, String)], kind: ElementType| found.iter().find(|(k, _)| *k == kind).unwrap().1.clone();
+    for (date, hour, owner, antiphon) in [
+        (Date::new(2037, 5, 27), "lauds", "st-bede-venerable", "Well done"),
+        (Date::new(2037, 5, 27), "lauds", "comm-extra-05-27-st-john-i-pope-and-martyr", "Daughters of Jerusalem"),
+        (Date::new(2026, 6, 4), "vespers", "st-boniface", "Light perpetual"),
+        (Date::new(2026, 6, 5), "lauds", "st-boniface", "Daughters of Jerusalem"),
+        (Date::new(2021, 6, 23), "lauds", "comm-extra-06-23-st-etheldreda-queen-and-virgin", "The kingdom of heaven"),
+        (Date::new(2019, 6, 22), "lauds", "st-alban", "Daughters of Jerusalem"),
+    ] {
+        let found = commemorated(date, hour, owner);
+        let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
+        assert!(ant.starts_with(antiphon) && ant.ends_with("alleluia."), "{date} {hour}: {ant}");
+        assert!(vers.lines().all(|l| l.ends_with("alleluia.")), "{date} {hour}: {vers}");
+    }
+    // I Vespers of Trinity Sunday are out of Paschaltide.
+    let (days, _) = year(2019);
+    let saturday = &days[Date::new(2019, 6, 22).ordinal() as usize - 1];
+    assert!(saturday.is_paschaltide("none") && !saturday.is_paschaltide("vespers"));
+    let sunday = commemorated(Date::new(2019, 6, 22), "vespers", "pentecost-sunday-1");
+    assert!(sunday.iter().all(|(_, t)| !t.contains("alleluia")), "{sunday:?}");
+}

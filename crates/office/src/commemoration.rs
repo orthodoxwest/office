@@ -26,6 +26,10 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
         return Vec::new();
     }
     let comms: Vec<FeastRef> = if hour_name == "lauds" { lauds_commemorations(&day.cal) } else { day.commemorations.clone() };
+    // A saint commemorated within the Octave of Pentecost keeps its Common's
+    // Paschaltide forms (2026 ordo, 4-5 June: Boniface "Light perpetual",
+    // "Daughters"; #631).
+    let season = if day.is_paschaltide(hour_name) { Season::Easter } else { day.season };
     let mut elems = Vec::new();
     for (i, comm) in comms.iter().enumerate() {
         let lookup = |reference: &str| -> (String, String) {
@@ -46,9 +50,9 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
-                return lookup_following_office_commemoration(comm, day.season, reference, t);
+                return lookup_following_office_commemoration(comm, season, reference, t);
             }
-            let found = lookup_commemoration(comm, day.season, hour_name, reference, t);
+            let found = lookup_commemoration(comm, season, hour_name, reference, t);
             // A vigil or feria without its own antiphon takes the Psalter's
             // for the weekday (General Rubrics VI; Diurnal p. 1*).
             if reference == "commemoration-antiphon"
