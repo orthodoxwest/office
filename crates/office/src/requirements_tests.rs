@@ -2,7 +2,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-use calendar::{CalendarData, Category, Date, MoveableDates, Season, build_calendar};
+use calendar::{CalendarData, Category, Color, Date, MoveableDates, Season, build_calendar};
 use liturgy::{ElementType, PostureAnchor, PrayerForm};
 
 use crate::{Day, Engine, HOUR_NAMES, resolve_office_days, testutil::TestData};
@@ -576,6 +576,64 @@ fn all_saints_fast_follows_the_vigil() {
             assert_eq!(vigil, day.date.day() == fast_day, "{}: vigil", day.date);
             assert_eq!(day.penitential.fast, vigil, "{}: fast", day.date);
         }
+    }
+}
+
+/// Commemorations whose feast definition chooses their texts: the Common is
+/// the right one for who they are (#617), "N." is a name (#607), and the
+/// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).
+#[test]
+fn commemoration_definitions_choose_fitting_texts() {
+    let commemorated = |date: Date, hour: &str, owner: &str| -> Vec<(String, String)> {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let found: Vec<_> = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.is_commemoration && e.commemoration_owner_id == owner)
+            .map(|e| (e.source_ref.clone(), e.text.clone()))
+            .collect();
+        assert!(!found.is_empty(), "{date} {hour}: {owner} not commemorated");
+        found
+    };
+    let has = |found: &[(String, String)], text: &str| found.iter().any(|(_, t)| t.contains(text));
+
+    // #617: Diurnal p. 465, St Peter at Lauds of 25 January "as above at I Vespers".
+    let peter = commemorated(Date::new(2027, 1, 25), "lauds", "comm-01-25-commemoration-of-st-peter");
+    assert!(has(&peter, "Thou art the shepherd of the sheep") && has(&peter, "Thou art Peter."), "{peter:?}");
+    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts.
+    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "comm-extra-07-06-the-octave-of-ss-peter-and-paul");
+    assert!(has(&octave, "Glorious princes") && has(&octave, "whose right hand upheld blessed Peter"), "{octave:?}");
+    for found in [&peter, &octave] {
+        assert!(!has(found, "good and faithful servant") && !has(found, "Confessor"), "{found:?}");
+    }
+
+    // #607: Diurnal p. 484 gives the Forty their own collect; the New Martyrs
+    // complete the Common's "thy holy Martyrs N.".
+    let forty = commemorated(Date::new(2026, 3, 10), "lauds", "comm-03-10-the-forty-holy-martyrs");
+    assert!(has(&forty, "the fortitude of thy glorious Martyrs in their confession"), "{forty:?}");
+    let russia = commemorated(Date::new(2026, 2, 4), "lauds", "comm-02-04-the-new-martyrs-of-russia");
+    assert!(has(&russia, "thy holy Martyrs of Russia:"), "{russia:?}");
+
+    // #610 (needs ruling): the 2026 ordo prints "The very hairs" for Saturninus;
+    // the one-Martyr Common stays until clergy rule (data/review/ordo-triage.csv).
+    let saturninus = "comm-11-29-st-saturninus-bishop-and-martyr";
+    let vespers = commemorated(Date::new(2026, 11, 28), "vespers", saturninus);
+    let lauds = commemorated(Date::new(2026, 11, 29), "lauds", saturninus);
+    assert!(has(&vespers, "This is a Martyr") && has(&lauds, "He that hateth his life"), "{vespers:?} {lauds:?}");
+    assert!(!has(&vespers, "The very hairs") && !has(&lauds, "The very hairs"));
+}
+
+/// #602: the Expectation is a feast of Our Lady in white (2017, 2018, 2023 and
+/// 2025 ordos); when an Ember day takes the office the day is violet.
+#[test]
+fn expectation_of_the_bvm_is_white() {
+    for (y, color) in [(2025, Color::White), (2023, Color::White), (2026, Color::Violet)] {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, 12, 18);
+        let lauds = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        assert_eq!(lauds.color, Some(color), "{date}: {}", lauds.feast);
     }
 }
 

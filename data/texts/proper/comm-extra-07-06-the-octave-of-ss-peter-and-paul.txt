@@ -1,0 +1,19 @@
+# Proper for [comm-extra-07-06-the-octave-of-ss-peter-and-paul]
+# When the Octave Day is impeded (by the Octave of Corpus Christi), its
+# commemoration takes the Octave Day's own texts (#617), as I Vespers already
+# does when the Octave Day is kept.
+
+[commemoration-antiphon-lauds]
+@use proper/ss-peter-paul-octave-day/commemoration-antiphon-lauds
+
+[commemoration-antiphon-vespers]
+@use proper/ss-peter-paul-octave-day/commemoration-antiphon-vespers
+
+[commemoration-versicle-lauds]
+@use proper/ss-peter-paul-octave-day/commemoration-versicle-lauds
+
+[commemoration-versicle-vespers]
+@use proper/ss-peter-paul-octave-day/commemoration-versicle-vespers
+
+[commemoration-collect]
+@use proper/ss-peter-paul-octave-day/collect
