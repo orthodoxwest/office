@@ -870,7 +870,7 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
 
 /// General Rubrics XXIII.5, Diurnal p. 3: the Epiphany ending is said "on
 /// Epiphany and throughout the Octave" only (2026 ordo, "Epiph. dox." through
-/// 13 January), even when Septuagesima comes early (2037); the
+/// 13 January), even when Septuagesima comes on 1 February (2037); the
 /// Transfiguration's hymns end "Transfigured on the mount to-day" at all the
 /// Hours, from I Vespers (p. 582) (#636).
 #[test]
@@ -890,9 +890,15 @@ fn epiphany_hymn_ending_ends_with_the_octave_and_transfiguration_has_its_own() {
                 assert!(!hymn(&format!("{y}-{d}"), name).contains(EPIPHANY), "{y}-{d} {name}");
             }
         }
-        for (d, name) in
-            [("08-05", "vespers"), ("08-05", "compline"), ("08-06", "prime"), ("08-06", "terce"), ("08-06", "none"), ("08-06", "vespers")]
-        {
+        for (d, name) in [
+            ("08-05", "vespers"),
+            ("08-05", "compline"),
+            ("08-06", "prime"),
+            ("08-06", "terce"),
+            ("08-06", "sext"),
+            ("08-06", "none"),
+            ("08-06", "vespers"),
+        ] {
             let text = hymn(&format!("{y}-{d}"), name);
             assert!(text.contains(TRANSFIGURED) && !text.contains(EPIPHANY), "{y}-{d} {name}");
         }
