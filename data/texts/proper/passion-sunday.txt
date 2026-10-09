@@ -65,45 +65,89 @@ R. Thanks be to God.
 # SOURCE: monastic diurnal, p. 276 (Passion Week, Monday)
 In the great day of the feast, * Jesus stood and cried, saying: If any man thirst, let him come unto me and drink.
 
+[collect-monday]
+# SOURCE: monastic diurnal, p. 276 (Passion Week, Monday, Collect at Lauds)
+Sanctify our fast, we beseech thee, O Lord: and mercifully bestow upon us the pardon of all our faults.
+
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 276 (Passion Week, Monday)
 If any man thirst, * let him come unto me and drink: and out of his belly shall flow living water, saith the Lord.
+
+[collect-vespers-monday]
+# SOURCE: monastic diurnal, p. 276 (Passion Week, Monday, Collect after the Ant. on Magnificat)
+Grant unto thy people, we beseech thee, O Lord, health of mind and body: that cleaving to good works, they may ever deserve to be defended by thy mighty protection.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 276 (Passion Week, Tuesday)
 My time * is not yet come, but your time is alway ready.
 
+[collect-tuesday]
+# SOURCE: monastic diurnal, p. 276 (Passion Week, Tuesday, Collect at Lauds)
+May our fasts be acceptable in thy sight, O Lord, we beseech thee: and by their atoning power, both make us worthy of thy grace, and lead us on to everlasting remedies.
+
 [magnificat-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 276 (Passion Week, Tuesday)
 Go ye up * unto this feast: I go not up yet, for my time is not yet full come.
+
+[collect-vespers-tuesday]
+# SOURCE: monastic diurnal, p. 276 (Passion Week, Tuesday, Collect after the Ant. on Magnificat)
+We beseech thee, O Lord, give us perseverance in humble service according to thy will: that in our day the people that serveth thee may increase both in number and in merit.
 
 [benedictus-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 276 (Passion Week, Wednesday)
 My sheep * hear my voice, and I the Lord both know them, and they follow me.
 
+[collect-wednesday]
+# SOURCE: monastic diurnal, p. 276, 277 (Passion Week, Wednesday, Collect at Lauds)
+Mercifully enlighten the hearts of thy faithful people, O God, by this fast which thou hast hallowed: and in thy loving-kindness graciously give ear to thy suppliant people unto whom thou grantest the grace of devotion.
+
 [magnificat-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 277 (Passion Week, Wednesday)
 Many good works * have I wrought among you: for which of these works do ye wish to kill me?
+
+[collect-vespers-wednesday]
+# SOURCE: monastic diurnal, p. 277 (Passion Week, Wednesday, Collect after the Ant. on Magnificat)
+Assist us mercifully, Almighty God, in these our supplications: and grant that we, to whom thou hast given a full assurance of hope in thy goodness, may receive the fruit of thy wonted loving-kindness.
 
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 277 (Passion Week, Thursday)
 The Master saith, * My time is at hand; I will keep the Passover at thy house with my disciples.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 277 (Passion Week, Thursday, Collect at Lauds)
+Grant, we beseech thee, Almighty God: that as the dignity of human nature hath been injured through excess, so by zeal for healing frugality it may be restored.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 277 (Passion Week, Thursday)
 With desire * I have desired to eat this Passover with you before I suffer.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 277 (Passion Week, Thursday, Collect after the Ant. on Magnificat)
+Be favourable to thy people, O Lord, we beseech thee: and grant that they, eschewing those things which displease thee, may be the more abundantly filled with the delights of thy commandments.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 277 (Passion Week, Friday)
 Now the feast day of the Jews * drew nigh; and the chief priests sought how they might kill Jesus, but they feared the people.
 
+[collect-friday]
+# SOURCE: monastic diurnal, p. 277, 278 (Passion Week, Friday, Collect at Lauds)
+We beseech thee, O Lord, mercifully pour thy grace into our hearts: that we who restrain ourselves from sin by voluntary chastisement, may rather suffer in time than be doomed to eternal punishment.
+
 [magnificat-antiphon-friday]
 # SOURCE: monastic diurnal, p. 278 (Passion Week, Friday)
 The chief priests * consulted how they might take Jesus and kill him; but they said, Not on the feast day, lest there be an uproar among the people.
 
+[collect-vespers-friday]
+# SOURCE: monastic diurnal, p. 278 (Passion Week, Friday, Collect after the Ant. on Magnificat)
+Grant, we beseech thee, Almighty God: that we who seek the grace of thy protection, may be delivered from all evils and serve thee with a quiet mind.
+
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 278 (Passion Week, Saturday)
 O Father, glorify thou me * with thine own self with the glory which I had with thee before the world began.
+
+[collect-saturday]
+# SOURCE: monastic diurnal, p. 278 (Passion Week, Saturday, Collect at Lauds)
+We beseech thee, O Lord, let the people dedicated unto thee advance in the spirit of godly devotion: that being disciplined by holy exercises, they may become the more pleasing unto thy Majesty as they increase in more excellent gifts.
 
 [magnificat-antiphon-first]
 @use proper/passion-sunday/commemoration-antiphon

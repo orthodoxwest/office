@@ -21,6 +21,11 @@ R. And with thy spirit.
 V. Let us bless the Lord.
 R. Thanks be to God.
 
+[benedicamus-domino-alleluia]
+# SOURCE: diurnal p. 235 (Saturday before Septuagesima, at the end of the Office)
+V. Let us bless the Lord, alleluia, alleluia.
+R. Thanks be to God, alleluia, alleluia.
+
 [faithful-departed]
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.

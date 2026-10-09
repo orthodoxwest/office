@@ -556,13 +556,25 @@ Type = prayer
 Ref = shared/formulas/collect-conclusion-through-same
 
 [Closing]
-Condition = not-office-of-the-dead,not-triduum
+Condition = not-office-of-the-dead,not-triduum,not-septuagesima-eve
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
 
 Type = versicle
 Ref = shared/leader/benedicamus-domino
+
+[Closing-Septuagesima-Eve]
+# Diurnal p. 235: Alleluia is said for the last time on the Saturday before
+# Septuagesima, and the dismissal takes it "even if Vespers have been of a
+# Double Feast of the I or II Class".
+Condition = not-office-of-the-dead,not-triduum,septuagesima-eve
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = shared/formulas/benedicamus-domino-alleluia
 
 [Closing-Faithful-Departed]
 # Diurnal p. 642: Vespers of the Dead begins immediately after Benedicamus.

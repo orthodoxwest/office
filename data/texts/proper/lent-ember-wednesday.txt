@@ -10,6 +10,10 @@ For as Jonas * was three days and three nights in the whale's belly, so shall th
 # SOURCE: diurnal p. 253
 Mercifully hear our prayers, O Lord, we beseech thee: and stretch forth the right hand of thy Majesty against all things that withstand us.
 
+[collect-vespers]
+# SOURCE: monastic diurnal, p. 253 (I Week in Lent, Ember Wednesday, Collect after the Ant. on Magnificat)
+Enlighten our minds, we beseech thee, O Lord, with the brightness of thy glory: that we may be able to see what we ought to do, and also may have power to do those things which are right.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #

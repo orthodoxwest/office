@@ -113,6 +113,7 @@ supported key):
 | `[hymn-lauds]`, `[hymn-vespers]` | Full hymn text |
 | `[commemoration-antiphon]`, `[commemoration-versicle]` | When commemorated |
 | `[commemoration-collect]` | When commemorated (defaults to `[collect]`) |
+| `[benedictus-antiphon-monday]`, `[collect-monday]`, `[collect-vespers-monday]`, … | In a Sunday's proper: that week's feria (the Lauds collect serves through None; a Lenten feria's Vespers collect only at Vespers, and when the feria is commemorated there) |
 
 ### Directives
 

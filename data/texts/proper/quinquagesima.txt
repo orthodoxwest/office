@@ -77,21 +77,41 @@ Lay up for yourselves * treasures in heaven, where neither moth nor rust doth co
 # SOURCE: monastic diurnal, p. 244 (Thursday after Ash Wednesday)
 Lord, my servant * lieth at home sick of the palsy, grievously tormented. Verily I say unto thee, I will come and heal him.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 244 (Thursday after Ash Wednesday, At Lauds, Collect)
+O God, who art offended by sin, and reconciled by penitence: mercifully regard the prayers of thy suppliant people, and turn away the scourge of thy wrath, which for our sins we have justly deserved.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 245 (Thursday after Ash Wednesday)
 Lord, I am not worthy * that thou shouldest enter under my roof: but speak the word only and my servant shall be healed.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 245 (Thursday after Ash Wednesday, At Vespers, Collect)
+Spare us, O Lord, spare thy people: that they who are justly chastised by thy scourges, may be relieved by thy tender mercy.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 245 (Friday after Ash Wednesday)
 When thou doest thine alms, * let not thy left hand know what thy right hand doeth.
 
+[collect-friday]
+# SOURCE: monastic diurnal, p. 245 (Friday after Ash Wednesday, At Lauds, Collect)
+We beseech thee, O Lord, to accompany with thy bounteous favour the fast upon which we have entered: that the observance which we shew forth in our bodies, we may be able also to practise with sincerity of heart.
+
 [magnificat-antiphon-friday]
 # SOURCE: monastic diurnal, p. 245 (Friday after Ash Wednesday)
 But thou, when thou prayest, * enter into thy closet, and when thou hast shut thy door, pray to thy Father.
 
+[collect-vespers-friday]
+# SOURCE: monastic diurnal, p. 245 (Friday after Ash Wednesday, At Vespers, Collect)
+Defend thy people, O Lord, and mercifully cleanse them from all their sins: for no adversity will harm them over whom iniquity hath no dominion.
+
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 245 (Saturday after Ash Wednesday)
 Yet they seek me daily, * and delight to know my ways.
+
+[collect-saturday]
+# SOURCE: monastic diurnal, p. 245 (Saturday after Ash Wednesday, At Lauds, Collect)
+Assist us, Lord, in these our supplications: and grant that we may keep with devout service this solemn fast, ordained for the healing of both soul and body.
 
 [magnificat-antiphon-first]
 # SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 1 (Pater fidei)

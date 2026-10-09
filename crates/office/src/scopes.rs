@@ -237,7 +237,7 @@ fn validate(raw: Raw, corpus: &Corpus) -> Result<AppointmentScope, (String, Stri
         }
         seen_hours.push(hour);
         for (i, slot) in raw.slots.iter().enumerate() {
-            if !matches!(slot.as_str(), "chapter" | "versicle" | "psalm-antiphon*") {
+            if !matches!(slot.as_str(), "chapter" | "short-responsory" | "hymn" | "versicle" | "psalm-antiphon*") {
                 return Err(fail(format!("invalid slot selector {}", data_format::quote(slot))));
             }
             if let Some(prior) = raw.slots[..i].iter().find(|p| selectors_overlap(p, slot)) {
@@ -330,8 +330,8 @@ mod tests {
         assert_eq!(err(&one(r#""exclude_weekdays":["funday"]"#)), "s.json: scope \"x\": unknown weekday \"funday\"");
         assert_eq!(err(&one(r#""exclude_weekdays":["monday","monday"]"#)), "s.json: scope \"x\": duplicate weekday \"monday\"");
         assert_eq!(
-            err(&one(r#""require_ferial":true"#).replace(r#"["chapter"]"#, r#"["hymn"]"#)),
-            "s.json: scope \"x\": invalid slot selector \"hymn\""
+            err(&one(r#""require_ferial":true"#).replace(r#"["chapter"]"#, r#"["benedictus-antiphon"]"#)),
+            "s.json: scope \"x\": invalid slot selector \"benedictus-antiphon\""
         );
         assert_eq!(
             err(&one(r#""require_ferial":true"#).replace(r#"["terce"]"#, r#"["sext"]"#)),

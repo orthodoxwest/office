@@ -1,5 +1,21 @@
 [
   {
+    "id": "lent-lauds-vespers-office",
+    "source": "Diurnal pp. 243-246, 250-251; 2026 ordo, Lent Office Notes: the Lenten order of the Office does not begin until Vespers of the Saturday after Ash Wednesday, and the intervening days take the Psalter's hymns. Easter -42 is Lent I, whose I Vespers carries its date.",
+    "season": "lent",
+    "hours": [
+      "lauds",
+      "vespers"
+    ],
+    "slots": [
+      "chapter",
+      "short-responsory",
+      "hymn",
+      "versicle"
+    ],
+    "from_easter": -42
+  },
+  {
     "id": "lent-ferial-chapters-antiphons",
     "source": "Diurnal pp. 250-251: ferial chapters and antiphons begin after Lent I. Easter -42 is Lent I; Sunday exclusion makes the first applicable day Monday.",
     "season": "lent",

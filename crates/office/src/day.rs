@@ -4,7 +4,7 @@
 
 use std::ops::{Deref, DerefMut};
 
-use calendar::{CalendarDay, Weekday};
+use calendar::{CalendarDay, Date, MoveableDates, Weekday};
 
 use crate::concurrence::VespersDesignation;
 
@@ -49,8 +49,20 @@ impl Day {
     /// office day has advanced to the following feast; the psalter keeps the
     /// civil evening on which Vespers is said.
     pub fn civil_weekday(&self) -> Weekday {
-        let date = if self.first_vespers { self.date.add_days(-1) } else { self.date };
-        date.weekday()
+        self.civil_date().weekday()
+    }
+
+    /// The civil date on which the hour is said: the eve at I Vespers.
+    pub fn civil_date(&self) -> Date {
+        if self.first_vespers { self.date.add_days(-1) } else { self.date }
+    }
+
+    /// The Saturday before Septuagesima, whose Vespers say Alleluia for the
+    /// last time even when they are of the Saturday's own feast (Diurnal
+    /// p. 235).
+    pub fn is_septuagesima_eve(&self) -> bool {
+        let civil = self.civil_date();
+        MoveableDates::compute(civil.year()).septuagesima.add_days(-1) == civil
     }
 
     /// Lowercase civil weekday name ("monday").

@@ -414,7 +414,9 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         && weekday != "sunday"
     {
         let prefix = format!("proper/{week}/");
-        let wd_refs: Vec<String> = ref_cands.iter().map(|c| format!("{c}-{weekday}")).collect();
+        // An hour's own weekday text first: a Lenten feria's Vespers collect
+        // differs from its Lauds collect (Diurnal pp. 244-278).
+        let wd_refs: Vec<String> = hour_candidates.iter().chain(&ref_cands).map(|c| format!("{c}-{weekday}")).collect();
         let (text, resolved) = first_text(t, &prefix, &wd_refs);
         if !text.is_empty() {
             return (substitute_proper_name(&text, &proper_name), resolved);
