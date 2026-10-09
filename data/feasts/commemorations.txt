@@ -116,7 +116,7 @@ Source = awrv
 Name = Commemoration of St Peter
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
 Month = 1
 Day = 25
 Source = awrv
@@ -178,6 +178,8 @@ Source = awrv
 
 [comm-02-04-the-new-martyrs-of-russia]
 Name = The New Martyrs of Russia
+# Completes "thy holy Martyrs N." in the Common's collect (#607).
+ProperName = of Russia
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1058,6 +1060,8 @@ Month = 11
 Day = 26
 Source = awrv
 
+# The 2026 ordo gives "The very hairs" (Many Martyrs) at I Vespers of Advent I
+# and Lauds; the one-Martyr Common is kept until clergy rule (#610).
 [comm-11-29-st-saturninus-bishop-and-martyr]
 Name = St Saturninus, Bishop & Martyr
 Rank = commemoration
@@ -1135,6 +1139,7 @@ Source = awrv
 
 [comm-extra-01-02-octave-day-of-st-stephen-protomartyr]
 Name = Octave Day of St Stephen, Protomartyr
+ProperName = Stephen
 Rank = commemoration
 Color = red
 Category = martyr
@@ -1361,7 +1366,7 @@ CompanionOf = commemoration-st-paul-apostle
 Name = The Octave of Ss Peter & Paul
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
 Month = 7
 Day = 6
 Source = awrv
@@ -1514,6 +1519,7 @@ Source = awrv
 
 [comm-extra-01-25-the-conversion-of-st-paul-the-apostle]
 Name = The Conversion of St Paul The Apostle
+ProperName = Paul
 Rank = commemoration
 Color = white
 Category = apostle
