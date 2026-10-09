@@ -323,7 +323,7 @@ mod routing_tests {
             async move {
                 let resp = router.oneshot(request).await.unwrap();
                 let status = resp.status();
-                (status, String::from_utf8(axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().to_vec()).unwrap())
+                (status, String::from_utf8_lossy(&axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap()).into_owned())
             }
         };
 
@@ -346,6 +346,9 @@ mod routing_tests {
         assert!(dated.contains("Lauds for Friday, December 25, 2026: The Nativity of Our Lord."), "the preview names the feast");
         let (_, home) = get("example.org", "/").await;
         assert!(home.contains("og:title\" content=\"Daily Office\"") && !home.contains("noindex"));
+        assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
+        let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
+        assert_eq!(status, StatusCode::OK, "the preview card is served");
         let (_, far) = get("example.org", "/calendar/1900").await;
         assert!(far.contains("noindex"));
         let (_, missing) = get("example.org", "/nowhere").await;

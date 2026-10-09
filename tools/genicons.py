@@ -13,20 +13,23 @@ One scene feeds every platform. It is rendered on a 1536 canvas that is an
 Android adaptive layer (108dp); the central 1024 is the 72dp a launcher shows
 and is the iOS, web and Play Store tile. Small one-colour uses (favicon,
 Android's themed icon and notification) are flat vectors of the same ring and
-cross.
+cross. The web's link-preview card sets the apse tile on the site's light plaster
+wall beside the app's name in its own EB Garamond.
 
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
 Run from the repository root; it checks its own output (ring width, contrast
 and overall darkness at launcher size) and fails if the icon stops reading.
 """
 import argparse
+import io
 import json
 import math
 import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage as ndi
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -458,6 +461,69 @@ def check(name, scene, dark):
 ANDROID_DENSITIES = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
 
 
+def font(name, size):
+    """One of the site's own faces: PIL reads TrueType, not the WOFF2 the site serves."""
+    face = TTFont(WEB / f"fonts/{name}.woff2")
+    face.flavor = None
+    ttf = io.BytesIO()
+    face.save(ttf)
+    ttf.seek(0)
+    return ImageFont.truetype(ttf, size)
+
+
+def nave_wall(w, h):
+    """The site's light wall at w x h: plaster-wide.jpg cover-fitted and composed as style.css composes
+    it (min(texture, knee) / knee, screened with --plaster-tint, multiplied by --plaster-base, under a
+    veil of --bg at 100% - --plaster-strength)."""
+    tex = Image.open(WEB / "plaster-wide.jpg").convert("L")
+    s = max(w / tex.width, h / tex.height)
+    tex = tex.resize((round(tex.width * s), round(tex.height * s)), Image.LANCZOS)
+    x0, y0 = (tex.width - w) // 2, (tex.height - h) // 2
+    t = np.asarray(tex.crop((x0, y0, x0 + w, y0 + h)), np.float32) / 255
+    knee, strength = 166 / 255, 0.70
+    t = (np.minimum(t, knee) / knee)[..., None]
+    wash = (1 - (1 - t) * (1 - rgb("#e9d3c0"))) * rgb("#fffdf7")
+    return np.clip(rgb("#faf3e9") * (1 - strength) + wash * strength, 0, 1)
+
+
+def tailpiece(draw, x, y, w, colour, scale):
+    """genornaments' tailpiece at any width: two rules thinning as the brush lifts, meeting a quatrefoil."""
+    c, r = x + w / 2, 6.2 * scale
+    lobes = [(c, y)] + [(c + 0.46 * r * math.cos(k * math.pi / 2), y + 0.46 * r * math.sin(k * math.pi / 2)) for k in range(4)]
+    for cx, cy in lobes:
+        draw.ellipse((cx - r / 2, cy - r / 2, cx + r / 2, cy + r / 2), fill=colour)
+    for side in (-1, 1):
+        inner, outer = c + side * 9.5 * scale, c + side * w / 2
+        draw.polygon([(outer, y - 0.3 * scale), (inner, y - 0.75 * scale), (inner, y + 0.75 * scale), (outer, y + 0.3 * scale)], fill=colour)
+
+
+def share_card(icon_tile):
+    """The 1200x630 picture a shared link previews with (og:image): the app icon as a launcher shows it,
+    on the site's light plaster wall, beside the name, a tailpiece and what the app is, in the site's
+    EB Garamond and its light theme's gold and ink."""
+    w, h, d, left = 1200, 630, 380, 100
+    top = (h - d) // 2
+    ss = 4
+    corners = Image.new("L", (d * ss, d * ss), 0)
+    ImageDraw.Draw(corners).rounded_rectangle((0, 0, d * ss - 1, d * ss - 1), radius=round(d * ss * 0.2237), fill=255)
+    corners = corners.resize((d, d), Image.LANCZOS)
+    shadow = Image.new("L", (w, h), 0)
+    shadow.paste(corners, (left + 6, top + 14))
+    shadow = np.asarray(shadow.filter(ImageFilter.GaussianBlur(18)), np.float32)[..., None] / 255
+    card = to_image(nave_wall(w, h) * (1 - 0.28 * shadow))
+    card.paste(to_image(icon_tile).resize((d, d), Image.LANCZOS), (left, top), corners)
+    draw = ImageDraw.Draw(card)
+    x = left + d + 72
+    gold, gold_line, ink, muted = (154, 115, 40), (201, 172, 114), (36, 28, 23), (122, 106, 88)
+    draw.text((x, 268), "Daily Office", font=font("eb-garamond-regular", 112), fill=gold, anchor="ls")
+    tailpiece(draw, x + 4, 306, 500, gold_line, 2.2)
+    italic = font("eb-garamond-italic", 42)
+    draw.text((x, 372), "The Benedictine Divine Office", font=italic, fill=ink, anchor="ls")
+    draw.text((x, 424), "of the Western Rite", font=italic, fill=ink, anchor="ls")
+    draw.text((x, 500), "orthodoxwestbreviary.com", font=font("eb-garamond-regular", 30), fill=muted, anchor="ls")
+    return card
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, help="also write the 1024 tiles here (e.g. the Play Store's 512 is "
@@ -476,6 +542,7 @@ def main():
         save_rgb(night_tile, WEB / f"icons/icon-{size}.png", size)
         save_rgb(night_tile, WEB / f"icons/icon-maskable-{size}.png", size)
     save_rgb(night_tile, WEB / "icons/apple-touch-icon.png", 180)
+    save(share_card(night_tile), WEB / "icons/share-card.png", palette=True)
     (WEB / "favicon.svg").write_text(favicon())
     print("wrote", (WEB / "favicon.svg").relative_to(ROOT))
 
