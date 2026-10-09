@@ -871,4 +871,15 @@ fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
     let (days, _) = year(2027);
     let sixth = &days[Date::new(2027, 7, 6).ordinal() as usize - 1];
     assert!(sixth.commemorations.iter().any(|c| c.id == "ss-peter-paul-octave-day"));
+    // ...and at its II Vespers: 2026 ordo 8 Nov., "Comm. Oct ('O how glorious'
+    // 641; Col. 640)"; 2025 ordo 6 July and 2024 ordo 6 July, "Comm. Oct. ...
+    // & Peter &c. ('Peter the Apostle' 558; Col. 560)". The 2021 ordo's 6 July
+    // (Cyril only) is the older reading.
+    for (y, m, d, octave_day) in
+        [(2027, 7, 6, "ss-peter-paul-octave-day"), (2025, 7, 6, "ss-peter-paul-octave-day"), (2026, 11, 8, "all-saints-octave-day")]
+    {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        assert!(day.vespers.commemorations.iter().any(|c| c.id == octave_day), "{}", day.date);
+    }
 }
