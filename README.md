@@ -156,6 +156,12 @@ subscribed calendars keep polling their feed URL; the feed's links name the
 canonical host. The old host's `/sw.js` becomes a worker that clears its caches
 and unregisters. Unset, every host is served as itself.
 
+**Search and link previews.** `/robots.txt` and `/sitemap.xml` point crawlers at
+the undated pages (today's day and hours, this year's ordo, reminders, privacy)
+on the canonical host. Every page names its canonical URL without `?form=` and
+carries Open Graph tags for link previews; dated days and hours, ordo years
+other than this one and the next, and error pages are `noindex`.
+
 ### Usage metrics
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from

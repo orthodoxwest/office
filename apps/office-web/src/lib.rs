@@ -2,6 +2,7 @@
 //! templates, reminder feed, and optional usage store.
 
 mod cache;
+mod crawl;
 // build.rs trims and stamps the stylesheet with this module; the library
 // compiles it only to test it.
 #[cfg(test)]
@@ -54,6 +55,8 @@ enum Route {
     Reminders,
     Privacy,
     Calendar,
+    Robots,
+    Sitemap,
     Root,
 }
 
@@ -98,7 +101,11 @@ impl Server {
         let Some(path) = unescape_path(uri.path()) else { return bad_request() };
         let query = Query::parse(raw_query);
         let host = headers.get(header::HOST).and_then(|h| h.to_str().ok()).or_else(|| uri.authority().map(|a| a.as_str())).unwrap_or("");
-        let req = Req { method, headers, path: &path, query: &query };
+        let site = match self.canonical.as_deref() {
+            Some(canonical) => format!("https://{canonical}"),
+            None => ics::base_url(headers, host),
+        };
+        let req = Req { method, headers, path: &path, query: &query, site: &site };
         if let Some(canonical) = self.canonical.as_deref()
             && moved::is_elsewhere(host, canonical)
         {
@@ -107,7 +114,13 @@ impl Server {
                 Route::UsageEvent | Route::Static => {}
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
-                Route::UsageDashboard | Route::Reminders | Route::Privacy | Route::Calendar | Route::Root => {
+                Route::UsageDashboard
+                | Route::Reminders
+                | Route::Privacy
+                | Route::Calendar
+                | Route::Robots
+                | Route::Sitemap
+                | Route::Root => {
                     let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
                     return moved::forward(canonical, method, headers, target);
                 }
@@ -122,6 +135,8 @@ impl Server {
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
             Route::Calendar => self.calendar(&req),
+            Route::Robots => crawl::robots(&site),
+            Route::Sitemap => crawl::sitemap(&site, Server::local_year()),
             Route::Root => self.root(&req),
         }
     }
@@ -152,6 +167,8 @@ impl Server {
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
             .route("/calendar/{*path}", endpoint(Route::Calendar))
+            .route("/robots.txt", endpoint(Route::Robots))
+            .route("/sitemap.xml", endpoint(Route::Sitemap))
             .fallback(move |req: Request| entry(Arc::clone(&self), Route::Root, req))
     }
 }
@@ -293,6 +310,46 @@ mod routing_tests {
         assert!(worker.contains("unregister") && !worker.contains("PRECACHE_DAYS"));
         let worker = body(send(Method::GET, "example.org", "/sw.js", false).await.unwrap()).await;
         assert!(worker.contains("PRECACHE_DAYS"));
+    }
+
+    #[tokio::test]
+    async fn search_engines_find_the_undated_pages_on_the_canonical_host() {
+        let mut server = Server::new(Path::new("../../data")).unwrap();
+        server.canonical = moved::parse_host("example.org");
+        let router = Arc::new(server).router();
+        let get = |host: &str, path: &str| {
+            let request = Request::builder().uri(path).header(header::HOST, host).body(Body::empty()).unwrap();
+            let router = router.clone();
+            async move {
+                let resp = router.oneshot(request).await.unwrap();
+                let status = resp.status();
+                (status, String::from_utf8(axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().to_vec()).unwrap())
+            }
+        };
+
+        let (status, robots) = get("example.org", "/robots.txt").await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
+        let (_, sitemap) = get("example.org", "/sitemap.xml").await;
+        for page in ["/", "/lauds", "/compline", "/privacy"] {
+            assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
+        }
+        assert!(!sitemap.contains("<loc>https://example.org/calendar</loc>"), "the bare ordo address only redirects");
+        let (status, _) = get("office.fly.dev", "/robots.txt").await;
+        assert_eq!(status, StatusCode::MOVED_PERMANENTLY);
+
+        let canonical = |path: &str| format!("rel=\"canonical\" href=\"{}\"", path.replace('/', "&#x2f;"));
+        let (_, today) = get("example.org", "/lauds?form=priest").await;
+        assert!(today.contains(&canonical("https://example.org/lauds")) && !today.contains("noindex"));
+        let (_, dated) = get("example.org", "/lauds?date=2026-12-25").await;
+        assert!(dated.contains(&canonical("https://example.org/lauds/2026-12-25")) && dated.contains("noindex"));
+        assert!(dated.contains("Lauds for Friday, December 25, 2026: The Nativity of Our Lord."), "the preview names the feast");
+        let (_, home) = get("example.org", "/").await;
+        assert!(home.contains("og:title\" content=\"Daily Office\"") && !home.contains("noindex"));
+        let (_, far) = get("example.org", "/calendar/1900").await;
+        assert!(far.contains("noindex"));
+        let (_, missing) = get("example.org", "/nowhere").await;
+        assert!(missing.contains("noindex") && !missing.contains("rel=\"canonical\""));
     }
 
     #[tokio::test]

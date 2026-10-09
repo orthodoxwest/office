@@ -31,6 +31,8 @@ pub struct Req<'a> {
     /// The decoded path (`r.URL.Path`).
     pub path: &'a str,
     pub query: &'a Query,
+    /// The site's origin (`https://host`): the canonical host's when one is set.
+    pub site: &'a str,
 }
 
 const VALID_HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
@@ -218,7 +220,7 @@ impl Server {
     /// The styled page for a 4xx or 5xx condition.
     pub fn error_page(&self, req: &Req, status: StatusCode, message: &str) -> Response<Body> {
         let data = ErrorData {
-            chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
+            chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() },
             title: status.canonical_reason().unwrap_or("").to_string(),
             message: message.to_string(),
         };
@@ -230,7 +232,15 @@ impl Server {
     }
 
     pub fn privacy(&self, req: &Req) -> Response<Body> {
-        let data = PrivacyData { chrome: Chrome { page: "privacy".into(), nav_date: self.nav_date_now(req), ..Chrome::default() } };
+        let data = PrivacyData {
+            chrome: Chrome {
+                page: "privacy".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/privacy".into(),
+                ..Chrome::default()
+            },
+        };
         match self.pages.privacy(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),
@@ -238,7 +248,8 @@ impl Server {
     }
 
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
-        let data = NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), ..Chrome::default() } };
+        let data =
+            NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() } };
         match self.pages.not_found(&data) {
             Ok(body) => html(StatusCode::NOT_FOUND, body),
             Err(e) => render_failed(&e),
@@ -300,6 +311,10 @@ impl Server {
                 season_class: season_class(Some(day.season)).into(),
                 rank_class: String::new(),
                 show_today: slug != now_slug,
+                // Today's page is the one to find; each dated day is one tap from it.
+                site: req.site.into(),
+                canonical: home_link(if ds.is_empty() { "" } else { &slug }),
+                noindex: !ds.is_empty(),
             },
             date_str: long_date(date),
             date_slug: slug.clone(),
@@ -330,6 +345,7 @@ impl Server {
         if !VALID_HOURS.contains(&hour_name) {
             return self.not_found_page(req);
         }
+        let dated = !date_str.is_empty() || !req.query.get("date").is_empty();
         let loc = self.user_location(req);
         let (date, date_str) = if date_str.is_empty() {
             let ds = req.query.get("date");
@@ -397,6 +413,9 @@ impl Server {
                 season_class: season_class(hour.season).into(),
                 rank_class: rank_class(hour.rank, hour.color).into(),
                 show_today: date_str != today_slug,
+                site: req.site.into(),
+                canonical: if dated { hour_link(hour_name, &date_slug(date)) } else { hour_link(hour_name, "") },
+                noindex: dated,
             },
             leader_forms: composed
                 .iter()
@@ -492,7 +511,16 @@ impl Server {
             href: calendar_month_link(y, m),
         };
         let data = CalendarData {
-            chrome: Chrome { page: "calendar".into(), nav_date: date_slug(now), usage_when: year.to_string(), ..Chrome::default() },
+            chrome: Chrome {
+                page: "calendar".into(),
+                nav_date: date_slug(now),
+                usage_when: year.to_string(),
+                site: req.site.into(),
+                canonical: same_view(year),
+                // Every year has an ordo; search needs only this one and the next.
+                noindex: !(now.year()..=now.year() + 1).contains(&year),
+                ..Chrome::default()
+            },
             year,
             view: view.name().into(),
             year_roman: presentation::year_roman(year),
@@ -539,7 +567,13 @@ impl Server {
 
     pub fn reminders(&self, req: &Req) -> Response<Body> {
         let data = RemindersData {
-            chrome: Chrome { page: "reminders".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
+            chrome: Chrome {
+                page: "reminders".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/reminders".into(),
+                ..Chrome::default()
+            },
             hours: REMINDER_DEFAULTS
                 .iter()
                 .map(|&(slug, name, hh, mm, checked)| ReminderHour {
