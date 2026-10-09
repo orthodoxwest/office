@@ -18,6 +18,13 @@ pub struct Chrome {
     /// `rank-first-class` on a first-class day's hour, which is framed; empty otherwise.
     pub rank_class: String,
     pub show_today: bool,
+    /// The site's origin (`https://host`), for the absolute addresses search engines and link
+    /// previews read; empty on pages with no address of their own (errors, the usage report).
+    pub site: String,
+    /// The page's path on `site`, without the reader's own choices (`?form=`).
+    pub canonical: String,
+    /// Kept out of search results: a dated day or hour, an ordo year far from now, an error.
+    pub noindex: bool,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

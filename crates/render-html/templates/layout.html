@@ -3,8 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
+  {%- set description %}{% block description %}The Benedictine Divine Office of the Antiochian Western Rite Vicariate: Lauds through Compline for each day, with the ordo and liturgical calendar.{% endblock %}{% endset %}
+  <meta name="description" content="{{ description }}">
   <title>{% block title %}Daily Office{% endblock %}</title>
+  {# Search engines and link previews (Messages, WhatsApp, Facebook, Slack) read these. A dated
+       day or hour, a far year of the ordo and an error stay out of search results; their links
+       are still followed. See office-web crawl.rs. #}
+  {% if noindex %}<meta name="robots" content="noindex">{% endif %}
+  {% if site %}
+  <link rel="canonical" href="{{ (site ~ canonical)|url }}">
+  <meta property="og:site_name" content="Daily Office">
+  <meta property="og:type" content="website">
+  {# Shared without a date, home stands for the whole site rather than the day it was shared. #}
+  <meta property="og:title" content="{% if canonical == "/" %}Daily Office{% else %}{{ self.title() }}{% endif %}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ (site ~ canonical)|url }}">
+  <meta property="og:image" content="{{ (site ~ static("icons/icon-512.png"))|url }}">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="The Daily Office icon">
+  <meta name="twitter:card" content="summary">
+  {% endif %}
   {# Apply stored appearance before CSS to avoid a flash.
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
   <script>

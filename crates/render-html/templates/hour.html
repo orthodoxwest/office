@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block description %}{{ hour.title }} for {{ date_str }}{% if hour.feast %}: {{ hour.feast|typeset }}{% endif %}. The Benedictine Divine Office of the Antiochian Western Rite Vicariate.{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
