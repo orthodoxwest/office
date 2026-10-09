@@ -3101,5 +3101,107 @@
         "ref": "proper/lent-sunday-3/collect-vespers-friday"
       }
     ]
+  },
+  {
+    "id": "easter-week-daily-collects",
+    "source": "Monastic Diurnal pp. 367-370: a proper Collect for each day of Easter Week. 2026 ordo, 13-18 Apr.: Lauds, Hours and Vespers 'Col. (367)', '(368)', '(368)', '(368)', '(369)', '(369f)'; 18 Apr. Vespers of Low Sunday 'Col. (371)'. Issue #634.",
+    "cases": [
+      {
+        "date": "2026-04-13",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-monday/collect"
+      },
+      {
+        "date": "2026-04-14",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-tuesday/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect",
+        "contains": "yearly solemnity of the Lord's Resurrection"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "terce",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-16",
+        "hour": "sext",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-5/collect",
+        "contains": "knit together divers nations"
+      },
+      {
+        "date": "2026-04-17",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-6/collect",
+        "contains": "covenant of reconciliation"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "none",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect",
+        "contains": "devoutly kept the Paschal Feast"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/low-sunday/collect"
+      },
+      {
+        "date": "2025-04-23",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2027-05-08",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect"
+      }
+    ]
+  },
+  {
+    "id": "doctor-magnificat-antiphon-in-paschaltide",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-bede-venerable/magnificat-antiphon-first-easter",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2027-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon-easter",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2037-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      }
+    ]
   }
 ]

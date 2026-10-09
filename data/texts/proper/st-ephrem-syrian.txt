@@ -4,6 +4,14 @@
 [magnificat-antiphon-first]
 @use commons/confessor/magnificat-antiphon-doctor
 
+# 18 June falls in Paschaltide when Pentecost is late (2027, 2040, 2043, 2046), when
+# the Common of Confessors adds one Alleluia to each antiphon (Diurnal p. 6*, §3; #640).
+[magnificat-antiphon-easter]
+@use commons/confessor-doctor-paschal/magnificat-antiphon
+
+[magnificat-antiphon-first-easter]
+@use commons/confessor-doctor-paschal/magnificat-antiphon
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
