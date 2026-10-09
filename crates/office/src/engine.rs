@@ -452,7 +452,15 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             element(ElementType::Antiphon, text, r, &src)
         }
         "proper-opening-acclamation" => {
-            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            // Diurnal p. 235: Alleluia is said for the last time at Vespers
+            // of the Saturday before Septuagesima; Compline begins the
+            // season's "Praise be to thee".
+            let (text, src) = if hour_name == "vespers" && r == "alleluia" && day.is_septuagesima_eve() {
+                let key = "ordinary/shared/alleluia".to_string();
+                (t.get(&key).to_string(), key)
+            } else {
+                resolve_proper_text(day, hour_name, r, t)
+            };
             element(ElementType::OpeningAcclamation, text, r, &src)
         }
         "proper-collect" => {

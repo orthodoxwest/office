@@ -146,6 +146,7 @@ enum Atom {
     OfficeOfTheDead,
     AppendedOfficeOfTheDead,
     Triduum,
+    SeptuagesimaEve,
     Weekday(Weekday),
     Feast(String),
     Season(Season),
@@ -198,6 +199,7 @@ fn parse_atom(atom: &str) -> Result<Atom, String> {
         "office-of-the-dead" => Atom::OfficeOfTheDead,
         "appended-office-of-the-dead" => Atom::AppendedOfficeOfTheDead,
         "triduum" => Atom::Triduum,
+        "septuagesima-eve" => Atom::SeptuagesimaEve,
         _ => {
             if let Some(value) = atom.strip_prefix("weekday-") {
                 let day = Weekday::ALL.into_iter().find(|d| d.name().to_lowercase() == value);
@@ -236,6 +238,7 @@ fn evaluate_atom(atom: &Atom, day: &Day, moveable: Option<&MoveableDates>, t: &O
         Atom::OfficeOfTheDead => psalmody::is_office_of_the_dead(day),
         Atom::AppendedOfficeOfTheDead => day.vespers.appended_office_of_the_dead,
         Atom::Triduum => is_triduum(day),
+        Atom::SeptuagesimaEve => day.is_septuagesima_eve(),
         Atom::Weekday(w) => day.civil_weekday() == *w,
         Atom::Feast(id) => day.celebration_is(id),
         Atom::Season(s) => day.season == *s,

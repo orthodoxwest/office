@@ -33,10 +33,11 @@ then every restriction must hold:
 
 With no matching record, seasonal lookup is unrestricted. Scopes don't affect
 proper/common precedence, redirects, the Prime explicit-proper rule, or
-Vespers selection. Current records, all at Terce, Sext, and None:
+Vespers selection. Current records, at Terce, Sext, and None unless noted:
 
 | Season and slots | Easter offset | Other restrictions |
 |---|---|---|
+| Lent chapters, short responsories, hymns and versicles at Lauds and Vespers | from -42 | None |
 | Lent chapters and psalm antiphons | from -42 | Ferias, excluding Sunday |
 | Lent versicles | from -42 | None |
 | Passiontide chapters | [-14, -3) | Ferias, excluding Sunday |
@@ -46,8 +47,9 @@ Vespers selection. Current records, all at Terce, Sext, and None:
 
 ## Validation
 
-Slot selectors are `chapter`, `versicle`, and `psalm-antiphon*` (the whole
-psalm-antiphon family); hour-qualified or numbered keys aren't selectors. Each
+Slot selectors are `chapter`, `short-responsory`, `hymn`, `versicle`, and
+`psalm-antiphon*` (the whole psalm-antiphon family); hour-qualified or numbered
+keys aren't selectors. Each
 record needs an ID, source, hours, slots, and at least one restriction; season
 and hour names must be known, and each selector must have a seasonal corpus
 candidate. Loading rejects unknown fields, duplicate IDs/hours/weekdays/

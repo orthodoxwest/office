@@ -67,45 +67,89 @@ R. Thanks be to God.
 # SOURCE: monastic diurnal, p. 261 (III Week in Lent, Monday)
 Verily I say unto you, * No prophet is accepted in his own country.
 
+[collect-monday]
+# SOURCE: monastic diurnal, p. 261 (III Week in Lent, Monday, Collect at Lauds)
+We beseech thee, O merciful Lord, pour thy grace into our hearts: that like as we do abstain from bodily food, so we may restrain our senses from every harmful indulgence.
+
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 262 (III Week in Lent, Monday)
 But Jesus, passing * through the midst of them, went his way.
+
+[collect-vespers-monday]
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Monday, Collect after the Ant. on Magnificat)
+Let thy merciful kindness, O Lord, be present to help us: that we may ever deserve to be rescued from the imminent perils of our sins by thy protection, and also to be saved by thy deliverance.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday)
 If two of you * shall agree on earth as touching anything that they shall ask, it shall be done for them of my Father, saith the Lord.
 
+[collect-tuesday]
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday, Collect at Lauds)
+Hear us, O Almighty and merciful God: and of thy favour bestow upon us the gift of wholesome self-restraint.
+
 [magnificat-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday)
 Where two or three * are gathered together in my Name, there am I in the midst of them, saith the Lord.
+
+[collect-vespers-tuesday]
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday, Collect after the Ant. on Magnificat)
+Defend us, O Lord, by thy protection: and keep us evermore from all iniquity.
 
 [benedictus-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 262 (III Week in Lent, Wednesday)
 Hearken, * and understand ye the traditions which the Lord hath given you.
 
+[collect-wednesday]
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Wednesday, Collect at Lauds)
+Grant unto us, we beseech thee, O Lord: that by the wholesome discipline of fasting, and by abstaining from all hurtful offences, we may the more easily obtain thy merciful forgiveness.
+
 [magnificat-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 262 (III Week in Lent, Wednesday)
 To eat with unwashen hands * defileth not a man.
+
+[collect-vespers-wednesday]
+# SOURCE: monastic diurnal, p. 262, 263 (III Week in Lent, Wednesday, Collect after the Ant. on Magnificat)
+Grant, we beseech thee, Almighty God: that we who seek the grace of thy protection, may be delivered from all evils and serve thee with a quiet mind.
 
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday)
 And devils also * came out of many, crying out and saying: Thou art Christ the Son of God. And he, rebuking them, suffered them not to speak: for they knew that he was Christ.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday, Collect at Lauds (the Benedictine collect, printed before the Sarum Collect))
+May the blessed solemnity of thy Saints Cosmas and Damian magnify thee, O Lord: in which, by thy ineffable providence, thou hast both granted them eternal glory, and us the benefit of their help.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday)
 Whosoever had any sick, * they brought them unto Jesus; and they were healed.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday, Collect after the Ant. on Magnificat)
+Let thy heavenly favour, we beseech thee, O Lord, increase the people that serveth thee: and make them ever to keep thy commandments.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 263 (III Week in Lent, Friday)
 Whosoever drinketh * of the water that I shall give him shall never thirst.
 
+[collect-friday]
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Friday, Collect at Lauds)
+Lord, we pray thee, let thy gracious favour attend upon our fast: that as in the body we abstain from food, so likewise in the spirit we may fast from sin.
+
 [magnificat-antiphon-friday]
 # SOURCE: monastic diurnal, p. 263 (III Week in Lent, Friday)
 Sir, I perceive * that thou art a prophet. Our fathers worshipped in this mountain.
 
+[collect-vespers-friday]
+# SOURCE: monastic diurnal, p. 264 (III Week in Lent, Friday, Collect after the Ant. on Magnificat)
+Grant, we beseech thee, Almighty God: that we who put our trust in thy protection may by thy help overcome all things that withstand us.
+
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 264 (III Week in Lent, Saturday)
 But Jesus stooped down, * and wrote on the ground: If any is without sin, let him cast a stone at her.
+
+[collect-saturday]
+# SOURCE: monastic diurnal, p. 264 (III Week in Lent, Saturday, Collect at Lauds)
+Grant, we beseech thee, Almighty God: that they who abstain from food in mortification of the flesh, may fast from sin by following after righteousness.
 
 [magnificat-antiphon-first]
 # SOURCE: monastic diurnal, p. 259 (III Sunday in Lent, At I Vespers)

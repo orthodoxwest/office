@@ -2804,5 +2804,207 @@
         "contains": "Let us serve"
       }
     ]
+  },
+  {
+    "id": "septuagesima-eve-last-alleluia",
+    "source": "Monastic Diurnal p. 235: at the end of Vespers on the Saturday before Septuagesima \"Let us bless the Lord, alleluia, alleluia\", said thus \"even if Vespers have been of a Double Feast of the I or II Class\"; \"Henceforward Alleluia is not said until Holy Sabbath\". 2026 ordo, 7 February. Issue #615.",
+    "cases": [
+      {
+        "date": "2026-02-07",
+        "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "ordinary/shared/alleluia"
+      },
+      {
+        "date": "2027-02-27",
+        "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "ordinary/shared/alleluia"
+      },
+      {
+        "date": "2028-02-12",
+        "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "ordinary/shared/alleluia"
+      },
+      {
+        "date": "2035-02-24",
+        "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "ordinary/shared/alleluia"
+      },
+      {
+        "date": "2026-02-07",
+        "hour": "compline",
+        "slot": "alleluia",
+        "ref": "seasonal/septuagesima/alleluia"
+      },
+      {
+        "date": "2026-02-14",
+        "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "seasonal/septuagesima/alleluia"
+      }
+    ]
+  },
+  {
+    "id": "lenten-office-begins-at-saturday-vespers",
+    "source": "2026 ordo, Lent Office Notes: \"liturgically the Lenten order of the Office does not begin until Vespers of the following Saturday, and the Office hymns for the intervening days are those appointed for weekdays as previously\"; ordo pp. 40-42. Monastic Diurnal pp. 243-246, 250-251. Issue #605.",
+    "cases": [
+      {
+        "date": "2026-02-25",
+        "hour": "lauds",
+        "slot": "chapter",
+        "ref": "ordinary/lauds/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "lauds",
+        "slot": "chapter",
+        "ref": "ordinary/lauds/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "lauds",
+        "slot": "hymn",
+        "ref": "ordinary/lauds/hymn-thursday"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "lauds",
+        "slot": "short-responsory",
+        "ref": "ordinary/lauds/short-responsory"
+      },
+      {
+        "date": "2026-02-27",
+        "hour": "lauds",
+        "slot": "hymn",
+        "ref": "ordinary/lauds/hymn-friday"
+      },
+      {
+        "date": "2026-02-28",
+        "hour": "lauds",
+        "slot": "hymn",
+        "ref": "ordinary/lauds/hymn-saturday"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "vespers",
+        "slot": "chapter",
+        "ref": "ordinary/vespers/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "vespers",
+        "slot": "hymn",
+        "ref": "ordinary/vespers/hymn-thursday"
+      },
+      {
+        "date": "2026-02-27",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-friday"
+      },
+      {
+        "date": "2028-03-02",
+        "hour": "lauds",
+        "slot": "hymn",
+        "ref": "ordinary/lauds/hymn-thursday"
+      },
+      {
+        "date": "2026-02-28",
+        "hour": "vespers",
+        "slot": "hymn",
+        "ref": "seasonal/lent/hymn-vespers"
+      },
+      {
+        "date": "2026-03-02",
+        "hour": "lauds",
+        "slot": "chapter",
+        "ref": "seasonal/lent/chapter-lauds"
+      },
+      {
+        "date": "2026-03-02",
+        "hour": "lauds",
+        "slot": "hymn",
+        "ref": "seasonal/lent/hymn-lauds"
+      }
+    ]
+  },
+  {
+    "id": "lenten-ferial-collects",
+    "source": "Monastic Diurnal pp. 244-278 (each feria's collect at Lauds, and a second after the Ant. on Magnificat); p. 244: \"The Collect of Lauds is said at all the Hours through None\"; 2026 ordo, Lent Office Notes: \"The second Collect given in the Proper for each Feria is said only at Vespers.\" 2024 ordo, 22 Feb. Vespers: \"Comm. Fer. ('That which ye have done' & Col. 252)\". Issue #606.",
+    "cases": [
+      {
+        "date": "2026-02-26",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/quinquagesima/collect-thursday"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/quinquagesima/collect-vespers-thursday"
+      },
+      {
+        "date": "2026-03-02",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/lent-sunday-1/collect-monday"
+      },
+      {
+        "date": "2026-03-04",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/lent-ember-wednesday/collect-vespers"
+      },
+      {
+        "date": "2026-03-10",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/lent-sunday-2/collect-tuesday",
+        "contains": "Perfect in us"
+      },
+      {
+        "date": "2026-03-10",
+        "hour": "sext",
+        "slot": "collect",
+        "ref": "proper/lent-sunday-2/collect-tuesday"
+      },
+      {
+        "date": "2026-03-10",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/lent-sunday-2/collect-vespers-tuesday",
+        "contains": "Be favourable to our supplications"
+      },
+      {
+        "date": "2026-03-12",
+        "hour": "lauds",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-collect",
+        "ref": "proper/lent-sunday-2/collect-thursday"
+      },
+      {
+        "date": "2026-03-12",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-collect",
+        "ref": "proper/lent-sunday-2/collect-vespers-thursday"
+      },
+      {
+        "date": "2026-03-23",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/laetare-sunday/collect-monday"
+      },
+      {
+        "date": "2026-03-31",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/passion-sunday/collect-vespers-tuesday"
+      }
+    ]
   }
 ]
