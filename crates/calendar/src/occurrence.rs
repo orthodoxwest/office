@@ -38,9 +38,10 @@ pub fn compare_feast_precedence_with_decision(a: &Feast, b: &Feast) -> (bool, De
 
     // Privileged ferias of the second class take the office over every feast
     // below a Double of the second class. So an Advent Ember Day takes the
-    // office from a Greater Double Octave Day, which is commemorated (Table of
-    // Occurrence, rubrics p. 60: Common Octave Day and Ember Day, 4; XIII.16,
-    // p. 64): 15 December 2021, 2027, 2032. The 2021 ordo keeps the Octave of
+    // office from a Common Octave Day, which is commemorated (rubrics p. 59:
+    // the Octave Day "is preferred to any Feast except a I or II Class Double,
+    // an Ember Day, or Rogation Monday", naming the Conception's octave; Table
+    // of Occurrence, p. 60, 4; XIII.16, p. 64): 15 December 2021, 2027, 2032. The 2021 ordo keeps the Octave of
     // the Conception, commemorating the feria; awaiting a ruling (#638).
     let (a_pf, b_pf) = (is_privileged_feria(a), is_privileged_feria(b));
     if a_pf != b_pf {

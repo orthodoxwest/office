@@ -1162,8 +1162,9 @@ fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
 }
 
 /// #638 (needs ruling): an Advent Ember Day takes the office from a Common
-/// Octave Day, which is commemorated (Table of Occurrence, rubrics p. 60, 4;
-/// XIII.16, p. 64), so on its eve Day VII keeps II Vespers and commemorates the
+/// Octave Day, which is commemorated (rubrics p. 59, "Common Octaves": the
+/// Octave Day yields to "an Ember Day", naming the Conception's octave; Table
+/// of Occurrence, p. 60, 4; XIII.16, p. 64), so on its eve Day VII keeps II Vespers and commemorates the
 /// Octave Day from I Vespers. The 2021 ordo instead keeps the Octave of the
 /// Conception on Ember Wednesday 15 December. Day VII on Ember Wednesday yields
 /// to the feria (2022 ordo 14 December, as the Table's "Day in Common Octave").
