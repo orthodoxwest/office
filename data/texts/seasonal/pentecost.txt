@@ -2,3 +2,11 @@
 # Ordinary time — Alleluia resumes its standard form from ordinary/shared/alleluia.
 # Add overrides here as needed.
 
+[hymn-doxology-pentecost]
+# SOURCE: Monastic Diurnal.pdf, p. 3 (On Pentecost and throughout the Octave) (#609)
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+Whom with the Father we adore
+And Holy Ghost for evermore.
+
+Amen.

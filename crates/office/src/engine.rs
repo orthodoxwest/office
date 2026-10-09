@@ -490,11 +490,16 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
                 return element(ElementType::Hymn, text, r, &src);
             }
             let mut refs = vec![src.clone()];
-            let doxology_ref = if uses_ascension_hymn_doxology(day) { "hymn-doxology-ascension" } else { "hymn-doxology" };
-            let (dox, dox_ref) = resolve_proper_text(day, hour_name, doxology_ref, t);
-            if dox_ref.starts_with("seasonal/") {
-                text = substitute_hymn_doxology(&text, &dox);
-                refs.push(dox_ref);
+            // A proper `hymn-doxology` entry (usually @omit) marks a hymn whose
+            // ending "is never changed".
+            let (_, own_ending) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
+            let keeps_own_ending = own_ending.starts_with("proper/");
+            if !keeps_own_ending && has_common_metre_ending(&text) {
+                let (dox, dox_ref) = resolve_proper_text(day, hour_name, hymn_doxology_ref(day), t);
+                if dox_ref.starts_with("seasonal/") {
+                    text = substitute_hymn_doxology(&text, &dox);
+                    refs.push(dox_ref);
+                }
             }
             let (title, body) = corpus::lines::split_hymn_title(&text);
             let mut e = OfficeElement::new(ElementType::Hymn, body);
@@ -523,13 +528,80 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             e.label = label;
             e
         }
+        "versicle" if r == BENEDICAMUS_REF && says_paschal_benedicamus(day, hour_name) => {
+            resolve_element(&HourElement::new(&elem.kind, BENEDICAMUS_ALLELUIA_REF), t)
+        }
         _ => resolve_element(elem, t),
     }
 }
 
-/// The Ascensiontide hymn ending, from the Ascension until Pentecost.
-fn uses_ascension_hymn_doxology(day: &Day) -> bool {
-    day.season == Season::Easter && day.date >= MoveableDates::compute(day.date.year()).ascension
+const BENEDICAMUS_REF: &str = "shared/leader/benedicamus-domino";
+const BENEDICAMUS_ALLELUIA_REF: &str = "shared/formulas/benedicamus-domino-alleluia";
+
+/// Diurnal p. 365: "Let us bless the Lord, alleluia, alleluia" at Lauds and
+/// Vespers from Easter Day "only through Lauds of Saturday before Low
+/// Sunday"; that Saturday's Vespers are I Vespers of Low Sunday (2026 ordo
+/// p. 18).
+fn says_paschal_benedicamus(day: &Day, hour_name: &str) -> bool {
+    let easter = MoveableDates::compute(day.date.year()).easter;
+    matches!(hour_name, "lauds" | "vespers") && day.date >= easter && day.date < easter.add_days(7)
+}
+
+/// The seasonal hymn ending (Diurnal p. 3). Eastertide's "To thee who, dead,
+/// again dost live" ends "all Hymns of the same metre through None of the
+/// Vigil of the Ascension, except those which have a proper Ending" (p. 364),
+/// then the Ascensiontide ending until Pentecost, and the Pentecost ending
+/// through its Octave. I Vespers and Compline belong to the following day's
+/// office.
+fn hymn_doxology_ref(day: &Day) -> &'static str {
+    let dates = MoveableDates::compute(day.date.year());
+    match day.season {
+        Season::Easter if day.date >= dates.ascension => "hymn-doxology-ascension",
+        Season::Easter => "hymn-doxology-easter",
+        Season::Pentecost if day.date < dates.pentecost.add_days(7) => "hymn-doxology-pentecost",
+        Season::Advent
+        | Season::Christmas
+        | Season::Epiphany
+        | Season::Septuagesima
+        | Season::Lent
+        | Season::Passiontide
+        | Season::Pentecost => "hymn-doxology",
+    }
+}
+
+/// The seasonal endings are iambic dimeter quatrains and replace only an
+/// ending of that metre: four lines of about eight syllables. Sapphic
+/// (11.11.11.5), trochaic (8.7.8.7.8.7) and shorter-lined hymns keep theirs.
+fn has_common_metre_ending(hymn: &str) -> bool {
+    let Some(body) = hymn.trim().strip_suffix("Amen.") else { return false };
+    let Some(stanza) = body.trim_end().rsplit("\n\n").next() else { return false };
+    let lines: Vec<&str> = stanza.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+    lines.len() == 4 && lines.iter().all(|l| (7..=9).contains(&syllables(l)))
+}
+
+/// A rough English syllable count: vowel groups per word, less a silent
+/// final "e", "es" or "ed". Close enough to tell 8 from 6 or 11.
+fn syllables(line: &str) -> usize {
+    line.split(|c: char| !c.is_ascii_alphabetic() && c != '\'' && c != '\u{2019}')
+        .map(|w| w.to_ascii_lowercase().replace(['\'', '\u{2019}'], ""))
+        .filter(|w| !w.is_empty())
+        .map(|w| {
+            let is_vowel = |c: char| "aeiouy".contains(c);
+            let mut groups = 0;
+            let mut prev = false;
+            for c in w.chars() {
+                let v = is_vowel(c);
+                if v && !prev {
+                    groups += 1;
+                }
+                prev = v;
+            }
+            let silent = (w.ends_with('e') && !w.ends_with("le") && !w.ends_with("ee"))
+                || (w.ends_with("es") && !["ses", "xes", "zes", "ches", "shes", "ces", "ges"].iter().any(|s| w.ends_with(s)))
+                || (w.ends_with("ed") && !w.ends_with("ted") && !w.ends_with("ded"));
+            if silent && groups > 1 { groups - 1 } else { groups.max(1) }
+        })
+        .sum()
 }
 
 /// De-duplicates refs, dropping empty ones, keeping first occurrences.

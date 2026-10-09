@@ -1,6 +1,15 @@
 # Eastertide seasonal overrides (Easter Sunday through the Saturday after Pentecost)
 # Alleluia is doubled throughout Eastertide.
 
+[hymn-doxology-easter]
+# SOURCE: Monastic Diurnal.pdf, p. 3 (In Eastertide); p. 364: "Thus end all Hymns of the same metre through None of the Vigil of the Ascension" (#609)
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+
+Amen.
+
 [hymn-doxology-ascension]
 # SOURCE: draft archdiocesan Lauds/Vespers books (seasonal hymn rubric from Ascension Day until Pentecost)
 All glory, Lord, to thee we pay,
