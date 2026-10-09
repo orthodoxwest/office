@@ -13,8 +13,8 @@ One scene feeds every platform. It is rendered on a 1536 canvas that is an
 Android adaptive layer (108dp); the central 1024 is the 72dp a launcher shows
 and is the iOS, web and Play Store tile. Small one-colour uses (favicon,
 Android's themed icon and notification) are flat vectors of the same ring and
-cross. The web's link-preview card sets the same gilt mark on a wide stretch of
-the apse wall beside the app's name in its own EB Garamond.
+cross. The web's link-preview card sets the apse tile on the site's light plaster
+wall beside the app's name in its own EB Garamond.
 
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
 Run from the repository root; it checks its own output (ring width, contrast
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 from fontTools.ttLib import TTFont
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage as ndi
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -471,27 +471,56 @@ def font(name, size):
     return ImageFont.truetype(ttf, size)
 
 
-def share_card(scene, ground):
-    """The 1200x630 picture a shared link previews with (og:image): the apse's mark on a wide stretch
-    of its bare wall, the name and what it is set beside it."""
-    w, h = 1200, 630
-    band = round(N * h / w)
-    o = (N - band) // 2
-    card = to_image(ground[o:o + band]).resize((w, h), Image.LANCZOS)
-    ring, cross = marks()
-    side = 2 * (RING_OUT + 8)
-    c0 = (N - side) // 2
-    crop = (slice(c0, c0 + side), slice(c0, c0 + side))
-    alpha = Image.fromarray((np.clip(ring + cross, 0, 1)[crop] * 255 + 0.5).astype(np.uint8), "L")
-    d, left = 400, 115
+def nave_wall(w, h):
+    """The site's light wall at w x h: plaster-wide.jpg cover-fitted and composed as style.css composes
+    it (min(texture, knee) / knee, screened with --plaster-tint, multiplied by --plaster-base, under a
+    veil of --bg at 100% - --plaster-strength)."""
+    tex = Image.open(WEB / "plaster-wide.jpg").convert("L")
+    s = max(w / tex.width, h / tex.height)
+    tex = tex.resize((round(tex.width * s), round(tex.height * s)), Image.LANCZOS)
+    x0, y0 = (tex.width - w) // 2, (tex.height - h) // 2
+    t = np.asarray(tex.crop((x0, y0, x0 + w, y0 + h)), np.float32) / 255
+    knee, strength = 166 / 255, 0.70
+    t = (np.minimum(t, knee) / knee)[..., None]
+    wash = (1 - (1 - t) * (1 - rgb("#e9d3c0"))) * rgb("#fffdf7")
+    return np.clip(rgb("#faf3e9") * (1 - strength) + wash * strength, 0, 1)
+
+
+def tailpiece(draw, x, y, w, colour, scale):
+    """genornaments' tailpiece at any width: two rules thinning as the brush lifts, meeting a quatrefoil."""
+    c, r = x + w / 2, 6.2 * scale
+    lobes = [(c, y)] + [(c + 0.46 * r * math.cos(k * math.pi / 2), y + 0.46 * r * math.sin(k * math.pi / 2)) for k in range(4)]
+    for cx, cy in lobes:
+        draw.ellipse((cx - r / 2, cy - r / 2, cx + r / 2, cy + r / 2), fill=colour)
+    for side in (-1, 1):
+        inner, outer = c + side * 9.5 * scale, c + side * w / 2
+        draw.polygon([(outer, y - 0.3 * scale), (inner, y - 0.75 * scale), (inner, y + 0.75 * scale), (outer, y + 0.3 * scale)], fill=colour)
+
+
+def share_card(icon_tile):
+    """The 1200x630 picture a shared link previews with (og:image): the app icon as a launcher shows it,
+    on the site's light plaster wall, beside the name, a tailpiece and what the app is, in the site's
+    EB Garamond and its light theme's gold and ink."""
+    w, h, d, left = 1200, 630, 380, 100
     top = (h - d) // 2
-    card.paste(to_image(scene[crop]).resize((d, d), Image.LANCZOS), (left, top), alpha.resize((d, d), Image.LANCZOS))
+    ss = 4
+    corners = Image.new("L", (d * ss, d * ss), 0)
+    ImageDraw.Draw(corners).rounded_rectangle((0, 0, d * ss - 1, d * ss - 1), radius=round(d * ss * 0.2237), fill=255)
+    corners = corners.resize((d, d), Image.LANCZOS)
+    shadow = Image.new("L", (w, h), 0)
+    shadow.paste(corners, (left + 6, top + 14))
+    shadow = np.asarray(shadow.filter(ImageFilter.GaussianBlur(18)), np.float32)[..., None] / 255
+    card = to_image(nave_wall(w, h) * (1 - 0.28 * shadow))
+    card.paste(to_image(icon_tile).resize((d, d), Image.LANCZOS), (left, top), corners)
     draw = ImageDraw.Draw(card)
-    x, gold, wash = left + d + 70, (214, 176, 98), (226, 214, 190)   # the leaf at rest; a limewash pale
-    draw.text((x, h / 2 - 18), "Daily Office", font=font("eb-garamond-regular", 108), fill=gold, anchor="ls")
-    italic = font("eb-garamond-italic", 44)
-    draw.text((x, h / 2 + 52), "The Benedictine Divine Office", font=italic, fill=wash, anchor="ls")
-    draw.text((x, h / 2 + 106), "of the Western Rite", font=italic, fill=wash, anchor="ls")
+    x = left + d + 72
+    gold, gold_line, ink, muted = (154, 115, 40), (201, 172, 114), (36, 28, 23), (122, 106, 88)
+    draw.text((x, 268), "Daily Office", font=font("eb-garamond-regular", 112), fill=gold, anchor="ls")
+    tailpiece(draw, x + 4, 306, 500, gold_line, 2.2)
+    italic = font("eb-garamond-italic", 42)
+    draw.text((x, 372), "The Benedictine Divine Office", font=italic, fill=ink, anchor="ls")
+    draw.text((x, 424), "of the Western Rite", font=italic, fill=ink, anchor="ls")
+    draw.text((x, 500), "orthodoxwestbreviary.com", font=font("eb-garamond-regular", 30), fill=muted, anchor="ls")
     return card
 
 
@@ -513,7 +542,7 @@ def main():
         save_rgb(night_tile, WEB / f"icons/icon-{size}.png", size)
         save_rgb(night_tile, WEB / f"icons/icon-maskable-{size}.png", size)
     save_rgb(night_tile, WEB / "icons/apple-touch-icon.png", 180)
-    save(share_card(night, vault), WEB / "icons/share-card.png", palette=True)
+    save(share_card(night_tile), WEB / "icons/share-card.png", palette=True)
     (WEB / "favicon.svg").write_text(favicon())
     print("wrote", (WEB / "favicon.svg").relative_to(ROOT))
 
