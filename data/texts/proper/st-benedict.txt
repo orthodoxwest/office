@@ -52,9 +52,11 @@ Benedict, the man of God, * was filled with the spirit of all the righteous: may
 Behold a great Confessor, who was as the morning star in the midst of a cloud, and as the moon at the full: * as the sun shining upon the temple of the Most High.
 R. Thanks be to God.
 
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
+[chapter-vespers]
+# Diurnal p. 493: I Vespers "Chapter as below at Lauds, p. 495"; II Vespers "All as at
+# I Vespers" (p. 497); 2026 ordo 21 Mar: Chp.(495).
+@use proper/st-benedict/chapter-lauds
+
 [hymn-lauds]
 # SOURCE: Monastic Diurnal.pdf, pp. 495-496 (St Benedict, At Lauds)
 Inter aeternas
@@ -134,9 +136,15 @@ Amen.
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
+[short-responsory-vespers]
+# SOURCE: diurnal p. 493 (At I Vespers; II Vespers "All as at I Vespers", p. 497)
+R. Holy Father Benedict, * Intercede for us.
+R. Holy Father Benedict.
+V. That we may be made worthy of the promises of Christ.
+R. Intercede for us.
+Glory be.
+R. Holy Father Benedict.
+
 # [vespers-psalmody]
 # Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
 #
@@ -179,12 +187,16 @@ Amen.
 # [chapter-ferial-prime]
 # Proper ferial chapter at Prime when the office explicitly supplies one.
 #
-# [chapter-terce]
-# Proper chapter at Terce.
-#
-# [chapter-sext]
-# Proper chapter at Sext.
-#
+[chapter-terce]
+# Diurnal p. 497: "Chapter as above at Lauds."
+@use proper/st-benedict/chapter-lauds
+
+[chapter-sext]
+# SOURCE: diurnal p. 497
+!Ecclus 50:3
+In his days the wells of water flowed out, and they were filled as the sea above measure. * He took care of his people that they should not fall.
+R. Thanks be to God.
+
 [chapter-none]
 # SOURCE: diurnal p. 497
 !Ecclus 50:9, 10, 12, 13

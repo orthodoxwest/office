@@ -650,6 +650,33 @@ fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
             }
         }
     }
+    // Diurnal pp. 493–497 (2026 ordo 21 Mar "Chp.(495) /Short ℟ &c.(493f)"):
+    // St Benedict's Vespers and Terce take the Lauds chapter, Sext and None
+    // have their own, and both Vespers the proper short responsory. In 2027
+    // the feast yields its Sunday and is kept on Monday 22 March.
+    for (y, day) in [(2026, 21), (2027, 22), (2030, 21)] {
+        let (days, moveable) = year(y);
+        let elements = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        let (eve, day) = (Date::new(y, 3, day - 1), Date::new(y, 3, day));
+        for (name, date, chapter) in [
+            ("vespers", eve, "Sir 50:6-7"),
+            ("lauds", day, "Sir 50:6-7"),
+            ("terce", day, "Sir 50:6-7"),
+            ("sext", day, "Ecclus 50:3"),
+            ("none", day, "Ecclus 50:9, 10, 12, 13"),
+            ("vespers", day, "Sir 50:6-7"),
+        ] {
+            let hour = elements(name, date);
+            assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
+            if name == "vespers" {
+                let responsory = hour.iter().find(|e| e.kind == ElementType::ShortResponsory).unwrap();
+                assert!(responsory.text.starts_with("R. Holy Father Benedict"), "{date} {name}");
+            }
+        }
+    }
 }
 
 #[test]

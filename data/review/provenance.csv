@@ -2398,6 +2398,7 @@ proper/st-bede-venerable/collect,c3ee8aef7130,diurnal,,528,verified,codex,2026-0
 proper/st-benedict/benedictus-antiphon,5eea5a137011,diurnal,"St Benedict, At Lauds, Ant. on Benedictus",496,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/chapter-lauds,da3ca2245297,diurnal,"St Benedict, At Lauds, Chapter",495,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/chapter-none,dcd2be32a3f5,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-benedict/chapter-sext,b6715627a5bd,diurnal,"March 21 St Benedict, At Sext, Chapter Ecclus. 50:3",497,verified,claude,2026-10-09,word-for-word from printed page image
 proper/st-benedict/collect,d44d2c5ecc2b,Monastic Diurnal.pdf,proper/st-benedict/collect; PDF pages 542,496,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording.
 proper/st-benedict/hymn-lauds,9cf85218b14f,diurnal,"St Benedict, At Lauds, Inter aeternas",495-496,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/hymn-vespers,ce8291584f07,diurnal,"St Benedict, At I Vespers, Laudibus cives",494,verified,claude,2026-09-28,word-for-word from printed page image
@@ -2408,6 +2409,7 @@ proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,202
 proper/st-benedict/psalm-antiphon-3,11b76cedfadb,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-benedict/psalm-antiphon-4,c1ebf0c51296,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-benedict/psalm-antiphon-5,01022ce96162,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-benedict/short-responsory-vespers,d8f91e1f7937,diurnal,"March 21 St Benedict, At I Vespers, Short R.",493,verified,claude,2026-10-09,word-for-word from printed page image; abbreviated repeats as printed
 proper/st-callistus/collect,990f8895f35b,diurnal,,624,verified,codex,2026-09-05,Word-for-word after normalization
 proper/st-catherine-alexandria/collect,ff4bffd9b5a3,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 832",PDF p. 20,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; corrected from the Vicariate Missal draft wording. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 820.
 proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,Monastic Diurnal.pdf,"Nov 22 St Cecilia, At Lauds, Ant. on Benedictus; PDF pages 710",666,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 666.
