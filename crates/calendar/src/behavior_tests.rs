@@ -217,6 +217,35 @@ fn first_class_feasts_admit_only_privileged_octaves() {
 }
 
 #[test]
+fn first_class_doubles_admit_no_common_vigil() {
+    // General Rubrics VI.2 and XIV.7 (#616): nothing is said of a Vigil on a
+    // Solemnity "unless it is the Vigil of the Epiphany"; a II Class Double
+    // keeps the Common Vigil (XIV.8).
+    let vigil = |id: &str, rank| {
+        let mut v = (*feast(id, rank, Category::Feria)).clone();
+        v.is_vigil = true;
+        v.vigil_of = Some("example".into());
+        Arc::new(v)
+    };
+    let common = vigil("vigil-of-nativity-john-baptist", Rank::Simple);
+    let epiphany = vigil("vigil-epiphany", Rank::SemiDouble);
+    for (winner, comm, kept) in [
+        (feast("corpus-christi", Rank::Double1stClass, Category::Lord), &common, false),
+        (feast("nativity-john-baptist", Rank::Double1stClass, Category::Confessor), &common, false),
+        (feast("vigil-pentecost", Rank::Double1stClass, Category::Feria), &common, false),
+        (feast("first-class", Rank::Double1stClass, Category::Lord), &epiphany, true),
+        (feast("visitation-bvm", Rank::Double2ndClass, Category::BlessedVirgin), &common, true),
+        (feast("double", Rank::Double, Category::Martyr), &common, true),
+    ] {
+        let (out, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(comm), OrderContext::default());
+        assert_eq!(!out.is_empty(), kept, "{} under {}: {decisions:?}", comm.id, winner.id);
+        if !kept {
+            assert!(decisions.iter().any(|d| d.rule == "commemoration:vigil-on-first-class-double"));
+        }
+    }
+}
+
+#[test]
 fn joseph_solemnity_suppresses_doubles_like_a_primary_feast() {
     // Fr Jason's #138 ruling alone (no ordo has a Double on the day): St
     // Joseph's Solemnity follows the Primary Feast list.
