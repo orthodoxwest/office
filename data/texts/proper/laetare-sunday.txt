@@ -61,45 +61,89 @@ R. Thanks be to God.
 # SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday)
 Take these things hence, * saith the Lord, and make not my Father's house an house of merchandise.
 
+[collect-monday]
+# SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday, Collect at Lauds)
+Grant, we beseech thee, Almighty God: that we who year by year devoutly renew this holy observance, may please thee both in mind and body.
+
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday)
 Destroy this temple, * saith the Lord, and in three days I will raise it up: but he spake of the temple of his body.
+
+[collect-vespers-monday]
+# SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday, Collect after the Ant. on Magnificat)
+O Lord, we beseech thee mercifully to hear us: and grant that we, to whom thou hast given an hearty desire to pray, may by thy mighty aid be defended and comforted in all dangers and adversities.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: monastic diurnal, pp. 266–267 (IV Week in Lent, Tuesday)
 Why go ye about * to kill me, a man that hath told you the truth?
 
+[collect-tuesday]
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Tuesday, Collect at Lauds)
+We beseech thee, O Lord, that the sacred fast which we observe: may bring upon us both an increase in all godly conversation, and the continual help of thy loving-kindness.
+
 [magnificat-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Tuesday)
 But no man * laid hands on him, because his hour was not yet come.
+
+[collect-vespers-tuesday]
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Tuesday, Collect after the Ant. on Magnificat)
+Have compassion, O Lord, upon thy people: and grant that those who labour under continual tribulations may be graciously relieved.
 
 [benedictus-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday)
 Master, * wherein hath this man sinned, that he was born blind? Jesus answered and said: Neither hath this man sinned, nor his parents; but that the works of God should be manifest in him.
 
+[collect-wednesday]
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday, Collect at Lauds)
+O God, who through the ordinance of fasting dost vouchsafe to the righteous the reward of his deserving, and to the sinner forgiveness of his sin: have mercy upon thy suppliant people, that the confession of our guilt may avail to obtain the pardon of our offences.
+
 [magnificat-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday)
 A man * that is called Jesus made clay out of spittle and anointed mine eyes, and now I see.
+
+[collect-vespers-wednesday]
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday, Collect after the Ant. on Magnificat)
+Let thy merciful ears, O Lord, be open to the prayers of thy humble servants: and that they may obtain their petitions, make them to ask such things as shall please thee.
 
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Thursday)
 Jesus went * into a city called Nain: and behold there was a dead man carried out, the only son of his mother.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Thursday, Collect at Lauds)
+Grant, we beseech thee, Almighty God: that we who are chastised by voluntary fasting, may be gladdened by holy devotion; that our earthly affections being weakened, we may the more easily lay hold on heavenly things.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Thursday)
 A great prophet * is risen up among us, and God hath visited his people.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Thursday, Collect after the Ant. on Magnificat)
+O God, the Disposer and Ruler of thy people: drive out the sins which assail them; that they may ever be well-pleasing unto thee, and safe under thy protection.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday)
 Our friend * Lazarus sleepeth: let us go, that we may awake him out of sleep.
 
+[collect-friday]
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday, Collect at Lauds)
+O God, who renewest the world by ineffable sacraments: grant, we beseech thee, that thy Church may never fail to profit by thine eternal institutions, nor yet be left destitute of thy temporal help.
+
 [magnificat-antiphon-friday]
 # SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday)
 Lord, if thou hadst been here, * Lazarus would not have died: lo, by this time he stinketh; for he hath lain in the grave four days already.
 
+[collect-vespers-friday]
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday, Collect after the Ant. on Magnificat)
+Grant, we beseech thee, Almighty God: that we who, knowing our own weakness, do put our whole trust and confidence in thy strength, may ever rejoice in thy loving-kindness.
+
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Saturday)
 He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
+
+[collect-saturday]
+# SOURCE: monastic diurnal, p. 268, 269 (IV Week in Lent, Saturday, Collect at Lauds)
+Let our devout affections, O Lord, we beseech thee, be made fruitful through thy grace: for then will the fast which we have undertaken be profitable unto us, if it be well-pleasing unto thy goodness.
 
 [magnificat-antiphon-first]
 # SOURCE: monastic diurnal, p. 264 (IV Sunday in Lent, At I Vespers)

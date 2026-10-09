@@ -708,6 +708,23 @@ fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     check(2026, 1, 14, "vespers", "Only and Trinal", "For thine Epiphany");
 }
 
+/// Diurnal p. 235: Vespers of the Saturday before Septuagesima end "Let us
+/// bless the Lord, alleluia, alleluia", even when they are of the Saturday's
+/// own feast (St Matthias, 2035); the next Saturday's do not (#615).
+#[test]
+fn septuagesima_eve_dismissal_keeps_the_alleluias() {
+    const ALLELUIA: &str = "shared/formulas/benedicamus-domino-alleluia";
+    const PLAIN: &str = "shared/leader/benedicamus-domino";
+    for (date, want) in [("2026-02-07", ALLELUIA), ("2027-02-27", ALLELUIA), ("2035-02-24", ALLELUIA), ("2026-02-14", PLAIN)] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let refs: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+        let dismissals: Vec<_> = refs.iter().filter(|r| [ALLELUIA, PLAIN].contains(r)).collect();
+        assert_eq!(dismissals, [&want], "{date}");
+    }
+}
+
 /// Commemorations whose feast definition chooses their texts: the Common is
 /// the right one for who they are (#617), "N." is a name (#607), and the
 /// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).

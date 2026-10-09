@@ -197,6 +197,7 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
     ref_errors.sort();
 
     parse_errors.extend(declaration_errors);
+    parse_errors.extend(validate_lenten_ferial_collects(corpus));
     parse_errors.extend(validate_omissions(corpus));
     parse_errors.extend(ref_errors);
     parse_errors
@@ -275,6 +276,44 @@ fn validate_lauds_psalmody_declarations(corpus: &Corpus) -> Vec<String> {
     errs
 }
 
+/// The Lenten ferias whose collects the Diurnal prints (pp. 244-278), by the
+/// week proper they read from: each has a Lauds collect, said through None,
+/// and a Vespers collect, except Saturday, whose Vespers are the Sunday's. Ash
+/// Wednesday and the Ember days are their own celebrations.
+const LENTEN_FERIAL_COLLECTS: [(&str, &[&str]); 6] = [
+    ("quinquagesima", &["thursday", "friday", "saturday"]),
+    ("lent-sunday-1", &["monday", "tuesday", "thursday"]),
+    ("lent-sunday-2", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("lent-sunday-3", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("laetare-sunday", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("passion-sunday", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+];
+
+/// A Lenten feria never falls back to its Sunday's collect (#606). Checked
+/// for each week whose proper is in the corpus.
+fn validate_lenten_ferial_collects(corpus: &Corpus) -> Vec<String> {
+    let mut errs = Vec::new();
+    for (week, days) in LENTEN_FERIAL_COLLECTS {
+        if !corpus.has(&format!("proper/{week}/collect")) {
+            continue;
+        }
+        for day in days {
+            let mut keys = vec![format!("proper/{week}/collect-{day}")];
+            if *day != "saturday" {
+                keys.push(format!("proper/{week}/collect-vespers-{day}"));
+            }
+            errs.extend(keys.into_iter().filter(|k| !corpus.has(k)).map(|k| format!("Lenten ferial collect not found: {k}")));
+        }
+    }
+    for ember in ["lent-ember-wednesday", "lent-ember-friday"] {
+        let key = format!("proper/{ember}/collect-vespers");
+        if corpus.has(&format!("proper/{ember}/collect")) && !corpus.has(&key) {
+            errs.push(format!("Lenten ferial collect not found: {key}"));
+        }
+    }
+    errs
+}
+
 /// Where the omission marker may appear: never on a psalm antiphon, and only
 /// on a slot that names its hour, so an omission stays inside the rubric
 /// that licenses it.
@@ -295,4 +334,31 @@ fn validate_omissions(corpus: &Corpus) -> Vec<String> {
     }
     errs.sort();
     errs
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lenten_ferias_need_their_own_collects() {
+        let file = |rel: &str, content: &str| corpus::TextFile { rel_path: rel.to_string(), content: content.to_string() };
+        let files = [
+            file("proper/lent-sunday-1.txt", "[collect]\nSunday\n\n[collect-monday]\nMonday\n"),
+            file("proper/lent-ember-friday.txt", "[collect]\nEmber\n\n[collect-vespers]\nEmber Vespers\n"),
+        ];
+        let corpus = Corpus::load(&files, None, None).unwrap();
+        let errs = validate_lenten_ferial_collects(&corpus);
+        let missing = |k: &str| format!("Lenten ferial collect not found: proper/lent-sunday-1/{k}");
+        assert_eq!(
+            errs,
+            [
+                missing("collect-vespers-monday"),
+                missing("collect-tuesday"),
+                missing("collect-vespers-tuesday"),
+                missing("collect-thursday"),
+                missing("collect-vespers-thursday"),
+            ]
+        );
+    }
 }
