@@ -327,6 +327,15 @@ fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Dec
     {
         return Some(Decision::new("commemoration:memorial-under-first-class-feast", "suppressed", comm.id.as_str()));
     }
+    // General Rubrics VI.2: a Vigil falling on a Solemnity has not even a
+    // Commemoration, "unless it is the Vigil of the Epiphany" (semi-double
+    // here, so not caught). XIV.7 admits no Common Vigil in occurrence at a I
+    // Class Double. Corpus Christi 2022, the transferred Nativity of St John
+    // Baptist 2021 and the Vigil of Pentecost 2024 print no Comm. of the
+    // Vigil (#616).
+    if comm.is_vigil && comm.rank == Rank::Simple && w.rank == Rank::Double1stClass {
+        return Some(Decision::new("commemoration:vigil-on-first-class-double", "suppressed", comm.id.as_str()));
+    }
     if w.id.starts_with("pentecost-octave-day-") && comm.id.starts_with("whit-ember-") {
         return Some(Decision::new("commemoration:pentecost-ember", "suppressed", comm.id.as_str()));
     }

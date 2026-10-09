@@ -2806,6 +2806,88 @@
     ]
   },
   {
+    "id": "january-13-14-sanctoral-collects",
+    "source": "Monastic Diurnal p. 231 (Octave of the Epiphany: all as on the Feast except the Collect) and p. 455 (St Hilary: all as in the Common; For Com. St Felix, Collect); Common of a Confessor and Bishop, For a Doctor, p. 37*. 2026 ordo pp. 28-29 (Issues #603, #604).",
+    "cases": [
+      {
+        "date": "2026-01-12",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect",
+        "contains": "inwardly renewed"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect",
+        "contains": "inwardly renewed"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "st-hilary",
+        "slot": "commemoration-collect",
+        "ref": "commons/confessor-doctor/commemoration-collect",
+        "contains": "blessed Hilary"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "comm-01-14-st-felix-of-nola-priest-and-martyr",
+        "slot": "commemoration-collect",
+        "ref": "proper/comm-01-14-st-felix-of-nola-priest-and-martyr/commemoration-collect",
+        "contains": "examples of thy Saints"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "commons/confessor-doctor/collect",
+        "contains": "blessed Hilary"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "lauds",
+        "commemoration_owner": "comm-01-14-st-felix-of-nola-priest-and-martyr",
+        "slot": "commemoration-collect",
+        "ref": "proper/comm-01-14-st-felix-of-nola-priest-and-martyr/commemoration-collect"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "sext",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "commons/confessor-doctor/collect"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "vespers",
+        "commemoration_owner": "st-hilary",
+        "slot": "commemoration-collect",
+        "ref": "commons/confessor-doctor/commemoration-collect",
+        "contains": "blessed Hilary"
+      }
+    ]
+  },
+  {
     "id": "septuagesima-eve-last-alleluia",
     "source": "Monastic Diurnal p. 235: at the end of Vespers on the Saturday before Septuagesima \"Let us bless the Lord, alleluia, alleluia\", said thus \"even if Vespers have been of a Double Feast of the I or II Class\"; \"Henceforward Alleluia is not said until Holy Sabbath\". 2026 ordo, 7 February. Issue #615.",
     "cases": [
@@ -2842,6 +2924,12 @@
       {
         "date": "2026-02-14",
         "hour": "vespers",
+        "slot": "alleluia",
+        "ref": "seasonal/septuagesima/alleluia"
+      },
+      {
+        "date": "2035-02-24",
+        "hour": "compline",
         "slot": "alleluia",
         "ref": "seasonal/septuagesima/alleluia"
       }
@@ -2933,7 +3021,7 @@
   },
   {
     "id": "lenten-ferial-collects",
-    "source": "Monastic Diurnal pp. 244-278 (each feria's collect at Lauds, and a second after the Ant. on Magnificat); p. 244: \"The Collect of Lauds is said at all the Hours through None\"; 2026 ordo, Lent Office Notes: \"The second Collect given in the Proper for each Feria is said only at Vespers.\" 2024 ordo, 22 Feb. Vespers: \"Comm. Fer. ('That which ye have done' & Col. 252)\". Issue #606.",
+    "source": "Monastic Diurnal pp. 244-278 (each feria's collect at Lauds, and a second after the Ant. on Magnificat); p. 244: \"The Collect of Lauds is said at all the Hours through None\"; 2026 ordo, Lent Office Notes: \"The second Collect given in the Proper for each Feria is said only at Vespers.\" 2026 ordo, 20 Mar., I Vespers of St Benedict: \"Comm. Fer. ('Sir I perceive' & Col. 263-4)\". Issue #606.",
     "cases": [
       {
         "date": "2026-02-26",
@@ -3004,6 +3092,13 @@
         "hour": "vespers",
         "slot": "collect",
         "ref": "proper/passion-sunday/collect-vespers-tuesday"
+      },
+      {
+        "date": "2026-03-20",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-collect",
+        "ref": "proper/lent-sunday-3/collect-vespers-friday"
       }
     ]
   }

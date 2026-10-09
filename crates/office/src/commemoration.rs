@@ -231,8 +231,8 @@ fn lookup_feria_commemoration(
         "commemoration-collect" => {
             if let Some(proper) = &feast.proper_id {
                 // The weekday's own collect for the hour (a Lenten feria's
-                // Vespers collect, 2024 ordo 22 Feb.: "Comm. Fer. ('That which
-                // ye have done' & Col. 252)"), else the Sunday's.
+                // Vespers collect: 2026 ordo, 20 Mar., I Vespers of St Benedict,
+                // "Comm. Fer. ('Sir I perceive' & Col. 263-4)"), else the Sunday's.
                 let weekday = day.map(|d| d.civil_weekday_name());
                 let weekday_refs = weekday.iter().flat_map(|w| [format!("collect-{hour_name}-{w}"), format!("collect-{w}")]);
                 for collect_ref in weekday_refs.chain(["collect".to_string()]).map(|r| format!("proper/{proper}/{r}")) {
