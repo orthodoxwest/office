@@ -1362,15 +1362,6 @@ Day = 30
 Source = awrv
 CompanionOf = commemoration-st-paul-apostle
 
-[comm-extra-07-06-the-octave-of-ss-peter-and-paul]
-Name = The Octave of Ss Peter & Paul
-Rank = commemoration
-Color = white
-Category = apostle
-Month = 7
-Day = 6
-Source = awrv
-
 [comm-extra-07-07-ss-cyril-and-methodius-bishops-and-confessors]
 Name = Ss Cyril and Methodius, Bishops & Confessors
 Rank = commemoration
@@ -1496,15 +1487,6 @@ Color = red
 Category = bishop-martyr
 Month = 12
 Day = 10
-Source = awrv
-
-[comm-extra-12-15-octave-of-the-conception-of-the-blessed-virgin-mary]
-Name = Octave of the Conception of the B.V.M.
-Rank = commemoration
-Color = white
-Category = blessed-virgin
-Month = 12
-Day = 15
 Source = awrv
 
 
