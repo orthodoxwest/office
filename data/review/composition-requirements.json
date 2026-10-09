@@ -2804,5 +2804,87 @@
         "contains": "Let us serve"
       }
     ]
+  },
+  {
+    "id": "january-13-14-sanctoral-collects",
+    "source": "Monastic Diurnal p. 231 (Octave of the Epiphany: all as on the Feast except the Collect) and p. 455 (St Hilary: all as in the Common; For Com. St Felix, Collect); Common of a Confessor and Bishop, For a Doctor, p. 37*. 2026 ordo pp. 28-29 (Issues #603, #604).",
+    "cases": [
+      {
+        "date": "2026-01-12",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect",
+        "contains": "inwardly renewed"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect",
+        "contains": "inwardly renewed"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/epiphany-octave-day/collect"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "st-hilary",
+        "slot": "commemoration-collect",
+        "ref": "commons/confessor-doctor/commemoration-collect",
+        "contains": "blessed Hilary"
+      },
+      {
+        "date": "2026-01-13",
+        "hour": "vespers",
+        "commemoration_owner": "comm-01-14-st-felix-of-nola-priest-and-martyr",
+        "slot": "commemoration-collect",
+        "ref": "proper/comm-01-14-st-felix-of-nola-priest-and-martyr/commemoration-collect",
+        "contains": "examples of thy Saints"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "commons/confessor-doctor/collect",
+        "contains": "blessed Hilary"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "lauds",
+        "commemoration_owner": "comm-01-14-st-felix-of-nola-priest-and-martyr",
+        "slot": "commemoration-collect",
+        "ref": "proper/comm-01-14-st-felix-of-nola-priest-and-martyr/commemoration-collect"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "sext",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "commons/confessor-doctor/collect"
+      },
+      {
+        "date": "2026-01-14",
+        "hour": "vespers",
+        "commemoration_owner": "st-hilary",
+        "slot": "commemoration-collect",
+        "ref": "commons/confessor-doctor/commemoration-collect",
+        "contains": "blessed Hilary"
+      }
+    ]
   }
 ]
