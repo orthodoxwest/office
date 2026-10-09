@@ -195,3 +195,7 @@ R. Thanks be to God.
 [chapter-none]
 # SOURCE: diurnal p. 524 (Finding of the Holy Cross, At None; same chapter as Exaltation p. 600)
 @use proper/exaltation-holy-cross/chapter-none
+
+[hymn-doxology-vespers]
+# SOURCE: Monastic Diurnal.pdf, pp. 520-521: Vexilla Regis, "the last stanza is never changed."
+@omit
