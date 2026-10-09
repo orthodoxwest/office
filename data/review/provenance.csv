@@ -2255,6 +2255,7 @@ proper/seven-sorrows-bvm/benedictus-antiphon,f4e276363451,diurnal,"Seven Sorrows
 proper/seven-sorrows-bvm/chapter-lauds,1b24d5a324ee,diurnal,"Seven Sorrows of the B.V.M., At Lauds",603,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/chapter-none,6d34f8dbf745,diurnal,,605,verified,codex,2026-09-03,Word-for-word after normalization
 proper/seven-sorrows-bvm/collect,029569ba9282,diurnal,"Seven Sorrows of the B.V.M., At Lauds",604,verified,codex,2026-09-08,Word-for-word after normalization
+proper/seven-sorrows-bvm/hymn-doxology,7c032b61b182,Monastic Diurnal.pdf,"Seven Sorrows of the B.V.M., I Vespers, At the Hours the Hymns end; PDF page 646",602,verified,claude,2026-10-09,Direct page-image review; wording confirmed.
 proper/seven-sorrows-bvm/hymn-lauds,21ae601c7411,diurnal,"Seven Sorrows of the B.V.M., At Lauds",603,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/hymn-vespers,7ad4ac316d18,diurnal,"Seven Sorrows of the B.V.M., At I Vespers",601,verified,codex,2026-09-08,Word-for-word after normalization
 proper/seven-sorrows-bvm/magnificat-antiphon,1a7906136904,diurnal,"Seven Sorrows of the B.V.M., At II Vespers",605,verified,codex,2026-09-08,Word-for-word after normalization
@@ -2681,6 +2682,7 @@ proper/transfiguration/chapter-lauds,88988824d5dd,Monastic Diurnal.pdf,proper/tr
 proper/transfiguration/chapter-none,408d1df78447,diurnal,,584,verified,codex,2026-09-14,Word-for-word after normalization
 proper/transfiguration/chapter-sext,6e5d2e539e66,Monastic Diurnal.pdf,proper/transfiguration/chapter-sext,"584, 39",verified,codex,2026-09-26,Direct page-image reading; normalized wording matches the existing corpus. Chapter body and scripture reference read on the cited feast page; printed p.39 explicitly supplies the response after every Chapter.
 proper/transfiguration/collect,55802e4274d6,Monastic Diurnal.pdf,"Aug 6, Transfiguration, At Lauds, Collect; PDF pages 627",583,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 583.
+proper/transfiguration/hymn-doxology,4ccb3425819b,Monastic Diurnal.pdf,"Transfiguration, I Vespers, The Hymns end thus at all the Hours; PDF page 626",582,verified,claude,2026-10-09,Direct page-image review; wording confirmed.
 proper/transfiguration/hymn-lauds,27b101b16fb7,Monastic Diurnal.pdf,proper/transfiguration/hymn-lauds,583,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
 proper/transfiguration/hymn-vespers,34cc68ff9a4b,Monastic Diurnal.pdf,proper/transfiguration/hymn-vespers,"581, 582",verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
 proper/transfiguration/magnificat-antiphon,947254a44f6d,Monastic Diurnal.pdf,proper/transfiguration/magnificat-antiphon,584,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.

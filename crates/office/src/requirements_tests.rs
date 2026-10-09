@@ -810,6 +810,96 @@ fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     check(2026, 1, 14, "vespers", "The prize of Maurus to attain", "For thine Epiphany");
 }
 
+/// General Rubrics XXIII.4 (b), (c): the hymns end "O Jesu, Virgin-born" on
+/// Corpus Christi and throughout its Octave and whenever the Office is of
+/// Our Lady (2026 ordo, "Nat. dox."; Diurnal pp. 414, 448, 69*), but not in
+/// the Corpus Christi Lauds hymn, not at Advent's Office of the Season, not
+/// on a saint's feast within the Octave as the ordos print it, and not where
+/// a feast has its own ending (Seven Sorrows, p. 602) (#628).
+#[test]
+fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
+    const VIRGIN_BORN: &str = "O Jesu, Virgin-born, to thee;";
+    let hymn = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap().text
+    };
+    // Corpus Christi, its Sunday (2027: within the Octave of SS Peter and
+    // Paul too) and days within the Octave; Our Lady's feasts and Octaves,
+    // the Conception's in Advent; the Saturday Office.
+    for (date, hours) in [
+        ("2026-06-11", &["prime", "terce", "compline"][..]),
+        ("2026-06-14", &["prime", "terce", "compline"]),
+        ("2026-06-15", &["prime", "terce", "compline"]),
+        ("2027-07-04", &["prime", "sext"]),
+        ("2026-08-15", &["prime", "terce"]),
+        ("2026-08-17", &["prime", "terce", "compline"]),
+        ("2026-09-08", &["prime", "terce", "compline"]),
+        ("2026-09-12", &["prime", "terce", "none"]),
+        ("2026-12-08", &["prime", "terce", "compline"]),
+        ("2026-12-10", &["prime", "terce", "compline"]),
+        ("2026-07-11", &["prime", "terce", "none"]),
+        ("2026-02-02", &["terce"]),
+        ("2026-03-25", &["terce"]),
+    ] {
+        for &name in hours {
+            assert!(hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
+        }
+    }
+    // Saturday Compline belongs to Sunday; St Joachim and St John Baptist
+    // within the Octaves, as the ordos print them (rubric differs: #635);
+    // Advent's Sunday within the Conception's Octave.
+    for (date, name) in [
+        ("2026-06-11", "lauds"),
+        ("2026-06-14", "lauds"),
+        ("2026-06-11", "vespers"),
+        ("2026-08-15", "vespers"),
+        ("2026-08-16", "terce"),
+        ("2025-06-24", "terce"),
+        ("2026-12-13", "terce"),
+        ("2026-09-12", "compline"),
+        ("2026-07-11", "compline"),
+        ("2026-09-15", "terce"),
+    ] {
+        assert!(!hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
+    }
+    assert!(hymn("2026-06-11", "lauds").contains("In our true native land with thee."));
+    assert!(hymn("2026-09-15", "terce").contains("Who died to make thy servants live;"));
+}
+
+/// General Rubrics XXIII.5, Diurnal p. 3: the Epiphany ending is said "on
+/// Epiphany and throughout the Octave" only (2026 ordo, "Epiph. dox." through
+/// 13 January), even when Septuagesima comes early (2037); the
+/// Transfiguration's hymns end "Transfigured on the mount to-day" at all the
+/// Hours, from I Vespers (p. 582) (#636).
+#[test]
+fn epiphany_hymn_ending_ends_with_the_octave_and_transfiguration_has_its_own() {
+    const EPIPHANY: &str = "For thine Epiphany today;";
+    const TRANSFIGURED: &str = "Transfigured on the mount to-day;";
+    let hymn = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap().text
+    };
+    for y in [2026, 2027, 2037] {
+        for name in ["lauds", "prime", "terce", "compline"] {
+            assert!(hymn(&format!("{y}-01-13"), name).contains(EPIPHANY), "{y}-01-13 {name}");
+            for d in ["01-14", "01-20", "01-29"] {
+                assert!(!hymn(&format!("{y}-{d}"), name).contains(EPIPHANY), "{y}-{d} {name}");
+            }
+        }
+        for (d, name) in
+            [("08-05", "vespers"), ("08-05", "compline"), ("08-06", "prime"), ("08-06", "terce"), ("08-06", "none"), ("08-06", "vespers")]
+        {
+            let text = hymn(&format!("{y}-{d}"), name);
+            assert!(text.contains(TRANSFIGURED) && !text.contains(EPIPHANY), "{y}-{d} {name}");
+        }
+        assert!(!hymn(&format!("{y}-08-07"), "terce").contains(TRANSFIGURED), "{y}");
+    }
+}
+
 /// Diurnal p. 235: Vespers of the Saturday before Septuagesima end "Let us
 /// bless the Lord, alleluia, alleluia", even when they are of the Saturday's
 /// own feast (St Matthias, 2035); the next Saturday's do not (#615).

@@ -79,6 +79,16 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
+[hymn-doxology]
+# SOURCE: Monastic Diurnal.pdf, p. 582: "The Hymns end thus at all the Hours." (General Rubrics XXIII.5)
+All glory, Lord, to thee we pay,
+Transfigured on the mount to-day;
+All glory, as is ever meet,
+To Father and to Paraclete.
+
+Amen.
+
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 581, 582
 Quicumque Christum

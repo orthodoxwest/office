@@ -1,7 +1,8 @@
-# Epiphanytide seasonal overrides (after the Octave of Epiphany through Septuagesima)
+# Epiphanytide seasonal overrides (the Epiphany through Septuagesima)
 
 [hymn-doxology]
 # SOURCE: Monastic Diurnal.pdf, p. 3
+# Said through the Octave Day of the Epiphany only (engine.rs hymn_doxology).
 All glory, Lord, to thee we pay
 For thine Epiphany today;
 All glory, as is ever meet,

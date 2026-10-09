@@ -148,6 +148,10 @@ In our true native land with thee.
 
 Amen.
 
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 416: before "All praise and thanks", "The following Ending is never changed." (General Rubrics XXIII.4)
+@omit
+
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 413, 414
 Pange lingua gloriosi
