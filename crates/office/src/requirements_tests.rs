@@ -725,6 +725,25 @@ fn septuagesima_eve_dismissal_keeps_the_alleluias() {
     }
 }
 
+/// Diurnal p. 223: I Vespers of the Epiphany take the "Ants. of Lauds,
+/// omitting the fourth"; II Vespers are "All as at I Vespers" (p. 226), and
+/// every Vespers of the Octave is as on the Feast (pp. 227, 229, 231; 2026
+/// ordo, 5–13 January: "Ant. (224)") (#625).
+#[test]
+fn epiphany_vespers_omit_the_fourth_lauds_antiphon() {
+    for y in 2026..=2033 {
+        let (days, moveable) = year(y);
+        for d in 5..=13 {
+            let date = Date::new(y, 1, d);
+            let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| !e.is_commemoration).collect();
+            let antiphon = |n: u32| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
+            assert!(antiphon(1).starts_with("Before the morning star"), "{date}");
+            assert!(antiphon(4).starts_with("Like a flame of fire"), "{date}: {}", antiphon(4));
+        }
+    }
+}
+
 /// Commemorations whose feast definition chooses their texts: the Common is
 /// the right one for who they are (#617), "N." is a name (#607), and the
 /// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).

@@ -24,6 +24,11 @@ O ye seas and floods, * bless ye the Lord: O ye wells, sing a hymn unto the Lord
 # SOURCE: diurnal p. 224
 Like a flame of fire, * that star glittereth yonder, revealing God, the King of kings: the wise men, when they beheld it, offered presents unto the mighty Ruler.
 
+[psalm-antiphon-4-vespers]
+# Diurnal p. 223, I Vespers: "Ants. of Lauds, omitting the fourth"; II
+# Vespers "All as at I Vespers" (p. 226), and so within the Octave (#625).
+@use proper/epiphany/psalm-antiphon-5
+
 [benedictus-antiphon]
 # SOURCE: diurnal p. 225
 To-day * the Church is joined to her heavenly Bridegroom; because in Jordan Christ hath washed away her offences: the wise men with their offerings hasten to the royal marriage, and the guests are regaled with water made wine, alleluia.

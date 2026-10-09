@@ -25,7 +25,9 @@
 [psalm-antiphon-3-first-vespers]
 @use proper/epiphany/psalm-antiphon-3
 
-[psalm-antiphon-4-first-vespers]
+[psalm-antiphon-4-vespers]
+# Both Vespers are as on the Feast (Diurnal pp. 229, 231), omitting Lauds'
+# fourth antiphon (#625).
 @use proper/epiphany/psalm-antiphon-5
 
 [chapter-lauds]
