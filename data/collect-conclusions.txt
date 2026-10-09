@@ -119,6 +119,8 @@ proper/christmas/collect through-same
 proper/easter-sunday/collect through-same
 proper/easter-sunday-2/collect through-same
 proper/easter-sunday-3/collect through-same
+# Diurnal p. 368 prints Wednesday in Easter Week's collect with "Through the same".
+proper/easter-sunday-octave-day-4/collect through-same
 proper/epiphany/collect through-same
 # Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
 proper/expectation-bvm/collect through-same

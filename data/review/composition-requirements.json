@@ -3101,5 +3101,81 @@
         "ref": "proper/lent-sunday-3/collect-vespers-friday"
       }
     ]
+  },
+  {
+    "id": "easter-week-daily-collects",
+    "source": "Monastic Diurnal pp. 367-370: a proper Collect for each day of Easter Week. 2026 ordo, 13-18 Apr.: Lauds, Hours and Vespers 'Col. (367)', '(368)', '(368)', '(368)', '(369)', '(369f)'; 18 Apr. Vespers of Low Sunday 'Col. (371)'. Issue #634.",
+    "cases": [
+      {
+        "date": "2026-04-13",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-monday/collect"
+      },
+      {
+        "date": "2026-04-14",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-tuesday/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect",
+        "contains": "yearly solemnity of the Lord's Resurrection"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "terce",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-16",
+        "hour": "sext",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-5/collect",
+        "contains": "knit together divers nations"
+      },
+      {
+        "date": "2026-04-17",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-6/collect",
+        "contains": "covenant of reconciliation"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "none",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect",
+        "contains": "devoutly kept the Paschal Feast"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/low-sunday/collect"
+      },
+      {
+        "date": "2025-04-23",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2027-05-08",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect"
+      }
+    ]
   }
 ]
