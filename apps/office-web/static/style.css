@@ -7009,12 +7009,11 @@ body.season-eastertide {
   text-indent: -1.1rem;
 }
 
-/* Prose spans need the same last-line care as paragraphs. Do not balance
-   entire prayers: preserve their natural measure and metrical hymn breaks. */
-.chapter .plain-line,
-.chapter .sigil-text,
-.collect .plain-line {
-  text-wrap: pretty;
+/* The prayer text runs to its natural measure. Safari's `pretty` reflows a
+   whole paragraph to even its rag, setting psalm verses and prayers short of
+   the margin; rubrics keep the paragraph default. */
+.elements p:not(.rubric) {
+  text-wrap: wrap;
 }
 
 /* Dialogue responses finish the preceding utterance. Let the gutter carry
