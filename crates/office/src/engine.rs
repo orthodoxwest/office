@@ -589,6 +589,12 @@ fn hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String
     if reference == "hymn-doxology" && day.celebration.as_deref().is_some_and(is_of_our_lady_or_corpus_christi) {
         return (t.get(NATIVITY).to_string(), NATIVITY.to_string());
     }
+    // XXIII.5, Diurnal p. 3: the Epiphany ending is said "on Epiphany and
+    // throughout the Octave", through 13 January (2026 ordo, "Epiph. dox."
+    // through the Octave Day only); afterwards the hymns keep their own (#636).
+    if day.season == Season::Epiphany && (day.date.month(), day.date.day()) > (1, 13) {
+        return (String::new(), String::new());
+    }
     resolve_proper_text(day, hour_name, reference, t)
 }
 

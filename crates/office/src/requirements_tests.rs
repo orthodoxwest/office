@@ -766,6 +766,38 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
     assert!(hymn("2026-09-15", "terce").contains("Who died to make thy servants live;"));
 }
 
+/// General Rubrics XXIII.5, Diurnal p. 3: the Epiphany ending is said "on
+/// Epiphany and throughout the Octave" only (2026 ordo, "Epiph. dox." through
+/// 13 January), even when Septuagesima comes early (2037); the
+/// Transfiguration's hymns end "Transfigured on the mount to-day" at all the
+/// Hours, from I Vespers (p. 582) (#636).
+#[test]
+fn epiphany_hymn_ending_ends_with_the_octave_and_transfiguration_has_its_own() {
+    const EPIPHANY: &str = "For thine Epiphany today;";
+    const TRANSFIGURED: &str = "Transfigured on the mount to-day;";
+    let hymn = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap().text
+    };
+    for y in [2026, 2027, 2037] {
+        for name in ["lauds", "prime", "terce", "compline"] {
+            assert!(hymn(&format!("{y}-01-13"), name).contains(EPIPHANY), "{y}-01-13 {name}");
+            for d in ["01-14", "01-20", "01-29"] {
+                assert!(!hymn(&format!("{y}-{d}"), name).contains(EPIPHANY), "{y}-{d} {name}");
+            }
+        }
+        for (d, name) in
+            [("08-05", "vespers"), ("08-05", "compline"), ("08-06", "prime"), ("08-06", "terce"), ("08-06", "none"), ("08-06", "vespers")]
+        {
+            let text = hymn(&format!("{y}-{d}"), name);
+            assert!(text.contains(TRANSFIGURED) && !text.contains(EPIPHANY), "{y}-{d} {name}");
+        }
+        assert!(!hymn(&format!("{y}-08-07"), "terce").contains(TRANSFIGURED), "{y}");
+    }
+}
+
 /// Diurnal p. 235: Vespers of the Saturday before Septuagesima end "Let us
 /// bless the Lord, alleluia, alleluia", even when they are of the Saturday's
 /// own feast (St Matthias, 2035); the next Saturday's do not (#615).
