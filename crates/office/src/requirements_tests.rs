@@ -746,7 +746,8 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
         }
     }
     // Saturday Compline belongs to Sunday; St Joachim and St John Baptist
-    // within the Octaves; Advent's Sunday within the Conception's Octave.
+    // within the Octaves, as the ordos print them (rubric differs: #635);
+    // Advent's Sunday within the Conception's Octave.
     for (date, name) in [
         ("2026-06-11", "lauds"),
         ("2026-06-14", "lauds"),

@@ -577,10 +577,12 @@ fn hymn_doxology_ref(day: &Day) -> &'static str {
 /// its Octave, and (c) "whenever the Office is of Blessed Mary", as the
 /// Diurnal repeats on her feasts and at the Saturday Office (pp. 414, 448,
 /// 69*). Paschaltide keeps its own ending (2026 ordo p. 64, the Saturday
-/// Office "Easter dox."), and so does Advent, when the Office is of the
-/// Season (XXIII.10; Diurnal p. 448), which the owner's category already
-/// excludes. A saint's feast within these Octaves keeps the ordinary ending,
-/// as the ordos print it (St Joachim, 2023–2026; #628).
+/// Office "Easter dox."; XXIII.4(c) says "even in Paschaltide", ruling
+/// pending in #635), and so does Advent, when the Office is of the Season
+/// (XXIII.10; Diurnal p. 448), which the owner's category already excludes.
+/// A saint's feast or a Sunday within these Octaves keeps the ordinary
+/// ending, as the ordos print it (St Joachim, 2023–2026), though XXIII.4
+/// gives saints' hymns the Octave's ending (ruling pending in #635).
 fn hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String) {
     const NATIVITY: &str = "seasonal/christmas/hymn-doxology";
     let reference = hymn_doxology_ref(day);
