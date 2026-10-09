@@ -1109,10 +1109,15 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
         (Date::new(2026, 6, 5), "lauds", "st-boniface", "Daughters of Jerusalem"),
         (Date::new(2021, 6, 23), "lauds", "comm-extra-06-23-st-etheldreda-queen-and-virgin", "The kingdom of heaven"),
         (Date::new(2019, 6, 22), "lauds", "st-alban", "Daughters of Jerusalem"),
+        // #640: a Doctor's "O Teacher" (Diurnal p. 43*) takes its Alleluia too (p. 6*, §3).
+        (Date::new(2037, 5, 26), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2037, 5, 27), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2046, 6, 17), "vespers", "st-ephrem-syrian", "O Teacher"),
+        (Date::new(2046, 6, 18), "vespers", "st-ephrem-syrian", "O Teacher"),
     ] {
         let found = commemorated(date, hour, owner);
         let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
-        assert!(ant.starts_with(antiphon) && ant.ends_with("alleluia."), "{date} {hour}: {ant}");
+        assert!(ant.starts_with(antiphon) && ant.to_lowercase().ends_with("alleluia."), "{date} {hour}: {ant}");
         assert!(vers.lines().all(|l| l.ends_with("alleluia.")), "{date} {hour}: {vers}");
     }
     // I Vespers of Trinity Sunday are out of Paschaltide.

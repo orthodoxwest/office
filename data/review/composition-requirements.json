@@ -3177,5 +3177,31 @@
         "ref": "proper/easter-sunday-octave-day-7/collect"
       }
     ]
+  },
+  {
+    "id": "doctor-magnificat-antiphon-in-paschaltide",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-bede-venerable/magnificat-antiphon-first-easter",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2027-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon-easter",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2037-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      }
+    ]
   }
 ]
