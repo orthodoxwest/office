@@ -1,0 +1,5 @@
+# Octave Day of the Epiphany (13 Jan). Diurnal p. 231: "All is said as on the Feast
+# except the Collect." Everything else falls back to proper/epiphany (#603).
+
+[collect]
+O God, whose only-begotten Son hath appeared in the substance of our flesh: grant, we beseech thee, that we may be worthy to be inwardly renewed by him whom we recognize as outwardly like unto us.

@@ -1228,6 +1228,7 @@ proper/circumcision/versicle-lauds,4467721db0e5,diurnal,,212,verified,codex,2026
 proper/circumcision/versicle-vespers,e2fa7635953e,diurnal,,210,verified,codex,2026-09-18,Word-for-word after normalization
 proper/comm-01-04-st-titus-bishop-and-confessor/commemoration-collect,7a6bdc171c13,diurnal,,454,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-01-12-st-benedict-biscop-abbot/commemoration-collect,53b283ac9ec6,diurnal,,454,verified,codex,2026-09-03,Word-for-word after normalization
+proper/comm-01-14-st-felix-of-nola-priest-and-martyr/commemoration-collect,8483582f0bc8,Monastic Diurnal.pdf,"January 14, St. Hilary, For Com. St. Felix, Collect; PDF pages 501",455,verified,claude,2026-10-09,"Direct page-image review; word-for-word. Moved from proper/st-hilary/collect, which p. 455 sends to the Common (#604)."
 proper/comm-01-18-st-prisca-of-rome-virgin-martyr/commemoration-collect,2041fe21bf1f,diurnal,,459,verified,codex,2026-09-05,Word-for-word after normalization
 proper/comm-01-19-ss-marius-martha-audifax-and-abachum-martyrs/commemoration-collect,66c4dc646deb,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 513",PDF p. 7,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; wording confirmed. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 614.
 proper/comm-01-22-ss-vincent-martyr/commemoration-collect,1b030f8db607,diurnal,,462,verified,codex,2026-09-05,Word-for-word after normalization
@@ -1459,6 +1460,7 @@ proper/easter-sunday/versicle-terce,ad2ba3365887,diurnal,,365,verified,codex,202
 proper/easter-tuesday/benedictus-antiphon,e54412b41854,diurnal,,368,verified,codex,2026-09-22,Word-for-word after normalization
 proper/easter-tuesday/collect,51f5a3568b5e,diurnal,,368,verified,codex,2026-09-11,Word-for-word after normalization; cited p. 369 was Thursday/Friday
 proper/easter-tuesday/magnificat-antiphon,a60dac1e818a,diurnal,,368,verified,codex,2026-09-22,Word-for-word after normalization
+proper/epiphany-octave-day/collect,86f05f43f4cd,Monastic Diurnal.pdf,"Octave of the Epiphany, Greater Double, Collect; PDF pages 277",231,verified,claude,2026-10-09,Direct page-image review; word-for-word (#603).
 proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,Monastic Diurnal.pdf,"Within the Octave of the Epiphany, II Day, Ant. on Benedictus; PDF pages 273",227,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 227.
 proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,Monastic Diurnal.pdf,"Within the Octave of the Epiphany, II Day, Ant. on Magnificat; PDF pages 273, 274","227, 228",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 227-228.
 proper/epiphany-octave-set-2/benedictus-antiphon,21939f821bc9,Monastic Diurnal.pdf,"Within the Octave of the Epiphany, III Day, Ant. on Benedictus; PDF pages 274",228,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 228.
@@ -2420,7 +2422,6 @@ proper/st-gregory-great/psalm-antiphon-3,0a97eaff94c3,diurnal,,486,verified,code
 proper/st-gregory-great/psalm-antiphon-4,f30d3303cc50,diurnal,,486,verified,codex,2026-09-22,Word-for-word after normalization
 proper/st-gregory-great/psalm-antiphon-5,9591036f9092,diurnal,,486,verified,codex,2026-09-22,Word-for-word after normalization
 proper/st-helen/collect,594bd6fed864,diurnal,,591,verified,codex,2026-09-17,Independent page-image readings agree; cache monastic-diurnal/0635.png; comparison
-proper/st-hilary/collect,8483582f0bc8,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-irenaeus/collect,71b31cf79e32,diurnal,,558,verified,codex,2026-09-09,Word-for-word after normalization
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
 proper/st-jerome/collect,70995b3e58d3,diurnal,,612,verified,codex,2026-09-03,Word-for-word after normalization
