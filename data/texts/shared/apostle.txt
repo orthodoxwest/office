@@ -1,0 +1,32 @@
+# Texts of the Common of Apostles that propers also name by their words, out of
+# their Common slot (the octave of SS Peter and Paul, St Andrew). They live here, not
+# in commons/, so the Common's paschal tier does not replace them in Paschaltide
+# (proper.rs, paschal_common_form). The Common reads them through @use.
+
+[versicle-their-sound]
+# SOURCE: draft archdiocesan Vespers book, p. 544 (Common of Apostles and Evangelists out of Paschaltide, I Vespers)
+V. Their sound is gone out into all lands.
+R. And their words into the ends of the world.
+
+[short-responsory-their-sound]
+# SOURCE: draft archdiocesan Lauds book, p. 609 (Common of Apostles and Evangelists out of Paschaltide)
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
+[short-responsory-thou-shalt-make-them-princes]
+# SOURCE: draft archdiocesan Vespers book, pp. 543, 552 (Common of Apostles out of Paschaltide)
+R. Thou shalt make them princes * in all lands.
+R. Thou shalt make them princes * in all lands.
+V. They shall remember thy Name, O Lord.
+R. In all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou shalt make them princes * in all lands.
+
+[versicle-thou-shalt-make-them-princes]
+# SOURCE: diurnal p. 12*
+V. Thou shalt make them princes in all lands.
+R. They shall remember thy Name, O Lord.

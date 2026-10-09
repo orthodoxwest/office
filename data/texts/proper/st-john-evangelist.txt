@@ -84,7 +84,7 @@ R. Thanks be to God.
 @use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-@use commons/apostle/hymn-lauds
+@use commons/apostle/hymn-vespers
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 88 (Saint John, Apostle and Evangelist)

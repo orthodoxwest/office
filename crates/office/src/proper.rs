@@ -126,7 +126,9 @@ pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str
 /// when it has one, as the Common tier itself does (Diurnal p. 6*, §3): the
 /// first hop of the alias chain into `commons/{cat}/{key}` that has a
 /// `commons/{cat}-paschal/{key}` takes it. A key already in a paschal tier
-/// is left alone.
+/// is left alone. The paschal form follows the target's slot, so a proper
+/// borrowing another slot's Common text for its words names a shared/ key
+/// instead (validate.rs, `validate_paschal_redirects`).
 fn paschal_common_form(found: (String, String), season: Option<Season>, t: &OfficeTexts) -> (String, String) {
     if season != Some(Season::Easter) {
         return found;

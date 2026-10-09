@@ -167,13 +167,14 @@ fn vespers_psalmody_candidates(day: &Day) -> Vec<String> {
 
 fn has_feast_proper_vespers_psalm_antiphons(day: &Day, t: &OfficeTexts) -> bool {
     let Some(c) = day.celebration.as_deref() else { return false };
+    let season = day.saints_season("vespers");
     for feast_id in feast_proper_ids(c) {
-        if day.season == Season::Easter
+        if season == Season::Easter
             && !lookup_section_text(&format!("proper/{feast_id}-paschal/"), None, "vespers", "psalm-antiphon-1", t).0.is_empty()
         {
             return true;
         }
-        if !lookup_section_text(&format!("proper/{feast_id}/"), Some(day.season), "vespers", "psalm-antiphon-1", t).0.is_empty() {
+        if !lookup_section_text(&format!("proper/{feast_id}/"), Some(season), "vespers", "psalm-antiphon-1", t).0.is_empty() {
             return true;
         }
     }

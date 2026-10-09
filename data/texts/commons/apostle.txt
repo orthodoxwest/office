@@ -133,27 +133,13 @@ R. And wisely considered of his doing.
 @use commons/apostle/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 544 (Common of Apostles and Evangelists out of Paschaltide, I Vespers)
-V. Their sound is gone out into all lands.
-R. And their words into the ends of the world.
+@use shared/apostle/versicle-their-sound
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 609 (Common of Apostles and Evangelists out of Paschaltide)
-R. Their sound is gone out * into all lands.
-R. Their sound is gone out * into all lands.
-V. And their words into the ends of the world.
-R. Into all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound is gone out * into all lands.
+@use shared/apostle/short-responsory-their-sound
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 543, 552 (Common of Apostles out of Paschaltide)
-R. Thou shalt make them princes * in all lands.
-R. Thou shalt make them princes * in all lands.
-V. They shall remember thy Name, O Lord.
-R. In all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * in all lands.
+@use shared/apostle/short-responsory-thou-shalt-make-them-princes
 
 [chapter-vespers]
 @use commons/apostle/chapter-lauds
@@ -166,9 +152,7 @@ R. Thou shalt make them princes * in all lands.
 @use commons/apostle/versicle-first-vespers
 
 [versicle-sext]
-# SOURCE: diurnal p. 12*
-V. Thou shalt make them princes in all lands.
-R. They shall remember thy Name, O Lord.
+@use shared/apostle/versicle-thou-shalt-make-them-princes
 
 [versicle-none]
 # SOURCE: diurnal p. 12*

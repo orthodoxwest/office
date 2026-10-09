@@ -68,13 +68,13 @@ One of the two * which followed the Lord was Andrew, Simon Peter's brother, alle
 @use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-@use commons/apostle/hymn-lauds
+@use commons/apostle/hymn-vespers
 
 [versicle-lauds]
 @use commons/apostle/versicle-lauds
 
 [versicle-vespers]
-@use commons/apostle/versicle-first-vespers
+@use shared/apostle/versicle-their-sound
 
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.
