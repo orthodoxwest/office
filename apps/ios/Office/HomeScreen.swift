@@ -317,9 +317,9 @@ private struct FrontispieceLayout: Layout {
 /**
  * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
  * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
- * rules, the lining thinned.
+ * rules, the lining thinned. The About page's table of the hours takes the same.
  */
-private struct FrontispieceInk {
+struct FrontispieceInk {
     let frame: Color
     let rule: Color
     let band: Color
@@ -439,12 +439,26 @@ private struct Frontispiece: View {
                     .padding(.top, m.px(tier.prayGap))
                 // Season and date control share one line after the invitation.
                 Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
-                if !view.season.isEmpty {
-                    Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
-                }
-                Disclosure(label: "Change date", open: picking) {
-                    withAnimation(unfolding) { picking.toggle() }
-                    if picking { reveal("disclosed") }
+                // In a reader's first week the introduction stands before Change date as its twin,
+                // and takes the season's place (each hour's header still names it), as on the web.
+                if aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst()) {
+                    // The web's 1rem gap, less the labels' own padding.
+                    HStack(spacing: m.px(11.2)) {
+                        Button { model.open(.about) } label: {
+                            Text(aboutPage.introduction.uppercased()).type(Scale.control).foregroundStyle(p.muted)
+                                .padding(.horizontal, m.px(8))
+                                .frame(minHeight: 44)
+                        }
+                        .buttonStyle(Quiet())
+                        .accessibilityLabel(aboutPage.introduction)
+                        .accessibilityHint("Opens About the Office")
+                        changeDate
+                    }
+                } else {
+                    if !view.season.isEmpty {
+                        Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
+                    }
+                    changeDate
                 }
                 if picking {
                     DayPicker(shown: date, today: model.today) { d in
@@ -467,6 +481,13 @@ private struct Frontispiece: View {
                 // a red or green day edges the head without outshouting the cross.
                 Panel(arch: tier.arch, ring: mix(day, ink.frame, 0.7), frame: ink.frame)
             }
+        }
+    }
+
+    private var changeDate: some View {
+        Disclosure(label: "Change date", open: picking) {
+            withAnimation(unfolding) { picking.toggle() }
+            if picking { reveal("disclosed") }
         }
     }
 

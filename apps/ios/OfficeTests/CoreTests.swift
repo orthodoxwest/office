@@ -18,6 +18,25 @@ final class CoreTests: XCTestCase {
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })
         XCTAssertEqual(gapBefore(blocks[heading - 1], blocks[heading]), 38)
     }
+
+    func testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo() {
+        let page = about()
+        XCTAssertFalse(page.title.isEmpty)
+        XCTAssertEqual(page.periods.flatMap(\.hours).map(\.hour), hourNames())
+        XCTAssertEqual(page.periods.flatMap(\.hours).count, 7)
+        let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
+        XCTAssertFalse(links.isEmpty)
+        for link in links {
+            XCTAssertTrue(["/calendar", "/reminders", "/privacy"].contains(link) || link.hasPrefix("https://"), link)
+            XCTAssertNotNil(aboutLink(link), link)
+        }
+        // The privacy policy is the production site's until a beacon's reply names a new address.
+        UserDefaults().removePersistentDomain(forName: "about-tests")
+        let defaults = UserDefaults(suiteName: "about-tests")!
+        XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://orthodoxwestbreviary.com/privacy")!))
+        defaults.set("https://example.org/api/usage", forKey: "usage-endpoint")
+        XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
+    }
 }
 
 /// What VoiceOver says for the office: every word, and none of the marks meant for the eye.
@@ -169,7 +188,7 @@ final class PlaceTests: XCTestCase {
     private let day = CivilDate(year: 2026, month: 3, day: 15)
 
     func testPagesRoundTripThroughSavedState() {
-        let pages: [Page] = [.home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders]
+        let pages: [Page] = [.home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders, .about]
         for page in pages { XCTAssertEqual(Page.decode(page.encoded), page) }
         XCTAssertNil(Page.decode("hour 2026-03-15 matins"))
         XCTAssertNil(Page.decode("ordo 2026 13 1"))
@@ -308,7 +327,8 @@ final class UsageTests: XCTestCase {
         let usage = usage()
         usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
         usage.record(.ordo(year: 2031), dark: false, form: "private")
-        usage.record(Page.year(2026).usageEvent, dark: false, form: "private")
+        usage.record(Page.year(2026).usageEvent!, dark: false, form: "private")
+        XCTAssertNil(Page.about.usageEvent)
         XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
     }
 
@@ -363,6 +383,18 @@ final class UsageTests: XCTestCase {
         self.usage().record(.hour(date: today, hour: "compline"), dark: false, form: "private")
         let moved = "https://example.org/api/usage"
         XCTAssertEqual(endpoints, [usageEndpoint(), moved, moved, moved])
+    }
+
+    func testANewcomerIsOfferedTheIntroductionForAWeek() {
+        let defaults = UserDefaults(suiteName: suite)!
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 0)
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(6 * 86_400)), 6)
+        XCTAssertTrue(aboutNewcomer(daysSinceFirst: 6))
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(7 * 86_400))))
+        // An installation that reported before first days were kept is no newcomer.
+        defaults.set("before", forKey: "usage-first")
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
     }
 
     func testDebugBuildsNeverReport() {

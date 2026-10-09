@@ -337,8 +337,9 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
-        // date + go-to-today (historical days) + pray + 7 hours + change-date.
-        .slice(0, 11)
+        // date + go-to-today (historical days) + pray + 7 hours + the first week's
+        // introduction + change-date.
+        .slice(0, 12)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
           // Recovery chrome when the landing day is not local today — intentional
@@ -346,6 +347,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           if (element.matches(".not-today-link")) return "go-to-today";
           if (element.matches(".pray-now")) return "pray";
           if (element.matches(".home-hour-link")) return element.getAttribute("data-hour");
+          if (element.matches(".home-introduction")) return "introduction";
           if (element.matches("summary")) return "change-date";
           return "unexpected";
         }),
@@ -366,6 +368,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
     "none",
     "vespers",
     "compline",
+    "introduction",
     "change-date",
   ]);
 });
@@ -678,7 +681,8 @@ test("a tablet's hour header sets the hours as one rank, with no link stranded",
       await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
       await openDatedPage(page, `/vespers/${testDate}`);
       const header = await page.evaluate(() => {
-        const links = [...document.querySelectorAll(".site-menu nav a")];
+        // About stands down from a wide hour's header (it has no box there).
+        const links = [...document.querySelectorAll(".site-menu nav a")].filter((a) => a.getClientRects().length);
         // Links on one baseline have boxes a pixel or two apart in height
         // (Reminders is set smaller); a new row begins a whole line lower.
         const tops = links.map((a) => a.getBoundingClientRect().top).sort((a, b) => a - b);
@@ -2767,6 +2771,12 @@ for (const { name, path, theme, knownViolations } of [
     theme: "dark",
     knownViolations: [],
   },
+  {
+    name: "About in the Nave theme",
+    path: "/about",
+    theme: "light",
+    knownViolations: [],
+  },
 ]) {
   test(`${name} stays within the accessibility baseline`, async ({ page }) => {
     await openDatedPage(page, path, theme);
@@ -2962,6 +2972,30 @@ test("a browser is new on the day it first opens the Office and returning after"
   // A reader from before this was counted, with a saved setting, is not mistaken for a new one.
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem("office-theme", "dark"); });
   expect(await visit()).toBe("returning");
+});
+
+// Home offers the introduction beside Change date for a reader's first week, in the season's
+// place; after that, and for a reader from before first days were kept, About is in the menu.
+test("home introduces the Office to a reader in their first week", async ({ page }) => {
+  const introduction = page.locator(".home-introduction");
+  const home = `/?date=${easternDay()}`;
+  await page.goto(home);
+  await expect(introduction).toBeVisible();
+  await expect(introduction).toHaveAttribute("href", "/about");
+  await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(-6));
+  await page.goto(home);
+  await expect(introduction).toBeVisible();
+  await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(-8));
+  await page.goto(home);
+  await expect(introduction).toBeHidden();
+  await page.evaluate(() => localStorage.setItem("office-first-counted", "before"));
+  await page.goto(home);
+  await expect(introduction).toBeHidden();
+  await page.getByText("Menu", { exact: true }).click();
+  await page.getByRole("link", { name: "About", exact: true }).click();
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("About the Office");
+  await expect(page.locator(".about-hour dt a")).toHaveText(["Lauds", "Prime", "Terce", "Sext", "None", "Vespers", "Compline"]);
 });
 
 test.describe("on a screen with a mouse", () => {

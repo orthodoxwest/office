@@ -72,7 +72,7 @@ Each page is shot on an iPhone and an iPad, in both themes.
 The screenshots come from launch arguments:
 
 - `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
-  `home`, `ordo`, `year` or `reminders`;
+  `home`, `ordo`, `year`, `reminders` or `about`;
 - `-today` fixes today;
 - `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
 - `-anchor hymn` or `-anchor psalm` scrolls an hour to its first hymn or psalm.

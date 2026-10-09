@@ -124,6 +124,8 @@
          the date → prayer invitation reading order. #}
     <div class="home-day-meta">
       {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
+      {# Shown only in a reader's first week (layout.html's data-newcomer); the menu keeps About after. #}
+      <a class="home-introduction" href="/about">Introduction</a>
       <details class="hour-date-nav home-date-nav">
         <summary>Change date</summary>
         <nav class="day-nav" aria-label="Date navigation">

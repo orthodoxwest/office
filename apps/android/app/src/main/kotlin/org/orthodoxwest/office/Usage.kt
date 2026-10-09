@@ -7,6 +7,7 @@ import java.net.URL
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -78,6 +79,19 @@ class Usage(
             ?: (if (prefs.contains(DAY)) BEFORE else day).also { prefs.edit().putString(FIRST, it).apply() }
     }
 
+    /**
+     * Days since the reporting day the app was first counted, for home's first-week introduction
+     * (`aboutNewcomer`), or -1 for an installation from before first days were kept. Asked before
+     * any beacon, or in a build that never reports, it keeps today as the first day, as the first
+     * beacon would: the day stays on the phone and is never sent.
+     */
+    fun daysSinceFirst(): Int {
+        val today = LocalDate.now(clock.withZone(REPORTING))
+        val first = firstDay(today.toString())
+        if (first == BEFORE) return -1
+        return runCatching { ChronoUnit.DAYS.between(LocalDate.parse(first), today).toInt() }.getOrDefault(-1)
+    }
+
     /** The reporting day's identifier: kept all day, replaced the next. */
     private fun idFor(day: String): String = synchronized(prefs) {
         prefs.getString(ID, null)?.takeIf { prefs.getString(DAY, null) == day }
@@ -91,6 +105,14 @@ class Usage(
         private const val BEFORE = "before"
         private const val ENDPOINT = "usage-endpoint"
         private val REPORTING: ZoneId = ZoneId.of("America/New_York")
+        private const val USAGE_PATH = "/api/usage"
+
+        /**
+         * The site's address, for the pages the app leaves to it (About's Privacy): the usage
+         * endpoint's host, which follows the site to the address a reply names.
+         */
+        fun site(prefs: SharedPreferences): String =
+            (synchronized(prefs) { prefs.getString(ENDPOINT, null) } ?: usageEndpoint()).removeSuffix(USAGE_PATH)
 
         /** One beacon at a time, off the main thread. */
         private val sender: Executor = Executors.newSingleThreadExecutor { Thread(it, "usage").apply { isDaemon = true } }

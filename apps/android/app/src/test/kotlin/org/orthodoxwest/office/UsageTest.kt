@@ -113,6 +113,32 @@ class UsageTest {
         assertTrue(posted.single().second.contains("visit:returning"))
     }
 
+    /** Home's first-week introduction counts from the day Usage keeps, whether or not it reports. */
+    @Test
+    fun daysAreCountedFromTheFirst() {
+        val quiet = Usage(prefs, enabled = false, clock = clock, executor = { it.run() }) { _, _, _ -> Usage.Reply(true) }
+        assertEquals(0, quiet.daysSinceFirst())
+        now = Instant.parse("2026-03-21T15:00:00Z")
+        assertEquals(6, quiet.daysSinceFirst())
+        // The first beacon reports the day already kept.
+        usage().record(UsageEvent.Home(CivilDate(2026, 3, 21)), dark = false, form = "private")
+        assertTrue(posted.single().second.contains("visit:returning"))
+    }
+
+    @Test
+    fun anInstallationThatReportedBeforeIsNoNewcomer() {
+        prefs.edit().putString("usage-day", "2026-03-10").putString("usage-id", "0".repeat(32)).commit()
+        assertEquals(-1, usage().daysSinceFirst())
+    }
+
+    @Test
+    fun theSiteIsTheEndpointsHost() {
+        assertEquals(usageEndpoint().removeSuffix("/api/usage"), Usage.site(prefs))
+        advertised = "https://example.org/api/usage"
+        usage().record(UsageEvent.Home(today), dark = false, form = "private")
+        assertEquals("https://example.org", Usage.site(prefs))
+    }
+
     @Test
     fun beaconsFollowTheSiteToTheAddressItNames() {
         advertised = "https://example.org/api/usage"

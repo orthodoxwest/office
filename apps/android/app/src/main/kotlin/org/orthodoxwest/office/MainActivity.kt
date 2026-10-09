@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.ordoYear
 
 /** The scrims `enableEdgeToEdge` gives a three-button navigation bar by default (Android 8–9). */
@@ -127,6 +128,7 @@ class MainActivity : ComponentActivity() {
                             onAllowNotifications = ::openNotificationSettings,
                             onAllowExact = ::openExactAlarmSettings,
                             entries = vm.entries.map { it.id },
+                            newcomer = vm.newcomer,
                         )
                     }
                 }
@@ -201,7 +203,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
- * `hour` and `ordo` is its content, still.
+ * `hour` and `ordo` is its content, still. `newcomer` is a reader's first week.
  */
 @Composable
 fun OfficeApp(
@@ -230,6 +232,7 @@ fun OfficeApp(
     onAllowExact: () -> Unit,
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
+    newcomer: Boolean = false,
 ) {
     val content = when {
         error != null -> Content.Failed(error)
@@ -262,13 +265,15 @@ fun OfficeApp(
         onAllowNotifications = onAllowNotifications,
         onAllowExact = onAllowExact,
         entries = entries,
+        newcomer = newcomer,
     )
 }
 
 /**
  * The app on its plaster wall: the page shown, under the shared header and menu. A new page
  * comes in as `motion` says, over the wall, once its content is ready; until then the page
- * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made.
+ * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made. In a
+ * reader's first week (`newcomer`) home offers the introduction.
  */
 @Composable
 fun OfficeApp(
@@ -295,7 +300,10 @@ fun OfficeApp(
     onAllowNotifications: () -> Unit,
     onAllowExact: () -> Unit,
     entries: List<Long>,
+    newcomer: Boolean = false,
 ) {
+    // About's words are the core's, the menu's name for the page and home's introduction among them.
+    val aboutView = remember { about() }
     var menu by remember { mutableStateOf(false) }
     // The wide header's Settings panel: the theme and text size.
     var settings by remember { mutableStateOf(false) }
@@ -368,13 +376,16 @@ fun OfficeApp(
                                 is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
                                 is Page.Ordo -> Page.Ordo(page.year, page.month)
                                 is Page.Year -> Page.Year(page.year)
-                                Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                                Page.Reminders, Page.About -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
                             },
                         )
                     },
                     ordoCurrent = page is Page.Ordo || page is Page.Year,
                     onReminders = { menu = false; onOpen(Page.Reminders) },
                     remindersCurrent = page is Page.Reminders,
+                    about = aboutView.menu,
+                    onAbout = { menu = false; onOpen(Page.About) },
+                    aboutCurrent = page is Page.About,
                     settingsOpen = settings,
                     onSettings = { settings = !settings },
                 )
@@ -390,6 +401,9 @@ fun OfficeApp(
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
@@ -409,6 +423,9 @@ fun OfficeApp(
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
@@ -435,6 +452,8 @@ fun OfficeApp(
                                 onDate = { onOpen(Page.Home(it)) },
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
+                                introduction = aboutView.introduction.takeIf { newcomer },
+                                onIntroduction = { onOpen(Page.About) },
                             )
                             page is Page.Hour && content is Content.Hour -> HourScreen(
                                 view = content.view,
@@ -482,6 +501,13 @@ fun OfficeApp(
                                 onTurnOff = onTurnOff,
                                 onAllowNotifications = onAllowNotifications,
                                 onAllowExact = onAllowExact,
+                            )
+                            page is Page.About -> AboutScreen(
+                                view = aboutView,
+                                today = today,
+                                chrome = chrome,
+                                insets = insets,
+                                onOpen = onOpen,
                             )
                             else -> Message("Preparing the office…", insets)
                         }

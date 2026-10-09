@@ -262,6 +262,91 @@ pub struct NotFoundData {
     pub chrome: Chrome,
 }
 
+/// The page for newcomers: what the Office is and how to pray it ([`presentation::about`]).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+    pub title: String,
+    pub blocks: Vec<AboutBlockView>,
+    /// The seven hours in home's three bands.
+    pub about_hours: Vec<AboutPeriod>,
+}
+
+/// One block of the About page. `kind` is intro, verse, heading, paragraph, hours, note or key;
+/// `html` is a paragraph's words, escaped, with its links made anchors.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutBlockView {
+    pub kind: &'static str,
+    pub text: String,
+    pub html: String,
+    pub cite: String,
+    pub mark: String,
+    pub red: bool,
+}
+
+/// One of home's bands of hours (Morning, Day, Evening) on the about page.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutPeriod {
+    pub label: String,
+    pub hours: Vec<AboutHour>,
+}
+
+/// An hour on the about page: its name, what it is, and when it is said.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AboutHour {
+    pub name: String,
+    pub url: String,
+    pub gloss: String,
+    pub time: String,
+}
+
+impl AboutData {
+    /// The page as presentation words it, for the page chrome given.
+    pub fn new(chrome: Chrome) -> AboutData {
+        use crate::escape::html_escape_string as esc;
+        use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_TITLE, AboutBlock, AboutRun, about_runs};
+        let block = |kind| AboutBlockView { kind, ..AboutBlockView::default() };
+        let blocks = ABOUT
+            .iter()
+            .map(|b| match *b {
+                AboutBlock::Intro(text) => AboutBlockView { text: text.into(), ..block("intro") },
+                AboutBlock::Verse { text, cite } => AboutBlockView { text: text.into(), cite: cite.into(), ..block("verse") },
+                AboutBlock::Heading(text) => AboutBlockView { text: text.into(), ..block("heading") },
+                AboutBlock::Paragraph(text) => {
+                    let html = about_runs(text)
+                        .into_iter()
+                        .map(|run| match run {
+                            AboutRun::Text(t) => esc(&t),
+                            AboutRun::Link { text, target } => format!("<a href=\"{}\">{}</a>", esc(&target), esc(&text)),
+                        })
+                        .collect();
+                    AboutBlockView { html, ..block("paragraph") }
+                }
+                AboutBlock::Hours => block("hours"),
+                AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
+                AboutBlock::Key { mark, red, text } => AboutBlockView { text: text.into(), mark: mark.into(), red, ..block("key") },
+            })
+            .collect();
+        let about_hours = ABOUT_HOURS
+            .iter()
+            .map(|(label, hours)| AboutPeriod {
+                label: (*label).into(),
+                hours: hours
+                    .iter()
+                    .map(|(slug, time)| AboutHour {
+                        name: presentation::title_case(slug),
+                        url: format!("/{slug}"),
+                        gloss: presentation::hour_gloss(slug).into(),
+                        time: (*time).into(),
+                    })
+                    .collect(),
+            })
+            .collect();
+        AboutData { chrome, title: ABOUT_TITLE.into(), blocks, about_hours }
+    }
+}
+
 /// The privacy policy.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct PrivacyData {

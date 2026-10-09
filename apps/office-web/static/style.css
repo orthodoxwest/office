@@ -667,6 +667,14 @@ summary:focus-visible {
   color: var(--text);
 }
 
+/* A wide hour's header is already full with the seven hours; About stays in
+   the header of every other page and in the phone's menu everywhere. */
+@media (min-width: 701px) {
+  .page-hour .site-menu nav a[data-nav="about"] {
+    display: none;
+  }
+}
+
 .nav-divider {
   width: 1px;
   /* An empty span has no baseline; it fills the row's height instead. */
@@ -1722,6 +1730,37 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+/* The introduction for a reader's first week, set beside Change date as its
+   twin: the same small capitals, ink and touch height. layout.html's
+   pre-paint script sets data-newcomer, so it never appears late. */
+.home-introduction {
+  display: none;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0.35rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+html[data-newcomer] .home-introduction {
+  display: flex;
+}
+
+/* The row holds two labels on a small phone, so for that week the
+   introduction takes the season's place (each hour's header still names it). */
+html[data-newcomer] .home-season {
+  display: none;
+}
+
+@media (hover: hover) {
+  .home-introduction:hover {
+    color: var(--accent);
+  }
 }
 
 /* Home reuses the hour "Change date" disclosure — after the title stack, not
@@ -5739,7 +5778,7 @@ body.season-eastertide {
 
 /* One focus ring for the card's controls: the date's gold, not the
    browser's or the oak. */
-.page-home :is(.pray-now, .home-hour-link, .home-date-nav > summary, .not-today-link):focus-visible {
+.page-home :is(.pray-now, .home-hour-link, .home-date-nav > summary, .home-introduction, .not-today-link):focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
@@ -6175,6 +6214,187 @@ body.season-eastertide {
   margin-bottom: 1.5rem;
   color: var(--muted);
   line-height: 1.5;
+}
+
+/* About the Office: the privacy page's prose measure, with the seven hours set
+   as home's table of periods (the period labels in the frieze's green earth
+   thinned, the frame in the lining) and the verse as red work. */
+.about {
+  --frontispiece-rule: rgba(107, 58, 31, 0.22);
+  --frontispiece-band: color-mix(in srgb, var(--inscription-ground) 9%, transparent);
+  --panel-rule: color-mix(in srgb, var(--lining) 45%, transparent);
+  max-width: 38rem;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about {
+    --frontispiece-rule: rgba(208, 176, 106, 0.24);
+    --frontispiece-band: rgba(208, 176, 106, 0.045);
+  }
+}
+
+:root[data-theme="dark"] .about {
+  --frontispiece-rule: rgba(208, 176, 106, 0.24);
+  --frontispiece-band: rgba(208, 176, 106, 0.045);
+}
+
+.about .ornament-headpiece {
+  width: 5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+}
+
+.about h1 {
+  margin-bottom: 0.55rem;
+  color: var(--text);
+  font-size: 1.8rem;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.about h2 {
+  margin: 1.8rem 0 0.45rem;
+  color: var(--titulus);
+  font-size: 0.95rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.about p {
+  margin-bottom: 0.8rem;
+}
+
+.about a {
+  color: var(--accent);
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.about-verse {
+  margin: 1.2rem 0 0;
+  color: var(--rubric);
+  text-align: center;
+}
+
+.about-verse p {
+  margin: 0;
+  font-style: italic;
+}
+
+.about-verse cite {
+  font-size: 0.82rem;
+  font-style: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+}
+
+.about-hours {
+  border-inline: 1px solid var(--panel-rule);
+}
+
+.about-hour-group {
+  display: grid;
+  grid-template-columns: 5.2rem minmax(0, 1fr);
+  border-top: 1px solid var(--frontispiece-rule);
+}
+
+.about-hour-group:first-child {
+  border-top-color: var(--panel-rule);
+}
+
+.about-hour-group:last-child {
+  border-bottom: 1px solid var(--panel-rule);
+}
+
+.about-hour-group-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+  margin: 0;
+  padding: 0 0.4rem;
+  border-right: 1px solid var(--frontispiece-rule);
+  background: var(--frontispiece-band);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.about .period-ornament {
+  display: block;
+  width: 1.2rem;
+  height: 0.8rem;
+  fill: var(--ornament);
+  opacity: 0.7;
+}
+
+.about-hour-group dl {
+  margin: 0;
+}
+
+.about-hour {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
+}
+
+.about-hour + .about-hour {
+  border-top: 1px solid var(--frontispiece-rule);
+}
+
+.about-hour dt {
+  font-size: 1.2rem;
+}
+
+.about-hour dt a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.about-hour dd {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.about-hour-gloss {
+  font-style: italic;
+}
+
+.about-hour-time {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.about-note {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.about-keys {
+  margin: 0 0 0.8rem;
+  padding: 0;
+  list-style: none;
+}
+
+.about-keys li {
+  margin-bottom: 0.55rem;
+}
+
+.about-key-red {
+  color: var(--rubric);
 }
 
 /* The privacy policy: the reminders page's measure and headings, set as prose. */

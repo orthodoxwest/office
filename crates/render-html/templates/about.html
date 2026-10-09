@@ -1,0 +1,47 @@
+{% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
+{# The words are presentation::about's, which the native apps set too. #}
+<div class="about">
+  {{ headpiece() }}
+  <h1>{{ title }}</h1>
+  {%- for b in blocks %}
+  {%- if b.kind == "intro" %}
+  <p class="about-intro">{{ b.text }}</p>
+  {%- elif b.kind == "verse" %}
+  <blockquote class="about-verse">
+    <p>{{ b.text }}</p>
+    <cite>{{ b.cite }}</cite>
+  </blockquote>
+  {%- elif b.kind == "heading" %}
+  <h2>{{ b.text }}</h2>
+  {%- elif b.kind == "paragraph" %}
+  <p>{{ b.html|safe }}</p>
+  {%- elif b.kind == "note" %}
+  <p class="about-note">{{ b.text }}</p>
+  {%- elif b.kind == "key" %}
+  {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
+  <ul class="about-keys">
+  {%- endif %}
+    <li><span class="about-key{% if b.red %} about-key-red{% endif %}">{{ b.mark }}</span> {{ b.text }}</li>
+  {%- if loop.nextitem is undefined or loop.nextitem.kind != "key" %}
+  </ul>
+  {%- endif %}
+  {%- elif b.kind == "hours" %}
+  <div class="about-hours">
+    {%- for period in about_hours %}
+    <section class="about-hour-group" aria-label="{{ period.label }}">
+      <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
+      <dl>
+        {%- for h in period.hours %}
+        <div class="about-hour">
+          <dt><a href="{{ h.url|url }}">{{ h.name }}</a></dt>
+          <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
+        </div>
+        {%- endfor %}
+      </dl>
+    </section>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+  {%- endfor %}
+</div>
+{% endblock %}
