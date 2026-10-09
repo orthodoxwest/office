@@ -52,14 +52,12 @@ Weekdays = wednesday, friday, saturday
 Fast = true
 Abstinence = true
 
-[friday-before-all-saints-fast]
-From = date:10-30
-To = date:10-30
-Fast = true
-
+# The fast follows the vigil, which is anticipated to Saturday when 31 October
+# is a Sunday (2021 ordo, 30 October). The 2026 ordo also marks Friday
+# 30 October; no other year does (see data/review/ordo-triage.csv).
 [vigil-of-all-saints-fast]
-From = date:10-31
-To = date:10-31
+From = feast:vigil-of-all-saints
+To = feast:vigil-of-all-saints
 Fast = true
 
 [advent-abstinence]
