@@ -37,7 +37,7 @@ pub struct Req<'a> {
 
 const VALID_HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 
-const ORDERED_HOURS: [(&str, &str); 7] = [
+pub(crate) const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Lauds", "lauds"),
     ("Prime", "prime"),
     ("Terce", "terce"),

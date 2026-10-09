@@ -1,6 +1,7 @@
 //! The Office web server: Axum routes over a shared calendar, corpus,
 //! templates, reminder feed, and optional usage store.
 
+mod api;
 mod cache;
 mod crawl;
 // build.rs trims and stamps the stylesheet with this module; the library
@@ -47,6 +48,7 @@ pub struct Server {
 /// Application endpoints; Axum owns path matching.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Route {
+    Api,
     UsageEvent,
     UsageDashboard,
     Static,
@@ -112,6 +114,8 @@ impl Server {
             match route {
                 // Clients that already hold these URLs keep using them where they are.
                 Route::UsageEvent | Route::Static => {}
+                // Other sites read the API from their pages, where a redirect is one more failure.
+                Route::Api => return self.api(&req),
                 Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
                 Route::ServiceWorker => return moved::farewell_worker(),
                 Route::UsageDashboard
@@ -127,6 +131,7 @@ impl Server {
             }
         }
         match route {
+            Route::Api => self.api(&req),
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
@@ -156,6 +161,7 @@ impl Server {
         };
         Router::new()
             .route("/api/usage", endpoint(Route::UsageEvent))
+            .route("/api/{*path}", endpoint(Route::Api))
             .route("/admin/usage", endpoint(Route::UsageDashboard))
             .route("/static", endpoint(Route::Static))
             .route("/static/", endpoint(Route::Static))
