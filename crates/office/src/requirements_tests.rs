@@ -728,9 +728,12 @@ fn septuagesima_eve_dismissal_keeps_the_alleluias() {
 /// Diurnal p. 223: I Vespers of the Epiphany take the "Ants. of Lauds,
 /// omitting the fourth"; II Vespers are "All as at I Vespers" (p. 226), and
 /// every Vespers of the Octave is as on the Feast (pp. 227, 229, 231; 2026
-/// ordo, 5–13 January: "Ant. (224)") (#625).
+/// ordo, 5–13 January: "Ant. (224)") (#625), with the Feast's psalms of
+/// Sunday at I Vespers of the Sunday within the Octave too (p. 229; 2026
+/// ordo, 10 January: "Ps. (111)"), also when it is anticipated on the
+/// Saturday (2030) (#626).
 #[test]
-fn epiphany_vespers_omit_the_fourth_lauds_antiphon() {
+fn epiphany_vespers_are_as_on_the_feast() {
     for y in 2026..=2033 {
         let (days, moveable) = year(y);
         for d in 5..=13 {
@@ -740,6 +743,8 @@ fn epiphany_vespers_omit_the_fourth_lauds_antiphon() {
             let antiphon = |n: u32| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
             assert!(antiphon(1).starts_with("Before the morning star"), "{date}");
             assert!(antiphon(4).starts_with("Like a flame of fire"), "{date}: {}", antiphon(4));
+            let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
         }
     }
 }
