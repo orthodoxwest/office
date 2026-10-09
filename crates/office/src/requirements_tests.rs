@@ -946,8 +946,9 @@ fn commemoration_definitions_choose_fitting_texts() {
     // #617: Diurnal p. 465, St Peter at Lauds of 25 January "as above at I Vespers".
     let peter = commemorated(Date::new(2027, 1, 25), "lauds", "comm-01-25-commemoration-of-st-peter");
     assert!(has(&peter, "Thou art the shepherd of the sheep") && has(&peter, "Thou art Peter."), "{peter:?}");
-    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts.
-    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "comm-extra-07-06-the-octave-of-ss-peter-and-paul");
+    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts
+    // (the generated octave day, not its dated duplicate: #622).
+    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "ss-peter-paul-octave-day");
     assert!(has(&octave, "Glorious princes") && has(&octave, "whose right hand upheld blessed Peter"), "{octave:?}");
     for found in [&peter, &octave] {
         assert!(!has(found, "good and faithful servant") && !has(found, "Confessor"), "{found:?}");
@@ -999,5 +1000,84 @@ fn no_vigil_commemoration_on_a_solemnity() {
         assert_eq!(day.celebration.as_deref().map(|c| c.id.as_str()), Some(celebration), "{}", day.date);
         assert!(day.commemorations.iter().all(|c| c.id != vigil), "{}: {vigil} commemorated", day.date);
         assert!(day.occurrence_decisions.iter().any(|x| x.rule == "commemoration:vigil-on-first-class-double"), "{}", day.date);
+    }
+}
+
+/// #631: Paschaltide runs until None of the Saturday after Pentecost (General
+/// Rubrics XXIV.3, XXXI.5; 2019, 2021 and 2026 ordos: "Paschaltide ends with
+/// None of Saturday"), so a saint commemorated within the Octave of Pentecost
+/// keeps the Paschaltide Common and its alleluias.
+#[test]
+fn pentecost_week_commemorations_keep_paschaltide_forms() {
+    let commemorated = |date: Date, hour: &str, owner: &str| -> Vec<(ElementType, String)> {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let found: Vec<_> = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.is_commemoration && e.commemoration_owner_id == owner)
+            .map(|e| (e.kind, e.text.clone()))
+            .collect();
+        assert!(!found.is_empty(), "{date} {hour}: {owner} not commemorated");
+        found
+    };
+    let text = |found: &[(ElementType, String)], kind: ElementType| found.iter().find(|(k, _)| *k == kind).unwrap().1.clone();
+    for (date, hour, owner, antiphon) in [
+        (Date::new(2037, 5, 27), "lauds", "st-bede-venerable", "Well done"),
+        (Date::new(2037, 5, 27), "lauds", "comm-extra-05-27-st-john-i-pope-and-martyr", "Daughters of Jerusalem"),
+        (Date::new(2026, 6, 4), "vespers", "st-boniface", "Light perpetual"),
+        (Date::new(2026, 6, 5), "lauds", "st-boniface", "Daughters of Jerusalem"),
+        (Date::new(2021, 6, 23), "lauds", "comm-extra-06-23-st-etheldreda-queen-and-virgin", "The kingdom of heaven"),
+        (Date::new(2019, 6, 22), "lauds", "st-alban", "Daughters of Jerusalem"),
+    ] {
+        let found = commemorated(date, hour, owner);
+        let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
+        assert!(ant.starts_with(antiphon) && ant.ends_with("alleluia."), "{date} {hour}: {ant}");
+        assert!(vers.lines().all(|l| l.ends_with("alleluia.")), "{date} {hour}: {vers}");
+    }
+    // I Vespers of Trinity Sunday are out of Paschaltide.
+    let (days, _) = year(2019);
+    let saturday = &days[Date::new(2019, 6, 22).ordinal() as usize - 1];
+    assert!(saturday.is_paschaltide("none") && !saturday.is_paschaltide("vespers"));
+    let sunday = commemorated(Date::new(2019, 6, 22), "vespers", "pentecost-sunday-1");
+    assert!(sunday.iter().all(|(_, t)| !t.contains("alleluia")), "{sunday:?}");
+}
+
+/// #622: on the eve of an impeded octave day, Vespers commemorate the octave
+/// once, by the Octave Day's I Vespers, not also Day VII (XIII.16). 5 July
+/// under Corpus Christi's octave (2024, 2027), and under a Sunday's I Vespers:
+/// 2025 ordo 5 July, "Comm. Oct. ('Peter the Apostle' 558; Col. 560)"; 2026
+/// ordo 7 Nov., "Comm. Oct. ('O ye Angels' 638; Col. 640)"; 2021 ordo 21 Aug.,
+/// "Comm. Oct. ('O most prudent Virgin')".
+#[test]
+fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
+    for (y, m, d, octave_day) in [
+        (2024, 7, 5, "ss-peter-paul-octave-day"),
+        (2027, 7, 5, "ss-peter-paul-octave-day"),
+        (2025, 7, 5, "ss-peter-paul-octave-day"),
+        (2026, 11, 7, "all-saints-octave-day"),
+        (2021, 8, 21, "assumption-bvm-octave-day"),
+    ] {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        let ids: Vec<_> = day.vespers.commemorations.iter().map(|c| c.id.as_str()).collect();
+        assert!(ids.contains(&octave_day), "{}: {ids:?}", day.date);
+        assert!(!ids.contains(&format!("{octave_day}-7").as_str()), "{}: {ids:?}", day.date);
+    }
+    // The impeded Octave Day itself is commemorated at Lauds of 6 July.
+    let (days, _) = year(2027);
+    let sixth = &days[Date::new(2027, 7, 6).ordinal() as usize - 1];
+    assert!(sixth.commemorations.iter().any(|c| c.id == "ss-peter-paul-octave-day"));
+    // ...and at its II Vespers: 2026 ordo 8 Nov., "Comm. Oct ('O how glorious'
+    // 641; Col. 640)"; 2025 ordo 6 July and 2024 ordo 6 July, "Comm. Oct. ...
+    // & Peter &c. ('Peter the Apostle' 558; Col. 560)". The 2021 ordo's 6 July
+    // (Cyril only) is the older reading.
+    for (y, m, d, octave_day) in
+        [(2027, 7, 6, "ss-peter-paul-octave-day"), (2025, 7, 6, "ss-peter-paul-octave-day"), (2026, 11, 8, "all-saints-octave-day")]
+    {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        assert!(day.vespers.commemorations.iter().any(|c| c.id == octave_day), "{}", day.date);
     }
 }

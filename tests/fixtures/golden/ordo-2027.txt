@@ -1044,14 +1044,14 @@ JUNE
            Lauds   r · Ben. God so loved the world · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. If a man love me · No Suff.
-               Com. St Alban, Protomartyr of England ("This is a Martyr")
+               Com. St Alban, Protomartyr of England ("Light perpetual")
  22  Tue     TUESDAY WITHIN THE OCTAVE OF PENTECOST     [1cl] r
            St Alban, Protomartyr of England (d)
            Lauds   r · Ben. I am the door · No Preces · No Suff.
-               Com. St Alban, Protomartyr of England ("He that hateth his life")
+               Com. St Alban, Protomartyr of England ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers r · II prec. · Mag. Peace · No Suff.
-               Com. St Alban, Protomartyr of England ("Whosoever will come after me")
+               Com. St Alban, Protomartyr of England ("O ye holy and righteous")
  23  Wed  L§ Ember Wednesday in Pentecost               [sd]  r
            St Etheldreda, Queen & Virgin (com)
            Lauds   r · Ben. I am the living bread · No Preces · No Suff.
@@ -1154,14 +1154,14 @@ JULY
                Com. Day VII within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · II prec. · Mag. O sacred banquet · No Suff.
-               Com. Day VII within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. The Octave of Ss Peter & Paul ("Peter the Apostle")
   6  Tue     Day VI within the Octave of Corpus Christi [sd]  w
-           The Octave of Ss Peter & Paul (com)
+           The Octave of Ss Peter & Paul (gd)
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. The Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · II prec. · Mag. O how sweet · No Suff.
+               Com. The Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. Ss Cyril and Methodius, Bishops & Confessors ("O how beautiful")
   7  Wed     Day VII within the Octave of Corpus Christi [sd]  w
            Ss Cyril and Methodius, Bishops & Confessors (d)
@@ -1474,7 +1474,7 @@ AUGUST
            Lauds   w · Ben. Who is she · No Preces · No Suff.
            Hours   No Preces
            Vespers g · I fol. (IX Sunday after Pentecost) · Mag. Wisdom crieth · No Suff.
-               Com. Day VII within the Octave of the Assumption ("On this day")
+               Com. Octave of the Assumption ("O most prudent Virgin")
                Com. Ss Timothy (Bishop), Hippolytus & Symphorian, Mm ("For theirs is the kingdom of heaven")
  22  Sun     IX Sunday after Pentecost                  [sd]  g
            Octave of the Assumption (gd)
@@ -2204,14 +2204,15 @@ DECEMBER
                Com. Tuesday after Advent III ("Thou, Bethlehem")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
+               Com. Octave of the Conception of the B.V.M. ("All generations")
                Com. Tuesday after Advent III ("Awake, awake")
-               Com. Octave of the Conception of the B.V.M. ("O holy Mary")
  15  Wed  L§ Ember Wednesday in Advent                  [f2]  v
-           Octave of the Conception of the B.V.M. (com)
+           Octave of the Conception of the B.V.M. (gd)
            Lauds   v · Ben. The Angel · No Preces · No Suff.
-               Com. Octave of the Conception of the B.V.M. ("Blessed art thou")
+               Com. Octave of the Conception of the B.V.M. ("The Lord God said")
            Hours   No Preces
            Vespers v · Mag. Behold the handmaid of the Lord · No Suff.
+               Com. Octave of the Conception of the B.V.M. ("Let us celebrate")
                Com. St Eusebius of Vercelli, Bishop & Martyr ("This is a Martyr")
  16  Thu  L  Thursday after Advent III                        v
            St Eusebius of Vercelli, Bishop & Martyr (com)

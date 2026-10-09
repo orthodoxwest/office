@@ -4,7 +4,7 @@
 
 use std::ops::{Deref, DerefMut};
 
-use calendar::{CalendarDay, Date, MoveableDates, Weekday};
+use calendar::{CalendarDay, Date, MoveableDates, Season, Weekday};
 
 use crate::concurrence::VespersDesignation;
 
@@ -63,6 +63,19 @@ impl Day {
     pub fn is_septuagesima_eve(&self) -> bool {
         let civil = self.civil_date();
         MoveableDates::compute(civil.year()).septuagesima.add_days(-1) == civil
+    }
+
+    /// Paschaltide at this hour: Eastertide, and the Octave of Pentecost
+    /// "until None of Saturday" before I Vespers of Trinity Sunday (General
+    /// Rubrics XXIV.3, XXXI.5; 2026 ordo, 6 June). The calendar's season
+    /// turns at Pentecost.
+    pub fn is_paschaltide(&self, hour_name: &str) -> bool {
+        if self.season == Season::Easter {
+            return true;
+        }
+        let civil = self.civil_date();
+        let since = civil.days_since(MoveableDates::compute(civil.year()).pentecost);
+        (0..6).contains(&since) || (since == 6 && !matches!(hour_name, "vespers" | "compline"))
     }
 
     /// Lowercase civil weekday name ("monday").
