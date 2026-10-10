@@ -175,18 +175,19 @@ R. Thanks be to God.
 
 [psalm-antiphon-4-lauds-monday]
 # SOURCE: Monastic Diurnal p. 46 (ferial canticle, P.T. antiphon)
-Thine anger * is turned away, O Lord, and thou comfortedst me. Alleluia.
+Thine anger * is turned away, O Lord, and thou comfortedst me, alleluia.
 
 [psalm-antiphon-4-lauds-tuesday]
 # SOURCE: Monastic Diurnal p. 52 (ferial canticle, P.T. antiphon)
-Be thou ready * to save us all the days of our life, O Lord. Alleluia.
+Be thou ready * to save us all the days of our life, O Lord, alleluia.
 
 [psalm-antiphon-4-lauds-wednesday]
 # SOURCE: Monastic Diurnal p. 57 (ferial canticle, P.T. antiphon)
-The Lord shall judge * the ends of the earth. Alleluia.
+The Lord shall judge * the ends of the earth, alleluia.
 
 [psalm-antiphon-4-lauds-thursday]
-# SOURCE: Monastic Diurnal p. 63 (ferial canticle, P.T. antiphon)
+# SOURCE: Monastic Diurnal p. 63 (ferial canticle, P.T. antiphon). Printed in full as
+# ". Alleluia." here, unlike the other days' "(P. T. Alleluia.)", so kept as printed.
 I will sing * unto the Lord, for he hath triumphed gloriously. Alleluia.
 
 [psalm-antiphon-4-lauds-friday]
@@ -195,7 +196,7 @@ O Lord, * I have heard thy speech, and was afraid, alleluia.
 
 [psalm-antiphon-3-lauds-saturday]
 # SOURCE: Monastic Diurnal p. 75 (ferial canticle, P.T. antiphon)
-Ascribe ye greatness * unto our God. Alleluia.
+Ascribe ye greatness * unto our God, alleluia.
 
 [psalm-antiphon-4-lauds-sunday]
 # SOURCE: Monastic Diurnal pp. 35, 370 (Paschaltide Sunday antiphon)

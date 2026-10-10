@@ -3213,6 +3213,47 @@
     ]
   },
   {
+    "id": "weekday-lauds-canticle-antiphons-in-paschaltide",
+    "source": "Monastic Diurnal pp. 46-79 (weekday Lauds, Ferial and Festal Canticles): the canticle antiphons print their Paschaltide alleluia as '(P. T. Alleluia.)', written ', alleluia.' as for the Commons (#645). Thursday's Ferial Canticle prints its P. T. Ant. in full, 'triumphed gloriously. Alleluia.' (p. 63), and Friday's '...was afraid, alleluia.' (p. 69); both are kept as printed.",
+    "cases": [
+      {
+        "date": "2026-05-04",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-monday",
+        "contains": "comfortedst me, alleluia."
+      },
+      {
+        "date": "2026-05-07",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-thursday",
+        "contains": "triumphed gloriously. Alleluia."
+      },
+      {
+        "date": "2026-05-15",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "seasonal/easter/psalm-antiphon-4-lauds-friday",
+        "contains": "was afraid, alleluia."
+      },
+      {
+        "date": "2026-05-26",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "ordinary/lauds/festal-canticle-antiphon-tuesday-easter",
+        "contains": "in all your doings, alleluia."
+      },
+      {
+        "date": "2027-05-27",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "ordinary/lauds/festal-canticle-antiphon-thursday-easter",
+        "contains": "saith the Lord, alleluia."
+      }
+    ]
+  },
+  {
     "id": "apostles-first-vespers-antiphons-in-paschaltide",
     "source": "Monastic Diurnal p. 16* (Common of Apostles and Evangelists in Paschaltide, At I Vespers: 'Ants. of Lauds, omitting the fourth. Psalms as at I Vespers of the Common of Apostles, p. 7*') and p. 17* (the Lauds antiphons). 2026 ordo, 5 May: 'I of fol. / Ant.(17*) / Ps.(7*)'. Out of Paschaltide the Common's own I Vespers antiphons (p. 7*). Issue #640.",
     "cases": [
