@@ -35,8 +35,8 @@
 @use commons/confessor-bishop-paschal/psalm-antiphon-5
 
 [magnificat-antiphon]
-# SOURCE: monastic diurnal, p. 35* (For a Doctor, at both Vespers), with the one Alleluia of
-# p. 6* §3 in the Diurnal's printed form ", alleluia." (Common of Apostles in Paschaltide, pp. 16*-17*)
+# SOURCE: monastic diurnal, p. 35* (For a Doctor, at both Vespers); Paschaltide form p. 3*
+# ("(P. T. Alleluia.)"), written ", alleluia." as in the other Paschal Commons
 O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God, alleluia.
 
 [short-responsory-lauds]
