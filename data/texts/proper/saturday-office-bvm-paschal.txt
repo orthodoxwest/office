@@ -20,6 +20,12 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.
 
+[short-responsory-vespers]
+# Vespers takes the Short R. "as on Feasts B.V.M." (Diurnal p. 68*), whose
+# Vespers has the Lauds responsory (p. 64*): in Paschaltide its Paschal form
+# (p. 66*), all else as throughout the Year (p. 71*).
+@use proper/saturday-office-bvm-paschal/short-responsory-lauds
+
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107 (Paschaltide rubric)
 V. Blessed art thou among women, alleluia.

@@ -1370,10 +1370,11 @@ fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
 
 /// Office of Saint Mary on Saturday (Diurnal pp. 68*–71*): its I Vespers has
 /// its own versicle, with alleluia in Paschaltide (pp. 68*, 71*), not the
-/// Common's "Vouchsafe" (p. 64*); and from the Saturday after the Octave of
-/// Epiphany to the Saturday before the Purification its collect is "O God,
-/// who by the fruitful virginity" at every Hour (p. 70*), and the Hours
-/// take the Circumcision's antiphons (pp. 70*–71*) (#652).
+/// Common's "Vouchsafe" (p. 64*), and in Paschaltide the Short R. takes its
+/// Paschal form (p. 66*); from the Saturday after the Octave of Epiphany to
+/// the Saturday before the Purification its collect is "O God, who by the
+/// fruitful virginity" at every Hour (p. 70*), and the Hours take the
+/// Circumcision's antiphons (pp. 70*–71*) (#652).
 #[test]
 fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
     let hour = |date: &str, name: &str| {
@@ -1387,7 +1388,13 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
         ("2027-05-14", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
         ("2028-05-12", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
     ] {
-        assert_eq!(principal(&hour(date, "vespers"), "versicle").text, versicle, "{date}");
+        let vespers = hour(date, "vespers");
+        assert_eq!(principal(&vespers, "versicle").text, versicle, "{date}");
+        // The Short R. as on Feasts B.V.M. (pp. 64*, 68*), Paschal in
+        // Paschaltide (pp. 66*, 71*).
+        let paschal = versicle.contains("alleluia");
+        let responsory = &principal(&vespers, "short-responsory").text;
+        assert_eq!(responsory.contains("Alleluia, alleluia."), paschal, "{date}");
     }
     const FRUITFUL: &str = "O God, who by the fruitful virginity of blessed Mary";
     for (date, name) in [
