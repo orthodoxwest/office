@@ -387,6 +387,14 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
         {
             return (true, "commemoration:first-vespers-seasonal-feria");
         }
+        // An Ember day of Advent or Lent is an Advent or Lenten feria, so a
+        // following feast's I Vespers commemorate it (XIV.8-9): 2017 ordo 20 Dec and 2019 ordo 20 Dec (St Thomas), 2022 ordo
+        // 18 March (St Joseph) and 14 Dec (the Conception's octave day),
+        // 2025 ordo 17 Dec (the Expectation); #642. Ember Saturday's evening
+        // is the Sunday's, which does not commemorate it (2026 ordo 19 Dec).
+        if penitential_season_feria(loser) && winner.is_some_and(|w| !w.is_category(Category::Sunday)) {
+            return (true, "commemoration:first-vespers-seasonal-ember-day");
+        }
         return (false, "commemoration:first-vespers-office-ended-at-none");
     }
     let Some(w) = winner else {
