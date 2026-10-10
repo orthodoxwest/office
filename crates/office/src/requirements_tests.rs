@@ -1390,3 +1390,71 @@ fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
         assert_eq!(collect.source_ref, want, "{date}");
     }
 }
+
+/// Office of Saint Mary on Saturday (Diurnal pp. 68*–71*): its I Vespers has
+/// its own versicle, with alleluia in Paschaltide (pp. 68*, 71*), not the
+/// Common's "Vouchsafe" (p. 64*), and in Paschaltide the Short R. takes its
+/// Paschal form (p. 66*); from the Saturday after the Octave of Epiphany to
+/// the Saturday before the Purification its collect is "O God, who by the
+/// fruitful virginity" at every Hour (p. 70*), and the Hours take the
+/// Circumcision's antiphons (pp. 70*–71*), otherwise the Common's (#652).
+#[test]
+fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
+    let hour = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap()
+    };
+    for (date, versicle) in [
+        ("2026-10-09", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-01-22", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-05-14", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+        ("2028-05-12", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+    ] {
+        let vespers = hour(date, "vespers");
+        assert_eq!(principal(&vespers, "versicle").text, versicle, "{date}");
+        // The Short R. as on Feasts B.V.M. (pp. 64*, 68*), Paschal in
+        // Paschaltide (pp. 66*, 71*).
+        let paschal = versicle.contains("alleluia");
+        let responsory = &principal(&vespers, "short-responsory").text;
+        assert_eq!(responsory.contains("Alleluia, alleluia."), paschal, "{date}");
+    }
+    const FRUITFUL: &str = "O God, who by the fruitful virginity of blessed Mary";
+    for (date, name) in [
+        ("2027-01-22", "vespers"),
+        ("2027-01-16", "lauds"),
+        ("2027-01-23", "lauds"),
+        ("2027-01-23", "terce"),
+        ("2027-01-30", "none"),
+        ("2028-01-29", "sext"),
+    ] {
+        assert!(principal(&hour(date, name), "collect").text.starts_with(FRUITFUL), "{date} {name}");
+    }
+    // The Saturday after the Purification is the Office throughout the Year.
+    assert!(principal(&hour("2027-02-06", "lauds"), "collect").text.starts_with("Grant, we beseech thee, O Lord God"));
+    // At the Hours, II After Christmas, the Circumcision's Lauds antiphons
+    // (pp. 70*–71*); afterwards the Common's (p. 67*).
+    let antiphon = |date: &str, name: &str| {
+        let hour = hour(date, name);
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Antiphon && !e.is_commemoration).unwrap().text
+    };
+    for date in ["2026-01-31", "2027-01-16", "2028-01-29", "2030-01-19"] {
+        for (name, incipit) in
+            [("prime", "O wondrous interchange!"), ("terce", "When thou wast born"), ("sext", "In the bush"), ("none", "Lo, Mary")]
+        {
+            assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
+        }
+    }
+    // Throughout the Year the Hours take the Common's, Prime too, though
+    // Lauds has the Saturday psalter's (pp. 69*, 65*, 67*); in Paschaltide
+    // with one Alleluia (p. 6*, §3; ", alleluia." as #645).
+    for (date, paschal) in [("2027-02-06", false), ("2026-10-10", false), ("2027-05-15", true), ("2030-06-01", true)] {
+        for (name, incipit) in
+            [("prime", "While the King"), ("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")]
+        {
+            let text = antiphon(date, name);
+            assert!(text.starts_with(incipit), "{date} {name}");
+            assert_eq!(text.ends_with(", alleluia."), paschal, "{date} {name}: {text}");
+        }
+    }
+}
