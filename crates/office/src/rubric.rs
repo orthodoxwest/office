@@ -13,6 +13,8 @@ fn phrases(reference: &str) -> &'static [&'static str] {
         "ordinary/compline/confiteor-rubric" => &["Our Father"],
         "shared/formulas/triduum-compline-opening-rubric" => &["Sir, ask a blessing", "Our help"],
         "shared/formulas/triduum-collect-rubric" => &["Let us pray", "Who with thee ... liveth"],
+        "shared/formulas/triduum-vespers-opening-rubric" => &["Our Father", "Hail Mary"],
+        "shared/formulas/holy-saturday-compline-alleluia-rubric" => &["Praise be to thee, O Lord, King of eternal glory", "Alleluia"],
         _ => &[],
     }
 }
@@ -75,5 +77,10 @@ mod tests {
         assert_eq!(prayed("shared/formulas/triduum-compline-opening-rubric", opening), ["Sir, ask a blessing", "Our help"]);
         let collect = "The Psalm being ended, there is said, without Let us pray, in a low voice, the Collect of the day, its conclusion Who with thee ... liveth being said in silence.";
         assert_eq!(prayed("shared/formulas/triduum-collect-rubric", collect), ["Let us pray", "Who with thee ... liveth"]);
+        let alleluia = "Henceforth Praise be to thee, O Lord, King of eternal glory is not said, but in its place is said Alleluia.";
+        assert_eq!(
+            prayed("shared/formulas/holy-saturday-compline-alleluia-rubric", alleluia),
+            ["Praise be to thee, O Lord, King of eternal glory", "Alleluia"]
+        );
     }
 }

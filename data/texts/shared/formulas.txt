@@ -175,6 +175,37 @@ Sir, ask a blessing is not said, nor the Short Lesson, nor Our help, nor the Lor
 The Hymn, Chapter, and Versicle are not said, but when the Psalms are ended the
 Antiphon on the Canticle Nunc dimittis is begun.
 
+[holy-saturday-compline-alleluia-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 361 (Easter Even at Compline)
+Henceforth Praise be to thee, O Lord, King of eternal glory is not said, but in
+its place is said Alleluia.
+
+[holy-saturday-compline-collect-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 362 (Easter Even at Compline)
+Then is said at once:
+
+[triduum-lauds-omission-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 311 (Maundy Thursday at Lauds)
+The Chapter, Short Responsory, and Hymn are not said during this Triduum.
+
+[triduum-vespers-opening-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 315 (Maundy Thursday at Vespers). The
+# printed rubric opens "On this and the following day,"; that clause is left out
+# because the rubric is said on both days, as the p. 314 rubric for the Hours
+# leaves out its own scope.
+Our Father and Hail Mary having been said secretly, Vespers are begun at once
+with the first Antiphon, without musical note.
+
+[triduum-vespers-omission-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 315 (Maundy Thursday at Vespers)
+The Chapter, Short Responsory, Hymn, and Versicle are not said during this
+Triduum.
+
+[holy-saturday-vespers-omission-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 360 (Easter Even at Vespers)
+The Chapter, Short Responsory, Hymn, and Versicle are not said, but the
+Antiphon on Magnificat is at once precented and taken up by the Choir.
+
 [paschal-sunday-psalm-antiphon]
 # SOURCE: Monastic Diurnal pp. 35, 370 (Paschaltide Sunday antiphon)
 Alleluia, * alleluia, alleluia; Alleluia, alleluia, alleluia; Alleluia, alleluia, alleluia.
