@@ -11,7 +11,7 @@ use calendar::computus::MoveableDates;
 use calendar::model::FERIA_COMMEMORATION_ID;
 use calendar::occurrence::compare_feast_precedence;
 use calendar::traits::{
-    is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
+    is_anticipated_sunday, is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
     is_penitential_feria_season, is_privileged_octave_commemoration, is_rogation_day, is_saturday_bvm, is_sunday, is_sunday_first_class,
     is_vigil, octave_parent_id, same_octave_days,
 };
@@ -225,11 +225,12 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
     }
-    // Notes on the Tables 12: a Sunday anticipated on Saturday has nothing
-    // at II Vespers, "even though [it] is only to be commemorated" (XIV.9:
-    // "only at I Vespers and at Lauds"), so it leaves II Vespers of a
-    // Saturday feast (the Purification, 2 February 2075 and 2086; #656).
-    if !incoming && comm.id.ends_with("-anticipated") && comm.is_category(Category::Sunday) {
+    // A Sunday anticipated on a Saturday Double of the I or II Class is
+    // commemorated "at I Vespers ... and at Lauds" (III.4-5; XIV.9), and
+    // "nothing is said of the Sunday at II Vespers" even when it is only
+    // commemorated (Notes on the Tables 12): not at II Vespers of the
+    // Purification, 2 February 2075 and 2086 (#656).
+    if !incoming && is_anticipated_sunday(comm) {
         return (false, "commemoration:second-vespers-anticipated-sunday-exclusion");
     }
     if matches!(comm.rank, Rank::Commemoration | Rank::Simple) {
@@ -373,7 +374,7 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
     // A Sunday office anticipated on Saturday ends at None: its evening is the
     // next Sunday's I Vespers, which do not commemorate it (2025 and 2026
     // ordos, 7 February; 2021 ordo, 20 November).
-    if loser.id.ends_with("-anticipated") && loser.is_category(Category::Sunday) {
+    if is_anticipated_sunday(loser) {
         return (false, "commemoration:first-vespers-anticipated-sunday-exclusion");
     }
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
@@ -493,9 +494,7 @@ fn impeded_double_at_first_vespers(winner: Option<&Feast>, impeder: Option<&Feas
         return (false, "commemoration:impeded-double-first-class-lauds-only");
     }
     if w.is_category(Category::Sunday) {
-        let ended_at_none = impeder.is_some_and(|p| {
-            (p.id.ends_with("-anticipated") && p.is_category(Category::Sunday)) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p)
-        });
+        let ended_at_none = impeder.is_some_and(|p| is_anticipated_sunday(p) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p));
         if ended_at_none {
             return (false, "commemoration:impeded-double-office-ended-at-none");
         }

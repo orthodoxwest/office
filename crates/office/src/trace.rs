@@ -5,7 +5,7 @@
 use calendar::traits::octave_parent_id;
 use calendar::{Category, Feast, Rank, Season};
 
-use crate::commemoration::{is_saturday_sunday_commemoration, octave_commemoration_ref};
+use crate::commemoration::{is_incoming_sunday_commemoration, octave_commemoration_ref};
 use crate::day::Day;
 use crate::engine::Engine;
 use crate::prime::is_prime_antiphon_ref;
@@ -116,7 +116,7 @@ fn commemoration_takes_first_vespers(day: &Day, comm: Option<&Feast>, reference:
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
+    is_incoming_sunday_commemoration(day, comm, "vespers", reference)
 }
 
 fn trace(day: &Day, hour_name: &str, reference: &str, selected: &str, t: &OfficeTexts) -> ProperResolutionTrace {
