@@ -46,6 +46,19 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if is_synthesized_feria(comm) {
                 return lookup_feria_commemoration(Some(day), comm, day.season, hour_name, reference, t);
             }
+            // An Advent Ember day's collect is "said at all the Hours until
+            // Vespers" (Diurnal p. 177): at Vespers it is a feria of its week,
+            // with the weekday's antiphon and the Sunday's collect (2025 ordo
+            // 17 Dec, "Comm. Fer. ... Col. 170"; 2022 ordo 14 Dec, "Behold the
+            // handmaid of the Lord"; #642).
+            if hour_name == "vespers"
+                && comm.id.starts_with("advent-ember-")
+                && let Some(week) = &day.temporal_week_id
+            {
+                let mut feria = (**comm).clone();
+                feria.proper_id = Some(week.clone());
+                return lookup_feria_commemoration(Some(day), &feria, day.season, hour_name, reference, t);
+            }
             if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
