@@ -1423,12 +1423,15 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
         }
     }
     // Throughout the Year the Hours take the Common's, Prime too, though
-    // Lauds has the Saturday psalter's (pp. 69*, 65*, 67*).
-    for date in ["2027-02-06", "2026-10-10", "2027-05-15"] {
+    // Lauds has the Saturday psalter's (pp. 69*, 65*, 67*); in Paschaltide
+    // with one Alleluia (p. 6*, §3; ", alleluia." as #645).
+    for (date, paschal) in [("2027-02-06", false), ("2026-10-10", false), ("2027-05-15", true), ("2030-06-01", true)] {
         for (name, incipit) in
             [("prime", "While the King"), ("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")]
         {
-            assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
+            let text = antiphon(date, name);
+            assert!(text.starts_with(incipit), "{date} {name}");
+            assert_eq!(text.ends_with(", alleluia."), paschal, "{date} {name}: {text}");
         }
     }
 }
