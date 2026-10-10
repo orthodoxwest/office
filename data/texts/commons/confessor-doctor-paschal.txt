@@ -35,8 +35,9 @@
 @use commons/confessor-bishop-paschal/psalm-antiphon-5
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 665 (Common of Doctors, Doctor optime; "P.T. Alleluia")
-O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God. Alleluia.
+# SOURCE: monastic diurnal, p. 35* (For a Doctor, at both Vespers); Paschaltide form p. 3*
+# ("(P. T. Alleluia.)"), written ", alleluia." as in the other Paschal Commons
+O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God, alleluia.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 407, 658 (Paschaltide)

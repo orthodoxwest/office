@@ -1,5 +1,5 @@
 # Texts of the Common of Apostles that propers also name by their words, out of
-# their Common slot (the octave of SS Peter and Paul, St Andrew). They live here, not
+# their Common slot (the octave of SS Peter and Paul). They live here, not
 # in commons/, so the Common's paschal tier does not replace them in Paschaltide
 # (proper.rs, paschal_common_form). The Common reads them through @use.
 
