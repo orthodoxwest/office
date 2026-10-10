@@ -134,12 +134,15 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 
 /// A Sunday commemorated at Saturday Vespers — whether a Saturday feast keeps
 /// II Vespers or a feast on the Sunday takes I Vespers — begins with its own
-/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403).
+/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
+/// office said on Saturday when the Octave Day of the Epiphany is Sunday is
+/// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
 pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
         && day.civil_weekday() == Weekday::Saturday
         && feast.is_category(Category::Sunday)
+        && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }
 
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers
