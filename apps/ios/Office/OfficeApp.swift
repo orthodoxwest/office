@@ -16,7 +16,8 @@ struct OfficeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView().environmentObject(model)
+            // The clock and notifications put away while the app is open, as Books does for reading.
+            RootView().environmentObject(model).statusBarHidden()
         }
     }
 }

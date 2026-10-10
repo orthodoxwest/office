@@ -4,7 +4,7 @@
   "description": "The hours of the Benedictine Office, with ordo and liturgical calendar.",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#fdf1e6",
   "theme_color": "#fdf1e6",
   "icons": [
