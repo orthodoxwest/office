@@ -1963,7 +1963,8 @@
         "date": "2026-05-16",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "commons/blessed-virgin/versicle-terce",
+        "ref": "commons/virgin-martyr-paschal/versicle-first-vespers",
+        "contains": "and reign, alleluia.",
         "before_slot": "collect"
       },
       {
@@ -3099,6 +3100,140 @@
         "commemoration_owner": "privileged-lenten-feria",
         "slot": "commemoration-collect",
         "ref": "proper/lent-sunday-3/collect-vespers-friday"
+      }
+    ]
+  },
+  {
+    "id": "easter-week-daily-collects",
+    "source": "Monastic Diurnal pp. 367-370: a proper Collect for each day of Easter Week. 2026 ordo, 13-18 Apr.: Lauds, Hours and Vespers 'Col. (367)', '(368)', '(368)', '(368)', '(369)', '(369f)'; 18 Apr. Vespers of Low Sunday 'Col. (371)'. Issue #634.",
+    "cases": [
+      {
+        "date": "2026-04-13",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-monday/collect"
+      },
+      {
+        "date": "2026-04-14",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-tuesday/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect",
+        "contains": "yearly solemnity of the Lord's Resurrection"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "terce",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-15",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2026-04-16",
+        "hour": "sext",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-5/collect",
+        "contains": "knit together divers nations"
+      },
+      {
+        "date": "2026-04-17",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-6/collect",
+        "contains": "covenant of reconciliation"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "none",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect",
+        "contains": "devoutly kept the Paschal Feast"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "vespers",
+        "slot": "collect",
+        "ref": "proper/low-sunday/collect"
+      },
+      {
+        "date": "2025-04-23",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-4/collect"
+      },
+      {
+        "date": "2027-05-08",
+        "hour": "lauds",
+        "slot": "collect",
+        "ref": "proper/easter-sunday-octave-day-7/collect"
+      }
+    ]
+  },
+  {
+    "id": "doctor-magnificat-antiphon-in-paschaltide",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2027-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
+        "contains": "Son of God. Alleluia."
+      },
+      {
+        "date": "2037-06-18",
+        "hour": "vespers",
+        "slot": "magnificat-antiphon",
+        "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      }
+    ]
+  },
+  {
+    "id": "apostles-first-vespers-antiphons-in-paschaltide",
+    "source": "Monastic Diurnal p. 16* (Common of Apostles and Evangelists in Paschaltide, At I Vespers: 'Ants. of Lauds, omitting the fourth. Psalms as at I Vespers of the Common of Apostles, p. 7*') and p. 17* (the Lauds antiphons). 2026 ordo, 5 May: 'I of fol. / Ant.(17*) / Ps.(7*)'. Out of Paschaltide the Common's own I Vespers antiphons (p. 7*). Issue #640.",
+    "cases": [
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle-paschal/psalm-antiphon-1",
+        "contains": "shall blossom as the lily, alleluia"
+      },
+      {
+        "date": "2026-05-05",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle-paschal/psalm-antiphon-4-first-vespers",
+        "contains": "Then shall the righteous"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "commons/apostle/psalm-antiphon-1-first-vespers"
+      },
+      {
+        "date": "2026-08-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
       }
     ]
   }

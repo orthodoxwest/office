@@ -1109,10 +1109,15 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
         (Date::new(2026, 6, 5), "lauds", "st-boniface", "Daughters of Jerusalem"),
         (Date::new(2021, 6, 23), "lauds", "comm-extra-06-23-st-etheldreda-queen-and-virgin", "The kingdom of heaven"),
         (Date::new(2019, 6, 22), "lauds", "st-alban", "Daughters of Jerusalem"),
+        // #640: a Doctor's "O Teacher" (Diurnal p. 43*) takes its Alleluia too (p. 6*, §3).
+        (Date::new(2037, 5, 26), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2037, 5, 27), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2046, 6, 17), "vespers", "st-ephrem-syrian", "O Teacher"),
+        (Date::new(2046, 6, 18), "vespers", "st-ephrem-syrian", "O Teacher"),
     ] {
         let found = commemorated(date, hour, owner);
         let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
-        assert!(ant.starts_with(antiphon) && ant.ends_with("alleluia."), "{date} {hour}: {ant}");
+        assert!(ant.starts_with(antiphon) && ant.to_lowercase().ends_with("alleluia."), "{date} {hour}: {ant}");
         assert!(vers.lines().all(|l| l.ends_with("alleluia.")), "{date} {hour}: {vers}");
     }
     // I Vespers of Trinity Sunday are out of Paschaltide.
@@ -1158,5 +1163,32 @@ fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
         let (days, _) = year(y);
         let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
         assert!(day.vespers.commemorations.iter().any(|c| c.id == octave_day), "{}", day.date);
+    }
+}
+
+/// #638 (needs ruling): an Advent Ember Day takes the office from a Common
+/// Octave Day, which is commemorated (rubrics p. 59, "Common Octaves": the
+/// Octave Day yields to "an Ember Day", naming the Conception's octave; Table
+/// of Occurrence, p. 60, 4; XIII.16, p. 64), so on its eve Day VII keeps II Vespers and commemorates the
+/// Octave Day from I Vespers. The 2021 ordo instead keeps the Octave of the
+/// Conception on Ember Wednesday 15 December. Day VII on Ember Wednesday yields
+/// to the feria (2022 ordo 14 December, as the Table's "Day in Common Octave").
+#[test]
+fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
+    for y in [2021, 2027, 2032] {
+        let (days, _) = year(y);
+        let eve = &days[Date::new(y, 12, 14).ordinal() as usize - 1];
+        let ember = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
+        assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
+        assert!(ember.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
+        assert_eq!(eve.vespers.feast.as_ref().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
+        assert!(eve.vespers.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
+    }
+    for y in [2022, 2033] {
+        let (days, _) = year(y);
+        let ember = &days[Date::new(y, 12, 14).ordinal() as usize - 1];
+        assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
+        let octave = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
+        assert_eq!(octave.celebration.as_deref().map(|c| c.id.as_str()), Some("conception-bvm-octave-day"), "{y}");
     }
 }

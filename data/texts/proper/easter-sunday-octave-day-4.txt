@@ -5,3 +5,7 @@ Cast the net * on the right side of the ship, and ye shall find, alleluia.
 [magnificat-antiphon]
 # SOURCE: monastic diurnal, p. 368 (Wednesday in Easter Week)
 Jesus saith unto his disciples, * Bring of the fish which ye have now caught. Simon Peter went up, and drew the net to land, full of great fishes, alleluia.
+
+[collect]
+# SOURCE: monastic diurnal, p. 368 (Wednesday in Easter Week); 2026 ordo, 15 Apr: "Col. (368)"
+O God, who makest us glad with the yearly solemnity of the Lord's Resurrection: mercifully grant that through the transient feasts which we do keep, we may become worthy to attain unto joys eternal.

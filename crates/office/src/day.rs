@@ -78,6 +78,13 @@ impl Day {
         (0..6).contains(&since) || (since == 6 && !matches!(hour_name, "vespers" | "compline"))
     }
 
+    /// The season a saint's proper and Common are read in: Easter throughout
+    /// Paschaltide, so the Octave of Pentecost keeps the Commons' paschal
+    /// forms (#631, #640).
+    pub fn saints_season(&self, hour_name: &str) -> Season {
+        if self.is_paschaltide(hour_name) { Season::Easter } else { self.season }
+    }
+
     /// Lowercase civil weekday name ("monday").
     pub fn civil_weekday_name(&self) -> String {
         self.civil_weekday().name().to_lowercase()

@@ -59,6 +59,11 @@ I will liken him * unto a wise man, which built his house upon a rock, alleluia.
 # SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
 The world, and all things earthly, * this man despised, triumphant: he laid up treasures in heaven by word and deed, alleluia.
 
+# The paschal form of commons/confessor/magnificat-antiphon-doctor, which a Doctor's
+# proper @uses (St Bede, St Ephrem; #640).
+[magnificat-antiphon-doctor]
+@use commons/confessor-doctor-paschal/magnificat-antiphon
+
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Commons Lauds book, p. 67 (Common of a Confessor not a Bishop, "In Paschaltide")
 @use commons/confessor-doctor-paschal/short-responsory-lauds
