@@ -3468,5 +3468,94 @@
         "ref": "ordinary/marian/salve-regina"
       }
     ]
+  },
+  {
+    "id": "confessor-bishop-vespers-omit-lauds-fourth-antiphon",
+    "source": "Monastic Diurnal, Common of a Confessor and Bishop: I Vespers take the antiphons of Lauds omitting the fourth (p. 33*); II Vespers' fourth is Good and faithful servant (p. 39*), in every season; Lauds' fourth is the Benedicite antiphon (p. 35*), alleluia-free after Septuagesima (draft archdiocesan Lauds book p. 654) (#663).",
+    "cases": [
+      {
+        "date": "2027-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-septuagesima",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2027-04-06",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-lent",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2028-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      }
+    ]
+  },
+  {
+    "id": "christmas-eve-prime-antiphon",
+    "source": "Monastic Diurnal, Christmas Eve, p. 183: \"At Prime, which is said as on Doubles, Ant. O Judah and Jerusalem\", Lauds' first antiphon (p. 182), also when the Vigil falls on Sunday (p. 183) (#658).",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2027-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      }
+    ]
   }
 ]

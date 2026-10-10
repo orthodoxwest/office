@@ -21,6 +21,12 @@ To-morrow * ye shall have salvation, saith the Lord God of hosts.
 [psalm-antiphon]
 @use proper/vigil-nativity/psalm-antiphon-1
 
+# Prime is said as on Doubles, with Lauds' first antiphon, not the IV Sunday
+# of Advent's (#658).
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal.pdf, p. 183 (Christmas Eve, At Prime: "Ant. O Judah and Jerusalem")
+@use proper/vigil-nativity/psalm-antiphon-1
+
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
 The Saviour * of the world shall arise as the sun: and shall come down into the Virgin's womb, as the showers upon the grass, alleluia.

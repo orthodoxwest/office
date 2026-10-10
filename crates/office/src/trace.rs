@@ -177,8 +177,8 @@ fn direct_proper_candidates(day: &Day, hour_name: &str, reference: &str, proper_
             let hour_refs = hour_ref_candidates(hour_name, attempt);
             let bare_refs = ref_candidates(attempt);
             let mut candidates = season_ref_candidates(&hour_refs, Some(day.season));
-            candidates.extend(season_ref_candidates(&bare_refs, Some(day.season)));
             candidates.extend(hour_refs);
+            candidates.extend(season_ref_candidates(&bare_refs, Some(day.season)));
             candidates.extend(bare_refs);
             for candidate in candidates {
                 if day.season == Season::Easter {
