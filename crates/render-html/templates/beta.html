@@ -1,0 +1,57 @@
+{% extends "layout.html" %}{% block title %}Test the Android app — Daily Office{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+{#- The group's name and the opt-in address are set in Play Console: Closed testing → Testers
+    takes the group, and shows the opt-in link. Change them here if either changes there. -#}
+<div class="privacy beta">
+  {{ headpiece() }}
+  <h1>Test the Android app</h1>
+  <p class="privacy-intro">
+    The Daily Office for Android is nearly ready for the Play Store. Before
+    Google will list it, at least twelve people must test it for fourteen days
+    in a row. Thank you for being one of them.
+  </p>
+  <p class="beta-device">
+    Open this page on your Android phone, so that every step uses the Google
+    account your Play Store is signed in to.
+  </p>
+
+  <ol class="beta-steps">
+    <li>
+      <h2>Join the testers’ group</h2>
+      <p><a class="beta-action" href="https://groups.google.com/g/daily-office-testers">Join the group</a></p>
+      <p>Tap <em>Join group</em>. It sends no email.</p>
+    </li>
+    <li>
+      <h2>Become a tester</h2>
+      <p><a class="beta-action" href="https://play.google.com/apps/testing/org.orthodoxwest.office">Become a tester</a></p>
+      <p>Tap <em>Become a tester</em>, then <em>Download it on Google Play</em>, and install the app.</p>
+    </li>
+    <li>
+      <h2>Keep it for two weeks</h2>
+      <p>
+        Keep the app installed for at least fourteen days, and please don’t tap
+        <em>Leave the program</em>: leaving and joining again starts the
+        fourteen days over. Updates come through the Play Store like any other
+        app’s.
+      </p>
+    </li>
+  </ol>
+
+  <h2>If something goes wrong</h2>
+  <p>
+    If the group or the test won’t let you join, you may be signed in with a
+    work or school account; switch to your personal Google account and try
+    again. If Google Play says the app isn’t available yet, wait a few minutes
+    and open the link again.
+  </p>
+  <p>
+    If you installed the preview from GitHub, keep it if you like: it sits
+    beside the Play Store app, but only the Play Store app counts toward the
+    test.
+  </p>
+  <p>
+    Tell us of a problem or a wish with <em>Report a problem</em> at the foot
+    of any hour, or through the
+    <a href="https://github.com/orthodoxwest/office/issues/new">project’s issue tracker</a>.
+  </p>
+</div>
+{% endblock %}

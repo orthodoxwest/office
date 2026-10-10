@@ -54,6 +54,7 @@ enum Route {
     Ics,
     Reminders,
     Privacy,
+    Beta,
     Calendar,
     Robots,
     Sitemap,
@@ -117,6 +118,7 @@ impl Server {
                 Route::UsageDashboard
                 | Route::Reminders
                 | Route::Privacy
+                | Route::Beta
                 | Route::Calendar
                 | Route::Robots
                 | Route::Sitemap
@@ -134,6 +136,7 @@ impl Server {
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
+            Route::Beta => self.beta(&req),
             Route::Calendar => self.calendar(&req),
             Route::Robots => crawl::robots(&site),
             Route::Sitemap => crawl::sitemap(&site, Server::local_year()),
@@ -164,6 +167,7 @@ impl Server {
             .route("/office.ics", endpoint(Route::Ics))
             .route("/reminders", endpoint(Route::Reminders))
             .route("/privacy", endpoint(Route::Privacy))
+            .route("/beta", endpoint(Route::Beta))
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
             .route("/calendar/{*path}", endpoint(Route::Calendar))
@@ -251,7 +255,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/beta", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");

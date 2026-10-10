@@ -6223,6 +6223,59 @@ body.season-eastertide {
   color: var(--muted);
 }
 
+/* The Android test's sign-up: the privacy page's prose, with numbered steps
+   whose links are the reminders page's buttons. */
+.beta-device {
+  font-style: italic;
+}
+
+.beta-steps {
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: beta-step;
+}
+
+.beta-steps > li {
+  position: relative;
+  padding-left: 2rem;
+  counter-increment: beta-step;
+}
+
+.beta-steps > li::before {
+  content: counter(beta-step);
+  position: absolute;
+  top: 0.02rem;
+  left: 0;
+  color: var(--titulus);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.beta-steps h2 {
+  margin-top: 1.4rem;
+}
+
+.privacy a.beta-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  max-width: 18rem;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  padding: 0.55rem 0.8rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.92rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.privacy a.beta-action:hover {
+  border-color: var(--text);
+}
+
 .reminders fieldset {
   margin-bottom: 1.1rem;
   padding: 0.55rem 0.85rem 0.75rem;
