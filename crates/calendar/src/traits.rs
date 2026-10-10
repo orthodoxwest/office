@@ -71,6 +71,11 @@ pub fn is_sunday(f: &Feast) -> bool {
     f.is_category(Category::Sunday)
 }
 
+/// A Sunday office anticipated on Saturday (General Rubrics IV.4-5).
+pub fn is_anticipated_sunday(f: &Feast) -> bool {
+    f.id.ends_with("-anticipated") && f.is_category(Category::Sunday)
+}
+
 pub fn is_ember_day(f: &Feast) -> bool {
     f.id.contains("ember-")
 }

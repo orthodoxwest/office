@@ -1051,6 +1051,53 @@ fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
     }
 }
 
+/// A Sunday anticipated on a Saturday Double of the I or II Class, "or some
+/// other Feast of XII Lessons", is commemorated "at I Vespers, with the
+/// Antiphon of Friday as given in the Psalter, and at Lauds" (General Rubrics IV.4-5): "He hath put down", not
+/// its II Vespers' "Save us, Lord". "Nothing is said of the Sunday at II
+/// Vespers" (Notes on the Tables 12; XIV.9) (#656).
+#[test]
+fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
+    for y in [2075, 2086] {
+        let (days, moveable) = year(y);
+        let comms = |d: i32| {
+            let date = Date::new(y, 2, d);
+            let day = &days[date.ordinal() as usize - 1];
+            assert_eq!(day.vespers.feast.as_ref().unwrap().id, "purification-bvm", "{date}");
+            let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect::<Vec<_>>()
+        };
+        let sunday = "epiphany-sunday-4-anticipated";
+        let friday = comms(1);
+        let text = |slot: &str| friday.iter().find(|e| e.commemoration_owner_id == sunday && e.slot_ref == slot).unwrap().text.clone();
+        assert!(text("commemoration-antiphon").starts_with("He hath put down the mighty"), "{y}");
+        assert!(text("commemoration-versicle").contains("Lord, let my prayer"), "{y}");
+        let saturday = comms(2);
+        assert!(saturday.iter().all(|e| e.commemoration_owner_id != sunday), "{y}");
+        assert!(saturday.iter().any(|e| e.commemoration_owner_id == "septuagesima"), "{y}");
+    }
+}
+
+/// IV.4: Friday's Psalter antiphon also when Friday keeps its II Vespers
+/// and the anticipated Sunday is commemorated as the incoming office (no
+/// such date before 2100; the 2075 Friday is given II Vespers here).
+#[test]
+fn anticipated_sunday_at_friday_second_vespers_takes_fridays_antiphon() {
+    let (days, moveable) = year(2075);
+    let friday_index = Date::new(2075, 2, 1).ordinal() as usize - 1;
+    let sunday = days[friday_index + 1].commemorations.iter().find(|c| c.id == "epiphany-sunday-4-anticipated").unwrap().clone();
+    let mut friday = days[friday_index].clone();
+    friday.vespers.owner = crate::concurrence::VespersOwner::IIOfPreceding;
+    friday.vespers.feast = friday.celebration.clone();
+    friday.vespers.commemorations = vec![sunday.clone()];
+    friday.vespers.incoming_commemoration_ids = vec![sunday.id.clone()];
+    friday.vespers.following_office_commemoration_id = None;
+    let hour = engine().compose_hour("vespers", &friday, &moveable, PrayerForm::Private).unwrap();
+    let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect();
+    let antiphon = elements.iter().find(|e| e.commemoration_owner_id == sunday.id && e.slot_ref == "commemoration-antiphon").unwrap();
+    assert!(antiphon.text.starts_with("He hath put down the mighty"), "{}", antiphon.text);
+}
+
 const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
 const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
 const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
