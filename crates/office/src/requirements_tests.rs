@@ -1178,6 +1178,23 @@ fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
     }
 }
 
+/// #643 (needs ruling): the Conception is ranked Double II Class, as every
+/// ordo prints it (D2), not I Class as the rubrics (p. 57) and the Diurnal
+/// (p. 448) give it. A Sunday II Class yields only to a Double I Class (rubrics
+/// p. 56), so on Advent II Sunday the feast is transferred to Monday, as the
+/// 2019 and 2024 ordos do; ranked I Class it would be kept on the Sunday.
+/// (Both are Double II Class, so the Sunday wins on the moveable tiebreak.)
+#[test]
+fn conception_on_advent_ii_sunday_is_transferred_to_monday() {
+    for y in [2019, 2024, 2030] {
+        let (days, _) = year(y);
+        let sunday = &days[Date::new(y, 12, 8).ordinal() as usize - 1];
+        let monday = &days[Date::new(y, 12, 9).ordinal() as usize - 1];
+        assert!(!sunday.celebration_is("conception-bvm"), "{y}");
+        assert!(monday.celebration_is("conception-bvm"), "{y}");
+    }
+}
+
 /// #638 (needs ruling): an Advent Ember Day takes the office from a Common
 /// Octave Day, which is commemorated (rubrics p. 59, "Common Octaves": the
 /// Octave Day yields to "an Ember Day", naming the Conception's octave; Table
