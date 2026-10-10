@@ -536,6 +536,16 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
         if feast_is_prec && is_octave_day(feast) {
             return (feast_wins, "concurrence:octave-day-in-possession-vs-sunday");
         }
+        // The Octave Day of the Epiphany takes I Vespers from the Sunday
+        // within its Octave, commemorating II Vespers of the Sunday, whether
+        // that Sunday falls on 12 January or is said on Saturday the 12th
+        // because the Octave Day is a Sunday (Diurnal p. 231; 2019 ordo,
+        // 12 January; 2025 ordo, 12 January) (#651). Not other octave days:
+        // the Sunday keeps II Vespers before the Octave Day of Ss Peter and
+        // Paul (2026 ordo, 5 July).
+        if feast.id == "epiphany-octave-day" {
+            return (feast_wins, "concurrence:epiphany-octave-day-vs-sunday");
+        }
         return (sunday_wins, "concurrence:sunday-below-class-ii");
     }
     // 5. An octave day against a Double below II Class (XIII.10).

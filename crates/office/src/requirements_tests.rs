@@ -997,6 +997,37 @@ fn epiphany_sunday_first_vespers_take_its_own_magnificat_antiphon() {
     }
 }
 
+/// The Sunday within the Octave of the Epiphany yields its Vespers to I
+/// Vespers of the Octave Day, which commemorate II Vespers of the Sunday:
+/// "Ant. Son, why hast thou, V. We have seen ... Collect O Lord, we beseech
+/// thee", also "if the Octave of the Epiphany should fall on Monday"
+/// (Diurnal p. 231). So on Saturday 12 January when the Octave Day is a
+/// Sunday and the Sunday is said on the Saturday (p. 228; 2019 ordo: "Mag.
+/// Ant. 'The wise men beholding' / Comm. ... I Epiphany Sun. ('Son')"), and
+/// on Sunday 12 January (2025 ordo: "I of fol. ... Comm. Sun. ('Son' 231;
+/// Col. 230)") (#651).
+#[test]
+fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
+    for y in [2019, 2030, 2036, 2041, 2047, 2020, 2025, 2031, 2048] {
+        let date = Date::new(y, 1, 12);
+        let (days, moveable) = year(y);
+        let day = &days[date.ordinal() as usize - 1];
+        assert_eq!(day.celebration.as_ref().unwrap().id, "epiphany-sunday-1", "{date}");
+        assert_eq!(day.vespers.feast.as_ref().unwrap().id, "epiphany-octave-day", "{date}");
+        let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+        let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
+        let text = |comm: bool, slot: &str| {
+            elements.iter().find(|e| e.is_commemoration == comm && e.slot_ref == slot).map(|e| e.text.clone()).unwrap_or_default()
+        };
+        assert!(text(false, "magnificat-antiphon").starts_with("The wise men, * beholding"), "{date}");
+        let owners: Vec<_> = elements.iter().filter(|e| e.is_commemoration).map(|e| e.commemoration_owner_id.as_str()).collect();
+        assert!(owners.iter().all(|o| *o == "epiphany-sunday-1"), "{date}: {owners:?}");
+        assert!(text(true, "commemoration-antiphon").starts_with("Son, * why hast thou"), "{date}");
+        assert!(text(true, "commemoration-versicle").contains("We have seen his star"), "{date}");
+        assert!(text(true, "commemoration-collect").starts_with("O Lord, we beseech thee mercifully"), "{date}");
+    }
+}
+
 const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
 const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
 const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
