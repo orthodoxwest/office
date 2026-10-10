@@ -1372,7 +1372,8 @@ fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
 /// its own versicle, with alleluia in Paschaltide (pp. 68*, 71*), not the
 /// Common's "Vouchsafe" (p. 64*); and from the Saturday after the Octave of
 /// Epiphany to the Saturday before the Purification its collect is "O God,
-/// who by the fruitful virginity" at every Hour (p. 70*) (#652).
+/// who by the fruitful virginity" at every Hour (p. 70*), and the Hours
+/// take the Circumcision's antiphons (pp. 70*–71*) (#652).
 #[test]
 fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
     let hour = |date: &str, name: &str| {
@@ -1401,4 +1402,20 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
     }
     // The Saturday after the Purification is the Office throughout the Year.
     assert!(principal(&hour("2027-02-06", "lauds"), "collect").text.starts_with("Grant, we beseech thee, O Lord God"));
+    // At the Hours, II After Christmas, the Circumcision's Lauds antiphons
+    // (pp. 70*–71*); afterwards the Common's (p. 67*).
+    let antiphon = |date: &str, name: &str| {
+        let hour = hour(date, name);
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Antiphon && !e.is_commemoration).unwrap().text
+    };
+    for date in ["2026-01-31", "2027-01-16", "2028-01-29", "2030-01-19"] {
+        for (name, incipit) in
+            [("prime", "O wondrous interchange!"), ("terce", "When thou wast born"), ("sext", "In the bush"), ("none", "Lo, Mary")]
+        {
+            assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
+        }
+    }
+    for (name, incipit) in [("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")] {
+        assert!(antiphon("2027-02-06", name).starts_with(incipit), "2027-02-06 {name}");
+    }
 }
