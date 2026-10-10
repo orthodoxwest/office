@@ -317,7 +317,7 @@ function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
   var installed = navigator.standalone === true ||
-    (!!window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    (!!window.matchMedia && window.matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches);
   var clientToken = installed ? " client:pwa" : " client:browser";
   // Prime, on a day with a Martyrology reading: whether the reader's setting
   // shows it or leaves the rubric in its place.

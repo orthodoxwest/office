@@ -46,6 +46,8 @@ targets:
         # The Nave's ground, or the Apse's when the phone is dark.
         UILaunchScreen:
           UIColorName: LaunchBackground
+        # No status bar from the launch screen on, as in the app (OfficeApp.swift).
+        UIStatusBarHidden: true
         # A background refresh moves the reminders' schedule on (Reminders.swift).
         UIBackgroundModes:
           - fetch
