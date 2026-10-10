@@ -1326,6 +1326,32 @@ fn final_antiphons_turn_at_the_diurnals_hours() {
     }
 }
 
+#[test]
+fn holy_saturday_compline_says_its_omissions() {
+    // Diurnal p. 361: "The Hymn, Chapter, and V. are not said, but when the
+    // Psalms are ended the Ant. on the Canticle Nunc dimittis is begun." The
+    // Triduum's own Compline (p. 316) has no such rubric.
+    const RUBRIC: &str = "shared/formulas/holy-saturday-compline-omission-rubric";
+    for y in [2026, 2027, 2035, 2053] {
+        let (days, moveable) = year(y);
+        let at = |date: Date| &days[date.ordinal() as usize - 1];
+        for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
+            let hour = engine().compose_hour("compline", at(moveable.holy_saturday), &moveable, form).unwrap();
+            let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
+            let i = elements.iter().position(|e| e.source_ref == RUBRIC).unwrap_or_else(|| panic!("{y} {form:?}"));
+            assert_eq!(elements[i].kind, ElementType::Rubric);
+            assert_eq!(elements[i - 2].source_ref, "psalms/134", "{y} {form:?}");
+            assert_eq!(elements[i + 1].slot_ref, "nunc-dimittis-antiphon", "{y} {form:?}");
+            // The Short Lesson keeps its place before the Confession.
+            assert!(!elements.iter().any(|e| e.kind == ElementType::Hymn || e.slot_ref == "chapter"), "{y} {form:?}");
+            for date in [moveable.holy_thursday, moveable.good_friday, moveable.easter.add_days(1)] {
+                let other = engine().compose_hour("compline", at(date), &moveable, form).unwrap();
+                assert!(other.sections.iter().flat_map(|s| &s.elements).all(|e| e.source_ref != RUBRIC), "{date} {form:?}");
+            }
+        }
+    }
+}
+
 /// #642 (needs ruling): the ordos commemorate an Ember day of Advent or Lent at
 /// I Vespers of the following feast and II Vespers of a feast kept on it, as
 /// they do the season's other ferias (XIV.8), though XIV.9 commemorates Ember

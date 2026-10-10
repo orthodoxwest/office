@@ -105,6 +105,11 @@ Ref = hymn
 
 [Nunc-Dimittis]
 Condition = feast-holy-saturday
+# Monastic Diurnal, p. 361: the Hymn, Chapter and Versicle are not said, and
+# the antiphon on Nunc dimittis follows the Psalms at once.
+
+Type = rubric
+Ref = shared/formulas/holy-saturday-compline-omission-rubric
 
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
