@@ -3557,5 +3557,101 @@
         "contains": "O Judah and Jerusalem"
       }
     ]
+  },
+  {
+    "id": "prime-chapter-on-vigils",
+    "source": "Monastic Diurnal p. 6 (Now unto the King on all Sundays and on privileged Vigils; Love the truth on other Ferias and on Common Vigils out of Paschaltide), p. 183 (Vigil of the Nativity, here also on Sunday 2028-12-24), p. 222 (Vigil of the Epiphany); General Rubrics rank table (privileged Vigils: the Nativity, Pentecost, the Epiphany). #658.",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2033-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-05-30",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      }
+    ]
   }
 ]

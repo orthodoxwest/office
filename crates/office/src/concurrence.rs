@@ -927,6 +927,11 @@ pub fn resolve_concurrence(preceding: &CalendarDay, following: &CalendarDay) -> 
 
 fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
     // All Souls ends at None; Vespers are of the displaced All Saints octave.
+    // Needs ruling (#662): these take II Vespers of the feast, as the 2023,
+    // 2025 (3 Nov) and 2026 ordos print ("As of II Vesp. of Feast"); Diurnal
+    // p. 654 says "as at I Vespers of the Feast", and the 2017-2022 ordos ("As
+    // of All Saints'" / "As of the Feast, except: Mag. Ant. 'O how glorious'")
+    // name neither.
     if let Some(octave) = all_souls_octave_vespers_office(preceding) {
         let mut synth = preceding.clone();
         synth.celebration = Some(octave.clone());

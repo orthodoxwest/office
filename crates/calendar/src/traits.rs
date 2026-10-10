@@ -88,6 +88,12 @@ pub fn is_vigil(f: &Feast) -> bool {
     f.is_vigil
 }
 
+/// The privileged Vigils of the General Rubrics' rank table: the Nativity and
+/// Pentecost (I class) and the Epiphany (II class). All others are common.
+pub fn is_privileged_vigil(f: &Feast) -> bool {
+    f.is_vigil && matches!(f.id.as_str(), "vigil-nativity" | "vigil-pentecost" | "vigil-epiphany")
+}
+
 /// The perpetual commemoration of St Peter or St Paul kept on the other
 /// apostle's feasts.
 pub fn is_apostolic_companion_commemoration(f: &Feast) -> bool {
