@@ -1082,6 +1082,21 @@ fn no_vigil_commemoration_on_a_solemnity() {
     }
 }
 
+/// #648: 22 January is St Vincent alone (Diurnal kalendar p. 12 and proper
+/// p. 461, "St. Vincent, M."); the 2023-2026 ordos' "Ss Vincent, Martyr" is
+/// left over from the 2017-2022 "Ss Vincent (Deacon) & Anastasius".
+#[test]
+fn st_vincent_is_named_as_one_martyr() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    // A weekday, a Sunday (2023) and a Saturday (2028).
+    for y in [2026, 2023, 2028] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, 1, 22)).unwrap();
+        let vincent = day.commemorations.iter().find(|c| c.id == "comm-01-22-ss-vincent-martyr");
+        assert_eq!(vincent.map(|c| c.name.as_str()), Some("St Vincent, Martyr"), "{}", day.date);
+    }
+}
+
 /// #631: Paschaltide runs until None of the Saturday after Pentecost (General
 /// Rubrics XXIV.3, XXXI.5; 2019, 2021 and 2026 ordos: "Paschaltide ends with
 /// None of Saturday"), so a saint commemorated within the Octave of Pentecost
