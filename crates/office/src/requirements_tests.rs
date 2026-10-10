@@ -1212,6 +1212,19 @@ fn expectation_of_the_bvm_is_white() {
     }
 }
 
+/// Needs ruling (#657): the Expectation keeps the supplement's proper office
+/// (2017 and 2018 ordos); 2023 and 2025 give the Common of the B.V.M.
+/// ("Blessed art thou" 66*).
+#[test]
+fn expectation_of_the_bvm_keeps_the_supplements_proper_office() {
+    let (days, moveable) = year(2025);
+    let date = Date::new(2025, 12, 18);
+    let lauds = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+    let elements: Vec<_> = lauds.sections.into_iter().flat_map(|s| s.elements).collect();
+    assert!(elements.iter().any(|e| e.source_ref == "proper/expectation-bvm/benedictus-antiphon"), "{date}");
+    assert!(elements.iter().any(|e| e.text.contains("He shall sit upon the throne")), "{date}");
+}
+
 /// General Rubrics VI.2 (#616): a Vigil on a Solemnity has not even a
 /// Commemoration. The 2021, 2022 and 2024 ordos print none; 2033 and 2035 are
 /// the issue's later Corpus Christi cases.
