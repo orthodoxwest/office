@@ -325,6 +325,11 @@ fn occurrence_at_second_vespers() {
         (&greater, feast("double", Rank::Double, Category::Martyr), true),
         (&greater, feast("privileged-lenten-feria", Rank::PrivilegedFeria, Category::Feria), true),
         (&second, feast(FERIA_COMMEMORATION_ID, Rank::Commemoration, Category::Feria), true),
+        // So are the Ember days of Advent and Lent, Advent and Lenten ferias
+        // (2025 ordo 12 March, 2018 ordo 21 Dec; #642).
+        (&second, feast("lent-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&second, feast("advent-ember-friday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&first, feast("lent-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), true),
     ] {
         assert_eq!(occurrence_commemorated_at_second_vespers(Some(w), &comm).0, want, "{} under {}", comm.id, w.id);
     }

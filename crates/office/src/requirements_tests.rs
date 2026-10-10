@@ -1194,12 +1194,13 @@ fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
 }
 
 /// #642: an Ember day of Advent or Lent is an Advent or Lenten feria, so I
-/// Vespers of the following feast commemorate it (XIV.8-9). At Vespers an
-/// Advent Ember day is a feria of its week: the weekday's antiphon (or the
-/// day's O antiphon) and the III Sunday's collect (Diurnal p. 177). Ember
-/// Saturday's evening is the Sunday's, without it (2026 ordo 19 Dec).
+/// Vespers of the following feast and II Vespers of a feast kept on it
+/// commemorate it (XIV.8-9). At Vespers an Advent Ember day is a feria of its
+/// week: the weekday's antiphon (or the day's O antiphon) and the III Sunday's
+/// collect (Diurnal p. 177). Ember Saturday, whose evening is the Sunday's, is
+/// pinned in the concurrence unit tests.
 #[test]
-fn first_vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
+fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
     for (date, ember, antiphon) in [
         // 2022 ordo: "Comm. Fer. ('Behold the handmaid of the Lord')".
         ("2022-12-14", "advent-ember-wednesday", "Behold the handmaid"),
@@ -1211,21 +1212,24 @@ fn first_vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
         ("2025-12-17", "advent-ember-wednesday", "O Wisdom"),
         // 2022 ordo, I Vespers of St Joseph: "Comm. Fer. ('He that made thee whole')".
         ("2022-03-18", "lent-ember-friday", "He that made me whole"),
+        // 2018 ordo, II Vespers of St Thomas: "Comm. Fer. ('O Day-spring')".
+        ("2018-12-21", "advent-ember-friday", "O Day-spring"),
+        // 2025 ordo, II Vespers of St Gregory: "Comm Fer. ('For as Jonas' & Col. 253)".
+        ("2025-03-12", "lent-ember-wednesday", "For as Jonas"),
     ] {
         let date = Date::parse(date).unwrap();
         let (days, moveable) = year(date.year());
         let day = &days[date.ordinal() as usize - 1];
-        assert_eq!(day.celebration.as_deref().map(|c| c.id.as_str()), Some(ember), "{date}");
         assert!(day.vespers.commemorations.iter().any(|c| c.id == ember), "{date}");
         let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
         let owned: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.commemoration_owner_id == ember).collect();
         assert!(owned.iter().any(|e| e.kind == ElementType::Antiphon && e.text.starts_with(antiphon)), "{date}: {owned:?}");
-        if ember.starts_with("advent-") {
-            let collect = owned.iter().find(|e| e.kind == ElementType::Collect).unwrap();
-            assert_eq!(collect.source_ref, "proper/advent-sunday-3/collect", "{date}");
-        }
+        let collect = owned.iter().find(|e| e.kind == ElementType::Collect).unwrap();
+        let want = match ember {
+            "lent-ember-wednesday" => "proper/lent-ember-wednesday/collect-vespers",
+            "lent-ember-friday" => "proper/lent-ember-friday/collect-vespers",
+            _ => "proper/advent-sunday-3/collect",
+        };
+        assert_eq!(collect.source_ref, want, "{date}");
     }
-    let (days, _) = year(2026);
-    let saturday = &days[Date::new(2026, 12, 19).ordinal() as usize - 1];
-    assert!(!saturday.vespers.commemorations.iter().any(|c| c.id == "advent-ember-saturday"));
 }
