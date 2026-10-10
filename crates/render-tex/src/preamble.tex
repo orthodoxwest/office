@@ -133,7 +133,7 @@
 %   psalm     dropped; when the verse fits one line, the same full-size
 %             initial is elevated onto that line's baseline instead. Lines
 %             below the initial turn over at the verses' text edge
-%             (\versewidth), as every other verse's do
+%             (\psalmversewidth), as every other verse's do
 %   response  a modest raised initial at the ℟ text edge (the opening
 %             response of a Short Responsory)
 % #2 names the letter whose optical profile applies, #3 is the gilt initial
@@ -305,7 +305,7 @@
           { \__initial_full:n {#4} \__initial_drop:nn {#5} {#6} \__initial_clear: }
         { psalm }
           {
-            \dim_set_eq:NN \l__initial_tail_dim \versewidth
+            \dim_set_eq:NN \l__initial_tail_dim \psalmversewidth
             \__initial_full:n {#4}
             \__initial_rows:n { \__initial_drop:nn {#5} {#6} }
             \int_compare:nNnTF { \g__initial_rows_int } > { 1 }
@@ -452,15 +452,15 @@
 
 % \psalmverse{num}{text} — num is empty for unnumbered first verse.
 % Numbered verses hang from a muted right-aligned gutter so every spoken line
-% shares one left edge, as verse-num does on the web hour. \versewidth is that
+% shares one left edge, as verse-num does on the web hour. \psalmversewidth is that
 % edge; a psalm's \initial turns its opening verse over to it too.
-\newlength{\versewidth}
-\setlength{\versewidth}{2em}
+\newlength{\psalmversewidth}
+\setlength{\psalmversewidth}{2em}
 \newcommand{\psalmverse}[2]{%
   \if\relax\detokenize{#1}\relax%
     \noindent #2\par%
   \else%
-    \noindent\hangindent=\versewidth\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
+    \noindent\hangindent=\psalmversewidth\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
   \fi%
 }
 
@@ -468,8 +468,8 @@
 % lines with a wrap hanging beneath, standing a little apart from the verses
 % above as its own stanza. It is sung to the psalm tone, so it keeps the
 % verses' text edge, as the web indents it by the verse gutter.
-\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\leftskip=\versewidth\sourceline{#1}\sourceline{#2}\end{sourcelines}}
-\newcommand{\glorialine}[1]{\medskip\begin{sourcelines}\leftskip=\versewidth\sourceline{#1}\end{sourcelines}}
+\newcommand{\gloriapatri}[2]{\medskip\begin{sourcelines}\leftskip=\psalmversewidth\sourceline{#1}\sourceline{#2}\end{sourcelines}}
+\newcommand{\glorialine}[1]{\medskip\begin{sourcelines}\leftskip=\psalmversewidth\sourceline{#1}\end{sourcelines}}
 
 % Spoken-role sigils set in rubric red, as the web sigil column does.
 % \Vbar/\Rbar come from gregoriotex, which the preamble loads above.
