@@ -1171,6 +1171,7 @@ fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
 /// (p. 448) give it. A Sunday II Class yields only to a Double I Class (rubrics
 /// p. 56), so on Advent II Sunday the feast is transferred to Monday, as the
 /// 2019 and 2024 ordos do; ranked I Class it would be kept on the Sunday.
+/// (Both are Double II Class, so the Sunday wins on the moveable tiebreak.)
 #[test]
 fn conception_on_advent_ii_sunday_is_transferred_to_monday() {
     for y in [2019, 2024, 2030] {
