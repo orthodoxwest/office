@@ -3181,27 +3181,34 @@
   },
   {
     "id": "doctor-magnificat-antiphon-in-paschaltide",
-    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. Issue #640.",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. The added Alleluia takes the Diurnal's printed form ', alleluia.' (Common of Apostles in Paschaltide, pp. 16*-17*). Issues #640, #645.",
     "cases": [
       {
         "date": "2026-05-26",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
-        "contains": "Son of God. Alleluia."
+        "contains": "Son of God, alleluia."
       },
       {
         "date": "2027-06-18",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
-        "contains": "Son of God. Alleluia."
+        "contains": "Son of God, alleluia."
       },
       {
         "date": "2037-06-18",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      },
+      {
+        "date": "2028-05-01",
+        "hour": "vespers",
+        "commemoration_owner": "st-athanasius",
+        "slot": "commemoration-antiphon",
+        "contains": "Son of God, alleluia."
       }
     ]
   },
