@@ -8,7 +8,6 @@ use crate::day::Day;
 use crate::engine::{append_hour_element, compact_refs, resolve_element};
 use crate::hourdef::{HourElement, HourSection};
 use crate::major::record_condition_decision;
-use crate::preces::SATURDAY_OFFICE_BVM_ID;
 use crate::proper::{advent_ferial_psalm_antiphon_ref, lookup_feast_proper_text, resolve_proper_text};
 use crate::texts::OfficeTexts;
 
@@ -169,11 +168,10 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     if !text.is_empty() && is_prime_antiphon_ref(&key, day.season) {
         return prime_element(SLOT, &key, text);
     }
-    if day.celebration_is(SATURDAY_OFFICE_BVM_ID) {
-        let key = "proper/saturday-office-bvm/saturday-psalm-antiphon-1";
-        return prime_element(SLOT, key, t.get(key).to_string());
-    }
     let ferial = day.celebration.as_deref().is_none_or(|c| c.is_category(Category::Feria));
+    // The Saturday Office of Our Lady says Lauds from the Saturday psalter
+    // but takes its Hours' antiphons from the Common (Diurnal pp. 69*, 65*,
+    // 67*: "While the King" at Prime) (#652).
     if !ferial {
         let (mut text, mut key) = resolve_proper_text(day, "lauds", SLOT, t);
         // The ordinary Sunday psalter has its own threefold Alleluia (p. 83).

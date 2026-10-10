@@ -1374,7 +1374,7 @@ fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
 /// Paschal form (p. 66*); from the Saturday after the Octave of Epiphany to
 /// the Saturday before the Purification its collect is "O God, who by the
 /// fruitful virginity" at every Hour (p. 70*), and the Hours take the
-/// Circumcision's antiphons (pp. 70*–71*) (#652).
+/// Circumcision's antiphons (pp. 70*–71*), otherwise the Common's (#652).
 #[test]
 fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
     let hour = |date: &str, name: &str| {
@@ -1422,7 +1422,13 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
             assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
         }
     }
-    for (name, incipit) in [("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")] {
-        assert!(antiphon("2027-02-06", name).starts_with(incipit), "2027-02-06 {name}");
+    // Throughout the Year the Hours take the Common's, Prime too, though
+    // Lauds has the Saturday psalter's (pp. 69*, 65*, 67*).
+    for date in ["2027-02-06", "2026-10-10", "2027-05-15"] {
+        for (name, incipit) in
+            [("prime", "While the King"), ("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")]
+        {
+            assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
+        }
     }
 }
