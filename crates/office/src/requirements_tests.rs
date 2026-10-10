@@ -120,6 +120,10 @@ fn all_souls_vespers_is_a_continuous_office() {
             let elements: Vec<_> = evening.sections.iter().flat_map(|s| &s.elements).collect();
             assert!(elements.iter().any(|e| e.source_ref == "proper/all-saints/magnificat-antiphon"));
             assert!(elements.iter().any(|e| e.source_ref == "shared/formulas/faithful-departed"));
+            // II Vespers' psalms, as the 2023 and 2026 ordos print; Diurnal
+            // p. 654 says "as at I Vespers" (#662, needs ruling).
+            let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/112", "psalms/113", "psalms/116b"], "{eve} {form:?}");
         }
     }
 }
@@ -576,6 +580,32 @@ fn all_saints_fast_follows_the_vigil() {
             assert_eq!(vigil, day.date.day() == fast_day, "{}: vigil", day.date);
             assert_eq!(day.penitential.fast, vigil, "{}: fast", day.date);
         }
+    }
+}
+
+#[test]
+fn vigil_preces_at_prime_and_at_compline_of_the_vespers_office() {
+    // General Rubrics XXXVII.3: on Vigils the Preces are said at Prime only,
+    // "since Vespers are of the Feast" (2026 ordo 31 Oct, "at Prime only").
+    // Best guess for #661: after a Saturday Vigil, Vespers and Compline are of
+    // the Sunday and keep the Preces (2022, 2025, 2026 ordos: "Preces").
+    let preces = |name: &str, date: Date| {
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.kind == ElementType::Preces)
+    };
+    for (date, at_compline) in [
+        (Date::new(2022, 7, 23), true),
+        (Date::new(2025, 11, 29), true),
+        (Date::new(2026, 8, 8), true),
+        (Date::new(2026, 11, 28), true),
+        (Date::new(2030, 2, 23), true),
+        (Date::new(2025, 8, 9), false),
+        (Date::new(2026, 7, 24), false),
+        (Date::new(2026, 10, 31), false),
+    ] {
+        assert!(preces("prime", date), "{date} prime");
+        assert_eq!(preces("compline", date), at_compline, "{date} compline");
     }
 }
 

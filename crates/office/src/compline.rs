@@ -37,6 +37,13 @@ pub fn compose_compline(day: &Day, sections: &[HourSection], t: &OfficeTexts, mo
 
 /// The office that owns the evening: the Dead on the eve of All Souls,
 /// otherwise the owner of Vespers.
+///
+/// This carries General Rubrics XXXVII.3 (on Vigils the Preces are said only
+/// at Prime, "since Vespers are of the Feast"): Compline takes the Preces of
+/// the office Vespers belongs to. Needs ruling (#661): after a Saturday Vigil,
+/// Vespers and Compline are of the Sunday, so the Preces are said, as the
+/// ordos' plain "Preces" on such Saturdays implies (2022-07-23, 2025-11-29,
+/// 2026-08-08, 2026-11-28; "at Prime only" appears only before a feast).
 pub fn compline_office_day(day: &Day) -> Day {
     if day.vespers.appended_office_of_the_dead { dead_office_day(day) } else { vespers_office_day(day) }
 }
