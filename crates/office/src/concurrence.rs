@@ -215,6 +215,13 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if comm.id == FERIA_COMMEMORATION_ID || comm.id == "privileged-lenten-feria" {
         return (true, "commemoration:second-vespers-seasonal-feria");
     }
+    // Needs ruling (#642): the ordos also commemorate the Ember days of Advent
+    // and Lent, against XIV.9 (Ember days "only at Lauds"): II Vespers of St
+    // Gregory on Ember Wednesday (2025 ordo 12 March, "For as Jonas") and of
+    // St Thomas on Ember Friday (2018 ordo 21 Dec, "O Day-spring").
+    if advent_or_lenten_ember_day(comm) {
+        return (true, "commemoration:second-vespers-seasonal-ember-day");
+    }
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
     }
@@ -341,10 +348,17 @@ fn same_octave_office(preceding: &CalendarDay, following: &CalendarDay) -> bool 
 /// "A Feria in Advent, in Septuagesimatide, or in Lent" (Diurnal §X), with
 /// the Ember days of Advent and Lent (2021 ordo 24 March, 2022 18 March).
 fn penitential_season_feria(f: &Feast) -> bool {
-    f.id == FERIA_COMMEMORATION_ID
-        || f.id == "privileged-lenten-feria"
-        || f.id.starts_with("lent-ember-")
-        || f.id.starts_with("advent-ember-")
+    f.id == FERIA_COMMEMORATION_ID || f.id == "privileged-lenten-feria" || advent_or_lenten_ember_day(f)
+}
+
+fn advent_or_lenten_ember_day(f: &Feast) -> bool {
+    f.id.starts_with("lent-ember-") || f.id.starts_with("advent-ember-")
+}
+
+/// Ember Saturday's evening is the Sunday's I Vespers, which do not
+/// commemorate it (2026 ordo 19 Dec).
+fn ember_saturday(f: &Feast) -> bool {
+    f.id.ends_with("-ember-saturday")
 }
 
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
@@ -386,6 +400,15 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
             && !is_vigil(loser)
         {
             return (true, "commemoration:first-vespers-seasonal-feria");
+        }
+        // Needs ruling (#642): XIV.9 commemorates an Ember day "only at
+        // Lauds", but the ordos commemorate an Advent or Lenten one at a
+        // following feast's I Vespers, like the season's other ferias (XIV.8):
+        // 2017 and 2019 ordos 20 Dec (St Thomas), 2022 ordo 18 March (St
+        // Joseph) and 14 Dec (the Conception's octave day), 2025 ordo 17 Dec
+        // (the Expectation). Ember Saturday is left to the Sunday.
+        if advent_or_lenten_ember_day(loser) && !ember_saturday(loser) && winner.is_some() {
+            return (true, "commemoration:first-vespers-seasonal-ember-day");
         }
         return (false, "commemoration:first-vespers-office-ended-at-none");
     }
@@ -512,6 +535,16 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
         }
         if feast_is_prec && is_octave_day(feast) {
             return (feast_wins, "concurrence:octave-day-in-possession-vs-sunday");
+        }
+        // The Octave Day of the Epiphany takes I Vespers from the Sunday
+        // within its Octave, commemorating II Vespers of the Sunday, whether
+        // that Sunday falls on 12 January or is said on Saturday the 12th
+        // because the Octave Day is a Sunday (Diurnal p. 231; 2019 ordo,
+        // 12 January; 2025 ordo, 12 January) (#651). Not other octave days:
+        // the Sunday keeps II Vespers before the Octave Day of Ss Peter and
+        // Paul (2026 ordo, 5 July).
+        if feast.id == "epiphany-octave-day" {
+            return (feast_wins, "concurrence:epiphany-octave-day-vs-sunday");
         }
         return (sunday_wins, "concurrence:sunday-below-class-ii");
     }

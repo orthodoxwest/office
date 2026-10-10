@@ -14,35 +14,9 @@ Grant, O Lord, unto thy faithful people: that they may enter upon the venerable 
 Look favourably, O Lord, on those who bow themselves before thy Majesty; that they who have been refreshed with the divine Gift may ever be sustained by thy heavenly aid.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 185–186; Copy of OCP Ferial Lauds.pdf, p. 47
-Nox et tenebrae et nubila
+# Diurnal p. 243: "all is said as in the Psalter throughout the Year" (Wednesday at Lauds, pp. 59-60).
+@use ordinary/lauds/hymn-wednesday
 
-Hence night and clouds that night-time brings,
-Confused and dark and troubled things;
-The dawn is here, the sky grows white,
-Christ is at hand; depart from sight.
-
-Earth's dusky veil is torn away,
-Pierced by the sparkling beams of day:
-The world resumes its hues apace
-Soon as the day-star shows its face.
-
-But thee, O Christ, alone we seek,
-With conscience pure and temper meek:
-With tears and chants we humbly pray
-That thou wouldst guide us through the day.
-
-For many a shade obscures each sense
-Which needs thy beams to purge it thence:
-Light of the Morning Star, illume,
-Serenely shining, all our gloom.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-
-Amen.
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 185; Copy of OCP Ferial Lauds.pdf
 R. Heal my soul * for I have sinned against thee.

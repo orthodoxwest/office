@@ -46,6 +46,19 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if is_synthesized_feria(comm) {
                 return lookup_feria_commemoration(Some(day), comm, day.season, hour_name, reference, t);
             }
+            // An Advent Ember day's collect is "said at all the Hours until
+            // Vespers" (Diurnal p. 177): at Vespers it is a feria of its week,
+            // with the weekday's antiphon and the Sunday's collect (2025 ordo
+            // 17 Dec, "Comm. Fer. ... Col. 170"; 2022 ordo 14 Dec, "Behold the
+            // handmaid of the Lord"; #642).
+            if hour_name == "vespers"
+                && comm.id.starts_with("advent-ember-")
+                && let Some(week) = &day.temporal_week_id
+            {
+                let mut feria = (**comm).clone();
+                feria.proper_id = Some(week.clone());
+                return lookup_feria_commemoration(Some(day), &feria, day.season, hour_name, reference, t);
+            }
             if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
@@ -134,12 +147,15 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 
 /// A Sunday commemorated at Saturday Vespers — whether a Saturday feast keeps
 /// II Vespers or a feast on the Sunday takes I Vespers — begins with its own
-/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403).
+/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
+/// office said on Saturday when the Octave Day of the Epiphany is Sunday is
+/// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
 pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
         && day.civil_weekday() == Weekday::Saturday
         && feast.is_category(Category::Sunday)
+        && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }
 
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers

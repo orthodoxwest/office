@@ -3181,27 +3181,34 @@
   },
   {
     "id": "doctor-magnificat-antiphon-in-paschaltide",
-    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. Issue #640.",
+    "source": "Monastic Diurnal p. 528 (St Bede: 'On Magnificat, Ant. O Teacher, p. 43*'), p. 536 (St Ephrem), p. 43* (Common of a Confessor, For a Doctor, both Vespers) and p. 6* section 3 (in Paschaltide the Common of Confessors adds one Alleluia to each antiphon). 2026 ordo, 26 May: 'Mag. Ant. \"O Teacher\" (43*)'. The added Alleluia takes the Diurnal's printed form ', alleluia.' (Common of Apostles in Paschaltide, pp. 16*-17*). Issues #640, #645.",
     "cases": [
       {
         "date": "2026-05-26",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
-        "contains": "Son of God. Alleluia."
+        "contains": "Son of God, alleluia."
       },
       {
         "date": "2027-06-18",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "commons/confessor-paschal/magnificat-antiphon-doctor",
-        "contains": "Son of God. Alleluia."
+        "contains": "Son of God, alleluia."
       },
       {
         "date": "2037-06-18",
         "hour": "vespers",
         "slot": "magnificat-antiphon",
         "ref": "proper/st-ephrem-syrian/magnificat-antiphon"
+      },
+      {
+        "date": "2028-05-01",
+        "hour": "vespers",
+        "commemoration_owner": "st-athanasius",
+        "slot": "commemoration-antiphon",
+        "contains": "Son of God, alleluia."
       }
     ]
   },
@@ -3234,6 +3241,190 @@
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
         "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
+      }
+    ]
+  },
+  {
+    "id": "st-andrew-vespers-versicles",
+    "source": "Monastic Diurnal p. 444 (St Andrew, I Vespers: V. of the Common, p. 10*) and p. 446 (II Vespers: Hymn and V. as at Lauds of the Common, p. 11*). Issue #647.",
+    "cases": [
+      {
+        "date": "2027-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2027-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      },
+      {
+        "date": "2029-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2029-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      }
+    ]
+  },
+  {
+    "id": "final-antiphon-hour-boundaries",
+    "source": "Monastic Diurnal, Final Antiphons B.V.M., pp. 153-155. 2026 ordo pp. 18, 22, 53, 69 (#649).",
+    "cases": [
+      {
+        "date": "2026-11-28",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-01",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-08",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-11",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-05",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
       }
     ]
   }

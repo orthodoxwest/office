@@ -74,16 +74,18 @@ One of the two * which followed the Lord was Andrew, Simon Peter's brother, alle
 @use commons/apostle/versicle-lauds
 
 [versicle-vespers]
-@use shared/apostle/versicle-their-sound
+# SOURCE: monastic diurnal, p. 446 (St Andrew, At II Vespers: "Hymn and V. as at Lauds of the Common, p. 11*")
+@use commons/apostle/versicle-vespers
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 444 (St Andrew, At I Vespers: "Short R., Hymn, and V. of the Common, p. 10*")
+@use commons/apostle/versicle-first-vespers
 
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.
 #
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
 #
 # [vespers-psalmody]
 # Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).

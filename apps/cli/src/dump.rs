@@ -452,13 +452,16 @@ fn calendar_day_record(d: &CalendarDay) -> Value {
     })
 }
 
-/// The Office-only resolution of the day: concurrence and the Marian antiphon.
+/// The Office-only resolution of the day: concurrence and the Marian
+/// antiphon of each hour that says one.
 fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
     let v = &o.vespers;
+    let moveable = MoveableDates::compute(d.date.year());
+    let marian = |hour: &str| office::seasonal::marian_antiphon(d.date, hour, &moveable);
     json!({
         "kind": "office_day",
         "date": day_str(d.date),
-        "marian_antiphon": o.marian_antiphon,
+        "marian_antiphon": {"lauds": marian("lauds"), "vespers": marian("vespers"), "compline": marian("compline")},
         "vespers": {
             "owner": v.owner.as_str(),
             "feast": feast(v.feast.as_deref()),

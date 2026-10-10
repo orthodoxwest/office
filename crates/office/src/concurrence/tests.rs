@@ -325,6 +325,11 @@ fn occurrence_at_second_vespers() {
         (&greater, feast("double", Rank::Double, Category::Martyr), true),
         (&greater, feast("privileged-lenten-feria", Rank::PrivilegedFeria, Category::Feria), true),
         (&second, feast(FERIA_COMMEMORATION_ID, Rank::Commemoration, Category::Feria), true),
+        // So are the Ember days of Advent and Lent, Advent and Lenten ferias
+        // (2025 ordo 12 March, 2018 ordo 21 Dec; #642).
+        (&second, feast("lent-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&second, feast("advent-ember-friday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&first, feast("lent-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), true),
     ] {
         assert_eq!(occurrence_commemorated_at_second_vespers(Some(w), &comm).0, want, "{} under {}", comm.id, w.id);
     }
@@ -375,6 +380,15 @@ fn outgoing_at_first_vespers() {
         (&second, feast("easter-sunday-octave-day-4", Rank::Double1stClass, Category::Lord), false),
         (&second, feast("feria", Rank::SemiDouble, Category::Feria), false),
         (&double, feast("privileged-lenten-feria", Rank::PrivilegedFeria, Category::Feria), true),
+        // An Ember day of Advent or Lent is kept at a following feast's I
+        // Vespers like any Advent or Lenten feria (2022 ordo 14 Dec and
+        // 18 March; #642), but not at the Sunday's after Ember Saturday
+        // (2026 ordo 19 Dec), and the September Ember days keep to Lauds.
+        (&second, feast("advent-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&double, feast("advent-ember-friday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&second, feast("lent-ember-friday", Rank::PrivilegedFeria, Category::Feria), true),
+        (&sunday, feast("advent-ember-saturday", Rank::PrivilegedFeria, Category::Feria), false),
+        (&second, feast("september-ember-wednesday", Rank::PrivilegedFeria, Category::Feria), false),
         // Diurnal §X: at I Vespers of a Double I Class, a Feria of Advent,
         // Septuagesima or Lent (Ember days included) and a Double I or II Class
         // are commemorated (#396), but the Lenten Saturday is not at I Vespers

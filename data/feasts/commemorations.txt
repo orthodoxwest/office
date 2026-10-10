@@ -95,7 +95,9 @@ Day = 19
 Source = awrv
 
 [comm-01-22-ss-vincent-martyr]
-Name = Ss Vincent, Martyr
+# St Vincent alone, as in the Diurnal (p. 461); the ordos' "Ss" is left over
+# from "Ss Vincent & Anastasius" (#648).
+Name = St Vincent, Martyr
 Rank = commemoration
 Color = red
 Category = martyr
