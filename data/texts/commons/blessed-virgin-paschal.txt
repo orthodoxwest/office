@@ -1,9 +1,11 @@
 # Paschal variants of the Common of Feasts of the B.V.M.: "one Alleluia is
 # added to each Antiphon, Versicle, and Response" (Monastic Diurnal p. 6*, §3),
-# in the printed form ", alleluia." (Common of Apostles in Paschaltide,
-# pp. 16*-17*; #645). Only the antiphons of the Hours (pp. 65*, 67*) are here:
-# the Office of Saint Mary on Saturday takes them in Paschaltide (pp. 69*, 71*)
-# (#652). Sections not present here fall through to the regular commons file.
+# written ", alleluia." (#645). Only the antiphons of the Hours (pp. 65*, 67*)
+# are here: the Office of Saint Mary on Saturday takes them in Paschaltide
+# (pp. 69*, 71*) (#652). Antiphon 4 is said only at Lauds, which that office
+# takes from the psalter, and no feast of the B.V.M. falls in Paschaltide; add
+# it if one ever does. Sections not present here fall through to the regular
+# commons file.
 
 [psalm-antiphon-1]
 # SOURCE: Monastic Diurnal.pdf, pp. 65*, 67* (Common of Feasts B.V.M., Ant. 1 at Lauds and Prime), with p. 6* §3
