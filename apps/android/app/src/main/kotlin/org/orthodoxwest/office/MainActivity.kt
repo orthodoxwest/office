@@ -63,6 +63,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -94,6 +97,7 @@ class MainActivity : ComponentActivity() {
         // A restored activity still holds the intent that first opened it; the saved way back already includes it.
         if (savedInstanceState == null) openFrom(intent)
         Shortcuts.publish(this)
+        hideStatusBar()
         setContent {
             val vm = vm
             val dark = vm.theme.dark(isSystemInDarkTheme())
@@ -149,6 +153,24 @@ class MainActivity : ComponentActivity() {
         vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Back from a dialog or another app, the status bar is put away again.
+        if (hasFocus) hideStatusBar()
+    }
+
+    /**
+     * The clock and notifications put away while the app is open: a swipe down from the top
+     * brings the status bar over the page for a moment, without moving the page, and it goes
+     * again by itself. The navigation bar stays, so Back and Home are where the reader expects
+     * them.
+     */
+    private fun hideStatusBar() {
+        val bars = WindowCompat.getInsetsController(window, window.decorView)
+        bars.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        bars.hide(WindowInsetsCompat.Type.statusBars())
     }
 
     /**
