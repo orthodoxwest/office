@@ -3530,5 +3530,32 @@
         "contains": "Good and faithful servant"
       }
     ]
+  },
+  {
+    "id": "christmas-eve-prime-antiphon",
+    "source": "Monastic Diurnal, Christmas Eve, p. 183: \"At Prime, which is said as on Doubles, Ant. O Judah and Jerusalem\", Lauds' first antiphon (p. 182), also when the Vigil falls on Sunday (p. 183) (#658).",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2027-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      }
+    ]
   }
 ]
