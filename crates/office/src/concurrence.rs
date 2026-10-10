@@ -323,7 +323,10 @@ fn following_office_commemorated_at_second_vespers(winner: Option<&Feast>, follo
         // Guardian Angels, 2025 ordo 24 Oct Raphael, 2022 ordo 25 Nov
         // Catherine; #542). Doubles of the 1st and 2nd class admit no
         // commemoration of it (2022 ordo 28 Oct Simon & Jude, 2019 ordo 26
-        // July Anne, 2018 ordo 2 Feb Purification).
+        // July Anne, 2018 ordo 2 Feb Purification). Needs ruling (#666): a
+        // Friday feast of Our Lady keeps it too (2021 and 2025 ordos), though
+        // VIII.3 says "no other Commemoration of her is to be made" and the
+        // 2022 ordo prints No Comm. at the Rosary.
         if is_saturday_bvm(feast) && winner.is_some_and(|w| w.rank.weight() < Rank::Double2ndClass.weight()) {
             return (true, "commemoration:following-office-at-second-vespers-saturday-bvm");
         }
