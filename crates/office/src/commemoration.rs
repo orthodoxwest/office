@@ -152,7 +152,7 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 /// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
 /// A Sunday anticipated on Saturday is commemorated at its I Vespers on
 /// Friday "with the Antiphon of Friday as given in the Psalter" (General
-/// Rubrics III.4-5; 2025 and 2026 ordos, 14 and 6 February: "Fri. Off. ...
+/// Rubrics IV.4-5; 2025 and 2026 ordos, 14 and 6 February: "Fri. Off. ...
 /// He hath put down") (#656).
 pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
@@ -165,7 +165,7 @@ pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &st
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers
 /// would: historia, the Sunday's "-first" proper, season, Saturday psalter.
 /// The civil evening is kept, so an anticipated Sunday commemorated at
-/// Friday's II Vespers takes Friday's psalter antiphon (III.4).
+/// Friday's II Vespers takes Friday's psalter antiphon (IV.4).
 fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
     let mut sunday = day.clone();
     if !sunday.first_vespers {

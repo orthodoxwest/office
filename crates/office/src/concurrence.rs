@@ -225,11 +225,11 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
     }
-    // A Sunday anticipated on a Saturday Double of the I or II Class is
-    // commemorated "at I Vespers ... and at Lauds" (III.4-5; XIV.9), and
-    // "nothing is said of the Sunday at II Vespers" even when it is only
-    // commemorated (Notes on the Tables 12): not at II Vespers of the
-    // Purification, 2 February 2075 and 2086 (#656).
+    // A Sunday anticipated on a Saturday Double of the I or II Class, "or
+    // some other Feast of XII Lessons", is commemorated "at I Vespers ... and
+    // at Lauds" (IV.4-5; XIV.9), and "nothing is said of the Sunday at II
+    // Vespers" even when it is only commemorated (Notes on the Tables 12):
+    // not at II Vespers of the Purification, 2 February 2075 and 2086 (#656).
     if !incoming && is_anticipated_sunday(comm) {
         return (false, "commemoration:second-vespers-anticipated-sunday-exclusion");
     }

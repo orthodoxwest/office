@@ -1028,9 +1028,9 @@ fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
     }
 }
 
-/// A Sunday anticipated on a Saturday Double of the I or II Class is
-/// commemorated "at I Vespers, with the Antiphon of Friday as given in the
-/// Psalter, and at Lauds" (General Rubrics III.4-5): "He hath put down", not
+/// A Sunday anticipated on a Saturday Double of the I or II Class, "or some
+/// other Feast of XII Lessons", is commemorated "at I Vespers, with the
+/// Antiphon of Friday as given in the Psalter, and at Lauds" (General Rubrics IV.4-5): "He hath put down", not
 /// its II Vespers' "Save us, Lord". "Nothing is said of the Sunday at II
 /// Vespers" (Notes on the Tables 12; XIV.9) (#656).
 #[test]
@@ -1055,7 +1055,7 @@ fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
     }
 }
 
-/// III.4: Friday's Psalter antiphon also when Friday keeps its II Vespers
+/// IV.4: Friday's Psalter antiphon also when Friday keeps its II Vespers
 /// and the anticipated Sunday is commemorated as the incoming office (no
 /// such date before 2100; the 2075 Friday is given II Vespers here).
 #[test]
