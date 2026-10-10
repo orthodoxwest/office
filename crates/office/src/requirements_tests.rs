@@ -1193,9 +1193,10 @@ fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
     }
 }
 
-/// #642: an Ember day of Advent or Lent is an Advent or Lenten feria, so I
-/// Vespers of the following feast and II Vespers of a feast kept on it
-/// commemorate it (XIV.8-9). At Vespers an Advent Ember day is a feria of its
+/// #642 (needs ruling): the ordos commemorate an Ember day of Advent or Lent at
+/// I Vespers of the following feast and II Vespers of a feast kept on it, as
+/// they do the season's other ferias (XIV.8), though XIV.9 commemorates Ember
+/// days "only at Lauds". At Vespers an Advent Ember day is a feria of its
 /// week: the weekday's antiphon (or the day's O antiphon) and the III Sunday's
 /// collect (Diurnal p. 177). Ember Saturday, whose evening is the Sunday's, is
 /// pinned in the concurrence unit tests.

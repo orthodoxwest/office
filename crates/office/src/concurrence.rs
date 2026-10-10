@@ -215,10 +215,10 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if comm.id == FERIA_COMMEMORATION_ID || comm.id == "privileged-lenten-feria" {
         return (true, "commemoration:second-vespers-seasonal-feria");
     }
-    // So do the Ember days of Advent and Lent, which are such ferias: II
-    // Vespers of St Gregory on Ember Wednesday (2025 ordo 12 March, "For as
-    // Jonas") and of St Thomas on Ember Friday (2018 ordo 21 Dec, "O
-    // Day-spring"); #642.
+    // Needs ruling (#642): the ordos also commemorate the Ember days of Advent
+    // and Lent, against XIV.9 (Ember days "only at Lauds"): II Vespers of St
+    // Gregory on Ember Wednesday (2025 ordo 12 March, "For as Jonas") and of
+    // St Thomas on Ember Friday (2018 ordo 21 Dec, "O Day-spring").
     if advent_or_lenten_ember_day(comm) {
         return (true, "commemoration:second-vespers-seasonal-ember-day");
     }
@@ -401,11 +401,12 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
         {
             return (true, "commemoration:first-vespers-seasonal-feria");
         }
-        // An Ember day of Advent or Lent is an Advent or Lenten feria, so a
-        // following feast's I Vespers commemorate it (XIV.8-9): 2017 and
-        // 2019 ordos 20 Dec (St Thomas), 2022 ordo 18 March (St Joseph) and
-        // 14 Dec (the Conception's octave day), 2025 ordo 17 Dec (the
-        // Expectation); #642. Ember Saturday is left to the Sunday.
+        // Needs ruling (#642): XIV.9 commemorates an Ember day "only at
+        // Lauds", but the ordos commemorate an Advent or Lenten one at a
+        // following feast's I Vespers, like the season's other ferias (XIV.8):
+        // 2017 and 2019 ordos 20 Dec (St Thomas), 2022 ordo 18 March (St
+        // Joseph) and 14 Dec (the Conception's octave day), 2025 ordo 17 Dec
+        // (the Expectation). Ember Saturday is left to the Sunday.
         if advent_or_lenten_ember_day(loser) && !ember_saturday(loser) && winner.is_some() {
             return (true, "commemoration:first-vespers-seasonal-ember-day");
         }
