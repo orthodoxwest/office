@@ -1367,3 +1367,38 @@ fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
         assert_eq!(collect.source_ref, want, "{date}");
     }
 }
+
+/// Office of Saint Mary on Saturday (Diurnal pp. 68*–71*): its I Vespers has
+/// its own versicle, with alleluia in Paschaltide (pp. 68*, 71*), not the
+/// Common's "Vouchsafe" (p. 64*); and from the Saturday after the Octave of
+/// Epiphany to the Saturday before the Purification its collect is "O God,
+/// who by the fruitful virginity" at every Hour (p. 70*) (#652).
+#[test]
+fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
+    let hour = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap()
+    };
+    for (date, versicle) in [
+        ("2026-10-09", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-01-22", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-05-14", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+        ("2028-05-12", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+    ] {
+        assert_eq!(principal(&hour(date, "vespers"), "versicle").text, versicle, "{date}");
+    }
+    const FRUITFUL: &str = "O God, who by the fruitful virginity of blessed Mary";
+    for (date, name) in [
+        ("2027-01-22", "vespers"),
+        ("2027-01-16", "lauds"),
+        ("2027-01-23", "lauds"),
+        ("2027-01-23", "terce"),
+        ("2027-01-30", "none"),
+        ("2028-01-29", "sext"),
+    ] {
+        assert!(principal(&hour(date, name), "collect").text.starts_with(FRUITFUL), "{date} {name}");
+    }
+    // The Saturday after the Purification is the Office throughout the Year.
+    assert!(principal(&hour("2027-02-06", "lauds"), "collect").text.starts_with("Grant, we beseech thee, O Lord God"));
+}
