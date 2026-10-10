@@ -548,6 +548,11 @@ HasVigil = true
 
 [conception-bvm]
 Name = Conception of the Blessed Virgin Mary
+# Needs ruling (#643): the rubrics (pp. 17, 57), the Diurnal (kalendar p. xxv,
+# proper p. 448) and the 2017–2019 ordos' rank tables make it a Primary Double
+# I Class, but every ordo's 8 December prints D2 and the 2019 and 2024 ordos
+# transfer it off Advent II Sunday to Monday, which a I Class Double would not
+# be (p. 56, Sundays II Class). Rank II Class follows the ordos' practice.
 Rank = double-2nd-class
 Color = white
 Category = blessed-virgin
