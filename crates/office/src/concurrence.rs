@@ -225,6 +225,13 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
     }
+    // Notes on the Tables 12: a Sunday anticipated on Saturday has nothing
+    // at II Vespers, "even though [it] is only to be commemorated" (XIV.9:
+    // "only at I Vespers and at Lauds"), so it leaves II Vespers of a
+    // Saturday feast (the Purification, 2 February 2075 and 2086; #656).
+    if !incoming && comm.id.ends_with("-anticipated") && comm.is_category(Category::Sunday) {
+        return (false, "commemoration:second-vespers-anticipated-sunday-exclusion");
+    }
     if matches!(comm.rank, Rank::Commemoration | Rank::Simple) {
         if is_apostolic_companion_commemoration(comm) && winner.is_none_or(|w| w.rank != Rank::Double1stClass) {
             return (true, "commemoration:second-vespers-apostolic-companion");

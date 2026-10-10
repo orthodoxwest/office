@@ -150,10 +150,14 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 /// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
 /// office said on Saturday when the Octave Day of the Epiphany is Sunday is
 /// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
+/// A Sunday anticipated on Saturday has its I Vespers on Friday, with
+/// Friday's psalter antiphon (2025 and 2026 ordos, 14 and 6 February: "Fri.
+/// Off. ... He hath put down"); commemorated there, it keeps them (needs
+/// ruling, #656).
 pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
-        && day.civil_weekday() == Weekday::Saturday
+        && (day.civil_weekday() == Weekday::Saturday || feast.id.ends_with("-anticipated"))
         && feast.is_category(Category::Sunday)
         && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }

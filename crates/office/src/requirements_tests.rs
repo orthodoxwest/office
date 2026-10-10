@@ -1028,6 +1028,34 @@ fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
     }
 }
 
+/// A Sunday anticipated on a Saturday feast is commemorated "only at I
+/// Vespers and at Lauds" (XIV.9): "nothing is said of the Sunday at II
+/// Vespers" even when it is only commemorated (Notes on the Tables 12). At
+/// its I Vespers on Friday it keeps the texts of its own I Vespers, Friday's
+/// "He hath put down" (2025 and 2026 ordos, 14 and 6 February), not its II
+/// Vespers' "Save us, Lord" (needs ruling, #656).
+#[test]
+fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
+    for y in [2075, 2086] {
+        let (days, moveable) = year(y);
+        let comms = |d: i32| {
+            let date = Date::new(y, 2, d);
+            let day = &days[date.ordinal() as usize - 1];
+            assert_eq!(day.vespers.feast.as_ref().unwrap().id, "purification-bvm", "{date}");
+            let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect::<Vec<_>>()
+        };
+        let sunday = "epiphany-sunday-4-anticipated";
+        let friday = comms(1);
+        let text = |slot: &str| friday.iter().find(|e| e.commemoration_owner_id == sunday && e.slot_ref == slot).unwrap().text.clone();
+        assert!(text("commemoration-antiphon").starts_with("He hath put down the mighty"), "{y}");
+        assert!(text("commemoration-versicle").contains("Lord, let my prayer"), "{y}");
+        let saturday = comms(2);
+        assert!(saturday.iter().all(|e| e.commemoration_owner_id != sunday), "{y}");
+        assert!(saturday.iter().any(|e| e.commemoration_owner_id == "septuagesima"), "{y}");
+    }
+}
+
 const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
 const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
 const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
