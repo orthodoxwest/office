@@ -927,6 +927,29 @@ mod tests {
         assert!(preamble().contains("\\newcommand{\\antopen}"));
     }
 
+    /// #665: a psalm's first verse turns over below its dropped initial at
+    /// the verses' text edge, where `\psalmverse` hangs every other verse,
+    /// not back at the margin under the verse numbers; every other mode's
+    /// turnovers keep the margin.
+    #[test]
+    fn psalm_initial_turns_over_at_the_verse_edge() {
+        let p = preamble();
+        assert!(p.contains("\\setlength{\\versewidth}{2em}"), "verse edge defined");
+        assert!(p.contains("\\noindent\\hangindent=\\versewidth\\hangafter=1"), "verses hang at the edge");
+        assert!(
+            p.contains("\\dim_use:N \\l__initial_tail_dim ~ \\dim_eval:n { \\linewidth - \\l__initial_tail_dim } \\scan_stop:"),
+            "drop's last parshape entry is the tail"
+        );
+        assert!(!p.contains("0pt ~ \\dim_use:N \\linewidth"), "no fixed margin tail");
+        let initial = &p[p.find("\\NewDocumentCommand \\initial ").expect("\\initial")..];
+        let reset = initial.find("\\dim_zero:N \\l__initial_tail_dim").expect("tail reset for every mode");
+        let psalm = initial.find("{ psalm }").expect("psalm mode");
+        let prose = initial.find("{ prose }").expect("prose mode");
+        let set = initial.find("\\dim_set_eq:NN \\l__initial_tail_dim \\versewidth").expect("psalm sets the tail");
+        assert!(reset < initial.find("{ drop }").unwrap() && psalm < set && set < prose, "only psalm mode sets the tail");
+        assert_eq!(initial.matches("\\l__initial_tail_dim").count(), 2);
+    }
+
     #[test]
     fn secret_span_keeps_its_leading_space_outside_the_colour() {
         let mut elem = OfficeElement::new(ElementType::Prayer, "I believe in God the Father Almighty.");
