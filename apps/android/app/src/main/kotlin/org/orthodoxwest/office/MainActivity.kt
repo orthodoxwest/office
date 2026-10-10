@@ -63,6 +63,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -94,14 +97,20 @@ class MainActivity : ComponentActivity() {
         // A restored activity still holds the intent that first opened it; the saved way back already includes it.
         if (savedInstanceState == null) openFrom(intent)
         Shortcuts.publish(this)
+        // Hidden from the first frame when the reader has chosen it.
+        showStatusBar(!vm.fullScreen)
         setContent {
             val vm = vm
             val dark = vm.theme.dark(isSystemInDarkTheme())
             LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
+            LaunchedEffect(vm.fullScreen) { showStatusBar(!vm.fullScreen) }
             val dissolve = rememberDissolve()
             Box(Modifier.fillMaxSize().dissolving(dissolve)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
-                    CompositionLocalProvider(LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) }) {
+                    CompositionLocalProvider(
+                        LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) },
+                        LocalFullScreen provides FullScreenChoice(vm.fullScreen) { on -> if (on != vm.fullScreen) vm.chooseFullScreen(on) },
+                    ) {
                         OfficeApp(
                             shown = vm.shown,
                             behind = vm.behind,
@@ -149,6 +158,27 @@ class MainActivity : ComponentActivity() {
         vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Back from a dialog or another app, the status bar is put away again.
+        if (hasFocus && vm.fullScreen) showStatusBar(false)
+    }
+
+    /**
+     * The status bar shown, or hidden for full screen: then a swipe down from the top brings it
+     * over the page for a moment, without moving the page, and it goes again by itself. The
+     * navigation bar stays, so Back and Home are where the reader expects them.
+     */
+    private fun showStatusBar(show: Boolean) {
+        val bars = WindowCompat.getInsetsController(window, window.decorView)
+        if (show) {
+            bars.show(WindowInsetsCompat.Type.statusBars())
+        } else {
+            bars.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            bars.hide(WindowInsetsCompat.Type.statusBars())
+        }
     }
 
     /**

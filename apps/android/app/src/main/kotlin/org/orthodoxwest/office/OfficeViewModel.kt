@@ -153,6 +153,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** Whether Prime reads the next day's Martyrology; off by default. */
     var martyrology: Boolean by mutableStateOf(prefs.getBoolean("martyrology", false))
         private set
+    /** Whether the status bar is hidden while the app is open; off by default. */
+    var fullScreen: Boolean by mutableStateOf(prefs.getBoolean("full-screen", false))
+        private set
 
     /**
      * Each visit on the way back with its content, once composed: the page shown keeps the
@@ -265,6 +268,11 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         // Prime composed with the old setting is composed again when next shown.
         contents.keys.retainAll(setOf(entry.id))
         load()
+    }
+
+    fun chooseFullScreen(value: Boolean) {
+        fullScreen = value
+        prefs.edit().putBoolean("full-screen", value).apply()
     }
 
     fun chooseTheme(value: ThemeChoice) {
