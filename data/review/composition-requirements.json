@@ -3236,5 +3236,39 @@
         "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
       }
     ]
+  },
+  {
+    "id": "st-andrew-vespers-versicles",
+    "source": "Monastic Diurnal p. 444 (St Andrew, I Vespers: V. of the Common, p. 10*) and p. 446 (II Vespers: Hymn and V. as at Lauds of the Common, p. 11*). Issue #647.",
+    "cases": [
+      {
+        "date": "2027-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2027-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      },
+      {
+        "date": "2029-11-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-first-vespers",
+        "contains": "Their sound is gone out"
+      },
+      {
+        "date": "2029-11-30",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/st-andrew/versicle-vespers",
+        "contains": "They declared the work of God"
+      }
+    ]
   }
 ]
