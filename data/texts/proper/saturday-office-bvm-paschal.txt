@@ -2,6 +2,11 @@
 # SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, III In Paschaltide, At Vespers)
 O Queen of heaven, * be joyful, alleluia; Because whom so meetly thou barest, alleluia, Hath arisen, as he promised, alleluia: Pray for us to the Father, alleluia.
 
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, III In Paschaltide, At Vespers)
+V. Full of grace are thy lips, alleluia.
+R. Because God hath blessed thee for ever, alleluia.
+
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 71* — "Ant. on Benedictus. O Queen of heaven, as above at Vespers."
 @use proper/saturday-office-bvm-paschal/magnificat-antiphon
@@ -14,6 +19,12 @@ V. Blessed art thou among women, and blessed is the fruit of thy womb.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.
+
+[short-responsory-vespers]
+# Vespers takes the Short R. "as on Feasts B.V.M." (Diurnal p. 68*), whose
+# Vespers has the Lauds responsory (p. 64*): in Paschaltide its Paschal form
+# (p. 66*), all else as throughout the Year (p. 71*).
+@use proper/saturday-office-bvm-paschal/short-responsory-lauds
 
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107 (Paschaltide rubric)

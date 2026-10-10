@@ -1,6 +1,6 @@
 # Saturday Office of the B.V.M., Christmas until the Purification.
-# Antiphon set shared with the Christmastide BVM offices; all other
-# sections fall back to proper/saturday-office-bvm and the commons.
+# Antiphon set and collect shared with the Christmastide BVM offices; all
+# other sections fall back to proper/saturday-office-bvm and the commons.
 
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After Christmas, At Lauds)
@@ -9,3 +9,27 @@ A great and wondrous mystery * is made known to us this day; a new thing is wrou
 [magnificat-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After Christmas, At Vespers)
 Great * is the mystery of the inheritance: the womb of her that knew not man is become the temple of the Godhead; by taking flesh of her, he was no way defiled: all the nations shall gather, saying: Glory be to thee, O Lord.
+
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After Christmas, At Vespers);
+# the same collect as the Circumcision's (p. 212). Lauds and the Hours keep it:
+# only the Office's one collect is printed ("Collect as below at Lauds", p. 68*).
+@use proper/circumcision/collect
+
+# At the Hours the antiphons are the Circumcision's Lauds antiphons 1, 2, 3
+# and 5 (Diurnal pp. 70*–71*), in place of the Common's (p. 67*).
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After Christmas, Ant. at Prime)
+@use proper/circumcision/psalm-antiphon-1
+
+[psalm-antiphon-2-terce]
+# SOURCE: Monastic Diurnal.pdf, pp. 70*–71* (Office of Saint Mary on Saturday, II After Christmas, Ant. at Terce)
+@use proper/circumcision/psalm-antiphon-2
+
+[psalm-antiphon-3-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, II After Christmas, Ant. at Sext)
+@use proper/circumcision/psalm-antiphon-3
+
+[psalm-antiphon-5-none]
+# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, II After Christmas, Ant. at None)
+@use proper/circumcision/psalm-antiphon-5

@@ -37,35 +37,9 @@ Blessed be God, even the Father of our Lord Jesus Christ, the Father of mercies,
 R. Thanks be to God.
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx); draft archdiocesan Vespers book, p. 129
-Caeli Deus sanctissime
+# Diurnal p. 243: "all is said as in the Psalter throughout the Year" (Wednesday at Vespers, p. 131).
+@use ordinary/vespers/hymn-wednesday
 
-O God, whose hand hath spread the sky
-And all its shining hosts on high,
-And, painting it with fiery light,
-Made it so beauteous and so bright:
-
-Thou, when the fourth day was begun,
-Didst frame the circle of the sun,
-And set the moon for ordered change,
-And planets for their wider range:
-
-To night and day, by certain line,
-Their varying bounds thou didst assign:
-And gavest a signal, known and meet,
-For months begun and months complete.
-
-Enlighten thou the hearts of men,
-Polluted souls make pure again:
-Unloose the bands of guilt within,
-Remove the burden of our sin.
-
-O Father, that we ask be done
-Through Jesus Christ, thine only Son,
-Who, with the Holy Ghost and thee,
-Shall live and reign eternally.
-
-Amen.
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 129 (Ash Wednesday)
 R. I will bless the Lord * at all times.
