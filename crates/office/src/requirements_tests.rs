@@ -739,6 +739,33 @@ fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
 }
 
 #[test]
+fn wednesday_lauds_hymn_is_the_printed_nox_et_tenebrae() {
+    // #650. Diurnal pp. 59–60 print Nox et tenebrae once, at Wednesday at
+    // Lauds; Ash Wednesday says "all is said as in the Psalter" (p. 243).
+    const DOXOLOGY: &str =
+        "All laud to God the Father be;\nAll praise, eternal Son, to thee;\nAll glory, as is ever meet,\nTo God the Holy Paraclete.";
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let hymn = |date: Date| {
+            let hour = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        // The nearest earlier Wednesday that keeps the ferial hymn.
+        let ferial = (1..=5)
+            .map(|weeks| hymn(moveable.ash_wednesday.add_days(-7 * weeks)))
+            .find(|h| h.source_ref == "ordinary/lauds/hymn-wednesday")
+            .unwrap();
+        assert!(ferial.text.starts_with("Hence, night and clouds that night-time brings,"), "{y}: {}", ferial.text);
+        assert!(
+            ferial.text.contains("That thou wouldst guide us through the day.") && ferial.text.contains(DOXOLOGY),
+            "{y}: {}",
+            ferial.text
+        );
+        assert_eq!(hymn(moveable.ash_wednesday).text, ferial.text, "{y}");
+    }
+}
+
+#[test]
 fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     // #609. Diurnal p. 3 and p. 364: "To thee who, dead, again dost live"
     // ends the hymns of the metre through None of the Vigil of the Ascension;
