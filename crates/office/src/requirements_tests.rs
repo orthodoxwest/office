@@ -950,7 +950,7 @@ fn epiphany_vespers_are_as_on_the_feast() {
 /// Diurnal p. 229: I Vespers of the Sunday within the Octave of the Epiphany
 /// are "as below at Vespers of Saturday", Magnificat antiphon "The Child
 /// Jesus", also on the Friday when the Sunday is anticipated because the
-/// Octave Day is a Sunday (p. 228; 2019 ordo, 11 January) (#646). An
+/// Octave Day is a Sunday (p. 228) (#646). An
 /// anticipated Sunday after Pentecost keeps Friday's antiphon (2022 ordo,
 /// 18 November: "He hath put down the mighty").
 #[test]

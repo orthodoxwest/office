@@ -68,7 +68,7 @@ pub fn is_per_annum_sunday(f: Option<&Feast>) -> bool {
     // `epiphany-sunday-within-octave` ahead of its own id, so every id is
     // checked for the exclusion before any is matched: anticipated on the
     // Saturday, its Friday I Vespers take its own Magnificat antiphon
-    // (Diurnal p. 229; 2019 ordo, 11 January: "The Child Jesus") (#646).
+    // (Diurnal p. 229; the 2019 ordo commemorates the Sunday with it) (#646).
     let ids = feast_proper_ids(f);
     if ids.iter().any(|id| id == "epiphany-sunday-1" || id == "pentecost-sunday-2") {
         return false;
