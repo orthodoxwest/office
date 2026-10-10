@@ -247,7 +247,8 @@ fn should_say_preces_table() {
         ("octave commemoration", make_day(3, 11, None, vec![r("test-octave-day-3", Rank::SemiDouble)], None), false),
         ("vigil of Epiphany", make_day(1, 5, None, vec![], None), false),
         ("Friday after Ascension octave", make_day(5, 29, None, vec![], None), false),
-        ("Eastertide Sunday", easter_sunday, false),
+        // Ordo day lines over Diurnal p. 7, pending a ruling (#660).
+        ("Eastertide Sunday (#660)", easter_sunday, false),
         ("Eastertide feria", easter_feria, true),
     ] {
         assert_eq!(should_say_preces(Some(&d), Some(&m)), want, "{name}");
