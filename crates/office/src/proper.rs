@@ -109,12 +109,16 @@ pub(crate) fn season_ref_candidates(refs: &[String], season: Option<Season>) -> 
     }
 }
 
-/// Resolves a section within one tier: season-qualified, then
-/// hour-qualified, then generic.
+/// Resolves a section within one tier: the hour's own text (its seasonal
+/// form first), then the generic text's seasonal form, then the generic. A
+/// seasonal form varies the text it qualifies, so it never displaces a text
+/// the hour takes in that one's place: Vespers of a Confessor Bishop omit
+/// Lauds' fourth antiphon (Diurnal pp. 33*, 39*), and so its alleluia-free
+/// Septuagesima form too (#663).
 pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     let hour_candidates = if hour_name.is_empty() { Vec::new() } else { hour_ref_candidates(hour_name, reference) };
     let ref_cands = ref_candidates(reference);
-    for list in [season_ref_candidates(&hour_candidates, season), season_ref_candidates(&ref_cands, season), hour_candidates] {
+    for list in [season_ref_candidates(&hour_candidates, season), hour_candidates, season_ref_candidates(&ref_cands, season)] {
         let found = first_text(t, prefix, &list);
         if !found.0.is_empty() {
             return paschal_common_form(found, season, t);
