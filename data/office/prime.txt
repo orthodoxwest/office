@@ -289,8 +289,11 @@ Ref = office
 Type = proper-antiphon
 Ref = psalm-antiphon-1
 
+# Diurnal p. 6: Now unto the King on Sundays, privileged Vigils, feasts and
+# Paschaltide ferias; Love the truth on other ferias and common Vigils. The
+# Vigils of the Nativity (p. 183) and the Epiphany (p. 222) name it (#658).
 [Chapter-Ferial]
-Condition = is-ferial,not-season-easter,not-triduum,not-office-of-the-dead
+Condition = is-ferial,not-privileged-vigil,not-season-easter,not-triduum,not-office-of-the-dead
 
 Type = proper-chapter
 Ref = chapter-ferial
@@ -303,6 +306,12 @@ Ref = chapter
 
 [Chapter-Easter-Feria]
 Condition = is-ferial,season-easter,not-triduum,not-office-of-the-dead
+
+Type = proper-chapter
+Ref = chapter
+
+[Chapter-Privileged-Vigil]
+Condition = privileged-vigil,not-season-easter,not-triduum,not-office-of-the-dead
 
 Type = proper-chapter
 Ref = chapter
