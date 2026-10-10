@@ -1192,3 +1192,26 @@ fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
         assert_eq!(octave.celebration.as_deref().map(|c| c.id.as_str()), Some("conception-bvm-octave-day"), "{y}");
     }
 }
+
+#[test]
+fn final_antiphons_turn_at_the_diurnals_hours() {
+    // Diurnal pp. 153-155; 2026 ordo pp. 18, 22, 53, 69 (#649). Each Final
+    // Antiphon begins and ends at a named hour, so the civil day of every
+    // boundary says two antiphons.
+    use crate::seasonal::marian_antiphon;
+    for y in 2026..=2053 {
+        let m = MoveableDates::compute(y);
+        let at = |date: Date| ["lauds", "vespers", "compline"].map(|h| marian_antiphon(date, h, &m));
+        let advent_eve = m.advent1.add_days(-1);
+        assert_eq!(at(advent_eve), ["salve-regina", "alma-redemptoris-advent", "alma-redemptoris-advent"], "{y}");
+        assert_eq!(
+            at(Date::new(y, 12, 24)),
+            ["alma-redemptoris-advent", "alma-redemptoris-christmas", "alma-redemptoris-christmas"],
+            "{y}"
+        );
+        assert_eq!(at(Date::new(y, 2, 2)), ["alma-redemptoris-christmas", "alma-redemptoris-christmas", "ave-regina-caelorum"], "{y}");
+        assert_eq!(at(m.holy_wednesday)[2], "ave-regina-caelorum", "{y}");
+        assert_eq!(at(m.holy_saturday)[2], "regina-caeli", "{y}");
+        assert_eq!(at(m.pentecost.add_days(6)), ["regina-caeli", "salve-regina", "salve-regina"], "{y}");
+    }
+}

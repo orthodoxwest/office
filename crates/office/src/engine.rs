@@ -14,7 +14,7 @@ use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_tridu
 use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
 use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
 use crate::texts::{OfficeTexts, load_texts};
-use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, vespers, voice};
+use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, seasonal, vespers, voice};
 
 /// The seven hours, in canonical order.
 pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
@@ -198,13 +198,8 @@ fn append_context_decisions(hour: &mut OfficeHour, day: &Day, hour_name: &str, m
     add(d, "antiphon:doubling", outcome, "");
 }
 
-pub const MARIAN_BOUNDARY_CIVIL_DAY: &str = "civil-day";
-pub const MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE: &str = "purification-vespers-override";
-
 fn add_marian_decisions(d: &mut Vec<Decision>, day: &Day, hour_name: &str) {
-    let (key, boundary) = marian_antiphon_selection(day, hour_name);
-    d.push(Decision::new("marian:selection", key, ""));
-    d.push(Decision::new("marian:boundary", boundary, ""));
+    d.push(Decision::new("marian:selection", marian_antiphon_selection(day, hour_name), ""));
 }
 
 /// Describes the synthetic office day that drove Vespers or Compline.
@@ -366,17 +361,15 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
     oe
 }
 
-/// The seasonal Marian antiphon slug and its boundary branch. Alma
-/// Redemptoris continues through II Vespers of the Purification.
-pub fn marian_antiphon_selection<'a>(day: &'a Day, hour_name: &str) -> (&'a str, &'static str) {
-    if hour_name == "vespers" && day.date.month() == 2 && day.date.day() == 2 {
-        return ("alma-redemptoris-christmas", MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE);
-    }
-    (&day.marian_antiphon, MARIAN_BOUNDARY_CIVIL_DAY)
+/// The seasonal Marian antiphon slug for this hour. Its boundaries fall at
+/// hours of the civil day the hour is said on, so I Vespers keeps its eve.
+pub fn marian_antiphon_selection(day: &Day, hour_name: &str) -> &'static str {
+    let civil = day.civil_date();
+    seasonal::marian_antiphon(civil, hour_name, &MoveableDates::compute(civil.year()))
 }
 
 fn resolve_marian_element(day: &Day, hour_name: &str, t: &OfficeTexts) -> OfficeElement {
-    let (key, _) = marian_antiphon_selection(day, hour_name);
+    let key = marian_antiphon_selection(day, hour_name);
     let r = format!("ordinary/marian/{key}");
     let mut text = t.get(&r).to_string();
     if text.is_empty() {

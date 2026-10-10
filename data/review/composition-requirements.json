@@ -3236,5 +3236,155 @@
         "ref": "commons/apostle/psalm-antiphon-4-first-vespers"
       }
     ]
+  },
+  {
+    "id": "final-antiphon-hour-boundaries",
+    "source": "Monastic Diurnal, Final Antiphons B.V.M., pp. 153-155. 2026 ordo pp. 18, 22, 53, 69 (#649).",
+    "cases": [
+      {
+        "date": "2026-11-28",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-11-27",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-advent"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-01",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2026-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/alma-redemptoris-christmas"
+      },
+      {
+        "date": "2027-02-02",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-08",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/ave-regina-caelorum"
+      },
+      {
+        "date": "2026-04-11",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-05",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "compline",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "lauds",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/regina-caeli"
+      },
+      {
+        "date": "2027-06-26",
+        "hour": "vespers",
+        "slot": "marian-antiphon",
+        "ref": "ordinary/marian/salve-regina"
+      }
+    ]
   }
 ]

@@ -1,5 +1,5 @@
 //! The day as the composers see it: the shared calendar day plus the Office's own resolution
-//! (Vespers, the Marian antiphon) and the two fields that exist only on the synthetic office-day
+//! (Vespers) and the two fields that exist only on the synthetic office-day
 //! used while composing I Vespers.
 
 use std::ops::{Deref, DerefMut};
@@ -11,8 +11,6 @@ use crate::concurrence::VespersDesignation;
 #[derive(Clone, Debug)]
 pub struct Day {
     pub cal: CalendarDay,
-    /// Corpus subkey under `ordinary/marian/`.
-    pub marian_antiphon: String,
     pub vespers: VespersDesignation,
     /// Set only on the synthetic office-day of a following feast's I Vespers:
     /// resolution then prefers "-first" ref variants.
@@ -36,13 +34,7 @@ impl DerefMut for Day {
 
 impl Day {
     pub fn new(cal: CalendarDay, office: crate::OfficeDay) -> Day {
-        Day {
-            cal,
-            marian_antiphon: office.marian_antiphon.to_string(),
-            vespers: office.vespers,
-            first_vespers: false,
-            following_office_commemoration_id: String::new(),
-        }
+        Day { cal, vespers: office.vespers, first_vespers: false, following_office_commemoration_id: String::new() }
     }
 
     /// The weekday of the psalter and weekday ordinary. At I Vespers the
