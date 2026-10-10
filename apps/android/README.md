@@ -51,8 +51,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). Ornaments are drawn
   from the web templates' SVG paths, and the Apse vault from its star tile.
 - **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
-  is open, like the web's wake lock. The menu's Full screen row (off by default) puts the status
-  bar away while the app is open; a swipe down from the top brings it back for a moment.
+  is open, like the web's wake lock. The status bar is put away while the app is open; a swipe
+  down from the top brings it back for a moment.
 - **Keeping the place.** Each visit on the way back keeps its own scroll position and open
   sections, and the way back itself is saved state: Back returns to where the reader was, and
   so does a return after Android has closed the app in the background (`PlaceTest`).

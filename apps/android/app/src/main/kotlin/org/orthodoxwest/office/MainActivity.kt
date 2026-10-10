@@ -97,20 +97,15 @@ class MainActivity : ComponentActivity() {
         // A restored activity still holds the intent that first opened it; the saved way back already includes it.
         if (savedInstanceState == null) openFrom(intent)
         Shortcuts.publish(this)
-        // Hidden from the first frame when the reader has chosen it.
-        showStatusBar(!vm.fullScreen)
+        hideStatusBar()
         setContent {
             val vm = vm
             val dark = vm.theme.dark(isSystemInDarkTheme())
             LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
-            LaunchedEffect(vm.fullScreen) { showStatusBar(!vm.fullScreen) }
             val dissolve = rememberDissolve()
             Box(Modifier.fillMaxSize().dissolving(dissolve)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
-                    CompositionLocalProvider(
-                        LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) },
-                        LocalFullScreen provides FullScreenChoice(vm.fullScreen) { on -> if (on != vm.fullScreen) vm.chooseFullScreen(on) },
-                    ) {
+                    CompositionLocalProvider(LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) }) {
                         OfficeApp(
                             shown = vm.shown,
                             behind = vm.behind,
@@ -163,22 +158,19 @@ class MainActivity : ComponentActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         // Back from a dialog or another app, the status bar is put away again.
-        if (hasFocus && vm.fullScreen) showStatusBar(false)
+        if (hasFocus) hideStatusBar()
     }
 
     /**
-     * The status bar shown, or hidden for full screen: then a swipe down from the top brings it
-     * over the page for a moment, without moving the page, and it goes again by itself. The
-     * navigation bar stays, so Back and Home are where the reader expects them.
+     * The clock and notifications put away while the app is open: a swipe down from the top
+     * brings the status bar over the page for a moment, without moving the page, and it goes
+     * again by itself. The navigation bar stays, so Back and Home are where the reader expects
+     * them.
      */
-    private fun showStatusBar(show: Boolean) {
+    private fun hideStatusBar() {
         val bars = WindowCompat.getInsetsController(window, window.decorView)
-        if (show) {
-            bars.show(WindowInsetsCompat.Type.statusBars())
-        } else {
-            bars.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            bars.hide(WindowInsetsCompat.Type.statusBars())
-        }
+        bars.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        bars.hide(WindowInsetsCompat.Type.statusBars())
     }
 
     /**

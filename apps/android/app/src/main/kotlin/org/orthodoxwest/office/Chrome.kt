@@ -238,11 +238,6 @@ class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
 
-/** The reader's setting for hiding the status bar while the app is open (off by default). */
-class FullScreenChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
-
-val LocalFullScreen = staticCompositionLocalOf { FullScreenChoice(false) {} }
-
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
  * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
@@ -379,9 +374,9 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 
 /**
  * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme, Text, Martyrology and Full screen rows, the current choice underlined in
- * gold. The pages are muted, the current one underlined in the lining. `prefsOnly` is the wide
- * header's Settings: the preference rows alone, under the header's end at `end`.
+ * then the Theme, Text and Martyrology rows, the current choice underlined in gold. The pages are
+ * muted, the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
+ * preference rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -478,25 +473,6 @@ fun MenuPanel(
                     }
                 }
                 PrefHint("On reads the saints of the coming day at Prime.")
-                // Android's own: the clock and notifications put away, a swipe from the top
-                // bringing them back for a moment.
-                val fullScreen = LocalFullScreen.current
-                MenuRow {
-                    Row(Modifier.width(54.dp)) {
-                        Text(
-                            "FULL SCREEN",
-                            Modifier.padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
-                            style = Type.label(10.56f, 0.08f).copy(color = p.muted),
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == fullScreen.on, Type.label(12f, 0.06f), p.accent) { fullScreen.onChange(on) }
-                    }
-                }
-                PrefHint("On hides the clock and notifications; swipe down from the top to see them.")
             }
         }
     }
