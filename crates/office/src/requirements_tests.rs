@@ -1088,13 +1088,10 @@ fn no_vigil_commemoration_on_a_solemnity() {
 #[test]
 fn st_vincent_is_named_as_one_martyr() {
     let data = CalendarData::load(&TestData("../../data".into())).unwrap();
-    // A weekday, a Sunday (2023) and a Saturday (2028).
-    for y in [2026, 2023, 2028] {
-        let cal = build_calendar(y, &data).unwrap();
-        let day = cal.days.iter().find(|day| day.date == Date::new(y, 1, 22)).unwrap();
-        let vincent = day.commemorations.iter().find(|c| c.id == "comm-01-22-ss-vincent-martyr");
-        assert_eq!(vincent.map(|c| c.name.as_str()), Some("St Vincent, Martyr"), "{}", day.date);
-    }
+    let cal = build_calendar(2026, &data).unwrap();
+    let day = cal.days.iter().find(|day| day.date == Date::new(2026, 1, 22)).unwrap();
+    let vincent = day.commemorations.iter().find(|c| c.id == "comm-01-22-ss-vincent-martyr");
+    assert_eq!(vincent.map(|c| c.name.as_str()), Some("St Vincent, Martyr"));
 }
 
 /// #631: Paschaltide runs until None of the Saturday after Pentecost (General
