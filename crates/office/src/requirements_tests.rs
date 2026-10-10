@@ -766,6 +766,29 @@ fn wednesday_lauds_hymn_is_the_printed_nox_et_tenebrae() {
 }
 
 #[test]
+fn ash_wednesday_vespers_hymn_is_the_psalter_caeli_deus() {
+    // Ash Wednesday's Vespers prints only the Magnificat antiphon and
+    // collect; "all is said as in the Psalter" (Diurnal p. 243), so the
+    // hymn is Wednesday's Caeli Deus sanctissime (p. 131), as at Lauds (#650).
+    // (2029 is left out: I Vespers of St Peter's Chair falls that evening.)
+    for y in [2026, 2027, 2028, 2030] {
+        let (days, moveable) = year(y);
+        let hymn = |date: Date| {
+            let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        let ferial = (1..=5)
+            .map(|weeks| hymn(moveable.ash_wednesday.add_days(-7 * weeks)))
+            .find(|h| h.source_ref == "ordinary/vespers/hymn-wednesday")
+            .unwrap();
+        assert!(ferial.text.contains("whose hand hath spread the sky"), "{y}: {}", ferial.text);
+        let ash = hymn(moveable.ash_wednesday);
+        assert_eq!(ash.source_ref, "proper/ash-wednesday/hymn-vespers", "{y}");
+        assert_eq!(ash.text, ferial.text, "{y}");
+    }
+}
+
+#[test]
 fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
     // #609. Diurnal p. 3 and p. 364: "To thee who, dead, again dost live"
     // ends the hymns of the metre through None of the Vigil of the Ascension;
