@@ -11,8 +11,11 @@ fn phrases(reference: &str) -> &'static [&'static str] {
         "ordinary/session/closing-rubric" => &["Our Father", "Hail Mary"],
         "shared/formulas/closing-our-father" => &["Our Father"],
         "ordinary/compline/confiteor-rubric" => &["Our Father"],
+        "shared/formulas/triduum-hours-opening-rubric" => &["Our Father", "Hail Mary", "I believe"],
         "shared/formulas/triduum-compline-opening-rubric" => &["Sir, ask a blessing", "Our help"],
         "shared/formulas/triduum-collect-rubric" => &["Let us pray", "Who with thee ... liveth"],
+        "shared/formulas/triduum-vespers-opening-rubric" => &["Our Father", "Hail Mary"],
+        "shared/formulas/holy-saturday-compline-alleluia-rubric" => &["Praise be to thee, O Lord, King of eternal glory", "Alleluia"],
         _ => &[],
     }
 }
@@ -75,5 +78,12 @@ mod tests {
         assert_eq!(prayed("shared/formulas/triduum-compline-opening-rubric", opening), ["Sir, ask a blessing", "Our help"]);
         let collect = "The Psalm being ended, there is said, without Let us pray, in a low voice, the Collect of the day, its conclusion Who with thee ... liveth being said in silence.";
         assert_eq!(prayed("shared/formulas/triduum-collect-rubric", collect), ["Let us pray", "Who with thee ... liveth"]);
+        let hours = "Prime, Terce, Sext, and None during this Triduum (after Our Father, Hail Mary, and at Prime I believe have been said secretly) are begun at once with the Psalms noted below.";
+        assert_eq!(prayed("shared/formulas/triduum-hours-opening-rubric", hours), ["Our Father", "Hail Mary", "I believe"]);
+        let alleluia = "Henceforth Praise be to thee, O Lord, King of eternal glory is not said, but in its place is said Alleluia.";
+        assert_eq!(
+            prayed("shared/formulas/holy-saturday-compline-alleluia-rubric", alleluia),
+            ["Praise be to thee, O Lord, King of eternal glory", "Alleluia"]
+        );
     }
 }

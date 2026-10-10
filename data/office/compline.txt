@@ -46,6 +46,13 @@ Ref = shared/formulas/triduum-compline-opening-rubric
 Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
+[Opening-Holy-Saturday]
+Condition = feast-holy-saturday
+# Monastic Diurnal, p. 361: from this Compline Alleluia replaces Praise be to thee.
+
+Type = rubric
+Ref = shared/formulas/holy-saturday-compline-alleluia-rubric
+
 [Psalmody]
 
 Type = psalm
@@ -105,6 +112,11 @@ Ref = hymn
 
 [Nunc-Dimittis]
 Condition = feast-holy-saturday
+# Monastic Diurnal, p. 361: the Hymn, Chapter and Versicle are not said, and
+# the antiphon on Nunc dimittis follows the Psalms at once.
+
+Type = rubric
+Ref = shared/formulas/holy-saturday-compline-omission-rubric
 
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
@@ -117,6 +129,11 @@ Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
+
+# Monastic Diurnal, p. 362: the collect follows at once. Nothing between here
+# and [Collect] is said on Holy Saturday.
+Type = rubric
+Ref = shared/formulas/holy-saturday-compline-collect-rubric
 
 [Nunc-Dimittis-Dead]
 Condition = office-of-the-dead

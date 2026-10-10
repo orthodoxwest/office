@@ -24,6 +24,10 @@ Type = antiphon
 Ref = shared/formulas/paschal-psalm-antiphon
 
 [Magnificat]
+# Diurnal p. 360: the Chapter, Short Responsory, Hymn and Versicle are not said.
+Type = rubric
+Ref = shared/formulas/holy-saturday-vespers-omission-rubric
+
 Type = antiphon
 Ref = proper/holy-saturday/vigil-magnificat-antiphon
 

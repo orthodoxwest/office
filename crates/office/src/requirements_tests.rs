@@ -1396,6 +1396,60 @@ fn final_antiphons_turn_at_the_diurnals_hours() {
     }
 }
 
+#[test]
+fn triduum_hours_say_their_omissions() {
+    // Each rubric with the element it must be followed by (a slot or source).
+    const LAUDS: (&str, &str) = ("shared/formulas/triduum-lauds-omission-rubric", "versicle"); // p. 311
+    const VESPERS_OPENING: (&str, &str) = ("shared/formulas/triduum-vespers-opening-rubric", "psalm-antiphon-1"); // p. 315
+    const VESPERS: (&str, &str) = ("shared/formulas/triduum-vespers-omission-rubric", "magnificat-antiphon"); // p. 315
+    const VIGIL_VESPERS: (&str, &str) =
+        ("shared/formulas/holy-saturday-vespers-omission-rubric", "proper/holy-saturday/vigil-magnificat-antiphon"); // p. 360
+    const ALLELUIA: (&str, &str) = ("shared/formulas/holy-saturday-compline-alleluia-rubric", "psalms/004"); // p. 361
+    const COMPLINE: (&str, &str) = ("shared/formulas/holy-saturday-compline-omission-rubric", "nunc-dimittis-antiphon"); // p. 361
+    const COLLECT: (&str, &str) = ("shared/formulas/holy-saturday-compline-collect-rubric", "greeting"); // p. 362
+    let all = [LAUDS, VESPERS_OPENING, VESPERS, VIGIL_VESPERS, ALLELUIA, COMPLINE, COLLECT];
+    for y in [2026, 2027, 2035, 2053] {
+        let (days, moveable) = year(y);
+        let m = &moveable;
+        let expected = |hour: &str, date: Date| -> Vec<(&str, &str)> {
+            let triduum = [m.holy_thursday, m.good_friday, m.holy_saturday].contains(&date);
+            match hour {
+                "lauds" if triduum => vec![LAUDS],
+                "vespers" if date == m.holy_saturday => vec![VIGIL_VESPERS],
+                "vespers" if triduum => vec![VESPERS_OPENING, VESPERS],
+                "compline" if date == m.holy_saturday => vec![ALLELUIA, COMPLINE, COLLECT],
+                _ => vec![],
+            }
+        };
+        for date in [m.holy_wednesday, m.holy_thursday, m.good_friday, m.holy_saturday, m.easter, m.easter.add_days(1)] {
+            for hour in ["lauds", "vespers", "compline"] {
+                for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
+                    let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], m, form).unwrap();
+                    let elements: Vec<_> = composed.sections.iter().flat_map(|s| &s.elements).collect();
+                    let context = format!("{date} {hour} {form:?}");
+                    let found: Vec<_> =
+                        elements.iter().filter(|e| all.iter().any(|(r, _)| e.source_ref == *r)).map(|e| e.source_ref.as_str()).collect();
+                    let want = expected(hour, date);
+                    assert_eq!(found, want.iter().map(|(r, _)| *r).collect::<Vec<_>>(), "{context}");
+                    for (rubric, next) in want {
+                        let i = elements.iter().position(|e| e.source_ref == rubric).unwrap();
+                        assert_eq!(elements[i].kind, ElementType::Rubric, "{context}");
+                        let after = elements[i + 1];
+                        assert!(
+                            [&after.slot_ref, &after.source_ref, &after.leader_slot].contains(&&next.to_string()),
+                            "{context}: {rubric} before {after:?}"
+                        );
+                    }
+                    if hour == "compline" && date == m.holy_saturday {
+                        // The Short Lesson keeps its place before the Confession.
+                        assert!(!elements.iter().any(|e| e.kind == ElementType::Hymn || e.slot_ref == "chapter"), "{context}");
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// #642 (needs ruling): the ordos commemorate an Ember day of Advent or Lent at
 /// I Vespers of the following feast and II Vespers of a feast kept on it, as
 /// they do the season's other ferias (XIV.8), though XIV.9 commemorates Ember
