@@ -169,9 +169,8 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
         return prime_element(SLOT, &key, text);
     }
     let ferial = day.celebration.as_deref().is_none_or(|c| c.is_category(Category::Feria));
-    // The Saturday Office of Our Lady says Lauds from the Saturday psalter
-    // but takes its Hours' antiphons from the Common (Diurnal pp. 69*, 65*,
-    // 67*: "While the King" at Prime) (#652).
+    // The Saturday Office of Our Lady takes the Common of Feasts B.V.M.'s
+    // Prime antiphon, "While the King" (Diurnal p. 67*; p. 69*) (#652).
     if !ferial {
         let (mut text, mut key) = resolve_proper_text(day, "lauds", SLOT, t);
         // The ordinary Sunday psalter has its own threefold Alleluia (p. 83).
