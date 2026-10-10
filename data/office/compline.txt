@@ -130,6 +130,11 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
 
+# Monastic Diurnal, p. 362: the collect follows at once. Nothing between here
+# and [Collect] is said on Holy Saturday.
+Type = rubric
+Ref = shared/formulas/holy-saturday-compline-collect-rubric
+
 [Nunc-Dimittis-Dead]
 Condition = office-of-the-dead
 
@@ -162,13 +167,6 @@ Ref = ordinary/shared/apostles-creed
 
 Type = preces
 Ref = ordinary/compline/preces
-
-[Collect-Holy-Saturday]
-Condition = feast-holy-saturday
-# Monastic Diurnal, p. 362: after the Nunc dimittis antiphon.
-
-Type = rubric
-Ref = shared/formulas/holy-saturday-compline-collect-rubric
 
 [Collect]
 Condition = not-office-of-the-dead,not-triduum

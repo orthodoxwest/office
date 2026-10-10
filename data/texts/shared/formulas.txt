@@ -139,10 +139,13 @@ God, world without end.
 R. Amen.
 
 [triduum-hours-opening-rubric]
-# SOURCE: Monastic Diurnal.pdf, printed p. 314 (Maundy Thursday at the Hours)
-The Our Father and Hail Mary (and at Prime I believe) having been said secretly,
-the Hour is begun at once with the Psalms, without the opening Versicles or the
-Hymn.
+# SOURCE: Monastic Diurnal.pdf, printed p. 314 (Maundy Thursday at the Hours). The
+# printed rubric goes on ": these ended, the Ant. Christ, for our sake is said
+# with the rest as above at Lauds."; only that trailing clause is left out,
+# because each Hour prints the ending in full, under its own rubric.
+Prime, Terce, Sext, and None during this Triduum (after Our Father, Hail Mary,
+and at Prime I believe have been said secretly) are begun at once with the
+Psalms noted below.
 
 [triduum-christus-factus-rubric]
 # SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
@@ -191,8 +194,8 @@ The Chapter, Short Responsory, and Hymn are not said during this Triduum.
 [triduum-vespers-opening-rubric]
 # SOURCE: Monastic Diurnal.pdf, printed p. 315 (Maundy Thursday at Vespers). The
 # printed rubric opens "On this and the following day,"; that clause is left out
-# because the rubric is said on both days, as the p. 314 rubric for the Hours
-# leaves out its own scope.
+# because the same text also prints at Good Friday Vespers, where "the following
+# day" would wrongly point to Holy Saturday.
 Our Father and Hail Mary having been said secretly, Vespers are begun at once
 with the first Antiphon, without musical note.
 

@@ -3112,7 +3112,7 @@ shared/formulas/rest-eternal,bf647dbb2752,diurnal,The Office of the Dead,72*,ver
 shared/formulas/triduum-christus-factus-rubric,350831b66dad,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
 shared/formulas/triduum-collect-rubric,a0457aa7ced7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
 shared/formulas/triduum-compline-opening-rubric,eebcc2fb8533,Monastic Diurnal.pdf,At Compline,316,verified,codex,2026-09-14,Transcribed from the page image.
-shared/formulas/triduum-hours-opening-rubric,3419686e95a5,diurnal,Maundy Thursday at the Hours,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-hours-opening-rubric,181125d1687a,Monastic Diurnal.pdf,Maundy Thursday at the Hours,314,verified,claude,2026-10-10,"Transcribed from the page image, replacing an earlier paraphrase; only the trailing clause sending the reader to Lauds for the ending is left out."
 shared/formulas/triduum-lauds-noise-rubric,ef9ab614dca9,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization
 shared/formulas/triduum-lauds-omission-rubric,d5670a124f64,Monastic Diurnal.pdf,Maundy Thursday at Lauds,311,verified,claude,2026-10-10,Transcribed from the page image; Ant. and the versicle/responsory signs written out as in the neighbouring Triduum rubrics.
 shared/formulas/triduum-prime-ending-rubric,823815a296ed,diurnal,Maundy Thursday at Prime,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
