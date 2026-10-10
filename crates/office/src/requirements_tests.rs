@@ -947,6 +947,29 @@ fn epiphany_vespers_are_as_on_the_feast() {
     }
 }
 
+/// Diurnal p. 229: I Vespers of the Sunday within the Octave of the Epiphany
+/// are "as below at Vespers of Saturday", Magnificat antiphon "The Child
+/// Jesus", also on the Friday when the Sunday is anticipated because the
+/// Octave Day is a Sunday (p. 228) (#646). An
+/// anticipated Sunday after Pentecost keeps Friday's antiphon (2022 ordo,
+/// 18 November: "He hath put down the mighty").
+#[test]
+fn epiphany_sunday_first_vespers_take_its_own_magnificat_antiphon() {
+    for (date, want) in [
+        ("2026-01-10", "The Child Jesus"),
+        ("2025-01-11", "The Child Jesus"),
+        ("2019-01-11", "The Child Jesus"),
+        ("2030-01-11", "The Child Jesus"),
+        ("2036-01-11", "The Child Jesus"),
+        ("2047-01-11", "The Child Jesus"),
+        ("2022-11-18", "He hath put down the mighty"),
+    ] {
+        let elements = vespers_elements(date);
+        let antiphon = elements.iter().rev().find(|e| e.slot_ref == "magnificat-antiphon").unwrap();
+        assert!(antiphon.text.starts_with(want), "{date}: {}", antiphon.text);
+    }
+}
+
 const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
 const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
 const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
