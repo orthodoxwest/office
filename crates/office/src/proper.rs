@@ -113,8 +113,8 @@ pub(crate) fn season_ref_candidates(refs: &[String], season: Option<Season>) -> 
 /// form first), then the generic text's seasonal form, then the generic. A
 /// seasonal form varies the text it qualifies, so it never displaces a text
 /// the hour takes in that one's place: Vespers of a Confessor Bishop omit
-/// Lauds' fourth antiphon (Diurnal pp. 33*, 39*), and so its alleluia-free
-/// Septuagesima form too (#663).
+/// Lauds' fourth antiphon (Diurnal pp. 33*, 39*), in Septuagesima and Lent
+/// as at other times (#663).
 pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     let hour_candidates = if hour_name.is_empty() { Vec::new() } else { hour_ref_candidates(hour_name, reference) };
     let ref_cands = ref_candidates(reference);
