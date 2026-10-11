@@ -49,7 +49,8 @@ private struct Setting {
 private func setting(_ kind: BlockKind) -> Setting {
     switch kind {
     // The tituli, red ochre on the limewash and gilt on the Apse night, clear of the rubrics' red.
-    case .heading, .commemorationHeading: return Setting(style: Scale.heading, color: \.titulus, alignment: .center)
+    case .heading: return Setting(style: Scale.heading, color: \.titulus, alignment: .center)
+    case .commemorationHeading: return Setting(style: Scale.commemorationName, color: \.titulus, alignment: .center)
     case .itemLabel: return Setting(style: Scale.itemLabel, color: \.titulus, alignment: .center)
     case .latinTitle, .canticleSection: return Setting(style: Scale.bodyItalic, color: \.muted, alignment: .center)
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
@@ -62,6 +63,11 @@ private func setting(_ kind: BlockKind) -> Setting {
     case .verse, .stanza, .gloriaPatri: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
     }
+}
+
+extension NSAttributedString.Key {
+    /// Marks a posture cue's run, so a divided opening can keep the cue with its mediant.
+    static let posture = NSAttributedString.Key("org.orthodoxwest.office.posture")
 }
 
 /// A block's runs as styled text in `style`, each run in its web class's colour and face.
@@ -98,12 +104,15 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.kern] = 0.4 * k
             a[.foregroundColor] = UIColor(p.muted)
         case .kicker:
-            a[.font] = garamond(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
+            // "Commemoration of", on its own line in the heading's small caps and tracking, as the
+            // web's `.commemoration-kicker`; the name beneath stays in mixed case.
+            a[.font] = garamond(size * 0.78, italic: style.italic, smallCaps: true, lining: style.lining)
             a[.foregroundColor] = UIColor(p.muted)
-            a[.kern] = size * 0.7 * 0.1
+            a[.kern] = Scale.heading.tracking * k
         case .posture:
             a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.rubric)
+            a[.posture] = true
         }
         out.append(NSAttributedString(string: run.text, attributes: a))
     }
