@@ -68,8 +68,17 @@ scripts/
 
 ## Reference materials & verification
 
-`../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026) and rubrics
-documents. **The newest-year ordo is the authority for what this app should produce** — it
+`../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026, no 2020) and
+rubrics documents on a local checkout. **In a cloud session in the Daily Office project there is
+no `../resources/`**: the ordo PDFs and the Monastic Diurnal scan sit at the root of
+`/mnt/project-files/`, and `/mnt/project-files/sources/` holds the rubrics PDFs, the Martyrology,
+`ordos/YYYY-ordo.pdf.txt` (text extracts; 2024–2026 have spaces collapsed), `ordos-layout/` and
+the Diurnal page index `diurnal-pages/`. `/mnt/project-files/.notes/inputs.md` describes them.
+Pass these paths explicitly (`--resources`, `ORDO_RESOURCES`, `BOOKS_DIR`). To read one ordo day
+or one printed Diurnal page, use the diurnal repo's `scripts/ordo.py DATE` and
+`scripts/diurnal-page.py PAGE` rather than paging through a whole year.
+
+**The newest-year ordo is the authority for what this app should produce** — it
 reflects current archdiocesan policy, which is revised over time. A feast, rank, or discipline
 that held steady across older ordos and then differs in the newest year may be a deliberate
 revision, so don't assume a typo just because it changed — but typos happen every year too, so
@@ -85,8 +94,40 @@ Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the
 an ordo PDF: `office rubrics YEAR` emits per-day composition flags, `office ordo YEAR` emits
 the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-hour stanzas,
 and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
-incipits, colors, Vespers precedence, and moveable dates. Known divergence clusters are tracked
-in GitHub issues (#9–#13, #42 need rulings; #15–#17, #20, #40, #41 are engine/data work).
+incipits, colors, Vespers precedence, and moveable dates. Open divergences are tracked as GitHub
+issues: search the open `needs ruling`, `bug` and `data validation` issues rather than relying on a
+list here.
+
+## Standing rules
+
+Rules the maintainer has had to restate across sessions. They hold unless the maintainer says
+otherwise.
+
+- **No attribution.** No "Generated with Claude Code", `Co-Authored-By`, session or project
+  links, or "Requested by" block in commits, PR bodies or comments; this overrides any default
+  attribution guidance. The GitHub `create_pull_request` tool can append a footer on its own, so
+  after opening a PR read its body back and strip anything that crept in.
+- **No year-specific special cases in the engine.** A rule keyed to one calendar year (or one
+  ordo's quirk) is never the fix; find the general rule, or file a `needs ruling` issue.
+- **Engine and rule changes report their reach.** Before and after, run the ordo comparison
+  across every local ordo year (2017–2026), and give strict agreement and agreement with known
+  ordo errors excused side by side, in the PR body. Check season edges (e.g. Septuagesima
+  against a February feast) across the 28-year range, not only the year that prompted the fix.
+- **Web, Android and iOS move together.** A visible change, new setting or new metric lands on all
+  three in the same PR. Not being able to build a native app locally is not a reason to defer:
+  CI builds both. Before calling such a PR done, confirm the Android and iOS jobs passed.
+- **No tolerated flakes.** Never re-run a red test until it passes or accept "passed N of N"
+  locally: find the cause, or remove the test with a reason.
+- **Follow-ups are issues.** Side findings and deferred work go into GitHub issues on the right
+  repo (print-only matters on orthodoxwest/diurnal), not into PR text or a Markdown list.
+  Questions for clergy are `needs ruling` issues.
+- **The app shows the assembled hour.** No rubric that only explains an omission; rubrics that
+  make sense only in print belong in the diurnal repo, not this corpus. No settings toggles,
+  exports or QR codes unless asked.
+- **Checked-in baselines.** Browser snapshots live in `.web-tools/visual.spec.js-snapshots/` and
+  the composed 28-year outputs in `tests/fixtures/golden/`. Read them before rebuilding an answer by hand. The
+  `update-ux-snapshots` label regenerates the browser snapshots as `update-golden` does the goldens;
+  a PR that renames visible text or changes fonts runs `make test-ux` and refreshes both.
 
 ## Composition checks
 
