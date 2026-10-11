@@ -1,6 +1,6 @@
 VESPERS
 Saturday, April 18, 2026
-Low Sunday (Octave of Easter)
+The Octave of Easter (Low Sunday)
 Season: easter | Color: white
 ============================================================
 
@@ -40,7 +40,7 @@ Alleluia
 
 Alleluia, * alleluia, alleluia.
 
---- Psalm 145b · Confiteantur tibi, Domine ---
+--- Psalm 144b (145b) · Confiteantur tibi, Domine ---
 Psalm 145:10-21
 
 ALL thy works praise thee, O Lord * [Sit.] and thy saints give thanks unto thee.
@@ -59,7 +59,7 @@ ALL thy works praise thee, O Lord * [Sit.] and thy saints give thanks unto thee.
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
 [Stand upright.] As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 146 · Lauda, anima mea, Dominum ---
+--- Psalm 145 (146) · Lauda, anima mea, Dominum ---
 Psalm 146
 
 PRAISE the Lord, O my soul; while I live will I praise the Lord * [Sit.] yea, as long as I have any being, I will sing praises unto my God.
@@ -76,7 +76,7 @@ PRAISE the Lord, O my soul; while I live will I praise the Lord * [Sit.] yea, as
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
 [Stand upright.] As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 147a · Laudate Dominum quoniam bonus ---
+--- Psalm 146 (147a) · Laudate Dominum quoniam bonus ---
 Psalm 147:1-11
 
 O PRAISE the Lord, for it is a good thing to sing praises unto our God * [Sit.] yea, a joyful and pleasant thing it is to be thankful.
@@ -94,7 +94,7 @@ O PRAISE the Lord, for it is a good thing to sing praises unto our God * [Sit.] 
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
 [Stand upright.] As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 147b · Lauda, Jerusalem, Dominum ---
+--- Psalm 147 (147b) · Lauda, Jerusalem, Dominum ---
 Psalm 147:12-20
 
 PRAISE the Lord, O Jerusalem * [Sit.] praise thy God, O Sion.
@@ -130,7 +130,7 @@ And now, the Red Sea's channel past,
 To Christ our Prince we sing at last.
 
 Upon the Altar of the Cross
-His body hath redeemed our loss:
+His Body hath redeemed our loss:
 And tasting of his roseate Blood,
 Our life is hid with him in God.
 
@@ -159,7 +159,7 @@ In this our Paschal joy, protect
 From all that death would fain effect
 Thy ransomed flock, thine own elect.
 
-To thee, who, dead, again dost live,
+To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
@@ -198,7 +198,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -251,8 +251,8 @@ R. Amen.
 V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

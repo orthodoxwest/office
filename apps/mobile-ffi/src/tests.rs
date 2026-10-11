@@ -12,19 +12,20 @@ fn repo_data() -> FsData {
 #[test]
 fn the_embedded_corpus_is_the_data_directory() {
     let fs = repo_data();
+    let data = EmbeddedData::new().unwrap();
     for dir in ["texts", "feasts", "office"] {
         let embedded =
             |rel: &str| !(rel.starts_with("chant/") || rel.ends_with(".md") || rel.rsplit('/').next().is_some_and(|n| n.starts_with('.')));
         let want: Vec<_> = fs.walk(dir).unwrap().into_iter().filter(|(rel, _)| embedded(rel)).collect();
-        let got = EmbeddedData.walk(dir).unwrap();
+        let got = data.walk(dir).unwrap();
         let paths = |files: &[(String, Vec<u8>)]| files.iter().map(|(rel, _)| rel.clone()).collect::<Vec<_>>();
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
     for file in ["appointment-scopes.json", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
-        assert_eq!(EmbeddedData.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
+        assert_eq!(data.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
     }
-    assert_eq!(EmbeddedData.read("review/provenance.csv").unwrap(), None);
+    assert_eq!(data.read("review/provenance.csv").unwrap(), None);
 }
 
 #[test]
@@ -36,7 +37,7 @@ fn composes_what_the_web_composes() {
     let moveable = MoveableDates::compute(2026);
     for (month, day) in [(1, 6), (4, 3), (4, 5), (9, 30), (12, 25)] {
         for hour in hour_names() {
-            let view = core.compose(hour.clone(), 2026, month, day, "private".into()).unwrap();
+            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), false).unwrap();
             let date = Date::new(2026, month, day);
             let want = engine.compose_hour(&hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
             let want_sections: Vec<SectionView> = render_blocks::hour_sections(&want).into_iter().map(SectionView::from).collect();
@@ -47,34 +48,42 @@ fn composes_what_the_web_composes() {
 }
 
 #[test]
-fn describes_the_day() {
+fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
-    let view = core.compose("vespers".into(), 2026, 12, 25, "priest".into()).unwrap();
-    assert_eq!(view.date_label, "Friday, December 25, 2026");
-    assert_eq!(view.color, "white");
-    assert!(!view.feast.is_empty());
+    let text = |v: &HourView| format!("{:?}", v.sections);
+    let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false).unwrap();
+    let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true).unwrap();
+    assert_eq!((off.martyrology, on.martyrology), (Some(false), Some(true)));
+    assert!(!text(&off).contains("Martyrology for tomorrow, September 8") && text(&on).contains("Martyrology for tomorrow, September 8"));
+    // Another hour, and a Prime without the Martyrology (Good Friday), have nothing to show.
+    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true).unwrap().martyrology, None);
+    for setting in [false, true] {
+        assert_eq!(core.compose("prime".into(), 2026, 4, 10, "private".into(), setting).unwrap().martyrology, None);
+    }
+}
+
+#[test]
+fn an_hour_of_a_first_class_day_is_framed() {
+    let core = OfficeCore::new().unwrap();
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false).unwrap().first_class;
+    assert!(hour("lauds", 12, 25));
+    // I Vespers takes the feast's rank; the Vigil's own Lauds is first class but violet.
+    assert!(hour("vespers", 12, 24));
+    assert!(!hour("lauds", 12, 24));
+    assert!(!hour("lauds", 12, 23));
+    assert!(!hour("lauds", 10, 7));
+    // First class for precedence, but violet or black: a Sunday in Lent, Ash Wednesday, Good Friday.
+    assert!(!hour("lauds", 3, 15));
+    assert!(!hour("lauds", 2, 25));
+    assert!(!hour("lauds", 4, 10));
 }
 
 #[test]
 fn rejects_bad_requests() {
     let core = OfficeCore::new().unwrap();
-    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into()).is_err());
-    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into()).is_err());
-    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into()).is_err());
-}
-
-#[test]
-fn current_office_follows_the_web_schedule() {
-    let at = |h| {
-        let c = current_office(h);
-        (c.hour, c.day_offset)
-    };
-    assert_eq!(at(0), ("compline".to_string(), -1));
-    assert_eq!(at(1), ("compline".to_string(), -1));
-    assert_eq!(at(2), ("lauds".to_string(), 0));
-    assert_eq!(at(12), ("sext".to_string(), 0));
-    assert_eq!(at(19), ("vespers".to_string(), 0));
-    assert_eq!(at(23), ("compline".to_string(), 0));
+    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), false).is_err());
 }
 
 fn civil(year: i32, month: i32, day: i32) -> CivilDate {
@@ -92,12 +101,42 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(home.season, "");
     assert_eq!(home.color, "violet");
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
+    assert_eq!(home.current_hour_note, "Evening prayer");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
+    assert_eq!(late.current_hour_note, "");
     let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
     assert_eq!((other.pray_now_label.as_str(), other.is_today), ("Open Lauds", false));
     assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
+}
+
+#[test]
+fn home_sets_the_days_versicle_on_a_plain_day() {
+    let core = OfficeCore::new().unwrap();
+    let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 15).unwrap();
+    assert_eq!(
+        (placidus.versicle.as_str(), placidus.response.as_str()),
+        ("Let the Saints be joyful with glory.", "Let them rejoice in their beds.")
+    );
+    // A Lenten feria, Passiontide, and a day with a commemoration go without.
+    for (m, d) in [(3, 11), (3, 30), (10, 12)] {
+        let home = core.home(civil(2026, m, d), civil(2026, m, d), 9).unwrap();
+        assert_eq!((home.versicle.as_str(), home.response.as_str()), ("", ""), "{m}-{d}");
+    }
+}
+
+#[test]
+fn home_parts_a_feast_from_its_familiar_name() {
+    let core = OfficeCore::new().unwrap();
+    let corpus = core.home(civil(2026, 6, 11), civil(2026, 6, 11), 9).unwrap();
+    assert_eq!(
+        (corpus.feast_name.as_str(), corpus.feast_alias.as_str()),
+        ("The Feast of the Most Holy Body of Christ", "(Corpus Christi)")
+    );
+    assert_eq!(corpus.feast, "The Feast of the Most Holy Body of Christ (Corpus Christi)");
+    let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 9).unwrap();
+    assert_eq!((placidus.feast_name.as_str(), placidus.feast_alias.as_str()), (placidus.feast.as_str(), ""));
 }
 
 #[test]
@@ -140,25 +179,67 @@ fn reminders_name_each_office_on_the_chosen_days() {
 }
 
 #[test]
-fn reminder_defaults_are_the_webs() {
-    let d = reminder_defaults();
-    assert_eq!(d.iter().map(|r| r.hour.as_str()).collect::<Vec<_>>(), hour_names());
-    let chosen: Vec<&str> = d.iter().filter(|r| r.chosen).map(|r| r.hour.as_str()).collect();
-    assert_eq!(chosen, ["lauds", "vespers", "compline"]);
-    assert_eq!((d[0].hour_of_day, d[0].minute), (6, 45));
+fn usage_beacons_count_current_pages_as_the_web_does() {
+    let today = civil(2026, 3, 15);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None);
+    assert_eq!(
+        beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
+        Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
+    );
+    assert_eq!(beacon(UsageEvent::Home { date: today }).as_deref(), Some("site appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::Ordo { year: 2027 }).as_deref(), Some("ordo appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::RemindersPage).as_deref(), Some("site appearance:nave screen:mobile client:android"));
+    assert_eq!(beacon(UsageEvent::RemindersOn).as_deref(), Some("reminders appearance:nave screen:mobile client:android"));
+    assert_eq!(
+        usage_beacon(
+            UsageEvent::Hour { date: today, hour: "prime".into() },
+            today,
+            false,
+            "private".into(),
+            UsageClient::Android,
+            Some(true),
+            Some(false)
+        )
+        .as_deref(),
+        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown visit:returning client:android")
+    );
+    assert_eq!(
+        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true)).as_deref(),
+        Some("site appearance:apse screen:mobile visit:first client:ios")
+    );
+    // The archive, and anything the server would refuse, are not counted.
+    for event in [
+        UsageEvent::Hour { date: civil(2026, 3, 17), hour: "lauds".into() },
+        UsageEvent::Home { date: civil(2019, 3, 15) },
+        UsageEvent::Ordo { year: 2030 },
+        UsageEvent::Hour { date: today, hour: "matins".into() },
+        UsageEvent::Home { date: civil(2026, 2, 30) },
+    ] {
+        assert_eq!(beacon(event.clone()), None, "{event:?}");
+    }
+    assert!(usage_endpoint().starts_with("https://") && usage_endpoint().ends_with("/api/usage"));
+    assert_eq!(usage_advertised_endpoint(usage_endpoint()), Some(usage_endpoint()));
+    assert_eq!(usage_advertised_endpoint("http://example.org/api/usage".into()), None);
 }
 
 #[test]
-fn the_ordo_year_sets_out_the_tabula() {
-    let y = ordo_year(2026);
-    assert_eq!(y.roman, "MMXXVI");
-    let figures: Vec<(&str, &str)> = y.figures.iter().map(|r| (r.label.as_str(), r.value.as_str())).collect();
-    assert_eq!(
-        figures,
-        [("Golden Number", "XIII"), ("Dominical Letter", "D"), ("Sundays after Epiphany", "4"), ("Sundays after Pentecost", "25")]
-    );
-    assert!(y.figures.iter().all(|r| r.date.is_none()));
-    let easter = y.moveable.iter().find(|r| r.label == "Easter Day").unwrap();
-    assert_eq!((easter.value.as_str(), easter.date), ("April 12", Some(civil(2026, 4, 12))));
-    assert_eq!(y.ember[0].value, "March 4, 6, 7");
+fn a_quick_scroll_does_not_pray_an_hour() {
+    let core = OfficeCore::new().unwrap();
+    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), false).unwrap();
+    let words: Vec<f64> = hour.sections.iter().flat_map(|s| &s.blocks).map(|b| f64::from(block_words(b.clone()))).collect();
+    let total: f64 = words.iter().sum();
+    assert!(total > 300.0, "{total}");
+    let quick = (0..3)
+        .fold(PrayedReading::default(), |r, i| prayed_reading_advance(r, total * f64::from(i) / 3.0, total * f64::from(i + 1) / 3.0, 1.0));
+    assert!(!prayed_reading_done(quick, total, true));
+    let mut slow = PrayedReading::default();
+    let mut at = 0.0;
+    // A block at a time, each on screen until it has been read.
+    for w in &words {
+        while slow.cursor < at + w {
+            slow = prayed_reading_advance(slow, at, at + w, 5.0);
+        }
+        at += w;
+    }
+    assert!(prayed_reading_done(slow, total, true) && !prayed_reading_done(slow, total, false));
 }

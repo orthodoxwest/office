@@ -162,6 +162,8 @@ def our_ordo_days(path):
             continue
         if key and s.startswith("Com."):
             days[key]["coms"].append(s[4:].strip())
+        if key and s.startswith("["):
+            days[key].setdefault("monastic", []).append(s)
         # Vespers stanza line: "Vespers <color> · <owner> · Mag. ... · <suff>".
         # Owner (I fol./II prec.) is absent when Vespers is not designated.
         mv = re.match(r"^\s*Vespers\s+([wrgvbp])\b", ln)
@@ -240,6 +242,27 @@ def cmd_calendar(pdf_path, ours_path):
             print(f"{k[0]:02d}-{k[1]:02d}  ours: {o_title}")
             print(f"        pdf: {p_title}")
     print(f"-- {n} headline mismatches")
+    n = 0
+    for k in sorted(set(pdf) & set(ours)):
+        p_names = monastic_names(pdf[k].get("", ""))
+        o_names = monastic_names("\n".join(ours[k].get("monastic", [])))
+        missing = [p for p in p_names if not any(similar(p, o) >= 0.5 for o in o_names)]
+        extra = [o for o in o_names if not any(similar(p, o) >= 0.5 for p in p_names)]
+        if missing or extra:
+            n += 1
+            print(f"{k[0]:02d}-{k[1]:02d}  ours: {'; '.join(o_names) or '(none)'}")
+            print(f"        pdf: {'; '.join(p_names) or '(none)'}")
+    print(f"-- {n} monastic & oblate notation mismatches")
+
+
+# The ordo's bracketed line for an observance kept by monastics and oblates
+# only, e.g. "[Solemnity of St. Benedict (Monastics & Oblates Only)]"; the
+# text layer collapses spaces from 2024 on.
+MONASTIC_RE = re.compile(r"\[([^\]]*?)\s*\(\s*monastics\s*&\s*oblates\s*only\s*\)\s*\]", re.I)
+
+
+def monastic_names(text):
+    return [m.group(1).strip() for m in MONASTIC_RE.finditer(text)]
 
 
 def read_rubrics(path):
@@ -299,7 +322,8 @@ def pdf_commemorations(section, day_title=""):
         block = re.split(r"\s*/\s*(?:No Comm\.|(?:No )?Suff\.)", block, maxsplit=1)[0]
         # A closing page-reference parenthesis followed by "&" remains
         # an item boundary even when extracted parentheses are unbalanced.
-        parts = re.split(r"\)\s*(?:/\s*)?&\s*(?=[A-Z])", block)
+        # "&." is a printed slip for "&" (2026: Jan 10).
+        parts = re.split(r"\)\s*(?:/\s*)?&\.?\s*(?=[A-Z])", block)
         for part in parts:
             name = re.split(r'[(/“"]', part, maxsplit=1)[0]
             name = re.sub(r"^[\s&;/]+", "", name).strip()
@@ -339,6 +363,11 @@ def commemoration_tokens(name):
     generic_bvm = bool(re.fullmatch(r"(?:the\s+)?" + BVM_RE, text.strip()))
     text = re.sub(r"\b" + BVM_RE, " blessed virgin mary ", text)
     text = re.sub(r"\bdorothea\b", "dorothy", text)
+    # Spellings the printed ordos use for saints the app names otherwise
+    # (Alexius Toth; the 2026 misprints Saturinus, Mechiades, Tibertius).
+    for printed, spelled in (("alexius", "alexis"), ("saturinus", "saturninus"),
+                             ("mechiades", "melchiades"), ("tibertius", "tiburtius")):
+        text = re.sub(rf"\b{printed}\b", spelled, text)
     text = re.sub(r"\bsavior\b", "saviour", text)
     text = re.sub(r"\bcommemoration of\b", " ", text)
     text = re.sub(r"\b(?:ss?|st)\.?(?=\s)", " saint ", text)
@@ -360,6 +389,12 @@ def commemoration_tokens(name):
         normalized.add("feria")
     if generic_bvm:
         normalized.update(("saturday", "office"))
+    # Every day of Advent IV falls on or after 18 December, when the Sunday
+    # and the feria are commemorated with the same O antiphon and the
+    # Sunday's collect; the ordos label that commemoration "Sun." or "Fer."
+    # without regard to the weekday (2026: 20 and 21 December).
+    if re.search(r"\biv sunday of advent\b|\bafter advent iv\b", text):
+        normalized.update(("sunday", "feria"))
     return normalized
 
 

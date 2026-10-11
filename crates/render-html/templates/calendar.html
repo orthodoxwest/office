@@ -26,7 +26,7 @@
   {% set theme = "" %}
   <div class="calendar-header" id="calendar-top">
     <div class="calendar-title">
-      {{ headpiece(true) }}
+      {{ headpiece() }}
       <h1>{{ year }} Ordo</h1>
       {# The frontispiece reads as the printed ordo's title page. #}
       <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
@@ -71,6 +71,9 @@
   <div class="calendar-tools">
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
   <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
+  {# A phone never shows the rank cells' titles, so the key spells them out,
+       each in the ink its days are set in. #}
+  <p class="calendar-legend calendar-ranks"><span class="sr-only">Ranks: </span>{% for abbr, name in [("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"), ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria")] %}<span class="rank-key"><span class="rank-key-abbr{% if abbr in ["1cl", "2cl", "gd"] %} is-greater{% elif abbr == "d" %} is-double{% endif %}">{{ abbr }}</span> {{ name }}</span>{% if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>
   </div>
   {% for m in months %}
   <section class="month" id="{{ m.slug }}">
@@ -90,7 +93,7 @@
       </thead>
       <tbody>
         {% for d in m.days %}
-        <tr class="day {{ d.color_class }}" id="d-{{ d.date_slug }}">
+        <tr class="day {{ d.color_class }}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
           <td class="day-num" data-label="Day"><a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
           <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
           <td class="day-feast" data-label="Feast">
@@ -101,14 +104,17 @@
                 <span class="day-mobile-weekday">{{ d.weekday }}</span>
               </a>
               <span class="day-mobile-flags">
-                {# aria-label is not allowed on a bare span; name these the
-                     way the wide-table cells below do. #}
-                {% if d.fast %}<span class="day-mobile-flag"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></span>{% endif %}
-                {% if d.abstinence %}<span class="day-mobile-flag">{{ fish() }}<span class="sr-only">Abstinence</span></span>{% endif %}
+                {# aria-label is not allowed on an abbr; name these the way
+                     the wide-table cells below do. Each mark, like the rank,
+                     spells itself out on hover, focus or a tap. #}
+                {% if d.fast %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}
+                {% if d.abstinence %}<abbr class="day-mobile-flag" tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
             <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
+            {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
+            {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# On cards both disclosures share one line; see .day-disclosures. #}
             <div class="day-disclosures">
             {% if d.commemorations %}<details class="day-commemorations"><summary>{{ d.commemorations|length }} commemoration{% if d.commemorations|length > 1 %}s{% endif %}</summary>{% for c in d.commemorations %}<span class="day-commemoration">{{ c|typeset }}</span>{% endfor %}</details>{% endif %}
@@ -150,8 +156,8 @@
             {% endif %}
             </div>
           </td>
-          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{% endif %}</td>
-          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}{{ fish() }}<span class="sr-only">Abstinence</span>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<abbr tabindex="0" title="Day of Fasting"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></abbr>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}<abbr tabindex="0" title="Day of Abstinence">{{ fish() }}<span class="sr-only">Abstinence</span></abbr>{% endif %}</td>
           <td class="day-rank" data-label="Rank">{% if d.rank_full %}<abbr tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}{{ d.rank }}{% endif %}</td>
         </tr>
         {% endfor %}

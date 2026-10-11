@@ -62,13 +62,21 @@ fn is_closing_punct(c: char) -> bool {
     ".,;:!?)]}’”".contains(c)
 }
 
-/// Title-cases a leading run of ALL-CAPS words so a drop cap takes only the
-/// initial: "GOD be merciful" → "God be merciful". A single capital ("O",
-/// "I") is a whole word and stays as it is.
+/// Names that keep their capital when an opening's ALL-CAPS run is softened:
+/// "MY GOD, my God" → "My God, my God", "IN JEWRY is God known" → "In Jewry".
+const PROPER_IN_OPENINGS: &[&str] = &["LORD", "GOD", "JEWRY", "ISRAEL", "JACOB", "SION", "JERUSALEM", "DAVID", "CHRIST", "JESUS"];
+
+/// Sentence-cases a leading run of ALL-CAPS words so a drop cap takes only the
+/// initial: "GOD be merciful" → "God be merciful", "MY SOUL cleaveth" →
+/// "My soul cleaveth". The Psalter sets its first two words in capitals; only
+/// the first keeps one, since a title-cased second word ("My Soul", "It Is")
+/// reads as a misprint beside the ornamented initial. A single capital ("O",
+/// "I") is a whole word and stays as it is, and names keep their capital.
 pub fn soften_drop_cap_opening(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut changed = false;
     let mut rest = s;
+    let mut first_word = true;
     loop {
         let ws = rest.len() - rest.trim_start().len();
         out.push_str(&rest[..ws]);
@@ -90,7 +98,13 @@ pub fn soften_drop_cap_opening(s: &str) -> String {
         }
         if letters.chars().count() >= 2 {
             let mut chars = letters.chars();
-            out.push(chars.next().expect("non-empty"));
+            let keep_initial = first_word || PROPER_IN_OPENINGS.contains(&letters);
+            let initial = chars.next().expect("non-empty");
+            if keep_initial {
+                out.push(initial);
+            } else {
+                out.extend(initial.to_lowercase());
+            }
             for c in chars {
                 // Use Unicode simple lowercase, mapping one character to one character.
                 let mut lower = c.to_lowercase();
@@ -104,6 +118,7 @@ pub fn soften_drop_cap_opening(s: &str) -> String {
         } else {
             out.push_str(word);
         }
+        first_word = false;
         rest = &rest[end..];
     }
     if changed { out } else { s.to_string() }

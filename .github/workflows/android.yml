@@ -44,11 +44,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      # Secrets can't be tested in a step's condition; whether the upload key is set can.
+      HAS_UPLOAD_KEY: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' }}
     outputs:
       version: ${{ steps.version.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The version code counts commits, so the preview needs full history.
           fetch-depth: 0
@@ -72,7 +75,7 @@ jobs:
           tool: cargo-ndk
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -81,22 +84,44 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" "platforms;android-36" > /dev/null
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build the APK and render screenshots
         working-directory: apps/android
         run: ./gradlew --console=plain assemblePreview testDebugUnitTest
 
+      # A manual run with the upload key also builds the store bundle (apps/android/README.md).
+      - name: Build the store bundle
+        id: bundle
+        if: github.event_name == 'workflow_dispatch' && env.HAS_UPLOAD_KEY == 'true'
+        working-directory: apps/android
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          OFFICE_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          OFFICE_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          export OFFICE_UPLOAD_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          trap 'rm -f "$OFFICE_UPLOAD_KEYSTORE"' EXIT
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$OFFICE_UPLOAD_KEYSTORE"
+          ./gradlew --console=plain bundleRelease
+
+      - uses: actions/upload-artifact@v7
+        if: steps.bundle.outcome == 'success'
+        with:
+          name: office-release-aab
+          path: apps/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
       - name: Name the APK
         run: cp apps/android/app/build/outputs/apk/preview/app-preview.apk office-preview.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: office-preview-apk
           path: office-preview.apk
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: android-screenshots
@@ -112,7 +137,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: office-preview-apk
 

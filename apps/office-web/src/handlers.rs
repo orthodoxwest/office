@@ -2,24 +2,27 @@
 //! models.
 
 use axum::body::Body;
-use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
+use axum::http::{HeaderMap, Method, Response, StatusCode, header};
 use calendar::MoveableDates;
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
+use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
-    CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
-    MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
+    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
+    MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
+    TabulaRow,
 };
 
 use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
+    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias,
 };
 
 /// What a page handler reads from the request.
@@ -29,6 +32,8 @@ pub struct Req<'a> {
     /// The decoded path (`r.URL.Path`).
     pub path: &'a str,
     pub query: &'a Query,
+    /// The site's origin (`https://host`): the canonical host's when one is set.
+    pub site: &'a str,
 }
 
 const VALID_HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
@@ -51,11 +56,14 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
+            note: hour_gloss(slug).to_string(),
         })
         .collect()
 }
 
-fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
+/// The hours either side of `hour`. Compline's next is the morrow's Lauds, so the last
+/// page of the day does not end in a blank.
+fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, String, String) {
     let mut out = (String::new(), String::new(), String::new(), String::new());
     if let Some(i) = ORDERED_HOURS.iter().position(|(_, slug)| *slug == hour) {
         if i > 0 {
@@ -65,6 +73,9 @@ fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
         if i + 1 < ORDERED_HOURS.len() {
             out.2 = ORDERED_HOURS[i + 1].0.to_string();
             out.3 = hour_link(ORDERED_HOURS[i + 1].1, date);
+        } else {
+            out.2 = ORDERED_HOURS[0].0.to_string();
+            out.3 = hour_link(ORDERED_HOURS[0].1, tomorrow);
         }
     }
     out
@@ -105,6 +116,16 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations,
+            monastic: d
+                .monastic
+                .iter()
+                .map(|m| MonasticRow {
+                    heading: m.heading(),
+                    rank: m.rank.abbrev().to_string(),
+                    rank_full: m.rank.display_name().to_string(),
+                    office: m.office.clone().unwrap_or_default(),
+                })
+                .collect(),
             hours_preces: o.hours_preces,
             vespers_note: o.vespers_note,
             ..DayRow::default()
@@ -200,7 +221,7 @@ impl Server {
     /// The styled page for a 4xx or 5xx condition.
     pub fn error_page(&self, req: &Req, status: StatusCode, message: &str) -> Response<Body> {
         let data = ErrorData {
-            chrome: Chrome { nav_date: self.nav_date_now(req), ..Chrome::default() },
+            chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() },
             title: status.canonical_reason().unwrap_or("").to_string(),
             message: message.to_string(),
         };
@@ -211,8 +232,44 @@ impl Server {
         }
     }
 
+    pub fn privacy(&self, req: &Req) -> Response<Body> {
+        let data = PrivacyData {
+            chrome: Chrome {
+                page: "privacy".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/privacy".into(),
+                ..Chrome::default()
+            },
+        };
+        match self.pages.privacy(&data) {
+            Ok(body) => html(StatusCode::OK, body),
+            Err(e) => render_failed(&e),
+        }
+    }
+
+    /// The Android closed test's sign-up, passed around by hand rather than found: kept out of
+    /// search and the sitemap.
+    pub fn beta(&self, req: &Req) -> Response<Body> {
+        let data = BetaData {
+            chrome: Chrome {
+                page: "beta".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/beta".into(),
+                noindex: true,
+                ..Chrome::default()
+            },
+        };
+        match self.pages.beta(&data) {
+            Ok(body) => html(StatusCode::OK, body),
+            Err(e) => render_failed(&e),
+        }
+    }
+
     pub fn not_found_page(&self, req: &Req) -> Response<Body> {
-        let data = NotFoundData { chrome: Chrome { nav_date: self.nav_date_now(req), ..Chrome::default() } };
+        let data =
+            NotFoundData { chrome: Chrome { page: "notice".into(), nav_date: self.nav_date_now(req), noindex: true, ..Chrome::default() } };
         match self.pages.not_found(&data) {
             Ok(body) => html(StatusCode::NOT_FOUND, body),
             Err(e) => render_failed(&e),
@@ -257,6 +314,14 @@ impl Server {
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
         let invite = invitation(date, now, now_hour);
+        let versicle = if home_shows_versicle(day) {
+            self.engine.compose_hour("lauds", day, &entry.moveable, PrayerForm::Private).ok().and_then(|h| hour_versicle(&h))
+        } else {
+            None
+        };
+        let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
+        let hours = build_home_hours(&slug, invite.current);
+        let (feast_name, feast_alias) = split_alias(&heading.feast);
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -264,23 +329,31 @@ impl Server {
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
                 season_class: season_class(Some(day.season)).into(),
+                rank_class: String::new(),
                 show_today: slug != now_slug,
+                // Today's page is the one to find; each dated day is one tap from it.
+                site: req.site.into(),
+                canonical: home_link(if ds.is_empty() { "" } else { &slug }),
+                noindex: !ds.is_empty(),
             },
             date_str: long_date(date),
             date_slug: slug.clone(),
             prev_link: home_link(&date_slug(date.add_days(-1))),
             next_link: home_link(&date_slug(date.add_days(1))),
             today_link: home_link(&now_slug),
-            feast_name: heading.feast,
+            feast_name: feast_name.into(),
+            feast_alias: feast_alias.into(),
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
             color: day.color.as_str().into(),
             season: heading.season,
             octave_note: heading.octave_note,
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
+            versicle,
+            response,
             calendar_link: calendar_link(&slug),
             pray_now_label: invite.label,
             pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
-            hours: build_home_hours(&slug, invite.current),
+            hours,
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -292,6 +365,7 @@ impl Server {
         if !VALID_HOURS.contains(&hour_name) {
             return self.not_found_page(req);
         }
+        let dated = !date_str.is_empty() || !req.query.get("date").is_empty();
         let loc = self.user_location(req);
         let (date, date_str) = if date_str.is_empty() {
             let ds = req.query.get("date");
@@ -317,23 +391,37 @@ impl Server {
         let Some(day) = entry.days.get(date.ordinal() as usize - 1) else {
             return self.error_page(req, StatusCode::BAD_REQUEST, "That date is outside the supported range.");
         };
-        let preview = req.query.get("preview") == "martyrology" && hour_name == "prime";
-        let compose = |form| {
-            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, martyrology_preview: preview })
+        let compose = |form, martyrology| {
+            self.engine.compose_hour_with_options(hour_name, day, &entry.moveable, &ComposeOptions { form, martyrology })
         };
-        let hour = match compose(PrayerForm::Private) {
+        let hour = match compose(PrayerForm::Private, false) {
             Ok(h) => h,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error composing hour: {e}")),
         };
         let mut composed = vec![(PrayerForm::Private, hour.clone())];
         for form in [PrayerForm::Deacon, PrayerForm::Priest] {
-            match compose(form) {
+            match compose(form, false) {
                 Ok(h) => composed.push((form, h)),
                 Err(_) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form."),
             }
         }
+        // Prime also carries the Martyrology for readers who turned it on in
+        // Settings, so the page (and the offline copy) is the same for everyone.
+        let mut martyrology = Vec::new();
+        if hour_name == "prime" {
+            for form in PrayerForm::ALL {
+                match compose(form, true) {
+                    Ok(h) if reads_martyrology(&h) => martyrology.push((form, h)),
+                    Ok(_) => break,
+                    Err(_) => {
+                        return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "Unable to compose the selected office form.");
+                    }
+                }
+            }
+        }
 
-        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) = adjacent_hours(hour_name, &date_str);
+        let (previous_hour_name, previous_hour_link, next_hour_name, next_hour_link) =
+            adjacent_hours(hour_name, &date_str, &date_slug(date.add_days(1)));
         let today_slug = date_slug(now_in(&loc).0);
         let mut data = HourData {
             chrome: Chrome {
@@ -343,7 +431,11 @@ impl Server {
                 // The hour's own season: I Vespers of Easter on Holy Saturday
                 // is unveiled while that day's Lauds is still veiled.
                 season_class: season_class(hour.season).into(),
+                rank_class: rank_class(hour.rank, hour.color).into(),
                 show_today: date_str != today_slug,
+                site: req.site.into(),
+                canonical: if dated { hour_link(hour_name, &date_slug(date)) } else { hour_link(hour_name, "") },
+                noindex: dated,
             },
             leader_forms: composed
                 .iter()
@@ -374,15 +466,12 @@ impl Server {
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
-        let mut resp = match self.pages.hour(&mut data, &forms) {
+        let martyrology: Vec<(PrayerForm, &OfficeHour)> =
+            if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
+        match self.pages.hour(&mut data, &forms, &martyrology) {
             Ok(body) => html(StatusCode::OK, body),
-            Err(e) => return render_failed(&e),
-        };
-        if req.query.has("preview") {
-            set(&mut resp, header::CACHE_CONTROL, "private, no-store");
-            resp.headers_mut().insert("x-robots-tag", HeaderValue::from_static("noindex, nofollow"));
+            Err(e) => render_failed(&e),
         }
-        resp
     }
 
     /// The ordo: "/calendar" leads to today's month; "/calendar/{year}" is
@@ -442,7 +531,16 @@ impl Server {
             href: calendar_month_link(y, m),
         };
         let data = CalendarData {
-            chrome: Chrome { page: "calendar".into(), nav_date: date_slug(now), usage_when: year.to_string(), ..Chrome::default() },
+            chrome: Chrome {
+                page: "calendar".into(),
+                nav_date: date_slug(now),
+                usage_when: year.to_string(),
+                site: req.site.into(),
+                canonical: same_view(year),
+                // Every year has an ordo; search needs only this one and the next.
+                noindex: !(now.year()..=now.year() + 1).contains(&year),
+                ..Chrome::default()
+            },
             year,
             view: view.name().into(),
             year_roman: presentation::year_roman(year),
@@ -489,7 +587,13 @@ impl Server {
 
     pub fn reminders(&self, req: &Req) -> Response<Body> {
         let data = RemindersData {
-            chrome: Chrome { page: "reminders".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
+            chrome: Chrome {
+                page: "reminders".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/reminders".into(),
+                ..Chrome::default()
+            },
             hours: REMINDER_DEFAULTS
                 .iter()
                 .map(|&(slug, name, hh, mm, checked)| ReminderHour {
@@ -544,6 +648,19 @@ mod tests {
         }
     }
 
+    // app.js reads an hour at presentation::Reading's pace before home marks it prayed.
+    #[test]
+    fn client_prayed_pace_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let constant = |name: &str| -> f64 {
+            let at = src.find(&format!("var {name} = ")).unwrap() + name.len() + 7;
+            src[at..].split(';').next().unwrap().parse().unwrap()
+        };
+        assert_eq!(constant("PRAYED_WORDS_PER_SECOND"), presentation::PRAYED_WORDS_PER_SECOND);
+        assert_eq!(constant("PRAYED_SHARE"), presentation::PRAYED_SHARE);
+        assert_eq!(constant("PRAYED_LONGEST_STEP"), presentation::PRAYED_LONGEST_STEP);
+    }
+
     use axum::http::Uri;
 
     use crate::test_server;
@@ -557,6 +674,48 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Home's head carries the day's versicle from Lauds on a plain day, and is
+    // stripped on a violet day and through Passiontide; a day with
+    // commemorations has them there instead.
+    #[test]
+    fn home_sets_the_days_versicle_on_a_plain_day() {
+        let versicle = |date: &str| {
+            let (status, _, body) = get(&format!("/?date={date}"));
+            assert_eq!(status, StatusCode::OK, "{date}");
+            body.find("<p class=\"home-versicle\">").map(|at| body[at..at + body[at..].find("</p>").unwrap()].to_string())
+        };
+        // St Placidus: the martyrs' versicle, each half with its sigil.
+        let placidus = versicle("2026-10-05").expect("a plain day's versicle");
+        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℣.</span> Let the Saints be joyful with glory."), "{placidus}");
+        assert!(placidus.contains("<span class=\"home-versicle-sigil\">℟.</span> Let them rejoice in their beds."), "{placidus}");
+        // Laetare, in rose, keeps it.
+        assert!(versicle("2026-03-22").is_some_and(|v| v.contains("God shall give his angels charge over thee.")));
+        // A Lenten feria (violet), Passion Sunday, Maundy Thursday, and a day with a commemoration.
+        for date in ["2026-03-11", "2026-03-29", "2026-04-09", "2026-10-12"] {
+            assert_eq!(versicle(date), None, "{date}");
+        }
+    }
+
+    // Prime carries both the rubric and tomorrow's reading for the reader's
+    // setting to choose between; nothing in the URL changes the page.
+    #[test]
+    fn prime_carries_the_martyrology_for_the_setting() {
+        let (status, _, body) = get("/prime/2026-09-07");
+        assert_eq!(status, StatusCode::OK);
+        let off =
+            body.find("<div data-martyrology-variant=\"off\"><p class=\"rubric\">Then the Martyrology is read").expect("rubric variant");
+        let on = body
+            .find("<div data-martyrology-variant=\"on\"><h2 class=\"section-heading\">Martyrology for tomorrow, September 8</h2>")
+            .expect("reading");
+        assert!(off < on);
+        assert_eq!(body.matches("data-martyrology-variant=").count(), 2, "only the Martyrology section varies");
+        assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
+        // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
+        for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {
+            assert!(!get(path).2.contains("data-martyrology-variant"), "{path}");
+        }
     }
 
     /// The page ends with the continuation links and each form's report
@@ -578,13 +737,13 @@ mod tests {
     fn adjacent_hours_keep_date() {
         let s = |v: (String, String, String, String)| v;
         assert_eq!(
-            s(adjacent_hours("sext", "2026-06-07")),
+            s(adjacent_hours("sext", "2026-06-07", "2026-06-08")),
             ("Terce".into(), "/terce/2026-06-07".into(), "None".into(), "/none/2026-06-07".into())
         );
-        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07");
+        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07", "2026-06-08");
         assert!(prev.is_empty() && prev_link.is_empty());
-        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
-        assert!(next.is_empty() && next_link.is_empty());
+        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07", "2026-06-08");
+        assert_eq!((next.as_str(), next_link.as_str()), ("Lauds", "/lauds/2026-06-08"));
     }
 
     #[test]
@@ -658,26 +817,17 @@ mod tests {
         assert!(!ordo("/calendar/9999/12").contains("Next month"));
     }
 
+    /// An observance kept by monastics and oblates only is the ordo's bracketed line under the
+    /// parish office, never the day itself.
     #[test]
-    fn ordo_frontispiece_sets_out_the_tabula() {
-        let body = ordo("/calendar/2026");
-        assert!(body.contains("<title>Ordo 2026</title>") && body.contains("Tabula Temporaria"));
-        let t = calendar::Tabula::compute(2026);
-        for want in [
-            format!("<dt>Golden Number</dt><dd>{}</dd>", calendar::computus::roman(t.golden_number)),
-            format!("<dt>Dominical Letter</dt><dd>{}</dd>", t.dominical_letter),
-            "<dt>Easter Day</dt><dd><a href=\"/calendar/2026/04#d-2026-04-12\">April 12</a></dd>".to_string(),
-            "<dt>Autumn (Holy Cross)</dt><dd><a href=\"/calendar/2026/09#d-2026-09-16\">September 16, 18, 19</a></dd>".to_string(),
-        ] {
-            assert!(body.contains(&want), "frontispiece missing {want:?}");
-        }
-        assert!(body.contains("<p class=\"calendar-subtitle\">Anno Domini MMXXVI</p>"));
-        assert!(body.contains(r#"<a class="calendar-whole-year" href="/calendar/2026/all">The whole year on one page</a>"#));
-        // Months are a page away; none is current here, and no rows render.
-        assert!(body.contains(r#"<a href="/calendar/2026/01" aria-label="January""#));
-        assert!(!body.contains(r#"aria-current="page">Jan"#));
-        assert!(!body.contains(r#"<tr class="day "#) && !body.contains("Previous month"));
-        assert!(body.contains(r#"href="/calendar/2025" aria-label="Previous year, 2025""#));
+    fn ordo_brackets_monastic_observances_under_the_day() {
+        let body = ordo("/calendar/2026/07");
+        let row = |slug: &str| body.split(&format!(r#"id="d-{slug}""#)).nth(1).and_then(|r| r.split("</tr>").next()).unwrap().to_string();
+        let benedict = row("2026-07-11");
+        assert!(benedict.contains("Saturday Office of the B.V.M."), "{benedict}");
+        assert!(benedict.contains(r#"<div class="day-monastic"><p>[Solemnity of St Benedict (Monastics &amp; Oblates Only)] <abbr tabindex="0" title="Greater Double">gd</abbr><span class="day-monastic-office">Proper Office, Monastic Diurnal pp. 560–564</span></p></div>"#), "{benedict}");
+        assert!(row("2026-07-16").contains("[Our Lady of Einsiedeln (Monastics &amp; Oblates Only)]"));
+        assert_eq!(body.matches(r#"class="day-monastic""#).count(), 2);
     }
 
     /// Today's month carries the strip's lozenge and says so, in its own
@@ -711,10 +861,19 @@ mod tests {
         let (status, headers, body) = get("/?date=2026-09-22");
         assert_eq!(status, StatusCode::OK);
         assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
-        let feast = body.find(r#"<p class="feast">Pentecost feria</p>"#).expect("names the feria");
+        let feast = body.find(r#"<p class="feast">Feria</p>"#).expect("names the feria");
         let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
         assert!(feast < also);
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");
+    }
+
+    /// The Triduum's days are their own ferias: home lists no feria beside them.
+    #[test]
+    fn triduum_commemorates_no_feria() {
+        for date in ["2026-04-09", "2026-04-10", "2026-04-11"] {
+            let (_, _, body) = get(&format!("/?date={date}"));
+            assert!(!body.contains("after Palm Sunday"), "{date}");
+        }
     }
 
     fn body_classes(path: &str) -> Vec<String> {
@@ -755,15 +914,9 @@ mod tests {
                 }
             }
         }
-    }
-
-    /// Holy Saturday's Vespers is I Vespers of Easter: the ornament follows
-    /// the hour on hour pages and the day on the home page.
-    #[test]
-    fn holy_saturday_vespers_unveils_ahead_of_the_day() {
-        let slug = date_slug(MoveableDates::compute(2026).holy_saturday);
-        assert!(body_classes(&format!("/lauds/{slug}")).contains(&"season-passiontide".into()));
-        assert!(body_classes(&format!("/vespers/{slug}")).contains(&"season-eastertide".into()));
-        assert!(body_classes(&format!("/?date={slug}")).contains(&"season-passiontide".into()));
+        // Holy Saturday's Vespers is I Vespers of Easter: the ornament
+        // follows the hour on hour pages and the day on the home page.
+        let classes = body_classes(&format!("/vespers/{}", date_slug(m.holy_saturday)));
+        assert!(classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
     }
 }

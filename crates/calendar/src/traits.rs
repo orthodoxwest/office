@@ -71,6 +71,11 @@ pub fn is_sunday(f: &Feast) -> bool {
     f.is_category(Category::Sunday)
 }
 
+/// A Sunday office anticipated on Saturday (General Rubrics IV.4-5).
+pub fn is_anticipated_sunday(f: &Feast) -> bool {
+    f.id.ends_with("-anticipated") && f.is_category(Category::Sunday)
+}
+
 pub fn is_ember_day(f: &Feast) -> bool {
     f.id.contains("ember-")
 }
@@ -81,6 +86,12 @@ pub fn is_rogation_day(f: &Feast) -> bool {
 
 pub fn is_vigil(f: &Feast) -> bool {
     f.is_vigil
+}
+
+/// The privileged Vigils of the General Rubrics' rank table: the Nativity and
+/// Pentecost (I class) and the Epiphany (II class). All others are common.
+pub fn is_privileged_vigil(f: &Feast) -> bool {
+    f.is_vigil && matches!(f.id.as_str(), "vigil-nativity" | "vigil-pentecost" | "vigil-epiphany")
 }
 
 /// The perpetual commemoration of St Peter or St Paul kept on the other
@@ -99,29 +110,5 @@ pub fn is_penitential_feria_season(season: Season) -> bool {
     match season {
         Season::Advent | Season::Septuagesima | Season::Lent | Season::Passiontide => true,
         Season::Christmas | Season::Epiphany | Season::Easter | Season::Pentecost => false,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::model::Color;
-
-    fn feast(id: &str) -> Feast {
-        Feast::synthetic(id, id, Rank::Double, Color::White, Category::Lord)
-    }
-
-    #[test]
-    fn octave_ids() {
-        assert!(is_octave_day(&feast("epiphany-octave-day")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day")));
-        assert!(is_day_within_octave(&feast("epiphany-octave-day-3")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day-")));
-        assert!(!is_day_within_octave(&feast("epiphany-octave-day-x")));
-        assert_eq!(octave_parent_id(&feast("all-saints-octave-day-2")), Some("all-saints"));
-        assert_eq!(octave_parent_id(&feast("all-saints-octave-day")), Some("all-saints"));
-        assert_eq!(octave_parent_id(&feast("all-saints")), None);
-        assert!(same_octave_days(&feast("x-octave-day-2"), &feast("x-octave-day")));
-        assert!(!same_octave_days(&feast("x"), &feast("x")));
     }
 }

@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, report_issue %}
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block description %}{{ hour.title }} for {{ date_str }}{% if hour.feast %}: {{ hour.feast|typeset }}{% endif %}. The Benedictine Divine Office of the Antiochian Western Rite Vicariate.{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
@@ -7,12 +7,14 @@
   {# The day's colour reaches the title's lozenge; the headpiece is set
        into the title's upper rule, as home and the ordo open their pages. #}
   <div class="hour-header day-color-{{ hour.color }}">
-    {{ headpiece(true) }}
+    {# Lauds is sung at sunrise and Vespers and Compline at its going down:
+         their headpieces carry the sun and the moon in place of the cross. #}
+    {{ headpiece("sun" if hour_name == "lauds" else ("moon" if hour_name in ["vespers", "compline"] else "")) }}
     <h1>{{ hour.title }}</h1>
     {# The no-break space holds each dot to the part before it, so a wrapped
          line never opens with a separator. #}
     {%- set season = hour.season|season_label %}
-    <p class="hour-meta"><span class="hour-meta-part">{{ date_str }}</span>{% if hour.feast %}&nbsp;&middot; <span class="hour-meta-part">{{ hour.feast|typeset }}</span>{% endif %}{% if season %}&nbsp;&middot; <span class="hour-meta-part">{{ season }}</span>{% endif %}</p>
+    <p class="hour-meta"><span class="hour-meta-part">{{ date_str }}</span>{% if hour.feast %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ hour.feast|typeset }}</span>{% endif %}{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
@@ -54,15 +56,18 @@
   </div>
   <div class="elements">
     {% if leader_forms %}
+    {#- A section the Martyrology changes carries both readings; the reader's
+         Settings choice (data-martyrology on the root) shows one. #}
+    {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
       <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
         <summary>{{ section.label }}</summary>
-        <div class="session-prayers-content">{{ section.html|safe }}</div>
+        <div class="session-prayers-content">{{ leader_section_html(section) }}</div>
       </details>
       {% else %}
       {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
-      {{ section.html|safe }}
+      {{ leader_section_html(section) }}
       {% endif %}
     {% endfor %}
     {% else %}
@@ -83,15 +88,19 @@
        where the vault may fade in around the administrative epilogue without
        ever sitting behind liturgical text. #}
   <div class="hour-epilogue">
+    <span class="hour-end-mark" aria-hidden="true"></span>
     <nav class="hour-continuation" aria-label="Other hours for this day">
       {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
-      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">Next hour</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">{{ "Tomorrow" if hour_name == "compline" else "Next hour" }}</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
     </nav>
-    {# Each form's report names that form's page. #}
+  </div>
+</div>
+{% endblock %}
+{# The report line is footer matter, under the tailpiece. Each form's
+     report names that form's page. #}
+{% block footer_matter %}{% from "macros.html" import report_issue %}
     {% if leader_forms %}
     {% for f in leader_forms %}<div data-leaders="{{ f.form }}">{{ report_issue(f.report_url) }}</div>{% endfor %}
     {% else %}{{ report_issue(report_url) }}{% endif %}
-  </div>
-</div>
 {% endblock %}

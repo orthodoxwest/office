@@ -144,7 +144,7 @@ def target_section(row: dict) -> str:
 def representative_url(row: dict) -> str:
     date = row.get("date", "")
     hour = row.get("hour", "")
-    return f"https://office.fly.dev/{hour}/{date}" if date and hour else ""
+    return f"https://orthodoxwestbreviary.com/{hour}/{date}" if date and hour else ""
 
 
 def build_dossiers(inventory: dict, catalog: dict[str, dict],

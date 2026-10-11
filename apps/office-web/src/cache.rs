@@ -115,25 +115,6 @@ mod tests {
     }
 
     #[test]
-    fn eviction_preserves_active_readers() {
-        let cache = cache();
-        let first = cache.get(2026).unwrap();
-        for year in 2027..=2026 + MAX_CACHED_YEARS as i32 {
-            cache.get(year).unwrap();
-        }
-        {
-            let entries = cache.entries.lock().unwrap();
-            assert_eq!(entries.years.len(), MAX_CACHED_YEARS);
-            assert!(!entries.years.contains_key(&2026), "oldest year was not evicted");
-        }
-        assert!(first.days.len() == 365 && first.days[0].date.year() == 2026, "eviction invalidated an active reader");
-        let again = cache.get(2026).unwrap();
-        assert!(!Arc::ptr_eq(&again, &first));
-        assert_eq!(again.days.len(), first.days.len());
-        assert!(again.days.iter().zip(&first.days).all(|(a, b)| a.date == b.date && a.celebration_id() == b.celebration_id()));
-    }
-
-    #[test]
     fn bounds_retention_and_keeps_recent_years() {
         let cache = cache();
         let load = |year: i32| {

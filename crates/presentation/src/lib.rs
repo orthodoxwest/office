@@ -1,11 +1,13 @@
 //! How the Office is named on every front: the web and the native apps set it in their own
 //! type, but read the same words from here. A day's name and heading, a season's, a date's; the
-//! office being prayed at a clock hour and home's invitation to it; and the prefilled "Report a
-//! problem" issue. Pure functions of the calendar and the composed hour: no templates, no
-//! platform, and nothing that composes an hour.
+//! office being prayed at a clock hour and home's invitation to it; the prefilled "Report a
+//! problem" issue; and the usage beacon's vocabulary ([`usage`]). Pure functions of the calendar
+//! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
-use calendar::{CalendarDay, Date, Season};
-use liturgy::OfficeHour;
+pub mod usage;
+
+use calendar::{CalendarDay, Color, Date, Rank, Season};
+use liturgy::{ElementType, OfficeHour};
 
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
@@ -26,6 +28,18 @@ pub fn season_class(season: Option<Season>) -> &'static str {
     }
 }
 
+/// The body class that frames a first-class feast's hour, or nothing. The ranking gives the
+/// penitential days of the first class the same rank for precedence (the Sundays of Lent, Ash
+/// Wednesday, Holy Week, the vigils), so the frame goes by the day's colour as well: a violet or
+/// black first-class day is kept, not kept festival.
+pub fn rank_class(rank: Option<Rank>, color: Option<Color>) -> &'static str {
+    match (rank, color) {
+        (Some(Rank::Double1stClass), Some(Color::Violet | Color::Black)) => "",
+        (Some(Rank::Double1stClass), _) => "rank-first-class",
+        _ => "",
+    }
+}
+
 /// The season as an hour header names it, or nothing. A bare "Easter",
 /// "Christmas", "Epiphany" or "Pentecost" beside a date reads as that feast
 /// day, so the tides take their season names. The season after Pentecost is
@@ -43,7 +57,8 @@ pub fn season_label(season: &str) -> String {
 }
 
 /// The day's display name, as home and the ordo name it: its celebration,
-/// else its temporal title, else the season's feria.
+/// else its temporal title, else the season's feria. After Pentecost it is plain "Feria", as the
+/// ordo prints it: "Pentecost feria" under an October date reads as the feast's week.
 pub fn day_name(day: &CalendarDay) -> String {
     if let Some(c) = &day.celebration {
         return c.name.clone();
@@ -51,7 +66,27 @@ pub fn day_name(day: &CalendarDay) -> String {
     if let Some(t) = &day.tempora {
         return t.clone();
     }
+    if day.season == Season::Pentecost {
+        return "Feria".into();
+    }
     format!("{} feria", title_case(day.season.as_str()))
+}
+
+/// A day's name parted from the familiar name the ordo gives after it in
+/// parentheses: "The Feast of the Most Holy Body of Christ (Corpus Christi)"
+/// is the name and "(Corpus Christi)". A parenthesis inside the name
+/// ("Ss Fabian (Bishop) & Sebastian, Martyrs") is a qualifier, not an
+/// alias, and stays put. The alias is empty when the name has none.
+pub fn split_alias(name: &str) -> (&str, &str) {
+    let name = name.trim_end();
+    let Some(open) = name.strip_suffix(')').and_then(|inner| inner.rfind(" (")) else {
+        return (name, "");
+    };
+    let alias = &name[open + 1..];
+    if alias[1..alias.len() - 1].contains(['(', ')']) {
+        return (name, "");
+    }
+    (&name[..open], alias)
 }
 
 /// Home's heading for a day.
@@ -62,7 +97,8 @@ pub struct DayHeading {
     /// "Octave of …" within an octave the name does not already mention; the
     /// ordo carries the full wording.
     pub octave_note: String,
-    /// The season's name, empty when the celebration already names it.
+    /// The season's name as [`season_label`] gives it, empty when the celebration already
+    /// names it or the season goes unnamed (after Pentecost).
     pub season: String,
 }
 
@@ -73,11 +109,36 @@ pub fn day_heading(day: &CalendarDay) -> DayHeading {
         Some(id) if !id.is_empty() && !lower.contains("octave") => format!("Octave of {}", calendar::builder::octave_display_name(id)),
         _ => String::new(),
     };
-    let mut season = title_case(day.season.as_str());
-    if !season.is_empty() && lower.contains(&season.to_lowercase()) {
-        season.clear();
-    }
+    // Named as the hour header names it ([`season_label`]): a bare "Pentecost" or "Easter"
+    // under an October or April date reads as that feast day. Still left out when the day's
+    // own name already says it ("Easter Day", "Monday in Easter Week").
+    let raw = day.season.as_str();
+    let season = if !raw.is_empty() && lower.contains(raw) { String::new() } else { season_label(raw) };
     DayHeading { feast, octave_note, season }
+}
+
+/// Whether home's head carries the day's versicle. A church is stripped through Passiontide
+/// whatever the colour, and on the violet days of Advent, Septuagesima and Lent, the Ember days
+/// and vigils (and the black ones); a feast within those seasons keeps its versicle, as it keeps
+/// its flowers, and so do Gaudete and Laetare in rose. A day with commemorations already fills
+/// the head with them.
+pub fn home_shows_versicle(day: &CalendarDay) -> bool {
+    day.season != Season::Passiontide && !matches!(day.color, Color::Violet | Color::Black) && day.commemorations.is_empty()
+}
+
+/// A versicle and its response, without their ℣. and ℟.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Versicle {
+    pub versicle: String,
+    pub response: String,
+}
+
+/// The versicle after the hymn in a composed Lauds or Vespers.
+pub fn hour_versicle(hour: &OfficeHour) -> Option<Versicle> {
+    let el = hour.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle")?;
+    let line =
+        |sigil: &str| el.text.lines().find_map(|l| l.trim().strip_prefix(sigil).map(|t| t.trim().to_string())).filter(|t| !t.is_empty());
+    Some(Versicle { versicle: line("V.")?, response: line("R.")? })
 }
 
 pub const MONTHS: [&str; 12] =
@@ -132,6 +193,56 @@ pub struct Invitation {
     /// The hour home's directory marks as now; empty when the invitation is
     /// not to this day's office.
     pub current: &'static str,
+}
+
+/// What an hour is, for a newcomer reading home's invitation: "Evening prayer".
+pub fn hour_gloss(slug: &str) -> &'static str {
+    match slug {
+        "lauds" => "Morning praise",
+        "prime" => "Prayer as work begins",
+        "terce" => "Mid-morning prayer",
+        "sext" => "Midday prayer",
+        "none" => "Afternoon prayer",
+        "vespers" => "Evening prayer",
+        "compline" => "Prayer before sleep",
+        _ => "",
+    }
+}
+
+/// How fast home's mark of an hour prayed lets a reader go: words a second, a quick silent
+/// reading (480 a minute), so a reader praying at any pace earns it and one scrolling through
+/// in seconds does not. app.js mirrors these three; office-web tests the two agree.
+pub const PRAYED_WORDS_PER_SECOND: f64 = 8.0;
+/// The share of an hour's words that must be read on screen: a reader may skip a psalm said
+/// by heart and still have prayed the hour.
+pub const PRAYED_SHARE: f64 = 0.7;
+/// The most one step of a reading counts, in seconds: a device that slept does not read.
+pub const PRAYED_LONGEST_STEP: f64 = 5.0;
+
+/// A reader's way through an hour's words, for home's mark of the hours prayed. Words are
+/// read in order, at no more than [`PRAYED_WORDS_PER_SECOND`], and only while on screen:
+/// words scrolled past unread stay unread, and time spent at the end does not read the
+/// beginning.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Reading {
+    /// How far through the hour's words reading has come.
+    pub cursor: f64,
+    /// How many words have been read.
+    pub read: f64,
+}
+
+impl Reading {
+    /// `seconds` more on the page, with the hour's words from `first` to `end` on screen.
+    pub fn advance(self, first: f64, end: f64, seconds: f64) -> Reading {
+        let cursor = self.cursor.max(first);
+        let step = (seconds.clamp(0.0, PRAYED_LONGEST_STEP) * PRAYED_WORDS_PER_SECOND).min(end - cursor).max(0.0);
+        Reading { cursor: cursor + step, read: self.read + step }
+    }
+
+    /// Whether the reader, now at the hour's end, has prayed its `total` words.
+    pub fn prayed(self, total: f64, at_end: bool) -> bool {
+        at_end && total > 0.0 && self.read >= total * PRAYED_SHARE
+    }
 }
 
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
@@ -296,6 +407,26 @@ mod tests {
     }
 
     #[test]
+    fn split_alias_parts_a_trailing_familiar_name_only() {
+        assert_eq!(
+            split_alias("The Feast of the Most Holy Body of Christ (Corpus Christi)"),
+            ("The Feast of the Most Holy Body of Christ", "(Corpus Christi)")
+        );
+        assert_eq!(split_alias("Saturday before Low Sunday (Sabbato in Albis)"), ("Saturday before Low Sunday", "(Sabbato in Albis)"));
+        assert_eq!(
+            split_alias("Commemoration of All the Faithful Departed (All Souls' Day)"),
+            ("Commemoration of All the Faithful Departed", "(All Souls' Day)")
+        );
+        assert_eq!(split_alias("Ss Fabian (Bishop) & Sebastian, Martyrs"), ("Ss Fabian (Bishop) & Sebastian, Martyrs", ""));
+        assert_eq!(
+            split_alias("Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs"),
+            ("Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs", "")
+        );
+        assert_eq!(split_alias("Christmas feria"), ("Christmas feria", ""));
+        assert_eq!(split_alias("(Resumed)"), ("(Resumed)", ""));
+    }
+
+    #[test]
     fn season_label_names_tides_and_leaves_pentecost_unnamed() {
         assert_eq!(season_label("easter"), "Eastertide");
         assert_eq!(season_label("christmas"), "Christmastide");
@@ -308,6 +439,45 @@ mod tests {
         assert_eq!(season_label(""), "");
     }
 
+    fn bare_day(season: Season, tempora: &str) -> CalendarDay {
+        CalendarDay {
+            date: Date::new(2026, 10, 7),
+            season,
+            tempora: Some(tempora.into()),
+            celebration: None,
+            commemorations: Vec::new(),
+            color: season.color(),
+            notes: None,
+            resolution_rule: String::new(),
+            occurrence_decisions: Vec::new(),
+            feria_commemoration: None,
+            temporal_week_id: None,
+            within_octave_of: None,
+            penitential: Default::default(),
+            monastic: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn day_name_leaves_pentecost_off_a_plain_feria() {
+        let mut day = bare_day(Season::Pentecost, "");
+        day.tempora = None;
+        assert_eq!(day_name(&day), "Feria");
+        day.season = Season::Advent;
+        assert_eq!(day_name(&day), "Advent feria");
+    }
+
+    #[test]
+    fn day_heading_names_the_season_as_the_hours_do() {
+        // A bare "Pentecost" under an October date reads as the feast; the season after it goes unnamed.
+        assert_eq!(day_heading(&bare_day(Season::Pentecost, "Holy Rosary")).season, "");
+        assert_eq!(day_heading(&bare_day(Season::Easter, "St Mark")).season, "Eastertide");
+        assert_eq!(day_heading(&bare_day(Season::Lent, "St Joseph")).season, "Lent");
+        // A name that already says the season keeps it off the line.
+        assert_eq!(day_heading(&bare_day(Season::Easter, "Monday in Easter Week")).season, "");
+        assert_eq!(day_heading(&bare_day(Season::Lent, "III Sunday in Lent")).season, "");
+    }
+
     #[test]
     fn season_class_veils_passiontide_and_brightens_paschaltide() {
         assert_eq!(season_class(Some(Season::Passiontide)), "season-passiontide");
@@ -316,6 +486,18 @@ mod tests {
             assert_eq!(season_class(Some(s)), "", "{s:?}");
         }
         assert_eq!(season_class(None), "");
+    }
+
+    #[test]
+    fn rank_class_frames_only_first_class_feasts() {
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::White)), "rank-first-class");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Red)), "rank-first-class");
+        // The penitential first-class days (Lent's Sundays, Ash Wednesday, Good Friday) are not framed.
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Violet)), "");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Black)), "");
+        assert_eq!(rank_class(Some(Rank::Double2ndClass), Some(Color::White)), "");
+        assert_eq!(rank_class(Some(Rank::Simple), Some(Color::White)), "");
+        assert_eq!(rank_class(None, None), "");
     }
 
     #[test]
@@ -340,6 +522,38 @@ mod tests {
         assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
         assert_eq!(current_hour_entry(16), ("none", "None", 0));
         assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
+    }
+
+    #[test]
+    fn an_hour_is_prayed_only_when_read_at_a_praying_pace() {
+        let total = 1200.0;
+        // Scrolled to the end in three seconds, the first screen and the last read.
+        let quick = Reading::default().advance(0.0, 80.0, 1.0).advance(500.0, 600.0, 1.0).advance(1130.0, 1200.0, 1.0);
+        assert!(!quick.prayed(total, true));
+        // Left at the end: only the end's own words are read, however long.
+        let parked = (0..60).fold(Reading::default().advance(1130.0, 1200.0, 1.0), |r, _| r.advance(1130.0, 1200.0, 5.0));
+        assert_eq!(parked.read, 70.0);
+        assert!(!parked.prayed(total, true));
+        // A screen at a time, with a minute on each: prayed, but only once at the end.
+        let mut slow = Reading::default();
+        for screen in 0..12 {
+            let first = f64::from(screen) * 100.0;
+            for _ in 0..12 {
+                slow = slow.advance(first, first + 100.0, 5.0);
+            }
+        }
+        assert_eq!(slow.read, total);
+        assert!(slow.prayed(total, true) && !slow.prayed(total, false));
+        // A whole hour on one screen still takes reading time; a sleeping device counts five seconds.
+        let tall = Reading::default().advance(0.0, total, 3600.0);
+        assert_eq!(tall.read, PRAYED_LONGEST_STEP * PRAYED_WORDS_PER_SECOND);
+        assert!(!Reading::default().prayed(0.0, true));
+    }
+
+    #[test]
+    fn every_hour_has_a_gloss_for_newcomers() {
+        assert_eq!(hour_gloss("vespers"), "Evening prayer");
+        assert!(["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].iter().all(|h| !hour_gloss(h).is_empty()));
     }
 
     #[test]

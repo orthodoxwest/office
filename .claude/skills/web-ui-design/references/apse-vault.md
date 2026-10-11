@@ -1,31 +1,42 @@
 # Apse vault implementation
 
 Read when changing the starfield, its masks, or post-office decoration.
-The existing design is a geometric diaper: crossed diagonal hairlines with
-principal stars at intersections and smaller stars at panel centres. The star
-shapes follow the parish apse: eight-ray principal stars (four long rays,
-four short diagonals) and small four-ray sparks.
+The field is the parish apse's painted vault: eight-ray stars (four long
+rays, four short diagonals) in three sizes, set by hand rather than on a
+lattice, each at its own opacity. A ribbed diaper with principal stars at the
+crossings came first and read as printed wallpaper.
 
-- The cell is one SVG data URL (`--apse-star-tile`) used as a **mask**, never
-  as a background image. The mask supplies only shape and alpha; the colour
-  is the pseudo-element's `background-color: var(--apse-ink)`, which is
-  `--ornament` in Apse and transparent in Nave. An SVG image cannot read
-  tokens, so painting it directly would freeze the stars through the seasons.
-  CSS gradients keep the colour too but cannot draw diagonal rays.
+- The tile is `ornaments/vault.svg` (`--apse-star-tile`), written by
+  `tools/genornaments.py` (seeded), used as a **mask**, never as a background
+  image. The mask supplies only shape and alpha; the colour is the
+  pseudo-element's `background-color`, painted through it. An SVG image
+  cannot read tokens, so painting it directly would freeze the stars
+  through the seasons. A star crossing the tile's edge is drawn again on
+  the far side, so the repeat is seamless.
+- Home's field and the hours' ending read `--wall-field`, `--wall-ink`,
+  `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-home-fade`,
+  `--wall-home-light`, `--wall-end-fade`, `--wall-foot-fade`), declared on
+  `body`: by night the vault (`--apse-vault`, `--apse-ink`, the seasonal
+  `--ornament`, `--apse-tile`, the leaf, soft fades), by day the Nave's
+  powdering (`ornaments/powder.svg`, one rosette to each cell of a 96×168px
+  quincunx tile that never scales, in `--rubric` at 12%, no leaf, square
+  cuts: under the beam at home, and below the hour navigation at the
+  ending, which lives in the epilogue's 3.25rem bottom padding and the
+  footer). The Nave gate mirrors the Apse one (`prefers-color-scheme:
+  light` with `:root:not([data-theme="dark"])`, and
+  `:root[data-theme="light"]`), and by day also sets `--apse-copy-shadow`
+  (the footer lettering's clearing) and `--niche-clear` (the desktop
+  niche's halo). The wide hours' side and ending fields read `--apse-vault`
+  directly, so by day the margins beside the prayer stay plain.
+  `--apse-gild` stays `none` by day: the rosettes are flat paint.
 - Each field's fade is a second mask layer (`linear-gradient`, sized 100%),
   intersected with the tile (`mask-composite: intersect` plus
   `-webkit-mask-composite: source-in`). Give both layers the tile's position
   so the phase reads the same on every layer.
-- Ribs run corner to corner and through the edge midpoints. Principal stars
-  sit at (25%,25%) and (75%,75%); smaller stars at (75%,25%) and (25%,75%).
-  Keep stars inside the cell, where no neighbour tile is needed to finish them.
-  The tile scales with `mask-size`, so star size scales with it. Every field
-  reads one `--apse-tile` from `body`: 132px on phones, 176px from 701px,
-  then 208px from 1800px and 240px from 2400px, so on very wide screens the
-  diaper reads as a painted ceiling rather than a wallpaper of small stars.
-  Keep the steps whole pixels; fractional tiles can seam. Each principal star carries a soft radial halo inside the
-  cell (28% at the centre, gone by 12 units), so the gold reads as catching
-  light; keep it interior to the cell like the stars.
+- Every field reads one `--apse-tile` from `body`: 528px on phones, 704px
+  from 701px, then 832px from 1800px and 960px from 2400px, so on very wide
+  screens the vault reads as a painted ceiling rather than a wallpaper of
+  small stars. Keep the steps whole pixels; fractional tiles can seam.
 - Every field adds `--apse-leaf` as a further mask layer: `leaf.png`, 64px
   of seamless low-frequency noise (`tools/genplaster --leaf`) drawn at
   1024px, so each star catches its own share of light (about 60-100%) as
@@ -48,8 +59,9 @@ four short diagonals) and small four-ray sparks.
   phone gutters retain a hint of stars. Separate gap/footer pieces previously
   shifted the visible pattern as content and viewport heights changed.
 - Hours admit the vault only in `.hour-epilogue`, after prayer. Keep the field
-  transparent through continuation links, fade in around the report link, and align
-  its bottom with the footer continuation. On desktop these layers bleed to
+  transparent through the end mark and the continuation links (it begins in
+  the epilogue's bottom padding), and align its bottom with the footer
+  continuation, which carries the colophon and the report line. On desktop these layers bleed to
   viewport edges without widening `.elements`. The stars sit straight on
   the wall, as home's do. A flat night ground once eased in beneath them
   (each host's outset `border-image`), but its fade banded (see below).
@@ -72,8 +84,10 @@ four short diagonals) and small four-ray sparks.
   plain and the ending scrolls. Below 1680px the margin holds a column of
   stars or less, which reads as an accident.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
-  band floating between blank margins. Keep the field static, and hide the
-  footer diamond where the vault already provides ornament.
+  band floating between blank margins. Keep the field static. The footer's
+  tailpiece (`footer::before`) sits on the field in both themes at one
+  geometry; `--apse-rest-seam` counts its height, so retune the seam if the
+  footer's height changes.
 - Software rasterization (headless Chromium, the snapshot tests, and any
   browser drawing without a GPU) truncates when it blends a feathered layer
   over a smooth dark field: a full-width fade steps down in one-level
@@ -81,8 +95,8 @@ four short diagonals) and small four-ray sparks.
   readers do meet software drawing, so Apse carries no full-width feathered
   flat layer over its wall: no softened prayer band and no ground under the
   epilogue. Star fields are safe, since their fades act only on sparse
-  shapes, and Nave's texture breaks the steps up. `ux.spec.js` measures
-  column and row stripes against the plain wall at the end of Lauds.
+  shapes, and Nave's texture breaks the steps up. Look for column and
+  row stripes against the plain wall at the end of Lauds by eye.
 - Measure paint cost when adding layers. An earlier 172-layer version cost
   roughly 600ms of extra first paint; one repeating tile stays within noise
   of a bare page. Check rendered pixels as well as valid CSS: sub-pixel

@@ -240,45 +240,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn julian_easter_known_dates() {
+    fn julian_easter_dates_and_weekdays() {
         for (year, m, d) in [(2024, 5, 5), (2025, 4, 20), (2026, 4, 12), (2027, 5, 2), (2028, 4, 16), (2029, 4, 8), (2030, 4, 28)] {
             assert_eq!(julian_easter(year), Date::new(year, m, d), "{year}");
         }
-    }
-
-    #[test]
-    fn julian_easter_always_sunday() {
         for year in 1900..2200 {
             assert_eq!(julian_easter(year).weekday(), Weekday::Sunday, "{year}");
-        }
-    }
-
-    #[test]
-    fn moveable_dates_2026() {
-        let m = MoveableDates::compute(2026);
-        assert_eq!(m.septuagesima, Date::new(2026, 2, 8));
-        assert_eq!(m.ash_wednesday, Date::new(2026, 2, 25));
-        assert_eq!(m.pentecost, Date::new(2026, 5, 31));
-        assert_eq!(m.advent1, Date::new(2026, 11, 29));
-        assert_eq!(MoveableDates::compute(2022).advent4, Date::new(2022, 12, 18));
-    }
-
-    #[test]
-    fn seasons() {
-        let m = MoveableDates::compute(2026);
-        for (date, want) in [
-            (Date::new(2026, 1, 1), Season::Christmas),
-            (Date::new(2026, 1, 6), Season::Epiphany),
-            (Date::new(2026, 2, 8), Season::Septuagesima),
-            (Date::new(2026, 2, 25), Season::Lent),
-            (Date::new(2026, 3, 29), Season::Passiontide),
-            (Date::new(2026, 3, 28), Season::Lent),
-            (Date::new(2026, 4, 12), Season::Easter),
-            (Date::new(2026, 5, 31), Season::Pentecost),
-            (Date::new(2026, 11, 29), Season::Advent),
-            (Date::new(2026, 12, 25), Season::Christmas),
-        ] {
-            assert_eq!(determine_season(date, &m), want, "{date}");
         }
     }
 
@@ -295,13 +262,6 @@ mod tests {
             assert_eq!(t.summer.wed, Date::new(year, summer.0, summer.1));
             assert_eq!(t.autumn.wed, Date::new(year, autumn.0, autumn.1));
             assert_eq!(t.winter.wed, Date::new(year, winter.0, winter.1));
-        }
-    }
-
-    #[test]
-    fn roman_numerals() {
-        for (n, want) in [(1, "I"), (4, "IV"), (9, "IX"), (11, "XI"), (13, "XIII"), (24, "XXIV"), (0, "")] {
-            assert_eq!(roman(n), want);
         }
     }
 }

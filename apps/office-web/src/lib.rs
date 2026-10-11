@@ -2,6 +2,7 @@
 //! templates, reminder feed, and optional usage store.
 
 mod cache;
+mod crawl;
 // build.rs trims and stamps the stylesheet with this module; the library
 // compiles it only to test it.
 #[cfg(test)]
@@ -9,6 +10,7 @@ mod css;
 mod handlers;
 mod http;
 mod ics;
+mod moved;
 pub mod pwa;
 pub mod usage;
 pub mod web_time;
@@ -38,6 +40,8 @@ pub struct Server {
     pages: Pages,
     version: String,
     usage: Option<Store>,
+    /// The host every other host forwards to; see [`moved`].
+    canonical: Option<String>,
 }
 
 /// Application endpoints; Axum owns path matching.
@@ -49,7 +53,11 @@ enum Route {
     ServiceWorker,
     Ics,
     Reminders,
+    Privacy,
+    Beta,
     Calendar,
+    Robots,
+    Sitemap,
     Root,
 }
 
@@ -61,7 +69,7 @@ impl Server {
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
         let version = pwa::compute_version(data_dir);
         let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None })
+        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None, canonical: None })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A
@@ -77,20 +85,61 @@ impl Server {
         }
     }
 
+    /// Reads `OFFICE_CANONICAL_HOST`: when set, requests for any other host forward there.
+    pub fn canonical_host_from_env(&mut self) {
+        let raw = std::env::var("OFFICE_CANONICAL_HOST").unwrap_or_default();
+        if raw.trim().is_empty() {
+            return;
+        }
+        match moved::parse_host(&raw) {
+            Some(host) => self.canonical = Some(host),
+            None => eprintln!("warn: OFFICE_CANONICAL_HOST is not a host name; not forwarding"),
+        }
+    }
+
     fn handle(&self, route: Route, method: &Method, uri: &Uri, headers: &HeaderMap, body: BeaconBody) -> Response<Body> {
         let raw_query = uri.query().unwrap_or("");
         let Some(path) = unescape_path(uri.path()) else { return bad_request() };
         let query = Query::parse(raw_query);
         let host = headers.get(header::HOST).and_then(|h| h.to_str().ok()).or_else(|| uri.authority().map(|a| a.as_str())).unwrap_or("");
-        let req = Req { method, headers, path: &path, query: &query };
+        let site = match self.canonical.as_deref() {
+            Some(canonical) => format!("https://{canonical}"),
+            None => ics::base_url(headers, host),
+        };
+        let req = Req { method, headers, path: &path, query: &query, site: &site };
+        if let Some(canonical) = self.canonical.as_deref()
+            && moved::is_elsewhere(host, canonical)
+        {
+            match route {
+                // Clients that already hold these URLs keep using them where they are.
+                Route::UsageEvent | Route::Static => {}
+                Route::Ics => return self.ics(&query, &format!("https://{canonical}")),
+                Route::ServiceWorker => return moved::farewell_worker(),
+                Route::UsageDashboard
+                | Route::Reminders
+                | Route::Privacy
+                | Route::Beta
+                | Route::Calendar
+                | Route::Robots
+                | Route::Sitemap
+                | Route::Root => {
+                    let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
+                    return moved::forward(canonical, method, headers, target);
+                }
+            }
+        }
         match route {
-            Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, body),
+            Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
             Route::ServiceWorker => pwa::service_worker(&self.version),
-            Route::Ics => self.ics(&query, headers, host),
+            Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
+            Route::Privacy => self.privacy(&req),
+            Route::Beta => self.beta(&req),
             Route::Calendar => self.calendar(&req),
+            Route::Robots => crawl::robots(&site),
+            Route::Sitemap => crawl::sitemap(&site, Server::local_year()),
             Route::Root => self.root(&req),
         }
     }
@@ -117,9 +166,13 @@ impl Server {
             .route("/sw.js", endpoint(Route::ServiceWorker))
             .route("/office.ics", endpoint(Route::Ics))
             .route("/reminders", endpoint(Route::Reminders))
+            .route("/privacy", endpoint(Route::Privacy))
+            .route("/beta", endpoint(Route::Beta))
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
             .route("/calendar/{*path}", endpoint(Route::Calendar))
+            .route("/robots.txt", endpoint(Route::Robots))
+            .route("/sitemap.xml", endpoint(Route::Sitemap))
             .fallback(move |req: Request| entry(Arc::clone(&self), Route::Root, req))
     }
 }
@@ -202,7 +255,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/beta", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");
@@ -218,6 +271,92 @@ mod routing_tests {
         let (month, day) = (&location["/calendar/".len().."/calendar/YYYY/MM".len()], &location[location.len() - 10..]);
         assert_eq!(month.replace('/', "-"), day[..7]);
         assert!(axum::body::to_bytes(redirect.into_body(), usize::MAX).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn other_hosts_forward_to_the_canonical_host() {
+        let mut server = Server::new(Path::new("../../data")).unwrap();
+        server.canonical = moved::parse_host("example.org");
+        let router = Arc::new(server).router();
+        let send = |method: Method, host: &str, path: &str, navigate: bool| {
+            let mut request = Request::builder().method(method).uri(path).header(header::HOST, host);
+            if navigate {
+                request = request.header("sec-fetch-mode", "navigate");
+            }
+            router.clone().oneshot(request.body(Body::empty()).unwrap())
+        };
+        let body = |resp: Response<Body>| async {
+            String::from_utf8(axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap().to_vec()).unwrap()
+        };
+
+        let home = send(Method::GET, "example.org", "/lauds/2026-03-11", true).await.unwrap();
+        assert_eq!(home.status(), StatusCode::OK);
+        assert!(body(home).await.contains("office-carry"), "the canonical host imports carried settings");
+
+        let old = send(Method::GET, "office.fly.dev", "/lauds/2026-03-11?form=priest", false).await.unwrap();
+        assert_eq!(old.status(), StatusCode::MOVED_PERMANENTLY);
+        assert_eq!(old.headers()[header::LOCATION], "https://example.org/lauds/2026-03-11?form=priest");
+        let nav = send(Method::GET, "office.fly.dev", "/", true).await.unwrap();
+        assert_eq!(nav.status(), StatusCode::OK);
+        assert!(body(nav).await.contains("location.replace(\"https://example.org\""));
+
+        // Native builds post here without following redirects; feeds and assets stay put.
+        let beacon = send(Method::POST, "office.fly.dev", "/api/usage", false).await.unwrap();
+        assert!(!beacon.status().is_redirection(), "{}", beacon.status());
+        let asset = send(Method::GET, "office.fly.dev", &pwa::asset_url("style.css"), false).await.unwrap();
+        assert_eq!(asset.status(), StatusCode::OK);
+        let feed = send(Method::GET, "office.fly.dev", "/office.ics?lauds=06:00&tz=America/New_York", false).await.unwrap();
+        assert_eq!(feed.status(), StatusCode::OK);
+        let feed = body(feed).await;
+        assert!(feed.contains("https://example.org/") && !feed.contains("office.fly.dev"), "feed links point at the canonical host");
+
+        let worker = body(send(Method::GET, "office.fly.dev", "/sw.js", false).await.unwrap()).await;
+        assert!(worker.contains("unregister") && !worker.contains("PRECACHE_DAYS"));
+        let worker = body(send(Method::GET, "example.org", "/sw.js", false).await.unwrap()).await;
+        assert!(worker.contains("PRECACHE_DAYS"));
+    }
+
+    #[tokio::test]
+    async fn search_engines_find_the_undated_pages_on_the_canonical_host() {
+        let mut server = Server::new(Path::new("../../data")).unwrap();
+        server.canonical = moved::parse_host("example.org");
+        let router = Arc::new(server).router();
+        let get = |host: &str, path: &str| {
+            let request = Request::builder().uri(path).header(header::HOST, host).body(Body::empty()).unwrap();
+            let router = router.clone();
+            async move {
+                let resp = router.oneshot(request).await.unwrap();
+                let status = resp.status();
+                (status, String::from_utf8_lossy(&axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap()).into_owned())
+            }
+        };
+
+        let (status, robots) = get("example.org", "/robots.txt").await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
+        let (_, sitemap) = get("example.org", "/sitemap.xml").await;
+        for page in ["/", "/lauds", "/compline", "/privacy"] {
+            assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
+        }
+        assert!(!sitemap.contains("<loc>https://example.org/calendar</loc>"), "the bare ordo address only redirects");
+        let (status, _) = get("office.fly.dev", "/robots.txt").await;
+        assert_eq!(status, StatusCode::MOVED_PERMANENTLY);
+
+        let canonical = |path: &str| format!("rel=\"canonical\" href=\"{}\"", path.replace('/', "&#x2f;"));
+        let (_, today) = get("example.org", "/lauds?form=priest").await;
+        assert!(today.contains(&canonical("https://example.org/lauds")) && !today.contains("noindex"));
+        let (_, dated) = get("example.org", "/lauds?date=2026-12-25").await;
+        assert!(dated.contains(&canonical("https://example.org/lauds/2026-12-25")) && dated.contains("noindex"));
+        assert!(dated.contains("Lauds for Friday, December 25, 2026: The Nativity of Our Lord."), "the preview names the feast");
+        let (_, home) = get("example.org", "/").await;
+        assert!(home.contains("og:title\" content=\"Daily Office\"") && !home.contains("noindex"));
+        assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
+        let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
+        assert_eq!(status, StatusCode::OK, "the preview card is served");
+        let (_, far) = get("example.org", "/calendar/1900").await;
+        assert!(far.contains("noindex"));
+        let (_, missing) = get("example.org", "/nowhere").await;
+        assert!(missing.contains("noindex") && !missing.contains("rel=\"canonical\""));
     }
 
     #[tokio::test]

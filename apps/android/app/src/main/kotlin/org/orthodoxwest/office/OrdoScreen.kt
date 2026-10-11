@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +23,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,11 +42,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.Month
@@ -81,14 +91,18 @@ fun OrdoScreen(
     val p = LocalPalette.current
     val wide = LocalWide.current
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
-    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) { LazyListState() }
+    // A day asked for (the web's #d-date) is brought into view once, when the month is ready:
+    // from the first frame when it already is, so the page comes in at that day. After that
+    // the reader's own scroll position stands, restored or not.
+    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
+    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
+    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
+        LazyListState(if (focusDay != 0 && month != null) focusItem else 0)
+    }
     val scope = rememberCoroutineScope()
-    // A day asked for (the web's #d-date) is brought into view once, when the month is ready;
-    // after that the reader's own scroll position stands, restored or not.
-    var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0) }
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
-            listState.scrollToItem(FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1)
+            listState.scrollToItem(focusItem)
             focused = true
         }
     }
@@ -116,6 +130,7 @@ fun OrdoScreen(
                 )
             }
         }
+        item(key = "ranks") { RankKey(ordoColumn().padding(bottom = 5.6.dp)) }
         item(key = "month") {
             MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), today.year == year && today.monthValue == monthNumber, ordoColumn().padding(top = 10.dp)) {
                 scope.launch { listState.animateScrollToItem(0) }
@@ -233,10 +248,8 @@ private fun OrdoHeader(
         }
     }
     val rules = Modifier.drawBehind {
-        // The frontispiece's double rule above, a hairline below.
+        // A hairline below; the ordo opens like the hours, its headpiece alone with no rule above.
         val w = 1.dp.toPx()
-        drawLine(p.goldLine, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
-        drawLine(p.goldLine, Offset(0f, w * 2.5f), Offset(size.width, w * 2.5f), w)
         drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
     }
     if (wide) {
@@ -308,7 +321,7 @@ fun OrdoYearScreen(
     }
 }
 
-/** "Tabula Temporaria" in small capitals over the ornament's double rule, its lozenge at the centre. */
+/** "Tabula Temporaria", a titulus in small capitals over the ornament's double rule, its lozenge at the centre. */
 @Composable
 private fun TabulaHeading() {
     val p = LocalPalette.current
@@ -324,15 +337,40 @@ private fun TabulaHeading() {
             lozenge(c, 4.5.dp.toPx(), p.bg, null)
             lozenge(c, 2.5.dp.toPx(), o.flat, null)
         }.padding(vertical = 6.4.dp),
-        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
+        style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp),
     )
 }
 
-/** The year's four figures, `perRow` to a row: the numeral large in the accent, its name beneath. */
+/**
+ * The year's four figures, `perRow` to a row, on a painted tablet: the surface thinned so the wall
+ * shows through, framed in the lining ruled twice (a thinner line 3dp inside the first), with a
+ * quatrefoil knop at each corner where the rules stop short. Each numeral large in the accent, its
+ * name beneath.
+ */
 @Composable
 private fun Figures(figures: List<TabulaRowView>, perRow: Int, modifier: Modifier) {
     val p = LocalPalette.current
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(
+        modifier.fillMaxWidth()
+            .background(p.surface.copy(alpha = p.surface.alpha * 0.6f))
+            .drawBehind {
+                val knop = 14.dp.toPx()
+                val w = 1.dp.toPx()
+                val inner = p.lining.copy(alpha = 0.4f)
+                for ((inset, ink) in listOf(0f to p.lining, 3.dp.toPx() to inner)) {
+                    val a = inset + w / 2f
+                    drawLine(ink, Offset(knop, a), Offset(size.width - knop, a), w)
+                    drawLine(ink, Offset(knop, size.height - a), Offset(size.width - knop, size.height - a), w)
+                    drawLine(ink, Offset(a, knop), Offset(a, size.height - knop), w)
+                    drawLine(ink, Offset(size.width - a, knop), Offset(size.width - a, size.height - knop), w)
+                }
+                for (x in listOf(0f, size.width - knop)) {
+                    for (y in listOf(0f, size.height - knop)) quatrefoil(Offset(x, y), knop, p.lining)
+                }
+            }
+            .padding(start = 6.4.dp, end = 6.4.dp, top = 17.6.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
         figures.chunked(perRow).forEach { pair ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 pair.forEach { f ->
@@ -374,6 +412,7 @@ private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalD
     }
 }
 
+/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule. */
 @Composable
 private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifier, onTop: () -> Unit) {
     val p = LocalPalette.current
@@ -383,11 +422,16 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
             val w = 1.dp.toPx()
             drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
             drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
-            if (isTodaysMonth) lozenge(Offset(size.width / 2f, size.height - w * 1.5f), 4.dp.toPx(), o.flat, null)
+            if (isTodaysMonth) {
+                // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
+                val c = Offset(size.width / 2f, size.height - w * 1.5f)
+                lozenge(c, 7.07.dp.toPx(), p.bg, null)
+                lozenge(c, 4.24.dp.toPx(), p.lining, null)
+            }
         }.padding(vertical = 6.4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
+        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
         Text("↑", Modifier.tap(label = "Back to the top", onClick = onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
     }
 }
@@ -408,41 +452,76 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         "abstinence".takeIf { d.abstinence },
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
-    val body: @Composable ColumnScope.() -> Unit = {
-        Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
-            if (d.commemorations.isNotEmpty()) {
-                val n = d.commemorations.size
-                SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
-            }
-            if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
+    val buttons: @Composable RowScope.() -> Unit = {
+        if (d.commemorations.isNotEmpty()) {
+            val n = d.commemorations.size
+            SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
         }
-        if (open["comms"] == true) d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) }
-        if (details && hasDetails) Digest(d)
+        if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
     }
-    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, body)
-    Column(modifier.then(if (isToday) Modifier.background(p.pressedWash) else Modifier)) {
+    val unfolded: @Composable ColumnScope.() -> Unit = {
+        Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
+        // Shown for the whole month at once, the rows stay where they are.
+        Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
+    }
+    val anyOpen = open["comms"] == true || (details && hasDetails)
+    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
+    val body: @Composable ColumnScope.() -> Unit = {
+        Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+        unfolded()
+    }
+    // Today is painted, not selected: a ground of the frieze's wash ruled top and bottom in the gold
+    // line, inset 8dp from the gutters, the day's number in gold.
+    Column(
+        modifier.then(
+            if (!isToday) Modifier else Modifier.drawBehind {
+                val inset = 8.dp.toPx()
+                val w = 1.dp.toPx()
+                // Above the row's hairline.
+                val h = size.height - w
+                drawRect(p.inscriptionWash, Offset(inset, 0f), Size(size.width - 2 * inset, h))
+                drawRect(p.goldLine, Offset(inset, 0f), Size(size.width - 2 * inset, w))
+                drawRect(p.goldLine, Offset(inset, h - w), Size(size.width - 2 * inset, w))
+            },
+        ),
+    ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
             // The day's liturgical colour as a rail beside its date.
             Box(Modifier.width(3.dp).height(40.dp).background(dayColor(d.color)))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = p.accent, fontFeatureSettings = "lnum"))
+                Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
                 if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.sp, lineHeight = 14.sp, color = p.accent))
             }
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.Top) {
                     // The date's stop already says the feast; the feast is a second target for the eye only.
-                    Text(d.feast, Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp, color = p.text))
+                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
                     Row(Modifier.padding(start = 8.dp, top = 2.dp).clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (d.fast) Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted))
                         if (d.abstinence) FishIcon(p.muted)
-                        if (d.rank.isNotEmpty()) Text(d.rank, Modifier.goldUnderline(true, p.goldLine), style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
+                        if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
                     }
                 }
+                Monastic(d)
                 body()
             }
         }
         Hairline(p.border)
+    }
+}
+
+/**
+ * The ordo's bracketed line for an observance kept by monastics and oblates only (the web's
+ * `.day-monastic`): quiet like a commemoration, never read as the day.
+ */
+@Composable
+private fun Monastic(d: OrdoDayView) {
+    val style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = LocalPalette.current.muted, fontStyle = FontStyle.Italic)
+    d.monastic.forEach { m ->
+        Text("[${m.heading}] ${m.rank}", Modifier.padding(top = 2.4.dp), style = style)
+        if (m.office.isNotEmpty()) Text(m.office, style = style)
     }
 }
 
@@ -470,7 +549,12 @@ private fun DayColumns(modifier: Modifier) {
     }
 }
 
-/** A day as a row of the desktop table: its colour as a rail beside the date, then the columns. */
+/**
+ * A day as a row of the desktop table: its colour as a rail beside the date, then the columns. The
+ * disclosures share the feast's line, 1.25rem after the name (the web's inline `.day-disclosures`
+ * from 701px), so a month reads as one line per day; one that is open (`anyOpen`) drops below the
+ * name at the column's full width, with what it unfolds.
+ */
 @Composable
 private fun DayTableRow(
     d: OrdoDayView,
@@ -479,12 +563,27 @@ private fun DayTableRow(
     spoken: String,
     onDay: (LocalDate) -> Unit,
     modifier: Modifier,
-    body: @Composable ColumnScope.() -> Unit,
+    anyOpen: Boolean,
+    buttons: @Composable RowScope.() -> Unit,
+    unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
     val rail = dayColor(d.color)
-    Column(modifier.then(if (isToday) Modifier.background(p.gold.copy(alpha = 0.06f)) else Modifier)) {
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 10.4.dp, bottom = 7.2.dp)) {
+    // Today is painted, not selected: the frieze's wash, ruled top and bottom in the gold line
+    // across the row, the day's number in gold.
+    Column(
+        modifier.then(
+            if (!isToday) Modifier else Modifier.drawBehind {
+                val w = 1.dp.toPx()
+                val h = size.height - w
+                drawRect(p.inscriptionWash, size = Size(size.width, h))
+                drawRect(p.goldLine, size = Size(size.width, w))
+                drawRect(p.goldLine, Offset(0f, h - w), Size(size.width, w))
+            },
+        ),
+    ) {
+        // The web's `.month-table td`: 0.5rem above and below, from 701px.
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
                     .drawBehind { drawRect(rail, Offset(0f, 1.6.dp.toPx()), Size(3.dp.toPx(), size.height - 1.6.dp.toPx())) }
@@ -492,27 +591,103 @@ private fun DayTableRow(
                     .padding(start = 10.4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = p.accent, fontFeatureSettings = "lnum"))
+                Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.2.sp, lineHeight = 15.7.sp, color = p.accent))
             }
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
                 // The date's stop already says the feast; the feast is a second target for the eye only.
-                Text(d.feast, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp, color = p.text))
-                body()
+                val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
+                // A bracketed line sits under the name, so the disclosures drop below it as on the web.
+                if (anyOpen || d.monastic.isNotEmpty()) {
+                    FeastName(d, name, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    Monastic(d)
+                    Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                } else {
+                    Row {
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap { onDay(date) }.semantics { hideFromAccessibility() })
+                        Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                    }
+                }
+                unfolded()
             }
+            // Fasting and abstinence stay quiet, so red in a row means rank.
             Box(Modifier.width(FlagCol).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.fast) Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.rubric, fontWeight = FontWeight.Bold))
+                if (d.fast) Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.muted, fontWeight = FontWeight.Bold))
             }
             Box(Modifier.width(FlagCol).padding(top = 6.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.abstinence) FishIcon(p.rubric)
+                if (d.abstinence) FishIcon(p.muted)
             }
+            // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
             Box(Modifier.width(RankCol).padding(end = 7.2.dp, top = 3.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopEnd) {
-                if (d.rank.isNotEmpty()) Text(d.rank, Modifier.goldUnderline(true, p.goldLine), style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = p.text))
+                if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = rankInk(d.rank, p)))
             }
         }
         Hairline(p.border)
     }
+}
+
+/** The ranks spelled out, each abbreviation in its days' ink, as the web's key: a phone has no titles to hover. */
+private val RankNames = listOf(
+    "1cl" to "first class",
+    "2cl" to "second class",
+    "gd" to "greater double",
+    "d" to "double",
+    "sd" to "semi-double",
+    "s" to "simple",
+    "f2" to "privileged feria",
+)
+
+@Composable
+private fun RankKey(modifier: Modifier) {
+    val p = LocalPalette.current
+    // No-break spaces keep each abbreviation with its name when the line wraps.
+    val key = buildAnnotatedString {
+        RankNames.forEachIndexed { i, (abbr, name) ->
+            if (i > 0) append(" · ")
+            withStyle(SpanStyle(color = rankInk(abbr, p))) { append(abbr) }
+            append("\u00A0" + name.replace(' ', '\u00A0'))
+        }
+    }
+    Text(
+        key,
+        modifier.clearAndSetSemantics { contentDescription = "Ranks: " + RankNames.joinToString(", ") { it.second } },
+        style = Type.small.copy(fontSize = 12.sp, lineHeight = 17.4.sp, color = p.muted),
+    )
+}
+
+/**
+ * A day's rank read from its ink, as in a Book of Hours: the great feasts red-letter, doubles
+ * slate blue, lesser days black.
+ */
+private fun rankInk(rank: String, p: Palette): Color = when (rank) {
+    "1cl", "2cl", "gd" -> p.rubric
+    "d" -> p.kalendarBlue
+    else -> p.text
+}
+
+/** A first-class feast's small painted cross, 0.62em with 0.32em after it, on the name's baseline. */
+private val FirstClassCross = mapOf(
+    "cross" to InlineTextContent(Placeholder(0.94.em, 0.62.em, PlaceholderVerticalAlign.AboveBaseline)) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) {
+            PaintedCross(Modifier.fillMaxHeight().aspectRatio(1f, matchHeightConstraintsFirst = true))
+        }
+    },
+)
+
+/** A feast's name in its rank's ink, a first-class feast's after a small painted cross. */
+@Composable
+private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
+    val first = d.rank == "1cl"
+    Text(
+        buildAnnotatedString {
+            if (first) appendInlineContent("cross", "✠")
+            append(d.feast)
+        },
+        modifier,
+        style = style.copy(color = rankInk(d.rank, LocalPalette.current)),
+        inlineContent = if (first) FirstClassCross else emptyMap(),
+    )
 }
 
 private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
@@ -522,7 +697,7 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
     Row(Modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = LocalPalette.current.muted))
-        Caret(open)
+        Caret(open, LocalPalette.current.muted)
     }
 }
 

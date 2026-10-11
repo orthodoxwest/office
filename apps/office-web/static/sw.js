@@ -63,14 +63,26 @@ var CORE_ASSETS = [
   assetURL("/static/fonts/eb-garamond-bold.woff2"),
   assetURL("/static/fonts/noto-sans-symbols-cross.woff2"),
   // The limewash wall (portrait for phones, wide crop for large screens), the
-  // softened copies behind wide hours' prayer and the Apse vault's leaf mask;
+  // phone panel's mirrored tile of it, the softened copies behind wide hours'
+  // prayer and the Apse vault's leaf mask;
   // precache them all so an installed app looks the same offline whatever it
   // is opened on.
   assetURL("/static/plaster.jpg"),
+  assetURL("/static/plaster-panel.jpg"),
   assetURL("/static/plaster-wide.jpg"),
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
-  assetURL("/static/leaf.png")
+  assetURL("/static/leaf.png"),
+  // The painted ornaments style.css masks its colours through
+  // (tools/genornaments.py).
+  assetURL("/static/ornaments/consecration.svg"),
+  assetURL("/static/ornaments/cross.svg"),
+  assetURL("/static/ornaments/sun.svg"),
+  assetURL("/static/ornaments/moon.svg"),
+  assetURL("/static/ornaments/vault.svg"),
+  assetURL("/static/ornaments/powder.svg"),
+  assetURL("/static/ornaments/quatrefoil.svg"),
+  assetURL("/static/ornaments/tailpiece.svg")
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always
@@ -91,22 +103,6 @@ function putIfOk(cache, req, resp) {
     });
   }
   return Promise.resolve(resp);
-}
-
-// Preview pages are deliberately network-only. In particular, an offline
-// preview must not silently turn into an older cached ordinary page.
-function previewOfflineResponse() {
-  return new Response(
-    "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Preview unavailable offline</title></head>" +
-    "<body><main><h1>Preview unavailable offline</h1><p>This preview requires a network connection.</p></main></body></html>",
-    { status: 503, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } }
-  );
-}
-
-function previewNetworkOnly(req) {
-  return fetch(req, { cache: "no-store" }).catch(function () {
-    return previewOfflineResponse();
-  });
 }
 
 function precacheURLs(cache, urls) {
@@ -354,7 +350,7 @@ function offlineResponse() {
     "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">" +
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
     "<meta name=\"description\" content=\"Benedictine Divine Office offline page.\">" +
-    "<title>Offline - Divine Office</title>" +
+    "<title>Offline - Daily Office</title>" +
     "<link rel=\"stylesheet\" href=\"" + assetURL("/static/style.css") + "\">" +
     "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" + assetURL("/static/favicon.svg") + "\">" +
     "<link rel=\"manifest\" href=\"" + assetURL("/static/manifest.webmanifest") + "\">" +
@@ -479,14 +475,6 @@ self.addEventListener("fetch", function (event) {
   }
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  // Any preview query is an explicit request for fresh, uncached output.
-  // Keep this before static/page routing so no redirect, cache lookup, or
-  // cache write can consume the preview request.
-  if (url.searchParams.has("preview")) {
-    event.respondWith(previewNetworkOnly(req));
     return;
   }
 

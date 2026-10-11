@@ -13,6 +13,11 @@ O ever blessed Mother of God, * Mary ever Virgin, temple of the Godhead, hallowe
 # SOURCE: Monastic Diurnal.pdf, p. 68* (Office of Saint Mary on Saturday, At Vespers)
 O blessed Mother * and spotless Virgin, thou glorious Queen of the world, intercede for us to the Lord.
 
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 68* (Office of Saint Mary on Saturday, At Vespers)
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
+
 [saturday-psalm-antiphon-1]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96, 101 (Saturday festal psalmody)
 Be favourable, * O Lord, and gracious.

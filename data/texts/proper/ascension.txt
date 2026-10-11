@@ -212,3 +212,11 @@ R. And to my God, and your God, alleluia.
 [commemoration-versicle-at-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 66 (Ascension octave at I Vespers of another feast)
 @use proper/ascension/versicle-vespers
+
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 389: before "Be thou our joy", "The following Ending is never changed."
+@omit
+
+[hymn-doxology-vespers]
+# Same hymn at Vespers (p. 389).
+@omit

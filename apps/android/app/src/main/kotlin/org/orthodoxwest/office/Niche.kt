@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.asAndroidPath
@@ -25,15 +26,19 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
- * frontispiece is set into the wall under a low round head, with a stone moulding, the day's
- * colour as a trim, and the room lit toward it. Phones keep the plain card.
+ * frontispiece is set into the wall under a pointed head, with a stone moulding, the day's colour
+ * as a trim, and the room lit toward it. Phones set it in a painted panel ([panel]).
  */
 data class NicheTokens(
     val stone: Color,
@@ -77,23 +82,6 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
 /** The niche's card width at a screen width: clamp(38rem, 10rem + 38vw, 48rem). */
 fun nicheWidth(screen: Dp): Dp = (160.dp + screen * 0.38f).coerceIn(608.dp, 768.dp)
 
-/** The round head's height: clamp(5rem, 2rem + 6vw, 8rem). */
-fun nicheHead(screen: Dp): Dp = (32.dp + screen * 0.06f).coerceIn(80.dp, 128.dp)
-
-/**
- * The niche's outline, `outset` beyond the card: a low elliptical head across the whole width
- * (border-radius: 50% 50% 0 0 / head head 0 0), square below.
- */
-fun nichePath(size: Size, head: Float, outset: Float): Path = Path().apply {
-    val d = outset
-    val ry = head + d
-    moveTo(-d, size.height + d)
-    lineTo(-d, -d + ry)
-    arcTo(Rect(-d, -d, size.width + d, -d + 2 * ry), 180f, 180f, false)
-    lineTo(size.width + d, size.height + d)
-    close()
-}
-
 /** Draws `path` blurred, for a CSS blur of `blur` (its Gaussian sigma is half the radius). */
 private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
     if (color.alpha == 0f) return
@@ -105,47 +93,114 @@ private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
     drawIntoCanvas { it.nativeCanvas.drawPath(path.asAndroidPath(), paint) }
 }
 
+/** The wall outside `shape`, drawn only for the shade its edge casts inside it. */
+private fun DrawScope.outside(shape: Path): Path {
+    val wall = Path().apply { addRect(Rect(-size.width, -size.height, 2 * size.width, 2 * size.height)) }
+    return Path.combine(PathOperation.Difference, wall, shape)
+}
+
 /**
- * The niche behind the frontispiece, in the order the web's box-shadows stack, bottom first: a
- * clearing of the Apse's ground, the shadow under the head, the moulding's edge and stone, the
- * day's colour; then the lit recess, its shadow under the head, the frame and the tooling.
+ * The niche behind the frontispiece, under the pointed head `a`, in the order the web's courses
+ * stack, outermost first: the room's shade under the niche and a field of the Apse's ground round
+ * both, the clearing, the moulding's edge and stone, the day's colour as a trim; then the frame
+ * and the lit recess, with the shade its head casts. Each is the arch offset by its own distance.
+ * The painted lining ([lining]) is the phone panel's, restated at the niche's scale.
  */
-fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: Color, tooling: Color) {
+fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, day: Color, frame: Color) {
     val rem = 16.dp.toPx()
+    val px = 1.dp.toPx()
+    fun shape(d: Float) = archPath(a, size.width, d, size.height + d)
+    // The moulding's silhouette, the source of its halo: the clearing, or with none the stone's edge.
+    val outer = shape(if (t.clear != null) 1.25f * rem + px else 0.75f * rem + px)
     t.clear?.let {
-        blurred(nichePath(size, head, 1.4f * rem), it, 1.8f * rem)
-        drawPath(nichePath(size, head, 1.25f * rem), it)
+        // drop-shadow(0 0 0.9rem clear) round the moulding and its shadow, as the second filter.
+        translate(0f, 1.25f * rem) { blurred(outer, it.copy(alpha = it.alpha * t.shade.alpha), 1.54f * rem) }
+        blurred(outer, it, 0.9f * rem)
     }
-    // 0 1.5rem 3rem -0.75rem: the head casts its shade down the wall.
-    translate(0f, 1.5f * rem) { blurred(nichePath(size, head, -0.75f * rem), t.shade, 3f * rem) }
-    drawPath(nichePath(size, head, 0.75f * rem + 1.dp.toPx()), t.edge)
-    drawPath(nichePath(size, head, 0.75f * rem), t.stone)
-    drawPath(nichePath(size, head, 2.dp.toPx()), day)
-    val shape = nichePath(size, head, 0f)
-    drawPath(shape, p.surface)
-    clipPath(shape) {
-        // A warm pool under the head, and a sheen falling from it.
+    // drop-shadow(0 1.25rem 1.25rem chapel-shade): the niche's shade on the wall below it.
+    translate(0f, 1.25f * rem) { blurred(outer, t.shade, 1.25f * rem) }
+    t.clear?.let { drawPath(shape(1.25f * rem + px), it) }
+    drawPath(shape(0.75f * rem + px), t.edge)
+    drawPath(shape(0.75f * rem), t.stone)
+    // The day's colour is a hint at the niche's edge, not a second frame.
+    drawPath(shape(1.5.dp.toPx()), day)
+    // The frame, the card's edge drawn in its rule, and the recess 2dp inside it.
+    val edge = shape(0f)
+    drawPath(edge, p.surface)
+    drawPath(edge, frame)
+    val recess = shape(-2 * px)
+    drawPath(recess, p.surface)
+    clipPath(recess) {
+        // A warm pool under the head, and a sheen falling from it, laid from 2rem above the card
+        // as the web's courses are.
+        val top = -2f * rem
+        val height = size.height - top
         val rx = size.width * 0.7f
-        val ry = size.height * 0.5f
-        scale(1f, ry / rx, pivot = Offset(size.width / 2f, 0f)) {
-            drawCircle(
-                Brush.radialGradient(0f to t.warm, 0.72f to Color.Transparent, center = Offset(size.width / 2f, 0f), radius = rx),
-                radius = rx,
-                center = Offset(size.width / 2f, 0f),
-            )
+        val ry = height * 0.5f
+        val crown = Offset(size.width / 2f, top)
+        scale(1f, ry / rx, pivot = crown) {
+            drawCircle(Brush.radialGradient(0f to t.warm, 0.72f to Color.Transparent, center = crown, radius = rx), radius = rx, center = crown)
         }
-        drawRect(Brush.verticalGradient(0f to t.sheen, 0.3f to Color.Transparent))
-        // inset 0 2.6rem 2.6rem -2rem: everything outside the shape, spread 2rem and dropped
-        // 2.6rem, blurred, and seen through the shape: a recess in shadow under the head.
-        val hole = nichePath(size, head, 2f * rem).apply { translate(Offset(0f, 2.6f * rem)) }
-        val all = Path().apply { addRect(Rect(-4 * rem, -4 * rem, size.width + 4 * rem, size.height + 4 * rem)) }
-        blurred(Path.combine(PathOperation.Difference, all, hole), t.recess, 2.6f * rem)
+        drawRect(
+            Brush.verticalGradient(0f to t.sheen, 0.3f to Color.Transparent, startY = top, endY = size.height),
+            topLeft = Offset(0f, top),
+            size = Size(size.width, height),
+        )
+        // drop-shadow(0 0.55rem 0.9rem recess): the wall outside the arch casts its shade in,
+        // and the recess lies in shadow under the head.
+        translate(0f, 0.55f * rem) { blurred(outside(recess), t.recess, 0.9f * rem) }
     }
-    drawPath(nichePath(size, head, -1.dp.toPx()), frame, style = Stroke(2.dp.toPx()))
-    // The book-cover tooling, 0.35rem inside, its head following the arch.
-    val inset = 0.35f * rem
-    val tool = nichePath(Size(size.width - 2 * inset, size.height - 2 * inset), head - inset, 0f)
-    translate(inset, inset) { drawPath(tool, tooling, style = Stroke(1.dp.toPx())) }
+}
+
+/**
+ * The lining painted round the head on a panel's or niche's back wall (`.home-lining`): the arch
+ * again, `inset` inside the card's edge, as a 2dp band of the lining and the day's colour
+ * (`hairline`) as a line 8dp inside the band's outer edge; round the head only and open below,
+ * down to this scope's foot (the inscription band), so it reads as paint on the wall rather than
+ * another edge of the arch. The scope is the card's width, its top the card's.
+ */
+fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color) {
+    // A miter limit of 2 keeps the point sharp, and bevels the hair's-breadth step that may join
+    // the upper arcs there rather than drawing it out into a spike.
+    fun line(d: Float, weight: Float, ink: Color) =
+        drawPath(archPath(a, size.width, d - weight / 2f, size.height, open = true), ink, style = Stroke(weight, miter = 2f))
+    line(-inset, 2.dp.toPx(), color)
+    line(-inset - 8.dp.toPx(), 1.dp.toPx(), hairline)
+}
+
+/**
+ * A phone's frontispiece: a painted panel under the pointed head `a`, in the niche's family
+ * (`.home-hero`), its courses outermost first: a soft halo of the wall's ground that keeps the
+ * field off it, the day's colour as a ring at its edge (`ring`), the frame, then the panel with
+ * the shade its head casts and, by day, the light caught under the head's edge.
+ */
+fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: ImageBitmap) {
+    val rem = 16.dp.toPx()
+    val px = 1.dp.toPx()
+    fun shape(d: Float) = archPath(a, size.width, d, size.height + d)
+    val outer = shape(1.5.dp.toPx())
+    // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg), by night 0.35rem and 0.6rem: the
+    // second blurs the first again, so it reaches as far as the two in quadrature.
+    val (near, far) = if (p.dark) 0.35f to 0.6f else 0.5f to 0.75f
+    blurred(outer, p.bg, sqrt(near * near + far * far) * rem)
+    blurred(outer, p.bg, near * rem)
+    drawPath(outer, ring)
+    val edge = shape(0f)
+    drawPath(edge, p.surface)
+    drawPath(edge, frame)
+    val face = shape(-px)
+    drawPath(face, p.surface)
+    clipPath(face) {
+        // The plaster under the day's words, cover-fitted to the panel as the web's `.home-arch-fill`.
+        val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
+        val fitted = IntSize((plaster.width * scale).roundToInt(), (plaster.height * scale).roundToInt())
+        drawImage(plaster, dstOffset = IntOffset((size.width.roundToInt() - fitted.width) / 2, (size.height.roundToInt() - fitted.height) / 2), dstSize = fitted)
+        val wall = outside(face)
+        // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
+        translate(0f, 0.3f * rem) { blurred(wall, nicheTokens(p).recess, 0.4f * rem) }
+        // drop-shadow(0 1px 0 white 45%), by day: the light caught under the head's edge.
+        if (!p.dark) translate(0f, px) { drawPath(wall, Color.White.copy(alpha = 0.45f)) }
+    }
 }
 
 /**

@@ -9,10 +9,11 @@ Month = 1
 Day = 1
 
 [holy-name-jesus]
-Name = Holy Name of Jesus
+Name = Most Holy Name of Jesus
 Rank = double-2nd-class
 Color = white
 Category = lord
+Secondary = true
 DateRule = holy-name
 
 [octave-day-st-stephen]
@@ -57,7 +58,7 @@ HasOctave = true
 OctaveClass = privileged-second
 
 [st-anthony-egypt]
-Name = St Anthony of Egypt
+Name = St Anthony, Abbot
 Rank = double
 Color = white
 Category = confessor
@@ -82,7 +83,7 @@ Month = 2
 Day = 2
 
 [st-agatha]
-Name = St Agatha
+Name = St Agatha, Virgin & Martyr
 Rank = greater-double
 Color = red
 Category = virgin-martyr
@@ -108,7 +109,7 @@ Day = 24
 HasVigil = true
 
 [st-gregory-great]
-Name = St Gregory the Great
+Name = St Gregory the Great, Bishop, Confessor & Doctor
 Rank = double-2nd-class
 Color = white
 Category = confessor-doctor
@@ -143,7 +144,7 @@ Source = 2026 archdiocesan ordo
 Notes = Wednesday after the II Sunday after Easter; proper office (TODO: propers)
 
 [st-benedict]
-Name = St Benedict
+Name = St Benedict, Abbot
 Rank = double-2nd-class
 Color = white
 Category = confessor
@@ -160,7 +161,7 @@ Month = 3
 Day = 25
 
 [st-george]
-Name = St George
+Name = St George, Martyr
 Rank = double-1st-class
 Color = red
 Category = martyr
@@ -185,7 +186,7 @@ Month = 5
 Day = 1
 
 [st-athanasius]
-Name = St Athanasius
+Name = St Athanasius, Bishop, Confessor & Doctor
 Rank = double
 Color = white
 Category = confessor-doctor
@@ -198,6 +199,7 @@ Name = Finding of the Holy Cross
 Rank = double-2nd-class
 Color = red
 Category = lord
+Secondary = true
 Month = 5
 Day = 3
 
@@ -253,6 +255,8 @@ Month = 6
 Day = 24
 HasVigil = true
 HasOctave = true
+OctaveDays = Day {n} within the Octave of St John Baptist
+OctaveDay8 = Octave of St John Baptist
 
 [st-augustine-canterbury]
 Name = St Augustine of Canterbury, Bishop & Confessor
@@ -264,7 +268,7 @@ Month = 5
 Day = 26
 
 [st-irenaeus]
-Name = St Irenaeus of Lyons, Bishop & Martyr
+Name = St Irenaeus of Lyon, Bishop & Martyr
 Rank = double
 Color = red
 Category = bishop-martyr
@@ -282,6 +286,7 @@ Month = 6
 Day = 29
 HasVigil = true
 HasOctave = true
+OctaveDay8 = The Octave of Ss Peter & Paul
 
 [visitation-bvm]
 Name = Visitation of the Blessed Virgin Mary
@@ -298,6 +303,7 @@ Color = white
 Category = apostle
 Month = 6
 Day = 30
+OctaveOf = ss-peter-paul
 
 [commemoration-st-peter-apostle]
 Name = Commemoration of St Peter, Apostle
@@ -308,16 +314,15 @@ Month = 6
 Day = 30
 CompanionOf = commemoration-st-paul-apostle
 
-[our-lady-einsiedeln]
-Name = Our Lady of Einsiedeln
-Rank = greater-double
-Color = white
-Category = blessed-virgin
-Month = 7
-Day = 16
+# Our Lady of Einsiedeln (16 July, Gd) is not in the default calendar: the 2026
+# ordo brackets it "Monastics & Oblates Only", the 2025 ordo omits it, and the
+# Vicariate missal's kalendar brackets it; the parish office is the feria with
+# Ss Nicholas & Habib Khasha commemorated (#11). The ordo page prints its
+# bracketed line from data/feasts/monastic.txt. Its proper file,
+# data/texts/proper/our-lady-einsiedeln.txt, is still an unfilled scaffold.
 
 [st-mary-magdalene]
-Name = St Mary Magdalene
+Name = St Mary Magdalene, Penitent
 Rank = greater-double
 Color = white
 Category = holy-woman
@@ -325,7 +330,7 @@ Month = 7
 Day = 22
 
 [st-james-greater]
-Name = St James the Greater, Apostle
+Name = St James, Apostle
 ProperName = James
 Rank = double-2nd-class
 Color = red
@@ -343,7 +348,7 @@ Month = 7
 Day = 26
 
 [transfiguration]
-Name = Transfiguration of Our Lord
+Name = The Transfiguration of Our Lord Jesus Christ
 Rank = double-2nd-class
 Color = white
 Category = lord
@@ -351,7 +356,7 @@ Month = 8
 Day = 6
 
 [st-lawrence]
-Name = St Lawrence, Martyr
+Name = St Laurence, Deacon & Martyr
 Rank = double-2nd-class
 Color = red
 Category = martyr
@@ -368,6 +373,7 @@ Month = 8
 Day = 15
 HasVigil = true
 HasOctave = true
+OctaveDay8 = Octave of the Assumption
 
 [st-joachim]
 Name = St Joachim, Father of the B.V.M.
@@ -417,6 +423,7 @@ Name = Exaltation of the Holy Cross
 Rank = greater-double
 Color = red
 Category = lord
+Secondary = true
 Month = 9
 Day = 14
 
@@ -471,7 +478,7 @@ Month = 10
 Day = 18
 
 [ss-simon-jude]
-Name = Ss Simon and Jude, Apostles
+Name = Ss Simon & Jude, Apostles
 Rank = double-2nd-class
 Color = red
 Category = apostle
@@ -490,7 +497,7 @@ HasVigil = true
 HasOctave = true
 
 [all-souls]
-Name = All Souls' Day
+Name = Commemoration of All the Faithful Departed (All Souls' Day)
 Rank = double
 Color = black
 Category = feria
@@ -498,7 +505,7 @@ Month = 11
 Day = 2
 
 [st-martin-tours]
-Name = St Martin of Tours
+Name = St Martin of Tours, Bishop & Confessor
 Rank = greater-double
 Color = white
 Category = confessor-bishop
@@ -541,6 +548,11 @@ HasVigil = true
 
 [conception-bvm]
 Name = Conception of the Blessed Virgin Mary
+# Needs ruling (#643): the rubrics (p. 57), the Diurnal (kalendar p. xxv,
+# proper p. 448) and the 2017–2019 ordos' rank tables make it a Primary Double
+# I Class, but every ordo's 8 December prints D2 and the 2019 and 2024 ordos
+# transfer it off Advent II Sunday to Monday, which a I Class Double would not
+# be (pp. 17 XI.1, 56). Rank II Class follows the ordos' practice.
 Rank = double-2nd-class
 Color = white
 Category = blessed-virgin
@@ -548,6 +560,8 @@ Month = 12
 Day = 8
 # No Office vigil (Diurnal p. 447).
 HasOctave = true
+OctaveDays = Day {n} within Conception Octave
+OctaveDay8 = Octave of the Conception of the B.V.M.
 
 [st-nicholas]
 Name = St Nicholas
@@ -559,7 +573,7 @@ Month = 12
 Day = 6
 
 [st-ambrose]
-Name = St Ambrose
+Name = St Ambrose of Milan, Bishop, Confessor & Doctor
 Rank = greater-double
 Color = white
 Category = confessor-doctor
@@ -579,7 +593,7 @@ Day = 13
 [expectation-bvm]
 Name = Expectation of the B.V.M.
 Rank = greater-double
-Color = violet
+Color = white
 Category = blessed-virgin
 Month = 12
 Day = 18
@@ -593,7 +607,7 @@ Month = 12
 Day = 21
 
 [christmas]
-Name = Nativity of Our Lord Jesus Christ
+Name = The Nativity of Our Lord
 Rank = double-1st-class
 Color = white
 Category = lord
@@ -601,6 +615,7 @@ PrimaryOfOurLord = true
 Month = 12
 Day = 25
 HasOctave = true
+OctaveDays = Day {n} within the Nativity Octave
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
 OctaveClass = privileged-third
 
@@ -621,7 +636,7 @@ Month = 12
 Day = 27
 
 [holy-innocents]
-Name = Holy Innocents
+Name = The Holy Innocents, Martyrs
 Rank = double-2nd-class
 # 2026 ordo: Lauds/Mass/Vespers R on a Monday (older ordos used violet on
 # weekdays; the newest ordo is authoritative for the sanctoral).
@@ -631,7 +646,7 @@ Month = 12
 Day = 28
 
 [st-sylvester]
-Name = St Sylvester I, Bishop
+Name = St Sylvester, Bishop & Confessor
 Rank = double
 Color = white
 Category = confessor-bishop

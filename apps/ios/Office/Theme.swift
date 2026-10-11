@@ -14,17 +14,31 @@ struct Palette: Equatable {
     let gold: Color
     let goldLine: Color
     let muted: Color
+    /** Words not said aloud: secret prayer, a psalm's opening its antiphon has just said. */
+    let unsaid: Color
     let border: Color
     let rubric: Color
+    // The painted ornament, in the earth pigments of English wall painting: terracotta for rules,
+    // linings and crosses, opaque and the same in every season; red ochre for the tituli (section
+    // headings, psalm numbers, "Ant."), gilt on the Apse; slate blue for the ordo's doubles.
+    let lining: Color
+    var titulus: Color
+    let kalendarBlue: Color
+    /// The evening hours' moon: the gold on the Nave, silver on the Apse night.
+    var moonInk: Color
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
-    let oakLine: Color
+    /// The header's beam, in both themes, and the light catching a timber's upper edge.
+    let oak: Color
+    let materialHighlight: Color
     let inscriptionGround: Color
     let inscriptionEdge: Color
     let inscriptionWash: Color
     /** The plaster wall behind every page, baked from the web's layers (apps/android/tools/bake-plaster.py). */
     let plaster: String
+    /** The phone home panel's plaster: the texture as soft light on the surface, veiled on the Apse (bake-plaster.py). */
+    let panel: String
 
     static let nave = Palette(
         dark: false,
@@ -34,36 +48,50 @@ struct Palette: Equatable {
         gold: Color(hex: 0x9A7328),
         goldLine: Color(hex: 0xC9AC72),
         muted: Color(hex: 0x6B5D54),
+        unsaid: Color(hex: 0x786B62),
         border: Color(hex: 0xDCCFC3),
         rubric: Color(hex: 0x8B1A1A),
+        lining: Color(hex: 0xA85A48),
+        titulus: Color(hex: 0x93412C),
+        kalendarBlue: Color(hex: 0x34507A),
+        moonInk: Color(hex: 0x9A7328),
         surface: Color(hex: 0xF6EDDF),
         surfaceEdge: Color(rgb: 107, 58, 31, 0.12),
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
-        oakLine: Color(rgb: 63, 55, 47, 0.34),
-        inscriptionGround: Color(hex: 0x34403A),
+        oak: Color(hex: 0x3F372F),
+        materialHighlight: Color(rgb: 255, 255, 255, 0.38),
+        inscriptionGround: Color(hex: 0x545F54),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
-        plaster: "plaster_nave.jpg"
+        plaster: "plaster_nave.jpg",
+        panel: "panel_nave.jpg"
     )
 
     static let apse = Palette(
         dark: true,
-        text: Color(hex: 0xE8E2D0),
+        text: Color(hex: 0xDDD6C3),
         bg: Color(hex: 0x121C28),
         accent: Color(hex: 0xD0B06A),
         gold: Color(hex: 0xD8BC74),
         goldLine: Color(hex: 0x6A5C3A),
         muted: Color(hex: 0x9AA4B0),
+        unsaid: Color(hex: 0x9AA4B0),
         border: Color(hex: 0x2A3648),
         rubric: Color(hex: 0xD47070),
+        lining: Color(hex: 0xCF8C6A),
+        titulus: Color(hex: 0xD8BC74),
+        kalendarBlue: Color(hex: 0xA9BEDF),
+        moonInk: Color(hex: 0xC9D0D9),
         surface: Color(hex: 0x172232),
         surfaceEdge: Color(rgb: 208, 176, 106, 0.18),
         pressedWash: Color(rgb: 208, 176, 106, 0.12),
-        oakLine: Color(rgb: 208, 176, 106, 0.16),
+        oak: Color(hex: 0x3F372F),
+        materialHighlight: Color(rgb: 208, 176, 106, 0.065),
         inscriptionGround: Color(hex: 0x263431),
         inscriptionEdge: Color(hex: 0x5C2B35),
         inscriptionWash: Color(rgb: 208, 176, 106, 0.04),
-        plaster: "plaster_apse.jpg"
+        plaster: "plaster_apse.jpg",
+        panel: "panel_apse.jpg"
     )
 }
 
@@ -80,7 +108,9 @@ extension Color {
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
  * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays `Palette.gold`.
+ * (controls, selections) stays `Palette.gold`. The painted rules are the lining's terracotta,
+ * so `line` is `Palette.lining` except where a season gilds or veils it; the church veils its
+ * images, not its walls.
  */
 struct Ornament: Equatable {
     let flat: Color
@@ -89,18 +119,32 @@ struct Ornament: Equatable {
     let lo: Color
     let ink: Color
 
-    /** The gilded initials' and lozenges' leaf, lit from above. */
-    var leaf: LinearGradient { LinearGradient(colors: [hi, lo], startPoint: .top, endPoint: .bottom) }
-
     static func of(_ p: Palette, season: String) -> Ornament {
         switch (season, p.dark) {
-        case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xB0A4C2))
-        case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xB0A4C2))
-        case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xE6CF8C))
-        case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xE6CF8C))
-        case (_, true): return Ornament(flat: p.gold, line: p.goldLine, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xD7B878))
-        default: return Ornament(flat: p.gold, line: p.goldLine, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xD7B878))
+        case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xDDD6E8))
+        case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xDDD6E8))
+        case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xF2E2B1))
+        case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xF2E2B1))
+        case (_, true): return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xECD9A0))
+        default: return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xECD9A0))
         }
+    }
+}
+
+extension Palette {
+    /**
+     * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are
+     * gilt, so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's
+     * are painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms
+     * while Apse's silver keeps its own ink.
+     */
+    func seasoned(_ season: String) -> Palette {
+        guard season == "passiontide" || season == "eastertide" else { return self }
+        let o = Ornament.of(self, season: season)
+        var p = self
+        if dark { p.titulus = o.flat }
+        if season == "passiontide" || !dark { p.moonInk = o.flat }
+        return p
     }
 }
 
@@ -114,6 +158,32 @@ func dayColor(_ name: String) -> Color {
     case "rose": return Color(hex: 0xC4607A)
     default: return Color(hex: 0xC9B896)
     }
+}
+
+/// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
+/// is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
+func dayColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    case ("red", true): return Color(hex: 0xC9503F)
+    case ("green", true): return Color(hex: 0x4F8A52)
+    case ("violet", true): return Color(hex: 0x8D62AD)
+    default: return dayColor(name)
+    }
+}
+
+/// CSS's color-mix in sRGB: `a` at `share` and `b` the rest, premultiplied, as CSS mixes
+/// translucent colours.
+func mix(_ a: Color, _ b: Color, _ share: CGFloat) -> Color {
+    var (ar, ag, ab, aa): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+    var (br, bg, bb, ba): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+    _ = UIColor(a).getRed(&ar, green: &ag, blue: &ab, alpha: &aa)
+    _ = UIColor(b).getRed(&br, green: &bg, blue: &bb, alpha: &ba)
+    let alpha = aa * share + ba * (1 - share)
+    guard alpha > 0 else { return .clear }
+    func channel(_ x: CGFloat, _ y: CGFloat) -> Double { Double((x * aa * share + y * ba * (1 - share)) / alpha) }
+    return Color(.sRGB, red: channel(ar, br), green: channel(ag, bg), blue: channel(ab, bb), opacity: Double(alpha))
 }
 
 /// The menu's Theme row: Default follows the device; Nave and Apse are the web's names.
@@ -234,9 +304,9 @@ struct TextStyle: Equatable {
     }
 }
 
-/// EB Garamond 12 at `size`. Regular and Italic only: its Bold was never finished, and the Office sets nothing bold.
+/// EB Garamond at `size`, the web's own instances (tools/gengaramond.py). Regular and Italic only: the Office sets nothing bold.
 func garamond(_ size: CGFloat, italic: Bool = false, smallCaps: Bool = false, lining: Bool = false) -> UIFont {
-    let base = UIFont(name: italic ? "EBGaramond12-Italic" : "EBGaramond12-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+    let base = UIFont(name: italic ? "EBGaramond-Italic" : "EBGaramond-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
     var features: [[UIFontDescriptor.FeatureKey: Int]] = []
     if smallCaps {
         features.append([.type: kLowerCaseType, .selector: kLowerCaseSmallCapsSelector])
@@ -261,6 +331,8 @@ enum Scale {
     static let verse = TextStyle(size: 20, line: 33)
     static let rubric = TextStyle(size: 18, line: 27)
     static let heading = TextStyle(size: 19.2, line: 24.96, tracking: 2.112, smallCaps: true)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    static let commemorationName = TextStyle(size: 19.2, line: 25.92, tracking: 0.29)
     static let itemLabel = TextStyle(size: 20, line: 27, tracking: 1.4, smallCaps: true, lining: true)
     static let reference = TextStyle(size: 17, line: 23.8)
     static let verseNumber = TextStyle(size: 15.6, line: 25.74)
@@ -268,7 +340,7 @@ enum Scale {
     static let hourTitle = TextStyle(size: 24.8, line: 39.68, tracking: 1.984)
     static let meta = TextStyle(size: 14.4, line: 20.88)
     static let small = TextStyle(size: 12.48, line: 19.97)
-    static let brand = TextStyle.label(13.12, 0.08)
+    static let brand = TextStyle.label(14.4, 0.08)
     static let menu = TextStyle.label(12.48, 0.08)
     static let control = TextStyle.label(11.52, 0.1)
 }
@@ -278,6 +350,7 @@ private struct PaletteKey: EnvironmentKey { static let defaultValue = Palette.na
 private struct OrnamentKey: EnvironmentKey { static let defaultValue = Ornament.of(.nave, season: "") }
 private struct MetricsKey: EnvironmentKey { static let defaultValue = Metrics() }
 private struct WideKey: EnvironmentKey { static let defaultValue = false }
+private struct RankedKey: EnvironmentKey { static let defaultValue = false }
 
 extension EnvironmentValues {
     var palette: Palette {
@@ -300,10 +373,20 @@ extension EnvironmentValues {
         get { self[WideKey.self] }
         set { self[WideKey.self] = newValue }
     }
+
+    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
+    /// an hour's links take a rank of their own under the brand and Settings.
+    var ranked: Bool {
+        get { self[RankedKey.self] }
+        set { self[RankedKey.self] = newValue }
+    }
 }
 
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
+
+/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
+let rankedBelow: CGFloat = 960
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

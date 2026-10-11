@@ -1,6 +1,10 @@
 [vespers-psalmody]
-# The generic Lord profile is not evidence for this unprinted Paschal office.
-@use psalmody/vespers/ferial
+# Diurnal p. 367 and the ordo: "As on Sun. II Vespers" (#608).
+@use psalmody/vespers/festal
+
+[psalm-antiphon-4-vespers]
+# Diurnal p. 366: at Vespers the "Ants. of Lauds, omitting the fourth".
+@use proper/easter-sunday/easter-antiphon-5
 
 [psalm-antiphon]
 @use proper/easter-sunday/easter-antiphon-1
@@ -39,33 +43,34 @@ O God, who in the Paschal festival hast given unto the world thy healing remedie
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
+[chapter-lauds]
+# Diurnal p. 367: "The Chapters and VV. are said as above at the Hours during the Octave" (#608).
+@use proper/easter-sunday/chapter-lauds
+
+[chapter-vespers]
+@use proper/easter-sunday/chapter-vespers
+
 # [hymn-lauds]
 # Hymn at Lauds. First line may be a Latin incipit title.
 #
 # [hymn-vespers]
 # Hymn at Vespers.
 #
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
+[versicle-lauds]
+@use proper/easter-sunday/versicle-lauds
+
+[versicle-vespers]
+@use proper/easter-sunday/versicle-vespers
+
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
 #
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
+[short-responsory-vespers]
+@use proper/easter-sunday/short-responsory-vespers
+
 # [vespers-psalmody-first]
 # I Vespers psalmody table when it differs from II Vespers.
 #

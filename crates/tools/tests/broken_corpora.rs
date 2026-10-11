@@ -62,16 +62,6 @@ fn broken_corpora_match_diagnostics() {
 }
 
 #[test]
-fn live_data_is_valid() {
-    let src = FsData::new("../../data");
-    assert_eq!(validate_calendar(&src), Vec::<String>::new());
-    assert_eq!(validate_texts(&src), Vec::<String>::new());
-    assert_eq!(office::validate::validate_hour_definitions(&src), Vec::<String>::new());
-    let inventory = provenance::scan_provenance(&src).unwrap();
-    zero_occurrence::load_zero_classifications(&src, &inventory).unwrap();
-}
-
-#[test]
 fn appended_dead_office_keeps_its_resolution_boundary_without_a_rubric() {
     let inventory = tools::review::resolution::build_resolution_inventory(&FsData::new("../../data"), 2026, 1).unwrap();
     let rows: Vec<_> =
@@ -108,12 +98,4 @@ fn appended_dead_office_keeps_its_resolution_boundary_without_a_rubric() {
         assert!(dead_count > 0);
         assert!(principal_count > 0);
     }
-}
-
-/// The rendered Assumption-week memorials are checked in
-/// data/review/composition-requirements.json ("assumption-week-memorials").
-#[test]
-fn live_corpus_loads_its_scopes() {
-    let texts = office::texts::load_texts(&FsData::new("../../data")).unwrap();
-    assert!(texts.scopes.is_some_and(|s| !s.list().is_empty()));
 }

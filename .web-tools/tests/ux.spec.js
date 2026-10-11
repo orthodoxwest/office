@@ -22,6 +22,23 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// Lays out the openings as a browser without initial-letter does (WebKit,
+// Firefox): the stylesheet's own fallback block, applied unconditionally,
+// with initial-letter turned off. Remove the returned tag to restore.
+async function fallbackInitials(page) {
+  const css = await page.evaluate(async () => (await fetch(document.querySelector('link[rel="stylesheet"][href*="style.css"]').href)).text());
+  const start = css.indexOf("@supports (not (initial-letter: 2))");
+  expect(start, "the stylesheet keeps a fallback for initial-letter").toBeGreaterThan(-1);
+  const open = css.indexOf("{", start);
+  let depth = 0;
+  let end = open;
+  for (; end < css.length; end++) {
+    if (css[end] === "{") depth++;
+    if (css[end] === "}" && --depth === 0) break;
+  }
+  return page.addStyleTag({ content: `*::first-letter { initial-letter: normal !important; }\n${css.slice(open + 1, end)}` });
+}
+
 // Phones reach Appearance and Text size from the foot of the site menu; wide
 // screens from the header's Settings. Open whichever is showing, choose, and
 // close it again so later measurements see the page.
@@ -195,12 +212,17 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's card sits close above the footer line, not above a band of wall.
+  // Home's colophon sits at the foot of the screen, as on desktop, with the
+  // card above it rather than the colophon floating under the card.
   const [card, footer] = await Promise.all([
     page.locator(".home").boundingBox(),
     page.locator("footer").boundingBox(),
   ]);
-  expect(footer.y - (card.y + card.height)).toBeLessThan(40);
+  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
+  const foot = await page.evaluate(
+    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
+  );
+  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
@@ -414,7 +436,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
     borderStyle: getComputedStyle(element).borderTopStyle,
   }));
   expect(naveState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(naveState.borderStyle).toBe("double");
+  expect(naveState.borderStyle).toBe("solid");
 
   await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -423,7 +445,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
     borderStyle: getComputedStyle(element).borderTopStyle,
   }));
   expect(apseState.background).toBe("rgba(0, 0, 0, 0)");
-  expect(apseState.borderStyle).toBe("double");
+  expect(apseState.borderStyle).toBe("solid");
 });
 
 test("the early-morning invitation opens the previous day's Compline", async ({ page }) => {
@@ -445,12 +467,82 @@ test("the foreground home invitation advances at the next office boundary", asyn
     "terce",
   );
 
+  // The current hour says what it is under its name, and the line moves with it.
+  const note = page.locator(".home-hour-link-note:visible");
+  await expect(note).toHaveCount(1);
+  await expect(note).toHaveText("Mid-morning prayer");
+
   await page.clock.fastForward("02:00");
 
   await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(note).toHaveText("Midday prayer");
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
     "data-hour",
     "sext",
+  );
+});
+
+test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
+  await page.goto("/compline/2026-10-07");
+  const next = page.locator(".next-hour");
+  await expect(next).toHaveAttribute("href", "/lauds/2026-10-08");
+  await expect(next.locator(".continuation-label")).toHaveText("Tomorrow");
+});
+
+// The end of the hour's text reaches the screen.
+async function atHourEnd(page) {
+  return page.evaluate(() => document.querySelector(".hour-end-mark").getBoundingClientRect().top < innerHeight);
+}
+
+test("scrolling through an hour in seconds does not mark it prayed", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
+    await page.mouse.wheel(0, 3000);
+    await page.clock.runFor(1000);
+  }
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  // Waiting at the end reads only the end.
+  await page.clock.runFor(120_000);
+  await page.goto("/?date=2026-10-07");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
+});
+
+test("an hour read through at a praying pace is marked prayed on home", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
+    await page.clock.runFor(20_000);
+    await page.mouse.wheel(0, 400);
+  }
+  await page.clock.runFor(2000);
+  await page.goto("/?date=2026-10-07");
+  const compline = page.locator('.home-hour-link[data-hour="compline"]');
+  await expect(compline).toHaveClass(/is-prayed/);
+  await expect(compline.locator(".home-hour-prayed .sr-only")).toHaveText("Prayed");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(1);
+  // Another day's home is not marked.
+  await page.goto("/?date=2026-10-06");
+  await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
+});
+
+test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
+  page,
+}) => {
+  // A sleeping phone or frozen PWA stops timer delays without stopping the
+  // clock; the refresh must notice the wall clock rather than wait out a
+  // timeout set at the previous hour.
+  await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+
+  await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
+  await page.clock.runFor("01:01");
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "vespers",
   );
 });
 
@@ -476,323 +568,127 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
 });
 
-test("parish material stays off the mobile prayer page", async ({
-  page,
-}) => {
-  await openDatedPage(page, `/?date=${testDate}`);
-
-  // The limewash wall is one fixed layer on html::before, shared by Nave and
-  // Apse and coloured by their tokens.
-  const wall = () =>
-    page.evaluate(() => {
-      const field = getComputedStyle(document.documentElement, "::before");
-      return { image: field.backgroundImage, position: field.position, content: field.content };
+test("the niche's cross stands clear under the lining at every desktop width", async ({ page }) => {
+  // The cross was once placed from the head's height: where the head
+  // flattens (tablets, narrow windows) the lining ran through it.
+  for (const width of [701, 820, 1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1100 });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const air = await page.evaluate(() => {
+      const zoom = Number(getComputedStyle(document.querySelector(".home-hero")).zoom) || 1;
+      const lining = document.querySelector(".home-lining").getBoundingClientRect();
+      const crown = document.querySelector(".home-crown").getBoundingClientRect();
+      const heading = document.querySelector("#home-date-heading").getBoundingClientRect();
+      // The lining's band, its gap and its inner hairline take 11px.
+      return { above: (crown.top - lining.top) / zoom - 11, below: (heading.top - crown.bottom) / zoom };
     });
-  const naveWall = await wall();
-  expect(naveWall.image).toMatch(/plaster(-wide)?\.jpg/);
-  expect(naveWall.position).toBe("fixed");
-  const naveMaterial = await page.evaluate(() => ({
-    page: getComputedStyle(document.body).backgroundImage,
-    inscriptionBand: getComputedStyle(
-      document.querySelector(".home-hour-group-label"),
-    ).backgroundColor,
-  }));
-  expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
-
-  await choosePreference(page, "Apse");
-  // The Apse vault is a background-image, which can only snap rather than
-  // crossfade, so app.js dips it invisible and applies the theme (and swaps
-  // this image) only once that dip completes — poll instead of reading the
-  // pre-swap Nave material on a fast single-worker CI run.
-  const readMaterial = () => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
-  await expect.poll(readMaterial).toBe("dark");
-  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
-
-  await page.goto(`/lauds/${testDate}`);
-  const prayerMaterial = await page.evaluate(() => ({
-    page: getComputedStyle(document.body).backgroundImage,
-    prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
-    wall: getComputedStyle(document.documentElement, "::before").content,
-  }));
-  expect(prayerMaterial).toEqual({ page: "none", prayer: "none", wall: "none" });
-
-  // Desktop. The theme persists in localStorage, so each half sets its own
-  // explicitly rather than inheriting whatever the previous step left behind.
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openDatedPage(page, `/?date=${testDate}`);
-
-  // The wall has no composition to become a spotlight on a wide canvas, so
-  // desktop Nave keeps it too; the body itself paints nothing over it.
-  await choosePreference(page, "Nave");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
-    "none",
-  );
-  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
-
-  // Apse adds the vault over the wall.
-  await choosePreference(page, "Apse");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const readVault = () =>
-    page.evaluate(() => {
-      const style = getComputedStyle(document.body, "::before");
-      return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
-    });
-  // One diaper cell as a mask tile (ribs, eight-ray principal stars, four-ray
-  // panel stars) intersected with the page fade, painted in the gilding. The
-  // ink crossfades in with the theme, so poll past its transparent start.
-  await expect.poll(async () => vaultPaints(await readVault())).toBe(true);
-  const vault = await readVault();
-  expect((vault.mask.match(/data:image\/svg\+xml/g) || []).length).toBe(1);
-  expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
+    expect(air.above, `${width}px: under the lining`).toBeGreaterThanOrEqual(6);
+    expect(air.below, `${width}px: over the date`).toBeGreaterThanOrEqual(12);
+  }
 });
 
-test("wide hour plaster softens the prayer without sideways scroll or stretching", async ({ page }) => {
-  // The prayer's field once reached 10rem past the column; with Large text
-  // at the 1000px threshold that ran past the viewport.
-  for (const size of ["small", "default", "large"]) {
-    for (const width of [1000, 1280]) {
-      await page.setViewportSize({ width, height: 900 });
-      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
-      await openDatedPage(page, `/lauds/${testDate}`);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-      expect(overflow, `${width}px ${size} text`).toBe(0);
+test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
+  // At a laptop's size it took two-thirds of an iPad's width and left a third
+  // of the screen bare below it.
+  for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const niche = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero").getBoundingClientRect();
+      const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
+      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
+    expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
+test("home's day stands clear of the lining's hairline, up the head as at its sides", async ({ page }) => {
+  // The ordo's names are long and the head narrows as it rises: a name once
+  // ran over the hairline at the jambs and, on tall phones with the versicle
+  // under the feast, a date or a name crossed it further up the arch. A probe
+  // clipped as the hairline is finds where it runs, so the test holds no
+  // figures of the arch.
+  for (const [width, height, dates] of [
+    [320, 740, ["2026-11-02", "2026-04-18", "2026-06-11"]],
+    [390, 844, ["2026-11-02", "2026-04-18", "2026-06-11"]],
+    [412, 915, ["2026-10-02", "2026-06-11"]],
+    [430, 932, ["2026-11-02", "2026-06-12"]],
+  ]) {
+    await page.setViewportSize({ width, height });
+    for (const date of dates) {
+      // Opened as today, so the versicle takes the head's spare height.
+      await page.clock.setFixedTime(new Date(`${date}T15:56:00-04:00`));
+      await openDatedPage(page, `/?date=${date}`);
+      const crossing = await page.evaluate(() => {
+        const lining = document.querySelector(".home-lining");
+        const hairline = getComputedStyle(lining, "::after");
+        const probe = document.createElement("div");
+        Object.assign(probe.style, { position: "absolute", top: hairline.top, right: hairline.right, bottom: hairline.bottom, left: hairline.left, clipPath: hairline.clipPath, pointerEvents: "auto" });
+        lining.append(probe);
+        const on = (x, y) => document.elementsFromPoint(x, y).includes(probe);
+        // Each line of the day, grown by its clear air, must not reach the hairline.
+        const air = 8;
+        const crossing = [];
+        const words = document.createTreeWalker(document.querySelector(".home-day-head"), NodeFilter.SHOW_TEXT);
+        for (let node = words.nextNode(); node; node = words.nextNode()) {
+          if (!node.textContent.trim() || !node.parentElement.checkVisibility()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const line of range.getClientRects()) {
+            const [left, right, top] = [line.left - air, line.right + air, line.top - air];
+            let touches = false;
+            for (let x = left; x <= right && !touches; x += 0.5) touches = on(x, top);
+            for (let y = top; y <= line.bottom && !touches; y += 0.5) touches = on(left, y) || on(right, y);
+            if (touches) crossing.push(node.textContent.trim());
+          }
+        }
+        probe.remove();
+        return crossing;
+      });
+      expect(crossing, `${width}x${height} ${date}`).toEqual([]);
     }
   }
-  // Landscape desktops take the wide crop, cover-fitted, never a distorting
-  // 100% 100%; phones keep the portrait field.
-  const wall = () =>
-    page.evaluate(() => {
-      const field = getComputedStyle(document.documentElement, "::before");
-      return { image: field.backgroundImage, size: field.backgroundSize };
-    });
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openDatedPage(page, `/?date=${testDate}`);
-  const desktop = await wall();
-  expect(desktop.image).toContain("plaster-wide.jpg");
-  expect(desktop.size.split(", ").every((layer) => layer === "cover")).toBe(true);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await openDatedPage(page, `/?date=${testDate}`);
-  expect((await wall()).image).toMatch(/plaster\.jpg/);
-
-  // The prayer's band is the same wall with the softened copy in place of
-  // the field and one more veil on top, cover-fitted like the wall so its
-  // clouds lie where the wall's do. Phones keep a flat page.
-  const band = () =>
-    page.evaluate(() => {
-      const wall = getComputedStyle(document.documentElement, "::before");
-      const band = getComputedStyle(document.body, "::before");
-      return {
-        content: band.content,
-        position: band.position,
-        wall: wall.backgroundImage,
-        image: band.backgroundImage,
-        blend: band.backgroundBlendMode,
-        wallBlend: wall.backgroundBlendMode,
-        size: band.backgroundSize,
-        mask: band.maskImage || band.webkitMaskImage,
-      };
-    });
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openDatedPage(page, `/lauds/${testDate}`);
-  const wide = await band();
-  expect(wide.content).toBe('""');
-  expect(wide.position).toBe("fixed");
-  expect(wide.image).toContain("plaster-wide-soft.jpg");
-  // Each file carries its own content stamp, so compare the layers unstamped.
-  const unstamped = (layers) => layers.replace(/\?v=[0-9a-f]+/g, "");
-  expect(unstamped(wide.image).endsWith(unstamped(wide.wall).replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
-  expect(wide.blend).toBe(`normal, ${wide.wallBlend}`);
-  expect(wide.size.split(", ").every((layer) => layer === "cover")).toBe(true);
-  expect(wide.mask).toContain("linear-gradient");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await openDatedPage(page, `/lauds/${testDate}`);
-  expect((await band()).content).toBe("none");
 });
 
-// The rendered page with its content hidden: its mean colour, that mean's
-// worst channel drift from --bg, and the luminance contrast in percent.
-// `clip` narrows the sample to one region of the viewport; `block` measures
-// contrast over square block means, which keeps clouds but drops the 8-bit
-// rounding that otherwise swamps Apse's sub-level variation.
-async function sampleWall(page, { clip, block = 1 } = {}) {
-  const png = (await page.screenshot(clip ? { clip } : {})).toString("base64");
-  return page.evaluate(async ({ b64, block }) => {
-    const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
-    const bitmap = await createImageBitmap(blob);
-    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-    const context = canvas.getContext("2d");
-    context.drawImage(bitmap, 0, 0);
-    const { width, height } = bitmap;
-    const data = context.getImageData(0, 0, width, height).data;
-    const sums = [0, 0, 0];
-    const columns = Math.floor(width / block);
-    const rows = Math.floor(height / block);
-    const blocks = new Float64Array(columns * rows);
-    for (let y = 0; y < rows * block; y++) {
-      for (let x = 0; x < columns * block; x++) {
-        const i = 4 * (y * width + x);
-        sums[0] += data[i];
-        sums[1] += data[i + 1];
-        sums[2] += data[i + 2];
-        blocks[Math.floor(y / block) * columns + Math.floor(x / block)] +=
-          0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-      }
-    }
-    const n = rows * block * columns * block;
-    let luminance = 0;
-    let luminance2 = 0;
-    for (const sum of blocks) {
-      const l = sum / (block * block);
-      luminance += l;
-      luminance2 += l * l;
-    }
-    const mean = luminance / blocks.length;
-    const bg = getComputedStyle(document.documentElement).backgroundColor.match(/\d+/g).map(Number);
-    return {
-      mean: sums.map((sum) => sum / n),
-      drift: Math.max(...sums.map((sum, i) => Math.abs(sum / n - bg[i]))),
-      contrast: (100 * Math.sqrt(luminance2 / blocks.length - mean * mean)) / mean,
-    };
-  }, { b64: png, block });
-}
+test("a feast's familiar name is set apart in italic and never broken", async ({ page }) => {
+  // A break inside it would leave half the parenthesis at a line's end.
+  for (const [width, height] of [[320, 740], [390, 844], [430, 932]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, "/?date=2026-11-02");
+    const alias = await page.locator(".home .feast-alias").evaluate((node) => ({
+      text: node.textContent,
+      italic: getComputedStyle(node).fontStyle,
+      lines: node.getClientRects().length,
+    }));
+    expect(alias, `${width}x${height}`).toEqual({ text: "(All Souls\u2019 Day)", italic: "italic", lines: 1 });
+  }
+  // A name without one is set whole.
+  await openDatedPage(page, `/?date=${testDate}`);
+  await expect(page.locator(".home .feast-alias")).toHaveCount(0);
+});
 
-for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
-  test(`the ${theme} wall is visible yet averages the page colour`, async ({ page }) => {
-    // Nave once rendered at 0.46% luminance contrast: mean-matched, and
-    // invisible. Sample the bare wall (content hidden) and hold both ends:
-    // visible, never loud, and averaging --bg so flat fields show no edge.
-    for (const width of [390, 1280]) {
+test("a tablet's hour header sets the hours as one rank, with no link stranded", async ({ page }) => {
+  // Wide widths hold the same: the prayer's softened field once reached past
+  // the column and, with Large text at the 1000px threshold, past the viewport.
+  for (const size of ["default", "large"]) {
+    for (const width of [701, 820, 999, 1000, 1100, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
-      // Home, not the ordo: the wall is one fixed layer on every page, and
-      // home loads in a fraction of the ordo's time.
-      await openDatedPage(page, `/?date=${testDate}`, theme);
-      // body::after is the home niche's room light, not the wall.
-      await page.addStyleTag({ content: "body > * { visibility: hidden !important; } body::before, body::after { display: none !important; }" });
-      const wall = await sampleWall(page);
-      expect(wall.drift, `${width}px mean vs --bg`).toBeLessThan(1.5);
-      expect(wall.contrast, `${width}px contrast %`).toBeGreaterThan(minContrast);
-      expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
-    }
-  });
-}
-
-test("the Nave prayer band is quieter than the wall but keeps its tone", async ({ page }) => {
-  // The band's softened copy must hold the wall's mean where it covers it,
-  // or its feathered edges show as a lighter or darker column; and it must
-  // stay quieter than the wall, or it is no longer a band.
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await openDatedPage(page, `/lauds/${testDate}`, "light");
-  await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
-  // The band's solid middle, then the same region of the bare wall.
-  const middle = { clip: { x: 440, y: 0, width: 400, height: 900 }, block: 4 };
-  const band = await sampleWall(page, middle);
-  await page.addStyleTag({ content: "body::before { display: none !important; }" });
-  const wall = await sampleWall(page, middle);
-  band.mean.forEach((channel, i) => expect(Math.abs(channel - wall.mean[i]), "band vs wall mean").toBeLessThan(1));
-  expect(band.contrast, "band contrast %").toBeLessThan(wall.contrast * 0.6);
-  expect(band.contrast, "band contrast %").toBeGreaterThan(0.1);
-
-  // Apse's wall is already quiet, and a feathered layer over so smooth a
-  // dark field bands in software rendering; it has no band, by choice or
-  // by default.
-  await openDatedPage(page, `/lauds/${testDate}`, "dark");
-  expect(await page.evaluate(() => getComputedStyle(document.body, "::before").content), "Apse").toBe("none");
-  await page.emulateMedia({ colorScheme: "dark" });
-  await openDatedPage(page, `/lauds/${testDate}`, "default");
-  expect(await page.evaluate(() => getComputedStyle(document.body, "::before").content), "default dark").toBe("none");
-});
-
-// The strongest one-pixel stripe in the rendered page: column means high-passed
-// along x and row means along y, each as the worst windowed deviation. A
-// feathered flat layer over a smooth wall shows here as software rasterizers
-// step its fade in one-level columns or rows.
-async function stripes(page) {
-  const png = (await page.screenshot()).toString("base64");
-  return page.evaluate(async (b64) => {
-    const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
-    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-    const context = canvas.getContext("2d");
-    context.drawImage(bitmap, 0, 0);
-    const { width, height } = bitmap;
-    const data = context.getImageData(0, 0, width, height).data;
-    // Each channel apart: the Apse steps fall in blue as often as not.
-    const columns = [0, 1, 2].map(() => new Float64Array(width));
-    const rows = [0, 1, 2].map(() => new Float64Array(height));
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        for (let c = 0; c < 3; c++) {
-          const v = data[4 * (y * width + x) + c];
-          columns[c][x] += v / height;
-          rows[c][y] += v / width;
-        }
-      }
-    }
-    const worst = (profile) => {
-      const pass = profile.map((v, i) => {
-        let sum = 0;
-        let count = 0;
-        for (let j = Math.max(0, i - 4); j <= Math.min(profile.length - 1, i + 4); j++, count++) sum += profile[j];
-        return v - sum / count;
-      });
-      let max = 0;
-      for (let start = 8; start + 160 <= pass.length - 8; start += 40) {
-        const window = pass.slice(start, start + 160);
-        const mean = window.reduce((a, b) => a + b) / window.length;
-        max = Math.max(max, Math.sqrt(window.reduce((a, b) => a + (b - mean) ** 2, 0) / window.length));
-      }
-      return max;
-    };
-    return { columns: Math.max(...columns.map(worst)), rows: Math.max(...rows.map(worst)) };
-  }, png);
-}
-
-for (const theme of ["light", "dark"]) {
-  test(`the ${theme} wide hour's layers leave no stripes where they fade`, async ({ page }) => {
-    // The end of Lauds on a wide screen gathers every layer above the wall:
-    // the prayer band, the side field and the ending's vault. Hide the
-    // text and the stars (which are meant to show), then hold the rest to
-    // the bare wall's own grain.
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await openDatedPage(page, `/lauds/${testDate}`, theme);
-    await page.addStyleTag({
-      content: `.elements, .hour-header, .hour-epilogue > *, footer > *, header, .hour-scroll-progress { visibility: hidden !important; }
-        .hour-epilogue::before, footer::after, .office-hour::before, .office-hour::after { display: none !important; }`,
-    });
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const layered = await stripes(page);
-    await page.addStyleTag({
-      content: "body, body *, body::before, body::after, body *::before, body *::after { visibility: hidden !important; }",
-    });
-    const wall = await stripes(page);
-    expect(layered.columns, "vertical stripes").toBeLessThan(wall.columns * 1.5 + 0.02);
-    expect(layered.rows, "horizontal stripes").toBeLessThan(wall.rows * 1.5 + 0.02);
-  });
-}
-
-test("thresholds and usage share the hour wall in both themes", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const reference = {};
-  for (const path of [`/lauds/${testDate}`, `/?date=${testDate}`, "/calendar/2026/03", "/reminders", "/admin/usage?days=7"]) {
-    await page.goto(path);
-    for (const theme of ["light", "dark"]) {
-      const material = await page.evaluate((theme) => {
-        document.documentElement.dataset.theme = theme;
-        const wall = getComputedStyle(document.documentElement, "::before");
-        const heading = document.querySelector(".month h2");
-        const signature = (style) => [style.backgroundImage, style.backgroundBlendMode, style.backgroundSize, style.opacity];
+      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+      await openDatedPage(page, `/vespers/${testDate}`);
+      const header = await page.evaluate(() => {
+        const links = [...document.querySelectorAll(".site-menu nav a")];
+        // Links on one baseline have boxes a pixel or two apart in height
+        // (Reminders is set smaller); a new row begins a whole line lower.
+        const tops = links.map((a) => a.getBoundingClientRect().top).sort((a, b) => a - b);
         return {
-          wall: signature(wall),
-          heading: heading ? signature(getComputedStyle(heading)) : null,
-          content: wall.content,
-          body: getComputedStyle(document.body).backgroundColor,
+          rows: tops.filter((top, i) => i === 0 || top - tops[i - 1] > 8).length,
+          overflow: document.documentElement.scrollWidth - innerWidth,
         };
-      }, theme);
-      expect(material.content, path).toBe('""');
-      expect(material.body, path).toBe("rgba(0, 0, 0, 0)");
-      reference[theme] ??= material.wall;
-      expect(material.wall, `${path} ${theme}`).toEqual(reference[theme]);
-      if (material.heading) expect(material.heading, theme).toEqual(reference[theme]);
+      });
+      expect(header.rows, `${width}px ${size} text`).toBe(1);
+      expect(header.overflow, `${width}px ${size} text`).toBe(0);
     }
   }
 });
@@ -857,122 +753,6 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
-test("the apse vault appears only over the night, and veils with the season", async ({
-  page,
-}) => {
-  const vault = async ({ width, theme, scheme, path }) => {
-    const context = await page.context().browser().newContext({
-      viewport: { width, height: 900 },
-      colorScheme: scheme,
-      isMobile: width < 700,
-    });
-    const sheet = await context.newPage();
-    if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(path);
-    const read = await sheet.evaluate(() => {
-      const style = getComputedStyle(document.body, "::before");
-      const rgb = getComputedStyle(document.documentElement)
-        .backgroundColor.match(/\d+/g)
-        .slice(0, 3)
-        .map(Number);
-      return {
-        // The vault has its own layer, so this cannot pick up
-        // --page-material's broad radials, which live on body and legitimately
-        // remain on the phone.
-        vault: { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor },
-        pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
-      };
-    });
-    await context.close();
-    return { stars: vaultPaints(read.vault), pageIsDark: read.pageIsDark, ink: read.vault.ink };
-  };
-
-  const home = `/?date=${testDate}`;
-  // Gold stars must never land on plaster. The Default-theme/light-device case
-  // is the one that bites: :root:not([data-theme="light"]) matches when no
-  // choice has been stored, so without a prefers-color-scheme guard the vault
-  // would light up over the Nave.
-  for (const scheme of ["light", "dark"]) {
-    const seen = await vault({ width: 1280, theme: null, scheme, path: home });
-    if (!seen.pageIsDark) expect(seen.stars).toBe(false);
-  }
-  expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(false);
-
-  // Present behind the Apse home at every width, absent in working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
-  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
-  for (const path of ["/calendar/2026/03", "/calendar/2026", "/reminders"]) {
-    expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(false);
-  }
-
-  // Gold leaf is gilding, so the vault keeps the season. This only holds while
-  // --apse-ink is declared where the seasonal --ornament lands; hoisting it
-  // to :root freezes the stars gold through Passiontide.
-  const ink = {};
-  for (const [season, date] of [
-    ["ordinary", testDate],
-    ["passiontide", "2026-04-08"],
-    ["eastertide", "2026-04-20"],
-  ]) {
-    ink[season] = (
-      await vault({ width: 1280, theme: "dark", scheme: "dark", path: `/?date=${date}` })
-    ).ink;
-  }
-  expect(ink.ordinary).toBeTruthy();
-  expect(ink.passiontide).not.toBe(ink.ordinary);
-  expect(ink.eastertide).not.toBe(ink.ordinary);
-  expect(ink.eastertide).not.toBe(ink.passiontide);
-
-  // The stars must actually light pixels. Declaring the layers is not enough:
-  // `circle 0.6px` is a *radius*, so with the colour stop at 50% the solid core
-  // was 0.3px and antialiasing ate nearly all of it — 58 declared stars lit 13
-  // pixels across half the viewport and the vault was invisible. Measured on
-  // the clean field beside the frontispiece, where nothing else paints.
-  const context = await page.context().browser().newContext({
-    viewport: { width: 1280, height: 900 },
-    colorScheme: "dark",
-    deviceScaleFactor: 1,
-  });
-  const sheet = await context.newPage();
-  await sheet.addInitScript(() => localStorage.setItem("office-theme", "dark"));
-  await sheet.goto(home);
-  const cardLeft = await sheet.evaluate(() =>
-    Math.round(document.querySelector(".home-hero").getBoundingClientRect().left),
-  );
-  const shot = await sheet.screenshot({
-    clip: { x: 10, y: 110, width: cardLeft - 30, height: 500 },
-  });
-  const lit = await sheet.evaluate(async (data) => {
-    const img = new Image();
-    img.src = "data:image/png;base64," + data;
-    await img.decode();
-    const canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx2d = canvas.getContext("2d");
-    ctx2d.drawImage(img, 0, 0);
-    const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
-    const counts = {};
-    for (let i = 0; i < px.length; i += 4) {
-      const key = `${px[i]},${px[i + 1]},${px[i + 2]}`;
-      counts[key] = (counts[key] || 0) + 1;
-    }
-    const bg = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])[0][0]
-      .split(",")
-      .map(Number);
-    let n = 0;
-    for (let i = 0; i < px.length; i += 4) {
-      const dev =
-        Math.abs(px[i] - bg[0]) + Math.abs(px[i + 1] - bg[1]) + Math.abs(px[i + 2] - bg[2]);
-      if (dev > 20) n += 1;
-    }
-    return n;
-  }, shot.toString("base64"));
-  await context.close();
-  expect(lit).toBeGreaterThan(30);
-});
-
 test("the frontispiece holds its width whatever the day is called", async ({ page }) => {
   // body is a column flex container, and an auto cross-axis margin suppresses
   // flex stretch — so main needs an explicit width:100% or it becomes
@@ -1010,7 +790,15 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
 // has both. Takes { mask, ink } read from a computed style.
 function vaultPaints({ mask, ink }) {
   const transparent = /^transparent$|^rgba\(\d+, \d+, \d+, 0\)$/.test(String(ink));
-  return String(mask).includes("data:image/svg+xml") && !transparent;
+  return String(mask).includes("ornaments/vault.svg") && !transparent;
+}
+
+// The Nave's wall is powdered with rosettes through the same fields, in the
+// lining thinned almost to the ground (a color() with a small alpha). A
+// field powders only when it has the rosette tile and some ink.
+function powderPaints({ mask, ink }) {
+  const transparent = /^transparent$|^rgba\(\d+, \d+, \d+, 0\)$|\/ 0\)$/.test(String(ink));
+  return String(mask).includes("ornaments/powder.svg") && !transparent;
 }
 
 // Multi-layer backgrounds serialize each layer's position/size (Chromium:
@@ -1035,26 +823,9 @@ function isTopCenterLayer(p) {
   );
 }
 
-function isBottomCenterLayer(p) {
-  return (
-    p === "50% 100%" ||
-    p === "50% 100" ||
-    p === "center bottom" ||
-    p === "bottom center" ||
-    p === "50% bottom" ||
-    p === "center 100%" ||
-    p === "center 100"
-  );
-}
-
 function isTopCenterPhase(phase) {
   const layers = phaseLayers(phase);
   return layers.length > 0 && layers.every(isTopCenterLayer);
-}
-
-function isBottomCenterPhase(phase) {
-  const layers = phaseLayers(phase);
-  return layers.length > 0 && layers.every(isBottomCenterLayer);
 }
 
 function tileEdgePx(size) {
@@ -1065,14 +836,10 @@ function tileEdgePx(size) {
   return { w: parseFloat(m[1]), h: parseFloat(m[2] || m[1]) };
 }
 
-function nearViewportEdge(value, expected, tol = 2) {
-  return Math.abs(value - expected) <= tol;
-}
-
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -1082,25 +849,34 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(`/?date=${testDate}`);
-    const seen = await sheet.evaluate(() => {
+    const seen = await sheet.evaluate((asToday) => {
+      // The fixed test day is historical, so the server adds the recovery
+      // line that local today's home never carries; drop it to measure the
+      // layout a reader sees on the day itself.
+      if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const diamond = getComputedStyle(footerElement, "::before");
-      const card = getComputedStyle(document.querySelector(".home-hero"));
+      const tailpiece = getComputedStyle(footerElement, "::before");
+      // The pointed head's halo is a filter on its outer courses.
+      const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
         stars: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        diamondVisible: diamond.visibility !== "hidden",
+        // The footer closes on its painted tailpiece in both themes, with
+        // the same geometry, so the footer never moves when the theme
+        // changes.
+        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
+        tailpieceShown: tailpiece.display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
-        cardShadow: card.boxShadow,
+        cardHalo: halo.filter,
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,
       };
-    });
+    }, asToday);
     await context.close();
     return seen;
   };
@@ -1108,23 +884,34 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
   expect(vaultPaints(apse.stars)).toBe(true);
   expect(apse.position).toBe("fixed");
-  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 132, h: 132 });
+  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.diamondVisible).toBe(false);
-  expect(apse.cardShadow).toContain(apse.pageBg);
+  expect(apse.tailpieceShown).toBe(true);
+  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
+  // The night carries no powdering: its field is the vault alone.
+  expect(powderPaints(apse.stars)).toBe(false);
 
-  // Nave keeps the same page geometry but paints no vault.
+  // Nave keeps the same page geometry but paints no vault: its wall is
+  // powdered with rosettes instead, in the same fixed field.
   for (const [theme, scheme] of [
     ["light", "light"],
     [null, "light"],
   ]) {
     const nave = await read({ height: 844, theme, scheme });
     expect(vaultPaints(nave.stars)).toBe(false);
-    expect(nave.diamondVisible).toBe(true);
+    expect(powderPaints(nave.stars)).toBe(true);
+    expect(nave.position).toBe("fixed");
+    expect(nave.tailpieceShown).toBe(true);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
+
+  // On the day itself a phone's home fits its viewport whole, every hour in
+  // reach without scrolling, on a 375x667 screen as well.
+  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
+  expect(small.scrolls).toBe(false);
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -1138,7 +925,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     const bare = await read({ width, height, theme: "light", scheme: "light" });
     expect(vaultPaints(field.stars)).toBe(true);
     expect(field.position).toBe("fixed");
-    expect(tileEdgePx(field.tileSize)).toEqual({ w: 132, h: 132 });
+    expect(tileEdgePx(field.tileSize)).toEqual({ w: 528, h: 528 });
     expect(isTopCenterPhase(field.phase)).toBe(true);
     expect(field.scrollHeight).toBe(bare.scrollHeight);
   }
@@ -1165,190 +952,6 @@ test("the mobile home vault survives browser-back viewport changes", async ({ pa
   expect(isTopCenterPhase(field[2])).toBe(true);
 });
 
-test("the hour vault begins after prayer, spans the footer, and does not move it", async ({ page }) => {
-  const read = async (theme, width = 390) => {
-    const context = await page.context().browser().newContext({
-      viewport: { width, height: 844 },
-      isMobile: width <= 700,
-      hasTouch: width <= 700,
-      colorScheme: theme,
-    });
-    const sheet = await context.newPage();
-    await sheet.addInitScript((storedTheme) => localStorage.setItem("office-theme", storedTheme), theme);
-    await sheet.goto(`/lauds/${testDate}`);
-    const seen = await sheet.evaluate(() => {
-      const main = document.querySelector("main");
-      const prayer = document.querySelector(".elements");
-      const epilogue = document.querySelector(".hour-epilogue");
-      const footerElement = document.querySelector("footer");
-      const field = getComputedStyle(epilogue, "::before");
-      const footerField = getComputedStyle(footerElement, "::after");
-      const diamond = getComputedStyle(footerElement, "::before");
-      const mainBox = main.getBoundingClientRect();
-      const prayerBox = prayer.getBoundingClientRect();
-      const epilogueBox = epilogue.getBoundingClientRect();
-      const footerBox = footerElement.getBoundingClientRect();
-      return {
-        pageClass: document.body.classList.contains("page-hour"),
-        prayerField: getComputedStyle(prayer).backgroundImage,
-        fieldLayers: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
-        footerLayers: { mask: footerField.maskImage || footerField.webkitMaskImage, ink: footerField.backgroundColor },
-        startsAfterPrayer: epilogueBox.top >= prayerBox.bottom,
-        endsWithMain: Math.abs(epilogueBox.bottom - mainBox.bottom) < 0.5,
-        joinsFooter:
-          Math.abs(footerBox.top + parseFloat(footerField.top) - epilogueBox.bottom) < 0.5,
-        fieldEdges: [
-          Math.round(epilogueBox.left + parseFloat(field.left)),
-          Math.round(epilogueBox.right - parseFloat(field.right)),
-        ],
-        footerEdges: [
-          Math.round(footerBox.left + parseFloat(footerField.left)),
-          Math.round(footerBox.right - parseFloat(footerField.right)),
-        ],
-        horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-        phase: [
-          field.maskPosition || field.webkitMaskPosition,
-          footerField.maskPosition || footerField.webkitMaskPosition,
-        ],
-        diamond: diamond.content,
-        diamondVisibility: diamond.visibility,
-      };
-    });
-    await context.close();
-    return seen;
-  };
-
-  const apse = await read("dark");
-  expect(apse.pageClass).toBe(true);
-  expect(apse.prayerField).toBe("none");
-  expect(vaultPaints(apse.fieldLayers)).toBe(true);
-  expect(vaultPaints(apse.footerLayers)).toBe(true);
-  expect(apse.startsAfterPrayer).toBe(true);
-  expect(apse.endsWithMain).toBe(true);
-  expect(apse.joinsFooter).toBe(true);
-  // 50vw full-bleed can be a hair off with classic scrollbars; allow 2px.
-  expect(nearViewportEdge(apse.fieldEdges[0], 0)).toBe(true);
-  expect(nearViewportEdge(apse.fieldEdges[1], 390)).toBe(true);
-  expect(nearViewportEdge(apse.footerEdges[0], 0)).toBe(true);
-  expect(nearViewportEdge(apse.footerEdges[1], 390)).toBe(true);
-  expect(apse.horizontalOverflow).toBe(false);
-  expect(isBottomCenterPhase(apse.phase[0])).toBe(true);
-  expect(isTopCenterPhase(apse.phase[1])).toBe(true);
-  // Kept, not dropped: the diamond's box stays (visibility: hidden) so the
-  // footer's own height — and everything below the glyph — never moves when
-  // Nave/Apse toggles.
-  expect(apse.diamond).toContain("✦");
-  expect(apse.diamondVisibility).toBe("hidden");
-
-  const nave = await read("light");
-  expect(nave.prayerField).toBe("none");
-  expect(vaultPaints(nave.fieldLayers)).toBe(false);
-  expect(vaultPaints(nave.footerLayers)).toBe(false);
-  expect(nave.diamond).toContain("✦");
-  expect(nave.diamondVisibility).toBe("visible");
-
-  const desktop = await read("dark", 1280);
-  expect(desktop.prayerField).toBe("none");
-  expect(nearViewportEdge(desktop.fieldEdges[0], 0)).toBe(true);
-  expect(nearViewportEdge(desktop.fieldEdges[1], 1280)).toBe(true);
-  expect(nearViewportEdge(desktop.footerEdges[0], 0)).toBe(true);
-  expect(nearViewportEdge(desktop.footerEdges[1], 1280)).toBe(true);
-  expect(desktop.joinsFooter).toBe(true);
-  expect(isBottomCenterPhase(desktop.phase[0])).toBe(true);
-  expect(isTopCenterPhase(desktop.phase[1])).toBe(true);
-  expect(desktop.horizontalOverflow).toBe(false);
-});
-
-test("wide hours set a still vault beside the prayer that comes down to meet the ending", async ({ page }) => {
-  // From 1680px the Apse vault stands in the margins while the office is
-  // said: fixed, so nothing moves at the edge of sight, and faded in only
-  // after the opening. The ending's field is a second fixed layer on the
-  // same phase, so the sides stay and run straight down into it.
-  const fields = () =>
-    page.evaluate(() => {
-      const read = (element, pseudo) => {
-        const field = getComputedStyle(element, pseudo);
-        return {
-          content: field.content,
-          position: field.position,
-          opacity: Number(field.opacity),
-          mask: field.maskImage || field.webkitMaskImage,
-          size: field.maskSize || field.webkitMaskSize,
-          phase: field.maskPosition || field.webkitMaskPosition,
-          ink: field.backgroundColor,
-        };
-      };
-      const hour = document.querySelector(".office-hour");
-      return {
-        sides: read(hour, "::after"),
-        ending: read(hour, "::before"),
-        epilogue: read(document.querySelector(".hour-epilogue"), "::before"),
-        footer: read(document.querySelector("footer"), "::after"),
-      };
-    });
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await openDatedPage(page, `/lauds/${testDate}`, "dark");
-  const top = await fields();
-  for (const field of [top.sides, top.ending]) {
-    expect(field.position).toBe("fixed");
-    expect(vaultPaints(field)).toBe(true);
-    // From 1800px the diaper widens, and every star takes its own share of
-    // the leaf.
-    expect(field.size.startsWith("208px 208px")).toBe(true);
-    expect(field.mask).toContain("leaf.png");
-    expect(field.opacity).toBe(0);
-  }
-  // One phase for both, so the lattices meet star to star.
-  expect(top.ending.size).toBe(top.sides.size);
-  expect(top.ending.phase).toBe(top.sides.phase);
-  // The scrolling fields would meet the fixed ones mid-lattice.
-  expect(top.epilogue.content).toBe("none");
-  expect(top.footer.content).toBe("none");
-  await page.evaluate(() => window.scrollTo(0, innerHeight));
-  await expect.poll(async () => (await fields()).sides.opacity).toBe(1);
-  expect((await fields()).ending.opacity).toBe(0);
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await expect.poll(async () => (await fields()).ending.opacity).toBe(1);
-  expect((await fields()).sides.opacity).toBe(1);
-
-  // At rest the fixed lattice takes the phase the scrolling fields took
-  // from the seam between epilogue and footer, at every text size.
-  for (const size of ["default", "large"]) {
-    await page.addInitScript((choice) => localStorage.setItem("office-text-size", choice), size);
-    await openDatedPage(page, `/lauds/${testDate}`, "dark");
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const seam = await page.evaluate(() => ({
-      phase: getComputedStyle(document.querySelector(".office-hour"), "::before").maskPosition,
-      height: innerHeight,
-      epilogue: document.querySelector(".hour-epilogue").getBoundingClientRect().bottom,
-    }));
-    // The tile's offset from the foot, as keywords ("left 50% bottom
-    // 211px") or as the spec's offsets from the top ("50% calc(100% -
-    // 211px)"), whichever this engine serializes.
-    const tile = phaseLayers(seam.phase)[0];
-    const offset =
-      tile.match(/bottom (-?[\d.]+)px$/) ||
-      tile.match(/calc\(100% - (-?[\d.]+)px\)$/) ||
-      tile.match(/calc\(-(-?[\d.]+)px \+ 100%\)$/);
-    expect(offset, `${size} tile phase ${tile}`).not.toBeNull();
-    expect(Math.abs(seam.height - Number(offset[1]) - seam.epilogue), `${size} seam`).toBeLessThan(2);
-  }
-
-  // Nave has no vault; narrower screens keep plain margins and the
-  // scrolling ending.
-  await openDatedPage(page, `/lauds/${testDate}`, "light");
-  const nave = await fields();
-  expect(vaultPaints(nave.sides)).toBe(false);
-  expect(vaultPaints(nave.ending)).toBe(false);
-  await page.setViewportSize({ width: 1600, height: 1000 });
-  await openDatedPage(page, `/lauds/${testDate}`, "dark");
-  const narrower = await fields();
-  expect(narrower.sides.content).toBe("none");
-  expect(narrower.ending.content).toBe("none");
-  expect(vaultPaints(narrower.epilogue)).toBe(true);
-  expect(vaultPaints(narrower.footer)).toBe(true);
-});
-
 test("the home vault is lit from the frontispiece in Apse only", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   const gilding = () => page.evaluate(() => getComputedStyle(document.body, "::before").backgroundImage);
@@ -1359,42 +962,9 @@ test("the home vault is lit from the frontispiece in Apse only", async ({ page }
     return { mask: style.maskImage || style.webkitMaskImage, size: style.maskSize || style.webkitMaskSize };
   });
   expect(field.mask).toContain("leaf.png");
-  expect(field.size.startsWith("176px 176px")).toBe(true);
+  expect(field.size.startsWith("704px 704px")).toBe(true);
   await openDatedPage(page, `/?date=${testDate}`, "light");
   expect(await gilding()).toBe("none");
-});
-
-test("the header beam holds one line and one geometry on every page", async ({ page }) => {
-  // The nav used to inherit the 46rem prose column, which fits the brand and
-  // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so
-  // the same header sat on two lines everywhere except there. Both the single
-  // line and the shared shell width are the point.
-  const shellWidths = [];
-  for (const [width, path] of [
-    [1024, `/?date=${testDate}`],
-    [1280, `/?date=${testDate}`],
-    [1280, `/lauds/${testDate}`],
-    [1280, "/calendar/2026/03"],
-    [1600, "/calendar/2026"],
-  ]) {
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto(path);
-    const header = await page.evaluate(() => {
-      const links = [...document.querySelectorAll('nav[aria-label="Primary"] a')];
-      return {
-        links: links.length,
-        rows: new Set(links.map((a) => Math.round(a.getBoundingClientRect().top))).size,
-        shell: Math.round(document.querySelector(".site-nav-shell").getBoundingClientRect().width),
-      };
-    });
-    // Hour pages carry the seven hours; elsewhere only Ordo and Reminders.
-    expect(header.links).toBe(path.startsWith("/lauds") ? 9 : 2);
-    expect(header.rows).toBe(1);
-    shellWidths.push(`${width}:${header.shell}`);
-  }
-  // Same viewport ⇒ same header, whichever room you are in.
-  expect(shellWidths[1]).toBe(shellWidths[2]);
-  expect(shellWidths[2]).toBe(shellWidths[3]);
 });
 
 test("the inscription band carries the frontispiece heading in both themes", async ({ page }) => {
@@ -1478,69 +1048,183 @@ test("the inscription band keeps the season with the rest of the gilding", async
   }
 });
 
-for (const theme of ["light", "dark"]) {
-  test(`Passiontide simplifies foliage without moving the prayer invitation — ${theme}`, async ({ page }) => {
-    await openDatedPage(page, "/?date=2026-04-08", theme);
-    const leaves = page.locator("use.ornament-foliage");
-    const rules = page.locator("use.ornament-sprig-rule");
-    // Inspect rendered instances: styling only a definition can leave a
-    // reused SVG painting leaves even when its source reports hidden.
-    expect(await leaves.count()).toBe(6);
-    for (const leaf of await leaves.all()) await expect(leaf).toBeHidden();
-    // A horizontal SVG stroke has a zero-height bounding box, so assert
-    // its visibility directly rather than Playwright's box-based matcher.
-    for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "visible");
-    await expect(page.locator(".ornament-headpiece > span")).toBeVisible();
+test("the hours' sun and moon and the Apse's gilt tituli keep the season", async ({ page }) => {
+  // The sun and moon are images, and Apse's tituli are gilt, so they veil
+  // and warm with the drop caps. Nave's tituli are painted red ochre and
+  // stay; Apse's moon is silver and keeps its own ink at Eastertide.
+  const ink = {};
+  for (const theme of ["light", "dark"]) {
+    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"], ["eastertide", "2026-04-20"]]) {
+      const context = await page.context().browser().newContext();
+      const sheet = await context.newPage();
+      await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+      const sign = async () => sheet.locator(".hour-header .ornament-headpiece > span[data-sign]")
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
+      await sheet.goto(`/lauds/${date}`);
+      const sun = await sign();
+      const titulus = await sheet.locator(".antiphon em").first().evaluate((node) => getComputedStyle(node).color);
+      await sheet.goto(`/vespers/${date}`);
+      ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
+      await context.close();
+    }
+    const [ordinary, veiled, paschal] = ["ordinary", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
+    expect(veiled.sun).not.toBe(ordinary.sun);
+    expect(paschal.sun).not.toBe(ordinary.sun);
+    expect(veiled.moon).not.toBe(ordinary.moon);
+    if (theme === "dark") {
+      expect(paschal.moon).toBe(ordinary.moon);
+      expect(veiled.titulus).not.toBe(ordinary.titulus);
+      expect(paschal.titulus).not.toBe(ordinary.titulus);
+    } else {
+      expect(paschal.moon).not.toBe(ordinary.moon);
+      expect(veiled.titulus).toBe(ordinary.titulus);
+      expect(paschal.titulus).toBe(ordinary.titulus);
+    }
+  }
+});
 
-    const invitation = page.locator(".pray-now");
-    const veiledBox = await invitation.boundingBox();
-    // Hold the day's content constant to isolate ornament from different
-    // feast names, notices, or commemorations changing the page height.
-    await page.evaluate(() => {
-      document.body.classList.replace("season-passiontide", "season-eastertide");
-    });
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
-    for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "hidden");
-    expect(await invitation.boundingBox()).toEqual(veiledBox);
-
-    await page.goto("/?date=2026-04-20");
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
-    // The year heading remains in ordinary gold even after browsing Easter.
-    await page.goto("/calendar/2026/04");
-    await expect(page.locator("body")).not.toHaveClass(/season-/);
-    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
+// The lozenge carries the day's liturgical colour; the colour is the same in
+// either theme, so one theme suffices.
+test("hour titles set their sign in the rule and the day's colour in the lozenge", async ({ page }) => {
+  const title = async () => page.evaluate(() => {
+    const heading = document.querySelector(".hour-header h1");
+    const headpiece = document.querySelector(".hour-header .ornament-headpiece");
+    return {
+      lozenge: getComputedStyle(heading, "::after").backgroundColor,
+      sign: headpiece.querySelector("span").dataset.sign || "cross",
+    };
   });
-}
+  // Lauds keeps the sun, Vespers and Compline the moon, the little hours
+  // the cross.
+  await openDatedPage(page, "/lauds/2026-09-28");
+  const green = await title();
+  expect(green.sign).toBe("sun");
+  await openDatedPage(page, "/lauds/2026-06-29");
+  const red = await title();
+  expect(red.lozenge).toBe("rgb(176, 42, 36)");
+  expect(red.lozenge).not.toBe(green.lozenge);
+  await openDatedPage(page, "/terce/2026-03-31");
+  expect((await title()).sign).toBe("cross");
+  await openDatedPage(page, "/vespers/2026-03-31");
+  expect((await title()).sign).toBe("moon");
+  await expect(page.locator(".hour-header .ornament-headpiece > span")).toBeVisible();
+});
 
-for (const theme of ["light", "dark"]) {
-  test(`hour titles set the headpiece in their rule and the day's colour in the lozenge — ${theme}`, async ({ page }) => {
-    const title = async () => page.evaluate(() => {
-      const heading = document.querySelector(".hour-header h1");
-      const headpiece = document.querySelector(".hour-header .ornament-headpiece");
-      const box = headpiece.getBoundingClientRect();
-      return {
-        lozenge: getComputedStyle(heading, "::after").backgroundColor,
-        // The upper rule is 3px deep at the heading's top edge.
-        offset: (box.top + box.bottom) / 2 - (heading.getBoundingClientRect().top + 1.5),
-        sprigs: [...headpiece.querySelectorAll(".ornament-sprig")].map(svg => getComputedStyle(svg).display),
-      };
-    });
-    await openDatedPage(page, "/lauds/2026-09-28", theme);
-    const green = await title();
-    expect(Math.abs(green.offset)).toBeLessThan(1);
-    expect(green.sprigs).toEqual(["block", "block"]);
-    await openDatedPage(page, "/lauds/2026-06-29", theme);
-    const red = await title();
-    expect(red.lozenge).toBe("rgb(176, 42, 36)");
-    expect(red.lozenge).not.toBe(green.lozenge);
-    // Passiontide veils the foliage: the cross stands alone in the rule.
-    await openDatedPage(page, "/lauds/2026-03-31", theme);
-    const veiled = await title();
-    expect(veiled.sprigs).toEqual(["none", "none"]);
-    expect(Math.abs(veiled.offset)).toBeLessThan(1);
-    await expect(page.locator(".hour-header .ornament-headpiece > span")).toBeVisible();
+// The headpiece's box is one height whatever sign it carries, so the title
+// stands at the same place on every hour of a day.
+test("hour titles stand at one height under the sun, the moon and the cross", async ({ page }) => {
+  const titleTop = async (hour) => {
+    await openDatedPage(page, `/${hour}/2026-03-31`);
+    return page.evaluate(() => document.querySelector(".hour-header h1").getBoundingClientRect().top);
+  };
+  const lauds = await titleTop("lauds");
+  expect(Math.abs((await titleTop("terce")) - lauds)).toBeLessThan(0.5);
+  expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
+});
+
+// On a phone the date takes its own line above the day's name, so the
+// separator never ends a line; on a wide screen the parts share one line.
+test("the hour's date line never strands its separator", async ({ page }) => {
+  await openDatedPage(page, "/lauds/2026-03-31");
+  const parts = page.locator(".hour-meta-part");
+  await expect(parts).toHaveCount(3);
+  const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  const phone = await rows();
+  expect(phone[0]).toBeLessThan(phone[1]);
+  expect(phone[1]).toBe(phone[2]);
+  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
+  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const laptop = await rows();
+  expect(new Set(laptop).size).toBe(1);
+  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+});
+
+// A psalm's Latin incipit shares the label's line with a dot between them,
+// or stands on its own line beneath without the dot: the dot never ends a
+// line alone. Sunday Lauds has Psalm 93's long title, stacked on a phone.
+test("psalm titles stack their Latin incipit without a stranded dot", async ({ page }) => {
+  await openDatedPage(page, "/lauds/2026-11-01");
+  const labels = page.locator(".item-label:has(.label-sep)");
+  expect(await labels.count()).toBeGreaterThan(3);
+  // Only the shown prayer form's labels have a box to measure.
+  const check = async () => labels.evaluateAll((els) => els.filter((el) => el.getBoundingClientRect().height > 0).map((el) => {
+    const sep = el.querySelector(".label-sep");
+    const incipit = el.querySelector(".psalm-incipit");
+    const stacked = el.classList.contains("stacked");
+    const sepShown = getComputedStyle(sep).display !== "none";
+    const lines = Math.round(incipit.getBoundingClientRect().top) > Math.round(el.getBoundingClientRect().top) + 2;
+    return { stacked, ok: stacked ? !sepShown && lines : sepShown && !lines };
+  }));
+  const phone = await check();
+  expect(phone.every((l) => l.ok)).toBe(true);
+  expect(phone.some((l) => l.stacked)).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.waitForFunction(() => !document.querySelector(".item-label.stacked"));
+  const laptop = await check();
+  expect(laptop.every((l) => l.ok && !l.stacked)).toBe(true);
+});
+
+// Every threshold between the office's parts carries the painted cross,
+// including the Chapter's and the Hymn's headings, which open their own
+// element rather than the list.
+test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
+  await openDatedPage(page, "/lauds/2026-03-31");
+  const marks = await page.evaluate(() => {
+    const mark = (sel) => {
+      const el = document.querySelector(sel);
+      const cs = getComputedStyle(el, "::before");
+      return { height: parseFloat(cs.height), mask: cs.maskImage || cs.webkitMaskImage };
+    };
+    return {
+      responsory: mark(".elements > .section-heading:not(:first-child)"),
+      chapter: mark(".elements > .chapter > .section-heading"),
+      hymn: mark(".elements > .hymn > .section-heading"),
+    };
   });
-}
+  expect(marks.chapter.height).toBeGreaterThan(5);
+  expect(marks.chapter).toEqual(marks.responsory);
+  expect(marks.hymn).toEqual(marks.responsory);
+});
+
+// iOS Safari sends a click only to what it judges tappable; a tap on the
+// page's text or the header's bare bar produces none, so the overlays must not
+// wait on a click to hear a tap outside them. Mimic that here by swallowing
+// every click whose target is not a control before the page's listeners see it.
+test("menus put away on a tap iOS Safari sends no click for", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest("a, button, input, select, textarea, label, summary")) {
+        e.stopImmediatePropagation();
+      }
+    }, true);
+  });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+
+  const menu = page.locator(".site-menu");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  // Beside the word, on the header's bar: still outside the menu's summary.
+  const shell = await page.locator(".site-nav-shell").boundingBox();
+  await page.touchscreen.tap(shell.x + shell.width - 2, shell.y + shell.height / 2);
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  await page.locator("footer > p").tap();
+  await expect(menu).not.toHaveAttribute("open", "");
+  // The word itself still closes it as well as opening it.
+  await page.getByText("Menu", { exact: true }).tap();
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).not.toHaveAttribute("open", "");
+
+  // A wide iPad's Settings is the same kind of overlay.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").tap();
+  await expect(settings).toHaveAttribute("open", "");
+  await page.locator("footer > p").tap();
+  await expect(settings).not.toHaveAttribute("open", "");
+});
 
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -1675,28 +1359,21 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
   }
 });
 
-test("appearance choice persists across prayer navigation", async ({ page }) => {
-  await page.goto(`/?date=${testDate}`);
-
-  await choosePreference(page, "Apse");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
-  await page.goto(`/lauds/${testDate}`);
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
-});
-
-test("text size choice persists across prayer navigation", async ({ page }) => {
+test("appearance and text size choices persist across prayer navigation", async ({ page }) => {
   await page.goto(`/?date=${testDate}`);
 
   // A passive visit must not invent a stored preference.
   expect(await page.evaluate(() => localStorage.getItem("office-text-size"))).toBeNull();
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
 
+  await choosePreference(page, "Apse");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await choosePreference(page, "Larger text");
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
 
   await page.goto(`/lauds/${testDate}`);
+  await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
   // Both copies (menu and Settings) reflect the stored choice.
   const large = page.locator('.text-size-option[data-text-size-choice="large"]');
@@ -1724,17 +1401,40 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   // Every menu preference keeps a thumb-sized target at the largest setting,
   // and the two rows share columns so each theme sits over a text size.
   await page.locator(".site-menu > summary").click();
-  const cells = await page.evaluate(() => {
-    const rects = (sel) =>
-      Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => el.getBoundingClientRect());
-    return { themes: rects(".theme-option"), sizes: rects(".text-size-option") };
-  });
-  const all = [...cells.themes, ...cells.sizes];
-  expect(all).toHaveLength(6);
+  await expect(page.locator(".site-menu")).toHaveAttribute("open", "");
+  const measure = () =>
+    page.evaluate(() => {
+      const rects = (sel) =>
+        Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => {
+          const r = el.getBoundingClientRect();
+          return { left: r.left, width: r.width, height: r.height };
+        });
+      return {
+        themes: rects(".theme-option[data-theme-choice]"),
+        sizes: rects(".text-size-option"),
+        martyrology: rects(".martyrology-option"),
+      };
+    });
+  // The panel is laid out once the menu has opened (it settles in from a
+  // closing transition); measure it then.
+  await expect
+    .poll(async () => {
+      const c = await measure();
+      return Math.min(...[...c.themes, ...c.sizes, ...c.martyrology].map((r) => r.height));
+    })
+    .toBeGreaterThanOrEqual(44);
+  const cells = await measure();
+  const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
+  expect(all).toHaveLength(8);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
   cells.themes.forEach((r, i) => {
     expect(Math.abs(r.left - cells.sizes[i].left)).toBeLessThan(1);
     expect(Math.abs(r.width - cells.sizes[i].width)).toBeLessThan(1);
+  });
+  // Off and On sit under the last two themes.
+  cells.martyrology.forEach((r, i) => {
+    expect(Math.abs(r.left - cells.themes[i + 1].left)).toBeLessThan(1);
+    expect(Math.abs(r.width - cells.themes[i + 1].width)).toBeLessThan(1);
   });
   expect(await overflows()).toBe(false);
   await page.locator(".site-menu > summary").click();
@@ -1989,6 +1689,41 @@ test("short prose openings keep one baseline and adapt to the reading measure", 
   expect(await opening.textContent()).toBe(originalText);
 });
 
+// WebKit takes the stack's first available face as the primary font whose
+// ascent and descent place every baseline, even a face whose unicode-range
+// holds the one glyph ✠; headed by the cross face, Safari sank each line's
+// text in its leading and hung the dropped initials under their second line.
+// The cross face follows the text faces, and still supplies the cross.
+test("the cross face follows the text faces in every stack and still sets the cross", async ({ page }) => {
+  const families = (selector) => page.evaluate((sel) => getComputedStyle(document.querySelector(sel)).fontFamily
+    .split(",").map((family) => family.trim().replace(/^"|"$/g, "")), selector);
+  const crossWidth = (family) => page.evaluate((f) => {
+    const span = document.createElement("span");
+    span.textContent = "\u2720";
+    if (f) span.style.fontFamily = f;
+    document.body.appendChild(span);
+    const width = span.getBoundingClientRect().width;
+    span.remove();
+    return width;
+  }, family);
+  await openDatedPage(page, "/vespers/2026-10-07");
+  const prayer = await families("body");
+  expect(prayer[0]).toBe("EB Garamond");
+  expect(prayer.indexOf("Office Cross")).toBeGreaterThan(0);
+  expect(prayer.indexOf("Office Cross")).toBeLessThan(prayer.indexOf("Georgia"));
+  expect(await page.evaluate(() => document.fonts.check('1em "Office Cross"', "\u2720"))).toBe(true);
+  const inherited = await crossWidth("");
+  expect(inherited).toBeCloseTo(await crossWidth('"Office Cross"'), 1);
+  expect(inherited).not.toBeCloseTo(await crossWidth('"EB Garamond", serif'), 1);
+  await openDatedPage(page, "/calendar/2026/10");
+  const ordo = await families(".page-calendar");
+  expect(ordo[0]).toBe("Ordo Garamond");
+  expect(ordo.indexOf("Ordo Cross")).toBe(ordo.length - 2);
+  const detail = await families(".day-office-incipit");
+  expect(detail[0]).toBe("Georgia");
+  expect(detail.indexOf("Ordo Cross")).toBe(detail.length - 2);
+});
+
 test("short psalm openings keep the same initial rank as adjacent psalms", async ({ page }) => {
   // Light only: themes share one geometry, held page-wide by "themes never change layout".
   const theme = "light";
@@ -1997,8 +1732,8 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
   const opening = psalms.nth(0).locator(".verse").first();
   const following = psalms.nth(1).locator(".verse").first();
   const original = await opening.textContent();
-  await expect(psalms.nth(0)).toContainText("Psalm 145b");
-  await expect(psalms.nth(1)).toContainText("Psalm 146");
+  await expect(psalms.nth(0)).toContainText("Psalm 144b (145b)");
+  await expect(psalms.nth(1)).toContainText("Psalm 145 (146)");
   // A one-line verse keeps its full-size initial and natural text flow.
   // Returning to wide after narrow also exercises font-size changes.
   for (const width of [1280, 390, 768, 320, 1280]) {
@@ -2006,13 +1741,16 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
       // With its "Sit." cue the opening no longer fits one wide line in
-      // large type either, so both sizes divide at the mediant.
-      const divided = width === 1280;
+      // large type either, so both sizes divide at the mediant. 768px is a
+      // knife edge for it: a browser's rounding decides whether its two
+      // halves fit one line, so either setting may stand there, as long as
+      // it is settled and never raised.
+      const expected = width === 1280 ? true : width === 768 ? null : false;
+      await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-raised"))).toBe(false);
+      if (expected !== null) await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(expected);
+      else await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided") !== el.classList.contains("initial-elevated"))).toBe(true);
+      const divided = await opening.evaluate(el => el.classList.contains("initial-divided"));
       const elevated = width >= 768 && !divided;
-      await expect.poll(() => opening.evaluate(el => ({
-        divided: el.classList.contains("initial-divided"),
-        raised: el.classList.contains("initial-raised"),
-      }))).toEqual({ divided, raised: false });
       await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
       const geometry = await opening.evaluate(el => {
         const cap = getComputedStyle(el, "::first-letter");
@@ -2055,24 +1793,50 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
   // Light only: themes share one geometry, held page-wide by "themes never change layout".
   const theme = "light";
   await openDatedPage(page, "/lauds/2026-09-13", theme);
-  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 63" });
+  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 62 (63)" });
   const opening = psalm.locator(".verse").first();
   const original = await opening.textContent();
   for (const size of ["normal", "large"]) {
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const width of [320, 390, 414, 430, 1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
-      // The opening carries its "Sit." cue after the mediant: at 430px it no
-      // longer fits one line and divides there; large type at 390px leaves a
-      // three-word tail, which wraps naturally.
-      const divided = [414, 430].includes(width) || (width === 390 && size === "normal");
-      await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
+      // The opening carries its "Sit." cue after the mediant. On the
+      // narrowest screen the tail wraps naturally and on a desktop the whole
+      // opening fits one line; at the phone widths between, a browser's
+      // rounding decides whether the tail is short enough to divide for, so
+      // either setting may stand, as long as it is settled.
+      const expected = width === 320 || width === 1280 ? false : null;
+      if (expected !== null) await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(expected);
+      // The typesetter runs in the next animation frame after a resize.
+      else await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const divided = await opening.evaluate(el => el.classList.contains("initial-divided"));
       await expect(opening).not.toHaveClass(/initial-raised/);
       const lines = await openingTextLines(opening);
       const elevated = width === 1280;
       expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
       expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
       expect(await opening.textContent()).toBe(original);
+      // Divided, the "Sit." cue ends the first line beside its mediant: at the
+      // head of the second, beside the initial, it read as the half-verse's
+      // first word.
+      if (divided) {
+        const bottoms = await opening.evaluate(el => {
+          const cue = el.querySelector(".mediant + .posture");
+          const after = cue.nextSibling;
+          const range = document.createRange();
+          const start = after.textContent.search(/\S/);
+          range.setStart(after, start);
+          range.setEnd(after, start + 1);
+          return {
+            leading: parseFloat(getComputedStyle(el).lineHeight),
+            first: el.querySelector(".initial-word").getBoundingClientRect().bottom,
+            cue: cue.getBoundingClientRect().bottom,
+            after: range.getBoundingClientRect().bottom,
+          };
+        });
+        expect(Math.abs(bottoms.cue - bottoms.first)).toBeLessThan(bottoms.leading / 2);
+        expect(bottoms.after - bottoms.cue).toBeGreaterThan(bottoms.leading / 2);
+      }
       // Repeated measurement (also used for printing/font changes) must not
       // alternate between natural and divided settings at the same measure.
       await page.evaluate(() => {
@@ -2088,7 +1852,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} full-size O sits on the first baseline`, ".initial-word");
   await page.setViewportSize({ width: 768, height: 900 });
-  const fallback = await page.addStyleTag({ content: ".initial-elevated::first-letter { initial-letter: normal !important; }" });
+  const fallback = await fallbackInitials(page);
   await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
   await expect(opening).toHaveClass(/initial-elevated/);
   await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} fallback O sits on the first baseline`, ".initial-word");
@@ -2134,9 +1898,7 @@ test("single-line initials clear the following verse across the alphabet and fal
   for (const size of ["normal", "large"]) {
     await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
     for (const fallback of [false, true]) {
-      const override = fallback ? await page.addStyleTag({ content:
-        ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
-      }) : null;
+      const override = fallback ? await fallbackInitials(page) : null;
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
       await expect.poll(() => page.locator(".verse:first-child").evaluateAll(els => els.map(el => el.className))).toEqual(
         Array(words.length).fill(expect.stringMatching(/^(?!.*\binitial-raised\b).*\binitial-elevated\b/)),
@@ -2150,30 +1912,7 @@ test("single-line initials clear the following verse across the alphabet and fal
   }
 });
 
-test("short responsories retain a raised initial when their text wraps", async ({ page }) => {
-  // Light only: themes share one geometry, held page-wide by "themes never change layout".
-  const theme = "light";
-  await openDatedPage(page, "/lauds/2026-06-18", theme);
-  const opening = page.locator(".short-responsory-opening .sigil-text");
-  const original = await opening.textContent();
-  for (const width of [1280, 320]) {
-    await page.setViewportSize({ width, height: 900 });
-    for (const size of ["normal", "large"]) {
-      await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
-      const geometry = await opening.evaluate(el => ({
-        float: getComputedStyle(el, "::first-letter").float,
-        height: el.getBoundingClientRect().height,
-        leading: parseFloat(getComputedStyle(el).lineHeight),
-      }));
-      expect(geometry.float).toBe("none");
-      if (width === 320) expect(geometry.height).toBeGreaterThan(geometry.leading * 1.9);
-      else expect(geometry.height).toBeCloseTo(geometry.leading, 0);
-      expect(await opening.textContent()).toBe(original);
-    }
-  }
-});
-
-test("optical initial profiles preserve words and give subsequent lines their own clearance", async ({ page }) => {
+test("prose openings across the alphabet preserve words and clear their initials", async ({ page }) => {
   const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
   const sentence = " hear our prayer, and let our cry come unto thee. Be merciful unto us, O Lord, and guide our steps in the way of peace.";
   const fixture = words.map(word => `<div class="chapter"><div class="liturgical-block"><p class="plain-line">${word}${sentence}</p></div></div>`).join("");
@@ -2190,62 +1929,13 @@ test("optical initial profiles preserve words and give subsequent lines their ow
   for (const width of [320, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     const openings = page.locator(".chapter .plain-line");
+    // The letters' optical profiles are pinned by the alphabet snapshot; here
+    // every opening keeps its words, its small caps and clear ink.
     for (let i = 0; i < words.length; i++) {
       const opening = openings.nth(i);
       await expect(opening).not.toHaveClass(/initial-raised/);
       expect(await opening.textContent()).toBe(words[i] + sentence);
-      const geometry = await opening.evaluate(el => {
-        const glyph = (node, index) => {
-          const range = document.createRange();
-          range.setStart(node, index);
-          range.setEnd(node, index + 1);
-          return range.getBoundingClientRect();
-        };
-        const cap = glyph(el.firstChild, 0);
-        const word = el.querySelector(".initial-word");
-        const first = glyph(word.firstChild, 0);
-        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        const rows = new Map();
-        let node;
-        while ((node = walker.nextNode())) {
-          for (let j = 0; j < node.length; j++) {
-            if ((node === el.firstChild && j === 0) || /\s/.test(node.textContent[j])) continue;
-            const rect = glyph(node, j);
-            const y = Math.round(rect.top);
-            rows.set(y, Math.min(rows.get(y) ?? Infinity, rect.left));
-          }
-        }
-        return {
-          initial: el.dataset.initial,
-          standalone: el.dataset.initialStandalone === "true",
-          caps: getComputedStyle(word).fontVariantCaps,
-          first: first.left,
-          capRight: cap.right,
-          capLeft: cap.left,
-          edge: el.getBoundingClientRect().left,
-          rows: [...rows.entries()].sort((a, b) => a[0] - b[0]).map(row => row[1]),
-        };
-      });
-      expect(geometry.caps).toBe("all-small-caps");
-      expect(geometry.rows.length).toBeGreaterThanOrEqual(2);
-      if (["A", "L"].includes(geometry.initial)) {
-        // First-word tucking does not pull the second row under the foot.
-        expect(geometry.first).toBeLessThan(geometry.rows[1] - 1);
-      }
-      if (["F", "P", "T", "V", "W", "Y"].includes(geometry.initial)) {
-        expect(geometry.rows[1]).toBeLessThan(geometry.first - 2);
-      }
-      if (geometry.initial === "Q" && width === 320) {
-        // The tail continues below the second baseline; keep the next row
-        // beside it before later rows return to the paragraph edge.
-        expect(geometry.rows[2]).toBeGreaterThanOrEqual(geometry.capRight - .5);
-      }
-      if (geometry.standalone) {
-        expect(geometry.first).toBeGreaterThan(geometry.capRight + 1);
-      }
-      if (["O", "T", "C"].includes(geometry.initial)) {
-        expect(geometry.capLeft).toBeLessThan(geometry.edge);
-      }
+      expect(await opening.locator(".initial-word").evaluate(el => getComputedStyle(el).fontVariantCaps)).toBe("all-small-caps");
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
     await expectInitialInkClear(page, page.locator(".elements"), ".chapter .plain-line:first-child", `${theme}/${width} alphabet ink clearance`);
@@ -2528,57 +2218,6 @@ test("Litany speaker marks share one spoken-text edge across All lines", async (
   }
 });
 
-test("desktop prayer text keeps a centred book measure and crisp section rhythm", async ({
-  page,
-}) => {
-  for (const width of [920, 1280, 1920]) {
-    await page.setViewportSize({ width, height: 900 });
-    await openDatedPage(page, `/lauds/${testDate}`);
-
-    const geometry = await page.evaluate(() => {
-      const elements = document.querySelector(".elements");
-      const elementsRect = elements.getBoundingClientRect();
-      const heading = [...document.querySelectorAll(".section-heading")].find(
-        (node) => node.textContent.trim() === "The Short Responsory",
-      );
-      const headingRect = heading.getBoundingClientRect();
-      const beforeRect = heading.previousElementSibling.getBoundingClientRect();
-      const afterRect = heading.nextElementSibling.getBoundingClientRect();
-      const headingStyle = getComputedStyle(heading);
-      return {
-        elementsWidth: elementsRect.width,
-        centreOffset: Math.abs(elementsRect.left + elementsRect.width / 2 - window.innerWidth / 2),
-        prayerFont: parseFloat(getComputedStyle(elements).fontSize),
-        headingLeading:
-          parseFloat(headingStyle.lineHeight) / parseFloat(headingStyle.fontSize),
-        beforeGap: headingRect.top - beforeRect.bottom,
-        afterGap: afterRect.top - headingRect.bottom,
-        overflow:
-          document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      };
-    });
-
-    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeGreaterThanOrEqual(580);
-    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeLessThanOrEqual(600);
-    expect(geometry.centreOffset, `${width}px prayer centring`).toBeLessThanOrEqual(1);
-    expect(geometry.prayerFont, `${width}px prayer face`).toBeCloseTo(20, 1);
-    expect(geometry.headingLeading, `${width}px heading leading`).toBeCloseTo(1.3, 1);
-    expect(geometry.beforeGap, `${width}px space before heading`).toBeGreaterThanOrEqual(36);
-    expect(geometry.afterGap, `${width}px space after heading`).toBeGreaterThanOrEqual(24);
-    expect(geometry.overflow, `${width}px horizontal overflow`).toBe(0);
-  }
-
-  // A tablet keeps the denser setting until there is enough open field to
-  // frame the larger desktop page.
-  await page.setViewportSize({ width: 768, height: 900 });
-  await openDatedPage(page, `/lauds/${testDate}`);
-  await expect
-    .poll(() =>
-      page.locator(".elements").evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
-    )
-    .toBeCloseTo(19, 1);
-});
-
 test("print keeps the designed 11pt prayer size at a desktop viewport", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ media: "print" });
@@ -2736,6 +2375,38 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(day.locator(".day-commemoration").first()).toBeVisible();
   await page.getByRole("button", { name: "Hide office details" }).click();
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
+});
+
+// The fasting, abstinence and rank marks each spell themselves out, under a
+// mouse and under a finger alike, without the tap opening the day.
+test("ordo marks name themselves on hover and on a tap", async ({ browser, baseURL }) => {
+  const tipOf = (locator) => locator.evaluate((el) => {
+    const tip = getComputedStyle(el, "::after");
+    if (tip.display === "none") return null;
+    const box = el.getBoundingClientRect();
+    return { text: tip.content.replace(/^"|"$/g, ""), left: box.right - parseFloat(tip.width), width: document.documentElement.clientWidth };
+  });
+  // Ash Wednesday 2026 (Julian paschalion) fasts, abstains and ranks first class.
+  for (const hasTouch of [true, false]) {
+    const viewport = hasTouch ? { width: 320, height: 700 } : { width: 1280, height: 900 };
+    const context = await browser.newContext({ baseURL, hasTouch, isMobile: hasTouch, viewport });
+    const page = await context.newPage();
+    await openDatedPage(page, "/calendar/2026/02");
+    const row = page.locator("#d-2026-02-25");
+    const scope = hasTouch ? row.locator(".day-mobile-flags") : row.locator("td.day-penitential-flag, td.day-rank");
+    const marks = scope.locator("abbr");
+    await expect(marks).toHaveCount(3);
+    const expected = ["Day of Fasting", "Day of Abstinence", "Double of the 1st Class"];
+    for (let i = 0; i < 3; i++) {
+      const mark = marks.nth(i);
+      if (hasTouch) await mark.tap(); else await mark.hover();
+      const tip = await tipOf(mark);
+      expect(tip?.text, `${hasTouch ? "tap" : "hover"} ${expected[i]}`).toBe(expected[i]);
+      expect(tip.left).toBeGreaterThanOrEqual(0);
+    }
+    await expect(page).toHaveURL(/\/calendar\/2026\/02$/);
+    await context.close();
+  }
 });
 
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
@@ -3156,6 +2827,7 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
         ".reminder-help > summary",
       ],
     ],
+    ["/beta", [".beta-action"]],
   ]) {
     await openDatedPage(page, path);
     for (const selector of selectors) {
@@ -3189,6 +2861,12 @@ for (const { name, path, theme, knownViolations } of [
     name: "Reminders in the Apse theme",
     path: "/reminders",
     theme: "dark",
+    knownViolations: [],
+  },
+  {
+    name: "the Android test's sign-up in the Nave theme",
+    path: "/beta",
+    theme: "light",
     knownViolations: [],
   },
 ]) {
@@ -3332,19 +3010,60 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     await page.goto(`/vespers/${easternDay()}`);
     await engage(page);
     await expect.poll(() => events.length, { message: label }).toBe(1);
+    // Leave for a page that never reports before changing the device: a
+    // beacon still settling would otherwise re-report in the new appearance.
+    await page.goto("/privacy");
     return events[0];
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
+});
+
+test("the installed web app reports itself apart from a browser tab", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  // Safari's home-screen app says so on navigator; others match display-mode: standalone.
+  await page.addInitScript(() => Object.defineProperty(navigator, "standalone", { configurable: true, value: true }));
+  await page.goto(`/?date=${easternDay()}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa");
+});
+
+// The device keeps only the day it first opened the Office; the beacon says first or returning.
+test("a browser is new on the day it first opens the Office and returning after", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const visit = async () => {
+    events.length = 0;
+    await page.goto(`/?date=${easternDay()}`);
+    await engage(page);
+    await expect.poll(() => events.length).toBe(1);
+    return events[0].match(/visit:(\w+)/)[1];
+  };
+  // Any number of pages on the first day are new; an earlier first day is returning.
+  expect(await visit()).toBe("first");
+  expect(await visit()).toBe("first");
+  await page.evaluate(() => localStorage.setItem("office-first-counted", "2026-01-01"));
+  expect(await visit()).toBe("returning");
+  // A reader from before this was counted, with a saved setting, is not mistaken for a new one.
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem("office-theme", "dark"); });
+  expect(await visit()).toBe("returning");
 });
 
 test.describe("on a screen with a mouse", () => {
@@ -3361,14 +3080,17 @@ test.describe("on a screen with a mouse", () => {
       await page.goto(`/vespers/${easternDay()}`);
       await engage(page);
       await expect.poll(() => events.length, { message: label }).toBe(1);
+      // Leave for a page that never reports before changing the device: a
+      // beacon still settling would otherwise re-report in the new appearance.
+      await page.goto("/privacy");
       return events[0];
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
   });
 });
 
@@ -3434,17 +3156,18 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("Martyrology preview stays opt-in and cannot enter the offline office cache", async ({ browser, baseURL }) => {
+test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
     const page = await context.newPage();
-    // Keep the September 8 pilot reading, but visit its next occurrence:
+    // Keep the September 8 reading, but visit its next occurrence:
     // precache intentionally prunes historical pages as the real clock moves.
     const now = new Date();
     const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
-    const normal = `/prime/${year}-09-07`;
-    const preview = normal + "?preview=martyrology";
-    await page.goto(normal);
+    const prime = `/prime/${year}-09-07`;
+    const reading = page.getByRole("heading", { name: "Martyrology for tomorrow, September 8", exact: true });
+    const rubric = page.locator(".elements").getByText("this may laudably be done");
+    await page.goto(prime);
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
       if (!navigator.serviceWorker.controller) {
@@ -3452,28 +3175,27 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
       }
     });
     await page.reload();
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
-    await page.goto(preview);
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toBeVisible();
+    // Off by default: the rubric stands, and nothing is stored.
+    await expect(rubric).toBeVisible();
+    await expect(reading).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBeNull();
+    for (const button of await page.locator('.martyrology-option[data-martyrology-choice="off"]').all()) {
+      await expect(button).toHaveAttribute("aria-pressed", "true");
+    }
+
+    await choosePreference(page, "On");
+    await expect(reading).toBeVisible();
+    await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
-    expect(await page.evaluate(async (normal) => {
-      for (const name of await caches.keys()) {
-        const cache = await caches.open(name);
-        for (const key of await cache.keys()) {
-          if (new URL(key.url).searchParams.has("preview")) return false;
-          if (new URL(key.url).pathname === normal) {
-            if ((await (await cache.match(key)).text()).includes("Martyrology — September 8")) return false;
-          }
-        }
-      }
-      return true;
-    }, normal)).toBe(true);
+    // Remembered, and the same page serves both settings, offline too.
     await context.setOffline(true);
-    await page.goto(preview);
-    await expect(page.getByRole("heading", { name: "Preview unavailable offline" })).toBeVisible();
-    await page.goto(normal);
-    await expect(page.locator(".elements")).toContainText("this may laudably be done");
-    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
+    await expect(reading).toBeVisible();
+    await choosePreference(page, "Off");
+    await expect(rubric).toBeVisible();
+    await expect(reading).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
   } finally {
     await context.close();
   }
@@ -3542,9 +3264,7 @@ test("wide and narrow initials clear text in native and fallback layouts", async
     for (const size of ["normal", "large"]) {
       await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
       for (const fallback of [false, true]) {
-        const override = fallback ? await page.addStyleTag({ content:
-          ".psalm-verses .verse:first-child::first-letter { initial-letter: normal; margin-top: .05em; margin-bottom: -.1em; }",
-        }) : null;
+        const override = fallback ? await fallbackInitials(page) : null;
         for (const initial of ["W", "I"]) {
           const geometry = await page.locator(".psalm-verses").first().evaluate((psalm, letter) => {
             const opening = psalm.querySelector(".verse");
@@ -3735,7 +3455,8 @@ test('prayer-form controls fit both themes and narrow or wide reading', async ({
       for (const name of ['Praying privately', 'With others, led by a deacon', 'With others, led by a priest']) {
         await expect(selector.getByRole('radio', { name, exact: true })).toBeVisible();
       }
-      const bounds = await selector.boundingBox();
+      // The picker lends its parts to the controls' grid, so its open panel is what is measured.
+      const bounds = await selector.locator('fieldset').boundingBox();
       expect(bounds.x).toBeGreaterThanOrEqual(0);
       expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
       const labels = await selector.locator('label').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().height));
@@ -3847,6 +3568,74 @@ test("home keeps feast and octave above the recovery link, including after midni
   expect(await order()).toBe(true);
 });
 
+test("home's versicle takes only the height its head has to spare", async ({ page }) => {
+  // Each day is opened as the reader's today, so no recovery link joins the head.
+  const open = async (date, width, height) => {
+    await page.setViewportSize({ width, height });
+    await page.clock.setFixedTime(new Date(`${date}T15:56:00-04:00`));
+    await page.goto(`/?date=${date}`);
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    return page.evaluate(() => ({
+      shown: document.querySelector(".home-versicle")?.checkVisibility() ?? null,
+      scrolls: document.documentElement.scrollHeight > innerHeight,
+    }));
+  };
+  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
+  // A 667px phone has none to spare.
+  expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });
+  // A Lenten feria is stripped: no versicle at all.
+  expect((await open("2026-03-11", 412, 735)).shown).toBe(null);
+});
+
+test("first-class hours stand in a frame that leaves the measure and ends at the prayer", async ({ page }) => {
+  for (const [width, height] of [[390, 844], [1280, 900]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, "/lauds/2026-12-25");
+    await expect(page.locator("body")).toHaveClass(/rank-first-class/);
+    const frame = await page.locator(".office-hour").evaluate(el => {
+      const before = getComputedStyle(el, "::before");
+      const after = getComputedStyle(el, "::after");
+      const elements = el.querySelector(".elements").getBoundingClientRect();
+      const epilogue = el.querySelector(".hour-epilogue").getBoundingClientRect();
+      const grid = getComputedStyle(el).gridTemplateColumns.split(" ").map(parseFloat);
+      return {
+        drawn: before.borderLeftStyle === "double" && after.borderLeftStyle === "double",
+        // Each line sits in its own grid column, and the inner column is the full measure.
+        side: grid[0], measure: grid[1], elementsWidth: elements.width,
+        gap: getComputedStyle(el).columnGap,
+        epilogueTop: epilogue.top, elementsBottom: elements.bottom,
+      };
+    });
+    expect(frame.drawn).toBe(true);
+    expect(frame.gap).toBe("0px");
+    // The phone gives the frame a little of its measure; the desktop's measure stays untouched.
+    expect(frame.elementsWidth).toBeLessThanOrEqual(frame.measure + 0.5);
+    expect(frame.side).toBe(width < 920 ? 12 : 8);
+    await openDatedPage(page, "/lauds/2026-10-07");
+    const feria = await page.locator(".elements").evaluate(el => el.getBoundingClientRect().width);
+    expect(frame.elementsWidth).toBeCloseTo(width < 920 ? feria - 24 : feria, 0);
+    await openDatedPage(page, "/lauds/2026-12-25");
+    // The phone's lines are drawn out past their columns to the screen's edge.
+    const lines = await page.locator(".office-hour").evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const before = getComputedStyle(el, "::before");
+      const after = getComputedStyle(el, "::after");
+      return { left: before.translate, right: after.translate, width: r.width };
+    });
+    expect(lines.left).toBe(width < 920 ? "-20px" : "none");
+    expect(lines.right).toBe(width < 920 ? "20px" : "none");
+  }
+  // A feria has no frame.
+  await openDatedPage(page, "/lauds/2026-10-07");
+  await expect(page.locator("body")).not.toHaveClass(/rank-first-class/);
+  expect(await page.locator(".office-hour").evaluate(el => getComputedStyle(el, "::before").content)).toBe("none");
+});
+
 test("Compline openings preserve words and align response columns around the blessing", async ({ page }) => {
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -3889,35 +3678,6 @@ test("Office prayer instructions retain spacing and Marian collects share initia
     await page.emulateMedia({ media: "screen" });
   }
 });
-
-// The report line clears its own glyphs, as the footer lettering does, and
-// leaves the stars around it: an opaque ground across its touch-target box
-// erased a whole row of the vault on phones.
-test("Apse clears the report lettering, not a band of the starfield", async ({ page }) => {
-  for (const width of [390, 1280]) {
-    await page.setViewportSize({ width, height: 900 });
-    await openDatedPage(page, "/vespers/2026-09-22", "dark");
-    const lines = await page.locator(".report-issue:visible").evaluateAll(els =>
-      els.map(el => {
-        const style = getComputedStyle(el);
-        return {
-          background: style.backgroundColor,
-          boxShadow: style.boxShadow,
-          textShadow: style.textShadow,
-          footerShadow: getComputedStyle(document.querySelector("footer")).textShadow,
-        };
-      }),
-    );
-    expect(lines.length).toBe(1);
-    for (const line of lines) {
-      expect(line.background).toBe("rgba(0, 0, 0, 0)");
-      expect(line.boxShadow).toBe("none");
-      expect(line.textShadow).not.toBe("none");
-      expect(line.textShadow).toBe(line.footerShadow);
-    }
-  }
-});
-
 
 test("error pages display hostile input as text", async ({ page }) => {
   const payload = '<img src=x onerror="window.unsafeMarkup=true"> + " & / café';

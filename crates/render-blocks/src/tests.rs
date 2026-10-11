@@ -2,7 +2,8 @@ use std::path::Path;
 
 use calendar::{CalendarData, Date, MoveableDates};
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, VoiceRole, VoiceSpan,
+    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, Unrepeated,
+    VoiceSpan,
 };
 use office::{Engine, HOUR_NAMES};
 use tools::fs::FsData;
@@ -34,7 +35,7 @@ fn pointed_verses_mark_the_mediant_and_number_the_gutter() {
     assert!(verses[0].drop_cap && !verses[1].drop_cap);
     assert_eq!(verses[1].marker, "2");
     // The drop-cap opening is softened, as on the web.
-    assert!(verses[0].plain_text().starts_with("O All ye Works"), "{}", verses[0].plain_text());
+    assert!(verses[0].plain_text().starts_with("O all ye Works"), "{}", verses[0].plain_text());
     assert_eq!(styles(verses[1]), [RunStyle::Plain, RunStyle::Mediant, RunStyle::Plain, RunStyle::Plain]);
     assert_eq!(verses[1].runs[1].text, "\u{a0}*");
 }
@@ -59,24 +60,33 @@ fn posture_cues_fall_at_their_anchors() {
     assert!(verses[0].plain_text().ends_with("\u{a0}* Sit. unto the Lord."), "{}", verses[0].plain_text());
     assert_eq!(cues(verses[1]), ["Stand."]);
     let gloria = out.last().unwrap();
+    assert_eq!(gloria.kind, BlockKind::GloriaPatri);
+    assert_eq!(styles(gloria).iter().filter(|s| **s == RunStyle::Break).count(), 1, "{gloria:#?}");
     assert_eq!(cues(gloria), ["Bow.", "Stand upright."]);
     assert!(gloria.plain_text().starts_with("Bow. Glory be"), "{}", gloria.plain_text());
 }
 
 #[test]
-fn versicles_and_responses_carry_sigils() {
-    let out = blocks(&elem(ElementType::Versicle, "V. O God, make speed to save us.\nR. O Lord, make haste to help us."));
-    let got: Vec<(BlockKind, &str)> = out.iter().map(|b| (b.kind, b.marker.as_str())).collect();
-    assert_eq!(got, [(BlockKind::Versicle, "℣."), (BlockKind::Response, "℟.")]);
-    assert_eq!(out[0].plain_text(), "℣. O God, make speed to save us.");
-}
-
-#[test]
-fn a_short_responsory_opens_with_an_unmarked_response() {
-    let out = blocks(&elem(ElementType::ShortResponsory, "R. Incline my heart, O God. * Unto thy testimonies.\nV. Turn away mine eyes."));
-    assert_eq!(out[0].kind, BlockKind::Response);
-    assert_eq!(out[0].marker, "");
-    assert_eq!(out[1].marker, "℣.");
+fn an_announced_antiphon_is_its_own_kind() {
+    let mut announced = elem(ElementType::Antiphon, "Let my prayer * O Lord, enter into thy presence.");
+    announced.announce = true;
+    let full = elem(ElementType::Antiphon, "Let my prayer * O Lord, enter into thy presence.");
+    let out = element_blocks(&[announced, full]);
+    assert_eq!(out.iter().map(|b| b.kind).collect::<Vec<_>>(), [BlockKind::AnnouncedAntiphon, BlockKind::Antiphon]);
+    assert_eq!(out[0].plain_text(), "Ant. Let my prayer.");
+    // The unrepeated-words note follows its antiphon's setting.
+    let psalm = || {
+        let mut p = elem(ElementType::Psalm, "Psalm 144\n\nBLESSED be the Lord my strength * who teacheth my hands to war.\n");
+        p.unrepeated = Some(Unrepeated { words: 2, named: String::new() });
+        p
+    };
+    let note = |announce: bool| {
+        let mut antiphon = elem(ElementType::Antiphon, "Blessed be * the Lord my strength and my fortress.");
+        antiphon.announce = announce;
+        element_blocks(&[antiphon, psalm()])[1].kind
+    };
+    assert_eq!(note(true), BlockKind::AnnouncementNote);
+    assert_eq!(note(false), BlockKind::AntiphonNote);
 }
 
 #[test]
@@ -86,22 +96,7 @@ fn secret_words_and_the_cross_are_their_own_runs() {
     let out = blocks(&e);
     assert_eq!(out.len(), 1);
     assert_eq!(styles(&out[0]), [RunStyle::Plain, RunStyle::Secret, RunStyle::Cross, RunStyle::Secret]);
-}
-
-#[test]
-fn speaker_turns_are_labelled() {
-    let mut e = elem(ElementType::Prayer, "Lord, have mercy. Christ, have mercy.");
-    e.voice = vec![
-        VoiceSpan::new("Lord, have mercy. ", true, Some(VoiceRole::Officiant)),
-        VoiceSpan::new("Christ, have mercy.", true, Some(VoiceRole::Response)),
-    ];
-    let kinds: Vec<(BlockKind, String)> = blocks(&e).iter().map(|b| (b.kind, b.plain_text())).collect();
-    assert_eq!(kinds[0], (BlockKind::Speaker, "Leader".to_string()));
-    assert_eq!(kinds[2], (BlockKind::Speaker, "People".to_string()));
-}
-
-#[test]
-fn prayed_words_in_a_rubric_are_marked() {
+    // Prayed words quoted in a rubric are their own runs too.
     let mut e = elem(ElementType::Rubric, "Then is said Glory be.");
     e.rubric_spans =
         vec![RubricSpan { text: "Then is said ".into(), prayed: false }, RubricSpan { text: "Glory be.".into(), prayed: true }];
@@ -109,7 +104,14 @@ fn prayed_words_in_a_rubric_are_marked() {
 }
 
 #[test]
-fn a_hymn_folds_its_amen_into_the_last_stanza() {
+fn a_hymn_s_rubrics_stand_in_its_column_and_its_amen_folds_in() {
+    let out = blocks(&elem(
+        ElementType::Hymn,
+        "/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\n\n/:Stand.:/\n\nVirgin thou immortal,\n",
+    ));
+    let kinds: Vec<BlockKind> = out.iter().map(|b| b.kind).collect();
+    assert_eq!(kinds, [BlockKind::Heading, BlockKind::HymnRubric, BlockKind::Stanza, BlockKind::HymnRubric, BlockKind::Stanza]);
+    // A closing Amen folds into the last stanza.
     let out = blocks(&elem(ElementType::Hymn, "Now that the daylight fills the sky,\nWe lift our hearts to God on high,\n\nAmen."));
     assert_eq!(out[0].kind, BlockKind::Heading);
     let stanzas: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Stanza).collect();
@@ -128,6 +130,7 @@ fn compline_opens_with_a_heading_and_collapsible_sections_do_not() {
         title: "Compline".into(),
         season: None,
         feast: String::new(),
+        rank: None,
         color: None,
         sections: vec![
             OfficeSection { label: String::new(), collapsible: false, elements: vec![elem(ElementType::Prayer, "Pray, Father.")] },

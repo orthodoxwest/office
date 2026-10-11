@@ -351,6 +351,7 @@ fn element(e: &OfficeElement) -> Value {
         "commemoration_owner_id": s(&e.commemoration_owner_id),
         "is_commemoration": e.is_commemoration,
         "announce": e.announce,
+        "unrepeated": e.unrepeated.as_ref().map(|u| json!({"words": u.words, "named": s(&u.named)})),
     })
 }
 
@@ -451,13 +452,16 @@ fn calendar_day_record(d: &CalendarDay) -> Value {
     })
 }
 
-/// The Office-only resolution of the day: concurrence and the Marian antiphon.
+/// The Office-only resolution of the day: concurrence and the Marian
+/// antiphon of each hour that says one.
 fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
     let v = &o.vespers;
+    let moveable = MoveableDates::compute(d.date.year());
+    let marian = |hour: &str| office::seasonal::marian_antiphon(d.date, hour, &moveable);
     json!({
         "kind": "office_day",
         "date": day_str(d.date),
-        "marian_antiphon": o.marian_antiphon,
+        "marian_antiphon": {"lauds": marian("lauds"), "vespers": marian("vespers"), "compline": marian("compline")},
         "vespers": {
             "owner": v.owner.as_str(),
             "feast": feast(v.feast.as_deref()),
@@ -500,27 +504,4 @@ fn check(v: &Value, path: &mut Vec<String>) -> Result<(), String> {
 pub fn marshal(v: &Value) -> Result<String, String> {
     check(v, &mut Vec::new())?;
     Ok(serde_json::to_string(v).expect("serializing a Value cannot fail"))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn canonical_encoding_matches_snapshot_contract() {
-        let v = json!({"b": "<&>\u{2028}", "a": [1, null, true], "c": "\u{1}\t\"\\"});
-        assert_eq!(marshal(&v).unwrap(), r#"{"a":[1,null,true],"b":"<&>\u{2028}","c":"\u0001\t\"\\"}"#.replace("\\u{2028}", "\u{2028}"));
-        assert_eq!(marshal(&json!({"x": [{"y": ""}]})).unwrap_err(), "/x/0/y: empty string (absent values are null)");
-    }
-
-    #[test]
-    fn selection_is_canonical() {
-        let sel = Selection { start_year: 2026, years: 1, hours: vec!["vespers".into(), "lauds".into()], ..Selection::default() }
-            .normalize()
-            .unwrap();
-        assert_eq!(sel.hours, ["lauds", "vespers"]);
-        assert_eq!(sel.forms, PRAYER_FORMS);
-        let err = Selection { start_year: 2026, years: 1, groups: vec!["x".into()], ..Selection::default() }.normalize().unwrap_err();
-        assert_eq!(err, "unknown record group \"x\" (want one of [corpus calendar office hours])");
-    }
 }

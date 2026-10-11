@@ -1,6 +1,6 @@
 # AWRV Benedictine Divine Office
 
-[Pray the Office](https://office.fly.dev) — the English Benedictine daily
+[Pray the Office](https://orthodoxwestbreviary.com) — the English Benedictine daily
 office for Antiochian Western Rite Vicariate use, with each hour's prayers,
 psalms, and propers assembled on one page.
 
@@ -92,6 +92,14 @@ make golden                      # update expected output after intentional chan
 make verify-psalms                # compare the psalter with its reference witness
 ```
 
+Each worktree has its own `target/`. Compiling bundled SQLite takes most of a
+cold release build; to share it across worktrees, install sccache and set
+`CC = "sccache cc"` under `[env]` in `~/.cargo/config.toml`. Don't use
+sccache as `rustc-wrapper`: Rust cache keys include the `target/` path, so a
+new worktree misses on every crate and builds more slowly.
+`make sweep-targets` deletes `target/` in checkouts idle for `SWEEP_HOURS`
+(default 24).
+
 Review changes under [tests/fixtures/golden/](tests/fixtures/golden/)
 (rendered hours, date-sensitive parity, text provenance) before committing.
 
@@ -139,11 +147,29 @@ and `data/` into a Debian slim runtime image. CI smoke-tests that image.
 Maintainers with Fly access deploy with `fly deploy`. To roll back a change,
 revert its PR, merge the revert, and deploy it.
 
+**Changing address.** `OFFICE_CANONICAL_HOST` (a bare host such as
+`example.org`) makes every other host forward there: browser navigations get a
+page that carries the reader's settings across, and other requests a 301 (308
+for non-GET). The usage beacon, `/office.ics` and `/static/*` keep answering on
+the old host, since native builds post beacons without following redirects and
+subscribed calendars keep polling their feed URL; the feed's links name the
+canonical host. The old host's `/sw.js` becomes a worker that clears its caches
+and unregisters. Unset, every host is served as itself.
+
+**Search and link previews.** `/robots.txt` and `/sitemap.xml` point crawlers at
+the undated pages (today's day and hours, this year's ordo, reminders, privacy)
+on the canonical host. Every page names its canonical URL without `?form=` and
+carries Open Graph tags for link previews; dated days and hours, ordo years
+other than this one and the next, and error pages are `noindex`.
+
 ### Usage metrics
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from
 the service-worker cache) of daily unique browsers, overall and per office,
-ordo, and reminder feed, over 7/30/90/366 days. Days are America/New_York.
+ordo, and reminder feed, over 7/30/90/365 days. Days are America/New_York.
+Its headline is the last seven completed days' average against the seven
+before, and the chart draws a trailing seven-day average, so a launch isn't
+averaged in with the quiet months before it.
 
 **What counts.** Visible pages, not completed prayers. A browser counts once
 overall and once in each hour it opens. Ordo counts a viewed calendar page;
@@ -155,16 +181,41 @@ browsers are missed; multiple devices or cleared cookies inflate the count.
 rendered, chosen or inherited) and `screen:desktop|mobile` (mobile means under
 the 700px breakpoint or a touch-primary pointer). Office pages also report
 `prayer-form:private|deacon|priest`, which measures the prayers read, not the
-reader's ordination. Each counts once per browser per day, so a reader who
+reader's ordination. `visit:first|returning` says whether this browser or installation first opened the Office
+today: each keeps that day on the device (`office-first-counted` in localStorage, `usage-first`
+in the apps) and sends only the word, so nothing links one day to the next. Browsers that used
+the Office before it existed count as returning when they hold a setting or the service
+worker; apps, when they had reported before. `client:browser|pwa|android|ios` separates a browser tab,
+the web app installed to a home screen, and the native apps. Prime, on a day
+with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
+reader's Settings choice (off by default) read it or left the rubric, which
+measures the reading's exposure (see MARTYROLOGY.md). Each counts once per browser per day, so a reader who
 switches mid-day counts on both sides and a pair can exceed the daily total;
 clients with an older cached `app.js` report none, so a pair can also fall
 short. The report draws each pair as a day-by-day mix band, since one period
 share can't distinguish a steady split from a migration.
 
 Values are stored as `family:value` and are never redefined: add a new key so
-an old series ends where its meaning ended. The server only has to understand
-the scope; unknown tokens from newer or older cached clients are dropped and
-the page still counts.
+an old series ends where its meaning ended. The vocabulary lives in
+`presentation::usage`, shared by the server's parser and the apps' beacons
+(app.js mirrors it). The server only has to understand the scope; unknown
+tokens from newer or older cached clients are dropped and the page still counts.
+
+**The native apps.** Release builds of the Android and iOS apps post the same
+beacon to `https://orthodoxwestbreviary.com/api/usage` (`presentation::usage::ENDPOINT`)
+until the server names another: every counted beacon's reply carries
+`Office-Usage-Endpoint: https://<canonical host>/api/usage`, and the apps keep it
+and post there from then on (only a plain HTTPS host is accepted). Builds from
+before the move post to `https://office.fly.dev/api/usage`, which keeps
+answering, and follow the header the same way. The browser's beacon is relative, so it follows the site by itself.
+Apps post when a page is shown: home and the reminders page count toward the total, each
+hour and the ordo in their columns, and turning reminders on counts as
+Reminders. The same current-page window applies (`current_day`, `current_year`);
+there is no engagement gate, since nothing crawls an app. Instead of a cookie the
+server sets, each app sends a random ID it replaces every reporting day, so
+nothing it sends ties one day to the next. Beacons are best effort: never queued
+offline or retried later. Debug builds (and so the apps' tests and CI
+screenshots) never report.
 
 **Scraping is welcome but never counted.** There is no robots.txt, but a
 crawler presents a fresh cookie jar per page and would otherwise mint a
@@ -193,7 +244,8 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 ```
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
-(30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`).
+(30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`); the
+apps send their own daily ID in its place.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept

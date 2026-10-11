@@ -16,3 +16,5 @@ Feast 'companion-rank' is an apostolic companion but is ranked double instead of
 Feast 'bad-rule' has unrecognized DateRule: "whitsun+1" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
 Feast 'bad-advent' has unrecognized DateRule: "advent-sunday-5" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
 Feast 'bad-epiphany' has unrecognized DateRule: "epiphany-sunday-0" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
+Feast 'group-title' would fill "N." in its Common's collect with its title "The Forty Holy Martyrs"; give it a ProperName or a proper collect (#607)
+Feast 'octave-title' would fill "N." in its Common's collect with its title "The Octave of Ss Peter & Paul"; give it a ProperName or a proper collect (#607)

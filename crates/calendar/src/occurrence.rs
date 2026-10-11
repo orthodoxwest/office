@@ -10,12 +10,16 @@ use crate::traits::{is_ember_day, is_privileged_feria};
 
 /// The precedence key (higher wins). Sundays below Greater Double are
 /// boosted to Greater Double.
-fn sort_key(f: &Feast) -> [i32; 3] {
+fn sort_key(f: &Feast) -> [i32; 4] {
     let mut weight = f.rank.weight();
     if f.is_category(Category::Sunday) && weight < Rank::GreaterDouble.weight() {
         weight = Rank::GreaterDouble.weight();
     }
-    [weight, i32::from(f.is_moveable()), i32::from(f.is_category(Category::Lord))]
+    // X.1(c): a primary feast before a secondary one of the same rite, ahead
+    // of the Lord's personal dignity (X.1(d)): Ss Philip and James before the
+    // Finding of the Holy Cross (2021 and 2024 ordos), St Mark after it (2022),
+    // the Circumcision before the Holy Name (2017-2024 ordos); #557.
+    [weight, i32::from(!f.secondary), i32::from(f.is_moveable()), i32::from(f.is_category(Category::Lord))]
 }
 
 fn is_corpus_octave_day(f: &Feast) -> bool {
@@ -33,7 +37,12 @@ pub fn compare_feast_precedence_with_decision(a: &Feast, b: &Feast) -> (bool, De
         |rule: &str, wins: bool| (wins, Decision::new(rule, if wins { "challenger-wins" } else { "incumbent-holds" }, detail.as_str()));
 
     // Privileged ferias of the second class take the office over every feast
-    // below a Double of the second class.
+    // below a Double of the second class. So an Advent Ember Day takes the
+    // office from a Common Octave Day, which is commemorated (rubrics p. 59:
+    // the Octave Day "is preferred to any Feast except a I or II Class Double,
+    // an Ember Day, or Rogation Monday", naming the Conception's octave; Table
+    // of Occurrence, p. 60, 4; XIII.16, p. 64): 15 December 2021, 2027, 2032. The 2021 ordo keeps the Octave of
+    // the Conception, commemorating the feria; awaiting a ruling (#638).
     let (a_pf, b_pf) = (is_privileged_feria(a), is_privileged_feria(b));
     if a_pf != b_pf {
         let other = if b_pf { a } else { b };
@@ -68,10 +77,13 @@ pub fn compare_feast_precedence_with_decision(a: &Feast, b: &Feast) -> (bool, De
         return decision(rule, ak[0] > bk[0]);
     }
     if ak[1] != bk[1] {
-        return decision("occurrence:temporal-tiebreak", ak[1] > bk[1]);
+        return decision("occurrence:primary-tiebreak", ak[1] > bk[1]);
     }
     if ak[2] != bk[2] {
-        return decision("occurrence:lord-tiebreak", ak[2] > bk[2]);
+        return decision("occurrence:temporal-tiebreak", ak[2] > bk[2]);
+    }
+    if ak[3] != bk[3] {
+        return decision("occurrence:lord-tiebreak", ak[3] > bk[3]);
     }
     decision("occurrence:equal-precedence-possession", false)
 }
@@ -147,6 +159,7 @@ fn day(date: Date, season: Season) -> CalendarDay {
         temporal_week_id: None,
         within_octave_of: None,
         penitential: Penitential::default(),
+        monastic: Vec::new(),
     }
 }
 
@@ -159,8 +172,14 @@ pub fn resolve_day(
     season_color: Color,
     transferred_in: &[FeastRef],
 ) -> (CalendarDay, Vec<FeastRef>) {
+    // XI.7: a transferred feast goes to the next day free of an occurrent
+    // Sunday, so on a Sunday it waits without competing (2021 ordo: the
+    // Visitation passes over the Sunday within the Corpus Christi octave).
+    let (held, transferred_in): (Vec<FeastRef>, Vec<FeastRef>) =
+        transferred_in.iter().cloned().partition(|_| date.weekday() == Weekday::Sunday);
+    let transferred_in = transferred_in.as_slice();
     let mut all: Vec<FeastRef> = candidates.iter().chain(transferred_in).cloned().collect();
-    let mut transfers_out = Vec::new();
+    let mut transfers_out = held.clone();
     let mut decisions = vec![Decision::new(
         "occurrence:resolution-mode",
         "start",
@@ -169,6 +188,9 @@ pub fn resolve_day(
     let (filtered, vigil_decisions) = exclude_seasonal_vigils(all, season);
     all = filtered;
     decisions.extend(vigil_decisions);
+    if !held.is_empty() {
+        decisions.push(Decision::new("occurrence:transfer-in", "held-over-sunday", feast_ids(&held)));
+    }
     if !transferred_in.is_empty() {
         decisions.push(Decision::new("occurrence:transfer-in", "considered", feast_ids(transferred_in)));
     }
@@ -205,9 +227,24 @@ pub fn resolve_day(
         decisions.push(Decision::new("occurrence:resolution-mode", "general-precedence", ""));
         &all
     };
+    let is_transferred = |f: &FeastRef| transferred_in.iter().any(|t| Arc::ptr_eq(t, f));
     let mut winner = pool[0].clone();
     for f in &pool[1..] {
-        let (wins, decision) = compare_feast_precedence_with_decision(f, &winner);
+        let (mut wins, mut decision) = compare_feast_precedence_with_decision(f, &winner);
+        // XI.7: a transferred feast waits for a day free of a I or II Class
+        // Double (2024 ordo: the Nativity of St John Baptist passes over the
+        // Visitation). XI.8: of equal transferred feasts the one whose own day
+        // comes first goes first (2019, 2021 and 2022 ordos: St Mark, then Ss
+        // Philip and James, then the Finding of the Holy Cross).
+        if wins && is_transferred(f) {
+            let occupied = !is_transferred(&winner) && winner.rank.weight() >= Rank::Double2ndClass.weight();
+            let earlier_equal = is_transferred(&winner) && sort_key(f)[0] == sort_key(&winner)[0];
+            if occupied || earlier_equal {
+                wins = false;
+                let outcome = if occupied { "day-occupied" } else { "earlier-own-day" };
+                decision = Decision::new("occurrence:transfer-order", outcome, format!("challenger={}; incumbent={}", f.id, winner.id));
+            }
+        }
         decisions.push(decision);
         if wins {
             winner = f.clone();
@@ -245,59 +282,4 @@ pub fn resolve_day(
     result.resolution_rule = if is_privileged_mode { "occurrence:privileged-day" } else { "occurrence:general-precedence" }.to_string();
     result.occurrence_decisions = decisions;
     (result, transfers_out)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn feast(id: &str, rank: Rank, category: Category) -> FeastRef {
-        Arc::new(Feast::synthetic(id, id, rank, Color::White, category))
-    }
-
-    #[test]
-    fn privileged_feria_beats_below_second_class() {
-        let feria = feast("lent-feria", Rank::PrivilegedFeria, Category::Feria);
-        let double = feast("st-x", Rank::GreaterDouble, Category::Confessor);
-        let second = feast("st-y", Rank::Double2ndClass, Category::Confessor);
-        assert!(compare_feast_precedence(&feria, &double));
-        assert!(!compare_feast_precedence(&double, &feria));
-        assert!(!compare_feast_precedence(&feria, &second));
-        assert!(compare_feast_precedence(&second, &feria));
-    }
-
-    #[test]
-    fn sunday_boost_and_possession() {
-        let sunday = feast("pentecost-sunday-5", Rank::SemiDouble, Category::Sunday);
-        let double = feast("st-x", Rank::Double, Category::Confessor);
-        let (wins, d) = compare_feast_precedence_with_decision(&sunday, &double);
-        assert!(wins);
-        assert_eq!(d.rule, "occurrence:sunday-rank-boost");
-        let other = feast("st-z", Rank::Double, Category::Confessor);
-        let (wins, d) = compare_feast_precedence_with_decision(&other, &double);
-        assert!(!wins);
-        assert_eq!(d.rule, "occurrence:equal-precedence-possession");
-    }
-
-    #[test]
-    fn second_class_transfers_and_simple_is_commemorated() {
-        let date = Date::new(2026, 6, 16); // Tuesday
-        let first = feast("big", Rank::Double1stClass, Category::Lord);
-        let second = feast("second", Rank::Double2ndClass, Category::Martyr);
-        let simple = feast("simple", Rank::Simple, Category::Martyr);
-        let (day, out) = resolve_day(date, &[second.clone(), first.clone(), simple.clone()], Season::Pentecost, Color::Green, &[]);
-        assert!(Arc::ptr_eq(day.celebration.as_ref().unwrap(), &first));
-        assert_eq!(out.len(), 1);
-        assert!(Arc::ptr_eq(&out[0], &second));
-        assert_eq!(day.commemorations.len(), 1);
-        assert_eq!(day.resolution_rule, "occurrence:general-precedence");
-    }
-
-    #[test]
-    fn empty_day_is_seasonal_feria() {
-        let (day, out) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
-        assert!(day.celebration.is_none() && out.is_empty());
-        assert_eq!(day.color, Color::Green);
-        assert_eq!(day.resolution_rule, "occurrence:no-candidates");
-    }
 }

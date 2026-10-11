@@ -3,12 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
-  <title>{% block title %}Divine Office{% endblock %}</title>
+  {%- set description %}{% block description %}The Benedictine Divine Office of the Antiochian Western Rite Vicariate: Lauds through Compline for each day, with the ordo and liturgical calendar.{% endblock %}{% endset %}
+  <meta name="description" content="{{ description }}">
+  <title>{% block title %}Daily Office{% endblock %}</title>
+  {# Search engines and link previews (Messages, WhatsApp, Facebook, Slack) read these. A dated
+       day or hour, a far year of the ordo and an error stay out of search results; their links
+       are still followed. See office-web crawl.rs. #}
+  {% if noindex %}<meta name="robots" content="noindex">{% endif %}
+  {% if site %}
+  <link rel="canonical" href="{{ (site ~ canonical)|url }}">
+  <meta property="og:site_name" content="Daily Office">
+  <meta property="og:type" content="website">
+  {# Shared without a date, home stands for the whole site rather than the day it was shared. #}
+  <meta property="og:title" content="{% if canonical == "/" %}Daily Office{% else %}{{ self.title() }}{% endif %}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ (site ~ canonical)|url }}">
+  {# tools/genicons.py paints the card from the app icon's scene. #}
+  <meta property="og:image" content="{{ (site ~ static("icons/share-card.png"))|url }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Daily Office app icon, a gold cross in its ring, beside the words Daily Office">
+  <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
   {# Apply stored appearance before CSS to avoid a flash.
-       Keys: office-theme, office-text-size, office-prayer-form. #}
+       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
   <script>
     (function () {
+      {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
+      try {
+        var carry = /^#office-carry=(.*)$/.exec(location.hash);
+        if (carry) {
+          new URLSearchParams(decodeURIComponent(carry[1])).forEach(function (value, key) {
+            if (/^office-(theme|text-size|prayer-form|martyrology)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
+          });
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+      } catch (e) {}
       try {
         var leaders = ["private", "deacon", "priest"];
         var requestedLeader = new URLSearchParams(location.search).get("form");
@@ -28,6 +58,7 @@
         } else if (s === "default") {
           document.documentElement.removeAttribute("data-text-size");
         }
+        if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
       } catch (e) {}
     })();
   </script>
@@ -52,7 +83,7 @@
 {# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
      that do not stand on a single day. #}
-<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}{% if rank_class %} {{ rank_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
   {%- from "macros.html" import prefs %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
@@ -117,6 +148,8 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
+    {# Footer matter a page adds under the tailpiece (the hours' report link). #}
+    {% block footer_matter %}{% endblock %}
   </footer>
 </body>
 </html>

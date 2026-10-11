@@ -19,10 +19,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -44,7 +44,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.94.1
@@ -85,7 +85,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@1.94.1
       - uses: Swatinem/rust-cache@v2
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload assurance summary
         if: always() && steps.assurance.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: assurance-summary
           path: assurance-summary.md
@@ -134,7 +134,7 @@ jobs:
 
       - name: Post or update golden failure comment
         if: steps.golden.outcome == 'failure' && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           GOLDEN_DIFF: ${{ steps.golden_diff.outputs.diff }}
         with:
@@ -185,7 +185,7 @@ jobs:
 
       - name: Resolve golden failure comment if tests now pass
         if: steps.golden.outcome == 'success' && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = '<!-- golden-test-result -->';
@@ -227,7 +227,7 @@ jobs:
     steps:
       - name: Determine whether UX tests are needed
         id: ux_changes
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const isIgnored = filename =>
@@ -278,17 +278,47 @@ jobs:
               : 'Skipping UX tests because only data and golden files changed.');
             core.setOutput('run', run ? 'true' : 'false');
 
+  # Built once on a bare runner, which already has a C toolchain, and handed
+  # to every suite. The browser image has none, and installing one there
+  # meant apt and a toolchain download in each suite, any of which could
+  # fail on a mirror timeout. The runner must stay on the browser image's
+  # Ubuntu release (jammy) so the binary links against the same glibc.
+  ux-server:
+    name: UX server build
+    needs: ux-changes
+    if: needs.ux-changes.outputs.run == 'true'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@1.94.1
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build the Rust server
+        run: make build
+
+      - name: Upload the server
+        uses: actions/upload-artifact@v7
+        with:
+          name: ux-server
+          path: target/release/office
+          if-no-files-found: error
+          retention-days: 1
+
   # The behavior suite is CPU-bound on one runner (more than 4 workers buys
   # nothing), so it is sharded across runners and the visual suite runs
-  # beside it. Each runner builds the server itself: with the shared Rust
-  # cache that is quicker than waiting on one build job for its binary.
+  # beside it.
   ux:
     name: UX ${{ matrix.suite }}
-    needs: ux-changes
+    needs: [ux-changes, ux-server]
     if: needs.ux-changes.outputs.run == 'true'
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+      image: mcr.microsoft.com/playwright:v1.63.0-jammy
     permissions:
       contents: read
       pull-requests: write
@@ -306,27 +336,19 @@ jobs:
             args: tests/visual.spec.js --workers=2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Install Rust build tools
-        run: |
-          if ! command -v cc > /dev/null || ! command -v make > /dev/null || ! command -v curl > /dev/null; then
-            apt-get update
-            apt-get install -y --no-install-recommends gcc libc6-dev make curl ca-certificates
-          fi
-
-      - uses: dtolnay/rust-toolchain@1.94.1
-
-      - uses: Swatinem/rust-cache@v2
+      - name: Download the Rust server
+        uses: actions/download-artifact@v8
         with:
-          # Every entry builds the same binary; one upload is enough.
-          save-if: ${{ matrix.suite == 'visual' }}
+          name: ux-server
+          path: target/release
 
-      - name: Build the Rust server
-        run: make build
+      - name: Make the server executable
+        run: chmod +x target/release/office
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -345,7 +367,7 @@ jobs:
 
       - name: Upload UX test report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.suite }}
           path: output/playwright/
@@ -367,7 +389,7 @@ jobs:
 
       - name: Upload visual snapshot candidates
         if: steps.candidates.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ux-snapshot-candidates
           path: .web-tools/tests/visual.spec.js-snapshots/
@@ -380,7 +402,7 @@ jobs:
           steps.tests.outcome == 'failure' &&
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = '<!-- ux-snapshot-result -->';
@@ -427,7 +449,7 @@ jobs:
           steps.tests.outcome == 'success' &&
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = '<!-- ux-snapshot-result -->';
@@ -459,7 +481,7 @@ jobs:
   # change rightly skipped them, whatever the shard layout above.
   ux-status:
     name: UX
-    needs: [ux-changes, ux]
+    needs: [ux-changes, ux-server, ux]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions: {}
@@ -469,6 +491,7 @@ jobs:
         env:
           DETECTION: ${{ needs.ux-changes.result }}
           RUN: ${{ needs.ux-changes.outputs.run }}
+          SERVER: ${{ needs.ux-server.result }}
           SUITES: ${{ needs.ux.result }}
         run: |
           if [ "$DETECTION" != success ]; then
@@ -478,6 +501,10 @@ jobs:
           if [ "$RUN" != true ]; then
             echo "Playwright skipped because only data and golden files changed." >> "$GITHUB_STEP_SUMMARY"
             exit 0
+          fi
+          if [ "$SERVER" != success ]; then
+            echo "::error::UX server build finished as $SERVER; see the UX server build job."
+            exit 1
           fi
           if [ "$SUITES" != success ]; then
             echo "::error::UX suites finished as $SUITES; see the UX jobs."
@@ -490,7 +517,35 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
+      # The Dockerfile's cache mounts live only inside this runner's Docker,
+      # so without this every run compiled every crate from scratch. They are
+      # saved like Swatinem/rust-cache's: keyed on the lockfile, refreshed
+      # when it changes, and restored by every branch.
+      - name: Cache the image's Cargo directories
+        id: cargo-cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            ${{ runner.temp }}/docker-cargo/registry
+            ${{ runner.temp }}/docker-cargo/git
+            ${{ runner.temp }}/docker-cargo/target
+          key: docker-cargo-${{ hashFiles('Cargo.lock', 'Dockerfile') }}
+          restore-keys: docker-cargo-
+
+      - name: Load the cache into Docker's cache mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          cache-map: |
+            {
+              "${{ runner.temp }}/docker-cargo/registry": "/usr/local/cargo/registry",
+              "${{ runner.temp }}/docker-cargo/git": "/usr/local/cargo/git",
+              "${{ runner.temp }}/docker-cargo/target": "/usr/src/app/target"
+            }
+          scratch-dir: ${{ runner.temp }}/docker-cargo-scratch
+          skip-extraction: ${{ steps.cargo-cache.outputs.cache-hit }}
+
       - name: Build runtime image
         run: docker build -t office-smoke .
       - name: Validate the packaged corpus and serve pages with usage enabled

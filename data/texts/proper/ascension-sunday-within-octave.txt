@@ -132,3 +132,10 @@ R. And to my God, and your God, alleluia.
 [lauds-psalmody]
 # SOURCE: Monastic Diurnal p. 392 (Lauds psalmody)
 @use psalmody/lauds/festal
+
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 389: the Ascension hymn's "Ending is never changed."
+@omit
+
+[hymn-doxology-vespers]
+@use proper/ascension-sunday-within-octave/hymn-doxology-lauds

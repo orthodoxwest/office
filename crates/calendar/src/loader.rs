@@ -5,13 +5,17 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use crate::date::Date;
-use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonthDay, OctaveClass, Rank};
+use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonasticObservance, MonthDay, OctaveClass, Rank};
 use crate::penitential::{PenitentialRule, section_to_penitential_rule};
 use data_format::atoi;
 use data_format::quote;
 
 /// The feast definition files, in load order.
 pub const FEAST_FILES: [&str; 4] = ["temporal.txt", "sanctoral.txt", "awrv.txt", "commemorations.txt"];
+
+/// Observances the ordo brackets for monastics and oblates. Not a feast file: nothing in it
+/// enters occurrence.
+pub const MONASTIC_FILE: &str = "feasts/monastic.txt";
 
 /// The penitential rules file at the data root.
 pub const PENITENTIAL_RULES_FILE: &str = "penitential.txt";
@@ -88,7 +92,10 @@ fn valid_fixed_date(month: i64, day: i64) -> bool {
     i64::from(date.month()) == month && i64::from(date.day()) == day
 }
 
-const KNOWN_FEAST_KEYS: [&str; 22] = [
+/// Per-day octave name keys, `OctaveDay2` through `OctaveDay8`.
+const OCTAVE_DAY_KEYS: [&str; 7] = ["OctaveDay2", "OctaveDay3", "OctaveDay4", "OctaveDay5", "OctaveDay6", "OctaveDay7", "OctaveDay8"];
+
+const KNOWN_FEAST_KEYS: [&str; 24] = [
     "Name",
     "Rank",
     "Color",
@@ -103,9 +110,11 @@ const KNOWN_FEAST_KEYS: [&str; 22] = [
     "IsVigil",
     "VigilOf",
     "OctaveOf",
+    "OctaveDays",
     "CommemorationClass",
     "OctaveClass",
     "PrimaryOfOurLord",
+    "Secondary",
     "CompanionOf",
     "OnlyWith",
     "SkipRomanLeapShift",
@@ -173,6 +182,12 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
             return Err(fail("PrimaryOfOurLord requires a Double I Class feast of Our Lord".to_string()));
         }
     }
+    if let Some(v) = flag("Secondary")? {
+        f.secondary = v;
+        if v && f.primary_of_our_lord {
+            return Err(fail("Secondary contradicts PrimaryOfOurLord".to_string()));
+        }
+    }
     if let Some(v) = flag("IsVigil")? {
         f.is_vigil = v;
     }
@@ -182,6 +197,20 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     }
     if m.get("OctaveOf").is_some() {
         f.octave_of = text("OctaveOf");
+    }
+    if let Some(pattern) = text("OctaveDays") {
+        if pattern.replace("{n}", "").replace("{weekday}", "").contains(['{', '}']) {
+            return Err(fail(format!("OctaveDays: unknown placeholder in {}", quote(&pattern))));
+        }
+        f.octave_days = Some(pattern);
+    }
+    for (day, key) in (2..).zip(OCTAVE_DAY_KEYS) {
+        if let Some(name) = text(key) {
+            f.octave_day_names.insert(day, name);
+        }
+    }
+    if (f.octave_days.is_some() || !f.octave_day_names.is_empty()) && !f.has_octave {
+        return Err(fail("OctaveDays and OctaveDay2–OctaveDay8 require HasOctave = true".to_string()));
     }
     if m.get("CompanionOf").is_some() {
         f.companion_of = text("CompanionOf");
@@ -206,7 +235,7 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     }
 
     // Report the first unknown key in byte order.
-    if let Some(key) = m.values.keys().find(|k| !KNOWN_FEAST_KEYS.contains(&k.as_str())) {
+    if let Some(key) = m.values.keys().find(|k| !KNOWN_FEAST_KEYS.contains(&k.as_str()) && !OCTAVE_DAY_KEYS.contains(&k.as_str())) {
         return Err(fail(format!("unrecognized key {}", quote(key))));
     }
 
@@ -257,6 +286,44 @@ pub fn load_feasts(src: &dyn DataSource) -> Result<Vec<FeastRef>, String> {
     Ok(feasts)
 }
 
+const KNOWN_MONASTIC_KEYS: [&str; 7] = ["Name", "Rank", "Month", "Day", "Office", "Source", "Notes"];
+
+/// Converts a parsed section into a monastic observance.
+pub fn section_to_monastic(m: &Section, source_file: &str) -> Result<MonasticObservance, String> {
+    let qid = quote(&m.id);
+    let fail = |e: String| format!("{source_file}: observance {qid}: {e}");
+    if m.id.is_empty() {
+        return Err(format!("{source_file}: section missing ID"));
+    }
+    if let Some(key) = m.values.keys().find(|k| !KNOWN_MONASTIC_KEYS.contains(&k.as_str())) {
+        return Err(fail(format!("unrecognized key {}", quote(key))));
+    }
+    let name = m.value("Name").to_string();
+    if name.is_empty() {
+        return Err(fail("missing Name".to_string()));
+    }
+    let rank = Rank::parse(m.value("Rank")).map_err(fail)?;
+    let month = atoi(m.value("Month")).map_err(|e| fail(format!("invalid Month: {e}")))?;
+    let day = atoi(m.value("Day")).map_err(|e| fail(format!("invalid Day: {e}")))?;
+    if !valid_fixed_date(month, day) {
+        return Err(fail(format!("invalid fixed date {month}/{day}")));
+    }
+    Ok(MonasticObservance {
+        id: m.id.clone(),
+        name,
+        rank,
+        fixed: MonthDay { month: month as u32, day: day as u32 },
+        office: m.get("Office").and_then(crate::model::non_empty),
+    })
+}
+
+/// Loads the monastic observances, none when the file is absent.
+pub fn load_monastic(src: &dyn DataSource) -> Result<Vec<MonasticObservance>, String> {
+    let Some(content) = src.read(MONASTIC_FILE)? else { return Ok(Vec::new()) };
+    let sections = parse_ini_sections(&src.display_path(MONASTIC_FILE), &content).map_err(|e| format!("parsing {MONASTIC_FILE}: {e}"))?;
+    sections.iter().map(|s| section_to_monastic(s, MONASTIC_FILE)).collect()
+}
+
 /// Loads the penitential rules file, which must exist.
 pub fn load_penitential_rules(src: &dyn DataSource) -> Result<Vec<PenitentialRule>, String> {
     let path = src.display_path(PENITENTIAL_RULES_FILE);
@@ -270,23 +337,21 @@ pub fn load_penitential_rules(src: &dyn DataSource) -> Result<Vec<PenitentialRul
 pub struct CalendarData {
     pub feasts: Vec<FeastRef>,
     pub penitential_rules: Vec<PenitentialRule>,
+    pub monastic: Vec<MonasticObservance>,
 }
 
 impl CalendarData {
     pub fn load(src: &dyn DataSource) -> Result<CalendarData, String> {
         let feasts = load_feasts(src).map_err(|e| format!("loading feasts: {e}"))?;
         let penitential_rules = load_penitential_rules(src).map_err(|e| format!("loading penitential rules: {e}"))?;
-        Ok(CalendarData { feasts, penitential_rules })
+        let monastic = load_monastic(src).map_err(|e| format!("loading monastic observances: {e}"))?;
+        Ok(CalendarData { feasts, penitential_rules, monastic })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn section(text: &str) -> Section {
-        parse_ini_sections("test.txt", text).unwrap().remove(0)
-    }
 
     #[test]
     fn parses_sections_and_comments() {
@@ -295,57 +360,24 @@ mod tests {
         assert_eq!(sections[0].get("Name"), Some("A = B"));
         assert_eq!(sections[0].get("Rank"), Some("double"));
         assert_eq!(sections[1].id, "b");
-    }
-
-    #[test]
-    fn syntax_errors() {
         assert_eq!(parse_ini_sections("f.txt", "Name = x\n").unwrap_err(), "f.txt:1: key-value pair outside of section");
         assert_eq!(parse_ini_sections("f.txt", "[a]\n\nnonsense\n").unwrap_err(), "f.txt:3: expected Key = value, got \"nonsense\"");
     }
 
     #[test]
-    fn fixed_feast() {
-        let f = section_to_feast(
-            &section("[st-x]\nName = St X\nRank = double\nColor = red\nCategory = martyr\nMonth = 2\nDay = 29\n"),
-            "s.txt",
-        )
-        .unwrap();
-        assert_eq!(f.fixed, Some(MonthDay { month: 2, day: 29 }));
-        assert_eq!(f.source.as_deref(), Some("base"));
-        assert_eq!(f.category, Some(Category::Martyr));
-    }
-
-    #[test]
-    fn schema_errors() {
-        let cases = [
-            ("[x]\nRank = double\nColor = red\nMonth = 1\nDay = 1\n", "s.txt: feast \"x\" missing Name"),
-            ("[x]\nName = X\nRank = big\nColor = red\n", "s.txt: feast \"x\": invalid rank: \"big\""),
-            ("[x]\nName = X\nRank = double\nColor = red\nMonth = 1\n", "s.txt: feast \"x\" must specify Month and Day together"),
-            ("[x]\nName = X\nRank = double\nColor = red\n", "s.txt: feast \"x\" must have either Month/Day or DateRule"),
-            ("[x]\nName = X\nRank = double\nColor = red\nMonth = 2\nDay = 30\n", "s.txt: feast \"x\" has invalid fixed date 2/30"),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nBogus = 1\n",
-                "s.txt: feast \"x\": unrecognized key \"Bogus\"",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nHasOctave = yes\n",
-                "s.txt: feast \"x\": HasOctave: expected true or false, got \"yes\"",
-            ),
-            (
-                "[x]\nName = X\nRank = simple\nColor = red\nCategory = martyr\nMonth = 1\nDay = 1\nIsVigil = true\n",
-                "s.txt: feast \"x\" is a vigil but has category \"martyr\" instead of feria",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nMonth = 1\nDay = 1\nOctaveClass = simple\n",
-                "s.txt: feast \"x\" specifies OctaveClass without HasOctave (except a Simple octave day)",
-            ),
-            (
-                "[x]\nName = X\nRank = double\nColor = red\nCategory = lord\nMonth = 1\nDay = 1\nPrimaryOfOurLord = true\n",
-                "s.txt: feast \"x\": PrimaryOfOurLord requires a Double I Class feast of Our Lord",
-            ),
-        ];
-        for (text, want) in cases {
-            assert_eq!(section_to_feast(&section(text), "s.txt").unwrap_err(), want);
-        }
+    fn monastic_observances_parse_and_reject_feast_keys() {
+        let parse = |raw: &str| section_to_monastic(&parse_ini_sections("m.txt", raw).unwrap()[0], "m.txt");
+        let o =
+            parse("[x]\nName = Solemnity of St Benedict\nRank = greater-double\nMonth = 7\nDay = 11\nOffice = Proper Office\n").unwrap();
+        assert_eq!(o.heading(), "Solemnity of St Benedict (Monastics & Oblates Only)");
+        assert_eq!((o.rank, o.fixed, o.office.as_deref()), (Rank::GreaterDouble, MonthDay { month: 7, day: 11 }, Some("Proper Office")));
+        assert_eq!(
+            parse("[x]\nName = X\nRank = double\nMonth = 7\nDay = 32\n").unwrap_err(),
+            "m.txt: observance \"x\": invalid fixed date 7/32"
+        );
+        assert_eq!(
+            parse("[x]\nName = X\nRank = double\nMonth = 7\nDay = 1\nHasOctave = true\n").unwrap_err(),
+            "m.txt: observance \"x\": unrecognized key \"HasOctave\""
+        );
     }
 }

@@ -2,8 +2,11 @@
 # Source: "Expectation BVM MD Propers.pdf" (Monastic Diurnal-format supplement),
 # pp. 1-2. Slots the supplement leaves to the Common of Feasts B.V.M. (Lauds
 # short responsory "Hail Mary, full of grace") fall through to
-# commons/blessed-virgin. Lauds psalmody is the festal Sunday set ("Ps. 93
-# Dominus regnavit and the rest, p. 34"), which the engine already gives.
+# commons/blessed-virgin. Needs ruling (#657): the 2023 and 2025 ordos give
+# the Common of the B.V.M. instead (61*, 65*-67*); 2017 and 2018 give this
+# proper office, which is kept until clergy rule. Lauds psalmody is the
+# festal Sunday set ("Ps. 93 Dominus regnavit and the rest, p. 34"), which the
+# engine already gives.
 
 [psalm-antiphon]
 @use proper/expectation-bvm/psalm-antiphon-1

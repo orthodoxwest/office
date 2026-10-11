@@ -1,5 +1,8 @@
 //! `office`: the command-line front end and web-server entry point.
 
+// The CLI matches serde_json values, not liturgical enums.
+#![allow(clippy::wildcard_enum_match_arm)]
+
 mod args;
 mod checks;
 mod commands;
@@ -21,6 +24,7 @@ fn cmd_serve(data: &tools::fs::FsData, args: &[String], _out: &mut dyn Write) ->
     let addr = args.first().map(String::as_str).unwrap_or(":8080");
     let mut server = office_web::Server::new(&data.dir).map_err(|e| format!("creating server: {e}"))?;
     server.open_usage_from_env();
+    server.canonical_host_from_env();
     eprintln!("Listening on http://localhost{addr}");
     office_web::run(server, addr)
 }

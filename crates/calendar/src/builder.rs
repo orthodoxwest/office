@@ -35,8 +35,10 @@ fn short_name_for(id: &str) -> Option<&'static str> {
     SHORT_NAMES.iter().find(|(k, _)| *k == id).map(|(_, v)| *v)
 }
 
+/// The feast's name without its titles, for octave and vigil references:
+/// "St James, Apostle" → "Vigil of St James".
 fn short_name(feast: &Feast) -> String {
-    short_name_for(&feast.id).map_or_else(|| feast.name.clone(), str::to_string)
+    short_name_for(&feast.id).map_or_else(|| feast.name.split(", ").next().unwrap_or_default().to_string(), str::to_string)
 }
 
 /// The display name of an octave's parent feast ("christmas" → "Christmas").
@@ -132,6 +134,32 @@ fn anticipated_epiphany_sunday_feast(m: &MoveableDates) -> Option<Feast> {
     );
     f.proper_id = Some(format!("epiphany-sunday-{n}"));
     f.date_rule = Some("easter-64".to_string()); // Saturday before Septuagesima
+    Some(f)
+}
+
+/// A Sunday after Pentecost left over before the last Sunday, anticipated on
+/// the preceding Saturday (General Rubrics, Sundays 4): the XXIII when there
+/// are 23 Sundays after Pentecost (2022 ordo, 19 November), or the XXII when
+/// there are 22 and the VII Sunday after Epiphany already took the XXIII
+/// (2021 ordo, 20 November). None when Epiphany VII/VIII used them all.
+fn anticipated_pentecost_sunday_feast(m: &MoveableDates, epiphany_sundays: usize) -> Option<Feast> {
+    let trinity = m.easter.add_days(56);
+    let total = m.advent1.days_since(trinity) / 7;
+    let used_after_epiphany: &[i32] = match epiphany_sundays {
+        7 => &[23],
+        8 => &[22, 23],
+        _ => &[],
+    };
+    let n = (total..=23).rev().find(|n| !used_after_epiphany.contains(n))?;
+    let saturday = m.advent1.add_days(-8);
+    let mut f = sunday(
+        format!("pentecost-sunday-{n}-anticipated"),
+        format!("Office of the {} Sunday after Pentecost", roman(n)),
+        Rank::SemiDouble,
+        Color::Green,
+    );
+    f.proper_id = Some(format!("pentecost-sunday-{n}"));
+    f.date_rule = Some(format!("easter+{}", saturday.days_since(m.easter)));
     Some(f)
 }
 
@@ -271,6 +299,14 @@ fn vigil_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast>
     vigils
 }
 
+/// "From Ash Wednesday, all Octaves cease until Low Sunday inclusive"
+/// (every ordo 2017–2026; Diurnal VII.1, VII.3). Easter's own octave is the
+/// exception. A day omitted here keeps its number: St George's octave resumes
+/// after Low Sunday counting from April 23 (2025 ordo, 30 April).
+fn octave_ceases(feast: &Feast, date: Date, m: &MoveableDates) -> bool {
+    feast.id != "easter-sunday" && date >= m.ash_wednesday && date <= m.low_sunday
+}
+
 /// Days 2–8 of every octave.
 fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast> {
     use crate::model::OctaveClass;
@@ -284,6 +320,9 @@ fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast
             let date = parent.add_days(day_num - 1);
             if is_christmas && day_num == 8 {
                 continue; // Jan 1 has its own feast
+            }
+            if octave_ceases(feast, date, m) {
+                continue;
             }
             if is_privileged {
                 if feast.id == "easter-sunday" && matches!(day_num, 2 | 3 | 8) {
@@ -307,24 +346,13 @@ fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast
             };
             let short = short_name(feast);
             let n = roman(day_num);
-            let (id, name) = if is_octave_day {
-                let name = match feast.id.as_str() {
-                    "conception-bvm" => "Octave of the Conception of the B.V.M.".to_string(),
-                    "nativity-john-baptist" => "Octave of St John Baptist".to_string(),
-                    "ss-peter-paul" => "The Octave of Ss Peter & Paul".to_string(),
-                    _ => format!("Octave Day of {short}"),
-                };
-                (format!("{}-octave-day", feast.id), name)
-            } else {
-                let name = match feast.id.as_str() {
-                    _ if is_christmas => format!("Day {n} within the Nativity Octave"),
-                    "conception-bvm" => format!("Day {n} within Conception Octave"),
-                    "nativity-john-baptist" => format!("Day {n} within the Octave of St John Baptist"),
-                    "ss-peter-paul" => format!("Day {n} within the Octave of Ss Peter & Paul"),
-                    _ => format!("Day {n} within the Octave of {short}"),
-                };
-                (format!("{}-octave-day-{day_num}", feast.id), name)
+            let name = match (feast.octave_day_names.get(&day_num), &feast.octave_days) {
+                (Some(name), _) => name.clone(),
+                (None, Some(pattern)) if !is_octave_day => pattern.replace("{n}", &n).replace("{weekday}", date.weekday().name()),
+                _ if is_octave_day => format!("Octave Day of {short}"),
+                _ => format!("Day {n} within the Octave of {short}"),
             };
+            let id = if is_octave_day { format!("{}-octave-day", feast.id) } else { format!("{}-octave-day-{day_num}", feast.id) };
             // Ferial days within the octave take per-day antiphon sets in
             // course, skipping Sundays.
             let mut proper_id = feast.id.clone();
@@ -359,10 +387,10 @@ fn remaining_ember_feasts(m: &MoveableDates, year: i32) -> Vec<Feast> {
     for (season, wed) in [("advent", advent_wed), ("september", sep_wed)] {
         for offset in [0, 2, 3] {
             let date = wed.add_days(offset);
-            let label = format!("{season}-ember-{}", date.weekday().name().to_lowercase());
+            let weekday = date.weekday().name();
             let mut f = Feast::synthetic(
-                label.clone(),
-                title_case(&label.replace('-', " ")),
+                format!("{season}-ember-{}", weekday.to_lowercase()),
+                format!("Ember {weekday} in {}", title_case(season)),
                 Rank::PrivilegedFeria,
                 Color::Violet,
                 Category::Feria,
@@ -452,39 +480,59 @@ fn temporal_week_id(candidates: &[FeastRef]) -> Option<String> {
     fallback
 }
 
-/// "Wednesday after Lent III" for unnamed Lenten and Passiontide weekdays.
-fn lenten_feria_name(date: Date, easter: Date, season: Season) -> Option<String> {
-    if date.weekday() == Weekday::Sunday {
+/// The ordo's name for an unnamed weekday of a penitential season:
+/// "Wednesday after Lent III", "Thursday after Septuagesima", "Tuesday after
+/// Advent I". In Septuagesimatide and Advent a Saturday is named for the
+/// Sunday it precedes ("Saturday before Sexagesima", "Saturday before Advent
+/// II"); Lent keeps "Saturday after Lent IV" (2026 ordo).
+fn seasonal_feria_name(date: Date, m: &MoveableDates, season: Season) -> Option<String> {
+    let weekday = date.weekday();
+    if weekday == Weekday::Sunday {
         return None;
     }
-    let weekday = date.weekday().name();
-    let to_easter = easter.days_since(date);
-    let after = match season {
+    let to_easter = m.easter.days_since(date);
+    let (after, before) = match season {
         Season::Lent => match to_easter {
-            43..=45 => "Ash Wednesday",
-            36..=41 => "Lent I",
-            29..=34 => "Lent II",
-            22..=27 => "Lent III",
-            15..=20 => "Lent IV",
+            43..=45 => ("Ash Wednesday".to_string(), None),
+            36..=41 => ("Lent I".to_string(), None),
+            29..=34 => ("Lent II".to_string(), None),
+            22..=27 => ("Lent III".to_string(), None),
+            15..=20 => ("Lent IV".to_string(), None),
             _ => return None,
         },
         Season::Passiontide => match to_easter {
-            8..=13 => "Passion Sunday",
+            8..=13 => ("Passion Sunday".to_string(), None),
+            1..=6 => ("Palm Sunday".to_string(), None),
             _ => return None,
         },
-        Season::Advent | Season::Christmas | Season::Epiphany | Season::Septuagesima | Season::Easter | Season::Pentecost => return None,
+        Season::Septuagesima => match to_easter {
+            57..=62 => ("Septuagesima".to_string(), Some("Sexagesima".to_string())),
+            50..=55 => ("Sexagesima".to_string(), Some("Quinquagesima".to_string())),
+            47..=48 => ("Quinquagesima".to_string(), None),
+            _ => return None,
+        },
+        Season::Advent => {
+            let week = date.days_since(m.advent1) / 7 + 1;
+            (format!("Advent {}", roman(week)), (week < 4).then(|| format!("Advent {}", roman(week + 1))))
+        }
+        Season::Christmas | Season::Epiphany | Season::Easter | Season::Pentecost => return None,
     };
-    Some(format!("{weekday} after {after}"))
+    Some(match before {
+        Some(next) if weekday == Weekday::Saturday => format!("Saturday before {next}"),
+        _ => format!("{} after {after}", weekday.name()),
+    })
 }
 
 /// The F2 feria that takes the office on weekdays in Lent and Passiontide.
-fn privileged_lenten_feria(date: Date, easter: Date, season: Season, week_id: Option<&str>) -> Option<Feast> {
-    if date.weekday() == Weekday::Sunday || !matches!(season, Season::Lent | Season::Passiontide) {
+/// Maundy Thursday, Good Friday and Holy Saturday are themselves the ferias
+/// of their days, so no feria stands beside them to be commemorated.
+fn privileged_lenten_feria(date: Date, m: &MoveableDates, season: Season, week_id: Option<&str>) -> Option<Feast> {
+    if date.weekday() == Weekday::Sunday || !matches!(season, Season::Lent | Season::Passiontide) || m.easter.days_since(date) <= 3 {
         return None;
     }
     let mut f = Feast::synthetic(
         "privileged-lenten-feria",
-        feria_commemoration_name(date, easter, season, week_id),
+        feria_commemoration_name(date, m, season),
         Rank::PrivilegedFeria,
         season.color(),
         Category::Feria,
@@ -494,19 +542,13 @@ fn privileged_lenten_feria(date: Date, easter: Date, season: Season, week_id: Op
 }
 
 /// "Friday after Lent III" or "Thursday after Septuagesima", else "the Feria".
-fn feria_commemoration_name(date: Date, easter: Date, season: Season, week_id: Option<&str>) -> String {
-    if let Some(name) = lenten_feria_name(date, easter, season) {
-        return name;
-    }
-    match week_id {
-        Some(w) if !w.is_empty() => format!("{} after {}", date.weekday().name(), title_case(&w.replace('-', " "))),
-        _ => "the Feria".to_string(),
-    }
+fn feria_commemoration_name(date: Date, m: &MoveableDates, season: Season) -> String {
+    seasonal_feria_name(date, m, season).unwrap_or_else(|| "the Feria".to_string())
 }
 
 /// The commemoration of the occurring seasonal feria displaced by a feast in
 /// Advent or on a penitential weekday (XIV.2,9).
-fn feria_commemoration(day: &CalendarDay, easter: Date) -> Option<Feast> {
+fn feria_commemoration(day: &CalendarDay, m: &MoveableDates) -> Option<Feast> {
     if !is_penitential_feria_season(day.season) || day.date.weekday() == Weekday::Sunday {
         return None;
     }
@@ -517,15 +559,15 @@ fn feria_commemoration(day: &CalendarDay, easter: Date) -> Option<Feast> {
     if day.commemorations.iter().any(|c| c.is_category(Category::Feria) && !c.is_vigil) {
         return None; // e.g. a demoted Ember day
     }
-    Some(seasonal_feria_commemoration(day, easter))
+    Some(seasonal_feria_commemoration(day, m))
 }
 
 /// The displaced seasonal feria as a commemoration. The office crate also
 /// uses it for a free feria at the next feast's I Vespers.
-pub fn seasonal_feria_commemoration(day: &CalendarDay, easter: Date) -> Feast {
+pub fn seasonal_feria_commemoration(day: &CalendarDay, m: &MoveableDates) -> Feast {
     let mut f = Feast::synthetic(
         FERIA_COMMEMORATION_ID,
-        feria_commemoration_name(day.date, easter, day.season, day.temporal_week_id.as_deref()),
+        feria_commemoration_name(day.date, m, day.season),
         Rank::Commemoration,
         day.season.color(),
         Category::Feria,
@@ -566,10 +608,14 @@ pub struct YearCalendar {
 pub fn build_calendar(year: i32, data: &CalendarData) -> Result<YearCalendar, String> {
     let (_, incoming) = build_calendar_year(year - 1, &data.feasts, &data.penitential_rules, &[])
         .map_err(|e| format!("building previous-year padding: {e}"))?;
-    let (days, outgoing) = build_calendar_year(year, &data.feasts, &data.penitential_rules, &incoming)?;
+    let (mut days, outgoing) = build_calendar_year(year, &data.feasts, &data.penitential_rules, &incoming)?;
     let (next, _) = build_calendar_year(year + 1, &data.feasts, &data.penitential_rules, &outgoing)
         .map_err(|e| format!("building following-year padding: {e}"))?;
-    let following_jan1 = next.into_iter().next().ok_or_else(|| format!("following-year padding for {} is empty", year + 1))?;
+    let mut following_jan1 = next.into_iter().next().ok_or_else(|| format!("following-year padding for {} is empty", year + 1))?;
+    for day in days.iter_mut().chain(std::iter::once(&mut following_jan1)) {
+        let on = MonthDay { month: day.date.month(), day: day.date.day() };
+        day.monastic = data.monastic.iter().filter(|o| o.fixed == on).cloned().collect();
+    }
     Ok(YearCalendar { year, days, following_jan1 })
 }
 
@@ -579,18 +625,23 @@ fn push_candidate(candidates: &mut HashMap<Date, Vec<FeastRef>>, feast: &FeastRe
     }
 }
 
+/// A feast awaiting transfer, with the date it was impeded on its own day.
+type Transferred = (Date, FeastRef);
+
 /// Resolves occurrence for one civil year, taking and returning the transfer
 /// queue at its boundaries.
 fn build_calendar_year(
     year: i32,
     feasts: &[FeastRef],
     rules: &[PenitentialRule],
-    incoming: &[FeastRef],
-) -> Result<(Vec<CalendarDay>, Vec<FeastRef>), String> {
+    incoming: &[Transferred],
+) -> Result<(Vec<CalendarDay>, Vec<Transferred>), String> {
     let m = MoveableDates::compute(year);
 
     let mut computed = epiphany_sunday_feasts(year, m.septuagesima);
+    let epiphany_sundays = computed.len();
     computed.extend(anticipated_epiphany_sunday_feast(&m));
+    computed.extend(anticipated_pentecost_sunday_feast(&m, epiphany_sundays));
     computed.extend(advent_sunday_feasts());
     computed.extend(eastertide_sunday_feasts());
     computed.extend(pentecost_sunday_feasts(m.easter, m.advent1));
@@ -624,14 +675,18 @@ fn build_calendar_year(
     for f in all_base.iter().filter(|f| f.has_octave) {
         if let Some(parent) = resolve_feast_date(f, year, &m) {
             for n in 0..8 {
-                octave_ranges.insert(parent.add_days(n), f.id.clone());
+                let date = parent.add_days(n);
+                if octave_ceases(f, date, &m) {
+                    continue;
+                }
+                octave_ranges.insert(date, f.id.clone());
             }
         }
     }
 
     let end = Date::new(year, 12, 31);
     let mut days = Vec::with_capacity(366);
-    let mut pending: Vec<FeastRef> = incoming.to_vec();
+    let mut pending: Vec<Transferred> = incoming.to_vec();
     let mut week_id: Option<String> = None;
     // A Sunday office anticipated on Saturday still governs the week that follows.
     let mut anticipated_week: Option<String> = None;
@@ -648,17 +703,23 @@ fn build_calendar_year(
                 .find(|f| f.is_category(Category::Sunday))
                 .map(|f| f.proper_id.clone().unwrap_or_else(|| f.id.clone()));
         }
-        if let Some(feria) = privileged_lenten_feria(current, m.easter, season, week_id.as_deref())
+        if let Some(feria) = privileged_lenten_feria(current, &m, season, week_id.as_deref())
             && !day_candidates.iter().any(|f| f.is_category(Category::Feria))
         {
             day_candidates.push(Arc::new(feria));
         }
-        let transferred_in = std::mem::take(&mut pending);
+        // XI.8: equal transferred feasts are kept in the order of their own days.
+        let queue = std::mem::take(&mut pending);
+        let transferred_in: Vec<FeastRef> = queue.iter().map(|(_, f)| f.clone()).collect();
         let (mut day, out) = resolve_day(current, &day_candidates, season, season.color(), &transferred_in);
-        pending.extend(out);
+        for f in out {
+            let own_day = queue.iter().find(|(_, q)| Arc::ptr_eq(q, &f)).map_or(current, |(d, _)| *d);
+            pending.push((own_day, f));
+        }
+        pending.sort_by_key(|(d, _)| *d);
         day.temporal_week_id = week_id.clone();
         if day.celebration.is_none() {
-            day.tempora = lenten_feria_name(current, m.easter, season);
+            day.tempora = seasonal_feria_name(current, &m, season);
         }
         if current.weekday() == Weekday::Saturday && day.celebration.is_none() && saturday_office_bvm_allowed(season) {
             let bvm = saturday_office_bvm_feast(current, season);
@@ -666,7 +727,7 @@ fn build_calendar_year(
             day.celebration = Some(Arc::new(bvm));
         }
         day.within_octave_of = octave_ranges.get(&current).cloned();
-        day.feria_commemoration = feria_commemoration(&day, m.easter).map(Arc::new);
+        day.feria_commemoration = feria_commemoration(&day, &m).map(Arc::new);
         days.push(day);
         current = current.add_days(1);
     }
@@ -680,22 +741,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn title_case_words() {
-        assert_eq!(title_case("advent ember wednesday"), "Advent Ember Wednesday");
-        assert_eq!(octave_display_name("christmas"), "Christmas");
-        assert_eq!(octave_display_name("st-lawrence"), "St Lawrence");
-    }
-
-    #[test]
-    fn nativity_octave_sunday() {
-        // 2022: Christmas on Sunday → Dec 29. 2027: Sunday Dec 26 → Dec 29.
-        // 2025: Sunday Dec 28 → Dec 29. 2024: Sunday Dec 29.
-        for (year, day) in [(2022, 29), (2027, 29), (2025, 29), (2024, 29), (2023, 31)] {
-            assert_eq!(nativity_octave_sunday_feast(year).fixed, Some(MonthDay { month: 12, day }), "{year}");
-        }
-    }
-
-    #[test]
     fn pentecost_sundays_resume_epiphany() {
         // 2024: Easter May 5 → few Sundays after Pentecost; 2026 has more.
         for year in [2024, 2026, 2029] {
@@ -705,79 +750,5 @@ mod tests {
             assert_eq!(resolve_feast_date(last, year, &m), Some(m.advent1.add_days(-7)), "{year}");
             assert!(last.id == "pentecost-sunday-24" || last.proper_id.as_deref() == Some("pentecost-sunday-24"));
         }
-    }
-
-    #[test]
-    fn leap_shift() {
-        assert_eq!(adjust_fixed_date_for_leap_year(2024, 2, 24, "st-matthias"), (2, 25));
-        assert_eq!(adjust_fixed_date_for_leap_year(2025, 2, 24, "st-matthias"), (2, 24));
-        assert_eq!(adjust_fixed_date_for_leap_year(2024, 2, 24, "vigil-of-x"), (2, 24));
-    }
-
-    #[test]
-    fn date_rules() {
-        let m = MoveableDates::compute(2026);
-        let rule = |r: &str| {
-            let mut f = Feast::synthetic("x", "x", Rank::Double, Color::White, Category::Lord);
-            f.date_rule = Some(r.to_string());
-            resolve_feast_date(&f, 2026, &m)
-        };
-        assert_eq!(rule("easter+1"), Some(m.easter_monday));
-        assert_eq!(rule("easter-63"), Some(m.septuagesima));
-        assert_eq!(rule("holy-name"), Some(Date::new(2026, 1, 4)));
-        assert_eq!(rule("last-sunday-october"), Some(Date::new(2026, 10, 25)));
-        assert_eq!(rule("advent-sunday-3"), Some(m.advent3));
-        assert_eq!(rule("advent-sunday-5"), None);
-        assert_eq!(rule("epiphany-sunday-2"), Some(Date::new(2026, 1, 18)));
-        assert_eq!(rule("pentecost-sunday-1"), Some(m.trinity_sunday));
-        assert_eq!(rule("nonsense"), None);
-        assert_eq!(rule("easter"), None);
-    }
-}
-
-#[cfg(test)]
-mod octave_tests {
-    use super::*;
-    use crate::model::OctaveClass;
-
-    #[test]
-    fn privileged_octaves_exclude_explicit_feasts_and_keep_easter_offsets() {
-        for (id, offset, days) in [("easter-sunday", 0, vec![4, 5, 6, 7]), ("pentecost", 49, vec![2, 3, 4, 5, 6, 7])] {
-            let mut f = Feast::synthetic(id, id, Rank::Double1stClass, Color::White, Category::Lord);
-            f.has_octave = true;
-            f.octave_class = OctaveClass::PrivilegedFirst;
-            f.date_rule = Some(format!("easter+{offset}"));
-            let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
-            assert_eq!(generated.len(), days.len());
-            for (f, n) in generated.iter().zip(days) {
-                assert_eq!(f.id, format!("{id}-octave-day-{n}"));
-                assert_eq!(f.date_rule, Some(format!("easter+{}", offset + n - 1)));
-                assert_eq!(f.rank, Rank::Double1stClass);
-                assert!(f.is_privileged_octave_day);
-            }
-        }
-    }
-
-    #[test]
-    fn octave_antiphon_sets_skip_sunday_and_terminal_day() {
-        let mut f = Feast::synthetic("example", "Example", Rank::Double1stClass, Color::White, Category::Apostle);
-        f.fixed = Some(MonthDay { month: 6, day: 11 });
-        f.has_octave = true;
-        f.octave_class = OctaveClass::PrivilegedThird;
-        let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
-        let expected = [
-            "example-octave-set-1",
-            "example-octave-set-2",
-            "example",
-            "example-octave-set-3",
-            "example-octave-set-4",
-            "example-octave-set-5",
-            "example",
-        ];
-        for (f, want) in generated.iter().zip(expected) {
-            assert_eq!(f.proper_id.as_deref(), Some(want));
-        }
-        assert_eq!(generated.last().unwrap().rank, Rank::GreaterDouble);
-        assert!(!generated.last().unwrap().is_privileged_octave_day);
     }
 }

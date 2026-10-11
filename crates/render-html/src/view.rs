@@ -15,7 +15,16 @@ pub struct Chrome {
     /// ordo, or empty when the page is always current.
     pub usage_when: String,
     pub season_class: String,
+    /// `rank-first-class` on a first-class day's hour, which is framed; empty otherwise.
+    pub rank_class: String,
     pub show_today: bool,
+    /// The site's origin (`https://host`), for the absolute addresses search engines and link
+    /// previews read; empty on pages with no address of their own (errors, the usage report).
+    pub site: String,
+    /// The page's path on `site`, without the reader's own choices (`?form=`).
+    pub canonical: String,
+    /// Kept out of search results: a dated day or hour, an ordo year far from now, an error.
+    pub noindex: bool,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -24,6 +33,8 @@ pub struct HomeHourLink {
     pub slug: String,
     pub url: String,
     pub is_current: bool,
+    /// What the hour is ("Evening prayer"), shown under its name while it is the current hour.
+    pub note: String,
 }
 
 /// The day-landing page.
@@ -36,12 +47,19 @@ pub struct HomeData {
     pub prev_link: String,
     pub next_link: String,
     pub today_link: String,
+    /// The day's name without its alias, and the alias in its parentheses
+    /// ("(Corpus Christi)") or empty (`presentation::split_alias`).
     pub feast_name: String,
+    pub feast_alias: String,
     pub commemorations: Vec<String>,
     pub color: String,
     pub season: String,
     pub octave_note: String,
     pub penitential: Vec<String>,
+    /// The day's versicle from Lauds and its response, set in the head on a plain day; both
+    /// empty otherwise (`presentation::home_shows_versicle`).
+    pub versicle: String,
+    pub response: String,
     pub calendar_link: String,
     pub pray_now_label: String,
     pub pray_now_link: String,
@@ -104,6 +122,17 @@ pub struct CommemorationRow {
     pub incipit: String,
 }
 
+/// An observance the ordo brackets for monastics and oblates, printed under the day's office.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct MonasticRow {
+    /// "Solemnity of St Benedict (Monastics & Oblates Only)", without the brackets.
+    pub heading: String,
+    pub rank: String,
+    pub rank_full: String,
+    /// Where its office is found, or empty.
+    pub office: String,
+}
+
 /// One day of the year calendar, with its office digest.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct DayRow {
@@ -118,6 +147,7 @@ pub struct DayRow {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    pub monastic: Vec<MonasticRow>,
     pub benedictus_antiphon: String,
     pub magnificat_antiphon: String,
     pub lauds_preces: bool,
@@ -228,6 +258,20 @@ pub struct RemindersData {
 /// The styled 404 page.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct NotFoundData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+}
+
+/// The privacy policy.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct PrivacyData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+}
+
+/// How to join the Android app's closed test on Google Play.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct BetaData {
     #[serde(flatten)]
     pub chrome: Chrome,
 }

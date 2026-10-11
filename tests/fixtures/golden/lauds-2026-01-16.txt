@@ -37,7 +37,7 @@ As it was in the beginning, is now, and ever shall be, * world without end. Amen
 
 Alleluia
 
---- Psalm 67 · Deus misereatur nostri ---
+--- Psalm 66 (67) · Deus misereatur nostri ---
 Psalm 67
 
 GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his countenance, and be merciful unto us:
@@ -53,7 +53,7 @@ GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his coun
 
 With thy free Spirit.
 
---- Psalm 51 · Miserere mei, Deus ---
+--- Psalm 50 (51) · Miserere mei, Deus ---
 Psalm 51
 
 HAVE mercy upon me, O God, after thy great goodness * [Sit.] according to the multitude of thy mercies do away mine offences.
@@ -83,7 +83,7 @@ With thy free Spirit * stablish my heart, O God.
 
 His Name is great.
 
---- Psalm 76 · Notus in Judæa Deus ---
+--- Psalm 75 (76) · Notus in Judæa Deus ---
 Psalm 76
 
 IN JEWRY is God known * [Sit.] his Name is great in Israel.
@@ -106,10 +106,12 @@ His Name is great * in Israel.
 
 It is a good thing.
 
---- Psalm 92 · Bonum est confiteri Domino ---
+These words are not repeated in the Psalm.
+
+--- Psalm 91 (92) · Bonum est confiteri Domino ---
 Psalm 92
 
-IT IS a good thing to give thanks unto the Lord * [Sit.] and to sing praises unto thy Name, O most Highest;
+(IT IS a good thing) to give thanks unto the Lord * [Sit.] and to sing praises unto thy Name, O most Highest;
 2. To tell of thy loving-kindness early in the morning * and of thy truth in the night-season;
 3. Upon an instrument of ten strings, and upon the lute * upon a loud instrument, and upon the harp.
 4. For thou, Lord, hast made me glad through thy works * and I will rejoice in giving praise for the operations of thy hands.
@@ -131,10 +133,12 @@ It is a good thing * to give thanks unto the Lord.
 
 O Lord.
 
+These words are not repeated in the Canticle.
+
 --- Habakkuk 3 · Domine, audivi auditionem tuam ---
 !Habakkuk 3:2-19
 
-O Lord, I have heard thy speech, * [Sit.] and was afraid.
+(O Lord,) I have heard thy speech, * [Sit.] and was afraid.
 2. O Lord, revive thy work in the midst of the years, in the midst of the years make known; * in wrath remember mercy.
 3. God came from Teman, * and the Holy One from mount Paran.
 4. His glory covered the heavens, * and the earth was full of his praise.
@@ -229,20 +233,20 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Heal my soul, * for I have sinned against thee.
 
 --- Aeterna caeli gloria ---
-Eternal Glory of the sky,
-Blest Hope of frail humanity,
+Eternal glory of the sky,
+Blest hope of frail humanity,
 The Father's Sole-begotten One,
 Yet born a spotless Virgin's Son;
 
-Uplift us with Thine arm of might,
-And let our hearts rise pure and bright;
-And ardent in God's praises, pay
-The thanks we owe Him every day.
+Uplift us with thine arm of might,
+And let our hearts rise pure and bright,
+And, ardent in God's praises, pay
+The thanks we owe him every day.
 
-The Day-star's rays are glittering clear,
-And tell that Day itself is near;
+The day-star's rays are glittering clear,
+And tell that day itself is near:
 The shadows of the night depart;
-Thou, Holy Light, illume the heart.
+Thou, holy Light, illume the heart.
 
 Within our senses ever dwell,
 And worldly darkness thence expel:
@@ -252,12 +256,12 @@ Preserve our souls devout and pure.
 The Faith that first must be possessed,
 Root deep within our inmost breast:
 And joyous Hope in second place,
-Then Charity, Thy greatest grace.
+Then Charity, thy greatest grace.
 
-All glory, Lord, to thee we pay
-For thine Epiphany today;
+All laud to God the Father be;
+All praise, eternal Son, to thee;
 All glory, as is ever meet,
-To Father and to Paraclete.
+To God the Holy Paraclete.
 
 Amen.
 
@@ -296,7 +300,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -377,8 +381,8 @@ R. Amen.
 V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

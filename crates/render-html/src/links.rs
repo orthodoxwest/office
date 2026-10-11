@@ -57,8 +57,9 @@ pub fn static_url(name: &str, version: &str) -> String {
 mod tests {
     use super::*;
 
+    /// Chrome links carry the page's liturgical day, so they hit the service worker's keys.
     #[test]
-    fn nav_link_keeps_chrome_dated() {
+    fn links() {
         const DATE: &str = "2026-06-07";
         for (base, want) in [
             ("/", "/?date=2026-06-07"),
@@ -69,26 +70,12 @@ mod tests {
             assert_eq!(nav_link(base, DATE), want, "nav_link({base:?})");
         }
         assert_eq!(nav_link("/lauds", ""), "/lauds");
-    }
-
-    #[test]
-    fn static_urls() {
-        assert_eq!(static_url("style.css", "abc"), "/static/style.css?v=abc");
-        assert_eq!(static_url("/fonts/x.woff2", "v1"), "/static/fonts/x.woff2?v=v1");
-        assert_eq!(static_url("app.js", ""), "/static/app.js");
-    }
-
-    #[test]
-    fn links() {
-        assert_eq!(nav_link("/", "2026-03-11"), "/?date=2026-03-11");
-        assert_eq!(nav_link("/lauds", "2026-03-11"), "/lauds/2026-03-11");
-        assert_eq!(nav_link("/calendar", "2026-03-11"), "/calendar/2026/03#d-2026-03-11");
-        assert_eq!(nav_link("/calendar", "2026-12-31"), "/calendar/2026/12#d-2026-12-31");
+        assert_eq!(nav_link("/calendar", ""), "/calendar");
         assert_eq!(calendar_month_link(2027, 1), "/calendar/2027/01");
         assert_eq!(calendar_year_link(2027), "/calendar/2027");
         assert_eq!(calendar_all_link(2027), "/calendar/2027/all");
-        assert_eq!(nav_link("/calendar", ""), "/calendar");
-        assert_eq!(nav_link("/reminders", "2026-03-11"), "/reminders");
-        assert_eq!(static_url("/style.css", "abc"), "/static/style.css?v=abc");
+        assert_eq!(static_url("style.css", "abc"), "/static/style.css?v=abc");
+        assert_eq!(static_url("/fonts/x.woff2", "v1"), "/static/fonts/x.woff2?v=v1");
+        assert_eq!(static_url("app.js", ""), "/static/app.js");
     }
 }

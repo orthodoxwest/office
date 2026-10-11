@@ -1,9 +1,10 @@
 import SwiftUI
+import UIKit
 
 /**
  * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
- * frontispiece is set into the wall under a low round head, with a stone moulding, the day's
- * colour as a trim, and the room lit toward it. Phones keep the plain card.
+ * frontispiece is set into the wall under a pointed head, with a stone moulding, the day's colour
+ * as a trim, and the room lit toward it. Phones set it in a painted panel (`Panel`).
  */
 struct NicheTokens {
     let stone: Color
@@ -48,101 +49,183 @@ struct NicheTokens {
 /// The niche's card width at a screen width: clamp(38rem, 10rem + 38vw, 48rem).
 func nicheWidth(_ screen: CGFloat) -> CGFloat { min(max(160 + screen * 0.38, 608), 768) }
 
-/// The round head's height: clamp(5rem, 2rem + 6vw, 8rem).
-func nicheHead(_ screen: CGFloat) -> CGFloat { min(max(32 + screen * 0.06, 80), 128) }
-
-/**
- * The niche's outline for a card of `size`, `outset` beyond it: a low elliptical head across the
- * whole width (border-radius: 50% 50% 0 0 / head head 0 0), square below.
- */
-func nichePath(_ size: CGSize, head: CGFloat, outset d: CGFloat, at origin: CGPoint = .zero) -> Path {
-    let ry = max(0, head + d)
-    let rx = size.width / 2 + d
-    var p = Path()
-    let left = origin.x - d, right = origin.x + size.width + d, top = origin.y - d, bottom = origin.y + size.height + d
-    p.move(to: CGPoint(x: left, y: bottom))
-    p.addLine(to: CGPoint(x: left, y: top + ry))
-    // The head: half an ellipse from the left side over to the right.
-    p.addArc(center: .zero, radius: 1, startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false,
-             transform: CGAffineTransform(translationX: (left + right) / 2, y: top + ry).scaledBy(x: rx, y: max(ry, 0.001)))
-    p.addLine(to: CGPoint(x: right, y: bottom))
-    p.closeSubpath()
-    return p
-}
-
 /// How far the niche's drawing runs beyond the card: the clearing, the moulding and their shadows.
 private let reach: CGFloat = 96
 
+/// The canvas's card, `reach` inside it: its pointed head offset by `d`, dropped `dy`.
+private struct Card {
+    let arch: Arch
+    let full: CGSize
+
+    var origin: CGPoint { CGPoint(x: reach, y: reach) }
+    var size: CGSize { CGSize(width: full.width - 2 * reach, height: full.height - 2 * reach) }
+
+    func shape(_ d: CGFloat, dy: CGFloat = 0) -> Path {
+        archPath(arch, width: size.width, outset: d, foot: size.height + d, at: CGPoint(x: origin.x, y: origin.y + dy))
+    }
+
+    /// Everything on the canvas outside the head offset by `d` and dropped `dy`: the wall, drawn
+    /// only for the shade its edge casts inside the shape.
+    func outside(_ d: CGFloat, dy: CGFloat) -> Path {
+        var wall = Path(CGRect(origin: .zero, size: full))
+        wall.addPath(shape(d, dy: dy))
+        return wall
+    }
+}
+
+/// Draws `path` blurred, for a CSS blur of `blur`: its Gaussian's deviation is half the radius.
+private func blurred(_ ctx: GraphicsContext, _ path: Path, _ color: Color, _ blur: CGFloat, eoFill: Bool = false) {
+    ctx.drawLayer { layer in
+        layer.addFilter(.blur(radius: blur / 2))
+        layer.fill(path, with: .color(color), style: FillStyle(eoFill: eoFill))
+    }
+}
+
 /**
- * The niche behind the frontispiece, in the order the web's box-shadows stack, bottom first: a
- * clearing of the Apse's ground, the shadow under the head, the moulding's edge and stone, the
- * day's colour; then the lit recess, its shadow under the head, the frame and the tooling.
+ * The niche behind the frontispiece, under the pointed head `arch`, in the order the web's
+ * courses stack, outermost first: the room's shade under the niche and a field of the Apse's
+ * ground round both, the clearing, the moulding's edge and stone, the day's colour as a trim;
+ * then the frame and the lit recess, with the shade its head casts. Each is the arch offset by
+ * its own distance.
  */
 struct Niche: View {
+    let arch: Arch
     let t: NicheTokens
     let day: Color
-    let head: CGFloat
     let frame: Color
-    let tooling: Color
     @Environment(\.palette) private var p
 
     var body: some View {
         Canvas { ctx, full in
             let rem: CGFloat = 16
-            let o = CGPoint(x: reach, y: reach)
-            let size = CGSize(width: full.width - 2 * reach, height: full.height - 2 * reach)
-            func shape(_ outset: CGFloat, dy: CGFloat = 0) -> Path {
-                nichePath(size, head: head, outset: outset, at: CGPoint(x: o.x, y: o.y + dy))
-            }
-            // CSS's blur radius is twice the Gaussian's deviation.
-            func blurred(_ path: Path, _ color: Color, _ blur: CGFloat) {
-                ctx.drawLayer { layer in
-                    layer.addFilter(.blur(radius: blur / 2))
-                    layer.fill(path, with: .color(color))
-                }
-            }
+            let card = Card(arch: arch, full: full)
+            let o = card.origin, size = card.size
+            // The moulding's silhouette, the source of its halo: the clearing, or with none the
+            // stone's edge.
+            let outer = t.clear != nil ? 1.25 * rem + 1 : 0.75 * rem + 1
             if let clear = t.clear {
-                blurred(shape(1.4 * rem), clear, 1.8 * rem)
-                ctx.fill(shape(1.25 * rem), with: .color(clear))
+                // drop-shadow(0 0 0.9rem clear) round the moulding and its shadow (as deep as the
+                // night's shade), as the second filter.
+                blurred(ctx, card.shape(outer, dy: 1.25 * rem), clear.opacity(0.62), 1.54 * rem)
+                blurred(ctx, card.shape(outer), clear, 0.9 * rem)
             }
-            // 0 1.5rem 3rem -0.75rem: the head casts its shade down the wall.
-            blurred(shape(-0.75 * rem, dy: 1.5 * rem), t.shade, 3 * rem)
-            ctx.fill(shape(0.75 * rem + 1), with: .color(t.edge))
-            ctx.fill(shape(0.75 * rem), with: .color(t.stone))
-            ctx.fill(shape(2), with: .color(day))
-            let recess = shape(0)
+            // drop-shadow(0 1.25rem 1.25rem chapel-shade): the niche's shade on the wall below it.
+            blurred(ctx, card.shape(outer, dy: 1.25 * rem), t.shade, 1.25 * rem)
+            if let clear = t.clear { ctx.fill(card.shape(1.25 * rem + 1), with: .color(clear)) }
+            ctx.fill(card.shape(0.75 * rem + 1), with: .color(t.edge))
+            ctx.fill(card.shape(0.75 * rem), with: .color(t.stone))
+            // The day's colour is a hint at the niche's edge, not a second frame.
+            ctx.fill(card.shape(1.5), with: .color(day))
+            // The frame, the card's edge drawn in its rule, and the recess 2pt inside it.
+            ctx.fill(card.shape(0), with: .color(p.surface))
+            ctx.fill(card.shape(0), with: .color(frame))
+            let recess = card.shape(-2)
             ctx.fill(recess, with: .color(p.surface))
             ctx.drawLayer { inside in
                 inside.clip(to: recess)
-                // A warm pool under the head, and a sheen falling from it.
-                let rx = size.width * 0.7, ry = size.height * 0.5
+                // A warm pool under the head, and a sheen falling from it, laid from 2rem above
+                // the card as the web's courses are.
+                let top = o.y - 2 * rem
+                let height = size.height + 2 * rem
+                let rx = size.width * 0.7, ry = height * 0.5
                 var pool = inside
-                pool.translateBy(x: o.x + size.width / 2, y: o.y)
+                pool.translateBy(x: o.x + size.width / 2, y: top)
                 pool.scaleBy(x: 1, y: ry / rx)
                 pool.fill(
                     Path(ellipseIn: CGRect(x: -rx, y: -rx, width: 2 * rx, height: 2 * rx)),
                     with: .radialGradient(Gradient(stops: [.init(color: t.warm, location: 0), .init(color: t.warm.opacity(0), location: 0.72)]), center: .zero, startRadius: 0, endRadius: rx)
                 )
                 inside.fill(
-                    Path(CGRect(x: o.x, y: o.y, width: size.width, height: size.height)),
-                    with: .linearGradient(Gradient(stops: [.init(color: t.sheen, location: 0), .init(color: t.sheen.opacity(0), location: 0.3)]), startPoint: CGPoint(x: 0, y: o.y), endPoint: CGPoint(x: 0, y: o.y + size.height))
+                    Path(CGRect(x: o.x, y: top, width: size.width, height: height)),
+                    with: .linearGradient(Gradient(stops: [.init(color: t.sheen, location: 0), .init(color: t.sheen.opacity(0), location: 0.3)]), startPoint: CGPoint(x: 0, y: top), endPoint: CGPoint(x: 0, y: top + height))
                 )
-                // inset 0 2.6rem 2.6rem -2rem: everything outside the shape, spread 2rem and
-                // dropped 2.6rem, blurred, and seen through the shape: a recess in shadow under the head.
-                var outside = Path(CGRect(origin: .zero, size: full))
-                outside.addPath(shape(2 * rem, dy: 2.6 * rem))
-                inside.drawLayer { shadow in
-                    shadow.addFilter(.blur(radius: 1.3 * rem))
-                    shadow.fill(outside, with: .color(t.recess), style: FillStyle(eoFill: true))
-                }
+                // drop-shadow(0 0.55rem 0.9rem recess): the wall outside the arch casts its shade
+                // in, and the recess lies in shadow under the head.
+                blurred(inside, card.outside(-2, dy: 0.55 * rem), t.recess, 0.9 * rem, eoFill: true)
             }
-            ctx.stroke(shape(-1), with: .color(frame), lineWidth: 2)
-            // The book-cover tooling, 0.35rem inside, its head following the arch.
-            let inset = 0.35 * rem
-            let tool = nichePath(CGSize(width: size.width - 2 * inset, height: size.height - 2 * inset), head: head - inset, outset: 0, at: CGPoint(x: o.x + inset, y: o.y + inset))
-            ctx.stroke(tool, with: .color(tooling), lineWidth: 1)
         }
         .padding(-reach)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * A phone's frontispiece: a painted panel under the pointed head `arch`, in the niche's family
+ * (`.home-hero`), its courses outermost first: a soft halo of the wall's ground that keeps the
+ * field off it, the day's colour as a ring at its edge (`ring`), the frame, then the panel with
+ * the shade its head casts and, by day, the light caught under the head's edge.
+ */
+struct Panel: View {
+    let arch: Arch
+    let ring: Color
+    let frame: Color
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        Canvas { ctx, full in
+            let rem: CGFloat = 16
+            let card = Card(arch: arch, full: full)
+            let outer = card.shape(1.5)
+            // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg), by night 0.35rem and
+            // 0.6rem: the second blurs the first again, so it reaches as far as the two in
+            // quadrature.
+            let (near, far): (CGFloat, CGFloat) = p.dark ? (0.35, 0.6) : (0.5, 0.75)
+            blurred(ctx, outer, p.bg, (near * near + far * far).squareRoot() * rem)
+            blurred(ctx, outer, p.bg, near * rem)
+            ctx.fill(outer, with: .color(ring))
+            ctx.fill(card.shape(0), with: .color(p.surface))
+            ctx.fill(card.shape(0), with: .color(frame))
+            let face = card.shape(-1)
+            ctx.fill(face, with: .color(p.surface))
+            ctx.drawLayer { inside in
+                inside.clip(to: face)
+                // The plaster under the day's words, cover-fitted to the panel as the web's `.home-arch-fill`.
+                if let plaster = UIImage(named: p.panel) {
+                    let image = inside.resolve(Image(uiImage: plaster))
+                    let scale = max(card.size.width / image.size.width, card.size.height / image.size.height)
+                    let fitted = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+                    let at = CGPoint(x: card.origin.x + (card.size.width - fitted.width) / 2, y: card.origin.y + (card.size.height - fitted.height) / 2)
+                    inside.draw(image, in: CGRect(origin: at, size: fitted))
+                }
+                // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
+                blurred(inside, card.outside(-1, dy: 0.3 * rem), NicheTokens.of(p).recess, 0.4 * rem, eoFill: true)
+                if !p.dark {
+                    // drop-shadow(0 1px 0 white 45%), by day: the light caught under the head's edge.
+                    inside.fill(card.outside(-1, dy: 1), with: .color(.white.opacity(0.45)), style: FillStyle(eoFill: true))
+                }
+            }
+        }
+        .padding(-reach)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * The lining painted round the head on a panel's or niche's back wall (`.home-lining`): the arch
+ * again, `inset` inside the card's edge, as a 2pt band of the lining and the day's colour
+ * (`hairline`) as a line 8pt inside the band's outer edge; round the head only and open below,
+ * down to the foot of this view (the inscription band), so it reads as paint on the wall rather
+ * than another edge of the arch. The view is the card's width, its top the card's.
+ */
+struct Lining: View {
+    let arch: Arch
+    let inset: CGFloat
+    let hairline: Color
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        Canvas { ctx, size in
+            // A miter limit of 2 keeps the point sharp, and bevels the hair's-breadth step that
+            // may join the upper arcs there rather than drawing it out into a spike.
+            func line(_ d: CGFloat, _ color: Color, width: CGFloat) {
+                let path = archPath(arch, width: size.width, outset: d - width / 2, foot: size.height, open: true)
+                ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: width, lineJoin: .miter, miterLimit: 2))
+            }
+            line(-inset, p.lining, width: 2)
+            line(-inset - 8, hairline, width: 1)
+        }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

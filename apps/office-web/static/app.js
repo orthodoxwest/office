@@ -1,5 +1,35 @@
 document.documentElement.classList.add("js");
 
+// A psalm's number and its Latin incipit share a line, a dot between them.
+// When the line cannot hold both, the incipit stands on its own line beneath
+// and the dot goes: a separator ending a line alone separates nothing. CSS
+// cannot see where a line broke, so the labels are measured with the dot in
+// place, and re-measured when the measure or the text size changes.
+(function () {
+  var labels = Array.from(document.querySelectorAll(".item-label > .label-sep")).map(function (sep) { return sep.parentNode; });
+  if (!labels.length) return;
+  var scheduled = false;
+  function measure() {
+    scheduled = false;
+    labels.forEach(function (label) { label.classList.remove("stacked"); });
+    var stacked = labels.filter(function (label) {
+      var sep = label.querySelector(".label-sep");
+      var incipit = label.querySelector(".psalm-incipit");
+      return incipit.getBoundingClientRect().top - sep.getBoundingClientRect().top > 2;
+    });
+    stacked.forEach(function (label) { label.classList.add("stacked"); });
+  }
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(measure);
+  }
+  measure();
+  window.addEventListener("resize", schedule);
+  if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(labels[0].closest(".elements") || document.body);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+})();
+
 // Source capitals at prose openings use real small caps, preserving the text.
 // The first letter stays a full capital ("I CONFESS"), the setting a service
 // book gives an opening without an ornamented initial; the rest of the run
@@ -45,6 +75,10 @@ document.documentElement.classList.add("js");
 
   openings.forEach(function (opening) {
     var node = opening.firstChild;
+    // A psalm whose antiphon has just said its opening words begins inside
+    // the span that mutes them; the letter and its word are still the first
+    // text, and the initial keeps its ornament colour over the muted run.
+    while (node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains("unrepeated")) node = node.firstChild;
     if (!node || node.nodeType !== Node.TEXT_NODE) return;
     var match = /^(\s*)([\p{L}][\p{L}\p{M}'’-]*)/u.exec(node.textContent);
     if (!match) return;
@@ -205,6 +239,7 @@ document.documentElement.classList.add("js");
   }
   window.addEventListener("resize", schedule);
   window.addEventListener("officeleaderchange", refresh);
+  window.addEventListener("officemartyrologychange", refresh);
   window.addEventListener("beforeprint", function () {
     measures = new WeakMap();
     typeset();
@@ -212,23 +247,86 @@ document.documentElement.classList.add("js");
   window.addEventListener("afterprint", refresh);
 })();
 
+// Home's versicle takes only the height the arch's head has to spare. Where
+// it would make the card taller, and so push the hours down the screen, the
+// head goes without it; measured again whenever the type, the window or the
+// head's other lines change.
+(function () {
+  var versicle = document.querySelector(".home-versicle");
+  var card = versicle && versicle.closest(".home-hero");
+  if (!card) return;
+  var frame = 0;
+  function fit() {
+    frame = 0;
+    versicle.hidden = true;
+    var without = card.getBoundingClientRect().height;
+    versicle.hidden = false;
+    versicle.hidden = card.getBoundingClientRect().height > without + 0.5;
+  }
+  function schedule() {
+    if (!frame) frame = window.requestAnimationFrame(fit);
+  }
+  fit();
+  if (document.fonts) document.fonts.ready.then(schedule);
+  window.addEventListener("resize", schedule);
+  if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(versicle.parentNode);
+})();
+
 // Appearance and screen dimensions accompany every usage beacon; office pages
-// also report the selected prayer form. These describe how the page
+// also report the selected prayer form, and Prime whether its Martyrology is
+// shown. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
-// coarse pointer, which catches tablets and a phone held in landscape. Both
-// are read at send time; the server counts each like any
-// other scope, once per browser per day.
+// coarse pointer, which catches tablets and a phone held in landscape — and
+// whether it is a browser tab or the installed web app (the native apps
+// report their own). All are read at send time; the server counts each like
+// any other scope, once per browser per day.
 //
 // Each is reported as "family:value", the name it is stored under, so a value
 // belongs to exactly one family and a family retired later cannot be confused
-// with a value name reused by a different one (see usage.Dimensions).
+// with a value name reused by a different one (see presentation::usage, whose
+// app_beacon writes the native apps' beacons in the same order).
+// Whether this browser first opened the Office today. It keeps that reporting day locally (a
+// browser that used the Office before this was recorded, shown by a stored setting or the
+// offline copy, keeps "before"); only first or returning is sent, so nothing links one day's
+// beacon to another's. The mark is made on the first page load, counted or not, so a later page
+// served by the offline copy is not mistaken for an old reader. Without storage nothing is said.
+var USAGE_FIRST_KEY = "office-first-counted";
+function usageVisitToken() {
+  try {
+    var parts = {};
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date()).forEach(function (part) { parts[part.type] = part.value; });
+    var day = parts.year + "-" + parts.month + "-" + parts.day;
+    var first = localStorage.getItem(USAGE_FIRST_KEY);
+    if (!first) {
+      var used = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+      for (var i = 0; !used && i < localStorage.length; i++) used = /^office-/.test(localStorage.key(i) || "");
+      first = used ? "before" : day;
+      localStorage.setItem(USAGE_FIRST_KEY, first);
+    }
+    return first === day ? " visit:first" : " visit:returning";
+  } catch {
+    return "";
+  }
+}
+usageVisitToken();
+
 function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
+  var installed = navigator.standalone === true ||
+    (!!window.matchMedia && window.matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches);
+  var clientToken = installed ? " client:pwa" : " client:browser";
+  // Prime, on a day with a Martyrology reading: whether the reader's setting
+  // shows it or leaves the rubric in its place.
+  var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
+    ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
+    : "";
+  clientToken = martyrologyToken + usageVisitToken() + clientToken;
   if (!window.matchMedia) {
-    return scope + leaderToken;
+    return scope + leaderToken + clientToken;
   }
   var forced = document.documentElement.getAttribute("data-theme");
   var dark = forced === "dark" ||
@@ -236,7 +334,7 @@ function usageBeaconBody(scope) {
   var handheld = window.matchMedia("(max-width: 700px), (pointer: coarse)").matches;
   return scope +
     (dark ? " appearance:apse" : " appearance:nave") +
-    (handheld ? " screen:mobile" : " screen:desktop") + leaderToken;
+    (handheld ? " screen:mobile" : " screen:desktop") + leaderToken + clientToken;
 }
 
 (function () {
@@ -469,6 +567,45 @@ function usageBeaconBody(scope) {
     });
   });
 
+  // Martyrology at Prime: Off (the default) / On. The same contract as the
+  // text size: localStorage only, so every reader's Prime page (and its
+  // offline copy) is the same; the pre-paint script in layout.html sets
+  // data-martyrology, and style.css shows the rubric or the reading.
+  var MARTYROLOGY_KEY = "office-martyrology";
+
+  var paintMartyrologyChoice = function (choice) {
+    if (choice === "on") {
+      document.documentElement.setAttribute("data-martyrology", "on");
+    } else {
+      document.documentElement.removeAttribute("data-martyrology");
+    }
+    document.querySelectorAll(".martyrology-option[data-martyrology-choice]").forEach(function (btn) {
+      btn.setAttribute("aria-pressed", btn.getAttribute("data-martyrology-choice") === choice ? "true" : "false");
+    });
+  };
+
+  var storedMartyrology = null;
+  try {
+    storedMartyrology = localStorage.getItem(MARTYROLOGY_KEY);
+  } catch {
+    // Blocked storage: the Martyrology stays off.
+  }
+  paintMartyrologyChoice(storedMartyrology === "on" ? "on" : "off");
+
+  document.querySelectorAll(".martyrology-option[data-martyrology-choice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var choice = btn.getAttribute("data-martyrology-choice") === "on" ? "on" : "off";
+      paintMartyrologyChoice(choice);
+      try {
+        localStorage.setItem(MARTYROLOGY_KEY, choice);
+      } catch {
+        // Private mode / blocked storage — the choice still applies for this page.
+      }
+      // Prime's usage beacon reports what is now on the page.
+      window.dispatchEvent(new Event("officemartyrologychange"));
+    });
+  });
+
   var offlineIndicator = document.createElement("div");
   offlineIndicator.className = "offline-indicator";
   offlineIndicator.textContent = "Offline";
@@ -640,6 +777,9 @@ function usageBeaconBody(scope) {
     } else {
       var anchor =
         document.querySelector(".hour-meta") ||
+        document.querySelector(".home-day-head .commemorations") ||
+        document.querySelector(".home-day-head .home-versicle") ||
+        document.querySelector(".home-day-head .penitential") ||
         document.querySelector(".home-day-head .octave-note") ||
         document.querySelector(".home-day-head .feast") ||
         document.querySelector(".home-day-head h1") ||
@@ -786,6 +926,23 @@ function usageBeaconBody(scope) {
     syncChromeIfNeeded();
   });
 
+  // A tap outside an overlay puts it away. iOS Safari sends a click only to
+  // what it judges tappable (links, controls, elements with their own click
+  // listener); a tap on the page's text or the header's bare bar produces no
+  // click at all, so a document click listener never hears it there.
+  // pointerup reaches every element, and a touch that becomes a scroll ends
+  // in pointercancel instead, so it stands for the tap. click stays for the
+  // keyboard; a mouse sends both, and the second finds it already closed. A
+  // right or middle button sends no click, so its pointerup leaves it open.
+  var onTapOutside = function (handler) {
+    document.addEventListener("pointerup", function (e) {
+      if (e.button === 0) {
+        handler(e);
+      }
+    });
+    document.addEventListener("click", handler);
+  };
+
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
   // scripting is available, keep [open] set on wide screens too (harmless
   // cosmetically, but matches disclosure semantics) and re-collapse on any
@@ -807,7 +964,7 @@ function usageBeaconBody(scope) {
 
     // The phone menu is an overlay: a tap anywhere outside it, or Escape,
     // puts it away. Taps inside (including the preferences) leave it open.
-    document.addEventListener("click", function (e) {
+    onTapOutside(function (e) {
       if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
         siteMenu.removeAttribute("open");
       }
@@ -827,7 +984,7 @@ function usageBeaconBody(scope) {
   // Escape, puts it away; a preference chosen inside leaves it open.
   var siteSettings = document.querySelector(".site-settings");
   if (siteSettings) {
-    document.addEventListener("click", function (e) {
+    onTapOutside(function (e) {
       if (siteSettings.open && !siteSettings.contains(e.target)) {
         siteSettings.removeAttribute("open");
       }
@@ -1212,7 +1369,16 @@ function usageBeaconBody(scope) {
       return state.view === "days" ? MONTH_NAMES[state.focus.getUTCMonth()] + " " + year : String(year);
     }
 
+    // What the grid shows, so an opening that would show the same again
+    // leaves it alone rather than rebuilding it under the unfolding.
+    var drawn = null;
+
+    function drawing() {
+      return [state.view, civilSlug(state.focus), state.chosen, state.today].join(" ");
+    }
+
     function render() {
+      drawn = drawing();
       picker.setAttribute("data-view", state.view);
       var days = state.view === "days";
       title.textContent = titleText();
@@ -1420,8 +1586,10 @@ function usageBeaconBody(scope) {
         title.focus();
         return;
       }
-      details.open = false;
-      details.querySelector("summary").focus();
+      // Through the summary, so the fold is the one a tap makes.
+      var summary = details.querySelector("summary");
+      summary.click();
+      summary.focus();
     });
 
     // Each opening starts from the page's own day, and from the current
@@ -1429,7 +1597,9 @@ function usageBeaconBody(scope) {
     details.addEventListener("toggle", function () {
       if (details.open) {
         reset();
-        render();
+        if (drawing() !== drawn) {
+          render();
+        }
       }
     });
 
@@ -1445,6 +1615,110 @@ function usageBeaconBody(scope) {
     }
     nav.insertAdjacentElement("afterend", buildDatePicker(details));
     details.classList.add("has-date-picker");
+  });
+
+  // On a phone, home's card is at least a screen tall, and the head above
+  // the day takes whatever height the card's contents leave. "Change date"
+  // unfolding under it used up that spare height first: the day leapt up in
+  // the opening frames, then stood while the card grew down under the
+  // picker, two motions one after the other. Instead the head gives up its
+  // spare height over the whole unfolding, at the disclosure's pace, so the
+  // day rises as the picker opens and settles with it; folding, the reverse.
+  // Where the head has nothing to give (a short phone, the desktop niche),
+  // the fold is left as it is.
+  document.querySelectorAll(".home-hero details.home-date-nav").forEach(function (details) {
+    var head = details.closest(".home-hero").querySelector(".home-summary");
+    var summary = details.querySelector("summary");
+    if (!head || !summary || !window.matchMedia || !window.CSS || !CSS.supports("interpolate-size", "allow-keywords")) {
+      return;
+    }
+    var stillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    // The head's heights folded and unfolded while it eases between them.
+    var easing = null;
+
+    // The head's height with the picker settled open or shut, laid out
+    // without the unfolding's transition and put back within the same task,
+    // so nothing of it is painted.
+    function settledHeight(open) {
+      var was = details.open;
+      details.classList.add("is-settling");
+      details.open = open;
+      var height = head.getBoundingClientRect().height;
+      details.open = was;
+      void head.offsetHeight;
+      details.classList.remove("is-settling");
+      return height;
+    }
+
+    function settle() {
+      easing = null;
+      head.style.removeProperty("transition");
+      head.style.removeProperty("min-height");
+      head.style.removeProperty("flex-grow");
+    }
+
+    // The summary's own toggle follows this listener in the same task, so
+    // the head's transition and the disclosure's start on the same frame.
+    summary.addEventListener("click", function () {
+      if (!document.documentElement.classList.contains("motion-ready") || !stillness.matches) {
+        return;
+      }
+      var opening = !details.open;
+      if (easing) {
+        // Turned back part-way: the disclosure retraces its transition, and
+        // the head heads back to where it came from.
+        head.style.minHeight = (opening ? easing.open : easing.shut) + "px";
+        return;
+      }
+      var from = head.getBoundingClientRect().height;
+      var to = settledHeight(opening);
+      if (Math.abs(to - from) < 1) {
+        return;
+      }
+      easing = opening ? { shut: from, open: to } : { shut: to, open: from };
+      head.style.flexGrow = "0";
+      head.style.minHeight = from + "px";
+      void head.offsetHeight;
+      // The unfolding's duration and easing (style.css, "Disclosures unfold").
+      head.style.transition = "min-height 200ms ease-out";
+      head.style.minHeight = to + "px";
+    });
+
+    head.addEventListener("transitionend", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    head.addEventListener("transitioncancel", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    window.addEventListener("resize", function () {
+      if (easing) {
+        settle();
+      }
+    });
+  });
+
+  // The home panel's courses are clipped to its pointed head by --arch-w,
+  // the card's width, which style.css gives in container units. An element
+  // styled in container units is restyled and laid out again whenever
+  // anything in its container moves, so every frame of "Change date"
+  // unfolding re-laid every course of the head and its long clip-paths
+  // (some 6ms a frame on a desktop, several times that on a phone). The same
+  // width in pixels, kept here as the card's width changes, costs nothing
+  // between those changes; without script the container units stand.
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    if (!("ResizeObserver" in window)) {
+      return;
+    }
+    new ResizeObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      var box = entry.contentBoxSize && entry.contentBoxSize[0];
+      var width = box ? box.inlineSize : entry.contentRect.width;
+      hero.style.setProperty("--arch-cqi", width + "px");
+    }).observe(hero);
   });
 
   // currentHourInfo returns the office most likely being prayed at the given
@@ -1543,9 +1817,8 @@ function usageBeaconBody(scope) {
       var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
       setHourCurrent(link, isCurrent);
       if (isCurrent && prayNow) {
-        var name = link.querySelector(".home-hour-link-name");
         prayNow.setAttribute("href", link.getAttribute("href"));
-        prayNow.textContent = "Pray " + (name ? name.textContent : "Now");
+        prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
         matched = true;
       }
     });
@@ -1568,34 +1841,64 @@ function usageBeaconBody(scope) {
   }
 
   // Home, Ordo, and an open office may remain visible across a time boundary
-  // without producing a visibility event. Schedule one refresh rather than
-  // polling: home uses the next office boundary; Ordo and an office only need
-  // midnight. Midnight is also a home boundary because Compline before 2am
-  // belongs to the previous liturgical day.
+  // without producing a visibility event. Home refreshes at the next office
+  // boundary; Ordo and an office only need midnight. Midnight is also a home
+  // boundary because Compline before 2am belongs to the previous liturgical
+  // day.
+  //
+  // The boundary is held as a wall-clock instant and checked in short steps,
+  // not awaited with one long timeout: timer delays stop counting while a
+  // phone sleeps or freezes a backgrounded PWA, and Android does not always
+  // deliver a visibility event on return, so a single timeout set at Sext
+  // could still be pending at Vespers.
+  var TIMED_REFRESH_STEP_MS = 60 * 1000;
   var timedChromeRefreshTimer = null;
-  function scheduleTimedChromeRefresh() {
-    var hasHomeCard = Boolean(document.querySelector(".home-prayer-card[data-date-slug]"));
-    var hasCalendar = Boolean(document.querySelector(".calendar"));
-    var hasOfficeHour = Boolean(document.querySelector(".office-hour"));
-    if (!hasHomeCard && !hasCalendar && !hasOfficeHour) {
-      return;
+  var timedChromeRefreshAt = null;
+  function timedChromeRefreshBoundary(now) {
+    if (document.querySelector(".home-prayer-card[data-date-slug]")) {
+      return nextOfficeBoundary(now);
     }
+    if (!document.querySelector(".calendar") && !document.querySelector(".office-hour")) {
+      return null;
+    }
+    var midnight = new Date(now.getTime());
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+    return midnight;
+  }
+  function scheduleTimedChromeRefresh() {
     if (timedChromeRefreshTimer) {
       clearTimeout(timedChromeRefreshTimer);
+      timedChromeRefreshTimer = null;
     }
     var now = new Date();
-    var next = hasHomeCard ? nextOfficeBoundary(now) : null;
-    if (next === null) {
-      next = new Date(now.getTime());
-      next.setDate(next.getDate() + 1);
-      next.setHours(0, 0, 0, 0);
+    if (timedChromeRefreshAt === null) {
+      var next = timedChromeRefreshBoundary(now);
+      if (next === null) {
+        return;
+      }
+      timedChromeRefreshAt = next.getTime() + 250;
     }
-    timedChromeRefreshTimer = setTimeout(function () {
-      timedChromeRefreshTimer = null;
-      syncChromeIfNeeded();
-      scheduleTimedChromeRefresh();
-    }, Math.max(0, next.getTime() - now.getTime()) + 250);
+    timedChromeRefreshTimer = setTimeout(
+      catchUpWithClock,
+      Math.min(TIMED_REFRESH_STEP_MS, Math.max(0, timedChromeRefreshAt - now.getTime())),
+    );
   }
+  // catchUpWithClock refreshes the chrome once the wall clock has passed the
+  // pending boundary, then schedules the next one.
+  function catchUpWithClock() {
+    timedChromeRefreshTimer = null;
+    if (timedChromeRefreshAt !== null && Date.now() >= timedChromeRefreshAt) {
+      timedChromeRefreshAt = null;
+      lastSyncedDay = localDateSlug(new Date());
+      syncChromeIfNeeded();
+    }
+    scheduleTimedChromeRefresh();
+  }
+  // Page Lifecycle resume (a frozen page thawing) and window focus are the
+  // other signals a returning PWA can give; check the clock on each.
+  document.addEventListener("resume", catchUpWithClock);
+  window.addEventListener("focus", catchUpWithClock);
   syncChromeIfNeeded();
   scheduleTimedChromeRefresh();
 
@@ -1874,7 +2177,146 @@ function usageBeaconBody(scope) {
   window.addEventListener("pageshow", function () { resume(); record(); });
   window.addEventListener("online", record);
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
+  window.addEventListener("officemartyrologychange", function () { engage(); record(); });
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();
+})();
+
+// Home marks the hours prayed: an hour counts once its end is reached after
+// its words were read on screen at a praying pace, so scrolling through in a
+// few seconds, or waiting at the end, does not mark it. presentation::Reading
+// is the rule; these three mirror its constants (office-web tests they agree).
+// The marks stay on this device a week, in localStorage only.
+(function () {
+  var PRAYED_WORDS_PER_SECOND = 8;
+  var PRAYED_SHARE = 0.7;
+  var PRAYED_LONGEST_STEP = 5;
+  var PRAYED_KEY = "office-prayed";
+  var KEEP_DAYS = 7;
+  var hours = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+  var day = document.body.getAttribute("data-usage-when") || "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+
+  function load() {
+    try {
+      var stored = JSON.parse(localStorage.getItem(PRAYED_KEY) || "{}");
+      return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function slugDaysAgo(days) {
+    var d = new Date();
+    d.setDate(d.getDate() - days);
+    var m = String(d.getMonth() + 1);
+    var dd = String(d.getDate());
+    return d.getFullYear() + "-" + (m.length < 2 ? "0" + m : m) + "-" + (dd.length < 2 ? "0" + dd : dd);
+  }
+
+  function markPrayed(hour) {
+    var prayed = load();
+    var oldest = slugDaysAgo(KEEP_DAYS);
+    Object.keys(prayed).forEach(function (d) {
+      if (d < oldest || !Array.isArray(prayed[d])) delete prayed[d];
+    });
+    var list = prayed[day] || [];
+    if (list.indexOf(hour) < 0) list.push(hour);
+    prayed[day] = list;
+    try {
+      localStorage.setItem(PRAYED_KEY, JSON.stringify(prayed));
+    } catch {
+      /* Storage refused: the hour simply goes unmarked. */
+    }
+  }
+
+  // Home: each hour prayed on the shown day carries a small gilt cross at its
+  // name's shoulder, and says "Prayed" to a screen reader.
+  if (document.body.classList.contains("page-home")) {
+    var paint = function () {
+      var list = load()[day];
+      document.querySelectorAll(".home-hour-link[data-hour]").forEach(function (link) {
+        var isPrayed = Array.isArray(list) && list.indexOf(link.getAttribute("data-hour")) >= 0;
+        var mark = link.querySelector(".home-hour-prayed");
+        link.classList.toggle("is-prayed", isPrayed);
+        if (isPrayed && !mark) {
+          mark = document.createElement("span");
+          mark.className = "home-hour-prayed";
+          mark.innerHTML = '<span aria-hidden="true">✠</span><span class="sr-only">Prayed</span>';
+          (link.querySelector(".home-hour-link-name") || link).appendChild(mark);
+        } else if (!isPrayed && mark) {
+          mark.remove();
+        }
+      });
+    };
+    paint();
+    window.addEventListener("pageshow", paint);
+    window.addEventListener("storage", function (e) {
+      if (e.key === PRAYED_KEY || e.key === null) paint();
+    });
+    return;
+  }
+
+  var hour = hours.find(function (name) { return document.body.classList.contains("page-" + name); });
+  var content = document.querySelector(".office-hour .elements");
+  var end = document.querySelector(".hour-end-mark");
+  if (!hour || !content || !end) return;
+
+  var cursor = 0;
+  var read = 0;
+  var done = false;
+  var last = Date.now();
+
+  // The words of the shown text, in order: each text node's count and box.
+  // A form or reading hidden by the reader's settings has no box and no words.
+  function wordsOnScreen() {
+    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    var range = document.createRange();
+    var total = 0;
+    var first = -1;
+    var through = 0;
+    var bottom = window.innerHeight;
+    for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+      var words = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
+      if (!words) continue;
+      range.selectNodeContents(node);
+      var rects = range.getClientRects();
+      if (!rects.length) continue;
+      var top = rects[0].top;
+      var low = rects[rects.length - 1].bottom;
+      if (low > 0 && top < bottom) {
+        if (first < 0) first = total;
+        through = total + words;
+      }
+      total += words;
+    }
+    // Nothing on screen: above the text, none of it is passed; below, all of it.
+    if (first < 0) first = through = content.getBoundingClientRect().bottom <= 0 ? total : 0;
+    return { total: total, first: first, through: through };
+  }
+
+  function tick() {
+    var now = Date.now();
+    var seconds = (now - last) / 1000;
+    last = now;
+    if (done || document.visibilityState !== "visible") return;
+    var seen = wordsOnScreen();
+    // presentation::Reading::advance
+    cursor = Math.max(cursor, seen.first);
+    var pace = Math.min(Math.max(seconds, 0), PRAYED_LONGEST_STEP) * PRAYED_WORDS_PER_SECOND;
+    var step = Math.max(0, Math.min(pace, seen.through - cursor));
+    cursor += step;
+    read += step;
+    var atEnd = end.getBoundingClientRect().top < window.innerHeight;
+    if (atEnd && seen.total > 0 && read >= seen.total * PRAYED_SHARE) {
+      done = true;
+      markPrayed(hour);
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    last = Date.now();
+  });
+  window.setInterval(tick, 1000);
 })();

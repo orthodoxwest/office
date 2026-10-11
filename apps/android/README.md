@@ -22,8 +22,9 @@ possible without distracting from a reverent experience. The app is the web's de
 native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 
 - **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
-  invitation, the hour directory by period, "Change date"), each hour (colour band, framed
-  title, "Change date" and "Prayer form", the office, its continuation and report link), and
+  invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
+  hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
+  office, its continuation and report link), and
   the ordo's month (year and month navigation, day rows with colour rails, ranks,
   commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo). The site menu carries the day's hours, the Ordo, and
@@ -31,7 +32,7 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
-  theme and text size; home's frontispiece set in the niche, with its round head, stone
+  theme and text size; home's frontispiece set in the niche, with its pointed head, stone
   moulding and day-coloured trim, centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
   Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
@@ -50,13 +51,23 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). Ornaments are drawn
   from the web templates' SVG paths, and the Apse vault from its star tile.
 - **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
-  is open, like the web's wake lock.
+  is open, like the web's wake lock. The status bar is put away while the app is open; a swipe
+  down from the top brings it back for a moment.
 - **Keeping the place.** Each visit on the way back keeps its own scroll position and open
   sections, and the way back itself is saved state: Back returns to where the reader was, and
   so does a return after Android has closed the app in the background (`PlaceTest`).
 - **The chosen theme throughout.** Nave or Apse colours the window from the first frame, the
   status and navigation bar icons, and (Android 13+) the next launch screen, whatever the
   phone's own light or dark (`WindowThemeTest`).
+- **Motion.** Quiet and brief, never decorative. A page comes in only once its content is
+  composed, so nothing flashes; it moves along Material's shared axis, deeper or later from
+  the end and back or earlier from the start, or fades through the wall where there is no
+  order (`MotionTest`). The back gesture draws the page behind in as it is made. Disclosures
+  unfold from their controls and, once open, scroll into view; the menu drops in; the date
+  picker's months slide, and a swipe turns them; a new theme or text size dissolves in
+  (`Dissolve.kt`). A pressed control dims, as on iOS. Remove animations shows each at once.
+- **Touch.** A light tick under a choice (a setting, a prayer form, a day) and a toggle's tick
+  on a checkbox; none for a page opened.
 - **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in
   the web's hairline glyphs. They open the day they are tapped; Compline in the small hours is
   the day before's, as "Pray now" reckons it (`ShortcutsTest`).
@@ -111,11 +122,32 @@ and a tap opens that hour.
   their own channel, so the phone's settings can still change or silence it. The recording is
   from the Versilian Community Sample Library, dedicated to the public domain (CC0 1.0);
   `tools/bake-bell.py` names the file and how it was trimmed.
-- **In 10 minutes.** A reminder's one action puts it away and rings it again, with the same
-  words, ten minutes later.
+- **Remind me in 10 min.** A reminder's one action puts it away and rings it again, with the
+  same words, ten minutes later. The action is worded as an action, so it is not read as the
+  office's own countdown.
+- **The time, not an age.** A reminder's title gives the office's clock time ("Prime · 7:00
+  AM", following the phone's 12/24-hour setting) rather than Android's relative "30m", which
+  drifts and does not say whether the office is past or to come.
+- **Clears itself.** A reminder leaves the shade an hour after its office begins (one fired late
+  still shows for ten minutes), so an old Prime does not linger into the afternoon.
 
 `ReminderTest` checks the schedule the alarm service holds, cancellation, the bell's channel,
-the ten-minute wait, and the posted notification.
+the ten-minute wait, and the posted notification, its clock time and when it clears.
+
+## Usage counts
+
+The app is counted in the web's daily usage report (the top-level README, "Usage metrics"), in
+the same words: `Usage.kt` posts one beacon, built by the Rust core (`usage_beacon`), when a
+page is shown, its theme or prayer form changes, or the reader comes back. Home and the reminders
+page count toward the day's readers, an hour and the ordo in their own columns, and turning
+reminders on as the web counts a generated feed link; only today's pages (a day either side)
+count. Each page counts once a day. In place of the web's cookie the app sends a random
+identifier it replaces every reporting day (America/New_York), so nothing it sends ties one day
+to the next. A beacon is best effort: it is never queued offline, retried later, or shown.
+
+This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
+`release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
+never does. `UsageTest` checks what counts, the daily identifier, and the retry.
 
 ## Trying it on a phone
 
@@ -134,6 +166,76 @@ the eventual store app rather than replace it. It is signed with `app/preview.ke
 deliberately public key (like Android's debug key) whose only job is letting every
 preview, from CI or a laptop, update the last. Store releases will use Play App Signing.
 
+## Store bundles
+
+Google Play takes a signed `.aab`. The `release` build signs with the upload key named by the
+environment; the key never enters the repository, and Play App Signing re-signs each upload
+with the app signing key Google holds.
+
+```bash
+export OFFICE_UPLOAD_KEYSTORE=~/keys/office-upload.jks
+export OFFICE_UPLOAD_STORE_PASSWORD=...
+export OFFICE_UPLOAD_KEY_PASSWORD=...
+export OFFICE_UPLOAD_KEY_ALIAS=upload   # the default
+
+make android-bundle        # → apps/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+Without the key, `bundleRelease` stops before building. A manual run of the Android workflow
+builds the same bundle when the repository has the `ANDROID_UPLOAD_KEYSTORE_BASE64`,
+`ANDROID_UPLOAD_STORE_PASSWORD` and `ANDROID_UPLOAD_KEY_PASSWORD` secrets, and attaches it as
+the `office-release-aab` artifact. The version code is the commit count, so build from a full
+clone of `master`.
+
+### Publishing from CI
+
+The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
+and uploads it to Google Play.
+
+- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
+  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
+  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
+  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
+  release still in review.
+- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
+  (lines starting with `#` dropped), never anything from the merge. The same text goes with
+  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
+  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
+  over Play's 500 characters stops the run before it builds.
+- **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
+  release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
+  track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
+  notes, but only for a commit that isn't already in Play: each build's version code is its
+  commit count, and Play takes each version code once.
+
+It needs:
+
+- the three upload-key secrets above;
+- `PLAY_SERVICE_ACCOUNT_JSON`: the JSON key of a Google Cloud service account that has been
+  invited under Play Console's *Users and permissions* with release rights for this app. Until
+  it is set, merges skip the upload;
+- a `play` environment (Settings → Environments) with you as required reviewer, so every
+  manual run waits for approval. Merges run in `play-internal`, which GitHub creates on first
+  use and which needs no reviewer.
+
+Google's API can't create the app or take its first bundle, so the very first upload is
+done by hand in Play Console.
+
+### Closed testers
+
+Closed testing's tester list is the Google Group `daily-office-testers` (*Anyone can join*),
+so volunteers add themselves. Send them to `/beta` on the website: it links the group and the
+test's opt-in page (`play.google.com/apps/testing/org.orthodoxwest.office`) and says what to
+keep doing for the 14 days Google asks of a new developer account. Neither link is set in
+code; if the group's name changes in Play Console, change `crates/render-html/templates/beta.html` to match.
+
+### Listing screenshots
+
+`StoreScreenshotTest` renders the listing's phone screenshots at 1080×1920 into
+`app/build/screenshots/store/` (`make android-screenshots`; CI's `android-screenshots`
+artifact carries them). Re-shoot after a visible change and replace them under *Main store
+listing*.
+
 ## Building locally
 
 Needs: the Rust toolchain with the Android targets, `cargo-ndk`, JDK 21, and the Android
@@ -151,7 +253,9 @@ make android-screenshots   # → apps/android/app/build/screenshots/*.png
 
 Gradle drives Cargo: `preBuild` runs `cargo ndk` for arm64-v8a, armeabi-v7a, and x86_64,
 builds the host library, and generates the Kotlin bindings into `app/build/generated/uniffi`.
-Nothing generated is checked in.
+Nothing generated is checked in. The APK carries those three ABIs and no others (`abiFilters`),
+though JNA ships its own native library for more. The corpus goes into the library compressed
+(`apps/mobile-ffi/build.rs`) and is inflated once when the engine loads.
 
 Build types: `debug` (debuggable, for Android Studio) and `preview` (optimized, non-debuggable,
 what the prerelease ships). Both use the `.preview` application ID. `preview` and `release` are
@@ -169,7 +273,8 @@ CI uploads them as the `android-screenshots` artifact.
 ## Fonts
 
 `res/font/` holds EB Garamond Regular and Italic and the ✠ glyph from Noto Sans Symbols,
-converted from the web's WOFF2 core subsets (`apps/office-web/static/fonts/`), under the SIL
-Open Font License (`FONTS-OFL-1.1.txt`). There is deliberately no Bold: EB Garamond 12's Bold
-is an unfinished 128-glyph face without small caps or ℣/℟, so under Android's Bold text setting
-Compose synthesizes weight from Regular instead (`ScreenshotTest.boldTextSetting`).
+under the SIL Open Font License (`FONTS-OFL-1.1.txt`). The Garamond files are the web's own
+instances (`tools/gengaramond.py`: the variable fonts pinned a step heavier than Regular, cut to
+Latin), so the apps set the very glyphs the web does. There is deliberately no Bold: the app
+sets nothing bold, so under Android's Bold text setting Compose synthesizes weight from Regular
+and small caps, sigils and ligatures stay (`ScreenshotTest.boldTextSetting`).

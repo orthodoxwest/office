@@ -61,45 +61,90 @@ R. Thanks be to God.
 # SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday)
 I am the Beginning, * even I that speak unto you.
 
+[collect-monday]
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday, Collect at Lauds)
+Grant, we beseech thee, Almighty God; that thy servants who abstain from food in mortification of the flesh, may fast from sin by following after righteousness.
+
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday)
 He that sent me * is with me; the Father hath not left me alone; for I do always those things that please him.
+
+[collect-vespers-monday]
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday, Collect after the Ant. on Magnificat)
+Assist us mercifully, Almighty God, in these our supplications; and grant that we, to whom thou hast given a full assurance of hope in thy goodness, may receive the fruit of thy wonted loving-kindness.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 257 (II Week in Lent, Tuesday)
 One is your Master, * which is in heaven, even Christ the Lord.
 
+[collect-tuesday]
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Tuesday, Collect at Lauds)
+Perfect in us, O merciful Lord, we beseech thee, the supporting strength bestowed in this holy observance: that as by thine appointment, we know what we ought to do, so by thine effectual working we may fulfil the same.
+
 [magnificat-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 257 (II Week in Lent, Tuesday)
 But all ye are brethren; * and call no man your father upon earth; for one is your Father, which is in heaven: neither be ye called masters; for one is your Master, even Christ.
+
+[collect-vespers-tuesday]
+# SOURCE: monastic diurnal, p. 257, 258 (II Week in Lent, Tuesday, Collect after the Ant. on Magnificat)
+Be favourable to our supplications, O Lord, and relieve the weakness of our souls: that receiving thy forgiveness, we may alway rejoice in thy blessing.
 
 [benedictus-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday)
 Behold, we go up * to Jerusalem: and the Son of man shall be betrayed to be crucified.
 
+[collect-wednesday]
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday, Collect at Lauds)
+We beseech thee, O Lord, favourably to behold thy people: and grant that those whom thou hast bidden to abstain from carnal food, may also cease from all hurtful vices.
+
 [magnificat-antiphon-wednesday]
 # SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday)
 For he shall be delivered * unto the Gentiles, to mock, and to scourge, and to crucify him.
+
+[collect-vespers-wednesday]
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday, Collect after the Ant. on Magnificat)
+O God, the restorer and lover of innocence, direct unto thyself the hearts of thy servants: that being enkindled with the ardour of thy spirit, they may be found both steadfast in faith, and fruitful in good works.
 
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday)
 Son, remember * that thou in thy lifetime receivedst thy good things, and likewise Lazarus evil things.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday, Collect at Lauds)
+Grant us, O Lord, we beseech thee, the help of thy grace: that we, being duly given to fasting and prayer, may be delivered from the enemies of both soul and body.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday)
 That rich man * who refused to Lazarus a crumb of bread, desired a drop of water.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday, Collect after the Ant. on Magnificat)
+Assist thy servants, O Lord; and at their petition bestow upon them thy continual loving-kindness: whereby thou mayest gather and restore those who glory in thee their Creator and Ruler, and mayest preserve those whom thou dost restore.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday)
 He will miserably destroy * those wicked men: and will let out his vineyard unto other husbandmen, which shall render him the fruits in their seasons.
 
+[collect-friday]
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday, Collect at Lauds)
+Grant, we beseech thee, Almighty God: that being cleansed by the hallowed fast, thou mayest bring us with pure minds to the holy feast which is drawing nigh.
+
 [magnificat-antiphon-friday]
 # SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday)
 When they sought to lay hands on him, * they feared the multitude, because they took him for a prophet.
 
+[collect-vespers-friday]
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday, Collect after the Ant. on Magnificat)
+Grant unto thy people, we beseech thee, O Lord, health of mind and body: that cleaving to good works, they may ever deserve to be defended by thy mighty protection.
+
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 259 (II Week in Lent, Saturday)
 I will go * to my father, and will say unto him: Father, make me as one of thy hired servants.
+
+[collect-saturday]
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Saturday, Collect at Lauds)
+Grant, we beseech thee, O Lord, a healthful effect to our fasts: that the chastisement of the flesh which we have taken upon us may avail to the strengthening of our souls.
+
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
 

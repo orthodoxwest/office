@@ -1,18 +1,16 @@
 //! The day as the composers see it: the shared calendar day plus the Office's own resolution
-//! (Vespers, the Marian antiphon) and the two fields that exist only on the synthetic office-day
+//! (Vespers) and the two fields that exist only on the synthetic office-day
 //! used while composing I Vespers.
 
 use std::ops::{Deref, DerefMut};
 
-use calendar::{CalendarDay, Weekday};
+use calendar::{CalendarDay, Date, MoveableDates, Season, Weekday};
 
 use crate::concurrence::VespersDesignation;
 
 #[derive(Clone, Debug)]
 pub struct Day {
     pub cal: CalendarDay,
-    /// Corpus subkey under `ordinary/marian/`.
-    pub marian_antiphon: String,
     pub vespers: VespersDesignation,
     /// Set only on the synthetic office-day of a following feast's I Vespers:
     /// resolution then prefers "-first" ref variants.
@@ -36,21 +34,47 @@ impl DerefMut for Day {
 
 impl Day {
     pub fn new(cal: CalendarDay, office: crate::OfficeDay) -> Day {
-        Day {
-            cal,
-            marian_antiphon: office.marian_antiphon.to_string(),
-            vespers: office.vespers,
-            first_vespers: false,
-            following_office_commemoration_id: String::new(),
-        }
+        Day { cal, vespers: office.vespers, first_vespers: false, following_office_commemoration_id: String::new() }
     }
 
     /// The weekday of the psalter and weekday ordinary. At I Vespers the
     /// office day has advanced to the following feast; the psalter keeps the
     /// civil evening on which Vespers is said.
     pub fn civil_weekday(&self) -> Weekday {
-        let date = if self.first_vespers { self.date.add_days(-1) } else { self.date };
-        date.weekday()
+        self.civil_date().weekday()
+    }
+
+    /// The civil date on which the hour is said: the eve at I Vespers.
+    pub fn civil_date(&self) -> Date {
+        if self.first_vespers { self.date.add_days(-1) } else { self.date }
+    }
+
+    /// The Saturday before Septuagesima, whose Vespers say Alleluia for the
+    /// last time even when they are of the Saturday's own feast (Diurnal
+    /// p. 235).
+    pub fn is_septuagesima_eve(&self) -> bool {
+        let civil = self.civil_date();
+        MoveableDates::compute(civil.year()).septuagesima.add_days(-1) == civil
+    }
+
+    /// Paschaltide at this hour: Eastertide, and the Octave of Pentecost
+    /// "until None of Saturday" before I Vespers of Trinity Sunday (General
+    /// Rubrics XXIV.3, XXXI.5; 2026 ordo, 6 June). The calendar's season
+    /// turns at Pentecost.
+    pub fn is_paschaltide(&self, hour_name: &str) -> bool {
+        if self.season == Season::Easter {
+            return true;
+        }
+        let civil = self.civil_date();
+        let since = civil.days_since(MoveableDates::compute(civil.year()).pentecost);
+        (0..6).contains(&since) || (since == 6 && !matches!(hour_name, "vespers" | "compline"))
+    }
+
+    /// The season a saint's proper and Common are read in: Easter throughout
+    /// Paschaltide, so the Octave of Pentecost keeps the Commons' paschal
+    /// forms (#631, #640).
+    pub fn saints_season(&self, hour_name: &str) -> Season {
+        if self.is_paschaltide(hour_name) { Season::Easter } else { self.season }
     }
 
     /// Lowercase civil weekday name ("monday").

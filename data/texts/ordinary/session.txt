@@ -26,9 +26,14 @@ offer thy praises to God while upon the earth, I now recite this Office to thee.
 
 
 [sacrosanctae]
-# SOURCE: Monastic Diurnal.pdf, p. front matter (unnumbered)
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+# HOUSE FORM, do not conform to the Diurnal. The vicariate wording "to the humanity
+# of our crucified Lord, Jesus Christ" (crucified on the Lord, not on the Humanity) is
+# a ruling from the supervising priest (#277, #278) and departs from the Diurnal's
+# "crucified Humanity of our Lord Jesus Christ" on purpose. A Diurnal recheck reverted
+# it once; crates/tools/tests/house_forms.rs now fails if it is reverted again.
+# SOURCE: vicariate translation, by ruling of the supervising priest (#277)
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

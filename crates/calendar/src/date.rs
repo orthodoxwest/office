@@ -179,10 +179,7 @@ mod tests {
             let d = Date::new(2026, 1, 1).add_days(n * 37);
             assert_eq!(Date::new(d.year(), d.month() as i32, d.day() as i32), d);
         }
-    }
-
-    #[test]
-    fn normalizes_out_of_range_dates() {
+        // Out-of-range components normalize rather than panic.
         assert_eq!(Date::new(2026, 2, 30).to_string(), "2026-03-02");
         assert_eq!(Date::new(2026, 2, 29).to_string(), "2026-03-01");
         assert_eq!(Date::new(2026, 13, 1).to_string(), "2027-01-01");

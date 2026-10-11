@@ -40,9 +40,6 @@ Condition = triduum
 # Lesson, nor Our help, nor the Lord's Prayer; but the Officiant begins the
 # Confession immediately.
 
-Type = rubric
-Ref = shared/formulas/triduum-compline-opening-rubric
-
 Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
@@ -81,13 +78,19 @@ Condition = triduum
 # and the collect of the day said without Let us pray.
 
 Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
+Ref = shared/formulas/triduum-kneel-rubric
 
 Type = proper-antiphon
 Ref = triduum-antiphon
 
+Type = rubric
+Ref = shared/formulas/triduum-secret-our-father-rubric
+
 Type = silent-prayer
 Ref = ordinary/shared/our-father
+
+Type = rubric
+Ref = shared/formulas/triduum-psalm-51-rubric
 
 Type = psalm
 Ref = psalms/051
@@ -105,6 +108,8 @@ Ref = hymn
 
 [Nunc-Dimittis]
 Condition = feast-holy-saturday
+# Monastic Diurnal, p. 361: the Hymn, Chapter and Versicle are not said, and
+# the antiphon on Nunc dimittis follows the Psalms at once.
 
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
@@ -138,7 +143,7 @@ Ref = short-responsory
 Type = dialogue
 Ref = ordinary/shared/kyrie
 
-Type = corporate-lord-prayer
+Type = partly-secret-lord-prayer
 Ref = ordinary/shared/our-father
 
 [Preces]

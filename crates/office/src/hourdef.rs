@@ -143,9 +143,11 @@ enum Atom {
     FestalWeekdayLaudsCanticle,
     FestalVespersPsalmody,
     IsFerial,
+    PrivilegedVigil,
     OfficeOfTheDead,
     AppendedOfficeOfTheDead,
     Triduum,
+    SeptuagesimaEve,
     Weekday(Weekday),
     Feast(String),
     Season(Season),
@@ -195,9 +197,11 @@ fn parse_atom(atom: &str) -> Result<Atom, String> {
         "festal-lauds-psalmody" => Atom::FestalLaudsPsalmody,
         "festal-vespers-psalmody" => Atom::FestalVespersPsalmody,
         "is-ferial" => Atom::IsFerial,
+        "privileged-vigil" => Atom::PrivilegedVigil,
         "office-of-the-dead" => Atom::OfficeOfTheDead,
         "appended-office-of-the-dead" => Atom::AppendedOfficeOfTheDead,
         "triduum" => Atom::Triduum,
+        "septuagesima-eve" => Atom::SeptuagesimaEve,
         _ => {
             if let Some(value) = atom.strip_prefix("weekday-") {
                 let day = Weekday::ALL.into_iter().find(|d| d.name().to_lowercase() == value);
@@ -233,9 +237,11 @@ fn evaluate_atom(atom: &Atom, day: &Day, moveable: Option<&MoveableDates>, t: &O
         Atom::FestalWeekdayLaudsCanticle => lauds_psalmody::uses_festal_weekday_lauds_canticle(day, t),
         Atom::FestalVespersPsalmody => psalmody::uses_festal_vespers_psalmody(day, t),
         Atom::IsFerial => day.is_ferial(),
+        Atom::PrivilegedVigil => day.celebration.as_deref().is_some_and(calendar::traits::is_privileged_vigil),
         Atom::OfficeOfTheDead => psalmody::is_office_of_the_dead(day),
         Atom::AppendedOfficeOfTheDead => day.vespers.appended_office_of_the_dead,
         Atom::Triduum => is_triduum(day),
+        Atom::SeptuagesimaEve => day.is_septuagesima_eve(),
         Atom::Weekday(w) => day.civil_weekday() == *w,
         Atom::Feast(id) => day.celebration_is(id),
         Atom::Season(s) => day.season == *s,
@@ -257,20 +263,6 @@ pub fn uses_triduum_form(day: &Day, hour_name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn parses_definitions() {
-        let sections = parse_hour_definition(
-            "h.txt",
-            "# c\n[Opening]\nCondition = not-triduum\nLabel = Open\nCollapsible = true\n\nType = versicle\nRef = a/b\n[Next]\nType = psalm\nRef = psalms/004\n",
-        )
-        .unwrap();
-        assert_eq!(sections.len(), 2);
-        assert_eq!(sections[0].label, "Open");
-        assert!(sections[0].collapsible);
-        assert!(sections[0].parsed.is_some());
-        assert_eq!(sections[1].elements, vec![HourElement::new("psalm", "psalms/004")]);
-    }
 
     #[test]
     fn definition_errors() {

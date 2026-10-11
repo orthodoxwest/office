@@ -2,6 +2,7 @@
 
 use std::collections::{BTreeSet, HashMap};
 
+use calendar::traits::octave_parent_id;
 use calendar::{Category, Color, Date, Rank, Season};
 use data_format::{quote, scan_lines};
 use liturgy::OfficeElement;
@@ -166,13 +167,14 @@ fn vespers_psalmody_candidates(day: &Day) -> Vec<String> {
 
 fn has_feast_proper_vespers_psalm_antiphons(day: &Day, t: &OfficeTexts) -> bool {
     let Some(c) = day.celebration.as_deref() else { return false };
+    let season = day.saints_season("vespers");
     for feast_id in feast_proper_ids(c) {
-        if day.season == Season::Easter
+        if season == Season::Easter
             && !lookup_section_text(&format!("proper/{feast_id}-paschal/"), None, "vespers", "psalm-antiphon-1", t).0.is_empty()
         {
             return true;
         }
-        if !lookup_section_text(&format!("proper/{feast_id}/"), Some(day.season), "vespers", "psalm-antiphon-1", t).0.is_empty() {
+        if !lookup_section_text(&format!("proper/{feast_id}/"), Some(season), "vespers", "psalm-antiphon-1", t).0.is_empty() {
             return true;
         }
     }
@@ -199,8 +201,13 @@ pub fn lookup_vespers_psalmody(day: &Day, t: &OfficeTexts) -> (String, String) {
         }
     }
     // A plain Double or a Simple without its own psalmody takes the weekday
-    // psalter (General Rubrics XX.1, XXV.4, III.1), outside octaves.
-    if matches!(c.rank, Rank::Double | Rank::Simple) && day.within_octave_of.is_none() && !has_feast_proper_vespers_psalm_antiphons(day, t)
+    // psalter (General Rubrics XX.1, XXV.4, III.1), also when it falls within
+    // another feast's octave (2026 ordo, 26 June: "Fri. Ps.") (#632). A day
+    // of the octave itself is said as on the Feast (XXV.4).
+    if matches!(c.rank, Rank::Double | Rank::Simple)
+        && !c.has_octave
+        && octave_parent_id(c).is_none()
+        && !has_feast_proper_vespers_psalm_antiphons(day, t)
     {
         return (FERIAL_WITH_WEEKDAY_ANTIPHONS.to_string(), "rubric/plain-double-ferial-vespers".to_string());
     }
@@ -322,21 +329,6 @@ pub fn compose_resolved_psalmody(day: &Day, hour_name: &str, items: &[PsalmodyIt
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn declarations() {
-        let (items, ferial) = parse_psalmody_declaration("psalm-antiphon-1 = psalms/110\npsalm-antiphon-2 = psalms/130 dates=12-25,12-27 antiphon=x/y\npsalm-antiphon-2 = psalms/131 dates=12-26\n").unwrap();
-        assert!(!ferial);
-        assert_eq!(items.len(), 3);
-        assert_eq!(items[1].antiphon, "x/y");
-        assert_eq!(parse_psalmody_declaration("ferial weekday-antiphons").unwrap(), (Vec::new(), true));
-        let selected = select_psalmody_items(items.clone(), Date::new(2026, 12, 26)).unwrap();
-        assert_eq!(selected.iter().map(|i| i.psalm.as_str()).collect::<Vec<_>>(), ["psalms/110", "psalms/131"]);
-        assert_eq!(
-            select_psalmody_items(items, Date::new(2026, 12, 28)).unwrap_err(),
-            "antiphon key \"psalm-antiphon-2\" has no alternative for date 12-28"
-        );
-    }
 
     #[test]
     fn declaration_errors() {

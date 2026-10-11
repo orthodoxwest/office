@@ -119,7 +119,7 @@ fn diff(left: impl BufRead, right: impl BufRead, out: &mut dyn Write, max_record
             (l, r) => {
                 diverged = true;
                 let side = if l.is_none() { "left" } else { "right" };
-                let next = key(&parse(l.as_deref().or(r.as_deref()).unwrap(), false)?);
+                let next = key(&parse(l.as_deref().or(r.as_deref()).expect("one dump continues"), false)?);
                 writeln!(out, "line {line}: {side} dump ended; the other continues with {next}").map_err(|e| e.to_string())?;
                 break;
             }
@@ -199,17 +199,13 @@ pub fn cmd_diff(args: &[String], out: &mut dyn Write) -> Result<(), String> {
 mod tests {
     use super::*;
     #[test]
-    fn excerpts_reveal_late_unicode_changes() {
+    fn diff_reports_divergence() {
         let prefix = "℣ ".repeat(100);
         let (a, b) = excerpts(&format!("{prefix}alpha"), &format!("{prefix}omega"));
         assert!(a.starts_with('…'));
         assert!(a.ends_with("alpha\""));
         assert!(b.ends_with("omega\""));
         assert!(!a.contains('�'));
-    }
-
-    #[test]
-    fn diff_reports_pointers_missing_values_and_sequence_divergence() {
         let a = "{\"date\":\"2026-01-01\",\"kind\":\"calendar_day\",\"list\":[1,2],\"only_left\":true}\n";
         let b = "{\"date\":\"2026-01-01\",\"kind\":\"calendar_day\",\"list\":[1],\"only_right\":null}\n";
         let mut out = Vec::new();
@@ -221,9 +217,6 @@ mod tests {
         assert!(diff(a.as_bytes(), a.as_bytes(), &mut Vec::new(), 20, 8).unwrap());
         assert!(!diff(a.as_bytes(), b"".as_slice(), &mut Vec::new(), 20, 8).unwrap());
         assert!(!diff(a.as_bytes(), a.replace("2026-01-01", "2026-01-02").as_bytes(), &mut Vec::new(), 20, 8).unwrap());
-    }
-    #[test]
-    fn diff_detects_noncanonical_encoding_and_escapes_pointer_tokens() {
         let a = "{\"a/b~\":1,\"kind\":\"meta\"}";
         let b = "{\"a/b~\":2,\"kind\":\"meta\"}";
         let mut out = Vec::new();

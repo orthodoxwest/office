@@ -56,3 +56,28 @@ Month = 5
 Day = 30
 IsVigil = true
 VigilOf = st-z
+
+[group-title]
+Name = The Forty Holy Martyrs
+Rank = commemoration
+Color = red
+Category = martyrs
+Month = 3
+Day = 10
+
+[group-title-named]
+Name = The New Martyrs of Russia
+ProperName = of Russia
+Rank = commemoration
+Color = red
+Category = martyrs
+Month = 2
+Day = 4
+
+[octave-title]
+Name = The Octave of Ss Peter & Paul
+Rank = commemoration
+Color = white
+Category = confessor
+Month = 7
+Day = 6

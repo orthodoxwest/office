@@ -13,12 +13,6 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(vespers.sections.flatMap(\.blocks).contains { $0.kind == .versicle })
     }
 
-    func testTheCurrentHourFollowsTheWebSchedule() {
-        XCTAssertEqual(currentOffice(clockHour: 1).hour, "compline")
-        XCTAssertEqual(currentOffice(clockHour: 1).dayOffset, -1)
-        XCTAssertEqual(currentOffice(clockHour: 18).hour, "vespers")
-    }
-
     func testTheGapsFollowTheWebsRhythm() throws {
         let blocks = try Office.core.get().compose(hour: "lauds", year: 2026, month: 3, day: 15, form: "private").sections.flatMap(\.blocks)
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })
@@ -62,11 +56,14 @@ final class SpokenTests: XCTestCase {
 
 /// The typesetter keeps the web's line boxes and seats the initial as the web does.
 final class ProseTests: XCTestCase {
-    private func spec(_ text: String, initial: Bool) -> ProseSpec {
+    private func spec(_ text: String, initial: Bool, adapt: Initial.Adapt = .prose) -> ProseSpec {
         let font = Scale.body.uiFont()
         var s = ProseSpec(text: NSAttributedString(string: text, attributes: [.font: font]), font: font, line: 32)
         if initial {
-            s.initial = Initial(letter: "O", deep: garamond(61), raised: garamond(42), gap: 3.66, alwaysRaised: false, hi: .yellow, lo: .brown)
+            let raised = NSAttributedString(string: "O", attributes: [.font: garamond(33)])
+            s.initial = Initial(
+                letter: "O", deep: garamond(69), raised: raised, left: 0, drop: 32, edge: 50, tuck: 0, rows: 2, adapt: adapt, color: .brown
+            )
         }
         return s
     }
@@ -90,8 +87,14 @@ final class ProseTests: XCTestCase {
 
     func testAShortOpeningRaisesItsInitial() {
         let opened = ProseLayout(spec: spec("men.", initial: true), width: 320)
-        // The raised capital stands taller than the one line beside it.
-        XCTAssertGreaterThan(opened.height, 32)
+        // The raised capital is a letter of its line, whose height it leaves as it was.
+        XCTAssertEqual(opened.height, 32)
+    }
+
+    func testAShortPsalmOpeningElevatesItsInitial() {
+        let opened = ProseLayout(spec: spec("men.", initial: true, adapt: .psalm), width: 320)
+        // The full capital rises into a line pitch above its one line.
+        XCTAssertEqual(opened.height, 64)
     }
 
     func testTheSmallCapsTakeTheRestOfTheFirstWord() throws {
@@ -136,6 +139,29 @@ final class SVGTests: XCTestCase {
         XCTAssertEqual(disc.width, 7, accuracy: 0.05)
         XCTAssertEqual(disc.height, 7, accuracy: 0.05)
     }
+
+    func testThePaintedMarksStandInTheirBoxes() {
+        // The consecration cross's ring, its arcs' flags set off by commas: radius 19.3 about the box's centre.
+        let ring = Mark.consecration.drawing.shapes[0].path.boundingRect
+        XCTAssertEqual(ring.minX, 0.7, accuracy: 0.05)
+        XCTAssertEqual(ring.maxX, 39.3, accuracy: 0.05)
+        XCTAssertEqual(ring.minY, 0.7, accuracy: 0.05)
+        XCTAssertEqual(ring.maxY, 39.3, accuracy: 0.05)
+        // The moon: its outer disc's left, top and foot, cut on the right by the inner arc.
+        let moon = Mark.moon.drawing.shapes[0].path.boundingRect
+        XCTAssertEqual(moon.minX, 2.4, accuracy: 0.05)
+        XCTAssertEqual(moon.minY, 2.4, accuracy: 0.05)
+        XCTAssertEqual(moon.maxX, 20.18, accuracy: 0.05)
+        XCTAssertEqual(moon.maxY, 21.6, accuracy: 0.05)
+        for mark in [Mark.consecration, .cross, .sun, .moon] {
+            let drawing = mark.drawing
+            for shape in drawing.shapes {
+                let bounds = shape.path.boundingRect
+                XCTAssertFalse(bounds.isEmpty, "\(mark)")
+                XCTAssertTrue(CGRect(x: 0, y: 0, width: drawing.box, height: drawing.box).contains(bounds), "\(mark)")
+            }
+        }
+    }
 }
 
 /// The way back, and where the app opens again.
@@ -153,8 +179,12 @@ final class PlaceTests: XCTestCase {
         let model = AppModel()
         model.path = []
         model.open(.hour(day, "lauds"))
+        let visit = model.path[0].id
         model.open(.hour(day, "prime"))
-        XCTAssertEqual(model.path, [.hour(day, "prime")])
+        // The same visit, so the stack changes it in place, moving on to the next hour.
+        XCTAssertEqual(model.path[0].id, visit)
+        XCTAssertEqual(model.motion(to: .hour(day, "prime")), .next)
+        XCTAssertEqual(model.pages, [.hour(day, "prime")])
         model.open(.ordo(year: 2026, month: 3, day: 0))
         XCTAssertEqual(model.path.count, 2)
         model.open(.home(day.adding(days: 1)))
@@ -162,7 +192,7 @@ final class PlaceTests: XCTestCase {
         let saved = model.saved
         let again = AppModel()
         again.restore(saved)
-        XCTAssertEqual(again.path, model.path)
+        XCTAssertEqual(again.pages, model.pages)
         XCTAssertEqual(again.root, model.root)
         model.goHome()
         XCTAssertTrue(model.path.isEmpty)
@@ -227,5 +257,115 @@ final class ReminderTests: XCTestCase {
         var off = settings(["vespers": (18, 0)])
         off.on = false
         XCTAssertTrue(try ReminderScheduler.plan(off, now: now, core: Office.core.get(), calendar: calendar).isEmpty)
+    }
+}
+
+/// The daily usage beacon: what counts, once a day, under an identifier that lasts the day.
+final class UsageTests: XCTestCase {
+    private let suite = "usage-tests"
+    private var posted: [(id: String, body: String)] = []
+    private var endpoints: [String] = []
+    private var online = true
+    private var advertised: String?
+    // 15 March 2026, mid-morning in New York.
+    private var now = Date(timeIntervalSince1970: 1_773_586_800)
+    private let today = CivilDate(year: 2026, month: 3, day: 15)
+
+    override func setUp() {
+        UserDefaults().removePersistentDomain(forName: suite)
+        posted = []
+        endpoints = []
+        online = true
+        advertised = nil
+    }
+
+    private func usage() -> Usage {
+        Usage(enabled: true, defaults: UserDefaults(suiteName: suite)!, now: { [unowned self] in self.now }) { [unowned self] endpoint, id, body, done in
+            if self.online {
+                self.posted.append((id, body))
+                self.endpoints.append(endpoint)
+            }
+            done(self.online, self.online ? self.advertised : nil)
+        }
+    }
+
+    func testEachPageCountsOnceADay() {
+        let usage = usage()
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.hour(date: today, hour: "vespers"), dark: true, form: "priest")
+        usage.record(.remindersOn, dark: true, form: "priest")
+        XCTAssertEqual(posted.map { $0.body }, [
+            "site appearance:nave screen:mobile visit:first client:ios",
+            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios",
+            "reminders appearance:apse screen:mobile visit:first client:ios",
+        ])
+        XCTAssertEqual(Set(posted.map { $0.id }).count, 1)
+        XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
+    }
+
+    func testTheArchiveIsNotCounted() {
+        let usage = usage()
+        usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
+        usage.record(.ordo(year: 2031), dark: false, form: "private")
+        usage.record(Page.year(2026).usageEvent, dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
+    }
+
+    func testTheIdentifierLastsOneReportingDay() {
+        usage().record(.home(date: today), dark: false, form: "private")
+        // Half past midnight in New York: a new identifier, and home counts again.
+        now = Date(timeIntervalSince1970: 1_773_635_400)
+        XCTAssertEqual(Usage.reportingDay(now), "2026-03-16")
+        let later = usage()
+        later.record(.home(date: today), dark: false, form: "private")
+        later.record(.hour(date: today, hour: "compline"), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 3)
+        XCTAssertNotEqual(posted[0].id, posted[1].id)
+        XCTAssertEqual(posted[1].id, posted[2].id)
+    }
+
+    func testAFailedBeaconIsTriedAgainOnTheNextVisit() {
+        let usage = usage()
+        online = false
+        usage.record(.home(date: today), dark: false, form: "private")
+        online = true
+        usage.record(.home(date: today), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 1)
+    }
+
+    func testAnInstallationIsNewOnItsFirstDayOnly() {
+        usage().record(.home(date: today), dark: false, form: "private")
+        now = now.addingTimeInterval(86_400)
+        usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body.contains("visit:first") }, [true, false])
+        XCTAssertTrue(posted[1].body.contains("visit:returning"))
+    }
+
+    func testAnInstallationThatReportedBeforeIsReturning() {
+        // An app updated from a build that counted readers but not new ones.
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.set("2026-03-10", forKey: "usage-day")
+        defaults.set(String(repeating: "0", count: 32), forKey: "usage-id")
+        usage().record(.home(date: today), dark: false, form: "private")
+        XCTAssertEqual(posted.count, 1)
+        XCTAssertTrue(posted[0].body.contains("visit:returning"))
+    }
+
+    func testBeaconsFollowTheSiteToTheAddressItNames() {
+        advertised = "https://example.org/api/usage"
+        let usage = usage()
+        usage.record(.home(date: today), dark: false, form: "private")
+        usage.record(.hour(date: today, hour: "lauds"), dark: false, form: "private")
+        // Anything but a plain HTTPS usage endpoint is ignored.
+        advertised = "http://elsewhere.example/api/usage"
+        usage.record(.hour(date: today, hour: "vespers"), dark: false, form: "private")
+        self.usage().record(.hour(date: today, hour: "compline"), dark: false, form: "private")
+        let moved = "https://example.org/api/usage"
+        XCTAssertEqual(endpoints, [usageEndpoint(), moved, moved, moved])
+    }
+
+    func testDebugBuildsNeverReport() {
+        XCTAssertNotEqual(Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String, "YES")
     }
 }

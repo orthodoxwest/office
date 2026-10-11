@@ -354,7 +354,7 @@ O Lord, * thou hast searched me out and known me.
 @use ordinary/vespers/psalm-antiphon-1-thursday
 [psalm-antiphon-3-thursday]
 # SOURCE: monastic diurnal, p. 134 (Thursday at Vespers, Throughout the Year)
-Deliver me, O Lord, * from the wicked man.
+Deliver me, * O Lord, from the wicked man.
 
 [psalm-antiphon-4-thursday]
 # SOURCE: monastic diurnal, p. 134 (Thursday at Vespers, Throughout the Year)

@@ -16,9 +16,16 @@ native text, screen for screen:
 - **The ordo**: the month (the wide table on an iPad), each day's office digest, and the year's
   Tabula Temporaria.
 - **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
-  and offers "In 10 minutes".
+  and offers "Remind me in 10 min".
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
+- **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
+  page of the same kind (the next hour, another day or month) changes in place, keeping the
+  page shown until the next is composed and then moving along Material's shared axis.
+  Disclosures unfold, the menu drops in, the picker's months slide and follow a swipe, and a
+  new theme or text size eases in. Reduce Motion turns the slides to fades. A pressed control
+  dims; a choice (a setting, a prayer form, a day) gives a selection tick, a checkbox a light
+  tap, and opening a page nothing.
 
 The Office's text is set with TextKit (`Prose.swift`), not SwiftUI's `Text`:
 
@@ -30,6 +37,15 @@ iOS keeps at most 64 pending notifications for an app, so reminders are schedule
 as fit, up to four weeks. Every visit, and a background refresh about twice a day, move the
 schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
 (`apps/android/tools/bake-bell.py`).
+
+## Usage counts
+
+As the Android app does (apps/android/README.md, "Usage counts"), the app is counted in the
+web's daily usage report: `Usage.swift` posts the Rust core's beacon when a page is shown, how
+it is read changes, or the app comes forward, once a day each, under a random identifier it
+replaces every reporting day. Only Release builds report (`OfficeCountsUsage`, set per
+configuration in `project.yml`); Debug builds, and so the tests and the simulator screenshots,
+never do. `UsageTests` checks what counts, the daily identifier, and the retry.
 
 ## Building
 
@@ -90,7 +106,7 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
    `org.orthodoxwest.office` (Certificates, Identifiers & Profiles → Identifiers; no
    capabilities). In App Store Connect, add a new iOS app with that bundle ID. Its store name
    must be unique across the App Store, so it may need to differ from the home-screen name
-   (`CFBundleDisplayName`, "Divine Office").
+   (`CFBundleDisplayName`, "Daily Office").
 2. **The distribution certificate.** Make a key and signing request, upload the request as an
    *Apple Distribution* certificate (Certificates → +), download `distribution.cer`, and pack
    both as a `.p12`. OpenSSL 3 needs `-legacy`, or the Mac runner's keychain cannot read it.

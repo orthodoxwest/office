@@ -11,5 +11,5 @@ calendar.workspace = true
 corpus.workspace = true
 liturgy.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
+[lints]
+workspace = true

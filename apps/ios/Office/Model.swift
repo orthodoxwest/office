@@ -94,6 +94,21 @@ enum Page: Hashable {
         }
     }
 
+    /// Where `next`, of the same kind, stands after this page in time: later, earlier, or neither.
+    func step(to next: Page) -> Motion {
+        let way: Int
+        switch (self, next) {
+        case let (.hour(a, h), .hour(b, k)):
+            let hours = hourNames()
+            way = a == b ? order(hours.firstIndex(of: h) ?? 0, hours.firstIndex(of: k) ?? 0) : a.compare(b)
+        case let (.home(a), .home(b)): way = a.compare(b)
+        case let (.ordo(y, m, _), .ordo(z, n, _)): way = order(y * 12 + m, z * 12 + n)
+        case let (.year(a), .year(b)): way = order(a, b)
+        default: way = 0
+        }
+        return way < 0 ? .next : way > 0 ? .previous : .fade
+    }
+
     /// A page as saved state writes it: "hour 2026-03-15 vespers".
     var encoded: String {
         switch self {
@@ -122,6 +137,35 @@ enum Page: Hashable {
     }
 }
 
+/// -1, 0 or 1 as `a` comes before, with or after `b`.
+private func order<T: Comparable>(_ a: T, _ b: T) -> Int { a < b ? -1 : a > b ? 1 : 0 }
+
+extension CivilDate {
+    /// -1, 0 or 1 as this day falls before, on or after `other`.
+    func compare(_ other: CivilDate) -> Int {
+        self == other ? 0 : (year, month, day) < (other.year, other.month, other.day) ? -1 : 1
+    }
+}
+
+/**
+ * How a page replaced in place moves: to the next or previous of its kind (an hour, a day, a
+ * month), or with no order between them, a fade. Going deeper and back are the navigation
+ * stack's own slide.
+ */
+enum Motion { case next, previous, fade }
+
+/**
+ * One place on the way back. While a page of the same kind replaces its page it stays the same
+ * visit to the navigation stack, so the screen changes in place rather than pushing.
+ */
+struct Entry: Hashable {
+    let id: Int
+    var page: Page
+
+    static func == (a: Entry, b: Entry) -> Bool { a.id == b.id }
+    func hash(into h: inout Hasher) { h.combine(id) }
+}
+
 /**
  * What is shown and the reader's remembered choices. The way back is a navigation stack over
  * home, so the edge swipe and the pages' own links both walk it.
@@ -130,20 +174,30 @@ final class AppModel: ObservableObject {
     static let shared = AppModel()
 
     @Published var root: CivilDate
-    @Published var path: [Page] = []
+    @Published var path: [Entry] = []
+    /// How the page replaced in place last moves, and the page it moved to.
+    @Published private(set) var step: (to: Page, motion: Motion)?
     @Published var menuOpen = false
     /// The wide header's Settings panel.
     @Published var settingsOpen = false
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
+    /// Whether Prime reads the next day's Martyrology; off by default.
+    @Published private(set) var martyrology: Bool
+    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
+    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
     /// Today, read again whenever the app comes forward; a screenshot run can fix it.
     @Published private(set) var today: CivilDate
     /// The hour of the clock, which chooses home's invitation.
     @Published private(set) var clockHour = civil.component(.hour, from: Date())
+    /// The hours prayed, for home's marks, as the web's `office-prayed`: "2026-10-07/lauds", kept
+    /// on this device a week.
+    @Published private(set) var prayed: Set<String>
 
     private let defaults = UserDefaults.standard
     private let pinnedToday: CivilDate?
+    private var nextEntry = 1
 
     let hours: [String] = hourNames()
 
@@ -155,10 +209,42 @@ final class AppModel: ObservableObject {
         form = UserDefaults.standard.string(forKey: "form").flatMap { f in prayerForms.contains { $0.value == f } ? f : nil } ?? "private"
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
+        martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
+    }
+
+    /// The hours prayed on `date`.
+    func hoursPrayed(on date: CivilDate) -> Set<String> {
+        Set(prayed.filter { $0.hasPrefix(date.iso + "/") }.map { String($0.dropFirst(date.iso.count + 1)) })
+    }
+
+    /// Marks `hour` of `date` prayed, letting marks older than a week go.
+    func markPrayed(_ date: CivilDate, _ hour: String) {
+        let oldest = CivilDate.of(Date()).adding(days: -7)
+        var kept = prayed.filter { CivilDate.parse(String($0.prefix(10))).map { $0.compare(oldest) >= 0 } ?? false }
+        kept.insert("\(date.iso)/\(hour)")
+        prayed = kept
+        defaults.set(Array(kept).sorted(), forKey: "prayed")
     }
 
     /// The page shown.
-    var page: Page { path.last ?? .home(root) }
+    var page: Page { path.last?.page ?? .home(root) }
+
+    /// The pages over home, on the way back.
+    var pages: [Page] { path.map(\.page) }
+
+    /// The page a visit on the way back shows now.
+    func page(of entry: Int) -> Page? { path.first { $0.id == entry }?.page }
+
+    /// How a page coming in place moves: as it was opened, or after any other change, a fade.
+    func motion(to page: Page) -> Motion { step.flatMap { $0.to == page ? $0.motion : nil } ?? .fade }
+
+    private func visits(_ pages: [Page]) -> [Entry] {
+        pages.map { page in
+            defer { nextEntry += 1 }
+            return Entry(id: nextEntry, page: page)
+        }
+    }
 
     /// Opens `next` over the current page; a page of the same kind replaces it, as a link would.
     func open(_ next: Page) {
@@ -166,19 +252,18 @@ final class AppModel: ObservableObject {
         settingsOpen = false
         if next == page { return }
         if next.kind == page.kind {
-            // Replaced in place, as a link is followed: no slide.
-            var t = Transaction()
-            t.disablesAnimations = true
-            withTransaction(t) {
-                if path.isEmpty, case let .home(d) = next { root = d } else if path.isEmpty { path.append(next) } else { path[path.count - 1] = next }
-            }
+            // Replaced in place, as a link is followed: the same visit, so no push; the page
+            // itself moves to the next or previous of its kind once composed.
+            step = (next, page.step(to: next))
+            if path.isEmpty, case let .home(d) = next { root = d } else { path[path.count - 1].page = next }
         } else {
-            path.append(next)
+            path += visits([next])
         }
     }
 
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
+        step = nil
         menuOpen = false
         settingsOpen = false
         root = today
@@ -186,6 +271,7 @@ final class AppModel: ObservableObject {
     }
 
     func chooseForm(_ value: String) {
+        step = nil
         form = value
         defaults.set(value, forKey: "form")
     }
@@ -200,12 +286,35 @@ final class AppModel: ObservableObject {
         defaults.set(value.rawValue, forKey: "text-size")
     }
 
-    /// Called when the app comes forward: the date may have turned while it was away.
+    func chooseMartyrology(_ value: Bool) {
+        step = nil
+        martyrology = value
+        defaults.set(value, forKey: "martyrology")
+    }
+
+    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    func composed(_ view: HourView, page: Page) {
+        guard view.hour == "prime" else { return }
+        primeMartyrology = (page, view.martyrology)
+    }
+
+    /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
+    func martyrologyShown(on page: Page) -> Bool? {
+        guard let prime = primeMartyrology, prime.page == page else { return nil }
+        return prime.shown
+    }
+
+    /// Called when the app comes forward, and every minute while it is in front: the hour or the
+    /// date may have turned since home was composed.
     func refreshToday() {
         let hour = civil.component(.hour, from: Date())
-        if hour != clockHour { clockHour = hour }
+        if hour != clockHour {
+            step = nil
+            clockHour = hour
+        }
         let now = pinnedToday ?? .of(Date())
         guard now != today else { return }
+        step = nil
         // Home that was showing today moves on with it.
         if root == today && path.isEmpty { root = now }
         today = now
@@ -213,14 +322,14 @@ final class AppModel: ObservableObject {
 
     /// The way back as saved state writes it, one page a line, for a return after iOS has closed the app.
     var saved: String {
-        ([Page.home(root)] + path).map(\.encoded).joined(separator: "\n")
+        ([Page.home(root)] + pages).map(\.encoded).joined(separator: "\n")
     }
 
     func restore(_ saved: String) {
         let pages = saved.split(separator: "\n").compactMap { Page.decode(String($0)) }
         guard case let .home(d)? = pages.first else { return }
         root = d
-        path = Array(pages.dropFirst())
+        path = visits(Array(pages.dropFirst()))
     }
 
     /**
@@ -233,10 +342,10 @@ final class AppModel: ObservableObject {
         let date = d.string(forKey: "date").flatMap(CivilDate.parse) ?? today
         root = date
         switch name {
-        case "hour": path = [.hour(date, d.string(forKey: "hour") ?? currentOffice(clockHour: 9).hour)]
-        case "ordo": path = [.ordo(year: Int(date.year), month: Int(date.month), day: 0)]
-        case "year": path = [.year(Int(date.year))]
-        case "reminders": path = [.reminders]
+        case "hour": path = visits([.hour(date, d.string(forKey: "hour") ?? currentOffice(clockHour: 9).hour)])
+        case "ordo": path = visits([.ordo(year: Int(date.year), month: Int(date.month), day: 0)])
+        case "year": path = visits([.year(Int(date.year))])
+        case "reminders": path = visits([.reminders])
         default: path = []
         }
         // `-settings YES` opens the wide header's Settings, for its screenshot.

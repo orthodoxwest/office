@@ -1,7 +1,7 @@
 # Latin incipits for the psalter and the canticles.
 #
 # Printed diurnals label each psalm with its Latin incipit as well as its
-# number ("Psalm 67 · Deus misereatur"), and the parish prints them on its
+# number ("Psalm 66 (67) · Deus misereatur"), and the parish prints them on its
 # Lauds and Vespers handouts. This file supplies that subtitle; the office
 # engine attaches it to the composed psalm or canticle element and every
 # renderer shows it beside the label.
@@ -22,7 +22,10 @@
 # The psalter is Coverdale (Book of Common Prayer), which uses HEBREW psalm
 # numbering. The Latin tradition — and Divinum Officium — uses VULGATE
 # (Septuagint) numbering, which runs one behind through most of the psalter
-# and divides several psalms differently. The incipit on each line below is
+# and divides several psalms differently. The app's labels put the Septuagint
+# number first and the Hebrew in parentheses (office::engine::psalm_label,
+# which follows the mapping below); the keys here stay Hebrew, as the corpus
+# does. The incipit on each line below is
 # the incipit of the SAME psalm as the key, expressed in Latin; it is NOT the
 # incipit of the Vulgate psalm that happens to share the number. So
 # "psalms/067 = Deus misereatur nostri" pairs our Psalm 67 (Coverdale "God be
@@ -239,7 +242,7 @@ psalms/137       = Super flumina Babylonis
 psalms/138       = Confitebor tibi, Domine
 psalms/139       = Domine, probasti me
 psalms/139a      = Domine, probasti me
-psalms/139b      = Quia tenebræ non obscurabuntur
+psalms/139b      = Et dixi
 psalms/140       = Eripe me, Domine
 psalms/141       = Domine, clamavi ad te
 psalms/142       = Voce mea ad Dominum

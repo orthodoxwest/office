@@ -10,6 +10,9 @@ primary_region = "iad"
 [env]
   PORT = "8080"
   OFFICE_USAGE_DB = "/usage/usage.sqlite"
+  # Every other host (office.fly.dev, www.) forwards here; see README "Changing address".
+  # Deploy this only once `fly certs check orthodoxwestbreviary.com` says the certificate is issued.
+  OFFICE_CANONICAL_HOST = "orthodoxwestbreviary.com"
 
 [[mounts]]
   source = "office_usage"

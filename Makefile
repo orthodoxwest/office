@@ -167,6 +167,10 @@ android: ## Build the sideloadable Android preview APK (needs Android SDK/NDK an
 	cd apps/android && ./gradlew assemblePreview
 	@echo "APK: apps/android/app/build/outputs/apk/preview/app-preview.apk"
 
+android-bundle: ## Build the signed Play Store bundle (needs the upload key in OFFICE_UPLOAD_*; see apps/android/README.md)
+	cd apps/android && ./gradlew bundleRelease
+	@echo "Bundle: apps/android/app/build/outputs/bundle/release/app-release.aab"
+
 android-screenshots: ## Render Android screens from the Rust core into apps/android/app/build/screenshots/
 	cd apps/android && ./gradlew testDebugUnitTest
 
@@ -180,7 +184,7 @@ clean: ## Remove build artifacts
 	rm -f office
 	rm -rf output/
 
-SWEEP_HOURS ?= 72
+SWEEP_HOURS ?= 24
 
 sweep-targets: ## Delete target/ in checkouts idle for SWEEP_HOURS (DRY_RUN=1 to preview)
 	python3 scripts/sweep-targets.py --hours $(SWEEP_HOURS) $(if $(DRY_RUN),--dry-run)

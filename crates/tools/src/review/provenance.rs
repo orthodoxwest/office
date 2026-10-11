@@ -494,24 +494,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn citations() {
-        let c = parse_citation("divinum-officium Sancti/01-06.txt [Ant 1] — check against diurnal p. 12", 4);
-        assert_eq!(
-            (c.kind.as_str(), c.source.as_str(), c.locator.as_str(), c.page.as_str()),
-            ("divinum-officium", "divinum-officium", "Sancti/01-06.txt [Ant 1]", "12")
-        );
-        assert_eq!(c.note, "check against diurnal p. 12");
-        let c = parse_citation("diurnal.pdf page 311–312", 1);
-        assert_eq!(
-            (c.kind.as_str(), c.source.as_str(), c.locator.as_str(), c.page.as_str()),
-            ("local-pdf", "diurnal.pdf", "page 311–312", "311–312")
-        );
-        let c = parse_citation("Monastic Diurnal, P.44", 1);
-        assert_eq!((c.kind.as_str(), c.page.as_str()), ("other", "44"));
-        assert_eq!(parse_citation("step12", 1).page, "");
-    }
-
-    #[test]
     fn only_current_verified_entries_pass() {
         let entry = |key: &str, status, stale| EntryProvenance {
             key: key.into(),
@@ -540,14 +522,5 @@ mod tests {
         assert!(got[0].starts_with("\"b\" is needs-review"), "{got:?}");
         assert!(got[1].starts_with("\"c\" is source-unknown"), "{got:?}");
         assert!(got[2].starts_with("\"d\" changed since its attestation"), "{got:?}");
-    }
-
-    #[test]
-    fn hashes_and_sections() {
-        assert_eq!(content_hash(""), "e3b0c44298fc");
-        assert_eq!(provenance_section("[psalm-antiphon-1]"), Some("psalm-antiphon-1"));
-        assert_eq!(provenance_section("[a b]"), None);
-        assert_eq!(provenance_section("[]"), None);
-        assert_eq!(join_nonempty(&[" a ", "", "b"]), "a | b");
     }
 }

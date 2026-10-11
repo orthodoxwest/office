@@ -16,12 +16,13 @@ struct OfficeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView().environmentObject(model)
+            // The clock and notifications put away while the app is open, as Books does for reading.
+            RootView().environmentObject(model).statusBarHidden()
         }
     }
 }
 
-/// Reminders: how a tapped one opens its hour, and how "In 10 minutes" puts one off.
+/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off.
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
@@ -58,21 +59,20 @@ struct RootView: View {
     /// The way back, kept for a return after iOS has closed the app in the background.
     @SceneStorage("way-back") private var wayBack = ""
     @State private var started = false
+    /// The clock, read every minute while the app is in front: a timer to the next hour stops
+    /// counting while the phone sleeps, so home could still highlight Sext at Vespers.
+    private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
+        let visit = Visit(
+            page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
+            martyrology: model.martyrologyShown(on: model.page)
+        )
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
-                    .navigationDestination(for: Page.self) { page in
-                        switch page {
-                        case let .home(d): HomePage(date: d)
-                        case let .hour(d, h): HourPage(date: d, hour: h)
-                        case let .ordo(y, m, d): OrdoPage(year: y, month: m, day: d)
-                        case let .year(y): YearPage(year: y)
-                        case .reminders: RemindersPage()
-                        }
-                    }
+                    .navigationDestination(for: Entry.self) { entry in EntryPage(entry: entry.id) }
             }
             .overlay(alignment: .topTrailing) {
                 if model.menuOpen && geo.size.width < wideFrom {
@@ -84,7 +84,7 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.horizontal, gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
                 if model.settingsOpen && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
@@ -95,12 +95,13 @@ struct RootView: View {
                             .padding(.top, 52)
                             .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .offset(y: -8)))
                 }
             }
             .animation(.easeOut(duration: 0.15), value: model.menuOpen)
             .animation(.easeOut(duration: 0.15), value: model.settingsOpen)
             .environment(\.wide, geo.size.width >= wideFrom)
+            .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
         }
         .environment(\.palette, palette)
         .environment(\.ornament, Ornament.of(palette, season: ""))
@@ -114,6 +115,16 @@ struct RootView: View {
             if !model.openFromLaunch() && !wayBack.isEmpty { model.restore(wayBack) }
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
+        // The page shown counts in the day's usage whenever it, how it is read (Prime's
+        // Martyrology included), or the day changes while the app is in front; each once a day
+        // (Usage.swift).
+        .onChange(of: visit, initial: true) { _, v in
+            guard v.active else { return }
+            Usage.shared.record(v.page.usageEvent, dark: v.dark, form: v.form, martyrology: v.martyrology)
+        }
+        .onReceive(minute) { _ in
+            if phase == .active { model.refreshToday() }
+        }
         .onChange(of: phase) { _, now in
             guard now == .active else { return }
             model.refreshToday()
@@ -122,6 +133,38 @@ struct RootView: View {
             ReminderScheduler.scheduleRefresh()
         }
     }
+}
+
+/**
+ * A visit's page, read from the way back as it is now: a page of the same kind replacing it
+ * changes it here, in place.
+ */
+private struct EntryPage: View {
+    let entry: Int
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        switch model.page(of: entry) {
+        case let .home(d)?: HomePage(date: d)
+        case let .hour(d, h)?: HourPage(date: d, hour: h)
+        case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
+        case let .year(y)?: YearPage(year: y)
+        case .reminders?: RemindersPage()
+        // Gone from the way back, while the stack lets it go.
+        case nil: Color.clear
+        }
+    }
+}
+
+/// What the day's usage count reads: the page, how it is read, the day, and whether the app is in front.
+private struct Visit: Equatable {
+    let page: Page
+    let form: String
+    let dark: Bool
+    let today: CivilDate
+    let active: Bool
+    /// At Prime, whether its Martyrology was shown, once composed.
+    let martyrology: Bool?
 }
 
 /// The pages hide the navigation bar, as the web has none; the edge swipe back stays.

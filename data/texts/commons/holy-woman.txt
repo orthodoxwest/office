@@ -36,8 +36,7 @@ Give her * of the fruit of her hands; and let her own works praise her in the ga
 She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to the needy; she eateth not the bread of idleness.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
-The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
+@use shared/holy-woman/antiphon-the-kingdom-of-heaven
 
 [commemoration-collect]
 @use commons/holy-woman/collect
@@ -133,9 +132,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God shall help her * with his countenance.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
-V. In thy grace and in thy beauty.
-R. Go forth, ride prosperously, and reign.
+@use shared/holy-woman/versicle-in-thy-grace
 
 [versicle-vespers]
 @use commons/holy-woman/versicle-lauds

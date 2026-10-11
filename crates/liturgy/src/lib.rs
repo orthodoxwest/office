@@ -2,7 +2,7 @@
 //! spans. Every composer produces it and every renderer consumes it. Empty text fields represent
 //! absence; the dump serializes them as null.
 
-use calendar::{Color, Date, Decision, Season};
+use calendar::{Color, Date, Decision, Rank, Season};
 
 /// The kind of a liturgical element.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -110,6 +110,33 @@ impl VoiceSpan {
     }
 }
 
+/// The corporate Lord's Prayer divided between its voices.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LordPrayerParts {
+    /// The officiant's words before his versicle or the people's answer.
+    pub officiant: Vec<VoiceSpan>,
+    /// After a secret stretch, the words he says aloud as a ℣.
+    pub versicle: Option<String>,
+    /// The people's ℟.
+    pub response: String,
+}
+
+impl LordPrayerParts {
+    /// The prayer as a voiced block: the officiant's prose, then its `V. `
+    /// and `R. ` lines.
+    pub fn voiced(&self) -> Vec<VoiceSpan> {
+        let mut spans: Vec<VoiceSpan> = self.officiant.iter().map(|s| VoiceSpan::new(s.text.as_str(), s.spoken, None)).collect();
+        let lines = self.versicle.iter().map(|v| format!("V. {}", v.trim())).chain([format!("R. {}", self.response.trim())]);
+        for line in lines {
+            if spans.last().is_some_and(|s| !s.text.ends_with('\n')) {
+                spans.push(VoiceSpan::new("\n", true, None));
+            }
+            spans.push(VoiceSpan::new(line, true, None));
+        }
+        spans
+    }
+}
+
 /// A run of a rubric; `prayed` marks words quoted for recitation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RubricSpan {
@@ -193,9 +220,45 @@ pub struct OfficeElement {
     pub commemoration_owner_id: String,
     pub is_commemoration: bool,
     pub announce: bool,
+    /// The opening words of a psalm or canticle that the antiphon before it
+    /// has just said, and so are not repeated.
+    pub unrepeated: Option<Unrepeated>,
+}
+
+/// Words that open a psalm or canticle exactly as its antiphon does: once the
+/// antiphon has said them, the psalm continues where the antiphon's words end
+/// (General Rubrics XXIV.8).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Unrepeated {
+    /// How many words of the first verse are not said.
+    pub words: usize,
+    /// Those words as the antiphon has them, when the antiphon said more than
+    /// them; empty when they are all it said.
+    pub named: String,
 }
 
 impl OfficeElement {
+    /// A psalm's label as its word, its Septuagint number and its Hebrew number
+    /// ("Psalm ", "66", "(67)"), which renderers set apart: in a small-caps label a
+    /// small-cap "1" reads as the section numeral "i", and the Hebrew number in
+    /// parentheses is muted beside the number that leads. The Hebrew part is empty
+    /// where the two numberings agree; a renderer joins a present one with a
+    /// no-break space. `None` for any other label.
+    pub fn psalm_label_parts(&self) -> Option<(&str, &str, &str)> {
+        if self.kind != ElementType::Psalm {
+            return None;
+        }
+        let numbers = self.label.strip_prefix("Psalm ")?;
+        if !numbers.starts_with(|c: char| c.is_ascii_digit()) {
+            return None;
+        }
+        let word = &self.label[..self.label.len() - numbers.len()];
+        Some(match numbers.split_once("\u{a0}(") {
+            Some((greek, _)) => (word, greek, &numbers[greek.len() + '\u{a0}'.len_utf8()..]),
+            None => (word, numbers, ""),
+        })
+    }
+
     pub fn new(kind: ElementType, text: impl Into<String>) -> OfficeElement {
         OfficeElement {
             leader_slot: String::new(),
@@ -213,6 +276,7 @@ impl OfficeElement {
             commemoration_owner_id: String::new(),
             is_commemoration: false,
             announce: false,
+            unrepeated: None,
         }
     }
 
@@ -223,6 +287,22 @@ impl OfficeElement {
             return antiphon_announcement(&self.text);
         }
         self.text.clone()
+    }
+
+    /// The rubric before a psalm or canticle whose opening words are not
+    /// repeated, worded after the Diurnal. "These words", not its "This",
+    /// since the antiphon itself is repeated after the psalm.
+    pub fn unrepeated_rubric(&self) -> Vec<RubricSpan> {
+        let Some(u) = &self.unrepeated else { return Vec::new() };
+        let item = if self.kind == ElementType::Canticle { "Canticle" } else { "Psalm" };
+        if u.named.is_empty() {
+            return vec![RubricSpan { text: format!("These words are not repeated in the {item}."), prayed: false }];
+        }
+        vec![
+            RubricSpan { text: "The words ".to_string(), prayed: false },
+            RubricSpan { text: u.named.clone(), prayed: true },
+            RubricSpan { text: format!(" are not repeated in the {item}."), prayed: false },
+        ]
     }
 
     /// The speaker turns, when every span is spoken by a named role and the
@@ -236,6 +316,33 @@ impl OfficeElement {
             text.push_str(&span.text);
         }
         (text == self.text).then_some(&self.voice[..])
+    }
+
+    /// The corporate Lord's Prayer's officiant, versicle and response; `None`
+    /// unless the spans give both officiant and response, when renderers fall
+    /// back to a plain prayer.
+    pub fn lord_prayer_parts(&self) -> Option<LordPrayerParts> {
+        let mut officiant: Vec<VoiceSpan> = Vec::new();
+        let mut response = String::new();
+        for span in &self.voice {
+            match span.role {
+                Some(VoiceRole::Officiant) => officiant.push(span.clone()),
+                Some(VoiceRole::Response) => response.push_str(&span.text),
+                Some(VoiceRole::Priest | VoiceRole::All) | None => {}
+            }
+        }
+        if officiant.is_empty() || response.is_empty() {
+            return None;
+        }
+        // Said aloud after a secret stretch, his last words are a versicle,
+        // closed with a period as the Diurnal prints it (pp. 10, 86, 151).
+        let versicle = match officiant.as_slice() {
+            [.., before, last] if !before.spoken && last.spoken => {
+                officiant.pop().map(|s| format!("{}.", s.text.trim_end().trim_end_matches([',', ';', ':', '.'])))
+            }
+            _ => None,
+        };
+        Some(LordPrayerParts { officiant, versicle, response })
     }
 }
 
@@ -258,6 +365,29 @@ pub fn antiphon_announcement(text: &str) -> String {
         return format!("{incipit}.");
     }
     text.to_string()
+}
+
+/// Splits `s` after its first `n` words, each word keeping its trailing
+/// punctuation: the head, the rest, and how many words the head holds (fewer
+/// than `n` when `s` runs out). A mark with no letter or digit, such as a
+/// mediant, is not a word.
+pub fn split_words(s: &str, n: usize) -> (&str, &str, usize) {
+    let mut taken = 0;
+    let mut end = 0;
+    let mut rest = s;
+    while taken < n {
+        let ws = rest.len() - rest.trim_start().len();
+        let token = rest[ws..].split(char::is_whitespace).next().unwrap_or("");
+        if token.is_empty() {
+            break;
+        }
+        if token.chars().any(char::is_alphanumeric) {
+            taken += 1;
+        }
+        end += ws + token.len();
+        rest = &s[end..];
+    }
+    (&s[..end], &s[end..], taken)
 }
 
 /// A group of elements; `collapsible` renders as a closed disclosure.
@@ -316,6 +446,9 @@ pub struct OfficeHour {
     pub title: String,
     pub season: Option<Season>,
     pub feast: String,
+    /// The rank of the celebration the hour belongs to (a following feast's
+    /// at its I Vespers), or none on a feria.
+    pub rank: Option<Rank>,
     pub color: Option<Color>,
     pub sections: Vec<OfficeSection>,
     pub decisions: Vec<Decision>,
@@ -324,6 +457,21 @@ pub struct OfficeHour {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_psalm_label_parts_its_word_from_its_numbers() {
+        let label = |kind, l: &str| {
+            let mut e = OfficeElement::new(kind, "");
+            e.label = l.into();
+            e.psalm_label_parts().map(|(w, g, h)| [w.to_string(), g.to_string(), h.to_string()])
+        };
+        let parts = |w: &str, g: &str, h: &str| Some([w.to_string(), g.to_string(), h.to_string()]);
+        assert_eq!(label(ElementType::Psalm, "Psalm 66\u{a0}(67)"), parts("Psalm ", "66", "(67)"));
+        assert_eq!(label(ElementType::Psalm, "Psalm 118\u{a0}i\u{a0}(119\u{a0}i)"), parts("Psalm ", "118\u{a0}i", "(119\u{a0}i)"));
+        assert_eq!(label(ElementType::Psalm, "Psalm 1"), parts("Psalm ", "1", ""));
+        assert_eq!(label(ElementType::Canticle, "Magnificat"), None);
+        assert_eq!(label(ElementType::Psalm, "Psalm"), None);
+    }
 
     #[test]
     fn announcements() {
@@ -337,12 +485,5 @@ mod tests {
         ] {
             assert_eq!(antiphon_announcement(text), want, "{text}");
         }
-    }
-
-    #[test]
-    fn prayer_forms() {
-        assert_eq!(PrayerForm::parse(""), Ok(PrayerForm::Private));
-        assert_eq!(PrayerForm::parse("priest"), Ok(PrayerForm::Priest));
-        assert!(PrayerForm::parse("bishop").is_err());
     }
 }

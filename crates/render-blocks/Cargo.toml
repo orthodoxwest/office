@@ -16,8 +16,5 @@ office.workspace = true
 render-html.workspace = true
 tools.workspace = true
 
-[lints.rust]
-unsafe_code = "forbid"
-
-[lints.clippy]
-wildcard_enum_match_arm = "deny"
+[lints]
+workspace = true

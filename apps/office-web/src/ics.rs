@@ -131,6 +131,15 @@ fn fold_line(out: &mut String, line: &str) {
     out.push_str("\r\n");
 }
 
+/// The external base URL of a request, honoring the proxy's X-Forwarded-Proto.
+pub fn base_url(headers: &HeaderMap, host: &str) -> String {
+    let scheme = match header_value(headers, "x-forwarded-proto") {
+        "" => "http",
+        s => s,
+    };
+    format!("{scheme}://{host}")
+}
+
 impl Server {
     fn build_ics(&self, cfg: &IcsConfig, base_url: &str, now: Timestamp) -> Result<String, String> {
         let mut out = String::new();
@@ -141,7 +150,7 @@ impl Server {
             "PRODID:-//AWRV Divine Office//office//EN",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
-            "X-WR-CALNAME:Divine Office",
+            "X-WR-CALNAME:Daily Office",
             "X-WR-CALDESC:Hours of the Benedictine Office",
             "REFRESH-INTERVAL;VALUE=DURATION:P1D",
             "X-PUBLISHED-TTL:P1D",
@@ -187,18 +196,13 @@ impl Server {
         Ok(out)
     }
 
-    /// `/office.ics`.
-    pub fn ics(&self, query: &Query, headers: &HeaderMap, host: &str) -> Response<Body> {
+    /// `/office.ics`, with links into the site at `base`.
+    pub fn ics(&self, query: &Query, base: &str) -> Response<Body> {
         let cfg = match parse_config(query) {
             Ok(c) => c,
             Err(e) => return http_error(&e, StatusCode::BAD_REQUEST),
         };
-        // The external base URL, honoring the proxy's X-Forwarded-Proto.
-        let scheme = match header_value(headers, "x-forwarded-proto") {
-            "" => "http",
-            s => s,
-        };
-        let body = match self.build_ics(&cfg, &format!("{scheme}://{host}"), Timestamp::now()) {
+        let body = match self.build_ics(&cfg, base, Timestamp::now()) {
             Ok(b) => b,
             Err(e) => return http_error(&format!("error building calendar: {e}"), StatusCode::INTERNAL_SERVER_ERROR),
         };
@@ -271,7 +275,7 @@ mod tests {
         assert!(body.starts_with("BEGIN:VCALENDAR\r\n") && body.ends_with("END:VCALENDAR\r\n"));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 7);
         for want in [
-            "SUMMARY:Lauds — Nativity of Our Lord Jesus Christ",
+            "SUMMARY:Lauds — The Nativity of Our Lord",
             // 06:45 EST is 11:45 UTC.
             "DTSTART:20261225T114500Z",
             "UID:lauds-2026-12-25@awrv-office",
@@ -283,19 +287,12 @@ mod tests {
         for (i, line) in body.split("\r\n").enumerate() {
             assert!(line.len() <= 75, "line {} exceeds 75 octets: {line:?}", i + 1);
         }
-    }
-
-    #[test]
-    fn day_filter_and_no_alarm() {
-        // 2026-06-08 is a Monday.
+        // A day filter and no alarm; 2026-06-08 is a Monday.
         let body = ics("vespers=18:00&days=sun&alarm=none&horizon=14", at(&TimeZone::UTC, 2026, 6, 8, 12, 0));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 2);
         assert!(!body.contains("BEGIN:VALARM"));
         assert!(body.contains("DTSTART:20260614T180000Z"));
-    }
-
-    #[test]
-    fn spans_year_boundary() {
+        // Across the year's end.
         let body = ics("compline=21:00&horizon=10", at(&TimeZone::UTC, 2026, 12, 28, 12, 0));
         assert!(body.contains("UID:compline-2027-01-03@awrv-office"));
         assert_eq!(body.matches("BEGIN:VEVENT").count(), 10);

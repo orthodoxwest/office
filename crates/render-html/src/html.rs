@@ -2,7 +2,7 @@
 //! the typography every run of display text passes through.
 
 use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, VoiceRole, VoiceSpan, posture_cues_at};
+use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
@@ -90,10 +90,27 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
         }
         ElementType::Psalm | ElementType::Canticle => {
+            let unrepeated = elem.unrepeated_rubric();
+            if !unrepeated.is_empty() {
+                sb.push_str(&render_rubric_spans(&unrepeated, "rubric unrepeated-note"));
+            }
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
             if !elem.label.is_empty() {
                 sb.push_str("<h3 class=\"item-label\">");
-                sb.push_str(&esc_text(&elem.label));
+                match elem.psalm_label_parts() {
+                    Some((word, greek, hebrew)) => {
+                        sb.push_str(&esc_text(word));
+                        sb.push_str("<span class=\"psalm-num\">");
+                        sb.push_str(&esc_text(greek));
+                        if !hebrew.is_empty() {
+                            sb.push_str("\u{a0}<span class=\"psalm-heb\">");
+                            sb.push_str(&esc_text(hebrew));
+                            sb.push_str("</span>");
+                        }
+                        sb.push_str("</span>");
+                    }
+                    None => sb.push_str(&esc_text(&elem.label)),
+                }
                 if !elem.incipit.is_empty() {
                     // The dot stays with the label; the Latin title wraps whole.
                     sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
@@ -103,7 +120,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 }
                 sb.push_str("</h3>");
             }
-            sb.push_str(&render_psalm_verses(&elem.text, &elem.postures));
+            sb.push_str(&render_psalm_verses(&elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words)));
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
                 sb.push_str(&render_gloria_patri(&doxology.text, &doxology.postures));
             }
@@ -174,9 +191,21 @@ fn posture_html(cues: &[PostureCue], at: PostureAnchor) -> String {
     posture_cues_at(cues, at).map(|cue| format!("<span class=\"posture\">{cue}</span> ")).collect()
 }
 
+/// Display text with its first `words` words muted as not said; returns the
+/// words still to mute.
+fn unrepeated_html(s: &str, words: usize) -> (String, usize) {
+    let (unsaid, rest, taken) = split_words(s, words);
+    if unsaid.is_empty() {
+        return (esc_cross(s), words);
+    }
+    (format!("<span class=\"unrepeated\">{}</span>{}", esc_cross(unsaid), esc_cross(rest)), words - taken)
+}
+
 /// A psalm or canticle. A scripture reference precedes the verses so the
 /// first verse is the first child of `.psalm-verses` and takes the drop cap.
-pub fn render_psalm_verses(text: &str, postures: &[PostureCue]) -> String {
+/// The first `unrepeated` words, which the antiphon has just said, are muted.
+pub fn render_psalm_verses(text: &str, postures: &[PostureCue], unrepeated: usize) -> String {
+    let mut unrepeated = unrepeated;
     let psalm = parse_psalm(text);
     let mut sb = String::new();
     if !psalm.scripture_ref.is_empty() {
@@ -219,12 +248,15 @@ pub fn render_psalm_verses(text: &str, postures: &[PostureCue]) -> String {
                     ));
                 }
                 sb.push_str(&posture_html(postures, PostureAnchor::BeforeVerse(verse)));
-                sb.push_str(&esc_cross(&first));
+                let (first, left) = unrepeated_html(&first, unrepeated);
+                let (second, left) = unrepeated_html(second, left);
+                unrepeated = left;
+                sb.push_str(&first);
                 let after_mediant = posture_html(postures, PostureAnchor::AfterMediant(verse));
                 if !second.is_empty() {
                     sb.push_str(MEDIANT);
                     sb.push_str(&after_mediant);
-                    sb.push_str(&esc_cross(second));
+                    sb.push_str(&second);
                 } else if !after_mediant.is_empty() {
                     sb.push(' ');
                     sb.push_str(after_mediant.trim_end());
@@ -258,16 +290,19 @@ fn render_flowing_block(text: &str) -> String {
 }
 
 fn render_rubric(elem: &OfficeElement) -> String {
-    let mut sb = String::from("<p class=\"rubric\">");
     if elem.rubric_spans.is_empty() {
-        sb.push_str(&esc_text(&elem.text));
-    } else {
-        for span in &elem.rubric_spans {
-            if span.prayed {
-                sb.push_str(&format!("<span class=\"rubric-prayed\">{}</span>", esc_cross(&span.text)));
-            } else {
-                sb.push_str(&esc_text(&span.text));
-            }
+        return format!("<p class=\"rubric\">{}</p>", esc_text(&elem.text));
+    }
+    render_rubric_spans(&elem.rubric_spans, "rubric")
+}
+
+fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
+    let mut sb = format!("<p class=\"{class}\">");
+    for span in spans {
+        if span.prayed {
+            sb.push_str(&format!("<span class=\"rubric-prayed\">{}</span>", esc_cross(&span.text)));
+        } else {
+            sb.push_str(&esc_text(&span.text));
         }
     }
     sb.push_str("</p>");
@@ -275,19 +310,15 @@ fn render_rubric(elem: &OfficeElement) -> String {
 }
 
 /// The corporate Lord's Prayer, split between officiant and people; any
-/// incomplete partition falls back to an ordinary prayer.
+/// incomplete partition falls back to an ordinary prayer. Said in secret up
+/// to a versicle, it is a voiced block with no initial.
 fn render_corporate_lord_prayer(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
+    let Some(parts) = elem.lord_prayer_parts() else { return render_flowing_block(&elem.text) };
+    if parts.versicle.is_some() {
+        return render_voice_block(&parts.voiced(), Mode::Flow);
     }
-    if officiant.is_empty() || response.is_empty() {
-        return render_flowing_block(&elem.text);
-    }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
+    let response = parts.response;
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     format!(
         "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\"><span class=\"{SIGIL_CLASS}\">℟.</span><span class=\"sigil-text\">{}</span></p></div>",

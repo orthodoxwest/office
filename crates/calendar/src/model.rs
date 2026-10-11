@@ -1,6 +1,7 @@
 //! Calendar types: ranks, colors, categories, seasons, feasts, and the
 //! resolved calendar day every product shares.
 
+use std::collections::BTreeMap;
 use std::fmt;
 use std::sync::Arc;
 
@@ -257,6 +258,31 @@ pub struct MonthDay {
     pub day: u32,
 }
 
+/// The qualifier the ordo prints inside the brackets after an observance kept only by monastics
+/// and oblates.
+pub const MONASTIC_QUALIFIER: &str = "Monastics & Oblates Only";
+
+/// An observance the ordo brackets "(Monastics & Oblates Only)": printed under the day's office
+/// as a notation, never part of the parish calendar. The app does not compose its office; its rank
+/// and office note are the ordo's words, carried for the reader who prays it from the Diurnal.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MonasticObservance {
+    pub id: String,
+    pub name: String,
+    pub rank: Rank,
+    pub fixed: MonthDay,
+    /// Where its office is found, e.g. "Proper Office, Monastic Diurnal pp. 560–564".
+    pub office: Option<String>,
+}
+
+impl MonasticObservance {
+    /// The bracketed line as the ordo prints it, without the brackets:
+    /// "Solemnity of St Benedict (Monastics & Oblates Only)".
+    pub fn heading(&self) -> String {
+        format!("{} ({MONASTIC_QUALIFIER})", self.name)
+    }
+}
+
 /// A liturgical feast or observance and its rubrical attributes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Feast {
@@ -283,8 +309,16 @@ pub struct Feast {
     /// The octave this day continues when its ID does not say so (Easter
     /// Monday and Tuesday).
     pub octave_of: Option<String>,
+    /// The ordo's names for this feast's generated octave days: a pattern for
+    /// days II–VII ("{n}" the day's numeral, "{weekday}" its weekday), and
+    /// single days 2–8 by number.
+    pub octave_days: Option<String>,
+    pub octave_day_names: BTreeMap<i32, String>,
     pub companion_of: Option<String>,
     pub primary_of_our_lord: bool,
+    /// A secondary feast in the Diurnal's Table of the Rank of Feasts (General
+    /// Rubrics X.1(c)); only the secondary feasts of Our Lord are marked so far.
+    pub secondary: bool,
     pub only_with: Option<String>,
     pub skip_roman_leap_shift: bool,
     /// Free text in the data files ("base" unless given).
@@ -315,8 +349,11 @@ impl Feast {
             is_vigil: false,
             vigil_of: None,
             octave_of: None,
+            octave_days: None,
+            octave_day_names: BTreeMap::new(),
             companion_of: None,
             primary_of_our_lord: false,
+            secondary: false,
             only_with: None,
             skip_roman_leap_shift: false,
             source: None,
@@ -426,6 +463,8 @@ pub struct CalendarDay {
     /// The parent feast ID when this day falls within an octave (days 1-8).
     pub within_octave_of: Option<String>,
     pub penitential: Penitential,
+    /// Observances the ordo brackets for monastics and oblates on this date; notation only.
+    pub monastic: Vec<MonasticObservance>,
 }
 
 impl CalendarDay {

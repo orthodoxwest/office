@@ -100,24 +100,24 @@ pub fn stamp_urls(css: &str, stamp: impl Fn(&str) -> Option<String>) -> Result<S
 mod tests {
     use super::{stamp_urls, strip_comments};
 
+    /// Comments go, with the lines they leave empty; strings and urls are
+    /// untouched; a removed comment never joins the tokens around it.
     #[test]
-    fn drops_comments_and_the_lines_they_leave() {
-        let src = "/* head */\n\na {\n  color: red; /* why */\n  /* note\n     spanning */\n  margin: 0;\n}\n";
-        assert_eq!(strip_comments(src), "a {\n  color: red;\n  margin: 0;\n}\n");
-    }
-
-    #[test]
-    fn keeps_strings_and_urls_intact() {
-        let src = "a::after { content: \"/* not a comment */\"; }\nb { content: '\\'/*'; background: url(\"x/*y.png\"); }\n";
-        assert_eq!(strip_comments(src), src);
-    }
-
-    #[test]
-    fn a_comment_never_joins_the_tokens_around_it() {
-        assert_eq!(strip_comments("a /* x */ .b {}\n"), "a  .b {}\n");
-        assert_eq!(strip_comments("a/**/.b {}\n"), "a.b {}\n");
-        assert_eq!(strip_comments("p { margin: 1px/**/2px; }\n"), "p { margin: 1px 2px; }\n");
-        assert_eq!(strip_comments("a{b:c}/**/\n"), "a{b:c}\n");
+    fn strip_comments_cases() {
+        let quoted = "a::after { content: \"/* not a comment */\"; }\nb { content: '\\'/*'; background: url(\"x/*y.png\"); }\n";
+        for (src, want) in [
+            (
+                "/* head */\n\na {\n  color: red; /* why */\n  /* note\n     spanning */\n  margin: 0;\n}\n",
+                "a {\n  color: red;\n  margin: 0;\n}\n",
+            ),
+            (quoted, quoted),
+            ("a /* x */ .b {}\n", "a  .b {}\n"),
+            ("a/**/.b {}\n", "a.b {}\n"),
+            ("p { margin: 1px/**/2px; }\n", "p { margin: 1px 2px; }\n"),
+            ("a{b:c}/**/\n", "a{b:c}\n"),
+        ] {
+            assert_eq!(strip_comments(src), want, "{src:?}");
+        }
     }
 
     #[test]

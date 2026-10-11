@@ -1,11 +1,11 @@
 # Proper scaffold for [comm-01-25-commemoration-of-st-peter]
 # Name: Commemoration of St. Peter
-# Rank: commemoration  Category: confessor
+# Rank: commemoration  Category: apostle
 #
 # Uncomment a section header and put text (or @use …) beneath it to activate.
 # Commented sections are not loaded. Do not leave an empty uncommented [key] —
 # that silences make audit without providing text.
-# Commons fallback: commons/confessor/{ref}
+# Commons fallback: commons/apostle/{ref}
 # Intentional commons-only: add this feast id to data/audit-ok.txt
 #
 # --- core ---
@@ -13,9 +13,10 @@
 # [commemoration-antiphon]
 # Antiphon when this feast is commemorated.
 #
-# [commemoration-antiphon-lauds]
-# Benedictus antiphon when this feast is commemorated at Lauds.
-#
+[commemoration-antiphon-lauds]
+# Diurnal p. 465: at Lauds, "Thou art the shepherd and the rest as above at I Vespers".
+@use proper/comm-01-25-commemoration-of-st-peter/commemoration-antiphon-vespers
+
 [commemoration-antiphon-vespers]
 # SOURCE: diurnal p. 463
 Thou art the shepherd of the sheep, O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
@@ -23,9 +24,9 @@ Thou art the shepherd of the sheep, O chief of the Apostles: unto thee were give
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration.
 #
-# [commemoration-versicle-lauds]
-# Versicle pair for the commemoration at Lauds.
-#
+[commemoration-versicle-lauds]
+@use proper/comm-01-25-commemoration-of-st-peter/commemoration-versicle-vespers
+
 [commemoration-versicle-vespers]
 # SOURCE: diurnal p. 463
 V. Thou art Peter.

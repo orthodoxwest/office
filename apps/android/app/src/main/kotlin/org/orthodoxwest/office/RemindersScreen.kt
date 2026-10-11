@@ -40,9 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -81,6 +82,7 @@ fun RemindersScreen(
     onAllowExact: () -> Unit,
 ) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
     val is24 = remember { DateFormat.is24HourFormat(context) }
     val clock = remember(is24) { DateTimeFormatter.ofPattern(if (is24) "HH:mm" else "h:mm a", Locale.getDefault()) }
@@ -106,7 +108,10 @@ fun RemindersScreen(
                     Row(Modifier.fillMaxWidth().heightIn(min = 46.dp), verticalAlignment = Alignment.CenterVertically) {
                         // The box and the hour's name are one checkbox; its time is a control of its own.
                         Row(
-                            Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) { onChange(settings.withHour(h.copy(chosen = it))) },
+                            Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) {
+                                haptics.toggled(it)
+                                onChange(settings.withHour(h.copy(chosen = it)))
+                            },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Tick(h.chosen)
@@ -131,7 +136,10 @@ fun RemindersScreen(
                     WEEK.forEach { d ->
                         val on = d in settings.days
                         Row(
-                            Modifier.heightIn(min = 44.dp).check(on) { onChange(settings.copy(days = if (it) settings.days + d else settings.days - d)) }
+                            Modifier.heightIn(min = 44.dp).check(on) {
+                                haptics.toggled(it)
+                                onChange(settings.copy(days = if (it) settings.days + d else settings.days - d))
+                            }
                                 .semantics { contentDescription = d.getDisplayName(JavaTextStyle.FULL, Locale.US) },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -150,7 +158,7 @@ fun RemindersScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(REMINDER_LEADS.first { it.first == settings.lead }.second, Modifier.weight(1f), style = body.copy(fontFeatureSettings = "lnum"))
-                        Caret(open)
+                        Caret(open, p.text)
                     }
                     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
                         REMINDER_LEADS.forEach { (minutes, label) ->
@@ -169,7 +177,7 @@ fun RemindersScreen(
                 )
                 OutlineButton("Turn off reminders", Modifier.padding(top = 12.dp), onTurnOff)
                 if (!status.notificationsAllowed) {
-                    Note("Notifications are off for the Divine Office, so reminders cannot appear.", "Allow notifications", onAllowNotifications)
+                    Note("Notifications are off for the Daily Office, so reminders cannot appear.", "Allow notifications", onAllowNotifications)
                 }
                 if (!status.exactAllowed) {
                     Note("Reminders may come a few minutes late. For the exact minute, allow alarms and reminders.", "Allow alarms", onAllowExact)
@@ -185,14 +193,15 @@ fun RemindersScreen(
 
 private fun ReminderSettings.withHour(h: HourReminder) = copy(hours = hours.map { if (it.hour == h.hour) h else it })
 
-/** The web's plain headpiece: a short rule either side of the cross, set to the left. */
+/** The web's headpiece, set to the left: a painted cross between two short rules. */
 @Composable
 private fun PlainHeadpiece() {
-    val o = LocalOrnament.current
+    val ink = LocalPalette.current.lining
+    val rule = ink.copy(alpha = 0.55f)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(o.line) }
-        Text("✠", Modifier.padding(horizontal = 8.dp), style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = o.flat))
-        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(o.line) }
+        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
+        Text("✠", Modifier.padding(horizontal = 8.dp), style = TextStyle(fontFamily = CrossFont, fontSize = 11.sp, color = ink))
+        Canvas(Modifier.width(22.dp).height(1.dp)) { drawRect(rule) }
     }
 }
 
@@ -214,23 +223,31 @@ private fun Fieldset(legend: String, modifier: Modifier = Modifier, content: @Co
     }
 }
 
-/** A checkbox in the accent colour, as the web's `accent-color` sets them; the row around it is the control. */
+/**
+ * A checkbox set by hand, as the web's are: a ruled square, 0.95rem, that fills with oak inside a
+ * margin of the ground when chosen. The platform's own box belongs to no theme here. The row
+ * around it is the control.
+ */
 @Composable
 private fun Tick(checked: Boolean) {
     val p = LocalPalette.current
-    Canvas(Modifier.size(20.dp).padding(1.dp)) {
-        val r = 2.dp.toPx()
+    Canvas(Modifier.size(20.dp)) {
+        val side = 15.2.dp.toPx()
+        val corner = Offset((size.width - side) / 2, (size.height - side) / 2)
+        val box = Size(side, side)
+        val rule = 1.dp.toPx()
+        drawRect(p.bg, corner, box)
         if (checked) {
-            drawRoundRect(p.accent, cornerRadius = CornerRadius(r))
-            val tick = Path().apply {
-                moveTo(size.width * 0.24f, size.height * 0.52f)
-                lineTo(size.width * 0.42f, size.height * 0.70f)
-                lineTo(size.width * 0.78f, size.height * 0.32f)
-            }
-            drawPath(tick, p.bg, style = Stroke(2.dp.toPx()))
-        } else {
-            drawRoundRect(p.muted, cornerRadius = CornerRadius(r), style = Stroke(1.2.dp.toPx()))
+            val inset = rule + 3.dp.toPx()
+            drawRect(p.accent, corner + Offset(inset, inset), Size(side - 2 * inset, side - 2 * inset))
         }
+        drawRoundRect(
+            if (checked) p.accent else p.muted,
+            corner + Offset(rule / 2, rule / 2),
+            Size(side - rule, side - rule),
+            CornerRadius(1.dp.toPx()),
+            style = Stroke(rule),
+        )
     }
 }
 

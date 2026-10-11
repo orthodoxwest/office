@@ -36,8 +36,8 @@ pub fn day(date: Date, season: Season) -> Day {
             temporal_week_id: None,
             within_octave_of: None,
             penitential: Penitential::default(),
+            monastic: Vec::new(),
         },
-        marian_antiphon: String::new(),
         vespers: VespersDesignation::unowned(),
         first_vespers: false,
         following_office_commemoration_id: String::new(),
@@ -60,11 +60,6 @@ pub fn celebrating(date: Date, season: Season, f: Feast) -> Day {
     let mut d = day(date, season);
     d.celebration = Some(arc(f));
     d
-}
-
-/// A fixed Monday: 0001-01-01.
-pub fn zero_date() -> Date {
-    Date::new(1, 1, 1)
 }
 
 /// A test-only reader of the repository's `data/` directory.

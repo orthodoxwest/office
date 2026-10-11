@@ -18,6 +18,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.currentOffice
 
@@ -36,13 +38,13 @@ class OfficeWidget : AppWidgetProvider() {
     /** Composing the day reads the corpus the first time in a process; keep it off the main thread. */
     private fun refreshing(context: Context) {
         val pending = goAsync()
-        Thread {
+        Widgets.worker.execute {
             try {
                 Widgets.refresh(context)
             } finally {
                 pending.finish()
             }
-        }.start()
+        }
     }
 }
 
@@ -56,6 +58,9 @@ object Widgets {
 
     /** Opens home for today, as the brand link does. */
     const val HOME = "org.orthodoxwest.office.HOME"
+
+    /** One thread for the provider's refreshes, so they run in order (and tests can wait them out). */
+    internal val worker: ExecutorService = Executors.newSingleThreadExecutor()
 
     private val DAY = DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)
 

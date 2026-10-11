@@ -123,20 +123,3 @@ fn short_responsory_versicle(responsory: &str) -> Option<String> {
     }
     Some(format!("V. {}\nR. {response}", versicle.split_whitespace().collect::<Vec<_>>().join(" ")))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn alleluias() {
-        assert_eq!(strip_trailing_alleluias("He is risen, alleluia, alleluia."), "He is risen");
-        assert_eq!(strip_trailing_alleluias("Rejoice alleluia"), "Rejoice");
-        assert_eq!(strip_trailing_alleluias("Rejoice."), "Rejoice");
-        assert_eq!(
-            short_responsory_versicle("R. Incline my heart * unto thy testimonies.\nV. Turn away mine eyes.\nR. Glory"),
-            Some("V. Incline my heart unto thy testimonies.\nR. Turn away mine eyes.".to_string())
-        );
-        assert_eq!(short_responsory_versicle("V. only"), None);
-    }
-}

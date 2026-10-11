@@ -12,22 +12,29 @@ let verseGutter: CGFloat = 28.8
 func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     guard let prev else { return 0 }
     let heading = { (b: BlockView) in b.kind == .heading || b.kind == .commemorationHeading }
+    let antiphon = { (b: BlockView) in b.kind == .antiphon || b.kind == .announcedAntiphon }
+    let note = { (b: BlockView) in b.kind == .antiphonNote || b.kind == .announcementNote }
     if heading(cur) { return 38 }
     if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
     if cur.kind == .gap || prev.kind == .gap { return 4.8 }
     if prev.kind == .itemLabel { return 9 }
-    if cur.kind == .itemLabel { return prev.kind == .antiphon ? 10 : 30 }
+    // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
+    if note(cur) { return 2.4 }
+    if cur.kind == .itemLabel { return antiphon(prev) || note(prev) ? 10 : 30 }
     if prev.kind == .chapterRef { return 15 }
     if prev.kind == .latinTitle { return 8 }
     if prev.kind == .speaker { return 3.2 }
     // A closing antiphon, then the next group's opening one: the threshold between groups.
-    if cur.kind == .antiphon && prev.kind == .antiphon { return 49 }
+    if antiphon(cur) && prev.kind == .antiphon { return 49 }
     // A closing antiphon sits close under its psalm's last verse or Gloria.
-    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .paragraph && !prev.startsElement)) { return 6 }
+    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .gloriaPatri && !prev.startsElement)) { return 6 }
     if cur.kind == .verse && prev.kind == .verse { return 4.8 }
     // The Gloria Patri after a psalm's last verse.
-    if cur.kind == .paragraph && prev.kind == .verse { return 13.6 }
+    if cur.kind == .gloriaPatri && prev.kind == .verse { return 13.6 }
     if cur.kind == .stanza && prev.kind == .stanza { return 12 }
+    // A hymn's rubric keeps a stanza's distance from the stanzas around it.
+    if cur.kind == .hymnRubric && prev.kind == .stanza { return 12 }
+    if cur.kind == .stanza && prev.kind == .hymnRubric { return 12 }
     if cur.startsElement { return 14 }
     return 4.8
 }
@@ -41,15 +48,26 @@ private struct Setting {
 
 private func setting(_ kind: BlockKind) -> Setting {
     switch kind {
-    case .heading, .commemorationHeading: return Setting(style: Scale.heading, color: \.text, alignment: .center)
-    case .itemLabel: return Setting(style: Scale.itemLabel, color: \.muted, alignment: .center)
+    // The tituli, red ochre on the limewash and gilt on the Apse night, clear of the rubrics' red.
+    case .heading: return Setting(style: Scale.heading, color: \.titulus, alignment: .center)
+    case .commemorationHeading: return Setting(style: Scale.commemorationName, color: \.titulus, alignment: .center)
+    case .itemLabel: return Setting(style: Scale.itemLabel, color: \.titulus, alignment: .center)
     case .latinTitle, .canticleSection: return Setting(style: Scale.bodyItalic, color: \.muted, alignment: .center)
     case .chapterRef, .scriptureRef: return Setting(style: Scale.reference, color: \.rubric, alignment: .center)
-    case .rubric: return Setting(style: Scale.rubric, color: \.rubric)
+    case .rubric, .antiphonNote: return Setting(style: Scale.rubric, color: \.rubric)
+    // Under an announcement, centred beneath its words.
+    case .announcementNote: return Setting(style: Scale.rubric, color: \.rubric, alignment: .center)
+    // A rubric among a hymn's stanzas, centred in its column.
+    case .hymnRubric: return Setting(style: Scale.rubric, color: \.rubric, alignment: .center)
     case .speaker: return Setting(style: Scale.speaker, color: \.rubric)
-    case .verse, .stanza: return Setting(style: Scale.verse, color: \.text)
+    case .verse, .stanza, .gloriaPatri: return Setting(style: Scale.verse, color: \.text)
     default: return Setting(style: Scale.body, color: \.text)
     }
+}
+
+extension NSAttributedString.Key {
+    /// Marks a posture cue's run, so a divided opening can keep the cue with its mediant.
+    static let posture = NSAttributedString.Key("org.orthodoxwest.office.posture")
 }
 
 /// A block's runs as styled text in `style`, each run in its web class's colour and face.
@@ -69,23 +87,43 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             break
         case .prayed:
             a[.foregroundColor] = UIColor(p.text)
-        case .mediant, .secret:
-            // The pointing asterisk is quiet, as are words said silently.
+        case .mediant:
+            // The pointing asterisk is quiet, and lowered 0.25em to the line's optical middle, as the
+            // web's `.mediant` (Garamond draws its asterisk high, as a footnote mark).
             a[.foregroundColor] = UIColor(p.muted)
+            a[.baselineOffset] = -0.25 * size
+        case .secret:
+            // Words not said aloud.
+            a[.foregroundColor] = UIColor(p.unsaid)
         case .cross:
             a[.foregroundColor] = UIColor(p.rubric)
             a[.font] = crossUIFont(size * 0.8)
         case .latin:
-            // Latin within a small-caps label is set in lower case italic, as the web's `.psalm-incipit`.
+            // Latin within a small-caps label is set in lower case italic and muted, as the web's `.psalm-incipit`.
             a[.font] = garamond(size, italic: true, smallCaps: false, lining: true)
             a[.kern] = 0.4 * k
-        case .kicker:
-            a[.font] = garamond(size * 0.7, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.muted)
-            a[.kern] = size * 0.7 * 0.1
+        case .kicker:
+            // "Commemoration of", on its own line in the heading's small caps and tracking, as the
+            // web's `.commemoration-kicker`; the name beneath stays in mixed case.
+            a[.font] = garamond(size * 0.78, italic: style.italic, smallCaps: true, lining: style.lining)
+            a[.foregroundColor] = UIColor(p.muted)
+            a[.kern] = Scale.heading.tracking * k
         case .posture:
             a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.rubric)
+            a[.posture] = true
+        case .numeral:
+            // A psalm's numbers ("66 (67)") out of its label's small caps, as the web's `.psalm-num`:
+            // a small-cap "1" is a bare stem that reads as the section numeral "i".
+            a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: false, lining: true)
+            a[.kern] = 0.02 * size * 0.9
+        case .hebrewNumeral:
+            // The Hebrew number beside it, "(67)", muted and a little smaller, as `.psalm-heb`
+            // (0.86 of the numeral's 0.9).
+            a[.font] = garamond(size * 0.774, italic: style.italic, smallCaps: false, lining: true)
+            a[.kern] = 0.02 * size * 0.774
+            a[.foregroundColor] = UIColor(p.muted)
         }
         out.append(NSAttributedString(string: run.text, attributes: a))
     }
@@ -109,10 +147,12 @@ private func inWord(_ c: unichar) -> Bool {
 /**
  * The opening letter and the text after it, with the small-caps transition applied: the rest of
  * the first word, or the next word after a lone O or I, as the eye leaves the capital. Only an
- * opening whose first run is ordinary spoken text takes an initial.
+ * opening whose first run is ordinary spoken text takes an initial, or a psalm's whose opening
+ * words go unsaid after its antiphon: the initial stays gilt, the words after it muted.
  */
 func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: String, rest: NSAttributedString)? {
-    guard block.runs.first?.style == .plain else { return nil }
+    let lead = block.runs.first?.style
+    guard lead == .plain || (lead == .secret && block.kind == .verse) else { return nil }
     let s = text.string as NSString
     var at = 0
     while at < s.length && isSpace(s.character(at: at)) { at += 1 }
@@ -143,17 +183,43 @@ func splitInitial(_ block: BlockView, _ text: NSAttributedString) -> (letter: St
     return (s.substring(with: letter), rest)
 }
 
-/// The initial for an opening in `style`: gilded, 3.05 times the text two lines deep, or 2.1 times raised.
-private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, raised: Bool) -> Initial {
+/**
+ * The initial for an opening in `style`, painted in the gilding: two lines deep as the web's
+ * `initial-letter: 2` sets it, fitted by its ink and the capital's optical profile (see
+ * `render_blocks::initials`), or raised as a letter of its line.
+ */
+private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: Metrics, adapt: Initial.Adapt) -> Initial {
     let size = style.size * m.type
+    let fit = initialFit(letter: letter)
+    let em = size * CGFloat(initialSize(lineHeightEm: Float(style.line / style.size)))
+    let deep = garamond(em)
+    let ink = CTLineGetBoundsWithOptions(CTLineCreateWithAttributedString(NSAttributedString(string: letter, attributes: [.font: deep])), .useGlyphPathBounds)
+    // The profiles are measured in the web's declared initial, not the size it is drawn at.
+    let profile = size * CGFloat(initialProfileEm())
+    let left = CGFloat(fit.hang) * profile
+    // Raised: the brush's edge a point below (the web's 1px text-shadow at 30%), and the space after.
+    let shadow = NSShadow()
+    shadow.shadowOffset = CGSize(width: 0, height: 1)
+    shadow.shadowBlurRadius = 0
+    shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
+    let raisedSize = size * CGFloat(raisedInitialSize())
+    let raised = NSAttributedString(string: letter, attributes: [
+        .font: garamond(raisedSize),
+        .foregroundColor: UIColor(o.flat),
+        .shadow: shadow,
+        .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,
+    ])
     return Initial(
         letter: letter,
-        deep: garamond(size * 3.05),
-        raised: garamond(size * 2.1),
-        gap: size * 3.05 * 0.06,
-        alwaysRaised: raised,
-        hi: UIColor(o.hi),
-        lo: UIColor(o.lo)
+        deep: deep,
+        raised: raised,
+        left: left - ink.minX,
+        drop: ink.maxY - CGFloat(capHeight()) * size,
+        edge: left + ink.width + CGFloat(fit.gap) * profile,
+        tuck: CGFloat(fit.tuck) * size,
+        rows: fit.depth > 0 ? 3 : 2,
+        adapt: adapt,
+        color: UIColor(o.flat)
     )
 }
 
@@ -179,7 +245,13 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
         var s = spec
         s.text = split.rest
         s.restIndent = max(s.restIndent, textStart)
-        s.initial = initial(split.letter, style, o, m, raised: raised)
+        let adapt: Initial.Adapt
+        switch block.kind {
+        case .verse: adapt = .psalm
+        case .stanza, .chantLine: adapt = .dropped
+        default: adapt = raised ? .raised : .prose
+        }
+        s.initial = initial(split.letter, style, o, m, adapt: adapt)
         return s
     }
 
@@ -192,15 +264,24 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
     }
 
     switch block.kind {
-    case .antiphon:
-        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it.
+    case .antiphon, .announcedAntiphon:
+        // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
+        // opening words stand centred over the psalm's label, as the web's `.antiphon-announce`.
         var sigil = Scale.body
         sigil.smallCaps = true
         sigil.tracking = 1.4
-        let t = marked(block.marker, sigil, p.rubric)
+        let t = marked(block.marker, sigil, p.titulus)
         t.append(NSAttributedString(string: " ", attributes: [.font: font]))
         t.append(text)
         spec.text = t
+        if block.kind == .announcedAntiphon {
+            spec.alignment = .center
+        } else {
+            spec.restIndent = 21.6 * m.type
+        }
+    case .antiphonNote:
+        // Under the antiphon's words, past its "Ant." (the antiphon's hanging indent).
+        spec.firstIndent = 21.6 * m.type
         spec.restIndent = 21.6 * m.type
     case .verse:
         if block.dropCap { return opening(textStart: gutter) }
@@ -216,6 +297,10 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
             spec.text = t
             spec.tabs = [NSTextTab(textAlignment: .right, location: gutter - m.px(8)), NSTextTab(textAlignment: .left, location: gutter)]
         }
+    case .gloriaPatri:
+        // The Gloria Patri keeps the verses' edge; each line's wrap steps in (the web's `.source-line`, 1.1rem).
+        spec.firstIndent = gutter
+        spec.restIndent = gutter + 17.6 * m.type
     case .versicle, .response, .all:
         if block.dropCap { return opening(textStart: 0, raised: true) }
         if block.marker.isEmpty { break }
@@ -238,8 +323,8 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
             spec.restIndent = sigil + m.px(6.4)
         }
     case .stanza:
-        // A wrapped line hangs beneath its own start.
-        spec.restIndent = 20 * m.type
+        // A wrapped line hangs beneath its own start (`.hymn-line`, 1.1rem).
+        spec.restIndent = 17.6 * m.type
         if block.dropCap { return opening(textStart: 0) }
     case .paragraph, .chantLine:
         if block.dropCap { return opening(textStart: 0) }
@@ -249,9 +334,16 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
     return spec
 }
 
+/// A psalm label's part (its title, or its Latin incipit) as a block of its own.
+private func labelPart(_ block: BlockView, _ runs: ArraySlice<RunView>) -> BlockView {
+    var part = block
+    part.runs = Array(runs)
+    return part
+}
+
 /**
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
- * stanzas are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
+ * stanzas and rubrics are set in `column`, the width of the hymn's longest line (see `hymnColumns`).
  */
 struct BlockRow: View {
     let block: BlockView
@@ -265,7 +357,23 @@ struct BlockRow: View {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
         } else {
             let prose = Prose(spec: proseSpec(block, p, o, m), spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
-            if block.kind == .stanza {
+            if block.kind == .itemLabel, let latin = block.runs.firstIndex(where: { $0.style == .latin }), latin > 0 {
+                // A psalm's number and its Latin incipit share a line, a dot between them. When the
+                // line cannot hold both, the incipit stands on its own line beneath and the dot goes
+                // (the web's `.item-label.stacked`): a separator ending a line alone separates nothing.
+                let title = labelPart(block, block.runs[..<(latin - 1)])
+                let incipit = labelPart(block, block.runs[latin...])
+                ViewThatFits(in: .horizontal) {
+                    prose.fixedSize(horizontal: true, vertical: false)
+                    VStack(spacing: 0) {
+                        Prose(spec: proseSpec(title, p, o, m))
+                        Prose(spec: proseSpec(incipit, p, o, m))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(spoken(block))
+            } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)
@@ -279,8 +387,9 @@ struct BlockRow: View {
 /// The web's `.hymn-verses` max-width, 28rem.
 private let hymnMax: CGFloat = 448
 
-/// The web's `.hymn-line` hanging padding (1.1rem at a phone's width), which its fit-content column counts.
-private let hymnHang: CGFloat = 17.6
+/// Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
+/// hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.
+private let hymnSlack: CGFloat = 1
 
 /// Where a block is in an hour: its section, and its place there.
 struct BlockAt: Hashable {
@@ -298,9 +407,6 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
         CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(t), nil, nil, nil))
     }
     let style = Scale.verse
-    let size = style.size * m.type
-    let cap = garamond(size * 3.05)
-    let gap = size * 3.05 * 0.06
     func stanzaWidth(_ block: BlockView) -> CGFloat {
         let text = runs(block, style, color: p.text, p, m)
         let s = text.string as NSString
@@ -312,10 +418,16 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
             let piece = text.attributedSubstring(from: NSRange(location: start, length: length))
             var w = width(piece)
             if block.dropCap && i <= 1 && !line.trimmingCharacters(in: .whitespaces).isEmpty {
-                // The initial stands beside the first two lines: its width and gap, less the letter it replaces.
+                // The initial stands beside the first two lines, which start at its fitted edges.
                 let letter = String(line.trimmingCharacters(in: .whitespaces).prefix(1))
-                let beside = ProseLayout.advance(letter, cap) + gap
-                w = i == 0 ? w - width(NSAttributedString(string: letter, attributes: [.font: style.uiFont(m)])) + beside : w + beside
+                let cap = initial(letter, style, o, m, adapt: .dropped)
+                if i == 0 {
+                    let after = line.drop { $0.isWhitespace }.dropFirst().drop { $0.isWhitespace }
+                    let from = (line as NSString).length - (String(after) as NSString).length
+                    w = width(piece.attributedSubstring(from: NSRange(location: from, length: length - from))) + cap.edge + cap.tuck
+                } else {
+                    w += cap.edge
+                }
             }
             widest = max(widest, w)
             start += length + 1
@@ -329,8 +441,8 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
         var run: [Int] = []
         var widest: CGFloat = 0
         func close() {
-            let column = min((widest + m.px(hymnHang)).rounded(.up), m.px(hymnMax))
-            for b in run { out[BlockAt(section: si, block: b)] = column }
+            let column = min((widest + m.px(hymnSlack)).rounded(.up), m.px(hymnMax))
+            if widest > 0 { for b in run { out[BlockAt(section: si, block: b)] = column } }
             run = []
             widest = 0
         }
@@ -339,6 +451,9 @@ func hymnColumns(_ sections: [SectionView], _ p: Palette, _ o: Ornament, _ m: Me
             case .stanza:
                 run.append(bi)
                 widest = max(widest, stanzaWidth(b))
+            // A hymn's rubric takes its column without widening it (the web's width: 0; min-width: 100%).
+            case .hymnRubric:
+                run.append(bi)
             case .rubric, .gap:
                 break
             default:
@@ -392,7 +507,7 @@ func spoken(_ block: BlockView) -> String {
     if let first = words.first { words = first.uppercased() + words.dropFirst() }
     let marker: String
     switch block.kind {
-    case .antiphon: marker = "Antiphon."
+    case .antiphon, .announcedAntiphon: marker = "Antiphon."
     case .versicle, .response: marker = block.marker.replacingOccurrences(of: "℣.", with: "Versicle.").replacingOccurrences(of: "℟.", with: "Response.")
     case .verse: marker = ""
     default: marker = block.marker

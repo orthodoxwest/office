@@ -12,6 +12,12 @@ val jniOut = layout.buildDirectory.dir("rustJniLibs")
 val bindingsOut = layout.buildDirectory.dir("generated/uniffi")
 val hostLibDir = repoRoot.resolve("target/release")
 
+/**
+ * The store upload key, from the environment, never the repository: a keystore path and its
+ * passwords. Play App Signing re-signs each upload with the app signing key Google holds.
+ */
+val uploadKeystore: String? = providers.environmentVariable("OFFICE_UPLOAD_KEYSTORE").orNull
+
 /** Commits on HEAD: a version code that only grows, the same on every machine. */
 fun commitCount(): Int = providers.exec {
     workingDir = repoRoot
@@ -29,6 +35,9 @@ android {
         targetSdk = 36
         versionCode = commitCount()
         versionName = "0.1.$versionCode"
+        // Only the ABIs the Rust core is built for. JNA's AAR carries its dispatch library for
+        // four more (armeabi, mips, mips64, x86), which could never load the engine.
+        ndk { abiFilters += rustAbis }
     }
 
     signingConfigs {
@@ -41,12 +50,23 @@ android {
             keyAlias = "preview"
             keyPassword = "preview"
         }
+        if (uploadKeystore != null) {
+            create("upload") {
+                storeFile = file(uploadKeystore)
+                storePassword = providers.environmentVariable("OFFICE_UPLOAD_STORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("OFFICE_UPLOAD_KEY_ALIAS").getOrElse("upload")
+                keyPassword = providers.environmentVariable("OFFICE_UPLOAD_KEY_PASSWORD").get()
+            }
+        }
     }
 
     buildTypes {
+        // Only builds that go to readers count usage (Usage.kt): never a debug build, its tests,
+        // or its screenshots.
         debug {
             applicationIdSuffix = ".preview"
             signingConfig = signingConfigs.getByName("preview")
+            buildConfigField("boolean", "COUNT_USAGE", "false")
         }
         // Shrunk by R8: the app's code is otherwise seven times the size of the whole
         // Rust engine, loaded on every launch and every reminder.
@@ -54,6 +74,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("boolean", "COUNT_USAGE", "true")
+            signingConfig = signingConfigs.findByName("upload")
         }
         // Optimized and non-debuggable, so scrolling is as smooth as a release,
         // but installable beside the eventual store app.
@@ -67,6 +89,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets {
@@ -118,6 +141,16 @@ val uniffiBindings = tasks.register<Exec>("uniffiBindings") {
         "cargo", "run", "--release", "--locked", "-p", "mobile-ffi", "--features", "bindgen", "--bin", "uniffi-bindgen", "--",
         "generate", lib.path, "--language", "kotlin", "--out-dir", bindingsOut.get().asFile.path, "--no-format",
     )
+}
+
+// Play rejects an unsigned bundle, so say why before the long native build rather than after.
+gradle.taskGraph.whenReady {
+    if (uploadKeystore == null && allTasks.any { it.path == ":app:bundleRelease" }) {
+        throw GradleException(
+            "bundleRelease needs the upload key: set OFFICE_UPLOAD_KEYSTORE, OFFICE_UPLOAD_STORE_PASSWORD " +
+                "and OFFICE_UPLOAD_KEY_PASSWORD (see apps/android/README.md)",
+        )
+    }
 }
 
 tasks.named("preBuild") {

@@ -79,7 +79,7 @@ Amen.
 
 The Lord liveth.
 
---- Psalm 18b · Cum sancto sanctus eris ---
+--- Psalm 17b (18b) · Cum sancto sanctus eris ---
 Psalm 18:25-51
 
 WITH the holy thou shalt be holy * and with a perfect man thou shalt be perfect.
@@ -113,7 +113,7 @@ WITH the holy thou shalt be holy * and with a perfect man thou shalt be perfect.
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 19 · Cæli enarrant gloriam Dei ---
+--- Psalm 18 (19) · Cæli enarrant gloriam Dei ---
 Psalm 19
 
 THE heavens declare the glory of God * and the firmament sheweth his handywork.
@@ -135,7 +135,7 @@ THE heavens declare the glory of God * and the firmament sheweth his handywork.
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 20 · Exaudiat te Dominus ---
+--- Psalm 19 (20) · Exaudiat te Dominus ---
 Psalm 20
 
 THE Lord hear thee in the day of trouble * the Name of the God of Jacob defend thee;
@@ -169,8 +169,8 @@ Our Father, who art in heaven, Hallowed be thy Name.
 Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
-And lead us not into temptation,
-R. But deliver us from evil. Amen.
+V. And lead us not into temptation.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -195,8 +195,8 @@ R. Amen.
 
 Then the Martyrology is read in Choir, and this may laudably be done also in the private recitation of the Office out of Choir.
 
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

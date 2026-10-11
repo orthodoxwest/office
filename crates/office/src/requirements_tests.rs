@@ -2,7 +2,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-use calendar::{CalendarData, Category, Date, MoveableDates, Season, build_calendar};
+use calendar::{CalendarData, Category, Color, Date, MoveableDates, Season, build_calendar};
 use liturgy::{ElementType, PostureAnchor, PrayerForm};
 
 use crate::{Day, Engine, HOUR_NAMES, resolve_office_days, testutil::TestData};
@@ -120,6 +120,10 @@ fn all_souls_vespers_is_a_continuous_office() {
             let elements: Vec<_> = evening.sections.iter().flat_map(|s| &s.elements).collect();
             assert!(elements.iter().any(|e| e.source_ref == "proper/all-saints/magnificat-antiphon"));
             assert!(elements.iter().any(|e| e.source_ref == "shared/formulas/faithful-departed"));
+            // II Vespers' psalms, as the 2023 and 2026 ordos print; Diurnal
+            // p. 654 says "as at I Vespers" (#662, needs ruling).
+            let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/112", "psalms/113", "psalms/116b"], "{eve} {form:?}");
         }
     }
 }
@@ -228,6 +232,44 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
 }
 
 #[test]
+fn lord_prayer_before_the_collect_is_secret_at_the_little_hours_and_answered_without_amen() {
+    // #671. Prime, Terce, Sext, None and Compline: "Our Father secretly until
+    // ℣ And lead us not into temptation. ℟ But deliver us from evil." (Diurnal
+    // pp. 10, 86, 151; General Rubrics XVII.2, XIX.1, XXXV.2: the words Our
+    // Father aloud with the versicle). Lauds and Vespers: said aloud by the
+    // Officiant, all answering (pp. 42, 122). No Amen at any Hour.
+    for y in [2026, 2027, 2032] {
+        let (days, moveable) = year(y);
+        for name in HOUR_NAMES {
+            let mut checked = 0;
+            for day in days.iter().step_by(23) {
+                for form in PrayerForm::ALL {
+                    let hour = engine().compose_hour(name, day, &moveable, form).unwrap();
+                    for e in hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.kind == ElementType::CorporateLordPrayer) {
+                        let context = format!("{} {name} {form:?}", day.date);
+                        let parts = e.lord_prayer_parts().expect(&context);
+                        assert_eq!(parts.response, "But deliver us from evil.", "{context}");
+                        assert!(!e.text.ends_with("Amen."), "{context}");
+                        if matches!(name, "lauds" | "vespers") {
+                            assert_eq!(parts.versicle, None, "{context}");
+                            assert!(parts.officiant.iter().all(|s| s.spoken), "{context}");
+                        } else {
+                            assert_eq!(parts.versicle.as_deref(), Some("And lead us not into temptation."), "{context}");
+                            let voiced: Vec<_> = parts.officiant.iter().map(|s| (s.spoken, s.text.as_str())).collect();
+                            assert_eq!(voiced[0], (true, "Our Father"), "{context}");
+                            assert!(!voiced[1].0 && voiced[1].1.contains("Thy kingdom come"), "{context}");
+                            assert!(voiced[1].1.ends_with("trespass against us.\n"), "{context}");
+                        }
+                        checked += 1;
+                    }
+                }
+            }
+            assert!(checked > 0, "{y} {name}");
+        }
+    }
+}
+
+#[test]
 fn sunday_commemoration_versicles_across_calendars() {
     for y in [2026, 2027, 2032] {
         let (days, moveable) = year(y);
@@ -277,7 +319,7 @@ fn composition_structure_across_calendars() {
                     let mut expected = match day.celebration_id() {
                         Some("holy-thursday" | "good-friday") => 6,
                         Some("holy-saturday") => 1,
-                        _ if hour.feast == "All Souls' Day" => 5,
+                        _ if hour.feast == "Commemoration of All the Faithful Departed (All Souls' Day)" => 5,
                         _ => 4,
                     };
                     if hour.sections.iter().any(|s| s.label == "Vespers of the Dead") {
@@ -401,7 +443,7 @@ fn major_collects_have_invitations_and_only_first_and_last_conclusions() {
     for (date, name, comms, final_ref) in [
         ("2026-01-01", "lauds", 0, ""),
         ("2026-01-01", "vespers", 0, ""),
-        ("2026-01-03", "vespers", 2, ""),
+        ("2026-01-04", "vespers", 2, ""),
         ("2026-01-04", "lauds", 2, ""),
         ("2026-01-05", "lauds", 1, ""),
         ("2026-01-17", "vespers", 4, ""),
@@ -507,5 +549,1112 @@ fn psalmody_posture_cues_follow_the_parish_booklets() {
     // Only Lauds and Vespers are cued.
     for hour in ["prime", "terce", "compline"] {
         assert!(cues(hour, Date::new(2026, 10, 4)).iter().all(|(_, _, got)| got.is_empty()), "{hour}");
+    }
+}
+
+/// #475/#477: the Martyrology announces Holy Name and each vigil on the day
+/// the calendar keeps it, including Sunday anticipation and St Matthias's
+/// leap-year move, whether or not the vigil has an office that day.
+#[test]
+fn martyrology_announcements_follow_the_calendar() {
+    let vigils = [
+        ("vigil-01-05", "vigil-epiphany"),
+        ("vigil-02-23", "vigil-of-st-matthias"),
+        ("vigil-06-23", "vigil-of-nativity-john-baptist"),
+        ("vigil-06-28", "vigil-of-ss-peter-paul"),
+        ("vigil-07-24", "vigil-of-st-james-greater"),
+        ("vigil-08-09", "vigil-of-st-lawrence"),
+        ("vigil-08-14", "vigil-of-assumption-bvm"),
+        ("vigil-08-23", "vigil-of-st-bartholomew"),
+        ("vigil-09-20", "vigil-of-st-matthew"),
+        ("vigil-10-27", "vigil-of-ss-simon-jude"),
+        ("vigil-10-31", "vigil-of-all-saints"),
+        ("vigil-11-29", "vigil-of-st-andrew"),
+    ];
+    let options = crate::ComposeOptions { martyrology: true, ..Default::default() };
+    let mut announced = HashSet::new();
+    for y in 2026..=2053 {
+        let (days, moveable) = year(y);
+        for pair in days.windows(2) {
+            let (today, tomorrow) = (&pair[0], &pair[1]);
+            let prime = engine().compose_hour_with_options("prime", today, &moveable, &options).unwrap();
+            if !crate::prime::reads_martyrology(&prime) {
+                continue;
+            }
+            let refs: HashSet<&str> = prime.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+            let details = tomorrow.occurrence_decisions.iter().filter_map(|d| d.detail.as_deref());
+            let named: HashSet<&str> = tomorrow
+                .celebration
+                .iter()
+                .chain(&tomorrow.commemorations)
+                .map(|f| f.id.as_str())
+                .chain(details.flat_map(|d| d.split(|c: char| !(c.is_ascii_alphanumeric() || c == '-'))))
+                .collect();
+            for (key, id) in vigils {
+                let read = refs.contains(format!("ordinary/martyrology/{key}").as_str());
+                assert_eq!(read, named.contains(id), "{}: {key} vs calendar {id}", tomorrow.date);
+                if read {
+                    announced.insert(key);
+                }
+            }
+            let holy_name = refs.contains("ordinary/martyrology/holy-name");
+            assert_eq!(holy_name, tomorrow.celebration_is("holy-name-jesus"), "{}: Holy Name", tomorrow.date);
+        }
+    }
+    assert_eq!(announced.len(), vigils.len(), "every vigil is announced in some year");
+}
+
+/// The All Saints fast falls on the vigil only, anticipated with it to
+/// Saturday when 31 October is a Sunday (2017–2025 ordos; 2021, 30 October).
+/// The 2026 ordo's extra fast on Friday 30 October is triaged as a reference
+/// error in data/review/ordo-triage.csv.
+#[test]
+fn all_saints_fast_follows_the_vigil() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, fast_day) in [(2021, 30), (2025, 31), (2026, 31), (2027, 30)] {
+        let cal = build_calendar(y, &data).unwrap();
+        for day in cal.days.iter().filter(|d| d.date.month() == 10 && d.date.day() >= 29) {
+            let vigil = day.celebration.as_deref().is_some_and(|c| c.id == "vigil-of-all-saints");
+            assert_eq!(vigil, day.date.day() == fast_day, "{}: vigil", day.date);
+            assert_eq!(day.penitential.fast, vigil, "{}: fast", day.date);
+        }
+    }
+}
+
+#[test]
+fn vigil_preces_at_prime_and_at_compline_of_the_vespers_office() {
+    // General Rubrics XXXVII.3: on Vigils the Preces are said at Prime only,
+    // "since Vespers are of the Feast" (2026 ordo 31 Oct, "at Prime only").
+    // Best guess for #661: after a Saturday Vigil, Vespers and Compline are of
+    // the Sunday and keep the Preces (2022, 2025, 2026 ordos: "Preces").
+    let preces = |name: &str, date: Date| {
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.kind == ElementType::Preces)
+    };
+    for (date, at_compline) in [
+        (Date::new(2022, 7, 23), true),
+        (Date::new(2025, 11, 29), true),
+        (Date::new(2026, 8, 8), true),
+        (Date::new(2026, 11, 28), true),
+        (Date::new(2030, 2, 23), true),
+        (Date::new(2025, 8, 9), false),
+        (Date::new(2026, 7, 24), false),
+        (Date::new(2026, 10, 31), false),
+    ] {
+        assert!(preces("prime", date), "{date} prime");
+        assert_eq!(preces("compline", date), at_compline, "{date} compline");
+    }
+}
+
+#[test]
+fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
+    // #633. Diurnal pp. 455–458 (St Maurus) and 493–497 (St Benedict): proper
+    // Lauds antiphons 1–5; I Vespers takes the "Ants. of Lauds, omitting the
+    // fourth", and II Vespers is "All as at I Vespers" save the versicle and
+    // Magnificat antiphon. 2026 ordo 14–15 Jan "Ant.(456f)", 21 Mar "Ant.(495)".
+    // Years in which neither feast nor its eve falls on a Sunday.
+    for y in [2026, 2030, 2031] {
+        let (days, moveable) = year(y);
+        let antiphons = |name: &str, date: Date| -> Vec<String> {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect();
+            (1..=5).filter_map(|n| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).map(|e| e.text.clone())).collect()
+        };
+        for (feast, eve, day, lauds) in [
+            (
+                "Maurus",
+                Date::new(y, 1, 14),
+                Date::new(y, 1, 15),
+                ["The blessed Maurus, * born", "Upheld by wings", "The blessed Maurus, * a disciple", "From the house", "He was chosen"],
+            ),
+            (
+                "Benedict",
+                Date::new(y, 3, 20),
+                Date::new(y, 3, 21),
+                [
+                    "There was a man of venerable life",
+                    "The blessed man Benedict",
+                    "The glorious",
+                    "Benedict * the man of the Lord",
+                    "Benedict, the man of God",
+                ],
+            ),
+        ] {
+            let got = antiphons("lauds", day);
+            assert_eq!(got.len(), 5, "{feast} {day} lauds");
+            for (text, want) in got.iter().zip(lauds) {
+                assert!(text.starts_with(want), "{feast} {day} lauds: {text}");
+            }
+            for date in [eve, day] {
+                let got = antiphons("vespers", date);
+                assert_eq!(got.len(), 4, "{feast} {date} vespers");
+                for (text, want) in got.iter().zip([lauds[0], lauds[1], lauds[2], lauds[4]]) {
+                    assert!(text.starts_with(want), "{feast} {date} vespers: {text}");
+                }
+            }
+        }
+        // Diurnal pp. 455–458: St Maurus's proper chapters (I and II Vespers
+        // and Terce "as at Lauds") and his Vespers hymn; Lauds keeps the
+        // Common's hymn ("Short R., Hymn, and V. as in the Common").
+        let elements = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        let (eve, day) = (Date::new(y, 1, 14), Date::new(y, 1, 15));
+        for (name, date, chapter) in [
+            ("vespers", eve, "Isa 43:1-3"),
+            ("lauds", day, "Isa 43:1-3"),
+            ("terce", day, "Isa 43:1-3"),
+            ("sext", day, "Prov 4:3-4"),
+            ("none", day, "Heb 11:9-10"),
+            ("vespers", day, "Isa 43:1-3"),
+        ] {
+            let hour = elements(name, date);
+            assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
+            if name == "vespers" || name == "lauds" {
+                let hymn = hour.iter().find(|e| e.kind == ElementType::Hymn).unwrap();
+                assert_eq!(hymn.source_ref == "proper/st-maurus/hymn-vespers", name == "vespers", "{date} {name}");
+            }
+        }
+    }
+    // Diurnal pp. 493–497 (2026 ordo 21 Mar "Chp.(495) /Short ℟ &c.(493f)"):
+    // St Benedict's Vespers and Terce take the Lauds chapter, Sext and None
+    // have their own, and both Vespers the proper short responsory. In 2027
+    // the feast yields its Sunday and is kept on Monday 22 March.
+    for (y, day) in [(2026, 21), (2027, 22), (2030, 21)] {
+        let (days, moveable) = year(y);
+        let elements = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        let (eve, day) = (Date::new(y, 3, day - 1), Date::new(y, 3, day));
+        for (name, date, chapter) in [
+            ("vespers", eve, "Sir 50:6-7"),
+            ("lauds", day, "Sir 50:6-7"),
+            ("terce", day, "Sir 50:6-7"),
+            ("sext", day, "Ecclus 50:3"),
+            ("none", day, "Ecclus 50:9, 10, 12, 13"),
+            ("vespers", day, "Sir 50:6-7"),
+        ] {
+            let hour = elements(name, date);
+            assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
+            if name == "vespers" {
+                let responsory = hour.iter().find(|e| e.kind == ElementType::ShortResponsory).unwrap();
+                assert!(responsory.text.starts_with("R. Holy Father Benedict"), "{date} {name}");
+            }
+        }
+    }
+}
+
+#[test]
+fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
+    // #608. Diurnal pp. 363–367: Easter Day Vespers takes the "Ants. of
+    // Lauds, omitting the fourth. Psalms of Sunday", the Lauds chapter and
+    // "The Lord is risen indeed"; "The Chapters and VV. are said as above at
+    // the Hours during the Octave". Diurnal p. 398 and the 2026 ordo pp.
+    // 54, 68–69 keep the Psalms of Sunday through both Octaves.
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let compose = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect::<Vec<_>>()
+        };
+        for offset in 0..6 {
+            let date = moveable.easter.add_days(offset);
+            let vespers = compose("vespers", date);
+            let psalms: Vec<_> = vespers.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+            let antiphon = |n| vespers.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
+            assert!(antiphon(4).starts_with("And the Angel answered"), "{date}");
+            let chapter = vespers.iter().find(|e| e.kind == ElementType::Chapter).unwrap();
+            assert_eq!(chapter.label, "I Cor. 5:7", "{date}");
+            let responsory = vespers.iter().find(|e| e.kind == ElementType::ShortResponsory).unwrap();
+            assert!(responsory.text.contains("hath appeared to Simon"), "{date}");
+            let lauds = compose("lauds", date);
+            assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "I Cor. 5:7", "{date} lauds");
+            // Diurnal pp. 364, 367: "This is the day" after the hymn at both.
+            for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
+                let versicle = hour.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+                assert!(versicle.text.starts_with("V. This is the day"), "{date} {name}");
+            }
+            // Diurnal p. 365: the double-Alleluia dismissal at Lauds and Vespers.
+            for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
+                assert!(hour.iter().any(|e| e.source_ref == "shared/formulas/benedicamus-domino-alleluia"), "{date} {name}");
+            }
+        }
+        // "Only through Lauds of Saturday before Low Sunday": its Vespers and
+        // the Little Hours keep the plain dismissal.
+        let saturday = moveable.easter.add_days(6);
+        assert!(compose("lauds", saturday).iter().any(|e| e.source_ref == "shared/formulas/benedicamus-domino-alleluia"), "{y}");
+        for name in ["vespers", "prime"] {
+            let hour = compose(name, if name == "prime" { moveable.easter } else { saturday });
+            assert!(hour.iter().all(|e| e.source_ref != "shared/formulas/benedicamus-domino-alleluia"), "{y} {name}");
+        }
+        for offset in 0..6 {
+            let date = moveable.pentecost.add_days(offset);
+            let vespers = compose("vespers", date);
+            let psalms: Vec<_> = vespers.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+            // Diurnal p. 398: II Vespers "All as at I Vespers, except" this versicle.
+            let versicle = vespers.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+            assert!(versicle.text.starts_with("V. The Apostles did speak"), "{date}");
+        }
+        let eve = compose("vespers", moveable.pentecost.add_days(-1));
+        let versicle = eve.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+        assert!(versicle.text.starts_with("V. They were all filled"), "{y} I Vespers");
+    }
+}
+
+#[test]
+fn wednesday_lauds_hymn_is_the_printed_nox_et_tenebrae() {
+    // #650. Diurnal pp. 59–60 print Nox et tenebrae once, at Wednesday at
+    // Lauds; Ash Wednesday says "all is said as in the Psalter" (p. 243).
+    const DOXOLOGY: &str =
+        "All laud to God the Father be;\nAll praise, eternal Son, to thee;\nAll glory, as is ever meet,\nTo God the Holy Paraclete.";
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let hymn = |date: Date| {
+            let hour = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        // The nearest earlier Wednesday that keeps the ferial hymn.
+        let ferial = (1..=5)
+            .map(|weeks| hymn(moveable.ash_wednesday.add_days(-7 * weeks)))
+            .find(|h| h.source_ref == "ordinary/lauds/hymn-wednesday")
+            .unwrap();
+        assert!(ferial.text.starts_with("Hence, night and clouds that night-time brings,"), "{y}: {}", ferial.text);
+        assert!(
+            ferial.text.contains("That thou wouldst guide us through the day.") && ferial.text.contains(DOXOLOGY),
+            "{y}: {}",
+            ferial.text
+        );
+        assert_eq!(hymn(moveable.ash_wednesday).text, ferial.text, "{y}");
+    }
+}
+
+#[test]
+fn ash_wednesday_vespers_hymn_is_the_psalter_caeli_deus() {
+    // Ash Wednesday's Vespers prints only the Magnificat antiphon and
+    // collect; "all is said as in the Psalter" (Diurnal p. 243), so the
+    // hymn is Wednesday's Caeli Deus sanctissime (p. 131), as at Lauds (#650).
+    // (2029 is left out: I Vespers of St Peter's Chair falls that evening.)
+    for y in [2026, 2027, 2028, 2030] {
+        let (days, moveable) = year(y);
+        let hymn = |date: Date| {
+            let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        let ferial = (1..=5)
+            .map(|weeks| hymn(moveable.ash_wednesday.add_days(-7 * weeks)))
+            .find(|h| h.source_ref == "ordinary/vespers/hymn-wednesday")
+            .unwrap();
+        assert!(ferial.text.contains("whose hand hath spread the sky"), "{y}: {}", ferial.text);
+        let ash = hymn(moveable.ash_wednesday);
+        assert_eq!(ash.source_ref, "proper/ash-wednesday/hymn-vespers", "{y}");
+        assert_eq!(ash.text, ferial.text, "{y}");
+    }
+}
+
+#[test]
+fn paschal_and_pentecost_hymn_doxologies_at_the_hours() {
+    // #609. Diurnal p. 3 and p. 364: "To thee who, dead, again dost live"
+    // ends the hymns of the metre through None of the Vigil of the Ascension;
+    // the Pentecost ending runs through the Octave, and Veni Creator replaces
+    // Nunc Sancte at Terce (p. 398). 2026 ordo pp. 54–69: "Easter dox.",
+    // "Ascension dox.", "Pentecost dox. / Veni Creator at Terce".
+    const EASTER: &str = "All glory, as is ever meet,\nTo Father and to Paraclete.";
+    const PENTECOST: &str = "Whom with the Father we adore\nAnd Holy Ghost for evermore.";
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let hymn = |name: &str, date: Date| {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+        };
+        let paschal = |date: Date, name: &str| {
+            let h = hymn(name, date);
+            assert!(h.text.contains("To thee who, dead, again dost live") && h.text.contains(EASTER), "{date} {name}: {}", h.text);
+        };
+        for date in [moveable.easter, moveable.easter.add_days(1), moveable.easter.add_days(8), moveable.ascension.add_days(-1)] {
+            for name in ["prime", "terce", "sext", "none", "compline"] {
+                // Compline of the Vigil follows I Vespers of the Ascension.
+                if date == moveable.ascension.add_days(-1) && name == "compline" {
+                    assert!(hymn(name, date).text.contains("Ascending o'er the stars"), "{date} {name}");
+                } else {
+                    paschal(date, name);
+                }
+            }
+        }
+        assert!(hymn("prime", moveable.ascension).text.contains("Ascending o'er the stars"), "{y}");
+        for offset in 0..6 {
+            let date = moveable.pentecost.add_days(offset);
+            for name in ["prime", "terce", "sext", "none", "compline"] {
+                assert!(hymn(name, date).text.contains(PENTECOST), "{date} {name}");
+            }
+            let terce = hymn("terce", date);
+            assert_eq!(terce.source_ref, "proper/pentecost/hymn-terce", "{date}");
+            assert_eq!(terce.label, "Veni, Creator Spiritus", "{date}");
+        }
+        // Compline of the Pentecost Vigil follows I Vespers of Pentecost;
+        // that of Ember Saturday follows I Vespers of Trinity Sunday.
+        assert!(hymn("compline", moveable.pentecost.add_days(-1)).text.contains(PENTECOST), "{y}");
+        let trinity_eve = moveable.pentecost.add_days(6);
+        assert!(hymn("compline", trinity_eve).text.contains("Shall live and reign eternally"), "{y}");
+        assert!(hymn("prime", trinity_eve.add_days(2)).text.contains("To God the Holy Paraclete"), "{y}");
+        // The Ascension hymn's "Ending is never changed" (p. 389).
+        for date in [moveable.ascension, moveable.ascension.add_days(3)] {
+            for name in ["lauds", "vespers"] {
+                let h = hymn(name, date);
+                assert!(h.text.contains("Be thou our joy") && !h.text.contains("Ascending o'er"), "{date} {name}");
+            }
+        }
+    }
+    // Hymns of the metre at Lauds and Vespers take the seasonal ending too:
+    // Jesu, corona celsior (St Bede) and the Saturday Office of Our Lady in
+    // Eastertide (2026 ordo p. 64, "Of BVM ... Easter dox."). The sapphic
+    // Iste Confessor (I Vespers of St Antony) keeps its own, before and after
+    // the Ascension, as does St Maurus's Qui te, posthabitis (#633).
+    let check = |y: i32, m: i32, d: i32, name: &str, has: &str, lacks: &str| {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, m, d);
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let h = hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap();
+        assert!(h.text.contains(has) && !h.text.contains(lacks), "{date} {name}: {}", h.text);
+    };
+    check(2027, 5, 27, "lauds", "To thee who, dead, again dost live", "Glory to thee, O Father, Lord");
+    check(2026, 5, 16, "lauds", "To thee who, dead, again dost live", "Virgin-born");
+    check(2026, 5, 26, "vespers", "Only and Trinal", "Ascending o'er");
+    check(2026, 1, 16, "vespers", "Only and Trinal", "For thine Epiphany");
+    check(2026, 1, 14, "vespers", "The prize of Maurus to attain", "For thine Epiphany");
+}
+
+/// General Rubrics XXIII.4 (b), (c): the hymns end "O Jesu, Virgin-born" on
+/// Corpus Christi and throughout its Octave and whenever the Office is of
+/// Our Lady (2026 ordo, "Nat. dox."; Diurnal pp. 414, 448, 69*), but not in
+/// the Corpus Christi Lauds hymn, not at Advent's Office of the Season, not
+/// on a saint's feast within the Octave as the ordos print it, and not where
+/// a feast has its own ending (Seven Sorrows, p. 602) (#628).
+#[test]
+fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
+    const VIRGIN_BORN: &str = "O Jesu, Virgin-born, to thee;";
+    let hymn = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap().text
+    };
+    // Corpus Christi, its Sunday (2027: within the Octave of SS Peter and
+    // Paul too) and days within the Octave; Our Lady's feasts and Octaves,
+    // the Conception's in Advent; the Saturday Office.
+    for (date, hours) in [
+        ("2026-06-11", &["prime", "terce", "compline"][..]),
+        ("2026-06-14", &["prime", "terce", "compline"]),
+        ("2026-06-15", &["prime", "terce", "compline"]),
+        ("2027-07-04", &["prime", "sext"]),
+        ("2026-08-15", &["prime", "terce"]),
+        ("2026-08-17", &["prime", "terce", "compline"]),
+        ("2026-09-08", &["prime", "terce", "compline"]),
+        ("2026-09-12", &["prime", "terce", "none"]),
+        ("2026-12-08", &["prime", "terce", "compline"]),
+        ("2026-12-10", &["prime", "terce", "compline"]),
+        ("2026-07-11", &["prime", "terce", "none"]),
+        ("2026-02-02", &["terce"]),
+        ("2026-03-25", &["terce"]),
+    ] {
+        for &name in hours {
+            assert!(hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
+        }
+    }
+    // Saturday Compline belongs to Sunday; St Joachim and St John Baptist
+    // within the Octaves, as the ordos print them (rubric differs: #635);
+    // Advent's Sunday within the Conception's Octave.
+    for (date, name) in [
+        ("2026-06-11", "lauds"),
+        ("2026-06-14", "lauds"),
+        ("2026-06-11", "vespers"),
+        ("2026-08-15", "vespers"),
+        ("2026-08-16", "terce"),
+        ("2025-06-24", "terce"),
+        ("2026-12-13", "terce"),
+        ("2026-09-12", "compline"),
+        ("2026-07-11", "compline"),
+        ("2026-09-15", "terce"),
+    ] {
+        assert!(!hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
+    }
+    assert!(hymn("2026-06-11", "lauds").contains("In our true native land with thee."));
+    assert!(hymn("2026-09-15", "terce").contains("Who died to make thy servants live;"));
+}
+
+/// General Rubrics XXIII.5, Diurnal p. 3: the Epiphany ending is said "on
+/// Epiphany and throughout the Octave" only (2026 ordo, "Epiph. dox." through
+/// 13 January), even when Septuagesima comes on 1 February (2037); the
+/// Transfiguration's hymns end "Transfigured on the mount to-day" at all the
+/// Hours, from I Vespers (p. 582) (#636).
+#[test]
+fn epiphany_hymn_ending_ends_with_the_octave_and_transfiguration_has_its_own() {
+    const EPIPHANY: &str = "For thine Epiphany today;";
+    const TRANSFIGURED: &str = "Transfigured on the mount to-day;";
+    let hymn = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap().text
+    };
+    for y in [2026, 2027, 2037] {
+        for name in ["lauds", "prime", "terce", "compline"] {
+            assert!(hymn(&format!("{y}-01-13"), name).contains(EPIPHANY), "{y}-01-13 {name}");
+            for d in ["01-14", "01-20", "01-29"] {
+                assert!(!hymn(&format!("{y}-{d}"), name).contains(EPIPHANY), "{y}-{d} {name}");
+            }
+        }
+        for (d, name) in [
+            ("08-05", "vespers"),
+            ("08-05", "compline"),
+            ("08-06", "prime"),
+            ("08-06", "terce"),
+            ("08-06", "sext"),
+            ("08-06", "none"),
+            ("08-06", "vespers"),
+        ] {
+            let text = hymn(&format!("{y}-{d}"), name);
+            assert!(text.contains(TRANSFIGURED) && !text.contains(EPIPHANY), "{y}-{d} {name}");
+        }
+        assert!(!hymn(&format!("{y}-08-07"), "terce").contains(TRANSFIGURED), "{y}");
+    }
+}
+
+/// Diurnal p. 235: Vespers of the Saturday before Septuagesima end "Let us
+/// bless the Lord, alleluia, alleluia", even when they are of the Saturday's
+/// own feast (St Matthias, 2035); the next Saturday's do not (#615).
+#[test]
+fn septuagesima_eve_dismissal_keeps_the_alleluias() {
+    const ALLELUIA: &str = "shared/formulas/benedicamus-domino-alleluia";
+    const PLAIN: &str = "shared/leader/benedicamus-domino";
+    for (date, want) in [("2026-02-07", ALLELUIA), ("2027-02-27", ALLELUIA), ("2035-02-24", ALLELUIA), ("2026-02-14", PLAIN)] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let refs: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+        let dismissals: Vec<_> = refs.iter().filter(|r| [ALLELUIA, PLAIN].contains(r)).collect();
+        assert_eq!(dismissals, [&want], "{date}");
+    }
+}
+
+/// Diurnal p. 223: I Vespers of the Epiphany take the "Ants. of Lauds,
+/// omitting the fourth"; II Vespers are "All as at I Vespers" (p. 226), and
+/// every Vespers of the Octave is as on the Feast (pp. 227, 229, 231; 2026
+/// ordo, 5–13 January: "Ant. (224)") (#625), with the Feast's psalms of
+/// Sunday at I Vespers of the Sunday within the Octave too (p. 229; 2026
+/// ordo, 10 January: "Ps. (111)"), also when it is anticipated on the
+/// Saturday (2030) (#626).
+#[test]
+fn epiphany_vespers_are_as_on_the_feast() {
+    for y in 2026..=2033 {
+        let (days, moveable) = year(y);
+        for d in 5..=13 {
+            let date = Date::new(y, 1, d);
+            let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| !e.is_commemoration).collect();
+            let antiphon = |n: u32| elements.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
+            assert!(antiphon(1).starts_with("Before the morning star"), "{date}");
+            assert!(antiphon(4).starts_with("Like a flame of fire"), "{date}: {}", antiphon(4));
+            let psalms: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/110", "psalms/111", "psalms/112", "psalms/113"], "{date}");
+        }
+    }
+}
+
+/// Diurnal p. 229: I Vespers of the Sunday within the Octave of the Epiphany
+/// are "as below at Vespers of Saturday", Magnificat antiphon "The Child
+/// Jesus", also on the Friday when the Sunday is anticipated because the
+/// Octave Day is a Sunday (p. 228) (#646). An
+/// anticipated Sunday after Pentecost keeps Friday's antiphon (2022 ordo,
+/// 18 November: "He hath put down the mighty").
+#[test]
+fn epiphany_sunday_first_vespers_take_its_own_magnificat_antiphon() {
+    for (date, want) in [
+        ("2026-01-10", "The Child Jesus"),
+        ("2025-01-11", "The Child Jesus"),
+        ("2019-01-11", "The Child Jesus"),
+        ("2030-01-11", "The Child Jesus"),
+        ("2036-01-11", "The Child Jesus"),
+        ("2047-01-11", "The Child Jesus"),
+        ("2022-11-18", "He hath put down the mighty"),
+    ] {
+        let elements = vespers_elements(date);
+        let antiphon = elements.iter().rev().find(|e| e.slot_ref == "magnificat-antiphon").unwrap();
+        assert!(antiphon.text.starts_with(want), "{date}: {}", antiphon.text);
+    }
+}
+
+/// The Sunday within the Octave of the Epiphany yields its Vespers to I
+/// Vespers of the Octave Day, which commemorate II Vespers of the Sunday:
+/// "Ant. Son, why hast thou, V. We have seen ... Collect O Lord, we beseech
+/// thee", also "if the Octave of the Epiphany should fall on Monday"
+/// (Diurnal p. 231). So on Saturday 12 January when the Octave Day is a
+/// Sunday and the Sunday is said on the Saturday (p. 228; 2019 ordo: "Mag.
+/// Ant. 'The wise men beholding' / Comm. ... I Epiphany Sun. ('Son')"), and
+/// on Sunday 12 January (2025 ordo: "I of fol. ... Comm. Sun. ('Son' 231;
+/// Col. 230)") (#651).
+#[test]
+fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
+    for y in [2019, 2030, 2036, 2041, 2047, 2020, 2025, 2031, 2048] {
+        let date = Date::new(y, 1, 12);
+        let (days, moveable) = year(y);
+        let day = &days[date.ordinal() as usize - 1];
+        assert_eq!(day.celebration.as_ref().unwrap().id, "epiphany-sunday-1", "{date}");
+        assert_eq!(day.vespers.feast.as_ref().unwrap().id, "epiphany-octave-day", "{date}");
+        let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+        let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
+        let text = |comm: bool, slot: &str| {
+            elements.iter().find(|e| e.is_commemoration == comm && e.slot_ref == slot).map(|e| e.text.clone()).unwrap_or_default()
+        };
+        assert!(text(false, "magnificat-antiphon").starts_with("The wise men, * beholding"), "{date}");
+        let owners: Vec<_> = elements.iter().filter(|e| e.is_commemoration).map(|e| e.commemoration_owner_id.as_str()).collect();
+        assert!(owners.iter().all(|o| *o == "epiphany-sunday-1"), "{date}: {owners:?}");
+        assert!(text(true, "commemoration-antiphon").starts_with("Son, * why hast thou"), "{date}");
+        assert!(text(true, "commemoration-versicle").contains("We have seen his star"), "{date}");
+        assert!(text(true, "commemoration-collect").starts_with("O Lord, we beseech thee mercifully"), "{date}");
+    }
+}
+
+/// A Sunday anticipated on a Saturday Double of the I or II Class, "or some
+/// other Feast of XII Lessons", is commemorated "at I Vespers, with the
+/// Antiphon of Friday as given in the Psalter, and at Lauds" (General Rubrics IV.4-5): "He hath put down", not
+/// its II Vespers' "Save us, Lord". "Nothing is said of the Sunday at II
+/// Vespers" (Notes on the Tables 12; XIV.9) (#656).
+#[test]
+fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
+    for y in [2075, 2086] {
+        let (days, moveable) = year(y);
+        let comms = |d: i32| {
+            let date = Date::new(y, 2, d);
+            let day = &days[date.ordinal() as usize - 1];
+            assert_eq!(day.vespers.feast.as_ref().unwrap().id, "purification-bvm", "{date}");
+            let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+            hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect::<Vec<_>>()
+        };
+        let sunday = "epiphany-sunday-4-anticipated";
+        let friday = comms(1);
+        let text = |slot: &str| friday.iter().find(|e| e.commemoration_owner_id == sunday && e.slot_ref == slot).unwrap().text.clone();
+        assert!(text("commemoration-antiphon").starts_with("He hath put down the mighty"), "{y}");
+        assert!(text("commemoration-versicle").contains("Lord, let my prayer"), "{y}");
+        let saturday = comms(2);
+        assert!(saturday.iter().all(|e| e.commemoration_owner_id != sunday), "{y}");
+        assert!(saturday.iter().any(|e| e.commemoration_owner_id == "septuagesima"), "{y}");
+    }
+}
+
+/// IV.4: Friday's Psalter antiphon also when Friday keeps its II Vespers
+/// and the anticipated Sunday is commemorated as the incoming office (no
+/// such date before 2100; the 2075 Friday is given II Vespers here).
+#[test]
+fn anticipated_sunday_at_friday_second_vespers_takes_fridays_antiphon() {
+    let (days, moveable) = year(2075);
+    let friday_index = Date::new(2075, 2, 1).ordinal() as usize - 1;
+    let sunday = days[friday_index + 1].commemorations.iter().find(|c| c.id == "epiphany-sunday-4-anticipated").unwrap().clone();
+    let mut friday = days[friday_index].clone();
+    friday.vespers.owner = crate::concurrence::VespersOwner::IIOfPreceding;
+    friday.vespers.feast = friday.celebration.clone();
+    friday.vespers.commemorations = vec![sunday.clone()];
+    friday.vespers.incoming_commemoration_ids = vec![sunday.id.clone()];
+    friday.vespers.following_office_commemoration_id = None;
+    let hour = engine().compose_hour("vespers", &friday, &moveable, PrayerForm::Private).unwrap();
+    let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect();
+    let antiphon = elements.iter().find(|e| e.commemoration_owner_id == sunday.id && e.slot_ref == "commemoration-antiphon").unwrap();
+    assert!(antiphon.text.starts_with("He hath put down the mighty"), "{}", antiphon.text);
+}
+
+const MONDAY_VESPERS: [&str; 4] = ["psalms/114", "psalms/115", "psalms/116a", "psalms/116b"];
+const TUESDAY_VESPERS: [&str; 4] = ["psalms/130", "psalms/131", "psalms/132", "psalms/133"];
+const THURSDAY_VESPERS: [&str; 4] = ["psalms/139a", "psalms/139b", "psalms/140", "psalms/141"];
+const FRIDAY_VESPERS: [&str; 4] = ["psalms/142", "psalms/144a", "psalms/144b", "psalms/145a"];
+
+/// The office's own Vespers elements on the civil evening of `date`.
+fn vespers_elements(date: &str) -> Vec<liturgy::OfficeElement> {
+    let date = Date::parse(date).unwrap();
+    let (days, moveable) = year(date.year());
+    let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+    hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| !e.is_commemoration).collect()
+}
+
+fn first_four_psalms(elements: &[liturgy::OfficeElement]) -> Vec<&str> {
+    elements.iter().filter(|e| e.kind == ElementType::Psalm).take(4).map(|e| e.source_ref.as_str()).collect()
+}
+
+/// General Rubrics XXV.4: a Double of III Lessons without proper antiphons
+/// says the weekday's psalms at Vespers, also within another feast's octave
+/// (2026 ordo: Ss John & Paul "Thu. Ps." and "Fri. Ps.", St Irenaeus "Fri.
+/// Ps.", St Augustine of Canterbury "Mon. Ps.", St Bede "Tue. Ps.") (#632).
+/// St Sylvester's I Vespers keep the Nativity's, as printed (Diurnal p. 208).
+#[test]
+fn lesser_doubles_within_octaves_say_the_weekday_psalms_at_vespers() {
+    const SYLVESTER: [&str; 4] = ["psalms/110", "psalms/111", "psalms/112", "psalms/132"];
+    for (date, want) in [
+        ("2026-06-25", THURSDAY_VESPERS),
+        ("2026-06-26", FRIDAY_VESPERS),
+        ("2026-07-03", FRIDAY_VESPERS),
+        ("2026-05-25", MONDAY_VESPERS),
+        ("2026-05-26", TUESDAY_VESPERS),
+        ("2026-12-30", SYLVESTER),
+        ("2027-12-30", SYLVESTER),
+    ] {
+        let elements = vespers_elements(date);
+        assert_eq!(first_four_psalms(&elements), want, "{date}");
+        if want == SYLVESTER {
+            let antiphon = elements.iter().find(|e| e.slot_ref.starts_with("psalm-antiphon-4")).unwrap();
+            assert!(antiphon.text.starts_with("Of the fruit"), "{date}");
+        }
+    }
+}
+
+/// Doctors of III Lessons whose Diurnal entry gives no psalms say the
+/// weekday's at Vespers (XXV.4): St Bede (p. 528; 2024 ordo "Mon. Ps.", 2025
+/// "Tue. Ps.") and St Ephrem (p. 536; 2018 and 2021 ordos "Fer. Pss.") (#632).
+#[test]
+fn lesser_doubles_without_proper_psalms_say_the_weekday_psalms_at_vespers() {
+    for (date, want) in
+        [("2024-05-27", MONDAY_VESPERS), ("2025-05-27", TUESDAY_VESPERS), ("2018-06-18", MONDAY_VESPERS), ("2021-06-18", FRIDAY_VESPERS)]
+    {
+        assert_eq!(first_four_psalms(&vespers_elements(date)), want, "{date}");
+    }
+}
+
+/// Commemorations whose feast definition chooses their texts: the Common is
+/// the right one for who they are (#617), "N." is a name (#607), and the
+/// Saturninus antiphon keeps the one-Martyr Common until clergy rule (#610).
+#[test]
+fn commemoration_definitions_choose_fitting_texts() {
+    let commemorated = |date: Date, hour: &str, owner: &str| -> Vec<(String, String)> {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let found: Vec<_> = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.is_commemoration && e.commemoration_owner_id == owner)
+            .map(|e| (e.source_ref.clone(), e.text.clone()))
+            .collect();
+        assert!(!found.is_empty(), "{date} {hour}: {owner} not commemorated");
+        found
+    };
+    let has = |found: &[(String, String)], text: &str| found.iter().any(|(_, t)| t.contains(text));
+
+    // #617: Diurnal p. 465, St Peter at Lauds of 25 January "as above at I Vespers".
+    let peter = commemorated(Date::new(2027, 1, 25), "lauds", "comm-01-25-commemoration-of-st-peter");
+    assert!(has(&peter, "Thou art the shepherd of the sheep") && has(&peter, "Thou art Peter."), "{peter:?}");
+    // #617: the impeded Octave Day of Ss Peter & Paul takes its own texts
+    // (the generated octave day, not its dated duplicate: #622).
+    let octave = commemorated(Date::new(2024, 7, 6), "lauds", "ss-peter-paul-octave-day");
+    assert!(has(&octave, "Glorious princes") && has(&octave, "whose right hand upheld blessed Peter"), "{octave:?}");
+    for found in [&peter, &octave] {
+        assert!(!has(found, "good and faithful servant") && !has(found, "Confessor"), "{found:?}");
+    }
+
+    // #607: Diurnal p. 484 gives the Forty their own collect; the New Martyrs
+    // complete the Common's "thy holy Martyrs N.".
+    let forty = commemorated(Date::new(2026, 3, 10), "lauds", "comm-03-10-the-forty-holy-martyrs");
+    assert!(has(&forty, "the fortitude of thy glorious Martyrs in their confession"), "{forty:?}");
+    let russia = commemorated(Date::new(2026, 2, 4), "lauds", "comm-02-04-the-new-martyrs-of-russia");
+    assert!(has(&russia, "thy holy Martyrs of Russia:"), "{russia:?}");
+
+    // #610 (needs ruling): the 2026 ordo prints "The very hairs" for Saturninus;
+    // the one-Martyr Common stays until clergy rule (data/review/ordo-triage.csv).
+    let saturninus = "comm-11-29-st-saturninus-bishop-and-martyr";
+    let vespers = commemorated(Date::new(2026, 11, 28), "vespers", saturninus);
+    let lauds = commemorated(Date::new(2026, 11, 29), "lauds", saturninus);
+    assert!(has(&vespers, "This is a Martyr") && has(&lauds, "He that hateth his life"), "{vespers:?} {lauds:?}");
+    assert!(!has(&vespers, "The very hairs") && !has(&lauds, "The very hairs"));
+}
+
+/// #602: the Expectation is a feast of Our Lady in white (2017, 2018, 2023 and
+/// 2025 ordos); when an Ember day takes the office the day is violet.
+#[test]
+fn expectation_of_the_bvm_is_white() {
+    for (y, color) in [(2025, Color::White), (2023, Color::White), (2026, Color::Violet)] {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, 12, 18);
+        let lauds = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        assert_eq!(lauds.color, Some(color), "{date}: {}", lauds.feast);
+    }
+}
+
+/// Needs ruling (#657): the Expectation keeps the supplement's proper office
+/// (2017 and 2018 ordos); 2023 and 2025 give the Common of the B.V.M.
+/// ("Blessed art thou" 66*).
+#[test]
+fn expectation_of_the_bvm_keeps_the_supplements_proper_office() {
+    let (days, moveable) = year(2025);
+    let date = Date::new(2025, 12, 18);
+    let lauds = engine().compose_hour("lauds", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+    let elements: Vec<_> = lauds.sections.into_iter().flat_map(|s| s.elements).collect();
+    assert!(elements.iter().any(|e| e.source_ref == "proper/expectation-bvm/benedictus-antiphon"), "{date}");
+    assert!(elements.iter().any(|e| e.text.contains("He shall sit upon the throne")), "{date}");
+}
+
+/// General Rubrics VI.2 (#616): a Vigil on a Solemnity has not even a
+/// Commemoration. The 2021, 2022 and 2024 ordos print none; 2033 and 2035 are
+/// the issue's later Corpus Christi cases.
+#[test]
+fn no_vigil_commemoration_on_a_solemnity() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, m, d, celebration, vigil) in [
+        (2021, 6, 28, "nativity-john-baptist", "vigil-of-ss-peter-paul"),
+        (2022, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2024, 6, 22, "vigil-pentecost", "vigil-of-nativity-john-baptist"),
+        (2033, 6, 23, "corpus-christi", "vigil-of-nativity-john-baptist"),
+        (2035, 6, 28, "corpus-christi", "vigil-of-ss-peter-paul"),
+    ] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(day.celebration.as_deref().map(|c| c.id.as_str()), Some(celebration), "{}", day.date);
+        assert!(day.commemorations.iter().all(|c| c.id != vigil), "{}: {vigil} commemorated", day.date);
+        assert!(day.occurrence_decisions.iter().any(|x| x.rule == "commemoration:vigil-on-first-class-double"), "{}", day.date);
+    }
+}
+
+/// #648: 22 January is St Vincent alone (Diurnal kalendar p. 12 and proper
+/// p. 461, "St. Vincent, M."); the 2023-2026 ordos' "Ss Vincent, Martyr" is
+/// left over from the 2017-2022 "Ss Vincent (Deacon) & Anastasius".
+#[test]
+fn st_vincent_is_named_as_one_martyr() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    let cal = build_calendar(2026, &data).unwrap();
+    let day = cal.days.iter().find(|day| day.date == Date::new(2026, 1, 22)).unwrap();
+    let vincent = day.commemorations.iter().find(|c| c.id == "comm-01-22-ss-vincent-martyr");
+    assert_eq!(vincent.map(|c| c.name.as_str()), Some("St Vincent, Martyr"));
+}
+
+/// #631: Paschaltide runs until None of the Saturday after Pentecost (General
+/// Rubrics XXIV.3, XXXI.5; 2019, 2021 and 2026 ordos: "Paschaltide ends with
+/// None of Saturday"), so a saint commemorated within the Octave of Pentecost
+/// keeps the Paschaltide Common and its alleluias.
+#[test]
+fn pentecost_week_commemorations_keep_paschaltide_forms() {
+    let commemorated = |date: Date, hour: &str, owner: &str| -> Vec<(ElementType, String)> {
+        let (days, moveable) = year(date.year());
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let found: Vec<_> = composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.is_commemoration && e.commemoration_owner_id == owner)
+            .map(|e| (e.kind, e.text.clone()))
+            .collect();
+        assert!(!found.is_empty(), "{date} {hour}: {owner} not commemorated");
+        found
+    };
+    let text = |found: &[(ElementType, String)], kind: ElementType| found.iter().find(|(k, _)| *k == kind).unwrap().1.clone();
+    for (date, hour, owner, antiphon) in [
+        (Date::new(2037, 5, 27), "lauds", "st-bede-venerable", "Well done"),
+        (Date::new(2037, 5, 27), "lauds", "comm-extra-05-27-st-john-i-pope-and-martyr", "Daughters of Jerusalem"),
+        (Date::new(2026, 6, 4), "vespers", "st-boniface", "Light perpetual"),
+        (Date::new(2026, 6, 5), "lauds", "st-boniface", "Daughters of Jerusalem"),
+        (Date::new(2021, 6, 23), "lauds", "comm-extra-06-23-st-etheldreda-queen-and-virgin", "The kingdom of heaven"),
+        (Date::new(2019, 6, 22), "lauds", "st-alban", "Daughters of Jerusalem"),
+        // #640: a Doctor's "O Teacher" (Diurnal p. 43*) takes its Alleluia too (p. 6*, §3).
+        (Date::new(2037, 5, 26), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2037, 5, 27), "vespers", "st-bede-venerable", "O Teacher"),
+        (Date::new(2046, 6, 17), "vespers", "st-ephrem-syrian", "O Teacher"),
+        (Date::new(2046, 6, 18), "vespers", "st-ephrem-syrian", "O Teacher"),
+    ] {
+        let found = commemorated(date, hour, owner);
+        let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
+        assert!(ant.starts_with(antiphon) && ant.to_lowercase().ends_with("alleluia."), "{date} {hour}: {ant}");
+        assert!(vers.lines().all(|l| l.ends_with("alleluia.")), "{date} {hour}: {vers}");
+    }
+    // I Vespers of Trinity Sunday are out of Paschaltide.
+    let (days, _) = year(2019);
+    let saturday = &days[Date::new(2019, 6, 22).ordinal() as usize - 1];
+    assert!(saturday.is_paschaltide("none") && !saturday.is_paschaltide("vespers"));
+    let sunday = commemorated(Date::new(2019, 6, 22), "vespers", "pentecost-sunday-1");
+    assert!(sunday.iter().all(|(_, t)| !t.contains("alleluia")), "{sunday:?}");
+}
+
+/// #622: on the eve of an impeded octave day, Vespers commemorate the octave
+/// once, by the Octave Day's I Vespers, not also Day VII (XIII.16). 5 July
+/// under Corpus Christi's octave (2024, 2027), and under a Sunday's I Vespers:
+/// 2025 ordo 5 July, "Comm. Oct. ('Peter the Apostle' 558; Col. 560)"; 2026
+/// ordo 7 Nov., "Comm. Oct. ('O ye Angels' 638; Col. 640)"; 2021 ordo 21 Aug.,
+/// "Comm. Oct. ('O most prudent Virgin')".
+#[test]
+fn eve_of_an_impeded_octave_day_commemorates_the_octave_once() {
+    for (y, m, d, octave_day) in [
+        (2024, 7, 5, "ss-peter-paul-octave-day"),
+        (2027, 7, 5, "ss-peter-paul-octave-day"),
+        (2025, 7, 5, "ss-peter-paul-octave-day"),
+        (2026, 11, 7, "all-saints-octave-day"),
+        (2021, 8, 21, "assumption-bvm-octave-day"),
+    ] {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        let ids: Vec<_> = day.vespers.commemorations.iter().map(|c| c.id.as_str()).collect();
+        assert!(ids.contains(&octave_day), "{}: {ids:?}", day.date);
+        assert!(!ids.contains(&format!("{octave_day}-7").as_str()), "{}: {ids:?}", day.date);
+    }
+    // The impeded Octave Day itself is commemorated at Lauds of 6 July.
+    let (days, _) = year(2027);
+    let sixth = &days[Date::new(2027, 7, 6).ordinal() as usize - 1];
+    assert!(sixth.commemorations.iter().any(|c| c.id == "ss-peter-paul-octave-day"));
+    // ...and at its II Vespers: 2026 ordo 8 Nov., "Comm. Oct ('O how glorious'
+    // 641; Col. 640)"; 2025 ordo 6 July and 2024 ordo 6 July, "Comm. Oct. ...
+    // & Peter &c. ('Peter the Apostle' 558; Col. 560)". The 2021 ordo's 6 July
+    // (Cyril only) is the older reading.
+    for (y, m, d, octave_day) in
+        [(2027, 7, 6, "ss-peter-paul-octave-day"), (2025, 7, 6, "ss-peter-paul-octave-day"), (2026, 11, 8, "all-saints-octave-day")]
+    {
+        let (days, _) = year(y);
+        let day = &days[Date::new(y, m, d).ordinal() as usize - 1];
+        assert!(day.vespers.commemorations.iter().any(|c| c.id == octave_day), "{}", day.date);
+    }
+}
+
+/// #643 (needs ruling): the Conception is ranked Double II Class, as every
+/// ordo prints it (D2), not I Class as the rubrics (p. 57) and the Diurnal
+/// (p. 448) give it. A Sunday II Class yields only to a Double I Class (rubrics
+/// p. 56), so on Advent II Sunday the feast is transferred to Monday, as the
+/// 2019 and 2024 ordos do; ranked I Class it would be kept on the Sunday.
+/// (Both are Double II Class, so the Sunday wins on the moveable tiebreak.)
+#[test]
+fn conception_on_advent_ii_sunday_is_transferred_to_monday() {
+    for y in [2019, 2024, 2030] {
+        let (days, _) = year(y);
+        let sunday = &days[Date::new(y, 12, 8).ordinal() as usize - 1];
+        let monday = &days[Date::new(y, 12, 9).ordinal() as usize - 1];
+        assert!(!sunday.celebration_is("conception-bvm"), "{y}");
+        assert!(monday.celebration_is("conception-bvm"), "{y}");
+    }
+}
+
+/// #638 (needs ruling): an Advent Ember Day takes the office from a Common
+/// Octave Day, which is commemorated (rubrics p. 59, "Common Octaves": the
+/// Octave Day yields to "an Ember Day", naming the Conception's octave; Table
+/// of Occurrence, p. 60, 4; XIII.16, p. 64), so on its eve Day VII keeps II Vespers and commemorates the
+/// Octave Day from I Vespers. The 2021 ordo instead keeps the Octave of the
+/// Conception on Ember Wednesday 15 December. Day VII on Ember Wednesday yields
+/// to the feria (2022 ordo 14 December, as the Table's "Day in Common Octave").
+#[test]
+fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
+    for y in [2021, 2027, 2032] {
+        let (days, _) = year(y);
+        let eve = &days[Date::new(y, 12, 14).ordinal() as usize - 1];
+        let ember = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
+        assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
+        assert!(ember.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
+        assert_eq!(eve.vespers.feast.as_ref().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
+        assert!(eve.vespers.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
+    }
+    for y in [2022, 2033] {
+        let (days, _) = year(y);
+        let ember = &days[Date::new(y, 12, 14).ordinal() as usize - 1];
+        assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
+        let octave = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
+        assert_eq!(octave.celebration.as_deref().map(|c| c.id.as_str()), Some("conception-bvm-octave-day"), "{y}");
+    }
+}
+
+#[test]
+fn final_antiphons_turn_at_the_diurnals_hours() {
+    // Diurnal pp. 153-155; 2026 ordo pp. 18, 22, 53, 69 (#649). Each Final
+    // Antiphon begins and ends at a named hour, so the civil day of every
+    // boundary says two antiphons.
+    use crate::seasonal::marian_antiphon;
+    for y in 2026..=2053 {
+        let m = MoveableDates::compute(y);
+        let at = |date: Date| ["lauds", "vespers", "compline"].map(|h| marian_antiphon(date, h, &m));
+        let advent_eve = m.advent1.add_days(-1);
+        assert_eq!(at(advent_eve), ["salve-regina", "alma-redemptoris-advent", "alma-redemptoris-advent"], "{y}");
+        assert_eq!(
+            at(Date::new(y, 12, 24)),
+            ["alma-redemptoris-advent", "alma-redemptoris-christmas", "alma-redemptoris-christmas"],
+            "{y}"
+        );
+        assert_eq!(at(Date::new(y, 2, 2)), ["alma-redemptoris-christmas", "alma-redemptoris-christmas", "ave-regina-caelorum"], "{y}");
+        assert_eq!(at(m.holy_wednesday)[2], "ave-regina-caelorum", "{y}");
+        assert_eq!(at(m.holy_saturday)[2], "regina-caeli", "{y}");
+        assert_eq!(at(m.pentecost.add_days(6)), ["regina-caeli", "salve-regina", "salve-regina"], "{y}");
+    }
+}
+
+/// Maintainer's direction, 2026-10-11: the app shows each Hour fully
+/// assembled, so the Diurnal's Triduum rubrics that only say what is omitted
+/// or where the next part is (pp. 311, 314-316, 360-362) are left to the
+/// printed diurnal. Those that ask something the page cannot do for the
+/// reader stay: kneeling and the secret Our Father (p. 313), the Collect
+/// without Let us pray (p. 313), and the noise at Lauds (p. 313).
+///
+/// Maintainer's direction, 2026-10-11: the p. 313 kneeling rubric is split
+/// into three short excerpts, each where it applies (All kneel → antiphon →
+/// secret Our Father → Psalm 51), with "Our Father" in black as words said.
+/// The Hours end with the Collect ("Thus are ended all the Hours during this
+/// Triduum"), so the Prayers After the Office are not said.
+#[test]
+fn triduum_hours_keep_action_rubrics_without_omission_notes() {
+    const KNEEL: &str = "shared/formulas/triduum-kneel-rubric";
+    const SECRET: &str = "shared/formulas/triduum-secret-our-father-rubric";
+    const PSALM_51: &str = "shared/formulas/triduum-psalm-51-rubric";
+    const COLLECT: &str = "shared/formulas/triduum-collect-rubric";
+    const NOISE: &str = "shared/formulas/triduum-lauds-noise-rubric";
+    const OMISSION: [&str; 7] =
+        ["not said", "not read", "said at once", "begun at once", "Henceforth", "without musical note", "Thus are ended"];
+    for y in [2026, 2027, 2035, 2053] {
+        let (days, moveable) = year(y);
+        let m = &moveable;
+        for date in [m.holy_thursday, m.good_friday, m.holy_saturday, m.easter] {
+            for hour in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] {
+                for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
+                    let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], m, form).unwrap();
+                    let elements: Vec<_> = composed.sections.iter().flat_map(|s| &s.elements).collect();
+                    let context = format!("{date} {hour} {form:?}");
+                    let rubrics: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Rubric).collect();
+                    for rubric in &rubrics {
+                        assert!(!OMISSION.iter().any(|p| rubric.text.contains(p)), "{context}: {}", rubric.source_ref);
+                    }
+                    let actions: Vec<_> = rubrics
+                        .iter()
+                        .map(|e| e.source_ref.as_str())
+                        .filter(|r| [KNEEL, SECRET, PSALM_51, COLLECT, NOISE].contains(r))
+                        .collect();
+                    let triduum = [m.holy_thursday, m.good_friday].contains(&date)
+                        || (date == m.holy_saturday && !["vespers", "compline"].contains(&hour));
+                    let want: &[&str] = match hour {
+                        "lauds" if triduum => &[KNEEL, SECRET, PSALM_51, COLLECT, NOISE],
+                        _ if triduum => &[KNEEL, SECRET, PSALM_51, COLLECT],
+                        _ => &[],
+                    };
+                    assert_eq!(actions, want, "{context}");
+                    let after_office = composed.sections.iter().any(|s| s.label == "Prayers After the Office")
+                        || elements.iter().any(|e| e.source_ref == "ordinary/session/sacrosanctae");
+                    if triduum {
+                        let i = elements.iter().position(|e| e.source_ref == KNEEL).unwrap();
+                        let antiphon = &elements[i + 1];
+                        assert!(antiphon.kind == ElementType::Antiphon && antiphon.text.starts_with("Christ"), "{context}");
+                        let refs: Vec<_> = elements[i + 2..i + 6].iter().map(|e| e.source_ref.as_str()).collect();
+                        assert_eq!(refs, [SECRET, "ordinary/shared/our-father", PSALM_51, "psalms/051"], "{context}");
+                        let said: Vec<_> = elements[i + 2].rubric_spans.iter().filter(|s| s.prayed).map(|s| s.text.as_str()).collect();
+                        assert_eq!(said, ["Our Father"], "{context}");
+                        assert!(elements[i + 4].rubric_spans.iter().all(|s| !s.prayed), "{context}: Psalm 51 is a label");
+                        assert!(!after_office, "{context}: the Hour ends with the Collect");
+                    } else if hour == "lauds" && date == m.easter {
+                        assert!(after_office, "{context}");
+                    }
+                    if hour == "compline" && date == m.holy_saturday {
+                        // The Hymn, Chapter and Versicle are not said (p. 361).
+                        assert!(!elements.iter().any(|e| e.kind == ElementType::Hymn || e.slot_ref == "chapter"), "{context}");
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// #642 (needs ruling): the ordos commemorate an Ember day of Advent or Lent at
+/// I Vespers of the following feast and II Vespers of a feast kept on it, as
+/// they do the season's other ferias (XIV.8), though XIV.9 commemorates Ember
+/// days "only at Lauds". At Vespers an Advent Ember day is a feria of its
+/// week: the weekday's antiphon (or the day's O antiphon) and the III Sunday's
+/// collect (Diurnal p. 177). Ember Saturday, whose evening is the Sunday's, is
+/// pinned in the concurrence unit tests.
+#[test]
+fn vespers_of_a_feast_commemorate_the_advent_or_lenten_ember_day() {
+    for (date, ember, antiphon) in [
+        // 2022 ordo: "Comm. Fer. ('Behold the handmaid of the Lord')".
+        ("2022-12-14", "advent-ember-wednesday", "Behold the handmaid"),
+        ("2033-12-14", "advent-ember-wednesday", "Behold the handmaid"),
+        // 2017 and 2019 ordos, I Vespers of St Thomas: "Comm. ... ('O Key of David')".
+        ("2017-12-20", "advent-ember-wednesday", "O Key of David"),
+        ("2019-12-20", "advent-ember-friday", "O Key of David"),
+        // 2025 ordo, I Vespers of the Expectation: "Comm. Fer. 'O Wisdom' 172; Col. 170".
+        ("2025-12-17", "advent-ember-wednesday", "O Wisdom"),
+        // 2022 ordo, I Vespers of St Joseph: "Comm. Fer. ('He that made thee whole')".
+        ("2022-03-18", "lent-ember-friday", "He that made me whole"),
+        // 2018 ordo, II Vespers of St Thomas: "Comm. Fer. ('O Day-spring')".
+        ("2018-12-21", "advent-ember-friday", "O Day-spring"),
+        // 2025 ordo, II Vespers of St Gregory: "Comm Fer. ('For as Jonas' & Col. 253)".
+        ("2025-03-12", "lent-ember-wednesday", "For as Jonas"),
+    ] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let day = &days[date.ordinal() as usize - 1];
+        assert!(day.vespers.commemorations.iter().any(|c| c.id == ember), "{date}");
+        let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+        let owned: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.commemoration_owner_id == ember).collect();
+        assert!(owned.iter().any(|e| e.kind == ElementType::Antiphon && e.text.starts_with(antiphon)), "{date}: {owned:?}");
+        let collect = owned.iter().find(|e| e.kind == ElementType::Collect).unwrap();
+        let want = match ember {
+            "lent-ember-wednesday" => "proper/lent-ember-wednesday/collect-vespers",
+            "lent-ember-friday" => "proper/lent-ember-friday/collect-vespers",
+            _ => "proper/advent-sunday-3/collect",
+        };
+        assert_eq!(collect.source_ref, want, "{date}");
+    }
+}
+
+/// Office of Saint Mary on Saturday (Diurnal pp. 68*–71*): its I Vespers has
+/// its own versicle, with alleluia in Paschaltide (pp. 68*, 71*), not the
+/// Common's "Vouchsafe" (p. 64*), and in Paschaltide the Short R. takes its
+/// Paschal form (p. 66*); from the Saturday after the Octave of Epiphany to
+/// the Saturday before the Purification its collect is "O God, who by the
+/// fruitful virginity" at every Hour (p. 70*), and the Hours take the
+/// Circumcision's antiphons (pp. 70*–71*), otherwise the Common's (#652).
+#[test]
+fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
+    let hour = |date: &str, name: &str| {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap()
+    };
+    for (date, versicle) in [
+        ("2026-10-09", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-01-22", "V. Full of grace are thy lips.\nR. Because God hath blessed thee for ever."),
+        ("2027-05-14", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+        ("2028-05-12", "V. Full of grace are thy lips, alleluia.\nR. Because God hath blessed thee for ever, alleluia."),
+    ] {
+        let vespers = hour(date, "vespers");
+        assert_eq!(principal(&vespers, "versicle").text, versicle, "{date}");
+        // The Short R. as on Feasts B.V.M. (pp. 64*, 68*), Paschal in
+        // Paschaltide (pp. 66*, 71*).
+        let paschal = versicle.contains("alleluia");
+        let responsory = &principal(&vespers, "short-responsory").text;
+        assert_eq!(responsory.contains("Alleluia, alleluia."), paschal, "{date}");
+    }
+    const FRUITFUL: &str = "O God, who by the fruitful virginity of blessed Mary";
+    for (date, name) in [
+        ("2027-01-22", "vespers"),
+        ("2027-01-16", "lauds"),
+        ("2027-01-23", "lauds"),
+        ("2027-01-23", "terce"),
+        ("2027-01-30", "none"),
+        ("2028-01-29", "sext"),
+    ] {
+        assert!(principal(&hour(date, name), "collect").text.starts_with(FRUITFUL), "{date} {name}");
+    }
+    // The Saturday after the Purification is the Office throughout the Year.
+    assert!(principal(&hour("2027-02-06", "lauds"), "collect").text.starts_with("Grant, we beseech thee, O Lord God"));
+    // At the Hours, II After Christmas, the Circumcision's Lauds antiphons
+    // (pp. 70*–71*); afterwards the Common's (p. 67*).
+    let antiphon = |date: &str, name: &str| {
+        let hour = hour(date, name);
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Antiphon && !e.is_commemoration).unwrap().text
+    };
+    for date in ["2026-01-31", "2027-01-16", "2028-01-29", "2030-01-19"] {
+        for (name, incipit) in
+            [("prime", "O wondrous interchange!"), ("terce", "When thou wast born"), ("sext", "In the bush"), ("none", "Lo, Mary")]
+        {
+            assert!(antiphon(date, name).starts_with(incipit), "{date} {name}");
+        }
+    }
+    // Throughout the Year the Hours take the Common's, Prime too, though
+    // Lauds has the Saturday psalter's (pp. 69*, 65*, 67*); in Paschaltide
+    // with one Alleluia (p. 6*, §3; ", alleluia." as #645).
+    for (date, paschal) in [("2027-02-06", false), ("2026-10-10", false), ("2027-05-15", true), ("2030-06-01", true)] {
+        for (name, incipit) in
+            [("prime", "While the King"), ("terce", "His left hand"), ("sext", "I am black"), ("none", "Thou art beautiful")]
+        {
+            let text = antiphon(date, name);
+            assert!(text.starts_with(incipit), "{date} {name}");
+            assert_eq!(text.ends_with(", alleluia."), paschal, "{date} {name}: {text}");
+        }
     }
 }

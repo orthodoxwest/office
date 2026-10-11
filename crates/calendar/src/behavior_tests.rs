@@ -144,6 +144,18 @@ fn companions_stay_grouped_and_concurrent_office_precedes_the_cap() {
     let (ordered, _) = ordered_commemorations(None, &input, OrderContext::default());
     assert_eq!(ordered.len(), MAX_COMMEMORATIONS_PER_DAY);
     assert_eq!(ordered[0].id, "sunday");
+    // A principal's companion precedes a greater double, both through the
+    // ordering entry point and at Lauds.
+    let parent = feast("apostolic-office", Rank::Double, Category::Apostle);
+    let mut companion = (*feast("companion", Rank::Commemoration, Category::Apostle)).clone();
+    companion.companion_of = Some(parent.id.clone());
+    let input = vec![feast("greater", Rank::GreaterDouble, Category::Confessor), Arc::new(companion)];
+    let (ordered, _) = ordered_commemorations(Some(&parent), &input, OrderContext::default());
+    assert_eq!(ids(&ordered), ["companion", "greater"]);
+    let (mut day, _) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
+    day.celebration = Some(parent);
+    day.commemorations = input;
+    assert_eq!(ids(&lauds_commemorations(&day)), ["companion", "greater"]);
 }
 
 #[test]
@@ -179,9 +191,9 @@ fn memorial_suppression_keeps_protected_scopes() {
 
 #[test]
 fn first_class_feasts_admit_only_privileged_octaves() {
-    // Diurnal X and General Rubrics XIV.4 (#378): no St George octave on St
-    // Joseph's Solemnity, no St John Baptist octave on Ss Peter and Paul; a
-    // Double II Class (St Mark) and a Sunday keep the common octave.
+    // General Rubrics XIV.4 (#378, #573): no St George octave on St Joseph's
+    // Solemnity or St Mark, no St John Baptist octave on Ss Peter and Paul, no
+    // Assumption octave on St Joachim; a Sunday keeps the common octave.
     let common = feast("st-george-octave-day-7", Rank::SemiDouble, Category::Martyr);
     let mut privileged = (*feast("corpus-christi-octave-day-3", Rank::SemiDouble, Category::Lord)).clone();
     privileged.is_privileged_octave_day = true;
@@ -190,13 +202,45 @@ fn first_class_feasts_admit_only_privileged_octaves() {
         (feast("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor), &common, false),
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &common, false),
         (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &privileged, true),
-        (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, true),
+        (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, false),
+        (feast("st-joachim", Rank::Double2ndClass, Category::Confessor), &common, false),
+        // The Visitation's own rubric (Diurnal p. 557) agrees.
+        (feast("visitation-bvm", Rank::Double2ndClass, Category::BlessedVirgin), &common, false),
         (feast("some-sunday", Rank::Double1stClass, Category::Sunday), &common, true),
     ] {
         let (out, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(comm), OrderContext::default());
         assert_eq!(!out.is_empty(), kept, "{} under {}: {decisions:?}", comm.id, winner.id);
         if !kept {
             assert!(decisions.iter().any(|d| d.rule == "commemoration:common-octave-under-first-class-feast"));
+        }
+    }
+}
+
+#[test]
+fn first_class_doubles_admit_no_common_vigil() {
+    // General Rubrics VI.2 and XIV.7 (#616): nothing is said of a Vigil on a
+    // Solemnity "unless it is the Vigil of the Epiphany"; a II Class Double
+    // keeps the Common Vigil (XIV.8).
+    let vigil = |id: &str, rank| {
+        let mut v = (*feast(id, rank, Category::Feria)).clone();
+        v.is_vigil = true;
+        v.vigil_of = Some("example".into());
+        Arc::new(v)
+    };
+    let common = vigil("vigil-of-nativity-john-baptist", Rank::Simple);
+    let epiphany = vigil("vigil-epiphany", Rank::SemiDouble);
+    for (winner, comm, kept) in [
+        (feast("corpus-christi", Rank::Double1stClass, Category::Lord), &common, false),
+        (feast("nativity-john-baptist", Rank::Double1stClass, Category::Confessor), &common, false),
+        (feast("vigil-pentecost", Rank::Double1stClass, Category::Feria), &common, false),
+        (feast("first-class", Rank::Double1stClass, Category::Lord), &epiphany, true),
+        (feast("visitation-bvm", Rank::Double2ndClass, Category::BlessedVirgin), &common, true),
+        (feast("double", Rank::Double, Category::Martyr), &common, true),
+    ] {
+        let (out, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(comm), OrderContext::default());
+        assert_eq!(!out.is_empty(), kept, "{} under {}: {decisions:?}", comm.id, winner.id);
+        if !kept {
+            assert!(decisions.iter().any(|d| d.rule == "commemoration:vigil-on-first-class-double"));
         }
     }
 }
@@ -247,6 +291,7 @@ fn transfers_continue_through_a_blocked_year_boundary() {
             fixed("jan1-blocker", Rank::Double1stClass, Color::White, Category::Lord, 1, 1),
         ],
         penitential_rules: vec![],
+        monastic: vec![],
     };
     let cal = build_calendar(2027, &data).unwrap();
     assert_eq!(cal.days[0].celebration.as_ref().unwrap().id, "jan1-blocker");
@@ -254,22 +299,6 @@ fn transfers_continue_through_a_blocked_year_boundary() {
     for (index, rule) in [(0, "occurrence:transfer-in"), (0, "occurrence:transfer-out"), (1, "occurrence:transfer-in")] {
         assert!(cal.days[index].occurrence_decisions.iter().any(|d| d.rule == rule), "{index}: {rule}");
     }
-}
-
-#[test]
-fn commemoration_callers_preserve_principal_companion_priority() {
-    let parent = feast("apostolic-office", Rank::Double, Category::Apostle);
-    let mut companion = (*feast("companion", Rank::Commemoration, Category::Apostle)).clone();
-    companion.companion_of = Some(parent.id.clone());
-    let companion = Arc::new(companion);
-    let greater = feast("greater", Rank::GreaterDouble, Category::Confessor);
-    let input = vec![greater, companion];
-    let (ordered, _) = ordered_commemorations(Some(&parent), &input, OrderContext::default());
-    assert_eq!(ids(&ordered), ["companion", "greater"]);
-    let (mut day, _) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
-    day.celebration = Some(parent);
-    day.commemorations = input;
-    assert_eq!(ids(&lauds_commemorations(&day)), ["companion", "greater"]);
 }
 
 #[test]

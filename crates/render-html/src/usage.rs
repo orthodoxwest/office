@@ -9,8 +9,7 @@ use serde::Serialize;
 use crate::escape::format_float;
 use crate::view::Chrome;
 
-/// The seven hours, as the usage store names its office scopes.
-pub const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub use presentation::usage::{Dimension, HOURS};
 
 /// One reporting day's counts, newest first in a window.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
@@ -20,18 +19,14 @@ pub struct UsageDay {
     pub hours: [i64; 7],
     pub ordo: i64,
     pub reminders: i64,
+    /// Readers counted for the first time that day, filled by the view model.
+    pub new_readers: i64,
     /// Display date and short weekday, filled by the view model.
     pub label: String,
     pub weekday: String,
     /// Counts by qualified dimension scope ("appearance:apse").
     #[serde(skip)]
     pub dimensions: BTreeMap<String, i64>,
-}
-
-/// A dimension family and its values, as the usage store declares them.
-pub struct Dimension<'a> {
-    pub key: &'a str,
-    pub values: &'a [&'a str],
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -84,11 +79,20 @@ pub struct UsageData {
     pub yesterday: i64,
     pub browser_days: i64,
     pub complete_days: i64,
-    /// `%.1f` of the completed-day average.
-    pub daily_average: String,
-    /// The average's distance from the chart's top, as a percentage; empty
-    /// without completed days.
-    pub average_top: String,
+    /// `%.1f` of the average over the last seven completed days (fewer, while
+    /// fewer are recorded).
+    pub week_average: String,
+    /// Completed days behind `week_average`, at most seven.
+    pub week_days: i64,
+    /// The note under `week_average`, comparing it with the seven days before
+    /// once fourteen completed days are recorded.
+    pub week_note: String,
+    /// The trailing seven-day average across the chart, as an SVG path in its
+    /// coordinates; empty when fewer than two days have one.
+    pub rolling_path: String,
+    /// Readers first counted over `week_days`, and the note beneath it.
+    pub week_new: i64,
+    pub week_new_note: String,
     pub office_totals: Vec<UsageOffice>,
     pub ordo_total: i64,
     pub reminders_total: i64,
@@ -104,17 +108,31 @@ const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Au
 
 const WEEKDAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+/// Days before a window that its weekly figures read: the seven-day average at the window's
+/// oldest day, and the week before the last.
+pub const LOOKBACK: usize = 8;
+
 /// Builds the chronological chart and newest-first table. The peak is a daily count, not a sum of
 /// overlapping browsers. Days before `since`, the first recorded day, predate collection: they
-/// are dropped rather than counted as quiet days, and today always remains.
+/// are dropped rather than counted as quiet days, and today always remains. `rows` may reach up
+/// to [`LOOKBACK`] days past the window; those older days feed only the weekly figures.
 pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimensions: &[Dimension]) -> UsageData {
     let recorded = rows.iter().take_while(|r| since.is_some_and(|s| r.day.as_str() >= s)).count();
     rows.truncate(recorded.max(1));
+    // Completed days, newest first, including any before the window.
+    let history: Vec<i64> = rows.iter().skip(1).map(|r| r.users).collect();
+    let first = |r: &UsageDay| r.dimensions.get("visit:first").copied().unwrap_or(0);
+    let week_new = rows.iter().skip(1).take(7).map(first).sum::<i64>();
+    for row in &mut rows {
+        row.new_readers = first(row);
+    }
+    rows.truncate(days.max(1) as usize);
     let mut d = UsageData {
         chrome: Chrome { page: "usage".into(), ..Chrome::default() },
         days,
         recorded_days: rows.len() as i64,
         hours: HOURS.iter().map(|h| h.to_string()).collect(),
+        week_new,
         ..UsageData::default()
     };
     d.trend_groups = trend_groups(&rows, dimensions);
@@ -130,7 +148,6 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
             width: format_float(if peak_office > 0 { 100.0 * count as f64 / peak_office as f64 } else { 0.0 }),
         })
         .collect();
-    let mut average = 0.0;
     for (i, row) in rows.iter().enumerate() {
         d.browser_days += row.users;
         d.ordo_total += row.ordo;
@@ -138,13 +155,33 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
         // Today is in progress; recorded zero days still count.
         if i > 0 {
             d.complete_days += 1;
-            average += row.users as f64;
         }
     }
-    if d.complete_days > 0 {
-        average /= d.complete_days as f64;
-    }
-    d.daily_average = format!("{average:.1}");
+    let mean = |days: &[i64]| days.iter().sum::<i64>() as f64 / days.len() as f64;
+    let week = &history[..history.len().min(7)];
+    d.week_days = week.len() as i64;
+    d.week_average = if week.is_empty() { String::new() } else { format!("{:.1}", mean(week)) };
+    d.week_new_note = match week.len() {
+        0 => "No completed days yet".into(),
+        7 => "First counted in the last 7 days".into(),
+        n => format!("First counted in {n} completed day{}", if n == 1 { "" } else { "s" }),
+    };
+    d.week_note = match week.len() {
+        0 => "No completed days yet".into(),
+        1 => "Over 1 completed day".into(),
+        n @ 2..7 => format!("A day, over {n} completed days"),
+        _ if history.len() < 14 => "A day, over the last week".into(),
+        _ => {
+            let before = mean(&history[7..14]);
+            let change = if before > 0.0 { (100.0 * (mean(week) - before) / before).round() as i64 } else { 0 };
+            match change {
+                _ if before == 0.0 => "A day; none the week before".into(),
+                0 => "A day, level with the week before".into(),
+                c if c > 0 => format!("A day, up {c}% on the week before"),
+                c => format!("A day, down {}% on the week before", -c),
+            }
+        }
+    };
     if rows.is_empty() {
         d.rows = rows;
         return d;
@@ -178,12 +215,24 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
         }
     }
     let scale = if d.max == 0 { 1 } else { d.max } as f64;
-    if d.complete_days > 0 && d.max > 0 {
-        d.average_top = format_float(100.0 - 100.0 * average / scale);
-    }
     let n = rows.len();
     let step = 720.0 / n as f64;
     let gap = step * 0.18;
+    // A completed day's trailing average needs its six days before recorded too.
+    let rolling: Vec<(usize, f64)> =
+        (1..n).filter(|&i| i + 6 <= history.len()).map(|i| ((n - 1 - i), mean(&history[i - 1..i + 6]))).collect();
+    if rolling.len() >= 2 {
+        d.rolling_path = rolling
+            .iter()
+            .rev()
+            .enumerate()
+            .map(|(k, &(x, avg))| {
+                let command = if k == 0 { "M" } else { "L" };
+                format!("{command}{} {}", format_float((x as f64 + 0.5) * step), format_float(160.0 - 160.0 * avg / scale))
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+    }
     for i in (0..n).rev() {
         let height = 160.0 * rows[i].users as f64 / scale;
         d.chart.push(UsageBar {
@@ -200,9 +249,15 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
     d
 }
 
-/// Display labels for the two-valued families, in the store's value order.
-/// The prayer-form family has its own fixed labels below.
-pub const TREND_LABELS: [(&str, [&str; 2]); 2] = [("appearance", ["Nave", "Apse"]), ("screen", ["Desktop", "Mobile"])];
+/// Each family's breakdown: its heading and its values' labels, in the store's value order.
+pub const TREND_LABELS: [(&str, &str, &[&str]); 6] = [
+    ("appearance", "Appearance", &["Nave", "Apse"]),
+    ("screen", "Screen", &["Desktop", "Mobile"]),
+    ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
+    ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
+    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
+    ("visit", "New or returning", &["New", "Returning"]),
+];
 
 fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> {
     let points = |scopes: &[String]| -> Vec<TrendPoint> {
@@ -212,20 +267,16 @@ fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> 
             .collect()
     };
     let mut groups = Vec::new();
-    for (key, labels) in TREND_LABELS {
+    for (key, label, series) in TREND_LABELS {
         let Some(dimension) = dimensions.iter().find(|d| d.key == key) else { continue };
         let scopes: Vec<String> = dimension.values.iter().map(|v| format!("{key}:{v}")).collect();
-        let mut label = key.to_string();
-        label[..1].make_ascii_uppercase();
-        groups.push(TrendGroup { key: key.into(), label, series: labels.iter().map(|l| l.to_string()).collect(), points: points(&scopes) });
+        groups.push(TrendGroup {
+            key: key.into(),
+            label: label.into(),
+            series: series.iter().map(|l| l.to_string()).collect(),
+            points: points(&scopes),
+        });
     }
-    let form_scopes: Vec<String> = ["private", "deacon", "priest"].iter().map(|v| format!("prayer-form:{v}")).collect();
-    groups.push(TrendGroup {
-        key: "prayer-form".into(),
-        label: "Prayer form".into(),
-        series: vec!["Private".into(), "Deacon".into(), "Priest".into()],
-        points: points(&form_scopes),
-    });
     groups
 }
 
@@ -265,11 +316,7 @@ fn trend_json(groups: &[TrendGroup]) -> String {
 mod tests {
     use super::*;
 
-    const DIMENSIONS: [Dimension<'static>; 3] = [
-        Dimension { key: "appearance", values: &["nave", "apse"] },
-        Dimension { key: "screen", values: &["desktop", "mobile"] },
-        Dimension { key: "prayer-form", values: &["private", "deacon", "priest"] },
-    ];
+    use presentation::usage::{DIMENSIONS, PRAYER_FORMS};
 
     fn row(day: &str, users: i64) -> UsageDay {
         UsageDay { day: day.into(), users, ..UsageDay::default() }
@@ -290,10 +337,7 @@ mod tests {
         }
         let empty = usage_data(vec![row("2026-09-05", 0)], 7, None, &DIMENSIONS);
         assert!(empty.max == 0 && num(&empty.chart[0].height) == 0.0 && empty.peak_date.is_empty(), "empty report implies activity");
-    }
-
-    #[test]
-    fn dates_across_years() {
+        // A window reaching into last year names that year.
         let crossing = usage_data(vec![row("2026-01-02", 1), row("2025-12-31", 1)], 2, Some("2025-12-31"), &DIMENSIONS);
         assert_eq!((crossing.first_date.as_str(), crossing.last_date.as_str()), ("Dec 31, 2025", "Jan 2"));
     }
@@ -307,7 +351,7 @@ mod tests {
         ];
         let d = usage_data(rows, 3, Some("2026-09-03"), &DIMENSIONS);
         assert_eq!(
-            (d.daily_average.as_str(), d.complete_days, d.browser_days),
+            (d.week_average.as_str(), d.complete_days, d.browser_days),
             ("4.5", 2, 109),
             "average excludes today, includes zero days"
         );
@@ -318,7 +362,11 @@ mod tests {
         assert_eq!((d.ordo_total, d.reminders_total), (5, 1));
         for rows in [vec![], vec![row("2026-09-05", 0)]] {
             let d = usage_data(rows, 7, None, &DIMENSIONS);
-            assert_eq!((d.complete_days, d.daily_average.as_str(), d.browser_days), (0, "0.0", 0), "empty average");
+            assert_eq!(
+                (d.complete_days, d.week_days, d.week_note.as_str(), d.browser_days),
+                (0, 0, "No completed days yet", 0),
+                "empty average"
+            );
             assert!(d.office_totals.iter().all(|o| o.width == "0"), "empty office comparison");
         }
     }
@@ -327,23 +375,101 @@ mod tests {
     fn days_before_collection_are_absent_not_quiet() {
         let rows = vec![row("2026-09-05", 2), row("2026-09-04", 10), row("2026-09-03", 6), row("2026-09-02", 0), row("2026-09-01", 0)];
         let d = usage_data(rows, 5, Some("2026-09-03"), &DIMENSIONS);
-        assert_eq!((d.recorded_days, d.complete_days, d.daily_average.as_str()), (3, 2, "8.0"), "average spans recorded days");
+        assert_eq!((d.recorded_days, d.complete_days, d.week_average.as_str()), (3, 2, "8.0"), "average spans recorded days");
         assert_eq!((d.rows.len(), d.chart.len(), d.first_date.as_str(), d.since_date.as_str()), (3, 3, "Sep 3", "Sep 3"));
         assert_eq!((d.rows[0].label.as_str(), d.rows[0].weekday.as_str()), ("Sep 5", "Sat"));
-        assert_eq!(num(&d.average_top), 20.0, "average line");
+        assert!(d.rolling_path.is_empty(), "a seven-day line drawn from three days");
         let whole = usage_data(vec![row("2026-09-05", 2), row("2026-09-04", 10)], 2, Some("2026-08-01"), &DIMENSIONS);
         assert!(whole.since_date.is_empty() && whole.recorded_days == 2, "a fully recorded window names no start");
     }
 
+    // Newest first: today, then `completed` days counting back.
+    fn days(today: i64, completed: &[i64]) -> Vec<UsageDay> {
+        let start = Date::new(2026, 10, 6);
+        std::iter::once(today)
+            .chain(completed.iter().copied())
+            .enumerate()
+            .map(|(i, n)| row(&presentation::date_slug(start.add_days(-(i as i32))), n))
+            .collect()
+    }
+
+    #[test]
+    fn last_week_against_the_week_before() {
+        let week = |rows: Vec<UsageDay>| {
+            let d = usage_data(rows, 7, Some("2026-01-01"), &DIMENSIONS);
+            (d.week_average, d.week_note)
+        };
+        // The window is seven days, but the comparison reads the lookback past it.
+        let mut launch = vec![20; 7];
+        launch.extend([10; 7]);
+        assert_eq!(week(days(500, &launch)), ("20.0".into(), "A day, up 100% on the week before".into()), "today is never averaged");
+        let mut quieter = vec![9; 7];
+        quieter.extend([12; 7]);
+        assert_eq!(week(days(0, &quieter)).1, "A day, down 25% on the week before");
+        assert_eq!(week(days(0, &[5; 14])).1, "A day, level with the week before");
+        let mut first = vec![4; 7];
+        first.extend([0; 7]);
+        assert_eq!(week(days(0, &first)).1, "A day; none the week before");
+        assert_eq!(week(days(0, &[6; 9])), ("6.0".into(), "A day, over the last week".into()));
+        assert_eq!(week(days(0, &[3, 5])), ("4.0".into(), "A day, over 2 completed days".into()));
+    }
+
+    #[test]
+    fn new_readers_over_the_last_week() {
+        let mut rows = days(0, &[1; 9]);
+        for (i, n) in [(0, 5), (1, 2), (7, 3), (8, 40)] {
+            rows[i].dimensions.insert("visit:first".into(), n);
+        }
+        let d = usage_data(rows, 7, Some("2026-01-01"), &DIMENSIONS);
+        // Today is in progress; the eighth completed day is the week before.
+        assert_eq!((d.week_new, d.week_new_note.as_str()), (5, "First counted in the last 7 days"));
+        assert_eq!(d.rows.iter().map(|r| r.new_readers).collect::<Vec<_>>(), [5, 2, 0, 0, 0, 0, 0]);
+        let d = usage_data(days(0, &[1, 1]), 7, Some("2026-01-01"), &DIMENSIONS);
+        assert_eq!((d.week_new, d.week_new_note.as_str()), (0, "First counted in 2 completed days"));
+    }
+
+    #[test]
+    fn seven_day_line_follows_the_bars() {
+        // Thirty days of 7, then a step to 14: the line rises over the week after it.
+        let mut completed = vec![14; 7];
+        completed.extend([7; 30]);
+        let d = usage_data(days(1, &completed), 30, Some("2026-01-01"), &DIMENSIONS);
+        let points: Vec<(f64, f64)> = d
+            .rolling_path
+            .split(['M', 'L'])
+            .filter(|p| !p.trim().is_empty())
+            .map(|p| {
+                let mut xy = p.split_whitespace().map(num);
+                (xy.next().unwrap(), xy.next().unwrap())
+            })
+            .collect();
+        // Every completed day in the window has a full week behind it; today has no point.
+        assert_eq!(points.len(), 29);
+        assert!(points.windows(2).all(|w| w[0].0 < w[1].0), "line runs oldest to newest");
+        let y = |avg: f64| 160.0 - 160.0 * avg / 14.0;
+        assert_eq!(points[0].1, y(7.0));
+        assert_eq!(points[28].1, y(14.0));
+        let bar = &d.chart[28];
+        assert_eq!(points[28].0, num(&bar.x) + num(&bar.width) / 2.0, "a point sits over its day's bar");
+        assert!(d.rows.len() == 30 && d.chart.len() == 30, "lookback days are not shown");
+    }
+
     #[test]
     fn trends_keep_scope_counts_and_chronological_dates() {
-        let dimensions = [("appearance:nave", 4), ("appearance:apse", 5), ("screen:mobile", 8), ("prayer-form:priest", 2)]
-            .into_iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
+        let dimensions = [
+            ("appearance:nave", 4),
+            ("appearance:apse", 5),
+            ("screen:mobile", 8),
+            ("prayer-form:priest", 2),
+            ("client:ios", 3),
+            ("martyrology:hidden", 6),
+        ]
+        .into_iter()
+        .map(|(k, v)| (k.to_string(), v))
+        .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 3);
+        assert_eq!(groups.len(), 6);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
@@ -353,19 +479,29 @@ mod tests {
             );
             assert!(group.points[0].counts.iter().all(|&c| c == 0), "missing observations invented: {group:?}");
         }
-        assert_eq!((groups[0].points[1].counts[1], groups[1].points[1].counts[1], groups[2].points[1].counts[2]), (5, 8, 2));
+        assert_eq!(
+            (
+                groups[0].points[1].counts[1],
+                groups[1].points[1].counts[1],
+                groups[2].points[1].counts[2],
+                groups[3].points[1].counts[3],
+                groups[4].points[1].counts[1]
+            ),
+            (5, 8, 2, 3, 6)
+        );
     }
 
     #[test]
     fn trend_json_matches_browser_contract() {
-        let groups = trend_groups(&[row("2026-09-14", 0)], &DIMENSIONS[..1]);
+        let some = [Dimension { key: "appearance", values: &["nave", "apse"] }, Dimension { key: "prayer-form", values: PRAYER_FORMS }];
+        let groups = trend_groups(&[row("2026-09-14", 0)], &some);
         assert_eq!(
             trend_json(&groups),
             r#"[{"Key":"appearance","Label":"Appearance","Series":["Nave","Apse"],"Points":[{"Day":"2026-09-14","Counts":[0,0]}]},{"Key":"prayer-form","Label":"Prayer form","Series":["Private","Deacon","Priest"],"Points":[{"Day":"2026-09-14","Counts":[0,0,0]}]}]"#
         );
         assert_eq!(
-            trend_json(&trend_groups(&[], &[])),
-            r#"[{"Key":"prayer-form","Label":"Prayer form","Series":["Private","Deacon","Priest"],"Points":null}]"#
+            trend_json(&trend_groups(&[], &DIMENSIONS[3..4])),
+            r#"[{"Key":"client","Label":"Client","Series":["Browser","Web app","Android","iOS"],"Points":null}]"#
         );
     }
 }

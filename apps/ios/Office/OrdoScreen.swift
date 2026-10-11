@@ -5,10 +5,11 @@ struct OrdoPage: View {
     let year: Int
     let month: Int
     let day: Int
+    @EnvironmentObject private var model: AppModel
 
     var body: some View {
         let (y, mo) = (year, month)
-        Loaded(key: "\(y)-\(mo)") {
+        Loaded(key: "\(y)-\(mo)", motion: model.motion(to: .ordo(year: y, month: mo, day: day))) {
             try Office.core.get().ordoMonth(year: Int32(y), month: Int32(mo))
         } content: { view in
             OrdoScreen(month: view, focusDay: day)
@@ -21,11 +22,19 @@ struct OrdoPage: View {
 /// A year's frontispiece: arithmetic, drawn at once.
 struct YearPage: View {
     let year: Int
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        OrdoYearScreen(view: ordoYear(year: Int32(year)))
-            .background(PlasterWall())
-            .toolbar(.hidden, for: .navigationBar)
+        // Drawn at once, so another year moves in as soon as it is asked for.
+        ZStack {
+            OrdoYearScreen(view: ordoYear(year: Int32(year)))
+                .id(year)
+                .transition(inPlace(model.motion(to: .year(year)), reduceMotion: reduceMotion))
+        }
+        .animation(.easeInOut(duration: 0.3), value: year)
+        .background(PlasterWall())
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
@@ -61,6 +70,7 @@ struct OrdoScreen: View {
                     SiteHeader().id("top")
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
+                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(5.6))
                     MonthHeading(name: monthName(number), isTodaysMonth: Int(model.today.year) == year && Int(model.today.month) == number) {
                         withAnimation { scroll.scrollTo("top", anchor: .top) }
                     }
@@ -100,6 +110,26 @@ struct OrdoScreen: View {
         }
     }
 
+    /// The ranks spelled out, each abbreviation in its days' ink, as the web's key: a phone has no titles to hover.
+    private static let rankNames = [
+        ("1cl", "first class"), ("2cl", "second class"), ("gd", "greater double"), ("d", "double"),
+        ("sd", "semi-double"), ("s", "simple"), ("f2", "privileged feria"),
+    ]
+
+    private var rankKey: some View {
+        // No-break spaces keep each abbreviation with its name when the line wraps.
+        let key = Self.rankNames.enumerated().reduce(Text("")) { line, entry in
+            let (i, (abbr, name)) = entry
+            let ink: Color = ["1cl", "2cl", "gd"].contains(abbr) ? p.rubric : abbr == "d" ? p.kalendarBlue : p.text
+            return line + Text(i > 0 ? " · " : "") + Text(abbr).foregroundColor(ink)
+                + Text("\u{00A0}" + name.replacingOccurrences(of: " ", with: "\u{00A0}"))
+        }
+        return key.type(Scale.small.sized(12, line: 17.4)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Ranks: " + Self.rankNames.map(\.1).joined(separator: ", "))
+    }
+
     private var tools: some View {
         let small = Scale.small.sized(12, line: 17.4)
         return HStack(spacing: 0) {
@@ -111,7 +141,7 @@ struct OrdoScreen: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Section mark: fasting. Fish: abstinence.")
             Spacer()
-            Button { allDetails.toggle() } label: {
+            Button { withAnimation(unfolding) { allDetails.toggle() } } label: {
                 Text(allDetails ? "Hide office details" : "Show office details").type(Scale.small).foregroundStyle(p.accent).underline()
                     .padding(.vertical, m.px(12))
             }
@@ -145,7 +175,7 @@ private struct OrdoHeader: View {
                     Spacer(minLength: 32)
                     yearNav
                 }
-                .padding(.top, m.px(13.4))
+                .padding(.top, m.px(10.4))
                 .padding(.bottom, m.px(16))
                 .background(rules)
                 strip.overlay(alignment: .bottom) { Rectangle().fill(p.border).frame(height: 1) }
@@ -157,18 +187,15 @@ private struct OrdoHeader: View {
                 Hairline(color: p.border).padding(.top, m.px(8))
                 strip
             }
-            .padding(.top, m.px(13.4))
+            .padding(.top, m.px(10.4))
             .padding(.bottom, m.px(16))
             .background(rules)
         }
     }
 
-    /// The frontispiece's double rule above, a hairline below.
+    /// The frontispiece's hairline below; it opens as the hours do, with its headpiece alone and no rule above.
     private var rules: some View {
         VStack(spacing: 0) {
-            Rectangle().fill(p.goldLine).frame(height: 1)
-            Spacer().frame(height: 1)
-            Rectangle().fill(p.goldLine).frame(height: 1)
             Spacer()
             Rectangle().fill(p.border).frame(height: 1)
         }
@@ -263,7 +290,7 @@ private struct OrdoHeader: View {
     }
 }
 
-/// A month's name in small capitals over the ornament's double rule; the way back to the top.
+/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule; the way back to the top.
 private struct MonthHeading: View {
     let name: String
     let isTodaysMonth: Bool
@@ -274,7 +301,7 @@ private struct MonthHeading: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(name).type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.accent)
+            Text(name).type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityAddTraits(.isHeader)
             Button(action: top) {
@@ -284,14 +311,19 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
-        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4 : nil, ring: nil) }
+        // Today's month takes the lozenge: a 6pt square of the lining's terracotta, ringed in the ground.
+        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4.24 : nil, ring: p.bg, ink: p.lining) }
     }
 }
 
-/// The ornament's double rule along a heading's foot, with a lozenge at its centre, ringed in the ground where `ring`.
+/**
+ * The ornament's double rule along a heading's foot, with a lozenge at its centre in the gilding
+ * or `ink`, ringed in the ground where `ring`.
+ */
 private struct OrnamentRule: View {
     let lozengeSize: CGFloat?
     let ring: Color?
+    var ink: Color?
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
@@ -304,8 +336,10 @@ private struct OrnamentRule: View {
                 ctx.stroke(line, with: .color(o.line), lineWidth: 1)
             }
             let c = CGPoint(x: size.width / 2, y: size.height - 1.5)
-            if let ring { ctx.fill(lozenge(c, m.px(4.5)), with: .color(ring)) }
-            if let lozengeSize { ctx.fill(lozenge(c, m.px(lozengeSize)), with: .color(o.flat)) }
+            if let lozengeSize {
+                if let ring { ctx.fill(lozenge(c, m.px(lozengeSize + 2)), with: .color(ring)) }
+                ctx.fill(lozenge(c, m.px(lozengeSize)), with: .color(ink ?? o.flat))
+            }
         }
         .frame(height: 12)
         .offset(y: 4.5)
@@ -348,28 +382,74 @@ private struct DayRow: View {
 
     private func openDay() { model.open(.home(d.date)) }
 
-    @ViewBuilder private var disclosures: some View {
+    /// A day's rank is its ink, as in a Book of Hours: the great feasts red-letter, doubles slate blue, lesser days black.
+    private var rankInk: Color? {
+        switch d.rank {
+        case "1cl", "2cl", "gd": return p.rubric
+        case "d": return p.kalendarBlue
+        default: return nil
+        }
+    }
+
+    /// The feast's name in its rank's ink, a first-class feast's with a small painted cross before it;
+    /// `fill` takes the column's width, else the name's own, wrapped to what it is given.
+    private func feastName(_ style: TextStyle, fill: Bool = true) -> some View {
+        let em = style.size * m.type
+        return HStack(alignment: .firstTextBaseline, spacing: 0) {
+            if d.rank == "1cl" {
+                PaintedMark(.cross, size: em * 0.62, color: p.lining).padding(.trailing, em * 0.32)
+            }
+            Text(d.feast).type(style).foregroundStyle(rankInk ?? p.text).multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
+    }
+
+    /// The ordo's bracketed line for an observance kept by monastics and oblates only (the web's
+    /// `.day-monastic`): quiet like a commemoration, never read as the day.
+    @ViewBuilder private var monastic: some View {
+        let style = TextStyle(size: 13.6, line: 20.4, italic: true)
+        ForEach(d.monastic, id: \.heading) { o in
+            Text("[\(o.heading)] \(o.rank)").type(style).foregroundStyle(p.muted).padding(.top, m.px(2.4))
+            if !o.office.isEmpty { Text(o.office).type(style).foregroundStyle(p.muted) }
+        }
+    }
+
+    private var anyOpen: Bool { comms || ((details ?? allDetails) && hasDetails) }
+
+    /// The disclosures' buttons: the commemorations' count and "Office details".
+    private var disclosureButtons: some View {
         let open = details ?? allDetails
-        HStack(spacing: m.px(9.6)) {
+        return HStack(spacing: m.px(9.6)) {
             if !d.commemorations.isEmpty {
                 let n = d.commemorations.count
-                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { comms.toggle() }
+                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { withAnimation(unfolding) { comms.toggle() } }
             }
-            if hasDetails { small("Office details", open) { details = !open } }
+            if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
         }
+    }
+
+    @ViewBuilder private var disclosures: some View {
+        disclosureButtons
+        disclosed
+    }
+
+    /// What the open disclosures unfold: the commemorations, and the office digest.
+    @ViewBuilder private var disclosed: some View {
+        let open = details ?? allDetails
         if comms {
             ForEach(d.commemorations, id: \.self) { c in
                 Text(c).type(TextStyle(size: 13.6, line: 20.4, italic: true)).foregroundStyle(p.muted)
             }
+            .transition(.unfold)
         }
-        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers) }
+        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
     }
 
     private func small(_ label: String, _ open: Bool, toggle: @escaping () -> Void) -> some View {
         Button(action: toggle) {
             HStack(spacing: 0) {
                 Text(label).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted)
-                Caret(open: open)
+                Caret(open: open, color: p.muted)
             }
             .frame(minHeight: 44)
         }
@@ -384,7 +464,7 @@ private struct DayRow: View {
                 Rectangle().fill(dayColor(d.color)).frame(width: 3, height: m.px(40))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
-                        Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(p.accent)
+                        Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
                         Text(d.weekday.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 16.8)).foregroundStyle(p.muted)
                         if isToday { Text("Today").type(Scale.small.sized(11, line: 14)).foregroundStyle(p.accent) }
                     }
@@ -397,22 +477,23 @@ private struct DayRow: View {
                     HStack(alignment: .top, spacing: 0) {
                         // The date's stop already says the feast; the feast is a second target for the eye only.
                         Button(action: openDay) {
-                            Text(d.feast).type(Scale.body.sized(16, line: 21.6)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            feastName(Scale.body.sized(16, line: 21.6))
                         }
                         .buttonStyle(Quiet())
                         .accessibilityHidden(true)
+                        // The card's marks stay quiet, as the web's: red in a row means rank.
                         HStack(spacing: m.px(6)) {
                             if d.fast { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) }
                             if d.abstinence { FishIcon(color: p.muted) }
                             if !d.rank.isEmpty {
-                                Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted).goldUnderline(true, p.goldLine)
+                                Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted)
                             }
                         }
                         .padding(.leading, m.px(8))
                         .padding(.top, m.px(2))
                         .accessibilityHidden(true)
                     }
+                    monastic
                     disclosures
                 }
             }
@@ -420,7 +501,8 @@ private struct DayRow: View {
             .padding(.bottom, m.px(6.4))
             Hairline(color: p.border)
         }
-        .background(isToday ? p.pressedWash : .clear)
+        // Today is painted, not selected: inset 8pt from the gutters.
+        .background { if isToday { TodayBand(inset: 8) } }
     }
 
     private var table: some View {
@@ -428,7 +510,7 @@ private struct DayRow: View {
             HStack(alignment: .top, spacing: 0) {
                 Button(action: openDay) {
                     VStack(spacing: 0) {
-                        Text("\(d.date.day)").type(TextStyle(size: 19.2, line: 23, lining: true)).foregroundStyle(p.accent)
+                        Text("\(d.date.day)").type(TextStyle(size: 19.2, line: 23, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
                         if isToday { Text("Today").type(Scale.small.sized(11.2, line: 15.7)).foregroundStyle(p.accent) }
                     }
                     .padding(.leading, dayColumnPad)
@@ -444,38 +526,76 @@ private struct DayRow: View {
                     .frame(width: weekColumn, alignment: .leading)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
-                    Button(action: openDay) {
-                        Text(d.feast).type(Scale.body.sized(16, line: 22.4)).foregroundStyle(p.text).multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    // The disclosures share the feast's line, 1.25rem after the name (the web's
+                    // inline `.day-disclosures` from 701px), so a month reads as one line per
+                    // day; one that is open drops below the name at the column's full width.
+                    let name = Scale.body.sized(16, line: 22.4)
+                    // A bracketed line sits under the name, so the disclosures drop below it as on the web.
+                    if anyOpen || !d.monastic.isEmpty {
+                        Button(action: openDay) { feastName(name) }
+                            .buttonStyle(Quiet())
+                            .accessibilityHidden(true)
+                        monastic
+                        disclosureButtons
+                    } else {
+                        HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
+                            Button(action: openDay) { feastName(name, fill: false) }
+                                .buttonStyle(Quiet())
+                                .accessibilityHidden(true)
+                                .layoutPriority(1)
+                            disclosureButtons.fixedSize()
+                            Spacer(minLength: 0)
+                        }
                     }
-                    .buttonStyle(Quiet())
-                    .accessibilityHidden(true)
-                    disclosures
+                    disclosed
                 }
                 .padding(.horizontal, 7.2)
+                // Fasting and abstinence stay quiet, so red in a row means rank.
                 Group {
-                    if d.fast { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.rubric) }
+                    if d.fast { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.muted) }
                 }
                 .frame(width: flagColumn)
                 .accessibilityHidden(true)
                 Group {
-                    if d.abstinence { FishIcon(color: p.rubric).padding(.top, 6) }
+                    if d.abstinence { FishIcon(color: p.muted).padding(.top, 6) }
                 }
                 .frame(width: flagColumn)
                 .accessibilityHidden(true)
+                // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
                 Group {
-                    if !d.rank.isEmpty { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(p.text).goldUnderline(true, p.goldLine) }
+                    if !d.rank.isEmpty { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(rankInk ?? p.text) }
                 }
                 .padding(.trailing, 7.2).padding(.top, 3)
                 .frame(width: rankColumn, alignment: .trailing)
                 .accessibilityHidden(true)
             }
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 10.4)
-            .padding(.bottom, 7.2)
+            // The web's `.month-table td`: 0.5rem above and below, from 701px.
+            .padding(.vertical, 8)
             Hairline(color: p.border)
         }
-        .background(isToday ? p.gold.opacity(0.06) : .clear)
+        // Today is painted, not selected: the band runs on across the row.
+        .background { if isToday { TodayBand(inset: 0) } }
+    }
+}
+
+/**
+ * Today in the ordo: a ground of the frieze's wash ruled top and bottom in the gold line, above the
+ * row's hairline, `inset` from its sides.
+ */
+private struct TodayBand: View {
+    let inset: CGFloat
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(p.goldLine).frame(height: 1)
+            Rectangle().fill(p.inscriptionWash)
+            Rectangle().fill(p.goldLine).frame(height: 1)
+        }
+        .padding(.horizontal, inset)
+        .padding(.bottom, 1)
+        .accessibilityHidden(true)
     }
 }
 
@@ -597,13 +717,13 @@ struct OrdoYearScreen: View {
     }
 }
 
-/// "Tabula Temporaria" in small capitals over the ornament's double rule, its lozenge at the centre.
+/// "Tabula Temporaria", a titulus in small capitals over the ornament's double rule, its lozenge at the centre.
 private struct TabulaHeading: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.accent)
+        Text("Tabula Temporaria").type(TextStyle(size: 21.6, line: 28, tracking: 1.3, smallCaps: true)).foregroundStyle(p.titulus)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, m.px(6.4))
             // Ringed in the page's ground, as the web's box-shadow parts the rules around it.
@@ -612,7 +732,12 @@ private struct TabulaHeading: View {
     }
 }
 
-/// The year's four figures, `perRow` to a row: the numeral large in the accent, its name beneath.
+/**
+ * The year's four figures, `perRow` to a row, on a painted tablet: the surface thinned so the wall
+ * shows through, framed in the lining ruled twice (a thinner line 3pt inside the first), with a
+ * quatrefoil knop at each corner where the rules stop short. Each numeral large in the accent, its
+ * name beneath.
+ */
 private struct Figures: View {
     let figures: [TabulaRowView]
     let perRow: Int
@@ -636,6 +761,40 @@ private struct Figures: View {
                 }
             }
         }
+        .padding(.horizontal, m.px(6.4))
+        .padding(.top, m.px(17.6))
+        .padding(.bottom, m.px(16))
+        .background(p.surface.opacity(0.6))
+        .overlay { TabletFrame() }
+    }
+}
+
+/// The tablet's frame: two rules each side, stopping short of the corners, where the knops sit.
+private struct TabletFrame: View {
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let knop = m.px(14)
+        ZStack {
+            Canvas { ctx, size in
+                for (inset, ink) in [(CGFloat(0), p.lining), (3, p.lining.opacity(0.4))] {
+                    let a = inset + 0.5
+                    var rule = Path()
+                    rule.move(to: CGPoint(x: knop, y: a)); rule.addLine(to: CGPoint(x: size.width - knop, y: a))
+                    rule.move(to: CGPoint(x: knop, y: size.height - a)); rule.addLine(to: CGPoint(x: size.width - knop, y: size.height - a))
+                    rule.move(to: CGPoint(x: a, y: knop)); rule.addLine(to: CGPoint(x: a, y: size.height - knop))
+                    rule.move(to: CGPoint(x: size.width - a, y: knop)); rule.addLine(to: CGPoint(x: size.width - a, y: size.height - knop))
+                    ctx.stroke(rule, with: .color(ink), lineWidth: 1)
+                }
+            }
+            let corners: [Alignment] = [.topLeading, .topTrailing, .bottomLeading, .bottomTrailing]
+            ForEach(0..<corners.count, id: \.self) { i in
+                PaintedMark(.quatrefoil, size: knop, color: p.lining).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: corners[i])
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

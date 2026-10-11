@@ -5,18 +5,23 @@
 //!
 //! Every run of display text passes through the same typography as the web and the booklet.
 
+pub mod initials;
+
+pub use initials::{InitialFit, initial_fit, initial_size};
+
 use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, VoiceRole, VoiceSpan, posture_cues_at};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BlockKind {
     /// A section or item heading ("Hymn", "Chapter", a section's label).
     Heading,
-    /// A commemoration heading: a `Kicker` run, then the feast's name.
+    /// A commemoration heading: a `Kicker` run, a `Break`, then the feast's name on its own line
+    /// (the web's block-level `.commemoration-kicker`).
     CommemorationHeading,
     /// A psalm or canticle label, its Latin incipit as a `Latin` run.
     ItemLabel,
@@ -30,10 +35,23 @@ pub enum BlockKind {
     CanticleSection,
     /// Rubric text, red except for `Prayed` runs.
     Rubric,
+    /// A rubric that annotates the antiphon above it (a psalm's opening words
+    /// that the antiphon has just said are not repeated): set as a rubric,
+    /// close under the antiphon's words, past its marker.
+    AntiphonNote,
+    /// The same note under an announced antiphon: centred beneath its words,
+    /// as the web's `.antiphon-announce + .unrepeated-note`.
+    AnnouncementNote,
     /// An antiphon; the marker is "Ant.".
     Antiphon,
+    /// An antiphon only announced before its psalm (its opening words): set
+    /// centred over the psalm's label, as the web's `.antiphon-announce`.
+    AnnouncedAntiphon,
     /// A pointed psalm or canticle verse; the marker is its printed number, if any.
     Verse,
+    /// The Gloria Patri after a psalm: two pointed lines separated by a `Break`
+    /// run, set on the verses' edge, each line's wrap hanging beneath its start.
+    GloriaPatri,
     /// Prose, or preserved lines separated by `Break` runs.
     Paragraph,
     /// A sung line of a Marian antiphon.
@@ -48,6 +66,9 @@ pub enum BlockKind {
     Speaker,
     /// A hymn stanza, its lines separated by `Break` runs.
     Stanza,
+    /// A rubric among a hymn's stanzas ("The following stanza is said
+    /// kneeling."), centred in the hymn's column, as the web's `.hymn-rubric`.
+    HymnRubric,
     /// Vertical space between groups of lines; it has no runs.
     Gap,
 }
@@ -62,7 +83,8 @@ pub enum RunStyle {
     Cross,
     /// Words quoted in a rubric for recitation, set as prayer, not rubric.
     Prayed,
-    /// Words said silently.
+    /// Words not said aloud: a secret prayer's silent part, or a psalm's
+    /// opening words that its antiphon has just said. Set in the `unsaid` tone.
     Secret,
     /// A Latin title or incipit.
     Latin,
@@ -72,6 +94,12 @@ pub enum RunStyle {
     Posture,
     /// A preserved line break; its text is "\n".
     Break,
+    /// A psalm's numbers in its small-caps label ("66 (67)"), set in lining
+    /// figures out of small caps, as the web's `.psalm-num`.
+    Numeral,
+    /// The Hebrew number beside it ("(67)"), muted and a little smaller, as the
+    /// web's `.psalm-heb`.
+    HebrewNumeral,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -180,7 +208,7 @@ pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return Block::new(
             BlockKind::CommemorationHeading,
-            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new(" ", RunStyle::Plain), Run::new(typeset(name), RunStyle::Plain)],
+            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new("\n", RunStyle::Break), Run::new(typeset(name), RunStyle::Plain)],
         );
     }
     Block::new(BlockKind::Heading, text_runs(label))
@@ -193,22 +221,37 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::OpeningAcclamation => out.push(Block::new(BlockKind::Paragraph, chant_runs(&elem.text))),
         ElementType::Antiphon => {
             if elem.label.is_empty() {
-                out.push(Block::marked(BlockKind::Antiphon, "Ant.", chant_runs(&elem.display_text())));
+                let kind = if elem.announce { BlockKind::AnnouncedAntiphon } else { BlockKind::Antiphon };
+                out.push(Block::marked(kind, "Ant.", chant_runs(&elem.display_text())));
             } else {
                 out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
                 marian_antiphon(out, &elem.text);
             }
         }
         ElementType::Psalm | ElementType::Canticle => {
+            let unrepeated = elem.unrepeated_rubric();
+            if !unrepeated.is_empty() {
+                let announced = out.last().is_some_and(|b| b.kind == BlockKind::AnnouncedAntiphon);
+                let kind = if announced { BlockKind::AnnouncementNote } else { BlockKind::AntiphonNote };
+                out.push(Block { kind, ..rubric_block(&unrepeated) });
+            }
             if !elem.label.is_empty() {
-                let mut runs = text_runs(&elem.label);
+                let mut runs = match elem.psalm_label_parts() {
+                    Some((word, greek, "")) => vec![Run::new(word, RunStyle::Plain), Run::new(typeset(greek), RunStyle::Numeral)],
+                    Some((word, greek, hebrew)) => vec![
+                        Run::new(word, RunStyle::Plain),
+                        Run::new(format!("{}\u{a0}", typeset(greek)), RunStyle::Numeral),
+                        Run::new(typeset(hebrew), RunStyle::HebrewNumeral),
+                    ],
+                    None => text_runs(&elem.label),
+                };
                 if !elem.incipit.is_empty() {
                     runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
                     runs.push(Run::new(typeset(&elem.incipit), RunStyle::Latin));
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
-            psalm_verses(out, &elem.text, &elem.postures);
+            psalm_verses(out, &elem.text, &elem.postures, elem.unrepeated.as_ref().map_or(0, |u| u.words));
             if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
                 out.push(gloria_patri(&doxology.text, &doxology.postures));
             }
@@ -228,11 +271,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
             liturgical_block(out, &elem.text, Mode::PreserveLines, true);
             mark_opening(out, start, |b| b.kind == BlockKind::Response && b.marker.is_empty());
         }
-        ElementType::CorporateLordPrayer => {
-            let start = out.len();
-            corporate_lord_prayer(out, elem);
-            mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
-        }
+        ElementType::CorporateLordPrayer => corporate_lord_prayer(out, elem),
         ElementType::Collect => {
             if elem.voice.is_empty() {
                 let start = out.len();
@@ -329,8 +368,12 @@ fn rubric(elem: &OfficeElement) -> Block {
     if elem.rubric_spans.is_empty() {
         return Block::new(BlockKind::Rubric, text_runs(&elem.text));
     }
+    rubric_block(&elem.rubric_spans)
+}
+
+fn rubric_block(spans: &[RubricSpan]) -> Block {
     let mut runs = Vec::new();
-    for span in &elem.rubric_spans {
+    for span in spans {
         if span.prayed {
             runs.extend(cross_runs(&span.text, RunStyle::Prayed));
         } else {
@@ -348,8 +391,22 @@ fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
     }
 }
 
+/// Runs of a half-verse, its first `words` words muted as not said; returns
+/// the words still to mute.
+fn push_unrepeated(runs: &mut Vec<Run>, s: &str, words: usize) -> usize {
+    let (unsaid, rest, taken) = split_words(s, words);
+    if !unsaid.is_empty() {
+        runs.extend(cross_runs(unsaid, RunStyle::Secret));
+    }
+    if !rest.is_empty() {
+        runs.extend(cross_runs(rest, RunStyle::Plain));
+    }
+    words - taken
+}
+
 /// A psalm or canticle: any scripture reference, then its verses, with posture cues at their anchors.
-fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue]) {
+/// The first `unrepeated` words, which the antiphon has just said, are muted.
+fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue], mut unrepeated: usize) {
     let psalm = parse_psalm(text);
     if !psalm.scripture_ref.is_empty() {
         out.push(Block::new(BlockKind::ScriptureRef, text_runs(&psalm.scripture_ref)));
@@ -377,13 +434,13 @@ fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue]) {
                 let first = if drop_cap { soften_drop_cap_opening(first) } else { first.clone() };
                 let mut runs = Vec::new();
                 push_postures(&mut runs, postures, PostureAnchor::BeforeVerse(verse));
-                runs.extend(cross_runs(&first, RunStyle::Plain));
+                unrepeated = push_unrepeated(&mut runs, &first, unrepeated);
                 let mut after_mediant = Vec::new();
                 push_postures(&mut after_mediant, postures, PostureAnchor::AfterMediant(verse));
                 if !second.is_empty() {
                     push_mediant(&mut runs, true);
                     runs.extend(after_mediant);
-                    runs.extend(cross_runs(second, RunStyle::Plain));
+                    unrepeated = push_unrepeated(&mut runs, second, unrepeated);
                 } else if !after_mediant.is_empty() {
                     // Without a mediant the cue ends the verse.
                     after_mediant.pop();
@@ -586,23 +643,24 @@ fn marian_antiphon(out: &mut Vec<Block>, text: &str) {
 }
 
 /// The corporate Lord's Prayer, split between officiant and people; any
-/// incomplete partition falls back to an ordinary prayer.
+/// incomplete partition falls back to an ordinary prayer. Said in secret up
+/// to a versicle, it is a voiced block with no initial.
 fn corporate_lord_prayer(out: &mut Vec<Block>, elem: &OfficeElement) {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
-    }
-    if officiant.is_empty() || response.is_empty() {
+    let start = out.len();
+    let Some(parts) = elem.lord_prayer_parts() else {
         liturgical_block(out, &elem.text, Mode::Flow, false);
+        mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
+        return;
+    };
+    if parts.versicle.is_some() {
+        voice_block(out, &parts.voiced(), Mode::Flow);
         return;
     }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     out.push(Block::new(BlockKind::Paragraph, chant_runs(&flow(&officiant))));
-    out.push(Block::marked(BlockKind::Response, "℟.", chant_runs(&flow(&response))));
+    out.push(Block::marked(BlockKind::Response, "℟.", chant_runs(&flow(&parts.response))));
+    mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
 }
 
 /// A hymn: one block per stanza, a standalone Amen folded into the stanza before it.
@@ -610,7 +668,7 @@ fn hymn_stanzas(out: &mut Vec<Block>, text: &str) {
     let hymn = parse_hymn(text);
     if !hymn.title.is_empty() {
         match hymn_rubric_text(&hymn.title) {
-            Some(r) => out.push(Block::new(BlockKind::Rubric, text_runs(r))),
+            Some(r) => out.push(Block::new(BlockKind::HymnRubric, text_runs(r))),
             None => out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&hymn.title, RunStyle::Latin))),
         }
     }
@@ -620,7 +678,7 @@ fn hymn_stanzas(out: &mut Vec<Block>, text: &str) {
             continue;
         }
         if let Some(rubrics) = hymn_rubric_stanza(stanza) {
-            out.extend(rubrics.into_iter().map(|r| Block::new(BlockKind::Rubric, text_runs(r))));
+            out.extend(rubrics.into_iter().map(|r| Block::new(BlockKind::HymnRubric, text_runs(r))));
             continue;
         }
         let mut runs = join_lines(stanza.iter().map(|l| cross_runs(l, RunStyle::Plain)), true);
@@ -650,7 +708,7 @@ fn gloria_patri(text: &str, postures: &[PostureCue]) -> Block {
         runs
     };
     let runs = if second.is_empty() { cued(0, first) } else { join_lines([cued(0, first), cued(1, second)], true) };
-    Block::new(BlockKind::Paragraph, runs)
+    Block::new(BlockKind::GloriaPatri, runs)
 }
 
 #[cfg(test)]

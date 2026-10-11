@@ -1,6 +1,6 @@
 VESPERS
 Saturday, January 3, 2026
-Holy Name of Jesus
+Most Holy Name of Jesus
 Season: christmas | Color: white
 ============================================================
 
@@ -40,7 +40,7 @@ Alleluia
 
 Whosoever * shall call on the Name of the Lord shall be saved.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ Whosoever * shall call on the Name of the Lord shall be saved.
 
 Holy and reverend * is his Name: the fear of the Lord is the beginning of wisdom.
 
---- Psalm 111 · Confitebor tibi, Domine ---
+--- Psalm 110 (111) · Confitebor tibi, Domine ---
 Psalm 111
 
 I WILL give thanks unto the Lord with my whole heart * [Sit.] secretly among the faithful, and in the congregation.
@@ -79,7 +79,7 @@ Holy and reverend * is his Name: the fear of the Lord is the beginning of wisdom
 
 Yet I will * rejoice in the Lord, I will joy in God my Jesus.
 
---- Psalm 112 · Beatus vir, qui timet Dominum ---
+--- Psalm 111 (112) · Beatus vir, qui timet Dominum ---
 Psalm 112
 
 BLESSED is the man that feareth the Lord * [Sit.] he hath great delight in his commandments.
@@ -100,7 +100,7 @@ Yet I will * rejoice in the Lord, I will joy in God my Jesus.
 
 From the rising of the sun * even unto the going down of the same, the Lord's Name be praised.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -188,7 +188,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -198,31 +198,6 @@ Let us pray.
 O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst bid that he be called Jesus: mercifully grant that we, who reverence his holy Name on earth, may also be filled with the joy of beholding him in heaven.
 Through the same thy Son Jesus Christ our Lord, who with thee in the unity of
 the Holy Spirit, liveth and reigneth God, world without end.
-R. Amen.
-
-Commemoration of Octave Day of the Holy Innocents
-
-These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
-
-V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion of the works of thy hands.
-
-Let us pray.
-
-O God, whose praise the Martyr Innocents confessed this day, not by speaking but by dying: mortify in us all the evils of vice, that our life may shew forth in deeds that faith in thee which our lips profess.
-
-Commemoration of St Titus, Bishop & Confessor
-
-O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of the people, pray unto the Lord for us.
-
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
-
-Let us pray.
-
-O God, who didst adorn blessed Titus, thy Bishop and Confessor, with the signs of an Apostle: grant that through his merits and intercession, we may live soberly, righteously, and godly, in this present world; and be made meet hereafter to come unto the heavenly country.
-Through thy Son Jesus Christ our Lord, who with thee in the unity of the Holy
-Spirit, liveth and reigneth God, world without end.
 R. Amen.
 
 V. O Lord, hear my prayer.
@@ -267,8 +242,8 @@ R. Amen.
 V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

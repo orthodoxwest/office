@@ -1,6 +1,6 @@
 LAUDS
 Monday, April 13, 2026
-Easter Monday
+Monday in Easter Week
 Season: easter | Color: white
 ============================================================
 
@@ -38,7 +38,7 @@ As it was in the beginning, is now, and ever shall be, * world without end. Amen
 
 Alleluia
 
---- Psalm 67 · Deus misereatur nostri ---
+--- Psalm 66 (67) · Deus misereatur nostri ---
 Psalm 67
 
 GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his countenance, and be merciful unto us:
@@ -54,7 +54,7 @@ GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his coun
 
 The Angel of the Lord * descended from heaven, and came and rolled back the stone from the door, and sat upon it, alleluia, alleluia.
 
---- Psalm 93 · Dominus regnavit, decorem indutus est ---
+--- Psalm 92 (93) · Dominus regnavit, decorem indutus est ---
 Psalm 93
 
 THE Lord is King, and hath put on glorious apparel * [Sit.] the Lord hath put on his apparel, and girded himself with strength.
@@ -71,7 +71,7 @@ The Angel of the Lord * descended from heaven, and came and rolled back the ston
 
 And behold, * there was a great earthquake: for the Angel of the Lord descended from heaven, alleluia.
 
---- Psalm 100 · Jubilate Deo, omnis terra ---
+--- Psalm 99 (100) · Jubilate Deo, omnis terra ---
 Psalm 100
 
 O BE joyful in the Lord, all ye lands * [Sit.] serve the Lord with gladness, and come before his presence with a song.
@@ -86,7 +86,7 @@ And behold, * there was a great earthquake: for the Angel of the Lord descended 
 
 His countenance * was like lightning, and his raiment white as snow, alleluia, alleluia.
 
---- Psalm 63 · Deus, Deus meus, ad te ---
+--- Psalm 62 (63) · Deus, Deus meus, ad te ---
 Psalm 63
 
 O GOD, thou art my God * [Sit.] early will I seek thee.
@@ -182,8 +182,8 @@ O PRAISE God in his holiness * praise him in the firmament of his power.
 
 And the Angel answered and said * unto the women, Fear not ye, for I know that ye seek Jesus, alleluia.
 
---- Rom 6:9-10 ---
-Christ being raised from the dead dieth no more; death hath no more dominion over him. For in that he died, he died unto sin once: but in that he liveth, he liveth unto God.
+--- I Cor. 5:7 ---
+Brethren: Purge out therefore the old leaven, * that ye may be a new lump, as ye are unleavened. * For even Christ our passover is sacrificed for us. *
 R. Thanks be to God.
 
 R. The Lord is risen from the tomb, alleluia, alleluia.
@@ -226,8 +226,8 @@ To Father and to Paraclete.
 
 Amen.
 
-V. In thy resurrection, O Christ, alleluia.
-R. Let heaven and earth rejoice, alleluia.
+V. This is the day which the Lord hath made, alleluia.
+R. We will rejoice and be glad in it, alleluia.
 
 Jesus himself * drew near to his disciples in the way, and went with them: but their eyes were holden that they should not know him: and he rebuked them, saying, O fools and slow of heart to believe all that the prophets have spoken, alleluia.
 
@@ -261,7 +261,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -276,8 +276,8 @@ R. Amen.
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
 
-V. Let us bless the Lord.
-R. Thanks be to God.
+V. Let us bless the Lord, alleluia, alleluia.
+R. Thanks be to God, alleluia, alleluia.
 
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
@@ -314,8 +314,8 @@ R. Amen.
 V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
-To the holy and undivided Trinity, to the crucified Humanity of our Lord Jesus Christ,
-to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
+To the holy and undivided Trinity, to the humanity of our crucified Lord,
+Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,
 and to the whole company of the Saints, be everlasting praise, honour, power,
 and glory from every creature, and unto us the remission of all our sins for ever,
 world without end.

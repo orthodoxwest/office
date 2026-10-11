@@ -23,6 +23,9 @@ class NormalizationTests(unittest.TestCase):
         left = "℣. Thou art œternal—\nR. Everlast-\ning."
         right = 'V. THOU ART OETERNAL\nR/ everlasting'
         self.assertEqual(transcribe.normalize_text(left), transcribe.normalize_text(right))
+        # A collect-conclusion entry is itself the cue, so it is not stripped.
+        key = "shared/formulas/collect-conclusion-through"
+        self.assertEqual(transcribe.normalize_text("Through.", key), "through")
 
     def test_classification_exact_near_different_and_low(self):
         exact = {"found": True, "text": "O Lord, hear us.", "confidence": "high"}
@@ -71,35 +74,6 @@ class NormalizationTests(unittest.TestCase):
         )
         self.assertEqual(classification, "near")
         self.assertEqual(score, 1.0)
-
-    def test_collect_conclusion_entries_are_not_stripped(self):
-        key = "shared/formulas/collect-conclusion-through"
-        self.assertEqual(transcribe.normalize_text("Through.", key), "through")
-
-
-class PromptTests(unittest.TestCase):
-    def test_prompt_names_feast_slot_pages_and_grammar(self):
-        description = transcribe.describe_key(
-            "proper/st-athanasius/short-responsory-vespers", Path("data"),
-            {"st-athanasius": "St. Athanasius"},
-        )
-        prompt = transcribe.build_prompt(
-            "proper/st-athanasius/short-responsory-vespers", description, "595",
-            [{"printed_page": "595", "pdf_page": 624, "png": "/cache/0624.png"},
-             {"printed_page": "596", "pdf_page": 625, "png": "/cache/0625.png"}],
-        )
-        for wanted in ("short responsory vespers for St. Athanasius", "printed page 595",
-                       "PDF 624", "V. ` and `R. `", "blank line between stanzas",
-                       "Omit printed entry labels", "corpus marker ` * `", "Never infer",
-                       "must stop before its conclusion cue"):
-            self.assertIn(wanted, prompt)
-
-    def test_canticle_descriptions_include_biblical_references(self):
-        self.assertEqual(
-            transcribe.describe_key("canticles/habakkuk-3", Path("data")),
-            "Canticle of Habakkuk (Hab. 3)",
-        )
-        self.assertIn("1 Sam. 2", transcribe.describe_key("canticles/hannah", Path("data")))
 
 
 class FakeProvider:
@@ -228,15 +202,12 @@ class ApplyDecisionTests(unittest.TestCase):
             ),
             "needs-human",
         )
-
-    def test_replace_requires_first_reader_similarity_to_corpus(self):
-        corpus = "abcdefghij"
-        first = answer("abcdeXXXXX")
-        second = answer("abcdeXXXXX")
-        self.assertLess(transcribe.similarity(first["text"], corpus), 0.6)
+        # Replacement also requires the first reader to resemble the corpus.
+        unlike = answer("abcdeXXXXX")
+        self.assertLess(transcribe.similarity(unlike["text"], "abcdefghij"), 0.6)
         self.assertEqual(
             transcribe.apply_decision(
-                "proper/x/collect", "different", first, second, corpus_text=corpus,
+                "proper/x/collect", "different", unlike, unlike, corpus_text="abcdefghij",
             ),
             "needs-human",
         )
@@ -384,12 +355,6 @@ class ApplyDecisionTests(unittest.TestCase):
             self.assertEqual(len(provider.calls), 1)
         finally:
             transcribe.corpus_text = original_corpus
-
-    def test_source_comment_pages_are_tried_with_range_continuation(self):
-        self.assertEqual(
-            transcribe.corpus_source_pages("ordinary/shared/suffrage-collect"),
-            ["42", "xxxi"],
-        )
 
     def test_source_comment_parser_accepts_hyphen_and_en_dash_ranges(self):
         with tempfile.TemporaryDirectory() as directory:

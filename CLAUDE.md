@@ -19,7 +19,8 @@ crates/
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
                            word-for-word against render-html
   presentation/            Words every front shares: day, season and date names, the current-hour
-                           schedule (app.js mirrors it), home's invitation, the report-issue link
+                           schedule (app.js mirrors it), home's invitation, the report-issue link,
+                           the usage beacon's vocabulary (server, app.js and native apps)
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
   cli/                     office command dispatch, dump stream, diff and digest
@@ -34,8 +35,13 @@ apps/
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
-  genicons.py              PWA icon generator; requires tools/requirements.txt
+  genicons.py              App icon (web, iOS, Android) and link-preview card generator; requires
+                           tools/requirements.txt
+  genornaments.py          Painted ornament masks (crosses, sun, moon, quatrefoil, tailpiece, the
+                           Apse vault tile and the Nave powdering cell) for the web
   genplaster.py            Texture generator; source photograph stays in ../resources/
+  genarch.py               Home frontispiece's pointed head: clip-path polygons in style.css, and
+                           the arcs' figures for the native apps (Arch.kt, Arch.swift)
 data/
   feasts/                  Feast definitions (INI-like format)
   texts/                   Liturgical texts
@@ -43,7 +49,8 @@ data/
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   latin-incipits.txt       Latin incipit printed beside each psalm/canticle label. Our psalter is
                            Coverdale = HEBREW numbering; incipits come from the Vulgate, which runs
-                           one behind — the file header records the join/split mapping. Sits outside
+                           one behind — the file header records the join/split mapping, which the
+                           psalm labels follow (Septuagint first, Hebrew in parentheses). Sits outside
                            data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
                            provenance, zero-occurrence and Latin-lint sweeps.
   review/provenance.csv    Source/page attestations; citations only, never book contents
@@ -128,7 +135,7 @@ Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly e
 
 - **`bug`** — the Rust code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrence_winner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
 - **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not the Rust engine.
-- **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and a decision from clergy is required before any fix can be written. Don't guess an implementation here; file the question and wait for a ruling.
+- **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and only clergy can settle it. File the question, then make the app give the most likely answer and keep the issue open until clergy rule. The newest ordo breaks ties between ordos unless its line is a carried-over template (copied from another year or from the neighbouring days) or it contradicts itself; then the rubric or Diurnal decides. Keep each guess easy to flip: name the issue in the code or data comment beside the rule and in one test, and add a `data/review/ordo-triage.csv` row wherever the guess contradicts an ordo line.
 
 These aren't mutually exclusive — an issue can need a ruling *and* turn into a bug/data-validation fix once the ruling lands (see #13, #15). Use the other labels (`enhancement`, `question`, `documentation`, `duplicate`, `invalid`, `wontfix`, `good first issue`, `help wanted`, `update-golden`) only when none of the three above fit.
 
@@ -186,6 +193,7 @@ Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `
 - Makefile: `make pdf HOUR=compline` (chains `./office tex` → `lualatex`)
 - Font: EB Garamond (`fonts-ebgaramond`). Cross ✠ via Noto Sans Symbols Black (`fonts-noto-extra`).
 - Layout: two-sided (inner margin alternates for booklet imposition), running heads via `fancyhdr`, headings and psalm/hymn labels kept with their text via `needspace`, PDF title/subject via `hyperref`. Display text goes through the same `corpus::typography::typeset` as the web (curly quotes, en-dash verse ranges).
+- Initials: `\initial` in the preamble mirrors the web's initial system (small-caps opening word; dropped, raised or elevated by the lines the opening takes; per-letter optical profiles from `style.css`, eased for print on a few letters). Recalibrate against a specimen of every letter when changing the initial face.
 - gregoriotex: required (TeX Live `gregorio` package) — the preamble loads it unconditionally; it supplies the ℣/℟ glyphs (`\Vbar`/`\Rbar`) even in non-chant booklets.
 - GABC chant files: `data/texts/chant/{psalms,canticles,hymns}/{slug}.gabc`. When present, element renders as `\gregorioscore{}` instead of formatted text. Psalm slugs zero-padded to 3 digits (e.g. `psalms/067.gabc`).
 
@@ -211,4 +219,10 @@ Month = 12
 Day = 25
 ```
 
-Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.
+Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.
+
+`data/feasts/monastic.txt` holds observances the ordo brackets "(Monastics & Oblates Only)". They
+are notation, not feasts: the ordo page, the text ordo and the apps' ordo print each as a bracketed
+line under the parish office of its date, and nothing in the file enters occurrence or composes an
+office. Keys: Name, Rank (the ordo's printed letter), Month, Day, Office (where its office is
+found), Source, Notes.

@@ -18,6 +18,7 @@ on:
     # The app embeds the corpus, so a text fix on master is a new build.
     paths:
       - "apps/ios/**"
+      - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
       - "crates/**"
       - "apps/android/app/src/main/res/font/**"
@@ -30,6 +31,7 @@ on:
     branches: [master]
     paths:
       - "apps/ios/**"
+      - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
       - "crates/render-blocks/**"
       - ".github/workflows/testflight.yml"
@@ -53,7 +55,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The build number counts commits, so it needs full history.
           fetch-depth: 0

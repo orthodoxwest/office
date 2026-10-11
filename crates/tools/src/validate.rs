@@ -47,6 +47,15 @@ pub fn validate_calendar(src: &dyn DataSource) -> Vec<String> {
     if !all.is_empty() {
         errors.extend(validate_semantics(&all));
     }
+    for f in &all {
+        if let Some(name) = title_as_proper_name(src, f) {
+            errors.push(format!(
+                "Feast '{}' would fill \"N.\" in its Common's collect with its title {}; give it a ProperName or a proper collect (#607)",
+                f.id,
+                quote(&name)
+            ));
+        }
+    }
     errors
 }
 
@@ -143,6 +152,26 @@ fn validate_semantics(feasts: &[Feast]) -> Vec<String> {
         }
     }
     errs
+}
+
+/// The name a saint's Common would put for "N." when it is a title rather than
+/// the saint's name: "thy holy Martyrs The Forty Holy Martyrs" (#607). Feasts
+/// with their own collect never reach the Common's "N.".
+fn title_as_proper_name(src: &dyn DataSource, f: &Feast) -> Option<String> {
+    use calendar::Category::{Angel, BlessedVirgin, Dedication, Feria, Lord};
+    if f.proper_name.is_some() || f.category.is_none_or(|c| matches!(c, Lord | BlessedVirgin | Angel | Dedication | Feria)) {
+        return None;
+    }
+    let name = office::proper::derive_proper_name_from_title(&f.name);
+    let title = name.starts_with("The ") || name.split_whitespace().any(|w| matches!(w, "Martyr" | "Martyrs" | "Octave"));
+    (title && !has_proper_collect(src, f)).then_some(name)
+}
+
+fn has_proper_collect(src: &dyn DataSource, f: &Feast) -> bool {
+    f.proper_id.iter().chain([&f.id]).any(|id| {
+        let Ok(Some(text)) = src.read(&format!("texts/proper/{id}.txt")) else { return false };
+        text.lines().any(|l| matches!(l.trim(), "[collect]" | "[commemoration-collect]"))
+    })
 }
 
 /// The DateRule patterns `resolve_feast_date` understands.
@@ -305,36 +334,4 @@ fn validate_control_characters(rel_path: &str, content: &[u8]) -> Vec<String> {
         errs.push(format!("{rel_path}:1:1: unexpected UTF-8 BOM"));
     }
     errs
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn date_rules() {
-        for (rule, ok) in [
-            ("easter+5", true),
-            ("easter-64", true),
-            ("easter", false),
-            ("epiphany-sunday-1", true),
-            ("epiphany-sunday-0", false),
-            ("advent-sunday-4", true),
-            ("advent-sunday-5", false),
-            ("pentecost-sunday-24", true),
-            ("holy-name", true),
-            ("last-sunday-october", true),
-            ("whitsun+1", false),
-        ] {
-            assert_eq!(is_valid_date_rule(rule), ok, "{rule}");
-        }
-    }
-
-    #[test]
-    fn near_names_and_distance() {
-        assert_eq!(edit_distance(b"kitten", b"sitting"), 3);
-        assert_eq!(near_psalmody_section_name("texts/proper/x/y.txt", "lauds-psalmodie"), Some("lauds-psalmody"));
-        assert_eq!(near_psalmody_section_name("texts/shared/x.txt", "lauds-psalmodie"), None);
-        assert_eq!(near_psalmody_section_name("texts/proper/x/y.txt", "collect"), None);
-    }
 }

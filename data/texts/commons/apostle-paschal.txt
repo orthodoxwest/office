@@ -41,6 +41,11 @@ Then shall the righteous * shine forth as the sun in the presence of God, allelu
 [psalm-antiphon-4-vespers]
 @use commons/apostle-paschal/psalm-antiphon-5
 
+# I Vespers: "Ants. of Lauds, omitting the fourth" (Diurnal p. 16*). The first three
+# come through the Common's psalm-antiphon-N-first-vespers redirects (#640).
+[psalm-antiphon-4-first-vespers]
+@use commons/apostle-paschal/psalm-antiphon-5
+
 [chapter-lauds]
 # SOURCE: diurnal p. 18*
 !Wis 5:1
@@ -170,8 +175,8 @@ Daughters of Jerusalem, * come forth and behold the Martyrs with the diadems whe
 Light perpetual * shall shine upon thy Saints, O Lord; and an ageless eternity, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: Monastic Diurnal.pdf, p. 17*
-Light perpetual * shall shine upon thy Saints, O Lord, and an ageless eternity, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 20* (II Vespers, Common of Apostles in Paschaltide)
+O ye holy and righteous, * rejoice in the Lord, alleluia: God hath chosen you to him to be his inheritance, alleluia.
 
 [commemoration-antiphon-lauds]
 # SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)

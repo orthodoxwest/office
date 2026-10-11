@@ -61,17 +61,33 @@ R. Thanks be to God.
 # SOURCE: monastic diurnal, p. 252 (I Week in Lent, Monday)
 Come, ye blessed * of my Father, inherit the kingdom prepared for you from the foundation of the world.
 
+[collect-monday]
+# SOURCE: monastic diurnal, p. 252 (Monday after I Sunday in Lent, Collect at Lauds)
+Turn thou us, O God our Saviour: and that the Lenten fast may profit us, do thou instruct our minds with heavenly teaching.
+
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 252 (I Week in Lent, Monday)
 That which ye have done * unto one of the least of mine, ye have done unto me, saith the Lord.
+
+[collect-vespers-monday]
+# SOURCE: monastic diurnal, p. 252 (Monday after I Sunday in Lent, Collect after the Ant. on Magnificat)
+Loose, O Lord, we beseech thee, the chain of our sins: and of thy great mercy, turn away from us the due reward of our deeds.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 252 (I Week in Lent, Tuesday)
 And Jesus * went into the temple of God, and cast out all them that sold and bought: and overthrew the tables of the money-changers, and the seats of them that sold doves.
 
+[collect-tuesday]
+# SOURCE: monastic diurnal, p. 252 (I Week in Lent, Tuesday, Collect at Lauds)
+Look down, O Lord, upon thy family: and grant that our souls, chastened by the mortifying of the flesh, may shine in thy sight with longing desire for thee.
+
 [magnificat-antiphon-tuesday]
 # SOURCE: monastic diurnal, p. 252 (I Week in Lent, Tuesday)
 Truly it is written, * Mine house shall be called an house of prayer for all nations: but ye have made it a den of robbers. And he was daily with them, teaching in the temple.
+
+[collect-vespers-tuesday]
+# SOURCE: monastic diurnal, p. 252 (I Week in Lent, Tuesday, Collect after the Ant. on Magnificat)
+Let our prayers ascend unto thee, O Lord: and do thou drive away from thy Church all taint of corruption.
 
 [benedictus-antiphon-wednesday]
 # SOURCE: monastic diurnal, pp. 252–253 (I Week in Lent, Ember Wednesday)
@@ -85,9 +101,17 @@ For as Jonas * was three days and three nights in the whale's belly, so shall th
 # SOURCE: monastic diurnal, p. 253 (I Week in Lent, Thursday)
 Jesus went thence, * and departed into the coasts of Tyre and Sidon: and behold, a woman of Canaan came out of the same coasts, and cried, saying, Have mercy on me, thou Son of David.
 
+[collect-thursday]
+# SOURCE: monastic diurnal, p. 253 (I Week in Lent, Thursday, Collect at Lauds)
+Look favourably, we beseech thee, O Lord, upon the devotion of thy people: that they who are mortified in the body through abstinence may be refreshed in mind through the fruit of good works.
+
 [magnificat-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 253 (I Week in Lent, Thursday)
 O woman, * great is thy faith: be it unto thee even as thou wilt.
+
+[collect-vespers-thursday]
+# SOURCE: monastic diurnal, p. 253 (I Week in Lent, Thursday, Collect after the Ant. on Magnificat)
+Grant, we beseech thee, O Lord, unto all Christian people: that they may both experience the truth of that which they profess, and also love the heavenly gift which they are wont to receive.
 
 [benedictus-antiphon-friday]
 # SOURCE: monastic diurnal, p. 253 (I Week in Lent, Ember Friday)

@@ -126,9 +126,9 @@ enum ReminderScheduler {
         return c
     }
 
-    /// The reminder's category: its "In 10 minutes" action, handled without opening the app.
+    /// The reminder's category: its "Remind me in 10 min" action, handled without opening the app.
     static func register(_ center: UNUserNotificationCenter = .current()) {
-        let later = UNNotificationAction(identifier: snoozeAction, title: "In 10 minutes", options: [])
+        let later = UNNotificationAction(identifier: snoozeAction, title: "Remind me in 10 min", options: [])
         center.setNotificationCategories([UNNotificationCategory(identifier: category, actions: [later], intentIdentifiers: [], options: [])])
     }
 
@@ -153,7 +153,7 @@ enum ReminderScheduler {
         }
     }
 
-    /// "In 10 minutes": the reminder is put away and rings again, with the same words, after the wait.
+    /// "Remind me in 10 min": the reminder is put away and rings again, with the same words, after the wait.
     static func snooze(_ notification: UNNotification) {
         let center = UNUserNotificationCenter.current()
         let request = notification.request
