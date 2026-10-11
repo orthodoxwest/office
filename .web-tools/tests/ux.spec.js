@@ -1816,6 +1816,27 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
       expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
       expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
       expect(await opening.textContent()).toBe(original);
+      // Divided, the "Sit." cue ends the first line beside its mediant: at the
+      // head of the second, beside the initial, it read as the half-verse's
+      // first word.
+      if (divided) {
+        const bottoms = await opening.evaluate(el => {
+          const cue = el.querySelector(".mediant + .posture");
+          const after = cue.nextSibling;
+          const range = document.createRange();
+          const start = after.textContent.search(/\S/);
+          range.setStart(after, start);
+          range.setEnd(after, start + 1);
+          return {
+            leading: parseFloat(getComputedStyle(el).lineHeight),
+            first: el.querySelector(".initial-word").getBoundingClientRect().bottom,
+            cue: cue.getBoundingClientRect().bottom,
+            after: range.getBoundingClientRect().bottom,
+          };
+        });
+        expect(Math.abs(bottoms.cue - bottoms.first)).toBeLessThan(bottoms.leading / 2);
+        expect(bottoms.after - bottoms.cue).toBeGreaterThan(bottoms.leading / 2);
+      }
       // Repeated measurement (also used for printing/font changes) must not
       // alternate between natural and divided settings at the same measure.
       await page.evaluate(() => {

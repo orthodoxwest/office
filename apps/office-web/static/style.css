@@ -2568,6 +2568,19 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   white-space: pre;
 }
 
+/* A posture cue at the mediant ("Sit.") ends the first line with it. Opening
+   the second line beside the initial, it read as the half-verse's first word. */
+@supports selector(:has(+ *)) {
+  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture)::after {
+    content: none;
+  }
+
+  .psalm-verses .verse.initial-divided > .mediant + .posture::after {
+    content: "\A";
+    white-space: pre;
+  }
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter. The
    smaller number's own line box is shorter than the verse's, so stretched
    to the top it rode about a quarter em above the text, like a footnote

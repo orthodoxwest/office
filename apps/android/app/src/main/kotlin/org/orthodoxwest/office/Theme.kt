@@ -236,6 +236,8 @@ object Type {
     val verse = face(20f, 33f)
     val rubric = face(18f, 27f)
     val heading = face(19.2f, 24.96f).copy(fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp, textAlign = TextAlign.Center)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    val commemorationName = face(19.2f, 25.92f).copy(letterSpacing = 0.29.sp, textAlign = TextAlign.Center)
     val itemLabel = face(20f, 27f).copy(fontFeatureSettings = "$ALL_SMALL_CAPS, lnum", letterSpacing = 1.4.sp, textAlign = TextAlign.Center)
     val reference = face(17f, 23.8f).copy(textAlign = TextAlign.Center)
     val verseNumber = face(15.6f, 25.74f).copy(textAlign = TextAlign.End)

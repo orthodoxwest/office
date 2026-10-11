@@ -20,7 +20,8 @@ use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue,
 pub enum BlockKind {
     /// A section or item heading ("Hymn", "Chapter", a section's label).
     Heading,
-    /// A commemoration heading: a `Kicker` run, then the feast's name.
+    /// A commemoration heading: a `Kicker` run, a `Break`, then the feast's name on its own line
+    /// (the web's block-level `.commemoration-kicker`).
     CommemorationHeading,
     /// A psalm or canticle label, its Latin incipit as a `Latin` run.
     ItemLabel,
@@ -201,7 +202,7 @@ pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return Block::new(
             BlockKind::CommemorationHeading,
-            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new(" ", RunStyle::Plain), Run::new(typeset(name), RunStyle::Plain)],
+            vec![Run::new("Commemoration of", RunStyle::Kicker), Run::new("\n", RunStyle::Break), Run::new(typeset(name), RunStyle::Plain)],
         );
     }
     Block::new(BlockKind::Heading, text_runs(label))

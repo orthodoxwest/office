@@ -143,7 +143,8 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
         BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (cross) PaintedCross(Modifier.padding(bottom = 11.2.dp).size(9.92.dp))
-            Text(runs(block), Modifier.fillMaxWidth(), style = Type.heading.copy(color = p.titulus))
+            val style = if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading
+            Text(runs(block), Modifier.fillMaxWidth(), style = style.copy(color = p.titulus))
         }
         BlockKind.ITEM_LABEL -> ItemLabel(block, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
@@ -369,13 +370,23 @@ private sealed interface OpeningSetting {
     class Dropped(val text: AnnotatedString, val layout: TextLayoutResult) : OpeningSetting
 }
 
-/** The opening with a break after its mediant (the web's `.initial-divided`), if it has one. */
+/** Marks a posture cue's run, so a divided opening can keep the cue with its mediant. */
+private const val POSTURE = "posture"
+
+/**
+ * The opening with a break after its mediant (the web's `.initial-divided`), if it has one. A
+ * posture cue at the mediant ("Sit.") ends the first line with it rather than opening the second
+ * beside the initial, where it read as the first word of the half-verse.
+ */
 private fun divideAtMediant(text: AnnotatedString): AnnotatedString? {
-    val at = text.text.indexOf('*').takeIf { it >= 0 } ?: return null
+    val mediant = text.text.indexOf('*').takeIf { it >= 0 } ?: return null
+    val next = (mediant + 1 until text.length).firstOrNull { !text.text[it].isWhitespace() }
+    val cue = next?.let { n -> text.getStringAnnotations(POSTURE, n, n + 1).firstOrNull { it.start == n } }
+    val at = cue?.end ?: (mediant + 1)
     return buildAnnotatedString {
-        append(text.subSequence(0, at + 1))
+        append(text.subSequence(0, at))
         append("\n")
-        append(text.subSequence(at + 1, text.length).withoutLeadingSpace())
+        append(text.subSequence(at, text.length).withoutLeadingSpace())
     }
 }
 
@@ -613,7 +624,9 @@ fun runs(block: BlockView): AnnotatedString {
     return buildAnnotatedString {
         for (run in block.runs) {
             val style = runStyle(run.style, p)
+            if (run.style == RunStyle.POSTURE) pushStringAnnotation(POSTURE, run.text)
             if (style == null) append(run.text) else withStyle(style) { append(run.text) }
+            if (run.style == RunStyle.POSTURE) pop()
         }
     }
 }
@@ -629,6 +642,8 @@ private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.SECRET -> SpanStyle(color = p.unsaid)
     // A psalm's Latin incipit is muted beside its titulus, as Latin titles are.
     RunStyle.LATIN -> SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.4.sp)
-    RunStyle.KICKER -> SpanStyle(fontSize = 0.7.em, color = p.muted, letterSpacing = 0.1.em)
+    // "Commemoration of", on its own line in the heading's small caps and tracking, as the web's
+    // `.commemoration-kicker`; the name beneath stays in mixed case.
+    RunStyle.KICKER -> SpanStyle(fontSize = 0.78.em, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp)
     RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)
 }

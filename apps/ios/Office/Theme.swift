@@ -331,6 +331,8 @@ enum Scale {
     static let verse = TextStyle(size: 20, line: 33)
     static let rubric = TextStyle(size: 18, line: 27)
     static let heading = TextStyle(size: 19.2, line: 24.96, tracking: 2.112, smallCaps: true)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    static let commemorationName = TextStyle(size: 19.2, line: 25.92, tracking: 0.29)
     static let itemLabel = TextStyle(size: 20, line: 27, tracking: 1.4, smallCaps: true, lining: true)
     static let reference = TextStyle(size: 17, line: 23.8)
     static let verseNumber = TextStyle(size: 15.6, line: 25.74)
