@@ -180,7 +180,7 @@ fun HourScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(section.label, style = Type.heading.copy(color = p.titulus))
-                            Caret(expanded, p.titulus)
+                            HeadingCaret(expanded, p.titulus)
                         } }
                     }
                     prev = null
@@ -370,9 +370,19 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
         // On a phone the date stands on its own line above the day's name, so a line never ends on
         // the separator (the web's `.hour-meta-part:first-child` to 700px); wide screens keep one line.
-        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta.joinToString(" · ")) else listOf(meta[0], meta.drop(1).joinToString(" · "))
+        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta) else listOf(meta.take(1), meta.drop(1))
         Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = meta.joinToString(". ") }, horizontalAlignment = Alignment.CenterHorizontally) {
-            for (line in metaLines) Text(line, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+            // Date, day and season each wrap whole (the web's inline-block `.hour-meta-part`), so a
+            // line breaks between them, never inside a saint's title; the separator, tied to the
+            // part before it by a no-break space, ends its line. A part longer than the line still
+            // wraps within itself.
+            for (line in metaLines) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
+                    line.forEachIndexed { j, part ->
+                        Text(if (j < line.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                    }
+                }
+            }
         }
         if (date != today) {
             Text(

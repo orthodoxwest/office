@@ -65,6 +65,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -190,8 +194,18 @@ fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescript
  * than left to whichever face sets `▾`.
  */
 @Composable
-fun Caret(open: Boolean, ink: Color, lighter: Boolean = true) {
-    val (gap, w, h) = with(LocalDensity.current) { Triple(5.5.sp.toDp(), 5.5.sp.toDp(), 4.5.sp.toDp()) }
+fun Caret(open: Boolean, ink: Color, lighter: Boolean = true) = Caret(open, ink, lighter, 5.5f, 5.5f, 4.5f)
+
+/**
+ * The caret beside a section heading that opens (the web's `.session-prayers summary::after`): the
+ * glyph at 0.75em of the 19.2px heading, 0.35em from it, rather than the small label's.
+ */
+@Composable
+fun HeadingCaret(open: Boolean, ink: Color) = Caret(open, ink, true, 5.8f, 8.1f, 6.6f)
+
+@Composable
+private fun Caret(open: Boolean, ink: Color, lighter: Boolean, gapSp: Float, wSp: Float, hSp: Float) {
+    val (gap, w, h) = with(LocalDensity.current) { Triple(gapSp.sp.toDp(), wSp.sp.toDp(), hSp.sp.toDp()) }
     val fill = if (lighter) ink.copy(alpha = ink.alpha * 0.7f) else ink
     // Drawn, not read: the disclosure says expanded or collapsed.
     Canvas(Modifier.padding(start = gap).size(w, h).clearAndSetSemantics {}) {
@@ -414,7 +428,9 @@ fun MenuPanel(
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
     Popup(
         alignment = Alignment.TopEnd,
-        offset = with(LocalDensity.current) { IntOffset(-end.roundToPx(), topOffset.roundToPx()) },
+        // The popup's window holds the panel's shadow too (`ShadowRoom` about it), so it stands
+        // that much further out and up.
+        offset = with(LocalDensity.current) { IntOffset(-(end - ShadowRoom).roundToPx(), (topOffset - ShadowRise).roundToPx()) },
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = visible),
     ) {
@@ -426,11 +442,19 @@ fun MenuPanel(
         ) {
             Column(
                 Modifier
+                    .padding(start = ShadowRoom, end = ShadowRoom, top = ShadowRise, bottom = ShadowRoom + 8.dp)
+                    // The web's soft shadow under the panel: `0 .45rem 1rem rgba(36, 28, 23, .09)`.
+                    .dropShadow(RectangleShape, Shadow(radius = 16.dp, color = Color(36, 28, 23).copy(alpha = 0.09f), offset = DpOffset(0.dp, 7.2.dp)))
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
                     .border(1.dp, p.border)
-                    // The panel's top edge is the painted line (`--ornament-line`).
-                    .drawBehind { drawRect(o.line, size = size.copy(height = 2.dp.toPx())) }
+                    // The panel's top edge is the painted line (`--ornament-line`), with the surface's
+                    // edge catching the light just inside it (`inset 0 1px 0 var(--surface-edge)`).
+                    .drawBehind {
+                        drawRect(o.line, size = size.copy(height = 2.dp.toPx()))
+                        val w = 1.dp.toPx()
+                        drawRect(p.surfaceEdge, Offset(w, 2.dp.toPx()), size.copy(width = size.width - 2 * w, height = w))
+                    }
                     .padding(10.4.dp),
             ) {
                 if (onHour != null && !prefsOnly) {
@@ -492,6 +516,10 @@ fun MenuPanel(
         }
     }
 }
+
+/** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
+private val ShadowRoom: Dp = 16.dp
+private val ShadowRise: Dp = 9.dp
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable
@@ -734,27 +762,45 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
     }
 }
 
-/** "How are you praying?": the three prayer forms, remembered on this device. */
+/**
+ * "How are you praying?": the three prayer forms, remembered on this device, as the web's
+ * `.leader-selector fieldset`: a small uppercase legend over a list at most 23rem wide, ruled
+ * above, below and between, the chosen form's ring filled in the accent and its words in the
+ * accent over a gold underline.
+ */
 @Composable
 fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
-    Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("How are you praying?", style = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.muted))
-        Spacer(Modifier.height(4.dp))
-        PRAYER_FORMS.forEach { (value, _, phrase) ->
-            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) {
-                if (value != form) haptics.chose()
-                onForm(value)
-            }, verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(16.dp).border(1.dp, if (value == form) p.gold else p.border, CircleShape), contentAlignment = Alignment.Center) {
-                    if (value == form) Box(Modifier.size(8.dp).background(p.gold, CircleShape))
+    Column(Modifier.widthIn(max = 368.dp).fillMaxWidth().padding(top = 12.dp, bottom = 8.dp)) {
+        Text("HOW ARE YOU PRAYING?", Modifier.padding(bottom = 10.4.dp), style = Type.label(11.2f, 0.1f).copy(color = p.muted))
+        Column(Modifier.fillMaxWidth().drawBehind {
+            val w = 1.dp.toPx()
+            drawLine(p.border, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
+            drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
+        }.padding(vertical = 1.dp)) {
+            PRAYER_FORMS.forEachIndexed { i, (value, _, phrase) ->
+                val chosen = value == form
+                if (i > 0) Hairline(p.surfaceEdge)
+                Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = chosen) {
+                    if (!chosen) haptics.chose()
+                    onForm(value)
+                }.padding(horizontal = 5.6.dp, vertical = 10.4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // The web's ring: a 1px circle on the ground; chosen, the accent with the ground
+                    // inset 3px inside its line.
+                    Box(Modifier.size(14.4.dp).background(if (chosen) p.accent else p.bg, CircleShape).border(1.dp, if (chosen) p.accent else p.muted, CircleShape), contentAlignment = Alignment.Center) {
+                        if (chosen) Box(Modifier.size(12.4.dp).border(3.dp, p.bg, CircleShape))
+                    }
+                    Spacer(Modifier.width(12.8.dp))
+                    Text(
+                        phrase,
+                        Modifier.goldUnderline(chosen, p.goldLine),
+                        style = Type.body.copy(fontSize = 14.4.sp, lineHeight = 20.16.sp, color = if (chosen) p.accent else p.text),
+                    )
                 }
-                Spacer(Modifier.width(10.dp))
-                Text(phrase, style = Type.body.copy(fontSize = 17.sp, lineHeight = 24.sp, color = p.text))
             }
         }
-        Text("Remembered on this device. Change it any time.", Modifier.padding(top = 4.dp), style = Type.small.copy(color = p.muted))
+        Text("Remembered on this device. Change it any time.", Modifier.padding(top = 11.2.dp), style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 18.56.sp, color = p.muted))
     }
 }
 
