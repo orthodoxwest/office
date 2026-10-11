@@ -132,7 +132,7 @@ fun OrdoScreen(
         }
         item(key = "ranks") { RankKey(ordoColumn().padding(bottom = 5.6.dp)) }
         item(key = "month") {
-            MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), today.year == year && today.monthValue == monthNumber, ordoColumn().padding(top = 10.dp)) {
+            MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), ordoColumn().padding(top = 10.dp)) {
                 scope.launch { listState.animateScrollToItem(0) }
             }
         }
@@ -207,7 +207,7 @@ private fun OrdoHeader(
             val cell = if (wide) Modifier else Modifier.weight(1f)
             Text("‹ ${year - 1}", cell.tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
-            Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(today.year == year, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(true, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
             Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
@@ -240,7 +240,7 @@ private fun OrdoHeader(
                                 if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
                                 if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), o.flat, null)
                             },
-                            style = Type.label(12.48f, 0.06f).copy(color = if (current) (if (wide) p.accent else p.text) else p.muted),
+                            style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
                         )
                     }
                 }
@@ -412,9 +412,9 @@ private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalD
     }
 }
 
-/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule. */
+/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule and its lozenge (`.month h2`). */
 @Composable
-private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifier, onTop: () -> Unit) {
+private fun MonthHeading(name: String, modifier: Modifier, onTop: () -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     Row(
@@ -422,12 +422,10 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
             val w = 1.dp.toPx()
             drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
             drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
-            if (isTodaysMonth) {
-                // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
-                val c = Offset(size.width / 2f, size.height - w * 1.5f)
-                lozenge(c, 7.07.dp.toPx(), p.bg, null)
-                lozenge(c, 4.24.dp.toPx(), p.lining, null)
-            }
+            // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
+            val c = Offset(size.width / 2f, size.height - w * 1.5f)
+            lozenge(c, 7.07.dp.toPx(), p.bg, null)
+            lozenge(c, 4.24.dp.toPx(), p.lining, null)
         }.padding(vertical = 6.4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -487,7 +485,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
             // The day's liturgical colour as a rail beside its date.
-            Box(Modifier.width(3.dp).height(40.dp).background(dayColor(d.color)))
+            Box(Modifier.width(3.dp).height(40.dp).background(railColor(d.color, p)))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
@@ -568,7 +566,7 @@ private fun DayTableRow(
     unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
-    val rail = dayColor(d.color)
+    val rail = railColor(d.color, p)
     // Today is painted, not selected: the frieze's wash, ruled top and bottom in the gold line
     // across the row, the day's number in gold.
     Column(
