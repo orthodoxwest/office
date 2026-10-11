@@ -1,7 +1,7 @@
 //! Commemorations at Lauds and Vespers: heading, antiphon, versicle, invitation, collect.
 
 use calendar::commemoration::lauds_commemorations;
-use calendar::traits::{is_day_within_octave, octave_parent_id};
+use calendar::traits::{is_anticipated_sunday, is_day_within_octave, octave_parent_id};
 use calendar::{Category, Feast, FeastRef, Rank, Season, Weekday};
 use liturgy::{ElementType, OfficeElement};
 
@@ -59,7 +59,7 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
                 feria.proper_id = Some(week.clone());
                 return lookup_feria_commemoration(Some(day), &feria, day.season, hour_name, reference, t);
             }
-            if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
+            if is_incoming_sunday_commemoration(day, comm, hour_name, reference) {
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
@@ -150,16 +150,22 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 /// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
 /// office said on Saturday when the Octave Day of the Epiphany is Sunday is
 /// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
-pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
+/// A Sunday anticipated on Saturday is commemorated at its I Vespers on
+/// Friday "with the Antiphon of Friday as given in the Psalter" (General
+/// Rubrics IV.4-5; 2025 and 2026 ordos, 14 and 6 February: "Fri. Off. ...
+/// He hath put down") (#656).
+pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
-        && day.civil_weekday() == Weekday::Saturday
+        && (day.civil_weekday() == Weekday::Saturday || is_anticipated_sunday(feast))
         && feast.is_category(Category::Sunday)
         && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }
 
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers
 /// would: historia, the Sunday's "-first" proper, season, Saturday psalter.
+/// The civil evening is kept, so an anticipated Sunday commemorated at
+/// Friday's II Vespers takes Friday's psalter antiphon (IV.4).
 fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
     let mut sunday = day.clone();
     if !sunday.first_vespers {
@@ -180,7 +186,7 @@ pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &st
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
+    is_incoming_sunday_commemoration(day, comm, "vespers", reference)
 }
 
 /// The I-Vespers texts of an incoming office or Memorial (VIII, X).

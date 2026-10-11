@@ -36,6 +36,12 @@ Ref = ordinary/vespers/opening-versicle
 Type = proper-opening-acclamation
 Ref = alleluia
 
+[Triduum-Opening]
+Condition = triduum
+
+Type = rubric
+Ref = shared/formulas/triduum-vespers-opening-rubric
+
 [Psalmody-Festal]
 Condition = festal-vespers-psalmody
 
@@ -407,6 +413,14 @@ Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = psalm-antiphon-4
+
+[Triduum-Omissions]
+Condition = triduum
+# Monastic Diurnal, printed p. 315: the Chapter, Short Responsory, Hymn and
+# Versicle are not said during the Triduum (each day's proper file omits them).
+
+Type = rubric
+Ref = shared/formulas/triduum-vespers-omission-rubric
 
 [Chapter]
 Type = proper-chapter

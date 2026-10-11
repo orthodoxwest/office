@@ -470,7 +470,7 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             let mut e = element(ElementType::Collect, text.clone(), "collect", &src);
             e.source_refs = compact_refs(refs.clone());
             if uses_triduum_form(day, hour_name) && refs.len() == 2 {
-                // The body is said in a low voice; the conclusion is silent
+                // The body is said "in a like voice"; the conclusion is silent
                 // with no aloud response (Diurnal p. 313).
                 let conclusion = text.strip_prefix(&format!("{body}\n")).unwrap_or(&text).replace("\nR. Amen.", "\nAmen.");
                 e.text = format!("{body}\n{conclusion}");

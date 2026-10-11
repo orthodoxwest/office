@@ -1010,6 +1010,14 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-5
 
+[Triduum-Omissions]
+Condition = triduum
+# Monastic Diurnal, printed p. 311: the Chapter, Short Responsory and Hymn
+# are not said during the Triduum (each day's proper file omits them).
+
+Type = rubric
+Ref = shared/formulas/triduum-lauds-omission-rubric
+
 [Chapter]
 Type = proper-chapter
 Ref = chapter
