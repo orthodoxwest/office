@@ -458,16 +458,21 @@ function usageBeaconBody(scope) {
       return anim.transitionProperty === "opacity";
     };
     var dips = root.getAnimations({ subtree: true }).filter(isDip);
-    // WebKit leaves pseudo-elements out of an element's subtree, so the
-    // wall's ::before dip is found only among the document's animations.
-    if (!dips.length && document.getAnimations) {
-      dips = document.getAnimations().filter(isDip);
-    }
-    // Still nothing reported: wait out the dip's nominal length rather than
-    // swapping at once, so the wall cannot flash.
+    // WebKit leaves pseudo-elements out of an element's subtree and reports
+    // no dip: watch the wall itself fall to transparent instead, frame by
+    // frame, still bounded by the limit.
     if (!dips.length) {
       return new Promise(function (resolve) {
-        setTimeout(resolve, VAULT_FADE_MS + 20);
+        var started = Date.now();
+        var look = function () {
+          var wall = Number(getComputedStyle(root, "::before").opacity);
+          if (wall <= 0.01 || Date.now() - started >= VAULT_FADE_LIMIT_MS) {
+            resolve();
+          } else {
+            requestAnimationFrame(look);
+          }
+        };
+        requestAnimationFrame(look);
       });
     }
     return Promise.race([
