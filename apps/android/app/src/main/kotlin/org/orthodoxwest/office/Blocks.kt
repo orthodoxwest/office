@@ -646,4 +646,10 @@ private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     // `.commemoration-kicker`; the name beneath stays in mixed case.
     RunStyle.KICKER -> SpanStyle(fontSize = 0.78.em, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp)
     RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)
+    // A psalm's numbers ("66 (67)") out of its label's small caps, as the web's `.psalm-num`: a
+    // small-cap "1" is a bare stem that reads as the section numeral "i".
+    RunStyle.NUMERAL -> SpanStyle(fontSize = 0.9.em, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.02.em)
+    // The Hebrew number beside it, "(67)", muted and a little smaller, as `.psalm-heb` (0.86 of
+    // the numeral's 0.9em).
+    RunStyle.HEBREW_NUMERAL -> SpanStyle(fontSize = 0.774.em, color = p.muted, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.02.em)
 }

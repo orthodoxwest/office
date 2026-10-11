@@ -783,6 +783,8 @@ pub enum RunStyle {
     Kicker,
     Posture,
     Break,
+    Numeral,
+    HebrewNumeral,
 }
 
 impl From<render_blocks::RunStyle> for RunStyle {
@@ -798,6 +800,8 @@ impl From<render_blocks::RunStyle> for RunStyle {
             S::Kicker => RunStyle::Kicker,
             S::Posture => RunStyle::Posture,
             S::Break => RunStyle::Break,
+            S::Numeral => RunStyle::Numeral,
+            S::HebrewNumeral => RunStyle::HebrewNumeral,
         }
     }
 }

@@ -171,7 +171,14 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
                 b.push_str(&format_rubric_spans(&elem.unrepeated_rubric()));
             }
             if !elem.label.is_empty() {
-                b.push_str(&format!("\n\\psalmlabel{{{}}}{{{}}}\n\n", tex_line(&elem.label), tex_line(&elem.incipit)));
+                let label = match elem.psalm_label_parts() {
+                    Some((word, greek, "")) => format!("{}\\psalmnum{{{}}}", tex_line(word), tex_line(greek)),
+                    Some((word, greek, hebrew)) => {
+                        format!("{}\\psalmnum{{{}~\\psalmheb{{{}}}}}", tex_line(word), tex_line(greek), tex_line(hebrew))
+                    }
+                    None => tex_line(&elem.label),
+                };
+                b.push_str(&format!("\n\\psalmlabel{{{label}}}{{{}}}\n\n", tex_line(&elem.incipit)));
             }
             b.push_str(&psalm);
         }

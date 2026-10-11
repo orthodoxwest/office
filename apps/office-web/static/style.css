@@ -2418,6 +2418,25 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--titulus);
 }
 
+/* A psalm's numbers, "66 (67)" or "118 i (119 i)", out of the label's small
+   caps: a small-cap "1" is a bare stem, the same shape as the section numeral
+   "i", so "118 i" read as "II8 I". Lining figures a little smaller than the
+   text sit at the small caps' height without their wide tracking, and a part
+   letter ("116a") or section numeral stays lower case. */
+.psalm-num {
+  font-variant-caps: normal;
+  font-variant-numeric: lining-nums;
+  font-size: 0.9em;
+  letter-spacing: 0.02em;
+}
+
+/* The Hebrew (Coverdale) number beside it, "(67)", muted and a little smaller
+   so the Septuagint number leads. */
+.psalm-heb {
+  color: var(--muted);
+  font-size: 0.86em;
+}
+
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
    it. Italic and un-small-capped so it reads as the Latin title rather than
    as more of the label. On a narrow screen it moves to its own line whole
