@@ -45,7 +45,9 @@ class SpokenTest {
     @Test
     fun aPsalmLabelReadsAsTwoPhrases() {
         val label = blocks.first { it.kind == BlockKind.ITEM_LABEL && "·" in it.runs.joinToString("") { r -> r.text } }
-        assertTrue(spoken(label), Regex("^Psalm \\d+\\. \\S").containsMatchIn(spoken(label)))
+        // "Psalm 66 (67). Deus misereatur nostri": the Septuagint number, then the Hebrew in
+        // parentheses where it differs.
+        assertTrue(spoken(label), Regex("^Psalm \\d+( \\(\\d+\\))?\\. \\S").containsMatchIn(spoken(label)))
     }
 
     @Test
