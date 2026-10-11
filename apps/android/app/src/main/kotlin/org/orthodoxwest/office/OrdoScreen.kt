@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -66,6 +68,7 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.CommemorationView
 import org.orthodoxwest.office.core.OrdoDayView
@@ -96,13 +99,25 @@ fun OrdoScreen(
     // the reader's own scroll position stands, restored or not.
     val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
     var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
+    // The day comes to rest under the month's pinned heading, not behind it: the heading's
+    // height (its padding, and the taller of its name's line and the ↑'s).
+    val pinned = with(LocalDensity.current) { (22.8.dp.toPx() + maxOf(28.sp.toPx(), 20.sp.toPx() + 12.dp.toPx())).roundToInt() }
     val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
-        LazyListState(if (focusDay != 0 && month != null) focusItem else 0)
+        LazyListState(if (focusDay != 0 && month != null) focusItem else 0, if (focusDay != 0 && month != null) -pinned else 0)
     }
     val scope = rememberCoroutineScope()
+    // How far the month's heading stands under the status bar: none while the rows above it hold
+    // it clear, the whole bar once it is pinned.
+    val barPx = with(LocalDensity.current) { insets.calculateTopPadding().roundToPx() }
+    val underBar by remember(barPx) {
+        derivedStateOf {
+            val above = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "ranks" }
+            if (above == null) barPx else (-(above.offset + above.size)).coerceIn(0, barPx)
+        }
+    }
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
-            listState.scrollToItem(focusItem)
+            listState.scrollToItem(focusItem, -pinned)
             focused = true
         }
     }
@@ -131,9 +146,16 @@ fun OrdoScreen(
             }
         }
         item(key = "ranks") { RankKey(ordoColumn().padding(bottom = 5.6.dp)) }
-        item(key = "month") {
-            MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), ordoColumn().padding(top = 10.dp)) {
-                scope.launch { listState.animateScrollToItem(0) }
+        // The month's heading pins while its days scroll beneath it (the web's sticky `.month h2`),
+        // so its ↑ back to the top stays in reach. It carries the wall's own copy, opaque, so the
+        // rows passing under it never show through.
+        stickyHeader(key = "month") {
+            // Pinned at the list's top edge, which runs under the status bar, the heading keeps its
+            // words below the bar: the wall's copy grows up behind it as it reaches the bar.
+            Box(Modifier.fillMaxWidth().wallBehind().padding(top = with(LocalDensity.current) { underBar.toDp() }), contentAlignment = Alignment.TopCenter) {
+                MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), ordoColumn().padding(top = 10.dp)) {
+                    scope.launch { listState.animateScrollToItem(0) }
+                }
             }
         }
         if (wide) item(key = "columns") { DayColumns(ordoColumn()) }
@@ -271,8 +293,8 @@ private fun OrdoHeader(
     }
 }
 
-/** The first day's item in a month's list: after the chrome, header, tools and month heading (and a wide screen's column headings). */
-private const val FIRST_DAY_ITEM = 4
+/** The first day's item in a month's list: after the chrome, header, tools, rank key and month heading (and a wide screen's column headings). */
+private const val FIRST_DAY_ITEM = 5
 
 /**
  * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
@@ -439,7 +461,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     val open = rememberSaveable(d.date, saver = Disclosures) { mutableStateMapOf<String, Boolean>() }
     val details = open["details"] ?: allDetails
     val date = LocalDate.of(d.date.year, d.date.month, d.date.day)
-    val hasDetails = d.hasLauds() || d.hoursPreces || d.hasVespers()
+    // One disclosure holds the day's commemorations and its office, as the web's
+    // `.day-office-details`.
+    val hasDetails = d.dayComms().isNotEmpty() || d.hasLauds() || d.hoursPreces || d.hasVespers()
     // One stop for a screen reader: the date, its colour and observances, and the feast.
     val spoken = listOfNotNull(
         date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)) + if (isToday) ", today" else "",
@@ -450,18 +474,13 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
     val buttons: @Composable RowScope.() -> Unit = {
-        if (d.commemorations.isNotEmpty()) {
-            val n = d.commemorations.size
-            SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
-        }
         if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
-        Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
         // Shown for the whole month at once, the rows stay where they are.
         Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
     }
-    val anyOpen = open["comms"] == true || (details && hasDetails)
+    val anyOpen = details && hasDetails
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
     val body: @Composable ColumnScope.() -> Unit = {
         Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
@@ -687,6 +706,12 @@ private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
     )
 }
 
+/** The day's commemorations not already named with an antiphon at its Lauds or Vespers (the web's `build_month`). */
+private fun OrdoDayView.dayComms(): List<String> {
+    val named = (laudsComms + vespersComms).map { it.name }.toSet()
+    return commemorations.filter { it !in named }
+}
+
 private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
 private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vespersPreces || vespersSuffrage || vespersComms.isNotEmpty() || vespersNote.isNotEmpty()
 
@@ -705,6 +730,9 @@ private fun Digest(d: OrdoDayView) {
     Column(
         Modifier.fillMaxWidth().padding(bottom = 8.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(8.dp),
     ) {
+        // The day's commemorations first, under "Day", as the hours' rows are set.
+        val day = d.dayComms()
+        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day.map { CommemorationView(it, "") })
         if (d.hasLauds()) {
             DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsComms)
         }

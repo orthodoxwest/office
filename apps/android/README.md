@@ -25,8 +25,9 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
   hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
   office, its continuation and report link), and
-  the ordo's month (year and month navigation, day rows with colour rails, ranks,
-  commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
+  the ordo's month (year and month navigation, the month's heading pinned while its days scroll,
+  day rows with colour rails, ranks, and one "Office details" disclosure holding the day's
+  commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo). The site menu carries the day's hours, the Ordo and
   Reminders, and the Theme (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On)
   rows. The date picker's title turns its
@@ -36,7 +37,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   theme and text size; home's frontispiece set in the niche, with its pointed head, stone
   moulding and day-coloured trim, centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
-  Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
+  Tabula's figures in one line and its tables side by side; from 1000dp "Blessing." hangs into
+  the margin as "All:" does, where below it stands above its words. `WideScreenshotTest` renders them
   at 1280×900, beside the web's desktop snapshots, and at a tablet's and a landscape phone's
   sizes.
 - **Hymns.** Each hymn's stanzas are centred in a column the width of its longest line, as the
@@ -49,7 +51,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   measured from the rendered web pages at a phone's width (one CSS px to one dp); compare
   `make android-screenshots` output with `.web-tools/tests/visual.spec.js-snapshots/`.
 - **Materials.** The plaster wall is baked from the web's own photograph and blend layers
-  (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). Ornaments are drawn
+  (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). The ordo's pinned
+  month heading carries a copy of the wall lined up with it, as the web's fixed attachment does. Ornaments are drawn
   from the web templates' SVG paths, and the Apse vault from its star tile.
 - **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
   is open, like the web's wake lock. The status bar is put away while the app is open; a swipe
