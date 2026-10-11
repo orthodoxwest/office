@@ -5,10 +5,10 @@ name: Publish to Play
 #
 # Every merge to master that changes the app goes to Internal testing, which only the maintainers
 # are testers of and which Google doesn't review. Those runs use the `play-internal` environment,
-# with no reviewer, and skip quietly until PLAY_SERVICE_ACCOUNT_JSON is set. Testers and the public
-# get a build only when it is promoted in Play Console, or uploaded by a manual run from the
-# Actions tab; manual runs use the `play` environment, so give it a required reviewer and nothing
-# else ships without approval.
+# with no reviewer, and skip quietly until PLAY_SERVICE_ACCOUNT_JSON is set. Closed testers get
+# the newest of them each Monday (play-promote.yml). The public gets a build only when it is
+# promoted in Play Console, or uploaded by a manual run from the Actions tab; manual runs use the
+# `play` environment, so give it a required reviewer.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).

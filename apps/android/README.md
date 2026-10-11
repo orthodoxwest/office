@@ -195,12 +195,16 @@ and uploads it to Google Play.
 - **Every merge to `master` that changes the app** goes to Internal testing, with the pull
   request's title as the release notes. Internal testing skips Google's review and reaches its
   testers (the maintainers) within minutes, so their phones always run `master`.
-- **Testers and the public** get a build when you promote it in Play Console (*Internal
-  testing → Promote release → Closed testing*, and later on to Production), which ships the
-  exact build you have been running. A manual run from the Actions tab can also upload to any
-  track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
-  notes, but only for a commit that isn't already in Play: each build's version code is its
-  commit count, and Play takes each version code once.
+- **Closed testers** get the newest Internal build every Monday: the **Promote to Closed
+  testing** workflow (`.github/workflows/play-promote.yml`, `tools/play-promote.py`) promotes
+  it, which sends it to Google's review, and does nothing when Closed testing already has it.
+  Run it from the Actions tab to promote at once, or with *dry run* to see what it would do.
+- **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
+  release → Production*), which ships the exact build testers have been running. A manual run
+  of Publish to Play from the Actions tab can also upload to any track (`internal`, `alpha`
+  for Closed testing, or `production`) with a staged rollout and notes, but only for a commit
+  that isn't already in Play: each build's version code is its commit count, and Play takes
+  each version code once.
 
 It needs:
 
