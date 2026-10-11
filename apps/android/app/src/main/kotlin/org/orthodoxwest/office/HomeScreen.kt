@@ -431,14 +431,17 @@ private fun Frontispiece(
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
                     val season = view.season.uppercase()
                     val seasonStyle = Type.label(11.2f, 0.12f).copy(color = p.muted)
-                    if (season.isEmpty() || picking) {
-                        if (season.isNotEmpty()) Text(season, Modifier.padding(top = 3.2.dp), style = seasonStyle)
-                        Disclosure("Change date", picking, { picking = !picking })
-                    } else {
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-                            Text(season, Modifier.alignByBaseline(), style = seasonStyle)
-                            Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.alignByBaseline())
+                    // One row throughout, so the control TalkBack just activated is the one that stays
+                    // (the web's one <summary>); open, the season fills its line and the control wraps.
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)) {
+                        if (season.isNotEmpty()) {
+                            Text(
+                                season,
+                                (if (picking) Modifier.fillMaxWidth() else Modifier).alignByBaseline(),
+                                style = seasonStyle.copy(textAlign = TextAlign.Center),
+                            )
                         }
+                        Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.alignByBaseline())
                     }
                 }
             },
