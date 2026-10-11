@@ -4022,7 +4022,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
    The hours' sun and moon are images too, and veil with the rest. Apse's
    tituli (section headings, psalm titles, "Ant.") are gilt where Nave's are
-   painted red ochre, so on the Apse they veil and on Nave they stay. Apse's
+   painted red ochre, so on the Apse they veil and warm with the season and
+   on Nave they stay. In Paschaltide the sun and Nave's gold moon warm too;
+   Apse's moon is silver and keeps its own ink then. Apse's
    --accent (links, menu, chosen options) is the room's functional gold and
    does not move.
 
@@ -4074,6 +4076,9 @@ body.season-eastertide {
   --ornament-hi: #c8922d;
   --ornament-lo: #886011;
   --inscription-ink: #f2e2b1;
+  /* Nave's gold moon warms with the rest of the leaf; Apse's silver moon is
+     restated in its blocks below, since silver does not take the gold. */
+  --moon-ink: var(--ornament);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -4090,6 +4095,8 @@ body.season-eastertide {
     --ornament-line: #7a6a44;
     --ornament-hi: #f2e2b1;
     --ornament-lo: #d3b86f;
+    --titulus: #e6cf8c;
+    --moon-ink: #c9d0d9;
   }
 }
 
@@ -4106,6 +4113,8 @@ body.season-eastertide {
   --ornament-line: #7a6a44;
   --ornament-hi: #f2e2b1;
   --ornament-lo: #d3b86f;
+  --titulus: #e6cf8c;
+  --moon-ink: #c9d0d9;
 }
 
 /* ── Narrow screens ── */

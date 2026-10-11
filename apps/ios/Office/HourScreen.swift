@@ -147,6 +147,7 @@ struct HourScreen: View {
     }
 
     var body: some View {
+        let p = self.p.seasoned(view.ornament)
         let o = Ornament.of(p, season: view.ornament)
         // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
@@ -234,6 +235,7 @@ struct HourScreen: View {
             }
         }
         .environment(\.ornament, o)
+        .environment(\.palette, p)
     }
 
     /**

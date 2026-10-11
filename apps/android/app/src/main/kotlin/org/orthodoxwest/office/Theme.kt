@@ -138,6 +138,21 @@ fun ornament(palette: Palette, season: String): Ornament = when {
     else -> Ornament(palette.gold, palette.lining, Color(0xFFB98D3C), Color(0xFF7D5C1C), Color(0xFFECD9A0))
 }
 
+/**
+ * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are gilt,
+ * so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's are
+ * painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms while
+ * Apse's silver keeps its own ink.
+ */
+fun seasoned(palette: Palette, season: String): Palette {
+    if (season != "passiontide" && season != "eastertide") return palette
+    val o = ornament(palette, season)
+    return palette.copy(
+        titulus = if (palette.dark) o.flat else palette.titulus,
+        moonInk = if (season == "passiontide" || !palette.dark) o.flat else palette.moonInk,
+    )
+}
+
 /** The liturgical colours of the ordo rails and the band across an hour's top (`.day-color-*`). */
 fun dayColor(name: String): Color = when (name) {
     "red" -> Color(0xFFB02A24)
@@ -245,7 +260,8 @@ fun OfficeTheme(
     content: @Composable () -> Unit,
 ) {
     val dark = choice.dark(isSystemInDarkTheme())
-    val palette = if (dark) Apse else Nave
+    val base = if (dark) Apse else Nave
+    val palette = seasoned(base, season)
     val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
         primary = palette.accent,
         background = palette.bg,
@@ -260,7 +276,7 @@ fun OfficeTheme(
     val scaled = Density(density.density * textSize.scale, density.fontScale)
     CompositionLocalProvider(
         LocalPalette provides palette,
-        LocalOrnament provides ornament(palette, season),
+        LocalOrnament provides ornament(base, season),
         LocalDensity provides scaled,
     ) {
         MaterialTheme(colorScheme = scheme, typography = MaterialTheme.typography.copy(bodyLarge = Type.body.copy(color = palette.text))) {

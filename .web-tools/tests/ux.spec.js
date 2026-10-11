@@ -1048,12 +1048,13 @@ test("the inscription band keeps the season with the rest of the gilding", async
   }
 });
 
-test("the hours' sun and moon and the Apse's gilt tituli veil in Passiontide", async ({ page }) => {
+test("the hours' sun and moon and the Apse's gilt tituli keep the season", async ({ page }) => {
   // The sun and moon are images, and Apse's tituli are gilt, so they veil
-  // with the drop caps. Nave's tituli are painted red ochre and stay.
+  // and warm with the drop caps. Nave's tituli are painted red ochre and
+  // stay; Apse's moon is silver and keeps its own ink at Eastertide.
   const ink = {};
   for (const theme of ["light", "dark"]) {
-    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"]]) {
+    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"], ["eastertide", "2026-04-20"]]) {
       const context = await page.context().browser().newContext();
       const sheet = await context.newPage();
       await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
@@ -1066,11 +1067,19 @@ test("the hours' sun and moon and the Apse's gilt tituli veil in Passiontide", a
       ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
       await context.close();
     }
-    const [ordinary, veiled] = [ink[`${theme} ordinary`], ink[`${theme} passiontide`]];
+    const [ordinary, veiled, paschal] = ["ordinary", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
     expect(veiled.sun).not.toBe(ordinary.sun);
+    expect(paschal.sun).not.toBe(ordinary.sun);
     expect(veiled.moon).not.toBe(ordinary.moon);
-    if (theme === "dark") expect(veiled.titulus).not.toBe(ordinary.titulus);
-    else expect(veiled.titulus).toBe(ordinary.titulus);
+    if (theme === "dark") {
+      expect(paschal.moon).toBe(ordinary.moon);
+      expect(veiled.titulus).not.toBe(ordinary.titulus);
+      expect(paschal.titulus).not.toBe(ordinary.titulus);
+    } else {
+      expect(paschal.moon).not.toBe(ordinary.moon);
+      expect(veiled.titulus).toBe(ordinary.titulus);
+      expect(paschal.titulus).toBe(ordinary.titulus);
+    }
   }
 });
 

@@ -236,10 +236,11 @@ enum HourSign {
     }
 }
 
-/// An hour title's sign alone, the rule itself its line: the ✠ in the lining, the sun gilt, the moon in its own ink.
+/// An hour title's sign alone, the rule itself its line: the ✠ in the lining, the sun gilt (veiled and warmed with the season), the moon in its own ink.
 struct TitleSign: View {
     let sign: HourSign
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -249,7 +250,7 @@ struct TitleSign: View {
             // nearer the sun's and moon's weight in the rule's break.
             case .cross: Cross(size: 13.75, color: p.lining)
             // 1.15em and 1.3em of the headpiece's 0.8rem.
-            case .sun: PaintedMark(.sun, size: 14.72 * m.type, color: p.gold)
+            case .sun: PaintedMark(.sun, size: 14.72 * m.type, color: o.flat)
             case .moon: PaintedMark(.moon, size: 16.64 * m.type, color: p.moonInk)
             }
         }
