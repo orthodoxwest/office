@@ -477,20 +477,11 @@ private struct Frontispiece: View {
                     let season = Text(view.season.uppercased()).type(.label(11.2, 0.12)).foregroundStyle(p.muted)
                         .multilineTextAlignment(.center)
                         .accessibilityLabel(view.season)
-                    if picking {
-                        season.padding(.top, m.px(3.2))
+                    // One layout either way, so "Change date" stays the control VoiceOver is on
+                    // as it opens.
+                    SeasonLine(spacing: m.px(16), above: m.px(3.2), stacked: picking) {
+                        season
                         change
-                    } else {
-                        ViewThatFits(in: .horizontal) {
-                            HStack(spacing: m.px(16)) {
-                                season
-                                change
-                            }
-                            VStack(spacing: 0) {
-                                season.padding(.top, m.px(3.2))
-                                change
-                            }
-                        }
                     }
                 }
             }
@@ -579,6 +570,55 @@ private struct Frontispiece: View {
         }
         .padding(.horizontal, -side)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/**
+ * The season and "Change date" (the web's `.home-day-meta`): side by side where the line has room
+ * for both, else, and always while the picker is open, the control on a line of its own under the
+ * season, which then stands `above` below the rule.
+ */
+private struct SeasonLine: Layout {
+    let spacing: CGFloat
+    let above: CGFloat
+    let stacked: Bool
+
+    /// Whether the two stand side by side in `width`, at their ideal widths.
+    private func beside(_ width: CGFloat?, _ subviews: Subviews) -> Bool {
+        guard !stacked, subviews.count == 2 else { return false }
+        guard let width, width.isFinite else { return true }
+        let ideal = subviews.map { $0.sizeThatFits(.unspecified).width }
+        return ideal[0] + spacing + ideal[1] <= width
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        if beside(proposal.width, subviews) {
+            let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+            return CGSize(width: sizes[0].width + spacing + sizes[1].width, height: max(sizes[0].height, sizes[1].height))
+        }
+        let free = ProposedViewSize(width: proposal.width, height: nil)
+        let sizes = subviews.map { $0.sizeThatFits(free) }
+        let width = sizes.map(\.width).max() ?? 0
+        return CGSize(width: width, height: above + sizes.map(\.height).reduce(0, +))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        if beside(bounds.width, subviews) {
+            let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+            var x = bounds.midX - (sizes[0].width + spacing + sizes[1].width) / 2
+            for (subview, size) in zip(subviews, sizes) {
+                subview.place(at: CGPoint(x: x, y: bounds.midY), anchor: .leading, proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            return
+        }
+        let free = ProposedViewSize(width: bounds.width, height: nil)
+        var y = bounds.minY + above
+        for subview in subviews {
+            let size = subview.sizeThatFits(free)
+            subview.place(at: CGPoint(x: bounds.midX, y: y), anchor: .top, proposal: ProposedViewSize(width: bounds.width, height: size.height))
+            y += size.height
+        }
     }
 }
 
