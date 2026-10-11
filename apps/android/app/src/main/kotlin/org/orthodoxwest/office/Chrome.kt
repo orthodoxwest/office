@@ -190,9 +190,9 @@ fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescript
  * than left to whichever face sets `▾`.
  */
 @Composable
-fun Caret(open: Boolean, ink: Color) {
+fun Caret(open: Boolean, ink: Color, lighter: Boolean = true) {
     val (gap, w, h) = with(LocalDensity.current) { Triple(5.5.sp.toDp(), 5.5.sp.toDp(), 4.5.sp.toDp()) }
-    val fill = ink.copy(alpha = ink.alpha * 0.7f)
+    val fill = if (lighter) ink.copy(alpha = ink.alpha * 0.7f) else ink
     // Drawn, not read: the disclosure says expanded or collapsed.
     Canvas(Modifier.padding(start = gap).size(w, h).clearAndSetSemantics {}) {
         val path = Path().apply {
@@ -504,19 +504,20 @@ private fun PrefHint(text: String) {
     )
 }
 
-/** A small uppercase disclosure label with its caret ("Change date ▾"). */
+/** A small uppercase disclosure label with its caret ("Change date ▾"), muted, in the accent while open. */
 @Composable
 fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String? = null, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
+    val ink = if (open) p.accent else p.muted
     Row(modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             buildAnnotatedString {
                 append(label.uppercase())
                 if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + value.uppercase()) }
             },
-            style = Type.control.copy(color = p.muted),
+            style = Type.control.copy(color = ink),
         )
-        Caret(open, p.muted)
+        Caret(open, ink)
     }
 }
 
@@ -553,90 +554,100 @@ private val PICKER_YEARS = 1950..2150
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days
- * are the choices. Sundays are red; the chosen day takes the gold underline, as a chosen
- * prayer form does, and today a quiet wash. The title turns the grid into the year's months,
- * and back; both views keep six weeks' height, so turning between them moves nothing below.
+ * are the choices. Sundays are red; the chosen day takes the accent on the gold underline, as
+ * a chosen prayer form does, and today a quiet wash. The title turns the grid into the year's
+ * months, and back; both views keep six weeks' height, so turning between them moves nothing
+ * below. The grid is seven thumb-wide days at most, centred (`.date-picker`). `centred` sets
+ * Previous · Today · Next together in the middle (`.day-nav`) rather than at the edges, as the
+ * web's home does at every width and an hour above 540px.
  */
 @Composable
-fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) {
+fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
     var month by remember(shown) { mutableStateOf(YearMonth.from(shown).coerceIn(PICKER_YEARS)) }
     var months by remember(shown) { mutableStateOf(false) }
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
+            horizontalArrangement = if (centred) Arrangement.Center else Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text("← Previous", Modifier.tap(label = "Previous day") { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
-            Spacer(Modifier.weight(1f))
+            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
             if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
-            Spacer(Modifier.weight(1f))
+            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
             Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
         }
-        Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-            // A month's step in the days, a year's in the months; none past the picker's span.
-            val step = if (months) 12L else 1L
-            val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
-            val forward = month.plusMonths(step).takeIf { it.year in PICKER_YEARS }
-            val stepStyle = link.copy(fontSize = 22.sp)
-            Text(
-                "‹",
-                Modifier.then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier)
-                    .padding(horizontal = 24.dp),
-                style = if (back != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
-            )
-            val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
-            Row(
-                Modifier.weight(1f).heightIn(min = 44.dp)
-                    .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(title.uppercase(), style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
-                Caret(months, p.text)
+        Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+                // A month's step in the days, a year's in the months; none past the picker's span.
+                val step = if (months) 12L else 1L
+                val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
+                val forward = month.plusMonths(step).takeIf { it.year in PICKER_YEARS }
+                val stepStyle = link.copy(fontSize = 22.sp)
+                // Each step a day's cell wide, over the first and last columns.
+                Box(
+                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) { Text("‹", style = if (back != null) stepStyle else stepStyle.copy(color = p.border)) }
+                val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
+                Row(
+                    Modifier.weight(1f).heightIn(min = 44.dp)
+                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(title.uppercase(), style = Type.label(11.52f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
+                    // Set like the disclosure labels around it, with their gold caret.
+                    Caret(months, p.goldLine, lighter = false)
+                }
+                Box(
+                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) { Text("›", style = if (forward != null) stepStyle else stepStyle.copy(color = p.border)) }
             }
-            Text(
-                "›",
-                Modifier.then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier)
-                    .padding(horizontal = 24.dp),
-                style = if (forward != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
-            )
-        }
-        // A swipe across the days turns the month, as the arrows do.
-        val swipe = with(LocalDensity.current) { 48.dp.toPx() }
-        var dragged by remember { mutableFloatStateOf(0f) }
-        val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
-        Box(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp).draggable(
-                rememberDraggableState { dragged += it },
-                Orientation.Horizontal,
-                enabled = !months,
-                onDragStarted = { dragged = 0f },
-                onDragStopped = {
-                    val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
-                    if (to != null && to.year in PICKER_YEARS) month = to
-                },
-            ),
-        ) {
-            // The days always lay out, for the height both views share; the months cover them.
-            AnimatedContent(
-                month,
-                Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
-                transitionSpec = {
-                    val on = if (targetState > initialState) 1 else -1
-                    (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
-                        (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
-                },
-                label = "month",
-            ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
-            if (months || daysAlpha < 1f) {
-                MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
-                    month = YearMonth.of(month.year, m)
-                    months = false
+            // A swipe across the days turns the month, as the arrows do.
+            val swipe = with(LocalDensity.current) { 48.dp.toPx() }
+            var dragged by remember { mutableFloatStateOf(0f) }
+            val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
+            Box(
+                Modifier.fillMaxWidth().draggable(
+                    rememberDraggableState { dragged += it },
+                    Orientation.Horizontal,
+                    enabled = !months,
+                    onDragStarted = { dragged = 0f },
+                    onDragStopped = {
+                        val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
+                        if (to != null && to.year in PICKER_YEARS) month = to
+                    },
+                ),
+            ) {
+                // The days always lay out, for the height both views share; the months cover them.
+                AnimatedContent(
+                    month,
+                    Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
+                    transitionSpec = {
+                        val on = if (targetState > initialState) 1 else -1
+                        (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
+                            (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
+                    },
+                    label = "month",
+                ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
+                if (months || daysAlpha < 1f) {
+                    MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
+                        month = YearMonth.of(month.year, m)
+                        months = false
+                    }
                 }
             }
         }
     }
 }
+
+/** Today's wash in the picker: the gold at a tenth on Nave; on the Apse the vault's blue lifted (`--apse-lift`), as gold reads grey on the night. */
+private fun todayWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.gold.copy(alpha = 0.1f)
 
 private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     year < years.first -> YearMonth.of(years.first, 1)
@@ -656,7 +667,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
             Text(
                 d.getDisplayName(JavaTextStyle.NARROW, Locale.US),
                 Modifier.weight(1f).padding(vertical = 8.dp),
-                style = Type.label(11.5f, 0.08f).copy(color = p.muted, textAlign = TextAlign.Center),
+                style = Type.label(10.56f, 0.1f).copy(color = if (d == DayOfWeek.SUNDAY) p.rubric else p.muted, textAlign = TextAlign.Center),
             )
         }
     }
@@ -669,8 +680,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
-                        // Today in Apse takes the vault's blue lifted, as the web's --apse-lift: gold reads grey on the night.
-                        .then(if (day == today) Modifier.background(if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.pressedWash) else Modifier)
+                        .then(if (day == today) Modifier.background(todayWash(p)) else Modifier)
                         .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
                             haptics.chose()
                             onPick(day)
@@ -678,10 +688,16 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     contentAlignment = Alignment.Center,
                 ) {
                     if (day != null) {
+                        // A chosen Sunday keeps its rubric over the gold rule.
+                        val ink = when {
+                            day.dayOfWeek == DayOfWeek.SUNDAY -> p.rubric
+                            day == shown -> p.accent
+                            else -> p.text
+                        }
                         Text(
                             day.dayOfMonth.toString(),
                             Modifier.goldUnderline(day == shown, p.goldLine),
-                            style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = if (day.dayOfWeek == DayOfWeek.SUNDAY) p.rubric else p.text, fontFeatureSettings = "lnum"),
+                            style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = ink, fontFeatureSettings = "lnum"),
                         )
                     }
                 }
@@ -704,7 +720,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.background(p.gold.copy(alpha = 0.1f)) else Modifier)
+                                .then(if (today.year == year && today.monthValue == m) Modifier.background(todayWash(p)) else Modifier)
                                 .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)

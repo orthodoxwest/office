@@ -426,10 +426,20 @@ private fun Frontispiece(
                     PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(view.currentHour, view.currentHourNote, prayed, tier) { onHour(date, it) }
-                    // Season and date control share one line after the invitation.
+                    // Season and date control share one baseline after the invitation (`.home-day-meta`);
+                    // once open, the control takes a row of its own under the season.
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
-                    if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
-                    Disclosure("Change date", picking, { picking = !picking })
+                    val season = view.season.uppercase()
+                    val seasonStyle = Type.label(11.2f, 0.12f).copy(color = p.muted)
+                    if (season.isEmpty() || picking) {
+                        if (season.isNotEmpty()) Text(season, Modifier.padding(top = 3.2.dp), style = seasonStyle)
+                        Disclosure("Change date", picking, { picking = !picking })
+                    } else {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                            Text(season, Modifier.alignByBaseline(), style = seasonStyle)
+                            Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.alignByBaseline())
+                        }
+                    }
                 }
             },
             // "Change date"'s picker, apart from the hours above it so the head can be measured
@@ -443,7 +453,7 @@ private fun Frontispiece(
                                 unfolded[0] = placeable.height
                                 layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                             },
-                        ) { DatePicker(date, today) { picking = false; onDate(it) } }
+                        ) { DatePicker(date, today, centred = true) { picking = false; onDate(it) } }
                     }
                 }
             },
