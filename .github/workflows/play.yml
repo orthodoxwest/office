@@ -3,12 +3,12 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Internal testing, which only the maintainers
-# are testers of and which Google doesn't review. Those runs use the `play-internal` environment,
-# with no reviewer, and skip quietly until PLAY_SERVICE_ACCOUNT_JSON is set. Closed testers get
-# the newest of them each Monday (play-promote.yml). The public gets a build only when it is
-# promoted in Play Console, or uploaded by a manual run from the Actions tab; manual runs use the
-# `play` environment, so give it a required reviewer.
+# Every merge to master that changes the app goes to Closed testing (the `alpha` track), so testers
+# always have master once Google's review passes; a newer merge replaces a release still in review.
+# Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
+# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build only when it is promoted in Play
+# Console, or uploaded by a manual run from the Actions tab; manual runs use the `play`
+# environment, so give it a required reviewer.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).
@@ -40,7 +40,7 @@ on:
         type: string
         default: ""
 
-# A merge waiting behind another replaces it, so Internal testing gets the newest build; a
+# A merge waiting behind another replaces it, so Closed testing gets the newest build; a
 # manual run has its own queue and is never replaced by a merge.
 concurrency:
   group: play-${{ github.event_name }}
@@ -63,7 +63,7 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'internal' }}
+    name: Build and upload to ${{ inputs.track || 'alpha' }}
     needs: ready
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
@@ -72,7 +72,7 @@ jobs:
     permissions:
       contents: read
     env:
-      TRACK: ${{ inputs.track || 'internal' }}
+      TRACK: ${{ inputs.track || 'alpha' }}
 
     steps:
       - name: Release from master only
