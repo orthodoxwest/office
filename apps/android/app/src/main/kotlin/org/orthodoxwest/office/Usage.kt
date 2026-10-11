@@ -1,7 +1,9 @@
 package org.orthodoxwest.office
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.provider.Settings
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Clock
@@ -29,7 +31,9 @@ import org.orthodoxwest.office.core.usageEndpointHeader
  * sends ties one day to the next. The app also keeps the day it was first counted, and says
  * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
- * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do.
+ * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a Firebase Test
+ * Lab device ([counts]): Play's pre-launch report installs every uploaded build fresh on a
+ * handful of them and crawls it, and each would count as a new reader.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
@@ -94,6 +98,16 @@ class Usage(
 
         /** One beacon at a time, off the main thread. */
         private val sender: Executor = Executors.newSingleThreadExecutor { Thread(it, "usage").apply { isDaemon = true } }
+
+        /**
+         * Whether this build on this device reports. Test Lab, which runs Play's pre-launch
+         * reports, marks its devices with this system setting
+         * (firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for).
+         */
+        fun counts(context: Context, build: Boolean = BuildConfig.COUNT_USAGE): Boolean =
+            build && Settings.System.getString(context.contentResolver, TEST_LAB) != "true"
+
+        private const val TEST_LAB = "firebase.test.lab"
 
         private val agent = "DivineOffice/${BuildConfig.VERSION_NAME} (Android ${Build.VERSION.RELEASE})"
 

@@ -147,7 +147,10 @@ to the next. A beacon is best effort: it is never queued offline, retried later,
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
-never does. `UsageTest` checks what counts, the daily identifier, and the retry.
+never does. Neither does a Firebase Test Lab device (the `firebase.test.lab` system setting):
+Play's pre-launch report installs each uploaded build fresh on several and crawls it, and with an
+upload on every merge they would otherwise outnumber the testers. `UsageTest` checks what counts,
+the daily identifier, the retry, and the Test Lab exclusion.
 
 ## Trying it on a phone
 
