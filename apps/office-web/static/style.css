@@ -937,6 +937,13 @@ summary:focus-visible {
   .site-nav-shell {
     align-items: baseline;
   }
+
+  /* The nav ships in a closed <details> and shows regardless of [open].
+     WebKit hides a closed disclosure's content until app.js opens it, so the
+     wide nav was missing without scripting and arrived late with it. */
+  .site-menu::details-content {
+    content-visibility: visible;
+  }
 }
 
 @media (min-width: 701px) and (pointer: coarse) {
@@ -8041,12 +8048,11 @@ body.page-home::before {
 
   .month h2 { position: static; }
   .day-disclosures { display: block; }
-  /* !important and display: WebKit hides a closed disclosure's content by
-     its own styles on that slot, which a plain declaration here does not beat
-     (Chromium's are overridden either way). */
+  /* No unfolding on paper: WebKit holds a discrete content-visibility
+     transition at hidden, so the motion rule would keep the digest unprinted. */
   :root .page-calendar .day-disclosures details::details-content {
-    display: block !important;
-    content-visibility: visible !important;
+    content-visibility: visible;
+    transition: none;
     block-size: auto;
     overflow: visible;
   }

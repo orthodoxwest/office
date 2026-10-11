@@ -454,27 +454,9 @@ function usageBeaconBody(scope) {
       });
     }
     // getAnimations flushes style, so the dip's transitions exist by now.
-    var isDip = function (anim) {
+    var dips = root.getAnimations({ subtree: true }).filter(function (anim) {
       return anim.transitionProperty === "opacity";
-    };
-    var dips = root.getAnimations({ subtree: true }).filter(isDip);
-    // WebKit leaves pseudo-elements out of an element's subtree and reports
-    // no dip: watch the wall itself fall to transparent instead, frame by
-    // frame, still bounded by the limit.
-    if (!dips.length) {
-      return new Promise(function (resolve) {
-        var started = Date.now();
-        var look = function () {
-          var wall = Number(getComputedStyle(root, "::before").opacity);
-          if (wall <= 0.01 || Date.now() - started >= VAULT_FADE_LIMIT_MS) {
-            resolve();
-          } else {
-            requestAnimationFrame(look);
-          }
-        };
-        requestAnimationFrame(look);
-      });
-    }
+    });
     return Promise.race([
       Promise.all(dips.map(function (anim) {
         return anim.finished.catch(function () {});
@@ -506,7 +488,14 @@ function usageBeaconBody(scope) {
       flashThemeTransition();
       paintThemeChoice(choice);
       writeStoredTheme(choice);
-      root.classList.remove("vault-hidden");
+      // Lift the wall a frame after the swap, so the new material is in place
+      // while it is still transparent (WebKit reports a pseudo-element's
+      // after-change style for a transition not yet started).
+      requestAnimationFrame(function () {
+        if (turn === vaultFadeTurn) {
+          root.classList.remove("vault-hidden");
+        }
+      });
     });
   };
 

@@ -2608,8 +2608,11 @@ test("ordo print reveals the office digest without changing screen disclosures",
   const day = page.locator("#d-2026-03-01");
   await expect(day.locator(".day-office-digest")).toBeHidden();
   await page.emulateMedia({ media: "print" });
-  await expect(day.locator(".day-office-digest")).toBeVisible();
-  await expect(day.locator(".day-office-comm").first()).toBeVisible();
+  // Rendered, though its <details> stays closed: Playwright's WebKit counts
+  // anything in a closed <details> as hidden, so ask the engine itself.
+  const rendered = locator => locator.evaluate(el => el.checkVisibility() && el.getBoundingClientRect().height > 0);
+  await expect.poll(() => rendered(day.locator(".day-office-digest"))).toBe(true);
+  await expect.poll(() => rendered(day.locator(".day-office-comm").first())).toBe(true);
   await expect(page.locator(".calendar-tools")).toBeHidden();
   await expect(page.locator(".ordo-continuation")).toBeHidden();
   await page.emulateMedia({ media: "screen" });
