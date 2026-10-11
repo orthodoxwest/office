@@ -187,6 +187,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var martyrology: Bool
     /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
     @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
+    /// The ornament season of each home or hour composed on the way back, which retints the
+    /// gilding of the chrome over it (the menu's painted line), as the page's own.
+    @Published private(set) var seasons: [Page: String] = [:]
     /// Today, read again whenever the app comes forward; a screenshot run can fix it.
     @Published private(set) var today: CivilDate
     /// The hour of the clock, which chooses home's invitation.
@@ -296,6 +299,17 @@ final class AppModel: ObservableObject {
     func composed(_ view: HourView, page: Page) {
         guard view.hour == "prime" else { return }
         primeMartyrology = (page, view.martyrology)
+    }
+
+    /// The ornament season of the page shown: its own once composed, else none.
+    var season: String { seasons[page] ?? "" }
+
+    /// Notes a composed page's ornament season, letting go of pages no longer on the way back.
+    func composed(season: String, page: Page) {
+        let kept = Set([Page.home(root)] + pages)
+        var now = seasons.filter { kept.contains($0.key) }
+        now[page] = season
+        if now != seasons { seasons = now }
     }
 
     /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.

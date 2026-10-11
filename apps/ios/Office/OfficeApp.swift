@@ -104,7 +104,8 @@ struct RootView: View {
             .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
         }
         .environment(\.palette, palette)
-        .environment(\.ornament, Ornament.of(palette, season: ""))
+        // The page's season for the chrome over it (the menu); a home or an hour sets its own within.
+        .environment(\.ornament, Ornament.of(palette, season: model.season))
         .environment(\.metrics, Metrics(textSize: model.textSize, dynamicType: dynamicType))
         .background(palette.bg.ignoresSafeArea())
         .tint(palette.accent)

@@ -57,6 +57,8 @@ struct ProseSpec: Equatable {
     var restIndent: CGFloat = 0
     var tabs: [NSTextTab] = []
     var initial: Initial?
+    /// How far the block reaches into the margin before its measure, for a sigil hung there ("All:").
+    var hang: CGFloat = 0
 }
 
 /// A spec laid out at one width: its line fragments, and where the initial stands.

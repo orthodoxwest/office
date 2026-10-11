@@ -160,16 +160,30 @@ func dayColor(_ name: String) -> Color {
     }
 }
 
+/// The band of the day's colour across an hour's top (`.color-band-*`): the rails' colours, but a
+/// white day's is the pale linen of a white vestment, in both themes.
+func bandColor(_ name: String) -> Color {
+    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name)
+}
+
+/// A day's colour as `.day-color-*` sets it on an hour's title: on the Apse night white and black
+/// are lifted, so the lozenge does not sink into the night.
+func titleColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    default: return dayColor(name)
+    }
+}
+
 /// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
 /// is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
 func dayColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
-    case ("white", true): return Color(hex: 0xD0B06A)
-    case ("black", true): return Color(hex: 0x8A94A0)
     case ("red", true): return Color(hex: 0xC9503F)
     case ("green", true): return Color(hex: 0x4F8A52)
     case ("violet", true): return Color(hex: 0x8D62AD)
-    default: return dayColor(name)
+    default: return titleColor(name, p)
     }
 }
 
@@ -374,7 +388,7 @@ extension EnvironmentValues {
         set { self[WideKey.self] = newValue }
     }
 
-    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
+    /// Whether a wide page is narrower than the hours' header holds on one line (701–999pt): there
     /// an hour's links take a rank of their own under the brand and Settings.
     var ranked: Bool {
         get { self[RankedKey.self] }
@@ -385,8 +399,9 @@ extension EnvironmentValues {
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
 
-/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
-let rankedBelow: CGFloat = 960
+/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`,
+/// where the list fits on one line at Larger text).
+let rankedBelow: CGFloat = 1000
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

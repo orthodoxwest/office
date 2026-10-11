@@ -22,7 +22,10 @@ native text, screen for screen:
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
   page of the same kind (the next hour, another day or month) changes in place, keeping the
   page shown until the next is composed and then moving along Material's shared axis.
-  Disclosures unfold, the menu drops in, the picker's months slide and follow a swipe, and a
+  Disclosures unfold; home's date picker is revealed from its top while the head above the day
+  gives up its spare height in step, as the web's and Android's do. Another prayer form, or the
+  Martyrology turned on or off, changes the hour where it stands, keeping the reader's place and
+  open sections. The menu drops in, the picker's months slide and follow a swipe, and a
   new theme or text size eases in. Reduce Motion turns the slides to fades. A pressed control
   dims; a choice (a setting, a prayer form, a day) gives a selection tick, a checkbox a light
   tap, and opening a page nothing.

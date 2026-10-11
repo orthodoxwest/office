@@ -71,7 +71,7 @@ struct OrdoScreen: View {
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                     rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(5.6))
-                    MonthHeading(name: monthName(number), isTodaysMonth: Int(model.today.year) == year && Int(model.today.month) == number) {
+                    MonthHeading(name: monthName(number)) {
                         withAnimation { scroll.scrollTo("top", anchor: .top) }
                     }
                     .ordoColumn(m, wide: wide)
@@ -226,11 +226,12 @@ private struct OrdoHeader: View {
                 .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
             VRule(color: p.border)
             Button { model.open(.ordo(year: Int(t.year), month: Int(t.month), day: Int(t.day))) } label: {
-                // The rule spans the cell, less its inset, as the web's current-year mark.
+                // Always underlined in the gold line, in any year, as the web's `.calendar-today-link`;
+                // the rule spans the cell, less its inset.
                 Text("Today").type(nav).foregroundStyle(p.accent)
                     .padding(m.px(12))
                     .frame(maxWidth: wide ? nil : .infinity)
-                    .goldUnderline(Int(t.year) == year, p.goldLine, inset: m.px(wide ? 12 : 24))
+                    .goldUnderline(true, p.goldLine, inset: m.px(wide ? 12 : 24))
             }
             .buttonStyle(Quiet())
             .accessibilityHint("Opens today in the ordo")
@@ -258,7 +259,7 @@ private struct OrdoHeader: View {
                         let todays = Int(t.year) == year && Int(t.month) == mo
                         Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
                             Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
-                                .foregroundStyle(current ? (wide ? p.accent : p.text) : p.muted)
+                                .foregroundStyle(current ? p.accent : p.muted)
                                 .overlay(alignment: .bottom) {
                                     if !wide {
                                         ZStack {
@@ -290,10 +291,9 @@ private struct OrdoHeader: View {
     }
 }
 
-/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule; the way back to the top.
+/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule and its lozenge; the way back to the top.
 private struct MonthHeading: View {
     let name: String
-    let isTodaysMonth: Bool
     let top: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -311,8 +311,9 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
-        // Today's month takes the lozenge: a 6pt square of the lining's terracotta, ringed in the ground.
-        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4.24 : nil, ring: p.bg, ink: p.lining) }
+        // Every month's rule takes the lozenge, echoing the hour's title (the web's `.month h2::after`):
+        // a 6pt square of the lining's terracotta, ringed in the ground.
+        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 4.24, ring: p.bg, ink: p.lining) }
     }
 }
 
