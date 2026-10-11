@@ -269,6 +269,13 @@ pub struct PrivacyData {
     pub chrome: Chrome,
 }
 
+/// How to join the Android app's closed test on Google Play.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct BetaData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+}
+
 /// The styled page for other 4xx and 5xx conditions.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct ErrorData {

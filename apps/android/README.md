@@ -215,6 +215,14 @@ It needs:
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
 
+### Closed testers
+
+Closed testing's tester list is the Google Group `daily-office-testers` (*Anyone can join*),
+so volunteers add themselves. Send them to `/beta` on the website: it links the group and the
+test's opt-in page (`play.google.com/apps/testing/org.orthodoxwest.office`) and says what to
+keep doing for the 14 days Google asks of a new developer account. Neither link is set in
+code; if the group's name changes in Play Console, change `crates/render-html/templates/beta.html` to match.
+
 ### Listing screenshots
 
 `StoreScreenshotTest` renders the listing's phone screenshots at 1080×1920 into

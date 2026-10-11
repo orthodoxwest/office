@@ -12,8 +12,9 @@ use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
-    CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonasticRow,
-    MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
+    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
+    MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
+    TabulaRow,
 };
 
 use crate::Server;
@@ -242,6 +243,25 @@ impl Server {
             },
         };
         match self.pages.privacy(&data) {
+            Ok(body) => html(StatusCode::OK, body),
+            Err(e) => render_failed(&e),
+        }
+    }
+
+    /// The Android closed test's sign-up, passed around by hand rather than found: kept out of
+    /// search and the sitemap.
+    pub fn beta(&self, req: &Req) -> Response<Body> {
+        let data = BetaData {
+            chrome: Chrome {
+                page: "beta".into(),
+                nav_date: self.nav_date_now(req),
+                site: req.site.into(),
+                canonical: "/beta".into(),
+                noindex: true,
+                ..Chrome::default()
+            },
+        };
+        match self.pages.beta(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),
         }
