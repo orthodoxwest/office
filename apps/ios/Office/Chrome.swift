@@ -40,11 +40,13 @@ struct Caret: View {
     let open: Bool
     /// The label's colour.
     let color: Color
+    /// How much of it the caret takes: 0.7, or all of a colour of its own (the picker's gold).
+    var share: Double = 0.7
     @Environment(\.metrics) private var m
 
     var body: some View {
         CaretShape(open: open)
-            .fill(color.opacity(0.7))
+            .fill(color.opacity(share))
             .frame(width: 5.5 * m.type, height: 4.5 * m.type)
             .padding(.leading, 5.5 * m.type)
             .accessibilityHidden(true)
@@ -427,8 +429,11 @@ extension View {
     }
 }
 
-/// How a disclosure opens and closes, as on Android: over a quarter second, easing in and out.
-let unfolding = Animation.easeInOut(duration: 0.26)
+/// How a disclosure opens, as on Android: over a quarter second, on Material's standard curve.
+let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.26)
+
+/// How home's date picker folds away, as Android's: a little quicker than it opened.
+let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.2)
 
 extension AnyTransition {
     /// A disclosure's contents, fading in as they drop a little from their control, and back.
@@ -472,9 +477,10 @@ private let pickerYears = 1950...2150
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days are
- * the choices. Sundays are red; the chosen day takes the gold underline, as a chosen prayer form
- * does, and today a quiet wash. The title turns the grid into the year's months, and back; both
- * views keep six weeks' height, so turning between them moves nothing below.
+ * the choices, a week at most seven thumbs wide. Sundays are red; the chosen day is in the accent
+ * over the gold underline, as a chosen prayer form is, and today takes a quiet wash. The title
+ * turns the grid into the year's months, and back; both views keep six weeks' height, so turning
+ * between them moves nothing below.
  */
 struct DayPicker: View {
     let shown: CivilDate
@@ -487,6 +493,7 @@ struct DayPicker: View {
     @State private var turn: CGFloat = 1
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.wide) private var wide
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(shown: CivilDate, today: CivilDate, pick: @escaping (CivilDate) -> Void) {
@@ -500,60 +507,72 @@ struct DayPicker: View {
 
     var body: some View {
         let link = Scale.body.sized(16, line: 24)
+        // A day's cell, a thumb wide and high (`--date-cell`, the web's touch target).
+        let cell = max(m.px(44), 44)
         VStack(spacing: 0) {
             Hairline(color: p.border).padding(.horizontal, m.px(24))
-            HStack {
+            // Spread across a phone; gathered in the middle on a wide screen, as the web's `.day-nav`.
+            HStack(spacing: wide ? m.px(5.6) : nil) {
                 Button { pick(shown.adding(days: -1)) } label: { Text("← Previous").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
                     .buttonStyle(Quiet()).accessibilityLabel("Previous day")
-                Spacer()
+                if !wide { Spacer() }
                 if shown != today {
                     Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
                 }
-                Spacer()
+                if !wide { Spacer() }
                 Button { pick(shown.adding(days: 1)) } label: { Text("Next →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
                     .buttonStyle(Quiet()).accessibilityLabel("Next day")
             }
             .padding(.top, m.px(8))
-            HStack(spacing: 0) {
-                // A month's step in the days, a year's in the months; none past the picker's span.
-                step("‹", back, months ? "Previous year" : "Previous month")
-                Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
-                    HStack(spacing: 0) {
-                        Text(title.uppercased()).type(.label(12.8, 0.1)).foregroundStyle(p.text)
-                        Caret(open: months, color: p.text)
+            // Seven thumb-wide days where they fit, centred; on a narrower column the week narrows
+            // to it, the days keeping their height.
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    // A month's step in the days, a year's in the months; none past the picker's span.
+                    step("‹", back, months ? "Previous year" : "Previous month", width: cell)
+                    Button { withAnimation(.easeInOut(duration: 0.18)) { months.toggle() } } label: {
+                        // Set like the disclosure labels around it, with their gold caret.
+                        HStack(spacing: 0) {
+                            Text(title.uppercased()).type(.label(11.52, 0.1)).foregroundStyle(p.text)
+                            Caret(open: months, color: p.goldLine, share: 1)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .buttonStyle(Quiet())
+                    .accessibilityLabel(months ? "\(title), back to days" : "\(title), choose another month")
+                    step("›", forward, months ? "Next year" : "Next month", width: cell)
                 }
-                .buttonStyle(Quiet())
-                .accessibilityLabel(months ? "\(title), back to days" : "\(title), choose another month")
-                step("›", forward, months ? "Next year" : "Next month")
+                .padding(.top, m.px(12))
+                ZStack {
+                    // The days always lay out, for the height both views share; the months cover them.
+                    // A new month's days slide in the way it turned.
+                    days
+                        .id(year * 12 + month)
+                        .transition(reduceMotion ? .opacity : .asymmetric(
+                            insertion: .offset(x: 60 * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
+                            removal: .offset(x: -60 * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
+                        ))
+                        .opacity(months ? 0 : 1)
+                        .accessibilityHidden(months)
+                    if months { monthGrid.transition(.opacity) }
+                }
+                .clipped()
+                // A swipe across the days turns the month, as the arrows do.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 24).onEnded { drag in
+                        guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2) else { return }
+                        turnTo(drag.translation.width < 0 ? forward : back)
+                    }
+                )
             }
-            .padding(.top, m.px(12))
-            ZStack {
-                // The days always lay out, for the height both views share; the months cover them.
-                // A new month's days slide in the way it turned.
-                days
-                    .id(year * 12 + month)
-                    .transition(reduceMotion ? .opacity : .asymmetric(
-                        insertion: .offset(x: 60 * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
-                        removal: .offset(x: -60 * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
-                    ))
-                    .opacity(months ? 0 : 1)
-                    .accessibilityHidden(months)
-                if months { monthGrid.transition(.opacity) }
-            }
-            .clipped()
+            .frame(maxWidth: 7 * cell)
             .padding(.horizontal, m.px(8))
-            // A swipe across the days turns the month, as the arrows do.
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 24).onEnded { drag in
-                    guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2) else { return }
-                    turnTo(drag.translation.width < 0 ? forward : back)
-                }
-            )
         }
         .padding(.top, m.px(8))
     }
+
+    /// Today's wash, in the days and the months: the gold thinned, or by night the vault's blue lifted (`--apse-lift`).
+    private var todayWash: Color { p.dark ? Color(hex: 0x84A0CC).opacity(0.13) : p.gold.opacity(0.1) }
 
     private var title: String { months ? "\(year)" : "\(monthName(month)) \(year)" }
 
@@ -577,10 +596,12 @@ struct DayPicker: View {
         return pickerYears.contains(y) ? (y, mo) : nil
     }
 
-    private func step(_ glyph: String, _ to: (Int, Int)?, _ label: String) -> some View {
+    /// A step to the next or previous month (or year), a cell wide; at the picker's span's end, in the rules' ink.
+    private func step(_ glyph: String, _ to: (Int, Int)?, _ label: String, width: CGFloat) -> some View {
         Button { turnTo(to) } label: {
-            Text(glyph).type(Scale.body.sized(22, line: 28)).foregroundStyle(to == nil ? p.muted.opacity(0.35) : p.accent)
-                .padding(.horizontal, m.px(24)).frame(minHeight: 44)
+            Text(glyph).type(Scale.body.sized(22, line: 28)).foregroundStyle(to == nil ? p.border : p.accent)
+                .frame(width: width)
+                .frame(minHeight: 44)
         }
         .buttonStyle(Quiet())
         .disabled(to == nil)
@@ -594,8 +615,8 @@ struct DayPicker: View {
         let length = civil.range(of: .day, in: .month, for: first.date)?.count ?? 30
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(Array(["S", "M", "T", "W", "T", "F", "S"].enumerated()), id: \.offset) { _, d in
-                    Text(d).type(.label(11.5, 0.08)).foregroundStyle(p.muted).frame(maxWidth: .infinity).padding(.vertical, m.px(8))
+                ForEach(Array(["S", "M", "T", "W", "T", "F", "S"].enumerated()), id: \.offset) { i, d in
+                    Text(d).type(.label(10.56, 0.1)).foregroundStyle(i == 0 ? p.rubric : p.muted).frame(maxWidth: .infinity).padding(.vertical, m.px(8))
                 }
             }
             .accessibilityHidden(true)
@@ -609,12 +630,12 @@ struct DayPicker: View {
                                 chose()
                                 pick(day)
                             } label: {
+                                // The chosen day in the accent over the gold rule; a Sunday stays red.
                                 Text("\(n)").type(TextStyle(size: 18, line: 30, lining: true))
-                                    .foregroundStyle(i == 0 ? p.rubric : p.text)
+                                    .foregroundStyle(i == 0 ? p.rubric : day == shown ? p.accent : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    // Today in Apse takes the vault's blue lifted, as the web's --apse-lift.
-                                    .background(day == today ? (p.dark ? Color(hex: 0x84A0CC).opacity(0.13) : p.pressedWash) : .clear)
+                                    .background(day == today ? todayWash : .clear)
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel(spokenDay(day, today: today))
@@ -637,13 +658,18 @@ struct DayPicker: View {
                         let mo = row * 3 + col
                         let chosen = Int(shown.year) == year && Int(shown.month) == mo
                         Button {
-                            month = mo
-                            months = false
+                            // Back to the days, fading as the title's turn does, the month's days
+                            // coming in the way it lies.
+                            if mo != month { turn = mo > month ? 1 : -1 }
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                month = mo
+                                months = false
+                            }
                         } label: {
                             Text(monthShort(mo).uppercased()).type(.label(11.5, 0.1)).foregroundStyle(chosen ? p.accent : p.text)
                                 .padding(.horizontal, m.px(14.4)).padding(.vertical, m.px(13))
                                 .goldUnderline(chosen, p.goldLine)
-                                .background(Int(today.year) == year && Int(today.month) == mo ? p.gold.opacity(0.1) : .clear)
+                                .background(Int(today.year) == year && Int(today.month) == mo ? todayWash : .clear)
                         }
                         .buttonStyle(Quiet())
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
