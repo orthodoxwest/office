@@ -926,6 +926,18 @@ function usageBeaconBody(scope) {
     syncChromeIfNeeded();
   });
 
+  // A tap outside an overlay puts it away. iOS Safari sends a click only to
+  // what it judges tappable (links, controls, elements with their own click
+  // listener); a tap on the page's text or the header's bare bar produces no
+  // click at all, so a document click listener never hears it there.
+  // pointerup reaches every element, and a touch that becomes a scroll ends
+  // in pointercancel instead, so it stands for the tap. click stays for the
+  // keyboard; a mouse sends both, and closing twice is harmless.
+  var onTapOutside = function (handler) {
+    document.addEventListener("pointerup", handler);
+    document.addEventListener("click", handler);
+  };
+
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
   // scripting is available, keep [open] set on wide screens too (harmless
   // cosmetically, but matches disclosure semantics) and re-collapse on any
@@ -947,7 +959,7 @@ function usageBeaconBody(scope) {
 
     // The phone menu is an overlay: a tap anywhere outside it, or Escape,
     // puts it away. Taps inside (including the preferences) leave it open.
-    document.addEventListener("click", function (e) {
+    onTapOutside(function (e) {
       if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
         siteMenu.removeAttribute("open");
       }
@@ -967,7 +979,7 @@ function usageBeaconBody(scope) {
   // Escape, puts it away; a preference chosen inside leaves it open.
   var siteSettings = document.querySelector(".site-settings");
   if (siteSettings) {
-    document.addEventListener("click", function (e) {
+    onTapOutside(function (e) {
       if (siteSettings.open && !siteSettings.contains(e.target)) {
         siteSettings.removeAttribute("open");
       }
