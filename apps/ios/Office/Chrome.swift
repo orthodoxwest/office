@@ -42,13 +42,15 @@ struct Caret: View {
     let color: Color
     /// How much of it the caret takes: 0.7, or all of a colour of its own (the picker's gold).
     var share: Double = 0.7
+    /// Its size against a label's: the web's `▾` at another size over 0.85em of the labels' 11.52px.
+    var scale: CGFloat = 1
     @Environment(\.metrics) private var m
 
     var body: some View {
         CaretShape(open: open)
             .fill(color.opacity(share))
-            .frame(width: 5.5 * m.type, height: 4.5 * m.type)
-            .padding(.leading, 5.5 * m.type)
+            .frame(width: 5.5 * scale * m.type, height: 4.5 * scale * m.type)
+            .padding(.leading, 5.5 * scale * m.type)
             .accessibilityHidden(true)
     }
 }

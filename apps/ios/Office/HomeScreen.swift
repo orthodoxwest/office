@@ -690,8 +690,8 @@ private struct PrayNow: View {
 }
 
 /**
- * The hours by period in horizontal bands, the current one underlined in gold: framed in the
- * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ * The hours by period in horizontal bands, the current one's cell washed over a gold line: framed
+ * in the lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
  */
 private struct HourDirectory: View {
     let current: String
@@ -733,7 +733,9 @@ private struct HourDirectory: View {
                     Rectangle().fill(ink.rule).frame(width: 1)
                     HStack(spacing: 0) {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
-                            if j > 0 { VRule(color: ink.rule, height: 16) }
+                            // The current hour's wash already divides it from its neighbours, so the
+                            // hairlines at its edges stand down (`.is-current::before`), keeping their place.
+                            if j > 0 { VRule(color: h == current || row.hours[j - 1] == current ? .clear : ink.rule, height: 16) }
                             let done = prayed.contains(h)
                             let gloss = h == current ? note : ""
                             Button { open(h) } label: {
@@ -741,7 +743,7 @@ private struct HourDirectory: View {
                                     // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                     Text(hourLabel(h))
                                         .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                        .foregroundStyle(done ? p.muted : h == current ? p.accent : p.text)
+                                        .foregroundStyle(done ? p.muted : p.text)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         // An hour prayed today withdraws to the muted ink, a small gilt cross
@@ -761,9 +763,12 @@ private struct HourDirectory: View {
                                             .minimumScaleFactor(0.7)
                                     }
                                 }
-                                .goldUnderline(h == current, p.goldLine)
                                 .padding(.horizontal, m.px(2))
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                // The current hour's whole cell is washed, a line of the ornament's gold
+                                // across its foot (`.home-hour-link.is-current`).
+                                .background(h == current ? currentWash : .clear)
+                                .goldUnderline(h == current, o.flat)
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
@@ -776,4 +781,7 @@ private struct HourDirectory: View {
         }
         .overlay(Rectangle().strokeBorder(ink.panelRule, lineWidth: 1).allowsHitTesting(false))
     }
+
+    /// The current hour's wash: the oak at 8%, or by night the vault's blue lifted (`--apse-lift`).
+    private var currentWash: Color { p.dark ? Color(rgb: 132, 160, 204, 0.13) : Color(rgb: 107, 58, 31, 0.08) }
 }

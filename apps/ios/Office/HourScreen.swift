@@ -237,7 +237,8 @@ struct HourScreen: View {
                                 Button { withAnimation(unfolding) { open[key] = !expanded } } label: {
                                     HStack(spacing: 0) {
                                         Text(label).type(Scale.heading).foregroundStyle(p.titulus)
-                                        Caret(open: expanded, color: p.titulus)
+                                        // A section's caret is 0.75em of its heading (`.session-prayers summary::after`).
+                                        Caret(open: expanded, color: p.titulus, scale: 0.75 * Scale.heading.size / (0.85 * 11.52))
                                     }
                                     .frame(maxWidth: .infinity, minHeight: 44)
                                 }
@@ -600,13 +601,18 @@ private struct HourTitle: View {
             .frame(maxWidth: max(m.px(384), titleWidth))
             // On a phone the date stands on its own line above the day's name, so a line never
             // ends on the separator (the web's `.hour-meta-part:first-child` to 700px); a wide
-            // screen keeps one line.
-            let metaLines = wide || meta.count < 2
-                ? [meta.joined(separator: "\u{00a0}· ")]
-                : [meta[0], meta.dropFirst().joined(separator: "\u{00a0}· ")]
+            // screen keeps one line. Each part is kept whole (`.hour-meta-part`), its separator
+            // bound to it by the no-break space, so a line breaks between parts, not inside one.
+            let metaLines: [[String]] = wide || meta.count < 2 ? [meta] : [[meta[0]], Array(meta.dropFirst())]
+            let space = ProseLayout.advance(" ", Scale.meta.uiFont(m))
             VStack(spacing: 0) {
-                ForEach(metaLines, id: \.self) { line in
-                    Text(line).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                ForEach(Array(metaLines.enumerated()), id: \.offset) { _, parts in
+                    MetaLine(space: space) {
+                        ForEach(Array(parts.enumerated()), id: \.offset) { i, part in
+                            Text(i < parts.count - 1 ? part + "\u{00a0}·" : part)
+                                .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                        }
+                    }
                 }
             }
             .padding(.top, m.px(2))
@@ -672,6 +678,53 @@ private struct HourTitle: View {
                 picking = false
             }
             if choosing { reveal("disclosed") }
+        }
+    }
+}
+
+/**
+ * A line of the hour's date, day and season (`.hour-meta-part`), each kept whole: as many to a line
+ * as fit, centred, so a line breaks between parts and never inside one, unless a part alone is
+ * wider than the line, which then wraps within itself. `space` follows each part's separator.
+ */
+private struct MetaLine: Layout {
+    let space: CGFloat
+
+    private typealias Row = (items: [(index: Int, size: CGSize)], width: CGFloat, height: CGFloat)
+
+    private func arrange(_ width: CGFloat, _ subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var row: Row = (items: [], width: 0, height: 0)
+        for (i, view) in subviews.enumerated() {
+            var size = view.sizeThatFits(.unspecified)
+            if size.width > width { size = view.sizeThatFits(ProposedViewSize(width: width, height: nil)) }
+            let next = row.items.isEmpty ? size.width : row.width + space + size.width
+            if next > width && !row.items.isEmpty {
+                rows.append(row)
+                row = (items: [(index: i, size: size)], width: size.width, height: size.height)
+            } else {
+                row = (items: row.items + [(index: i, size: size)], width: next, height: max(row.height, size.height))
+            }
+        }
+        if !row.items.isEmpty { rows.append(row) }
+        return rows
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrange(proposal.width ?? .infinity, subviews)
+        return CGSize(width: rows.map { $0.width }.max() ?? 0, height: rows.reduce(0) { $0 + $1.height })
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        // Arranged at the width it was measured at, so the lines break where they were measured.
+        for row in arrange(proposal.width ?? bounds.width, subviews) {
+            var x = bounds.midX - row.width / 2
+            for item in row.items {
+                subviews[item.index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(item.size))
+                x += item.size.width + space
+            }
+            y += row.height
         }
     }
 }
