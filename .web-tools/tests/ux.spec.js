@@ -1152,6 +1152,45 @@ test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
   expect(marks.hymn).toEqual(marks.responsory);
 });
 
+// iOS Safari sends a click only to what it judges tappable; a tap on the
+// page's text or the header's bare bar produces none, so the overlays must not
+// wait on a click to hear a tap outside them. Mimic that here by swallowing
+// every click whose target is not a control before the page's listeners see it.
+test("menus put away on a tap iOS Safari sends no click for", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest("a, button, input, select, textarea, label, summary")) {
+        e.stopImmediatePropagation();
+      }
+    }, true);
+  });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+
+  const menu = page.locator(".site-menu");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  // Beside the word, on the header's bar: still outside the menu's summary.
+  const shell = await page.locator(".site-nav-shell").boundingBox();
+  await page.touchscreen.tap(shell.x + shell.width - 2, shell.y + shell.height / 2);
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).toHaveAttribute("open", "");
+  await page.locator("footer > p").tap();
+  await expect(menu).not.toHaveAttribute("open", "");
+  // The word itself still closes it as well as opening it.
+  await page.getByText("Menu", { exact: true }).tap();
+  await page.getByText("Menu", { exact: true }).tap();
+  await expect(menu).not.toHaveAttribute("open", "");
+
+  // A wide iPad's Settings is the same kind of overlay.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").tap();
+  await expect(settings).toHaveAttribute("open", "");
+  await page.locator("footer > p").tap();
+  await expect(settings).not.toHaveAttribute("open", "");
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
