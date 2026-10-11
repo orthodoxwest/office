@@ -152,8 +152,9 @@ Our Father is said entirely in secret.
 [triduum-psalm-51-rubric]
 # SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
 # Excerpted for the app from "Then in a somewhat higher voice is said: Ps. 51";
-# Ps. written out and the colon dropped, as the earlier combined rubric had it.
-Then in a somewhat higher voice is said Psalm 51.
+# Ps. written out and the colon dropped, as the earlier combined rubric had it;
+# numbered as the app's psalm labels are, Septuagint first, Hebrew in parentheses.
+Then in a somewhat higher voice is said Psalm 50 (51).
 
 [triduum-collect-rubric]
 # SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)

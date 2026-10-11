@@ -84,7 +84,7 @@ mod tests {
     fn triduum_ending_rubrics_mark_only_the_words_said() {
         let secret = "Our Father is said entirely in secret.";
         assert_eq!(prayed("shared/formulas/triduum-secret-our-father-rubric", secret), ["Our Father"]);
-        let psalm = "Then in a somewhat higher voice is said Psalm 51.";
+        let psalm = "Then in a somewhat higher voice is said Psalm 50 (51).";
         assert!(build_rubric_spans("shared/formulas/triduum-psalm-51-rubric", psalm).is_empty());
         assert!(build_rubric_spans("shared/formulas/triduum-kneel-rubric", "All kneel.").is_empty());
         let noise = "But at Lauds, after the Collect is ended, a little noise and clatter is made; the lighted candle is at once brought forth from beneath the Altar; and all rise and depart in silence.";

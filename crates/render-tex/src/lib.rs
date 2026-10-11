@@ -809,7 +809,8 @@ fn tex_line(s: &str) -> String {
     escape_tex(&typeset(s)).replace('✠', "\\crux{}")
 }
 
-/// The GABC slug of an element label: "Psalm 67" → "067", else a slug.
+/// The GABC slug of an element label, by the psalter's Hebrew number:
+/// "Psalm 66 (67)" and "Psalm 4" → "067" and "004", else a slug.
 pub fn label_to_slug(label: &str, kind: ElementType) -> String {
     if label.is_empty() {
         return String::new();
@@ -817,7 +818,12 @@ pub fn label_to_slug(label: &str, kind: ElementType) -> String {
     if kind == ElementType::Psalm
         && let Some(after) = label.strip_prefix("Psalm ")
     {
-        let num = after.split_whitespace().next().unwrap_or("");
+        let after = after.replace('\u{a0}', " ");
+        let hebrew = match after.split_once(" (") {
+            Some((_, h)) if h.starts_with(|c: char| c.is_ascii_digit()) => h.trim_end_matches(')'),
+            _ => &after,
+        };
+        let num = hebrew.split_whitespace().next().unwrap_or("");
         return format!("{num:0>3}");
     }
     slugify(label)
@@ -1001,6 +1007,9 @@ mod tests {
         }
         for (label, kind, want) in [
             ("Psalm 67", ElementType::Psalm, "067"),
+            ("Psalm 66 (67)", ElementType::Psalm, "067"),
+            ("Psalm 117 (118)", ElementType::Psalm, "118"),
+            ("Psalm 66\u{a0}(67)", ElementType::Psalm, "067"),
             ("Psalm 4", ElementType::Psalm, "004"),
             ("Psalm 118 (Aleph)", ElementType::Psalm, "118"),
             ("Magnificat", ElementType::Canticle, "magnificat"),

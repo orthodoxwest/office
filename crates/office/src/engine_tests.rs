@@ -30,3 +30,29 @@ fn seasonal_hymn_endings_replace_only_iambic_dimeter_quatrains() {
         "Father, Son eternal,\nHoly Ghost supernal,\nWith one praise we bless thee,\nThree in One confess thee.\n\nAmen."
     ));
 }
+
+/// Fr Jason's direction, relayed 2026-10-11: the Septuagint (Vulgate) number
+/// first, the Hebrew (Coverdale) number in parentheses.
+#[test]
+fn psalm_labels_put_the_septuagint_number_first() {
+    let label = |r: &str| format_label("psalm", r).replace('\u{a0}', " ");
+    assert_eq!(label("psalms/004"), "Psalm 4");
+    assert_eq!(label("psalms/009a"), "Psalm 9a");
+    assert_eq!(label("psalms/010"), "Psalm 9 (10)");
+    assert_eq!(label("psalms/018a"), "Psalm 17a (18a)");
+    assert_eq!(label("psalms/051"), "Psalm 50 (51)");
+    assert_eq!(label("psalms/067"), "Psalm 66 (67)");
+    assert_eq!(label("psalms/114"), "Psalm 113 (114)");
+    assert_eq!(label("psalms/115"), "Psalm 113 (115)");
+    assert_eq!(label("psalms/116a"), "Psalm 114 (116a)");
+    assert_eq!(label("psalms/116b"), "Psalm 115 (116b)");
+    assert_eq!(label("psalms/116"), "Psalm 114–115 (116)");
+    assert_eq!(label("psalms/119-xxii"), "Psalm 118 xxii (119 xxii)");
+    assert_eq!(label("psalms/146"), "Psalm 145 (146)");
+    assert_eq!(label("psalms/147a"), "Psalm 146 (147a)");
+    assert_eq!(label("psalms/147b"), "Psalm 147 (147b)");
+    assert_eq!(label("psalms/148a"), "Psalm 148a");
+    assert_eq!(label("psalms/150"), "Psalm 150");
+    // The numbers hold together; only the space after "Psalm" may break.
+    assert_eq!(format_label("psalm", "psalms/119-i"), "Psalm 118\u{a0}i\u{a0}(119\u{a0}i)");
+}
