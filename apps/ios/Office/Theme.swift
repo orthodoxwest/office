@@ -374,7 +374,7 @@ extension EnvironmentValues {
         set { self[WideKey.self] = newValue }
     }
 
-    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
+    /// Whether a wide page is narrower than the hours' header holds on one line (701–999pt): there
     /// an hour's links take a rank of their own under the brand and Settings.
     var ranked: Bool {
         get { self[RankedKey.self] }
@@ -385,8 +385,9 @@ extension EnvironmentValues {
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
 
-/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
-let rankedBelow: CGFloat = 960
+/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`,
+/// where the list fits on one line at Larger text).
+let rankedBelow: CGFloat = 1000
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

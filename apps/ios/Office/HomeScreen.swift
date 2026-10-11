@@ -18,6 +18,7 @@ struct HomePage: View {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)
+                .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .home(date)) }
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)

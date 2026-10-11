@@ -123,7 +123,7 @@ struct SiteHeader: View {
 
     var body: some View {
         let nav = SiteNav(model)
-        // From 701 to 959pt an hour's links don't fit beside the brand and Settings: left in the
+        // From 701 to 999pt an hour's links don't fit beside the brand and Settings: left in the
         // row they would crowd it, so they take a centred rank of their own beneath, as a book sets
         // its running head over the page.
         let rank = wide && ranked && nav.onHour != nil
@@ -242,15 +242,17 @@ private struct InlineNav: View {
 }
 
 /**
- * The site menu's panel: on an hour, the day's hours (2/3/2 as on home); the Ordo and
- * Reminders, the current page underlined in the lining's terracotta; then the Theme and Text
- * rows, the current choice underlined in gold. `prefsOnly` is the wide header's Settings: the
- * Theme and Text rows alone.
+ * The site menu's panel: on an hour, the day's hours (2/3/2 as on home, a hairline between the
+ * bands); the Ordo and Reminders, the current page underlined in the lining's terracotta; then
+ * the Theme, Text and Martyrology rows, muted, the current choice in the accent over the gilding's
+ * rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows alone. Its
+ * top edge is the painted line, which follows the season of the page shown.
  */
 struct MenuPanel: View {
     var prefsOnly = false
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -258,10 +260,13 @@ struct MenuPanel: View {
         let style = TextStyle.label(13.12, 0.06)
         VStack(spacing: 0) {
             if let onHour = nav.onHour, !prefsOnly {
-                ForEach([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]], id: \.self) { row in
+                let bands = [["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]
+                ForEach(Array(bands.enumerated()), id: \.offset) { i, row in
                     HStack(spacing: 0) {
                         ForEach(row, id: \.self) { h in link(hourLabel(h).uppercased(), h == nav.currentHour, style) { onHour(h) } }
                     }
+                    // A hairline between the bands, so the grouping reads without labels.
+                    .overlay(alignment: .top) { if i > 0 { Hairline(color: p.surfaceEdge) } }
                     .padding(.bottom, m.px(2.4))
                 }
                 Hairline(color: p.border).padding(.vertical, m.px(4))
@@ -270,14 +275,14 @@ struct MenuPanel: View {
                 HStack(spacing: 0) {
                     link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
                     // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                    link("REMINDERS", nav.remindersCurrent, .label(12, 0.06), action: nav.onReminders)
+                    link("REMINDERS", nav.remindersCurrent, .label(11.52, 0.04), action: nav.onReminders)
                 }
                 Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             }
             HStack(spacing: 0) {
                 rowLabel("THEME")
                 ForEach(ThemeChoice.allCases) { t in
-                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), p.accent, spoken: "\(t.label) theme") {
+                    cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), spoken: "\(t.label) theme") {
                         guard t != model.theme else { return }
                         chose()
                         withAnimation(restyling) { model.chooseTheme(t) }
@@ -289,13 +294,14 @@ struct MenuPanel: View {
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
-                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), p.muted, spoken: textSizeName(s)) {
+                    cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), spoken: textSizeName(s)) {
                         guard s != model.textSize else { return }
                         chose()
                         withAnimation(restyling) { model.chooseTextSize(s) }
                     }
                 }
             }
+            .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
             // The Martyrology at Prime: Off and On under the last two themes, the longer label
             // taking the first theme's cell, as on the web.
             HStack(spacing: 0) {
@@ -306,20 +312,22 @@ struct MenuPanel: View {
                     .accessibilityHidden(true)
                 Color.clear.frame(maxWidth: .infinity, minHeight: 44)
                 ForEach([false, true], id: \.self) { on in
-                    cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), p.accent, spoken: "Martyrology at Prime \(on ? "on" : "off")") {
+                    cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), spoken: "Martyrology at Prime \(on ? "on" : "off")") {
                         guard on != model.martyrology else { return }
                         chose()
                         model.chooseMartyrology(on)
                     }
                 }
             }
+            .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
             hint("On reads the saints of the coming day at Prime.")
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
         .background(p.surface)
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
-        .overlay(alignment: .top) { Rectangle().fill(p.lining).frame(height: 2) }
+        // The panel's top edge is the painted line (`--ornament-line`).
+        .overlay(alignment: .top) { Rectangle().fill(o.line).frame(height: 2) }
         .shadow(color: .black.opacity(p.dark ? 0.4 : 0.12), radius: 12, y: 4)
     }
 
@@ -353,11 +361,13 @@ struct MenuPanel: View {
         .accessibilityAddTraits(current ? .isSelected : [])
     }
 
-    private func cell(_ label: String, _ current: Bool, _ style: TextStyle, _ color: Color, spoken: String? = nil, action: @escaping () -> Void) -> some View {
+    /// A setting's choice: muted, the chosen one in the accent over the gilding's rule (the web's
+    /// `[aria-pressed="true"]`), marked as the current hour is on home.
+    private func cell(_ label: String, _ current: Bool, _ style: TextStyle, spoken: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label).type(style).foregroundStyle(current ? p.text : color)
+            Text(label).type(style).foregroundStyle(current ? p.accent : p.muted)
                 .frame(maxWidth: .infinity, minHeight: 44)
-                .goldUnderline(current, p.goldLine)
+                .goldUnderline(current, o.flat)
         }
         .buttonStyle(Quiet())
         .accessibilityLabel(spoken ?? label.capitalized)
