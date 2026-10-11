@@ -442,9 +442,10 @@ function usageBeaconBody(scope) {
   // itself never renders, so the material fades rather than flashing on or off.
   // Wait on the dip itself rather than its nominal length: a busy frame can
   // start it late, and a swap on a clock would then land mid-fade. The
-  // timer only bounds the wait, for a browser that reports no transitions.
+  // timer only bounds the wait for a dip that stalls; a loaded device can
+  // take several frames to start one.
   var VAULT_FADE_MS = 100;
-  var VAULT_FADE_LIMIT_MS = 400;
+  var VAULT_FADE_LIMIT_MS = 1000;
   var vaultFadeTurn = 0;
 
   var vaultDipped = function (root) {
@@ -476,6 +477,13 @@ function usageBeaconBody(scope) {
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       return;
+    }
+    // The wall holds transparent only under .theme-anim, so keep it on until
+    // the swap: a slow dip outlasting the crossfade's timer would otherwise
+    // bring the wall back before the swap and show it.
+    if (themeAnimTimer) {
+      clearTimeout(themeAnimTimer);
+      themeAnimTimer = null;
     }
     root.classList.add("vault-hidden");
     var turn = ++vaultFadeTurn;
