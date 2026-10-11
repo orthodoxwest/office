@@ -219,11 +219,11 @@ val WideFrom: Dp = 701.dp
 /** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
 val LocalWide = staticCompositionLocalOf { false }
 
-/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`). */
-val RankedBelow: Dp = 960.dp
+/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`). */
+val RankedBelow: Dp = 1000.dp
 
 /**
- * Whether a wide page is narrower than the hours' header holds on one line (701–959dp): there an
+ * Whether a wide page is narrower than the hours' header holds on one line (701–999dp): there an
  * hour's links take a rank of their own under the brand and Settings.
  */
 val LocalRanked = staticCompositionLocalOf { false }
@@ -260,7 +260,7 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // From 701 to 959dp an hour's links don't fit beside the brand and Settings: left in the row
+    // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
     // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
     // running head over the page.
     val rank = wide && LocalRanked.current && nav?.onHour != null
@@ -277,7 +277,9 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 // ascent, 0.29em descent); the capitals' middle is 0.325em above it. Raised by
                 // the difference, as the web's phone header raises it, it centres on the caps.
                 ConsecrationCross(Modifier.offset(y = -(14.4f * 0.115f).dp).size(18.dp))
-                Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
+                // A word space follows the mark's margin on a wide screen; the phone's brand is a
+                // flex box, whose words drop the space they begin with.
+                Text(if (LocalWide.current) " DAILY OFFICE" else "DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
             if (rank) {
@@ -357,26 +359,32 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
-/** A menu cell; a `page` (an hour, the Ordo, Reminders) is underlined in the lining when current, a chosen setting in gold. */
+/**
+ * A menu cell, muted until it is the one: a `page` (an hour, the Ordo, Reminders) is in ink over
+ * the lining's rule when current, a chosen setting in the accent over the ornament's (`--ornament`).
+ * `spoken` names a cell drawn as a glyph.
+ */
 @Composable
-private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, page: Boolean = false, onClick: () -> Unit) {
+private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, page: Boolean = false, spoken: String? = null, onClick: () -> Unit) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current) {
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current) {
             if (!page && !current) haptics.chose()
             onClick()
         }
-            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, p.goldLine)),
+            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, o.flat)),
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
+    ) { Text(label, style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center)) }
 }
 
 /**
- * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme, Text and Martyrology rows, the current choice underlined in gold. The pages are
- * muted, the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
- * preference rows alone, under the header's end at `end`.
+ * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
+ * the bands); the Ordo and Reminders; then the Theme, Text and Martyrology rows, the current choice
+ * in the accent over the ornament's rule. The pages are muted, the current one underlined in the
+ * lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the header's
+ * end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -426,42 +434,49 @@ fun MenuPanel(
                     .padding(10.4.dp),
             ) {
                 if (onHour != null && !prefsOnly) {
-                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEach { row ->
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, p.muted, page = true) { onHour(h) } } }
+                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
+                        // A hairline between the bands, so the grouping reads without labels.
+                        if (i > 0) Hairline(p.surfaceEdge)
+                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true) { onHour(h) } } }
                         Spacer(Modifier.height(2.4.dp))
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
                 if (!prefsOnly) {
                     MenuRow {
-                        MenuCell("ORDO", onOrdoCurrent, nav, p.muted, page = true, onClick = onOrdo)
-                        // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, page = true, onClick = onReminders)
+                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
+                        // Habit setup, not an hour: quieter than the Ordo, as on the web (`.nav-secondary`).
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
                 }
                 MenuRow {
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
-                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), p.accent) { onTheme(t) } }
+                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
                 PrefHint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+                Hairline(p.surfaceEdge)
                 MenuRow {
                     Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                     TextSize.entries.forEach { s ->
                         val size = when (s) { TextSize.SMALL -> 13f; TextSize.DEFAULT -> 16f; TextSize.LARGE -> 20f }
-                        MenuCell("A", s == textSize, Type.label(size, 0f), p.muted) { onTextSize(s) }
+                        val spoken = when (s) { TextSize.SMALL -> "Smaller text"; TextSize.DEFAULT -> "Default text size"; TextSize.LARGE -> "Larger text" }
+                        MenuCell("A", s == textSize, Type.label(size, 0f), spoken = spoken) { onTextSize(s) }
                     }
                 }
                 // The Martyrology at Prime: Off and On under the last two themes, the longer label
                 // taking the first theme's cell, as on the web.
                 val martyrology = LocalMartyrology.current
+                Hairline(p.surfaceEdge)
                 MenuRow {
                     Row(Modifier.width(54.dp)) {
                         Text(
                             "MARTYROLOGY",
-                            Modifier.padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
+                            // Said as the web's group names the row.
+                            Modifier.semantics { contentDescription = "Martyrology at Prime" }
+                                .padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
                             style = Type.label(10.56f, 0.08f).copy(color = p.muted),
                             maxLines = 1,
                             softWrap = false,
@@ -469,7 +484,7 @@ fun MenuPanel(
                     }
                     Spacer(Modifier.weight(1f))
                     listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), p.accent) { martyrology.onChange(on) }
+                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
                 PrefHint("On reads the saints of the coming day at Prime.")
