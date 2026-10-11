@@ -59,5 +59,19 @@ export default defineConfig({
         colorScheme: "light",
       },
     },
+    // Safari's engine runs the behaviour suite only: pixel snapshots differ
+    // between engines by design, and the visual suite pins Chromium's. Needs
+    // `npx playwright install webkit` locally (the CI container has it).
+    {
+      name: "mobile-webkit",
+      testMatch: "ux.spec.js",
+      use: {
+        browserName: "webkit",
+        viewport: { width: 390, height: 844 },
+        hasTouch: true,
+        isMobile: true,
+        colorScheme: "light",
+      },
+    },
   ],
 });
