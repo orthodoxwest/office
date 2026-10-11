@@ -115,7 +115,8 @@ fun RemindersScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Tick(h.chosen)
-                            Text(h.name, Modifier.padding(start = 12.dp), style = body)
+                            // Muted until chosen, as the web's `.reminder-hour-row.is-selected`.
+                            Text(h.name, Modifier.padding(start = 12.dp), style = body.copy(color = if (h.chosen) p.text else p.muted))
                         }
                         val label = h.time.format(clock)
                         if (h.chosen) {
