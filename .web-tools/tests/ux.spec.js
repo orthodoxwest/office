@@ -1048,6 +1048,32 @@ test("the inscription band keeps the season with the rest of the gilding", async
   }
 });
 
+test("the hours' sun and moon and the Apse's gilt tituli veil in Passiontide", async ({ page }) => {
+  // The sun and moon are images, and Apse's tituli are gilt, so they veil
+  // with the drop caps. Nave's tituli are painted red ochre and stay.
+  const ink = {};
+  for (const theme of ["light", "dark"]) {
+    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"]]) {
+      const context = await page.context().browser().newContext();
+      const sheet = await context.newPage();
+      await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+      const sign = async () => sheet.locator(".hour-header .ornament-headpiece > span[data-sign]")
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
+      await sheet.goto(`/lauds/${date}`);
+      const sun = await sign();
+      const titulus = await sheet.locator(".antiphon em").first().evaluate((node) => getComputedStyle(node).color);
+      await sheet.goto(`/vespers/${date}`);
+      ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
+      await context.close();
+    }
+    const [ordinary, veiled] = [ink[`${theme} ordinary`], ink[`${theme} passiontide`]];
+    expect(veiled.sun).not.toBe(ordinary.sun);
+    expect(veiled.moon).not.toBe(ordinary.moon);
+    if (theme === "dark") expect(veiled.titulus).not.toBe(ordinary.titulus);
+    else expect(veiled.titulus).toBe(ordinary.titulus);
+  }
+});
+
 // The lozenge carries the day's liturgical colour; the colour is the same in
 // either theme, so one theme suffices.
 test("hour titles set their sign in the rule and the day's colour in the lozenge", async ({ page }) => {
