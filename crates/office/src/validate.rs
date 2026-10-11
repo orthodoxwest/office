@@ -18,7 +18,7 @@ use crate::psalmody::{
 use crate::texts::load_texts;
 
 /// The `Type` values the engine recognises; others silently become rubrics.
-const VALID_ELEMENT_TYPES: [&str; 32] = [
+const VALID_ELEMENT_TYPES: [&str; 33] = [
     "officiant-greeting",
     "officiant-confession",
     "officiant-opening",
@@ -33,6 +33,7 @@ const VALID_ELEMENT_TYPES: [&str; 32] = [
     "silent-prayer",
     "partly-secret-prayer",
     "corporate-lord-prayer",
+    "partly-secret-lord-prayer",
     "dialogue",
     "preces",
     "rubric",

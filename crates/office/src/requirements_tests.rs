@@ -232,6 +232,44 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
 }
 
 #[test]
+fn lord_prayer_before_the_collect_is_secret_at_the_little_hours_and_answered_without_amen() {
+    // #671. Prime, Terce, Sext, None and Compline: "Our Father secretly until
+    // ℣ And lead us not into temptation. ℟ But deliver us from evil." (Diurnal
+    // pp. 10, 86, 151; General Rubrics XVII.2, XIX.1, XXXV.2: the words Our
+    // Father aloud with the versicle). Lauds and Vespers: said aloud by the
+    // Officiant, all answering (pp. 42, 122). No Amen at any Hour.
+    for y in [2026, 2027, 2032] {
+        let (days, moveable) = year(y);
+        for name in HOUR_NAMES {
+            let mut checked = 0;
+            for day in days.iter().step_by(23) {
+                for form in PrayerForm::ALL {
+                    let hour = engine().compose_hour(name, day, &moveable, form).unwrap();
+                    for e in hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.kind == ElementType::CorporateLordPrayer) {
+                        let context = format!("{} {name} {form:?}", day.date);
+                        let parts = e.lord_prayer_parts().expect(&context);
+                        assert_eq!(parts.response, "But deliver us from evil.", "{context}");
+                        assert!(!e.text.ends_with("Amen."), "{context}");
+                        if matches!(name, "lauds" | "vespers") {
+                            assert_eq!(parts.versicle, None, "{context}");
+                            assert!(parts.officiant.iter().all(|s| s.spoken), "{context}");
+                        } else {
+                            assert_eq!(parts.versicle.as_deref(), Some("And lead us not into temptation."), "{context}");
+                            let voiced: Vec<_> = parts.officiant.iter().map(|s| (s.spoken, s.text.as_str())).collect();
+                            assert_eq!(voiced[0], (true, "Our Father"), "{context}");
+                            assert!(!voiced[1].0 && voiced[1].1.contains("Thy kingdom come"), "{context}");
+                            assert!(voiced[1].1.ends_with("trespass against us.\n"), "{context}");
+                        }
+                        checked += 1;
+                    }
+                }
+            }
+            assert!(checked > 0, "{y} {name}");
+        }
+    }
+}
+
+#[test]
 fn sunday_commemoration_versicles_across_calendars() {
     for y in [2026, 2027, 2032] {
         let (days, moveable) = year(y);

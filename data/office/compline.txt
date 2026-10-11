@@ -155,7 +155,7 @@ Ref = short-responsory
 Type = dialogue
 Ref = ordinary/shared/kyrie
 
-Type = corporate-lord-prayer
+Type = partly-secret-lord-prayer
 Ref = ordinary/shared/our-father
 
 [Preces]

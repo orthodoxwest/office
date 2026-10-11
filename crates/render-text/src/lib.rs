@@ -1,7 +1,7 @@
 //! Plain-text rendering of a composed hour, for the CLI and the text goldens.
 
 use corpus::lines::{psalm_verse_lines, split_leading_verse_number};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, VoiceRole, posture_cues_at, split_words};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, posture_cues_at, split_words};
 
 const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -97,18 +97,10 @@ fn posture_text(elem: &OfficeElement, text: &str) -> String {
 
 /// Adds only the response sigil the corporate form requires.
 fn corporate_lord_prayer_text(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
+    match elem.lord_prayer_parts() {
+        Some(parts) => parts.voiced().iter().map(|s| s.text.as_str()).collect(),
+        None => elem.text.clone(),
     }
-    if officiant.is_empty() || response.is_empty() {
-        return elem.text.clone();
-    }
-    format!("{}\nR. {}", officiant.trim_end_matches([' ', '\t', '\n']), response.trim())
 }
 
 #[cfg(test)]
