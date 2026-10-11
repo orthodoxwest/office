@@ -184,7 +184,6 @@ private fun OrdoHeader(
     modifier: Modifier,
 ) {
     val p = LocalPalette.current
-    val o = LocalOrnament.current
     val wide = LocalWide.current
     // Previous and next year keep the page's kind: a month's, or the frontispiece.
     val sameView = { y: Int -> if (month == null) onYear(y) else onMonth(y, month) }
@@ -212,7 +211,7 @@ private fun OrdoHeader(
             Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
     }
-    // The month strip: the shown month underlined in gold, and today's month marked with the
+    // The month strip: the shown month underlined in gold, and today's month marked with the gold
     // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
     val strip: @Composable () -> Unit = {
         Month.entries.chunked(if (wide) 12 else 6).forEach { row ->
@@ -226,7 +225,7 @@ private fun OrdoHeader(
                                 if (!wide) Modifier else Modifier.drawBehind {
                                     val y = size.height - 1.dp.toPx()
                                     if (current) drawLine(p.goldLine, Offset(0f, y), Offset(size.width, y), 2.dp.toPx())
-                                    if (todays) lozenge(Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx()), 3.dp.toPx(), o.flat, null)
+                                    if (todays) lozenge(Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx()), 3.dp.toPx(), p.gold, null)
                                 },
                             )
                             .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
@@ -238,7 +237,7 @@ private fun OrdoHeader(
                                 if (wide) return@drawBehind
                                 val y = size.height + 4.dp.toPx()
                                 if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
-                                if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), o.flat, null)
+                                if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), p.gold, null)
                             },
                             style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
                         )

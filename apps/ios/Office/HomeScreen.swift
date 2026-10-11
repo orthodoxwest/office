@@ -500,7 +500,7 @@ private struct Frontispiece: View {
             // (the disclosure's own unfolding, Android's `Unfold`), and laid out only while shown.
             VStack(spacing: 0) {
                 if unfolded {
-                    DayPicker(shown: date, today: model.today) { d in
+                    DayPicker(shown: date, today: model.today, centred: true) { d in
                         picking = false
                         unfolded = false
                         model.open(.home(d))

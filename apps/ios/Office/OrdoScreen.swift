@@ -246,7 +246,7 @@ private struct OrdoHeader: View {
         Text(s).type(style).foregroundStyle(p.accent).padding(m.px(12)).frame(maxWidth: wide ? nil : .infinity)
     }
 
-    // The month strip: the shown month underlined in gold, and today's month marked with the
+    // The month strip: the shown month underlined in gold, and today's month marked with the gold
     // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
     private var strip: some View {
         let t = model.today
@@ -264,7 +264,7 @@ private struct OrdoHeader: View {
                                     if !wide {
                                         ZStack {
                                             if current { Rectangle().fill(p.goldLine).frame(height: 2).padding(.horizontal, -m.px(14)) }
-                                            if todays { Diamond(size: 6) }
+                                            if todays { Diamond(size: 6, color: p.gold) }
                                         }
                                         .offset(y: m.px(5))
                                     }
@@ -274,7 +274,7 @@ private struct OrdoHeader: View {
                                     if wide {
                                         ZStack {
                                             if current { Rectangle().fill(p.goldLine).frame(height: 2) }
-                                            if todays { Diamond(size: 6) }
+                                            if todays { Diamond(size: 6, color: p.gold) }
                                         }
                                         .frame(height: 6)
                                         .offset(y: 3)
@@ -462,7 +462,7 @@ private struct DayRow: View {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 0) {
                 // The day's liturgical colour as a rail beside its date.
-                Rectangle().fill(dayColor(d.color)).frame(width: 3, height: m.px(40))
+                Rectangle().fill(titleColor(d.color, p)).frame(width: 3, height: m.px(40))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
                         Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
@@ -517,7 +517,7 @@ private struct DayRow: View {
                     .padding(.leading, dayColumnPad)
                     .frame(width: dayColumn, alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .overlay(alignment: .leading) { Rectangle().fill(dayColor(d.color)).frame(width: 3).padding(.top, 1.6) }
+                    .overlay(alignment: .leading) { Rectangle().fill(titleColor(d.color, p)).frame(width: 3).padding(.top, 1.6) }
                 }
                 .buttonStyle(Quiet())
                 .accessibilityLabel(spoken)

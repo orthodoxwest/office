@@ -181,7 +181,7 @@ struct HourScreen: View {
                     Rectangle().fill(bandColor(view.color)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
-                    HourTitle(view: view, date: date)
+                    HourTitle(view: view, date: date, pageWidth: width)
                         .padding(.horizontal, inset)
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
@@ -476,6 +476,8 @@ private struct ProgressHairline: View {
 private struct HourTitle: View {
     let view: HourView
     let date: CivilDate
+    /// The page's width, for the web's 540px step in the date picker's navigation.
+    let pageWidth: CGFloat
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -540,7 +542,7 @@ private struct HourTitle: View {
             }
             .padding(.top, m.px(4))
             if picking {
-                DayPicker(shown: date, today: model.today) { d in
+                DayPicker(shown: date, today: model.today, centred: pageWidth > 540) { d in
                     picking = false
                     model.open(.hour(d, view.hour))
                 }
@@ -602,6 +604,7 @@ private struct Epilogue: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.wide) private var wide
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -626,9 +629,9 @@ private struct Epilogue: View {
             // The field is phased from the seam where the ending's air (3.25rem) meets the footer.
             // By night it fades in over the first rem and thins down the footer.
             let air = m.px(52)
-            // A full thumb's height to tap the report line, as the web's on a phone, grown about
-            // the line rather than into the space around it.
-            let reach = max(0, (44 - 18.9 * m.type) / 2)
+            // A full thumb's height to tap the report line on a phone, the line centred in it: the
+            // web's link grows its line box so, and the foot with it.
+            let reach = wide ? 0 : max(0, (44 - 18.9 * m.type) / 2)
             Footer(gap: 52 + 53.6, reserve: true) {
                 Button {
                     if let url = URL(string: reportUrl) { openURL(url) }
@@ -640,7 +643,6 @@ private struct Epilogue: View {
                         .padding(.vertical, reach)
                 }
                 .buttonStyle(Quiet())
-                .padding(.vertical, -reach)
                 .accessibilityHint("Opens the report form in your browser")
                 .measured(m)
                 .reserve(p.bg, m)

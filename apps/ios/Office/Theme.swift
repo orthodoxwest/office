@@ -166,8 +166,8 @@ func bandColor(_ name: String) -> Color {
     name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name)
 }
 
-/// A day's colour as `.day-color-*` sets it on an hour's title: on the Apse night white and black
-/// are lifted, so the lozenge does not sink into the night.
+/// A day's colour as `.day-color-*` sets it on an hour's title and the ordo's rails: on the Apse
+/// night white and black are lifted, so they do not sink into the night.
 func titleColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
     case ("white", true): return Color(hex: 0xD0B06A)

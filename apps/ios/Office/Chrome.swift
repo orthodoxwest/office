@@ -141,7 +141,9 @@ struct SiteHeader: View {
                         PaintedMark(.consecration, size: m.px(18), color: p.lining)
                             .offset(y: -m.px(14.4 * 0.115))
                             .padding(.trailing, m.px(6.08))
-                        Text(" DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
+                        // A word space follows the mark's margin on a wide screen; the phone's brand is a
+                        // flex box, whose words drop the space they begin with.
+                        Text(wide ? " DAILY OFFICE" : "DAILY OFFICE").type(Scale.brand).foregroundStyle(p.text)
                     }
                     .padding(.vertical, m.px(10))
                 }
@@ -485,6 +487,9 @@ private let pickerYears = 1950...2150
 struct DayPicker: View {
     let shown: CivilDate
     let today: CivilDate
+    /// Previous · Today · Next gathered in the middle (home, and an hour wider than 540pt), or
+    /// spread to the edges (an hour on a phone), as the web's `.day-nav`.
+    let centred: Bool
     let pick: (CivilDate) -> Void
     @State private var year: Int
     @State private var month: Int
@@ -493,12 +498,12 @@ struct DayPicker: View {
     @State private var turn: CGFloat = 1
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
-    @Environment(\.wide) private var wide
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(shown: CivilDate, today: CivilDate, pick: @escaping (CivilDate) -> Void) {
+    init(shown: CivilDate, today: CivilDate, centred: Bool, pick: @escaping (CivilDate) -> Void) {
         self.shown = shown
         self.today = today
+        self.centred = centred
         self.pick = pick
         let y = Int(shown.year)
         _year = State(initialValue: min(max(y, pickerYears.lowerBound), pickerYears.upperBound))
@@ -511,15 +516,14 @@ struct DayPicker: View {
         let cell = max(m.px(44), 44)
         VStack(spacing: 0) {
             Hairline(color: p.border).padding(.horizontal, m.px(24))
-            // Spread across a phone; gathered in the middle on a wide screen, as the web's `.day-nav`.
-            HStack(spacing: wide ? m.px(5.6) : nil) {
+            HStack(spacing: centred ? m.px(5.6) : nil) {
                 Button { pick(shown.adding(days: -1)) } label: { Text("← Previous").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
                     .buttonStyle(Quiet()).accessibilityLabel("Previous day")
-                if !wide { Spacer() }
+                if !centred { Spacer() }
                 if shown != today {
                     Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
                 }
-                if !wide { Spacer() }
+                if !centred { Spacer() }
                 Button { pick(shown.adding(days: 1)) } label: { Text("Next →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
                     .buttonStyle(Quiet()).accessibilityLabel("Next day")
             }
