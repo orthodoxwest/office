@@ -818,9 +818,10 @@ pub fn label_to_slug(label: &str, kind: ElementType) -> String {
     if kind == ElementType::Psalm
         && let Some(after) = label.strip_prefix("Psalm ")
     {
+        let after = after.replace('\u{a0}', " ");
         let hebrew = match after.split_once(" (") {
             Some((_, h)) if h.starts_with(|c: char| c.is_ascii_digit()) => h.trim_end_matches(')'),
-            _ => after,
+            _ => &after,
         };
         let num = hebrew.split_whitespace().next().unwrap_or("");
         return format!("{num:0>3}");
@@ -1008,6 +1009,7 @@ mod tests {
             ("Psalm 67", ElementType::Psalm, "067"),
             ("Psalm 66 (67)", ElementType::Psalm, "067"),
             ("Psalm 117 (118)", ElementType::Psalm, "118"),
+            ("Psalm 66\u{a0}(67)", ElementType::Psalm, "067"),
             ("Psalm 4", ElementType::Psalm, "004"),
             ("Psalm 118 (Aleph)", ElementType::Psalm, "118"),
             ("Magnificat", ElementType::Canticle, "magnificat"),

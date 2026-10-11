@@ -682,7 +682,8 @@ fn format_label(kind: &str, reference: &str) -> String {
 /// the psalms, then the Coverdale psalter's Hebrew number in parentheses when
 /// it differs ("Psalm 66 (67)"; "Psalm 4"). The parentheses keep the part a
 /// split psalm carries in our psalter, so the reader with a Prayer Book finds
-/// it ("Psalm 147 (147b)"). The joins and splits are those recorded in
+/// it ("Psalm 147 (147b)"). The numbers are joined by no-break spaces. The
+/// joins and splits are those recorded in
 /// data/latin-incipits.txt.
 pub fn psalm_label(name: &str) -> String {
     let name = name.trim_start_matches('0');
@@ -706,7 +707,10 @@ pub fn psalm_label(name: &str) -> String {
         (147, _) => format!("146–147{part}"),
         _ => hebrew.clone(),
     };
-    if greek == hebrew { format!("Psalm {greek}") } else { format!("Psalm {greek} ({hebrew})") }
+    // The numbers hold together, so a narrow column never strands the Hebrew
+    // number, or a section's numeral, at the head of a line of its own.
+    let number = if greek == hebrew { greek } else { format!("{greek} ({hebrew})") };
+    format!("Psalm {}", number.replace(' ', "\u{a0}"))
 }
 
 /// A leading "!" line is the chapter's scripture reference.

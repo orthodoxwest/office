@@ -35,7 +35,7 @@ fn seasonal_hymn_endings_replace_only_iambic_dimeter_quatrains() {
 /// first, the Hebrew (Coverdale) number in parentheses.
 #[test]
 fn psalm_labels_put_the_septuagint_number_first() {
-    let label = |r: &str| format_label("psalm", r);
+    let label = |r: &str| format_label("psalm", r).replace('\u{a0}', " ");
     assert_eq!(label("psalms/004"), "Psalm 4");
     assert_eq!(label("psalms/009a"), "Psalm 9a");
     assert_eq!(label("psalms/010"), "Psalm 9 (10)");
@@ -53,4 +53,6 @@ fn psalm_labels_put_the_septuagint_number_first() {
     assert_eq!(label("psalms/147b"), "Psalm 147 (147b)");
     assert_eq!(label("psalms/148a"), "Psalm 148a");
     assert_eq!(label("psalms/150"), "Psalm 150");
+    // The numbers hold together; only the space after "Psalm" may break.
+    assert_eq!(format_label("psalm", "psalms/119-i"), "Psalm 118\u{a0}i\u{a0}(119\u{a0}i)");
 }
