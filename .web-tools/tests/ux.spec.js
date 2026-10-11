@@ -2372,7 +2372,7 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(page.locator("#d-2026-03-02 .day-office-details")).not.toHaveAttribute("open", "");
   await page.getByRole("button", { name: "Show office details" }).click();
   await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
-  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  await expect(day.locator(".day-office-comm").first()).toBeVisible();
   await page.getByRole("button", { name: "Hide office details" }).click();
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
 });
@@ -2583,7 +2583,7 @@ test("ordo print reveals the office digest without changing screen disclosures",
   await expect(day.locator(".day-office-digest")).toBeHidden();
   await page.emulateMedia({ media: "print" });
   await expect(day.locator(".day-office-digest")).toBeVisible();
-  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  await expect(day.locator(".day-office-comm").first()).toBeVisible();
   await expect(page.locator(".calendar-tools")).toBeHidden();
   await expect(page.locator(".ordo-continuation")).toBeHidden();
   await page.emulateMedia({ media: "screen" });

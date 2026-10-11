@@ -142,6 +142,9 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             row.vespers_suffrage = vespers.suffrage;
             row.vespers_comms = comm_rows(&vespers.comms);
         }
+        // The day's commemorations open its office details; one its Lauds or Vespers names with
+        // an antiphon is not named twice.
+        row.commemorations.retain(|c| !row.lauds_comms.iter().chain(&row.vespers_comms).any(|r| &r.name == c));
         month.days.push(row);
     }
     month

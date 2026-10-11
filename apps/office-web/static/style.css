@@ -484,8 +484,6 @@ footer {
    red rubrics in the text face. Georgia is absent on Android and Linux, where
    this stack falls through to the platform serif (Noto/DejaVu), and a second
    face inside the prayer reads as a mistake rather than as an instruction. */
-.day-commemorations .day-commemoration,
-.day-commemorations summary,
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
@@ -500,11 +498,6 @@ h1,
 h2,
 h3 {
   text-wrap: balance;
-}
-
-p,
-li {
-  text-wrap: pretty;
 }
 
 .skip-link {
@@ -3638,14 +3631,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 @media (min-width: 701px) and (pointer: fine) {
   .day-disclosures summary { min-height: 0; }
 }
-.day-commemoration {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-style: italic;
-  line-height: 1.5;
-}
-.day-commemoration::before { content: "Com. "; }
 /* The ordo's bracketed line for an observance kept by monastics and oblates
    only: under the name, quiet like a commemoration, never read as the day. */
 .day-monastic {
@@ -4268,7 +4253,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
   :root.motion-ready details.reminder-help::details-content {
@@ -4287,7 +4271,6 @@ body.season-eastertide {
 
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
   :root.motion-ready details.reminder-help[open]::details-content {
@@ -7141,13 +7124,6 @@ body.season-eastertide {
 .hymn-line {
   padding-left: 1.1rem;
   text-indent: -1.1rem;
-}
-
-/* The prayer text runs to its natural measure. Safari's `pretty` reflows a
-   whole paragraph to even its rag, setting psalm verses and prayers short of
-   the margin; rubrics keep the paragraph default. */
-.elements p:not(.rubric) {
-  text-wrap: wrap;
 }
 
 /* Dialogue responses finish the preceding utterance. Let the gutter carry
