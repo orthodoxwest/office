@@ -334,7 +334,11 @@ struct MenuPanel: View {
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         // The panel's top edge is the painted line (`--ornament-line`).
         .overlay(alignment: .top) { Rectangle().fill(o.line).frame(height: 2) }
-        .shadow(color: .black.opacity(p.dark ? 0.4 : 0.12), radius: 12, y: 4)
+        // The web's shadow, in both themes: a light catching the edge under the painted line
+        // (`inset 0 1px 0 var(--surface-edge)`), and a soft one cast below (`0 0.45rem 1rem`,
+        // its blur twice a SwiftUI radius).
+        .overlay(alignment: .top) { Rectangle().fill(p.surfaceEdge).frame(height: 1).padding(.top, 2).padding(.horizontal, 0.5) }
+        .shadow(color: Color(rgb: 36, 28, 23, 0.09), radius: m.px(8), y: m.px(7.2))
     }
 
     /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
@@ -688,7 +692,10 @@ struct DayPicker: View {
     }
 }
 
-/// "How are you praying?": the three prayer forms, remembered on this device.
+/// "How are you praying?": the three prayer forms, remembered on this device, as the web's
+/// `.leader-selector` sets them: a small-capital legend over a left-aligned list at most 23rem wide,
+/// ruled above, below and between; the chosen form's radio filled in the accent within a ring of
+/// the ground, its words in the accent over the gold rule.
 struct FormChooser: View {
     let form: String
     let choose: (String) -> Void
@@ -696,30 +703,46 @@ struct FormChooser: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        VStack(spacing: 0) {
-            Text("How are you praying?").type(Scale.body.sized(16, line: 24)).foregroundStyle(p.muted).padding(.bottom, m.px(4))
-            ForEach(prayerForms, id: \.value) { f in
+        VStack(alignment: .leading, spacing: 0) {
+            Text("How are you praying?".uppercased()).type(.label(11.2, 0.1)).foregroundStyle(p.muted)
+                .padding(.bottom, m.px(10.4))
+                .accessibilityAddTraits(.isHeader)
+            Hairline(color: p.border)
+            ForEach(Array(prayerForms.enumerated()), id: \.offset) { i, f in
+                let on = f.value == form
+                if i > 0 { Hairline(color: p.surfaceEdge) }
                 Button {
-                    if f.value != form { chose() }
+                    if !on { chose() }
                     choose(f.value)
                 } label: {
-                    HStack(spacing: m.px(10)) {
+                    HStack(spacing: m.px(12.8)) {
                         ZStack {
-                            Circle().stroke(f.value == form ? p.gold : p.border, lineWidth: 1).frame(width: m.px(16), height: m.px(16))
-                            if f.value == form { Circle().fill(p.gold).frame(width: m.px(8), height: m.px(8)) }
+                            Circle().fill(on ? p.accent : p.bg)
+                            if on { Circle().strokeBorder(p.bg, lineWidth: 3).padding(1) }
+                            Circle().strokeBorder(on ? p.accent : p.muted, lineWidth: 1)
                         }
-                        Text(f.phrase).type(Scale.body.sized(17, line: 24)).foregroundStyle(p.text)
+                        .frame(width: m.px(14.4), height: m.px(14.4))
+                        Text(f.phrase).type(TextStyle(size: 14.4, line: 20.16))
+                            .foregroundStyle(on ? p.accent : p.text)
+                            .goldUnderline(on, p.goldLine)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .frame(minHeight: 44)
+                    .padding(.vertical, m.px(10.4))
+                    .padding(.horizontal, m.px(5.6))
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 }
                 .buttonStyle(Quiet())
-                .accessibilityAddTraits(f.value == form ? .isSelected : [])
+                .accessibilityAddTraits(on ? .isSelected : [])
             }
-            Text("Remembered on this device. Change it any time.").type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(4))
+            Hairline(color: p.border)
+            Text("Remembered on this device. Change it any time.").type(TextStyle(size: 12.8, line: 18.56)).foregroundStyle(p.muted)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, m.px(11.2))
         }
+        .frame(maxWidth: m.px(368), alignment: .leading)
         .frame(maxWidth: .infinity)
-        .padding(.top, m.px(8))
-        .padding(.bottom, m.px(4))
+        .padding(.top, m.px(12))
+        .padding(.bottom, m.px(8))
     }
 }
 
