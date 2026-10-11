@@ -122,7 +122,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     // Parsing the corpus takes a moment; it starts at once, off the main thread. The alarms share it.
     private val core = viewModelScope.async(Dispatchers.Default) { Office.core }
     private val reminderStore = ReminderStore(app)
-    private val usage = Usage(prefs)
+    private val usage = Usage(prefs, enabled = Usage.counts(app))
     private var loading: Job? = null
 
     val hours: List<String> = hourNames()

@@ -2,6 +2,7 @@ package org.orthodoxwest.office
 
 import android.app.Application
 import android.content.Context
+import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import java.time.Clock
 import java.time.Instant
@@ -145,5 +146,18 @@ class UsageTest {
         Usage(prefs, clock = clock, executor = { it.run() }) { _, id, body -> posted += id to body; Usage.Reply(true) }
             .record(UsageEvent.Home(today), dark = false, form = "private")
         assertTrue(posted.isEmpty())
+    }
+
+    // Play's pre-launch report crawls every upload on fresh Test Lab devices; none is a reader.
+    @Test
+    fun testLabDevicesAreNotCounted() {
+        assertTrue(Usage.counts(app, build = true))
+        assertFalse(Usage.counts(app, build = false))
+        Settings.System.putString(app.contentResolver, "firebase.test.lab", "true")
+        try {
+            assertFalse(Usage.counts(app, build = true))
+        } finally {
+            Settings.System.putString(app.contentResolver, "firebase.test.lab", "false")
+        }
     }
 }
