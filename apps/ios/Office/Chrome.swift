@@ -440,22 +440,24 @@ extension AnyTransition {
     }
 }
 
-/// A small uppercase disclosure label with its caret ("Change date ▾").
+/// A small uppercase disclosure label with its caret ("Change date ▾"), muted, in the accent while open; its `value` in ink.
 struct Disclosure: View {
     let label: String
     let open: Bool
     var value: String?
+    var style: TextStyle = Scale.control
     let toggle: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let ink = open ? p.accent : p.muted
         Button(action: toggle) {
             HStack(spacing: 0) {
                 (Text(label.uppercased()) + Text(value.map { " " + $0.uppercased() } ?? "").foregroundColor(p.text))
-                    .type(Scale.control)
-                    .foregroundStyle(p.muted)
-                Caret(open: open, color: p.muted)
+                    .type(style)
+                    .foregroundStyle(ink)
+                Caret(open: open, color: ink)
             }
             .padding(.horizontal, m.px(8))
             .frame(minHeight: 44)

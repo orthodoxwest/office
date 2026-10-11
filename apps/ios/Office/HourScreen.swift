@@ -8,19 +8,24 @@ private let openPreparation: Set<String> = ["lauds", "prime", "vespers"]
 /**
  * What a page shows once its content is composed. Composing reads the corpus, so it runs off
  * the main thread; the page keeps what it had until the new content is ready, then moves to it
- * as `motion` says, from the top of the new page.
+ * as `motion` says, from the top of the new page. Content composed again for the same `place`
+ * (an hour in another prayer form) is the same page: it changes where it stands, keeping the
+ * reader's place and what they had opened, as the web's prayer form does.
  */
 struct Loaded<Value, Content: View>: View {
     let key: String
+    let place: String
     let motion: Motion
     let load: () throws -> Value
     let content: (Value) -> Content
-    @State private var shown: (key: String, value: Value)?
+    @State private var shown: (place: String, value: Value)?
     @State private var failure: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(key: String, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    /// `key` names what is composed; `place`, the page it is (by default the same).
+    init(key: String, place: String? = nil, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
+        self.place = place ?? key
         self.motion = motion
         self.load = load
         self.content = content
@@ -29,7 +34,7 @@ struct Loaded<Value, Content: View>: View {
     var body: some View {
         ZStack {
             if let shown {
-                content(shown.value).id(shown.key).transition(transition)
+                content(shown.value).id(shown.place).transition(transition)
             } else if let failure {
                 Message(text: failure)
             } else {
@@ -37,16 +42,17 @@ struct Loaded<Value, Content: View>: View {
             }
         }
         .task(id: key) {
+            let place = self.place
             let result = await compose(load)
             switch result {
             case let .success(v):
                 failure = nil
-                // The first content simply appears (the stack's push brings it); later
-                // content replaces it in motion.
-                if shown == nil {
-                    shown = (key, v)
+                // The first content simply appears (the stack's push brings it), and the same
+                // page composed again changes in place; another page replaces it in motion.
+                if shown == nil || shown?.place == place {
+                    shown = (place, v)
                 } else {
-                    withAnimation(.easeInOut(duration: 0.3)) { shown = (key, v) }
+                    withAnimation(.easeInOut(duration: 0.3)) { shown = (place, v) }
                 }
             case let .failure(e):
                 shown = nil
@@ -92,11 +98,14 @@ struct HourPage: View {
     var body: some View {
         let form = model.form
         let martyrology = model.martyrology
-        Loaded(key: "\(date.iso) \(hour) \(form) \(martyrology)", motion: model.motion(to: .hour(date, hour))) {
+        // Another prayer form, or the Martyrology turned on or off, is the same page composed
+        // again: the reader keeps their place and the sections they opened.
+        Loaded(key: "\(date.iso) \(hour) \(form) \(martyrology)", place: "\(date.iso) \(hour)", motion: model.motion(to: .hour(date, hour))) {
             try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
         } content: { view in
             HourScreen(view: view, date: date)
-                .onAppear { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.martyrology, initial: true) { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .hour(date, hour)) }
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -137,6 +146,9 @@ struct HourScreen: View {
     @State private var width: CGFloat = 0
     @State private var headerHeight: CGFloat = 0
     @State private var epilogueHeight: CGFloat = 0
+    /// The row at the top of the screen, kept by the scroll view so the reader's place holds when
+    /// the hour is composed again in another form; the page itself never watches it.
+    @State private var place = Place()
 
     init(view: HourView, date: CivilDate) {
         self.view = view
@@ -166,7 +178,7 @@ struct HourScreen: View {
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    Rectangle().fill(dayColor(view.color)).frame(height: 3).accessibilityHidden(true)
+                    Rectangle().fill(bandColor(view.color)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                     HourTitle(view: view, date: date)
@@ -216,12 +228,16 @@ struct HourScreen: View {
                     .read(rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
+                .scrollTargetLayout()
                 .background(alignment: .top) {
                     if view.firstClass {
                         FirstClassFrame(top: 3 + headerHeight, bottom: epilogueHeight + m.px(20))
                     }
                 }
             }
+            // The row the reader is at stays where it stands while the office changes around it, as
+            // the web's prayer form keeps the first element on screen in its place.
+            .scrollPosition(id: Binding(get: { place.row }, set: { place.row = $0 }))
             .coordinateSpace(name: Reading.space)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
@@ -293,7 +309,8 @@ struct HourScreen: View {
         var afterClosed = false
         for (i, section) in view.sections.enumerated() {
             if section.collapsible {
-                let expanded = open[i] ?? false
+                // A section new to this form opens as the hour's sections open.
+                let expanded = open[i] ?? openPreparation.contains(view.hour)
                 out.append(.toggle(section: i, label: section.label, open: expanded))
                 prev = nil
                 afterClosed = !expanded
@@ -320,6 +337,11 @@ struct HourScreen: View {
         }
         return out
     }
+}
+
+/// Where the reader is: the top row's id, as the scroll view reports it.
+private final class Place {
+    var row: String?
 }
 
 /**
@@ -485,7 +507,7 @@ private struct HourTitle: View {
                     .padding(.horizontal, m.px(20.8))
                     .accessibilityLabel(view.title)
                     .accessibilityAddTraits(.isHeader)
-                DoubleRule(lozengeColor: dayColor(view.color))
+                DoubleRule(lozengeColor: titleColor(view.color, p))
             }
             .frame(maxWidth: max(m.px(384), titleWidth))
             // On a phone the date stands on its own line above the day's name, so a line never
@@ -528,7 +550,15 @@ private struct HourTitle: View {
             if choosing {
                 FormChooser(form: model.form) { f in
                     withAnimation(unfolding) { choosing = false }
+                    let changed = f != model.form
                     model.chooseForm(f)
+                    // VoiceOver hears that the prayers changed, as the web's status line says it;
+                    // a moment later, so the chooser folding away does not cut it short.
+                    if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            UIAccessibility.post(notification: .announcement, argument: "Prayers updated. \(phrase).")
+                        }
+                    }
                 }
                 .id("disclosed")
                 .transition(.unfold)
@@ -596,6 +626,9 @@ private struct Epilogue: View {
             // The field is phased from the seam where the ending's air (3.25rem) meets the footer.
             // By night it fades in over the first rem and thins down the footer.
             let air = m.px(52)
+            // A full thumb's height to tap the report line, as the web's on a phone, grown about
+            // the line rather than into the space around it.
+            let reach = max(0, (44 - 18.9 * m.type) / 2)
             Footer(gap: 52 + 53.6, reserve: true) {
                 Button {
                     if let url = URL(string: reportUrl) { openURL(url) }
@@ -604,8 +637,10 @@ private struct Epilogue: View {
                         .type(Scale.small.sized(11.84, line: 18.9))
                         .foregroundStyle(p.muted)
                         .multilineTextAlignment(.center)
+                        .padding(.vertical, reach)
                 }
                 .buttonStyle(Quiet())
+                .padding(.vertical, -reach)
                 .accessibilityHint("Opens the report form in your browser")
                 .measured(m)
                 .reserve(p.bg, m)

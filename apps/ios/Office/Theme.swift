@@ -160,16 +160,30 @@ func dayColor(_ name: String) -> Color {
     }
 }
 
+/// The band of the day's colour across an hour's top (`.color-band-*`): the rails' colours, but a
+/// white day's is the pale linen of a white vestment, in both themes.
+func bandColor(_ name: String) -> Color {
+    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name)
+}
+
+/// A day's colour as `.day-color-*` sets it on an hour's title: on the Apse night white and black
+/// are lifted, so the lozenge does not sink into the night.
+func titleColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    default: return dayColor(name)
+    }
+}
+
 /// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
 /// is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
 func dayColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
-    case ("white", true): return Color(hex: 0xD0B06A)
-    case ("black", true): return Color(hex: 0x8A94A0)
     case ("red", true): return Color(hex: 0xC9503F)
     case ("green", true): return Color(hex: 0x4F8A52)
     case ("violet", true): return Color(hex: 0x8D62AD)
-    default: return dayColor(name)
+    default: return titleColor(name, p)
     }
 }
 
