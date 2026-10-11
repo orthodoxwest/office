@@ -1488,7 +1488,8 @@ fn triduum_hours_keep_action_rubrics_without_omission_notes() {
     const CHRISTUS_FACTUS: &str = "shared/formulas/triduum-christus-factus-rubric";
     const COLLECT: &str = "shared/formulas/triduum-collect-rubric";
     const NOISE: &str = "shared/formulas/triduum-lauds-noise-rubric";
-    const OMISSION: [&str; 6] = ["not said", "not read", "said at once", "begun at once", "Henceforth", "without musical note"];
+    const OMISSION: [&str; 7] =
+        ["not said", "not read", "said at once", "begun at once", "Henceforth", "without musical note", "Thus are ended"];
     for y in [2026, 2027, 2035, 2053] {
         let (days, moveable) = year(y);
         let m = &moveable;
