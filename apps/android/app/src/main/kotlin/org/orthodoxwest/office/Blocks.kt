@@ -72,6 +72,9 @@ val VerseGutter: Dp = 28.8.dp
 private val SigilGap: Dp = 6.4.dp
 private val SigilColumn: Dp = VerseGutter - SigilGap
 
+/** How far a spelled-out sigil ("Blessing.") may hang into a wide screen's margin: all its extra width, at any text size. */
+private val WordHang: Dp = 72.dp
+
 /**
  * A sigil set right-aligned in its column. A mark wider than the column hangs up to `hang` into
  * the margin before it; only beyond that (a large system font) does the column widen, so the
@@ -204,15 +207,21 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
             block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth(), style = text)
-            // "Blessing." is too wide to hang in the page gutter: it stands above its words,
-            // both on the edge the ℣/℟ lines' words share, as the web's phone layout sets it.
-            block.kind == BlockKind.VERSICLE && block.marker.length > 2 -> Column(m.fillMaxWidth().padding(start = VerseGutter)) {
+            // "Blessing." is too wide to hang in a phone's or a narrow tablet's gutter: below the
+            // web's 1000px it stands above its words, both on the edge the ℣/℟ lines' words share
+            // (`.sigil-word` to 999px).
+            block.kind == BlockKind.VERSICLE && block.marker.length > 2 && !(LocalWide.current && !LocalRanked.current) -> Column(m.fillMaxWidth().padding(start = VerseGutter)) {
                 Text(block.marker, style = text.copy(color = p.rubric))
                 Text(runs(block), style = text)
             }
             else -> Row(m.fillMaxWidth()) {
-                // "All:" hangs its extra width into the page gutter, keeping its words on that edge.
-                val hang = if (block.kind == BlockKind.ALL) Gutter else 0.dp
+                // "All:" hangs its extra width into the page gutter, keeping its words on that edge;
+                // from 1000dp "Blessing." hangs into the wide margin the same way (`.sigil-word`).
+                val hang = when {
+                    block.kind == BlockKind.ALL -> Gutter
+                    block.marker.length > 2 -> WordHang
+                    else -> 0.dp
+                }
                 Text(block.marker, Modifier.sigilColumn(hang).alignByBaseline(), softWrap = false, style = text.copy(color = p.rubric))
                 Spacer(Modifier.width(SigilGap))
                 Text(runs(block), Modifier.alignByBaseline(), style = text)

@@ -79,7 +79,8 @@ class AccessibilityTest {
         compose.onNodeWithText("CHANGE DATE", substring = true).assert(state("Expanded"))
         compose.onNodeWithContentDescription("Sunday, March 15, today").assertIsSelected()
         compose.onNodeWithContentDescription("Previous month").assert(role(Role.Button))
-        compose.onAllNodesWithText("How are you praying?").fetchSemanticsNodes().let { assertTrue(it.isEmpty()) }
+        // The prayer form's legend is set in capitals, as the web's `.leader-selector legend`.
+        compose.onAllNodesWithText("HOW ARE YOU PRAYING?").fetchSemanticsNodes().let { assertTrue(it.isEmpty()) }
     }
 
     @Test
