@@ -1732,8 +1732,8 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
   const opening = psalms.nth(0).locator(".verse").first();
   const following = psalms.nth(1).locator(".verse").first();
   const original = await opening.textContent();
-  await expect(psalms.nth(0)).toContainText("Psalm 145b");
-  await expect(psalms.nth(1)).toContainText("Psalm 146");
+  await expect(psalms.nth(0)).toContainText("Psalm 144b (145b)");
+  await expect(psalms.nth(1)).toContainText("Psalm 145 (146)");
   // A one-line verse keeps its full-size initial and natural text flow.
   // Returning to wide after narrow also exercises font-size changes.
   for (const width of [1280, 390, 768, 320, 1280]) {
@@ -1793,7 +1793,7 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
   // Light only: themes share one geometry, held page-wide by "themes never change layout".
   const theme = "light";
   await openDatedPage(page, "/lauds/2026-09-13", theme);
-  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 63" });
+  const psalm = page.locator(".psalm").filter({ hasText: "Psalm 62 (63)" });
   const opening = psalm.locator(".verse").first();
   const original = await opening.textContent();
   for (const size of ["normal", "large"]) {

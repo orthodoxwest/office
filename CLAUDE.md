@@ -49,7 +49,8 @@ data/
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   latin-incipits.txt       Latin incipit printed beside each psalm/canticle label. Our psalter is
                            Coverdale = HEBREW numbering; incipits come from the Vulgate, which runs
-                           one behind — the file header records the join/split mapping. Sits outside
+                           one behind — the file header records the join/split mapping, which the
+                           psalm labels follow (Septuagint first, Hebrew in parentheses). Sits outside
                            data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
                            provenance, zero-occurrence and Latin-lint sweeps.
   review/provenance.csv    Source/page attestations; citations only, never book contents

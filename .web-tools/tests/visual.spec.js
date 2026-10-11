@@ -171,7 +171,7 @@ for (const [width, theme, divided] of [[390, "light", null], [320, "dark", false
   test(`mobile psalm opening at ${width}px — ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 600 });
     await openForSnapshot(page, "/lauds/2026-09-13", theme);
-    const psalm = page.locator(".psalm").filter({ hasText: "Psalm 63" });
+    const psalm = page.locator(".psalm").filter({ hasText: "Psalm 62 (63)" });
     if (divided !== null) await expect.poll(() => psalm.locator(".verse").first().evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
     await psalm.evaluate(el => window.scrollTo(0, el.getBoundingClientRect().top + scrollY - 24));
     await expect(page).toHaveScreenshot(`psalm-opening-${width}-${theme}.png`);

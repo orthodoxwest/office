@@ -666,18 +666,47 @@ fn map_element_type(kind: &str) -> ElementType {
     }
 }
 
-/// A label from the ref's last path component: "Psalm 4", or a title-cased
-/// canticle or hymn name.
+/// A label from the ref's last path component: "Psalm 66 (67)", or a
+/// title-cased canticle or hymn name.
 fn format_label(kind: &str, reference: &str) -> String {
     let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
-        "psalm" => {
-            let n = name.trim_start_matches('0');
-            format!("Psalm {}", if n.is_empty() { "0" } else { n })
-        }
+        "psalm" => psalm_label(&name),
         "canticle" | "hymn" => title_case(&name),
         _ => String::new(),
     }
+}
+
+/// A psalm's label from its corpus name ("067", "018a", "119 i"): the
+/// Septuagint (Vulgate) number first, as the Orthodox and Latin books number
+/// the psalms, then the Coverdale psalter's Hebrew number in parentheses when
+/// it differs ("Psalm 66 (67)"; "Psalm 4"). The parentheses keep the part a
+/// split psalm carries in our psalter, so the reader with a Prayer Book finds
+/// it ("Psalm 147 (147b)"). The joins and splits are those recorded in
+/// data/latin-incipits.txt.
+pub fn psalm_label(name: &str) -> String {
+    let name = name.trim_start_matches('0');
+    let digits = name.find(|c: char| !c.is_ascii_digit()).unwrap_or(name.len());
+    let (number, part) = name.split_at(digits);
+    let Ok(n) = number.parse::<u32>() else {
+        return format!("Psalm {}", if name.is_empty() { "0" } else { name });
+    };
+    let hebrew = format!("{n}{part}");
+    let greek = match (n, part) {
+        (10, _) => format!("9{part}"),
+        (11..=113 | 117..=146, _) => format!("{}{part}", n - 1),
+        (114 | 115, _) => format!("113{part}"),
+        // Hebrew 116 and 147 are each two psalms in the Septuagint, which our
+        // halves follow.
+        (116, "a") => "114".to_string(),
+        (116, "b") => "115".to_string(),
+        (116, _) => format!("114–115{part}"),
+        (147, "a") => "146".to_string(),
+        (147, "b") => "147".to_string(),
+        (147, _) => format!("146–147{part}"),
+        _ => hebrew.clone(),
+    };
+    if greek == hebrew { format!("Psalm {greek}") } else { format!("Psalm {greek} ({hebrew})") }
 }
 
 /// A leading "!" line is the chapter's scripture reference.
