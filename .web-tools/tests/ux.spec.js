@@ -428,7 +428,11 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   // carry it visually, so the word is sr-only rather than a chip beside the
   // hour name. Assert it is in the accessibility tree and out of the picture.
   await expect(current.getByText("Now", { exact: true })).toBeAttached();
-  await expect(current.getByText("Now", { exact: true })).not.toBeInViewport();
+  // Clipped to nothing, not scrolled away: WebKit's IntersectionObserver
+  // ignores the target's own clip, so measure the box rather than the viewport.
+  const nowBox = await current.getByText("Now", { exact: true }).boundingBox();
+  expect(nowBox.width * nowBox.height).toBeLessThanOrEqual(1);
+  expect(await current.getByText("Now", { exact: true }).evaluate(el => getComputedStyle(el).clip)).toMatch(/rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/);
   await expect(current.locator("xpath=ancestor::section[1]")).toContainText("Day");
 
   const naveState = await invitation.evaluate((element) => ({
@@ -489,6 +493,13 @@ test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
   await expect(next.locator(".continuation-label")).toHaveText("Tomorrow");
 });
 
+// The reader moves down the page. The prayed mark reads only what is on
+// screen, so a script scroll stands for a wheel or a swipe in every engine
+// (mobile WebKit in Playwright has no mouse.wheel).
+async function scrollHourBy(page, dy) {
+  await page.evaluate(top => scrollBy({ top, behavior: "instant" }), dy);
+}
+
 // The end of the hour's text reaches the screen.
 async function atHourEnd(page) {
   return page.evaluate(() => document.querySelector(".hour-end-mark").getBoundingClientRect().top < innerHeight);
@@ -498,7 +509,7 @@ test("scrolling through an hour in seconds does not mark it prayed", async ({ pa
   await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 3 && !(await atHourEnd(page)); i++) {
-    await page.mouse.wheel(0, 3000);
+    await scrollHourBy(page, 3000);
     await page.clock.runFor(1000);
   }
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
@@ -513,7 +524,7 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
   await page.goto("/compline/2026-10-07");
   for (let i = 0; i < 60 && !(await atHourEnd(page)); i++) {
     await page.clock.runFor(20_000);
-    await page.mouse.wheel(0, 400);
+    await scrollHourBy(page, 400);
   }
   await page.clock.runFor(2000);
   await page.goto("/?date=2026-10-07");
@@ -1191,7 +1202,8 @@ test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
 // page's text or the header's bare bar produces none, so the overlays must not
 // wait on a click to hear a tap outside them. Mimic that here by swallowing
 // every click whose target is not a control before the page's listeners see it.
-test("menus put away on a tap iOS Safari sends no click for", async ({ page }) => {
+test("menus put away on a tap iOS Safari sends no click for", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's Linux WebKit turns a touchscreen tap into touch and mouse events but no pointer events (iOS WebKit derives them; the GTK/WPE ports do not), so the pointerup that real iOS Safari sends never arrives");
   await page.addInitScript(() => {
     window.addEventListener("click", (e) => {
       if (!e.target.closest("a, button, input, select, textarea, label, summary")) {
@@ -1767,7 +1779,9 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         const rect = el.getBoundingClientRect();
         return {
           size: cap.fontSize,
-          initial: cap.initialLetter,
+          // Engines without initial-letter (WebKit, Firefox) take the
+          // stylesheet's float fallback; matching the next psalm's letter size holds the rank there.
+          initial: CSS.supports("initial-letter", "2") ? cap.initialLetter : null,
           height: rect.height,
           leading: parseFloat(getComputedStyle(el).lineHeight),
           halfVerseGap: secondHalf.top - firstWord.top,
@@ -1776,7 +1790,7 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         };
       });
       expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
-      expect(geometry.initial).toBe(elevated ? "2 1" : "2");
+      if (geometry.initial !== null) expect(geometry.initial).toBe(elevated ? "2 1" : "2");
       expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading - 1);
       expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
       if (width >= 768) {
@@ -2116,6 +2130,10 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         second: glyph(secondText, 0, 1),
         secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
         openingLeft: opening.getBoundingClientRect().left,
+        // The two line boxes a two-line initial stands in. A range's box for
+        // the cap is its font's em box, which WebKit's float fallback hangs
+        // below the second line although the letter stands on that baseline.
+        capRowsBottom: opening.getBoundingClientRect().top + 2 * parseFloat(getComputedStyle(opening).lineHeight),
         openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
         openingIndent: parseFloat(getComputedStyle(opening).textIndent),
         laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
@@ -2144,8 +2162,11 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
     // On a wide measure the second source line sits beside the cap. On a
     // phone the first source line may wrap through both drop-cap line boxes,
     // so the second source line starts below at the opening block's left edge.
+    const capBottom = Number.isFinite(geometry.capRowsBottom)
+      ? Math.min(geometry.cap.bottom, geometry.capRowsBottom)
+      : geometry.cap.bottom;
     const yOverlap =
-      geometry.second.top < geometry.cap.bottom - 0.5 &&
+      geometry.second.top < capBottom - 0.5 &&
       geometry.second.bottom > geometry.cap.top + 0.5;
     if (yOverlap) {
       expect(
@@ -2508,7 +2529,12 @@ test("ordo first layout and day anchors stay put when the deferred app loads", a
     await page.goto("/calendar/2026/09#d-2026-09-14", { waitUntil: "commit" });
     const row = page.locator("#d-2026-09-14");
     await expect(row).toBeAttached();
-    await page.evaluate(() => document.fonts.ready);
+    // Wait for the faces the first layout asked for. Not document.fonts.ready:
+    // WebKit holds it until the document has loaded, which the held app.js forbids.
+    await page.evaluate(() => {
+      void document.body.offsetHeight;
+      return Promise.all([...document.fonts].filter(face => face.status === "loading").map(face => face.loaded.catch(() => {})));
+    });
     await expect(page.locator(".ordo-continuation")).toBeAttached();
     const geometry = () => page.evaluate(() => ({
       height: document.documentElement.scrollHeight,
@@ -3156,7 +3182,8 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL }) => {
+test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
     const page = await context.newPage();
@@ -3398,7 +3425,8 @@ test('prayer-form metrics record the rendered form and subsequent switches only 
   expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('prayer-form:'))).toBe(true);
 });
 
-test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL }) => {
+test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
   try {
     const page = await context.newPage();
@@ -3418,7 +3446,8 @@ test('cached prayer pages include every form and preserve an explicit form throu
   } finally { await context.close(); }
 });
 
-test("the ordo's current month and frontispiece are saved for offline use", async ({ browser, baseURL }) => {
+test("the ordo's current month and frontispiece are saved for offline use", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
   try {
     const page = await context.newPage();

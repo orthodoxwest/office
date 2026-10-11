@@ -8041,8 +8041,12 @@ body.page-home::before {
 
   .month h2 { position: static; }
   .day-disclosures { display: block; }
+  /* !important and display: WebKit hides a closed disclosure's content by
+     its own styles on that slot, which a plain declaration here does not beat
+     (Chromium's are overridden either way). */
   :root .page-calendar .day-disclosures details::details-content {
-    content-visibility: visible;
+    display: block !important;
+    content-visibility: visible !important;
     block-size: auto;
     overflow: visible;
   }

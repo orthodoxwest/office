@@ -454,9 +454,22 @@ function usageBeaconBody(scope) {
       });
     }
     // getAnimations flushes style, so the dip's transitions exist by now.
-    var dips = root.getAnimations({ subtree: true }).filter(function (anim) {
+    var isDip = function (anim) {
       return anim.transitionProperty === "opacity";
-    });
+    };
+    var dips = root.getAnimations({ subtree: true }).filter(isDip);
+    // WebKit leaves pseudo-elements out of an element's subtree, so the
+    // wall's ::before dip is found only among the document's animations.
+    if (!dips.length && document.getAnimations) {
+      dips = document.getAnimations().filter(isDip);
+    }
+    // Still nothing reported: wait out the dip's nominal length rather than
+    // swapping at once, so the wall cannot flash.
+    if (!dips.length) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, VAULT_FADE_MS + 20);
+      });
+    }
     return Promise.race([
       Promise.all(dips.map(function (anim) {
         return anim.finished.catch(function () {});
