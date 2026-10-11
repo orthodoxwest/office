@@ -1483,9 +1483,17 @@ fn final_antiphons_turn_at_the_diurnals_hours() {
 /// printed diurnal. Those that ask something the page cannot do for the
 /// reader stay: kneeling and the secret Our Father (p. 313), the Collect
 /// without Let us pray (p. 313), and the noise at Lauds (p. 313).
+///
+/// Maintainer's direction, 2026-10-11: the p. 313 kneeling rubric is split
+/// into three short excerpts, each where it applies (All kneel → antiphon →
+/// secret Our Father → Psalm 51), with "Our Father" in black as words said.
+/// The Hours end with the Collect ("Thus are ended all the Hours during this
+/// Triduum"), so the Prayers After the Office are not said.
 #[test]
 fn triduum_hours_keep_action_rubrics_without_omission_notes() {
-    const CHRISTUS_FACTUS: &str = "shared/formulas/triduum-christus-factus-rubric";
+    const KNEEL: &str = "shared/formulas/triduum-kneel-rubric";
+    const SECRET: &str = "shared/formulas/triduum-secret-our-father-rubric";
+    const PSALM_51: &str = "shared/formulas/triduum-psalm-51-rubric";
     const COLLECT: &str = "shared/formulas/triduum-collect-rubric";
     const NOISE: &str = "shared/formulas/triduum-lauds-noise-rubric";
     const OMISSION: [&str; 7] =
@@ -1503,16 +1511,34 @@ fn triduum_hours_keep_action_rubrics_without_omission_notes() {
                     for rubric in &rubrics {
                         assert!(!OMISSION.iter().any(|p| rubric.text.contains(p)), "{context}: {}", rubric.source_ref);
                     }
-                    let actions: Vec<_> =
-                        rubrics.iter().map(|e| e.source_ref.as_str()).filter(|r| [CHRISTUS_FACTUS, COLLECT, NOISE].contains(r)).collect();
+                    let actions: Vec<_> = rubrics
+                        .iter()
+                        .map(|e| e.source_ref.as_str())
+                        .filter(|r| [KNEEL, SECRET, PSALM_51, COLLECT, NOISE].contains(r))
+                        .collect();
                     let triduum = [m.holy_thursday, m.good_friday].contains(&date)
                         || (date == m.holy_saturday && !["vespers", "compline"].contains(&hour));
                     let want: &[&str] = match hour {
-                        "lauds" if triduum => &[CHRISTUS_FACTUS, COLLECT, NOISE],
-                        _ if triduum => &[CHRISTUS_FACTUS, COLLECT],
+                        "lauds" if triduum => &[KNEEL, SECRET, PSALM_51, COLLECT, NOISE],
+                        _ if triduum => &[KNEEL, SECRET, PSALM_51, COLLECT],
                         _ => &[],
                     };
                     assert_eq!(actions, want, "{context}");
+                    let after_office = composed.sections.iter().any(|s| s.label == "Prayers After the Office")
+                        || elements.iter().any(|e| e.source_ref == "ordinary/session/sacrosanctae");
+                    if triduum {
+                        let i = elements.iter().position(|e| e.source_ref == KNEEL).unwrap();
+                        let antiphon = &elements[i + 1];
+                        assert!(antiphon.kind == ElementType::Antiphon && antiphon.text.starts_with("Christ"), "{context}");
+                        let refs: Vec<_> = elements[i + 2..i + 6].iter().map(|e| e.source_ref.as_str()).collect();
+                        assert_eq!(refs, [SECRET, "ordinary/shared/our-father", PSALM_51, "psalms/051"], "{context}");
+                        let said: Vec<_> = elements[i + 2].rubric_spans.iter().filter(|s| s.prayed).map(|s| s.text.as_str()).collect();
+                        assert_eq!(said, ["Our Father"], "{context}");
+                        assert!(elements[i + 4].rubric_spans.iter().all(|s| !s.prayed), "{context}: Psalm 51 is a label");
+                        assert!(!after_office, "{context}: the Hour ends with the Collect");
+                    } else if hour == "lauds" && date == m.easter {
+                        assert!(after_office, "{context}");
+                    }
                     if hour == "compline" && date == m.holy_saturday {
                         // The Hymn, Chapter and Versicle are not said (p. 361).
                         assert!(!elements.iter().any(|e| e.kind == ElementType::Hymn || e.slot_ref == "chapter"), "{context}");

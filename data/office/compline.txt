@@ -78,13 +78,19 @@ Condition = triduum
 # and the collect of the day said without Let us pray.
 
 Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
+Ref = shared/formulas/triduum-kneel-rubric
 
 Type = proper-antiphon
 Ref = triduum-antiphon
 
+Type = rubric
+Ref = shared/formulas/triduum-secret-our-father-rubric
+
 Type = silent-prayer
 Ref = ordinary/shared/our-father
+
+Type = rubric
+Ref = shared/formulas/triduum-psalm-51-rubric
 
 Type = psalm
 Ref = psalms/051
