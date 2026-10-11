@@ -177,6 +177,15 @@ fun dayColor(name: String, p: Palette): Color = when {
 }
 
 /**
+ * A day's colour as an hour's title lozenge and the ordo's rails set it (`.day-color-*` outside
+ * home): on the Apse night white and black alone are lifted.
+ */
+fun railColor(name: String, p: Palette): Color = if (p.dark && (name == "white" || name == "black")) dayColor(name, p) else dayColor(name)
+
+/** The vestment-trim band across an hour's top (`.color-band-*`): the day's colour, white as ivory rather than the lozenge's stone, in both themes. */
+fun bandColor(name: String): Color = if (name == "white") Color(0xFFE8E0CC) else dayColor(name)
+
+/**
  * The menu's Theme row: Default follows the device; Nave and Apse are the web's names. `window`
  * is the style that colours the window, and the launch screen, before Compose draws.
  */
