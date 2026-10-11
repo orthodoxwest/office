@@ -3,8 +3,10 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Closed testing (the `alpha` track), so testers
-# always have master once Google's review passes; a newer merge replaces a release still in review.
+# Every merge to master that changes the app goes to Internal testing and Closed testing (the
+# `alpha` track) at once: Internal reaches the maintainers within minutes, unreviewed, so a bad build
+# shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
+# replaces a release still in review.
 # Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
 # PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build only when it is promoted in Play
 # Console, or uploaded by a manual run from the Actions tab; manual runs use the `play`
@@ -40,7 +42,7 @@ on:
         type: string
         default: ""
 
-# A merge waiting behind another replaces it, so Closed testing gets the newest build; a
+# A merge waiting behind another replaces it, so the testing tracks get the newest build; a
 # manual run has its own queue and is never replaced by a merge.
 concurrency:
   group: play-${{ github.event_name }}
@@ -63,7 +65,7 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'alpha' }}
+    name: Build and upload to ${{ inputs.track || 'internal and closed testing' }}
     needs: ready
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
@@ -72,7 +74,8 @@ jobs:
     permissions:
       contents: read
     env:
-      TRACK: ${{ inputs.track || 'alpha' }}
+      # One upload, released on each comma-separated track in the same edit.
+      TRACKS: ${{ inputs.track || 'internal,alpha' }}
 
     steps:
       - name: Release from master only
@@ -165,7 +168,7 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ env.TRACK }}
+          tracks: ${{ env.TRACKS }}
           status: completed
           whatsNewDirectory: ${{ steps.notes.outputs.dir }}
 
@@ -177,7 +180,7 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ env.TRACK }}
+          tracks: ${{ env.TRACKS }}
           status: inProgress
           userFraction: ${{ steps.rollout.outputs.fraction }}
           whatsNewDirectory: ${{ steps.notes.outputs.dir }}

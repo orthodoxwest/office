@@ -192,10 +192,11 @@ clone of `master`.
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
 and uploads it to Google Play.
 
-- **Every merge to `master` that changes the app** goes to Closed testing, with the pull
-  request's title as the release notes. Each release passes Google's review (usually hours)
-  before it reaches testers, and a newer merge replaces a release still in review, so testers
-  run `master` as of the last approved merge.
+- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
+  at once, with the pull request's title as the release notes. Internal testing skips Google's
+  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
+  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
+  release still in review.
 - **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
   release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
   track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
