@@ -28,6 +28,10 @@ office.workspace = true
 presentation.workspace = true
 render-blocks.workspace = true
 uniffi.workspace = true
+miniz_oxide.workspace = true
+
+[build-dependencies]
+miniz_oxide.workspace = true
 
 [dev-dependencies]
 tools.workspace = true

@@ -31,6 +31,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync",
 rusqlite = { version = "0.40", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 uniffi = "0.32"
+miniz_oxide = "0.9"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -1,6 +1,7 @@
 //! Embeds the engine's data files: everything under `data/` except the review ledgers, Markdown
 //! notes, and chant scores. Entries are listed depth first, each directory's names in byte order,
-//! the order `DataSource::walk` promises.
+//! the order `DataSource::walk` promises. The files go in as one DEFLATE stream, about a fifth of
+//! their size, which the library inflates once when it loads the engine (data.rs).
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -32,11 +33,18 @@ fn main() {
     println!("cargo:rerun-if-changed={}", data.display());
     let mut files = Vec::new();
     walk(&data, "", &mut files);
-    let mut src = String::from("pub static FILES: &[(&str, &[u8])] = &[\n");
+    let mut blob = Vec::new();
+    let mut src =
+        String::from("/// Each file's path and its byte range in the inflated data.\npub static FILES: &[(&str, usize, usize)] = &[\n");
     for (rel, path) in &files {
-        writeln!(src, "    ({rel:?}, include_bytes!({:?})),", path.display().to_string()).expect("writing to a String cannot fail");
+        let start = blob.len();
+        blob.extend(std::fs::read(path).expect("reading data file"));
+        writeln!(src, "    ({rel:?}, {start}, {}),", blob.len()).expect("writing to a String cannot fail");
     }
     src.push_str("];\n");
-    let out = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR")).join("data_files.rs");
-    std::fs::write(out, src).expect("writing data_files.rs");
+    writeln!(src, "/// The inflated data's length.\npub const LEN: usize = {};", blob.len()).expect("writing to a String cannot fail");
+    src.push_str("/// Every file, end to end, as raw DEFLATE.\npub static DEFLATED: &[u8] = include_bytes!(concat!(env!(\"OUT_DIR\"), \"/data.deflate\"));\n");
+    let out = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR"));
+    std::fs::write(out.join("data.deflate"), miniz_oxide::deflate::compress_to_vec(&blob, 10)).expect("writing data.deflate");
+    std::fs::write(out.join("data_files.rs"), src).expect("writing data_files.rs");
 }

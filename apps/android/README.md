@@ -248,7 +248,9 @@ make android-screenshots   # → apps/android/app/build/screenshots/*.png
 
 Gradle drives Cargo: `preBuild` runs `cargo ndk` for arm64-v8a, armeabi-v7a, and x86_64,
 builds the host library, and generates the Kotlin bindings into `app/build/generated/uniffi`.
-Nothing generated is checked in.
+Nothing generated is checked in. The APK carries those three ABIs and no others (`abiFilters`),
+though JNA ships its own native library for more. The corpus goes into the library compressed
+(`apps/mobile-ffi/build.rs`) and is inflated once when the engine loads.
 
 Build types: `debug` (debuggable, for Android Studio) and `preview` (optimized, non-debuggable,
 what the prerelease ships). Both use the `.preview` application ID. `preview` and `release` are

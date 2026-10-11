@@ -12,19 +12,20 @@ fn repo_data() -> FsData {
 #[test]
 fn the_embedded_corpus_is_the_data_directory() {
     let fs = repo_data();
+    let data = EmbeddedData::new().unwrap();
     for dir in ["texts", "feasts", "office"] {
         let embedded =
             |rel: &str| !(rel.starts_with("chant/") || rel.ends_with(".md") || rel.rsplit('/').next().is_some_and(|n| n.starts_with('.')));
         let want: Vec<_> = fs.walk(dir).unwrap().into_iter().filter(|(rel, _)| embedded(rel)).collect();
-        let got = EmbeddedData.walk(dir).unwrap();
+        let got = data.walk(dir).unwrap();
         let paths = |files: &[(String, Vec<u8>)]| files.iter().map(|(rel, _)| rel.clone()).collect::<Vec<_>>();
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
     for file in ["appointment-scopes.json", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
-        assert_eq!(EmbeddedData.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
+        assert_eq!(data.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
     }
-    assert_eq!(EmbeddedData.read("review/provenance.csv").unwrap(), None);
+    assert_eq!(data.read("review/provenance.csv").unwrap(), None);
 }
 
 #[test]
