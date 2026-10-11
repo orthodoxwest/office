@@ -385,7 +385,14 @@
   \Needspace{4\baselineskip}\smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip\noindent%
 }
 
-% Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
+% A psalm's numbers in its label ("66 (67)"): lining figures out of small caps,
+% a little smaller, as the web's .psalm-num. A small-cap "1" is a bare stem that
+% reads as the section numeral "i".
+\newcommand{\psalmnum}[1]{{\normalfont\small\addfontfeatures{Numbers=Lining}#1}}
+% The Hebrew number beside it, "(67)", muted and a little smaller, as .psalm-heb.
+\newcommand{\psalmheb}[1]{{\footnotesize\color{mutedgray}#1}}
+
+% Psalm/canticle label: the word in body-size small caps, the Latin incipit in italic
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone. Kept with its first verses.
 \newcommand{\psalmlabel}[2]{%

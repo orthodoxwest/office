@@ -113,6 +113,17 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: style.smallCaps, lining: style.lining)
             a[.foregroundColor] = UIColor(p.rubric)
             a[.posture] = true
+        case .numeral:
+            // A psalm's numbers ("66 (67)") out of its label's small caps, as the web's `.psalm-num`:
+            // a small-cap "1" is a bare stem that reads as the section numeral "i".
+            a[.font] = garamond(size * 0.9, italic: style.italic, smallCaps: false, lining: true)
+            a[.kern] = 0.02 * size * 0.9
+        case .hebrewNumeral:
+            // The Hebrew number beside it, "(67)", muted and a little smaller, as `.psalm-heb`
+            // (0.86 of the numeral's 0.9).
+            a[.font] = garamond(size * 0.774, italic: style.italic, smallCaps: false, lining: true)
+            a[.kern] = 0.02 * size * 0.774
+            a[.foregroundColor] = UIColor(p.muted)
         }
         out.append(NSAttributedString(string: run.text, attributes: a))
     }

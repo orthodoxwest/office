@@ -238,6 +238,27 @@ pub struct Unrepeated {
 }
 
 impl OfficeElement {
+    /// A psalm's label as its word, its Septuagint number and its Hebrew number
+    /// ("Psalm ", "66", "(67)"), which renderers set apart: in a small-caps label a
+    /// small-cap "1" reads as the section numeral "i", and the Hebrew number in
+    /// parentheses is muted beside the number that leads. The Hebrew part is empty
+    /// where the two numberings agree; a renderer joins a present one with a
+    /// no-break space. `None` for any other label.
+    pub fn psalm_label_parts(&self) -> Option<(&str, &str, &str)> {
+        if self.kind != ElementType::Psalm {
+            return None;
+        }
+        let numbers = self.label.strip_prefix("Psalm ")?;
+        if !numbers.starts_with(|c: char| c.is_ascii_digit()) {
+            return None;
+        }
+        let word = &self.label[..self.label.len() - numbers.len()];
+        Some(match numbers.split_once("\u{a0}(") {
+            Some((greek, _)) => (word, greek, &numbers[greek.len() + '\u{a0}'.len_utf8()..]),
+            None => (word, numbers, ""),
+        })
+    }
+
     pub fn new(kind: ElementType, text: impl Into<String>) -> OfficeElement {
         OfficeElement {
             leader_slot: String::new(),
@@ -436,6 +457,21 @@ pub struct OfficeHour {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_psalm_label_parts_its_word_from_its_numbers() {
+        let label = |kind, l: &str| {
+            let mut e = OfficeElement::new(kind, "");
+            e.label = l.into();
+            e.psalm_label_parts().map(|(w, g, h)| [w.to_string(), g.to_string(), h.to_string()])
+        };
+        let parts = |w: &str, g: &str, h: &str| Some([w.to_string(), g.to_string(), h.to_string()]);
+        assert_eq!(label(ElementType::Psalm, "Psalm 66\u{a0}(67)"), parts("Psalm ", "66", "(67)"));
+        assert_eq!(label(ElementType::Psalm, "Psalm 118\u{a0}i\u{a0}(119\u{a0}i)"), parts("Psalm ", "118\u{a0}i", "(119\u{a0}i)"));
+        assert_eq!(label(ElementType::Psalm, "Psalm 1"), parts("Psalm ", "1", ""));
+        assert_eq!(label(ElementType::Canticle, "Magnificat"), None);
+        assert_eq!(label(ElementType::Psalm, "Psalm"), None);
+    }
 
     #[test]
     fn announcements() {

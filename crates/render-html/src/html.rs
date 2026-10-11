@@ -97,7 +97,20 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
             if !elem.label.is_empty() {
                 sb.push_str("<h3 class=\"item-label\">");
-                sb.push_str(&esc_text(&elem.label));
+                match elem.psalm_label_parts() {
+                    Some((word, greek, hebrew)) => {
+                        sb.push_str(&esc_text(word));
+                        sb.push_str("<span class=\"psalm-num\">");
+                        sb.push_str(&esc_text(greek));
+                        if !hebrew.is_empty() {
+                            sb.push_str("\u{a0}<span class=\"psalm-heb\">");
+                            sb.push_str(&esc_text(hebrew));
+                            sb.push_str("</span>");
+                        }
+                        sb.push_str("</span>");
+                    }
+                    None => sb.push_str(&esc_text(&elem.label)),
+                }
                 if !elem.incipit.is_empty() {
                     // The dot stays with the label; the Latin title wraps whole.
                     sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");

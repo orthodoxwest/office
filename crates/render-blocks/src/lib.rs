@@ -94,6 +94,12 @@ pub enum RunStyle {
     Posture,
     /// A preserved line break; its text is "\n".
     Break,
+    /// A psalm's numbers in its small-caps label ("66 (67)"), set in lining
+    /// figures out of small caps, as the web's `.psalm-num`.
+    Numeral,
+    /// The Hebrew number beside it ("(67)"), muted and a little smaller, as the
+    /// web's `.psalm-heb`.
+    HebrewNumeral,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -230,7 +236,15 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 out.push(Block { kind, ..rubric_block(&unrepeated) });
             }
             if !elem.label.is_empty() {
-                let mut runs = text_runs(&elem.label);
+                let mut runs = match elem.psalm_label_parts() {
+                    Some((word, greek, "")) => vec![Run::new(word, RunStyle::Plain), Run::new(typeset(greek), RunStyle::Numeral)],
+                    Some((word, greek, hebrew)) => vec![
+                        Run::new(word, RunStyle::Plain),
+                        Run::new(format!("{}\u{a0}", typeset(greek)), RunStyle::Numeral),
+                        Run::new(typeset(hebrew), RunStyle::HebrewNumeral),
+                    ],
+                    None => text_runs(&elem.label),
+                };
                 if !elem.incipit.is_empty() {
                     runs.push(Run::new("\u{a0}· ", RunStyle::Plain));
                     runs.push(Run::new(typeset(&elem.incipit), RunStyle::Latin));
