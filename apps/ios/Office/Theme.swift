@@ -22,10 +22,10 @@ struct Palette: Equatable {
     // linings and crosses, opaque and the same in every season; red ochre for the tituli (section
     // headings, psalm numbers, "Ant."), gilt on the Apse; slate blue for the ordo's doubles.
     let lining: Color
-    let titulus: Color
+    var titulus: Color
     let kalendarBlue: Color
     /// The evening hours' moon: the gold on the Nave, silver on the Apse night.
-    let moonInk: Color
+    var moonInk: Color
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
@@ -128,6 +128,23 @@ struct Ornament: Equatable {
         case (_, true): return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xECD9A0))
         default: return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xB98D3C), lo: Color(hex: 0x7D5C1C), ink: Color(hex: 0xECD9A0))
         }
+    }
+}
+
+extension Palette {
+    /**
+     * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are
+     * gilt, so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's
+     * are painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms
+     * while Apse's silver keeps its own ink.
+     */
+    func seasoned(_ season: String) -> Palette {
+        guard season == "passiontide" || season == "eastertide" else { return self }
+        let o = Ornament.of(self, season: season)
+        var p = self
+        if dark { p.titulus = o.flat }
+        if season == "passiontide" || !dark { p.moonInk = o.flat }
+        return p
     }
 }
 

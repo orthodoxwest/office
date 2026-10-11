@@ -34,6 +34,7 @@ struct HomeScreen: View {
     @State private var nicheFrame: CGRect?
 
     var body: some View {
+        let p = self.p.seasoned(view.ornament)
         let o = Ornament.of(p, season: view.ornament)
         GeometryReader { geo in
             let screen = geo.size.width
@@ -96,6 +97,7 @@ struct HomeScreen: View {
         }
         .onPreferenceChange(NicheFrameKey.self) { nicheFrame = $0 }
         .environment(\.ornament, o)
+        .environment(\.palette, p)
     }
 }
 

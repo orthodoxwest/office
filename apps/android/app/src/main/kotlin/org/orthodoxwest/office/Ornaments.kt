@@ -221,8 +221,9 @@ fun Headpiece(modifier: Modifier = Modifier) {
 @Composable
 fun HourSign(hour: String) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     when (hour) {
-        "lauds" -> Canvas(Modifier.size(14.72.dp)) { fitted(24f, 24f) { drawPath(Sun, p.gold) } }
+        "lauds" -> Canvas(Modifier.size(14.72.dp)) { fitted(24f, 24f) { drawPath(Sun, o.flat) } }
         "vespers", "compline" -> Canvas(Modifier.size(16.64.dp)) { fitted(24f, 24f) { drawPath(Moon, p.moonInk) } }
         // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem), nearer
         // the sun's and moon's weight in the rule's break.

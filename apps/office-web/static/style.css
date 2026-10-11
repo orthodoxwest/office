@@ -4020,6 +4020,14 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    Painted rules and linings (--lining) do not move: the church veils its
    images, not its walls. The focus rings are --accent and never were gold.
 
+   The hours' sun and moon are images too, and veil with the rest. Apse's
+   tituli (section headings, psalm titles, "Ant.") are gilt where Nave's are
+   painted red ochre, so on the Apse they veil and warm with the season and
+   on Nave they stay. In Paschaltide the sun and Nave's gold moon warm too;
+   Apse's moon is silver and keeps its own ink then. Apse's
+   --accent (links, menu, chosen options) is the room's functional gold and
+   does not move.
+
    The season class is stamped on <body> server-side per date
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
 
@@ -4057,6 +4065,9 @@ body.season-passiontide {
   --ornament-hi: #8d8395;
   --ornament-lo: #605469;
   --inscription-ink: #ddd6e8;
+  /* Nave's moon is gold leaf and Apse's silver; both veil to the season's
+     --ornament, resolved here on the body after the theme has set it. */
+  --moon-ink: var(--ornament);
 }
 
 body.season-eastertide {
@@ -4065,6 +4076,9 @@ body.season-eastertide {
   --ornament-hi: #c8922d;
   --ornament-lo: #886011;
   --inscription-ink: #f2e2b1;
+  /* Nave's gold moon warms with the rest of the leaf; Apse's silver moon is
+     restated in its blocks below, since silver does not take the gold. */
+  --moon-ink: var(--ornament);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -4073,6 +4087,7 @@ body.season-eastertide {
     --ornament-line: #565070;
     --ornament-hi: #cac1d7;
     --ornament-lo: #988aad;
+    --titulus: #b0a4c2;
   }
 
   :root:not([data-theme="light"]) body.season-eastertide {
@@ -4080,6 +4095,8 @@ body.season-eastertide {
     --ornament-line: #7a6a44;
     --ornament-hi: #f2e2b1;
     --ornament-lo: #d3b86f;
+    --titulus: #e6cf8c;
+    --moon-ink: #c9d0d9;
   }
 }
 
@@ -4088,6 +4105,7 @@ body.season-eastertide {
   --ornament-line: #565070;
   --ornament-hi: #cac1d7;
   --ornament-lo: #988aad;
+  --titulus: #b0a4c2;
 }
 
 :root[data-theme="dark"] body.season-eastertide {
@@ -4095,6 +4113,8 @@ body.season-eastertide {
   --ornament-line: #7a6a44;
   --ornament-hi: #f2e2b1;
   --ornament-lo: #d3b86f;
+  --titulus: #e6cf8c;
+  --moon-ink: #c9d0d9;
 }
 
 /* ── Narrow screens ── */
@@ -4368,7 +4388,8 @@ body.season-eastertide {
   width: 1.15em;
   height: 1.15em;
   color: transparent;
-  background: var(--gold);
+  /* The sun is gilding, so it keeps the season (see "Seasonal ornament"). */
+  background: var(--ornament);
   -webkit-mask: url("ornaments/sun.svg") center / contain no-repeat;
   mask: url("ornaments/sun.svg") center / contain no-repeat;
 }
