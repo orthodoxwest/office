@@ -13,8 +13,8 @@ native text, screen for screen:
 - **The hours**: the colour band and framed title, the web's spacing, and the Lauds, Prime and
   Vespers preparation open. Psalms get their gilded initials, antiphons their hanging sigils,
   and hymns a centred column.
-- **The ordo**: the month (the wide table on an iPad), each day's office digest, and the year's
-  Tabula Temporaria.
+- **The ordo**: the month under its pinned heading (the wide table on an iPad), each day's
+  office details (its commemorations and office digest), and the year's Tabula Temporaria.
 - **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
   and offers "Remind me in 10 min".
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and

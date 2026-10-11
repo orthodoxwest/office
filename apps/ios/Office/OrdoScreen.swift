@@ -62,25 +62,41 @@ struct OrdoScreen: View {
     @State private var allDetails = false
     @State private var focused = false
 
+    /// The scroll view's height.
+    @State private var viewport: CGFloat = 0
+
+    /// Where a day asked for is brought: 3.5rem below the top, clear of the pinned month heading
+    /// (the web's `scroll-margin-top`). Its mark has no height, so its top stands at this share of
+    /// the screen.
+    private var focus: UnitPoint {
+        viewport > 0 ? UnitPoint(x: 0.5, y: min(1, m.px(56) / viewport)) : .top
+    }
+
     var body: some View {
         let year = Int(month.year), number = Int(month.month)
         ScrollViewReader { scroll in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     SiteHeader().id("top")
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
-                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(5.6))
-                    MonthHeading(name: monthName(number)) {
-                        withAnimation { scroll.scrollTo("top", anchor: .top) }
-                    }
-                    .ordoColumn(m, wide: wide)
-                    .padding(.top, m.px(10))
-                    if wide { DayColumns().ordoColumn(m, wide: wide) }
-                    ForEach(month.days, id: \.date.day) { d in
-                        DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails)
-                            .ordoColumn(m, wide: wide)
-                            .id("d-\(d.date.day)")
+                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(15.6))
+                    // The month's heading stays pinned while its days scroll under it (the web's
+                    // sticky `.month h2`), so the way back to the top stays in reach.
+                    Section {
+                        if wide { DayColumns().ordoColumn(m, wide: wide) }
+                        ForEach(month.days, id: \.date.day) { d in
+                            // Where a day asked for is brought: a mark of no height at its top, which
+                            // `focus` sets clear of the pinned heading.
+                            Color.clear.frame(height: 0).id("d-\(d.date.day)")
+                            DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails)
+                                .ordoColumn(m, wide: wide)
+                        }
+                    } header: {
+                        MonthHeading(name: monthName(number)) {
+                            withAnimation { scroll.scrollTo("top", anchor: .top) }
+                        }
+                        .ordoColumn(m, wide: wide)
                     }
                     let prev = number == 1 ? (year - 1, 12) : (year, number - 1)
                     let next = number == 12 ? (year + 1, 1) : (year, number + 1)
@@ -99,12 +115,13 @@ struct OrdoScreen: View {
                     Footer()
                 }
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
             .onAppear {
                 // A day asked for is brought into view once; after that the reader's own place stands.
                 guard !focused else { return }
                 focused = true
                 if focusDay > 0 {
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: .top) }
+                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: focus) }
                 }
             }
         }
@@ -311,6 +328,9 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
+        // Pinned, it hides the days passing beneath it down to its rule: the flat ground, as the
+        // web's sticky heading takes on iOS, where its copy of the wall cannot line up with the wall.
+        .background { p.bg.padding(.bottom, -4.5) }
         // Every month's rule takes the lozenge, echoing the hour's title (the web's `.month h2::after`):
         // a 6pt square of the lining's terracotta, ringed in the ground.
         .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 4.24, ring: p.bg, ink: p.lining) }
@@ -359,11 +379,17 @@ private struct DayRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var details: Bool?
-    @State private var comms = false
 
     private var hasLauds: Bool { !d.benedictusAntiphon.isEmpty || d.laudsPreces || d.laudsSuffrage || !d.laudsComms.isEmpty }
     private var hasVespers: Bool { !d.magnificatAntiphon.isEmpty || d.vespersPreces || d.vespersSuffrage || !d.vespersComms.isEmpty || !d.vespersNote.isEmpty }
-    private var hasDetails: Bool { hasLauds || d.hoursPreces || hasVespers }
+    private var hasDetails: Bool { !d.commemorations.isEmpty || hasLauds || d.hoursPreces || hasVespers }
+
+    /// The day's commemorations that open its office details: one its Lauds or Vespers already names
+    /// with an antiphon is not named twice (as the web's `build_month`).
+    private var dayComms: [String] {
+        let named = Set((d.laudsComms + d.vespersComms).map { $0.name })
+        return d.commemorations.filter { !named.contains($0) }
+    }
 
     /// One stop for VoiceOver: the date, its colour and observances, and the feast.
     private var spoken: String {
@@ -415,18 +441,12 @@ private struct DayRow: View {
         }
     }
 
-    private var anyOpen: Bool { comms || ((details ?? allDetails) && hasDetails) }
+    private var anyOpen: Bool { (details ?? allDetails) && hasDetails }
 
-    /// The disclosures' buttons: the commemorations' count and "Office details".
-    private var disclosureButtons: some View {
+    /// The day's one disclosure, "Office details", which holds its commemorations and its office.
+    @ViewBuilder private var disclosureButtons: some View {
         let open = details ?? allDetails
-        return HStack(spacing: m.px(9.6)) {
-            if !d.commemorations.isEmpty {
-                let n = d.commemorations.count
-                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { withAnimation(unfolding) { comms.toggle() } }
-            }
-            if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
-        }
+        if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
     }
 
     @ViewBuilder private var disclosures: some View {
@@ -434,16 +454,10 @@ private struct DayRow: View {
         disclosed
     }
 
-    /// What the open disclosures unfold: the commemorations, and the office digest.
+    /// What the open disclosure unfolds: the day's commemorations, and the office digest.
     @ViewBuilder private var disclosed: some View {
         let open = details ?? allDetails
-        if comms {
-            ForEach(d.commemorations, id: \.self) { c in
-                Text(c).type(TextStyle(size: 13.6, line: 20.4, italic: true)).foregroundStyle(p.muted)
-            }
-            .transition(.unfold)
-        }
-        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
+        if open && hasDetails { Digest(d: d, dayComms: dayComms, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
     }
 
     private func small(_ label: String, _ open: Bool, toggle: @escaping () -> Void) -> some View {
@@ -634,6 +648,8 @@ private struct DayColumns: View {
 /// The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations.
 private struct Digest: View {
     let d: OrdoDayView
+    /// The day's commemorations its Lauds and Vespers do not name, set first as the "Day".
+    let dayComms: [String]
     let hasLauds: Bool
     let hasVespers: Bool
     @Environment(\.palette) private var p
@@ -641,6 +657,9 @@ private struct Digest: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if !dayComms.isEmpty {
+                hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms.map { CommemorationView(name: $0, incipit: "") })
+            }
             if hasLauds {
                 hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, comms: d.laudsComms)
             }
