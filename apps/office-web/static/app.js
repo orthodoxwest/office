@@ -1369,7 +1369,16 @@ function usageBeaconBody(scope) {
       return state.view === "days" ? MONTH_NAMES[state.focus.getUTCMonth()] + " " + year : String(year);
     }
 
+    // What the grid shows, so an opening that would show the same again
+    // leaves it alone rather than rebuilding it under the unfolding.
+    var drawn = null;
+
+    function drawing() {
+      return [state.view, civilSlug(state.focus), state.chosen, state.today].join(" ");
+    }
+
     function render() {
+      drawn = drawing();
       picker.setAttribute("data-view", state.view);
       var days = state.view === "days";
       title.textContent = titleText();
@@ -1577,8 +1586,10 @@ function usageBeaconBody(scope) {
         title.focus();
         return;
       }
-      details.open = false;
-      details.querySelector("summary").focus();
+      // Through the summary, so the fold is the one a tap makes.
+      var summary = details.querySelector("summary");
+      summary.click();
+      summary.focus();
     });
 
     // Each opening starts from the page's own day, and from the current
@@ -1586,7 +1597,9 @@ function usageBeaconBody(scope) {
     details.addEventListener("toggle", function () {
       if (details.open) {
         reset();
-        render();
+        if (drawing() !== drawn) {
+          render();
+        }
       }
     });
 
@@ -1602,6 +1615,110 @@ function usageBeaconBody(scope) {
     }
     nav.insertAdjacentElement("afterend", buildDatePicker(details));
     details.classList.add("has-date-picker");
+  });
+
+  // On a phone, home's card is at least a screen tall, and the head above
+  // the day takes whatever height the card's contents leave. "Change date"
+  // unfolding under it used up that spare height first: the day leapt up in
+  // the opening frames, then stood while the card grew down under the
+  // picker, two motions one after the other. Instead the head gives up its
+  // spare height over the whole unfolding, at the disclosure's pace, so the
+  // day rises as the picker opens and settles with it; folding, the reverse.
+  // Where the head has nothing to give (a short phone, the desktop niche),
+  // the fold is left as it is.
+  document.querySelectorAll(".home-hero details.home-date-nav").forEach(function (details) {
+    var head = details.closest(".home-hero").querySelector(".home-summary");
+    var summary = details.querySelector("summary");
+    if (!head || !summary || !window.matchMedia || !window.CSS || !CSS.supports("interpolate-size", "allow-keywords")) {
+      return;
+    }
+    var stillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    // The head's heights folded and unfolded while it eases between them.
+    var easing = null;
+
+    // The head's height with the picker settled open or shut, laid out
+    // without the unfolding's transition and put back within the same task,
+    // so nothing of it is painted.
+    function settledHeight(open) {
+      var was = details.open;
+      details.classList.add("is-settling");
+      details.open = open;
+      var height = head.getBoundingClientRect().height;
+      details.open = was;
+      void head.offsetHeight;
+      details.classList.remove("is-settling");
+      return height;
+    }
+
+    function settle() {
+      easing = null;
+      head.style.removeProperty("transition");
+      head.style.removeProperty("min-height");
+      head.style.removeProperty("flex-grow");
+    }
+
+    // The summary's own toggle follows this listener in the same task, so
+    // the head's transition and the disclosure's start on the same frame.
+    summary.addEventListener("click", function () {
+      if (!document.documentElement.classList.contains("motion-ready") || !stillness.matches) {
+        return;
+      }
+      var opening = !details.open;
+      if (easing) {
+        // Turned back part-way: the disclosure retraces its transition, and
+        // the head heads back to where it came from.
+        head.style.minHeight = (opening ? easing.open : easing.shut) + "px";
+        return;
+      }
+      var from = head.getBoundingClientRect().height;
+      var to = settledHeight(opening);
+      if (Math.abs(to - from) < 1) {
+        return;
+      }
+      easing = opening ? { shut: from, open: to } : { shut: to, open: from };
+      head.style.flexGrow = "0";
+      head.style.minHeight = from + "px";
+      void head.offsetHeight;
+      // The unfolding's duration and easing (style.css, "Disclosures unfold").
+      head.style.transition = "min-height 200ms ease-out";
+      head.style.minHeight = to + "px";
+    });
+
+    head.addEventListener("transitionend", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    head.addEventListener("transitioncancel", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    window.addEventListener("resize", function () {
+      if (easing) {
+        settle();
+      }
+    });
+  });
+
+  // The home panel's courses are clipped to its pointed head by --arch-w,
+  // the card's width, which style.css gives in container units. An element
+  // styled in container units is restyled and laid out again whenever
+  // anything in its container moves, so every frame of "Change date"
+  // unfolding re-laid every course of the head and its long clip-paths
+  // (some 6ms a frame on a desktop, several times that on a phone). The same
+  // width in pixels, kept here as the card's width changes, costs nothing
+  // between those changes; without script the container units stand.
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    if (!("ResizeObserver" in window)) {
+      return;
+    }
+    new ResizeObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      var box = entry.contentBoxSize && entry.contentBoxSize[0];
+      var width = box ? box.inlineSize : entry.contentRect.width;
+      hero.style.setProperty("--arch-cqi", width + "px");
+    }).observe(hero);
   });
 
   // currentHourInfo returns the office most likely being prayed at the given
