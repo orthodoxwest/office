@@ -53,9 +53,6 @@ Condition = triduum
 # psalmody, and the Gloria Patri is not said during the Triduum.
 # Psalm 119 vv. 33-80, as at Sunday Terce and Sext.
 
-Type = rubric
-Ref = shared/formulas/triduum-hours-opening-rubric
-
 Type = psalm
 Ref = psalms/119-v
 

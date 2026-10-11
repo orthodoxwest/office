@@ -1439,52 +1439,43 @@ fn final_antiphons_turn_at_the_diurnals_hours() {
     }
 }
 
+/// Maintainer's direction, 2026-10-11: the app shows each Hour fully
+/// assembled, so the Diurnal's Triduum rubrics that only say what is omitted
+/// or where the next part is (pp. 311, 314-316, 360-362) are left to the
+/// printed diurnal. Those that ask something the page cannot do for the
+/// reader stay: kneeling and the secret Our Father (p. 313), the Collect
+/// without Let us pray (p. 313), and the noise at Lauds (p. 313).
 #[test]
-fn triduum_hours_say_their_omissions() {
-    // Each rubric with the element it must be followed by (a slot or source).
-    const LAUDS: (&str, &str) = ("shared/formulas/triduum-lauds-omission-rubric", "versicle"); // p. 311
-    const VESPERS_OPENING: (&str, &str) = ("shared/formulas/triduum-vespers-opening-rubric", "psalm-antiphon-1"); // p. 315
-    const VESPERS: (&str, &str) = ("shared/formulas/triduum-vespers-omission-rubric", "magnificat-antiphon"); // p. 315
-    const VIGIL_VESPERS: (&str, &str) =
-        ("shared/formulas/holy-saturday-vespers-omission-rubric", "proper/holy-saturday/vigil-magnificat-antiphon"); // p. 360
-    const ALLELUIA: (&str, &str) = ("shared/formulas/holy-saturday-compline-alleluia-rubric", "psalms/004"); // p. 361
-    const COMPLINE: (&str, &str) = ("shared/formulas/holy-saturday-compline-omission-rubric", "nunc-dimittis-antiphon"); // p. 361
-    const COLLECT: (&str, &str) = ("shared/formulas/holy-saturday-compline-collect-rubric", "greeting"); // p. 362
-    let all = [LAUDS, VESPERS_OPENING, VESPERS, VIGIL_VESPERS, ALLELUIA, COMPLINE, COLLECT];
+fn triduum_hours_keep_action_rubrics_without_omission_notes() {
+    const CHRISTUS_FACTUS: &str = "shared/formulas/triduum-christus-factus-rubric";
+    const COLLECT: &str = "shared/formulas/triduum-collect-rubric";
+    const NOISE: &str = "shared/formulas/triduum-lauds-noise-rubric";
+    const OMISSION: [&str; 6] = ["not said", "not read", "said at once", "begun at once", "Henceforth", "without musical note"];
     for y in [2026, 2027, 2035, 2053] {
         let (days, moveable) = year(y);
         let m = &moveable;
-        let expected = |hour: &str, date: Date| -> Vec<(&str, &str)> {
-            let triduum = [m.holy_thursday, m.good_friday, m.holy_saturday].contains(&date);
-            match hour {
-                "lauds" if triduum => vec![LAUDS],
-                "vespers" if date == m.holy_saturday => vec![VIGIL_VESPERS],
-                "vespers" if triduum => vec![VESPERS_OPENING, VESPERS],
-                "compline" if date == m.holy_saturday => vec![ALLELUIA, COMPLINE, COLLECT],
-                _ => vec![],
-            }
-        };
-        for date in [m.holy_wednesday, m.holy_thursday, m.good_friday, m.holy_saturday, m.easter, m.easter.add_days(1)] {
-            for hour in ["lauds", "vespers", "compline"] {
+        for date in [m.holy_thursday, m.good_friday, m.holy_saturday, m.easter] {
+            for hour in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] {
                 for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
                     let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], m, form).unwrap();
                     let elements: Vec<_> = composed.sections.iter().flat_map(|s| &s.elements).collect();
                     let context = format!("{date} {hour} {form:?}");
-                    let found: Vec<_> =
-                        elements.iter().filter(|e| all.iter().any(|(r, _)| e.source_ref == *r)).map(|e| e.source_ref.as_str()).collect();
-                    let want = expected(hour, date);
-                    assert_eq!(found, want.iter().map(|(r, _)| *r).collect::<Vec<_>>(), "{context}");
-                    for (rubric, next) in want {
-                        let i = elements.iter().position(|e| e.source_ref == rubric).unwrap();
-                        assert_eq!(elements[i].kind, ElementType::Rubric, "{context}");
-                        let after = elements[i + 1];
-                        assert!(
-                            [&after.slot_ref, &after.source_ref, &after.leader_slot].contains(&&next.to_string()),
-                            "{context}: {rubric} before {after:?}"
-                        );
+                    let rubrics: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Rubric).collect();
+                    for rubric in &rubrics {
+                        assert!(!OMISSION.iter().any(|p| rubric.text.contains(p)), "{context}: {}", rubric.source_ref);
                     }
+                    let actions: Vec<_> =
+                        rubrics.iter().map(|e| e.source_ref.as_str()).filter(|r| [CHRISTUS_FACTUS, COLLECT, NOISE].contains(r)).collect();
+                    let triduum = [m.holy_thursday, m.good_friday].contains(&date)
+                        || (date == m.holy_saturday && !["vespers", "compline"].contains(&hour));
+                    let want: &[&str] = match hour {
+                        "lauds" if triduum => &[CHRISTUS_FACTUS, COLLECT, NOISE],
+                        _ if triduum => &[CHRISTUS_FACTUS, COLLECT],
+                        _ => &[],
+                    };
+                    assert_eq!(actions, want, "{context}");
                     if hour == "compline" && date == m.holy_saturday {
-                        // The Short Lesson keeps its place before the Confession.
+                        // The Hymn, Chapter and Versicle are not said (p. 361).
                         assert!(!elements.iter().any(|e| e.kind == ElementType::Hymn || e.slot_ref == "chapter"), "{context}");
                     }
                 }

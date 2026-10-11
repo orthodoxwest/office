@@ -59,9 +59,6 @@ Condition = triduum
 # psalmody, and the Gloria Patri is not said during the Triduum.
 # Psalm 54, then Psalm 119 vv. 1-32 as at Sunday Prime.
 
-Type = rubric
-Ref = shared/formulas/triduum-hours-opening-rubric
-
 Type = psalm
 Ref = psalms/054
 
@@ -412,9 +409,6 @@ Ref = shared/formulas/triduum-collect-rubric
 
 Type = proper-collect
 Ref = collect
-
-Type = rubric
-Ref = shared/formulas/triduum-prime-ending-rubric
 
 [Closing]
 Condition = not-triduum,not-office-of-the-dead
