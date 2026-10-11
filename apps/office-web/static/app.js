@@ -932,9 +932,14 @@ function usageBeaconBody(scope) {
   // click at all, so a document click listener never hears it there.
   // pointerup reaches every element, and a touch that becomes a scroll ends
   // in pointercancel instead, so it stands for the tap. click stays for the
-  // keyboard; a mouse sends both, and closing twice is harmless.
+  // keyboard; a mouse sends both, and the second finds it already closed. A
+  // right or middle button sends no click, so its pointerup leaves it open.
   var onTapOutside = function (handler) {
-    document.addEventListener("pointerup", handler);
+    document.addEventListener("pointerup", function (e) {
+      if (e.button === 0) {
+        handler(e);
+      }
+    });
     document.addEventListener("click", handler);
   };
 
