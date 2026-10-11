@@ -16,7 +16,8 @@ the polygons are written once, in terms of three custom properties the
 stylesheet sets per layer:
 
   --arch-w     the card's width (from container units: the card is an
-               inline-size container, so its layers can measure it)
+               inline-size container, so its layers can measure it; app.js
+               restates the same width in pixels)
   --arch-lift  how far above the card each layer's box starts, room for an
                outer layer's point
   --arch-d     the layer's offset outward from the card's edge (negative

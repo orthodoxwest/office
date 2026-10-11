@@ -321,6 +321,9 @@ private fun Frontispiece(
     val ink = frontispieceInk(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
+    // The picker's full height as it was last laid out, so the head can ease in step with its
+    // unfolding (below); written while the picker is measured, read in the same measure pass.
+    val unfolded = remember { IntArray(1) }
     // The hours prayed on this day, marked again when one is prayed.
     val context = LocalContext.current
     val prayed = remember(date, Prayed.version) { Prayed.hours(context, date) }
@@ -427,7 +430,21 @@ private fun Frontispiece(
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
                     if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
                     Disclosure("Change date", picking, { picking = !picking })
-                    Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
+                }
+            },
+            // "Change date"'s picker, apart from the hours above it so the head can be measured
+            // without it.
+            {
+                Box(Modifier.fillMaxWidth().padding(horizontal = side), contentAlignment = Alignment.TopCenter) {
+                    Unfold(picking) {
+                        Column(
+                            Modifier.layout { measurable, constraints ->
+                                val placeable = measurable.measure(constraints)
+                                unfolded[0] = placeable.height
+                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                            },
+                        ) { DatePicker(date, today) { picking = false; onDate(it) } }
+                    }
                 }
             },
         ),
@@ -450,18 +467,27 @@ private fun Frontispiece(
         val versicle = verses.firstOrNull()?.measure(full)
         val back = backs.firstOrNull()?.measure(full)
         val after = slots[5].first().measure(full)
+        val picker = slots[6].first().measure(full)
         val headPad = tier.headPad.roundToPx()
         val foot = tier.bottom.roundToPx()
         val day = facts.height + (back?.height ?: 0) + tier.dayGap.roundToPx()
+        val rise = (tier.arch.rise * width).roundToInt()
         // The day under the head's room for the cross, and the band no higher than the springing,
         // so it never crosses the arch; on a phone, the height the card is given beyond its own.
-        val summary = maxOf(headPad + day, (tier.arch.rise * width).roundToInt(), constraints.minHeight - after.height - foot)
+        val shut = maxOf(headPad + day, rise, constraints.minHeight - after.height - foot)
         // The versicle takes only the height the head has to spare: where it would make the card
-        // taller, the head goes without it.
-        val verse = versicle?.takeIf { headPad + day + it.height <= summary }
+        // taller, the head goes without it. It is fitted to the card with the picker shut, as the
+        // web's is, so opening the picker never takes it away.
+        val verse = versicle?.takeIf { headPad + day + it.height <= shut }
+        // The picker takes the head's spare height before it lengthens the card. Taken as it
+        // unfolded, that spare height went in the first frames: the day leapt up, then stood
+        // while the card grew down under the picker. Instead the head gives it up in step with
+        // the unfolding, so the day rises as the picker opens and settles with it.
+        val open = maxOf(headPad + day + (verse?.height ?: 0), rise, constraints.minHeight - after.height - unfolded[0] - foot)
+        val summary = if (picker.height == 0 || unfolded[0] == 0) shut else shut - (shut - open) * minOf(picker.height, unfolded[0]) / unfolded[0]
         val spare = summary - headPad - day - (verse?.height ?: 0)
         val wall = walls.first().measure(Constraints.fixed(width, summary))
-        val height = summary + after.height + foot
+        val height = summary + after.height + picker.height + foot
         layout(width, height) {
             wall.place(0, 0)
             mark.place((width - mark.width) / 2, tier.crownTop.roundToPx())
@@ -471,6 +497,7 @@ private fun Frontispiece(
             verse?.let { it.place(0, y); y += it.height }
             back?.place(0, y)
             after.place(0, summary)
+            picker.place(0, summary + after.height)
         }
     }
 }

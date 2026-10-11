@@ -1704,7 +1704,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Season and date control share one baseline, so naming the season costs no
    extra line in the title stack. Once the disclosure is open it claims the
-   whole row and the date picker keeps its full width. */
+   whole row and the date picker keeps its full width. Without a season it
+   claims the row shut as well, so the picker does not narrow as it folds. */
 .home-day-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1712,7 +1713,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   gap: 0 1rem;
 }
 
-.home-day-meta .home-date-nav[open] {
+.home-day-meta .home-date-nav:is([open], :only-child) {
   flex: 1 0 100%;
 }
 
@@ -4249,6 +4250,12 @@ body.season-eastertide {
       content-visibility 200ms allow-discrete;
   }
 
+  /* app.js lays home's head out with the picker settled, to ease the head
+     in step with the unfolding; that look must not start a transition. */
+  :root.motion-ready details.hour-date-nav.is-settling::details-content {
+    transition: none;
+  }
+
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
   :root.motion-ready details.day-commemorations[open]::details-content,
@@ -4458,7 +4465,10 @@ body.season-eastertide {
   --day-clear: calc(var(--panel-inset) + 9px + 0.75rem);
   --lining-day: var(--day-color, var(--lining));
   --pad-x: 1rem;
-  --arch-w: calc(100cqi + 2 * var(--pad-x));
+  /* app.js sets --arch-cqi to the card's inline size in pixels, the same
+     length as 100cqi, so the courses' clip-paths do not have to be laid out
+     again on every frame of a disclosure unfolding in the card. */
+  --arch-w: calc(var(--arch-cqi, 100cqi) + 2 * var(--pad-x));
   --arch-lift: 2rem;
   --arch-frame: 1px;
   --arch-ground: var(--surface);
