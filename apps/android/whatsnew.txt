@@ -1,0 +1,7 @@
+# What's new: the release notes Google Play shows with each build this workflow uploads.
+#
+# Every merge that changes the app uploads a build to Internal and Closed testing, and the text
+# below (lines starting with # are dropped) goes with it, unchanged, until you edit it. Leave it
+# empty and builds go up with no notes. A manual run's "notes" input replaces it for that run.
+# Play takes at most 500 characters; a longer text stops the run before it builds.
+# Promoting a release to Production in Play Console keeps its notes, and you can edit them there.

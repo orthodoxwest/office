@@ -193,10 +193,15 @@ The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundl
 and uploads it to Google Play.
 
 - **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
-  at once, with the pull request's title as the release notes. Internal testing skips Google's
+  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
   review and reaches the maintainers within minutes, so a bad build shows there first; Closed
   testing reaches testers once the review passes (usually hours), and a newer merge replaces a
   release still in review.
+- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
+  (lines starting with `#` dropped), never anything from the merge. The same text goes with
+  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
+  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
+  over Play's 500 characters stops the run before it builds.
 - **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
   release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
   track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
