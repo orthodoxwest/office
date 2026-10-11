@@ -428,6 +428,11 @@ input {
    because someone chose Larger. */
 html {
   font-size: 100%;
+  /* iOS Safari enlarges text by itself when a phone turns to landscape; the
+     text-size setting above is the only scaling, as in Chrome. 100% (not
+     none) keeps pinch zoom. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html[data-text-size="small"] {
@@ -1150,6 +1155,7 @@ footer::before {
   background: var(--lining);
   -webkit-mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
   mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1848,6 +1854,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1936,6 +1943,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-decoration: none;
   font-variant-numeric: lining-nums tabular-nums;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2619,6 +2627,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--muted);
   font-size: 0.78em;
   line-height: 1.75;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2767,6 +2776,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-align: right;
   font-weight: normal;
   color: var(--rubric);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -7204,6 +7214,7 @@ body.season-eastertide {
 .month-top,
 .continuation-label,
 .home-hour-link-state {
+  -webkit-user-select: none;
   user-select: none;
 }
 
