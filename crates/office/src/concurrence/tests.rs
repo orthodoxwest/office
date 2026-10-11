@@ -202,6 +202,12 @@ fn saturday_bvm_commemorated_at_friday_double_ii_vespers() {
     assert_eq!(r.owner, IIOfPreceding);
     assert!(same_list(&r.commemorations, &[&bvm]), "{:?}", ids(&r.commemorations));
     assert_eq!(r.following_office_commemoration_id.as_deref(), Some("saturday-office-bvm"));
+
+    // Needs ruling (#666): a Friday feast of Our Lady keeps it as well (2025
+    // ordo 12 Sep, Holy Name of Mary: "Comm. BVM ('O blessed Mother' 68*").
+    let walsingham = f("our-lady-walsingham", Rank::GreaterDouble, Category::BlessedVirgin);
+    let r = resolve_concurrence(&day(Some(&walsingham), &[]), &day(Some(&bvm), &[]));
+    assert!(same_list(&r.commemorations, &[&bvm]), "{:?}", ids(&r.commemorations));
 }
 
 #[test]

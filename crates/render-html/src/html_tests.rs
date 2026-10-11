@@ -283,15 +283,28 @@ fn dialogue_and_corporate_lord_prayer_roles() {
     has(&dialogue, ">All:</span>");
     let mut prayer = elem(
         ElementType::CorporateLordPrayer,
-        "Our Father, who art in heaven.\nAnd lead us not into temptation,\nBut deliver us from evil. Amen.",
+        "Our Father, who art in heaven.\nAnd lead us not into temptation,\nBut deliver us from evil.",
     );
     prayer.voice = vec![
         VoiceSpan::new("Our Father, who art in heaven.\nAnd lead us not into temptation,\n", true, Some(VoiceRole::Officiant)),
-        VoiceSpan::new("But deliver us from evil. Amen.", true, Some(VoiceRole::Response)),
+        VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
     ];
     let html = render(&prayer);
     has(&html, r#"corporate-lord-prayer-officiant">Our Father"#);
-    has(&html, r#">℟.</span><span class="sigil-text">But deliver us from evil. Amen."#);
+    has(&html, r#">℟.</span><span class="sigil-text">But deliver us from evil.</span>"#);
+    // Said in secret until its ℣ at the little Hours (Diurnal p. 10; #671):
+    // no initial, the middle muted.
+    prayer.voice = vec![
+        VoiceSpan::new("Our Father", true, Some(VoiceRole::Officiant)),
+        VoiceSpan::new(", who art in heaven.\n", false, Some(VoiceRole::Officiant)),
+        VoiceSpan::new("And lead us not into temptation,\n", true, Some(VoiceRole::Officiant)),
+        VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
+    ];
+    let secret = render(&prayer);
+    lacks(&secret, "corporate-lord-prayer-officiant");
+    has(&secret, r#"<span class="spoken-text">Our Father</span><span class="secret-text">, who art in heaven.</span>"#);
+    has(&secret, r#">℣.</span><span class="sigil-text"><span class="spoken-text">And lead us not into temptation.</span>"#);
+    has(&secret, r#">℟.</span><span class="sigil-text"><span class="spoken-text">But deliver us from evil.</span>"#);
     let fallback = render(&elem(ElementType::CorporateLordPrayer, "Our Father, who art in heaven."));
     lacks(&fallback, "corporate-lord-prayer-officiant");
     has(&fallback, r#"<p class="plain-line">Our Father, who art in heaven.</p>"#);

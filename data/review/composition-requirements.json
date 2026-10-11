@@ -3468,5 +3468,190 @@
         "ref": "ordinary/marian/salve-regina"
       }
     ]
+  },
+  {
+    "id": "confessor-bishop-vespers-omit-lauds-fourth-antiphon",
+    "source": "Monastic Diurnal, Common of a Confessor and Bishop: I Vespers take the antiphons of Lauds omitting the fourth (p. 33*); II Vespers' fourth is Good and faithful servant (p. 39*), in every season; Lauds' fourth is the Benedicite antiphon (p. 35*), alleluia-free after Septuagesima (draft archdiocesan Lauds book p. 654) (#663).",
+    "cases": [
+      {
+        "date": "2027-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-26",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2030-02-27",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-septuagesima",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2027-04-06",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      },
+      {
+        "date": "2027-04-07",
+        "hour": "lauds",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-lent",
+        "contains": "O ye priests of God"
+      },
+      {
+        "date": "2028-04-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "contains": "Good and faithful servant"
+      }
+    ]
+  },
+  {
+    "id": "christmas-eve-prime-antiphon",
+    "source": "Monastic Diurnal, Christmas Eve, p. 183: \"At Prime, which is said as on Doubles, Ant. O Judah and Jerusalem\", Lauds' first antiphon (p. 182), also when the Vigil falls on Sunday (p. 183) (#658).",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2027-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/vigil-nativity/psalm-antiphon-1-prime",
+        "contains": "O Judah and Jerusalem"
+      }
+    ]
+  },
+  {
+    "id": "prime-chapter-on-vigils",
+    "source": "Monastic Diurnal p. 6 (Now unto the King on all Sundays and on privileged Vigils; Love the truth on other Ferias and on Common Vigils out of Paschaltide), p. 183 (Vigil of the Nativity, here also on Sunday 2028-12-24), p. 222 (Vigil of the Epiphany); General Rubrics rank table (privileged Vigils: the Nativity, Pentecost, the Epiphany). #658.",
+    "cases": [
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2033-12-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2028-01-05",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-05-30",
+        "hour": "prime",
+        "slot": "chapter",
+        "ref": "ordinary/prime/chapter"
+      },
+      {
+        "date": "2026-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2028-12-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2027-01-05",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "absent": true
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-07-24",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter-ferial",
+        "ref": "ordinary/prime/chapter-ferial"
+      },
+      {
+        "date": "2030-02-23",
+        "hour": "prime",
+        "slot": "chapter",
+        "absent": true
+      }
+    ]
   }
 ]

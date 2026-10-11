@@ -13,9 +13,7 @@ use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{
-    ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceRole, VoiceSpan, posture_cues_at, split_words,
-};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -258,11 +256,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
             liturgical_block(out, &elem.text, Mode::PreserveLines, true);
             mark_opening(out, start, |b| b.kind == BlockKind::Response && b.marker.is_empty());
         }
-        ElementType::CorporateLordPrayer => {
-            let start = out.len();
-            corporate_lord_prayer(out, elem);
-            mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
-        }
+        ElementType::CorporateLordPrayer => corporate_lord_prayer(out, elem),
         ElementType::Collect => {
             if elem.voice.is_empty() {
                 let start = out.len();
@@ -634,23 +628,24 @@ fn marian_antiphon(out: &mut Vec<Block>, text: &str) {
 }
 
 /// The corporate Lord's Prayer, split between officiant and people; any
-/// incomplete partition falls back to an ordinary prayer.
+/// incomplete partition falls back to an ordinary prayer. Said in secret up
+/// to a versicle, it is a voiced block with no initial.
 fn corporate_lord_prayer(out: &mut Vec<Block>, elem: &OfficeElement) {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
-    }
-    if officiant.is_empty() || response.is_empty() {
+    let start = out.len();
+    let Some(parts) = elem.lord_prayer_parts() else {
         liturgical_block(out, &elem.text, Mode::Flow, false);
+        mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
+        return;
+    };
+    if parts.versicle.is_some() {
+        voice_block(out, &parts.voiced(), Mode::Flow);
         return;
     }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     out.push(Block::new(BlockKind::Paragraph, chant_runs(&flow(&officiant))));
-    out.push(Block::marked(BlockKind::Response, "℟.", chant_runs(&flow(&response))));
+    out.push(Block::marked(BlockKind::Response, "℟.", chant_runs(&flow(&parts.response))));
+    mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
 }
 
 /// A hymn: one block per stanza, a standalone Amen folded into the stanza before it.

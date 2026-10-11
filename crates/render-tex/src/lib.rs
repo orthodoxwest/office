@@ -5,7 +5,7 @@ use calendar::{Color, Season};
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at, split_words,
+    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words,
 };
 
 const PREAMBLE: &str = include_str!("preamble.tex");
@@ -661,20 +661,17 @@ fn split_at_word(text: &str, initial_end: usize) -> (String, String, String) {
     (initial.to_string(), rest[..word_end].to_string(), rest[word_end..].to_string())
 }
 
+/// Said in secret up to a versicle, the prayer is muted prose with no
+/// initial, then its ℣ and ℟.
 fn format_corporate_lord_prayer(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
-    }
-    if officiant.is_empty() || response.is_empty() {
-        return format_block(&elem.text);
-    }
+    let Some(parts) = elem.lord_prayer_parts() else { return format_block(&elem.text) };
     let flow = |s: &str| s.split_whitespace().collect::<Vec<_>>().join(" ");
-    format!("{}\\response{{{}}}\n\n", initial(Initial::Prose, &flow(&officiant), ""), mediant_line(&flow(&response)))
+    if let Some(versicle) = &parts.versicle {
+        let lines = format!("V. {}\nR. {}", flow(versicle), flow(&parts.response));
+        return format!("{}{}", format_voice_spans(&parts.officiant), format_lines(&lines));
+    }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
+    format!("{}\\response{{{}}}\n\n", initial(Initial::Prose, &flow(&officiant), ""), mediant_line(&flow(&parts.response)))
 }
 
 /// How a block sets its plain prose lines.
@@ -856,9 +853,17 @@ fn format_prayer_voice(elem: &OfficeElement) -> Option<String> {
     if !silent || joined != elem.text {
         return None;
     }
+    Some(format_voice_spans(&elem.voice))
+}
+
+/// Spans as one muted-where-silent paragraph flow.
+fn format_voice_spans(spans: &[VoiceSpan]) -> String {
     let mut b = String::from("\\noindent ");
-    for span in &elem.voice {
+    for (n, span) in spans.iter().enumerate() {
         let mut text = span.text.as_str();
+        if n + 1 == spans.len() {
+            text = text.trim_end();
+        }
         if !span.spoken {
             // \color ends with \ignorespaces: a leading space stays outside it.
             let trimmed = text.trim_start();
@@ -879,7 +884,7 @@ fn format_prayer_voice(elem: &OfficeElement) -> Option<String> {
         }
     }
     b.push_str("\\par\n\n");
-    Some(b)
+    b
 }
 
 #[cfg(test)]
@@ -925,6 +930,29 @@ mod tests {
         assert!(body.contains("\\antclose{"), "{body}");
         assert_eq!(tex_section(&section, None), body);
         assert!(preamble().contains("\\newcommand{\\antopen}"));
+    }
+
+    /// #665: a psalm's first verse turns over below its dropped initial at
+    /// the verses' text edge, where `\psalmverse` hangs every other verse,
+    /// not back at the margin under the verse numbers; every other mode's
+    /// turnovers keep the margin.
+    #[test]
+    fn psalm_initial_turns_over_at_the_verse_edge() {
+        let p = preamble();
+        assert!(p.contains("\\setlength{\\psalmversewidth}{2em}"), "verse edge defined");
+        assert!(p.contains("\\noindent\\hangindent=\\psalmversewidth\\hangafter=1"), "verses hang at the edge");
+        assert!(
+            p.contains("\\dim_use:N \\l__initial_tail_dim ~ \\dim_eval:n { \\linewidth - \\l__initial_tail_dim } \\scan_stop:"),
+            "drop's last parshape entry is the tail"
+        );
+        assert!(!p.contains("0pt ~ \\dim_use:N \\linewidth"), "no fixed margin tail");
+        let initial = &p[p.find("\\NewDocumentCommand \\initial ").expect("\\initial")..];
+        let reset = initial.find("\\dim_zero:N \\l__initial_tail_dim").expect("tail reset for every mode");
+        let psalm = initial.find("{ psalm }").expect("psalm mode");
+        let prose = initial.find("{ prose }").expect("prose mode");
+        let set = initial.find("\\dim_set_eq:NN \\l__initial_tail_dim \\psalmversewidth").expect("psalm sets the tail");
+        assert!(reset < initial.find("{ drop }").unwrap() && psalm < set && set < prose, "only psalm mode sets the tail");
+        assert_eq!(initial.matches("\\l__initial_tail_dim").count(), 2);
     }
 
     #[test]

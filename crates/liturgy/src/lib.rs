@@ -110,6 +110,33 @@ impl VoiceSpan {
     }
 }
 
+/// The corporate Lord's Prayer divided between its voices.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LordPrayerParts {
+    /// The officiant's words before his versicle or the people's answer.
+    pub officiant: Vec<VoiceSpan>,
+    /// After a secret stretch, the words he says aloud as a ℣.
+    pub versicle: Option<String>,
+    /// The people's ℟.
+    pub response: String,
+}
+
+impl LordPrayerParts {
+    /// The prayer as a voiced block: the officiant's prose, then its `V. `
+    /// and `R. ` lines.
+    pub fn voiced(&self) -> Vec<VoiceSpan> {
+        let mut spans: Vec<VoiceSpan> = self.officiant.iter().map(|s| VoiceSpan::new(s.text.as_str(), s.spoken, None)).collect();
+        let lines = self.versicle.iter().map(|v| format!("V. {}", v.trim())).chain([format!("R. {}", self.response.trim())]);
+        for line in lines {
+            if spans.last().is_some_and(|s| !s.text.ends_with('\n')) {
+                spans.push(VoiceSpan::new("\n", true, None));
+            }
+            spans.push(VoiceSpan::new(line, true, None));
+        }
+        spans
+    }
+}
+
 /// A run of a rubric; `prayed` marks words quoted for recitation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RubricSpan {
@@ -268,6 +295,33 @@ impl OfficeElement {
             text.push_str(&span.text);
         }
         (text == self.text).then_some(&self.voice[..])
+    }
+
+    /// The corporate Lord's Prayer's officiant, versicle and response; `None`
+    /// unless the spans give both officiant and response, when renderers fall
+    /// back to a plain prayer.
+    pub fn lord_prayer_parts(&self) -> Option<LordPrayerParts> {
+        let mut officiant: Vec<VoiceSpan> = Vec::new();
+        let mut response = String::new();
+        for span in &self.voice {
+            match span.role {
+                Some(VoiceRole::Officiant) => officiant.push(span.clone()),
+                Some(VoiceRole::Response) => response.push_str(&span.text),
+                Some(VoiceRole::Priest | VoiceRole::All) | None => {}
+            }
+        }
+        if officiant.is_empty() || response.is_empty() {
+            return None;
+        }
+        // Said aloud after a secret stretch, his last words are a versicle,
+        // closed with a period as the Diurnal prints it (pp. 10, 86, 151).
+        let versicle = match officiant.as_slice() {
+            [.., before, last] if !before.spoken && last.spoken => {
+                officiant.pop().map(|s| format!("{}.", s.text.trim_end().trim_end_matches([',', ';', ':', '.'])))
+            }
+            _ => None,
+        };
+        Some(LordPrayerParts { officiant, versicle, response })
     }
 }
 
