@@ -148,14 +148,21 @@ class UsageTest {
         assertTrue(posted.isEmpty())
     }
 
-    // Play's pre-launch report crawls every upload on fresh Test Lab devices; none is a reader.
+    // Play's pre-launch report crawls every upload on fresh test devices; none is a reader.
     @Test
-    fun testLabDevicesAreNotCounted() {
-        assertTrue(Usage.counts(app, build = true))
-        assertFalse(Usage.counts(app, build = false))
+    fun testDevicesAreNotCounted() {
+        val play = "com.android.vending"
+        assertTrue(Usage.counts(app, build = true, store = true, installer = play))
+        assertFalse(Usage.counts(app, build = false, store = true, installer = play))
+        // A store build the Play Store did not install came from the test harness.
+        assertFalse(Usage.counts(app, build = true, store = true, installer = null))
+        assertFalse(Usage.counts(app, build = true, store = true, installer = "com.android.shell"))
+        // The preview is sideloaded, so it has no store to check.
+        assertTrue(Usage.counts(app, build = true, store = false, installer = null))
         Settings.System.putString(app.contentResolver, "firebase.test.lab", "true")
         try {
-            assertFalse(Usage.counts(app, build = true))
+            assertFalse(Usage.counts(app, build = true, store = true, installer = play))
+            assertFalse(Usage.counts(app, build = true, store = false, installer = null))
         } finally {
             Settings.System.putString(app.contentResolver, "firebase.test.lab", "false")
         }

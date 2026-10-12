@@ -228,8 +228,9 @@ crawler presents a fresh cookie jar per page and would otherwise mint a
 - Nothing reports until the page is touched or visible for eight seconds.
 - Self-identifying crawlers (`usage::is_bot`: `<name>bot/<version>` or an
   explicit token, not merely the substring "bot") get `204` with no cookie.
-- The Android app does not report from a Firebase Test Lab device, where
-  Play's pre-launch report installs and crawls every uploaded build.
+- The Android app does not report from the devices where Play's pre-launch
+  report installs and crawls every uploaded build: a store build reports only
+  when the Play Store installed it.
 
 A stealth scraper that dwells on today's pages still counts, and a reader
 browsing only the archive is missed.

@@ -151,10 +151,12 @@ to the next. A beacon is best effort: it is never queued offline, retried later,
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
-never does. Neither does a Firebase Test Lab device (the `firebase.test.lab` system setting):
-Play's pre-launch report installs each uploaded build fresh on several and crawls it, and with an
-upload on every merge they would otherwise outnumber the testers. `UsageTest` checks what counts,
-the daily identifier, the retry, and the Test Lab exclusion.
+never does. Nor does a phone in Play's pre-launch report, which installs each uploaded build
+fresh on several test devices and crawls it; with an upload on every merge they would otherwise
+outnumber the testers. A `release` build reports only when the Play Store installed it (the test
+devices get it from the test harness), and no build reports where Test Lab's `firebase.test.lab`
+system setting is set. `UsageTest` checks what counts, the daily identifier, the retry, and the
+test-device exclusion.
 
 ## Trying it on a phone
 
