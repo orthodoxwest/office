@@ -62,14 +62,19 @@ struct OrdoScreen: View {
     @State private var allDetails = false
     @State private var focused = false
 
-    /// The scroll view's height.
+    /// The scroll view's height, and the pinned month heading's as last laid out.
     @State private var viewport: CGFloat = 0
+    @State private var heading: CGFloat = 0
+    /// The wall's frame on the screen, for the pinned heading's copy of it.
+    @State private var wall: CGRect = .zero
 
-    /// Where a day asked for is brought: 3.5rem below the top, clear of the pinned month heading
-    /// (the web's `scroll-margin-top`). Its mark has no height, so its top stands at this share of
-    /// the screen.
+    /// Where a day asked for is brought: clear of the pinned month heading, a little below it (the
+    /// web's `scroll-margin-top`, 3.5rem at the default size). The heading grows with the reader's
+    /// type; one not yet laid out is taken at its text's line and padding. The day's mark has no
+    /// height, so its top stands at this share of the screen.
     private var focus: UnitPoint {
-        viewport > 0 ? UnitPoint(x: 0.5, y: min(1, m.px(56) / viewport)) : .top
+        let pinned = heading > 0 ? heading : 28 * m.type + m.px(12.8)
+        return viewport > 0 ? UnitPoint(x: 0.5, y: min(1, (pinned + m.px(15.2)) / viewport)) : .top
     }
 
     var body: some View {
@@ -97,6 +102,11 @@ struct OrdoScreen: View {
                             withAnimation { scroll.scrollTo("top", anchor: .top) }
                         }
                         .ordoColumn(m, wide: wide)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heading = $0 }
+                        // Pinned, it hides the days passing beneath it down to its rule with the
+                        // wall's own copy, lined up with the wall, as the web's sticky heading's
+                        // fixed copy and the Android app's: no box shows, pinned or at rest.
+                        .background { WallCopy(wall: wall).padding(.bottom, -4.5) }
                     }
                     let prev = number == 1 ? (year - 1, 12) : (year, number - 1)
                     let next = number == 12 ? (year + 1, 1) : (year, number + 1)
@@ -116,9 +126,17 @@ struct OrdoScreen: View {
                 }
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
-            .onAppear {
-                // A day asked for is brought into view once; after that the reader's own place stands.
-                guard !focused else { return }
+            // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
+            .background {
+                GeometryReader { _ in
+                    Color.clear.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { wall = $0 }
+                }
+                .ignoresSafeArea()
+            }
+            .onChange(of: viewport, initial: true) {
+                // A day asked for is brought into view once, when the screen's height is known to
+                // place it by; after that the reader's own place stands.
+                guard viewport > 0, !focused else { return }
                 focused = true
                 if focusDay > 0 {
                     DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: focus) }
@@ -328,9 +346,6 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
-        // Pinned, it hides the days passing beneath it down to its rule: the flat ground, as the
-        // web's sticky heading takes on iOS, where its copy of the wall cannot line up with the wall.
-        .background { p.bg.padding(.bottom, -4.5) }
         // Every month's rule takes the lozenge, echoing the hour's title (the web's `.month h2::after`):
         // a 6pt square of the lining's terracotta, ringed in the ground.
         .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 4.24, ring: p.bg, ink: p.lining) }

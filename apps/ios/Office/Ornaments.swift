@@ -388,6 +388,37 @@ struct PlasterWall: View {
 }
 
 /**
+ * The wall's own copy behind something that must hide what passes beneath it (the ordo's pinned
+ * month heading): opaque, and lined up with the wall (`wall`, its frame on the screen) as the web's
+ * `background-attachment: fixed` lines its copy up, so it shows no seam, pinned or at rest.
+ */
+struct WallCopy: View {
+    let wall: CGRect
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        GeometryReader { geo in
+            let at = geo.frame(in: .global).origin
+            ZStack(alignment: .topLeading) {
+                p.bg
+                // Scaled and centred on the wall's frame as `PlasterWall` is, then shifted by where this stands on it.
+                if wall.width > 0, wall.height > 0, let image = UIImage(named: p.plaster) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: wall.width, height: wall.height)
+                        .offset(x: wall.minX - at.x, y: wall.minY - at.y)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .clipped()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the Apse
  * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile

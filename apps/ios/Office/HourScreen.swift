@@ -44,6 +44,8 @@ struct Loaded<Value, Content: View>: View {
         .task(id: key) {
             let place = self.place
             let result = await compose(load)
+            // Another key was asked for while this one composed: what it asked for is coming.
+            guard !Task.isCancelled else { return }
             switch result {
             case let .success(v):
                 failure = nil
@@ -167,8 +169,9 @@ private struct Held {
 }
 
 /// How far the hour has been prayed. Another prayer form is the same hour, so it carries over, as
-/// the Android app's does.
+/// the Android app's does; another hour or day begins again (`page`, the one it was prayed on).
 private final class PrayedSoFar {
+    var page = ""
     var reading = PrayedReading(cursor: 0, read: 0)
     var done = false
 }
@@ -263,7 +266,7 @@ struct HourScreen: View {
                                 .environment(\.metrics, prayer)
                             }
                         }
-                        .read(n, into: reading)
+                        .read(row.id, at: n, into: reading)
                     }
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
@@ -273,7 +276,7 @@ struct HourScreen: View {
                         reportUrl: view.reportUrl,
                         date: date
                     )
-                    .read(rows.count, into: reading)
+                    .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
                 .background(alignment: .top) {
@@ -310,6 +313,13 @@ struct HourScreen: View {
      * wait there, does not.
      */
     @MainActor private func watchPrayed() async {
+        // Reached in place from another hour, the page keeps its state: that hour's reading is not this one's.
+        let page = "\(date.iso) \(view.hour)"
+        if prayed.page != page {
+            prayed.page = page
+            prayed.reading = PrayedReading(cursor: 0, read: 0)
+            prayed.done = false
+        }
         var last = Date()
         while !Task.isCancelled && !prayed.done {
             try? await Task.sleep(for: .seconds(1))
@@ -357,14 +367,13 @@ struct HourScreen: View {
      * is still the one composed before.
      */
     private func hold() {
-        let rows = self.rows
         let height = reading.viewport.height
         let marks = reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
             // `scrollTo` stands the row's point at the anchor's height on the screen's: for its top
             // to stay where it is, that height is its top over the room the screen has beside it.
             let room = height - shown.frame.height
-            guard shown.row < rows.count, room > 0, shown.frame.minY >= 0, shown.frame.minY <= room else { return nil }
-            return (id: rows[shown.row].id, anchor: UnitPoint(x: 0.5, y: shown.frame.minY / room))
+            guard room > 0, shown.frame.minY >= 0, shown.frame.minY <= room else { return nil }
+            return (id: shown.id, anchor: UnitPoint(x: 0.5, y: shown.frame.minY / room))
         }
         held = Held(marks: marks, ids: rows.map(\.id))
     }
@@ -435,6 +444,8 @@ struct HourScreen: View {
 final class Reading {
     /// The scroll view's coordinates, from the top of the screen below the status bar.
     static let space = "hour"
+    /// The hour's ending's id among the rows' (theirs hold a `|`, or begin "toggle ").
+    static let ending = "ending"
     /// How much of the office has passed, from 0 to 1; the only thing the hairline watches.
     private(set) var ratio: CGFloat = 0
     /// The office's rows in number; the ending stands at this index. A section opened or closed
@@ -445,30 +456,31 @@ final class Reading {
     @ObservationIgnored var viewport: CGSize = .zero {
         didSet { if viewport.width != oldValue.width { heights = [:] }; update() }
     }
-    /// Each row's height as last laid out, by index, and where those on screen now stand.
+    /// Each row's height as last laid out, by index; and where those on screen now stand, by the
+    /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
-    @ObservationIgnored private var frames: [Int: CGRect] = [:]
+    @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
 
-    func place(_ row: Int, _ frame: CGRect?) {
+    func place(_ id: String, at row: Int, _ frame: CGRect?) {
         if let frame {
-            frames[row] = frame
+            frames[id] = (row: row, frame: frame)
             heights[row] = frame.height
         } else {
-            frames[row] = nil
+            frames[id] = nil
         }
         update()
     }
 
-    /// The office's rows on screen now and where each stands, top-most first.
-    func shownRows() -> [(row: Int, frame: CGRect)] {
-        frames.filter { $0.key < rows && $0.value.maxY > 0 && $0.value.minY < viewport.height }
-            .sorted { $0.value.minY < $1.value.minY }
-            .map { (row: $0.key, frame: $0.value) }
+    /// The office's rows on screen now, by id, and where each stands, top-most first.
+    func shownRows() -> [(id: String, frame: CGRect)] {
+        frames.filter { $0.value.row < rows && $0.value.frame.maxY > 0 && $0.value.frame.minY < viewport.height }
+            .sorted { $0.value.frame.minY < $1.value.frame.minY }
+            .map { (id: $0.key, frame: $0.value.frame) }
     }
 
     /// The rows on screen now, and whether the office's ending is.
     func onScreen() -> (rows: [Int], ending: Bool) {
-        let shown = frames.filter { $0.value.maxY > 0 && $0.value.minY < viewport.height }.map(\.key)
+        let shown = frames.values.filter { $0.frame.maxY > 0 && $0.frame.minY < viewport.height }.map { $0.row }
         return (shown.filter { $0 < rows }, shown.contains(rows))
     }
 
@@ -481,13 +493,13 @@ final class Reading {
         let end = rows
         guard end > 0 else { return 0 }
         let bottom = viewport.height
-        let ending = frames[end]
+        let ending = frames[Reading.ending]?.frame
         if let ending, ending.minY <= bottom { return 1 }
-        guard let top = frames.filter({ $0.value.minY <= 0 }).max(by: { $0.key < $1.key }), top.key < end else { return 0 }
+        guard let top = frames.values.filter({ $0.frame.minY <= 0 }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
         let known = (0..<end).compactMap { heights[$0] }
         let average = known.isEmpty ? 1 : known.reduce(0, +) / CGFloat(known.count)
         func height(_ i: Int) -> CGFloat { heights[i] ?? average }
-        let passed = (0..<top.key).reduce(0) { $0 + height($1) } - top.value.minY
+        let passed = (0..<top.row).reduce(0) { $0 + height($1) } - top.frame.minY
         // Once the ending is in sight its distance is known exactly.
         let left = ending.map { $0.minY - bottom } ?? ((0..<end).reduce(0) { $0 + height($1) } - bottom - passed)
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
@@ -495,10 +507,10 @@ final class Reading {
 }
 
 private extension View {
-    /// Reports this row's place on screen to `reading`, and its leaving.
-    func read(_ row: Int, into reading: Reading) -> some View {
-        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Reading.space)) } action: { reading.place(row, $0) }
-            .onDisappear { reading.place(row, nil) }
+    /// Reports the place on screen of this row, `id`, the `row`th, to `reading`, and its leaving.
+    func read(_ id: String, at row: Int, into reading: Reading) -> some View {
+        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Reading.space)) } action: { reading.place(id, at: row, $0) }
+            .onDisappear { reading.place(id, at: row, nil) }
     }
 }
 
@@ -643,9 +655,10 @@ private struct HourTitle: View {
             }
             if choosing {
                 FormChooser(form: model.form) { f in
-                    withAnimation(unfolding) { choosing = false }
                     let changed = f != model.form
-                    model.chooseForm(f)
+                    // The prayers change once the chooser has folded away, so the reader's place is
+                    // held where the rows then stand, not where they stood below the open chooser.
+                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
                     // VoiceOver hears that the prayers changed, as the web's status line says it;
                     // a moment later, so the chooser folding away does not cut it short.
                     if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {

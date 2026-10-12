@@ -706,6 +706,7 @@ struct FormChooser: View {
         VStack(alignment: .leading, spacing: 0) {
             Text("How are you praying?".uppercased()).type(.label(11.2, 0.1)).foregroundStyle(p.muted)
                 .padding(.bottom, m.px(10.4))
+                .accessibilityLabel("How are you praying?")
                 .accessibilityAddTraits(.isHeader)
             Hairline(color: p.border)
             ForEach(Array(prayerForms.enumerated()), id: \.offset) { i, f in
