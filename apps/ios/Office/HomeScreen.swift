@@ -18,6 +18,7 @@ struct HomePage: View {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)
+                .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .home(date)) }
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -269,27 +270,49 @@ private func unbroken(_ date: String) -> String {
  * the day under the head's room for them, then from the inscription band the invitation and the
  * hours. The day's part (`.home-summary`) is never shorter than the head, so the band never
  * crosses the arch, and takes whatever height the card is offered beyond its own, the day
- * centred in it or set two parts to three.
+ * centred in it or set two parts to three. "Change date"'s picker stands under the hours, apart
+ * from them so the head is measured without it.
  */
 private struct FrontispieceLayout: Layout {
     let tier: HomeTier
     let m: Metrics
+    /// How far the picker has unfolded, from 0 to 1, eased frame by frame with the disclosure.
+    var open: CGFloat
+
+    var animatableData: CGFloat {
+        get { open }
+        set { open = newValue }
+    }
 
     /// The head's height, the day's parts (its facts, the versicle when it fits, and "Go to
-    /// today"), and the whole. The versicle takes only the height the head has to spare: where it
-    /// would make the card taller, the head goes without it.
-    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, height: CGFloat) {
+    /// today"), the hours, the picker as far as it has unfolded, and the whole. The versicle takes
+    /// only the height the head has to spare: where it would make the card taller, the head goes
+    /// without it. It is fitted to the card with the picker shut, as the web's is, so opening the
+    /// picker never takes it away.
+    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, after: CGFloat, picker: CGFloat, height: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let facts = subviews[2].sizeThatFits(free).height
         let versicle = subviews[3].sizeThatFits(free).height
         let back = subviews[4].sizeThatFits(free).height
         let after = subviews[5].sizeThatFits(free).height
+        // The picker's full height; none once it has folded away.
+        let full = subviews[6].sizeThatFits(free).height
+        let unfolded = min(max(open, 0), 1)
         let foot = m.px(tier.bottom)
+        let pad = m.px(tier.headPad)
         let day = facts + back + m.px(tier.dayGap)
+        let rise = tier.arch.rise * width
         let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
-        let summary = max(m.px(tier.headPad) + day, tier.arch.rise * width, least - after - foot)
-        let fits = versicle > 0 && m.px(tier.headPad) + day + versicle <= summary
-        return (summary, facts, fits ? versicle : nil, back, summary + after + foot)
+        let shut = max(pad + day, rise, least - after - foot)
+        let fits = versicle > 0 && pad + day + versicle <= shut
+        // The picker takes the head's spare height before it lengthens the card. Taken as it
+        // unfolded, that height went in the first frames: the day leapt up, then stood while the
+        // card grew under the picker. Instead the head gives it up in step with the unfolding, so
+        // the day rises as the picker opens and settles with it.
+        let opened = max(pad + day + (fits ? versicle : 0), rise, least - after - full - foot)
+        let summary = full > 0 ? shut - (shut - opened) * unfolded : shut
+        let picker = full * unfolded
+        return (summary, facts, fits ? versicle : nil, back, after, picker, summary + after + picker + foot)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -298,7 +321,7 @@ private struct FrontispieceLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let (summary, facts, versicle, back, _) = measure(bounds.width, proposal, subviews)
+        let (summary, facts, versicle, back, after, picker, _) = measure(bounds.width, proposal, subviews)
         let free = ProposedViewSize(width: bounds.width, height: nil)
         let pad = m.px(tier.headPad)
         let spare = summary - pad - facts - (versicle ?? 0) - back - m.px(tier.dayGap)
@@ -313,6 +336,8 @@ private struct FrontispieceLayout: Layout {
         y += versicle ?? 0
         subviews[4].place(at: CGPoint(x: bounds.minX, y: y), proposal: free)
         subviews[5].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
+        // Revealed from its top as far as it has unfolded.
+        subviews[6].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary + after), proposal: ProposedViewSize(width: bounds.width, height: picker))
     }
 }
 
@@ -344,6 +369,8 @@ private struct Frontispiece: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var picking = false
+    /// Whether the picker is laid out: from its opening until it has folded away.
+    @State private var unfolded = false
     @Environment(\.reveal) private var reveal
 
     var body: some View {
@@ -354,7 +381,7 @@ private struct Frontispiece: View {
         let ink = FrontispieceInk.of(p)
         let desk = tier.desk
         let side = m.px(tier.side)
-        FrontispieceLayout(tier: tier, m: m) {
+        FrontispieceLayout(tier: tier, m: m, open: picking ? 1 : 0) {
             // A lining painted round the head on the back wall, down to the inscription band:
             // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding.
             Lining(arch: tier.arch, inset: m.px(desk ? 26 : 12), hairline: liningDay)
@@ -439,26 +466,47 @@ private struct Frontispiece: View {
                 .padding(.top, m.px(tier.bandGap))
                 HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
-                // Season and date control share one line after the invitation.
+                // The season and "Change date" share one line after the invitation, centred (the
+                // web's `.home-day-meta`). Open, the date control takes a line of its own beneath
+                // the season, and the picker the card's width.
                 Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
-                if !view.season.isEmpty {
-                    Text(view.season).type(Scale.small).foregroundStyle(p.muted).padding(.top, m.px(3.2))
-                }
-                Disclosure(label: "Change date", open: picking) {
-                    withAnimation(unfolding) { picking.toggle() }
-                    if picking { reveal("disclosed") }
-                }
-                if picking {
-                    DayPicker(shown: date, today: model.today) { d in
-                        picking = false
-                        model.open(.home(d))
+                let change = Disclosure(label: "Change date", open: picking, style: .label(11.2, 0.1)) { togglePicker() }
+                if view.season.isEmpty {
+                    change
+                } else {
+                    let season = Text(view.season.uppercased()).type(.label(11.2, 0.12)).foregroundStyle(p.muted)
+                        .multilineTextAlignment(.center)
+                        .accessibilityLabel(view.season)
+                    // One layout either way, so "Change date" stays the control VoiceOver is on
+                    // as it opens.
+                    SeasonLine(spacing: m.px(16), above: m.px(3.2), stacked: picking) {
+                        season
+                        change
                     }
-                    .id("disclosed")
-                    .transition(.unfold)
                 }
             }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
+            // "Change date"'s picker, revealed from its top as the layout gives it its height
+            // (the disclosure's own unfolding, Android's `Unfold`), and laid out only while shown.
+            VStack(spacing: 0) {
+                if unfolded {
+                    DayPicker(shown: date, today: model.today, centred: true) { d in
+                        picking = false
+                        unfolded = false
+                        model.open(.home(d))
+                    }
+                    .transition(.identity)
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+            .clipped()
+            .opacity(picking ? 1 : 0)
+            .accessibilityHidden(!picking)
+            .padding(.horizontal, side)
+            .frame(maxWidth: .infinity)
+            .id("disclosed")
         }
         .background {
             if let niche {
@@ -469,6 +517,20 @@ private struct Frontispiece: View {
                 // a red or green day edges the head without outshouting the cross.
                 Panel(arch: tier.arch, ring: mix(day, ink.frame, 0.7), frame: ink.frame)
             }
+        }
+    }
+
+    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves.
+    private func togglePicker() {
+        if picking {
+            withAnimation(folding) { picking = false } completion: {
+                // Opened again while it folded, it stays.
+                if !picking { unfolded = false }
+            }
+        } else {
+            unfolded = true
+            withAnimation(unfolding) { picking = true }
+            reveal("disclosed")
         }
     }
 
@@ -508,6 +570,55 @@ private struct Frontispiece: View {
         }
         .padding(.horizontal, -side)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/**
+ * The season and "Change date" (the web's `.home-day-meta`): side by side where the line has room
+ * for both, else, and always while the picker is open, the control on a line of its own under the
+ * season, which then stands `above` below the rule.
+ */
+private struct SeasonLine: Layout {
+    let spacing: CGFloat
+    let above: CGFloat
+    let stacked: Bool
+
+    /// Whether the two stand side by side in `width`, at their ideal widths.
+    private func beside(_ width: CGFloat?, _ subviews: Subviews) -> Bool {
+        guard !stacked, subviews.count == 2 else { return false }
+        guard let width, width.isFinite else { return true }
+        let ideal = subviews.map { $0.sizeThatFits(.unspecified).width }
+        return ideal[0] + spacing + ideal[1] <= width
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        if beside(proposal.width, subviews) {
+            let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+            return CGSize(width: sizes[0].width + spacing + sizes[1].width, height: max(sizes[0].height, sizes[1].height))
+        }
+        let free = ProposedViewSize(width: proposal.width, height: nil)
+        let sizes = subviews.map { $0.sizeThatFits(free) }
+        let width = sizes.map(\.width).max() ?? 0
+        return CGSize(width: width, height: above + sizes.map(\.height).reduce(0, +))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        if beside(bounds.width, subviews) {
+            let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+            var x = bounds.midX - (sizes[0].width + spacing + sizes[1].width) / 2
+            for (subview, size) in zip(subviews, sizes) {
+                subview.place(at: CGPoint(x: x, y: bounds.midY), anchor: .leading, proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            return
+        }
+        let free = ProposedViewSize(width: bounds.width, height: nil)
+        var y = bounds.minY + above
+        for subview in subviews {
+            let size = subview.sizeThatFits(free)
+            subview.place(at: CGPoint(x: bounds.midX, y: y), anchor: .top, proposal: ProposedViewSize(width: bounds.width, height: size.height))
+            y += size.height
+        }
     }
 }
 
@@ -579,8 +690,8 @@ private struct PrayNow: View {
 }
 
 /**
- * The hours by period in horizontal bands, the current one underlined in gold: framed in the
- * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ * The hours by period in horizontal bands, the current one's cell washed over a gold line: framed
+ * in the lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
  */
 private struct HourDirectory: View {
     let current: String
@@ -622,7 +733,9 @@ private struct HourDirectory: View {
                     Rectangle().fill(ink.rule).frame(width: 1)
                     HStack(spacing: 0) {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
-                            if j > 0 { VRule(color: ink.rule, height: 16) }
+                            // The current hour's wash already divides it from its neighbours, so the
+                            // hairlines at its edges stand down (`.is-current::before`), keeping their place.
+                            if j > 0 { VRule(color: h == current || row.hours[j - 1] == current ? .clear : ink.rule, height: 16) }
                             let done = prayed.contains(h)
                             let gloss = h == current ? note : ""
                             Button { open(h) } label: {
@@ -630,7 +743,7 @@ private struct HourDirectory: View {
                                     // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                     Text(hourLabel(h))
                                         .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                        .foregroundStyle(done ? p.muted : h == current ? p.accent : p.text)
+                                        .foregroundStyle(done ? p.muted : p.text)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         // An hour prayed today withdraws to the muted ink, a small gilt cross
@@ -650,9 +763,12 @@ private struct HourDirectory: View {
                                             .minimumScaleFactor(0.7)
                                     }
                                 }
-                                .goldUnderline(h == current, p.goldLine)
                                 .padding(.horizontal, m.px(2))
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                // The current hour's whole cell is washed, a line of the ornament's gold
+                                // across its foot (`.home-hour-link.is-current`).
+                                .background(h == current ? currentWash : .clear)
+                                .goldUnderline(h == current, o.flat)
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
@@ -665,4 +781,7 @@ private struct HourDirectory: View {
         }
         .overlay(Rectangle().strokeBorder(ink.panelRule, lineWidth: 1).allowsHitTesting(false))
     }
+
+    /// The current hour's wash: the oak at 8%, or by night the vault's blue lifted (`--apse-lift`).
+    private var currentWash: Color { p.dark ? Color(rgb: 132, 160, 204, 0.13) : Color(rgb: 107, 58, 31, 0.08) }
 }

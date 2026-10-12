@@ -62,25 +62,51 @@ struct OrdoScreen: View {
     @State private var allDetails = false
     @State private var focused = false
 
+    /// The scroll view's height, and the pinned month heading's as last laid out.
+    @State private var viewport: CGFloat = 0
+    @State private var heading: CGFloat = 0
+    /// The wall's frame on the screen, for the pinned heading's copy of it.
+    @State private var wall: CGRect = .zero
+
+    /// Where a day asked for is brought: clear of the pinned month heading, a little below it (the
+    /// web's `scroll-margin-top`, 3.5rem at the default size). The heading grows with the reader's
+    /// type; one not yet laid out is taken at its text's line and padding. The day's mark has no
+    /// height, so its top stands at this share of the screen.
+    private var focus: UnitPoint {
+        let pinned = heading > 0 ? heading : 28 * m.type + m.px(12.8)
+        return viewport > 0 ? UnitPoint(x: 0.5, y: min(1, (pinned + m.px(15.2)) / viewport)) : .top
+    }
+
     var body: some View {
         let year = Int(month.year), number = Int(month.month)
         ScrollViewReader { scroll in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     SiteHeader().id("top")
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
-                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(5.6))
-                    MonthHeading(name: monthName(number), isTodaysMonth: Int(model.today.year) == year && Int(model.today.month) == number) {
-                        withAnimation { scroll.scrollTo("top", anchor: .top) }
-                    }
-                    .ordoColumn(m, wide: wide)
-                    .padding(.top, m.px(10))
-                    if wide { DayColumns().ordoColumn(m, wide: wide) }
-                    ForEach(month.days, id: \.date.day) { d in
-                        DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails)
-                            .ordoColumn(m, wide: wide)
-                            .id("d-\(d.date.day)")
+                    rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(15.6))
+                    // The month's heading stays pinned while its days scroll under it (the web's
+                    // sticky `.month h2`), so the way back to the top stays in reach.
+                    Section {
+                        if wide { DayColumns().ordoColumn(m, wide: wide) }
+                        ForEach(month.days, id: \.date.day) { d in
+                            // Where a day asked for is brought: a mark of no height at its top, which
+                            // `focus` sets clear of the pinned heading.
+                            Color.clear.frame(height: 0).id("d-\(d.date.day)")
+                            DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails)
+                                .ordoColumn(m, wide: wide)
+                        }
+                    } header: {
+                        MonthHeading(name: monthName(number)) {
+                            withAnimation { scroll.scrollTo("top", anchor: .top) }
+                        }
+                        .ordoColumn(m, wide: wide)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heading = $0 }
+                        // Pinned, it hides the days passing beneath it down to its rule with the
+                        // wall's own copy, lined up with the wall, as the web's sticky heading's
+                        // fixed copy and the Android app's: no box shows, pinned or at rest.
+                        .background { WallCopy(wall: wall).padding(.bottom, -4.5) }
                     }
                     let prev = number == 1 ? (year - 1, 12) : (year, number - 1)
                     let next = number == 12 ? (year + 1, 1) : (year, number + 1)
@@ -99,12 +125,21 @@ struct OrdoScreen: View {
                     Footer()
                 }
             }
-            .onAppear {
-                // A day asked for is brought into view once; after that the reader's own place stands.
-                guard !focused else { return }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
+            // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
+            .background {
+                GeometryReader { _ in
+                    Color.clear.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { wall = $0 }
+                }
+                .ignoresSafeArea()
+            }
+            .onChange(of: viewport, initial: true) {
+                // A day asked for is brought into view once, when the screen's height is known to
+                // place it by; after that the reader's own place stands.
+                guard viewport > 0, !focused else { return }
                 focused = true
                 if focusDay > 0 {
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: .top) }
+                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: focus) }
                 }
             }
         }
@@ -226,11 +261,12 @@ private struct OrdoHeader: View {
                 .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
             VRule(color: p.border)
             Button { model.open(.ordo(year: Int(t.year), month: Int(t.month), day: Int(t.day))) } label: {
-                // The rule spans the cell, less its inset, as the web's current-year mark.
+                // Always underlined in the gold line, in any year, as the web's `.calendar-today-link`;
+                // the rule spans the cell, less its inset.
                 Text("Today").type(nav).foregroundStyle(p.accent)
                     .padding(m.px(12))
                     .frame(maxWidth: wide ? nil : .infinity)
-                    .goldUnderline(Int(t.year) == year, p.goldLine, inset: m.px(wide ? 12 : 24))
+                    .goldUnderline(true, p.goldLine, inset: m.px(wide ? 12 : 24))
             }
             .buttonStyle(Quiet())
             .accessibilityHint("Opens today in the ordo")
@@ -245,7 +281,7 @@ private struct OrdoHeader: View {
         Text(s).type(style).foregroundStyle(p.accent).padding(m.px(12)).frame(maxWidth: wide ? nil : .infinity)
     }
 
-    // The month strip: the shown month underlined in gold, and today's month marked with the
+    // The month strip: the shown month underlined in gold, and today's month marked with the gold
     // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
     private var strip: some View {
         let t = model.today
@@ -258,12 +294,12 @@ private struct OrdoHeader: View {
                         let todays = Int(t.year) == year && Int(t.month) == mo
                         Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
                             Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
-                                .foregroundStyle(current ? (wide ? p.accent : p.text) : p.muted)
+                                .foregroundStyle(current ? p.accent : p.muted)
                                 .overlay(alignment: .bottom) {
                                     if !wide {
                                         ZStack {
                                             if current { Rectangle().fill(p.goldLine).frame(height: 2).padding(.horizontal, -m.px(14)) }
-                                            if todays { Diamond(size: 6) }
+                                            if todays { Diamond(size: 6, color: p.gold) }
                                         }
                                         .offset(y: m.px(5))
                                     }
@@ -273,7 +309,7 @@ private struct OrdoHeader: View {
                                     if wide {
                                         ZStack {
                                             if current { Rectangle().fill(p.goldLine).frame(height: 2) }
-                                            if todays { Diamond(size: 6) }
+                                            if todays { Diamond(size: 6, color: p.gold) }
                                         }
                                         .frame(height: 6)
                                         .offset(y: 3)
@@ -290,10 +326,9 @@ private struct OrdoHeader: View {
     }
 }
 
-/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule; the way back to the top.
+/// A Kalendar's month, its rubricated heading in the titulus over the ornament's double rule and its lozenge; the way back to the top.
 private struct MonthHeading: View {
     let name: String
-    let isTodaysMonth: Bool
     let top: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -311,8 +346,9 @@ private struct MonthHeading: View {
             .accessibilityLabel("Back to the top")
         }
         .padding(.vertical, m.px(6.4))
-        // Today's month takes the lozenge: a 6pt square of the lining's terracotta, ringed in the ground.
-        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: isTodaysMonth ? 4.24 : nil, ring: p.bg, ink: p.lining) }
+        // Every month's rule takes the lozenge, echoing the hour's title (the web's `.month h2::after`):
+        // a 6pt square of the lining's terracotta, ringed in the ground.
+        .overlay(alignment: .bottom) { OrnamentRule(lozengeSize: 4.24, ring: p.bg, ink: p.lining) }
     }
 }
 
@@ -358,11 +394,17 @@ private struct DayRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var details: Bool?
-    @State private var comms = false
 
     private var hasLauds: Bool { !d.benedictusAntiphon.isEmpty || d.laudsPreces || d.laudsSuffrage || !d.laudsComms.isEmpty }
     private var hasVespers: Bool { !d.magnificatAntiphon.isEmpty || d.vespersPreces || d.vespersSuffrage || !d.vespersComms.isEmpty || !d.vespersNote.isEmpty }
-    private var hasDetails: Bool { hasLauds || d.hoursPreces || hasVespers }
+    private var hasDetails: Bool { !d.commemorations.isEmpty || hasLauds || d.hoursPreces || hasVespers }
+
+    /// The day's commemorations that open its office details: one its Lauds or Vespers already names
+    /// with an antiphon is not named twice (as the web's `build_month`).
+    private var dayComms: [String] {
+        let named = Set((d.laudsComms + d.vespersComms).map { $0.name })
+        return d.commemorations.filter { !named.contains($0) }
+    }
 
     /// One stop for VoiceOver: the date, its colour and observances, and the feast.
     private var spoken: String {
@@ -414,18 +456,12 @@ private struct DayRow: View {
         }
     }
 
-    private var anyOpen: Bool { comms || ((details ?? allDetails) && hasDetails) }
+    private var anyOpen: Bool { (details ?? allDetails) && hasDetails }
 
-    /// The disclosures' buttons: the commemorations' count and "Office details".
-    private var disclosureButtons: some View {
+    /// The day's one disclosure, "Office details", which holds its commemorations and its office.
+    @ViewBuilder private var disclosureButtons: some View {
         let open = details ?? allDetails
-        return HStack(spacing: m.px(9.6)) {
-            if !d.commemorations.isEmpty {
-                let n = d.commemorations.count
-                small("\(n) commemoration\(n > 1 ? "s" : "")", comms) { withAnimation(unfolding) { comms.toggle() } }
-            }
-            if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
-        }
+        if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
     }
 
     @ViewBuilder private var disclosures: some View {
@@ -433,16 +469,10 @@ private struct DayRow: View {
         disclosed
     }
 
-    /// What the open disclosures unfold: the commemorations, and the office digest.
+    /// What the open disclosure unfolds: the day's commemorations, and the office digest.
     @ViewBuilder private var disclosed: some View {
         let open = details ?? allDetails
-        if comms {
-            ForEach(d.commemorations, id: \.self) { c in
-                Text(c).type(TextStyle(size: 13.6, line: 20.4, italic: true)).foregroundStyle(p.muted)
-            }
-            .transition(.unfold)
-        }
-        if open && hasDetails { Digest(d: d, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
+        if open && hasDetails { Digest(d: d, dayComms: dayComms, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
     }
 
     private func small(_ label: String, _ open: Bool, toggle: @escaping () -> Void) -> some View {
@@ -461,7 +491,7 @@ private struct DayRow: View {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 0) {
                 // The day's liturgical colour as a rail beside its date.
-                Rectangle().fill(dayColor(d.color)).frame(width: 3, height: m.px(40))
+                Rectangle().fill(titleColor(d.color, p)).frame(width: 3, height: m.px(40))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
                         Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
@@ -516,7 +546,7 @@ private struct DayRow: View {
                     .padding(.leading, dayColumnPad)
                     .frame(width: dayColumn, alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .overlay(alignment: .leading) { Rectangle().fill(dayColor(d.color)).frame(width: 3).padding(.top, 1.6) }
+                    .overlay(alignment: .leading) { Rectangle().fill(titleColor(d.color, p)).frame(width: 3).padding(.top, 1.6) }
                 }
                 .buttonStyle(Quiet())
                 .accessibilityLabel(spoken)
@@ -633,6 +663,8 @@ private struct DayColumns: View {
 /// The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations.
 private struct Digest: View {
     let d: OrdoDayView
+    /// The day's commemorations its Lauds and Vespers do not name, set first as the "Day".
+    let dayComms: [String]
     let hasLauds: Bool
     let hasVespers: Bool
     @Environment(\.palette) private var p
@@ -640,6 +672,9 @@ private struct Digest: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if !dayComms.isEmpty {
+                hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms.map { CommemorationView(name: $0, incipit: "") })
+            }
             if hasLauds {
                 hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, comms: d.laudsComms)
             }

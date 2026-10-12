@@ -4,6 +4,12 @@ import UIKit
 /// The verse gutter (`--verse-gutter`, 1.8rem): verse numbers and ℣/℟ sit in it, text beyond it.
 let verseGutter: CGFloat = 28.8
 
+/// How far "All:" may hang into the page's margin (`.sigil-all`, 2.25rem less ℣'s 1.4rem).
+private let allHang: CGFloat = 13.6
+
+/// How far "Blessing." may hang into a wide page's margin (`.sigil-word`, 4.25rem less ℣'s 1.4rem).
+private let wordHang: CGFloat = 45.6
+
 /**
  * Space above `cur`, after `prev`, in the web's rhythm at a phone's width (measured from the
  * rendered hour, as the Android app's `gapBefore`): a clear threshold between psalm groups, air
@@ -224,7 +230,8 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
 }
 
 /// How a block is typeset: its text, face, measure and any initial, as the Android app's `Block`.
-func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) -> ProseSpec {
+/// `hangsWords`: the page is 1000pt wide or more, where "Blessing." hangs into the margin as "All:" does.
+func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, hangsWords: Bool = false) -> ProseSpec {
     let look = setting(block.kind)
     let style = look.style
     let color = p[keyPath: look.color]
@@ -304,23 +311,33 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics) ->
     case .versicle, .response, .all:
         if block.dropCap { return opening(textStart: 0, raised: true) }
         if block.marker.isEmpty { break }
-        if block.marker.count > 2 {
-            // A spelled-out sigil ("Blessing.", "All:") stands above the text.
+        let word = block.marker.count > 2 && block.kind != .all
+        if word && !hangsWords {
+            // "Blessing." is too wide to hang in the page's gutter: below 1000pt it stands above its
+            // words (the web's `.sigil-word` to 999px).
             let t = marked(block.marker, Scale.body, p.rubric)
             t.append(NSAttributedString(string: "\u{2028}", attributes: [.font: font]))
             t.append(text)
             spec.text = t
             spec.restIndent = gutter
         } else {
-            // The sigil set right in its gutter; the gutter keeps its stop at any size.
+            // The sigil set right in its gutter; the gutter keeps its stop at any size. "All:" is
+            // wider than ℣./℟. and hangs its extra width into the page's gutter, so its words keep
+            // the edge the ℣/℟ lines' words share (the web's `.sigil-all`): the block reaches out
+            // by `hang` and its stops move in by as much. From 1000pt "Blessing." hangs so too.
+            let mark = marked(block.marker, Scale.body, p.rubric)
             let t = NSMutableAttributedString(string: "\t", attributes: [.font: font])
-            t.append(marked(block.marker, Scale.body, p.rubric))
+            t.append(mark)
             t.append(NSAttributedString(string: "\t", attributes: [.font: font]))
             t.append(text)
             spec.text = t
             let sigil = m.px(22)
-            spec.tabs = [NSTextTab(textAlignment: .right, location: sigil), NSTextTab(textAlignment: .left, location: sigil + m.px(6.4))]
-            spec.restIndent = sigil + m.px(6.4)
+            let width = CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(NSAttributedString(attributedString: mark)), nil, nil, nil))
+            let hang = block.kind == .all ? min(m.px(allHang), max(0, width - sigil)) : word ? min(m.px(wordHang), max(0, width - sigil)) : 0
+            let stop = max(sigil, width - hang) + hang
+            spec.tabs = [NSTextTab(textAlignment: .right, location: stop), NSTextTab(textAlignment: .left, location: stop + m.px(6.4))]
+            spec.restIndent = stop + m.px(6.4)
+            spec.hang = hang
         }
     case .stanza:
         // A wrapped line hangs beneath its own start (`.hymn-line`, 1.1rem).
@@ -351,12 +368,15 @@ struct BlockRow: View {
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
+    @Environment(\.wide) private var wide
+    @Environment(\.ranked) private var ranked
 
     var body: some View {
         if block.kind == .gap {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
         } else {
-            let prose = Prose(spec: proseSpec(block, p, o, m), spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
+            let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked)
+            let prose = Prose(spec: spec, spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
             if block.kind == .itemLabel, let latin = block.runs.firstIndex(where: { $0.style == .latin }), latin > 0 {
                 // A psalm's number and its Latin incipit share a line, a dot between them. When the
                 // line cannot hold both, the incipit stands on its own line beneath and the dot goes
@@ -378,7 +398,8 @@ struct BlockRow: View {
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)
             } else {
-                prose
+                // A sigil hung into the margin ("All:") takes the room it hangs into.
+                prose.padding(.leading, -spec.hang)
             }
         }
     }

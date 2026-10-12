@@ -272,7 +272,8 @@ func lozenge(_ center: CGPoint, _ r: CGFloat) -> Path {
 /**
  * The painted double rule that frames a title, in the lining's terracotta, broken by `gap` at its
  * centre (where the title's sign sits) and optionally interrupted by a lozenge in the day's colour,
- * ringed in the lining. `heavy` is the hour title's upper rule: 2px over 1px, as the home niche's lining.
+ * ringed in the lining and then in the page's ground. `heavy` is the hour title's upper rule: 2px
+ * over 1px, as the home niche's lining.
  */
 struct DoubleRule: View {
     var gap: CGFloat = 0
@@ -304,7 +305,12 @@ struct DoubleRule: View {
                 ctx.stroke(line, with: .color(p.lining), lineWidth: weight)
             }
             if let lozengeColor {
-                let l = lozenge(CGPoint(x: size.width / 2, y: mid), r)
+                let centre = CGPoint(x: size.width / 2, y: mid)
+                // A ring of the page's ground 2px beyond the lining's (`0 0 0 3px var(--bg)`), so the
+                // lozenge breaks the rules rather than sitting on them: the lining's outer edge is
+                // half a pixel past `r`, and a band's width across a lozenge's point is √2 times it.
+                ctx.fill(lozenge(centre, r + m.px(2.5) * CGFloat(2).squareRoot()), with: .color(p.bg))
+                let l = lozenge(centre, r)
                 ctx.fill(l, with: .color(lozengeColor))
                 ctx.stroke(l, with: .color(p.lining), lineWidth: 1)
             }
@@ -377,6 +383,37 @@ struct PlasterWall: View {
             }
         }
         .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * The wall's own copy behind something that must hide what passes beneath it (the ordo's pinned
+ * month heading): opaque, and lined up with the wall (`wall`, its frame on the screen) as the web's
+ * `background-attachment: fixed` lines its copy up, so it shows no seam, pinned or at rest.
+ */
+struct WallCopy: View {
+    let wall: CGRect
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        GeometryReader { geo in
+            let at = geo.frame(in: .global).origin
+            ZStack(alignment: .topLeading) {
+                p.bg
+                // Scaled and centred on the wall's frame as `PlasterWall` is, then shifted by where this stands on it.
+                if wall.width > 0, wall.height > 0, let image = UIImage(named: p.plaster) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: wall.width, height: wall.height)
+                        .offset(x: wall.minX - at.x, y: wall.minY - at.y)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .clipped()
+        }
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
 }

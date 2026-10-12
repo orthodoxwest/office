@@ -8,19 +8,24 @@ private let openPreparation: Set<String> = ["lauds", "prime", "vespers"]
 /**
  * What a page shows once its content is composed. Composing reads the corpus, so it runs off
  * the main thread; the page keeps what it had until the new content is ready, then moves to it
- * as `motion` says, from the top of the new page.
+ * as `motion` says, from the top of the new page. Content composed again for the same `place`
+ * (an hour in another prayer form) is the same page: it changes where it stands, keeping the
+ * reader's place and what they had opened, as the web's prayer form does.
  */
 struct Loaded<Value, Content: View>: View {
     let key: String
+    let place: String
     let motion: Motion
     let load: () throws -> Value
     let content: (Value) -> Content
-    @State private var shown: (key: String, value: Value)?
+    @State private var shown: (place: String, value: Value)?
     @State private var failure: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(key: String, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    /// `key` names what is composed; `place`, the page it is (by default the same).
+    init(key: String, place: String? = nil, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
+        self.place = place ?? key
         self.motion = motion
         self.load = load
         self.content = content
@@ -29,7 +34,7 @@ struct Loaded<Value, Content: View>: View {
     var body: some View {
         ZStack {
             if let shown {
-                content(shown.value).id(shown.key).transition(transition)
+                content(shown.value).id(shown.place).transition(transition)
             } else if let failure {
                 Message(text: failure)
             } else {
@@ -37,16 +42,19 @@ struct Loaded<Value, Content: View>: View {
             }
         }
         .task(id: key) {
+            let place = self.place
             let result = await compose(load)
+            // Another key was asked for while this one composed: what it asked for is coming.
+            guard !Task.isCancelled else { return }
             switch result {
             case let .success(v):
                 failure = nil
-                // The first content simply appears (the stack's push brings it); later
-                // content replaces it in motion.
-                if shown == nil {
-                    shown = (key, v)
+                // The first content simply appears (the stack's push brings it), and the same
+                // page composed again changes in place; another page replaces it in motion.
+                if shown == nil || shown?.place == place {
+                    shown = (place, v)
                 } else {
-                    withAnimation(.easeInOut(duration: 0.3)) { shown = (key, v) }
+                    withAnimation(.easeInOut(duration: 0.3)) { shown = (place, v) }
                 }
             case let .failure(e):
                 shown = nil
@@ -92,11 +100,20 @@ struct HourPage: View {
     var body: some View {
         let form = model.form
         let martyrology = model.martyrology
-        Loaded(key: "\(date.iso) \(hour) \(form) \(martyrology)", motion: model.motion(to: .hour(date, hour))) {
-            try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
-        } content: { view in
-            HourScreen(view: view, date: date)
+        let composition = "\(form) \(martyrology)"
+        // Another prayer form, or the Martyrology turned on or off, is the same page composed
+        // again: the reader keeps their place and the sections they opened.
+        Loaded(key: "\(date.iso) \(hour) \(composition)", place: "\(date.iso) \(hour)", motion: model.motion(to: .hour(date, hour))) { () throws -> ComposedHour in
+            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
+            return ComposedHour(view: view, composition: composition)
+        } content: { (composed: ComposedHour) in
+            let view = composed.view
+            HourScreen(view: view, date: date, composition: composed.composition)
+                // Reported whenever the page comes forward (an earlier Prime gone back to
+                // included), and again when its Martyrology is turned on or off.
                 .onAppear { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.martyrology) { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .hour(date, hour)) }
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -106,43 +123,88 @@ struct HourPage: View {
     }
 }
 
+/// An hour as composed, and the prayer form and Martyrology setting it was composed in.
+private struct ComposedHour {
+    let view: HourView
+    let composition: String
+}
+
 /**
  * One row of an hour's page: a collapsible section's toggle, or a block with the space above it
- * and, before a heading between the office's parts, the small painted cross.
+ * and, before a heading between the office's parts, the small painted cross. A row's id is its
+ * content's, the same in every prayer form where the row is: its section's key, then the block's
+ * kind, marker and words, and which of the blocks so made in that section it is.
  */
 private enum Row: Identifiable {
-    case toggle(section: Int, label: String, open: Bool)
-    case block(BlockAt, BlockView, gap: CGFloat, cross: Bool)
+    case toggle(section: String, label: String, open: Bool)
+    case block(BlockAt, BlockView, id: String, gap: CGFloat, cross: Bool)
 
     var id: String {
         switch self {
-        case let .toggle(i, _, _): return "toggle-\(i)"
-        case let .block(at, _, _, _): return "\(at.section)-\(at.block)"
+        case let .toggle(key, _, _): return "toggle \(key)"
+        case let .block(_, _, id, _, _): return id
         }
     }
+}
+
+/// Each section's key, the same in every prayer form: its label, and which of the sections so
+/// labelled it is.
+private func sectionKeys(_ sections: [SectionView]) -> [String] {
+    var seen: [String: Int] = [:]
+    return sections.map { section in
+        let n = seen[section.label, default: 0]
+        seen[section.label] = n + 1
+        return "\(section.label)#\(n)"
+    }
+}
+
+/**
+ * Where the reader was when the prayer form or the Martyrology changed, as the web's prayer form
+ * notes it (leader.js): the office's rows then on screen, top-most first, each with the anchor
+ * that would stand it where it stood; and every row's id, to tell whether the office changed.
+ */
+private struct Held {
+    let marks: [(id: String, anchor: UnitPoint)]
+    let ids: [String]
+}
+
+/// How far the hour has been prayed. Another prayer form is the same hour, so it carries over, as
+/// the Android app's does; another hour or day begins again (`page`, the one it was prayed on).
+private final class PrayedSoFar {
+    var page = ""
+    var reading = PrayedReading(cursor: 0, read: 0)
+    var done = false
 }
 
 /// An hour, as the web's hour page: colour band, header, title, controls, the office, its epilogue.
 struct HourScreen: View {
     let view: HourView
     let date: CivilDate
+    /// The prayer form and Martyrology setting `view` was composed in.
+    let composition: String
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
-    /// The collapsible sections, open or not.
-    @State private var open: [Int: Bool]
+    /// The collapsible sections, open or not, by their keys, so they stay as the reader left them
+    /// in another prayer form.
+    @State private var open: [String: Bool]
     /// How far through the office, for the hairline across the top.
     @State private var reading = Reading()
     /// The page's width, and the heights of what stands above and below a first-class day's frame.
     @State private var width: CGFloat = 0
     @State private var headerHeight: CGFloat = 0
     @State private var epilogueHeight: CGFloat = 0
+    /// Where the reader was when the prayer form or the Martyrology changed, until the hour is
+    /// composed again.
+    @State private var held: Held?
+    @State private var prayed = PrayedSoFar()
 
-    init(view: HourView, date: CivilDate) {
+    init(view: HourView, date: CivilDate, composition: String) {
         self.view = view
         self.date = date
-        var open: [Int: Bool] = [:]
-        for (i, s) in view.sections.enumerated() where s.collapsible { open[i] = openPreparation.contains(view.hour) }
+        self.composition = composition
+        var open: [String: Bool] = [:]
+        for (key, s) in zip(sectionKeys(view.sections), view.sections) where s.collapsible { open[key] = openPreparation.contains(view.hour) }
         _open = State(initialValue: open)
     }
 
@@ -166,19 +228,20 @@ struct HourScreen: View {
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    Rectangle().fill(dayColor(view.color)).frame(height: 3).accessibilityHidden(true)
+                    Rectangle().fill(bandColor(view.color)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
-                    HourTitle(view: view, date: date)
+                    HourTitle(view: view, date: date, pageWidth: width)
                         .padding(.horizontal, inset)
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
                             switch row {
-                            case let .toggle(i, label, expanded):
-                                Button { withAnimation(unfolding) { open[i] = !expanded } } label: {
+                            case let .toggle(key, label, expanded):
+                                Button { withAnimation(unfolding) { open[key] = !expanded } } label: {
                                     HStack(spacing: 0) {
                                         Text(label).type(Scale.heading).foregroundStyle(p.titulus)
-                                        Caret(open: expanded, color: p.titulus)
+                                        // A section's caret is 0.75em of its heading (`.session-prayers summary::after`).
+                                        Caret(open: expanded, color: p.titulus, scale: 0.75 * Scale.heading.size / (0.85 * 11.52))
                                     }
                                     .frame(maxWidth: .infinity, minHeight: 44)
                                 }
@@ -190,7 +253,7 @@ struct HourScreen: View {
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
-                            case let .block(at, block, gap, cross):
+                            case let .block(at, block, _, gap, cross):
                                 VStack(spacing: 0) {
                                     if cross {
                                         PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
@@ -203,7 +266,7 @@ struct HourScreen: View {
                                 .environment(\.metrics, prayer)
                             }
                         }
-                        .read(n, into: reading)
+                        .read(row.id, at: n, into: reading)
                     }
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
@@ -213,7 +276,7 @@ struct HourScreen: View {
                         reportUrl: view.reportUrl,
                         date: date
                     )
-                    .read(rows.count, into: reading)
+                    .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
                 }
                 .background(alignment: .top) {
@@ -227,7 +290,13 @@ struct HourScreen: View {
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
-            .task(id: "\(date.iso)/\(view.hour)") { await watchPrayed() }
+            // Begun again on the hour composed in another form, so it reads the rows now shown.
+            .task(id: "\(date.iso)/\(view.hour)/\(composition)") { await watchPrayed() }
+            // The row the reader is at stays where it stood while the office changes around it, as
+            // the web's prayer form keeps the first element on screen in its place.
+            .onChange(of: model.form) { hold() }
+            .onChange(of: model.martyrology) { hold() }
+            .onChange(of: composition) { restore(scroll) }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
@@ -244,9 +313,15 @@ struct HourScreen: View {
      * wait there, does not.
      */
     @MainActor private func watchPrayed() async {
-        var sofar = PrayedReading(cursor: 0, read: 0)
+        // Reached in place from another hour, the page keeps its state: that hour's reading is not this one's.
+        let page = "\(date.iso) \(view.hour)"
+        if prayed.page != page {
+            prayed.page = page
+            prayed.reading = PrayedReading(cursor: 0, read: 0)
+            prayed.done = false
+        }
         var last = Date()
-        while !Task.isCancelled {
+        while !Task.isCancelled && !prayed.done {
             try? await Task.sleep(for: .seconds(1))
             let now = Date()
             let seconds = now.timeIntervalSince(last)
@@ -256,7 +331,7 @@ struct HourScreen: View {
             var total = 0.0
             for row in rows {
                 var words = 0.0
-                if case let .block(_, block, _, _) = row { words = Double(blockWords(block: block)) }
+                if case let .block(_, block, _, _, _) = row { words = Double(blockWords(block: block)) }
                 spans.append((total, total + words))
                 total += words
             }
@@ -264,8 +339,9 @@ struct HourScreen: View {
             let shown = seen.rows.filter { $0 < spans.count }.map { spans[$0] }
             let first = shown.map(\.from).min() ?? (seen.ending ? total : 0)
             let through = shown.map(\.to).max() ?? first
-            sofar = prayedReadingAdvance(reading: sofar, first: first, through: through, seconds: seconds)
-            if prayedReadingDone(reading: sofar, total: total, atEnd: seen.ending) {
+            prayed.reading = prayedReadingAdvance(reading: prayed.reading, first: first, through: through, seconds: seconds)
+            if prayedReadingDone(reading: prayed.reading, total: total, atEnd: seen.ending) {
+                prayed.done = true
                 model.markPrayed(date, view.hour)
                 return
             }
@@ -275,7 +351,7 @@ struct HourScreen: View {
     private func anchor(_ rows: [Row]) -> String? {
         let asked = UserDefaults.standard.string(forKey: "anchor")
         let at = rows.firstIndex { row in
-            guard case let .block(_, block, _, _) = row else { return false }
+            guard case let .block(_, block, _, _, _) = row else { return false }
             switch asked {
             case "hymn": return block.kind == .stanza
             case "psalm": return block.kind == .verse && block.dropCap
@@ -286,19 +362,51 @@ struct HourScreen: View {
         return at.map { rows[max(0, $0 - 2)].id }
     }
 
+    /**
+     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
+     * is still the one composed before.
+     */
+    private func hold() {
+        let height = reading.viewport.height
+        let marks = reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
+            // `scrollTo` stands the row's point at the anchor's height on the screen's: for its top
+            // to stay where it is, that height is its top over the room the screen has beside it.
+            let room = height - shown.frame.height
+            guard room > 0, shown.frame.minY >= 0, shown.frame.minY <= room else { return nil }
+            return (id: shown.id, anchor: UnitPoint(x: 0.5, y: shown.frame.minY / room))
+        }
+        held = Held(marks: marks, ids: rows.map(\.id))
+    }
+
+    /// Once the hour is composed again, stands the top-most row held that is still in it where it stood.
+    private func restore(_ scroll: ScrollViewProxy) {
+        guard let was = held else { return }
+        held = nil
+        let ids = rows.map(\.id)
+        // The office reads the same in this form (the Martyrology away from Prime): nothing moved.
+        guard ids != was.ids else { return }
+        let present = Set(ids)
+        guard let mark = was.marks.first(where: { present.contains($0.id) }) else { return }
+        // Once the new rows are laid out.
+        DispatchQueue.main.async { scroll.scrollTo(mark.id, anchor: mark.anchor) }
+    }
+
     /// The page's rows. Each block's space depends on the one before it, across sections.
     private var rows: [Row] {
         var out: [Row] = []
         var prev: BlockView?
         var afterClosed = false
-        for (i, section) in view.sections.enumerated() {
+        for ((i, section), key) in zip(view.sections.enumerated(), sectionKeys(view.sections)) {
             if section.collapsible {
-                let expanded = open[i] ?? false
-                out.append(.toggle(section: i, label: section.label, open: expanded))
+                // A section new to this form opens as the hour's sections open.
+                let expanded = open[key] ?? openPreparation.contains(view.hour)
+                out.append(.toggle(section: key, label: section.label, open: expanded))
                 prev = nil
                 afterClosed = !expanded
                 if !expanded { continue }
             }
+            // How many blocks of each make this section has had, so that two alike differ.
+            var made: [String: Int] = [:]
             for (j, block) in section.blocks.enumerated() {
                 let heading = block.kind == .heading
                 let gap: CGFloat
@@ -314,7 +422,10 @@ struct HourScreen: View {
                 // office's own (the web's `.elements > .section-heading`), the Hymn's and the
                 // Chapter's included, but the page's first.
                 let part = (heading || block.kind == .commemorationHeading) && !section.collapsible
-                out.append(.block(BlockAt(section: i, block: j), block, gap: gap, cross: part && !out.isEmpty))
+                let make = "\(key)|\(block.kind)|\(block.marker)|\(block.runs.map(\.text).joined())"
+                let n = made[make, default: 0]
+                made[make] = n + 1
+                out.append(.block(BlockAt(section: i, block: j), block, id: "\(make)#\(n)", gap: gap, cross: part && !out.isEmpty))
                 prev = block
             }
         }
@@ -333,6 +444,8 @@ struct HourScreen: View {
 final class Reading {
     /// The scroll view's coordinates, from the top of the screen below the status bar.
     static let space = "hour"
+    /// The hour's ending's id among the rows' (theirs hold a `|`, or begin "toggle ").
+    static let ending = "ending"
     /// How much of the office has passed, from 0 to 1; the only thing the hairline watches.
     private(set) var ratio: CGFloat = 0
     /// The office's rows in number; the ending stands at this index. A section opened or closed
@@ -343,23 +456,31 @@ final class Reading {
     @ObservationIgnored var viewport: CGSize = .zero {
         didSet { if viewport.width != oldValue.width { heights = [:] }; update() }
     }
-    /// Each row's height as last laid out, by index, and where those on screen now stand.
+    /// Each row's height as last laid out, by index; and where those on screen now stand, by the
+    /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
-    @ObservationIgnored private var frames: [Int: CGRect] = [:]
+    @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
 
-    func place(_ row: Int, _ frame: CGRect?) {
+    func place(_ id: String, at row: Int, _ frame: CGRect?) {
         if let frame {
-            frames[row] = frame
+            frames[id] = (row: row, frame: frame)
             heights[row] = frame.height
         } else {
-            frames[row] = nil
+            frames[id] = nil
         }
         update()
     }
 
+    /// The office's rows on screen now, by id, and where each stands, top-most first.
+    func shownRows() -> [(id: String, frame: CGRect)] {
+        frames.filter { $0.value.row < rows && $0.value.frame.maxY > 0 && $0.value.frame.minY < viewport.height }
+            .sorted { $0.value.frame.minY < $1.value.frame.minY }
+            .map { (id: $0.key, frame: $0.value.frame) }
+    }
+
     /// The rows on screen now, and whether the office's ending is.
     func onScreen() -> (rows: [Int], ending: Bool) {
-        let shown = frames.filter { $0.value.maxY > 0 && $0.value.minY < viewport.height }.map(\.key)
+        let shown = frames.values.filter { $0.frame.maxY > 0 && $0.frame.minY < viewport.height }.map { $0.row }
         return (shown.filter { $0 < rows }, shown.contains(rows))
     }
 
@@ -372,13 +493,13 @@ final class Reading {
         let end = rows
         guard end > 0 else { return 0 }
         let bottom = viewport.height
-        let ending = frames[end]
+        let ending = frames[Reading.ending]?.frame
         if let ending, ending.minY <= bottom { return 1 }
-        guard let top = frames.filter({ $0.value.minY <= 0 }).max(by: { $0.key < $1.key }), top.key < end else { return 0 }
+        guard let top = frames.values.filter({ $0.frame.minY <= 0 }).max(by: { $0.row < $1.row }), top.row < end else { return 0 }
         let known = (0..<end).compactMap { heights[$0] }
         let average = known.isEmpty ? 1 : known.reduce(0, +) / CGFloat(known.count)
         func height(_ i: Int) -> CGFloat { heights[i] ?? average }
-        let passed = (0..<top.key).reduce(0) { $0 + height($1) } - top.value.minY
+        let passed = (0..<top.row).reduce(0) { $0 + height($1) } - top.frame.minY
         // Once the ending is in sight its distance is known exactly.
         let left = ending.map { $0.minY - bottom } ?? ((0..<end).reduce(0) { $0 + height($1) } - bottom - passed)
         return passed + left <= 0 ? 1 : min(1, max(0, passed / (passed + left)))
@@ -386,10 +507,10 @@ final class Reading {
 }
 
 private extension View {
-    /// Reports this row's place on screen to `reading`, and its leaving.
-    func read(_ row: Int, into reading: Reading) -> some View {
-        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Reading.space)) } action: { reading.place(row, $0) }
-            .onDisappear { reading.place(row, nil) }
+    /// Reports the place on screen of this row, `id`, the `row`th, to `reading`, and its leaving.
+    func read(_ id: String, at row: Int, into reading: Reading) -> some View {
+        onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Reading.space)) } action: { reading.place(id, at: row, $0) }
+            .onDisappear { reading.place(id, at: row, nil) }
     }
 }
 
@@ -454,6 +575,8 @@ private struct ProgressHairline: View {
 private struct HourTitle: View {
     let view: HourView
     let date: CivilDate
+    /// The page's width, for the web's 540px step in the date picker's navigation.
+    let pageWidth: CGFloat
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -485,18 +608,23 @@ private struct HourTitle: View {
                     .padding(.horizontal, m.px(20.8))
                     .accessibilityLabel(view.title)
                     .accessibilityAddTraits(.isHeader)
-                DoubleRule(lozengeColor: dayColor(view.color))
+                DoubleRule(lozengeColor: titleColor(view.color, p))
             }
             .frame(maxWidth: max(m.px(384), titleWidth))
             // On a phone the date stands on its own line above the day's name, so a line never
             // ends on the separator (the web's `.hour-meta-part:first-child` to 700px); a wide
-            // screen keeps one line.
-            let metaLines = wide || meta.count < 2
-                ? [meta.joined(separator: "\u{00a0}· ")]
-                : [meta[0], meta.dropFirst().joined(separator: "\u{00a0}· ")]
+            // screen keeps one line. Each part is kept whole (`.hour-meta-part`), its separator
+            // bound to it by the no-break space, so a line breaks between parts, not inside one.
+            let metaLines: [[String]] = wide || meta.count < 2 ? [meta] : [[meta[0]], Array(meta.dropFirst())]
+            let space = ProseLayout.advance(" ", Scale.meta.uiFont(m))
             VStack(spacing: 0) {
-                ForEach(metaLines, id: \.self) { line in
-                    Text(line).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                ForEach(Array(metaLines.enumerated()), id: \.offset) { _, parts in
+                    MetaLine(space: space) {
+                        ForEach(Array(parts.enumerated()), id: \.offset) { i, part in
+                            Text(i < parts.count - 1 ? part + "\u{00a0}·" : part)
+                                .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                        }
+                    }
                 }
             }
             .padding(.top, m.px(2))
@@ -518,7 +646,7 @@ private struct HourTitle: View {
             }
             .padding(.top, m.px(4))
             if picking {
-                DayPicker(shown: date, today: model.today) { d in
+                DayPicker(shown: date, today: model.today, centred: pageWidth > 540) { d in
                     picking = false
                     model.open(.hour(d, view.hour))
                 }
@@ -527,8 +655,17 @@ private struct HourTitle: View {
             }
             if choosing {
                 FormChooser(form: model.form) { f in
-                    withAnimation(unfolding) { choosing = false }
-                    model.chooseForm(f)
+                    let changed = f != model.form
+                    // The prayers change once the chooser has folded away, so the reader's place is
+                    // held where the rows then stand, not where they stood below the open chooser.
+                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
+                    // VoiceOver hears that the prayers changed, as the web's status line says it;
+                    // a moment later, so the chooser folding away does not cut it short.
+                    if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            UIAccessibility.post(notification: .announcement, argument: "Prayers updated. \(phrase).")
+                        }
+                    }
                 }
                 .id("disclosed")
                 .transition(.unfold)
@@ -559,6 +696,53 @@ private struct HourTitle: View {
 }
 
 /**
+ * A line of the hour's date, day and season (`.hour-meta-part`), each kept whole: as many to a line
+ * as fit, centred, so a line breaks between parts and never inside one, unless a part alone is
+ * wider than the line, which then wraps within itself. `space` follows each part's separator.
+ */
+private struct MetaLine: Layout {
+    let space: CGFloat
+
+    private typealias Row = (items: [(index: Int, size: CGSize)], width: CGFloat, height: CGFloat)
+
+    private func arrange(_ width: CGFloat, _ subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var row: Row = (items: [], width: 0, height: 0)
+        for (i, view) in subviews.enumerated() {
+            var size = view.sizeThatFits(.unspecified)
+            if size.width > width { size = view.sizeThatFits(ProposedViewSize(width: width, height: nil)) }
+            let next = row.items.isEmpty ? size.width : row.width + space + size.width
+            if next > width && !row.items.isEmpty {
+                rows.append(row)
+                row = (items: [(index: i, size: size)], width: size.width, height: size.height)
+            } else {
+                row = (items: row.items + [(index: i, size: size)], width: next, height: max(row.height, size.height))
+            }
+        }
+        if !row.items.isEmpty { rows.append(row) }
+        return rows
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrange(proposal.width ?? .infinity, subviews)
+        return CGSize(width: rows.map { $0.width }.max() ?? 0, height: rows.reduce(0) { $0 + $1.height })
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        // Arranged at the width it was measured at, so the lines break where they were measured.
+        for row in arrange(proposal.width ?? bounds.width, subviews) {
+            var x = bounds.midX - row.width / 2
+            for item in row.items {
+                subviews[item.index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(item.size))
+                x += item.size.width + space
+            }
+            y += row.height
+        }
+    }
+}
+
+/**
  * After the prayer: the consecration cross the hour ends on, the other hours, and the foot, with
  * the report line under its colophon. The wall's field shows only below the hour navigation: the
  * Apse vault by night, the Nave's powdering by day.
@@ -572,6 +756,7 @@ private struct Epilogue: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
+    @Environment(\.wide) private var wide
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -596,6 +781,9 @@ private struct Epilogue: View {
             // The field is phased from the seam where the ending's air (3.25rem) meets the footer.
             // By night it fades in over the first rem and thins down the footer.
             let air = m.px(52)
+            // A full thumb's height to tap the report line on a phone, the line centred in it: the
+            // web's link grows its line box so, and the foot with it.
+            let reach = wide ? 0 : max(0, (44 - 18.9 * m.type) / 2)
             Footer(gap: 52 + 53.6, reserve: true) {
                 Button {
                     if let url = URL(string: reportUrl) { openURL(url) }
@@ -604,6 +792,7 @@ private struct Epilogue: View {
                         .type(Scale.small.sized(11.84, line: 18.9))
                         .foregroundStyle(p.muted)
                         .multilineTextAlignment(.center)
+                        .padding(.vertical, reach)
                 }
                 .buttonStyle(Quiet())
                 .accessibilityHint("Opens the report form in your browser")

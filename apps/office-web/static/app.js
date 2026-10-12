@@ -442,9 +442,10 @@ function usageBeaconBody(scope) {
   // itself never renders, so the material fades rather than flashing on or off.
   // Wait on the dip itself rather than its nominal length: a busy frame can
   // start it late, and a swap on a clock would then land mid-fade. The
-  // timer only bounds the wait, for a browser that reports no transitions.
+  // timer only bounds the wait for a dip that stalls; a loaded device can
+  // take several frames to start one.
   var VAULT_FADE_MS = 100;
-  var VAULT_FADE_LIMIT_MS = 400;
+  var VAULT_FADE_LIMIT_MS = 1000;
   var vaultFadeTurn = 0;
 
   var vaultDipped = function (root) {
@@ -473,9 +474,19 @@ function usageBeaconBody(scope) {
     flashThemeTransition();
     var root = document.documentElement;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Supersede any dip still pending from before the setting changed.
+      vaultFadeTurn++;
+      root.classList.remove("vault-hidden");
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       return;
+    }
+    // The wall holds transparent only under .theme-anim, so keep it on until
+    // the swap: a slow dip outlasting the crossfade's timer would otherwise
+    // bring the wall back before the swap and show it.
+    if (themeAnimTimer) {
+      clearTimeout(themeAnimTimer);
+      themeAnimTimer = null;
     }
     root.classList.add("vault-hidden");
     var turn = ++vaultFadeTurn;
@@ -488,7 +499,14 @@ function usageBeaconBody(scope) {
       flashThemeTransition();
       paintThemeChoice(choice);
       writeStoredTheme(choice);
-      root.classList.remove("vault-hidden");
+      // Lift the wall a frame after the swap, so the new material is in place
+      // while it is still transparent (WebKit reports a pseudo-element's
+      // after-change style for a transition not yet started).
+      requestAnimationFrame(function () {
+        if (turn === vaultFadeTurn) {
+          root.classList.remove("vault-hidden");
+        }
+      });
     });
   };
 
@@ -934,13 +952,23 @@ function usageBeaconBody(scope) {
   // in pointercancel instead, so it stands for the tap. click stays for the
   // keyboard; a mouse sends both, and the second finds it already closed. A
   // right or middle button sends no click, so its pointerup leaves it open.
-  var onTapOutside = function (handler) {
+  // Safari moves a touch's click onto a control near the finger, so a tap
+  // just beside the overlay's own summary closes it on pointerup and then
+  // clicks the summary, which would open it again: that click is dropped.
+  var onTapOutside = function (overlay, handler) {
+    var closedByTap = -1;
     document.addEventListener("pointerup", function (e) {
-      if (e.button === 0) {
+      closedByTap = e.button === 0 && handler(e) ? e.timeStamp : -1;
+    });
+    document.addEventListener("click", function (e) {
+      var summary = e.target.closest && e.target.closest("summary");
+      if (closedByTap >= 0 && e.timeStamp - closedByTap < 1000 && summary && summary.parentElement === overlay) {
+        e.preventDefault();
+      } else {
         handler(e);
       }
+      closedByTap = -1;
     });
-    document.addEventListener("click", handler);
   };
 
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
@@ -964,10 +992,12 @@ function usageBeaconBody(scope) {
 
     // The phone menu is an overlay: a tap anywhere outside it, or Escape,
     // puts it away. Taps inside (including the preferences) leave it open.
-    onTapOutside(function (e) {
+    onTapOutside(siteMenu, function (e) {
       if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
         siteMenu.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
@@ -984,10 +1014,12 @@ function usageBeaconBody(scope) {
   // Escape, puts it away; a preference chosen inside leaves it open.
   var siteSettings = document.querySelector(".site-settings");
   if (siteSettings) {
-    onTapOutside(function (e) {
+    onTapOutside(siteSettings, function (e) {
       if (siteSettings.open && !siteSettings.contains(e.target)) {
         siteSettings.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && siteSettings.open) {
@@ -1937,7 +1969,7 @@ function usageBeaconBody(scope) {
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home
   // page. The day-number link stays as the keyboard/no-JS path; clicks on
-  // links, rank tooltips, and the commemorations disclosure keep their own
+  // links, rank tooltips, and the office details disclosure keep their own
   // behavior, and selecting text never navigates.
   var calendarEl = document.querySelector(".calendar");
   if (calendarEl) {

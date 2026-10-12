@@ -428,6 +428,11 @@ input {
    because someone chose Larger. */
 html {
   font-size: 100%;
+  /* iOS Safari enlarges text by itself when a phone turns to landscape; the
+     text-size setting above is the only scaling, as in Chrome. 100% (not
+     none) keeps pinch zoom. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html[data-text-size="small"] {
@@ -479,8 +484,6 @@ footer {
    red rubrics in the text face. Georgia is absent on Android and Linux, where
    this stack falls through to the platform serif (Noto/DejaVu), and a second
    face inside the prayer reads as a mistake rather than as an instruction. */
-.day-commemorations .day-commemoration,
-.day-commemorations summary,
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
@@ -495,11 +498,6 @@ h1,
 h2,
 h3 {
   text-wrap: balance;
-}
-
-p,
-li {
-  text-wrap: pretty;
 }
 
 .skip-link {
@@ -939,6 +937,13 @@ summary:focus-visible {
   .site-nav-shell {
     align-items: baseline;
   }
+
+  /* The nav ships in a closed <details> and shows regardless of [open].
+     WebKit hides a closed disclosure's content until app.js opens it, so the
+     wide nav was missing without scripting and arrived late with it. */
+  .site-menu::details-content {
+    content-visibility: visible;
+  }
 }
 
 @media (min-width: 701px) and (pointer: coarse) {
@@ -1150,6 +1155,7 @@ footer::before {
   background: var(--lining);
   -webkit-mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
   mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1848,6 +1854,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1936,6 +1943,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-decoration: none;
   font-variant-numeric: lining-nums tabular-nums;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2619,6 +2627,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--muted);
   font-size: 0.78em;
   line-height: 1.75;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2767,6 +2776,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-align: right;
   font-weight: normal;
   color: var(--rubric);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -3628,14 +3638,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 @media (min-width: 701px) and (pointer: fine) {
   .day-disclosures summary { min-height: 0; }
 }
-.day-commemoration {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-style: italic;
-  line-height: 1.5;
-}
-.day-commemoration::before { content: "Com. "; }
 /* The ordo's bracketed line for an observance kept by monastics and oblates
    only: under the name, quiet like a commemoration, never read as the day. */
 .day-monastic {
@@ -4258,7 +4260,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
   :root.motion-ready details.reminder-help::details-content {
@@ -4277,7 +4278,6 @@ body.season-eastertide {
 
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
   :root.motion-ready details.reminder-help[open]::details-content {
@@ -7133,13 +7133,6 @@ body.season-eastertide {
   text-indent: -1.1rem;
 }
 
-/* The prayer text runs to its natural measure. Safari's `pretty` reflows a
-   whole paragraph to even its rag, setting psalm verses and prayers short of
-   the margin; rubrics keep the paragraph default. */
-.elements p:not(.rubric) {
-  text-wrap: wrap;
-}
-
 /* Dialogue responses finish the preceding utterance. Let the gutter carry
    the speaker and keep the adjacent lines on one steady vertical rhythm. */
 .liturgical-block > :is(.versicle-line, .response-line, .all-line) {
@@ -7204,6 +7197,7 @@ body.season-eastertide {
 .month-top,
 .continuation-label,
 .home-hour-link-state {
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -8054,8 +8048,11 @@ body.page-home::before {
 
   .month h2 { position: static; }
   .day-disclosures { display: block; }
+  /* No unfolding on paper: WebKit holds a discrete content-visibility
+     transition at hidden, so the motion rule would keep the digest unprinted. */
   :root .page-calendar .day-disclosures details::details-content {
     content-visibility: visible;
+    transition: none;
     block-size: auto;
     overflow: visible;
   }

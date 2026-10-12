@@ -65,6 +65,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -190,9 +194,19 @@ fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescript
  * than left to whichever face sets `▾`.
  */
 @Composable
-fun Caret(open: Boolean, ink: Color) {
-    val (gap, w, h) = with(LocalDensity.current) { Triple(5.5.sp.toDp(), 5.5.sp.toDp(), 4.5.sp.toDp()) }
-    val fill = ink.copy(alpha = ink.alpha * 0.7f)
+fun Caret(open: Boolean, ink: Color, lighter: Boolean = true) = Caret(open, ink, lighter, 5.5f, 5.5f, 4.5f)
+
+/**
+ * The caret beside a section heading that opens (the web's `.session-prayers summary::after`): the
+ * glyph at 0.75em of the 19.2px heading, 0.35em from it, rather than the small label's.
+ */
+@Composable
+fun HeadingCaret(open: Boolean, ink: Color) = Caret(open, ink, true, 5.8f, 8.1f, 6.6f)
+
+@Composable
+private fun Caret(open: Boolean, ink: Color, lighter: Boolean, gapSp: Float, wSp: Float, hSp: Float) {
+    val (gap, w, h) = with(LocalDensity.current) { Triple(gapSp.sp.toDp(), wSp.sp.toDp(), hSp.sp.toDp()) }
+    val fill = if (lighter) ink.copy(alpha = ink.alpha * 0.7f) else ink
     // Drawn, not read: the disclosure says expanded or collapsed.
     Canvas(Modifier.padding(start = gap).size(w, h).clearAndSetSemantics {}) {
         val path = Path().apply {
@@ -209,7 +223,7 @@ fun Caret(open: Boolean, ink: Color) {
 
 /** A current control's underline: gold for a chosen setting, or `width` thick in the lining for the current page. */
 fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp, width: Dp = 1.dp): Modifier = if (!on) this else this.drawBehind {
-    val y = size.height - width.toPx()
+    val y = size.height - width.toPx() / 2f
     drawLine(color, Offset(inset.toPx(), y), Offset(size.width - inset.toPx(), y), width.toPx())
 }
 
@@ -219,11 +233,11 @@ val WideFrom: Dp = 701.dp
 /** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
 val LocalWide = staticCompositionLocalOf { false }
 
-/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`). */
-val RankedBelow: Dp = 960.dp
+/** Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`). */
+val RankedBelow: Dp = 1000.dp
 
 /**
- * Whether a wide page is narrower than the hours' header holds on one line (701–959dp): there an
+ * Whether a wide page is narrower than the hours' header holds on one line (701–999dp): there an
  * hour's links take a rank of their own under the brand and Settings.
  */
 val LocalRanked = staticCompositionLocalOf { false }
@@ -260,7 +274,7 @@ class SiteNav(
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
     val wide = LocalWide.current && nav != null
-    // From 701 to 959dp an hour's links don't fit beside the brand and Settings: left in the row
+    // From 701 to 999dp an hour's links don't fit beside the brand and Settings: left in the row
     // they would crowd it, so they take a centred rank of their own beneath, as a book sets its
     // running head over the page.
     val rank = wide && LocalRanked.current && nav?.onHour != null
@@ -277,7 +291,9 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 // ascent, 0.29em descent); the capitals' middle is 0.325em above it. Raised by
                 // the difference, as the web's phone header raises it, it centres on the caps.
                 ConsecrationCross(Modifier.offset(y = -(14.4f * 0.115f).dp).size(18.dp))
-                Text("DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
+                // A word space follows the mark's margin on a wide screen; the phone's brand is a
+                // flex box, whose words drop the space they begin with.
+                Text(if (LocalWide.current) " DAILY OFFICE" else "DAILY OFFICE", Modifier.padding(start = 6.08.dp), style = Type.brand.copy(color = p.text))
             }
             Spacer(Modifier.weight(1f))
             if (rank) {
@@ -357,26 +373,32 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
-/** A menu cell; a `page` (an hour, the Ordo, Reminders) is underlined in the lining when current, a chosen setting in gold. */
+/**
+ * A menu cell, muted until it is the one: a `page` (an hour, the Ordo, Reminders) is in ink over
+ * the lining's rule when current, a chosen setting in the accent over the ornament's (`--ornament`).
+ * `spoken` names a cell drawn as a glyph.
+ */
 @Composable
-private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, page: Boolean = false, onClick: () -> Unit) {
+private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, page: Boolean = false, spoken: String? = null, onClick: () -> Unit) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current) {
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current) {
             if (!page && !current) haptics.chose()
             onClick()
         }
-            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, p.goldLine)),
+            .then(if (page) Modifier.goldUnderline(current, p.lining, width = 1.5.dp) else Modifier.goldUnderline(current, o.flat)),
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
+    ) { Text(label, style = style.copy(color = if (!current) p.muted else if (page) p.text else p.accent, textAlign = TextAlign.Center)) }
 }
 
 /**
- * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme, Text and Martyrology rows, the current choice underlined in gold. The pages are
- * muted, the current one underlined in the lining. `prefsOnly` is the wide header's Settings: the
- * preference rows alone, under the header's end at `end`.
+ * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
+ * the bands); the Ordo and Reminders; then the Theme, Text and Martyrology rows, the current choice
+ * in the accent over the ornament's rule. The pages are muted, the current one underlined in the
+ * lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the header's
+ * end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -406,7 +428,9 @@ fun MenuPanel(
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
     Popup(
         alignment = Alignment.TopEnd,
-        offset = with(LocalDensity.current) { IntOffset(-end.roundToPx(), topOffset.roundToPx()) },
+        // The popup's window holds the panel's shadow too (`ShadowRoom` about it), so it stands
+        // that much further out and up.
+        offset = with(LocalDensity.current) { IntOffset(-(end - ShadowRoom).roundToPx(), (topOffset - ShadowRise).roundToPx()) },
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = visible),
     ) {
@@ -418,50 +442,65 @@ fun MenuPanel(
         ) {
             Column(
                 Modifier
+                    .padding(start = ShadowRoom, end = ShadowRoom, top = ShadowRise, bottom = ShadowRoom + 8.dp)
+                    // The web's soft shadow under the panel: `0 .45rem 1rem rgba(36, 28, 23, .09)`.
+                    .dropShadow(RectangleShape, Shadow(radius = 16.dp, color = Color(36, 28, 23).copy(alpha = 0.09f), offset = DpOffset(0.dp, 7.2.dp)))
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
                     .border(1.dp, p.border)
-                    // The panel's top edge is the painted line (`--ornament-line`).
-                    .drawBehind { drawRect(o.line, size = size.copy(height = 2.dp.toPx())) }
+                    // The panel's top edge is the painted line (`--ornament-line`), with the surface's
+                    // edge catching the light just inside it (`inset 0 1px 0 var(--surface-edge)`).
+                    .drawBehind {
+                        drawRect(o.line, size = size.copy(height = 2.dp.toPx()))
+                        val w = 1.dp.toPx()
+                        drawRect(p.surfaceEdge, Offset(w, 2.dp.toPx()), size.copy(width = size.width - 2 * w, height = w))
+                    }
                     .padding(10.4.dp),
             ) {
                 if (onHour != null && !prefsOnly) {
-                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEach { row ->
-                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, p.muted, page = true) { onHour(h) } } }
+                    listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEachIndexed { i, row ->
+                        // A hairline between the bands, so the grouping reads without labels.
+                        if (i > 0) Hairline(p.surfaceEdge)
+                        MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, page = true) { onHour(h) } } }
                         Spacer(Modifier.height(2.4.dp))
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
                 if (!prefsOnly) {
                     MenuRow {
-                        MenuCell("ORDO", onOrdoCurrent, nav, p.muted, page = true, onClick = onOrdo)
-                        // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, page = true, onClick = onReminders)
+                        MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
+                        // Habit setup, not an hour: quieter than the Ordo, as on the web (`.nav-secondary`).
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
                 }
                 MenuRow {
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
-                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), p.accent) { onTheme(t) } }
+                    ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
                 PrefHint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+                Hairline(p.surfaceEdge)
                 MenuRow {
                     Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                     TextSize.entries.forEach { s ->
                         val size = when (s) { TextSize.SMALL -> 13f; TextSize.DEFAULT -> 16f; TextSize.LARGE -> 20f }
-                        MenuCell("A", s == textSize, Type.label(size, 0f), p.muted) { onTextSize(s) }
+                        val spoken = when (s) { TextSize.SMALL -> "Smaller text"; TextSize.DEFAULT -> "Default text size"; TextSize.LARGE -> "Larger text" }
+                        MenuCell("A", s == textSize, Type.label(size, 0f), spoken = spoken) { onTextSize(s) }
                     }
                 }
                 // The Martyrology at Prime: Off and On under the last two themes, the longer label
                 // taking the first theme's cell, as on the web.
                 val martyrology = LocalMartyrology.current
+                Hairline(p.surfaceEdge)
                 MenuRow {
                     Row(Modifier.width(54.dp)) {
                         Text(
                             "MARTYROLOGY",
-                            Modifier.padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
+                            // Said as the web's group names the row.
+                            Modifier.semantics { contentDescription = "Martyrology at Prime" }
+                                .padding(start = 10.4.dp).wrapContentWidth(Alignment.Start, unbounded = true),
                             style = Type.label(10.56f, 0.08f).copy(color = p.muted),
                             maxLines = 1,
                             softWrap = false,
@@ -469,7 +508,7 @@ fun MenuPanel(
                     }
                     Spacer(Modifier.weight(1f))
                     listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f), p.accent) { martyrology.onChange(on) }
+                        MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
                 PrefHint("On reads the saints of the coming day at Prime.")
@@ -477,6 +516,10 @@ fun MenuPanel(
         }
     }
 }
+
+/** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
+private val ShadowRoom: Dp = 16.dp
+private val ShadowRise: Dp = 9.dp
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable
@@ -489,19 +532,20 @@ private fun PrefHint(text: String) {
     )
 }
 
-/** A small uppercase disclosure label with its caret ("Change date ▾"). */
+/** A small uppercase disclosure label with its caret ("Change date ▾"), muted, in the accent while open. */
 @Composable
 fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String? = null, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
+    val ink = if (open) p.accent else p.muted
     Row(modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             buildAnnotatedString {
                 append(label.uppercase())
                 if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + value.uppercase()) }
             },
-            style = Type.control.copy(color = p.muted),
+            style = Type.control.copy(color = ink),
         )
-        Caret(open, p.muted)
+        Caret(open, ink)
     }
 }
 
@@ -538,90 +582,100 @@ private val PICKER_YEARS = 1950..2150
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days
- * are the choices. Sundays are red; the chosen day takes the gold underline, as a chosen
- * prayer form does, and today a quiet wash. The title turns the grid into the year's months,
- * and back; both views keep six weeks' height, so turning between them moves nothing below.
+ * are the choices. Sundays are red; the chosen day takes the accent on the gold underline, as
+ * a chosen prayer form does, and today a quiet wash. The title turns the grid into the year's
+ * months, and back; both views keep six weeks' height, so turning between them moves nothing
+ * below. The grid is seven thumb-wide days at most, centred (`.date-picker`). `centred` sets
+ * Previous · Today · Next together in the middle (`.day-nav`) rather than at the edges, as the
+ * web's home does at every width and an hour above 540px.
  */
 @Composable
-fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) {
+fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
     var month by remember(shown) { mutableStateOf(YearMonth.from(shown).coerceIn(PICKER_YEARS)) }
     var months by remember(shown) { mutableStateOf(false) }
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
+            horizontalArrangement = if (centred) Arrangement.Center else Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text("← Previous", Modifier.tap(label = "Previous day") { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
-            Spacer(Modifier.weight(1f))
+            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
             if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
-            Spacer(Modifier.weight(1f))
+            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
             Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
         }
-        Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-            // A month's step in the days, a year's in the months; none past the picker's span.
-            val step = if (months) 12L else 1L
-            val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
-            val forward = month.plusMonths(step).takeIf { it.year in PICKER_YEARS }
-            val stepStyle = link.copy(fontSize = 22.sp)
-            Text(
-                "‹",
-                Modifier.then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier)
-                    .padding(horizontal = 24.dp),
-                style = if (back != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
-            )
-            val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
-            Row(
-                Modifier.weight(1f).heightIn(min = 44.dp)
-                    .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(title.uppercase(), style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
-                Caret(months, p.text)
+        Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+                // A month's step in the days, a year's in the months; none past the picker's span.
+                val step = if (months) 12L else 1L
+                val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
+                val forward = month.plusMonths(step).takeIf { it.year in PICKER_YEARS }
+                val stepStyle = link.copy(fontSize = 22.sp)
+                // Each step a day's cell wide, over the first and last columns.
+                Box(
+                    Modifier.size(44.dp).then(if (back != null) Modifier.tap(label = if (months) "Previous year" else "Previous month") { month = back } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) { Text("‹", style = if (back != null) stepStyle else stepStyle.copy(color = p.border)) }
+                val title = if (months) "${month.year}" else "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US)} ${month.year}"
+                Row(
+                    Modifier.weight(1f).heightIn(min = 44.dp)
+                        .tap(label = if (months) "$title, back to days" else "$title, choose another month") { months = !months },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(title.uppercase(), style = Type.label(11.52f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center))
+                    // Set like the disclosure labels around it, with their gold caret.
+                    Caret(months, p.goldLine, lighter = false)
+                }
+                Box(
+                    Modifier.size(44.dp).then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) { Text("›", style = if (forward != null) stepStyle else stepStyle.copy(color = p.border)) }
             }
-            Text(
-                "›",
-                Modifier.then(if (forward != null) Modifier.tap(label = if (months) "Next year" else "Next month") { month = forward } else Modifier)
-                    .padding(horizontal = 24.dp),
-                style = if (forward != null) stepStyle else stepStyle.copy(color = p.muted.copy(alpha = 0.35f)),
-            )
-        }
-        // A swipe across the days turns the month, as the arrows do.
-        val swipe = with(LocalDensity.current) { 48.dp.toPx() }
-        var dragged by remember { mutableFloatStateOf(0f) }
-        val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
-        Box(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp).draggable(
-                rememberDraggableState { dragged += it },
-                Orientation.Horizontal,
-                enabled = !months,
-                onDragStarted = { dragged = 0f },
-                onDragStopped = {
-                    val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
-                    if (to != null && to.year in PICKER_YEARS) month = to
-                },
-            ),
-        ) {
-            // The days always lay out, for the height both views share; the months cover them.
-            AnimatedContent(
-                month,
-                Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
-                transitionSpec = {
-                    val on = if (targetState > initialState) 1 else -1
-                    (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
-                        (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
-                },
-                label = "month",
-            ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
-            if (months || daysAlpha < 1f) {
-                MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
-                    month = YearMonth.of(month.year, m)
-                    months = false
+            // A swipe across the days turns the month, as the arrows do.
+            val swipe = with(LocalDensity.current) { 48.dp.toPx() }
+            var dragged by remember { mutableFloatStateOf(0f) }
+            val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
+            Box(
+                Modifier.fillMaxWidth().draggable(
+                    rememberDraggableState { dragged += it },
+                    Orientation.Horizontal,
+                    enabled = !months,
+                    onDragStarted = { dragged = 0f },
+                    onDragStopped = {
+                        val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
+                        if (to != null && to.year in PICKER_YEARS) month = to
+                    },
+                ),
+            ) {
+                // The days always lay out, for the height both views share; the months cover them.
+                AnimatedContent(
+                    month,
+                    Modifier.alpha(daysAlpha).then(if (months) Modifier.clearAndSetSemantics {} else Modifier),
+                    transitionSpec = {
+                        val on = if (targetState > initialState) 1 else -1
+                        (slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { on * it / 5 } + fadeIn(tween(180, delayMillis = 60))) togetherWith
+                            (slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -on * it / 5 } + fadeOut(tween(90)))
+                    },
+                    label = "month",
+                ) { m -> Column { Days(m, shown, today, live = !months, onPick) } }
+                if (months || daysAlpha < 1f) {
+                    MonthGrid(month.year, shown, today, Modifier.matchParentSize().alpha(1f - daysAlpha), live = months) { m ->
+                        month = YearMonth.of(month.year, m)
+                        months = false
+                    }
                 }
             }
         }
     }
 }
+
+/** Today's wash in the picker: the gold at a tenth on Nave; on the Apse the vault's blue lifted (`--apse-lift`), as gold reads grey on the night. */
+private fun todayWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.gold.copy(alpha = 0.1f)
 
 private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     year < years.first -> YearMonth.of(years.first, 1)
@@ -641,7 +695,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
             Text(
                 d.getDisplayName(JavaTextStyle.NARROW, Locale.US),
                 Modifier.weight(1f).padding(vertical = 8.dp),
-                style = Type.label(11.5f, 0.08f).copy(color = p.muted, textAlign = TextAlign.Center),
+                style = Type.label(10.56f, 0.1f).copy(color = if (d == DayOfWeek.SUNDAY) p.rubric else p.muted, textAlign = TextAlign.Center),
             )
         }
     }
@@ -654,8 +708,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
-                        // Today in Apse takes the vault's blue lifted, as the web's --apse-lift: gold reads grey on the night.
-                        .then(if (day == today) Modifier.background(if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.pressedWash) else Modifier)
+                        .then(if (day == today) Modifier.background(todayWash(p)) else Modifier)
                         .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
                             haptics.chose()
                             onPick(day)
@@ -663,10 +716,16 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     contentAlignment = Alignment.Center,
                 ) {
                     if (day != null) {
+                        // A chosen Sunday keeps its rubric over the gold rule.
+                        val ink = when {
+                            day.dayOfWeek == DayOfWeek.SUNDAY -> p.rubric
+                            day == shown -> p.accent
+                            else -> p.text
+                        }
                         Text(
                             day.dayOfMonth.toString(),
                             Modifier.goldUnderline(day == shown, p.goldLine),
-                            style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = if (day.dayOfWeek == DayOfWeek.SUNDAY) p.rubric else p.text, fontFeatureSettings = "lnum"),
+                            style = Type.body.copy(fontSize = 18.sp, lineHeight = 30.sp, color = ink, fontFeatureSettings = "lnum"),
                         )
                     }
                 }
@@ -689,7 +748,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.background(p.gold.copy(alpha = 0.1f)) else Modifier)
+                                .then(if (today.year == year && today.monthValue == m) Modifier.background(todayWash(p)) else Modifier)
                                 .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
@@ -703,27 +762,45 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
     }
 }
 
-/** "How are you praying?": the three prayer forms, remembered on this device. */
+/**
+ * "How are you praying?": the three prayer forms, remembered on this device, as the web's
+ * `.leader-selector fieldset`: a small uppercase legend over a list at most 23rem wide, ruled
+ * above, below and between, the chosen form's ring filled in the accent and its words in the
+ * accent over a gold underline.
+ */
 @Composable
 fun FormChooser(form: String, onForm: (String) -> Unit) {
     val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
-    Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("How are you praying?", style = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.muted))
-        Spacer(Modifier.height(4.dp))
-        PRAYER_FORMS.forEach { (value, _, phrase) ->
-            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) {
-                if (value != form) haptics.chose()
-                onForm(value)
-            }, verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(16.dp).border(1.dp, if (value == form) p.gold else p.border, CircleShape), contentAlignment = Alignment.Center) {
-                    if (value == form) Box(Modifier.size(8.dp).background(p.gold, CircleShape))
+    Column(Modifier.widthIn(max = 368.dp).fillMaxWidth().padding(top = 12.dp, bottom = 8.dp)) {
+        Text("HOW ARE YOU PRAYING?", Modifier.padding(bottom = 10.4.dp), style = Type.label(11.2f, 0.1f).copy(color = p.muted))
+        Column(Modifier.fillMaxWidth().drawBehind {
+            val w = 1.dp.toPx()
+            drawLine(p.border, Offset(0f, w / 2f), Offset(size.width, w / 2f), w)
+            drawLine(p.border, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
+        }.padding(vertical = 1.dp)) {
+            PRAYER_FORMS.forEachIndexed { i, (value, _, phrase) ->
+                val chosen = value == form
+                if (i > 0) Hairline(p.surfaceEdge)
+                Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = chosen) {
+                    if (!chosen) haptics.chose()
+                    onForm(value)
+                }.padding(horizontal = 5.6.dp, vertical = 10.4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // The web's ring: a 1px circle on the ground; chosen, the accent with the ground
+                    // inset 3px inside its line.
+                    Box(Modifier.size(14.4.dp).background(if (chosen) p.accent else p.bg, CircleShape).border(1.dp, if (chosen) p.accent else p.muted, CircleShape), contentAlignment = Alignment.Center) {
+                        if (chosen) Box(Modifier.size(12.4.dp).border(3.dp, p.bg, CircleShape))
+                    }
+                    Spacer(Modifier.width(12.8.dp))
+                    Text(
+                        phrase,
+                        Modifier.goldUnderline(chosen, p.goldLine),
+                        style = Type.body.copy(fontSize = 14.4.sp, lineHeight = 20.16.sp, color = if (chosen) p.accent else p.text),
+                    )
                 }
-                Spacer(Modifier.width(10.dp))
-                Text(phrase, style = Type.body.copy(fontSize = 17.sp, lineHeight = 24.sp, color = p.text))
             }
         }
-        Text("Remembered on this device. Change it any time.", Modifier.padding(top = 4.dp), style = Type.small.copy(color = p.muted))
+        Text("Remembered on this device. Change it any time.", Modifier.padding(top = 11.2.dp), style = Type.small.copy(fontSize = 12.8.sp, lineHeight = 18.56.sp, color = p.muted))
     }
 }
 
