@@ -250,13 +250,14 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
 }
 
 /// Each family's breakdown: its heading and its values' labels, in the store's value order.
-pub const TREND_LABELS: [(&str, &str, &[&str]); 6] = [
+pub const TREND_LABELS: [(&str, &str, &[&str]); 7] = [
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
     ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
     ("visit", "New or returning", &["New", "Returning"]),
+    ("new-client", "New readers by client", &["Browser", "Web app", "Android", "iOS"]),
 ];
 
 fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> {
@@ -469,7 +470,7 @@ mod tests {
         .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 6);
+        assert_eq!(groups.len(), 7);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
