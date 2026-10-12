@@ -65,6 +65,8 @@ export default defineConfig({
     {
       name: "mobile-webkit",
       testMatch: "ux.spec.js",
+      // WebKit lays out the long hours some three times slower than Chromium.
+      timeout: 60_000,
       use: {
         browserName: "webkit",
         viewport: { width: 390, height: 844 },

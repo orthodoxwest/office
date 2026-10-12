@@ -716,6 +716,22 @@ test("forced colours drop the wall for the system canvas", async ({ page }) => {
   expect(band, "hour band").toBe("none");
 });
 
+test("quick theme changes settle on the last choice with the wall restored", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => {
+    const pick = choice => document.querySelector(`.theme-option[data-theme-choice="${choice}"]`).click();
+    pick("dark");
+    pick("light");
+    setTimeout(() => pick("dark"), 50);
+  });
+  const html = page.locator("html");
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await expect(html).not.toHaveClass(/vault-hidden|theme-anim/);
+  expect(await page.evaluate(() => localStorage.getItem("office-theme"))).toBe("dark");
+  await expect.poll(() => page.evaluate(() => Number(getComputedStyle(document.documentElement, "::before").opacity))).toBe(1);
+});
+
 test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openDatedPage(page, `/?date=${testDate}`);
@@ -1202,8 +1218,7 @@ test("Chapter and Hymn headings carry the section cross", async ({ page }) => {
 // page's text or the header's bare bar produces none, so the overlays must not
 // wait on a click to hear a tap outside them. Mimic that here by swallowing
 // every click whose target is not a control before the page's listeners see it.
-test("menus put away on a tap iOS Safari sends no click for", async ({ page, browserName }) => {
-  test.skip(browserName === "webkit", "Playwright's Linux WebKit turns a touchscreen tap into touch and mouse events but no pointer events (iOS WebKit derives them; the GTK/WPE ports do not), so the pointerup that real iOS Safari sends never arrives");
+test("menus put away on a tap iOS Safari sends no click for", async ({ page }) => {
   await page.addInitScript(() => {
     window.addEventListener("click", (e) => {
       if (!e.target.closest("a, button, input, select, textarea, label, summary")) {
@@ -1217,6 +1232,7 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page, bro
   await page.getByText("Menu", { exact: true }).tap();
   await expect(menu).toHaveAttribute("open", "");
   // Beside the word, on the header's bar: still outside the menu's summary.
+  // WebKit moves this tap's click onto the summary; it must not reopen it.
   const shell = await page.locator(".site-nav-shell").boundingBox();
   await page.touchscreen.tap(shell.x + shell.width - 2, shell.y + shell.height / 2);
   await expect(menu).not.toHaveAttribute("open", "");
@@ -2133,7 +2149,10 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         // The two line boxes a two-line initial stands in. A range's box for
         // the cap is its font's em box, which WebKit's float fallback hangs
         // below the second line although the letter stands on that baseline.
-        capRowsBottom: opening.getBoundingClientRect().top + 2 * parseFloat(getComputedStyle(opening).lineHeight),
+        // Only the fallback needs the bound; initial-letter's box is the cap's own.
+        capRowsBottom: CSS.supports("initial-letter", "2")
+          ? NaN
+          : opening.getBoundingClientRect().top + 2 * parseFloat(getComputedStyle(opening).lineHeight),
         openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
         openingIndent: parseFloat(getComputedStyle(opening).textIndent),
         laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
@@ -2379,6 +2398,21 @@ test("without JavaScript the native date field still jumps", async ({ browser, b
   await page.getByRole("button", { name: "Go" }).click();
   await expect(page).toHaveURL(/\/lauds.*2026-03-20/);
   await context.close();
+});
+
+test("a day's commemorations open its office details, each named once", async ({ page }) => {
+  // Holy Saturday keeps St Leo at no hour, so the details name him on a row of
+  // the day's own; St Paul, kept at Lauds and Vespers on 18 January, is named
+  // only there, with his antiphon.
+  await openDatedPage(page, "/calendar/2026/04");
+  const leo = page.locator("#d-2026-04-11 .day-office-digest .day-office-hour").first();
+  await expect(leo.locator("dt")).toHaveText("Day");
+  await expect(leo.locator(".day-office-comm")).toHaveText(/^Com\. St Leo the Great/);
+  await openDatedPage(page, "/calendar/2026/01");
+  const digest = page.locator("#d-2026-01-18 .day-office-digest");
+  await expect(digest.locator("dt", { hasText: /^Day$/ })).toHaveCount(0);
+  await expect(digest.locator(".day-office-comm", { hasText: "St Paul" })).toHaveCount(2);
+  await expect(digest).not.toContainText("Commemoration of");
 });
 
 test("ordo disclosures are deliberate and survive a change in screen width", async ({ page }) => {

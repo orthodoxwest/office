@@ -107,7 +107,9 @@ pub fn ordo_day(day: &Day, engine: &Engine, moveable: &MoveableDates) -> OrdoDay
         color: day.color,
         fast: day.penitential.fast,
         abstinence: day.penitential.abstinence,
-        commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
+        // Named as the hours' headings name them ("St Paul", not "Commemoration of St Paul"),
+        // so a day's commemoration can be matched to the one its Lauds or Vespers carries.
+        commemorations: day.commemorations.iter().map(|c| c.commemoration_name().to_string()).collect(),
         lauds: summarize("lauds"),
         hours_preces: summarize("prime").is_some_and(|h| h.preces),
         vespers: summarize("vespers"),
@@ -140,4 +142,29 @@ pub fn incipit(text: &str) -> String {
         out.push('…');
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use calendar::{CalendarData, MoveableDates, build_calendar};
+
+    use super::*;
+    use crate::{resolve_office_days, testutil::TestData};
+
+    #[test]
+    fn a_days_commemorations_are_named_as_its_hours_name_them() {
+        let data = TestData("../../data".into());
+        let engine = Engine::load(&data).unwrap();
+        let cal = build_calendar(2026, &CalendarData::load(&data).unwrap()).unwrap();
+        let offices = resolve_office_days(&cal);
+        let moveable = MoveableDates::compute(2026);
+        let (c, o) = cal.days.into_iter().zip(offices).find(|(c, _)| c.date.to_string() == "2026-01-18").unwrap();
+        let ordo = ordo_day(&Day::new(c, o), &engine, &moveable);
+        // The Second Sunday after Epiphany commemorates St Paul (a feast named "Commemoration of
+        // St Paul") at Lauds; the day's list and the hour's heading must agree on the name.
+        let lauds: Vec<_> = ordo.lauds.unwrap().comms.into_iter().map(|c| c.name).collect();
+        assert!(ordo.commemorations.iter().any(|c| c == "St Paul"), "{:?}", ordo.commemorations);
+        assert!(ordo.commemorations.iter().all(|c| !c.starts_with("Commemoration of ")));
+        assert!(lauds.iter().any(|c| c == "St Paul"), "{lauds:?}");
+    }
 }

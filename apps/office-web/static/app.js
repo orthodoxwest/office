@@ -474,6 +474,9 @@ function usageBeaconBody(scope) {
     flashThemeTransition();
     var root = document.documentElement;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Supersede any dip still pending from before the setting changed.
+      vaultFadeTurn++;
+      root.classList.remove("vault-hidden");
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       return;
@@ -949,13 +952,23 @@ function usageBeaconBody(scope) {
   // in pointercancel instead, so it stands for the tap. click stays for the
   // keyboard; a mouse sends both, and the second finds it already closed. A
   // right or middle button sends no click, so its pointerup leaves it open.
-  var onTapOutside = function (handler) {
+  // Safari moves a touch's click onto a control near the finger, so a tap
+  // just beside the overlay's own summary closes it on pointerup and then
+  // clicks the summary, which would open it again: that click is dropped.
+  var onTapOutside = function (overlay, handler) {
+    var closedByTap = -1;
     document.addEventListener("pointerup", function (e) {
-      if (e.button === 0) {
+      closedByTap = e.button === 0 && handler(e) ? e.timeStamp : -1;
+    });
+    document.addEventListener("click", function (e) {
+      var summary = e.target.closest && e.target.closest("summary");
+      if (closedByTap >= 0 && e.timeStamp - closedByTap < 1000 && summary && summary.parentElement === overlay) {
+        e.preventDefault();
+      } else {
         handler(e);
       }
+      closedByTap = -1;
     });
-    document.addEventListener("click", handler);
   };
 
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
@@ -979,10 +992,12 @@ function usageBeaconBody(scope) {
 
     // The phone menu is an overlay: a tap anywhere outside it, or Escape,
     // puts it away. Taps inside (including the preferences) leave it open.
-    onTapOutside(function (e) {
+    onTapOutside(siteMenu, function (e) {
       if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
         siteMenu.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
@@ -999,10 +1014,12 @@ function usageBeaconBody(scope) {
   // Escape, puts it away; a preference chosen inside leaves it open.
   var siteSettings = document.querySelector(".site-settings");
   if (siteSettings) {
-    onTapOutside(function (e) {
+    onTapOutside(siteSettings, function (e) {
       if (siteSettings.open && !siteSettings.contains(e.target)) {
         siteSettings.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && siteSettings.open) {
@@ -1952,7 +1969,7 @@ function usageBeaconBody(scope) {
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home
   // page. The day-number link stays as the keyboard/no-JS path; clicks on
-  // links, rank tooltips, and the commemorations disclosure keep their own
+  // links, rank tooltips, and the office details disclosure keep their own
   // behavior, and selecting text never navigates.
   var calendarEl = document.querySelector(".calendar");
   if (calendarEl) {
