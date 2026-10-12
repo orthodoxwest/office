@@ -153,9 +153,11 @@ This is the app's only use of the network (the `INTERNET` permission). Only `pre
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
 never does. Nor does a phone in Play's pre-launch report, which installs each uploaded build
 fresh on several test devices and crawls it; with an upload on every merge they would otherwise
-outnumber the testers. A `release` build reports only when the Play Store installed it (the test
-devices get it from the test harness), and no build reports where Test Lab's `firebase.test.lab`
-system setting is set. `UsageTest` checks what counts, the daily identifier, the retry, and the
+outnumber the testers. Nothing on those phones reliably marks them (not all carry Test Lab's
+`firebase.test.lab` system setting, which still rules out those that do, and the Play Store
+installs the build), but each is wiped within minutes, so an installation reports only once it is
+two hours old (`Usage.SETTLING`). A reader's first hours on a new install go uncounted; an update
+keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, and the
 test-device exclusion.
 
 ## Trying it on a phone
