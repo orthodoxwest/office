@@ -7,6 +7,8 @@ import android.provider.Settings
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Clock
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
@@ -32,8 +34,10 @@ import org.orthodoxwest.office.core.usageEndpointHeader
  * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
  * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a phone in
- * Play's pre-launch report ([counts]), which installs every uploaded build fresh on several test
- * devices and crawls it; each would count as a new reader.
+ * Play's pre-launch report, which installs every uploaded build fresh on several test devices and
+ * crawls it; each would count as a new reader. Nothing on those phones reliably says so (not all
+ * carry Test Lab's setting, and the Play Store installs the build), but each is wiped within
+ * minutes of the install, so an installation reports only once it is [SETTLING] old.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
@@ -42,6 +46,8 @@ class Usage(
     private val prefs: SharedPreferences,
     private val enabled: Boolean = BuildConfig.COUNT_USAGE,
     private val clock: Clock = Clock.systemDefaultZone(),
+    /** When this installation was first installed; null counts at once. */
+    private val installed: Instant? = null,
     private val executor: Executor = sender,
     private val post: (endpoint: String, id: String, body: String) -> Reply = ::send,
 ) {
@@ -54,6 +60,7 @@ class Usage(
     /** `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one. */
     fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null) {
         if (!enabled) return
+        if (installed != null && Duration.between(installed, clock.instant()) < SETTLING) return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
         val first = firstDay(day) == day
         val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first) ?: return
@@ -100,35 +107,27 @@ class Usage(
         private val sender: Executor = Executors.newSingleThreadExecutor { Thread(it, "usage").apply { isDaemon = true } }
 
         /**
-         * Whether this build on this device reports. A store build reports only when Play
-         * installed it: the pre-launch report's devices are given the build by the test harness,
-         * not the Play Store, and not all of them carry the system setting Test Lab documents
-         * (firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for),
-         * which still rules out any that do. The sideloaded preview has no store to check.
+         * How old an installation must be before it reports. Play's pre-launch test phones are
+         * wiped within minutes of installing a build; a reader's first hours on a new install go
+         * uncounted, and every page after them counts as usual (as New, on the first such day).
+         * An update keeps the first install time, so testers who update keep counting.
          */
-        fun counts(
-            context: Context,
-            build: Boolean = BuildConfig.COUNT_USAGE,
-            store: Boolean = BuildConfig.BUILD_TYPE == "release",
-            installer: String? = installerOf(context),
-        ): Boolean =
-            build &&
-                (!store || installer == PLAY_STORE) &&
-                Settings.System.getString(context.contentResolver, TEST_LAB) != "true"
+        val SETTLING: Duration = Duration.ofHours(2)
 
-        /** The package that installed this app, if Android says. */
-        private fun installerOf(context: Context): String? = runCatching {
-            val pm = context.packageManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                pm.getInstallSourceInfo(context.packageName).installingPackageName
-            } else {
-                @Suppress("DEPRECATION")
-                pm.getInstallerPackageName(context.packageName)
-            }
+        /**
+         * Whether this build on this device reports: not a debug build, nor a device carrying the
+         * system setting Test Lab documents
+         * (firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for).
+         */
+        fun counts(context: Context, build: Boolean = BuildConfig.COUNT_USAGE): Boolean =
+            build && Settings.System.getString(context.contentResolver, TEST_LAB) != "true"
+
+        /** When this app was first installed on the device, if Android says. */
+        fun installedAt(context: Context): Instant? = runCatching {
+            Instant.ofEpochMilli(context.packageManager.getPackageInfo(context.packageName, 0).firstInstallTime)
         }.getOrNull()
 
         private const val TEST_LAB = "firebase.test.lab"
-        private const val PLAY_STORE = "com.android.vending"
 
         private val agent = "DivineOffice/${BuildConfig.VERSION_NAME} (Android ${Build.VERSION.RELEASE})"
 

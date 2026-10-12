@@ -229,8 +229,8 @@ crawler presents a fresh cookie jar per page and would otherwise mint a
 - Self-identifying crawlers (`usage::is_bot`: `<name>bot/<version>` or an
   explicit token, not merely the substring "bot") get `204` with no cookie.
 - The Android app does not report from the devices where Play's pre-launch
-  report installs and crawls every uploaded build: a store build reports only
-  when the Play Store installed it.
+  report installs and crawls every uploaded build: an installation reports
+  only once it is two hours old, and those devices are wiped sooner.
 
 A stealth scraper that dwells on today's pages still counts, and a reader
 browsing only the archive is missed.

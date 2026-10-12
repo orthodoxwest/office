@@ -151,20 +151,28 @@ class UsageTest {
     // Play's pre-launch report crawls every upload on fresh test devices; none is a reader.
     @Test
     fun testDevicesAreNotCounted() {
-        val play = "com.android.vending"
-        assertTrue(Usage.counts(app, build = true, store = true, installer = play))
-        assertFalse(Usage.counts(app, build = false, store = true, installer = play))
-        // A store build the Play Store did not install came from the test harness.
-        assertFalse(Usage.counts(app, build = true, store = true, installer = null))
-        assertFalse(Usage.counts(app, build = true, store = true, installer = "com.android.shell"))
-        // The preview is sideloaded, so it has no store to check.
-        assertTrue(Usage.counts(app, build = true, store = false, installer = null))
+        assertTrue(Usage.counts(app, build = true))
+        assertFalse(Usage.counts(app, build = false))
         Settings.System.putString(app.contentResolver, "firebase.test.lab", "true")
         try {
-            assertFalse(Usage.counts(app, build = true, store = true, installer = play))
-            assertFalse(Usage.counts(app, build = true, store = false, installer = null))
+            assertFalse(Usage.counts(app, build = true))
         } finally {
             Settings.System.putString(app.contentResolver, "firebase.test.lab", "false")
         }
+    }
+
+    // A test phone is wiped minutes after the install; a reader's later pages count, as New.
+    @Test
+    fun aFreshInstallationWaitsBeforeReporting() {
+        val installed = now.minusSeconds(600)
+        val usage = Usage(prefs, enabled = true, clock = clock, installed = installed, executor = { it.run() }) { _, id, body ->
+            posted += id to body
+            Usage.Reply(true)
+        }
+        usage.record(UsageEvent.Home(today), dark = false, form = "private")
+        assertTrue(posted.isEmpty())
+        now = now.plus(Usage.SETTLING)
+        usage.record(UsageEvent.Home(today), dark = false, form = "private")
+        assertEquals(listOf("site appearance:nave screen:mobile visit:first client:android"), posted.map { it.second })
     }
 }
