@@ -1225,17 +1225,6 @@ Month = 3
 Day = 17
 Source = awrv
 
-[comm-extra-03-17-st-joseph-of-arimathea-c]
-ProperID = st-joseph-arimathea
-ProperName = Joseph
-Name = St Joseph of Arimathea, C
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 3
-Day = 17
-Source = awrv
-
 [comm-extra-03-20-st-cuthbert-bishop-and-confessor]
 Name = St Cuthbert, Bishop & Confessor
 Rank = commemoration
