@@ -31,9 +31,9 @@ import org.orthodoxwest.office.core.usageEndpointHeader
  * sends ties one day to the next. The app also keeps the day it was first counted, and says
  * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
- * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a Firebase Test
- * Lab device ([counts]): Play's pre-launch report installs every uploaded build fresh on a
- * handful of them and crawls it, and each would count as a new reader.
+ * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a phone in
+ * Play's pre-launch report ([counts]), which installs every uploaded build fresh on several test
+ * devices and crawls it; each would count as a new reader.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
@@ -100,14 +100,35 @@ class Usage(
         private val sender: Executor = Executors.newSingleThreadExecutor { Thread(it, "usage").apply { isDaemon = true } }
 
         /**
-         * Whether this build on this device reports. Test Lab, which runs Play's pre-launch
-         * reports, marks its devices with this system setting
-         * (firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for).
+         * Whether this build on this device reports. A store build reports only when Play
+         * installed it: the pre-launch report's devices are given the build by the test harness,
+         * not the Play Store, and not all of them carry the system setting Test Lab documents
+         * (firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for),
+         * which still rules out any that do. The sideloaded preview has no store to check.
          */
-        fun counts(context: Context, build: Boolean = BuildConfig.COUNT_USAGE): Boolean =
-            build && Settings.System.getString(context.contentResolver, TEST_LAB) != "true"
+        fun counts(
+            context: Context,
+            build: Boolean = BuildConfig.COUNT_USAGE,
+            store: Boolean = BuildConfig.BUILD_TYPE == "release",
+            installer: String? = installerOf(context),
+        ): Boolean =
+            build &&
+                (!store || installer == PLAY_STORE) &&
+                Settings.System.getString(context.contentResolver, TEST_LAB) != "true"
+
+        /** The package that installed this app, if Android says. */
+        private fun installerOf(context: Context): String? = runCatching {
+            val pm = context.packageManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                pm.getInstallSourceInfo(context.packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getInstallerPackageName(context.packageName)
+            }
+        }.getOrNull()
 
         private const val TEST_LAB = "firebase.test.lab"
+        private const val PLAY_STORE = "com.android.vending"
 
         private val agent = "DivineOffice/${BuildConfig.VERSION_NAME} (Android ${Build.VERSION.RELEASE})"
 
