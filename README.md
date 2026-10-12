@@ -186,7 +186,9 @@ today: each keeps that day on the device (`office-first-counted` in localStorage
 in the apps) and sends only the word, so nothing links one day to the next. Browsers that used
 the Office before it existed count as returning when they hold a setting or the service
 worker; apps, when they had reported before. `client:browser|pwa|android|ios` separates a browser tab,
-the web app installed to a home screen, and the native apps. Prime, on a day
+the web app installed to a home screen, and the native apps. The server also counts a
+first-day visit under `new-client:<client>`, so new readers split by client; no beacon sends it.
+Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which
 measures the reading's exposure (see MARTYROLOGY.md). Each counts once per browser per day, so a reader who

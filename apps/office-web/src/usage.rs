@@ -182,6 +182,8 @@ CREATE TABLE IF NOT EXISTS seen (
             scopes.push(scope);
         }
         scopes.extend(dimensions.iter().map(String::as_str));
+        let new_client = presentation::usage::new_client(dimensions);
+        scopes.extend(new_client.as_deref());
         for v in scopes {
             let n =
                 tx.execute("INSERT OR IGNORE INTO seen VALUES (?, ?, ?)", params![day, hash.as_slice(), v]).map_err(|e| e.to_string())?;
@@ -627,6 +629,8 @@ mod tests {
             ("screen:mobile", 2),
             ("prayer-form:priest", 2),
             ("visit:first", 2),
+            ("new-client:android", 1),
+            ("new-client:ios", 1),
         ] {
             assert_eq!(sum(scope), n, "{scope}");
         }
