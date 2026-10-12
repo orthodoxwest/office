@@ -2373,6 +2373,10 @@ test("the date picker keeps to 1950-2150", async ({ page }) => {
   // Keys stop at the end rather than leaving the span.
   await page.goto("/lauds/2150-12-15");
   await page.getByText("Change date", { exact: true }).click();
+  // Let the opening's toggle run first: it resets the roving focus to the
+  // page's day, as a reader's own keypress always follows it.
+  await expect(picker.getByRole("grid", { name: "December 2150" })).toBeVisible();
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))));
   await picker.getByRole("link", { name: "Thursday, December 31, 2150" }).focus();
   await page.keyboard.press("ArrowRight");
   await expect(picker.getByRole("link", { name: "Thursday, December 31, 2150" })).toBeFocused();
