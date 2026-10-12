@@ -349,6 +349,13 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
     var choosing by remember { mutableStateOf(false) }
     // What a screen reader hears when the form changes (the web's `#leader-status`).
     var status by remember { mutableStateOf("") }
+    // Once said, the words are taken down, so a later swipe does not find them lingering.
+    LaunchedEffect(status) {
+        if (status.isNotEmpty()) {
+            delay(5_000)
+            status = ""
+        }
+    }
     Column(Modifier.measure().padding(top = 17.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         // Painted double rules frame the title. The hour's sign is set alone into the upper rule,
         // broken only for it; the day's colour reaches the lower one's lozenge. The rules take

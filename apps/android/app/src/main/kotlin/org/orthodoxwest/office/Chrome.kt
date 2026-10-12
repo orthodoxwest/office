@@ -223,7 +223,7 @@ private fun Caret(open: Boolean, ink: Color, lighter: Boolean, gapSp: Float, wSp
 
 /** A current control's underline: gold for a chosen setting, or `width` thick in the lining for the current page. */
 fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp, width: Dp = 1.dp): Modifier = if (!on) this else this.drawBehind {
-    val y = size.height - width.toPx()
+    val y = size.height - width.toPx() / 2f
     drawLine(color, Offset(inset.toPx(), y), Offset(size.width - inset.toPx(), y), width.toPx())
 }
 

@@ -1,6 +1,7 @@
 package org.orthodoxwest.office
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +47,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -59,7 +64,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -100,16 +104,22 @@ fun OrdoScreen(
     val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
     var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
     // The day comes to rest under the month's pinned heading, not behind it: the heading's
-    // height (its padding, and the taller of its name's line and the ↑'s).
-    val pinned = with(LocalDensity.current) { (22.8.dp.toPx() + maxOf(28.sp.toPx(), 20.sp.toPx() + 12.dp.toPx())).roundToInt() }
+    // measured height, or before its first layout an estimate (its padding, and the taller of
+    // its name's line and the ↑'s 48dp).
+    var headingPx by remember { mutableIntStateOf(0) }
+    val estimate = with(LocalDensity.current) { (10.dp.toPx() + maxOf(28.sp.toPx() + 12.8.dp.toPx(), 48.dp.toPx())).roundToInt() }
+    val pinned = if (headingPx > 0) headingPx else estimate
+    // Where a day was brought to rest by the estimate, set right once the heading is measured.
+    val restedAt = remember(year, monthNumber, focusDay) { mutableIntStateOf(0) }
     val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
+        if (focusDay != 0 && month != null) restedAt.intValue = pinned
         LazyListState(if (focusDay != 0 && month != null) focusItem else 0, if (focusDay != 0 && month != null) -pinned else 0)
     }
     val scope = rememberCoroutineScope()
     // How far the month's heading stands under the status bar: none while the rows above it hold
     // it clear, the whole bar once it is pinned.
     val barPx = with(LocalDensity.current) { insets.calculateTopPadding().roundToPx() }
-    val underBar by remember(barPx) {
+    val underBar by remember(barPx, listState) {
         derivedStateOf {
             val above = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "ranks" }
             if (above == null) barPx else (-(above.offset + above.size)).coerceIn(0, barPx)
@@ -118,7 +128,15 @@ fun OrdoScreen(
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
             listState.scrollToItem(focusItem, -pinned)
+            restedAt.intValue = if (headingPx > 0) 0 else pinned
             focused = true
+        }
+    }
+    LaunchedEffect(headingPx) {
+        val rested = restedAt.intValue
+        if (headingPx > 0 && rested > 0) {
+            if (rested != headingPx) listState.scrollBy((rested - headingPx).toFloat())
+            restedAt.intValue = 0
         }
     }
     LazyColumn(
@@ -153,7 +171,10 @@ fun OrdoScreen(
             // Pinned at the list's top edge, which runs under the status bar, the heading keeps its
             // words below the bar: the wall's copy grows up behind it as it reaches the bar.
             Box(Modifier.fillMaxWidth().wallBehind().padding(top = with(LocalDensity.current) { underBar.toDp() }), contentAlignment = Alignment.TopCenter) {
-                MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), ordoColumn().padding(top = 10.dp)) {
+                MonthHeading(
+                    Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US),
+                    Modifier.onSizeChanged { headingPx = it.height }.then(ordoColumn()).padding(top = 10.dp),
+                ) {
                     scope.launch { listState.animateScrollToItem(0) }
                 }
             }
@@ -247,7 +268,11 @@ private fun OrdoHeader(
                                 if (!wide) Modifier else Modifier.drawBehind {
                                     val y = size.height - 1.dp.toPx()
                                     if (current) drawLine(p.goldLine, Offset(0f, y), Offset(size.width, y), 2.dp.toPx())
-                                    if (todays) lozenge(Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx()), 3.dp.toPx(), p.gold, null)
+                                    if (todays) {
+                                        val c = Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx())
+                                        lozenge(c, 5.83.dp.toPx(), p.bg, null)
+                                        lozenge(c, 3.dp.toPx(), p.gold, null)
+                                    }
                                 },
                             )
                             .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
@@ -259,7 +284,10 @@ private fun OrdoHeader(
                                 if (wide) return@drawBehind
                                 val y = size.height + 4.dp.toPx()
                                 if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
-                                if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), p.gold, null)
+                                if (todays) {
+                                    lozenge(Offset(size.width / 2f, y), 5.83.dp.toPx(), p.bg, null)
+                                    lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), p.gold, null)
+                                }
                             },
                             style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
                         )
@@ -447,11 +475,14 @@ private fun MonthHeading(name: String, modifier: Modifier, onTop: () -> Unit) {
             val c = Offset(size.width / 2f, size.height - w * 1.5f)
             lozenge(c, 7.07.dp.toPx(), p.bg, null)
             lozenge(c, 4.24.dp.toPx(), p.lining, null)
-        }.padding(vertical = 6.4.dp),
+        },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
-        Text("↑", Modifier.tap(label = "Back to the top", onClick = onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
+        // The name keeps the heading's padding; the ↑ takes a 48dp target, which stands into it.
+        Text(name, Modifier.weight(1f).padding(vertical = 6.4.dp).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
+        Box(Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).tap(label = "Back to the top", onClick = onTop), contentAlignment = Alignment.Center) {
+            Text("↑", Modifier.clearAndSetSemantics {}, style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
+        }
     }
 }
 
