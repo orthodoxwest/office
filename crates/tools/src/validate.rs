@@ -141,6 +141,14 @@ fn validate_semantics(feasts: &[Feast]) -> Vec<String> {
         }
     }
     for f in feasts {
+        let octave_names = f.octave_days.iter().chain(f.octave_day_names.values());
+        for name in std::iter::once(&f.name).chain(octave_names) {
+            if let Some(problem) = name_style_problem(name) {
+                errs.push(format!("Feast '{}' name {} {problem} (#695)", f.id, quote(name)));
+            }
+        }
+    }
+    for f in feasts {
         if let Some(rule) = &f.date_rule
             && !is_valid_date_rule(rule)
         {
@@ -152,6 +160,21 @@ fn validate_semantics(feasts: &[Feast]) -> Vec<String> {
         }
     }
     errs
+}
+
+/// Why a feast's name departs from the house style the ordo prints, if it does:
+/// "&" joins names and titles ("Ss Peter & Paul", "Bishop & Confessor"), and
+/// "the" takes a capital only as a name's first word.
+fn name_style_problem(name: &str) -> Option<&'static str> {
+    let mut words = name.split(' ');
+    words.next();
+    if name.split(' ').any(|w| w == "and") {
+        Some("joins with \"and\"; write \"&\"")
+    } else if words.any(|w| w == "The") {
+        Some("capitalizes \"The\" within it")
+    } else {
+        None
+    }
 }
 
 /// The name a saint's Common would put for "N." when it is a title rather than
