@@ -529,3 +529,13 @@ fn unrepeated_words_are_muted_across_the_mediant() {
     has(&html, "It is");
     lacks(&html, r#"<span class="unrepeated">It"#);
 }
+
+#[test]
+fn psalm_flex_is_printed_in_the_first_half() {
+    let html = render_psalm_verses(
+        "Psalm 1\n\nBLESSED is the man that hath not walked in the counsel of the ungodly, † nor stood in the way of sinners * and hath not sat in the seat of the scornful.\n",
+        &[],
+        0,
+    );
+    has(&html, "of the ungodly, † nor stood in the way of sinners\u{a0}<span class=\"mediant\">*</span> and hath not sat");
+}

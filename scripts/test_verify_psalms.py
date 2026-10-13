@@ -24,6 +24,7 @@ class VerifyPsalmsTest(unittest.TestCase):
                                ('First * another.', 'wording'), ('First second.', 'pointing'),
                                ('First * second * third', 'pointing')]:
             self.assertEqual(v.compare_verse(text, 'First : second.'), expected)
+        self.assertIsNone(v.compare_verse('First, † more * second.', 'First, more : second.'))
 
     def test_split_alignment_and_numbering(self):
         source = {148: [v.Verse(1, True, 'One : first.'), v.Verse(2, True, 'Two : second.'), v.Verse(3, True, 'Three : third.')]}
