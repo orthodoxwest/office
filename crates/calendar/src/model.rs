@@ -175,10 +175,11 @@ impl Season {
 
 /// General Rubrics VII.1-3 octave groups. The privileged classes are
 /// Easter/Pentecost, Epiphany/Corpus Christi, and Nativity/Ascension/Sacred
-/// Heart.
+/// Heart; the rest of the I Class octaves are common, and a II Class feast's
+/// octave is simple.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
 pub enum OctaveClass {
-    /// The data files spell this as an absent or empty `OctaveClass`.
+    /// Also the class of a feast with no octave, whose `OctaveClass` is absent.
     #[default]
     Common,
     PrivilegedFirst,
@@ -188,20 +189,20 @@ pub enum OctaveClass {
 }
 
 impl OctaveClass {
-    /// The data-file spelling; `None` for the common class.
-    pub fn as_str(self) -> Option<&'static str> {
+    /// The data-file spelling.
+    pub fn as_str(self) -> &'static str {
         match self {
-            OctaveClass::Common => None,
-            OctaveClass::PrivilegedFirst => Some("privileged-first"),
-            OctaveClass::PrivilegedSecond => Some("privileged-second"),
-            OctaveClass::PrivilegedThird => Some("privileged-third"),
-            OctaveClass::Simple => Some("simple"),
+            OctaveClass::Common => "common",
+            OctaveClass::PrivilegedFirst => "privileged-first",
+            OctaveClass::PrivilegedSecond => "privileged-second",
+            OctaveClass::PrivilegedThird => "privileged-third",
+            OctaveClass::Simple => "simple",
         }
     }
 
     pub fn parse(s: &str) -> Option<OctaveClass> {
         match s {
-            "" => Some(OctaveClass::Common),
+            "common" => Some(OctaveClass::Common),
             "privileged-first" => Some(OctaveClass::PrivilegedFirst),
             "privileged-second" => Some(OctaveClass::PrivilegedSecond),
             "privileged-third" => Some(OctaveClass::PrivilegedThird),

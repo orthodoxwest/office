@@ -168,6 +168,8 @@ Category = martyr
 Month = 4
 Day = 23
 HasOctave = true
+# Patron of the Archdiocese (2026 ordo): Rubrics VII.1(i)-(j), and VII.3 makes it common.
+OctaveClass = common
 
 [st-mark]
 Name = St Mark, Evangelist
@@ -257,6 +259,8 @@ HasVigil = true
 HasOctave = true
 OctaveDays = Day {n} within the Octave of St John Baptist
 OctaveDay8 = Octave of St John Baptist
+# Diurnal p. 538 "Double I Class with Common Octave"; Rubrics VII.3.
+OctaveClass = common
 
 [st-augustine-canterbury]
 Name = St Augustine of Canterbury, Bishop & Confessor
@@ -287,6 +291,8 @@ Day = 29
 HasVigil = true
 HasOctave = true
 OctaveDay8 = The Octave of Ss Peter & Paul
+# Diurnal p. 544 "Double I Class with Common Octave"; Rubrics VII.3.
+OctaveClass = common
 
 [visitation-bvm]
 Name = Visitation of the Blessed Virgin Mary
@@ -363,6 +369,8 @@ Category = martyr
 Month = 8
 Day = 10
 HasVigil = true
+# Diurnal p. 585 "Double II Class with Simple Octave"; the octave day is in commemorations.txt.
+OctaveClass = simple
 
 [assumption-bvm]
 Name = Assumption of the Blessed Virgin Mary
@@ -374,6 +382,8 @@ Day = 15
 HasVigil = true
 HasOctave = true
 OctaveDay8 = Octave of the Assumption
+# Diurnal p. 588 "Double I Class with Common Octave"; Rubrics VII.3.
+OctaveClass = common
 
 [st-joachim]
 Name = St Joachim, Father of the B.V.M.
@@ -408,6 +418,8 @@ Color = white
 Category = blessed-virgin
 Month = 9
 Day = 8
+# Diurnal p. 595 "Double II Class with Simple Octave"; the Seven Sorrows take its octave day.
+OctaveClass = simple
 
 [holy-name-mary]
 Name = The Most Holy Name of Mary
@@ -495,6 +507,8 @@ Month = 11
 Day = 1
 HasVigil = true
 HasOctave = true
+# Diurnal p. 637 "Double I Class with Common Octave"; Rubrics VII.3.
+OctaveClass = common
 
 [all-souls]
 Name = Commemoration of All the Faithful Departed (All Souls' Day)
@@ -560,6 +574,8 @@ Month = 12
 Day = 8
 # No Office vigil (Diurnal p. 447).
 HasOctave = true
+# Diurnal p. 448 "Double I Class with Common Octave"; Rubrics VII.3.
+OctaveClass = common
 OctaveDays = Day {n} within Conception Octave
 OctaveDay8 = Octave of the Conception of the B.V.M.
 
@@ -626,6 +642,8 @@ Color = red
 Category = martyr
 Month = 12
 Day = 26
+# Diurnal p. 193 "Double II Class with Simple Octave"; octave-day-st-stephen keeps it.
+OctaveClass = simple
 
 [st-john-evangelist]
 Name = St John, Apostle and Evangelist
@@ -634,6 +652,8 @@ Color = white
 Category = apostle
 Month = 12
 Day = 27
+# Diurnal p. 198 "Double II Class with Simple Octave"; octave-day-st-john keeps it.
+OctaveClass = simple
 
 [holy-innocents]
 Name = The Holy Innocents, Martyrs
@@ -644,6 +664,8 @@ Color = red
 Category = martyr
 Month = 12
 Day = 28
+# Diurnal p. 201 "Double II Class with Simple Octave"; octave-day-holy-innocents keeps it.
+OctaveClass = simple
 
 [st-sylvester]
 Name = St Sylvester, Bishop & Confessor

@@ -22,6 +22,7 @@ Category = martyr
 Month = 6
 Day = 1
 HasOctave = true
+OctaveClass = common
 
 [st-x]
 Name = St X again
