@@ -39,7 +39,7 @@ Graciously hear our prayers, we beseech thee, O Lord: that we, being loosed from
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 174 (Quinquagesima Sunday); draft archdiocesan Vespers book, p. 214 (Saturday before Quinquagesima)
-!1 Cor 13:1
+!1 Cor. 13:1
 Brethren: Though I speak with the tongues of men and of angels, and have not charity, I am become as sounding brass, or a tinkling cymbal.
 R. Thanks be to God.
 
@@ -185,13 +185,13 @@ Mighty Abraham, * the father of our faith, offered a burnt offering upon the alt
 #
 [chapter-sext]
 # SOURCE: diurnal p. 242
-!1 Cor 13:8, 9
+!1 Cor. 13:8, 9
 Charity never faileth: * but whether there be prophecies, they shall fail; whether there be tongues, they shall cease; whether there be knowledge, it shall vanish away. * For we know in part, and we prophesy in part.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 242
-!1 Cor 13:13
+!1 Cor. 13:13
 And now abideth * faith, hope, charity, these three; * but the greatest of these is charity.
 R. Thanks be to God.
 

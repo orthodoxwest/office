@@ -59,7 +59,7 @@ O God, who as at this time didst teach the hearts of thy faithful people, by sen
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
-!Acts 2:1-2
+!Acts 2:1, 2
 When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
@@ -71,7 +71,7 @@ R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At None)
-!Acts 2:10-11
+!Acts 2:10, 11
 Jews and proselytes, Cretes and Arabians, we do hear them speak in our tongues * the wonderful works of God.
 R. Thanks be to God.
 

@@ -71,19 +71,19 @@ Grant, we beseech thee, Almighty God: that the reverend solemnity of blessed N.,
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
-!Sir 44:17
+!Ecclus. 44:17
 Behold a great priest who in his days pleased God and was found righteous: * and in the time of wrath he was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Sext)
-!Sir 44:19-21
+!Ecclus. 44:19-21
 In glory was there none like unto him, who kept the law of the Most High: * therefore the Lord assured him by an oath that he would bless the nations in his seed.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At None)
-!Sir 45:15-16
+!Ecclus. 45:15, 16
 He consecrated him to execute the office of the priesthood, to bless the people in his Name, * and to offer sacrifices to the Lord, incense, and a sweet savour.
 R. Thanks be to God.
 

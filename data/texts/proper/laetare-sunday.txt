@@ -35,19 +35,19 @@ Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthil
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, pp. 264–265 (IV Sunday in Lent, At Lauds)
-!Gal 4:22-24
+!Gal. 4:22-24
 Brethren: It is written, that Abraham had two sons; the one by a bondmaid, the other by a freewoman. But he who was of the bondwoman was born after the flesh: but he of the freewoman was by promise. * Which things are an allegory.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 265 (IV Sunday in Lent, At Sext)
-!Gal 4:27
+!Gal. 4:27
 Rejoice, thou barren that bearest not; break forth and cry, thou that travailest not; * for the desolate hath many more children than she which hath an husband.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 266 (IV Sunday in Lent, At None)
-!Gal 4:31-5:1
+!Gal. 4:31-5:1
 So then, brethren, we are not children of the bondwoman, but of the free. * Stand fast, therefore, in the liberty wherewith Christ hath made us free.
 R. Thanks be to God.
 

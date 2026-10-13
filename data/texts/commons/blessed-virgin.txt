@@ -49,19 +49,19 @@ Grant, we beseech thee, O Lord God, that we thy servants may rejoice in continua
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
-!Sir 24:9-10
+!Ecclus. 24:9, 10
 He created me from the beginning before the world, and I shall never fail. * In the holy tabernacle I served before him.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Sext)
-!Sir 24:10-12
+!Ecclus. 24:10-12
 So was I established in Sion; likewise in the beloved city he gave me rest, and in Jerusalem was my power; and I took root in an honourable people, even in the portion of the Lord's inheritance, * and my abode is in the assembly of the saints.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At None)
-!Sir 24:15
+!Ecclus. 24:15
 I gave a sweet smell like cinnamon and aspalathus, * and I yielded a pleasant odour like the best myrrh.
 R. Thanks be to God.
 

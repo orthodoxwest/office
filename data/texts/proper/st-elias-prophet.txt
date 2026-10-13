@@ -31,7 +31,7 @@ Thou hast slain; * moreover, thou hast taken possession: behold, I will bring ev
 
 [chapter-lauds]
 # SOURCE: elias-propers-july20.pdf, p. 2 (At Lauds, Chapter, Ecclus. xlviii)
-!Sir 48:1-2
+!Ecclus. 48:1, 2
 Then stood up Elias the prophet as fire, and his word burned like a lamp. † He brought a sore famine upon them, * and by his zeal he diminished their number.
 R. Thanks be to God.
 
@@ -45,13 +45,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: elias-propers-july20.pdf, p. 3 (At Sext, Chapter, Ecclus. xlviii)
-!Sir 48:3-4
+!Ecclus. 48:3, 4
 By the word of the Lord he shut up the heaven, † and he brought down fire from heaven thrice. * Thus was Elias magnified in his wondrous works.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: elias-propers-july20.pdf, p. 3 (At None, Chapter, Ecclus. xlviii)
-!Sir 48:5,10
+!Ecclus. 48:5, 10
 Thou raisedst up a dead man from below, † from the lot of death, by the word of the Lord God. * Who was registered in the judgments of times to appease the wrath of the Lord.
 R. Thanks be to God.
 

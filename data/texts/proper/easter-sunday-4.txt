@@ -47,7 +47,7 @@ Now I go my way * to him that sent me: but because I said these things unto you,
 
 [chapter-first-vespers]
 # SOURCE: diurnal p. 382
-!Jas 1:17
+!James 1:17
 Dearly beloved: Every good gift and every perfect gift is from above, and cometh down from the Father of lights, * with whom is no variableness, neither shadow of turning.
 R. Thanks be to God.
 
@@ -57,13 +57,13 @@ O Almighty God, who alone canst order the unruly wills and affections of sinful 
 
 [chapter-sext]
 # SOURCE: diurnal p. 383
-!Jas 1:19-20
+!James 1:19, 20
 Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath: * for the wrath of man worketh not the righteousness of God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 383
-!Jas 1:21
+!James 1:21
 Wherefore lay apart all filthiness and superfluity of naughtiness, * and receive with meekness the engrafted word, which is able to save your souls.
 R. Thanks be to God.
 

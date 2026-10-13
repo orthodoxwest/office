@@ -62,19 +62,19 @@ Almighty and everlasting God, who didst will to restore all things in thy well b
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 587 (Christ the King)
-!Col 1:12-13
+!Col. 1:12, 13
 Brethren: Let us give thanks unto the Father, which hath made us meet to be partakers of the inheritance of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of his dear Son.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
-!Col 1:16-18
+!Col. 1:16-18
 All things were created by him, and for him: and he is before all things, and by him all things consist. * And he is the head of the body, the Church: who is the beginning, the firstborn from the dead; that in all things he might have the preeminence.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
-!Col 1:19-20
+!Col. 1:19, 20
 For it pleased the Father that in him should all fulness dwell; and, having made peace through the blood of his cross, * to reconcile all things unto himself, whether they be things in earth, or things in heaven, in Christ Jesus our Lord.
 R. Thanks be to God.
 

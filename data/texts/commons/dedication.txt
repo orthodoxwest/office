@@ -49,19 +49,19 @@ O God, who year by year renewest for us the dedication day of this thy holy temp
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
-!Rev 21:2
+!Rev. 21:2
 I saw the holy city, new Jerusalem, coming down from God out of heaven, * prepared as a bride adorned for her husband.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At Sext)
-!Rev 21:3
+!Rev. 21:3
 And I heard a great voice out of heaven, saying, Behold, the tabernacle of God is with men, and he will dwell with them, and they shall be his people, * and God himself shall be with them, and be their God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At None)
-!Rev 21:4-5
+!Rev. 21:4, 5
 And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away. * And he that sat upon the throne said, Behold I make all things new.
 R. Thanks be to God.
 

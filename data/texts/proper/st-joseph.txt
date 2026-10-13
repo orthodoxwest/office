@@ -51,19 +51,19 @@ Help us, we beseech thee, O Lord, for the worth of him who espoused thy most hol
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
-!Prov 28:20; 27:18
+!Prov. 28:20; 27:18
 A faithful man shall abound with blessings; * and he that waiteth on his Master shall be honoured.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 492 (St Joseph, At Sext)
-!Sir 45:1,4
+!Ecclus. 45:1, 4
 Beloved of God and men, whose memorial is blessed. He sanctified him in his faithfulness and meekness, * and chose him out of all men.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, pp. 492–493 (St Joseph, At None)
-!Wis 10:10
+!Wisdom 10:10
 When the righteous fled, Wisdom guided him in right paths, shewed him the kingdom of God, and gave him knowledge of holy things, * made him rich in his travels, and multiplied the fruit of his labours.
 R. Thanks be to God.
 

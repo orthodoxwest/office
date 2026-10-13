@@ -49,13 +49,13 @@ O God, who makest us glad this day by the yearly solemnity of the Exaltation of 
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 599 (Exaltation of the Holy Cross, At Lauds)
-!Phil 2:5-8
+!Phil. 2:5-8
 Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, * and took upon him the form of a servant, and was made in the likeness of men: * and was found in fashion as a man.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 600 (Exaltation of the Holy Cross, At Sext)
-!Gal 6:14
+!Gal. 6:14
 But God forbid that I should glory, * save in the Cross of our Lord Jesus Christ, by whom the world is crucified unto me, and I unto the world.
 R. Thanks be to God.
 
@@ -238,7 +238,7 @@ R. And praise thy Name, O Lord.
 #
 [chapter-none]
 # SOURCE: diurnal p. 600
-!Phil 2:8,9
+!Phil. 2:8, 9
 He humbled himself, and became obedient unto death, even the death of the Cross. * Wherefore God also hath highly exalted him, * and given him a Name which is above every name.
 R. Thanks be to God.
 

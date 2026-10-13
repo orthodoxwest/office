@@ -36,25 +36,25 @@ Stir up thy power, we beseech thee, O Lord, and come: and with great might succo
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 45 (The Fourth Sunday in Advent)
-!1 Cor 4:1-2
+!1 Cor. 4:1, 2
 Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards, that a man be found faithful.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 180 (IV Sunday in Advent, At Sext)
-!1 Cor 4:3
+!1 Cor. 4:3
 But with me it is a very small thing that I should be judged of you, or of man's judgment; * yea, I judge not mine own self.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 180 (IV Sunday in Advent, At None)
-!1 Cor 4:5
+!1 Cor. 4:5
 Therefore judge nothing before the time, until the Lord come, who both will bring to light the hidden things of darkness, and will make manifest the counsels of the hearts: * and then shall every man have praise of God.
 R. Thanks be to God.
 
 [chapter-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 32 (The Fourth Sunday in Advent)
-!1 Cor 4:1-2
+!1 Cor. 4:1, 2
 Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards that a man be found faithful.
 R. Thanks be to God.
 

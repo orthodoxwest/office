@@ -48,7 +48,7 @@ Then shall the righteous * shine forth as the sun in the presence of God, allelu
 
 [chapter-lauds]
 # SOURCE: diurnal p. 18*
-!Wis 5:1
+!Wisdom 5:1
 Then shall the righteous man stand in great boldness * before the face of such as have afflicted him, * and made no account of his labours.
 R. Thanks be to God.
 
@@ -57,13 +57,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: diurnal p. 19*
-!Wis 5:5
+!Wisdom 5:5
 How is he numbered among the children of God, * and his lot is among the Saints!
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 19*
-!Rom 8:28
+!Rom. 8:28
 We know that all things work together for good to them that love God, * to them who are the called according to his purpose.
 R. Thanks be to God.
 

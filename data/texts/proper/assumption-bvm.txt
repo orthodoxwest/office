@@ -39,19 +39,19 @@ Forgive, we beseech thee, O Lord, the offences of thy servants: and grant that w
 
 [chapter-lauds]
 # SOURCE: diurnal p. 589
-!Sir 24:7-8
+!Ecclus. 24:7, 8
 In all things I sought rest, and I shall abide in the Lord's inheritance. So the Creator of all things gave me a commandment, * and he that made me caused my tabernacle to rest.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At Sext)
-!Sir 24:10-12
+!Ecclus. 24:10-12
 So was I established in Sion: likewise in the beloved city he gave me rest, and in Jerusalem was my power; * and I took root in an honourable people, even in the portion of the Lord's inheritance, and my abode is in the assembly of the saints.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At None)
-!Sir 24:15
+!Ecclus. 24:15
 I gave a sweet smell like cinnamon and aspalathus, * and I yielded a pleasant odour like the best myrrh.
 R. Thanks be to God.
 

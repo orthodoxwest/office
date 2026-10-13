@@ -58,13 +58,13 @@ Almighty and everlasting God, who hast given unto us thy servants grace, by the 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 315 (The Feast of the Most Holy Trinity)
-!Rom 11:33
+!Rom. 11:33
 O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 408 (Trinity Sunday, At Sext)
-!2 Cor 13:14
+!2 Cor. 13:14
 The grace of our Lord Jesus Christ, and the love of God, * and the communion of the Holy Ghost, be with you all. Amen.
 R. Thanks be to God.
 

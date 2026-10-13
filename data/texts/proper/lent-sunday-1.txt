@@ -35,19 +35,19 @@ O God, who dost purify thy Church by the yearly observance of the Lenten fast: g
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 247 (I Sunday in Lent, At Lauds)
-!2 Cor 6:1-2
+!2 Cor. 6:1, 2
 Brethren: We beseech you also that ye receive not the grace of God in vain. For he saith, I have heard thee in a time accepted, * and in the day of salvation have I succoured thee.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 249 (I Sunday in Lent, At Sext)
-!2 Cor 6:2-3
+!2 Cor. 6:2, 3
 Behold, now is the accepted time; behold, now is the day of salvation. Giving no offence in anything, * that the ministry be not blamed.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 249 (I Sunday in Lent, At None)
-!2 Cor 6:9-10
+!2 Cor. 6:9, 10
 As chastened, and not killed; as sorrowful, yet alway rejoicing; as poor, yet making many rich; * as having nothing, and yet possessing all things.
 R. Thanks be to God.
 

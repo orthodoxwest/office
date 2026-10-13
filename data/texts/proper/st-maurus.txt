@@ -62,7 +62,7 @@ He was chosen * by the Lord to be an example to the cloistered, and a chief obse
 #
 [chapter-lauds]
 # SOURCE: diurnal p. 457
-!Isa 43:1-3
+!Isa. 43:1-3
 Fear not: for I have redeemed thee, I have called thee by thy name; thou art mine. When thou passest through the waters, I will be with thee; * for I am the Lord thy God, the Holy One of Israel, thy Saviour.
 R. Thanks be to God.
 
@@ -172,13 +172,13 @@ Amen.
 
 [chapter-sext]
 # SOURCE: diurnal pp. 457-458
-!Prov 4:3-4
+!Prov. 4:3, 4
 For I was my father's son: he taught me also, and said unto me, Let thine heart retain my words: * keep my commandments, and live.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 458
-!Heb 11:9-10
+!Heb. 11:9, 10
 By faith he sojourned in the land of promise, as in a strange country, dwelling in tabernacles with the heirs with him of the same promise: for he looked for a city which hath foundations, * whose builder and maker is God.
 R. Thanks be to God.
 

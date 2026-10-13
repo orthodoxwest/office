@@ -74,19 +74,19 @@ We beseech thee, O Lord, that blessed N., thy Virgin and Martyr, may implore for
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
-!2 Cor 10:17-18
+!2 Cor. 10:17, 18
 Brethren: He that glorieth, let him glory in the Lord. * For not he that commendeth himself is approved, but whom the Lord commendeth.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 50* (Common of Virgins, At Sext)
-!2 Cor 11:2
+!2 Cor. 11:2
 I am jealous over you with godly jealousy: for I have espoused you to one husband, * that I may present you as a chaste virgin to Christ.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 50* (Common of Virgins, At None, For a Virgin Martyr)
-!Sir 51:9-10
+!Ecclus. 51:9, 10
 Then lifted I up my supplication from the earth, and prayed for deliverance from death. I called upon the Lord, the Father of my Lord, that he would not leave me in the days of my trouble, * and in the time of the proud, when there was no help.
 R. Thanks be to God.
 
