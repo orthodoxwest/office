@@ -343,7 +343,13 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
         // A wrapped line hangs beneath its own start (`.hymn-line`, 1.1rem).
         spec.restIndent = 17.6 * m.type
         if block.dropCap { return opening(textStart: 0) }
-    case .paragraph, .chantLine:
+    case .paragraph:
+        // A prose opening (a chapter, a collect, the Our Father) turns over below its initial at the
+        // edge its ℟'s words share, the initial hung in the gutter, as a psalm's first verse does.
+        if block.dropCap { return opening(textStart: gutter) }
+    case .chantLine:
+        // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
+        spec.restIndent = 19.2 * m.type
         if block.dropCap { return opening(textStart: 0) }
     default:
         break

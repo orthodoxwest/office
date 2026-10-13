@@ -13,6 +13,8 @@ Multiple feasts on 5/1 at rank double: st-x, st-y
 Multiple feasts on 4/1 at rank simple: st-w, st-v
 Feast 'st-z' has an octave but is only ranked greater-double
 Feast 'companion-rank' is an apostolic companion but is ranked double instead of commemoration
+Feast 'style-and' name "Ss U and T, Martyrs" joins with "and"; write "&" (#695)
+Feast 'style-the' name "Dedication of The Basilica of St S" capitalizes "The" within it (#695)
 Feast 'bad-rule' has unrecognized DateRule: "whitsun+1" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
 Feast 'bad-advent' has unrecognized DateRule: "advent-sunday-5" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
 Feast 'bad-epiphany' has unrecognized DateRule: "epiphany-sunday-0" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)

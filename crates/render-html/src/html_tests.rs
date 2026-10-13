@@ -221,7 +221,10 @@ fn marian_antiphon_preserves_verse_and_reflows_prayer() {
     lacks(&html, r#"<p class="chant-line">Grant us"#);
     // The opening pair shares one block so a two-line drop cap can float
     // across both source lines; later verse lines stay discrete.
-    has(&html, r#"<p class="chant-line chant-line-opening">Queen of the heavens, we hail thee,<br>Hail thee, Lady of all the Angels;</p>"#);
+    has(
+        &html,
+        r#"<p class="chant-line chant-line-opening">Queen of the heavens, we hail thee,<br><span class="chant-line-second">Hail thee, Lady of all the Angels;</span></p>"#,
+    );
     has(&html, r#"<p class="chant-line">To thee the faithful send up their sighs.</p>"#);
     has(&html, "Grant us, O merciful God, protection in our weakness: that we may rise again from our sins.");
 }
@@ -528,4 +531,14 @@ fn unrepeated_words_are_muted_across_the_mediant() {
     has(&html, r#"<span class="unrepeated">brethren, to</span> dwell."#);
     has(&html, "It is");
     lacks(&html, r#"<span class="unrepeated">It"#);
+}
+
+#[test]
+fn psalm_flex_is_printed_in_the_first_half() {
+    let html = render_psalm_verses(
+        "Psalm 1\n\nBLESSED is the man that hath not walked in the counsel of the ungodly, † nor stood in the way of sinners * and hath not sat in the seat of the scornful.\n",
+        &[],
+        0,
+    );
+    has(&html, "of the ungodly, † nor stood in the way of sinners\u{a0}<span class=\"mediant\">*</span> and hath not sat");
 }
