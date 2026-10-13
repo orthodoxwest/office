@@ -324,7 +324,10 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
         text = stripped.to_string();
     }
     let kind = map_element_type(&elem.kind);
-    let label = format_label(&elem.kind, &elem.reference);
+    let label = match elem.kind.as_str() {
+        "canticle" => canticle_label(&elem.reference, &text),
+        kind => format_label(kind, &elem.reference),
+    };
     let with_source = |mut e: OfficeElement| {
         e.source_ref = elem.reference.clone();
         e.source_refs = vec![elem.reference.clone()];
@@ -666,43 +669,37 @@ fn map_element_type(kind: &str) -> ElementType {
     }
 }
 
-/// A label from the ref's last path component: "Psalm 66 (67)", a canticle's
-/// name, or a title-cased hymn name.
+/// A label from the ref's last path component: "Psalm 66 (67)", or a
+/// title-cased hymn name. A canticle's label is its name from its text.
 fn format_label(kind: &str, reference: &str) -> String {
-    let key = reference.rsplit('/').next().unwrap_or("");
-    let name = key.replace('-', " ");
+    let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
         "psalm" => psalm_label(&name),
-        "canticle" => canticle_name(key).map_or_else(|| title_case(&name), str::to_string),
-        "hymn" => title_case(&name),
+        "canticle" | "hymn" => title_case(&name),
         _ => String::new(),
     }
 }
 
-/// A canticle's name as the Diurnal gives it, by its singer: the Index of
-/// Canticles (p. 164*), save the Song of Zacharias, which the Diurnal heads so
-/// over the canticle itself (pp. 41, 312, 105*) where its index spells
-/// "Zachariah". `None` for a corpus key it does not name.
-pub fn canticle_name(key: &str) -> Option<&'static str> {
-    Some(match key {
-        "1-chronicles-29" => "The Song of David",
-        "benedicite" => "The Song of the Three Children",
-        "benedictus" => "The Song of Zacharias",
-        "deuteronomy-32" => "The Song of Moses",
-        "exodus-15" => "The Song of Moses",
-        "habakkuk-3" => "The Song of Habakkuk",
-        "hannah" => "The Song of Hannah",
-        "isaiah-12" => "The Song of Isaiah",
-        "isaiah-38" => "The Song of Hezekiah",
-        "isaiah-45" => "The Song of Isaiah",
-        "jeremiah-31" => "The Song of Jeremiah",
-        "judith-16" => "The Song of Judith",
-        "magnificat" => "The Song of Mary",
-        "nunc-dimittis" => "The Song of Simeon",
-        "sirach-36" => "The Song of the Son of Sirach",
-        "tobit-13" => "The Song of Tobit",
-        _ => return None,
-    })
+/// A canticle's label: the name its title block gives it, as the Diurnal names
+/// it ("The Song of Moses"), else one made from its key. The words are joined
+/// by no-break spaces, so a line too short for the name and its incipit moves
+/// the incipit down rather than breaking the name; a name wider than a phone's
+/// line may break after a "the" within it, as the Diurnal breaks "The Song of
+/// the Three / Children" (p. 35).
+pub fn canticle_label(reference: &str, text: &str) -> String {
+    let title = corpus::lines::parse_psalm(text).title;
+    if title.is_empty() {
+        return format_label("canticle", reference);
+    }
+    let words: Vec<&str> = title.split_whitespace().collect();
+    let mut label = String::with_capacity(title.len() + words.len());
+    for (i, word) in words.iter().enumerate() {
+        if i > 0 {
+            label.push(if words[i - 1] == "the" { ' ' } else { '\u{a0}' });
+        }
+        label.push_str(word);
+    }
+    label
 }
 
 /// A psalm's label from its corpus name ("067", "018a", "119 i"): the

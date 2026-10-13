@@ -1169,7 +1169,9 @@ test("the hour's date line never strands its separator", async ({ page }) => {
 
 // A psalm's Latin incipit shares the label's line with a dot between them,
 // or stands on its own line beneath without the dot: the dot never ends a
-// line alone. Sunday Lauds has Psalm 93's long title, stacked on a phone.
+// line alone. Sunday Lauds has Psalm 93's long title, stacked on a phone, and
+// the Song of the Three Children, whose name and incipit outrun even a
+// laptop's measure: its name stays whole and the incipit goes beneath.
 test("psalm titles stack their Latin incipit without a stranded dot", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-11-01");
   const labels = page.locator(".item-label:has(.label-sep)");
@@ -1181,15 +1183,17 @@ test("psalm titles stack their Latin incipit without a stranded dot", async ({ p
     const stacked = el.classList.contains("stacked");
     const sepShown = getComputedStyle(sep).display !== "none";
     const lines = Math.round(incipit.getBoundingClientRect().top) > Math.round(el.getBoundingClientRect().top) + 2;
-    return { stacked, ok: stacked ? !sepShown && lines : sepShown && !lines };
+    return { stacked, psalm: Boolean(el.closest(".psalm")), ok: stacked ? !sepShown && lines : sepShown && !lines };
   }));
   const phone = await check();
   expect(phone.every((l) => l.ok)).toBe(true);
   expect(phone.some((l) => l.stacked)).toBe(true);
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.waitForFunction(() => !document.querySelector(".item-label.stacked"));
+  await page.waitForFunction(() => !document.querySelector(".psalm > .item-label.stacked"));
   const laptop = await check();
-  expect(laptop.every((l) => l.ok && !l.stacked)).toBe(true);
+  expect(laptop.every((l) => l.ok)).toBe(true);
+  expect(laptop.filter((l) => l.psalm).every((l) => !l.stacked)).toBe(true);
+  expect(laptop.some((l) => l.stacked)).toBe(true);
 });
 
 // Every threshold between the office's parts carries the painted cross,

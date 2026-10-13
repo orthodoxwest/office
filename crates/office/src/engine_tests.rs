@@ -32,19 +32,23 @@ fn seasonal_hymn_endings_replace_only_iambic_dimeter_quatrains() {
 }
 
 /// Diurnal, Index of Canticles (p. 164*): every canticle in the corpus is named
-/// by its singer.
+/// by its singer, in its title block.
 #[test]
 fn canticles_take_the_diurnals_names() {
-    assert_eq!(format_label("canticle", "canticles/exodus-15"), "The Song of Moses");
-    assert_eq!(format_label("canticle", "canticles/hannah"), "The Song of Hannah");
-    assert_eq!(format_label("canticle", "canticles/benedicite"), "The Song of the Three Children");
-    assert_eq!(format_label("canticle", "canticles/benedictus"), "The Song of Zacharias");
-    assert_eq!(format_label("canticle", "canticles/magnificat"), "The Song of Mary");
-    let refs = crate::testutil::live_texts().corpus.references();
-    let keys: Vec<&str> = refs.iter().filter_map(|r| r.strip_prefix("canticles/")).collect();
-    assert!(keys.contains(&"magnificat"), "{keys:?}");
-    let unnamed: Vec<&&str> = keys.iter().filter(|key| canticle_name(key).is_none()).collect();
-    assert!(unnamed.is_empty(), "canticles without a Diurnal name: {unnamed:?}");
+    let texts = crate::testutil::live_texts();
+    let label = |r: &str| canticle_label(r, texts.corpus.get(r));
+    assert_eq!(label("canticles/exodus-15"), "The\u{a0}Song\u{a0}of\u{a0}Moses");
+    assert_eq!(label("canticles/magnificat"), "The\u{a0}Song\u{a0}of\u{a0}Mary");
+    // The name holds together, save after a "the" within it.
+    assert_eq!(label("canticles/benedicite"), "The\u{a0}Song\u{a0}of\u{a0}the Three\u{a0}Children");
+    assert_eq!(label("canticles/sirach-36"), "The\u{a0}Song\u{a0}of\u{a0}the Son\u{a0}of\u{a0}Sirach");
+    // Without a title, a label from the key.
+    assert_eq!(canticle_label("canticles/isaiah-12", "!Isaiah 12:1-6\n\nO Lord, I will praise thee."), "Isaiah 12");
+    let refs = texts.corpus.references();
+    let keys: Vec<&str> = refs.iter().filter(|r| r.starts_with("canticles/")).copied().collect();
+    assert!(keys.contains(&"canticles/magnificat"), "{keys:?}");
+    let unnamed: Vec<&&str> = keys.iter().filter(|r| !label(r).starts_with("The\u{a0}Song\u{a0}of\u{a0}")).collect();
+    assert!(unnamed.is_empty(), "canticles without the Diurnal's name: {unnamed:?}");
 }
 
 /// Fr Jason's direction, relayed 2026-10-11: the Septuagint (Vulgate) number
