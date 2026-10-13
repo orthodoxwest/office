@@ -2771,37 +2771,37 @@ proper/visitation-bvm/psalm-antiphon-2,e6051ff2bf65,Monastic Diurnal.pdf,proper/
 proper/visitation-bvm/psalm-antiphon-3,092b8f2348c3,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization
 proper/visitation-bvm/psalm-antiphon-4,8ccf7fea9b4f,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization
 proper/visitation-bvm/psalm-antiphon-5,d53d9445057b,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization
-psalms/001,e19d81a02f61,Coverdale Psalter,Psalm 1,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/002,cebfe3005251,Coverdale Psalter,Psalm 2,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/001,4cd0c50b7111,Coverdale Psalter,Psalm 1,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 4."
+psalms/002,d8f1a06a867d,Coverdale Psalter,Psalm 2,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 4, 5."
 psalms/003,90dcbba6a990,Coverdale Psalter,Psalm 3,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/004,ef8bdef10b1e,Coverdale Psalter,Psalm 4,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/005,3774aae75cb4,Coverdale Psalter,Psalm 5,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/006,123a70534a91,Coverdale Psalter,Psalm 6,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/007,7c05c04669b7,Coverdale Psalter,Psalm 7,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/006,1544ffa59e13,Coverdale Psalter,Psalm 6,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 5, 6."
+psalms/007,177827eb340c,Coverdale Psalter,Psalm 7,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 14, 15."
 psalms/008,03e5de7ab393,Coverdale Psalter,Psalm 8,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/009,9dbba3771e38,Coverdale Psalter,Psalm 9,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/009a,4d50bb471ef6,Coverdale Psalter,Psalm 9:1-18,,verified,codex,2026-07-15,Text extracted from verified psalms/009; Prime division confirmed against parish prayerbook
 psalms/009b,7a0744ed2318,Coverdale Psalter,Psalm 9:19-20,,verified,codex,2026-07-15,Text extracted from verified psalms/009; Prime division confirmed against parish prayerbook
-psalms/010,75baa9c5f3d4,Coverdale Psalter,Psalm 10,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/010,118729ccaa10,Coverdale Psalter,Psalm 10,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 17, 18, 19."
 psalms/011,49be3fd46375,Coverdale Psalter,Psalm 11,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/012,3a2549cc84ab,Coverdale Psalter,Psalm 12,,verified,bwaldrep,2026-10-01,"Removed the space before the comma in v. 4 (ought to speak, who), which the 1662 comparison cannot see because it ignores space before punctuation. Checked against the 1662 BCP and the Monastic Diurnal page image (printed p. 20, PDF page 66), which agree. The diurnal also differs from this 1662 text at v. 5 (Now, for the comfortless troubles sake) and v. 7 (silver which); the 1662 reading is kept. Reviewed by Claude; attested by bwaldrep."
 psalms/013,114e0484147d,Coverdale Psalter,Psalm 13,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/014,bae3277a576d,Coverdale Psalter,Psalm 14,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/014,743ac02e3d60,Coverdale Psalter,Psalm 14,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 21."
 psalms/015,a4575d592bfc,Coverdale Psalter,Psalm 15,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/016,032799054b04,Coverdale Psalter,Psalm 16,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/017,66a3cbbc9be6,Coverdale Psalter,Psalm 17,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/018,b86eaae54271,Coverdale Psalter,Psalm 18,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/018a,f14d3a656dc0,Coverdale Psalter,Psalm 18:1-24,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/018b,0d4478ba8fdf,Coverdale Psalter,Psalm 18:25-51,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/019,90f4ee201430,Coverdale Psalter,Psalm 19,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/020,e992c689033c,Coverdale Psalter,Psalm 20,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/017,120b3c9fdbe5,Coverdale Psalter,Psalm 17,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 23, 24."
+psalms/018,b44831b245bc,Coverdale Psalter,Psalm 18,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 24, 25, 26, 27, 28."
+psalms/018a,c11bfa4626c5,Coverdale Psalter,Psalm 18:1-24,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 24, 25, 26, 27, 28."
+psalms/018b,8ab7f92fd71d,Coverdale Psalter,Psalm 18:25-51,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 24, 25, 26, 27, 28."
+psalms/019,c23ed5960416,Coverdale Psalter,Psalm 19,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 28, 29."
+psalms/020,ddcc22ef9675,Coverdale Psalter,Psalm 20,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 29."
 psalms/021,8b996466d458,Coverdale Psalter,Psalm 21,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/022,9406bb4f2e7f,Coverdale Psalter,Psalm 22,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/022,6bd4b80910c9,Coverdale Psalter,Psalm 22,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 317, 318, 319."
 psalms/023,ac3476de6a24,Coverdale Psalter,Psalm 23,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/024,f433ccd3c0b0,Coverdale Psalter,Psalm 24,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/024,1b392bba062d,Coverdale Psalter,Psalm 24,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 346, 347."
 psalms/025,71fe1d42be0a,Coverdale Psalter,Psalm 25,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/026,2b6f41f65833,Coverdale Psalter,Psalm 26,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/027,9ec7e33206e7,Coverdale Psalter,Psalm 27,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
+psalms/027,9df0b8c5c644,Coverdale Psalter,Psalm 27,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. Diurnal flex marks (†) read from page images, pp. 320, 321."
 psalms/028,3202d7edc299,Coverdale Psalter,Psalm 28,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/029,6d9808965274,Coverdale Psalter,Psalm 29,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/030,163cc992bd17,Coverdale Psalter,Psalm 30,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2810,14 +2810,14 @@ psalms/032,37e5ca8af7fa,Coverdale Psalter,Psalm 32,,verified,codex,2026-07-10,Ma
 psalms/033,c3e33f8f20f8,Coverdale Psalter,Psalm 33,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/034,277785234f82,Coverdale Psalter,Psalm 34,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/035,db362fd8a64c,Coverdale Psalter,Psalm 35,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/036,54f8d59743a3,Coverdale Psalter,Psalm 36,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/036,4d1550732f15,Coverdale Psalter,Psalm 36,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 45, 46."
 psalms/037,08fb7522a916,Coverdale Psalter,Psalm 37,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/038,97392b5e3bda,Coverdale Psalter,Psalm 38,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/039,380e95237867,Coverdale Psalter,Psalm 39,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/040,6bf588a3fc63,Coverdale Psalter,Psalm 40,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/040,6ace471c0cf6,Coverdale Psalter,Psalm 40,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 325, 326."
 psalms/041,ee9284ff7220,Coverdale Psalter,Psalm 41,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/042,6c053a09bc1b,Coverdale Psalter,Psalm 42,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/043,991e55200626,Coverdale Psalter,Psalm 43,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/043,8d4bb8b852a3,Coverdale Psalter,Psalm 43,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 50, 51."
 psalms/044,7298e58f5712,Coverdale Psalter,Psalm 44,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/045,963aa028643d,Coverdale Psalter,Psalm 45,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/046,c16531ee6384,Coverdale Psalter,Psalm 46,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2825,32 +2825,32 @@ psalms/047,bc79d2ca8544,Coverdale Psalter,Psalm 47,,verified,codex,2026-07-10,Ma
 psalms/048,39f964d13cff,Coverdale Psalter,Psalm 48,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/049,e4283719ca15,Coverdale Psalter,Psalm 49,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/050,8782a30d2f0f,Coverdale Psalter,Psalm 50,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/051,20378e5c969e,Coverdale Psalter,Psalm 51,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/051,5c2357a4de5a,Coverdale Psalter,Psalm 51,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 30, 31, 32."
 psalms/052,6819bb1ac1f8,Coverdale Psalter,Psalm 52,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/053,015f79556322,Coverdale Psalter,Psalm 53,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/054,1d5c0b60df73,Coverdale Psalter,Psalm 54,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/055,3333f98788dd,Coverdale Psalter,Psalm 55,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/056,e01ab1546a16,Coverdale Psalter,Psalm 56,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/057,1be642d126be,Coverdale Psalter,Psalm 57,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/057,ca326cd0cb7a,Coverdale Psalter,Psalm 57,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 51, 52."
 psalms/058,99b82b8089d9,Coverdale Psalter,Psalm 58,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/059,6a294f1d6d02,Coverdale Psalter,Psalm 59,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/059,491bde161c16,Coverdale Psalter,Psalm 59,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 330, 331."
 psalms/060,0df3e24e6aa6,Coverdale Psalter,Psalm 60,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/061,052bb8f4244e,Coverdale Psalter,Psalm 61,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/062,eb92f4370dae,Coverdale Psalter,Psalm 62,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/063,a3d5352a7645,Coverdale Psalter,Psalm 63,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/064,9fda879a34e5,Coverdale Psalter,Psalm 64,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/065,2a3180d5b289,Coverdale Psalter,Psalm 65,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/065,abde1cbb9cba,Coverdale Psalter,Psalm 65,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 56, 57."
 psalms/066,d6c232f95e79,Coverdale Psalter,Psalm 66,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/067,d18dfc7a3b0a,Coverdale Psalter,Psalm 67,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/068,ab7310523965,Coverdale Psalter,Psalm 68,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/069,0cd416da1e2f,Coverdale Psalter,Psalm 69,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/069,7b7fd5987703,Coverdale Psalter,Psalm 69,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 285, 286, 287, 288."
 psalms/070,99317cdd1c1e,Coverdale Psalter,Psalm 70,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/071,0338aeacd3f7,Coverdale Psalter,Psalm 71,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/072,5abda9ecd92e,Coverdale Psalter,Psalm 72,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/073,0bb2a5cc599b,Coverdale Psalter,Psalm 73,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/074,2b058097548f,Coverdale Psalter,Psalm 74,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/071,c9cf24cc08e6,Coverdale Psalter,Psalm 71,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 288, 289, 290."
+psalms/072,fdc571d92e98,Coverdale Psalter,Psalm 72,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 293, 294."
+psalms/073,f5e96475c720,Coverdale Psalter,Psalm 73,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 294, 295, 296."
+psalms/074,49d6bb48d9e4,Coverdale Psalter,Psalm 74,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 296, 297, 298."
 psalms/075,c6a82f9d66f0,Coverdale Psalter,Psalm 75,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/076,de58e6c9b86e,Coverdale Psalter,Psalm 76,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/076,a2db7df2222a,Coverdale Psalter,Psalm 76,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 67, 68."
 psalms/077,d63a6a5ca90c,Coverdale Psalter,Psalm 77,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/078,7c2caf96640a,Coverdale Psalter,Psalm 78,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/079,315e7875883b,Coverdale Psalter,Psalm 79,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
@@ -2864,17 +2864,17 @@ psalms/086,91295010f5bc,Coverdale Psalter,Psalm 86,,verified,codex,2026-07-10,Ma
 psalms/087,7d29d65cc0cc,Coverdale Psalter,Psalm 87,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/088,ff104e318416,Coverdale Psalter,Psalm 88,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/089,a8dfddf53550,Coverdale Psalter,Psalm 89,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/090,8d2aa514afe3,Coverdale Psalter,Psalm 90,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/090,cd2aef622b7d,Coverdale Psalter,Psalm 90,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 62, 63."
 psalms/091,fa85eafcea56,Coverdale Psalter,Psalm 91,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/092,f4e6a0841ad8,Coverdale Psalter,Psalm 92,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/092,ff66c2debeb0,Coverdale Psalter,Psalm 92,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 68, 69."
 psalms/093,a53bcef615b4,Coverdale Psalter,Psalm 93,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/094,e5df5d4c1b11,Coverdale Psalter,Psalm 94,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/094,4156f8ffed5c,Coverdale Psalter,Psalm 94,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 333, 334."
 psalms/095,f3c3a9a5c9f3,Coverdale Psalter,Psalm 95,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/096,d0a6e864e89f,Coverdale Psalter,Psalm 96,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/097,910aa61ec7d3,Coverdale Psalter,Psalm 97,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/098,b6174a448948,Coverdale Psalter,Psalm 98,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/099,75738248b043,Coverdale Psalter,Psalm 99,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/100,3e6a0ae4ec32,Coverdale Psalter,Psalm 100,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/100,56b0b56cca9e,Coverdale Psalter,Psalm 100,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal pointing (flex marks; v. 2 mediant moved after “not we ourselves”) read from page images, p. 34."
 psalms/101,184bf9fa6475,Coverdale Psalter,Psalm 101,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/102,be4fc9f4837e,Coverdale Psalter,Psalm 102,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/103,de3264072aa3,Coverdale Psalter,Psalm 103,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2889,12 +2889,12 @@ psalms/111,ca83c6902586,Coverdale Psalter,Psalm 111,,verified,codex,2026-07-10,M
 psalms/112,67e515f85391,Coverdale Psalter,Psalm 112,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/113,8ff16357e4ad,Coverdale Psalter,Psalm 113,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/114,18328e9cc7da,Coverdale Psalter,Psalm 114,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/115,4d4149435af6,Coverdale Psalter,Psalm 115,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/116,43e5bc403367,Coverdale Psalter,Psalm 116,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/116a,787067eb29d0,diurnal,,119-120,verified,claude,2026-09-30,Direct page-image review (PDF pages 165-166); identical to psalms/116 vv. 1-9.
+psalms/115,7a1c6d054d56,Coverdale Psalter,Psalm 115,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 118, 119."
+psalms/116,4b0e5d7f82e8,Coverdale Psalter,Psalm 116,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 119, 120."
+psalms/116a,d799c0810df2,diurnal,,119-120,verified,claude,2026-10-13,"Direct page-image review (PDF pages 165-166); identical to psalms/116 vv. 1-9. Diurnal flex marks (†) read from page images, pp. 119, 120."
 psalms/116b,381b821a03e6,Coverdale Psalter,Psalm 116:10-16,,verified,codex,2026-07-18,"Machine-verified against attested psalms/116 (1662 BCP); printed as Vulgate 115 Credidi in draft Commons Vespers book pp. 11, 27, 45, 61, 79"
 psalms/117,4ca37f9f33e0,Coverdale Psalter,Psalm 117,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/118,892d8ed80f36,Coverdale Psalter,Psalm 118,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
+psalms/118,a4c7012c88b4,Coverdale Psalter,Psalm 118,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. Diurnal flex marks (†) read from page images, pp. 32, 33."
 psalms/119,e1f63709450c,Coverdale Psalter,Psalm 119,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/119-i,9b6eb4d436d8,Coverdale Psalter,Psalm 119:1-8,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/119-ii,acf39266295b,Coverdale Psalter,Psalm 119:9-16,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -2921,44 +2921,44 @@ psalms/119-xxii,4d05196c4057,Coverdale Psalter,Psalm 119:169-176,,verified,codex
 psalms/120,a29928f603f9,Coverdale Psalter,Psalm 120,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/121,3048887dc9df,Coverdale Psalter,Psalm 121,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/122,8541c4ac2d30,Coverdale Psalter,Psalm 122,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/123,8f6ab1e7d3d2,Coverdale Psalter,Psalm 123,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/124,2ec6e969f222,Coverdale Psalter,Psalm 124,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
+psalms/123,3680e855fd2f,Coverdale Psalter,Psalm 123,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 105."
+psalms/124,70098827906e,Coverdale Psalter,Psalm 124,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. v. 2 “thy were” corrected to “they were” per Diurnal p. 105 and 1662."
 psalms/125,8f2f709969fd,Coverdale Psalter,Psalm 125,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/126,d0830f90c787,Coverdale Psalter,Psalm 126,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/127,b457a96d68f8,Coverdale Psalter,Psalm 127,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/126,dd616ff087c6,Coverdale Psalter,Psalm 126,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 108."
+psalms/127,058ab0a5f68b,Coverdale Psalter,Psalm 127,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 108."
 psalms/128,d531ee141016,Coverdale Psalter,Psalm 128,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/129,c9f72cb04ad4,Coverdale Psalter,Psalm 129,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/129,a8584705f5d5,Coverdale Psalter,Psalm 129,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 121."
 psalms/130,916070b52ff5,Coverdale Psalter,Psalm 130,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/131,5e82f6203e24,Coverdale Psalter,Psalm 131,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/132,b32d0355411b,Coverdale Psalter,Psalm 132,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/133,62fad58c15a1,Coverdale Psalter,Psalm 133,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/131,be136f8c65f9,Coverdale Psalter,Psalm 131,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 123, 124."
+psalms/132,542d07c0c1ad,Coverdale Psalter,Psalm 132,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 124, 125."
+psalms/133,b87069bef203,Coverdale Psalter,Psalm 133,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 125."
 psalms/134,f9f958b5f1ae,Coverdale Psalter,Psalm 134,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/135,cd1874d224e7,Coverdale Psalter,Psalm 135,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/135,4731fe489f29,Coverdale Psalter,Psalm 135,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 126, 127, 128."
 psalms/136,111b27d55637,Coverdale Psalter,Psalm 136,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/137,0fd0baa9ef9d,Coverdale Psalter,Psalm 137,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
-psalms/138,aa3e49d2d915,Coverdale Psalter,Psalm 138,,verified,claude,2026-10-06,"Case of the divine name in verse 8 restored (LORD, as the 1662 Psalter prints it); wording unchanged."
-psalms/139,456446354166,Coverdale Psalter,Psalm 139,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/137,a80057792a66,Coverdale Psalter,Psalm 137,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. Diurnal flex marks (†) read from page images, pp. 129, 130."
+psalms/138,055d022cd488,Coverdale Psalter,Psalm 138,,verified,claude,2026-10-13,"Case of the divine name in verse 8 restored (LORD, as the 1662 Psalter prints it); wording unchanged. Diurnal flex marks (†) read from page images, p. 130."
+psalms/139,0ddb83b4b844,Coverdale Psalter,Psalm 139,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 132, 133."
 psalms/139a,e1823ee01ffc,Coverdale Psalter,Psalm 139:1-9,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
-psalms/139b,3ed0433ba095,Coverdale Psalter,Psalm 139:10-24,,verified,claude,2026-10-01,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132."
-psalms/140,b55807026c26,Coverdale Psalter,Psalm 140,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/139b,d5cd25eecf96,Coverdale Psalter,Psalm 139:10-24,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; divided before v. 10 (Et dixi) as the Monastic Diurnal divides it, p. 132. Diurnal flex marks (†) read from page images, pp. 132, 133."
+psalms/140,02ea4e4ef858,Coverdale Psalter,Psalm 140,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 133, 134."
 psalms/141,3121e1944895,Coverdale Psalter,Psalm 141,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
-psalms/142,e854bfb34c28,Coverdale Psalter,Psalm 142,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/143,a7c3c65009b1,Coverdale Psalter,Psalm 143,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
-psalms/143a,33145c1a1678,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 125","73, 74, 79",verified,codex,2026-09-27,Direct page-image comparison; corpus unchanged.
-psalms/143b,45de3027d12c,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 121, 125","73–75, 79",verified,codex,2026-09-27,Direct page-image comparison; corpus unchanged.
-psalms/144,7fdb26042ce6,Coverdale Psalter,Psalm 144,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/144a,6a6abcaf9e3a,Coverdale Psalter,Psalm 144:1-8,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/144b,e888f40281b2,Coverdale Psalter,Psalm 144:9-15,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/142,11d375005062,Coverdale Psalter,Psalm 142,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 136, 137."
+psalms/143,6c553a316c50,Coverdale Psalter,Psalm 143,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. Diurnal flex marks (†) read from page images, pp. 74, 75."
+psalms/143a,8e6e302411c1,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 125","73, 74, 79",verified,claude,2026-10-13,"Direct page-image comparison. Diurnal flex marks (†) read from page images, pp. 74, 75."
+psalms/143b,6fa198238cc1,Monastic Diurnal.pdf,"Saturday Lauds; PDF pages 119, 120, 121, 125","73–75, 79",verified,claude,2026-10-13,"Direct page-image comparison. Diurnal flex marks (†) read from page images, pp. 74, 75."
+psalms/144,97321dd57efc,Coverdale Psalter,Psalm 144,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 137, 138."
+psalms/144a,cb9c795fbd2b,Coverdale Psalter,Psalm 144:1-8,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 137, 138."
+psalms/144b,eab0288b7b11,Coverdale Psalter,Psalm 144:9-15,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 137, 138."
 psalms/145,2a63e6c8d424,Coverdale Psalter,Psalm 145,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/145a,06500617d7d8,Coverdale Psalter,Psalm 145:1-13,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/145b,cda4eed7b575,Coverdale Psalter,Psalm 145:10-21,,verified,codex,2026-07-14,Machine-verified against 1662 BCP
-psalms/146,8cbe907afc4f,Coverdale Psalter,Psalm 146,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/146,2ac83dbcec48,Coverdale Psalter,Psalm 146,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 141, 142."
 psalms/147,08bf01a3f98d,Coverdale Psalter,Psalm 147,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/147a,d56f9646e87b,Coverdale Psalter,Psalm 147:1-11,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/147b,5f23a53d018a,Coverdale Psalter,Psalm 147:12-20,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/148,dbaec380a6de,Coverdale Psalter,Psalm 148,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/148,74827d4c68be,Coverdale Psalter,Psalm 148,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 37, 38."
 psalms/148a,9791f6b89cee,Coverdale Psalter,Psalm 148a,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/148b,6db49b723244,Coverdale Psalter,Psalm 148b,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 37, 38."
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 seasonal/advent/benedictus-antiphon-december-21,cfa9c60357cb,diurnal,"III Week in Advent, Dec. 21 Commemoration of Advent at Lauds",176,verified,claude,2026-09-23,Direct page-image reading (PDF p. 222); pointing normalized.
