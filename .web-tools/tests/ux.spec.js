@@ -68,6 +68,32 @@ function textLinesIn(el) {
   return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
 }
 
+// The left edge of each row of text in `el`, top to bottom, leaving out the
+// opening letter: a dropped initial's rows, then its turnovers.
+function rowStartsIn(el) {
+  const leading = parseFloat(getComputedStyle(el).lineHeight);
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const rows = [];
+  let node;
+  let first = el.textContent.search(/\S/) >= 0;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement.closest(".mediant, .posture")) continue;
+    for (let i = 0; i < node.length; i++) {
+      if (/\s/.test(node.textContent[i])) continue;
+      if (first) { first = false; continue; } // The initial has its own box.
+      const range = document.createRange();
+      range.setStart(node, i);
+      range.setEnd(node, i + 1);
+      const rect = range.getBoundingClientRect();
+      if (!rect.width) continue;
+      const row = rows.find((r) => Math.abs(r.top - rect.top) < leading / 2);
+      if (row) row.left = Math.min(row.left, rect.left);
+      else rows.push({ top: rect.top, left: rect.left });
+    }
+  }
+  return rows.sort((a, b) => a.top - b.top).map((r) => r.left);
+}
+
 async function openingTextLines(opening) {
   return opening.evaluate(textLinesIn);
 }
@@ -1974,16 +2000,18 @@ test("prose openings across the alphabet preserve words and clear their initials
 
 test("Prime hymn initial clears its second metrical line on narrow pages", async ({ page }) => {
   const primeHours = [
-    { date: "2026-03-15", label: "Sunday" },
-    { date: "2026-06-18", label: "feria" },
+    { hour: "prime", date: "2026-03-15", label: "Sunday" },
+    { hour: "prime", date: "2026-06-18", label: "feria" },
+    // "Proclaims the morn's approaching ray:" turns over on a phone.
+    { hour: "lauds", date: "2026-10-13", label: "Lauds" },
   ];
 
-  for (const { date, label: hymn } of primeHours) {
+  for (const { hour, date, label: hymn } of primeHours) {
     // Light only: themes share one geometry, held page-wide by "themes never change layout".
     const theme = "light";
     for (const width of [320, 390]) {
       await page.setViewportSize({ width, height: 844 });
-      await openDatedPage(page, `/prime/${date}`, theme);
+      await openDatedPage(page, `/${hour}/${date}`, theme);
 
       const geometry = await page.evaluate(() => {
         const [opening, secondLine] = document.querySelectorAll(
@@ -2003,14 +2031,19 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
           cap: firstGlyph(opening),
           secondLine: firstGlyph(secondLine),
           openingLeft: opening.getBoundingClientRect().left,
-          secondLineIndent: parseFloat(getComputedStyle(secondLine).textIndent),
-          secondLinePadding: parseFloat(getComputedStyle(secondLine).paddingLeft),
+          rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
         };
       });
+      // Its rows after the first (rowStartsIn leaves out the line's first letter).
+      const secondRows = await page.locator(".hymn-stanza-opening .hymn-line").nth(1).evaluate(rowStartsIn);
 
       const label = `${hymn}/${theme}/${width}px`;
-      expect(geometry.secondLineIndent, `${label} second-line outdent`).toBe(0);
-      expect(geometry.secondLinePadding, `${label} second-line hang padding`).toBe(0);
+      // Its own turnover steps in from where the line starts, beside the
+      // initial or at the stanza edge; it never falls back under the letter.
+      const rows = [geometry.secondLine.left, ...secondRows.slice(1)];
+      for (const left of rows.slice(1)) {
+        expect(left - rows[0], `${label} second line's turnover steps in`).toBeCloseTo(0.9 * geometry.rem, 0);
+      }
       const yOverlap =
         geometry.secondLine.top < geometry.cap.bottom - 0.5 &&
         geometry.secondLine.bottom > geometry.cap.top + 0.5;
@@ -2118,20 +2151,14 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
       const later = document.querySelector(
         ".marian-antiphon .liturgical-block > .chant-line:not(.chant-line-opening)",
       );
-      // First source line text is before the <br>; second is after it.
-      const br = [...opening.childNodes].find((n) => n.nodeName === "BR");
+      // First source line text is before the <br>; the second is its own
+      // block after it, so its turnover hangs under it.
       const firstText = [...opening.childNodes].find(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
       );
-      let secondText = null;
-      if (br) {
-        for (let n = br.nextSibling; n; n = n.nextSibling) {
-          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
-            secondText = n;
-            break;
-          }
-        }
-      }
+      const secondText = [...(opening.querySelector(":scope > br + .chant-line-second")?.childNodes ?? [])].find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+      ) ?? null;
       const glyph = (node, start = 0, end = 1) => {
         if (!node) return null;
         const range = document.createRange();
@@ -2159,8 +2186,15 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         laterIndent: later ? parseFloat(getComputedStyle(later).textIndent) : 0,
         label: document.querySelector(".marian-antiphon .item-label")?.textContent ?? "",
         float: getComputedStyle(opening, "::first-letter").float,
+        rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
       };
     });
+    // The second source line's turnover hangs under it, as a later line's
+    // does, rather than returning to the margin under the initial.
+    const secondRows = await page.locator(".marian-antiphon .chant-line-second").evaluate(rowStartsIn);
+    for (const left of secondRows.slice(1)) {
+      expect(left - geometry.second.left, `${width}px second source line's turnover steps in`).toBeCloseTo(1.2 * geometry.rem, 0);
+    }
 
     const label = `${width}px`;
     expect(geometry.label, `${label} seasonal Marian`).toMatch(/Salve Regina/i);
@@ -3320,6 +3354,39 @@ test("long opening verses return to the numbered text edge below the initial", a
       if (width <= 390) expect(geometry.lines.length).toBeGreaterThan(2);
       for (const left of geometry.lines.slice(2)) {
         expect(Math.abs(left - geometry.edge), `${width}px ${size} continuation alignment`).toBeLessThan(1);
+      }
+    }
+  }
+});
+
+// The print diurnal's rule, as the psalms keep it above: below a dropped
+// initial, a prose opening turns over at the spoken-text edge its ℟ shares,
+// not back at the margin under the letter. 1 Cor. 6:20 is the reported case.
+test("prose openings turn over at the response's text edge below the initial", async ({ page }) => {
+  const openings = [
+    { path: "/none/2026-10-13", block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+    { path: "/lauds/2026-10-13", block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+    { path: "/lauds/2026-10-13", block: ".collect .liturgical-block", opening: ".plain-line:first-child" },
+    { path: "/lauds/2026-10-13", block: ".corporate-lord-prayer", opening: ".corporate-lord-prayer-officiant" },
+  ];
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const { path, block, opening } of openings) {
+      await openDatedPage(page, path);
+      for (const fallback of [false, true]) {
+        const tag = fallback ? await fallbackInitials(page) : null;
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+        const target = page.locator(block).first();
+        const label = `${path} ${block} ${width}px ${fallback ? "fallback" : "native"}`;
+        await expect(target.locator(opening)).not.toHaveClass(/initial-raised/);
+        const rows = await target.locator(opening).evaluate(rowStartsIn);
+        const edge = await target.locator(".response-line .sigil-text").first().evaluate((el) => el.getBoundingClientRect().left);
+        if (width <= 390) expect(rows.length, `${label} turns over`).toBeGreaterThan(2);
+        // Beside a narrow initial a line meets the same edge; never short of it.
+        for (const left of rows.slice(0, 2)) expect(left, `${label} beside the initial`).toBeGreaterThan(edge - 1);
+        for (const left of rows.slice(2)) expect(Math.abs(left - edge), `${label} turnover at the text edge`).toBeLessThan(1);
+        await expectInitialInkClear(page, target, opening, `${label} ink clears the initial`);
+        if (tag) await tag.evaluate((el) => el.remove());
       }
     }
   }

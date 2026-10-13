@@ -239,8 +239,15 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             val inColumn = if (column != null) Modifier.width(column) else Modifier
             Text(runs(block), inColumn.fillMaxWidth(), style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center))
         }
-        BlockKind.PARAGRAPH, BlockKind.CHANT_LINE -> {
-            if (block.dropCap) Opening(block, text, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = text)
+        // A prose opening (a chapter, a collect, the Our Father) turns over below its initial at the
+        // edge its ℟'s words share, the initial hung in the gutter, as a psalm's first verse does.
+        BlockKind.PARAGRAPH -> {
+            if (block.dropCap) Opening(block, text, m, textStart = VerseGutter) else Text(runs(block), m.fillMaxWidth(), style = text)
+        }
+        // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
+        BlockKind.CHANT_LINE -> {
+            val chant = text.copy(textIndent = TextIndent(restLine = 19.2.sp))
+            if (block.dropCap) Opening(block, chant, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = chant)
         }
     }
 }
@@ -252,8 +259,9 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
  * a single line (elevated), and may break after its mediant rather than leave a stub of a second
  * line (divided). Hymns and the Marian antiphon always drop. The rest of the first word, or the
  * next word after a lone O or I, turns to small caps as the eye leaves the capital. The capital
- * stands at the measure's edge (a psalm's hangs into the verse gutter); `textStart` places the
- * lines that run on below it.
+ * stands at the measure's edge (a psalm's and prose's hang into the verse gutter); `textStart`
+ * places the lines that run on below it, and a raised capital's line stands at the measure's edge.
+ * A line that turns over below the capital keeps its style's hanging indent (a hymn's, a sung line's).
  */
 @Composable
 private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
@@ -329,13 +337,13 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                     divided.second.lineCount == 2 && balance(divided.second) > balance(natural) + 0.15f ->
                     OpeningSetting.Dropped(divided.first, divided.second)
                 block.kind == BlockKind.PARAGRAPH &&
-                    measurer.measure(raisedText, plain, constraints = Constraints(maxWidth = (width - start.toInt()).coerceAtLeast(1))).lineCount < 2 ->
+                    measurer.measure(raisedText, plain, constraints = Constraints(maxWidth = width.coerceAtLeast(1))).lineCount < 2 ->
                     OpeningSetting.Raised
                 else -> OpeningSetting.Dropped(body, natural)
             }
         }
         when (setting) {
-            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth().padding(start = textStart), style = plain)
+            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth(), style = plain)
             is OpeningSetting.Elevated -> {
                 // One line pitch above the text, into which the capital rises; its ink top meets the
                 // cap height of that empty line, its foot the text's baseline.
@@ -356,8 +364,20 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                 // has no first break, its paragraphs split there instead).
                 val first = shown.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
                 val nl = text.text.indexOf('\n')
-                val after = text.subSequence(if (nl in 0 until split) split + 1 else split, text.length)
+                val from = if (nl in 0 until split) split + 1 else split
+                // Split inside a line (not at its break), the remainder's first line is that line's
+                // turnover: it takes the hanging indent too, rather than reading as a line of its own.
+                val turnover = from in 1 until text.length && text.text[from - 1] != '\n' && text.text[from] != '\n'
+                val hang = style.textIndent?.restLine ?: 0.sp
+                val after = text.subSequence(from, text.length)
                     .let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
+                    .let { rest ->
+                        val end = rest.text.indexOf('\n').let { if (it < 0) rest.length else it }
+                        if (!turnover || hang.value == 0f) rest else buildAnnotatedString {
+                            withStyle(ParagraphStyle(textIndent = TextIndent(hang, hang))) { append(rest.subSequence(0, end)) }
+                            if (end < rest.length) append(rest.subSequence(end + 1, rest.length))
+                        }
+                    }
                 // The capital's ink top meets the first line's cap height; its foot then stands on the second baseline.
                 val capTop = beside.getLineBaseline(0) + cap.drop - cap.glyph.firstBaseline
                 Column {
