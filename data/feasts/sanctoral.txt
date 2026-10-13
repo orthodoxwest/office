@@ -178,7 +178,7 @@ Month = 4
 Day = 25
 
 [ss-philip-james]
-Name = Ss Philip and James, Apostles
+Name = Ss Philip & James, Apostles
 Rank = double-2nd-class
 Color = red
 Category = apostle
@@ -278,7 +278,7 @@ Day = 3
 Notes = AWRV keeps Irenaeus on July 3 (per archdiocesan ordo), clear of the Vigil of Ss. Peter & Paul
 
 [ss-peter-paul]
-Name = Ss Peter and Paul, Apostles
+Name = Ss Peter & Paul, Apostles
 Rank = double-1st-class
 Color = red
 Category = apostle
@@ -445,7 +445,7 @@ Month = 9
 Day = 20
 
 [st-matthew]
-Name = St Matthew, Apostle and Evangelist
+Name = St Matthew, Apostle & Evangelist
 Rank = double-2nd-class
 Color = red
 Category = apostle
@@ -530,7 +530,7 @@ Month = 11
 Day = 22
 
 [st-clement-i]
-Name = St Clement I, Bishop and Martyr
+Name = St Clement I, Bishop & Martyr
 Rank = double
 Color = red
 Category = bishop-martyr
@@ -628,7 +628,7 @@ Month = 12
 Day = 26
 
 [st-john-evangelist]
-Name = St John, Apostle and Evangelist
+Name = St John, Apostle & Evangelist
 Rank = double-2nd-class
 Color = white
 Category = apostle
@@ -869,7 +869,7 @@ Month = 10
 Day = 24
 
 [dedication-basilica-st-saviour]
-Name = Dedication of The Basilica of St Saviour
+Name = Dedication of the Basilica of St Saviour
 Rank = greater-double
 Color = white
 Category = dedication
@@ -1075,7 +1075,7 @@ Month = 6
 Day = 26
 
 [ss-cyril-methodius]
-Name = Ss Cyril and Methodius, Bishops & Confessors
+Name = Ss Cyril & Methodius, Bishops & Confessors
 Rank = double
 Color = white
 Category = confessor-bishop
