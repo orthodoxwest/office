@@ -666,15 +666,43 @@ fn map_element_type(kind: &str) -> ElementType {
     }
 }
 
-/// A label from the ref's last path component: "Psalm 66 (67)", or a
-/// title-cased canticle or hymn name.
+/// A label from the ref's last path component: "Psalm 66 (67)", a canticle's
+/// name, or a title-cased hymn name.
 fn format_label(kind: &str, reference: &str) -> String {
-    let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
+    let key = reference.rsplit('/').next().unwrap_or("");
+    let name = key.replace('-', " ");
     match kind {
         "psalm" => psalm_label(&name),
-        "canticle" | "hymn" => title_case(&name),
+        "canticle" => canticle_name(key).map_or_else(|| title_case(&name), str::to_string),
+        "hymn" => title_case(&name),
         _ => String::new(),
     }
+}
+
+/// A canticle's name as the Diurnal gives it, by its singer: the Index of
+/// Canticles (p. 164*), save the Song of Zacharias, which the Diurnal heads so
+/// over the canticle itself (pp. 41, 312, 105*) where its index spells
+/// "Zachariah". `None` for a corpus key it does not name.
+pub fn canticle_name(key: &str) -> Option<&'static str> {
+    Some(match key {
+        "1-chronicles-29" => "The Song of David",
+        "benedicite" => "The Song of the Three Children",
+        "benedictus" => "The Song of Zacharias",
+        "deuteronomy-32" => "The Song of Moses",
+        "exodus-15" => "The Song of Moses",
+        "habakkuk-3" => "The Song of Habakkuk",
+        "hannah" => "The Song of Hannah",
+        "isaiah-12" => "The Song of Isaiah",
+        "isaiah-38" => "The Song of Hezekiah",
+        "isaiah-45" => "The Song of Isaiah",
+        "jeremiah-31" => "The Song of Jeremiah",
+        "judith-16" => "The Song of Judith",
+        "magnificat" => "The Song of Mary",
+        "nunc-dimittis" => "The Song of Simeon",
+        "sirach-36" => "The Song of the Son of Sirach",
+        "tobit-13" => "The Song of Tobit",
+        _ => return None,
+    })
 }
 
 /// A psalm's label from its corpus name ("067", "018a", "119 i"): the

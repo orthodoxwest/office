@@ -31,6 +31,22 @@ fn seasonal_hymn_endings_replace_only_iambic_dimeter_quatrains() {
     ));
 }
 
+/// Diurnal, Index of Canticles (p. 164*): every canticle in the corpus is named
+/// by its singer.
+#[test]
+fn canticles_take_the_diurnals_names() {
+    assert_eq!(format_label("canticle", "canticles/exodus-15"), "The Song of Moses");
+    assert_eq!(format_label("canticle", "canticles/hannah"), "The Song of Hannah");
+    assert_eq!(format_label("canticle", "canticles/benedicite"), "The Song of the Three Children");
+    assert_eq!(format_label("canticle", "canticles/benedictus"), "The Song of Zacharias");
+    assert_eq!(format_label("canticle", "canticles/magnificat"), "The Song of Mary");
+    let refs = crate::testutil::live_texts().corpus.references();
+    let keys: Vec<&str> = refs.iter().filter_map(|r| r.strip_prefix("canticles/")).collect();
+    assert!(keys.contains(&"magnificat"), "{keys:?}");
+    let unnamed: Vec<&&str> = keys.iter().filter(|key| canticle_name(key).is_none()).collect();
+    assert!(unnamed.is_empty(), "canticles without a Diurnal name: {unnamed:?}");
+}
+
 /// Fr Jason's direction, relayed 2026-10-11: the Septuagint (Vulgate) number
 /// first, the Hebrew (Coverdale) number in parentheses.
 #[test]
