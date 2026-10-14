@@ -2550,6 +2550,18 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-indent: 0;
 }
 
+/* Its own turnover still steps inward, as every other line's does: under the
+   initial, a turnover at the stanza edge read as the next metrical line. Its
+   own formatting context keeps the whole line beside the initial while the
+   two meet, so the hanging indent counts from the initial's edge there (a
+   negative indent in a line box shortened by the float would run into the
+   letter); below the initial it counts from the stanza edge, as elsewhere. */
+.hymn-stanza-opening .hymn-line:first-child + .hymn-line {
+  display: flow-root;
+  padding-left: 0.9rem;
+  text-indent: -0.9rem;
+}
+
 /* Amen is nested in the last hymn-line span and follows the verse after an
    ordinary word space, as printed diurnals set it; it stays roman like the
    prayer. The earlier 0.35em sat beside Garamond's narrow 0.2em space and
@@ -2717,6 +2729,24 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   float: left;
   margin: 0.05em calc(var(--initial-gap, 0.06) * 1em) calc(-0.1em + var(--initial-depth, 0) * 1em) calc(var(--initial-hang, 0) * 1em);
   color: var(--ornament);
+}
+
+/* After a dropped initial, a prose opening turns over at the spoken-text edge
+   the ℣/℟ lines share, as a psalm's first verse turns over at its verses' (and
+   as the print diurnal sets both). The initial hangs into the sigil gutter, so
+   the lines beside it are unchanged; below it they ran back to the margin,
+   under the letter, as if a new paragraph began there. A raised initial is a
+   letter of its line and stays at the margin. */
+.chapter .liturgical-block .plain-line:first-child:not(.initial-raised),
+.collect .liturgical-block .plain-line:first-child:not(.initial-raised),
+.corporate-lord-prayer-officiant:not(.initial-raised) {
+  padding-left: var(--verse-gutter);
+}
+
+.chapter .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+.collect .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+.corporate-lord-prayer-officiant:not(.initial-raised)::first-letter {
+  margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
 }
 
 /* On a one-line chapter reading the two-line drop cap still reserves a second
@@ -2934,6 +2964,16 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   padding-left: 0;
   text-indent: 0;
   line-height: 1.75;
+}
+
+/* Its second source line hangs its own turnover, as the lines after it do;
+   turned back to the margin, its last word read as a source line of its own
+   under the initial. As the hymn's second line (above), its own formatting
+   context counts the indent from the initial's edge while the two meet. */
+.marian-antiphon .chant-line-second {
+  display: flow-root;
+  padding-left: 1.2rem;
+  text-indent: -1.2rem;
 }
 
 /* Session prayers are part of the office, not a settings card. Summary
@@ -6753,7 +6793,10 @@ body.season-eastertide {
     margin-left: calc(var(--initial-hang, 0) * var(--opening-em));
   }
 
-  .psalm-verses .verse:first-child::first-letter {
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+  .collect .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+  .corporate-lord-prayer-officiant:not(.initial-raised)::first-letter {
     margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * var(--opening-em));
   }
 }

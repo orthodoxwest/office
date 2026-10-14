@@ -29,13 +29,15 @@ pub enum PsalmItem {
 /// A parsed psalm or canticle.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PsalmText {
+    /// The title block's name line ("Psalm 67", "The Song of Moses").
+    pub title: String,
     pub scripture_ref: String,
     pub items: Vec<PsalmItem>,
 }
 
 /// Parses a psalm or canticle body. The title block — everything above the
-/// first blank line or numbered verse — is dropped except for a "!" scripture
-/// reference. A "Glory be…" line opens a Gloria that the next "as it was…"
+/// first blank line or numbered verse — is dropped except for its name and a
+/// "!" scripture reference. A "Glory be…" line opens a Gloria that the next "as it was…"
 /// line closes; anything else intervening leaves it open where it stands.
 pub fn parse_psalm(text: &str) -> PsalmText {
     parse_psalm_lines(text).0
@@ -65,6 +67,8 @@ fn parse_psalm_lines(text: &str) -> (PsalmText, Vec<usize>) {
         }
         if let Some(r) = trimmed.strip_prefix('!') {
             parsed.scripture_ref = r.to_string();
+        } else if parsed.title.is_empty() {
+            parsed.title = trimmed.to_string();
         }
     }
 

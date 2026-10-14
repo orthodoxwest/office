@@ -470,11 +470,14 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
             let open_n = prose.len().min(2);
             if open_n > 0 {
                 sb.push_str("<p class=\"chant-line chant-line-opening\">");
+                // The second line is a block of its own (styled), so its
+                // turnover can hang under it rather than under the initial.
                 for (i, l) in prose[..open_n].iter().enumerate() {
                     if i > 0 {
-                        sb.push_str("<br>");
+                        sb.push_str(&format!("<br><span class=\"chant-line-second\">{}</span>", chant_line_html(l)));
+                    } else {
+                        sb.push_str(&chant_line_html(l));
                     }
-                    sb.push_str(&chant_line_html(l));
                 }
                 sb.push_str("</p>");
             }

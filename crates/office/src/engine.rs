@@ -324,7 +324,10 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
         text = stripped.to_string();
     }
     let kind = map_element_type(&elem.kind);
-    let label = format_label(&elem.kind, &elem.reference);
+    let label = match elem.kind.as_str() {
+        "canticle" => canticle_label(&elem.reference, &text),
+        kind => format_label(kind, &elem.reference),
+    };
     let with_source = |mut e: OfficeElement| {
         e.source_ref = elem.reference.clone();
         e.source_refs = vec![elem.reference.clone()];
@@ -667,7 +670,7 @@ fn map_element_type(kind: &str) -> ElementType {
 }
 
 /// A label from the ref's last path component: "Psalm 66 (67)", or a
-/// title-cased canticle or hymn name.
+/// title-cased hymn name. A canticle's label is its name from its text.
 fn format_label(kind: &str, reference: &str) -> String {
     let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
@@ -675,6 +678,28 @@ fn format_label(kind: &str, reference: &str) -> String {
         "canticle" | "hymn" => title_case(&name),
         _ => String::new(),
     }
+}
+
+/// A canticle's label: the name its title block gives it, as the Diurnal names
+/// it ("The Song of Moses"), else one made from its key. The words are joined
+/// by no-break spaces, so a line too short for the name and its incipit moves
+/// the incipit down rather than breaking the name; a name wider than a phone's
+/// line may break after a "the" within it, as the Diurnal breaks "The Song of
+/// the Three / Children" (p. 35).
+pub fn canticle_label(reference: &str, text: &str) -> String {
+    let title = corpus::lines::parse_psalm(text).title;
+    if title.is_empty() {
+        return format_label("canticle", reference);
+    }
+    let words: Vec<&str> = title.split_whitespace().collect();
+    let mut label = String::with_capacity(title.len() + words.len());
+    for (i, word) in words.iter().enumerate() {
+        if i > 0 {
+            label.push(if words[i - 1] == "the" { ' ' } else { '\u{a0}' });
+        }
+        label.push_str(word);
+    }
+    label
 }
 
 /// A psalm's label from its corpus name ("067", "018a", "119 i"): the

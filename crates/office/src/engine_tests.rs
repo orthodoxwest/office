@@ -31,6 +31,28 @@ fn seasonal_hymn_endings_replace_only_iambic_dimeter_quatrains() {
     ));
 }
 
+/// Every canticle in the corpus is named as the Diurnal heads it where its text
+/// is printed, by its singer, in its title block.
+#[test]
+fn canticles_take_the_diurnals_names() {
+    let texts = crate::testutil::live_texts();
+    let label = |r: &str| canticle_label(r, texts.corpus.get(r));
+    assert_eq!(label("canticles/exodus-15"), "The\u{a0}Song\u{a0}of\u{a0}Moses");
+    // Diurnal p. 115.
+    assert_eq!(label("canticles/magnificat"), "The\u{a0}Song\u{a0}of\u{a0}the Blessed\u{a0}Virgin\u{a0}Mary");
+    // The name holds together, save after a "the" within it.
+    assert_eq!(label("canticles/benedicite"), "The\u{a0}Song\u{a0}of\u{a0}the Three\u{a0}Children");
+    // Diurnal p. 79.
+    assert_eq!(label("canticles/sirach-36"), "The\u{a0}Song\u{a0}of\u{a0}Jesus\u{a0}the Son\u{a0}of\u{a0}Sirach");
+    // Without a title, a label from the key.
+    assert_eq!(canticle_label("canticles/isaiah-12", "!Isaiah 12:1-6\n\nO Lord, I will praise thee."), "Isaiah 12");
+    let refs = texts.corpus.references();
+    let keys: Vec<&str> = refs.iter().filter(|r| r.starts_with("canticles/")).copied().collect();
+    assert!(keys.contains(&"canticles/magnificat"), "{keys:?}");
+    let unnamed: Vec<&&str> = keys.iter().filter(|r| !label(r).starts_with("The\u{a0}Song\u{a0}of\u{a0}")).collect();
+    assert!(unnamed.is_empty(), "canticles without the Diurnal's name: {unnamed:?}");
+}
+
 /// Fr Jason's direction, relayed 2026-10-11: the Septuagint (Vulgate) number
 /// first, the Hebrew (Coverdale) number in parentheses.
 #[test]
