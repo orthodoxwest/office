@@ -2,8 +2,26 @@ import Observation
 import SwiftUI
 import UIKit
 
-/// The Lauds, Prime and Vespers preparation opens, as on the web; the other hours' stays closed.
-private let openPreparation: Set<String> = ["lauds", "prime", "vespers"]
+/**
+ * Whether an hour's prayers before or after the Office open, as the web's `office-prayers-open`:
+ * the hour's default (Lauds, Prime and Vespers open, the other hours' closed) until the reader
+ * opens or closes them, then that choice, kept on this device for the hour's section
+ * ("sext/Prayers Before the Office"). A section a day leaves out (the Triduum's prayers after the
+ * Office) keeps its choice for when it returns.
+ */
+private enum SessionPrayers {
+    private static let openByDefault: Set<String> = ["lauds", "prime", "vespers"]
+
+    private static func key(_ hour: String, _ label: String) -> String { "prayers-open.\(hour)/\(label)" }
+
+    static func opens(_ hour: String, _ label: String) -> Bool {
+        UserDefaults.standard.object(forKey: key(hour, label)) as? Bool ?? openByDefault.contains(hour)
+    }
+
+    static func choose(_ hour: String, _ label: String, open: Bool) {
+        UserDefaults.standard.set(open, forKey: key(hour, label))
+    }
+}
 
 /**
  * What a page shows once its content is composed. Composing reads the corpus, so it runs off
@@ -204,7 +222,7 @@ struct HourScreen: View {
         self.date = date
         self.composition = composition
         var open: [String: Bool] = [:]
-        for (key, s) in zip(sectionKeys(view.sections), view.sections) where s.collapsible { open[key] = openPreparation.contains(view.hour) }
+        for (key, s) in zip(sectionKeys(view.sections), view.sections) where s.collapsible { open[key] = SessionPrayers.opens(view.hour, s.label) }
         _open = State(initialValue: open)
     }
 
@@ -237,7 +255,10 @@ struct HourScreen: View {
                         Group {
                             switch row {
                             case let .toggle(key, label, expanded):
-                                Button { withAnimation(unfolding) { open[key] = !expanded } } label: {
+                                Button {
+                                    withAnimation(unfolding) { open[key] = !expanded }
+                                    SessionPrayers.choose(view.hour, label, open: !expanded)
+                                } label: {
                                     HStack(spacing: 0) {
                                         Text(label).type(Scale.heading).foregroundStyle(p.titulus)
                                         // A section's caret is 0.75em of its heading (`.session-prayers summary::after`).
@@ -399,7 +420,7 @@ struct HourScreen: View {
         for ((i, section), key) in zip(view.sections.enumerated(), sectionKeys(view.sections)) {
             if section.collapsible {
                 // A section new to this form opens as the hour's sections open.
-                let expanded = open[key] ?? openPreparation.contains(view.hour)
+                let expanded = open[key] ?? SessionPrayers.opens(view.hour, section.label)
                 out.append(.toggle(section: key, label: section.label, open: expanded))
                 prev = nil
                 afterClosed = !expanded

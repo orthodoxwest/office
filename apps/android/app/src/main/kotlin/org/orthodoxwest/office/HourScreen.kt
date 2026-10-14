@@ -85,9 +85,6 @@ import org.orthodoxwest.office.core.blockWords
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
 
-/** The Lauds, Prime and Vespers preparation opens, as on the web; the other hours' stays closed. */
-private val OPEN_PREPARATION = setOf("lauds", "prime", "vespers")
-
 /** An hour, as the web's hour page: colour band, header, title, controls, the office, its epilogue. */
 @Composable
 fun HourScreen(
@@ -116,10 +113,11 @@ fun HourScreen(
             if (left == 0) host.keepScreenOn = false
         }
     }
+    val context = LocalContext.current
     // Saved with the scroll position: an opened section moves everything below it.
     val open = rememberSaveable(view.hour, view.dateLabel, saver = OpenSections) {
         mutableStateMapOf<Int, Boolean>().apply {
-            view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, view.hour in OPEN_PREPARATION) }
+            view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, SessionPrayers.opens(context, view.hour, s.label)) }
         }
     }
     val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
@@ -175,7 +173,11 @@ fun HourScreen(
                     item(key = "toggle-$i") {
                         CompositionLocalProvider(LocalDensity provides prayer) { Row(
                             Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
-                                .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
+                                .semantics { heading() }.tap {
+                                    unfolding = true
+                                    open[i] = !expanded
+                                    SessionPrayers.choose(context, view.hour, section.label, !expanded)
+                                }.disclosed(expanded),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
