@@ -98,6 +98,10 @@ class ScreenshotTest {
     @Test
     fun laudsApse() { show(Page.Hour(lent, "lauds"), ThemeChoice.APSE, today = lent.plusDays(3)); shoot("lauds-apse") }
 
+    // A little hour: the cross, not the sun or moon, set into the title's upper rule.
+    @Test
+    fun noneApse() { show(Page.Hour(lent, "none"), ThemeChoice.APSE); shoot("none-apse") }
+
     /** A first-class day's hour stands in its frame. */
     @Test
     fun laudsChristmasNave() { show(Page.Hour(LocalDate.of(2026, 12, 25), "lauds"), ThemeChoice.NAVE); shoot("lauds-christmas-nave") }
