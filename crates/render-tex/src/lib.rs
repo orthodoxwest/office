@@ -165,7 +165,13 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
         ElementType::OpeningAcclamation => b.push_str(&format!("\\acclamation{{{}}}\n\n", mediant_line(&elem.text))),
         ElementType::Psalm | ElementType::Canticle => {
             let unrepeated = elem.unrepeated.as_ref().map_or(0, |u| u.words);
-            let psalm = format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, unrepeated, chant);
+            // A canticle's score is found by its corpus key: two canticles share a name.
+            let name = if elem.kind == ElementType::Canticle && !elem.source_ref.is_empty() {
+                elem.source_ref.rsplit('/').next().unwrap_or("")
+            } else {
+                &elem.label
+            };
+            let psalm = format_psalm(&elem.text, name, elem.kind, &elem.postures, unrepeated, chant);
             // A chant score sets the psalm whole, so the rubric stands only over text.
             if unrepeated > 0 && psalm.contains("\\begin{psalmverses}") {
                 b.push_str(&format_rubric_spans(&elem.unrepeated_rubric()));
