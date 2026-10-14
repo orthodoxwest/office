@@ -362,10 +362,12 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         // the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
             // One height whatever the sign (the web's 1.05rem headpiece), so the title stands at
-            // the same place on every hour.
+            // the same place on every hour. The cross's line is taller than the box, so the sign is
+            // measured whole and centred over it, as the iOS frame does: held to the box's
+            // height, the Text clipped the cross's lower half.
             Box(Modifier.fillMaxWidth().height(16.8.dp), contentAlignment = Alignment.Center) {
                 DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
-                HourSign(view.hour)
+                Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
             }
             Text(
                 view.title.uppercase(),
