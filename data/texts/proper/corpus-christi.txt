@@ -72,7 +72,7 @@ O God, who in a wonderful Sacrament hast left unto us a memorial of thy Passion:
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 325 (Corpus Christi)
-!1 Cor 11:23-24
+!1 Cor. 11:23, 24
 Brethren: I have received of the Lord that which also I delivered unto you, that the Lord Jesus the same night in which he was betrayed took bread: and when he had given thanks, he brake it, and said, Take, eat: this is my body, which is broken for you: this do in remembrance of me.
 R. Thanks be to God.
 
@@ -84,13 +84,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 417 (Corpus Christi, At Sext)
-!1 Cor 11:26
+!1 Cor. 11:26
 For as often as ye eat this bread, and drink this cup, * ye do shew the Lord's death till he come.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 417 (Corpus Christi, At None)
-!1 Cor 11:27
+!1 Cor. 11:27
 Whosoever shall eat this bread, and drink this cup of the Lord, unworthily, * shall be guilty of the body and blood of the Lord.
 R. Thanks be to God.
 

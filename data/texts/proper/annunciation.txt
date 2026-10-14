@@ -71,19 +71,19 @@ O God, who didst ordain that thy Word should take flesh in the womb of the bless
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 502 (Annunciation, At Lauds)
-!Isa 7:14-15
+!Isa. 7:14, 15
 Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. * Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 503 (Annunciation, At Sext)
-!Luke 1:32-33
+!Luke 1:32, 33
 The Lord God shall give unto him the throne of his father David: and he shall reign over the house of Jacob for ever; * and of his kingdom there shall be no end.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 504 (Annunciation, At None)
-!Isa 11:1-2
+!Isa. 11:1, 2
 There shall come forth a rod out of the stem of Jesse, and a Branch shall grow out of his roots: * and the Spirit of the Lord shall rest upon him.
 R. Thanks be to God.
 

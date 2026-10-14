@@ -72,19 +72,19 @@ O God, who makest us glad by the yearly solemnity of blessed N., thy Martyr and 
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
-!Jas 1:12
+!James 1:12
 Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, * which the Lord hath promised to them that love him.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Sext)
-!Sir 15:3
+!Ecclus. 15:3
 With the bread of life and understanding shall the Lord our God feed him, * and give him the water of saving wisdom to drink.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At None)
-!Sir 39:5
+!Ecclus. 39:5
 The righteous man will give his heart to resort early to the Lord that made him, * and will pray before the Most High.
 R. Thanks be to God.
 

@@ -47,19 +47,19 @@ O God, who by the leading of a star didst manifest thy only-begotten Son to the 
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 224 (Epiphany, At Lauds)
-!Isa 60:1
+!Isa. 60:1
 Arise, shine; for thy light is come, * and the glory of the Lord is risen upon thee.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 226 (Epiphany, At Sext)
-!Isa 60:4
+!Isa. 60:4
 Lift up thine eyes round about, and see: all they gather themselves together, they come to thee: * thy sons shall come from far, and thy daughters shall be nursed at thy side.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 226 (Epiphany, At None)
-!Isa 60:6
+!Isa. 60:6
 All they from Sheba shall come: * they shall bring gold and incense; and they shall shew forth the praises of the Lord.
 R. Thanks be to God.
 

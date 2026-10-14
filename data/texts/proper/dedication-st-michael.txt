@@ -48,7 +48,7 @@ O everlasting God, who hast ordained and constituted the services of Angels and 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 566 (Dedication of St Michael)
-!Rev 1:1-2
+!Rev. 1:1, 2
 God shewed things which must shortly come to pass, speaking by his Angel unto his servant John, who bare record of the word of God, and of the testimony of Jesus Christ, and of all things that he saw.
 R. Thanks be to God.
 
@@ -194,13 +194,13 @@ R. I will worship toward thy holy temple, and praise thy Name.
 
 [chapter-sext]
 # SOURCE: diurnal p. 611
-!Rev 5:11,12; 7:10
+!Rev. 5:11, 12; 7:10
 I heard the voice of many Angels round about the throne and the beasts and the elders: and the number of them was ten thousand times ten thousand, and thousands of thousands; * saying with a loud voice, Salvation to our God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 611
-!Rev 12:7,8
+!Rev. 12:7, 8
 There was war in heaven: Michael and his Angels fought against the dragon; and the dragon fought and his angels, and prevailed not; * neither was their place found any more in heaven.
 R. Thanks be to God.
 

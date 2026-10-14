@@ -119,19 +119,19 @@ To God the Holy Paraclete.
 Amen.
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 25* (Common of Many Martyrs out of Paschaltide, At Lauds)
-!Wis 3:1-3
+!Wisdom 3:1-3
 The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise they seemed to die, * but they are in peace.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Sext)
-!Wis 10:17
+!Wisdom 10:17
 The Lord rendered to the righteous a reward of their labours, guided them in a marvellous way, and was unto them for a cover by day, * and a light of stars in the night-season.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At None)
-!Wis 3:7-8
+!Wisdom 3:7, 8
 The righteous shall shine, and run to and fro like sparks among the stubble. They shall judge the nations, and have dominion over the people, * and their Lord shall reign for ever.
 R. Thanks be to God.
 

@@ -38,13 +38,13 @@ Yield up to us * a man so righteous, restore to us a man so holy: destroy not a 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 355 (St Andrew)
-!Rom 10:10-11
+!Rom. 10:10, 11
 Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 445 (St Andrew, At Sext)
-!Rom 10:12-13
+!Rom. 10:12, 13
 For there is no difference between the Jew and the Greek: * for the same Lord over all is rich unto all that call upon him. For whosoever shall call upon the Name of the Lord shall be saved.
 R. Thanks be to God.
 

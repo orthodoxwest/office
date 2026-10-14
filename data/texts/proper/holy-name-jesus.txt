@@ -58,19 +58,19 @@ O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, a
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 117 (Holy Name of Jesus)
-!Phil 2:8-10
+!Phil. 2:8-10
 Brethren: Christ humbled himself, and became obedient unto death, even the death of the Cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name; that at the Name of Jesus every knee should bow.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Sext)
-!Phil 2:10-11
+!Phil. 2:10, 11
 At the Name of Jesus every knee should bow, of things in heaven, and things in earth, and things under the earth; * and every tongue should confess that Jesus Christ is Lord, to the glory of God the Father.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 218 (Holy Name of Jesus, At None)
-!Col 3:17
+!Col. 3:17
 Whatsoever ye do in word or deed, * do all in the Name of the Lord Jesus, giving thanks unto God and the Father by him.
 R. Thanks be to God.
 

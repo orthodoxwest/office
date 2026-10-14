@@ -703,12 +703,12 @@ fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
         };
         let (eve, day) = (Date::new(y, 1, 14), Date::new(y, 1, 15));
         for (name, date, chapter) in [
-            ("vespers", eve, "Isa 43:1-3"),
-            ("lauds", day, "Isa 43:1-3"),
-            ("terce", day, "Isa 43:1-3"),
-            ("sext", day, "Prov 4:3-4"),
-            ("none", day, "Heb 11:9-10"),
-            ("vespers", day, "Isa 43:1-3"),
+            ("vespers", eve, "Isa. 43:1-3"),
+            ("lauds", day, "Isa. 43:1-3"),
+            ("terce", day, "Isa. 43:1-3"),
+            ("sext", day, "Prov. 4:3, 4"),
+            ("none", day, "Heb. 11:9, 10"),
+            ("vespers", day, "Isa. 43:1-3"),
         ] {
             let hour = elements(name, date);
             assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
@@ -730,12 +730,12 @@ fn maurus_and_benedict_vespers_take_lauds_antiphons_omitting_the_fourth() {
         };
         let (eve, day) = (Date::new(y, 3, day - 1), Date::new(y, 3, day));
         for (name, date, chapter) in [
-            ("vespers", eve, "Sir 50:6-7"),
-            ("lauds", day, "Sir 50:6-7"),
-            ("terce", day, "Sir 50:6-7"),
-            ("sext", day, "Ecclus 50:3"),
-            ("none", day, "Ecclus 50:9, 10, 12, 13"),
-            ("vespers", day, "Sir 50:6-7"),
+            ("vespers", eve, "Ecclus. 50:6, 7"),
+            ("lauds", day, "Ecclus. 50:6, 7"),
+            ("terce", day, "Ecclus. 50:6, 7"),
+            ("sext", day, "Ecclus. 50:3"),
+            ("none", day, "Ecclus. 50:9, 10, 12, 13"),
+            ("vespers", day, "Ecclus. 50:6, 7"),
         ] {
             let hour = elements(name, date);
             assert_eq!(hour.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, chapter, "{date} {name}");
@@ -768,11 +768,11 @@ fn easter_and_pentecost_octaves_say_vespers_as_on_sunday() {
             let antiphon = |n| vespers.iter().find(|e| e.slot_ref == format!("psalm-antiphon-{n}")).unwrap().text.clone();
             assert!(antiphon(4).starts_with("And the Angel answered"), "{date}");
             let chapter = vespers.iter().find(|e| e.kind == ElementType::Chapter).unwrap();
-            assert_eq!(chapter.label, "I Cor. 5:7", "{date}");
+            assert_eq!(chapter.label, "1 Cor. 5:7", "{date}");
             let responsory = vespers.iter().find(|e| e.kind == ElementType::ShortResponsory).unwrap();
             assert!(responsory.text.contains("hath appeared to Simon"), "{date}");
             let lauds = compose("lauds", date);
-            assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "I Cor. 5:7", "{date} lauds");
+            assert_eq!(lauds.iter().find(|e| e.kind == ElementType::Chapter).unwrap().label, "1 Cor. 5:7", "{date} lauds");
             // Diurnal pp. 364, 367: "This is the day" after the hymn at both.
             for (name, hour) in [("lauds", &lauds), ("vespers", &vespers)] {
                 let versicle = hour.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();

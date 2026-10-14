@@ -35,19 +35,19 @@ O everlasting God, who hast ordained and constituted the services of Angels and 
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 609 (Dedication of St Michael, At Lauds; Apparition uses the same office)
-!Rev 1:1-2
+!Rev. 1:1, 2
 God shewed things which must shortly come to pass, * speaking by his Angel unto his servant John, who bare record of the word of God, and of the testimony of Jesus Christ, and of all things that he saw.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 611 (Dedication of St Michael, At Sext; Apparition uses the same office)
-!Rev 5:11-12
+!Rev. 5:11, 12
 I heard the voice of many Angels round about the throne and the beasts and the elders: * and the number of them was ten thousand times ten thousand, and thousands of thousands; saying with a loud voice, Salvation to our God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, pp. 611–612 (Dedication of St Michael, At None; Apparition uses the same office)
-!Rev 12:7-8
+!Rev. 12:7, 8
 There was war in heaven: * Michael and his Angels fought against the dragon; and the dragon fought and his angels, and prevailed not; neither was their place found any more in heaven.
 R. Thanks be to God.
 

@@ -146,7 +146,7 @@ Amen.
 #
 [chapter-lauds]
 # SOURCE: diurnal p. 363
-!I Cor. 5:7
+!1 Cor. 5:7
 Brethren: Purge out therefore the old leaven, * that ye may be a new lump, as ye are unleavened. * For even Christ our passover is sacrificed for us. *
 R. Thanks be to God.
 
@@ -215,13 +215,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: diurnal p. 365
-!1 Cor 5:8
+!1 Cor. 5:8
 Therefore let us keep the feast, not with old leaven, neither with the leaven of malice and wickedness; * but with the unleavened bread of sincerity and truth.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 365
-!Col 3:1,2
+!Col. 3:1, 2
 If ye then be risen with Christ, seek those things which are above, where Christ sitteth on the right hand of God. * Set your affection on things above, not on things on the earth.
 R. Thanks be to God.
 

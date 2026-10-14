@@ -279,7 +279,7 @@ Amen.
 
 [chapter]
 # SOURCE: draft archdiocesan Lauds book, p. 185 (Wednesday; printed citation corrected to match its Romans text)
-!Rom. 13:12-13
+!Rom. 13:12, 13
 The night is far spent, the day is at hand: let us therefore cast off the
 works of darkness, and let us put on the armour of light. Let us walk
 honestly, as in the day.
@@ -463,7 +463,7 @@ Upon the well-tuned cymbals * O praise God.
 
 [chapter-sunday]
 # SOURCE: diurnal p. 39
-!Rev 7:12
+!Rev. 7:12
 Blessing, and glory, and wisdom, and thanksgiving, * and honour, and power, and might, be unto our God * for ever and ever. Amen.
 R. Thanks be to God.
 

@@ -207,7 +207,7 @@ Amen.
 
 [chapter]
 # SOURCE: draft archdiocesan Vespers book, p. 129 (Wednesday; citation includes the quoted opening of verse 4)
-!2 Cor. 1:3-4
+!2 Cor. 1:3, 4
 Blessed be God, even the Father of our Lord Jesus Christ, the Father of
 mercies, and the God of all comfort, who comforteth us in all our tribulation.
 R. Thanks be to God.

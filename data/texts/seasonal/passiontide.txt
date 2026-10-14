@@ -12,7 +12,7 @@ Deliver me, O Lord, * and set me beside thee; and I care not who lifteth his han
 # SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Propers for
 # Lauds, The Chapter. Copy of OCP Ferial Lauds.pdf p. 126 dropped "may" before "be no
 # more remembered"; restored per the booklet and Jer 11:19.
-!Jer 11:19
+!Jer. 11:19
 Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name may be no more remembered.
 R. Thanks be to God.
 
@@ -87,7 +87,7 @@ R. Defend me from them that rise up against me.
 # with the versicle added. Hence Lauds keeps a proper versicle, printed for each of the
 # three days, and Vespers has none. Both rubrics speak only for Lauds and Vespers — the
 # Little Hours have their own Triduum rubric on p. 314, which we do not model yet.
-!Jer 11:20
+!Jer. 11:20
 But, O Lord of hosts, that judgest righteously, that triest the reins and the heart, let me see thy vengeance on them; for unto thee have I revealed my cause, O Lord my God.
 R. Thanks be to God.
 
@@ -154,19 +154,19 @@ R. And preserve me from the wicked man.
 
 [chapter-terce]
 # SOURCE: diurnal p. 274
-!Jer 17:13
+!Jer. 17:13
 O Lord, all that forsake thee shall be ashamed, and they that depart from me shall be written in the earth, * because they have forsaken the Lord, the fountain of living waters.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: diurnal p. 275
-!Jer 17:18
+!Jer. 17:18
 Let them be confounded that persecute me, but let not me be confounded: let them be dismayed, but let not me be dismayed: * bring upon them the day of evil, and destroy them with double destruction, O Lord our God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 275
-!Jer 18:20
+!Jer. 18:20
 Remember that I stood before thee to speak good for them, * and to turn away thy wrath from them.
 R. Thanks be to God.
 

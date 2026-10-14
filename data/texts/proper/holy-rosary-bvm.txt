@@ -62,7 +62,7 @@ The Virgin Mary * is exalted above the choirs of Angels: and upon her head a cro
 #
 [chapter-lauds]
 # SOURCE: diurnal p. 619
-!Ecclus 24:25; 39:17
+!Ecclus. 24:25; 39:17
 In me is all grace of the way and of the truth; * in me is all hope of life and of virtue. * As a rose planted by the water-brooks have I budded forth.
 R. Thanks be to God.
 
@@ -169,13 +169,13 @@ R. That we may be made worthy of the promises of Christ.
 #
 [chapter-sext]
 # SOURCE: diurnal p. 621
-!Ecclus 39:14
+!Ecclus. 39:14
 Flourish as a lily, * send forth a smell, and sing a song of praise, * bless the Lord in all his works.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 621
-!Ecclus 24:13,14
+!Ecclus. 24:13, 14
 I was exalted like a cedar in Libanus, * and as a cypress tree upon the mountains of Hermon. * I was exalted like a palm tree in Engaddi, and as a rose plant in Jericho.
 R. Thanks be to God.
 

@@ -35,19 +35,19 @@ We beseech thee, Almighty God, look upon the hearty desires of thy humble servan
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 260 (III Sunday in Lent, At Lauds)
-!Eph 5:1-2
+!Ephes. 5:1, 2
 Brethren: Be ye therefore followers of God, as dear children; and walk in love, as Christ also hath loved us, * and hath given himself for us, an offering and a sacrifice to God for a sweet-smelling savour.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At Sext)
-!Eph 5:5
+!Ephes. 5:5
 For this ye know, that no whoremonger, nor unclean person, nor covetous man, who is an idolater, * hath any inheritance in the kingdom of Christ and of God.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At None)
-!Eph 5:8-9
+!Ephes. 5:8, 9
 For ye were sometimes darkness, but now are ye light in the Lord: * walk as children of light; for the fruit of the Spirit is in all goodness and righteousness and truth.
 R. Thanks be to God.
 
@@ -56,7 +56,7 @@ R. Thanks be to God.
 
 [chapter-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 136 (Saturday before the Third Sunday in Lent)
-!Eph 5:1-2
+!Ephes. 5:1, 2
 Brethren: Be ye therefore followers of God, as dear children; and walk in love, as Christ also hath loved us, and hath given himself for us, an offering and a sacrifice to God for a sweet-smelling savour.
 R. Thanks be to God.
 

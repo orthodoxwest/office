@@ -49,7 +49,7 @@ Of the fruit * of thy body shall I set upon thy seat.
 
 [chapter-lauds]
 # SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds, Chapter)
-!Isa 11:1-2
+!Isa. 11:1, 2
 There shall come forth a rod out of the stem of Jesse, † and a Branch shall grow out of his roots: * and the Spirit of the Lord shall rest upon him.
 R. Thanks be to God.
 
@@ -63,13 +63,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At Sext, Chapter)
-!Isa 7:14-15
+!Isa. 7:14, 15
 Behold, a virgin shall conceive, and bear a son, † and shall call his name Immanuel. * Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At None, Chapter; printed "Isaiah 45")
-!Isa 45:8
+!Isa. 45:8
 Drop down, ye heavens, from above, and let the skies pour down righteousness: let the earth open, and let them bring forth salvation, and let righteousness spring up together; I the Lord have created it.
 R. Thanks be to God.
 
