@@ -2215,6 +2215,32 @@ function usageBeaconBody(scope) {
   resume();
 })();
 
+// The prayers before and after the Office open by the hour's default (Lauds,
+// Prime and Vespers open) until the reader opens or closes them; that choice
+// is then kept for the hour's section on this device, in localStorage only, as
+// "sext/Prayers Before the Office": true. hour.html applies it before paint.
+// Only a tap on the summary is a choice, not the page settling its defaults.
+(function () {
+  var PRAYERS_KEY = "office-prayers-open";
+  document.querySelectorAll(".elements > details.session-prayers[data-prayers]").forEach(function (details) {
+    var summary = details.querySelector(":scope > summary");
+    if (!summary) return;
+    summary.addEventListener("click", function () {
+      // The summary's own toggle follows this listener, so the choice is the
+      // state it will leave.
+      var open = !details.open;
+      try {
+        var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
+        if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};
+        chosen[details.getAttribute("data-prayers")] = open;
+        localStorage.setItem(PRAYERS_KEY, JSON.stringify(chosen));
+      } catch {
+        /* Storage refused: the hour keeps its default next time. */
+      }
+    });
+  });
+})();
+
 // Home marks the hours prayed: an hour counts once its end is reached after
 // its words were read on screen at a praying pace, so scrolling through in a
 // few seconds, or waiting at the end, does not mark it. presentation::Reading

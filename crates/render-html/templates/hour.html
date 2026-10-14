@@ -61,7 +61,7 @@
     {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
-      <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
         <summary>{{ section.label }}</summary>
         <div class="session-prayers-content">{{ leader_section_html(section) }}</div>
       </details>
@@ -73,7 +73,7 @@
     {% else %}
     {% for section in sections %}
       {% if section.collapsible %}
-      <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
         <summary>{{ section.label }}</summary>
         <div class="session-prayers-content">{{ section.html|safe }}</div>
       </details>
@@ -84,6 +84,21 @@
     {% endfor %}
     {% endif %}
   </div>
+  {#- The reader's last choice for this hour's prayers before or after the Office
+       (app.js keeps it, keyed as data-prayers) stands over the hour's default
+       before the page is painted. A section the day leaves out (the Triduum's
+       prayers after the Office) keeps its choice for when it returns. #}
+  <script>
+    (function () {
+      try {
+        var chosen = JSON.parse(localStorage.getItem("office-prayers-open") || "{}");
+        document.querySelectorAll(".elements > details.session-prayers[data-prayers]").forEach(function (details) {
+          var open = chosen[details.getAttribute("data-prayers")];
+          if (open === true || open === false) details.open = open;
+        });
+      } catch (e) {}
+    })();
+  </script>
   {# The prayer ends above this wrapper. In Apse it becomes the threshold
        where the vault may fade in around the administrative epilogue without
        ever sitting behind liturgical text. #}

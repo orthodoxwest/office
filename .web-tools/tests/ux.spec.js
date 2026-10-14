@@ -2326,6 +2326,27 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
 });
 
+test("the prayers before and after the Office keep the reader's choice for their hour", async ({ page }) => {
+  const before = (hour, date) => page.goto(`/${hour}/${date}`).then(() => page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]'));
+  const after = () => page.locator('details.session-prayers[data-prayers$="/Prayers After the Office"]');
+
+  // Sext's open closed, Lauds's open, until the reader chooses.
+  await expect(await before("sext", testDate)).not.toHaveAttribute("open");
+  await page.locator("details.session-prayers > summary", { hasText: "Prayers Before the Office" }).click();
+  await expect(await before("sext", "2026-03-22")).toHaveAttribute("open");
+  // Another hour keeps its own default.
+  await expect(await before("terce", "2026-03-22")).not.toHaveAttribute("open");
+
+  // Lauds's prayers after the Office closed, then left out in the Triduum,
+  // keep the choice for when they return.
+  await before("lauds", testDate);
+  await page.locator("details.session-prayers > summary", { hasText: "Prayers After the Office" }).click();
+  await before("lauds", "2026-04-10");
+  await expect(after()).toHaveCount(0);
+  await expect(await before("lauds", "2026-04-20")).toHaveAttribute("open");
+  await expect(after()).not.toHaveAttribute("open");
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
