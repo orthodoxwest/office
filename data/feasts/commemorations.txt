@@ -1354,7 +1354,7 @@ Source = awrv
 CompanionOf = commemoration-st-paul-apostle
 
 [comm-extra-07-07-ss-cyril-and-methodius-bishops-and-confessors]
-Name = Ss Cyril and Methodius, Bishops & Confessors
+Name = Ss Cyril & Methodius, Bishops & Confessors
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1491,7 +1491,7 @@ Day = 18
 Source = awrv
 
 [comm-extra-01-25-the-conversion-of-st-paul-the-apostle]
-Name = The Conversion of St Paul The Apostle
+Name = The Conversion of St Paul the Apostle
 ProperName = Paul
 Rank = commemoration
 Color = white
@@ -1519,7 +1519,7 @@ Day = 6
 Source = awrv
 
 [comm-extra-02-06-st-photius-bishop-and-confessor]
-Name = St Photius, Bishop and Confessor
+Name = St Photius, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1620,7 +1620,7 @@ Source = awrv
 
 [comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve]
 ProperName = Alexander, Eventius & Theodulus
-Name = Ss Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
+Name = Ss Alexander, Eventius & Theodulus, Martyrs; & St Juvenalis, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1767,7 +1767,7 @@ Source = awrv
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
 ProperName = Nazarius, Celsus & Victor
-Name = Ss Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
+Name = Ss Nazarius & Celsus, Martyrs; St Victor, Bishop & Martyr; & St Innocent, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
