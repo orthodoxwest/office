@@ -93,6 +93,25 @@ Day = 11
 HasOctave = true
 OctaveClass = privileged-fourth
 
+[octave-without-class]
+Name = Octave Without Class
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 3
+Day = 12
+HasOctave = true
+
+[simple-octave-with-octave]
+Name = Simple Octave With HasOctave
+Rank = double-2nd-class
+Color = white
+Category = lord
+Month = 3
+Day = 13
+HasOctave = true
+OctaveClass = simple
+
 [commemoration-class-category]
 Name = Commemoration Class Category
 Rank = simple

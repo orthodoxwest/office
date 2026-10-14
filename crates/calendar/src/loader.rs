@@ -266,8 +266,18 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     if !f.is_vigil && f.vigil_of.is_some() {
         return Err(format!("{source_file}: feast {qid} specifies VigilOf but is not a vigil"));
     }
-    if f.octave_class != OctaveClass::Common && !f.has_octave && !(f.octave_class == OctaveClass::Simple && f.rank == Rank::Simple) {
-        return Err(format!("{source_file}: feast {qid} specifies OctaveClass without HasOctave (except a Simple octave day)"));
+    // Every octave names its Rubrics VII.3 group. A simple octave is kept only
+    // on its octave day, which has its own entry, so the feast and that day
+    // carry `simple` without `HasOctave` (#696).
+    let octave_class_named = m.get("OctaveClass").is_some();
+    if f.has_octave && !octave_class_named {
+        return Err(format!("{source_file}: feast {qid} has HasOctave without OctaveClass"));
+    }
+    if f.has_octave && f.octave_class == OctaveClass::Simple {
+        return Err(format!("{source_file}: feast {qid} has a simple octave, which takes no HasOctave"));
+    }
+    if octave_class_named && !f.has_octave && f.octave_class != OctaveClass::Simple {
+        return Err(format!("{source_file}: feast {qid} specifies OctaveClass without HasOctave (except a simple octave)"));
     }
     Ok(f)
 }

@@ -284,7 +284,8 @@ fn feast(f: Option<&Feast>) -> Value {
         "day": f.fixed.map(|md| md.day),
         "has_octave": f.has_octave,
         "has_vigil": f.has_vigil,
-        "octave_class": f.octave_class.as_str(),
+        // Null for a feast without an octave and for a day within a common one.
+        "octave_class": (f.has_octave || f.octave_class != calendar::model::OctaveClass::Common).then(|| f.octave_class.as_str()),
         "commemoration_class": f.commemoration_class.as_str(),
         "is_privileged_octave_day": f.is_privileged_octave_day,
         "is_vigil": f.is_vigil,
