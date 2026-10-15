@@ -3205,6 +3205,8 @@ test("a browser is new on the day it first opens the Office and returning after"
 // Home offers the introduction beside Change date for a reader's first week, in the season's
 // place; after that, and for a reader from before first days were kept, About is in the menu.
 test("home introduces the Office to a reader in their first week", async ({ page }) => {
+  // Kept off the real usage store, which the deduplication test counts from in parallel.
+  await page.route("**/api/usage", route => route.fulfill({ status: 204 }));
   const introduction = page.locator(".home-introduction");
   const home = `/?date=${easternDay()}`;
   await page.goto(home);
