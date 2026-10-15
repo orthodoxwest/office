@@ -221,7 +221,10 @@ fn marian_antiphon_preserves_verse_and_reflows_prayer() {
     lacks(&html, r#"<p class="chant-line">Grant us"#);
     // The opening pair shares one block so a two-line drop cap can float
     // across both source lines; later verse lines stay discrete.
-    has(&html, r#"<p class="chant-line chant-line-opening">Queen of the heavens, we hail thee,<br>Hail thee, Lady of all the Angels;</p>"#);
+    has(
+        &html,
+        r#"<p class="chant-line chant-line-opening">Queen of the heavens, we hail thee,<br><span class="chant-line-second">Hail thee, Lady of all the Angels;</span></p>"#,
+    );
     has(&html, r#"<p class="chant-line">To thee the faithful send up their sighs.</p>"#);
     has(&html, "Grant us, O merciful God, protection in our weakness: that we may rise again from our sins.");
 }
@@ -283,15 +286,28 @@ fn dialogue_and_corporate_lord_prayer_roles() {
     has(&dialogue, ">All:</span>");
     let mut prayer = elem(
         ElementType::CorporateLordPrayer,
-        "Our Father, who art in heaven.\nAnd lead us not into temptation,\nBut deliver us from evil. Amen.",
+        "Our Father, who art in heaven.\nAnd lead us not into temptation,\nBut deliver us from evil.",
     );
     prayer.voice = vec![
         VoiceSpan::new("Our Father, who art in heaven.\nAnd lead us not into temptation,\n", true, Some(VoiceRole::Officiant)),
-        VoiceSpan::new("But deliver us from evil. Amen.", true, Some(VoiceRole::Response)),
+        VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
     ];
     let html = render(&prayer);
     has(&html, r#"corporate-lord-prayer-officiant">Our Father"#);
-    has(&html, r#">℟.</span><span class="sigil-text">But deliver us from evil. Amen."#);
+    has(&html, r#">℟.</span><span class="sigil-text">But deliver us from evil.</span>"#);
+    // Said in secret until its ℣ at the little Hours (Diurnal p. 10; #671):
+    // no initial, the middle muted.
+    prayer.voice = vec![
+        VoiceSpan::new("Our Father", true, Some(VoiceRole::Officiant)),
+        VoiceSpan::new(", who art in heaven.\n", false, Some(VoiceRole::Officiant)),
+        VoiceSpan::new("And lead us not into temptation,\n", true, Some(VoiceRole::Officiant)),
+        VoiceSpan::new("But deliver us from evil.", true, Some(VoiceRole::Response)),
+    ];
+    let secret = render(&prayer);
+    lacks(&secret, "corporate-lord-prayer-officiant");
+    has(&secret, r#"<span class="spoken-text">Our Father</span><span class="secret-text">, who art in heaven.</span>"#);
+    has(&secret, r#">℣.</span><span class="sigil-text"><span class="spoken-text">And lead us not into temptation.</span>"#);
+    has(&secret, r#">℟.</span><span class="sigil-text"><span class="spoken-text">But deliver us from evil.</span>"#);
     let fallback = render(&elem(ElementType::CorporateLordPrayer, "Our Father, who art in heaven."));
     lacks(&fallback, "corporate-lord-prayer-officiant");
     has(&fallback, r#"<p class="plain-line">Our Father, who art in heaven.</p>"#);
@@ -368,7 +384,7 @@ fn commemoration_heading_preserves_name_and_escapes_markup() {
 
 fn psalm_67(incipit: &str) -> OfficeElement {
     let mut e = elem(ElementType::Psalm, "Psalm 67\n\n1. Be merciful unto us * and bless us.");
-    e.label = "Psalm 67".into();
+    e.label = "Psalm 66\u{a0}(67)".into();
     e.incipit = incipit.into();
     e
 }
@@ -379,7 +395,7 @@ fn psalm_label_carries_latin_incipit() {
     has(
         &html,
         concat!(
-            r#"<h3 class="item-label">Psalm 67"#,
+            "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span>",
             "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>",
             r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
         ),
@@ -393,7 +409,7 @@ fn psalm_label_carries_latin_incipit() {
     has(&html, r#"<span class="psalm-incipit" lang="la">Magnificat anima mea Dominum</span>"#);
     // Without a recorded incipit there is no empty span or orphaned separator.
     let html = render_section_elements(&[psalm_67("")]);
-    has(&html, r#"<h3 class="item-label">Psalm 67</h3>"#);
+    has(&html, "<h3 class=\"item-label\">Psalm <span class=\"psalm-num\">66\u{a0}<span class=\"psalm-heb\">(67)</span></span></h3>");
     lacks(&html, "label-sep");
     lacks(&html, "psalm-incipit");
     let html = render_section_elements(&[psalm_67("Deus <b>misereatur</b> & nostri")]);
@@ -435,7 +451,6 @@ fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
             penitential: Default::default(),
             monastic: Vec::new(),
         },
-        marian_antiphon: "salve-regina".to_string(),
         vespers: office::concurrence::VespersDesignation::unowned(),
         first_vespers: false,
         following_office_commemoration_id: String::new(),
@@ -516,4 +531,14 @@ fn unrepeated_words_are_muted_across_the_mediant() {
     has(&html, r#"<span class="unrepeated">brethren, to</span> dwell."#);
     has(&html, "It is");
     lacks(&html, r#"<span class="unrepeated">It"#);
+}
+
+#[test]
+fn psalm_flex_is_printed_in_the_first_half() {
+    let html = render_psalm_verses(
+        "Psalm 1\n\nBLESSED is the man that hath not walked in the counsel of the ungodly, † nor stood in the way of sinners * and hath not sat in the seat of the scornful.\n",
+        &[],
+        0,
+    );
+    has(&html, "of the ungodly, † nor stood in the way of sinners\u{a0}<span class=\"mediant\">*</span> and hath not sat");
 }

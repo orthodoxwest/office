@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-[collect]
-# SOURCE: diurnal p. 455
-Grant, we beseech thee, Almighty God: that the examples of thy Saints may urge us to a better life; that we may imitate the deeds of them whose festivals we celebrate.
+# [collect]
+# Collect of this feast. Diurnal p. 455 says "All as in the Common", so Hilary takes
+# commons/confessor-doctor/collect (p. 37*, as the ordo appoints). The "Grant, we
+# beseech thee" collect printed on p. 455 belongs to the commemoration of St Felix (#604).
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.

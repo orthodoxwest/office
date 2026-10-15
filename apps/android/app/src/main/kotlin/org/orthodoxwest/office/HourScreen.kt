@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
@@ -52,12 +53,15 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -80,9 +84,6 @@ import org.orthodoxwest.office.core.blockWords
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
-
-/** The Lauds, Prime and Vespers preparation opens, as on the web; the other hours' stays closed. */
-private val OPEN_PREPARATION = setOf("lauds", "prime", "vespers")
 
 /** An hour, as the web's hour page: colour band, header, title, controls, the office, its epilogue. */
 @Composable
@@ -112,10 +113,11 @@ fun HourScreen(
             if (left == 0) host.keepScreenOn = false
         }
     }
+    val context = LocalContext.current
     // Saved with the scroll position: an opened section moves everything below it.
     val open = rememberSaveable(view.hour, view.dateLabel, saver = OpenSections) {
         mutableStateMapOf<Int, Boolean>().apply {
-            view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, view.hour in OPEN_PREPARATION) }
+            view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, SessionPrayers.opens(context, view.hour, s.label)) }
         }
     }
     val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
@@ -157,7 +159,7 @@ fun HourScreen(
             contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(dayColor(view.color))) }
+            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color))) }
             item(key = "chrome") { chrome() }
             item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
             // Each block's space depends on the one before it, across sections.
@@ -171,12 +173,16 @@ fun HourScreen(
                     item(key = "toggle-$i") {
                         CompositionLocalProvider(LocalDensity provides prayer) { Row(
                             Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
-                                .semantics { heading() }.tap { unfolding = true; open[i] = !expanded }.disclosed(expanded),
+                                .semantics { heading() }.tap {
+                                    unfolding = true
+                                    open[i] = !expanded
+                                    SessionPrayers.choose(context, view.hour, section.label, !expanded)
+                                }.disclosed(expanded),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(section.label, style = Type.heading.copy(color = p.titulus))
-                            Caret(expanded, p.titulus)
+                            HeadingCaret(expanded, p.titulus)
                         } }
                     }
                     prev = null
@@ -343,30 +349,51 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
     val p = LocalPalette.current
     var picking by remember { mutableStateOf(false) }
     var choosing by remember { mutableStateOf(false) }
+    // What a screen reader hears when the form changes (the web's `#leader-status`).
+    var status by remember { mutableStateOf("") }
+    // Once said, the words are taken down, so a later swipe does not find them lingering.
+    LaunchedEffect(status) {
+        if (status.isNotEmpty()) {
+            delay(5_000)
+            status = ""
+        }
+    }
     Column(Modifier.measure().padding(top = 17.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         // Painted double rules frame the title. The hour's sign is set alone into the upper rule,
         // broken only for it; the day's colour reaches the lower one's lozenge. The rules take
         // the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
             // One height whatever the sign (the web's 1.05rem headpiece), so the title stands at
-            // the same place on every hour.
+            // the same place on every hour. The cross's line is taller than the box, so the sign is
+            // measured whole and centred over it, as the iOS frame does: held to the box's
+            // height, the Text clipped the cross's lower half.
             Box(Modifier.fillMaxWidth().height(16.8.dp), contentAlignment = Alignment.Center) {
                 DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
-                HourSign(view.hour)
+                Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
             }
             Text(
                 view.title.uppercase(),
                 Modifier.padding(horizontal = 20.8.dp).semantics { heading(); contentDescription = view.title },
                 style = Type.hourTitle.copy(color = p.text),
             )
-            DoubleRule(lozenge = dayColor(view.color), color = p.lining)
+            DoubleRule(lozenge = railColor(view.color, p), color = p.lining)
         }
         val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
         // On a phone the date stands on its own line above the day's name, so a line never ends on
         // the separator (the web's `.hour-meta-part:first-child` to 700px); wide screens keep one line.
-        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta.joinToString(" · ")) else listOf(meta[0], meta.drop(1).joinToString(" · "))
+        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta) else listOf(meta.take(1), meta.drop(1))
         Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = meta.joinToString(". ") }, horizontalAlignment = Alignment.CenterHorizontally) {
-            for (line in metaLines) Text(line, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+            // Date, day and season each wrap whole (the web's inline-block `.hour-meta-part`), so a
+            // line breaks between them, never inside a saint's title; the separator, tied to the
+            // part before it by a no-break space, ends its line. A part longer than the line still
+            // wraps within itself.
+            for (line in metaLines) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
+                    line.forEachIndexed { j, part ->
+                        Text(if (j < line.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                    }
+                }
+            }
         }
         if (date != today) {
             Text(
@@ -380,9 +407,16 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             Disclosure("Change date", picking, { picking = !picking; choosing = false })
             Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second)
         }
-        Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
-        Unfold(choosing) { FormChooser(form) { choosing = false; onForm(it) } }
-        Spacer(Modifier.height(7.2.dp))
+        // Previous · Today · Next keep to the edges up to 540dp, and gather in the middle above it.
+        Unfold(picking) { DatePicker(date, today, centred = LocalConfiguration.current.screenWidthDp > 540) { picking = false; onDate(it) } }
+        Unfold(choosing) {
+            FormChooser(form) {
+                choosing = false
+                if (it != form) status = "Prayers updated. ${PRAYER_FORMS.first { f -> f.first == it }.third}."
+                onForm(it)
+            }
+        }
+        Spacer(Modifier.fillMaxWidth().height(7.2.dp).semantics { liveRegion = LiveRegionMode.Polite; if (status.isNotEmpty()) contentDescription = status })
         Hairline(p.lining.copy(alpha = 0.3f))
     }
 }
@@ -436,7 +470,9 @@ private fun Epilogue(
                         append("Spotted an error on this page? ")
                         withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append("Report a problem") }
                     },
-                    Modifier.measure().padding(top = 4.8.dp).reserve(p.bg).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
+                    Modifier.measure().padding(top = 4.8.dp).reserve(p.bg).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) }
+                        // A thumb's height on a phone, the line centred in it, as the web's link.
+                        .heightIn(min = if (LocalWide.current) 0.dp else 44.dp).wrapContentHeight(),
                     style = Type.small.copy(fontSize = 11.84.sp, lineHeight = 18.9.sp, color = p.muted, textAlign = TextAlign.Center),
                 )
             }

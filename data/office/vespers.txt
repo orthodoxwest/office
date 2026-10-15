@@ -443,13 +443,19 @@ Condition = triduum
 # and the collect of the day said without Let us pray.
 
 Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
+Ref = shared/formulas/triduum-kneel-rubric
 
 Type = proper-antiphon
 Ref = triduum-antiphon
 
+Type = rubric
+Ref = shared/formulas/triduum-secret-our-father-rubric
+
 Type = silent-prayer
 Ref = ordinary/shared/our-father
+
+Type = rubric
+Ref = shared/formulas/triduum-psalm-51-rubric
 
 Type = psalm
 Ref = psalms/051
@@ -556,13 +562,25 @@ Type = prayer
 Ref = shared/formulas/collect-conclusion-through-same
 
 [Closing]
-Condition = not-office-of-the-dead,not-triduum
+Condition = not-office-of-the-dead,not-triduum,not-septuagesima-eve
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
 
 Type = versicle
 Ref = shared/leader/benedicamus-domino
+
+[Closing-Septuagesima-Eve]
+# Diurnal p. 235: Alleluia is said for the last time on the Saturday before
+# Septuagesima, and the dismissal takes it "even if Vespers have been of a
+# Double Feast of the I or II Class".
+Condition = not-office-of-the-dead,not-triduum,septuagesima-eve
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = shared/formulas/benedicamus-domino-alleluia
 
 [Closing-Faithful-Departed]
 # Diurnal p. 642: Vespers of the Dead begins immediately after Benedicamus.
@@ -605,7 +623,10 @@ Type = versicle
 Ref = shared/formulas/divine-help
 
 [Post-Office]
-Condition = not-appended-office-of-the-dead,not-office-of-the-dead
+# Monastic Diurnal, printed p. 313: "Thus are ended all the Hours during this
+# Triduum" with the Collect (at Lauds all then "rise and depart in silence"),
+# so the prayers after the Office are not said (maintainer's direction, 2026-10-11).
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 Collapsible = true
 Label = Prayers After the Office
 

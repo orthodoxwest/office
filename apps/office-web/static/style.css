@@ -428,6 +428,11 @@ input {
    because someone chose Larger. */
 html {
   font-size: 100%;
+  /* iOS Safari enlarges text by itself when a phone turns to landscape; the
+     text-size setting above is the only scaling, as in Chrome. 100% (not
+     none) keeps pinch zoom. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html[data-text-size="small"] {
@@ -479,8 +484,6 @@ footer {
    red rubrics in the text face. Georgia is absent on Android and Linux, where
    this stack falls through to the platform serif (Noto/DejaVu), and a second
    face inside the prayer reads as a mistake rather than as an instruction. */
-.day-commemorations .day-commemoration,
-.day-commemorations summary,
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
@@ -495,11 +498,6 @@ h1,
 h2,
 h3 {
   text-wrap: balance;
-}
-
-p,
-li {
-  text-wrap: pretty;
 }
 
 .skip-link {
@@ -947,6 +945,13 @@ summary:focus-visible {
   .site-nav-shell {
     align-items: baseline;
   }
+
+  /* The nav ships in a closed <details> and shows regardless of [open].
+     WebKit hides a closed disclosure's content until app.js opens it, so the
+     wide nav was missing without scripting and arrived late with it. */
+  .site-menu::details-content {
+    content-visibility: visible;
+  }
 }
 
 @media (min-width: 701px) and (pointer: coarse) {
@@ -1158,6 +1163,7 @@ footer::before {
   background: var(--lining);
   -webkit-mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
   mask: url("ornaments/tailpiece.svg") center / contain no-repeat;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1712,7 +1718,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Season and date control share one baseline, so naming the season costs no
    extra line in the title stack. Once the disclosure is open it claims the
-   whole row and the date picker keeps its full width. */
+   whole row and the date picker keeps its full width. Without a season it
+   claims the row shut as well, so the picker does not narrow as it folds. */
 .home-day-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1720,7 +1727,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   gap: 0 1rem;
 }
 
-.home-day-meta .home-date-nav[open] {
+.home-day-meta .home-date-nav:is([open], :only-child) {
   flex: 1 0 100%;
 }
 
@@ -1886,6 +1893,7 @@ html[data-newcomer] .home-season {
   font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1974,6 +1982,7 @@ html[data-newcomer] .home-season {
   text-decoration: none;
   font-variant-numeric: lining-nums tabular-nums;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2457,6 +2466,25 @@ html[data-newcomer] .home-season {
   color: var(--titulus);
 }
 
+/* A psalm's numbers, "66 (67)" or "118 i (119 i)", out of the label's small
+   caps: a small-cap "1" is a bare stem, the same shape as the section numeral
+   "i", so "118 i" read as "II8 I". Lining figures a little smaller than the
+   text sit at the small caps' height without their wide tracking, and a part
+   letter ("116a") or section numeral stays lower case. */
+.psalm-num {
+  font-variant-caps: normal;
+  font-variant-numeric: lining-nums;
+  font-size: 0.9em;
+  letter-spacing: 0.02em;
+}
+
+/* The Hebrew (Coverdale) number beside it, "(67)", muted and a little smaller
+   so the Septuagint number leads. */
+.psalm-heb {
+  color: var(--muted);
+  font-size: 0.86em;
+}
+
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
    it. Italic and un-small-capped so it reads as the Latin title rather than
    as more of the label. On a narrow screen it moves to its own line whole
@@ -2561,6 +2589,18 @@ html[data-newcomer] .home-season {
   text-indent: 0;
 }
 
+/* Its own turnover still steps inward, as every other line's does: under the
+   initial, a turnover at the stanza edge read as the next metrical line. Its
+   own formatting context keeps the whole line beside the initial while the
+   two meet, so the hanging indent counts from the initial's edge there (a
+   negative indent in a line box shortened by the float would run into the
+   letter); below the initial it counts from the stanza edge, as elsewhere. */
+.hymn-stanza-opening .hymn-line:first-child + .hymn-line {
+  display: flow-root;
+  padding-left: 0.9rem;
+  text-indent: -0.9rem;
+}
+
 /* Amen is nested in the last hymn-line span and follows the verse after an
    ordinary word space, as printed diurnals set it; it stays roman like the
    prayer. The earlier 0.35em sat beside Garamond's narrow 0.2em space and
@@ -2607,6 +2647,19 @@ html[data-newcomer] .home-season {
   white-space: pre;
 }
 
+/* A posture cue at the mediant ("Sit.") ends the first line with it. Opening
+   the second line beside the initial, it read as the half-verse's first word. */
+@supports selector(:has(+ *)) {
+  .psalm-verses .verse.initial-divided > .mediant:has(+ .posture)::after {
+    content: none;
+  }
+
+  .psalm-verses .verse.initial-divided > .mediant + .posture::after {
+    content: "\A";
+    white-space: pre;
+  }
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter. The
    smaller number's own line box is shorter than the verse's, so stretched
    to the top it rode about a quarter em above the text, like a footnote
@@ -2625,6 +2678,7 @@ html[data-newcomer] .home-season {
   color: var(--muted);
   font-size: 0.78em;
   line-height: 1.75;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2716,6 +2770,24 @@ html[data-newcomer] .home-season {
   color: var(--ornament);
 }
 
+/* After a dropped initial, a prose opening turns over at the spoken-text edge
+   the ℣/℟ lines share, as a psalm's first verse turns over at its verses' (and
+   as the print diurnal sets both). The initial hangs into the sigil gutter, so
+   the lines beside it are unchanged; below it they ran back to the margin,
+   under the letter, as if a new paragraph began there. A raised initial is a
+   letter of its line and stays at the margin. */
+.chapter .liturgical-block .plain-line:first-child:not(.initial-raised),
+.collect .liturgical-block .plain-line:first-child:not(.initial-raised),
+.corporate-lord-prayer-officiant:not(.initial-raised) {
+  padding-left: var(--verse-gutter);
+}
+
+.chapter .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+.collect .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+.corporate-lord-prayer-officiant:not(.initial-raised)::first-letter {
+  margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * 1em);
+}
+
 /* On a one-line chapter reading the two-line drop cap still reserves a second
    line; keep the ℟ response at the margin rather than letting it wrap in beside
    the cap. Mirrors the numbered-verse `clear` that protects the psalm cap.
@@ -2773,6 +2845,7 @@ html[data-newcomer] .home-season {
   text-align: right;
   font-weight: normal;
   color: var(--rubric);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2930,6 +3003,16 @@ html[data-newcomer] .home-season {
   padding-left: 0;
   text-indent: 0;
   line-height: 1.75;
+}
+
+/* Its second source line hangs its own turnover, as the lines after it do;
+   turned back to the margin, its last word read as a source line of its own
+   under the initial. As the hymn's second line (above), its own formatting
+   context counts the indent from the initial's edge while the two meet. */
+.marian-antiphon .chant-line-second {
+  display: flow-root;
+  padding-left: 1.2rem;
+  text-indent: -1.2rem;
 }
 
 /* Session prayers are part of the office, not a settings card. Summary
@@ -3634,14 +3717,6 @@ html[data-newcomer] .home-season {
 @media (min-width: 701px) and (pointer: fine) {
   .day-disclosures summary { min-height: 0; }
 }
-.day-commemoration {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-style: italic;
-  line-height: 1.5;
-}
-.day-commemoration::before { content: "Com. "; }
 /* The ordo's bracketed line for an observance kept by monastics and oblates
    only: under the name, quiet like a commemoration, never read as the day. */
 .day-monastic {
@@ -4059,6 +4134,14 @@ html[data-newcomer] .home-season {
    Painted rules and linings (--lining) do not move: the church veils its
    images, not its walls. The focus rings are --accent and never were gold.
 
+   The hours' sun and moon are images too, and veil with the rest. Apse's
+   tituli (section headings, psalm titles, "Ant.") are gilt where Nave's are
+   painted red ochre, so on the Apse they veil and warm with the season and
+   on Nave they stay. In Paschaltide the sun and Nave's gold moon warm too;
+   Apse's moon is silver and keeps its own ink then. Apse's
+   --accent (links, menu, chosen options) is the room's functional gold and
+   does not move.
+
    The season class is stamped on <body> server-side per date
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
 
@@ -4096,6 +4179,9 @@ body.season-passiontide {
   --ornament-hi: #8d8395;
   --ornament-lo: #605469;
   --inscription-ink: #ddd6e8;
+  /* Nave's moon is gold leaf and Apse's silver; both veil to the season's
+     --ornament, resolved here on the body after the theme has set it. */
+  --moon-ink: var(--ornament);
 }
 
 body.season-eastertide {
@@ -4104,6 +4190,9 @@ body.season-eastertide {
   --ornament-hi: #c8922d;
   --ornament-lo: #886011;
   --inscription-ink: #f2e2b1;
+  /* Nave's gold moon warms with the rest of the leaf; Apse's silver moon is
+     restated in its blocks below, since silver does not take the gold. */
+  --moon-ink: var(--ornament);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -4112,6 +4201,7 @@ body.season-eastertide {
     --ornament-line: #565070;
     --ornament-hi: #cac1d7;
     --ornament-lo: #988aad;
+    --titulus: #b0a4c2;
   }
 
   :root:not([data-theme="light"]) body.season-eastertide {
@@ -4119,6 +4209,8 @@ body.season-eastertide {
     --ornament-line: #7a6a44;
     --ornament-hi: #f2e2b1;
     --ornament-lo: #d3b86f;
+    --titulus: #e6cf8c;
+    --moon-ink: #c9d0d9;
   }
 }
 
@@ -4127,6 +4219,7 @@ body.season-eastertide {
   --ornament-line: #565070;
   --ornament-hi: #cac1d7;
   --ornament-lo: #988aad;
+  --titulus: #b0a4c2;
 }
 
 :root[data-theme="dark"] body.season-eastertide {
@@ -4134,6 +4227,8 @@ body.season-eastertide {
   --ornament-line: #7a6a44;
   --ornament-hi: #f2e2b1;
   --ornament-lo: #d3b86f;
+  --titulus: #e6cf8c;
+  --moon-ink: #c9d0d9;
 }
 
 /* ── Narrow screens ── */
@@ -4244,7 +4339,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
   :root.motion-ready details.reminder-help::details-content {
@@ -4255,9 +4349,14 @@ body.season-eastertide {
       content-visibility 200ms allow-discrete;
   }
 
+  /* app.js lays home's head out with the picker settled, to ease the head
+     in step with the unfolding; that look must not start a transition. */
+  :root.motion-ready details.hour-date-nav.is-settling::details-content {
+    transition: none;
+  }
+
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
   :root.motion-ready details.reminder-help[open]::details-content {
@@ -4407,7 +4506,8 @@ body.season-eastertide {
   width: 1.15em;
   height: 1.15em;
   color: transparent;
-  background: var(--gold);
+  /* The sun is gilding, so it keeps the season (see "Seasonal ornament"). */
+  background: var(--ornament);
   -webkit-mask: url("ornaments/sun.svg") center / contain no-repeat;
   mask: url("ornaments/sun.svg") center / contain no-repeat;
 }
@@ -4463,7 +4563,10 @@ body.season-eastertide {
   --day-clear: calc(var(--panel-inset) + 9px + 0.75rem);
   --lining-day: var(--day-color, var(--lining));
   --pad-x: 1rem;
-  --arch-w: calc(100cqi + 2 * var(--pad-x));
+  /* app.js sets --arch-cqi to the card's inline size in pixels, the same
+     length as 100cqi, so the courses' clip-paths do not have to be laid out
+     again on every frame of a disclosure unfolding in the card. */
+  --arch-w: calc(var(--arch-cqi, 100cqi) + 2 * var(--pad-x));
   --arch-lift: 2rem;
   --arch-frame: 1px;
   --arch-ground: var(--surface);
@@ -6443,6 +6546,59 @@ body.season-eastertide {
   color: var(--muted);
 }
 
+/* The Android test's sign-up: the privacy page's prose, with numbered steps
+   whose links are the reminders page's buttons. */
+.beta-device {
+  font-style: italic;
+}
+
+.beta-steps {
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: beta-step;
+}
+
+.beta-steps > li {
+  position: relative;
+  padding-left: 2rem;
+  counter-increment: beta-step;
+}
+
+.beta-steps > li::before {
+  content: counter(beta-step);
+  position: absolute;
+  top: 0.02rem;
+  left: 0;
+  color: var(--titulus);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.beta-steps h2 {
+  margin-top: 1.4rem;
+}
+
+.privacy a.beta-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  max-width: 18rem;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  padding: 0.55rem 0.8rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.92rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.privacy a.beta-action:hover {
+  border-color: var(--text);
+}
+
 .reminders fieldset {
   margin-bottom: 1.1rem;
   padding: 0.55rem 0.85rem 0.75rem;
@@ -6857,7 +7013,10 @@ body.season-eastertide {
     margin-left: calc(var(--initial-hang, 0) * var(--opening-em));
   }
 
-  .psalm-verses .verse:first-child::first-letter {
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+  .collect .liturgical-block .plain-line:first-child:not(.initial-raised)::first-letter,
+  .corporate-lord-prayer-officiant:not(.initial-raised)::first-letter {
     margin-left: calc(-1 * var(--verse-gutter) + var(--initial-hang, 0) * var(--opening-em));
   }
 }
@@ -7237,13 +7396,6 @@ body.season-eastertide {
   text-indent: -1.1rem;
 }
 
-/* The prayer text runs to its natural measure. Safari's `pretty` reflows a
-   whole paragraph to even its rag, setting psalm verses and prayers short of
-   the margin; rubrics keep the paragraph default. */
-.elements p:not(.rubric) {
-  text-wrap: wrap;
-}
-
 /* Dialogue responses finish the preceding utterance. Let the gutter carry
    the speaker and keep the adjacent lines on one steady vertical rhythm. */
 .liturgical-block > :is(.versicle-line, .response-line, .all-line) {
@@ -7308,6 +7460,7 @@ body.season-eastertide {
 .month-top,
 .continuation-label,
 .home-hour-link-state {
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -8158,8 +8311,11 @@ body.page-home::before {
 
   .month h2 { position: static; }
   .day-disclosures { display: block; }
+  /* No unfolding on paper: WebKit holds a discrete content-visibility
+     transition at hidden, so the motion rule would keep the digest unprinted. */
   :root .page-calendar .day-disclosures details::details-content {
     content-visibility: visible;
+    transition: none;
     block-size: auto;
     overflow: visible;
   }

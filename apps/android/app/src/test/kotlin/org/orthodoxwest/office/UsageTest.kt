@@ -2,6 +2,7 @@ package org.orthodoxwest.office
 
 import android.app.Application
 import android.content.Context
+import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import java.time.Clock
 import java.time.Instant
@@ -171,5 +172,33 @@ class UsageTest {
         Usage(prefs, clock = clock, executor = { it.run() }) { _, id, body -> posted += id to body; Usage.Reply(true) }
             .record(UsageEvent.Home(today), dark = false, form = "private")
         assertTrue(posted.isEmpty())
+    }
+
+    // Play's pre-launch report crawls every upload on fresh test devices; none is a reader.
+    @Test
+    fun testDevicesAreNotCounted() {
+        assertTrue(Usage.counts(app, build = true))
+        assertFalse(Usage.counts(app, build = false))
+        Settings.System.putString(app.contentResolver, "firebase.test.lab", "true")
+        try {
+            assertFalse(Usage.counts(app, build = true))
+        } finally {
+            Settings.System.putString(app.contentResolver, "firebase.test.lab", "false")
+        }
+    }
+
+    // A test phone is wiped minutes after the install; a reader's later pages count, as New.
+    @Test
+    fun aFreshInstallationWaitsBeforeReporting() {
+        val installed = now.minusSeconds(600)
+        val usage = Usage(prefs, enabled = true, clock = clock, installed = installed, executor = { it.run() }) { _, id, body ->
+            posted += id to body
+            Usage.Reply(true)
+        }
+        usage.record(UsageEvent.Home(today), dark = false, form = "private")
+        assertTrue(posted.isEmpty())
+        now = now.plus(Usage.SETTLING)
+        usage.record(UsageEvent.Home(today), dark = false, form = "private")
+        assertEquals(listOf("site appearance:nave screen:mobile visit:first client:android"), posted.map { it.second })
     }
 }

@@ -86,10 +86,18 @@ pub const ABOUT: &[AboutBlock] = &[
         red: false,
         text: "at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.",
     },
-    AboutBlock::Heading("The calendar"),
+    AboutBlock::Heading("Settings"),
+    AboutBlock::Paragraph(
+        "Settings (in the Menu on a phone) offer two appearances: the Nave, the church by day, and the Apse, its \
+         vault by night; Default follows your device. You can also make the text larger or smaller, and have Prime \
+         read the Martyrology, the saints of the coming day. Your choices are kept on your device.",
+    ),
+    AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(
         "Each day keeps a feast or the office of its season, as the archdiocesan ordo appoints, and the home page \
-         wears the day’s liturgical color. The [Ordo](/calendar) sets out every day of the year.",
+         wears the day’s liturgical color. The [Ordo](/calendar) sets out the year a month at a time: each day’s \
+         feast, rank and color, its fasts, and how each hour is kept. A key explains its marks, and the year’s \
+         first page gives the moveable feasts and Ember days.",
     ),
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(

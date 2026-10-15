@@ -52,13 +52,13 @@ Go forth, Ananias, * and enquire for Saul; for behold, he prayeth: for he is a c
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 464 (Conversion of St Paul, At Lauds)
-!Acts 9:1-2
+!Acts 9:1, 2
 And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, * he might bring them bound unto Jerusalem.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At Sext)
-!Acts 9:8-9
+!Acts 9:8, 9
 And Saul arose from the earth; and when his eyes were opened, he saw no man: but they led him by the hand, and brought him into Damascus. * And he was three days without sight, and neither did eat nor drink.
 R. Thanks be to God.
 

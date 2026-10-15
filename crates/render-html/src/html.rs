@@ -2,7 +2,7 @@
 //! the typography every run of display text passes through.
 
 use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, VoiceRole, VoiceSpan, posture_cues_at, split_words};
+use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
@@ -97,7 +97,20 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             sb.push_str(&format!("<div class=\"{}\">", elem.kind.as_str()));
             if !elem.label.is_empty() {
                 sb.push_str("<h3 class=\"item-label\">");
-                sb.push_str(&esc_text(&elem.label));
+                match elem.psalm_label_parts() {
+                    Some((word, greek, hebrew)) => {
+                        sb.push_str(&esc_text(word));
+                        sb.push_str("<span class=\"psalm-num\">");
+                        sb.push_str(&esc_text(greek));
+                        if !hebrew.is_empty() {
+                            sb.push_str("\u{a0}<span class=\"psalm-heb\">");
+                            sb.push_str(&esc_text(hebrew));
+                            sb.push_str("</span>");
+                        }
+                        sb.push_str("</span>");
+                    }
+                    None => sb.push_str(&esc_text(&elem.label)),
+                }
                 if !elem.incipit.is_empty() {
                     // The dot stays with the label; the Latin title wraps whole.
                     sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
@@ -297,19 +310,15 @@ fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
 }
 
 /// The corporate Lord's Prayer, split between officiant and people; any
-/// incomplete partition falls back to an ordinary prayer.
+/// incomplete partition falls back to an ordinary prayer. Said in secret up
+/// to a versicle, it is a voiced block with no initial.
 fn render_corporate_lord_prayer(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
+    let Some(parts) = elem.lord_prayer_parts() else { return render_flowing_block(&elem.text) };
+    if parts.versicle.is_some() {
+        return render_voice_block(&parts.voiced(), Mode::Flow);
     }
-    if officiant.is_empty() || response.is_empty() {
-        return render_flowing_block(&elem.text);
-    }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
+    let response = parts.response;
     let flow = |s: &str| s.split('\n').map(str::trim).filter(|l| !l.is_empty()).collect::<Vec<_>>().join(" ");
     format!(
         "<div class=\"liturgical-block corporate-lord-prayer\"><p class=\"plain-line corporate-lord-prayer-officiant\">{}</p><p class=\"response-line corporate-lord-prayer-response\"><span class=\"{SIGIL_CLASS}\">℟.</span><span class=\"sigil-text\">{}</span></p></div>",
@@ -461,11 +470,14 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
             let open_n = prose.len().min(2);
             if open_n > 0 {
                 sb.push_str("<p class=\"chant-line chant-line-opening\">");
+                // The second line is a block of its own (styled), so its
+                // turnover can hang under it rather than under the initial.
                 for (i, l) in prose[..open_n].iter().enumerate() {
                     if i > 0 {
-                        sb.push_str("<br>");
+                        sb.push_str(&format!("<br><span class=\"chant-line-second\">{}</span>", chant_line_html(l)));
+                    } else {
+                        sb.push_str(&chant_line_html(l));
                     }
-                    sb.push_str(&chant_line_html(l));
                 }
                 sb.push_str("</p>");
             }

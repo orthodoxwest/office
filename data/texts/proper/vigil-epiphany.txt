@@ -50,7 +50,7 @@ Almighty, everlasting God, direct our actions according to thy good pleasure: th
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 127 (Vigil of the Epiphany)
-!Gal 4:1-2
+!Gal. 4:1, 2
 Brethren: The heir, as long as he is a child, differeth nothing from a servant, though he be lord of all; but is under tutors and governors until the time appointed of the father.
 R. Thanks be to God.
 
@@ -63,13 +63,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 222 (Vigil of the Epiphany, At Sext)
-!Gal 4:4-5
+!Gal. 4:4, 5
 But when the fulness of the time was come, God sent forth his Son, made of a woman, * made under the law, to redeem them that were under the law, that we might receive the adoption of sons.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 223 (Vigil of the Epiphany, At None)
-!Gal 4:7
+!Gal. 4:7
 Wherefore thou art no more a servant, but a son; * and if a son, then an heir of God through Christ.
 R. Thanks be to God.
 

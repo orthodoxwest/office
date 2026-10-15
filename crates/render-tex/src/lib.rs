@@ -5,7 +5,7 @@ use calendar::{Color, Season};
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceRole, posture_cues_at, split_words,
+    ElementType, OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words,
 };
 
 const PREAMBLE: &str = include_str!("preamble.tex");
@@ -165,13 +165,26 @@ fn tex_element(elem: &OfficeElement, ant: &str, chant: Option<&Chant<'_>>) -> St
         ElementType::OpeningAcclamation => b.push_str(&format!("\\acclamation{{{}}}\n\n", mediant_line(&elem.text))),
         ElementType::Psalm | ElementType::Canticle => {
             let unrepeated = elem.unrepeated.as_ref().map_or(0, |u| u.words);
-            let psalm = format_psalm(&elem.text, &elem.label, elem.kind, &elem.postures, unrepeated, chant);
+            // A canticle's score is found by its corpus key: two canticles share a name.
+            let name = if elem.kind == ElementType::Canticle && !elem.source_ref.is_empty() {
+                elem.source_ref.rsplit('/').next().unwrap_or("")
+            } else {
+                &elem.label
+            };
+            let psalm = format_psalm(&elem.text, name, elem.kind, &elem.postures, unrepeated, chant);
             // A chant score sets the psalm whole, so the rubric stands only over text.
             if unrepeated > 0 && psalm.contains("\\begin{psalmverses}") {
                 b.push_str(&format_rubric_spans(&elem.unrepeated_rubric()));
             }
             if !elem.label.is_empty() {
-                b.push_str(&format!("\n\\psalmlabel{{{}}}{{{}}}\n\n", tex_line(&elem.label), tex_line(&elem.incipit)));
+                let label = match elem.psalm_label_parts() {
+                    Some((word, greek, "")) => format!("{}\\psalmnum{{{}}}", tex_line(word), tex_line(greek)),
+                    Some((word, greek, hebrew)) => {
+                        format!("{}\\psalmnum{{{}~\\psalmheb{{{}}}}}", tex_line(word), tex_line(greek), tex_line(hebrew))
+                    }
+                    None => tex_line(&elem.label),
+                };
+                b.push_str(&format!("\n\\psalmlabel{{{label}}}{{{}}}\n\n", tex_line(&elem.incipit)));
             }
             b.push_str(&psalm);
         }
@@ -661,20 +674,17 @@ fn split_at_word(text: &str, initial_end: usize) -> (String, String, String) {
     (initial.to_string(), rest[..word_end].to_string(), rest[word_end..].to_string())
 }
 
+/// Said in secret up to a versicle, the prayer is muted prose with no
+/// initial, then its ℣ and ℟.
 fn format_corporate_lord_prayer(elem: &OfficeElement) -> String {
-    let (mut officiant, mut response) = (String::new(), String::new());
-    for span in &elem.voice {
-        match span.role {
-            Some(VoiceRole::Officiant) => officiant.push_str(&span.text),
-            Some(VoiceRole::Response) => response.push_str(&span.text),
-            Some(VoiceRole::Priest | VoiceRole::All) | None => {}
-        }
-    }
-    if officiant.is_empty() || response.is_empty() {
-        return format_block(&elem.text);
-    }
+    let Some(parts) = elem.lord_prayer_parts() else { return format_block(&elem.text) };
     let flow = |s: &str| s.split_whitespace().collect::<Vec<_>>().join(" ");
-    format!("{}\\response{{{}}}\n\n", initial(Initial::Prose, &flow(&officiant), ""), mediant_line(&flow(&response)))
+    if let Some(versicle) = &parts.versicle {
+        let lines = format!("V. {}\nR. {}", flow(versicle), flow(&parts.response));
+        return format!("{}{}", format_voice_spans(&parts.officiant), format_lines(&lines));
+    }
+    let officiant: String = parts.officiant.iter().map(|s| s.text.as_str()).collect();
+    format!("{}\\response{{{}}}\n\n", initial(Initial::Prose, &flow(&officiant), ""), mediant_line(&flow(&parts.response)))
 }
 
 /// How a block sets its plain prose lines.
@@ -812,7 +822,8 @@ fn tex_line(s: &str) -> String {
     escape_tex(&typeset(s)).replace('✠', "\\crux{}")
 }
 
-/// The GABC slug of an element label: "Psalm 67" → "067", else a slug.
+/// The GABC slug of an element label, by the psalter's Hebrew number:
+/// "Psalm 66 (67)" and "Psalm 4" → "067" and "004", else a slug.
 pub fn label_to_slug(label: &str, kind: ElementType) -> String {
     if label.is_empty() {
         return String::new();
@@ -820,7 +831,12 @@ pub fn label_to_slug(label: &str, kind: ElementType) -> String {
     if kind == ElementType::Psalm
         && let Some(after) = label.strip_prefix("Psalm ")
     {
-        let num = after.split_whitespace().next().unwrap_or("");
+        let after = after.replace('\u{a0}', " ");
+        let hebrew = match after.split_once(" (") {
+            Some((_, h)) if h.starts_with(|c: char| c.is_ascii_digit()) => h.trim_end_matches(')'),
+            _ => &after,
+        };
+        let num = hebrew.split_whitespace().next().unwrap_or("");
         return format!("{num:0>3}");
     }
     slugify(label)
@@ -856,9 +872,17 @@ fn format_prayer_voice(elem: &OfficeElement) -> Option<String> {
     if !silent || joined != elem.text {
         return None;
     }
+    Some(format_voice_spans(&elem.voice))
+}
+
+/// Spans as one muted-where-silent paragraph flow.
+fn format_voice_spans(spans: &[VoiceSpan]) -> String {
     let mut b = String::from("\\noindent ");
-    for span in &elem.voice {
+    for (n, span) in spans.iter().enumerate() {
         let mut text = span.text.as_str();
+        if n + 1 == spans.len() {
+            text = text.trim_end();
+        }
         if !span.spoken {
             // \color ends with \ignorespaces: a leading space stays outside it.
             let trimmed = text.trim_start();
@@ -879,7 +903,7 @@ fn format_prayer_voice(elem: &OfficeElement) -> Option<String> {
         }
     }
     b.push_str("\\par\n\n");
-    Some(b)
+    b
 }
 
 #[cfg(test)]
@@ -925,6 +949,29 @@ mod tests {
         assert!(body.contains("\\antclose{"), "{body}");
         assert_eq!(tex_section(&section, None), body);
         assert!(preamble().contains("\\newcommand{\\antopen}"));
+    }
+
+    /// #665: a psalm's first verse turns over below its dropped initial at
+    /// the verses' text edge, where `\psalmverse` hangs every other verse,
+    /// not back at the margin under the verse numbers; every other mode's
+    /// turnovers keep the margin.
+    #[test]
+    fn psalm_initial_turns_over_at_the_verse_edge() {
+        let p = preamble();
+        assert!(p.contains("\\setlength{\\psalmversewidth}{2em}"), "verse edge defined");
+        assert!(p.contains("\\noindent\\hangindent=\\psalmversewidth\\hangafter=1"), "verses hang at the edge");
+        assert!(
+            p.contains("\\dim_use:N \\l__initial_tail_dim ~ \\dim_eval:n { \\linewidth - \\l__initial_tail_dim } \\scan_stop:"),
+            "drop's last parshape entry is the tail"
+        );
+        assert!(!p.contains("0pt ~ \\dim_use:N \\linewidth"), "no fixed margin tail");
+        let initial = &p[p.find("\\NewDocumentCommand \\initial ").expect("\\initial")..];
+        let reset = initial.find("\\dim_zero:N \\l__initial_tail_dim").expect("tail reset for every mode");
+        let psalm = initial.find("{ psalm }").expect("psalm mode");
+        let prose = initial.find("{ prose }").expect("prose mode");
+        let set = initial.find("\\dim_set_eq:NN \\l__initial_tail_dim \\psalmversewidth").expect("psalm sets the tail");
+        assert!(reset < initial.find("{ drop }").unwrap() && psalm < set && set < prose, "only psalm mode sets the tail");
+        assert_eq!(initial.matches("\\l__initial_tail_dim").count(), 2);
     }
 
     #[test]
@@ -973,6 +1020,9 @@ mod tests {
         }
         for (label, kind, want) in [
             ("Psalm 67", ElementType::Psalm, "067"),
+            ("Psalm 66 (67)", ElementType::Psalm, "067"),
+            ("Psalm 117 (118)", ElementType::Psalm, "118"),
+            ("Psalm 66\u{a0}(67)", ElementType::Psalm, "067"),
             ("Psalm 4", ElementType::Psalm, "004"),
             ("Psalm 118 (Aleph)", ElementType::Psalm, "118"),
             ("Magnificat", ElementType::Canticle, "magnificat"),

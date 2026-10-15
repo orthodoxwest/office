@@ -35,6 +35,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 /** An SVG path, as the web's templates and ornaments draw it. */
 private fun svg(d: String): Path = PathParser().parsePathString(d).toPath()
@@ -221,8 +235,9 @@ fun Headpiece(modifier: Modifier = Modifier) {
 @Composable
 fun HourSign(hour: String) {
     val p = LocalPalette.current
+    val o = LocalOrnament.current
     when (hour) {
-        "lauds" -> Canvas(Modifier.size(14.72.dp)) { fitted(24f, 24f) { drawPath(Sun, p.gold) } }
+        "lauds" -> Canvas(Modifier.size(14.72.dp)) { fitted(24f, 24f) { drawPath(Sun, o.flat) } }
         "vespers", "compline" -> Canvas(Modifier.size(16.64.dp)) { fitted(24f, 24f) { drawPath(Moon, p.moonInk) } }
         // A step larger than the shared headpiece's cross (the web's 1rem against 0.8rem), nearer
         // the sun's and moon's weight in the rule's break.
@@ -232,7 +247,8 @@ fun HourSign(hour: String) {
 
 /**
  * A painted double rule, broken by `gap` at its centre (where a headpiece's sign sits) and
- * optionally interrupted by a lozenge in the day's colour, ringed in the lining. `heavy` is the
+ * optionally interrupted by a lozenge in the day's colour, ringed in the lining and set in a ring
+ * of the page ground that breaks the rules about it. `heavy` is the
  * hour title's upper rule: 2dp over 1dp, as the home niche's lining.
  */
 @Composable
@@ -253,7 +269,13 @@ fun DoubleRule(modifier: Modifier = Modifier, gap: Dp = 0.dp, lozenge: Color? = 
                 drawLine(color, Offset(0f, y), Offset(size.width, y), line)
             }
         }
-        if (lozenge != null) lozenge(Offset(size.width / 2f, mid), 4.5.dp.toPx(), lozenge, p.lining)
+        if (lozenge != null) {
+            val c = Offset(size.width / 2f, mid)
+            // A 3px ring of the page ground breaks the rules about it (the web's
+            // `box-shadow: 0 0 0 1px var(--lining), 0 0 0 3px var(--bg)` on the 0.3rem square).
+            lozenge(c, 7.64.dp.toPx(), p.bg, null)
+            lozenge(c, 4.5.dp.toPx(), lozenge, p.lining)
+        }
     }
 }
 
@@ -322,6 +344,30 @@ fun FishIcon(color: Color, modifier: Modifier = Modifier) {
 @Composable
 fun PlasterWall() {
     Image(painterResource(LocalPalette.current.plaster), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+}
+
+/**
+ * The wall's own copy behind something that must hide what passes beneath it (the ordo's pinned
+ * month heading): opaque, and lined up with the full-screen wall as the web's `background-attachment:
+ * fixed` lines its copy up, so the heading shows no seam as it pins.
+ */
+@Composable
+fun Modifier.wallBehind(): Modifier {
+    val p = LocalPalette.current
+    val image = ImageBitmap.imageResource(p.plaster)
+    val window = LocalWindowInfo.current.containerSize
+    var at by remember { mutableStateOf(Offset.Zero) }
+    return this.onGloballyPositioned { at = it.positionInWindow() }.drawBehind {
+        drawRect(p.bg)
+        if (window.width == 0 || window.height == 0) return@drawBehind
+        // The wall's ContentScale.Crop: scaled to cover the window, centred.
+        val scale = max(window.width / image.width.toFloat(), window.height / image.height.toFloat())
+        val w = (image.width * scale).roundToInt()
+        val h = (image.height * scale).roundToInt()
+        val left = ((window.width - w) / 2f - at.x).roundToInt()
+        val top = ((window.height - h) / 2f - at.y).roundToInt()
+        clipRect { drawImage(image, dstOffset = IntOffset(left, top), dstSize = IntSize(w, h)) }
+    }
 }
 
 /**

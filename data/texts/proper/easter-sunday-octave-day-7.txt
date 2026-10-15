@@ -1,3 +1,9 @@
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 369 (Saturday before Low Sunday)
 They ran both together, * and the other disciple did outrun Peter, and came first to the sepulchre, alleluia.
+
+[collect]
+# SOURCE: monastic diurnal, pp. 369–370 (Saturday before Low Sunday); 2026 ordo, 18 Apr: "Col. (369f)".
+# The Diurnal's "[In America as on Tuesday.]" points at Tuesday's APB collect, which
+# the corpus does not use on Tuesday either (proper/easter-tuesday/collect).
+Grant, we beseech thee, Almighty God: that we who have devoutly kept the Paschal Feast, may thereby be counted worthy to attain unto eternal joys.

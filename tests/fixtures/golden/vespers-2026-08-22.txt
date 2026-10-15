@@ -40,7 +40,7 @@ Alleluia
 
 Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lo
 
 The Virgin Mary * is taken up into heavenly chambers, wherein the King of kings sitteth upon a starry throne.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -77,7 +77,7 @@ The Virgin Mary * is taken up into heavenly chambers, wherein the King of kings 
 
 We will run after thee, * because of the savour of thine ointments: exceedingly do the virgins love thee.
 
---- Psalm 122 · Lætatus sum in his ---
+--- Psalm 121 (122) · Lætatus sum in his ---
 Psalm 122
 
 I WAS glad when they said unto me * [Sit.] We will go into the house of the Lord.
@@ -97,12 +97,12 @@ We will run after thee, * because of the savour of thine ointments: exceedingly 
 
 Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.
 
---- Psalm 127 · Nisi Dominus ædificaverit domum ---
+--- Psalm 126 (127) · Nisi Dominus ædificaverit domum ---
 Psalm 127
 
 EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 2. Except the Lord keep the city * the watchman waketh but in vain.
-3. It is but lost labour that ye haste to rise up early, and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
+3. It is but lost labour that ye haste to rise up early, † and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
 4. Lo, children and the fruit of the womb * are an heritage and gift that cometh of the Lord.
 5. Like as the arrows in the hand of the giant * even so are the young children.
 6. Happy is the man that hath his quiver full of them * [Stand.] they shall not be ashamed when they speak with their enemies in the gate.
@@ -112,7 +112,7 @@ EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 
 Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.
 
---- Sir 24:7-8 ---
+--- Ecclus. 24:7, 8 ---
 In all things I sought rest, and I shall abide in the Lord's inheritance. So the Creator of all things gave me a commandment, * and he that made me caused my tabernacle to rest.
 R. Thanks be to God.
 
@@ -168,7 +168,8 @@ R. Above choirs of Angels to the heavenly kingdom.
 
 On this day * the Virgin Mary went up into heaven: rejoice, because she reigneth with Christ for ever and ever.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -195,7 +196,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

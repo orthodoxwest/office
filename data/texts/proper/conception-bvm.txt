@@ -42,19 +42,19 @@ O merciful God, hear the supplication of thy servants: that we who are gathered 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 365 (The Conception of the B.V.M.)
-!Prov 8:22-24
+!Prov. 8:22-24
 The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, pp. 449–450 (Conception of the B.V.M., At Sext)
-!Ezek 44:2-3
+!Ezek. 44:2, 3
 This gate shall be shut, it shall not be opened, and no man shall enter in by it; * because the Lord, the God of Israel, hath entered in by it, therefore it shall be shut. It is for the prince; the prince, he shall sit in it.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At None)
-!Rev 12:1
+!Rev. 12:1
 There appeared a great wonder in heaven; * a woman clothed with the sun, and the moon under her feet, and upon her head a crown of twelve stars.
 R. Thanks be to God.
 

@@ -13,8 +13,10 @@ sanctoral.txt: feast "bad-bool": HasOctave: expected true or false, got "yes"
 sanctoral.txt: feast "vigil-category" is a vigil but has category "martyr" instead of feria
 sanctoral.txt: feast "vigil-without-owner" is a vigil but does not specify VigilOf
 sanctoral.txt: feast "owner-without-vigil" specifies VigilOf but is not a vigil
-sanctoral.txt: feast "octave-class-without-octave" specifies OctaveClass without HasOctave (except a Simple octave day)
+sanctoral.txt: feast "octave-class-without-octave" specifies OctaveClass without HasOctave (except a simple octave)
 sanctoral.txt: feast "bad-octave-class": invalid OctaveClass "privileged-fourth"
+sanctoral.txt: feast "octave-without-class" has HasOctave without OctaveClass
+sanctoral.txt: feast "simple-octave-with-octave" has a simple octave, which takes no HasOctave
 sanctoral.txt: feast "commemoration-class-category": CommemorationClass requires feria category
 sanctoral.txt: feast "primary-rank": PrimaryOfOurLord requires a Double I Class feast of Our Lord
 Syntax error in awrv.txt: $DATA/feasts/awrv.txt:10: expected Key = value, got "this line is not a key-value pair"

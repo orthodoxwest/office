@@ -38,13 +38,13 @@ Yield up to us * a man so righteous, restore to us a man so holy: destroy not a 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 355 (St Andrew)
-!Rom 10:10-11
+!Rom. 10:10, 11
 Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 445 (St Andrew, At Sext)
-!Rom 10:12-13
+!Rom. 10:12, 13
 For there is no difference between the Jew and the Greek: * for the same Lord over all is rich unto all that call upon him. For whosoever shall call upon the Name of the Lord shall be saved.
 R. Thanks be to God.
 
@@ -68,12 +68,17 @@ One of the two * which followed the Lord was Andrew, Simon Peter's brother, alle
 @use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-@use commons/apostle/hymn-lauds
+@use commons/apostle/hymn-vespers
 
 [versicle-lauds]
 @use commons/apostle/versicle-lauds
 
 [versicle-vespers]
+# SOURCE: monastic diurnal, p. 446 (St Andrew, At II Vespers: "Hymn and V. as at Lauds of the Common, p. 11*")
+@use commons/apostle/versicle-vespers
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 444 (St Andrew, At I Vespers: "Short R., Hymn, and V. of the Common, p. 10*")
 @use commons/apostle/versicle-first-vespers
 
 # [commemoration-versicle]
@@ -81,9 +86,6 @@ One of the two * which followed the Lord was Andrew, Simon Peter's brother, alle
 #
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
 #
 # [vespers-psalmody]
 # Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).

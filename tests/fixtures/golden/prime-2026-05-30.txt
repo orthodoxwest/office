@@ -79,7 +79,7 @@ Amen.
 
 The Lord liveth.
 
---- Psalm 18b · Cum sancto sanctus eris ---
+--- Psalm 17b (18b) · Cum sancto sanctus eris ---
 Psalm 18:25-51
 
 WITH the holy thou shalt be holy * and with a perfect man thou shalt be perfect.
@@ -106,14 +106,14 @@ WITH the holy thou shalt be holy * and with a perfect man thou shalt be perfect.
 46. The strange children shall fail * and be afraid out of their prisons.
 47. The Lord liveth, and blessed be my strong helper * and praised be the God of my salvation;
 48. Even the God that seeth that I be avenged * and subdueth the people unto me.
-49. It is he that delivereth me from my cruel enemies, and setteth me up above mine adversaries * thou shalt rid me from the wicked man.
+49. It is he that delivereth me from my cruel enemies, † and setteth me up above mine adversaries * thou shalt rid me from the wicked man.
 50. For this cause will I give thanks unto thee, O Lord, among the Gentiles * and sing praises unto thy Name.
 51. Great prosperity giveth he unto his King * and sheweth loving-kindness unto David his Anointed, and unto his seed for evermore.
 
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 19 · Cæli enarrant gloriam Dei ---
+--- Psalm 18 (19) · Cæli enarrant gloriam Dei ---
 Psalm 19
 
 THE heavens declare the glory of God * and the firmament sheweth his handywork.
@@ -121,7 +121,7 @@ THE heavens declare the glory of God * and the firmament sheweth his handywork.
 3. There is neither speech nor language * but their voices are heard among them.
 4. Their sound is gone out into all lands * and their words into the ends of the world.
 5. In them hath he set a tabernacle for the sun * which cometh forth as a bridegroom out of his chamber, and rejoiceth as a giant to run his course.
-6. It goeth forth from the uttermost part of the heaven, and runneth about unto the end of it again * and there is nothing hid from the heat thereof.
+6. It goeth forth from the uttermost part of the heaven, † and runneth about unto the end of it again * and there is nothing hid from the heat thereof.
 7. The law of the Lord is an undefiled law, converting the soul * the testimony of the Lord is sure, and giveth wisdom unto the simple.
 8. The statutes of the Lord are right, and rejoice the heart * the commandment of the Lord is pure, and giveth light unto the eyes.
 9. The fear of the Lord is clean, and endureth for ever * the judgements of the Lord are true, and righteous altogether.
@@ -135,15 +135,15 @@ THE heavens declare the glory of God * and the firmament sheweth his handywork.
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
---- Psalm 20 · Exaudiat te Dominus ---
+--- Psalm 19 (20) · Exaudiat te Dominus ---
 Psalm 20
 
 THE Lord hear thee in the day of trouble * the Name of the God of Jacob defend thee;
 2. Send thee help from the sanctuary * and strengthen thee out of Sion;
 3. Remember all thy offerings * and accept thy burnt-sacrifice;
 4. Grant thee thy heart's desire * and fulfil all thy mind.
-5. We will rejoice in thy salvation, and triumph in the Name of the Lord our God * the Lord perform all thy petitions.
-6. Now know I that the Lord helpeth his Anointed, and will hear him from his holy heaven * even with the wholesome strength of his right hand.
+5. We will rejoice in thy salvation, † and triumph in the Name of the Lord our God * the Lord perform all thy petitions.
+6. Now know I that the Lord helpeth his Anointed, † and will hear him from his holy heaven * even with the wholesome strength of his right hand.
 7. Some put their trust in chariots, and some in horses * but we will remember the Name of the Lord our God.
 8. They are brought down, and fallen * but we are risen, and stand upright.
 9. Save, Lord, and hear us, O King of heaven * when we call upon thee.
@@ -169,8 +169,8 @@ Our Father, who art in heaven, Hallowed be thy Name.
 Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
-And lead us not into temptation,
-R. But deliver us from evil. Amen.
+V. And lead us not into temptation.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

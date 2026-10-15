@@ -1,6 +1,6 @@
 VESPERS
 Monday, November 9, 2026
-Dedication of The Basilica of St Saviour
+Dedication of the Basilica of St Saviour
 Season: pentecost | Color: white
 ============================================================
 
@@ -40,7 +40,7 @@ Alleluia
 
 Holiness becometh * thine house, O Lord, for ever.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ Holiness becometh * thine house, O Lord, for ever.
 
 My house * shall be called the house of prayer.
 
---- Psalm 111 · Confitebor tibi, Domine ---
+--- Psalm 110 (111) · Confitebor tibi, Domine ---
 Psalm 111
 
 I WILL give thanks unto the Lord with my whole heart * [Sit.] secretly among the faithful, and in the congregation.
@@ -79,7 +79,7 @@ My house * shall be called the house of prayer.
 
 This is the Lord's house, * firmly builded: it is well founded on the solid rock.
 
---- Psalm 112 · Beatus vir, qui timet Dominum ---
+--- Psalm 111 (112) · Beatus vir, qui timet Dominum ---
 Psalm 112
 
 BLESSED is the man that feareth the Lord * [Sit.] he hath great delight in his commandments.
@@ -100,7 +100,7 @@ This is the Lord's house, * firmly builded: it is well founded on the solid rock
 
 All thy walls * shall be stones most precious; and the towers of Jerusalem shall be upbuilded with jewels.
 
---- Psalm 147b · Lauda, Jerusalem, Dominum ---
+--- Psalm 147 (147b) · Lauda, Jerusalem, Dominum ---
 Psalm 147:12-20
 
 PRAISE the Lord, O Jerusalem * [Sit.] praise thy God, O Sion.
@@ -118,7 +118,7 @@ PRAISE the Lord, O Jerusalem * [Sit.] praise thy God, O Sion.
 
 All thy walls * shall be stones most precious; and the towers of Jerusalem shall be upbuilded with jewels.
 
---- Rev 21:2 ---
+--- Rev. 21:2 ---
 I saw the holy city, new Jerusalem, coming down from God out of heaven, * prepared as a bride adorned for her husband.
 R. Thanks be to God.
 
@@ -172,7 +172,8 @@ R. For ever.
 
 O how dreadful * is this place! truly this is none other but the house of God, and the gate of heaven.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -199,7 +200,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

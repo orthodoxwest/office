@@ -35,19 +35,19 @@ O God, who from among other Angels didst choose the Archangel Gabriel to announc
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
-!Dan 9:21-22
+!Dan. 9:21, 22
 Behold the man Gabriel, whom I had seen in the vision at the beginning, being caused to fly swiftly, touched me about the time of the evening oblation. And he informed me, and talked with me, and said, * O Daniel, I am now come forth to give thee skill and understanding.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 501 (St Gabriel, At Sext)
-!Dan 9:23-24
+!Dan. 9:23, 24
 And I am come to shew thee; for thou art greatly beloved: * seventy weeks are determined to make an end of sins, and to seal up the vision and prophecy, and to anoint the most Holy.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 501 (St Gabriel, At None)
-!Dan 9:25
+!Dan. 9:25
 Know therefore and understand, that from the going forth of the commandment to restore and to build Jerusalem unto the Messiah the Prince, * shall be seven weeks, and threescore and two weeks.
 R. Thanks be to God.
 

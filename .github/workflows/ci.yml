@@ -327,13 +327,20 @@ jobs:
       matrix:
         include:
           - suite: behavior-1
-            args: tests/ux.spec.js --workers=4 --shard=1/3
+            args: tests/ux.spec.js --project=mobile-chromium --workers=4 --shard=1/3
           - suite: behavior-2
-            args: tests/ux.spec.js --workers=4 --shard=2/3
+            args: tests/ux.spec.js --project=mobile-chromium --workers=4 --shard=2/3
           - suite: behavior-3
-            args: tests/ux.spec.js --workers=4 --shard=3/3
+            args: tests/ux.spec.js --project=mobile-chromium --workers=4 --shard=3/3
+          # The same behaviour in Safari's engine.
+          - suite: webkit-1
+            args: tests/ux.spec.js --project=mobile-webkit --workers=4 --shard=1/3
+          - suite: webkit-2
+            args: tests/ux.spec.js --project=mobile-webkit --workers=4 --shard=2/3
+          - suite: webkit-3
+            args: tests/ux.spec.js --project=mobile-webkit --workers=4 --shard=3/3
           - suite: visual
-            args: tests/visual.spec.js --workers=2
+            args: tests/visual.spec.js --project=mobile-chromium --workers=2
 
     steps:
       - uses: actions/checkout@v7

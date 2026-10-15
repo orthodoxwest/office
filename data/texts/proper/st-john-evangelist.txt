@@ -58,19 +58,19 @@ Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 86 (Saint John, Apostle and Evangelist)
-!Sir 15:1-2
+!Ecclus. 15:1, 2
 He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 200 (St John, Apostle and Evangelist, At Sext)
-!Sir 15:3
+!Ecclus. 15:3
 With the bread of understanding shall she feed him, * and give him the water of wisdom to drink.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 200 (St John, Apostle and Evangelist, At None)
-!Sir 15:5-6
+!Ecclus. 15:5, 6
 In the midst of the congregation shall she open his mouth. He shall find joy and a crown of gladness, * and she shall cause him to inherit an everlasting name.
 R. Thanks be to God.
 
@@ -84,7 +84,7 @@ R. Thanks be to God.
 @use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-@use commons/apostle/hymn-lauds
+@use commons/apostle/hymn-vespers
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 88 (Saint John, Apostle and Evangelist)

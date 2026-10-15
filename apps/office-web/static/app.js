@@ -317,7 +317,7 @@ function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
   var installed = navigator.standalone === true ||
-    (!!window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    (!!window.matchMedia && window.matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches);
   var clientToken = installed ? " client:pwa" : " client:browser";
   // Prime, on a day with a Martyrology reading: whether the reader's setting
   // shows it or leaves the rubric in its place.
@@ -442,9 +442,10 @@ function usageBeaconBody(scope) {
   // itself never renders, so the material fades rather than flashing on or off.
   // Wait on the dip itself rather than its nominal length: a busy frame can
   // start it late, and a swap on a clock would then land mid-fade. The
-  // timer only bounds the wait, for a browser that reports no transitions.
+  // timer only bounds the wait for a dip that stalls; a loaded device can
+  // take several frames to start one.
   var VAULT_FADE_MS = 100;
-  var VAULT_FADE_LIMIT_MS = 400;
+  var VAULT_FADE_LIMIT_MS = 1000;
   var vaultFadeTurn = 0;
 
   var vaultDipped = function (root) {
@@ -473,9 +474,19 @@ function usageBeaconBody(scope) {
     flashThemeTransition();
     var root = document.documentElement;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Supersede any dip still pending from before the setting changed.
+      vaultFadeTurn++;
+      root.classList.remove("vault-hidden");
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       return;
+    }
+    // The wall holds transparent only under .theme-anim, so keep it on until
+    // the swap: a slow dip outlasting the crossfade's timer would otherwise
+    // bring the wall back before the swap and show it.
+    if (themeAnimTimer) {
+      clearTimeout(themeAnimTimer);
+      themeAnimTimer = null;
     }
     root.classList.add("vault-hidden");
     var turn = ++vaultFadeTurn;
@@ -488,7 +499,14 @@ function usageBeaconBody(scope) {
       flashThemeTransition();
       paintThemeChoice(choice);
       writeStoredTheme(choice);
-      root.classList.remove("vault-hidden");
+      // Lift the wall a frame after the swap, so the new material is in place
+      // while it is still transparent (WebKit reports a pseudo-element's
+      // after-change style for a transition not yet started).
+      requestAnimationFrame(function () {
+        if (turn === vaultFadeTurn) {
+          root.classList.remove("vault-hidden");
+        }
+      });
     });
   };
 
@@ -926,6 +944,33 @@ function usageBeaconBody(scope) {
     syncChromeIfNeeded();
   });
 
+  // A tap outside an overlay puts it away. iOS Safari sends a click only to
+  // what it judges tappable (links, controls, elements with their own click
+  // listener); a tap on the page's text or the header's bare bar produces no
+  // click at all, so a document click listener never hears it there.
+  // pointerup reaches every element, and a touch that becomes a scroll ends
+  // in pointercancel instead, so it stands for the tap. click stays for the
+  // keyboard; a mouse sends both, and the second finds it already closed. A
+  // right or middle button sends no click, so its pointerup leaves it open.
+  // Safari moves a touch's click onto a control near the finger, so a tap
+  // just beside the overlay's own summary closes it on pointerup and then
+  // clicks the summary, which would open it again: that click is dropped.
+  var onTapOutside = function (overlay, handler) {
+    var closedByTap = -1;
+    document.addEventListener("pointerup", function (e) {
+      closedByTap = e.button === 0 && handler(e) ? e.timeStamp : -1;
+    });
+    document.addEventListener("click", function (e) {
+      var summary = e.target.closest && e.target.closest("summary");
+      if (closedByTap >= 0 && e.timeStamp - closedByTap < 1000 && summary && summary.parentElement === overlay) {
+        e.preventDefault();
+      } else {
+        handler(e);
+      }
+      closedByTap = -1;
+    });
+  };
+
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
   // scripting is available, keep [open] set on wide screens too (harmless
   // cosmetically, but matches disclosure semantics) and re-collapse on any
@@ -947,10 +992,12 @@ function usageBeaconBody(scope) {
 
     // The phone menu is an overlay: a tap anywhere outside it, or Escape,
     // puts it away. Taps inside (including the preferences) leave it open.
-    document.addEventListener("click", function (e) {
+    onTapOutside(siteMenu, function (e) {
       if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
         siteMenu.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
@@ -967,10 +1014,12 @@ function usageBeaconBody(scope) {
   // Escape, puts it away; a preference chosen inside leaves it open.
   var siteSettings = document.querySelector(".site-settings");
   if (siteSettings) {
-    document.addEventListener("click", function (e) {
+    onTapOutside(siteSettings, function (e) {
       if (siteSettings.open && !siteSettings.contains(e.target)) {
         siteSettings.removeAttribute("open");
+        return true;
       }
+      return false;
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && siteSettings.open) {
@@ -1352,7 +1401,16 @@ function usageBeaconBody(scope) {
       return state.view === "days" ? MONTH_NAMES[state.focus.getUTCMonth()] + " " + year : String(year);
     }
 
+    // What the grid shows, so an opening that would show the same again
+    // leaves it alone rather than rebuilding it under the unfolding.
+    var drawn = null;
+
+    function drawing() {
+      return [state.view, civilSlug(state.focus), state.chosen, state.today].join(" ");
+    }
+
     function render() {
+      drawn = drawing();
       picker.setAttribute("data-view", state.view);
       var days = state.view === "days";
       title.textContent = titleText();
@@ -1560,8 +1618,10 @@ function usageBeaconBody(scope) {
         title.focus();
         return;
       }
-      details.open = false;
-      details.querySelector("summary").focus();
+      // Through the summary, so the fold is the one a tap makes.
+      var summary = details.querySelector("summary");
+      summary.click();
+      summary.focus();
     });
 
     // Each opening starts from the page's own day, and from the current
@@ -1569,7 +1629,9 @@ function usageBeaconBody(scope) {
     details.addEventListener("toggle", function () {
       if (details.open) {
         reset();
-        render();
+        if (drawing() !== drawn) {
+          render();
+        }
       }
     });
 
@@ -1585,6 +1647,110 @@ function usageBeaconBody(scope) {
     }
     nav.insertAdjacentElement("afterend", buildDatePicker(details));
     details.classList.add("has-date-picker");
+  });
+
+  // On a phone, home's card is at least a screen tall, and the head above
+  // the day takes whatever height the card's contents leave. "Change date"
+  // unfolding under it used up that spare height first: the day leapt up in
+  // the opening frames, then stood while the card grew down under the
+  // picker, two motions one after the other. Instead the head gives up its
+  // spare height over the whole unfolding, at the disclosure's pace, so the
+  // day rises as the picker opens and settles with it; folding, the reverse.
+  // Where the head has nothing to give (a short phone, the desktop niche),
+  // the fold is left as it is.
+  document.querySelectorAll(".home-hero details.home-date-nav").forEach(function (details) {
+    var head = details.closest(".home-hero").querySelector(".home-summary");
+    var summary = details.querySelector("summary");
+    if (!head || !summary || !window.matchMedia || !window.CSS || !CSS.supports("interpolate-size", "allow-keywords")) {
+      return;
+    }
+    var stillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    // The head's heights folded and unfolded while it eases between them.
+    var easing = null;
+
+    // The head's height with the picker settled open or shut, laid out
+    // without the unfolding's transition and put back within the same task,
+    // so nothing of it is painted.
+    function settledHeight(open) {
+      var was = details.open;
+      details.classList.add("is-settling");
+      details.open = open;
+      var height = head.getBoundingClientRect().height;
+      details.open = was;
+      void head.offsetHeight;
+      details.classList.remove("is-settling");
+      return height;
+    }
+
+    function settle() {
+      easing = null;
+      head.style.removeProperty("transition");
+      head.style.removeProperty("min-height");
+      head.style.removeProperty("flex-grow");
+    }
+
+    // The summary's own toggle follows this listener in the same task, so
+    // the head's transition and the disclosure's start on the same frame.
+    summary.addEventListener("click", function () {
+      if (!document.documentElement.classList.contains("motion-ready") || !stillness.matches) {
+        return;
+      }
+      var opening = !details.open;
+      if (easing) {
+        // Turned back part-way: the disclosure retraces its transition, and
+        // the head heads back to where it came from.
+        head.style.minHeight = (opening ? easing.open : easing.shut) + "px";
+        return;
+      }
+      var from = head.getBoundingClientRect().height;
+      var to = settledHeight(opening);
+      if (Math.abs(to - from) < 1) {
+        return;
+      }
+      easing = opening ? { shut: from, open: to } : { shut: to, open: from };
+      head.style.flexGrow = "0";
+      head.style.minHeight = from + "px";
+      void head.offsetHeight;
+      // The unfolding's duration and easing (style.css, "Disclosures unfold").
+      head.style.transition = "min-height 200ms ease-out";
+      head.style.minHeight = to + "px";
+    });
+
+    head.addEventListener("transitionend", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    head.addEventListener("transitioncancel", function (event) {
+      if (event.target === head && event.propertyName === "min-height") {
+        settle();
+      }
+    });
+    window.addEventListener("resize", function () {
+      if (easing) {
+        settle();
+      }
+    });
+  });
+
+  // The home panel's courses are clipped to its pointed head by --arch-w,
+  // the card's width, which style.css gives in container units. An element
+  // styled in container units is restyled and laid out again whenever
+  // anything in its container moves, so every frame of "Change date"
+  // unfolding re-laid every course of the head and its long clip-paths
+  // (some 6ms a frame on a desktop, several times that on a phone). The same
+  // width in pixels, kept here as the card's width changes, costs nothing
+  // between those changes; without script the container units stand.
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    if (!("ResizeObserver" in window)) {
+      return;
+    }
+    new ResizeObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      var box = entry.contentBoxSize && entry.contentBoxSize[0];
+      var width = box ? box.inlineSize : entry.contentRect.width;
+      hero.style.setProperty("--arch-cqi", width + "px");
+    }).observe(hero);
   });
 
   // currentHourInfo returns the office most likely being prayed at the given
@@ -1803,7 +1969,7 @@ function usageBeaconBody(scope) {
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home
   // page. The day-number link stays as the keyboard/no-JS path; clicks on
-  // links, rank tooltips, and the commemorations disclosure keep their own
+  // links, rank tooltips, and the office details disclosure keep their own
   // behavior, and selecting text never navigates.
   var calendarEl = document.querySelector(".calendar");
   if (calendarEl) {
@@ -2047,6 +2213,32 @@ function usageBeaconBody(scope) {
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();
+})();
+
+// The prayers before and after the Office open by the hour's default (Lauds,
+// Prime and Vespers open) until the reader opens or closes them; that choice
+// is then kept for the hour's section on this device, in localStorage only, as
+// "sext/Prayers Before the Office": true. hour.html applies it before paint.
+// Only a tap on the summary is a choice, not the page settling its defaults.
+(function () {
+  var PRAYERS_KEY = "office-prayers-open";
+  document.querySelectorAll(".elements > details.session-prayers[data-prayers]").forEach(function (details) {
+    var summary = details.querySelector(":scope > summary");
+    if (!summary) return;
+    summary.addEventListener("click", function () {
+      // The summary's own toggle follows this listener, so the choice is the
+      // state it will leave.
+      var open = !details.open;
+      try {
+        var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
+        if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};
+        chosen[details.getAttribute("data-prayers")] = open;
+        localStorage.setItem(PRAYERS_KEY, JSON.stringify(chosen));
+      } catch {
+        /* Storage refused: the hour keeps its default next time. */
+      }
+    });
+  });
 })();
 
 // Home marks the hours prayed: an hour counts once its end is reached after

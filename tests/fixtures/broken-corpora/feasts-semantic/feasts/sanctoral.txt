@@ -22,6 +22,7 @@ Category = martyr
 Month = 6
 Day = 1
 HasOctave = true
+OctaveClass = common
 
 [st-x]
 Name = St X again
@@ -62,3 +63,19 @@ Color = white
 Category = confessor
 Month = 4
 Day = 1
+
+[style-and]
+Name = Ss U and T, Martyrs
+Rank = simple
+Color = red
+Category = martyr
+Month = 4
+Day = 2
+
+[style-the]
+Name = Dedication of The Basilica of St S
+Rank = simple
+Color = white
+Category = dedication
+Month = 4
+Day = 3

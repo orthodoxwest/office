@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
@@ -268,7 +269,13 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp, privat
     val bandPad = pick(3.2.dp, 3.2.dp, 3.2.dp, 3.84.dp)
     val bandGap = pick(15.2.dp, 12.dp, 16.dp, 20.dp)
     val pray = pick(23.2f, 19.2f, 22.4f, 24f)
-    val prayPad = pick(13.8.dp, 13.9.dp, 15.5.dp, 17.9.dp)
+    /**
+     * The invitation's padding above and below its words, its 1px line included, as the web's
+     * `.pray-now` (0.68rem 0.72rem on a phone, 0.8rem from 830 high, 0.95rem from 880): measured
+     * against the web's snapshot, Compose sets the line where the browser does, so nothing is added.
+     */
+    val prayTop = pick(13.8.dp, 11.9.dp, 13.8.dp, 16.2.dp)
+    val prayBottom = pick(13.8.dp, 12.5.dp, 13.8.dp, 16.2.dp)
     val prayGap = pick(15.2.dp, 11.2.dp, 20.dp, 24.dp)
     val row = pick(46.dp, 44.dp, 54.4.dp, 62.4.dp)
     val hour = pick(17.6f, 15.68f)
@@ -328,6 +335,9 @@ private fun Frontispiece(
     val ink = frontispieceInk(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
+    // The picker's full height as it was last laid out, so the head can ease in step with its
+    // unfolding (below); written while the picker is measured, read in the same measure pass.
+    val unfolded = remember { IntArray(1) }
     // The hours prayed on this day, marked again when one is prayed.
     val context = LocalContext.current
     val prayed = remember(date, Prayed.version) { Prayed.hours(context, date) }
@@ -430,25 +440,49 @@ private fun Frontispiece(
                     PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(view.currentHour, view.currentHourNote, prayed, tier) { onHour(date, it) }
-                    // Season and date control share one line after the invitation.
+                    // Season and date control share one baseline after the invitation (`.home-day-meta`);
+                    // once open, the control takes a row of its own under the season.
                     Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
-                    if (introduction != null) {
-                        // A reader's first week: the introduction before Change date as its twin,
-                        // the same small capitals, ink and touch height. It takes the season's
-                        // place, which each hour's header still names.
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    val season = view.season.uppercase()
+                    val seasonStyle = Type.label(11.2f, 0.12f).copy(color = p.muted)
+                    // One row throughout, so the control TalkBack just activated is the one that stays
+                    // (the web's one <summary>); open, the season fills its line and the control wraps.
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)) {
+                        if (introduction != null) {
+                            // A reader's first week: the introduction before Change date as its
+                            // twin, the same small capitals, ink and touch height. It takes the
+                            // season's place, which each hour's header still names.
                             Text(
                                 introduction.uppercase(),
-                                Modifier.heightIn(min = 44.dp).tap(onClick = onIntroduction).padding(horizontal = 8.dp).wrapContentHeight(Alignment.CenterVertically),
+                                (if (picking) Modifier.fillMaxWidth().wrapContentWidth() else Modifier).alignByBaseline()
+                                    .heightIn(min = 44.dp).tap(onClick = onIntroduction).padding(horizontal = 8.dp)
+                                    .wrapContentHeight(Alignment.CenterVertically),
                                 style = Type.control.copy(color = p.muted),
                             )
-                            Disclosure("Change date", picking, { picking = !picking })
+                        } else if (season.isNotEmpty()) {
+                            Text(
+                                season,
+                                (if (picking) Modifier.fillMaxWidth() else Modifier).alignByBaseline(),
+                                style = seasonStyle.copy(textAlign = TextAlign.Center),
+                            )
                         }
-                    } else {
-                        if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 3.2.dp), style = Type.small.copy(color = p.muted))
-                        Disclosure("Change date", picking, { picking = !picking })
+                        Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.alignByBaseline())
                     }
-                    Unfold(picking) { DatePicker(date, today) { picking = false; onDate(it) } }
+                }
+            },
+            // "Change date"'s picker, apart from the hours above it so the head can be measured
+            // without it.
+            {
+                Box(Modifier.fillMaxWidth().padding(horizontal = side), contentAlignment = Alignment.TopCenter) {
+                    Unfold(picking) {
+                        Column(
+                            Modifier.layout { measurable, constraints ->
+                                val placeable = measurable.measure(constraints)
+                                unfolded[0] = placeable.height
+                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                            },
+                        ) { DatePicker(date, today, centred = true) { picking = false; onDate(it) } }
+                    }
                 }
             },
         ),
@@ -471,18 +505,27 @@ private fun Frontispiece(
         val versicle = verses.firstOrNull()?.measure(full)
         val back = backs.firstOrNull()?.measure(full)
         val after = slots[5].first().measure(full)
+        val picker = slots[6].first().measure(full)
         val headPad = tier.headPad.roundToPx()
         val foot = tier.bottom.roundToPx()
         val day = facts.height + (back?.height ?: 0) + tier.dayGap.roundToPx()
+        val rise = (tier.arch.rise * width).roundToInt()
         // The day under the head's room for the cross, and the band no higher than the springing,
         // so it never crosses the arch; on a phone, the height the card is given beyond its own.
-        val summary = maxOf(headPad + day, (tier.arch.rise * width).roundToInt(), constraints.minHeight - after.height - foot)
+        val shut = maxOf(headPad + day, rise, constraints.minHeight - after.height - foot)
         // The versicle takes only the height the head has to spare: where it would make the card
-        // taller, the head goes without it.
-        val verse = versicle?.takeIf { headPad + day + it.height <= summary }
+        // taller, the head goes without it. It is fitted to the card with the picker shut, as the
+        // web's is, so opening the picker never takes it away.
+        val verse = versicle?.takeIf { headPad + day + it.height <= shut }
+        // The picker takes the head's spare height before it lengthens the card. Taken as it
+        // unfolded, that spare height went in the first frames: the day leapt up, then stood
+        // while the card grew down under the picker. Instead the head gives it up in step with
+        // the unfolding, so the day rises as the picker opens and settles with it.
+        val open = maxOf(headPad + day + (verse?.height ?: 0), rise, constraints.minHeight - after.height - unfolded[0] - foot)
+        val summary = if (picker.height == 0 || unfolded[0] == 0) shut else shut - (shut - open) * minOf(picker.height, unfolded[0]) / unfolded[0]
         val spare = summary - headPad - day - (verse?.height ?: 0)
         val wall = walls.first().measure(Constraints.fixed(width, summary))
-        val height = summary + after.height + foot
+        val height = summary + after.height + picker.height + foot
         layout(width, height) {
             wall.place(0, 0)
             mark.place((width - mark.width) / 2, tier.crownTop.roundToPx())
@@ -492,6 +535,7 @@ private fun Frontispiece(
             verse?.let { it.place(0, y); y += it.height }
             back?.place(0, y)
             after.place(0, summary)
+            picker.place(0, summary + after.height)
         }
     }
 }
@@ -558,15 +602,18 @@ private fun PrayNow(label: String, tier: HomeTier, onClick: () -> Unit) {
                 val i = w + 3.dp.toPx() + w / 2f
                 drawRect(inner, Offset(i, i), size.copy(width = size.width - 2 * i, height = size.height - 2 * i), style = Stroke(w))
             }
-            .padding(vertical = tier.prayPad, horizontal = 15.8.dp),
+            .padding(top = tier.prayTop, bottom = tier.prayBottom, start = 13.8.dp, end = 13.8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
     }
 }
 
+/** The current hour's wash: the oak at 8% on Nave; on the Apse the vault's blue lifted (`--apse-lift`). */
+private fun currentWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else Color(107, 58, 31).copy(alpha = 0.08f)
+
 /**
- * The hours by period in horizontal bands, the current one underlined in gold: framed in the
+ * The hours by period in horizontal bands, the current one washed and underlined in gold: framed in the
  * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
  */
 @Composable
@@ -604,20 +651,22 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                 Box(Modifier.width(1.dp).fillMaxHeight().background(ink.rule))
                 Row(Modifier.weight(1f).heightIn(min = tier.row), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
-                        if (j > 0) Divider(ink.rule, 16.dp)
+                        // The current hour's wash already divides it from its neighbours, so the
+                        // hairlines either side of it are hidden (their room kept), as the web's.
+                        if (j > 0) Divider(if (h == current || hours[j - 1] == current) Color.Transparent else ink.rule, 16.dp)
                         val done = h in prayed
-                        val gloss = if (h == current) note else ""
-                        val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { h == current }, "prayed".takeIf { done })
-                        Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) }, contentAlignment = Alignment.Center) {
+                        val now = h == current
+                        val gloss = if (now) note else ""
+                        val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { now }, "prayed".takeIf { done })
+                        // The current hour's whole cell takes the wash, with a line in the ornament's
+                        // gold across its foot (`.home-hour-link.is-current`); its name stays in the ink.
+                        val cell = if (now) Modifier.background(currentWash(p)).goldUnderline(true, o.flat) else Modifier
+                        Box(Modifier.weight(1f).fillMaxHeight().then(cell).tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) }, contentAlignment = Alignment.Center) {
                             // An hour prayed today withdraws to the muted ink, a small gilt cross at its
                             // shoulder, as the web's `.is-prayed`; the cross takes no width.
-                            val ink = when {
-                                done -> p.muted
-                                h == current -> p.accent
-                                else -> p.text
-                            }
+                            val ink = if (done) p.muted else p.text
                             val name = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = ink)
-                            Column(Modifier.goldUnderline(h == current, p.goldLine), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box {
                                     // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
                                     BasicText(

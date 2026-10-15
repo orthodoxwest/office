@@ -23,6 +23,7 @@ and calendar collisions; they do not establish agreement with future ordos.
 | Passiontide little hours use their printed chapters, direct versicles and antiphons, with Sunday and Holy Week exceptions | Diurnal pp. 272–275, 279–280; 2026 ordo pp. 50–53. Passion/Palm Sunday Prime–None antiphons, ferial Passion-week antiphons, chapters through Holy Wednesday, Holy Monday–Wednesday Lauds antiphon mapping controls, Lent/Triduum boundaries, and calendar-wide versicle/chapter/antiphon rules in three years. |
 | III and IV Sundays after Easter keep their own chapters, including Lauds and II Vespers cross-references | Diurnal pp. 380–383; 2026 ordo p. 62. May 10 five-hour chapter checks, III Sunday cases in 2027/2032, the May 3, 2026 Holy Cross precedence control and following ferial little hours. |
 | V Sunday after Easter Lauds and II Vespers use their explicit chapter appointment | Diurnal pp. 385–386; 2026 ordo p. 64. May 17 Lauds/Vespers; little-hour chapters remain excluded pending #339. |
+| The Final Antiphon of Our Lady turns at the hour the Diurnal names, not at midnight | Diurnal pp. 153–155; 2026 ordo pp. 18, 22, 53, 69 (#649). Both sides of every boundary (Saturday before Advent, I Vespers of Christmas, Purification, Holy Wednesday/Saturday, Pentecost-octave Saturday) in 2026–2027, and a 2026–2053 sweep of the selection. |
 
 The earlier Sunday Lauds repair (#332) has its own direct appointment tests.
 No row above certifies the entire hour or the entire source page.

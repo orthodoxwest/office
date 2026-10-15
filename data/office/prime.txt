@@ -59,9 +59,6 @@ Condition = triduum
 # psalmody, and the Gloria Patri is not said during the Triduum.
 # Psalm 54, then Psalm 119 vv. 1-32 as at Sunday Prime.
 
-Type = rubric
-Ref = shared/formulas/triduum-hours-opening-rubric
-
 Type = psalm
 Ref = psalms/054
 
@@ -289,8 +286,11 @@ Ref = office
 Type = proper-antiphon
 Ref = psalm-antiphon-1
 
+# Diurnal p. 6: Now unto the King on Sundays, privileged Vigils, feasts and
+# Paschaltide ferias; Love the truth on other ferias and common Vigils. The
+# Vigils of the Nativity (p. 183) and the Epiphany (p. 222) name it (#658).
 [Chapter-Ferial]
-Condition = is-ferial,not-season-easter,not-triduum,not-office-of-the-dead
+Condition = is-ferial,not-privileged-vigil,not-season-easter,not-triduum,not-office-of-the-dead
 
 Type = proper-chapter
 Ref = chapter-ferial
@@ -307,6 +307,12 @@ Condition = is-ferial,season-easter,not-triduum,not-office-of-the-dead
 Type = proper-chapter
 Ref = chapter
 
+[Chapter-Privileged-Vigil]
+Condition = privileged-vigil,not-season-easter,not-triduum,not-office-of-the-dead
+
+Type = proper-chapter
+Ref = chapter
+
 [Pre-Collect]
 Condition = not-triduum,not-office-of-the-dead
 Label = Litany & Lord's Prayer
@@ -317,7 +323,7 @@ Ref = pre-collect-versicle
 Type = dialogue
 Ref = ordinary/shared/kyrie
 
-Type = corporate-lord-prayer
+Type = partly-secret-lord-prayer
 Ref = ordinary/shared/our-father
 
 [Preces]
@@ -387,13 +393,19 @@ Condition = triduum
 # Psalm 51, and the collect of the day said without Let us pray.
 
 Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
+Ref = shared/formulas/triduum-kneel-rubric
 
 Type = proper-antiphon
 Ref = triduum-antiphon
 
+Type = rubric
+Ref = shared/formulas/triduum-secret-our-father-rubric
+
 Type = silent-prayer
 Ref = ordinary/shared/our-father
+
+Type = rubric
+Ref = shared/formulas/triduum-psalm-51-rubric
 
 Type = psalm
 Ref = psalms/051
@@ -403,9 +415,6 @@ Ref = shared/formulas/triduum-collect-rubric
 
 Type = proper-collect
 Ref = collect
-
-Type = rubric
-Ref = shared/formulas/triduum-prime-ending-rubric
 
 [Closing]
 Condition = not-triduum,not-office-of-the-dead
@@ -446,7 +455,10 @@ Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace
 
 [Post-Office]
-Condition = not-office-of-the-dead
+# Monastic Diurnal, printed p. 313: "Thus are ended all the Hours during this
+# Triduum" with the Collect (at Lauds all then "rise and depart in silence"),
+# so the prayers after the Office are not said (maintainer's direction, 2026-10-11).
+Condition = not-office-of-the-dead,not-triduum
 Collapsible = true
 Label = Prayers After the Office
 

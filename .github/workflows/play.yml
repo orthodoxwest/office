@@ -3,12 +3,14 @@ name: Publish to Play
 # Builds the signed store bundle from master and uploads it to a Google Play track. Setup and the
 # secrets it reads are in apps/android/README.md ("Publishing from CI").
 #
-# Every merge to master that changes the app goes to Internal testing, which only the maintainers
-# are testers of and which Google doesn't review. Those runs use the `play-internal` environment,
-# with no reviewer, and skip quietly until PLAY_SERVICE_ACCOUNT_JSON is set. Testers and the public
-# get a build only when it is promoted in Play Console, or uploaded by a manual run from the
-# Actions tab; manual runs use the `play` environment, so give it a required reviewer and nothing
-# else ships without approval.
+# Every merge to master that changes the app goes to Internal testing and Closed testing (the
+# `alpha` track) at once: Internal reaches the maintainers within minutes, unreviewed, so a bad build
+# shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
+# replaces a release still in review.
+# Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
+# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build only when it is promoted in Play
+# Console, or uploaded by a manual run from the Actions tab; manual runs use the `play`
+# environment, so give it a required reviewer.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).
@@ -24,6 +26,8 @@ on:
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/play.yml"
+      # Editing the notes alone uploads nothing; the next app change carries them.
+      - "!apps/android/whatsnew.txt"
   workflow_dispatch:
     inputs:
       track:
@@ -36,11 +40,11 @@ on:
         type: string
         default: "1"
       notes:
-        description: "Release notes (what's new), optional"
+        description: "Release notes (what's new); empty uses apps/android/whatsnew.txt"
         type: string
         default: ""
 
-# A merge waiting behind another replaces it, so Internal testing gets the newest build; a
+# A merge waiting behind another replaces it, so the testing tracks get the newest build; a
 # manual run has its own queue and is never replaced by a merge.
 concurrency:
   group: play-${{ github.event_name }}
@@ -63,7 +67,7 @@ jobs:
         run: echo "play=$HAS_PLAY" >> "$GITHUB_OUTPUT"
 
   publish:
-    name: Build and upload to ${{ inputs.track || 'internal' }}
+    name: Build and upload to ${{ inputs.track || 'internal and closed testing' }}
     needs: ready
     # A manual run without the credentials still fails, at the upload, so the missing secret shows.
     if: github.event_name == 'workflow_dispatch' || needs.ready.outputs.play == 'true'
@@ -72,7 +76,8 @@ jobs:
     permissions:
       contents: read
     env:
-      TRACK: ${{ inputs.track || 'internal' }}
+      # One upload, released on each comma-separated track in the same edit.
+      TRACKS: ${{ inputs.track || 'internal,alpha' }}
 
     steps:
       - name: Release from master only
@@ -101,6 +106,31 @@ jobs:
         with:
           # The version code counts commits, so the bundle needs full history.
           fetch-depth: 0
+
+      # The notes are apps/android/whatsnew.txt as checked in (a manual run's input replaces it),
+      # never anything taken from the merge. Empty means no notes. Checked before the build, so
+      # a text Play would refuse stops the run early.
+      - name: Write the release notes
+        id: notes
+        env:
+          NOTES: ${{ inputs.notes }}
+        run: |
+          if [ -z "$NOTES" ]; then
+            NOTES=$(grep -v '^#' apps/android/whatsnew.txt | sed '/./,$!d')
+          fi
+          if [ -n "$NOTES" ]; then
+            LENGTH=$(printf '%s' "$NOTES" | python3 -c 'import sys; print(len(sys.stdin.read()))')
+            if [ "$LENGTH" -gt 500 ]; then
+              echo "::error::Release notes are $LENGTH characters; Play takes at most 500"
+              exit 1
+            fi
+            mkdir -p "$RUNNER_TEMP/whatsnew"
+            printf '%s\n' "$NOTES" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+            echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
+            echo "Release notes:"; cat "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+          else
+            echo "No release notes"
+          fi
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.94.1
@@ -139,23 +169,6 @@ jobs:
           echo "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$OFFICE_UPLOAD_KEYSTORE"
           ./gradlew --console=plain bundleRelease
 
-      # A merge's notes are its pull request's title, the first line of the merge commit's body.
-      - name: Write the release notes
-        id: notes
-        env:
-          NOTES: ${{ inputs.notes }}
-        run: |
-          if [ "$GITHUB_EVENT_NAME" = push ]; then
-            NOTES=$(git log -1 --format=%b | sed '/^$/d' | head -n 1)
-            [ -n "$NOTES" ] || NOTES=$(git log -1 --format=%s)
-          fi
-          if [ -n "$NOTES" ]; then
-            mkdir -p "$RUNNER_TEMP/whatsnew"
-            # Play takes at most 500 characters.
-            printf '%s\n' "$NOTES" | head -c 500 > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
-            echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Upload to Google Play
         if: steps.rollout.outputs.status == 'completed'
         # v1.1.5, pinned by commit.
@@ -165,7 +178,7 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ env.TRACK }}
+          tracks: ${{ env.TRACKS }}
           status: completed
           whatsNewDirectory: ${{ steps.notes.outputs.dir }}
 
@@ -177,7 +190,7 @@ jobs:
           packageName: org.orthodoxwest.office
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: ${{ env.TRACK }}
+          tracks: ${{ env.TRACKS }}
           status: inProgress
           userFraction: ${{ steps.rollout.outputs.fraction }}
           whatsNewDirectory: ${{ steps.notes.outputs.dir }}

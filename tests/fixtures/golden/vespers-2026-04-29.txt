@@ -40,7 +40,7 @@ Alleluia
 
 And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is ca
 
 The Angel Gabriel * was sent from God to a virgin espoused to a man whose name was Joseph, of the house of David: and the virgin's name was Mary, alleluia.
 
---- Psalm 111 · Confitebor tibi, Domine ---
+--- Psalm 110 (111) · Confitebor tibi, Domine ---
 Psalm 111
 
 I WILL give thanks unto the Lord with my whole heart * [Sit.] secretly among the faithful, and in the congregation.
@@ -79,7 +79,7 @@ The Angel Gabriel * was sent from God to a virgin espoused to a man whose name w
 
 Joseph went up * from Galilee, out of the city of Nazareth into Judaea, unto the city of David, which is called Bethlehem, alleluia.
 
---- Psalm 112 · Beatus vir, qui timet Dominum ---
+--- Psalm 111 (112) · Beatus vir, qui timet Dominum ---
 Psalm 112
 
 BLESSED is the man that feareth the Lord * [Sit.] he hath great delight in his commandments.
@@ -100,7 +100,7 @@ Joseph went up * from Galilee, out of the city of Nazareth into Judaea, unto the
 
 And Jesus himself * was beginning about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -117,7 +117,7 @@ PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
 
 And Jesus himself * was beginning about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
 
---- Gen 49:26 ---
+--- Gen. 49:26 ---
 The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
 R. Thanks be to God.
 
@@ -161,7 +161,8 @@ R. And his fruit was sweet to my palate, alleluia.
 
 Son, * why hast thou thus dealt with us? behold thy father and I have sought thee sorrowing, alleluia.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -188,7 +189,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

@@ -40,7 +40,7 @@ Alleluia
 
 Thy Saints, * O Lord, shall blossom as the lily, alleluia: and as the odour of balsam shall they be before thee, alleluia.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ Thy Saints, * O Lord, shall blossom as the lily, alleluia: and as the odour of b
 
 In the heavenly kingdom * the Blessed have their dwelling-place, alleluia: and their rest for ever and ever, alleluia.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -77,7 +77,7 @@ In the heavenly kingdom * the Blessed have their dwelling-place, alleluia: and t
 
 Thy blessed Saints, O Lord, * cried out within the veil, alleluia, alleluia, alleluia.
 
---- Psalm 116b · Credidi, propter quod locutus sum ---
+--- Psalm 115 (116b) · Credidi, propter quod locutus sum ---
 Psalm 116:10-16
 
 I BELIEVED, and therefore will I speak; but I was sore troubled * [Sit.] I said in my haste, All men are liars.
@@ -95,7 +95,7 @@ Thy blessed Saints, O Lord, * cried out within the veil, alleluia, alleluia, all
 
 Then shall the righteous * shine forth as the sun in the presence of God, alleluia.
 
---- Psalm 139 · Domine, probasti me ---
+--- Psalm 138 (139) · Domine, probasti me ---
 Psalm 139
 
 O LORD, thou hast searched me out and known me * [Sit.] thou knowest my down-sitting and mine up-rising, thou understandest my thoughts long before.
@@ -108,7 +108,7 @@ O LORD, thou hast searched me out and known me * [Sit.] thou knowest my down-sit
 8. If I take the wings of the morning * and remain in the uttermost parts of the sea;
 9. Even there also shall thy hand lead me * and thy right hand shall hold me.
 10. If I say, Peradventure the darkness shall cover me * then shall my night be turned to day.
-11. Yea, the darkness is no darkness with thee, but the night is as clear as the day * the darkness and light to thee are both alike.
+11. Yea, the darkness is no darkness with thee, † but the night is as clear as the day * the darkness and light to thee are both alike.
 12. For my reins are thine * thou hast covered me in my mother's womb.
 13. I will give thanks unto thee, for I am fearfully and wonderfully made * marvellous are thy works, and that my soul knoweth right well.
 14. My bones are not hid from thee * though I be made secretly, and fashioned beneath in the earth.
@@ -128,7 +128,7 @@ O LORD, thou hast searched me out and known me * [Sit.] thou knowest my down-sit
 
 Then shall the righteous * shine forth as the sun in the presence of God, alleluia.
 
---- Wis 5:1 ---
+--- Wisdom 5:1 ---
 Then shall the righteous man stand in great boldness * before the face of such as have afflicted him, * and made no account of his labours.
 R. Thanks be to God.
 
@@ -177,7 +177,8 @@ R. Is the death of his Saints, alleluia.
 
 O ye holy and righteous, * rejoice in the Lord, alleluia: God hath chosen you to him to be his inheritance, alleluia.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -204,7 +205,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

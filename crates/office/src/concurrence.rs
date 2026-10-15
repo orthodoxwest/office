@@ -11,7 +11,7 @@ use calendar::computus::MoveableDates;
 use calendar::model::FERIA_COMMEMORATION_ID;
 use calendar::occurrence::compare_feast_precedence;
 use calendar::traits::{
-    is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
+    is_anticipated_sunday, is_apostolic_companion_commemoration, is_day_within_octave, is_double_or_above, is_ember_day, is_octave_day,
     is_penitential_feria_season, is_privileged_octave_commemoration, is_rogation_day, is_saturday_bvm, is_sunday, is_sunday_first_class,
     is_vigil, octave_parent_id, same_octave_days,
 };
@@ -215,8 +215,23 @@ fn second_vespers_commemoration(winner: Option<&Feast>, comm: &Feast, incoming: 
     if comm.id == FERIA_COMMEMORATION_ID || comm.id == "privileged-lenten-feria" {
         return (true, "commemoration:second-vespers-seasonal-feria");
     }
+    // Needs ruling (#642): the ordos also commemorate the Ember days of Advent
+    // and Lent, against XIV.9 (Ember days "only at Lauds"): II Vespers of St
+    // Gregory on Ember Wednesday (2025 ordo 12 March, "For as Jonas") and of
+    // St Thomas on Ember Friday (2018 ordo 21 Dec, "O Day-spring").
+    if advent_or_lenten_ember_day(comm) {
+        return (true, "commemoration:second-vespers-seasonal-ember-day");
+    }
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
         return (false, "commemoration:second-vespers-feria-or-vigil-lauds-only");
+    }
+    // A Sunday anticipated on a Saturday Double of the I or II Class, "or
+    // some other Feast of XII Lessons", is commemorated "at I Vespers ... and
+    // at Lauds" (IV.4-5; XIV.9), and "nothing is said of the Sunday at II
+    // Vespers" even when it is only commemorated (Notes on the Tables 12):
+    // not at II Vespers of the Purification, 2 February 2075 and 2086 (#656).
+    if !incoming && is_anticipated_sunday(comm) {
+        return (false, "commemoration:second-vespers-anticipated-sunday-exclusion");
     }
     if matches!(comm.rank, Rank::Commemoration | Rank::Simple) {
         if is_apostolic_companion_commemoration(comm) && winner.is_none_or(|w| w.rank != Rank::Double1stClass) {
@@ -308,7 +323,10 @@ fn following_office_commemorated_at_second_vespers(winner: Option<&Feast>, follo
         // Guardian Angels, 2025 ordo 24 Oct Raphael, 2022 ordo 25 Nov
         // Catherine; #542). Doubles of the 1st and 2nd class admit no
         // commemoration of it (2022 ordo 28 Oct Simon & Jude, 2019 ordo 26
-        // July Anne, 2018 ordo 2 Feb Purification).
+        // July Anne, 2018 ordo 2 Feb Purification). Needs ruling (#666): a
+        // Friday feast of Our Lady keeps it too (2021 and 2025 ordos), though
+        // VIII.3 says "no other Commemoration of her is to be made" and the
+        // 2022 ordo prints No Comm. at the Rosary.
         if is_saturday_bvm(feast) && winner.is_some_and(|w| w.rank.weight() < Rank::Double2ndClass.weight()) {
             return (true, "commemoration:following-office-at-second-vespers-saturday-bvm");
         }
@@ -341,10 +359,17 @@ fn same_octave_office(preceding: &CalendarDay, following: &CalendarDay) -> bool 
 /// "A Feria in Advent, in Septuagesimatide, or in Lent" (Diurnal §X), with
 /// the Ember days of Advent and Lent (2021 ordo 24 March, 2022 18 March).
 fn penitential_season_feria(f: &Feast) -> bool {
-    f.id == FERIA_COMMEMORATION_ID
-        || f.id == "privileged-lenten-feria"
-        || f.id.starts_with("lent-ember-")
-        || f.id.starts_with("advent-ember-")
+    f.id == FERIA_COMMEMORATION_ID || f.id == "privileged-lenten-feria" || advent_or_lenten_ember_day(f)
+}
+
+fn advent_or_lenten_ember_day(f: &Feast) -> bool {
+    f.id.starts_with("lent-ember-") || f.id.starts_with("advent-ember-")
+}
+
+/// Ember Saturday's evening is the Sunday's I Vespers, which do not
+/// commemorate it (2026 ordo 19 Dec).
+fn ember_saturday(f: &Feast) -> bool {
+    f.id.ends_with("-ember-saturday")
 }
 
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
@@ -352,7 +377,7 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
     // A Sunday office anticipated on Saturday ends at None: its evening is the
     // next Sunday's I Vespers, which do not commemorate it (2025 and 2026
     // ordos, 7 February; 2021 ordo, 20 November).
-    if loser.id.ends_with("-anticipated") && loser.is_category(Category::Sunday) {
+    if is_anticipated_sunday(loser) {
         return (false, "commemoration:first-vespers-anticipated-sunday-exclusion");
     }
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
@@ -386,6 +411,15 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
             && !is_vigil(loser)
         {
             return (true, "commemoration:first-vespers-seasonal-feria");
+        }
+        // Needs ruling (#642): XIV.9 commemorates an Ember day "only at
+        // Lauds", but the ordos commemorate an Advent or Lenten one at a
+        // following feast's I Vespers, like the season's other ferias (XIV.8):
+        // 2017 and 2019 ordos 20 Dec (St Thomas), 2022 ordo 18 March (St
+        // Joseph) and 14 Dec (the Conception's octave day), 2025 ordo 17 Dec
+        // (the Expectation). Ember Saturday is left to the Sunday.
+        if advent_or_lenten_ember_day(loser) && !ember_saturday(loser) && winner.is_some() {
+            return (true, "commemoration:first-vespers-seasonal-ember-day");
         }
         return (false, "commemoration:first-vespers-office-ended-at-none");
     }
@@ -463,9 +497,7 @@ fn impeded_double_at_first_vespers(winner: Option<&Feast>, impeder: Option<&Feas
         return (false, "commemoration:impeded-double-first-class-lauds-only");
     }
     if w.is_category(Category::Sunday) {
-        let ended_at_none = impeder.is_some_and(|p| {
-            (p.id.ends_with("-anticipated") && p.is_category(Category::Sunday)) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p)
-        });
+        let ended_at_none = impeder.is_some_and(|p| is_anticipated_sunday(p) || is_ember_day(p) || is_rogation_day(p) || is_vigil(p));
         if ended_at_none {
             return (false, "commemoration:impeded-double-office-ended-at-none");
         }
@@ -512,6 +544,16 @@ pub fn concurrence_winner(prec: &Feast, fol: &Feast) -> (VespersOwner, &'static 
         }
         if feast_is_prec && is_octave_day(feast) {
             return (feast_wins, "concurrence:octave-day-in-possession-vs-sunday");
+        }
+        // The Octave Day of the Epiphany takes I Vespers from the Sunday
+        // within its Octave, commemorating II Vespers of the Sunday, whether
+        // that Sunday falls on 12 January or is said on Saturday the 12th
+        // because the Octave Day is a Sunday (Diurnal p. 231; 2019 ordo,
+        // 12 January; 2025 ordo, 12 January) (#651). Not other octave days:
+        // the Sunday keeps II Vespers before the Octave Day of Ss Peter and
+        // Paul (2026 ordo, 5 July).
+        if feast.id == "epiphany-octave-day" {
+            return (feast_wins, "concurrence:epiphany-octave-day-vs-sunday");
         }
         return (sunday_wins, "concurrence:sunday-below-class-ii");
     }
@@ -687,9 +729,20 @@ fn boundary_commemorations(
             decisions.push(decision("commemoration:first-vespers-second-class-memorial-exclusion", "suppressed", &c.id));
             continue;
         }
-        if !second_vespers && loser_included && loser.is_some_and(|l| same_octave_days(l, c)) {
-            decisions.push(decision("commemoration:first-vespers-duplicate-octave-day", "suppressed", &c.id));
-            continue;
+        if !second_vespers
+            && loser_included
+            && let Some(l) = loser.filter(|l| same_octave_days(l, c))
+        {
+            // The following octave day supersedes today's day within the
+            // octave (XIII.16; 2025 ordo 5 July, "Comm. Oct. ('Peter the
+            // Apostle' 558; Col. 560)"; #622).
+            if !(is_octave_day(c) && is_day_within_octave(l)) {
+                decisions.push(decision("commemoration:first-vespers-duplicate-octave-day", "suppressed", &c.id));
+                continue;
+            }
+            comms.retain(|x| x.id != l.id);
+            loser_included = false;
+            decisions.push(decision("commemoration:octave-day-supersedes-day-within", "suppressed", &l.id));
         }
         let (included, rule) = occurrence_commemorated_at_first_vespers(c);
         if !included {
@@ -877,6 +930,11 @@ pub fn resolve_concurrence(preceding: &CalendarDay, following: &CalendarDay) -> 
 
 fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
     // All Souls ends at None; Vespers are of the displaced All Saints octave.
+    // Needs ruling (#662): these take II Vespers of the feast, as the 2023,
+    // 2025 (3 Nov) and 2026 ordos print ("As of II Vesp. of Feast"); Diurnal
+    // p. 654 says "as at I Vespers of the Feast", and the 2017-2022 ordos ("As
+    // of All Saints'" / "As of the Feast, except: Mag. Ant. 'O how glorious'")
+    // name neither.
     if let Some(octave) = all_souls_octave_vespers_office(preceding) {
         let mut synth = preceding.clone();
         synth.celebration = Some(octave.clone());

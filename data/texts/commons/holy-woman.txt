@@ -36,8 +36,7 @@ Give her * of the fruit of her hands; and let her own works praise her in the ga
 She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to the needy; she eateth not the bread of idleness.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
-The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
+@use shared/holy-woman/antiphon-the-kingdom-of-heaven
 
 [commemoration-collect]
 @use commons/holy-woman/collect
@@ -48,7 +47,7 @@ Hear us, O God our Saviour: that as we rejoice in the festival of blessed N., so
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, For a Saint neither Virgin nor Martyr)
-!Prov 31:10-11
+!Prov. 31:10, 11
 Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, * so that he shall have no need of spoil.
 R. Thanks be to God.
 
@@ -62,13 +61,13 @@ R. Because God hath blessed thee for ever.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Sext, For a Saint neither Virgin nor Martyr)
-!Prov 31:20-21
+!Prov. 31:20, 21
 She stretcheth out her hand to the poor: yea, she reacheth forth her hands to the needy; * she is not afraid of the snow for her household.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 55* (Common of Holy Women not Virgins, At None, For a Saint neither Virgin nor Martyr)
-!Prov 31:29-30
+!Prov. 31:29, 30
 Many daughters have done virtuously, but thou excellest them all. Favour is deceitful, and beauty is vain: * but a woman that feareth the Lord, she shall be praised.
 R. Thanks be to God.
 
@@ -133,9 +132,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God shall help her * with his countenance.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
-V. In thy grace and in thy beauty.
-R. Go forth, ride prosperously, and reign.
+@use shared/holy-woman/versicle-in-thy-grace
 
 [versicle-vespers]
 @use commons/holy-woman/versicle-lauds

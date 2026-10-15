@@ -22,10 +22,10 @@ struct Palette: Equatable {
     // linings and crosses, opaque and the same in every season; red ochre for the tituli (section
     // headings, psalm numbers, "Ant."), gilt on the Apse; slate blue for the ordo's doubles.
     let lining: Color
-    let titulus: Color
+    var titulus: Color
     let kalendarBlue: Color
     /// The evening hours' moon: the gold on the Nave, silver on the Apse night.
-    let moonInk: Color
+    var moonInk: Color
     let surface: Color
     let surfaceEdge: Color
     let pressedWash: Color
@@ -131,6 +131,23 @@ struct Ornament: Equatable {
     }
 }
 
+extension Palette {
+    /**
+     * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are
+     * gilt, so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's
+     * are painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms
+     * while Apse's silver keeps its own ink.
+     */
+    func seasoned(_ season: String) -> Palette {
+        guard season == "passiontide" || season == "eastertide" else { return self }
+        let o = Ornament.of(self, season: season)
+        var p = self
+        if dark { p.titulus = o.flat }
+        if season == "passiontide" || !dark { p.moonInk = o.flat }
+        return p
+    }
+}
+
 /// The liturgical colours of the ordo rails and the band across an hour's top (`.day-color-*`).
 func dayColor(_ name: String) -> Color {
     switch name {
@@ -143,16 +160,30 @@ func dayColor(_ name: String) -> Color {
     }
 }
 
+/// The band of the day's colour across an hour's top (`.color-band-*`): the rails' colours, but a
+/// white day's is the pale linen of a white vestment, in both themes.
+func bandColor(_ name: String) -> Color {
+    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name)
+}
+
+/// A day's colour as `.day-color-*` sets it on an hour's title and the ordo's rails: on the Apse
+/// night white and black are lifted, so they do not sink into the night.
+func titleColor(_ name: String, _ p: Palette) -> Color {
+    switch (name, p.dark) {
+    case ("white", true): return Color(hex: 0xD0B06A)
+    case ("black", true): return Color(hex: 0x8A94A0)
+    default: return dayColor(name)
+    }
+}
+
 /// A day's colour as home sets it: on the Apse night white and black are lifted, as `.day-color-*`
 /// is, and so are red, green and violet, which are mixed for limewash and would sink into the night.
 func dayColor(_ name: String, _ p: Palette) -> Color {
     switch (name, p.dark) {
-    case ("white", true): return Color(hex: 0xD0B06A)
-    case ("black", true): return Color(hex: 0x8A94A0)
     case ("red", true): return Color(hex: 0xC9503F)
     case ("green", true): return Color(hex: 0x4F8A52)
     case ("violet", true): return Color(hex: 0x8D62AD)
-    default: return dayColor(name)
+    default: return titleColor(name, p)
     }
 }
 
@@ -314,6 +345,8 @@ enum Scale {
     static let verse = TextStyle(size: 20, line: 33)
     static let rubric = TextStyle(size: 18, line: 27)
     static let heading = TextStyle(size: 19.2, line: 24.96, tracking: 2.112, smallCaps: true)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    static let commemorationName = TextStyle(size: 19.2, line: 25.92, tracking: 0.29)
     static let itemLabel = TextStyle(size: 20, line: 27, tracking: 1.4, smallCaps: true, lining: true)
     static let reference = TextStyle(size: 17, line: 23.8)
     static let verseNumber = TextStyle(size: 15.6, line: 25.74)
@@ -355,7 +388,7 @@ extension EnvironmentValues {
         set { self[WideKey.self] = newValue }
     }
 
-    /// Whether a wide page is narrower than the hours' header holds on one line (701–959pt): there
+    /// Whether a wide page is narrower than the hours' header holds on one line (701–999pt): there
     /// an hour's links take a rank of their own under the brand and Settings.
     var ranked: Bool {
         get { self[RankedKey.self] }
@@ -366,8 +399,9 @@ extension EnvironmentValues {
 /// The web's breakpoint (style.css `min-width: 701px`).
 let wideFrom: CGFloat = 701
 
-/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 959px`).
-let rankedBelow: CGFloat = 960
+/// Where the hours' header holds its links beside the brand and Settings (style.css `max-width: 999px`,
+/// where the list fits on one line at Larger text).
+let rankedBelow: CGFloat = 1000
 
 /// Sets a style from the type scale, at the page's size.
 private struct Typeface: ViewModifier {

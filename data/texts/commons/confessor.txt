@@ -77,19 +77,19 @@ O God, who gavest blessed N. to thy people as a minister of eternal salvation: g
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
-!Sir 31:8-9
+!Ecclus. 31:8, 9
 Blessed is the man that is found without blemish, and hath not gone after gold. * Who is he? and we will call him blessed: for wonderful things hath he done among his people.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, pp. 45*–46* (Common of a Confessor not a Bishop, At Sext)
-!Sir 39:5
+!Ecclus. 39:5
 The righteous man will give his heart to resort early to the Lord that made him, * and will pray before the Most High.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At None)
-!Wis 10:10
+!Wisdom 10:10
 The Lord guided the righteous in right paths, shewed him the kingdom of God, and gave him knowledge of holy things, * made him rich in his travels, and multiplied the fruit of his labours.
 R. Thanks be to God.
 

@@ -13,8 +13,8 @@ native text, screen for screen:
 - **The hours**: the colour band and framed title, the web's spacing, and the Lauds, Prime and
   Vespers preparation open. Psalms get their gilded initials, antiphons their hanging sigils,
   and hymns a centred column.
-- **The ordo**: the month (the wide table on an iPad), each day's office digest, and the year's
-  Tabula Temporaria.
+- **The ordo**: the month under its pinned heading (the wide table on an iPad), each day's
+  office details (its commemorations and office digest), and the year's Tabula Temporaria.
 - **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
   and offers "Remind me in 10 min".
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
@@ -22,7 +22,10 @@ native text, screen for screen:
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
   page of the same kind (the next hour, another day or month) changes in place, keeping the
   page shown until the next is composed and then moving along Material's shared axis.
-  Disclosures unfold, the menu drops in, the picker's months slide and follow a swipe, and a
+  Disclosures unfold; home's date picker is revealed from its top while the head above the day
+  gives up its spare height in step, as the web's and Android's do. Another prayer form, or the
+  Martyrology turned on or off, changes the hour where it stands, keeping the reader's place and
+  open sections. The menu drops in, the picker's months slide and follow a swipe, and a
   new theme or text size eases in. Reduce Motion turns the slides to fades. A pressed control
   dims; a choice (a setting, a prayer form, a day) gives a selection tick, a checkbox a light
   tap, and opening a page nothing.
@@ -82,6 +85,62 @@ the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
 
 ## Signing
 
-Simulator builds need none. A phone needs an Apple Developer account: the preview will go out
-through TestFlight once the publishing account exists. Until then, Xcode's free provisioning
-runs it on a phone of your own for seven days at a time.
+Simulator builds need none. Xcode's free provisioning runs the app on a phone of your own, from
+a Mac, for seven days at a time; everyone else gets it through TestFlight.
+
+## TestFlight
+
+`.github/workflows/testflight.yml` archives the app for release on every pull request that
+touches it, unsigned, with the current Xcode. On `master` it also signs the archive, uploads it
+to App Store Connect, and gives it to the TestFlight external group **Testers**. A tester
+installs Apple's TestFlight app and opens the group's public link once; each later build
+reaches them there, as the Android preview's link always serves the newest APK.
+
+The version is `MARKETING_VERSION` in `project.yml`; the build number counts commits, as the
+Android version code does. Apple reviews the first build of each version (usually within a
+day) before external testers can install it, and normally lets later builds of the same
+version through without, so only a release should raise `MARKETING_VERSION`. Builds lapse after
+90 days, and a re-run for a commit already uploaded is refused at the upload.
+
+Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
+needs a Mac: the certificate is made with `openssl`, the rest on the web.
+
+1. **The app.** Under the organization's Apple Developer account, add the App ID
+   `org.orthodoxwest.office` (Certificates, Identifiers & Profiles → Identifiers; no
+   capabilities). In App Store Connect, add a new iOS app with that bundle ID. Its store name
+   must be unique across the App Store, so it may need to differ from the home-screen name
+   (`CFBundleDisplayName`, "Daily Office").
+2. **The distribution certificate.** Make a key and signing request, upload the request as an
+   *Apple Distribution* certificate (Certificates → +), download `distribution.cer`, and pack
+   both as a `.p12`. OpenSSL 3 needs `-legacy`, or the Mac runner's keychain cannot read it.
+
+   ```bash
+   openssl req -new -newkey rsa:2048 -nodes -keyout dist.key -out dist.csr \
+     -subj "/emailAddress=you@example.org/CN=Organization Name/C=US"
+   openssl x509 -inform der -in distribution.cer -out dist.pem
+   openssl pkcs12 -export -legacy -inkey dist.key -in dist.pem -out dist.p12
+   ```
+3. **The profile.** Profiles → + → *App Store Connect*, for the App ID and certificate above;
+   download it.
+4. **The API key.** App Store Connect → Users and Access → Integrations → Team Keys, with the
+   App Manager role. Download the `.p8` (offered only once) and note its Key ID and the
+   Issuer ID above the list.
+5. **The secrets** (repository Settings → Secrets and variables → Actions):
+
+   | Secret | Value |
+   | --- | --- |
+   | `IOS_DIST_CERT_P12` | `base64 -w0 dist.p12` |
+   | `IOS_DIST_CERT_PASSWORD` | the `.p12`'s export password |
+   | `IOS_APPSTORE_PROFILE` | `base64 -w0` of the downloaded `.mobileprovision` |
+   | `ASC_KEY_ID` | the key's ID |
+   | `ASC_ISSUER_ID` | the Issuer ID |
+   | `ASC_KEY` | the `.p8` file's contents |
+
+   The team ID is read from the profile. Keep `dist.key` and the `.p8` out of the repository.
+6. **TestFlight.** In the app's TestFlight tab, fill in Test Information (the beta review's
+   contact and a feedback email), add an external group named `Testers`, and turn on its
+   public link. Run the workflow from the Actions tab, or push to `master`; once Apple has
+   reviewed the first build, the link installs it.
+
+The certificate and profile last a year. Renew both the same way and replace the three
+secrets; the API key does not expire.

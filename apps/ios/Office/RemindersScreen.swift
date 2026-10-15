@@ -148,7 +148,9 @@ struct RemindersScreen: View {
             } label: {
                 HStack(spacing: m.px(12)) {
                     Tick(checked: h.chosen)
-                    Text(h.name).type(Scale.body).foregroundStyle(p.text)
+                    // An hour not chosen stands back in the muted ink (the web's `.reminder-hour-name`).
+                    Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
+                        .animation(.easeInOut(duration: 0.14), value: h.chosen)
                     Spacer(minLength: 0)
                 }
                 .frame(minHeight: 46)

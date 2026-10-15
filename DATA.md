@@ -58,7 +58,7 @@ Optional keys:
 | `HasOctave = true` | Generate an octave |
 | `OctaveDays` | Names the generated days II–VII as the ordo prints them: `{n}` is the day's numeral, `{weekday}` its weekday (`{weekday} in Easter Week`). Default `Day {n} within the Octave of …` |
 | `OctaveDay2` … `OctaveDay8` | Names one generated octave day, over `OctaveDays` (`OctaveDay8 = The Octave of the Ascension`). Day VIII defaults to `Octave Day of …` |
-| `OctaveClass` | `privileged-first` (Easter, Pentecost), `privileged-second` (Epiphany, Corpus Christi), `privileged-third` (Nativity, Ascension, Sacred Heart) per General Rubrics VII.3; `simple` for simple octaves or explicit Simple octave days. Omitted means a common octave. Generated days inherit it; terminal days do not inherit weekday commemoration privilege. |
+| `OctaveClass` | `privileged-first` (Easter, Pentecost), `privileged-second` (Epiphany, Corpus Christi), `privileged-third` (Nativity, Ascension, Sacred Heart) or `common` (every other I Class octave) per General Rubrics VII.3, required with `HasOctave`; `simple` for a II Class feast's simple octave (VII.1), on the feast and its octave day, without `HasOctave` since only the octave day is kept and it has its own entry. Generated days inherit it; terminal days do not inherit weekday commemoration privilege. |
 | `CommemorationClass` | One of the two ferial ordering exceptions in XIV.14: `epiphany-vigil`, `post-ascension-feria` |
 | `HasVigil = true` | Generate a preceding vigil |
 | `IsVigil = true` + `VigilOf = feast-id` | This observance is an explicit vigil of that feast |
@@ -113,6 +113,7 @@ supported key):
 | `[hymn-lauds]`, `[hymn-vespers]` | Full hymn text |
 | `[commemoration-antiphon]`, `[commemoration-versicle]` | When commemorated |
 | `[commemoration-collect]` | When commemorated (defaults to `[collect]`) |
+| `[benedictus-antiphon-monday]`, `[collect-monday]`, `[collect-vespers-monday]`, … | In a Sunday's proper: that week's feria (the Lauds collect serves through None; a Lenten feria's Vespers collect only at Vespers, and when the feria is commemorated there) |
 
 ### Directives
 

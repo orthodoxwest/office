@@ -51,7 +51,7 @@ O God, in whose Passion, according to the prophecy of Simeon, a sword of grief p
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
-!Lam 2:13
+!Lam. 2:13
 What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
 R. Thanks be to God.
 
@@ -157,6 +157,16 @@ The strength do thou impart
 That erst upheld the Virgin's heart!
 
 Amen.
+
+[hymn-doxology]
+# SOURCE: Monastic Diurnal.pdf, p. 602: "At the Hours the Hymns end:" (2026 ordo, "Ppr. dox. (602)")
+Glory to thee, O Lord, we give,
+Who died to make thy servants live;
+Whom with the Father we adore
+And Holy Spirit evermore.
+
+Amen.
+
 [versicle-lauds]
 # SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 V. O Virgin Mary, by thy sorrow's might.
@@ -211,7 +221,7 @@ R. Who didst stand by the Cross of Jesus.
 #
 [chapter-none]
 # SOURCE: diurnal p. 605
-!Lam 2:18
+!Lam. 2:18
 Let tears run down like a river day and night: * give thyself no rest; * let not the apple of thine eye cease.
 R. Thanks be to God.
 

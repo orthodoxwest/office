@@ -47,19 +47,19 @@ Grant us, we beseech thee, Almighty God, grace to quench the flames of our sins:
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 516 (Saint Laurence, Martyr)
-!2 Cor 9:6
+!2 Cor. 9:6
 Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 587 (St Lawrence, At Sext)
-!2 Cor 9:7
+!2 Cor. 9:7
 Every man according as he purposeth in his heart, so let him give; * not grudgingly, or of necessity: for God loveth a cheerful giver.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 587 (St Lawrence, At None)
-!2 Cor 9:8-9
+!2 Cor. 9:8, 9
 God is able to make all grace abound toward you; * that ye, always having all sufficiency in all things, may abound to every good work: as it is written, He hath dispersed abroad; he hath given to the poor; his righteousness remaineth for ever.
 R. Thanks be to God.
 

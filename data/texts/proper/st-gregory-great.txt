@@ -44,7 +44,7 @@ O God, who hast bestowed upon the soul of thy servant Gregory the reward of eter
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 406 (St Gregory the Great)
-!Sir 50:1
+!Ecclus. 50:1
 Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
 R. Thanks be to God.
 

@@ -115,13 +115,18 @@
             <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
             {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
-            {# On cards both disclosures share one line; see .day-disclosures. #}
+            {# One disclosure holds the day's commemorations and its office. #}
             <div class="day-disclosures">
-            {% if d.commemorations %}<details class="day-commemorations"><summary>{{ d.commemorations|length }} commemoration{% if d.commemorations|length > 1 %}s{% endif %}</summary>{% for c in d.commemorations %}<span class="day-commemoration">{{ c|typeset }}</span>{% endfor %}</details>{% endif %}
-            {% if d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_note or d.lauds_comms or d.vespers_comms %}
+            {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_note or d.lauds_comms or d.vespers_comms %}
             <details class="day-office-details">
               <summary>Office details</summary>
               <dl class="day-office-digest">
+              {% if d.commemorations %}
+              <div class="day-office-hour">
+                <dt>Day</dt>
+                <dd>{% for c in d.commemorations %}<span class="day-office-comm">Com. {{ c|typeset }}</span>{% endfor %}</dd>
+              </div>
+              {% endif %}
               {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_comms %}
               <div class="day-office-hour">
                 <dt>Lauds</dt>

@@ -58,19 +58,19 @@ O God, who hast made this day honourable for us by the Nativity of blessed John:
 
 [chapter-lauds]
 # SOURCE: diurnal p. 540
-!Isa 49:1
+!Isa. 49:1
 Listen, O isles, unto me; and hearken, ye people, from far; * The Lord hath called me from the womb; * from the bowels of my mother hath he made mention of my name.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At Sext)
-!Isa 49:5-6
+!Isa. 49:5, 6
 And now, saith the Lord that formed me from the womb to be his servant: I will give thee for a light to the Gentiles, * that thou mayest be my salvation unto the end of the earth.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At None)
-!Isa 49:7
+!Isa. 49:7
 Kings shall see and arise, princes also shall worship the Lord thy God, * and the Holy One of Israel, who hath chosen thee.
 R. Thanks be to God.
 
@@ -161,6 +161,15 @@ V. Whose name was John.
 R. Sent from God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. There was a man * sent from God.
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 539 (Nativity of St John Baptist, I & II Vespers Short R.; 2026 ordo Short R &c. 539)
+R. Among them that are born of women * there hath not risen a greater.
+R. Among them that are born of women * there hath not risen a greater.
+V. Than John the Baptist.
+R. There hath not risen a greater.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Among them that are born of women * there hath not risen a greater.
 
 [versicle-sext]
 # SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)

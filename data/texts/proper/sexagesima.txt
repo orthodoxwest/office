@@ -47,7 +47,7 @@ O God, who seest that we put not our trust in anything that we do; mercifully gr
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 162 (Sexagesima Sunday); draft archdiocesan Vespers book, p. 214 (Saturday before Sexagesima)
-!2 Cor 11:19-20
+!2 Cor. 11:19, 20
 Brethren: Ye suffer fools gladly, seeing ye yourselves are wise. For ye suffer, if a man bring you into bondage, if a man devour you, if a man take of you, if a man exalt himself, if a man smite you on the face.
 R. Thanks be to God.
 
@@ -149,13 +149,13 @@ The Lord * said unto Noah: The end of all flesh is come before me: Make thee an 
 #
 [chapter-sext]
 # SOURCE: diurnal p. 239
-!2 Cor 11:25
+!2 Cor. 11:25
 Thrice was I beaten with rods, once was I stoned, * thrice I suffered shipwreck, * a night and a day I have been in the deep.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 240
-!2 Cor 12:9
+!2 Cor. 12:9
 Most gladly therefore will I rather glory in my infirmities, * that the power of Christ may rest upon me.
 R. Thanks be to God.
 

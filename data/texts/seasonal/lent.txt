@@ -9,7 +9,7 @@ As I live, * saith the Lord, I have no pleasure in the death of a sinner, but ra
 # SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Propers for Lauds,
 # The Chapter. Was "show" from Copy of OCP Ferial Lauds.pdf p. 124; the booklet reads
 # "shew", which also matches the corpus's usage elsewhere.
-!Isa 58:1
+!Isa. 58:1
 Cry aloud, spare not; lift up thy voice like a trumpet, and shew my people their transgression, and the house of Jacob their sins.
 R. Thanks be to God.
 
@@ -124,19 +124,19 @@ R. He shall defend thee * under his wings.
 
 [chapter-terce]
 # SOURCE: diurnal p. 250
-!Joel 2:12,13
+!Joel 2:12, 13
 Turn ye even to me with all your heart, and with fasting, and with weeping, and with mourning; * and rend your heart, and not your garments, saith the Lord Almighty.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: diurnal p. 251
-!Isa 55:7
+!Isa. 55:7
 Let the wicked forsake his way, and the unrighteous man his thoughts; † and let him return unto the Lord, and he will have mercy upon him: * and to our God, for he will abundantly pardon.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 251
-!Isa 58:7
+!Isa. 58:7
 Deal thy bread to the hungry, and bring the poor that are cast out to thy house: * when thou seest the naked, cover him; and hide not thyself from thine own flesh.
 R. Thanks be to God.
 

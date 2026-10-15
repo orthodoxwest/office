@@ -25,20 +25,23 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
   hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
   office, its continuation and report link), and
-  the ordo's month (year and month navigation, day rows with colour rails, ranks,
-  commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
+  the ordo's month (year and month navigation, the month's heading pinned while its days scroll,
+  day rows with colour rails, ranks, and one "Office details" disclosure holding the day's
+  commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo), and About the Office (`AboutScreen.kt`: the core's
   `about()` words, the seven hours as home's table of periods; home offers it as "Introduction"
   beside Change date in a reader's first week). The site menu carries the day's hours, the Ordo,
   Reminders and About (left out of a wide hour's header, as on the web), and the Theme
-  (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
+  (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On) rows. The date picker's
+  title turns its
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
   theme and text size; home's frontispiece set in the niche, with its pointed head, stone
   moulding and day-coloured trim, centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
-  Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
+  Tabula's figures in one line and its tables side by side; from 1000dp "Blessing." hangs into
+  the margin as "All:" does, where below it stands above its words. `WideScreenshotTest` renders them
   at 1280×900, beside the web's desktop snapshots, and at a tablet's and a landscape phone's
   sizes.
 - **Hymns.** Each hymn's stanzas are centred in a column the width of its longest line, as the
@@ -51,10 +54,12 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   measured from the rendered web pages at a phone's width (one CSS px to one dp); compare
   `make android-screenshots` output with `.web-tools/tests/visual.spec.js-snapshots/`.
 - **Materials.** The plaster wall is baked from the web's own photograph and blend layers
-  (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). Ornaments are drawn
+  (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). The ordo's pinned
+  month heading carries a copy of the wall lined up with it, as the web's fixed attachment does. Ornaments are drawn
   from the web templates' SVG paths, and the Apse vault from its star tile.
 - **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
-  is open, like the web's wake lock.
+  is open, like the web's wake lock. The status bar is put away while the app is open; a swipe
+  down from the top brings it back for a moment.
 - **Keeping the place.** Each visit on the way back keeps its own scroll position and open
   sections, and the way back itself is saved state: Back returns to where the reader was, and
   so does a return after Android has closed the app in the background (`PlaceTest`).
@@ -149,7 +154,14 @@ to the next. A beacon is best effort: it is never queued offline, retried later,
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
-never does. `UsageTest` checks what counts, the daily identifier, and the retry.
+never does. Nor does a phone in Play's pre-launch report, which installs each uploaded build
+fresh on several test devices and crawls it; with an upload on every merge they would otherwise
+outnumber the testers. Nothing on those phones reliably marks them (not all carry Test Lab's
+`firebase.test.lab` system setting, which still rules out those that do, and the Play Store
+installs the build), but each is wiped within minutes, so an installation reports only once it is
+two hours old (`Usage.SETTLING`). A reader's first hours on a new install go uncounted; an update
+keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, and the
+test-device exclusion.
 
 ## Trying it on a phone
 
@@ -194,12 +206,18 @@ clone of `master`.
 The **Publish to Play** workflow (`.github/workflows/play.yml`) builds the bundle from `master`
 and uploads it to Google Play.
 
-- **Every merge to `master` that changes the app** goes to Internal testing, with the pull
-  request's title as the release notes. Internal testing skips Google's review and reaches its
-  testers (the maintainers) within minutes, so their phones always run `master`.
-- **Testers and the public** get a build when you promote it in Play Console (*Internal
-  testing → Promote release → Closed testing*, and later on to Production), which ships the
-  exact build you have been running. A manual run from the Actions tab can also upload to any
+- **Every merge to `master` that changes the app** goes to Internal testing and Closed testing
+  at once, with `apps/android/whatsnew.txt` as the release notes. Internal testing skips Google's
+  review and reaches the maintainers within minutes, so a bad build shows there first; Closed
+  testing reaches testers once the review passes (usually hours), and a newer merge replaces a
+  release still in review.
+- **The release notes** ("What's new") are only ever the text of `apps/android/whatsnew.txt`
+  (lines starting with `#` dropped), never anything from the merge. The same text goes with
+  every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
+  pull request whose merge should carry it; a change to that file alone uploads nothing. A text
+  over Play's 500 characters stops the run before it builds.
+- **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
+  release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
   track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
   notes, but only for a commit that isn't already in Play: each build's version code is its
   commit count, and Play takes each version code once.
@@ -216,6 +234,14 @@ It needs:
 
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
+
+### Closed testers
+
+Closed testing's tester list is the Google Group `daily-office-testers` (*Anyone can join*),
+so volunteers add themselves. Send them to `/beta` on the website: it links the group and the
+test's opt-in page (`play.google.com/apps/testing/org.orthodoxwest.office`) and says what to
+keep doing for the 14 days Google asks of a new developer account. Neither link is set in
+code; if the group's name changes in Play Console, change `crates/render-html/templates/beta.html` to match.
 
 ### Listing screenshots
 
@@ -241,7 +267,9 @@ make android-screenshots   # → apps/android/app/build/screenshots/*.png
 
 Gradle drives Cargo: `preBuild` runs `cargo ndk` for arm64-v8a, armeabi-v7a, and x86_64,
 builds the host library, and generates the Kotlin bindings into `app/build/generated/uniffi`.
-Nothing generated is checked in.
+Nothing generated is checked in. The APK carries those three ABIs and no others (`abiFilters`),
+though JNA ships its own native library for more. The corpus goes into the library compressed
+(`apps/mobile-ffi/build.rs`) and is inflated once when the engine loads.
 
 Build types: `debug` (debuggable, for Android Studio) and `preview` (optimized, non-debuggable,
 what the prerelease ships). Both use the `.preview` application ID. `preview` and `release` are

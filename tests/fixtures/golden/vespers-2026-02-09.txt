@@ -40,7 +40,7 @@ Praise be to thee, O Lord, King of eternal glory.
 
 Go forth now, brother, * go forth if thou canst: bid me farewell, and depart to the monastery.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ Go forth now, brother, * go forth if thou canst: bid me farewell, and depart to 
 
 Almighty God * forgive thee, my sister: what is this thou hast done?
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -77,7 +77,7 @@ Almighty God * forgive thee, my sister: what is this thou hast done?
 
 Lo, I entreated thee, * and thou wouldest not hear me: I entreated my Lord, and he heard me.
 
---- Psalm 122 · Lætatus sum in his ---
+--- Psalm 121 (122) · Lætatus sum in his ---
 Psalm 122
 
 I WAS glad when they said unto me * [Sit.] We will go into the house of the Lord.
@@ -97,12 +97,12 @@ Lo, I entreated thee, * and thou wouldest not hear me: I entreated my Lord, and 
 
 When holy Benedict * had withdrawn himself in his cell for three days, he lifted up his eyes, and saw the soul of his sister, departing from the body in the likeness of a dove, enter the secret places of the heavens.
 
---- Psalm 127 · Nisi Dominus ædificaverit domum ---
+--- Psalm 126 (127) · Nisi Dominus ædificaverit domum ---
 Psalm 127
 
 EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 2. Except the Lord keep the city * the watchman waketh but in vain.
-3. It is but lost labour that ye haste to rise up early, and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
+3. It is but lost labour that ye haste to rise up early, † and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
 4. Lo, children and the fruit of the womb * are an heritage and gift that cometh of the Lord.
 5. Like as the arrows in the hand of the giant * even so are the young children.
 6. Happy is the man that hath his quiver full of them * [Stand.] they shall not be ashamed when they speak with their enemies in the gate.
@@ -112,7 +112,7 @@ EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 
 When holy Benedict * had withdrawn himself in his cell for three days, he lifted up his eyes, and saw the soul of his sister, departing from the body in the likeness of a dove, enter the secret places of the heavens.
 
---- Cant 2:10,14 ---
+--- Cant. 2:10, 14 ---
 Rise up, my love, my fair one, and come away. * O my dove, that art in the clefts of the rock, in the secret places of the stairs, let me see thy countenance, let me hear thy voice; * for sweet is thy voice, and thy countenance is comely.
 R. Thanks be to God.
 
@@ -171,7 +171,8 @@ R. And as a dove to her windows?
 
 Let all the multitude * of the faithful exult in the glory of the gracious virgin Scholastica: and chiefly let the company of virgins be joyful, celebrating her Solemnity; for she besought the Lord, pouring forth her tears, and of him received greater power, because her love was greater.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -198,7 +199,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

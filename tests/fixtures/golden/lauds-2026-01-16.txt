@@ -37,7 +37,7 @@ As it was in the beginning, is now, and ever shall be, * world without end. Amen
 
 Alleluia
 
---- Psalm 67 · Deus misereatur nostri ---
+--- Psalm 66 (67) · Deus misereatur nostri ---
 Psalm 67
 
 GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his countenance, and be merciful unto us:
@@ -53,13 +53,13 @@ GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his coun
 
 With thy free Spirit.
 
---- Psalm 51 · Miserere mei, Deus ---
+--- Psalm 50 (51) · Miserere mei, Deus ---
 Psalm 51
 
 HAVE mercy upon me, O God, after thy great goodness * [Sit.] according to the multitude of thy mercies do away mine offences.
 2. Wash me throughly from my wickedness * and cleanse me from my sin.
 3. For I acknowledge my faults * and my sin is ever before me.
-4. Against thee only have I sinned, and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
+4. Against thee only have I sinned, † and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
 5. Behold, I was shapen in wickedness * and in sin hath my mother conceived me.
 6. But lo, thou requirest truth in the inward parts * and shalt make me to understand wisdom secretly.
 7. Thou shalt purge me with hyssop, and I shall be clean * thou shalt wash me, and I shall be whiter than snow.
@@ -69,12 +69,12 @@ HAVE mercy upon me, O God, after thy great goodness * [Sit.] according to the mu
 11. Cast me not away from thy presence * and take not thy holy Spirit from me.
 12. O give me the comfort of thy help again * and stablish me with thy free Spirit.
 13. Then shall I teach thy ways unto the wicked * and sinners shall be converted unto thee.
-14. Deliver me from blood-guiltiness, O God, thou that art the God of my health * and my tongue shall sing of thy righteousness.
+14. Deliver me from blood-guiltiness, O God, † thou that art the God of my health * and my tongue shall sing of thy righteousness.
 15. Thou shalt open my lips, O Lord * and my mouth shall shew thy praise.
-16. For thou desirest no sacrifice, else would I give it thee * but thou delightest not in burnt-offerings.
+16. For thou desirest no sacrifice, † else would I give it thee * but thou delightest not in burnt-offerings.
 17. The sacrifice of God is a troubled spirit * a broken and contrite heart, O God, shalt thou not despise.
 18. O be favourable and gracious unto Sion * build thou the walls of Jerusalem.
-19. Then shalt thou be pleased with the sacrifice of righteousness, with the burnt-offerings and oblations * [Stand.] then shall they offer young bullocks upon thine altar.
+19. Then shalt thou be pleased with the sacrifice of righteousness, † with the burnt-offerings and oblations * [Stand.] then shall they offer young bullocks upon thine altar.
 
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
 [Stand upright.] As it was in the beginning, is now, and ever shall be, * world without end. Amen.
@@ -83,7 +83,7 @@ With thy free Spirit * stablish my heart, O God.
 
 His Name is great.
 
---- Psalm 76 · Notus in Judæa Deus ---
+--- Psalm 75 (76) · Notus in Judæa Deus ---
 Psalm 76
 
 IN JEWRY is God known * [Sit.] his Name is great in Israel.
@@ -96,7 +96,7 @@ IN JEWRY is God known * [Sit.] his Name is great in Israel.
 8. Thou didst cause thy judgement to be heard from heaven * the earth trembled, and was still;
 9. When God arose to judgement * and to help all the meek upon earth.
 10. The fierceness of man shall turn to thy praise * and the fierceness of them shalt thou refrain.
-11. Promise unto the Lord your God, and keep it, all ye that are round about him * bring presents unto him that ought to be feared.
+11. Promise unto the Lord your God, and keep it, † all ye that are round about him * bring presents unto him that ought to be feared.
 12. He shall refrain the spirit of princes * [Stand.] and is wonderful among the kings of the earth.
 
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
@@ -108,7 +108,7 @@ It is a good thing.
 
 These words are not repeated in the Psalm.
 
---- Psalm 92 · Bonum est confiteri Domino ---
+--- Psalm 91 (92) · Bonum est confiteri Domino ---
 Psalm 92
 
 (IT IS a good thing) to give thanks unto the Lord * [Sit.] and to sing praises unto thy Name, O most Highest;
@@ -117,7 +117,7 @@ Psalm 92
 4. For thou, Lord, hast made me glad through thy works * and I will rejoice in giving praise for the operations of thy hands.
 5. O Lord, how glorious are thy works * thy thoughts are very deep.
 6. An unwise man doth not well consider this * and a fool doth not understand it.
-7. When the ungodly are green as the grass, and when all the workers of wickedness do flourish * then shall they be destroyed for ever; but thou, Lord, art the most Highest for evermore.
+7. When the ungodly are green as the grass, † and when all the workers of wickedness do flourish * then shall they be destroyed for ever; but thou, Lord, art the most Highest for evermore.
 8. For lo, thine enemies, O Lord, lo, thine enemies shall perish * and all the workers of wickedness shall be destroyed.
 9. But mine horn shall be exalted like the horn of an unicorn * for I am anointed with fresh oil.
 10. Mine eye also shall see his lust of mine enemies * and mine ear shall hear his desire of the wicked that arise up against me.
@@ -135,8 +135,9 @@ O Lord.
 
 These words are not repeated in the Canticle.
 
---- Habakkuk 3 · Domine, audivi auditionem tuam ---
-!Habakkuk 3:2-19
+--- The Song of Habakkuk · Domine, audivi auditionem tuam ---
+The Song of Habakkuk
+!Hab. 3:2-19
 
 (O Lord,) I have heard thy speech, * [Sit.] and was afraid.
 2. O Lord, revive thy work in the midst of the years, in the midst of the years make known; * in wrath remember mercy.
@@ -188,8 +189,8 @@ O PRAISE the Lord of heaven * [Sit.] praise him in the height.
 9. Mountains and all hills * fruitful trees and all cedars;
 10. Beasts and all cattle * worms and feathered fowls;
 11. Kings of the earth and all people * princes and all judges of the world;
-12. Young men and maidens, old men and children, praise the Name of the Lord * for his Name only is excellent, and his praise above heaven and earth.
-13. He shall exalt the horn of his people; all his saints shall praise him * even the children of Israel, even the people that serveth him.
+12. Young men and maidens, old men and children, † praise the Name of the Lord * for his Name only is excellent, and his praise above heaven and earth.
+13. He shall exalt the horn of his people; † all his saints shall praise him * even the children of Israel, even the people that serveth him.
 
 --- Psalm 149 · Cantate Domino canticum novum ---
 Psalm 149
@@ -219,7 +220,7 @@ O PRAISE God in his holiness * praise him in the firmament of his power.
 
 In the cymbals and dances, * upon the strings and pipe, O praise the Lord.
 
---- Rom. 13:12-13 ---
+--- Rom. 13:12, 13 ---
 The night is far spent, the day is at hand: let us therefore cast off the
 works of darkness, and let us put on the armour of light. Let us walk
 honestly, as in the day.
@@ -233,20 +234,20 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Heal my soul, * for I have sinned against thee.
 
 --- Aeterna caeli gloria ---
-Eternal Glory of the sky,
-Blest Hope of frail humanity,
+Eternal glory of the sky,
+Blest hope of frail humanity,
 The Father's Sole-begotten One,
 Yet born a spotless Virgin's Son;
 
-Uplift us with Thine arm of might,
-And let our hearts rise pure and bright;
-And ardent in God's praises, pay
-The thanks we owe Him every day.
+Uplift us with thine arm of might,
+And let our hearts rise pure and bright,
+And, ardent in God's praises, pay
+The thanks we owe him every day.
 
-The Day-star's rays are glittering clear,
-And tell that Day itself is near;
+The day-star's rays are glittering clear,
+And tell that day itself is near:
 The shadows of the night depart;
-Thou, Holy Light, illume the heart.
+Thou, holy Light, illume the heart.
 
 Within our senses ever dwell,
 And worldly darkness thence expel:
@@ -256,12 +257,12 @@ Preserve our souls devout and pure.
 The Faith that first must be possessed,
 Root deep within our inmost breast:
 And joyous Hope in second place,
-Then Charity, Thy greatest grace.
+Then Charity, thy greatest grace.
 
-All glory, Lord, to thee we pay
-For thine Epiphany today;
+All laud to God the Father be;
+All praise, eternal Son, to thee;
 All glory, as is ever meet,
-To Father and to Paraclete.
+To God the Holy Paraclete.
 
 Amen.
 
@@ -270,7 +271,8 @@ R. So shall we rejoice and be glad all the days of our life.
 
 Through the tender mercy.
 
---- Benedictus · Benedictus Dominus, Deus Israël ---
+--- The Song of Zacharias · Benedictus Dominus, Deus Israël ---
+The Song of Zacharias
 !Luke 1:68-79
 
 Blessed be the Lord God of Israel; * for he hath visited, and redeemed his people;
@@ -300,7 +302,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

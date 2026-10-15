@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -56,6 +57,7 @@ class ScreenshotTest {
         reminders: ReminderSettings = ReminderStore(ApplicationProvider.getApplicationContext()).load(),
         status: ReminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
         newcomer: Boolean = false,
+        insets: PaddingValues = PaddingValues(),
     ) {
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
@@ -63,7 +65,7 @@ class ScreenshotTest {
         compose.setContent {
             OfficeTheme(choice = theme, season = home?.ornament ?: hour?.ornament ?: "") {
                 OfficeApp(
-                    page, today, hourNames(), home, hour, ordo, null, form, theme, TextSize.DEFAULT, PaddingValues(),
+                    page, today, hourNames(), home, hour, ordo, null, form, theme, TextSize.DEFAULT, insets,
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = status,
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
@@ -101,6 +103,10 @@ class ScreenshotTest {
 
     @Test
     fun laudsApse() { show(Page.Hour(lent, "lauds"), ThemeChoice.APSE, today = lent.plusDays(3)); shoot("lauds-apse") }
+
+    // A little hour: the cross, not the sun or moon, set into the title's upper rule.
+    @Test
+    fun noneApse() { show(Page.Hour(lent, "none"), ThemeChoice.APSE); shoot("none-apse") }
 
     /** A first-class day's hour stands in its frame. */
     @Test
@@ -193,6 +199,42 @@ class ScreenshotTest {
         compose.onNodeWithText("MARCH 2026").performClick()
         compose.waitForIdle()
         shoot("date-picker-months-nave")
+    }
+
+    /** The prayer form's chooser open, for review beside the web's `.leader-selector` fieldset. */
+    @Test
+    fun prayerForm() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
+        compose.onNodeWithText("PRAYER FORM", substring = true).performClick()
+        compose.waitForIdle()
+        shoot("prayer-form-nave")
+    }
+
+    /**
+     * A day's office details open, the month's heading pinned above it, as the web's
+     * `ordo-details` snapshot: the day's commemorations are in its one disclosure.
+     */
+    @Test
+    fun ordoDetails() {
+        val epiphanytide = LocalDate.of(2026, 1, 4)
+        show(Page.Ordo(2026, 1, 4), ThemeChoice.NAVE, today = epiphanytide)
+        compose.waitForIdle()
+        val all = compose.onAllNodesWithText("Office details")
+        val nodes = all.fetchSemanticsNodes()
+        // The 4th's disclosure is the one beside its "Today".
+        val today = compose.onNodeWithText("Today").fetchSemanticsNode().boundsInRoot.top
+        val first = nodes.indices.minBy { kotlin.math.abs(nodes[it].boundsInRoot.top - today) }
+        all[first].performClick()
+        compose.waitForIdle()
+        shoot("ordo-details-nave")
+    }
+
+    /** Under a status bar the month's heading pins below it, clear of the bar, its days passing beneath. */
+    @Test
+    fun ordoPinnedUnderStatusBar() {
+        show(Page.Ordo(2026, 3, 20), ThemeChoice.APSE, insets = PaddingValues(top = 32.dp))
+        compose.waitForIdle()
+        shoot("ordo-pinned-apse")
     }
 
     @Test

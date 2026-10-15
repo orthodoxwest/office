@@ -1,0 +1,6 @@
+# Proper for [comm-03-10-the-forty-holy-martyrs]
+# The antiphons and versicles are the Common of Many Martyrs (Diurnal p. 484,
+# "For theirs" and "The very hairs", p. 2*); the collect is the Forty's own.
+
+[commemoration-collect]
+Grant, we beseech thee, Almighty God: that we who acknowledge the fortitude of thy glorious Martyrs in their confession, may experience their loving intercession for us before thee.

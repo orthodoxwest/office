@@ -62,7 +62,7 @@ pub struct OfficeCore {
 impl OfficeCore {
     #[uniffi::constructor]
     pub fn new() -> Result<Arc<OfficeCore>, OfficeError> {
-        let src = EmbeddedData;
+        let src = EmbeddedData::new().map_err(failed)?;
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
         Ok(Arc::new(OfficeCore { engine, calendar, year: Mutex::new(None) }))
@@ -887,6 +887,8 @@ pub enum RunStyle {
     Kicker,
     Posture,
     Break,
+    Numeral,
+    HebrewNumeral,
 }
 
 impl From<render_blocks::RunStyle> for RunStyle {
@@ -902,6 +904,8 @@ impl From<render_blocks::RunStyle> for RunStyle {
             S::Kicker => RunStyle::Kicker,
             S::Posture => RunStyle::Posture,
             S::Break => RunStyle::Break,
+            S::Numeral => RunStyle::Numeral,
+            S::HebrewNumeral => RunStyle::HebrewNumeral,
         }
     }
 }

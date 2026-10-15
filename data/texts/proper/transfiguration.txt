@@ -45,12 +45,12 @@ O God, who in the glorious Transfiguration of thine only-begotten Son didst conf
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 507 (The Transfiguration of Our Lord Jesus Christ)
-!Phil 3:20-21
+!Phil. 3:20, 21
 We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
 R. Thanks be to God.
 
 [chapter-sext]
-!2 Cor 3:18
+!2 Cor. 3:18
 But we all, with open face beholding as in a glass the glory of the Lord, are changed into the same image from glory to glory, * even as by the Spirit of the Lord.
 R. Thanks be to God.
 
@@ -79,6 +79,16 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
+[hymn-doxology]
+# SOURCE: Monastic Diurnal.pdf, p. 582: "The Hymns end thus at all the Hours." (General Rubrics XXIII.5)
+All glory, Lord, to thee we pay,
+Transfigured on the mount to-day;
+All glory, as is ever meet,
+To Father and to Paraclete.
+
+Amen.
+
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 581, 582
 Quicumque Christum
@@ -181,6 +191,6 @@ R. Glory and great worship shalt thou lay upon him, alleluia.
 
 [chapter-none]
 # SOURCE: diurnal p. 584
-!Rev 21:10,11,23
+!Rev. 21:10, 11, 23
 And he carried me away in the spirit to a great and high mountain, * and shewed me that great city, the holy Jerusalem, descending out of heaven from God, having the glory of God; * and the Lamb is the light thereof.
 R. Thanks be to God.

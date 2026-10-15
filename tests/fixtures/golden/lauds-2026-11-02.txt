@@ -18,13 +18,13 @@ Amen.
 
 The bones which thou hast broken * shall rejoice in the Lord.
 
---- Psalm 51 · Miserere mei, Deus ---
+--- Psalm 50 (51) · Miserere mei, Deus ---
 Psalm 51
 
 HAVE mercy upon me, O God, after thy great goodness * according to the multitude of thy mercies do away mine offences.
 2. Wash me throughly from my wickedness * and cleanse me from my sin.
 3. For I acknowledge my faults * and my sin is ever before me.
-4. Against thee only have I sinned, and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
+4. Against thee only have I sinned, † and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
 5. Behold, I was shapen in wickedness * and in sin hath my mother conceived me.
 6. But lo, thou requirest truth in the inward parts * and shalt make me to understand wisdom secretly.
 7. Thou shalt purge me with hyssop, and I shall be clean * thou shalt wash me, and I shall be whiter than snow.
@@ -34,12 +34,12 @@ HAVE mercy upon me, O God, after thy great goodness * according to the multitude
 11. Cast me not away from thy presence * and take not thy holy Spirit from me.
 12. O give me the comfort of thy help again * and stablish me with thy free Spirit.
 13. Then shall I teach thy ways unto the wicked * and sinners shall be converted unto thee.
-14. Deliver me from blood-guiltiness, O God, thou that art the God of my health * and my tongue shall sing of thy righteousness.
+14. Deliver me from blood-guiltiness, O God, † thou that art the God of my health * and my tongue shall sing of thy righteousness.
 15. Thou shalt open my lips, O Lord * and my mouth shall shew thy praise.
-16. For thou desirest no sacrifice, else would I give it thee * but thou delightest not in burnt-offerings.
+16. For thou desirest no sacrifice, † else would I give it thee * but thou delightest not in burnt-offerings.
 17. The sacrifice of God is a troubled spirit * a broken and contrite heart, O God, shalt thou not despise.
 18. O be favourable and gracious unto Sion * build thou the walls of Jerusalem.
-19. Then shalt thou be pleased with the sacrifice of righteousness, with the burnt-offerings and oblations * then shall they offer young bullocks upon thine altar.
+19. Then shalt thou be pleased with the sacrifice of righteousness, † with the burnt-offerings and oblations * then shall they offer young bullocks upon thine altar.
 
 Rest eternal grant unto them, O Lord.
 And let light perpetual shine upon them.
@@ -48,20 +48,20 @@ The bones which thou hast broken * shall rejoice in the Lord.
 
 Thou, O Lord, * that hearest the prayer, unto thee shall all flesh come.
 
---- Psalm 65 · Te decet hymnus ---
+--- Psalm 64 (65) · Te decet hymnus ---
 Psalm 65
 
 THOU, O God, art praised in Sion * and unto thee shall the vow be performed in Jerusalem.
 2. Thou that hearest the prayer * unto thee shall all flesh come.
 3. My misdeeds prevail against me * O be thou merciful unto our sins.
 4. Blessed is the man whom thou choosest, and receivest unto thee * he shall dwell in thy court, and shall be satisfied with the pleasures of thy house, even of thy holy temple.
-5. Thou shalt shew us wonderful things in thy righteousness, O God of our salvation * thou that art the hope of all the ends of the earth, and of them that remain in the broad sea.
+5. Thou shalt shew us wonderful things in thy righteousness, † O God of our salvation * thou that art the hope of all the ends of the earth, and of them that remain in the broad sea.
 6. Who in his strength setteth fast the mountains * and is girded about with power.
 7. Who stilleth the raging of the sea * and the noise of his waves, and the madness of the people.
 8. They also that dwell in the uttermost parts of the earth shall be afraid at thy tokens * thou that makest the outgoings of the morning and evening to praise thee.
 9. Thou visitest the earth, and blessest it * thou makest it very plenteous.
 10. The river of God is full of water * thou preparest their corn, for so thou providest for the earth.
-11. Thou waterest her furrows, thou sendest rain into the little valleys thereof * thou makest it soft with the drops of rain, and blessest the increase of it.
+11. Thou waterest her furrows, † thou sendest rain into the little valleys thereof * thou makest it soft with the drops of rain, and blessest the increase of it.
 12. Thou crownest the year with thy goodness * and thy clouds drop fatness.
 13. They shall drop upon the dwellings of the wilderness * and the little hills shall rejoice on every side.
 14. The folds shall be full of sheep * the valleys also shall stand so thick with corn, that they shall laugh and sing.
@@ -73,7 +73,7 @@ Thou, O Lord, * that hearest the prayer, unto thee shall all flesh come.
 
 Thy right hand * hath upholden me, O Lord.
 
---- Psalm 63 · Deus, Deus meus, ad te ---
+--- Psalm 62 (63) · Deus, Deus meus, ad te ---
 Psalm 63
 
 O GOD, thou art my God * early will I seek thee.
@@ -96,8 +96,9 @@ Thy right hand * hath upholden me, O Lord.
 
 From the gate of hell, * deliver my soul, O Lord.
 
---- Isaiah 38 · Ego dixi: In dimidio dierum meorum ---
-!Isaiah 38:10-20
+--- The Song of Hezekiah · Ego dixi: In dimidio dierum meorum ---
+The Song of Hezekiah
+!Isa. 38:10-20
 
 I said in the cutting off of my days, I shall go to the gates of the grave: * I am deprived of the residue of my years.
 2. I said, I shall not see the Lord, even the Lord, in the land of the living: * I shall behold man no more with the inhabitants of the world.
@@ -140,7 +141,8 @@ R. Blessed are the dead which die in the Lord.
 
 I am the resurrection * and the life, saith the Lord: he that believeth in me, though he were dead, yet shall he live: and whosoever liveth and believeth in me shall never die.
 
---- Benedictus · Benedictus Dominus, Deus Israël ---
+--- The Song of Zacharias · Benedictus Dominus, Deus Israël ---
+The Song of Zacharias
 !Luke 1:68-79
 
 Blessed be the Lord God of Israel; * for he hath visited, and redeemed his people;

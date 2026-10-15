@@ -21,6 +21,12 @@ To-morrow * ye shall have salvation, saith the Lord God of hosts.
 [psalm-antiphon]
 @use proper/vigil-nativity/psalm-antiphon-1
 
+# Prime is said as on Doubles, with Lauds' first antiphon, not the IV Sunday
+# of Advent's (#658).
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal.pdf, p. 183 (Christmas Eve, At Prime: "Ant. O Judah and Jerusalem")
+@use proper/vigil-nativity/psalm-antiphon-1
+
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
 The Saviour * of the world shall arise as the sun: and shall come down into the Virgin's womb, as the showers upon the grass, alleluia.
@@ -31,7 +37,7 @@ O God, who makest us glad with the yearly expectation of the birth of thine only
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 55 (Vigil of the Nativity)
-!Rom 1:1-3
+!Rom. 1:1-3
 Paul, a servant of Jesus Christ, called to be an apostle, separated unto the gospel of God, (which he had promised afore by his prophets in the holy scriptures,) concerning his Son Jesus Christ our Lord, which was made of the seed of David according to the flesh.
 R. Thanks be to God.
 
@@ -46,13 +52,13 @@ R. Ye shall know this day * that the Lord will come.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Sext)
-!Rom 1:4
+!Rom. 1:4
 Who was declared to be the Son of God with power, * according to the Spirit of holiness, by the resurrection from the dead.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 183 (Christmas Eve, At None)
-!Rom 1:5-6
+!Rom. 1:5, 6
 By whom we have received grace and apostleship, * for obedience to the faith among all nations, for his name: among whom are ye also the called of Jesus Christ our Lord.
 R. Thanks be to God.
 

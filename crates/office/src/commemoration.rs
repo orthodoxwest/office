@@ -1,7 +1,7 @@
 //! Commemorations at Lauds and Vespers: heading, antiphon, versicle, invitation, collect.
 
 use calendar::commemoration::lauds_commemorations;
-use calendar::traits::{is_day_within_octave, octave_parent_id};
+use calendar::traits::{is_anticipated_sunday, is_day_within_octave, octave_parent_id};
 use calendar::{Category, Feast, FeastRef, Rank, Season, Weekday};
 use liturgy::{ElementType, OfficeElement};
 
@@ -26,6 +26,10 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
         return Vec::new();
     }
     let comms: Vec<FeastRef> = if hour_name == "lauds" { lauds_commemorations(&day.cal) } else { day.commemorations.clone() };
+    // A saint commemorated within the Octave of Pentecost keeps its Common's
+    // Paschaltide forms (2026 ordo, 4-5 June: Boniface "Light perpetual",
+    // "Daughters"; #631).
+    let season = day.saints_season(hour_name);
     let mut elems = Vec::new();
     for (i, comm) in comms.iter().enumerate() {
         let lookup = |reference: &str| -> (String, String) {
@@ -42,13 +46,26 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if is_synthesized_feria(comm) {
                 return lookup_feria_commemoration(Some(day), comm, day.season, hour_name, reference, t);
             }
-            if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
+            // An Advent Ember day's collect is "said at all the Hours until
+            // Vespers" (Diurnal p. 177): at Vespers it is a feria of its week,
+            // with the weekday's antiphon and the Sunday's collect (2025 ordo
+            // 17 Dec, "Comm. Fer. ... Col. 170"; 2022 ordo 14 Dec, "Behold the
+            // handmaid of the Lord"; #642).
+            if hour_name == "vespers"
+                && comm.id.starts_with("advent-ember-")
+                && let Some(week) = &day.temporal_week_id
+            {
+                let mut feria = (**comm).clone();
+                feria.proper_id = Some(week.clone());
+                return lookup_feria_commemoration(Some(day), &feria, day.season, hour_name, reference, t);
+            }
+            if is_incoming_sunday_commemoration(day, comm, hour_name, reference) {
                 return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
-                return lookup_following_office_commemoration(comm, day.season, reference, t);
+                return lookup_following_office_commemoration(comm, season, reference, t);
             }
-            let found = lookup_commemoration(comm, day.season, hour_name, reference, t);
+            let found = lookup_commemoration(comm, season, hour_name, reference, t);
             // A vigil or feria without its own antiphon takes the Psalter's
             // for the weekday (General Rubrics VI; Diurnal p. 1*).
             if reference == "commemoration-antiphon"
@@ -130,16 +147,25 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
 
 /// A Sunday commemorated at Saturday Vespers — whether a Saturday feast keeps
 /// II Vespers or a feast on the Sunday takes I Vespers — begins with its own
-/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403).
-pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
+/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403). The Sunday
+/// office said on Saturday when the Octave Day of the Epiphany is Sunday is
+/// outgoing, commemorated with its II-Vespers antiphon (p. 231) (#651).
+/// A Sunday anticipated on Saturday is commemorated at its I Vespers on
+/// Friday "with the Antiphon of Friday as given in the Psalter" (General
+/// Rubrics IV.4-5; 2025 and 2026 ordos, 14 and 6 February: "Fri. Off. ...
+/// He hath put down") (#656).
+pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
         && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
-        && day.civil_weekday() == Weekday::Saturday
+        && (day.civil_weekday() == Weekday::Saturday || is_anticipated_sunday(feast))
         && feast.is_category(Category::Sunday)
+        && day.vespers.incoming_commemoration_ids.contains(&feast.id)
 }
 
 /// Resolves the commemorated Sunday's slot exactly as its own I Vespers
 /// would: historia, the Sunday's "-first" proper, season, Saturday psalter.
+/// The civil evening is kept, so an anticipated Sunday commemorated at
+/// Friday's II Vespers takes Friday's psalter antiphon (IV.4).
 fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
     let mut sunday = day.clone();
     if !sunday.first_vespers {
@@ -160,7 +186,7 @@ pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &st
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
+    is_incoming_sunday_commemoration(day, comm, "vespers", reference)
 }
 
 /// The I-Vespers texts of an incoming office or Memorial (VIII, X).
@@ -230,10 +256,16 @@ fn lookup_feria_commemoration(
         }
         "commemoration-collect" => {
             if let Some(proper) = &feast.proper_id {
-                let collect_ref = format!("proper/{proper}/collect");
-                let text = t.get(&collect_ref);
-                if !text.is_empty() {
-                    return (text.to_string(), collect_ref);
+                // The weekday's own collect for the hour (a Lenten feria's
+                // Vespers collect: 2026 ordo, 20 Mar., I Vespers of St Benedict,
+                // "Comm. Fer. ('Sir I perceive' & Col. 263-4)"), else the Sunday's.
+                let weekday = day.map(|d| d.civil_weekday_name());
+                let weekday_refs = weekday.iter().flat_map(|w| [format!("collect-{hour_name}-{w}"), format!("collect-{w}")]);
+                for collect_ref in weekday_refs.chain(["collect".to_string()]).map(|r| format!("proper/{proper}/{r}")) {
+                    let text = t.get(&collect_ref);
+                    if !text.is_empty() {
+                        return (text.to_string(), collect_ref);
+                    }
                 }
             }
         }

@@ -128,6 +128,11 @@ class WideScreenshotTest {
     @Config(qualifiers = "w844dp-h390dp-mdpi")
     fun landscapeHome() { show(Page.Home(lent), ThemeChoice.NAVE); shoot("landscape-home") }
 
+    /** From 1000dp "Blessing." hangs into the margin, as "All:" does (the web's `.sigil-word`). */
+    @Test
+    @Config(qualifiers = "w1024dp-h1366dp-xhdpi")
+    fun tabletCompline() { show(Page.Hour(lent, "compline"), ThemeChoice.NAVE); shoot("tablet-compline") }
+
     @Test
     @Config(qualifiers = "w844dp-h390dp-mdpi")
     fun landscapeCompline() { show(Page.Hour(lent, "compline"), ThemeChoice.NAVE); shoot("landscape-compline") }

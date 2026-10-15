@@ -18,7 +18,7 @@ use crate::psalmody::{
 use crate::texts::load_texts;
 
 /// The `Type` values the engine recognises; others silently become rubrics.
-const VALID_ELEMENT_TYPES: [&str; 32] = [
+const VALID_ELEMENT_TYPES: [&str; 33] = [
     "officiant-greeting",
     "officiant-confession",
     "officiant-opening",
@@ -33,6 +33,7 @@ const VALID_ELEMENT_TYPES: [&str; 32] = [
     "silent-prayer",
     "partly-secret-prayer",
     "corporate-lord-prayer",
+    "partly-secret-lord-prayer",
     "dialogue",
     "preces",
     "rubric",
@@ -197,7 +198,9 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
     ref_errors.sort();
 
     parse_errors.extend(declaration_errors);
+    parse_errors.extend(validate_lenten_ferial_collects(corpus));
     parse_errors.extend(validate_omissions(corpus));
+    parse_errors.extend(validate_paschal_redirects(corpus));
     parse_errors.extend(ref_errors);
     parse_errors
 }
@@ -275,6 +278,44 @@ fn validate_lauds_psalmody_declarations(corpus: &Corpus) -> Vec<String> {
     errs
 }
 
+/// The Lenten ferias whose collects the Diurnal prints (pp. 244-278), by the
+/// week proper they read from: each has a Lauds collect, said through None,
+/// and a Vespers collect, except Saturday, whose Vespers are the Sunday's. Ash
+/// Wednesday and the Ember days are their own celebrations.
+const LENTEN_FERIAL_COLLECTS: [(&str, &[&str]); 6] = [
+    ("quinquagesima", &["thursday", "friday", "saturday"]),
+    ("lent-sunday-1", &["monday", "tuesday", "thursday"]),
+    ("lent-sunday-2", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("lent-sunday-3", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("laetare-sunday", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+    ("passion-sunday", &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]),
+];
+
+/// A Lenten feria never falls back to its Sunday's collect (#606). Checked
+/// for each week whose proper is in the corpus.
+fn validate_lenten_ferial_collects(corpus: &Corpus) -> Vec<String> {
+    let mut errs = Vec::new();
+    for (week, days) in LENTEN_FERIAL_COLLECTS {
+        if !corpus.has(&format!("proper/{week}/collect")) {
+            continue;
+        }
+        for day in days {
+            let mut keys = vec![format!("proper/{week}/collect-{day}")];
+            if *day != "saturday" {
+                keys.push(format!("proper/{week}/collect-vespers-{day}"));
+            }
+            errs.extend(keys.into_iter().filter(|k| !corpus.has(k)).map(|k| format!("Lenten ferial collect not found: {k}")));
+        }
+    }
+    for ember in ["lent-ember-wednesday", "lent-ember-friday"] {
+        let key = format!("proper/{ember}/collect-vespers");
+        if corpus.has(&format!("proper/{ember}/collect")) && !corpus.has(&key) {
+            errs.push(format!("Lenten ferial collect not found: {key}"));
+        }
+    }
+    errs
+}
+
 /// Where the omission marker may appear: never on a psalm antiphon, and only
 /// on a slot that names its hour, so an omission stays inside the rubric
 /// that licenses it.
@@ -295,4 +336,103 @@ fn validate_omissions(corpus: &Corpus) -> Vec<String> {
     }
     errs.sort();
     errs
+}
+
+/// Named alternatives a Common prints for a slot (the Doctor's Magnificat
+/// antiphon, Diurnal pp. 43*, 46*); a proper may take one for that slot.
+const COMMON_SLOT_VARIANTS: [&str; 1] = ["doctor"];
+
+/// In Paschaltide a proper's `@use` into a Common reads the paschal form of
+/// the target's slot (proper.rs, `paschal_common_form`). A proper that borrows
+/// a Common text for another slot because the words match would then read the
+/// paschal text of the wrong slot; it names a shared/ key instead. Flagged: a
+/// proper slot whose Common target has a paschal form that differs from the
+/// paschal Common's own text for the proper's slot.
+fn validate_paschal_redirects(corpus: &Corpus) -> Vec<String> {
+    let mut errs = Vec::new();
+    for key in corpus.references() {
+        let Some(slot) = key.strip_prefix("proper/").and_then(|r| r.split_once('/')).map(|(_, s)| s) else {
+            continue;
+        };
+        let mut target = corpus.alias_target(key);
+        while let Some(t) = target.filter(|t| t.starts_with("proper/")) {
+            target = corpus.alias_target(t);
+        }
+        let Some((cat, target_slot)) = target.and_then(|t| t.strip_prefix("commons/")).and_then(|r| r.split_once('/')) else {
+            continue;
+        };
+        let base = slot.strip_suffix("-first").unwrap_or(slot);
+        if cat.ends_with("-paschal")
+            || target_slot == slot
+            || COMMON_SLOT_VARIANTS.iter().any(|v| target_slot.strip_prefix(base).and_then(|r| r.strip_prefix('-')) == Some(v))
+        {
+            continue;
+        }
+        let read = format!("commons/{cat}-paschal/{target_slot}");
+        let own = format!("commons/{cat}-paschal/{slot}");
+        if corpus.has(&read) && corpus.has(&own) && corpus.get(&read) != corpus.get(&own) {
+            errs.push(format!(
+                "{key}: @use {} reads {read} in Paschaltide, not {own}; name a shared/ text for words borrowed from another slot",
+                target.unwrap_or_default()
+            ));
+        }
+    }
+    errs.sort();
+    errs
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_proper_borrows_another_slots_common_text_through_shared() {
+        let file = |rel: &str, content: &str| corpus::TextFile { rel_path: rel.to_string(), content: content.to_string() };
+        let files = [
+            file(
+                "commons/apostle.txt",
+                "[versicle-vespers]\nV. Vespers.\n\n[versicle-sext]\n@use shared/apostle/princes\n\n[magnificat-antiphon-doctor]\nO Teacher.\n",
+            ),
+            file(
+                "commons/apostle-paschal.txt",
+                "[versicle-vespers]\nV. Vespers, alleluia.\n\n[versicle-sext]\nV. Sext, alleluia.\n\n\
+                 [magnificat-antiphon]\nPlain, alleluia.\n\n[magnificat-antiphon-doctor]\nO Teacher, alleluia.\n",
+            ),
+            file("shared/apostle.txt", "[princes]\nV. Princes.\n"),
+            file(
+                "proper/octave.txt",
+                "[versicle-vespers]\n@use commons/apostle/versicle-sext\n\n[versicle-lauds]\n@use proper/octave/versicle-vespers\n\n\
+                 [magnificat-antiphon]\n@use commons/apostle/magnificat-antiphon-doctor\n",
+            ),
+            file("proper/fixed.txt", "[versicle-vespers]\n@use shared/apostle/princes\n"),
+        ];
+        let corpus = Corpus::load(&files, None, None).unwrap();
+        assert_eq!(
+            validate_paschal_redirects(&corpus),
+            ["proper/octave/versicle-vespers: @use commons/apostle/versicle-sext reads commons/apostle-paschal/versicle-sext \
+              in Paschaltide, not commons/apostle-paschal/versicle-vespers; name a shared/ text for words borrowed from another slot"]
+        );
+    }
+
+    #[test]
+    fn lenten_ferias_need_their_own_collects() {
+        let file = |rel: &str, content: &str| corpus::TextFile { rel_path: rel.to_string(), content: content.to_string() };
+        let files = [
+            file("proper/lent-sunday-1.txt", "[collect]\nSunday\n\n[collect-monday]\nMonday\n"),
+            file("proper/lent-ember-friday.txt", "[collect]\nEmber\n\n[collect-vespers]\nEmber Vespers\n"),
+        ];
+        let corpus = Corpus::load(&files, None, None).unwrap();
+        let errs = validate_lenten_ferial_collects(&corpus);
+        let missing = |k: &str| format!("Lenten ferial collect not found: proper/lent-sunday-1/{k}");
+        assert_eq!(
+            errs,
+            [
+                missing("collect-vespers-monday"),
+                missing("collect-tuesday"),
+                missing("collect-vespers-tuesday"),
+                missing("collect-thursday"),
+                missing("collect-vespers-thursday"),
+            ]
+        );
+    }
 }

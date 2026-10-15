@@ -236,7 +236,7 @@ pub fn dedupe_commemorations(winner: Option<&Feast>, comms: &[FeastRef]) -> (Vec
         a == b || a.contains(b) || b.contains(a)
     };
     let mut seen: Vec<String> = Vec::new();
-    let mut deduped = Vec::new();
+    let mut deduped: Vec<FeastRef> = Vec::new();
     let mut decisions = Vec::new();
     for comm in comms {
         let mut key = normalize_commemoration_name(&comm.name);
@@ -247,8 +247,16 @@ pub fn dedupe_commemorations(winner: Option<&Feast>, comms: &[FeastRef]) -> (Vec
             decisions.push(Decision::new("commemoration:matches-winner", "suppressed", comm.id.as_str()));
             continue;
         }
-        if seen.iter().any(|prior| same_or_contained(&key, prior)) {
-            decisions.push(Decision::new("commemoration:duplicate-name", "suppressed", comm.id.as_str()));
+        if let Some(i) = seen.iter().position(|prior| same_or_contained(&key, prior)) {
+            // The generated octave day outranks a dated entry of the same
+            // name: only it is known to Vespers as the octave's, which then
+            // drops the preceding day within the octave (XIII.16; #622).
+            let dropped = if is_octave_day(comm) && !is_octave_day(&deduped[i]) {
+                std::mem::replace(&mut deduped[i], comm.clone())
+            } else {
+                comm.clone()
+            };
+            decisions.push(Decision::new("commemoration:duplicate-name", "suppressed", dropped.id.as_str()));
             continue;
         }
         seen.push(key);
@@ -326,6 +334,15 @@ fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Dec
         && suppresses_memorials(Some(w))
     {
         return Some(Decision::new("commemoration:memorial-under-first-class-feast", "suppressed", comm.id.as_str()));
+    }
+    // General Rubrics VI.2: a Vigil falling on a Solemnity has not even a
+    // Commemoration, "unless it is the Vigil of the Epiphany" (semi-double
+    // here, so not caught). XIV.7 admits no Common Vigil in occurrence at a I
+    // Class Double. Corpus Christi 2022, the transferred Nativity of St John
+    // Baptist 2021 and the Vigil of Pentecost 2024 print no Comm. of the
+    // Vigil (#616).
+    if comm.is_vigil && comm.rank == Rank::Simple && w.rank == Rank::Double1stClass {
+        return Some(Decision::new("commemoration:vigil-on-first-class-double", "suppressed", comm.id.as_str()));
     }
     if w.id.starts_with("pentecost-octave-day-") && comm.id.starts_with("whit-ember-") {
         return Some(Decision::new("commemoration:pentecost-ember", "suppressed", comm.id.as_str()));

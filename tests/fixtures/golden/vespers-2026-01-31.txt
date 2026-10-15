@@ -40,7 +40,7 @@ Alleluia
 
 Thy kingdom.
 
---- Psalm 145b · Confiteantur tibi, Domine ---
+--- Psalm 144b (145b) · Confiteantur tibi, Domine ---
 Psalm 145:10-21
 
 ALL thy works praise thee, O Lord * [Sit.] and thy saints give thanks unto thee.
@@ -63,7 +63,7 @@ Thy kingdom, * O Lord, is an everlasting kingdom.
 
 While I have my being.
 
---- Psalm 146 · Lauda, anima mea, Dominum ---
+--- Psalm 145 (146) · Lauda, anima mea, Dominum ---
 Psalm 146
 
 PRAISE the Lord, O my soul; while I live will I praise the Lord * [Sit.] yea, as long as I have any being, I will sing praises unto my God.
@@ -74,7 +74,7 @@ PRAISE the Lord, O my soul; while I live will I praise the Lord * [Sit.] yea, as
 6. Who helpeth them to right that suffer wrong * who feedeth the hungry.
 7. The Lord looseth men out of prison * the Lord giveth sight to the blind.
 8. The Lord helpeth them that are fallen * the Lord careth for the righteous.
-9. The Lord careth for the strangers, he defendeth the fatherless and widow * as for the way of the ungodly, he turneth it upside down.
+9. The Lord careth for the strangers, † he defendeth the fatherless and widow * as for the way of the ungodly, he turneth it upside down.
 10. The Lord thy God, O Sion, shall be King for evermore * [Stand.] and throughout all generations.
 
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
@@ -84,7 +84,7 @@ While I have my being * will I praise my God.
 
 O how joyful.
 
---- Psalm 147a · Laudate Dominum quoniam bonus ---
+--- Psalm 146 (147a) · Laudate Dominum quoniam bonus ---
 Psalm 147:1-11
 
 O PRAISE the Lord, for it is a good thing to sing praises unto our God * [Sit.] yea, a joyful and pleasant thing it is to be thankful.
@@ -108,7 +108,7 @@ Praise the Lord.
 
 These words are not repeated in the Psalm.
 
---- Psalm 147b · Lauda, Jerusalem, Dominum ---
+--- Psalm 147 (147b) · Lauda, Jerusalem, Dominum ---
 Psalm 147:12-20
 
 (PRAISE the Lord,) O Jerusalem * [Sit.] praise thy God, O Sion.
@@ -148,10 +148,10 @@ To thee our evening prayer we raise;
 Thy glory suppliant we adore
 For ever and for evermore.
 
-All glory, Lord, to thee we pay
-For thine Epiphany today;
+All laud to God the Father be;
+All praise, eternal Son, to thee;
 All glory, as is ever meet,
-To Father and to Paraclete.
+To God the Holy Paraclete.
 
 Amen.
 
@@ -160,7 +160,8 @@ R. And let thy mercy come down on us.
 
 God hath holpen.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -187,7 +188,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

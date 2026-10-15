@@ -70,10 +70,10 @@ And night in turn is drawing on,
 With conscience by the world unstained,
 Shall praise his Name for victory gained.
 
-All laud to God the Father be;
-All praise, eternal Son, to thee;
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
 All glory, as is ever meet,
-To God the Holy Paraclete.
+To Father and to Paraclete.
 
 Amen.
 
@@ -82,7 +82,7 @@ Behold a great priest.
 --- Psalm 1 · Beatus vir, qui non abiit ---
 Psalm 1
 
-BLESSED is the man that hath not walked in the counsel of the ungodly, nor stood in the way of sinners * and hath not sat in the seat of the scornful.
+BLESSED is the man that hath not walked in the counsel of the ungodly, † nor stood in the way of sinners * and hath not sat in the seat of the scornful.
 2. But his delight is in the law of the Lord * and in his law will he exercise himself day and night.
 3. And he shall be like a tree planted by the water-side * that will bring forth his fruit in due season.
 4. His leaf also shall not wither * and look, whatsoever he doeth, it shall prosper.
@@ -107,7 +107,7 @@ WHY do the heathen so furiously rage together * and why do the people imagine a 
 9. Thou shalt bruise them with a rod of iron * and break them in pieces like a potter's vessel.
 10. Be wise now therefore, O ye kings * be learned, ye that are judges of the earth.
 11. Serve the Lord in fear * and rejoice unto him with reverence.
-12. Kiss the Son, lest he be angry, and so ye perish from the right way * if his wrath be kindled, (yea, but a little,) blessed are all they that put their trust in him.
+12. Kiss the Son, lest he be angry, † and so ye perish from the right way * if his wrath be kindled, (yea, but a little,) blessed are all they that put their trust in him.
 
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
@@ -120,7 +120,7 @@ O LORD, rebuke me not in thine indignation * neither chasten me in thy displeasu
 3. My soul also is sore troubled * but, Lord, how long wilt thou punish me?
 4. Turn thee, O Lord, and deliver my soul * O save me for thy mercy's sake.
 5. For in death no man remembereth thee * and who will give thee thanks in the pit?
-6. I am weary of my groaning; every night wash I my bed * and water my couch with my tears.
+6. I am weary of my groaning; † every night wash I my bed * and water my couch with my tears.
 7. My beauty is gone for very trouble * and worn away because of all mine enemies.
 8. Away from me, all ye that work vanity * for the Lord hath heard the voice of my weeping.
 9. The Lord hath heard my petition * the Lord will receive my prayer.
@@ -147,8 +147,8 @@ Our Father, who art in heaven, Hallowed be thy Name.
 Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
-And lead us not into temptation,
-R. But deliver us from evil. Amen.
+V. And lead us not into temptation.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

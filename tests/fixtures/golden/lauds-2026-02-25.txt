@@ -38,7 +38,7 @@ As it was in the beginning, is now, and ever shall be, * world without end. Amen
 
 Praise be to thee, O Lord, King of eternal glory.
 
---- Psalm 67 · Deus misereatur nostri ---
+--- Psalm 66 (67) · Deus misereatur nostri ---
 Psalm 67
 
 GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his countenance, and be merciful unto us:
@@ -54,13 +54,13 @@ GOD be merciful unto us, and bless us * [Sit.] and shew us the light of his coun
 
 Wash me throughly, * O Lord, from my wickedness.
 
---- Psalm 51 · Miserere mei, Deus ---
+--- Psalm 50 (51) · Miserere mei, Deus ---
 Psalm 51
 
 HAVE mercy upon me, O God, after thy great goodness * [Sit.] according to the multitude of thy mercies do away mine offences.
 2. Wash me throughly from my wickedness * and cleanse me from my sin.
 3. For I acknowledge my faults * and my sin is ever before me.
-4. Against thee only have I sinned, and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
+4. Against thee only have I sinned, † and done this evil in thy sight * that thou mightest be justified in thy saying, and clear when thou art judged.
 5. Behold, I was shapen in wickedness * and in sin hath my mother conceived me.
 6. But lo, thou requirest truth in the inward parts * and shalt make me to understand wisdom secretly.
 7. Thou shalt purge me with hyssop, and I shall be clean * thou shalt wash me, and I shall be whiter than snow.
@@ -70,12 +70,12 @@ HAVE mercy upon me, O God, after thy great goodness * [Sit.] according to the mu
 11. Cast me not away from thy presence * and take not thy holy Spirit from me.
 12. O give me the comfort of thy help again * and stablish me with thy free Spirit.
 13. Then shall I teach thy ways unto the wicked * and sinners shall be converted unto thee.
-14. Deliver me from blood-guiltiness, O God, thou that art the God of my health * and my tongue shall sing of thy righteousness.
+14. Deliver me from blood-guiltiness, O God, † thou that art the God of my health * and my tongue shall sing of thy righteousness.
 15. Thou shalt open my lips, O Lord * and my mouth shall shew thy praise.
-16. For thou desirest no sacrifice, else would I give it thee * but thou delightest not in burnt-offerings.
+16. For thou desirest no sacrifice, † else would I give it thee * but thou delightest not in burnt-offerings.
 17. The sacrifice of God is a troubled spirit * a broken and contrite heart, O God, shalt thou not despise.
 18. O be favourable and gracious unto Sion * build thou the walls of Jerusalem.
-19. Then shalt thou be pleased with the sacrifice of righteousness, with the burnt-offerings and oblations * [Stand.] then shall they offer young bullocks upon thine altar.
+19. Then shalt thou be pleased with the sacrifice of righteousness, † with the burnt-offerings and oblations * [Stand.] then shall they offer young bullocks upon thine altar.
 
 [Bow.] Glory be to the Father, and to the Son, * and to the Holy Ghost;
 [Stand upright.] As it was in the beginning, is now, and ever shall be, * world without end. Amen.
@@ -84,7 +84,7 @@ Wash me throughly, * O Lord, from my wickedness.
 
 Preserve my life, * O Lord, from fear of the enemy.
 
---- Psalm 64 · Exaudi, Deus, orationem meam ---
+--- Psalm 63 (64) · Exaudi, Deus, orationem meam ---
 Psalm 64
 
 HEAR my voice, O God, in my prayer * [Sit.] preserve my life from fear of the enemy.
@@ -107,20 +107,20 @@ Thou, O God, * art praised in Sion.
 
 These words are not repeated in the Psalm.
 
---- Psalm 65 · Te decet hymnus ---
+--- Psalm 64 (65) · Te decet hymnus ---
 Psalm 65
 
 (THOU, O God, art praised in Sion) * [Sit.] and unto thee shall the vow be performed in Jerusalem.
 2. Thou that hearest the prayer * unto thee shall all flesh come.
 3. My misdeeds prevail against me * O be thou merciful unto our sins.
 4. Blessed is the man whom thou choosest, and receivest unto thee * he shall dwell in thy court, and shall be satisfied with the pleasures of thy house, even of thy holy temple.
-5. Thou shalt shew us wonderful things in thy righteousness, O God of our salvation * thou that art the hope of all the ends of the earth, and of them that remain in the broad sea.
+5. Thou shalt shew us wonderful things in thy righteousness, † O God of our salvation * thou that art the hope of all the ends of the earth, and of them that remain in the broad sea.
 6. Who in his strength setteth fast the mountains * and is girded about with power.
 7. Who stilleth the raging of the sea * and the noise of his waves, and the madness of the people.
 8. They also that dwell in the uttermost parts of the earth shall be afraid at thy tokens * thou that makest the outgoings of the morning and evening to praise thee.
 9. Thou visitest the earth, and blessest it * thou makest it very plenteous.
 10. The river of God is full of water * thou preparest their corn, for so thou providest for the earth.
-11. Thou waterest her furrows, thou sendest rain into the little valleys thereof * thou makest it soft with the drops of rain, and blessest the increase of it.
+11. Thou waterest her furrows, † thou sendest rain into the little valleys thereof * thou makest it soft with the drops of rain, and blessest the increase of it.
 12. Thou crownest the year with thy goodness * and thy clouds drop fatness.
 13. They shall drop upon the dwellings of the wilderness * and the little hills shall rejoice on every side.
 14. The folds shall be full of sheep * [Stand.] the valleys also shall stand so thick with corn, that they shall laugh and sing.
@@ -132,8 +132,9 @@ Thou, O God, * art praised in Sion.
 
 The Lord shall judge * the ends of the earth.
 
---- Hannah · Exsultavit cor meum in Domino ---
-!1 Samuel 2:1-10
+--- The Song of Hannah · Exsultavit cor meum in Domino ---
+The Song of Hannah
+!1 Sam. 2:1-10
 
 MY heart rejoiceth in the Lord * [Sit.] mine horn is exalted in the Lord.
 2. My mouth is enlarged over mine enemies * because I rejoice in thy salvation.
@@ -173,8 +174,8 @@ O PRAISE the Lord of heaven * [Sit.] praise him in the height.
 9. Mountains and all hills * fruitful trees and all cedars;
 10. Beasts and all cattle * worms and feathered fowls;
 11. Kings of the earth and all people * princes and all judges of the world;
-12. Young men and maidens, old men and children, praise the Name of the Lord * for his Name only is excellent, and his praise above heaven and earth.
-13. He shall exalt the horn of his people; all his saints shall praise him * even the children of Israel, even the people that serveth him.
+12. Young men and maidens, old men and children, † praise the Name of the Lord * for his Name only is excellent, and his praise above heaven and earth.
+13. He shall exalt the horn of his people; † all his saints shall praise him * even the children of Israel, even the people that serveth him.
 
 --- Psalm 149 · Cantate Domino canticum novum ---
 Psalm 149
@@ -204,8 +205,10 @@ O PRAISE God in his holiness * praise him in the firmament of his power.
 
 O all ye heavens, * praise ye the Lord.
 
---- Isa 58:1 ---
-Cry aloud, spare not; lift up thy voice like a trumpet, and shew my people their transgression, and the house of Jacob their sins.
+--- Rom. 13:12, 13 ---
+The night is far spent, the day is at hand: let us therefore cast off the
+works of darkness, and let us put on the armour of light. Let us walk
+honestly, as in the day.
 R. Thanks be to God.
 
 R. Heal my soul * for I have sinned against thee.
@@ -216,7 +219,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Heal my soul * for I have sinned against thee.
 
 --- Nox et tenebrae et nubila ---
-Hence night and clouds that night-time brings,
+Hence, night and clouds that night-time brings,
 Confused and dark and troubled things;
 The dawn is here, the sky grows white,
 Christ is at hand; depart from sight.
@@ -248,7 +251,8 @@ R. So shall we rejoice and be glad all the days of our life.
 
 When ye fast, * be not, as the hypocrites, of a sad countenance.
 
---- Benedictus · Benedictus Dominus, Deus Israël ---
+--- The Song of Zacharias · Benedictus Dominus, Deus Israël ---
+The Song of Zacharias
 !Luke 1:68-79
 
 Blessed be the Lord God of Israel; * for he hath visited, and redeemed his people;
@@ -278,7 +282,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

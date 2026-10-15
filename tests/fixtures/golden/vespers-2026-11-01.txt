@@ -40,7 +40,7 @@ Alleluia
 
 I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ I beheld a great multitude * which no man could number, of all nations, standing
 
 And all the Angels * stood round about the throne, and fell before the throne on their faces, and worshipped God.
 
---- Psalm 112 · Beatus vir, qui timet Dominum ---
+--- Psalm 111 (112) · Beatus vir, qui timet Dominum ---
 Psalm 112
 
 BLESSED is the man that feareth the Lord * [Sit.] he hath great delight in his commandments.
@@ -79,7 +79,7 @@ And all the Angels * stood round about the throne, and fell before the throne on
 
 Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -98,7 +98,7 @@ Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and t
 
 All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
 
---- Psalm 116b · Credidi, propter quod locutus sum ---
+--- Psalm 115 (116b) · Credidi, propter quod locutus sum ---
 Psalm 116:10-16
 
 I BELIEVED, and therefore will I speak; but I was sore troubled * [Sit.] I said in my haste, All men are liars.
@@ -114,7 +114,7 @@ I BELIEVED, and therefore will I speak; but I was sore troubled * [Sit.] I said 
 
 All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
 
---- Rev 7:2, 3 ---
+--- Rev. 7:2, 3 ---
 Behold, I John saw another Angel ascending from the east, having the seal of the living God: * and he cried with a loud voice to the four Angels, to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, * till we have sealed the servants of our God in their foreheads.
 R. Thanks be to God.
 
@@ -168,7 +168,8 @@ R. Let them rejoice in their beds.
 
 O how glorious * is the kingdom wherein all the Saints rejoice with Christ; arrayed in white robes, they follow the Lamb whithersoever he goeth.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -195,7 +196,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
@@ -229,13 +230,13 @@ R. Thanks be to God.
 
 I will walk before the Lord * in the land of the living.
 
---- Psalm 116 · Dilexi, quoniam exaudiet Dominus ---
+--- Psalm 114–115 (116) · Dilexi, quoniam exaudiet Dominus ---
 Psalm 116
 
 I AM well pleased * that the Lord hath heard the voice of my prayer;
 2. That he hath inclined his ear unto me * therefore will I call upon him as long as I live.
 3. The snares of death compassed me round about * and the pains of hell gat hold upon me.
-4. I shall find trouble and heaviness, and I will call upon the Name of the Lord * O Lord, I beseech thee, deliver my soul.
+4. I shall find trouble and heaviness, † and I will call upon the Name of the Lord * O Lord, I beseech thee, deliver my soul.
 5. Gracious is the Lord, and righteous * yea, our God is merciful.
 6. The Lord preserveth the simple * I was in misery, and he helped me.
 7. Turn again then unto thy rest, O my soul * for the Lord hath rewarded thee.
@@ -256,7 +257,7 @@ I will walk before the Lord * in the land of the living.
 
 Woe is me * that I am constrained to dwell with Mesech.
 
---- Psalm 120 · Ad Dominum cum tribularer ---
+--- Psalm 119 (120) · Ad Dominum cum tribularer ---
 Psalm 120
 
 WHEN I was in trouble I called upon the Lord * and he heard me.
@@ -273,7 +274,7 @@ Woe is me * that I am constrained to dwell with Mesech.
 
 The Lord shall preserve thee from all evil: * yea, it is even he that shall keep thy soul.
 
---- Psalm 121 · Levavi oculos meos ---
+--- Psalm 120 (121) · Levavi oculos meos ---
 Psalm 121
 
 I WILL lift up mine eyes unto the hills * from whence cometh my help.
@@ -292,7 +293,7 @@ The Lord shall preserve thee from all evil: * yea, it is even he that shall keep
 
 If thou, Lord, wilt be extreme to mark what is done amiss, * O Lord, who may abide it?
 
---- Psalm 130 · De profundis clamavi ---
+--- Psalm 129 (130) · De profundis clamavi ---
 Psalm 130
 
 OUT of the deep have I called unto thee, O Lord * Lord, hear my voice.
@@ -311,16 +312,16 @@ If thou, Lord, wilt be extreme to mark what is done amiss, * O Lord, who may abi
 
 Despise not then, * O Lord, the works of thine own hands.
 
---- Psalm 138 · Confitebor tibi, Domine ---
+--- Psalm 137 (138) · Confitebor tibi, Domine ---
 Psalm 138
 
 I WILL give thanks unto thee, O Lord, with my whole heart * even before the gods will I sing praise unto thee.
-2. I will worship toward thy holy temple, and praise thy Name, because of thy loving-kindness and truth * for thou hast magnified thy Name and thy word above all things.
+2. I will worship toward thy holy temple, † and praise thy Name, because of thy loving-kindness and truth * for thou hast magnified thy Name and thy word above all things.
 3. When I called upon thee, thou heardest me * and enduedst my soul with much strength.
 4. All the kings of the earth shall praise thee, O Lord * for they have heard the words of thy mouth.
 5. Yea, they shall sing in the ways of the Lord * that great is the glory of the Lord.
 6. For though the Lord be high, yet hath he respect unto the lowly * as for the proud, he beholdeth them afar off.
-7. Though I walk in the midst of trouble, yet shalt thou refresh me * thou shalt stretch forth thy hand upon the furiousness of mine enemies, and thy right hand shall save me.
+7. Though I walk in the midst of trouble, † yet shalt thou refresh me * thou shalt stretch forth thy hand upon the furiousness of mine enemies, and thy right hand shall save me.
 8. The Lord shall make good his loving-kindness toward me * yea, thy mercy, O Lord, endureth for ever; despise not then the works of thine own hands.
 
 Rest eternal grant unto them, O Lord.
@@ -333,7 +334,8 @@ R. Blessed are the dead which die in the Lord.
 
 All that the Father giveth me * shall come to me; and him that cometh to me, I will in no wise cast out.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.

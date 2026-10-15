@@ -39,19 +39,34 @@ pub struct Dimension<'a> {
 /// Families of mutually exclusive values describing how a page was
 /// rendered. Stored as "<key>:<value>"; a written key or value is never
 /// redefined.
-pub const DIMENSIONS: [Dimension<'static>; 6] = [
+pub const DIMENSIONS: [Dimension<'static>; 7] = [
     Dimension { key: "appearance", values: &["nave", "apse"] },
     Dimension { key: "screen", values: &["desktop", "mobile"] },
     Dimension { key: "prayer-form", values: PRAYER_FORMS },
     // A browser tab, the installed web app, or a native app.
-    Dimension { key: "client", values: &["browser", "pwa", "android", "ios"] },
+    Dimension { key: "client", values: CLIENTS },
     // Prime only, on a day with a Martyrology reading: whether the reader's
     // setting showed it or left the rubric in its place.
     Dimension { key: "martyrology", values: MARTYROLOGY },
     // Whether this browser or installation is counted for the first time today. The device
     // remembers the day it was first counted; nothing sent links one day to another.
     Dimension { key: "visit", values: VISITS },
+    // The client of a first-day visit, so new readers can be told apart by client. The server
+    // derives it from a beacon's `visit:first` and `client` ([`new_client`]); no client sends it.
+    Dimension { key: "new-client", values: CLIENTS },
 ];
+
+/// The `client` family's values.
+pub const CLIENTS: &[&str] = &["browser", "pwa", "android", "ios"];
+
+/// The `new-client` scope a beacon's dimensions add: its client, when the visit is a first one.
+pub fn new_client(dimensions: &[String]) -> Option<String> {
+    if !dimensions.iter().any(|d| d == "visit:first") {
+        return None;
+    }
+    let client = dimensions.iter().find_map(|d| d.strip_prefix("client:"))?;
+    Some(format!("new-client:{client}"))
+}
 
 /// The `visit` family's values: a first day, then every day after.
 pub const VISITS: &[&str] = &["first", "returning"];
@@ -96,7 +111,11 @@ pub fn parse_event(body: &str) -> Option<Event> {
     let mut seen = Vec::new();
     for field in fields {
         let Some(key) = dimension_key(field) else { continue };
-        if seen.contains(&key) || (key == "prayer-form" && !HOURS.contains(&scope)) || (key == "martyrology" && scope != "prime") {
+        if key == "new-client"
+            || seen.contains(&key)
+            || (key == "prayer-form" && !HOURS.contains(&scope))
+            || (key == "martyrology" && scope != "prime")
+        {
             continue;
         }
         seen.push(key);
@@ -211,12 +230,24 @@ mod tests {
             // Any page can say whether the reader is new.
             ("site visit:first client:browser", "site", vec!["visit:first", "client:browser"]),
             ("vespers visit:returning visit:first", "vespers", vec!["visit:returning"]),
+            // The server derives the new reader's client; a beacon cannot claim it.
+            ("site new-client:android visit:first", "site", vec!["visit:first"]),
         ] {
             let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
             assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
         }
         for body in ["", "matins", "matins appearance:nave", "appearance:nave", " lauds"] {
             assert!(parse_event(body).is_none(), "{body:?} accepted");
+        }
+    }
+
+    #[test]
+    fn new_readers_are_counted_by_client() {
+        let dims = |body: &str| parse_event(body).unwrap().dimensions;
+        assert_eq!(new_client(&dims("site visit:first client:android")).as_deref(), Some("new-client:android"));
+        assert_eq!(new_client(&dims("lauds client:browser screen:mobile visit:first")).as_deref(), Some("new-client:browser"));
+        for body in ["site visit:returning client:android", "site client:ios", "site visit:first", "site"] {
+            assert_eq!(new_client(&dims(body)), None, "{body:?}");
         }
     }
 

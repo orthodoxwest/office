@@ -120,31 +120,31 @@ Peter the Apostle * and Paul the Doctor of the Gentiles: these have taught us th
 
 [short-responsory-lauds]
 # SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes (Common p. 10*)
-@use commons/apostle/short-responsory-vespers
+@use shared/apostle/short-responsory-thou-shalt-make-them-princes
 
 [short-responsory-vespers]
 # SOURCE: Monastic Diurnal p. 558: Their sound (Common p. 11*)
-@use commons/apostle/short-responsory-lauds
+@use shared/apostle/short-responsory-their-sound
 
 [versicle-lauds]
 # SOURCE: Monastic Diurnal p. 558: Their sound
-@use commons/apostle/versicle-first-vespers
+@use shared/apostle/versicle-their-sound
 
 [versicle-vespers]
 # SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes
-@use commons/apostle/versicle-sext
+@use shared/apostle/versicle-thou-shalt-make-them-princes
 
 [versicle-first-vespers]
 # SOURCE: Monastic Diurnal pp. 558–559; octave Vespers exception, including anticipated commemoration
-@use commons/apostle/versicle-sext
+@use shared/apostle/versicle-thou-shalt-make-them-princes
 
 [commemoration-versicle-lauds]
 # SOURCE: Monastic Diurnal p. 558: Their sound
-@use commons/apostle/versicle-first-vespers
+@use shared/apostle/versicle-their-sound
 
 [commemoration-versicle-vespers]
 # SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes
-@use commons/apostle/versicle-sext
+@use shared/apostle/versicle-thou-shalt-make-them-princes
 
 [collect]
 # SOURCE: Monastic Diurnal p. 560; 2026 ordo p. 78

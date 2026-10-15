@@ -72,6 +72,9 @@ val VerseGutter: Dp = 28.8.dp
 private val SigilGap: Dp = 6.4.dp
 private val SigilColumn: Dp = VerseGutter - SigilGap
 
+/** How far a spelled-out sigil ("Blessing.") may hang into a wide screen's margin: all its extra width, at any text size. */
+private val WordHang: Dp = 72.dp
+
 /**
  * A sigil set right-aligned in its column. A mark wider than the column hangs up to `hang` into
  * the margin before it; only beyond that (a large system font) does the column widen, so the
@@ -143,7 +146,8 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
         BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (cross) PaintedCross(Modifier.padding(bottom = 11.2.dp).size(9.92.dp))
-            Text(runs(block), Modifier.fillMaxWidth(), style = Type.heading.copy(color = p.titulus))
+            val style = if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading
+            Text(runs(block), Modifier.fillMaxWidth(), style = style.copy(color = p.titulus))
         }
         BlockKind.ITEM_LABEL -> ItemLabel(block, m.fillMaxWidth(), Type.itemLabel.copy(color = p.titulus))
         BlockKind.LATIN_TITLE, BlockKind.CANTICLE_SECTION -> Text(
@@ -203,15 +207,21 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
             block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth(), style = text)
-            // "Blessing." is too wide to hang in the page gutter: it stands above its words,
-            // both on the edge the ℣/℟ lines' words share, as the web's phone layout sets it.
-            block.kind == BlockKind.VERSICLE && block.marker.length > 2 -> Column(m.fillMaxWidth().padding(start = VerseGutter)) {
+            // "Blessing." is too wide to hang in a phone's or a narrow tablet's gutter: below the
+            // web's 1000px it stands above its words, both on the edge the ℣/℟ lines' words share
+            // (`.sigil-word` to 999px).
+            block.kind == BlockKind.VERSICLE && block.marker.length > 2 && !(LocalWide.current && !LocalRanked.current) -> Column(m.fillMaxWidth().padding(start = VerseGutter)) {
                 Text(block.marker, style = text.copy(color = p.rubric))
                 Text(runs(block), style = text)
             }
             else -> Row(m.fillMaxWidth()) {
-                // "All:" hangs its extra width into the page gutter, keeping its words on that edge.
-                val hang = if (block.kind == BlockKind.ALL) Gutter else 0.dp
+                // "All:" hangs its extra width into the page gutter, keeping its words on that edge;
+                // from 1000dp "Blessing." hangs into the wide margin the same way (`.sigil-word`).
+                val hang = when {
+                    block.kind == BlockKind.ALL -> Gutter
+                    block.marker.length > 2 -> WordHang
+                    else -> 0.dp
+                }
                 Text(block.marker, Modifier.sigilColumn(hang).alignByBaseline(), softWrap = false, style = text.copy(color = p.rubric))
                 Spacer(Modifier.width(SigilGap))
                 Text(runs(block), Modifier.alignByBaseline(), style = text)
@@ -229,8 +239,15 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             val inColumn = if (column != null) Modifier.width(column) else Modifier
             Text(runs(block), inColumn.fillMaxWidth(), style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center))
         }
-        BlockKind.PARAGRAPH, BlockKind.CHANT_LINE -> {
-            if (block.dropCap) Opening(block, text, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = text)
+        // A prose opening (a chapter, a collect, the Our Father) turns over below its initial at the
+        // edge its ℟'s words share, the initial hung in the gutter, as a psalm's first verse does.
+        BlockKind.PARAGRAPH -> {
+            if (block.dropCap) Opening(block, text, m, textStart = VerseGutter) else Text(runs(block), m.fillMaxWidth(), style = text)
+        }
+        // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
+        BlockKind.CHANT_LINE -> {
+            val chant = text.copy(textIndent = TextIndent(restLine = 19.2.sp))
+            if (block.dropCap) Opening(block, chant, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = chant)
         }
     }
 }
@@ -242,8 +259,9 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
  * a single line (elevated), and may break after its mediant rather than leave a stub of a second
  * line (divided). Hymns and the Marian antiphon always drop. The rest of the first word, or the
  * next word after a lone O or I, turns to small caps as the eye leaves the capital. The capital
- * stands at the measure's edge (a psalm's hangs into the verse gutter); `textStart` places the
- * lines that run on below it.
+ * stands at the measure's edge (a psalm's and prose's hang into the verse gutter); `textStart`
+ * places the lines that run on below it, and a raised capital's line stands at the measure's edge.
+ * A line that turns over below the capital keeps its style's hanging indent (a hymn's, a sung line's).
  */
 @Composable
 private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, textStart: Dp, raised: Boolean = false) {
@@ -319,13 +337,13 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                     divided.second.lineCount == 2 && balance(divided.second) > balance(natural) + 0.15f ->
                     OpeningSetting.Dropped(divided.first, divided.second)
                 block.kind == BlockKind.PARAGRAPH &&
-                    measurer.measure(raisedText, plain, constraints = Constraints(maxWidth = (width - start.toInt()).coerceAtLeast(1))).lineCount < 2 ->
+                    measurer.measure(raisedText, plain, constraints = Constraints(maxWidth = width.coerceAtLeast(1))).lineCount < 2 ->
                     OpeningSetting.Raised
                 else -> OpeningSetting.Dropped(body, natural)
             }
         }
         when (setting) {
-            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth().padding(start = textStart), style = plain)
+            OpeningSetting.Raised -> Text(raisedText, Modifier.fillMaxWidth(), style = plain)
             is OpeningSetting.Elevated -> {
                 // One line pitch above the text, into which the capital rises; its ink top meets the
                 // cap height of that empty line, its foot the text's baseline.
@@ -346,8 +364,20 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
                 // has no first break, its paragraphs split there instead).
                 val first = shown.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
                 val nl = text.text.indexOf('\n')
-                val after = text.subSequence(if (nl in 0 until split) split + 1 else split, text.length)
+                val from = if (nl in 0 until split) split + 1 else split
+                // Split inside a line (not at its break), the remainder's first line is that line's
+                // turnover: it takes the hanging indent too, rather than reading as a line of its own.
+                val turnover = from in 1 until text.length && text.text[from - 1] != '\n' && text.text[from] != '\n'
+                val hang = style.textIndent?.restLine ?: 0.sp
+                val after = text.subSequence(from, text.length)
                     .let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
+                    .let { rest ->
+                        val end = rest.text.indexOf('\n').let { if (it < 0) rest.length else it }
+                        if (!turnover || hang.value == 0f) rest else buildAnnotatedString {
+                            withStyle(ParagraphStyle(textIndent = TextIndent(hang, hang))) { append(rest.subSequence(0, end)) }
+                            if (end < rest.length) append(rest.subSequence(end + 1, rest.length))
+                        }
+                    }
                 // The capital's ink top meets the first line's cap height; its foot then stands on the second baseline.
                 val capTop = beside.getLineBaseline(0) + cap.drop - cap.glyph.firstBaseline
                 Column {
@@ -369,13 +399,23 @@ private sealed interface OpeningSetting {
     class Dropped(val text: AnnotatedString, val layout: TextLayoutResult) : OpeningSetting
 }
 
-/** The opening with a break after its mediant (the web's `.initial-divided`), if it has one. */
+/** Marks a posture cue's run, so a divided opening can keep the cue with its mediant. */
+private const val POSTURE = "posture"
+
+/**
+ * The opening with a break after its mediant (the web's `.initial-divided`), if it has one. A
+ * posture cue at the mediant ("Sit.") ends the first line with it rather than opening the second
+ * beside the initial, where it read as the first word of the half-verse.
+ */
 private fun divideAtMediant(text: AnnotatedString): AnnotatedString? {
-    val at = text.text.indexOf('*').takeIf { it >= 0 } ?: return null
+    val mediant = text.text.indexOf('*').takeIf { it >= 0 } ?: return null
+    val next = (mediant + 1 until text.length).firstOrNull { !text.text[it].isWhitespace() }
+    val cue = next?.let { n -> text.getStringAnnotations(POSTURE, n, n + 1).firstOrNull { it.start == n } }
+    val at = cue?.end ?: (mediant + 1)
     return buildAnnotatedString {
-        append(text.subSequence(0, at + 1))
+        append(text.subSequence(0, at))
         append("\n")
-        append(text.subSequence(at + 1, text.length).withoutLeadingSpace())
+        append(text.subSequence(at, text.length).withoutLeadingSpace())
     }
 }
 
@@ -613,7 +653,9 @@ fun runs(block: BlockView): AnnotatedString {
     return buildAnnotatedString {
         for (run in block.runs) {
             val style = runStyle(run.style, p)
+            if (run.style == RunStyle.POSTURE) pushStringAnnotation(POSTURE, run.text)
             if (style == null) append(run.text) else withStyle(style) { append(run.text) }
+            if (run.style == RunStyle.POSTURE) pop()
         }
     }
 }
@@ -629,6 +671,14 @@ private fun runStyle(style: RunStyle, p: Palette): SpanStyle? = when (style) {
     RunStyle.SECRET -> SpanStyle(color = p.unsaid)
     // A psalm's Latin incipit is muted beside its titulus, as Latin titles are.
     RunStyle.LATIN -> SpanStyle(color = p.muted, fontStyle = FontStyle.Italic, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.4.sp)
-    RunStyle.KICKER -> SpanStyle(fontSize = 0.7.em, color = p.muted, letterSpacing = 0.1.em)
+    // "Commemoration of", on its own line in the heading's small caps and tracking, as the web's
+    // `.commemoration-kicker`; the name beneath stays in mixed case.
+    RunStyle.KICKER -> SpanStyle(fontSize = 0.78.em, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp)
     RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)
+    // A psalm's numbers ("66 (67)") out of its label's small caps, as the web's `.psalm-num`: a
+    // small-cap "1" is a bare stem that reads as the section numeral "i".
+    RunStyle.NUMERAL -> SpanStyle(fontSize = 0.9.em, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.02.em)
+    // The Hebrew number beside it, "(67)", muted and a little smaller, as `.psalm-heb` (0.86 of
+    // the numeral's 0.9em).
+    RunStyle.HEBREW_NUMERAL -> SpanStyle(fontSize = 0.774.em, color = p.muted, fontFeatureSettings = NO_SMALL_CAPS, letterSpacing = 0.02.em)
 }

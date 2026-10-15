@@ -49,7 +49,8 @@ data/
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   latin-incipits.txt       Latin incipit printed beside each psalm/canticle label. Our psalter is
                            Coverdale = HEBREW numbering; incipits come from the Vulgate, which runs
-                           one behind — the file header records the join/split mapping. Sits outside
+                           one behind — the file header records the join/split mapping, which the
+                           psalm labels follow (Septuagint first, Hebrew in parentheses). Sits outside
                            data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
                            provenance, zero-occurrence and Latin-lint sweeps.
   review/provenance.csv    Source/page attestations; citations only, never book contents
@@ -194,7 +195,7 @@ Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `
 - Layout: two-sided (inner margin alternates for booklet imposition), running heads via `fancyhdr`, headings and psalm/hymn labels kept with their text via `needspace`, PDF title/subject via `hyperref`. Display text goes through the same `corpus::typography::typeset` as the web (curly quotes, en-dash verse ranges).
 - Initials: `\initial` in the preamble mirrors the web's initial system (small-caps opening word; dropped, raised or elevated by the lines the opening takes; per-letter optical profiles from `style.css`, eased for print on a few letters). Recalibrate against a specimen of every letter when changing the initial face.
 - gregoriotex: required (TeX Live `gregorio` package) — the preamble loads it unconditionally; it supplies the ℣/℟ glyphs (`\Vbar`/`\Rbar`) even in non-chant booklets.
-- GABC chant files: `data/texts/chant/{psalms,canticles,hymns}/{slug}.gabc`. When present, element renders as `\gregorioscore{}` instead of formatted text. Psalm slugs zero-padded to 3 digits (e.g. `psalms/067.gabc`).
+- GABC chant files: `data/texts/chant/{psalms,canticles,hymns}/{slug}.gabc`. When present, element renders as `\gregorioscore{}` instead of formatted text. Psalm slugs zero-padded to 3 digits (e.g. `psalms/067.gabc`); a canticle's slug is its corpus key (`canticles/exodus-15.gabc`), since two canticles share a name.
 
 ## Liturgical specifics
 

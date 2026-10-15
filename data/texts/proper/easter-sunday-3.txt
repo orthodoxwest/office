@@ -33,7 +33,7 @@ Verily I say unto you, * that ye shall weep and lament, but the world shall rejo
 
 [chapter-first-vespers]
 # SOURCE: diurnal p. 380
-!1 Pet 2:11
+!1 Pet. 2:11
 Dearly beloved: I beseech you as strangers and pilgrims, abstain from fleshly lusts, * which war against the soul.
 R. Thanks be to God.
 
@@ -43,13 +43,13 @@ Almighty God, who shewest to them that are in error the light of thy truth, to t
 
 [chapter-sext]
 # SOURCE: diurnal p. 380
-!1 Pet 2:13-14
+!1 Pet. 2:13, 14
 Submit yourselves to every ordinance of man for the Lord's sake: whether it be to the king, as supreme; or unto governors, as unto them that are sent by him for the punishment of evildoers, * and for the praise of them that do well.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 381
-!1 Pet 2:18-19
+!1 Pet. 2:18, 19
 Servants, be subject to your masters with all fear; not only to the good and gentle, but also to the froward, * for this is thankworthy in our Lord Jesus Christ.
 R. Thanks be to God.
 

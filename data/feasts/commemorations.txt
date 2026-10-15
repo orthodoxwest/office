@@ -95,7 +95,9 @@ Day = 19
 Source = awrv
 
 [comm-01-22-ss-vincent-martyr]
-Name = Ss Vincent, Martyr
+# St Vincent alone, as in the Diurnal (p. 461); the ordos' "Ss" is left over
+# from "Ss Vincent & Anastasius" (#648).
+Name = St Vincent, Martyr
 Rank = commemoration
 Color = red
 Category = martyr
@@ -116,7 +118,7 @@ Source = awrv
 Name = Commemoration of St Peter
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
 Month = 1
 Day = 25
 Source = awrv
@@ -178,6 +180,8 @@ Source = awrv
 
 [comm-02-04-the-new-martyrs-of-russia]
 Name = The New Martyrs of Russia
+# Completes "thy holy Martyrs N." in the Common's collect (#607).
+ProperName = of Russia
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -640,8 +644,8 @@ Source = awrv
 [comm-08-17-octave-of-st-laurence]
 Name = Octave of St Laurence
 Rank = commemoration
-Color = white
-Category = confessor
+Color = red
+Category = martyr
 ProperID = st-lawrence
 Month = 8
 Day = 17
@@ -1058,6 +1062,8 @@ Month = 11
 Day = 26
 Source = awrv
 
+# The 2026 ordo gives "The very hairs" (Many Martyrs) at I Vespers of Advent I
+# and Lauds; the one-Martyr Common is kept until clergy rule (#610).
 [comm-11-29-st-saturninus-bishop-and-martyr]
 Name = St Saturninus, Bishop & Martyr
 Rank = commemoration
@@ -1135,6 +1141,7 @@ Source = awrv
 
 [comm-extra-01-02-octave-day-of-st-stephen-protomartyr]
 Name = Octave Day of St Stephen, Protomartyr
+ProperName = Stephen
 Rank = commemoration
 Color = red
 Category = martyr
@@ -1214,17 +1221,6 @@ Name = St Patrick, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
-Month = 3
-Day = 17
-Source = awrv
-
-[comm-extra-03-17-st-joseph-of-arimathea-c]
-ProperID = st-joseph-arimathea
-ProperName = Joseph
-Name = St Joseph of Arimathea, C
-Rank = commemoration
-Color = white
-Category = confessor
 Month = 3
 Day = 17
 Source = awrv
@@ -1357,17 +1353,8 @@ Day = 30
 Source = awrv
 CompanionOf = commemoration-st-paul-apostle
 
-[comm-extra-07-06-the-octave-of-ss-peter-and-paul]
-Name = The Octave of Ss Peter & Paul
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 7
-Day = 6
-Source = awrv
-
 [comm-extra-07-07-ss-cyril-and-methodius-bishops-and-confessors]
-Name = Ss Cyril and Methodius, Bishops & Confessors
+Name = Ss Cyril & Methodius, Bishops & Confessors
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1493,27 +1480,19 @@ Month = 12
 Day = 10
 Source = awrv
 
-[comm-extra-12-15-octave-of-the-conception-of-the-blessed-virgin-mary]
-Name = Octave of the Conception of the B.V.M.
-Rank = commemoration
-Color = white
-Category = blessed-virgin
-Month = 12
-Day = 15
-Source = awrv
-
 
 [comm-extra-01-18-chair-of-st-peter-in-rome]
 Name = Chair of St Peter in Rome
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
 Month = 1
 Day = 18
 Source = awrv
 
 [comm-extra-01-25-the-conversion-of-st-paul-the-apostle]
-Name = The Conversion of St Paul The Apostle
+Name = The Conversion of St Paul the Apostle
+ProperName = Paul
 Rank = commemoration
 Color = white
 Category = apostle
@@ -1540,7 +1519,7 @@ Day = 6
 Source = awrv
 
 [comm-extra-02-06-st-photius-bishop-and-confessor]
-Name = St Photius, Bishop and Confessor
+Name = St Photius, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1641,7 +1620,7 @@ Source = awrv
 
 [comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve]
 ProperName = Alexander, Eventius & Theodulus
-Name = Ss Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
+Name = Ss Alexander, Eventius & Theodulus, Martyrs; & St Juvenalis, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1788,7 +1767,7 @@ Source = awrv
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
 ProperName = Nazarius, Celsus & Victor
-Name = Ss Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
+Name = Ss Nazarius & Celsus, Martyrs; St Victor, Bishop & Martyr; & St Innocent, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs

@@ -54,6 +54,22 @@ static WORD_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[A-Za-z]+").expe
 /// A word, a space, then punctuation that closes a clause: a transcription slip
 /// ("vex my soul ; for"). An ellipsis ("thee ... liveth") is not one.
 static SPACED_PUNCTUATION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[\w’”)] [,;:.?!](\s|$)").expect("valid regex"));
+/// A scripture reference in the Diurnal's style: "Ecclus. 50:6, 7", "Rom. 13:12",
+/// "Gal. 4:31-5:1", "Rev. 5:11, 12; 7:10". The verses follow a chapter after a
+/// colon; a list takes a space after each comma; chapters are parted by "; ".
+static SCRIPTURE_REF_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?<book>(?:[1-4] )?[A-Z][a-z]+\.?) (?<cites>[0-9]+:[0-9]+(?:-[0-9]+(?::[0-9]+)?)?(?:, [0-9]+(?:-[0-9]+)?)*(?:; [0-9]+:[0-9]+(?:-[0-9]+)?(?:, [0-9]+(?:-[0-9]+)?)*)*)$")
+        .expect("valid regex")
+});
+static VERSE_RANGE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:^|[:, ])([0-9]+)-([0-9]+)(?:$|[,;])").expect("valid regex"));
+/// Each book as the Monastic Diurnal names it over a chapter or canticle: a
+/// point after an abbreviation, and the short books written out. Ecclesiasticus
+/// is "Ecclus." pending the ruling asked in #694 ("Ecclus." or "Sir.").
+const SCRIPTURE_BOOKS: [&str; 37] = [
+    "Gen.", "Exod.", "Deut.", "1 Sam.", "1 Chron.", "Tobit", "Judith", "Prov.", "Cant.", "Wisdom", "Ecclus.", "Isa.", "Jer.", "Lam.",
+    "Ezek.", "Dan.", "Joel", "Hab.", "Zech.", "Mal.", "Luke", "Acts", "Rom.", "1 Cor.", "2 Cor.", "Gal.", "Ephes.", "Phil.", "Col.",
+    "1 Thess.", "1 Tim.", "Titus", "Heb.", "James", "1 Pet.", "1 John", "Rev.",
+];
 static INDEXED_ANTIPHON_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"/psalm-antiphon(-[0-9]+)?$").expect("valid regex"));
 
 /// Scans the corpus (and the chant scores) for formatting and content
@@ -123,6 +139,26 @@ fn lint_mechanical(r: &mut LintReport, key: &str, text: &str) {
     if text.contains('`') {
         add("backtick", "contains backtick (use apostrophe)".into());
     }
+    for line in text.split('\n') {
+        if let Some(cite) = line.trim().strip_prefix('!')
+            && let Some(problem) = scripture_ref_problem(cite)
+        {
+            add("scripture-ref", format!("{} {problem}", quote(cite)));
+        }
+    }
+}
+
+/// Why a scripture reference departs from the Diurnal's style (#694), if it does.
+fn scripture_ref_problem(r: &str) -> Option<&'static str> {
+    let Some(m) = SCRIPTURE_REF_RE.captures(r) else {
+        return Some("is not written as Book chapter:verse, with \", \" between verses and \"; \" between chapters");
+    };
+    if !SCRIPTURE_BOOKS.contains(&&m["book"]) {
+        return Some("names its book otherwise than the Diurnal");
+    }
+    // The Diurnal lists two verses ("6, 7") and ranges only three or more ("1-3").
+    let pair = VERSE_RANGE_RE.captures_iter(&m["cites"]).any(|c| c[1].parse::<u32>().ok().map(|a| a + 1) == c[2].parse().ok());
+    pair.then_some("joins two verses with a hyphen; the Diurnal lists them (\"6, 7\")")
 }
 
 /// Indexed psalm antiphons normally carry a pointing asterisk.
@@ -259,5 +295,17 @@ mod tests {
         assert!(mechanical("vex my soul; for I am thy servant.").is_empty());
         assert!(mechanical("Who with thee ... liveth").is_empty());
         assert!(mechanical("bless ye the Lord: * praise him").is_empty());
+    }
+
+    #[test]
+    fn scripture_refs_take_the_diurnals_style() {
+        for good in ["Ecclus. 50:6, 7", "Rom. 13:12", "1 Cor. 6:20", "Gal. 4:31-5:1", "Rev. 5:11, 12; 7:10", "Wisdom 3:1-3", "Acts 5:12"] {
+            assert_eq!(scripture_ref_problem(good), None, "{good}");
+        }
+        for bad in ["Rev 7:12", "Sir. 24:9", "1 Peter 5:8", "Col. 3:1,2", "Rom. 6:9-10", "Isa. 13:22–14:1", "Zach. 8:19", "Joel 2:12, 13 "]
+        {
+            assert!(scripture_ref_problem(bad).is_some(), "{bad}");
+        }
+        assert_eq!(mechanical("!Sir 24:9-10\nFrom the beginning."), ["scripture-ref"]);
     }
 }

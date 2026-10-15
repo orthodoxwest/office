@@ -40,7 +40,7 @@ Alleluia
 
 In the day of thy power * shall the people offer thee freewill offerings with an holy worship: the dew of thy birth is of the womb of the morning.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ In the day of thy power * shall the people offer thee freewill offerings with an
 
 The Lord hath sent * redemption unto his people: he hath commanded his covenant for ever.
 
---- Psalm 111 · Confitebor tibi, Domine ---
+--- Psalm 110 (111) · Confitebor tibi, Domine ---
 Psalm 111
 
 I WILL give thanks unto the Lord with my whole heart * [Sit.] secretly among the faithful, and in the congregation.
@@ -79,7 +79,7 @@ The Lord hath sent * redemption unto his people: he hath commanded his covenant 
 
 Unto the godly * there ariseth up light in the darkness: the Lord is merciful, loving, and righteous.
 
---- Psalm 112 · Beatus vir, qui timet Dominum ---
+--- Psalm 111 (112) · Beatus vir, qui timet Dominum ---
 Psalm 112
 
 BLESSED is the man that feareth the Lord * [Sit.] he hath great delight in his commandments.
@@ -100,7 +100,7 @@ Unto the godly * there ariseth up light in the darkness: the Lord is merciful, l
 
 With the Lord * there is mercy, and with him is plenteous redemption.
 
---- Psalm 130 · De profundis clamavi ---
+--- Psalm 129 (130) · De profundis clamavi ---
 Psalm 130
 
 OUT of the deep have I called unto thee, O Lord * [Sit.] Lord, hear my voice.
@@ -117,7 +117,7 @@ OUT of the deep have I called unto thee, O Lord * [Sit.] Lord, hear my voice.
 
 With the Lord * there is mercy, and with him is plenteous redemption.
 
---- Heb 1:1-2 ---
+--- Heb. 1:1, 2 ---
 God, who at sundry times and in divers manners spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by his Son, whom he hath appointed heir of all things, by whom also he made the worlds.
 R. Thanks be to God.
 
@@ -171,7 +171,8 @@ R. His salvation, alleluia.
 
 To-day * the Christ is born; to-day hath a Saviour appeared: to-day on earth Angels are singing, Archangels rejoicing: to-day the righteous exult and say, Glory to God in the highest, alleluia.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -198,7 +199,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

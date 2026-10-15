@@ -60,7 +60,7 @@ O Lord, who never failest to help and govern those whom thou dost bring up in th
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 325 (Sunday within the Octave of Corpus Christi)
-!1 John 3:13-14
+!1 John 3:13, 14
 Marvel not, my brethren, if the world hate you. We know that we have passed from death unto life, because we love the brethren.
 R. Thanks be to God.
 
@@ -120,6 +120,10 @@ O grant us life that shall not end
 In our true native land with thee.
 
 Amen.
+
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 416: "The following Ending is never changed."
+@use proper/corpus-christi/hymn-doxology-lauds
 
 [hymn-first-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 413, 414, 418

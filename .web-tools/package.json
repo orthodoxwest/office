@@ -2,7 +2,7 @@
   "name": "orthodoxwest-office",
   "private": true,
   "scripts": {
-    "install:browser": "playwright install --with-deps chromium",
+    "install:browser": "playwright install --with-deps chromium webkit",
     "lint": "cd .. && .web-tools/node_modules/.bin/eslint --config .web-tools/eslint.config.mjs .web-tools/*.mjs .web-tools/tests/*.js apps/office-web/static/*.js",
     "test:ux": "playwright test"
   },

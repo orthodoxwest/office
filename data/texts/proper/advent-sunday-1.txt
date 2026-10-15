@@ -36,19 +36,19 @@ Stir up thy might, we beseech thee, O Lord, and come; that we, who are ever thre
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 12 (The First Sunday in Advent)
-!Rom 13:11
+!Rom. 13:11
 Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 161 (I Sunday in Advent, At Sext)
-!Rom 13:12
+!Rom. 13:12
 The night is far spent, the day is at hand: let us therefore cast off the works of darkness, * and let us put on the armour of light.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 162 (I Sunday in Advent, At None)
-!Rom 13:13-14
+!Rom. 13:13, 14
 Let us walk honestly, as in the day; not in rioting and drunkenness, not in chambering and wantonness, not in strife and envying. * But put ye on the Lord Jesus Christ.
 R. Thanks be to God.
 

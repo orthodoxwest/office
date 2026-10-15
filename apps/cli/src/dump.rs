@@ -284,7 +284,8 @@ fn feast(f: Option<&Feast>) -> Value {
         "day": f.fixed.map(|md| md.day),
         "has_octave": f.has_octave,
         "has_vigil": f.has_vigil,
-        "octave_class": f.octave_class.as_str(),
+        // Null for a feast without an octave and for a day within a common one.
+        "octave_class": (f.has_octave || f.octave_class != calendar::model::OctaveClass::Common).then(|| f.octave_class.as_str()),
         "commemoration_class": f.commemoration_class.as_str(),
         "is_privileged_octave_day": f.is_privileged_octave_day,
         "is_vigil": f.is_vigil,
@@ -452,13 +453,16 @@ fn calendar_day_record(d: &CalendarDay) -> Value {
     })
 }
 
-/// The Office-only resolution of the day: concurrence and the Marian antiphon.
+/// The Office-only resolution of the day: concurrence and the Marian
+/// antiphon of each hour that says one.
 fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
     let v = &o.vespers;
+    let moveable = MoveableDates::compute(d.date.year());
+    let marian = |hour: &str| office::seasonal::marian_antiphon(d.date, hour, &moveable);
     json!({
         "kind": "office_day",
         "date": day_str(d.date),
-        "marian_antiphon": o.marian_antiphon,
+        "marian_antiphon": {"lauds": marian("lauds"), "vespers": marian("vespers"), "compline": marian("compline")},
         "vespers": {
             "owner": v.owner.as_str(),
             "feast": feast(v.feast.as_deref()),

@@ -85,19 +85,19 @@ R. He hath made her to dwell in his tabernacle.
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 568 (St Mary Magdalene, At Lauds)
-!Cant 3:2
+!Cant. 3:2
 I will rise now, * and go about the city in the streets, and in the broad ways I will seek him whom my soul loveth.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At Sext)
-!Cant 8:6
+!Cant. 8:6
 Set me as a seal upon thine heart, * as a seal upon thine arm: for love is strong as death.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At None)
-!Cant 8:7
+!Cant. 8:7
 Many waters cannot quench love, * neither can the floods drown it.
 R. Thanks be to God.
 

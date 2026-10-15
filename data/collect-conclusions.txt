@@ -53,6 +53,7 @@ proper/all-souls/collect who-livest
 proper/chair-peter-antioch/collect who-livest
 # This is the same collect whose Diurnal form is printed for the commemoration
 # of St Peter on p. 463 with "Who with God the Father ... livest".
+proper/comm-01-25-commemoration-of-st-peter/commemoration-collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest
@@ -96,6 +97,9 @@ proper/st-catherine-alexandria/collect who-liveth
 # Lord. Who with thee..." — our text had dropped that trailing clause, which is
 # what makes this Son-at-the-end; restored with the collect.
 proper/purification-bvm/collect who-liveth
+# Diurnal p. 231 prints "Who with thee . . . liveth" for the Octave Day of the
+# Epiphany (#603).
+proper/epiphany-octave-day/collect who-liveth
 # The Octave repeats its own printed collect, which also ends on the Son
 # (Diurnal p. 220), rather than resolving through the feast's corpus key.
 proper/octave-day-st-stephen/collect who-liveth
@@ -115,6 +119,8 @@ proper/christmas/collect through-same
 proper/easter-sunday/collect through-same
 proper/easter-sunday-2/collect through-same
 proper/easter-sunday-3/collect through-same
+# Diurnal p. 368 prints Wednesday in Easter Week's collect with "Through the same".
+proper/easter-sunday-octave-day-4/collect through-same
 proper/epiphany/collect through-same
 # Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
 proper/expectation-bvm/collect through-same

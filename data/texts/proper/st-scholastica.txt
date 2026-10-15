@@ -62,7 +62,7 @@ When holy Benedict * had withdrawn himself in his cell for three days, he lifted
 #
 [chapter-lauds]
 # SOURCE: diurnal p. 477
-!Cant 2:10,14
+!Cant. 2:10, 14
 Rise up, my love, my fair one, and come away. * O my dove, that art in the clefts of the rock, in the secret places of the stairs, let me see thy countenance, let me hear thy voice; * for sweet is thy voice, and thy countenance is comely.
 R. Thanks be to God.
 
@@ -223,13 +223,13 @@ In the likeness.
 
 [chapter-sext]
 # SOURCE: diurnal p. 478
-!Cant 6:9
+!Cant. 6:9
 My dove, my undefiled is but one; * the daughters of Sion saw her and blessed her; * yea, the queens praised her.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: diurnal p. 479
-!Cant 5:12
+!Cant. 5:12
 Her eyes are as the eyes of doves by the rivers of waters, * washed with milk, and fitly set.
 R. Thanks be to God.
 

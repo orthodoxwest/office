@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-01-14-st-felix-of-nola-priest-and-martyr]
+# Name: St. Felix of Nola, Priest & Martyr
+# Rank: commemoration  Category: martyr
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/martyr/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# Diurnal p. 455, "For Com. St. Felix" (#604)
+Grant, we beseech thee, Almighty God: that the examples of thy Saints may urge us to a better life; that we may imitate the deeds of them whose festivals we celebrate.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

@@ -36,19 +36,19 @@ Stir up our hearts, O Lord, to make ready the ways of thine Only-begotten; that 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 23 (The Second Sunday in Advent)
-!Rom 15:4
+!Rom. 15:4
 Brethren: Whatsoever things were written aforetime were written for our learning, that we through patience and comfort of the scriptures might have hope.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 167 (II Sunday in Advent, At Sext)
-!Rom 15:5-6
+!Rom. 15:5, 6
 Now the God of patience and consolation grant you to be like-minded one toward another, according to Christ Jesus; that ye may with one mind and one mouth glorify God, * even the Father of our Lord Jesus Christ.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, pp. 167–168 (II Sunday in Advent, At None)
-!Rom 15:13
+!Rom. 15:13
 Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, * through the power of the Holy Ghost.
 R. Thanks be to God.
 

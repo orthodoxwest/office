@@ -138,6 +138,21 @@ fun ornament(palette: Palette, season: String): Ornament = when {
     else -> Ornament(palette.gold, palette.lining, Color(0xFFB98D3C), Color(0xFF7D5C1C), Color(0xFFECD9A0))
 }
 
+/**
+ * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are gilt,
+ * so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's are
+ * painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms while
+ * Apse's silver keeps its own ink.
+ */
+fun seasoned(palette: Palette, season: String): Palette {
+    if (season != "passiontide" && season != "eastertide") return palette
+    val o = ornament(palette, season)
+    return palette.copy(
+        titulus = if (palette.dark) o.flat else palette.titulus,
+        moonInk = if (season == "passiontide" || !palette.dark) o.flat else palette.moonInk,
+    )
+}
+
 /** The liturgical colours of the ordo rails and the band across an hour's top (`.day-color-*`). */
 fun dayColor(name: String): Color = when (name) {
     "red" -> Color(0xFFB02A24)
@@ -160,6 +175,15 @@ fun dayColor(name: String, p: Palette): Color = when {
     p.dark && name == "violet" -> Color(0xFF8D62AD)
     else -> dayColor(name)
 }
+
+/**
+ * A day's colour as an hour's title lozenge and the ordo's rails set it (`.day-color-*` outside
+ * home): on the Apse night white and black alone are lifted.
+ */
+fun railColor(name: String, p: Palette): Color = if (p.dark && (name == "white" || name == "black")) dayColor(name, p) else dayColor(name)
+
+/** The vestment-trim band across an hour's top (`.color-band-*`): the day's colour, white as ivory rather than the lozenge's stone, in both themes. */
+fun bandColor(name: String): Color = if (name == "white") Color(0xFFE8E0CC) else dayColor(name)
 
 /**
  * The menu's Theme row: Default follows the device; Nave and Apse are the web's names. `window`
@@ -221,6 +245,8 @@ object Type {
     val verse = face(20f, 33f)
     val rubric = face(18f, 27f)
     val heading = face(19.2f, 24.96f).copy(fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 2.112.sp, textAlign = TextAlign.Center)
+    // A commemoration's name, in mixed case under its small-caps kicker, as the web's `.commemoration-name`.
+    val commemorationName = face(19.2f, 25.92f).copy(letterSpacing = 0.29.sp, textAlign = TextAlign.Center)
     val itemLabel = face(20f, 27f).copy(fontFeatureSettings = "$ALL_SMALL_CAPS, lnum", letterSpacing = 1.4.sp, textAlign = TextAlign.Center)
     val reference = face(17f, 23.8f).copy(textAlign = TextAlign.Center)
     val verseNumber = face(15.6f, 25.74f).copy(textAlign = TextAlign.End)
@@ -245,7 +271,8 @@ fun OfficeTheme(
     content: @Composable () -> Unit,
 ) {
     val dark = choice.dark(isSystemInDarkTheme())
-    val palette = if (dark) Apse else Nave
+    val base = if (dark) Apse else Nave
+    val palette = seasoned(base, season)
     val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
         primary = palette.accent,
         background = palette.bg,
@@ -260,7 +287,7 @@ fun OfficeTheme(
     val scaled = Density(density.density * textSize.scale, density.fontScale)
     CompositionLocalProvider(
         LocalPalette provides palette,
-        LocalOrnament provides ornament(palette, season),
+        LocalOrnament provides ornament(base, season),
         LocalDensity provides scaled,
     ) {
         MaterialTheme(colorScheme = scheme, typography = MaterialTheme.typography.copy(bodyLarge = Type.body.copy(color = palette.text))) {

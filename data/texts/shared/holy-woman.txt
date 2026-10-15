@@ -1,0 +1,12 @@
+# Texts of the Common of Holy Women that commemorations (St Felicitas, St Sabina) name
+# outside their Common slot. They live here, not in commons/, so the Common's paschal
+# tier does not replace them in Paschaltide (proper.rs, paschal_common_form).
+
+[antiphon-the-kingdom-of-heaven]
+# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
+The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
+
+[versicle-in-thy-grace]
+# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.

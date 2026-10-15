@@ -1,6 +1,7 @@
 package org.orthodoxwest.office
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +30,9 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +47,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -66,6 +72,7 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.CommemorationView
 import org.orthodoxwest.office.core.OrdoDayView
@@ -96,14 +103,40 @@ fun OrdoScreen(
     // the reader's own scroll position stands, restored or not.
     val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
     var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
+    // The day comes to rest under the month's pinned heading, not behind it: the heading's
+    // measured height, or before its first layout an estimate (its padding, and the taller of
+    // its name's line and the ↑'s 48dp).
+    var headingPx by remember { mutableIntStateOf(0) }
+    val estimate = with(LocalDensity.current) { (10.dp.toPx() + maxOf(28.sp.toPx() + 12.8.dp.toPx(), 48.dp.toPx())).roundToInt() }
+    val pinned = if (headingPx > 0) headingPx else estimate
+    // Where a day was brought to rest by the estimate, set right once the heading is measured.
+    val restedAt = remember(year, monthNumber, focusDay) { mutableIntStateOf(0) }
     val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) {
-        LazyListState(if (focusDay != 0 && month != null) focusItem else 0)
+        if (focusDay != 0 && month != null) restedAt.intValue = pinned
+        LazyListState(if (focusDay != 0 && month != null) focusItem else 0, if (focusDay != 0 && month != null) -pinned else 0)
     }
     val scope = rememberCoroutineScope()
+    // How far the month's heading stands under the status bar: none while the rows above it hold
+    // it clear, the whole bar once it is pinned.
+    val barPx = with(LocalDensity.current) { insets.calculateTopPadding().roundToPx() }
+    val underBar by remember(barPx, listState) {
+        derivedStateOf {
+            val above = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "ranks" }
+            if (above == null) barPx else (-(above.offset + above.size)).coerceIn(0, barPx)
+        }
+    }
     LaunchedEffect(month != null, focused) {
         if (month != null && !focused) {
-            listState.scrollToItem(focusItem)
+            listState.scrollToItem(focusItem, -pinned)
+            restedAt.intValue = if (headingPx > 0) 0 else pinned
             focused = true
+        }
+    }
+    LaunchedEffect(headingPx) {
+        val rested = restedAt.intValue
+        if (headingPx > 0 && rested > 0) {
+            if (rested != headingPx) listState.scrollBy((rested - headingPx).toFloat())
+            restedAt.intValue = 0
         }
     }
     LazyColumn(
@@ -131,9 +164,19 @@ fun OrdoScreen(
             }
         }
         item(key = "ranks") { RankKey(ordoColumn().padding(bottom = 5.6.dp)) }
-        item(key = "month") {
-            MonthHeading(Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US), today.year == year && today.monthValue == monthNumber, ordoColumn().padding(top = 10.dp)) {
-                scope.launch { listState.animateScrollToItem(0) }
+        // The month's heading pins while its days scroll beneath it (the web's sticky `.month h2`),
+        // so its ↑ back to the top stays in reach. It carries the wall's own copy, opaque, so the
+        // rows passing under it never show through.
+        stickyHeader(key = "month") {
+            // Pinned at the list's top edge, which runs under the status bar, the heading keeps its
+            // words below the bar: the wall's copy grows up behind it as it reaches the bar.
+            Box(Modifier.fillMaxWidth().wallBehind().padding(top = with(LocalDensity.current) { underBar.toDp() }), contentAlignment = Alignment.TopCenter) {
+                MonthHeading(
+                    Month.of(monthNumber).getDisplayName(JavaTextStyle.FULL, Locale.US),
+                    Modifier.onSizeChanged { headingPx = it.height }.then(ordoColumn()).padding(top = 10.dp),
+                ) {
+                    scope.launch { listState.animateScrollToItem(0) }
+                }
             }
         }
         if (wide) item(key = "columns") { DayColumns(ordoColumn()) }
@@ -184,7 +227,6 @@ private fun OrdoHeader(
     modifier: Modifier,
 ) {
     val p = LocalPalette.current
-    val o = LocalOrnament.current
     val wide = LocalWide.current
     // Previous and next year keep the page's kind: a month's, or the frontispiece.
     val sameView = { y: Int -> if (month == null) onYear(y) else onMonth(y, month) }
@@ -207,12 +249,12 @@ private fun OrdoHeader(
             val cell = if (wide) Modifier else Modifier.weight(1f)
             Text("‹ ${year - 1}", cell.tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
-            Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(today.year == year, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(true, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
             Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
     }
-    // The month strip: the shown month underlined in gold, and today's month marked with the
+    // The month strip: the shown month underlined in gold, and today's month marked with the gold
     // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
     val strip: @Composable () -> Unit = {
         Month.entries.chunked(if (wide) 12 else 6).forEach { row ->
@@ -226,7 +268,11 @@ private fun OrdoHeader(
                                 if (!wide) Modifier else Modifier.drawBehind {
                                     val y = size.height - 1.dp.toPx()
                                     if (current) drawLine(p.goldLine, Offset(0f, y), Offset(size.width, y), 2.dp.toPx())
-                                    if (todays) lozenge(Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx()), 3.dp.toPx(), o.flat, null)
+                                    if (todays) {
+                                        val c = Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx())
+                                        lozenge(c, 5.83.dp.toPx(), p.bg, null)
+                                        lozenge(c, 3.dp.toPx(), p.gold, null)
+                                    }
                                 },
                             )
                             .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
@@ -238,9 +284,12 @@ private fun OrdoHeader(
                                 if (wide) return@drawBehind
                                 val y = size.height + 4.dp.toPx()
                                 if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
-                                if (todays) lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), o.flat, null)
+                                if (todays) {
+                                    lozenge(Offset(size.width / 2f, y), 5.83.dp.toPx(), p.bg, null)
+                                    lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), p.gold, null)
+                                }
                             },
-                            style = Type.label(12.48f, 0.06f).copy(color = if (current) (if (wide) p.accent else p.text) else p.muted),
+                            style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
                         )
                     }
                 }
@@ -272,8 +321,8 @@ private fun OrdoHeader(
     }
 }
 
-/** The first day's item in a month's list: after the chrome, header, tools and month heading (and a wide screen's column headings). */
-private const val FIRST_DAY_ITEM = 4
+/** The first day's item in a month's list: after the chrome, header, tools, rank key and month heading (and a wide screen's column headings). */
+private const val FIRST_DAY_ITEM = 5
 
 /**
  * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
@@ -412,9 +461,9 @@ private fun TabulaTable(title: String, rows: List<TabulaRowView>, onDay: (LocalD
     }
 }
 
-/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule. */
+/** A Kalendar's month: its rubricated heading, in the titulus, over the ornament's double rule and its lozenge (`.month h2`). */
 @Composable
-private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifier, onTop: () -> Unit) {
+private fun MonthHeading(name: String, modifier: Modifier, onTop: () -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     Row(
@@ -422,17 +471,18 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
             val w = 1.dp.toPx()
             drawLine(o.line, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
             drawLine(o.line, Offset(0f, size.height - w * 2.5f), Offset(size.width, size.height - w * 2.5f), w)
-            if (isTodaysMonth) {
-                // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
-                val c = Offset(size.width / 2f, size.height - w * 1.5f)
-                lozenge(c, 7.07.dp.toPx(), p.bg, null)
-                lozenge(c, 4.24.dp.toPx(), p.lining, null)
-            }
-        }.padding(vertical = 6.4.dp),
+            // A 6dp square in the lining, ringed 2dp in the page's ground where it parts the rule.
+            val c = Offset(size.width / 2f, size.height - w * 1.5f)
+            lozenge(c, 7.07.dp.toPx(), p.bg, null)
+            lozenge(c, 4.24.dp.toPx(), p.lining, null)
+        },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
-        Text("↑", Modifier.tap(label = "Back to the top", onClick = onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
+        // The name keeps the heading's padding; the ↑ takes a 48dp target, which stands into it.
+        Text(name, Modifier.weight(1f).padding(vertical = 6.4.dp).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
+        Box(Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).tap(label = "Back to the top", onClick = onTop), contentAlignment = Alignment.Center) {
+            Text("↑", Modifier.clearAndSetSemantics {}, style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
+        }
     }
 }
 
@@ -442,7 +492,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     val open = rememberSaveable(d.date, saver = Disclosures) { mutableStateMapOf<String, Boolean>() }
     val details = open["details"] ?: allDetails
     val date = LocalDate.of(d.date.year, d.date.month, d.date.day)
-    val hasDetails = d.hasLauds() || d.hoursPreces || d.hasVespers()
+    // One disclosure holds the day's commemorations and its office, as the web's
+    // `.day-office-details`.
+    val hasDetails = d.dayComms().isNotEmpty() || d.hasLauds() || d.hoursPreces || d.hasVespers()
     // One stop for a screen reader: the date, its colour and observances, and the feast.
     val spoken = listOfNotNull(
         date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)) + if (isToday) ", today" else "",
@@ -453,18 +505,13 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
     val buttons: @Composable RowScope.() -> Unit = {
-        if (d.commemorations.isNotEmpty()) {
-            val n = d.commemorations.size
-            SmallDisclosure("$n commemoration${if (n > 1) "s" else ""}", open["comms"] == true) { open["comms"] = open["comms"] != true }
-        }
         if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
-        Unfold(open["comms"] == true) { d.commemorations.forEach { Text(it, style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)) } }
         // Shown for the whole month at once, the rows stay where they are.
         Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
     }
-    val anyOpen = open["comms"] == true || (details && hasDetails)
+    val anyOpen = details && hasDetails
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
     val body: @Composable ColumnScope.() -> Unit = {
         Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
@@ -487,7 +534,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
             // The day's liturgical colour as a rail beside its date.
-            Box(Modifier.width(3.dp).height(40.dp).background(dayColor(d.color)))
+            Box(Modifier.width(3.dp).height(40.dp).background(railColor(d.color, p)))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
@@ -568,7 +615,7 @@ private fun DayTableRow(
     unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
-    val rail = dayColor(d.color)
+    val rail = railColor(d.color, p)
     // Today is painted, not selected: the frieze's wash, ruled top and bottom in the gold line
     // across the row, the day's number in gold.
     Column(
@@ -690,6 +737,12 @@ private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
     )
 }
 
+/** The day's commemorations not already named with an antiphon at its Lauds or Vespers (the web's `build_month`). */
+private fun OrdoDayView.dayComms(): List<String> {
+    val named = (laudsComms + vespersComms).map { it.name }.toSet()
+    return commemorations.filter { it !in named }
+}
+
 private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
 private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vespersPreces || vespersSuffrage || vespersComms.isNotEmpty() || vespersNote.isNotEmpty()
 
@@ -708,6 +761,9 @@ private fun Digest(d: OrdoDayView) {
     Column(
         Modifier.fillMaxWidth().padding(bottom = 8.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(8.dp),
     ) {
+        // The day's commemorations first, under "Day", as the hours' rows are set.
+        val day = d.dayComms()
+        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day.map { CommemorationView(it, "") })
         if (d.hasLauds()) {
             DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsComms)
         }

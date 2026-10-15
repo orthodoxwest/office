@@ -57,6 +57,8 @@ struct ProseSpec: Equatable {
     var restIndent: CGFloat = 0
     var tabs: [NSTextTab] = []
     var initial: Initial?
+    /// How far the block reaches into the margin before its measure, for a sigil hung there ("All:").
+    var hang: CGFloat = 0
 }
 
 /// A spec laid out at one width: its line fragments, and where the initial stands.
@@ -192,16 +194,23 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         return rows.map(\.width).min()! / wide
     }
 
-    /// The opening with a break after its mediant (the web's `.initial-divided`), if it has one.
+    /// The opening with a break after its mediant (the web's `.initial-divided`), if it has one. A
+    /// posture cue at the mediant ("Sit.") ends the first line with it rather than opening the
+    /// second beside the initial, where it read as the first word of the half-verse.
     private static func divideAtMediant(_ text: NSAttributedString) -> NSAttributedString? {
         let s = text.string as NSString
         let at = s.range(of: "*")
         guard at.location != NSNotFound else { return nil }
-        let head = at.location + at.length
+        var head = at.location + at.length
+        let space = (String(s.substring(from: head).prefix { $0.isWhitespace }) as NSString).length
+        var cue = NSRange(location: NSNotFound, length: 0)
+        if head + space < text.length, text.attribute(.posture, at: head + space, effectiveRange: &cue) != nil, cue.location == head + space {
+            head = cue.location + cue.length
+        }
         let tail = s.substring(from: head)
         let skip = (String(tail.prefix { $0.isWhitespace }) as NSString).length
         let out = NSMutableAttributedString(attributedString: text.attributedSubstring(from: NSRange(location: 0, length: head)))
-        out.append(NSAttributedString(string: "\n", attributes: text.attributes(at: max(0, head - 1), effectiveRange: nil)))
+        out.append(NSAttributedString(string: "\n", attributes: text.attributes(at: at.location, effectiveRange: nil)))
         out.append(text.attributedSubstring(from: NSRange(location: head + skip, length: text.length - head - skip)))
         return out
     }

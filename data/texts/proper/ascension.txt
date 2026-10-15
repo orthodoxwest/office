@@ -45,13 +45,13 @@ Grant, we beseech thee, Almighty God, that like as we do believe thy only-begott
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 294 (The Ascension of Our Lord)
-!Acts 1:1-2
+!Acts 1:1, 2
 The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
 R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 390 (Ascension Day, At Sext)
-!Acts 1:4-5
+!Acts 1:4, 5
 He, being assembled together with them, commanded them that they should not depart from Jerusalem, but wait for the promise of the Father, which, saith he, ye have heard of me. For John truly baptized with water; * but ye shall be baptized with the Holy Ghost not many days hence.
 R. Thanks be to God.
 
@@ -212,3 +212,11 @@ R. And to my God, and your God, alleluia.
 [commemoration-versicle-at-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 66 (Ascension octave at I Vespers of another feast)
 @use proper/ascension/versicle-vespers
+
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 389: before "Be thou our joy", "The following Ending is never changed."
+@omit
+
+[hymn-doxology-vespers]
+# Same hymn at Vespers (p. 389).
+@omit

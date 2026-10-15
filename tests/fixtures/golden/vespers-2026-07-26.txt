@@ -40,7 +40,7 @@ Alleluia
 
 While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
 
---- Psalm 110 · Dixit Dominus Domino meo ---
+--- Psalm 109 (110) · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * [Sit.] Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -58,7 +58,7 @@ While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelli
 
 We will run after thee * because of the savour of thine ointments: exceedingly do the virgins love thee.
 
---- Psalm 113 · Laudate, pueri, Dominum ---
+--- Psalm 112 (113) · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * [Sit.] O praise the Name of the Lord.
@@ -77,7 +77,7 @@ We will run after thee * because of the savour of thine ointments: exceedingly d
 
 Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away.
 
---- Psalm 122 · Lætatus sum in his ---
+--- Psalm 121 (122) · Lætatus sum in his ---
 Psalm 122
 
 I WAS glad when they said unto me * [Sit.] We will go into the house of the Lord.
@@ -97,12 +97,12 @@ Lo, the winter is past, * the rain is over and gone: rise up, my love, and come 
 
 This woman * is beautiful among the daughters of Jerusalem.
 
---- Psalm 127 · Nisi Dominus ædificaverit domum ---
+--- Psalm 126 (127) · Nisi Dominus ædificaverit domum ---
 Psalm 127
 
 EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 2. Except the Lord keep the city * the watchman waketh but in vain.
-3. It is but lost labour that ye haste to rise up early, and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
+3. It is but lost labour that ye haste to rise up early, † and so late take rest, and eat the bread of carefulness * for so he giveth his beloved sleep.
 4. Lo, children and the fruit of the womb * are an heritage and gift that cometh of the Lord.
 5. Like as the arrows in the hand of the giant * even so are the young children.
 6. Happy is the man that hath his quiver full of them * [Stand.] they shall not be ashamed when they speak with their enemies in the gate.
@@ -112,7 +112,7 @@ EXCEPT the Lord build the house * [Sit.] their labour is but lost that build it.
 
 This woman * is beautiful among the daughters of Jerusalem.
 
---- Prov 31:10-11 ---
+--- Prov. 31:10, 11 ---
 Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, * so that he shall have no need of spoil.
 R. Thanks be to God.
 
@@ -156,7 +156,8 @@ R. Because God hath blessed thee for ever.
 
 She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to the needy; she eateth not the bread of idleness.
 
---- Magnificat · Magnificat anima mea Dominum ---
+--- The Song of the Blessed Virgin Mary · Magnificat anima mea Dominum ---
+The Song of the Blessed Virgin Mary
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
@@ -183,7 +184,7 @@ Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
 And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
-R. But deliver us from evil. Amen.
+R. But deliver us from evil.
 
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.

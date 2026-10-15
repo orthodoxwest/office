@@ -51,7 +51,7 @@ O God, who in thine ineffable providence vouchsafed to choose blessed Joseph as 
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 285 (The Solemnity of Saint Joseph)
-!Gen 49:26
+!Gen. 49:26
 The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
 R. Thanks be to God.
 
@@ -63,13 +63,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: md-solemnity-joseph.pdf, p. 3 (At Sext, Chapter, Gen. xlix. 25)
-!Gen 49:25
+!Gen. 49:25
 The God of thy father shall help thee, † and the Almighty shall bless thee, * with the blessings of heaven above.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: md-solemnity-joseph.pdf, p. 3 (At None, Chapter, Gen. xlix. 22)
-!Gen 49:22
+!Gen. 49:22
 Joseph is a growing son, † a growing son and comely to behold; * the daughters run to and fro upon the wall.
 R. Thanks be to God.
 
