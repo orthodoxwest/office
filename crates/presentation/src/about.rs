@@ -82,6 +82,12 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Key { mark: "℣. ℟.", red: true, text: "mark a versicle and its response. Praying alone, you say both." },
     AboutBlock::Key { mark: "✠", red: true, text: "marks where to make the sign of the cross." },
     AboutBlock::Key {
+        mark: "Secret prayers,",
+        red: false,
+        text: "set in fainter type, are said silently. Where only the first and last words stand out, as in some Our \
+               Fathers, those words are said aloud and the rest in silence.",
+    },
+    AboutBlock::Key {
         mark: "Prayer form,",
         red: false,
         text: "at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.",
