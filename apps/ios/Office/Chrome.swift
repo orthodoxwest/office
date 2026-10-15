@@ -77,8 +77,8 @@ struct CaretShape: Shape {
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
- * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline on
- * a wide screen.
+ * hour page, then the Ordo, Reminders and About. The menu sets it out on a phone, the header
+ * inline on a wide screen.
  */
 struct SiteNav {
     let hours: [String]
@@ -88,6 +88,8 @@ struct SiteNav {
     let ordoCurrent: Bool
     let onReminders: () -> Void
     let remindersCurrent: Bool
+    let onAbout: () -> Void
+    let aboutCurrent: Bool
 
     init(_ model: AppModel) {
         let page = model.page
@@ -105,7 +107,7 @@ struct SiteNav {
             case let .home(d), let .hour(d, _): model.open(.ordo(year: Int(d.year), month: Int(d.month), day: Int(d.day)))
             case let .ordo(y, m, _): model.open(.ordo(year: y, month: m, day: 0))
             case let .year(y): model.open(.year(y))
-            case .reminders: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
+            case .reminders, .about: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
             }
         }
         switch page {
@@ -114,6 +116,8 @@ struct SiteNav {
         }
         onReminders = { model.open(.reminders) }
         remindersCurrent = page == .reminders
+        onAbout = { model.open(.about) }
+        aboutCurrent = page == .about
     }
 }
 
@@ -194,7 +198,7 @@ struct SiteHeader: View {
     }
 }
 
-/// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders quieter.
+/// The desktop header's links (`.site-menu nav`), muted: the current one in ink over the lining's terracotta; Reminders and About quieter.
 private struct InlineNav: View {
     let nav: SiteNav
     /// The pages' links, and Settings after them; a ranked header sets them apart.
@@ -213,6 +217,11 @@ private struct InlineNav: View {
                 }
                 link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
                 link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
+                // An hour's header is already full with the seven hours, so About stays out of
+                // it, as on the web; the phone's menu keeps it everywhere.
+                if nav.onHour == nil {
+                    link(aboutPage.menu, nav.aboutCurrent, secondary: true, action: nav.onAbout)
+                }
             }
             // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
             if settings {
@@ -249,10 +258,10 @@ private struct InlineNav: View {
 
 /**
  * The site menu's panel: on an hour, the day's hours (2/3/2 as on home, a hairline between the
- * bands); the Ordo and Reminders, the current page underlined in the lining's terracotta; then
- * the Theme, Text and Martyrology rows, muted, the current choice in the accent over the gilding's
- * rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows alone. Its
- * top edge is the painted line, which follows the season of the page shown.
+ * bands); the Ordo, Reminders and About, the current page underlined in the lining's terracotta;
+ * then the Theme, Text and Martyrology rows, muted, the current choice in the accent over the
+ * gilding's rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows
+ * alone. Its top edge is the painted line, which follows the season of the page shown.
  */
 struct MenuPanel: View {
     var prefsOnly = false
@@ -280,8 +289,9 @@ struct MenuPanel: View {
             if !prefsOnly {
                 HStack(spacing: 0) {
                     link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
-                    // Habit setup, not an hour: quieter than the Ordo, as on the web.
+                    // Habit setup and the page for newcomers, not hours: quieter than the Ordo, as on the web.
                     link("REMINDERS", nav.remindersCurrent, .label(11.52, 0.04), action: nav.onReminders)
+                    link(aboutPage.menu.uppercased(), nav.aboutCurrent, .label(11.52, 0.04), action: nav.onAbout)
                 }
                 Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             }

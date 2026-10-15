@@ -9,10 +9,10 @@ use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
-use crate::view::{BetaData, CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
+use crate::view::{AboutData, BetaData, CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
 use presentation::{season_label, title_case};
 
-const TEMPLATES: [(&str, &str); 11] = [
+const TEMPLATES: [(&str, &str); 12] = [
     ("layout.html", include_str!("../templates/layout.html")),
     ("macros.html", include_str!("../templates/macros.html")),
     ("home.html", include_str!("../templates/home.html")),
@@ -20,6 +20,7 @@ const TEMPLATES: [(&str, &str); 11] = [
     ("calendar.html", include_str!("../templates/calendar.html")),
     ("reminders.html", include_str!("../templates/reminders.html")),
     ("privacy.html", include_str!("../templates/privacy.html")),
+    ("about.html", include_str!("../templates/about.html")),
     ("beta.html", include_str!("../templates/beta.html")),
     ("404.html", include_str!("../templates/404.html")),
     ("error.html", include_str!("../templates/error.html")),
@@ -105,6 +106,10 @@ impl Pages {
 
     pub fn reminders(&self, data: &RemindersData) -> Result<String, String> {
         self.render("reminders.html", data)
+    }
+
+    pub fn about(&self, data: &AboutData) -> Result<String, String> {
+        self.render("about.html", data)
     }
 
     pub fn privacy(&self, data: &PrivacyData) -> Result<String, String> {

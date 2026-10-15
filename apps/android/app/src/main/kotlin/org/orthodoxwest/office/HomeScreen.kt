@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
@@ -73,7 +74,10 @@ private val PERIODS = listOf(
     Triple(Period.EVENING, "Evening", listOf("vespers", "compline")),
 )
 
-/** Home: the day's frontispiece, the invitation to pray, and the hours of the day. */
+/**
+ * Home: the day's frontispiece, the invitation to pray, and the hours of the day. In a reader's
+ * first week `introduction` names the link to About beside Change date.
+ */
 @Composable
 fun HomeScreen(
     view: HomeView,
@@ -84,6 +88,8 @@ fun HomeScreen(
     onDate: (LocalDate) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
+    introduction: String? = null,
+    onIntroduction: () -> Unit = {},
 ) {
     // Where the niche stands in the room, which the chapel light follows.
     var room by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -124,7 +130,7 @@ fun HomeScreen(
                     chrome()
                     // The moulding stands 0.75rem out from the card; room for it below the header.
                     Frontispiece(
-                        view, date, today, onDate, onHour, onOrdoDay,
+                        view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
                         Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 12.dp).widthIn(max = cardWidth).fillMaxWidth()
                             .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
                         HomeTier(desk = true, screen = screen, tall = tall, card = cardWidth, dyn = LocalDensity.current.fontScale),
@@ -141,7 +147,7 @@ fun HomeScreen(
                     header = chrome,
                     card = {
                         Frontispiece(
-                            view, date, today, onDate, onHour, onOrdoDay,
+                            view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
                             Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
                             HomeTier(desk = false, screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                         )
@@ -297,11 +303,11 @@ private fun mix(a: Color, b: Color, share: Float): Color {
 /**
  * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
  * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
- * rules, the lining thinned.
+ * rules, the lining thinned. About's table of the hours wears them too.
  */
-private class FrontispieceInk(val frame: Color, val rule: Color, val band: Color, val panelRule: Color)
+class FrontispieceInk(val frame: Color, val rule: Color, val band: Color, val panelRule: Color)
 
-private fun frontispieceInk(p: Palette): FrontispieceInk = if (p.dark) {
+fun frontispieceInk(p: Palette): FrontispieceInk = if (p.dark) {
     FrontispieceInk(Color(208, 176, 106).copy(alpha = 0.34f), Color(208, 176, 106).copy(alpha = 0.24f), Color(208, 176, 106).copy(alpha = 0.045f), p.lining.copy(alpha = 0.45f))
 } else {
     FrontispieceInk(Color(87, 52, 33).copy(alpha = 0.3f), Color(107, 58, 31).copy(alpha = 0.22f), p.inscriptionGround.copy(alpha = 0.09f), p.lining.copy(alpha = 0.45f))
@@ -318,6 +324,8 @@ private fun Frontispiece(
     onDate: (LocalDate) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
+    introduction: String?,
+    onIntroduction: () -> Unit,
     modifier: Modifier,
     tier: HomeTier,
     niche: NicheTokens? = null,
@@ -440,7 +448,18 @@ private fun Frontispiece(
                     // One row throughout, so the control TalkBack just activated is the one that stays
                     // (the web's one <summary>); open, the season fills its line and the control wraps.
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)) {
-                        if (season.isNotEmpty()) {
+                        if (introduction != null) {
+                            // A reader's first week: the introduction before Change date as its
+                            // twin, the same small capitals, ink and touch height. It takes the
+                            // season's place, which each hour's header still names.
+                            Text(
+                                introduction.uppercase(),
+                                (if (picking) Modifier.fillMaxWidth().wrapContentWidth() else Modifier).alignByBaseline()
+                                    .heightIn(min = 44.dp).tap(onClick = onIntroduction).padding(horizontal = 8.dp)
+                                    .wrapContentHeight(Alignment.CenterVertically),
+                                style = Type.control.copy(color = p.muted),
+                            )
+                        } else if (season.isNotEmpty()) {
                             Text(
                                 season,
                                 (if (picking) Modifier.fillMaxWidth() else Modifier).alignByBaseline(),
