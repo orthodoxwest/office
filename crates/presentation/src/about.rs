@@ -21,8 +21,30 @@ pub enum AboutBlock {
     Hours,
     /// A quiet line set under the block before it.
     Note(&'static str),
-    /// A key to the page's marks: the mark (in the rubrics' red when `red`), then what it means.
-    Key { mark: &'static str, red: bool, text: &'static str },
+    /// A key to the page's marks: the mark, set in its `ink`, then what it means.
+    Key { mark: &'static str, ink: KeyInk, text: &'static str },
+}
+
+/// The ink a key's mark is set in, so it shows what it names.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum KeyInk {
+    /// The body text's.
+    Text,
+    /// The rubrics' red.
+    Rubric,
+    /// The faded ink of words said silently.
+    Unsaid,
+}
+
+impl KeyInk {
+    /// The ink's name, as the web's class and the native apps read it.
+    pub fn name(self) -> &'static str {
+        match self {
+            KeyInk::Text => "text",
+            KeyInk::Rubric => "rubric",
+            KeyInk::Unsaid => "unsaid",
+        }
+    }
 }
 
 /// The page's title.
@@ -78,18 +100,22 @@ pub const ABOUT: &[AboutBlock] = &[
          button on the home page always opens the hour for the time of day.",
     ),
     AboutBlock::Heading("Reading the page"),
-    AboutBlock::Key { mark: "Red words", red: true, text: "are rubrics, directions for the one praying, and are not read aloud." },
-    AboutBlock::Key { mark: "℣. ℟.", red: true, text: "mark a versicle and its response. Praying alone, you say both." },
-    AboutBlock::Key { mark: "✠", red: true, text: "marks where to make the sign of the cross." },
     AboutBlock::Key {
-        mark: "Secret prayers,",
-        red: false,
-        text: "set in fainter type, are said silently. Where only the first and last words stand out, as in some Our \
+        mark: "Red words",
+        ink: KeyInk::Rubric,
+        text: "are rubrics, directions for the one praying, and are not read aloud.",
+    },
+    AboutBlock::Key { mark: "℣. ℟.", ink: KeyInk::Rubric, text: "mark a versicle and its response. Praying alone, you say both." },
+    AboutBlock::Key { mark: "✠", ink: KeyInk::Rubric, text: "marks where to make the sign of the cross." },
+    AboutBlock::Key {
+        mark: "Fainter type",
+        ink: KeyInk::Unsaid,
+        text: "marks secret prayers, said silently. Where only the first and last words stand out, as in some Our \
                Fathers, those words are said aloud and the rest in silence.",
     },
     AboutBlock::Key {
         mark: "Prayer form,",
-        red: false,
+        ink: KeyInk::Text,
         text: "at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.",
     },
     AboutBlock::Heading("The Ordo"),

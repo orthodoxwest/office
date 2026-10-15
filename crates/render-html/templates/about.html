@@ -21,7 +21,7 @@
   {%- if loop.previtem is undefined or loop.previtem.kind != "key" %}
   <ul class="about-keys">
   {%- endif %}
-    <li><span class="about-key{% if b.red %} about-key-red{% endif %}">{{ b.mark }}</span> {{ b.text }}</li>
+    <li><span class="about-key about-key-{{ b.ink }}">{{ b.mark }}</span> {{ b.text }}</li>
   {%- if loop.nextitem is undefined or loop.nextitem.kind != "key" %}
   </ul>
   {%- endif %}

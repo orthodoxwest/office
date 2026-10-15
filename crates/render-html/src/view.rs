@@ -282,7 +282,7 @@ pub struct AboutBlockView {
     pub html: String,
     pub cite: String,
     pub mark: String,
-    pub red: bool,
+    pub ink: &'static str,
 }
 
 /// One of home's bands of hours (Morning, Day, Evening) on the about page.
@@ -325,7 +325,9 @@ impl AboutData {
                 }
                 AboutBlock::Hours => block("hours"),
                 AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
-                AboutBlock::Key { mark, red, text } => AboutBlockView { text: text.into(), mark: mark.into(), red, ..block("key") },
+                AboutBlock::Key { mark, ink, text } => {
+                    AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name(), ..block("key") }
+                }
             })
             .collect();
         let about_hours = ABOUT_HOURS

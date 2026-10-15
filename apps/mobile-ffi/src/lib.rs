@@ -470,7 +470,7 @@ pub struct AboutBlockView {
     pub runs: Vec<AboutRunView>,
     pub cite: String,
     pub mark: String,
-    pub red: bool,
+    pub ink: String,
 }
 
 /// An hour on the About page's table: its slug, name, what it is and when it is said.
@@ -509,7 +509,7 @@ pub fn about() -> AboutView {
         runs: Vec::new(),
         cite: String::new(),
         mark: String::new(),
-        red: false,
+        ink: String::new(),
     };
     let blocks = ABOUT
         .iter()
@@ -529,7 +529,9 @@ pub fn about() -> AboutView {
             },
             AboutBlock::Hours => block("hours"),
             AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
-            AboutBlock::Key { mark, red, text } => AboutBlockView { text: text.into(), mark: mark.into(), red, ..block("key") },
+            AboutBlock::Key { mark, ink, text } => {
+                AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name().into(), ..block("key") }
+            }
         })
         .collect();
     let periods = ABOUT_HOURS

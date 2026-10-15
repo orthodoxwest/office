@@ -138,7 +138,7 @@ fun AboutScreen(
                     // The mark first, in the rubrics' red where the page prints it so.
                     "key" -> Text(
                         buildAnnotatedString {
-                            withStyle(SpanStyle(color = if (b.red) p.rubric else p.text)) { append(b.mark) }
+                            withStyle(SpanStyle(color = when (b.ink) { "rubric" -> p.rubric; "unsaid" -> p.unsaid; else -> p.text })) { append(b.mark) }
                             append(" ")
                             append(b.text)
                         },

@@ -6496,8 +6496,12 @@ body.season-eastertide {
   margin-bottom: 0.55rem;
 }
 
-.about-key-red {
+.about-key-rubric {
   color: var(--rubric);
+}
+
+.about-key-unsaid {
+  color: var(--unsaid);
 }
 
 /* The privacy policy: the reminders page's measure and headings, set as prose. */

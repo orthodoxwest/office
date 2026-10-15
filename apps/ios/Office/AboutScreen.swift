@@ -125,7 +125,7 @@ struct AboutScreen: View {
         case "note":
             Text(b.text).type(Scale.body.sized(16.8, line: 26)).foregroundStyle(p.muted)
         case "key":
-            (Text(b.mark).foregroundColor(b.red ? p.rubric : p.text) + Text(" " + b.text))
+            (Text(b.mark).foregroundColor(b.ink == "rubric" ? p.rubric : b.ink == "unsaid" ? p.unsaid : p.text) + Text(" " + b.text))
                 .type(Scale.body.sized(20, line: 31)).foregroundStyle(p.text)
         default:
             // The intro, and any block a later core adds, as plain prose.
