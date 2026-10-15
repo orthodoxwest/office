@@ -64,8 +64,8 @@ pub const ABOUT: &[AboutBlock] = &[
         "In the sixth century St Benedict of Nursia set the hours in order in his Rule for monks, taking the \
          Psalmist’s “seven times a day” as his measure and giving out the whole Psalter in each week. His life was \
          written by St Gregory the Great, whom the East honors as St Gregory the Dialogist, and St Benedict is kept \
-         as a saint in East and West alike. His Rule spread through the monasteries of the West in the five centuries \
-         before the schism of 1054. Since 1958 the Antiochian Archdiocese has kept a Western Rite, and within it the \
+         as a saint in East and West alike. His Rule spread through the monasteries of the West in the centuries \
+         before the Great Schism. Since 1958 the Antiochian Archdiocese has kept a Western Rite, and within it the \
          Benedictine hours are prayed again in the Orthodox Church.",
     ),
     AboutBlock::Heading("The seven hours"),
@@ -86,12 +86,6 @@ pub const ABOUT: &[AboutBlock] = &[
         red: false,
         text: "at the head of each hour, sets the page for praying alone or with others led by a deacon or a priest.",
     },
-    AboutBlock::Heading("Settings"),
-    AboutBlock::Paragraph(
-        "Settings (in the Menu on a phone) offer two appearances: the Nave, the church by day, and the Apse, its \
-         vault by night; Default follows your device. You can also make the text larger or smaller, and have Prime \
-         read the Martyrology, the saints of the coming day. Your choices are kept on your device.",
-    ),
     AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(
         "Each day keeps a feast or the office of its season, as the archdiocesan ordo appoints, and the home page \
@@ -103,8 +97,11 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Paragraph(
         "The psalm translation is from the Coverdale Psalter, and the texts are checked against the printed diurnal. \
          Installed on a phone, the Office works without a connection, and [Reminders](/reminders) can call you to the \
-         hours you keep. There are no accounts and no advertising; see [Privacy](/privacy). If you find a mistake, \
-         please tell us through the [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
+         hours you keep. In Settings (in the Menu on a phone) you can choose the Nave, the church by day, or the \
+         Apse, its vault by night, change the text size, and have Prime read the Martyrology, the saints of the coming \
+         day. Your choices stay on your device: there are no accounts and no advertising; see [Privacy](/privacy). \
+         If you find a mistake, please tell us through the \
+         [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
 ];
 
