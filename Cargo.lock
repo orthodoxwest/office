@@ -854,6 +854,8 @@ dependencies = [
  "presentation",
  "render-html",
  "rusqlite",
+ "serde",
+ "serde_json",
  "sha2",
  "tokio",
  "tools",
