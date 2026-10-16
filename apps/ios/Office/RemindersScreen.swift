@@ -344,10 +344,13 @@ private struct TimesGroup: View {
 
     var body: some View {
         let unavailable = settings.place.map { !$0.sunAvailable } ?? false
+        // Past the limit the reader's own times are in force, whatever was chosen; the choice is
+        // kept so the sun takes over again when the app is next opened nearer the equator.
+        let bySun = settings.followSun && !unavailable
         Band(name: "Times") {
-            choice("At times I choose", selected: !settings.followSun, enabled: true, sun: false)
+            choice("At times I choose", selected: !bySun, enabled: true, sun: false)
             Hairline(color: p.border)
-            choice("By the sun where I am", selected: settings.followSun, enabled: !unavailable, sun: true)
+            choice("By the sun where I am", selected: bySun, enabled: !unavailable, sun: true)
             if unavailable {
                 Remark(text: sunUnavailableNote())
             } else if settings.followSun {

@@ -239,6 +239,9 @@ private fun Times(
     val haptics = LocalHapticFeedback.current
     val body = Type.body.copy(color = p.text)
     val unavailable = settings.place?.sunAvailable == false
+    // Past the limit the reader's own times are in force, whatever was chosen; the choice is kept
+    // so the sun takes over again when the app is next opened nearer the equator.
+    val bySun = settings.followSun && !unavailable
     Group("Times", modifier) {
         @Composable
         fun Choice(label: String, selected: Boolean, enabled: Boolean, sun: Boolean) {
@@ -257,9 +260,9 @@ private fun Times(
             }
         }
         Column(Modifier.selectableGroup()) {
-            Choice("At times I choose", !settings.followSun, enabled = true, sun = false)
+            Choice("At times I choose", !bySun, enabled = true, sun = false)
             Hairline(p.border)
-            Choice("By the sun where I am", settings.followSun, enabled = !unavailable, sun = true)
+            Choice("By the sun where I am", bySun, enabled = !unavailable, sun = true)
         }
         if (unavailable) {
             Remark(sunUnavailableNote())
