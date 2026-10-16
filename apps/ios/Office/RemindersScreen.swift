@@ -372,7 +372,7 @@ private struct TimesGroup: View {
             if !selected { choose(sun) }
         } label: {
             HStack(spacing: m.px(12)) {
-                Mark(selected: selected)
+                RadioMark(selected: selected)
                 Text(label).type(Scale.body).foregroundStyle(p.text)
                 Spacer(minLength: 0)
             }
@@ -413,7 +413,7 @@ private struct SunTime: View {
 }
 
 /// The radio mark, the round sister of `Tick`: a ruled circle, an oak dot inside a margin of the ground when chosen.
-private struct Mark: View {
+private struct RadioMark: View {
     let selected: Bool
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
