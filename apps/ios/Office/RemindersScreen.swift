@@ -326,7 +326,7 @@ private struct Band<Content: View>: View {
 /// What marks each hour's time by the sun, under the time.
 private let sunMarks = [
     "lauds": "sunrise", "prime": "first hour", "terce": "third hour",
-    "sext": "noon by the sun", "none": "ninth hour", "vespers": "sunset",
+    "sext": "solar noon", "none": "ninth hour", "vespers": "sunset",
 ]
 
 /**

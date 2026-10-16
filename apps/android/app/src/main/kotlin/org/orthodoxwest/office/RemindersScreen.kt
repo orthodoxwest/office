@@ -216,7 +216,7 @@ private val SUN_MARKS = mapOf(
     "lauds" to "sunrise",
     "prime" to "first hour",
     "terce" to "third hour",
-    "sext" to "noon by the sun",
+    "sext" to "solar noon",
     "none" to "ninth hour",
     "vespers" to "sunset",
 )
