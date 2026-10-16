@@ -196,8 +196,9 @@ struct RemindersScreen: View {
                 }
             }
             // Compline keeps the reader's time while the hours follow the sun, but waits for the evening.
-            if sun != nil && h.chosen && h.hour == "compline" {
-                Text("Your time, moved later when the sun sets late.").type(Scale.body.sized(14, line: 20)).foregroundStyle(p.muted)
+            if let sun, h.chosen && h.hour == "compline" {
+                let moved = (sun.hour, sun.minute) != (h.hourOfDay, h.minute)
+                Text(moved ? "Tonight at \(clock(sun.hour, sun.minute)), an hour after sunset." : "Your time, moved later when the sun sets late.").type(Scale.body.sized(14, line: 20)).foregroundStyle(p.muted)
                     .padding(.leading, m.px(32)).padding(.bottom, m.px(8))
             }
         }

@@ -146,7 +146,7 @@ fun RemindersScreen(
                             Text(label, Modifier.padding(horizontal = 11.dp), style = body.copy(color = p.muted.copy(alpha = 0.6f), fontFeatureSettings = "lnum"))
                         }
                     }
-                    if (sun != null && h.chosen && h.hour == "compline") ComplineNote()
+                    if (sun != null && h.chosen && h.hour == "compline") ComplineNote(sun[h.hour]?.takeIf { it != h.time }?.format(clock))
                 }
             }
             Group("Days", Modifier.padding(top = 28.dp)) {
@@ -301,12 +301,15 @@ private fun SunTime(label: String, h: HourReminder, chosen: Boolean) {
     }
 }
 
-/** Under a chosen Compline while the hours follow the sun: its time is the reader's, but it waits for the evening. */
+/**
+ * Under a chosen Compline while the hours follow the sun: its time is the reader's, but it waits
+ * for the evening; `tonight` is the later time the sun sets for it today, if any.
+ */
 @Composable
-private fun ComplineNote() {
+private fun ComplineNote(tonight: String?) {
     val p = LocalPalette.current
     Text(
-        "Your time, moved later when the sun sets late.",
+        if (tonight != null) "Tonight at $tonight, an hour after sunset." else "Your time, moved later when the sun sets late.",
         Modifier.padding(start = 32.dp, bottom = 8.dp),
         style = Type.body.copy(fontSize = 14.sp, lineHeight = 20.sp, color = p.muted),
     )
