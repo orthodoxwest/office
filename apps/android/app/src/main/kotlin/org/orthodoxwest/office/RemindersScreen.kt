@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -37,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -44,6 +47,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -53,13 +57,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import org.orthodoxwest.office.core.sunUnavailableNote
 
-/** Whether the phone will let reminders through, and on the minute. */
-data class ReminderStatus(val notificationsAllowed: Boolean, val exactAllowed: Boolean)
+/** Whether the phone will let reminders through, and on the minute, and tell the app where it is. */
+data class ReminderStatus(val notificationsAllowed: Boolean, val exactAllowed: Boolean, val locationAllowed: Boolean = true)
 
 /** Monday first, as the web's Days row. */
 private val WEEK = DayOfWeek.entries.toList()
@@ -80,6 +87,9 @@ fun RemindersScreen(
     onTurnOff: () -> Unit,
     onAllowNotifications: () -> Unit,
     onAllowExact: () -> Unit,
+    today: LocalDate = LocalDate.now(),
+    onFollowSun: (Boolean) -> Unit = {},
+    onAllowLocation: () -> Unit = {},
 ) {
     val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
@@ -88,6 +98,8 @@ fun RemindersScreen(
     val clock = remember(is24) { DateTimeFormatter.ofPattern(if (is24) "HH:mm" else "h:mm a", Locale.getDefault()) }
     var editing by remember { mutableStateOf<HourReminder?>(null) }
     val body = Type.body.copy(color = p.text)
+    // Today's times by the sun, while the hours follow it.
+    val sun = remember(settings, today) { settings.sunTimes(today, ZoneId.systemDefault()) }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,7 +114,8 @@ fun RemindersScreen(
                 Modifier.padding(top = 10.dp),
                 style = body.copy(color = p.muted),
             )
-            Fieldset("Hours", Modifier.padding(top = 28.dp)) {
+            Times(settings, status, Modifier.padding(top = 28.dp), onFollowSun, onAllowLocation)
+            Group("Hours", Modifier.padding(top = 28.dp)) {
                 settings.hours.forEachIndexed { i, h ->
                     if (i > 0) Hairline(p.border)
                     Row(Modifier.fillMaxWidth().heightIn(min = 46.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -118,8 +131,11 @@ fun RemindersScreen(
                             // Muted until chosen, as the web's `.reminder-hour-row.is-selected`.
                             Text(h.name, Modifier.padding(start = 12.dp), style = body.copy(color = if (h.chosen) p.text else p.muted))
                         }
-                        val label = h.time.format(clock)
-                        if (h.chosen) {
+                        val bySun = sun?.get(h.hour)?.takeIf { h.hour != "compline" }
+                        val label = (bySun ?: h.time).format(clock)
+                        if (bySun != null) {
+                            SunTime(label, h, h.chosen)
+                        } else if (h.chosen) {
                             Text(
                                 label,
                                 Modifier.border(1.dp, p.border).background(p.bg).tap(label = "${h.name} at $label", action = "change the time") { editing = h }
@@ -130,9 +146,10 @@ fun RemindersScreen(
                             Text(label, Modifier.padding(horizontal = 11.dp), style = body.copy(color = p.muted.copy(alpha = 0.6f), fontFeatureSettings = "lnum"))
                         }
                     }
+                    if (sun != null && h.chosen && h.hour == "compline") ComplineNote(sun[h.hour]?.takeIf { it != h.time }?.format(clock))
                 }
             }
-            Fieldset("Days", Modifier.padding(top = 28.dp)) {
+            Group("Days", Modifier.padding(top = 28.dp)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                     WEEK.forEach { d ->
                         val on = d in settings.days
@@ -150,7 +167,7 @@ fun RemindersScreen(
                     }
                 }
             }
-            Fieldset("Remind me", Modifier.padding(top = 28.dp)) {
+            Group("Remind me", Modifier.padding(top = 28.dp)) {
                 var open by remember { mutableStateOf(false) }
                 Box {
                     Row(
@@ -194,6 +211,134 @@ fun RemindersScreen(
 
 private fun ReminderSettings.withHour(h: HourReminder) = copy(hours = hours.map { if (it.hour == h.hour) h else it })
 
+/** What marks each hour's time by the sun, under the time. */
+private val SUN_MARKS = mapOf(
+    "lauds" to "sunrise",
+    "prime" to "first hour",
+    "terce" to "third hour",
+    "sext" to "noon by the sun",
+    "none" to "ninth hour",
+    "vespers" to "sunset",
+)
+
+/**
+ * Whether the hours keep the reader's times or follow the sun, the reason the sun cannot be
+ * followed here, and the way to let the app know where it is. Kept apart from the page around it,
+ * to be restyled on its own. Past the latitude limit the sun's row is greyed and cannot be chosen;
+ * choosing the reader's own times forgets the place, so the sun can be chosen again elsewhere.
+ */
+@Composable
+private fun Times(
+    settings: ReminderSettings,
+    status: ReminderStatus,
+    modifier: Modifier,
+    onFollowSun: (Boolean) -> Unit,
+    onAllowLocation: () -> Unit,
+) {
+    val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
+    val body = Type.body.copy(color = p.text)
+    val unavailable = settings.place?.sunAvailable == false
+    // Past the limit the reader's own times are in force, whatever was chosen; the choice is kept
+    // so the sun takes over again when the app is next opened nearer the equator.
+    val bySun = settings.followSun && !unavailable
+    Group("Times", modifier) {
+        @Composable
+        fun Choice(label: String, selected: Boolean, enabled: Boolean, sun: Boolean) {
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 46.dp).alpha(if (enabled) 1f else 0.5f)
+                    .selectable(selected, enabled = enabled, role = Role.RadioButton) {
+                        if (!selected) {
+                            haptics.toggled(true)
+                            onFollowSun(sun)
+                        }
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Mark(selected)
+                Text(label, Modifier.padding(start = 12.dp), style = body)
+            }
+        }
+        Column(Modifier.selectableGroup()) {
+            Choice("At times I choose", !bySun, enabled = true, sun = false)
+            Hairline(p.border)
+            Choice("By the sun where I am", bySun, enabled = !unavailable, sun = true)
+        }
+        if (unavailable) {
+            Remark(sunUnavailableNote())
+        } else if (settings.followSun) {
+            Text(
+                "Lauds at sunrise, Vespers at sunset, and the little hours at the first, third, sixth and ninth hours of daylight. " +
+                    "Times for where you were when you last opened the app.",
+                Modifier.padding(top = 2.dp, bottom = 10.dp),
+                style = Type.body.copy(fontSize = 16.sp, lineHeight = 23.sp, color = p.muted),
+            )
+        }
+        if (settings.followSun && !status.locationAllowed) {
+            Note("Allow location to time reminders by the sun.", "Open settings", onAllowLocation)
+            Spacer(Modifier.height(6.dp))
+        }
+        Hairline(p.border)
+    }
+}
+
+/** An hour's time as the sun sets it today: plain, with what marks it beneath; faint when not chosen. */
+@Composable
+private fun SunTime(label: String, h: HourReminder, chosen: Boolean) {
+    val p = LocalPalette.current
+    val time = Type.body.copy(fontFeatureSettings = "lnum")
+    if (!chosen) {
+        Text(label, Modifier.padding(horizontal = 11.dp), style = time.copy(color = p.muted.copy(alpha = 0.6f)))
+        return
+    }
+    val mark = SUN_MARKS[h.hour].orEmpty()
+    Column(
+        Modifier.padding(horizontal = 11.dp, vertical = 4.dp).semantics(mergeDescendants = true) { contentDescription = "${h.name} at $label, $mark" },
+        horizontalAlignment = Alignment.End,
+    ) {
+        Text(label, style = time.copy(color = p.text))
+        Text(mark, style = Type.label(11f, 0.08f).copy(color = p.gold, fontFeatureSettings = ALL_SMALL_CAPS, lineHeight = 14.sp))
+    }
+}
+
+/**
+ * Under a chosen Compline while the hours follow the sun: its time is the reader's, but it waits
+ * for the evening; `tonight` is the later time the sun sets for it today, if any.
+ */
+@Composable
+private fun ComplineNote(tonight: String?) {
+    val p = LocalPalette.current
+    Text(
+        if (tonight != null) "Tonight at $tonight, an hour after sunset." else "Your time, moved later when the sun sets late.",
+        Modifier.padding(start = 32.dp, bottom = 8.dp),
+        style = Type.body.copy(fontSize = 14.sp, lineHeight = 20.sp, color = p.muted),
+    )
+}
+
+/** The radio mark, the round sister of [Tick]: a ruled circle, an oak dot inside a margin of the ground when chosen. */
+@Composable
+private fun Mark(selected: Boolean) {
+    val p = LocalPalette.current
+    Canvas(Modifier.size(20.dp)) {
+        val r = 15.2.dp.toPx() / 2
+        val rule = 1.dp.toPx()
+        drawCircle(p.bg, r, center)
+        if (selected) drawCircle(p.accent, r - rule - 3.dp.toPx(), center)
+        drawCircle(if (selected) p.accent else p.muted, r - rule / 2, center, style = Stroke(rule))
+    }
+}
+
+/** A remark set as a [Note] is, with its gold rule, but with nothing to do about it. */
+@Composable
+private fun Remark(text: String) {
+    val p = LocalPalette.current
+    Text(
+        text,
+        Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 12.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(start = 12.dp),
+        style = Type.body.copy(fontSize = 16.sp, lineHeight = 23.sp, color = p.muted),
+    )
+}
+
 /** The web's headpiece, set to the left: a painted cross between two short rules. */
 @Composable
 private fun PlainHeadpiece() {
@@ -206,21 +351,31 @@ private fun PlainHeadpiece() {
     }
 }
 
-/** A bordered group with its legend set into the top rule, as a web fieldset. */
+/**
+ * A group of the page's controls under its name, set as home's "Pray the hours" band: the name
+ * in small caps between gilt lozenges, a gold fillet above and below, and the rows on the page
+ * itself beneath. A screen reader takes the name as the group's heading.
+ */
 @Composable
-private fun Fieldset(legend: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun Group(name: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val p = LocalPalette.current
-    // The legend is drawn over the frame's top edge, after its contents; a screen reader takes it first.
-    Box(modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
-        Column(Modifier.padding(top = 8.dp).fillMaxWidth().border(1.dp, p.border).background(p.surface).padding(horizontal = 14.dp, vertical = 10.dp)) {
-            Spacer(Modifier.height(4.dp))
-            content()
-        }
-        Text(
-            legend,
-            Modifier.padding(start = 12.dp).background(p.surface).padding(horizontal = 6.dp).semantics { heading(); traversalIndex = -1f },
-            style = Type.label(10.56f, 0.1f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS, lineHeight = 16.sp),
+    // Home's band is gilt on its green earth; on the bare page the gold reads where the gilt would fade.
+    Column(modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
+        Lozenged(
+            name,
+            Type.label(11f, 0.16f).copy(color = p.gold, fontFeatureSettings = ALL_SMALL_CAPS),
+            p.gold,
+            Modifier.fillMaxWidth()
+                .drawBehind {
+                    val w = 1.dp.toPx()
+                    drawLine(p.goldLine, Offset(0f, w / 2), Offset(size.width, w / 2), w)
+                    drawLine(p.goldLine, Offset(0f, size.height - w / 2), Offset(size.width, size.height - w / 2), w)
+                }
+                .padding(vertical = 7.dp)
+                .semantics { heading(); traversalIndex = -1f },
         )
+        Spacer(Modifier.height(6.dp))
+        content()
     }
 }
 

@@ -337,6 +337,24 @@ struct Diamond: View {
     }
 }
 
+/// An inscription's words between two gilt lozenges, as home's "Pray the hours" band and the
+/// reminder page's group names set them.
+struct Lozenged: View {
+    let text: String
+    let style: TextStyle
+    let ink: Color
+    var diamond: CGFloat = 7.07
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        HStack(spacing: m.px(12)) {
+            Diamond(size: diamond, color: ink)
+            Text(text).type(style).foregroundStyle(ink)
+            Diamond(size: diamond, color: ink)
+        }
+    }
+}
+
 /// One of home's period glyphs, filled in `color`.
 struct PeriodIcon: View {
     let period: Period

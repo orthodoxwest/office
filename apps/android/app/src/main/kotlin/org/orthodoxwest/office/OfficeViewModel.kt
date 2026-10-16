@@ -302,7 +302,28 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         reminderStatus = ReminderStatus(
             notificationsAllowed = Notifications.allowed(app),
             exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms(),
+            locationAllowed = PhoneLocation.allowed(app),
         )
+    }
+
+    /**
+     * Turns following the sun on or off. Off forgets the place; on reads it (once the activity
+     * has asked for the permission) and reschedules when it comes.
+     */
+    fun setFollowSun(on: Boolean) {
+        changeReminders(reminders.copy(followSun = on, place = if (on) reminders.place else null))
+        if (on) refreshPlace()
+    }
+
+    /**
+     * Reads the phone's place again when the hours follow the sun, then reschedules from it.
+     * Called on every return to the app; the place is never read in the background.
+     */
+    fun refreshPlace() {
+        if (!reminders.followSun) return
+        PhoneLocation.read(getApplication()) { place ->
+            if (reminders.followSun) changeReminders(reminders.copy(place = place))
+        }
     }
 
     fun syncReminders() {

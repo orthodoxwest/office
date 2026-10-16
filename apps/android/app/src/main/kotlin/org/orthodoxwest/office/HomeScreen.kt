@@ -424,9 +424,7 @@ private fun Frontispiece(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
-                        Text("Pray the hours", Modifier.padding(horizontal = 12.dp), style = Type.label(tier.band, if (desk) 0.17f else 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS))
-                        Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
+                        Lozenged("Pray the hours", Type.label(tier.band, if (desk) 0.17f else 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS), o.ink)
                     }
                     Spacer(Modifier.height(tier.bandGap))
                     PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }

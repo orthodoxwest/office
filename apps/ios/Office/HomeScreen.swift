@@ -548,11 +548,7 @@ private struct Frontispiece: View {
     /// each with a gilt fillet inside it, run through to the frame.
     private func inscription(side: CGFloat) -> some View {
         // Gilt lozenges either side, 5pt squares on their points.
-        HStack(spacing: m.px(12)) {
-            Diamond(size: 7.07, color: o.ink)
-            Text("Pray the hours").type(TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.16), smallCaps: true)).foregroundStyle(o.ink)
-            Diamond(size: 7.07, color: o.ink)
-        }
+        Lozenged(text: "Pray the hours", style: TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.16), smallCaps: true), ink: o.ink)
         .padding(.vertical, m.px(tier.bandPad))
         .frame(maxWidth: .infinity)
         .background(p.inscriptionGround)

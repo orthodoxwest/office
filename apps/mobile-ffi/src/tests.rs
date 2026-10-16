@@ -159,7 +159,7 @@ fn reminders_name_each_office_on_the_chosen_days() {
     let choose = |hour: &str, h: i32, m: i32| ReminderChoice { hour: hour.into(), hour_of_day: h, minute: m };
     // Sundays only, starting Saturday 14 March 2026: the one Sunday in three days is the 15th.
     let sundays = vec![true, false, false, false, false, false, false];
-    let got = core.reminders(civil(2026, 3, 14), 3, vec![choose("vespers", 18, 0), choose("lauds", 6, 45)], sundays).unwrap();
+    let got = core.reminders(civil(2026, 3, 14), 3, vec![choose("vespers", 18, 0), choose("lauds", 6, 45)], sundays, None).unwrap();
     assert_eq!(got.len(), 2);
     // In time order, whatever the order chosen.
     assert_eq!((got[0].hour.as_str(), got[0].hour_of_day, got[0].minute), ("lauds", 6, 45));
@@ -168,14 +168,49 @@ fn reminders_name_each_office_on_the_chosen_days() {
     assert_eq!(got[1].summary, "Vespers — III Sunday in Lent");
     assert!(got[1].description.contains("Lent"), "{}", got[1].description);
     // Across the year's end, every day.
-    let week = core.reminders(civil(2026, 12, 30), 4, vec![choose("compline", 21, 0)], vec![true; 7]).unwrap();
+    let week = core.reminders(civil(2026, 12, 30), 4, vec![choose("compline", 21, 0)], vec![true; 7], None).unwrap();
     assert_eq!(
         week.iter().map(|r| r.date).collect::<Vec<_>>(),
         [civil(2026, 12, 30), civil(2026, 12, 31), civil(2027, 1, 1), civil(2027, 1, 2)]
     );
-    assert!(core.reminders(civil(2026, 1, 1), 1, vec![choose("matins", 3, 0)], vec![true; 7]).is_err());
-    assert!(core.reminders(civil(2026, 1, 1), 1, vec![choose("lauds", 24, 0)], vec![true; 7]).is_err());
-    assert!(core.reminders(civil(2026, 1, 1), 1, vec![], vec![true; 6]).is_err());
+    assert!(core.reminders(civil(2026, 1, 1), 1, vec![choose("matins", 3, 0)], vec![true; 7], None).is_err());
+    assert!(core.reminders(civil(2026, 1, 1), 1, vec![choose("lauds", 24, 0)], vec![true; 7], None).is_err());
+    assert!(core.reminders(civil(2026, 1, 1), 1, vec![], vec![true; 6], None).is_err());
+}
+
+#[test]
+fn reminders_can_follow_the_sun() {
+    let core = OfficeCore::new().unwrap();
+    let choose = |hour: &str, h: i32, m: i32| ReminderChoice { hour: hour.into(), hour_of_day: h, minute: m };
+    let all = || ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].map(|h| choose(h, 21, 0)).to_vec();
+    let at = |r: &ReminderView| (r.hour.clone(), format!("{:02}:{:02}", r.hour_of_day, r.minute));
+    // Philadelphia at midsummer, EDT: twelve hours of 75 minutes from 5:32, and Compline an
+    // hour after sunset rather than at nine.
+    let philly = |offset| Some(SunPlace { latitude: 39.9526, longitude: -75.1652, utc_offsets: vec![offset] });
+    let june = core.reminders(civil(2026, 6, 21), 1, all(), vec![true; 7], philly(-240)).unwrap();
+    let got: Vec<_> = june.iter().map(at).collect();
+    let want = [
+        ("lauds", "05:32"),
+        ("prime", "06:47"),
+        ("terce", "09:17"),
+        ("sext", "13:03"),
+        ("none", "16:48"),
+        ("vespers", "20:33"),
+        ("compline", "21:33"),
+    ];
+    assert_eq!(got, want.map(|(h, t)| (h.to_string(), t.to_string())));
+    // In December the evening is long enough: Compline keeps nine.
+    let december = core.reminders(civil(2026, 12, 21), 1, all(), vec![true; 7], philly(-300)).unwrap();
+    assert_eq!(at(&december[6]), ("compline".into(), "21:00".into()));
+    assert_eq!(at(&december[5]), ("vespers".into(), "16:39".into()));
+    // Past the limit, the chosen times stand.
+    let fairbanks = Some(SunPlace { latitude: 64.84, longitude: -147.72, utc_offsets: vec![-480] });
+    let north = core.reminders(civil(2026, 6, 21), 1, vec![choose("lauds", 6, 45)], vec![true; 7], fairbanks).unwrap();
+    assert_eq!(at(&north[0]), ("lauds".into(), "06:45".into()));
+    // Each day needs its offset.
+    assert!(core.reminders(civil(2026, 6, 21), 2, all(), vec![true; 7], philly(-240)).is_err());
+    assert!(sun_available(58.3) && !sun_available(61.2));
+    assert!(sun_unavailable_note().contains("too long"));
 }
 
 #[test]

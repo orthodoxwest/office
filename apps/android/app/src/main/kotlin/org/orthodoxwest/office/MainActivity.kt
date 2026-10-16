@@ -88,6 +88,13 @@ class MainActivity : ComponentActivity() {
         vm.refreshReminderStatus()
     }
 
+    // Following the sun asks for the phone's rough place; on a refusal the setting stays on, the
+    // hours keep their chosen times, and the page says how to allow it.
+    private val askLocation = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        vm.refreshReminderStatus()
+        vm.setFollowSun(true)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The reader's theme from the first frame, not the phone's light or dark.
         val theme = ThemeChoice.saved(this)
@@ -130,6 +137,8 @@ class MainActivity : ComponentActivity() {
                             onTurnOff = { vm.setRemindersOn(false) },
                             onAllowNotifications = ::openNotificationSettings,
                             onAllowExact = ::openExactAlarmSettings,
+                            onFollowSun = ::followSun,
+                            onAllowLocation = ::openAppSettings,
                             entries = vm.entries.map { it.id },
                         )
                     }
@@ -146,8 +155,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         vm.refreshReminderStatus()
-        // Every visit keeps the alarm window running ahead, and the widget current.
+        // Every visit keeps the alarm window running ahead, and the widget current; following the
+        // sun, the place is read again and the schedule follows it once it comes.
         vm.syncReminders()
+        vm.refreshPlace()
         vm.refreshWidgets()
         // Home may have been left showing an hour that has since passed.
         vm.refreshClock()
@@ -210,6 +221,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun followSun(on: Boolean) {
+        if (on && !PhoneLocation.allowed(this)) {
+            askLocation.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        } else {
+            vm.setFollowSun(on)
+        }
+    }
+
+    /** The app's own settings page, where its location permission is. */
+    private fun openAppSettings() {
+        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
+    }
+
     private fun openNotificationSettings() {
         startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
     }
@@ -250,6 +274,8 @@ fun OfficeApp(
     onTurnOff: () -> Unit,
     onAllowNotifications: () -> Unit,
     onAllowExact: () -> Unit,
+    onFollowSun: (Boolean) -> Unit = {},
+    onAllowLocation: () -> Unit = {},
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
 ) {
@@ -283,6 +309,8 @@ fun OfficeApp(
         onTurnOff = onTurnOff,
         onAllowNotifications = onAllowNotifications,
         onAllowExact = onAllowExact,
+        onFollowSun = onFollowSun,
+        onAllowLocation = onAllowLocation,
         entries = entries,
     )
 }
@@ -316,6 +344,8 @@ fun OfficeApp(
     onTurnOff: () -> Unit,
     onAllowNotifications: () -> Unit,
     onAllowExact: () -> Unit,
+    onFollowSun: (Boolean) -> Unit = {},
+    onAllowLocation: () -> Unit = {},
     entries: List<Long>,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -504,6 +534,9 @@ fun OfficeApp(
                                 onTurnOff = onTurnOff,
                                 onAllowNotifications = onAllowNotifications,
                                 onAllowExact = onAllowExact,
+                                today = today,
+                                onFollowSun = onFollowSun,
+                                onAllowLocation = onAllowLocation,
                             )
                             else -> Message("Preparing the office…", insets)
                         }

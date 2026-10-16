@@ -20,6 +20,7 @@ use presentation::{
 };
 
 pub use data::EmbeddedData;
+use presentation::sun;
 
 uniffi::setup_scaffolding!();
 
@@ -129,14 +130,24 @@ impl OfficeCore {
 
     /// The reminders due over `days` days from `from`: each chosen hour at its
     /// time, on the chosen weekdays (`weekdays[0]` is Sunday), named as the
-    /// web's calendar feed names its events. In date and time order.
+    /// web's calendar feed names its events. In date and time order. With a
+    /// place, each time follows that day's sun ([`presentation::sun`]); a day
+    /// without sunrise, or a place past the latitude limit, keeps the chosen
+    /// times.
     pub fn reminders(
         &self,
         from: CivilDate,
         days: i32,
         choices: Vec<ReminderChoice>,
         weekdays: Vec<bool>,
+        sun: Option<SunPlace>,
     ) -> Result<Vec<ReminderView>, OfficeError> {
+        if let Some(place) = &sun
+            && place.utc_offsets.len() < days.max(0) as usize
+        {
+            return Err(failed("a place needs the zone's offset for every day"));
+        }
+        let sun = sun.filter(|p| sun::available(p.latitude) && p.longitude.is_finite());
         if weekdays.len() != 7 {
             return Err(failed("weekdays must name all seven days, Sunday first"));
         }
@@ -159,12 +170,21 @@ impl OfficeCore {
             }
             let year = self.year(date.year())?;
             let day = year.days.get(date.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {date}")))?;
-            for c in &chosen {
+            let today = sun.as_ref().and_then(|p| sun::sun_day(date, p.latitude, p.longitude, p.utc_offsets[i as usize]));
+            let mut times: Vec<(&ReminderChoice, i32)> = chosen
+                .iter()
+                .map(|c| {
+                    let fixed = (c.hour_of_day * 60 + c.minute) as u32;
+                    (*c, today.as_ref().map_or(fixed, |t| sun::office_minute(&c.hour, t, fixed)) as i32)
+                })
+                .collect();
+            times.sort_by_key(|&(_, m)| m);
+            for (c, m) in times {
                 out.push(ReminderView {
                     hour: c.hour.clone(),
                     date: CivilDate::from(date),
-                    hour_of_day: c.hour_of_day,
-                    minute: c.minute,
+                    hour_of_day: m / 60,
+                    minute: m % 60,
                     title: title_case(&c.hour),
                     feast: typeset(&day_name(day)),
                     summary: typeset(&reminder_summary(&c.hour, day)),
@@ -380,6 +400,29 @@ pub struct ReminderChoice {
     pub hour: String,
     pub hour_of_day: i32,
     pub minute: i32,
+}
+
+/// Where the reader is, for reminders that follow the sun: degrees north and
+/// east, and the zone's offset from UTC in minutes for each day asked for,
+/// taken at that day's local noon.
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
+pub struct SunPlace {
+    pub latitude: f64,
+    pub longitude: f64,
+    pub utc_offsets: Vec<i32>,
+}
+
+/// Whether reminders can follow the sun at a latitude; past the limit the
+/// setting is greyed out.
+#[uniffi::export]
+pub fn sun_available(latitude: f64) -> bool {
+    sun::available(latitude)
+}
+
+/// Why the sun setting is greyed out, under its switch.
+#[uniffi::export]
+pub fn sun_unavailable_note() -> String {
+    sun::UNAVAILABLE_NOTE.to_string()
 }
 
 /// One reminder: an office on a civil date at a local time, with its words.

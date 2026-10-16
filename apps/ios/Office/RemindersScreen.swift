@@ -22,9 +22,12 @@ struct RemindersScreen: View {
     @State private var settings = ReminderStore.load()
     @State private var permission = ReminderPermission.unknown
     @State private var editing: HourReminder?
+    @ObservedObject private var location = PhoneLocation.shared
 
     var body: some View {
         let text = Scale.body
+        // Today's times by the sun, while the hours follow it.
+        let sun = (try? Office.core.get()).flatMap { settings.sunTimes(on: Date(), core: $0) }
         ScrollView {
             VStack(spacing: 0) {
                 SiteHeader()
@@ -33,14 +36,26 @@ struct RemindersScreen: View {
                     Text("Set prayer reminders").type(text.sized(26, line: 32)).foregroundStyle(p.text).padding(.top, m.px(10)).accessibilityAddTraits(.isHeader)
                     Text("Choose the hours you pray and their times. Each reminder names the office and the feast of the day. Your schedule stays on this phone, and reminders come without a connection.")
                         .type(text).foregroundStyle(p.muted).padding(.top, m.px(10))
-                    Fieldset(legend: "Hours") {
+                    TimesGroup(settings: settings, locationDenied: location.denied) { follow in
+                        toggled()
+                        var s = settings
+                        s.followSun = follow
+                        // Back to the reader's own times, the place is forgotten.
+                        if !follow { s.place = nil }
+                        change(s)
+                        if follow { location.refresh() }
+                    } allowLocation: {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    }
+                    .padding(.top, m.px(28))
+                    Band(name: "Hours") {
                         ForEach(Array(settings.hours.enumerated()), id: \.offset) { i, h in
                             if i > 0 { Hairline(color: p.border) }
-                            hourRow(h)
+                            hourRow(h, sun: sun?[h.hour])
                         }
                     }
                     .padding(.top, m.px(28))
-                    Fieldset(legend: "Days") {
+                    Band(name: "Days") {
                         FlowRow(spacing: m.px(18)) {
                             ForEach(reminderWeek, id: \.self) { d in
                                 let on = settings.days.contains(d)
@@ -63,7 +78,7 @@ struct RemindersScreen: View {
                         }
                     }
                     .padding(.top, m.px(28))
-                    Fieldset(legend: "Remind me") {
+                    Band(name: "Remind me") {
                         Menu {
                             ForEach(reminderLeads, id: \.minutes) { lead in
                                 Button(lead.label) {
@@ -98,6 +113,8 @@ struct RemindersScreen: View {
             }
         }
         .onAppear(perform: readPermission)
+        // A place read on coming back to the app is saved apart from the page; read it again.
+        .onChange(of: location.revision) { _, _ in settings = ReminderStore.load() }
         .onChange(of: phase) { _, now in if now == .active { readPermission() } }
         .sheet(item: Binding(get: { editing.map(Editing.init) }, set: { editing = $0?.hour })) { e in
             TimeSheet(hour: e.hour) { h in
@@ -137,47 +154,59 @@ struct RemindersScreen: View {
         }
     }
 
-    private func hourRow(_ h: HourReminder) -> some View {
-        HStack(spacing: 0) {
-            // The box and the hour's name are one checkbox; its time is a control of its own.
-            Button {
-                toggled()
-                var changed = h
-                changed.chosen.toggle()
-                change(settings.with(changed))
-            } label: {
-                HStack(spacing: m.px(12)) {
-                    Tick(checked: h.chosen)
-                    // An hour not chosen stands back in the muted ink (the web's `.reminder-hour-name`).
-                    Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
-                        .animation(.easeInOut(duration: 0.14), value: h.chosen)
-                    Spacer(minLength: 0)
-                }
-                .frame(minHeight: 46)
-            }
-            .buttonStyle(Quiet())
-            .accessibilityAddTraits(h.chosen ? .isSelected : [])
-            let label = clock(h)
-            if h.chosen {
-                Button { editing = h } label: {
-                    Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
-                        .padding(.horizontal, m.px(10)).padding(.vertical, m.px(5))
-                        .background(p.bg)
-                        .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+    private func hourRow(_ h: HourReminder, sun: (hour: Int, minute: Int)?) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 0) {
+                // The box and the hour's name are one checkbox; its time is a control of its own.
+                Button {
+                    toggled()
+                    var changed = h
+                    changed.chosen.toggle()
+                    change(settings.with(changed))
+                } label: {
+                    HStack(spacing: m.px(12)) {
+                        Tick(checked: h.chosen)
+                        // An hour not chosen stands back in the muted ink (the web's `.reminder-hour-name`).
+                        Text(h.name).type(Scale.body).foregroundStyle(h.chosen ? p.text : p.muted)
+                            .animation(.easeInOut(duration: 0.14), value: h.chosen)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(minHeight: 46)
                 }
                 .buttonStyle(Quiet())
-                .accessibilityLabel("\(h.name) at \(label)")
-                .accessibilityHint("Changes the time")
-            } else {
-                Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.muted.opacity(0.6)).padding(.horizontal, m.px(11))
-                    .accessibilityHidden(true)
+                .accessibilityAddTraits(h.chosen ? .isSelected : [])
+                if let sun, h.hour != "compline" {
+                    SunTime(name: h.name, hour: h.hour, label: clock(sun.hour, sun.minute), chosen: h.chosen)
+                } else {
+                    let label = clock(h.hourOfDay, h.minute)
+                    if h.chosen {
+                        Button { editing = h } label: {
+                            Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
+                                .padding(.horizontal, m.px(10)).padding(.vertical, m.px(5))
+                                .background(p.bg)
+                                .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+                        }
+                        .buttonStyle(Quiet())
+                        .accessibilityLabel("\(h.name) at \(label)")
+                        .accessibilityHint("Changes the time")
+                    } else {
+                        Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.muted.opacity(0.6)).padding(.horizontal, m.px(11))
+                            .accessibilityHidden(true)
+                    }
+                }
+            }
+            // Compline keeps the reader's time while the hours follow the sun, but waits for the evening.
+            if let sun, h.chosen && h.hour == "compline" {
+                let moved = (sun.hour, sun.minute) != (h.hourOfDay, h.minute)
+                Text(moved ? "Tonight at \(clock(sun.hour, sun.minute)), an hour after sunset." : "Your time, moved later when the sun sets late.").type(Scale.body.sized(14, line: 20)).foregroundStyle(p.muted)
+                    .padding(.leading, m.px(32)).padding(.bottom, m.px(8))
             }
         }
     }
 
     /// A time as the phone shows it: "7:00 AM", or "07:00" on a 24-hour clock.
-    private func clock(_ h: HourReminder) -> String {
-        let date = civil.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: h.hourOfDay, minute: h.minute)) ?? Date()
+    private func clock(_ hour: Int, _ minute: Int) -> String {
+        let date = civil.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: hour, minute: minute)) ?? Date()
         return date.formatted(date: .omitted, time: .shortened)
     }
 
@@ -264,31 +293,159 @@ private struct TimeSheet: View {
     }
 }
 
-/// A bordered group with its legend set into the top rule, as a web fieldset.
-private struct Fieldset<Content: View>: View {
-    let legend: String
+/**
+ * A group of the page's controls under its name, set as home's "Pray the hours" band: the name
+ * in small caps between gilt lozenges, a gold fillet above and below, and the rows on the page
+ * itself beneath. A screen reader takes the name as the group's heading.
+ */
+private struct Band<Content: View>: View {
+    let name: String
     @ViewBuilder let content: Content
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 0) { content }
-                .padding(.top, m.px(4))
-                .padding(.horizontal, m.px(14))
-                .padding(.vertical, m.px(10))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(p.surface)
-                .overlay(Rectangle().stroke(p.border, lineWidth: 1))
-                .padding(.top, m.px(8))
-            Text(legend.uppercased()).type(TextStyle(size: 10.56, line: 16, tracking: 1.056, smallCaps: true)).foregroundStyle(p.accent)
-                .padding(.horizontal, m.px(6))
-                .background(p.surface)
-                .padding(.leading, m.px(12))
+        VStack(alignment: .leading, spacing: 0) {
+            // Home's band is gilt on its green earth; on the bare page the gold reads where the gilt would fade.
+            Lozenged(text: name, style: TextStyle(size: 11, line: 17.6, tracking: 1.76, smallCaps: true), ink: p.gold)
+                .padding(.vertical, m.px(7))
+                .frame(maxWidth: .infinity)
+                .overlay(alignment: .top) { Rectangle().fill(p.goldLine).frame(height: 1) }
+                .overlay(alignment: .bottom) { Rectangle().fill(p.goldLine).frame(height: 1) }
+                .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilitySortPriority(1)
+            VStack(alignment: .leading, spacing: 0) { content }
+                .padding(.top, m.px(6))
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .contain)
+    }
+}
+
+/// What marks each hour's time by the sun, under the time.
+private let sunMarks = [
+    "lauds": "sunrise", "prime": "first hour", "terce": "third hour",
+    "sext": "noon by the sun", "none": "ninth hour", "vespers": "sunset",
+]
+
+/**
+ * Whether the hours keep the reader's times or follow the sun, the reason the sun cannot be
+ * followed here, and the way to let the app know where it is. Kept apart from the page around it,
+ * to be restyled on its own. Past the latitude limit the sun's row is greyed and cannot be chosen;
+ * choosing the reader's own times forgets the place, so the sun can be chosen again elsewhere.
+ */
+private struct TimesGroup: View {
+    let settings: ReminderSettings
+    let locationDenied: Bool
+    let choose: (Bool) -> Void
+    let allowLocation: () -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let unavailable = settings.place.map { !$0.sunAvailable } ?? false
+        // Past the limit the reader's own times are in force, whatever was chosen; the choice is
+        // kept so the sun takes over again when the app is next opened nearer the equator.
+        let bySun = settings.followSun && !unavailable
+        Band(name: "Times") {
+            choice("At times I choose", selected: !bySun, enabled: true, sun: false)
+            Hairline(color: p.border)
+            choice("By the sun where I am", selected: bySun, enabled: !unavailable, sun: true)
+            if unavailable {
+                Remark(text: sunUnavailableNote())
+            } else if settings.followSun {
+                Text("Lauds at sunrise, Vespers at sunset, and the little hours at the first, third, sixth and ninth hours of daylight. Times for where you were when you last opened the app.")
+                    .type(Scale.body.sized(16, line: 23)).foregroundStyle(p.muted)
+                    .padding(.top, m.px(2)).padding(.bottom, m.px(10))
+            }
+            if settings.followSun && locationDenied {
+                Note(text: "Allow location to time reminders by the sun.", action: "Open settings", perform: allowLocation)
+                    .padding(.bottom, m.px(6))
+            }
+            Hairline(color: p.border)
+        }
+    }
+
+    private func choice(_ label: String, selected: Bool, enabled: Bool, sun: Bool) -> some View {
+        Button {
+            if !selected { choose(sun) }
+        } label: {
+            HStack(spacing: m.px(12)) {
+                RadioMark(selected: selected)
+                Text(label).type(Scale.body).foregroundStyle(p.text)
+                Spacer(minLength: 0)
+            }
+            .frame(minHeight: 46)
+        }
+        .buttonStyle(Quiet())
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.5)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// An hour's time as the sun sets it today: plain, with what marks it beneath; faint when not chosen.
+private struct SunTime: View {
+    let name: String
+    let hour: String
+    let label: String
+    let chosen: Bool
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        if chosen {
+            let mark = sunMarks[hour] ?? ""
+            VStack(alignment: .trailing, spacing: 0) {
+                Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
+                Text(mark).type(TextStyle(size: 11, line: 14, tracking: 0.88, smallCaps: true)).foregroundStyle(p.gold)
+            }
+            .padding(.horizontal, m.px(11))
+            .padding(.vertical, m.px(4))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(name) at \(label), \(mark)")
+        } else {
+            Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.muted.opacity(0.6)).padding(.horizontal, m.px(11))
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+/// The radio mark, the round sister of `Tick`: a ruled circle, an oak dot inside a margin of the ground when chosen.
+private struct RadioMark: View {
+    let selected: Bool
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let side = m.px(15.2)
+        Canvas { ctx, size in
+            let rect = CGRect(x: (size.width - side) / 2, y: (size.height - side) / 2, width: side, height: side)
+            ctx.fill(Path(ellipseIn: rect), with: .color(p.bg))
+            if selected {
+                ctx.fill(Path(ellipseIn: rect.insetBy(dx: 1 + 3, dy: 1 + 3)), with: .color(p.accent))
+            }
+            ctx.stroke(Path(ellipseIn: rect.insetBy(dx: 0.5, dy: 0.5)), with: .color(selected ? p.accent : p.muted), lineWidth: 1)
+        }
+        .frame(width: m.px(20), height: m.px(20))
+        .accessibilityHidden(true)
+    }
+}
+
+/// A remark set as a `Note` is, with its gold rule, but with nothing to do about it.
+private struct Remark: View {
+    let text: String
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        Text(text).type(Scale.body.sized(16, line: 23)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, m.px(12))
+            .overlay(alignment: .leading) { Rectangle().fill(p.goldLine).frame(width: 1) }
+            .padding(.top, m.px(6))
+            .padding(.bottom, m.px(12))
     }
 }
 

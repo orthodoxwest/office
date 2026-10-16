@@ -258,6 +258,68 @@ final class ReminderTests: XCTestCase {
         off.on = false
         XCTAssertTrue(try ReminderScheduler.plan(off, now: now, core: Office.core.get(), calendar: calendar).isEmpty)
     }
+
+    private let philadelphia = StoredPlace(latitude: 39.9526, longitude: -75.1652, readAt: Date(timeIntervalSince1970: 1_781_971_200))
+
+    private func bySun(_ place: StoredPlace) -> ReminderSettings {
+        var s = settings(["lauds": (6, 45), "vespers": (18, 0), "compline": (21, 0)])
+        s.followSun = true
+        s.place = place
+        return s
+    }
+
+    func testTheSunTimesTheHoursAtThePlaceKept() throws {
+        // Philadelphia at midsummer: Lauds at sunrise (5:32), Vespers at sunset (8:33), Compline
+        // an hour after it rather than at nine; each ten minutes early.
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 3, minute: 0)))
+        let plan = try ReminderScheduler.plan(bySun(philadelphia), now: now, core: Office.core.get(), calendar: calendar)
+        let first = plan.prefix(3).map { "\($0.hour) \($0.at.hour ?? -1):\($0.at.minute ?? -1)" }
+        XCTAssertEqual(first, ["lauds 5:22", "vespers 20:23", "compline 21:23"])
+    }
+
+    func testEachDayTakesItsOwnOffsetAcrossAClockChange() throws {
+        // Summer time ends on 1 November 2026.
+        let from = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 10, day: 30, hour: 3)))
+        let place = try XCTUnwrap(bySun(philadelphia).sunPlace(from: from, days: 4, calendar: calendar))
+        XCTAssertEqual(place.utcOffsets, [-240, -240, -300, -300])
+        XCTAssertNil(settings(["lauds": (6, 45)]).sunPlace(from: from, days: 4, calendar: calendar))
+    }
+
+    func testPastTheLimitTheChosenTimesStand() throws {
+        let fairbanks = StoredPlace(latitude: 64.84, longitude: -147.72, readAt: Date())
+        XCTAssertFalse(fairbanks.sunAvailable)
+        XCTAssertFalse(bySun(fairbanks).sunActive)
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 3, minute: 0)))
+        let first = try XCTUnwrap(ReminderScheduler.plan(bySun(fairbanks), now: now, core: Office.core.get(), calendar: calendar).first)
+        XCTAssertEqual(first.at.hour, 6)
+        XCTAssertEqual(first.at.minute, 35)
+        XCTAssertFalse(sunUnavailableNote().isEmpty)
+    }
+
+    func testTodaysSunTimesForThePage() throws {
+        let day = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 21, hour: 9)))
+        let times = try XCTUnwrap(bySun(philadelphia).sunTimes(on: day, core: Office.core.get(), calendar: calendar))
+        XCTAssertEqual(times["lauds"]?.hour, 5)
+        XCTAssertEqual(times["lauds"]?.minute, 32)
+        XCTAssertEqual(times["sext"]?.hour, 13)
+        XCTAssertEqual(times["sext"]?.minute, 3)
+        XCTAssertEqual(times["compline"]?.hour, 21)
+        XCTAssertEqual(times["compline"]?.minute, 33)
+    }
+
+    func testTheSettingAndPlaceAreKept() {
+        let saved = ReminderStore.load()
+        defer { ReminderStore.save(saved) }
+        ReminderStore.save(bySun(philadelphia))
+        XCTAssertEqual(ReminderStore.load().place, philadelphia)
+        XCTAssertTrue(ReminderStore.load().followSun)
+        var off = bySun(philadelphia)
+        off.followSun = false
+        off.place = nil
+        ReminderStore.save(off)
+        XCTAssertNil(ReminderStore.load().place)
+        XCTAssertFalse(ReminderStore.load().followSun)
+    }
 }
 
 /// The daily usage beacon: what counts, once a day, under an identifier that lasts the day.

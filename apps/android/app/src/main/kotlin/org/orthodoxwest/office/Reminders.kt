@@ -29,7 +29,9 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import org.orthodoxwest.office.core.OfficeCore
 import org.orthodoxwest.office.core.ReminderChoice
+import org.orthodoxwest.office.core.SunPlace
 import org.orthodoxwest.office.core.reminderDefaults
+import org.orthodoxwest.office.core.sunAvailable
 
 /** The engine, loaded once per process: the app and its alarms share it. */
 object Office {
@@ -42,16 +44,49 @@ data class HourReminder(val hour: String, val name: String, val chosen: Boolean,
 /** Minutes before the hour, as the web's "Remind me" offers them (without its alert-less option). */
 val REMINDER_LEADS = listOf(0 to "At the hour", 5 to "5 minutes before", 10 to "10 minutes before", 15 to "15 minutes before", 30 to "30 minutes before")
 
+/** Where the phone last was, read while the app was open, and when: the sun's times are this place's. */
+data class StoredPlace(val latitude: Double, val longitude: Double, val readAt: Instant) {
+    /** Whether the sun can time the hours here; past the limit the setting is greyed out. */
+    val sunAvailable: Boolean get() = sunAvailable(latitude)
+}
+
 /** The reader's reminders. Nothing fires until they are turned on. */
 data class ReminderSettings(
     val on: Boolean,
     val hours: List<HourReminder>,
     val days: Set<DayOfWeek>,
     val lead: Int,
+    /** Whether the hours follow the sun at [place] rather than the times chosen (all but Compline's). */
+    val followSun: Boolean = false,
+    val place: StoredPlace? = null,
 ) {
     /** Sunday first, as the engine counts the week. */
     val weekdays: List<Boolean>
         get() = (listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }).map { it in days }
+
+    /** The sun's times are in use: the setting is on, a place is known, and it is short of the limit. */
+    val sunActive: Boolean get() = followSun && place?.sunAvailable == true
+
+    /**
+     * The place for the engine over `days` days from `from`, each day with the zone's offset at its
+     * local noon; null while the hours keep the chosen times.
+     */
+    fun sunPlace(from: LocalDate, days: Int, zone: ZoneId): SunPlace? {
+        val at = place?.takeIf { followSun } ?: return null
+        return SunPlace(at.latitude, at.longitude, (0 until days).map { zone.rules.getOffset(from.plusDays(it.toLong()).atTime(12, 0)).totalSeconds / 60 })
+    }
+
+    /**
+     * Today's time of every hour, chosen or not, as the sun sets them here (Compline's the reader's
+     * own, kept an hour after sunset); null unless the sun's times are in use.
+     */
+    fun sunTimes(today: LocalDate, zone: ZoneId): Map<String, LocalTime>? {
+        if (!sunActive) return null
+        val all = hours.map { ReminderChoice(it.hour, it.time.hour, it.time.minute) }
+        return runCatching {
+            Office.core.reminders(today.toCivil(), 1, all, List(7) { true }, sunPlace(today, 1, zone)).associate { it.hour to LocalTime.of(it.hourOfDay, it.minute) }
+        }.getOrNull()
+    }
 }
 
 /** The settings in the app's preferences, starting from the web's defaults. */
@@ -73,6 +108,12 @@ class ReminderStore(context: Context) {
             hours = hours,
             days = days ?: DayOfWeek.entries.toSet(),
             lead = prefs.getInt("lead", 10),
+            followSun = prefs.getBoolean("follow-sun", false),
+            place = run {
+                val latitude = prefs.getString("place.latitude", null)?.toDoubleOrNull()
+                val longitude = prefs.getString("place.longitude", null)?.toDoubleOrNull()
+                if (latitude == null || longitude == null) null else StoredPlace(latitude, longitude, Instant.ofEpochMilli(prefs.getLong("place.read", 0)))
+            },
         )
     }
 
@@ -82,6 +123,14 @@ class ReminderStore(context: Context) {
             putInt("lead", s.lead)
             putString("days", s.days.joinToString(",") { it.name })
             s.hours.forEach { h -> putString("hour.${h.hour}", "${if (h.chosen) 1 else 0},${h.time.hour},${h.time.minute}") }
+            putBoolean("follow-sun", s.followSun)
+            if (s.place == null) {
+                remove("place.latitude").remove("place.longitude").remove("place.read")
+            } else {
+                putString("place.latitude", s.place.latitude.toString())
+                putString("place.longitude", s.place.longitude.toString())
+                putLong("place.read", s.place.readAt.toEpochMilli())
+            }
         }.apply()
     }
 }
@@ -113,7 +162,8 @@ object ReminderScheduler {
         val zone: ZoneId = now.zone
         val wanted = if (!settings.on) emptyList() else {
             val chosen = settings.hours.filter { it.chosen }.map { ReminderChoice(it.hour, it.time.hour, it.time.minute) }
-            Office.core.reminders(now.toLocalDate().toCivil(), HORIZON_DAYS, chosen, settings.weekdays).mapNotNull { r ->
+            val from = now.toLocalDate()
+            Office.core.reminders(from.toCivil(), HORIZON_DAYS, chosen, settings.weekdays, settings.sunPlace(from, HORIZON_DAYS, zone)).mapNotNull { r ->
                 val office = LocalDate.of(r.date.year, r.date.month, r.date.day).atTime(r.hourOfDay, r.minute).atZone(zone)
                 val at = office.minusMinutes(settings.lead.toLong())
                 if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary)

@@ -10,11 +10,14 @@ import androidx.test.core.app.ApplicationProvider
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.TimeZone
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -165,5 +168,67 @@ class ReminderTest {
         // Fired long after (the phone was off): still a snooze's length to see it.
         val late = Notifications.lingers(ZonedDateTime.of(2026, 3, 15, 6, 45, 0, 0, zone).toInstant(), ZonedDateTime.of(2026, 3, 15, 9, 0, 0, 0, zone).toInstant())
         assertEquals(ReminderScheduler.SNOOZE, late)
+    }
+
+    private fun followSun(latitude: Double, longitude: Double) {
+        val store = ReminderStore(app)
+        store.save(store.load().copy(on = true, followSun = true, place = StoredPlace(latitude, longitude, Instant.parse("2026-06-20T16:00:00Z"))))
+    }
+
+    @Test
+    fun theSunTimesTheHoursAtThePlaceKept() {
+        // Philadelphia at midsummer: Lauds at sunrise (5:32), Vespers at sunset (8:33), Compline
+        // an hour after it rather than at nine; each ten minutes early.
+        followSun(39.9526, -75.1652)
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 6, 21, 3, 0, 0, 0, zone))
+        val times = times()
+        assertEquals(24, times.size)
+        assertEquals(listOf("2026-06-21T05:22", "2026-06-21T20:23", "2026-06-21T21:23"), times.take(3))
+    }
+
+    @Test
+    fun eachDayTakesItsOwnOffsetAcrossAClockChange() {
+        followSun(39.9526, -75.1652)
+        val settings = ReminderStore(app).load()
+        // Summer time ends on 1 November 2026.
+        val place = settings.sunPlace(LocalDate.of(2026, 10, 30), 4, zone)!!
+        assertEquals(listOf(-240, -240, -300, -300), place.utcOffsets)
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 10, 30, 3, 0, 0, 0, zone))
+        // Sunrise moves an hour earlier on the clock with it.
+        val lauds = times().filter { it.substring(11, 13).toInt() < 9 }
+        val oct31 = lauds.single { it.startsWith("2026-10-31") }
+        val nov1 = lauds.single { it.startsWith("2026-11-01") }
+        val minutes = { t: String -> t.substring(11, 13).toInt() * 60 + t.substring(14, 16).toInt() }
+        assertTrue(minutes(oct31) - minutes(nov1) in 55..65)
+    }
+
+    @Test
+    fun pastTheLimitTheChosenTimesStand() {
+        followSun(64.84, -147.72)
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 6, 21, 3, 0, 0, 0, zone))
+        assertEquals("2026-06-21T06:35", times().first())
+        assertFalse(ReminderStore(app).load().sunActive)
+    }
+
+    @Test
+    fun thePlaceIsKeptAndForgotten() {
+        followSun(39.9526, -75.1652)
+        val kept = ReminderStore(app).load()
+        assertTrue(kept.followSun && kept.sunActive)
+        assertEquals(StoredPlace(39.9526, -75.1652, Instant.parse("2026-06-20T16:00:00Z")), kept.place)
+        ReminderStore(app).save(kept.copy(followSun = false, place = null))
+        val off = ReminderStore(app).load()
+        assertFalse(off.followSun)
+        assertNull(off.place)
+        assertNull(off.sunPlace(LocalDate.of(2026, 6, 21), 8, zone))
+    }
+
+    @Test
+    fun theSunsTimesForTheScreen() {
+        followSun(39.9526, -75.1652)
+        val today = ReminderStore(app).load().sunTimes(LocalDate.of(2026, 6, 21), zone)!!
+        assertEquals(LocalTime.of(5, 32), today["lauds"])
+        assertEquals(LocalTime.of(13, 3), today["sext"])
+        assertEquals(LocalTime.of(21, 33), today["compline"])
     }
 }
