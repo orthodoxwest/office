@@ -58,6 +58,8 @@ targets:
           - fetch
         BGTaskSchedulerPermittedIdentifiers:
           - org.orthodoxwest.office.reminders
+        # Reminders that follow the sun read the phone's place while the app is open (Reminders.swift).
+        NSLocationWhenInUseUsageDescription: The Daily Office uses your location on this phone to time reminders by sunrise and sunset. It never leaves your phone.
         # Whether this build reports the daily usage count (Usage.swift): Release only.
         OfficeCountsUsage: $(OFFICE_COUNTS_USAGE)
         UIAppFonts:

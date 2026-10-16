@@ -1,4 +1,6 @@
 import BackgroundTasks
+import Combine
+import CoreLocation
 import Foundation
 import UserNotifications
 
@@ -19,6 +21,19 @@ let reminderLeads: [(minutes: Int, label: String)] = [
 /// Monday first, as the web's Days row; 1 is Sunday, as the calendar counts.
 let reminderWeek = [2, 3, 4, 5, 6, 7, 1]
 
+/// Where the phone last was, read while the app was open, and when: the sun's times are this place's.
+struct StoredPlace: Equatable {
+    var latitude: Double
+    var longitude: Double
+    var readAt: Date
+
+    /// Whether the sun can time the hours here; past the limit the setting is greyed out.
+    var sunAvailable: Bool { sunReaches(latitude) }
+}
+
+/// The core's latitude limit (`sunAvailable(latitude:)`), under a name the property above does not shadow.
+private func sunReaches(_ latitude: Double) -> Bool { sunAvailable(latitude: latitude) }
+
 /// The reader's reminders. Nothing is scheduled until they are turned on.
 struct ReminderSettings: Equatable {
     var on: Bool
@@ -26,9 +41,39 @@ struct ReminderSettings: Equatable {
     /// The weekdays chosen, 1 (Sunday) to 7.
     var days: Set<Int>
     var lead: Int
+    /// Whether the hours follow the sun at `place` rather than the times chosen (all but Compline's).
+    var followSun = false
+    var place: StoredPlace?
 
     /// Sunday first, as the engine counts the week.
     var weekdays: [Bool] { (1...7).map { days.contains($0) } }
+
+    /// The sun's times are in use: the setting is on, a place is known, and it is short of the limit.
+    var sunActive: Bool { followSun && place?.sunAvailable == true }
+
+    /// The place for the engine over `days` days from `from`'s day, each day with the zone's
+    /// offset at its local noon; nil while the hours keep the chosen times.
+    func sunPlace(from: Date, days: Int, calendar: Calendar = .current) -> SunPlace? {
+        guard followSun, let place else { return nil }
+        let start = calendar.startOfDay(for: from)
+        let offsets = (0..<days).map { i -> Int32 in
+            let day = calendar.date(byAdding: .day, value: i, to: start) ?? start
+            let noon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
+            return Int32(calendar.timeZone.secondsFromGMT(for: noon) / 60)
+        }
+        return SunPlace(latitude: place.latitude, longitude: place.longitude, utcOffsets: offsets)
+    }
+
+    /// Today's time of every hour, chosen or not, as the sun sets them here (Compline's the
+    /// reader's own, kept an hour after sunset); nil unless the sun's times are in use.
+    func sunTimes(on day: Date, core: OfficeCore, calendar: Calendar = .current) -> [String: (hour: Int, minute: Int)]? {
+        guard sunActive else { return nil }
+        let all = hours.map { ReminderChoice(hour: $0.hour, hourOfDay: Int32($0.hourOfDay), minute: Int32($0.minute)) }
+        let parts = calendar.dateComponents([.year, .month, .day], from: day)
+        let from = CivilDate(year: Int32(parts.year ?? 2026), month: Int32(parts.month ?? 1), day: Int32(parts.day ?? 1))
+        guard let times = try? core.reminders(from: from, days: 1, choices: all, weekdays: Array(repeating: true, count: 7), sun: sunPlace(from: day, days: 1, calendar: calendar)) else { return nil }
+        return Dictionary(times.map { ($0.hour, (hour: Int($0.hourOfDay), minute: Int($0.minute))) }, uniquingKeysWith: { a, _ in a })
+    }
 
     func with(_ h: HourReminder) -> ReminderSettings {
         var s = self
@@ -54,8 +99,17 @@ enum ReminderStore {
             on: defaults.bool(forKey: "reminders.on"),
             hours: hours,
             days: days ?? Set(1...7),
-            lead: defaults.object(forKey: "reminders.lead") as? Int ?? 10
+            lead: defaults.object(forKey: "reminders.lead") as? Int ?? 10,
+            followSun: defaults.bool(forKey: "reminders.followSun"),
+            place: place()
         )
+    }
+
+    private static func place() -> StoredPlace? {
+        guard let latitude = defaults.object(forKey: "reminders.place.latitude") as? Double,
+              let longitude = defaults.object(forKey: "reminders.place.longitude") as? Double else { return nil }
+        let read = defaults.object(forKey: "reminders.place.read") as? Double ?? 0
+        return StoredPlace(latitude: latitude, longitude: longitude, readAt: Date(timeIntervalSince1970: read))
     }
 
     static func save(_ s: ReminderSettings) {
@@ -64,6 +118,14 @@ enum ReminderStore {
         defaults.set(s.days.sorted().map(String.init).joined(separator: ","), forKey: "reminders.days")
         for h in s.hours {
             defaults.set("\(h.chosen ? 1 : 0),\(h.hourOfDay),\(h.minute)", forKey: "reminders.hour.\(h.hour)")
+        }
+        defaults.set(s.followSun, forKey: "reminders.followSun")
+        if let place = s.place {
+            defaults.set(place.latitude, forKey: "reminders.place.latitude")
+            defaults.set(place.longitude, forKey: "reminders.place.longitude")
+            defaults.set(place.readAt.timeIntervalSince1970, forKey: "reminders.place.read")
+        } else {
+            for key in ["reminders.place.latitude", "reminders.place.longitude", "reminders.place.read"] { defaults.removeObject(forKey: key) }
         }
     }
 }
@@ -102,7 +164,8 @@ enum ReminderScheduler {
         let parts = calendar.dateComponents([.year, .month, .day], from: now)
         let from = CivilDate(year: Int32(parts.year ?? 2026), month: Int32(parts.month ?? 1), day: Int32(parts.day ?? 1))
         var out: [PlannedReminder] = []
-        for r in try core.reminders(from: from, days: Int32(reach), choices: chosen, weekdays: settings.weekdays) {
+        let sun = settings.sunPlace(from: now, days: reach, calendar: calendar)
+        for r in try core.reminders(from: from, days: Int32(reach), choices: chosen, weekdays: settings.weekdays, sun: sun) {
             let office = DateComponents(year: Int(r.date.year), month: Int(r.date.month), day: Int(r.date.day), hour: Int(r.hourOfDay), minute: Int(r.minute))
             guard let officeDate = calendar.date(from: office),
                   let fire = calendar.date(byAdding: .minute, value: -settings.lead, to: officeDate),
@@ -182,4 +245,57 @@ enum ReminderScheduler {
 /// Whether iOS lets reminders through.
 enum ReminderPermission: Equatable {
     case unknown, allowed, denied
+}
+
+/**
+ * Where the phone is, for reminders that follow the sun: read to the kilometre, only while the
+ * app is in front (when-in-use permission, never in the background), and kept on the phone. Each
+ * place read is saved and the reminders rescheduled from it; `revision` tells the page.
+ */
+final class PhoneLocation: NSObject, ObservableObject, CLLocationManagerDelegate {
+    static let shared = PhoneLocation()
+
+    private let manager = CLLocationManager()
+    @Published private(set) var authorization: CLAuthorizationStatus
+    /// Moves on with every place saved, so the page reads its settings again.
+    @Published private(set) var revision = 0
+
+    override private init() {
+        authorization = manager.authorizationStatus
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyKilometer
+    }
+
+    var denied: Bool { authorization == .denied || authorization == .restricted }
+    private var allowed: Bool { authorization == .authorizedWhenInUse || authorization == .authorizedAlways }
+
+    /// Reads the place again when the hours follow the sun, asking first if the reader has not been asked.
+    func refresh() {
+        guard ReminderStore.load().followSun else { return }
+        switch authorization {
+        case .notDetermined: manager.requestWhenInUseAuthorization()
+        case .authorizedWhenInUse, .authorizedAlways: manager.requestLocation()
+        default: break
+        }
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        authorization = manager.authorizationStatus
+        if allowed && ReminderStore.load().followSun { manager.requestLocation() }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let l = locations.last else { return }
+        var s = ReminderStore.load()
+        guard s.followSun else { return }
+        s.place = StoredPlace(latitude: l.coordinate.latitude, longitude: l.coordinate.longitude, readAt: Date())
+        ReminderStore.save(s)
+        ReminderScheduler.sync()
+        revision += 1
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // No place this time: the one kept, or the chosen times, stand until the next visit.
+    }
 }

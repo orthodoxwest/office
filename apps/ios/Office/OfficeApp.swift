@@ -129,9 +129,11 @@ struct RootView: View {
         .onChange(of: phase) { _, now in
             guard now == .active else { return }
             model.refreshToday()
-            // Every visit keeps the reminders running ahead.
+            // Every visit keeps the reminders running ahead; following the sun, the place is read
+            // again and the reminders rescheduled from it once it comes.
             ReminderScheduler.sync()
             ReminderScheduler.scheduleRefresh()
+            PhoneLocation.shared.refresh()
         }
     }
 }
