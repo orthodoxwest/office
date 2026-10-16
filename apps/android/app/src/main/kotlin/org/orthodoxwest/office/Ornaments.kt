@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -276,6 +277,19 @@ fun DoubleRule(modifier: Modifier = Modifier, gap: Dp = 0.dp, lozenge: Color? = 
             lozenge(c, 7.64.dp.toPx(), p.bg, null)
             lozenge(c, 4.5.dp.toPx(), lozenge, p.lining)
         }
+    }
+}
+
+/**
+ * An inscription's words between two gilt lozenges 7dp across, as home's "Pray the hours" band
+ * and the reminder page's group names set them.
+ */
+@Composable
+fun Lozenged(text: String, style: TextStyle, ink: Color, modifier: Modifier = Modifier) {
+    Row(modifier, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, ink, null) }
+        Text(text, Modifier.padding(horizontal = 12.dp), style = style)
+        Canvas(Modifier.size(7.dp)) { lozenge(center, size.minDimension / 2f, ink, null) }
     }
 }
 
