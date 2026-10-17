@@ -338,6 +338,9 @@ private fun Frontispiece(
     // would be tan there, and takes the gold line by day.
     val liningDay = if (!p.dark && view.color == "white") p.goldLine else day
     val desk = tier.desk
+    // The day's red work. By night the phone panel's moonlight lifts the ground under it, so the
+    // rubric red is lifted with it to keep its contrast (the web's Apse phone panel).
+    val rubric = if (p.dark && !desk) Color(0xFFE08585) else p.rubric
     val side = tier.side
     Layout(
         contents = listOf<@Composable () -> Unit>(
@@ -360,7 +363,7 @@ private fun Frontispiece(
                     if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
-                            view.penitential.forEach { Text(it, style = Type.small.copy(color = p.rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
+                            view.penitential.forEach { Text(it, style = Type.small.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
                         }
                     }
                     if (view.commemorations.isNotEmpty()) {
@@ -385,8 +388,8 @@ private fun Frontispiece(
                 if (style != null && view.versicle.isNotEmpty()) {
                     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
-                            VersicleLine("℣.", view.versicle, style)
-                            VersicleLine("℟.", view.response, style)
+                            VersicleLine("℣.", view.versicle, style, rubric)
+                            VersicleLine("℟.", view.response, style, rubric)
                         }
                     }
                 }
@@ -534,13 +537,13 @@ private fun FeastName(name: String, alias: String, size: Float, modifier: Modifi
     }
 }
 
-/** A line of the day's versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the text's ink a little withdrawn. */
+/** A line of the day's versicle: its ℣ or ℟ upright in the rubrics' red (`rubric`), the words in italic, the text's ink a little withdrawn. */
 @Composable
-private fun VersicleLine(sigil: String, words: String, size: Float) {
+private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color) {
     val p = LocalPalette.current
     Text(
         buildAnnotatedString {
-            withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = p.rubric)) { append(sigil) }
+            withStyle(SpanStyle(fontStyle = FontStyle.Normal, color = rubric)) { append(sigil) }
             append(" ")
             append(words)
         },

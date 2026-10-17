@@ -6095,16 +6095,9 @@ body.season-eastertide {
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
     --lining-day: var(--day-color, var(--lining));
-    /* The shade under the head without the day's highlight, then a soft
-       erase: only on phones, since a solid 0.5rem ring of --bg eats half a
-       ~16px gutter and reads as a matte disc against the graded night
-       wash. The niche keeps its own halo. Unlike masking the page field,
-       this follows the card without changing the vault's fixed tile
-       origin. */
-    --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
-    --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
-    /* The night panel's plaster reads as cloud at full strength: veiled to
-       a soft mottle. */
+    /* The night niche's plaster reads as cloud at full strength: veiled to
+       a soft mottle. The phone panel restates its halo, shade and veil
+       (see "The Apse's phone panel"). */
     --panel-plaster-veil: 60%;
   }
 
@@ -6140,8 +6133,6 @@ body.season-eastertide {
   --frontispiece-rule: rgba(208, 176, 106, 0.24);
   --frontispiece-band: rgba(208, 176, 106, 0.045);
   --lining-day: var(--day-color, var(--lining));
-  --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0 0.6rem var(--bg));
-  --panel-shade: drop-shadow(0 0.3rem 0.4rem var(--niche-recess));
   --panel-plaster-veil: 60%;
 }
 
@@ -6184,7 +6175,8 @@ body.season-eastertide {
    is the wall outside the arch, drawn for its shade, brought in and painted;
    down the sides and foot, where the head casts no shade, it is an inset
    shadow on the panel, in the colour the stone's light has faded to by the
-   springing. */
+   springing. The moonlight lifts the ground under the day's red work, so
+   the rubric red is lifted with it to keep its contrast. */
 @media (max-width: 700px) and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
     --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
@@ -6193,6 +6185,7 @@ body.season-eastertide {
     --panel-plaster-veil: 50%;
     --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
     --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
+    --rubric: #e08585;
   }
 
   :root:not([data-theme="light"]) .page-home .home-arch-fill {
@@ -6214,6 +6207,7 @@ body.season-eastertide {
     --panel-plaster-veil: 50%;
     --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
     --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
+    --rubric: #e08585;
   }
 
   :root[data-theme="dark"] .page-home .home-arch-fill {
@@ -7025,7 +7019,8 @@ body.season-eastertide {
      the marks where they read as weather rather than plaster (the Apse
      restates it); the desktop niche lays the same plaster under its glow.
      Named layers blend onto the ground one by one: the veil normally, the
-     plaster as soft light, over the flat ground.
+     plaster as soft light, over the Apse's moonlight (--panel-glow, none
+     by day) and the flat ground.
      The plaster keeps one scale whatever the card's height, so opening
      Change date uncovers more wall rather than stretching it: the field is
      as tall as the card a screen leaves before anything opens (or as wide

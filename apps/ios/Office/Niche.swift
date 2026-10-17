@@ -75,9 +75,10 @@ private struct Card {
     /// The head's springing, where its curves meet the sides.
     var spring: CGFloat { origin.y + arch.rise * size.width }
 
-    /// The wall outside the head offset by `d` and dropped `dy`, above the springing only.
+    /// The wall outside the head offset by `d` (inward, so negative) and dropped `dy`, inside the
+    /// head's own sides and above its springing (the web's `.home-arch-shade::before`).
     func head(_ d: CGFloat, dy: CGFloat) -> Path {
-        outside(d, dy: dy).intersection(Path(CGRect(x: 0, y: 0, width: full.width, height: spring + dy)), eoFill: true)
+        outside(d, dy: dy).intersection(Path(CGRect(x: origin.x - d, y: 0, width: size.width + 2 * d, height: spring + dy)), eoFill: true)
     }
 }
 
@@ -231,11 +232,11 @@ struct Panel: View {
                     let moon = Gradient(colors: [Color(rgb: 150, 178, 220, 0.1), Color(rgb: 150, 178, 220, 0)])
                     glow.fill(Path(ellipseIn: CGRect(x: -w, y: -w, width: 2 * w, height: 2 * w)), with: .radialGradient(moon, center: .zero, startRadius: 0, endRadius: w))
                     // drop-shadow(0 1px 0 moonlit 14%) drop-shadow(0 0.25rem 1rem black 30%):
-                    // light under the head's edge, and its shade soft and wide. The course casts
-                    // them from round the head only: the web paints it down the sides and foot
-                    // on the panel, under no shade.
-                    inside.fill(card.head(inset, dy: 1), with: .color(Color(rgb: 200, 214, 234, 0.14)))
+                    // the head's shade soft and wide, and over it the light under the head's edge.
+                    // The course casts them from round the head only: the web paints it down the
+                    // sides and foot on the panel, under no shade.
                     blurred(inside, card.head(inset, dy: 0.25 * rem), .black.opacity(0.3), rem)
+                    inside.fill(card.head(inset, dy: 1), with: .color(Color(rgb: 200, 214, 234, 0.14)))
                 } else {
                     // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
                     blurred(inside, card.outside(-1, dy: 0.3 * rem), NicheTokens.of(p).recess, 0.4 * rem, eoFill: true)

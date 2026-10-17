@@ -214,9 +214,10 @@ fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: Ima
         drawImage(plaster, dstOffset = IntOffset((size.width.roundToInt() - fitted.width) / 2, (size.height.roundToInt() - fitted.height) / 2), dstSize = fitted)
         val wall = outside(face)
         if (p.dark) {
-            // The course casts its shade from round the head only: the web paints it down the
-            // sides and foot on the panel, under no shade.
-            val head = Path.combine(PathOperation.Intersect, wall, Path().apply { addRect(Rect(-size.width, -size.height, 2 * size.width, a.rise * size.width)) })
+            // The course casts its shade from round the head only, inside the head's own sides
+            // (the web's `.home-arch-shade::before`): the web paints it down the sides and foot on
+            // the panel, under no shade.
+            val head = Path.combine(PathOperation.Intersect, wall, Path().apply { addRect(Rect(5 * px, -size.height, size.width - 5 * px, a.rise * size.width)) })
             // --panel-glow: moonlight under the cross, radii the panel's width and 1.06 of it,
             // centred 0.39 of it below the courses' top (2rem above the point). The web lays it
             // under the plaster and veils both by half; laid over the baked plaster at half its
@@ -226,10 +227,10 @@ fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: Ima
             scale(1f, 1.06f, pivot = center) {
                 drawCircle(Brush.radialGradient(0f to Color(150, 178, 220).copy(alpha = 0.1f), 1f to Color.Transparent, center = center, radius = w), radius = w, center = center)
             }
-            // drop-shadow(0 1px 0 moonlit 14%) drop-shadow(0 0.25rem 1rem black 30%): light
-            // under the head's edge, and its shade soft and wide.
-            translate(0f, px) { drawPath(head, Color(200, 214, 234).copy(alpha = 0.14f)) }
+            // drop-shadow(0 1px 0 moonlit 14%) drop-shadow(0 0.25rem 1rem black 30%): the head's
+            // shade soft and wide, and over it the light under the head's edge.
             translate(0f, 0.25f * rem) { blurred(head, Color.Black.copy(alpha = 0.3f), rem) }
+            translate(0f, px) { drawPath(head, Color(200, 214, 234).copy(alpha = 0.14f)) }
         } else {
             // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
             translate(0f, 0.3f * rem) { blurred(wall, nicheTokens(p).recess, 0.4f * rem) }

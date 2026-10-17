@@ -110,9 +110,11 @@ or impose a redesign on an unrelated change.
   head's shade is soft and wide (a tight black one read as a dark band
   between the stone and the lining), and the card casts a shadow on the
   sky under a clearing of the sky's own colour, which keeps the stars off
-  its edge. The native apps draw the same. The date's weekday and the rest of it are each kept
-  whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
-  phone's flex touch target keeps their space. The day's words stand
+  its edge; the day's red work is lifted to keep its contrast on the
+  moonlight. The native apps draw the same. The date's weekday and the
+  rest of it are each kept whole (`.home-date-weekday`,
+  `.home-date-rest`), inside one span so the phone's flex touch target
+  keeps their space. The day's words stand
   `--day-clear` in from the card's edge (the hairline, then 0.75rem of
   air; the native apps' `dayClear`), so a long name such as the ordo's
   "Commemoration of All the Faithful Departed (All Souls' Day)" breaks
