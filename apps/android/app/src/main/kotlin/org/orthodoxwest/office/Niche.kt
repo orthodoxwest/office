@@ -172,23 +172,40 @@ fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color) {
  * A phone's frontispiece: a painted panel under the pointed head `a`, in the niche's family
  * (`.home-hero`), its courses outermost first: a soft halo of the wall's ground that keeps the
  * field off it, the day's colour as a ring at its edge (`ring`), the frame, then the panel with
- * the shade its head casts and, by day, the light caught under the head's edge.
+ * the shade its head casts and, by day, the light caught under the head's edge. By night (the
+ * web's Apse phone panel) the frame is a course of slate lit from above, the panel stands a step
+ * above the sky with moonlight under the cross, its shade is soft and wide, and the card casts a
+ * shadow on the sky instead of the halo.
  */
 fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: ImageBitmap) {
     val rem = 16.dp.toPx()
     val px = 1.dp.toPx()
     fun shape(d: Float) = archPath(a, size.width, d, size.height + d)
     val outer = shape(1.5.dp.toPx())
-    // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg), by night 0.35rem and 0.6rem: the
-    // second blurs the first again, so it reaches as far as the two in quadrature.
-    val (near, far) = if (p.dark) 0.35f to 0.6f else 0.5f to 0.75f
-    blurred(outer, p.bg, sqrt(near * near + far * far) * rem)
-    blurred(outer, p.bg, near * rem)
+    if (p.dark) {
+        // drop-shadow(0 0 0.35rem bg) drop-shadow(0 0.5rem 1rem black 70%): a clearing of the
+        // sky's own colour that keeps the stars off the card's edge, over the shadow the card
+        // casts on the sky. The second shadow is cast by the card and its clearing, so it reaches
+        // as far as the two in quadrature.
+        translate(0f, 0.5f * rem) { blurred(outer, Color.Black.copy(alpha = 0.7f), sqrt(0.35f * 0.35f + 1f) * rem) }
+        blurred(outer, p.bg, 0.35f * rem)
+    } else {
+        // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg): the second blurs the first
+        // again, so it reaches as far as the two in quadrature.
+        blurred(outer, p.bg, sqrt(0.5f * 0.5f + 0.75f * 0.75f) * rem)
+        blurred(outer, p.bg, 0.5f * rem)
+    }
     drawPath(outer, ring)
     val edge = shape(0f)
     drawPath(edge, p.surface)
-    drawPath(edge, frame)
-    val face = shape(-px)
+    if (p.dark) {
+        // --arch-stone: the slate course, lit from above, from the courses' top (2rem above the
+        // point) to the springing, and level below it.
+        drawPath(edge, Brush.verticalGradient(listOf(Color(0xFF3A485E), Color(0xFF2A3648)), startY = -2f * rem, endY = a.rise * size.width))
+    } else {
+        drawPath(edge, frame)
+    }
+    val face = shape(if (p.dark) -5 * px else -px)
     drawPath(face, p.surface)
     clipPath(face) {
         // The plaster under the day's words, cover-fitted to the panel as the web's `.home-arch-fill`.
@@ -196,10 +213,29 @@ fun DrawScope.panel(a: Arch, p: Palette, ring: Color, frame: Color, plaster: Ima
         val fitted = IntSize((plaster.width * scale).roundToInt(), (plaster.height * scale).roundToInt())
         drawImage(plaster, dstOffset = IntOffset((size.width.roundToInt() - fitted.width) / 2, (size.height.roundToInt() - fitted.height) / 2), dstSize = fitted)
         val wall = outside(face)
-        // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
-        translate(0f, 0.3f * rem) { blurred(wall, nicheTokens(p).recess, 0.4f * rem) }
-        // drop-shadow(0 1px 0 white 45%), by day: the light caught under the head's edge.
-        if (!p.dark) translate(0f, px) { drawPath(wall, Color.White.copy(alpha = 0.45f)) }
+        if (p.dark) {
+            // The course casts its shade from round the head only: the web paints it down the
+            // sides and foot on the panel, under no shade.
+            val head = Path.combine(PathOperation.Intersect, wall, Path().apply { addRect(Rect(-size.width, -size.height, 2 * size.width, a.rise * size.width)) })
+            // --panel-glow: moonlight under the cross, radii the panel's width and 1.06 of it,
+            // centred 0.39 of it below the courses' top (2rem above the point). The web lays it
+            // under the plaster and veils both by half; laid over the baked plaster at half its
+            // strength it lifts the panel as much and keeps the trowel marks.
+            val w = size.width
+            val center = Offset(w / 2f, 0.39f * w - 2f * rem)
+            scale(1f, 1.06f, pivot = center) {
+                drawCircle(Brush.radialGradient(0f to Color(150, 178, 220).copy(alpha = 0.1f), 1f to Color.Transparent, center = center, radius = w), radius = w, center = center)
+            }
+            // drop-shadow(0 1px 0 moonlit 14%) drop-shadow(0 0.25rem 1rem black 30%): light
+            // under the head's edge, and its shade soft and wide.
+            translate(0f, px) { drawPath(head, Color(200, 214, 234).copy(alpha = 0.14f)) }
+            translate(0f, 0.25f * rem) { blurred(head, Color.Black.copy(alpha = 0.3f), rem) }
+        } else {
+            // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
+            translate(0f, 0.3f * rem) { blurred(wall, nicheTokens(p).recess, 0.4f * rem) }
+            // drop-shadow(0 1px 0 white 45%): the light caught under the head's edge.
+            translate(0f, px) { drawPath(wall, Color.White.copy(alpha = 0.45f)) }
+        }
     }
 }
 

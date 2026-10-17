@@ -13,9 +13,10 @@ texture or any --plaster-* token:
     python3 apps/android/tools/bake-plaster.py
 
 The phone home's panel (style.css, ".home-arch-fill" under 700px) lays the same grey texture as
-soft light over the panel's ground (--arch-ground, the surface), then a veil of that ground
-(--panel-plaster-veil: none by day, 60% on the Apse, whose night plaster read as cloud at full
-strength). That is baked here too, as panel_<theme>.jpg, for the apps to clip to the arch.
+soft light over the panel's ground (--arch-ground: the surface by day, a step above the sky by
+night), then a veil of that ground (--panel-plaster-veil: none by day, 50% on the Apse, whose night
+plaster read as cloud at full strength). That is baked here too, as panel_<theme>.jpg, for the apps
+to clip to the arch; the Apse's moonlight (--panel-glow) the apps lay over it.
 
 Requires Pillow and numpy (tools/requirements.txt).
 """
@@ -34,10 +35,10 @@ THEMES = {
     "apse": dict(bg="#121c28", base="#182332", tint="#7d949c", knee=(255, 255, 255), dodge=(0, 0, 0), strength=0.52),
 }
 
-# The panel's ground (--surface) and veil (--panel-plaster-veil) of each theme.
+# The phone panel's ground (--arch-ground) and veil (--panel-plaster-veil) of each theme.
 PANELS = {
     "nave": dict(ground="#f6eddf", veil=0.0),
-    "apse": dict(ground="#172232", veil=0.60),
+    "apse": dict(ground="#192436", veil=0.50),
 }
 
 

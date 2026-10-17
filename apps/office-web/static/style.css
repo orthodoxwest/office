@@ -4608,11 +4608,12 @@ body.season-eastertide {
   display: none;
 }
 
-/* The frame, the card's edge drawn in its rule over the panel. */
+/* The frame, the card's edge drawn in its rule over the panel (the Apse's
+   phone panel lays a stone course here instead, --arch-stone). */
 .page-home .home-hero::after {
   --arch-d: 0px;
   z-index: -3;
-  background: linear-gradient(var(--frontispiece-frame), var(--frontispiece-frame)), var(--surface);
+  background: var(--arch-stone, linear-gradient(var(--frontispiece-frame), var(--frontispiece-frame)), var(--surface));
 }
 
 /* The panel, with the shade its head casts: the wall outside the arch,
@@ -6168,6 +6169,64 @@ body.season-eastertide {
   background: rgba(208, 176, 106, 0.14);
 }
 
+/* The Apse's phone panel. By day the plaster frame is paler than the panel
+   and the head's shade falls on a light ground, so the panel stands out from
+   the wall; by night the gold ring alone read as a line drawn on the sky,
+   and a black shade vanished into a panel the sky's own blue. So the frame
+   becomes a course of slate lit from above, the panel stands a step above
+   the sky with moonlight under the cross (under the plaster, so the trowel
+   marks run through it, and cool, since gold on the night blue goes grey),
+   the head's shade is soft and wide (a tight one read as a dark band between
+   the stone and the lining), and the card casts a shadow on the sky, over a
+   clearing of the sky's own colour that keeps the stars off its edge. The
+   stone is the frame and a course 4px wide inside it, so the panel's box and
+   every other course keep the geometry they have by day: round the head it
+   is the wall outside the arch, drawn for its shade, brought in and painted;
+   down the sides and foot, where the head casts no shade, it is an inset
+   shadow on the panel, in the colour the stone's light has faded to by the
+   springing. */
+@media (max-width: 700px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-hero {
+    --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
+    --arch-ground: #192436;
+    --panel-glow: radial-gradient(ellipse 100% calc(1.06 * var(--arch-w)) at 50% calc(0.39 * var(--arch-w)), rgba(150, 178, 220, 0.2), transparent);
+    --panel-plaster-veil: 50%;
+    --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
+    --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch-fill {
+    box-shadow: inset 0 0 0 4px #2a3648;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch-shade::before {
+    --arch-d: calc(-1 * var(--arch-frame) - 4px);
+    inset: 0 4px 4px;
+    background: var(--arch-stone);
+  }
+}
+
+@media (max-width: 700px) {
+  :root[data-theme="dark"] .page-home .home-hero {
+    --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
+    --arch-ground: #192436;
+    --panel-glow: radial-gradient(ellipse 100% calc(1.06 * var(--arch-w)) at 50% calc(0.39 * var(--arch-w)), rgba(150, 178, 220, 0.2), transparent);
+    --panel-plaster-veil: 50%;
+    --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
+    --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch-fill {
+    box-shadow: inset 0 0 0 4px #2a3648;
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch-shade::before {
+    --arch-d: calc(-1 * var(--arch-frame) - 4px);
+    inset: 0 4px 4px;
+    background: var(--arch-stone);
+  }
+}
+
 @media (hover: hover) and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .pray-now:hover {
     border-color: var(--accent);
@@ -6984,8 +7043,9 @@ body.season-eastertide {
         color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent)
       ),
       url("plaster-panel.jpg") center top / max(100%, calc((100svh - 10.9rem) * 800 / 1063)) auto repeat-y,
+      var(--panel-glow, linear-gradient(transparent, transparent)),
       var(--arch-ground);
-    background-blend-mode: normal, soft-light, normal;
+    background-blend-mode: normal, soft-light, normal, normal;
   }
 
   .page-home .home-summary {
