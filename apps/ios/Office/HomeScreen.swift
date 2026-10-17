@@ -373,6 +373,10 @@ private struct Frontispiece: View {
     @State private var unfolded = false
     @Environment(\.reveal) private var reveal
 
+    /// The day's red work. By night the phone panel's moonlight lifts the ground under it, so the
+    /// rubric red is lifted with it to keep its contrast (the web's Apse phone panel).
+    private var rubric: Color { p.dark && !tier.desk ? Color(hex: 0xE08585) : p.rubric }
+
     var body: some View {
         let day = dayColor(view.color, p)
         // The lining's inner line is the day's colour, beside the cross on the plaster; a white
@@ -411,7 +415,7 @@ private struct Frontispiece: View {
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(p.rubric)
+                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(rubric)
                         }
                     }
                     .padding(.top, m.px(12))
@@ -537,7 +541,7 @@ private struct Frontispiece: View {
     /// A line of the versicle: its ℣ or ℟ upright in the rubrics' red, the words in italic, the
     /// text's ink a little withdrawn.
     private func versicleLine(_ sigil: String, _ words: String, _ style: TextStyle) -> some View {
-        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(p.rubric) + Text(" " + words))
+        (Text(sigil).font(Font(garamond(style.size * m.type))).foregroundColor(rubric) + Text(" " + words))
             .type(style)
             .foregroundStyle(p.text.opacity(0.84))
             .multilineTextAlignment(.center)

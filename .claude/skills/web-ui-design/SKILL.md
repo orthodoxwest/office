@@ -100,9 +100,21 @@ or impose a redesign on an unrelated change.
   (`--head-pad`) and centred in what is left. The day block is at least
   the head's rise tall, so the band never crosses the arch. Halo and
   shade are filter tokens (`--panel-halo`, `--panel-shade`) that the Apse
-  rules restate. The date's weekday and the rest of it are each kept
-  whole (`.home-date-weekday`, `.home-date-rest`), inside one span so the
-  phone's flex touch target keeps their space. The day's words stand
+  rules restate. On a phone by night the gold ring alone read as a line
+  drawn on the sky, so the Apse sets a slate course 5px wide inside the
+  ring (`--arch-stone`, lit from above as far as the springing): round the
+  head it is the shade layer's wall brought 4px in and painted, down the
+  sides and foot an inset shadow on the panel, so no box moves between
+  themes. The panel stands a step above the sky (`--arch-ground`) with
+  moonlight under the cross beneath the plaster (`--panel-glow`), the
+  head's shade is soft and wide (a tight black one read as a dark band
+  between the stone and the lining), and the card casts a shadow on the
+  sky under a clearing of the sky's own colour, which keeps the stars off
+  its edge; the day's red work is lifted to keep its contrast on the
+  moonlight. The native apps draw the same. The date's weekday and the
+  rest of it are each kept whole (`.home-date-weekday`,
+  `.home-date-rest`), inside one span so the phone's flex touch target
+  keeps their space. The day's words stand
   `--day-clear` in from the card's edge (the hairline, then 0.75rem of
   air; the native apps' `dayClear`), so a long name such as the ordo's
   "Commemoration of All the Faithful Departed (All Souls' Day)" breaks
