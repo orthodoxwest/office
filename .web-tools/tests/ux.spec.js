@@ -3387,18 +3387,24 @@ test("long opening verses return to the numbered text edge below the initial", a
 // The print diurnal's rule, as the psalms keep it above: below a dropped
 // initial, a prose opening turns over at the spoken-text edge its ℟ shares,
 // not back at the margin under the letter. 1 Cor. 6:20 is the reported case.
-test("prose openings turn over at the response's text edge below the initial", async ({ page }) => {
-  const openings = [
-    { path: "/none/2026-10-13", block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
-    { path: "/lauds/2026-10-13", block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
-    { path: "/lauds/2026-10-13", block: ".collect .liturgical-block", opening: ".plain-line:first-child" },
-    { path: "/lauds/2026-10-13", block: ".corporate-lord-prayer", opening: ".corporate-lord-prayer-officiant" },
-  ];
-  for (const width of [320, 390, 1280]) {
+// One test per width: the twenty-four layouts measured in one test outran its
+// timeout on a loaded CI runner. Each page is opened once per width.
+const proseOpenings = {
+  "/none/2026-10-13": [
+    { block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+  ],
+  "/lauds/2026-10-13": [
+    { block: ".chapter .liturgical-block", opening: ".plain-line:first-child" },
+    { block: ".collect .liturgical-block", opening: ".plain-line:first-child" },
+    { block: ".corporate-lord-prayer", opening: ".corporate-lord-prayer-officiant" },
+  ],
+};
+for (const width of [320, 390, 1280]) {
+  test(`prose openings turn over at the response's text edge below the initial at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
-    for (const { path, block, opening } of openings) {
+    for (const [path, openings] of Object.entries(proseOpenings)) {
       await openDatedPage(page, path);
-      for (const fallback of [false, true]) {
+      for (const { block, opening } of openings) for (const fallback of [false, true]) {
         const tag = fallback ? await fallbackInitials(page) : null;
         await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
         const target = page.locator(block).first();
@@ -3414,8 +3420,8 @@ test("prose openings turn over at the response's text edge below the initial", a
         if (tag) await tag.evaluate((el) => el.remove());
       }
     }
-  }
-});
+  });
+}
 
 test("wide and narrow initials clear text in native and fallback layouts", async ({ page }) => {
   for (const width of [320, 390]) {
