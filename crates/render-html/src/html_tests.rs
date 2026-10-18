@@ -264,7 +264,34 @@ fn rubric_keeps_quoted_prayer_words_black() {
     let mut e = elem(ElementType::Rubric, "Our Father is said secretly.");
     e.rubric_spans =
         vec![RubricSpan { text: "Our Father".into(), prayed: true }, RubricSpan { text: " is said secretly.".into(), prayed: false }];
-    has(&render(&e), r#"<span class="rubric-prayed">Our Father</span> is said secretly."#);
+    has(&render(&e), r#"<span class="rubric-prayed">Our Father</span> is said "#);
+}
+
+/// The note rides in attributes: the rubric's words on the page are its own, word for word with
+/// the native blocks.
+#[test]
+fn rubric_marks_its_glossed_term_with_the_note() {
+    let mut e = elem(ElementType::Rubric, "Our Father is said secretly.");
+    e.rubric_spans =
+        vec![RubricSpan { text: "Our Father".into(), prayed: true }, RubricSpan { text: " is said secretly.".into(), prayed: false }];
+    let html = render(&e);
+    has(&html, r#"is said <span class="gloss-term" data-gloss-title="Secretly" data-gloss="Only the first words are said aloud."#);
+    has(&html, r#"is said silently.">secretly</span>.</p>"#);
+
+    let plain = render(&elem(ElementType::Rubric, "Then secretly, Our Father, Hail Mary, and I believe."));
+    has(&plain, r#"<p class="rubric">Then <span class="gloss-term" data-gloss-title="Secretly""#);
+
+    let mut whole = elem(ElementType::Rubric, "Our Father entirely in secret. Then confession is made:");
+    whole.rubric_spans = vec![
+        RubricSpan { text: "Our Father".into(), prayed: true },
+        RubricSpan { text: " entirely in secret. Then confession is made:".into(), prayed: false },
+    ];
+    has(
+        &render(&whole),
+        r#"data-gloss-title="Entirely in secret" data-gloss="The whole prayer, shown in grey, is said silently.">entirely in secret</span>"#,
+    );
+
+    lacks(&render(&elem(ElementType::Rubric, "All kneel.")), "gloss");
 }
 
 #[test]

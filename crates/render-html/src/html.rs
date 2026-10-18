@@ -8,6 +8,7 @@ pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
 
 use crate::escape::html_escape_string;
+use presentation::gloss::{GlossRun, gloss_runs};
 
 // Sigil column classes: a single mark (℣. / ℟.) takes the narrow gutter;
 // spelled-out words take their own class so CSS can move them above the text
@@ -291,7 +292,7 @@ fn render_flowing_block(text: &str) -> String {
 
 fn render_rubric(elem: &OfficeElement) -> String {
     if elem.rubric_spans.is_empty() {
-        return format!("<p class=\"rubric\">{}</p>", esc_text(&elem.text));
+        return format!("<p class=\"rubric\">{}</p>", rubric_text(&elem.text));
     }
     render_rubric_spans(&elem.rubric_spans, "rubric")
 }
@@ -302,10 +303,29 @@ fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
         if span.prayed {
             sb.push_str(&format!("<span class=\"rubric-prayed\">{}</span>", esc_cross(&span.text)));
         } else {
-            sb.push_str(&esc_text(&span.text));
+            sb.push_str(&rubric_text(&span.text));
         }
     }
     sb.push_str("</p>");
+    sb
+}
+
+/// A rubric's instruction text, its glossed terms marked with their notes. The note rides in
+/// attributes, so the page's words are the rubric's own; app.js makes each term a button that
+/// opens it.
+fn rubric_text(text: &str) -> String {
+    let mut sb = String::new();
+    for run in gloss_runs(text) {
+        match run {
+            GlossRun::Text(t) => sb.push_str(&esc_text(t)),
+            GlossRun::Term(t, gloss) => sb.push_str(&format!(
+                "<span class=\"gloss-term\" data-gloss-title=\"{}\" data-gloss=\"{}\">{}</span>",
+                esc_text(gloss.title),
+                esc_text(gloss.note),
+                esc_text(t)
+            )),
+        }
+    }
     sb
 }
 

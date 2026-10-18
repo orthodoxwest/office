@@ -53,6 +53,88 @@ document.documentElement.classList.add("js");
   });
 })();
 
+// A rubric term a newcomer stumbles on ("secretly") opens a short note. The
+// server marks the term and carries the note in its attributes
+// (presentation::gloss); here it becomes a button, and one note, shared by
+// every term, opens above the word so it never covers the prayer it
+// explains. A tap elsewhere or Escape closes it.
+(function () {
+  var terms = document.querySelectorAll("span.gloss-term[data-gloss]");
+  if (!terms.length) return;
+  var note = document.createElement("div");
+  note.className = "gloss-note";
+  note.id = "gloss-note";
+  note.setAttribute("role", "status");
+  note.hidden = true;
+  var title = document.createElement("span");
+  title.className = "gloss-title";
+  var body = document.createElement("p");
+  note.append(title, body);
+  document.body.append(note);
+  var open = null;
+
+  function place() {
+    if (!open) return;
+    var r = open.getBoundingClientRect();
+    var margin = 12;
+    var w = note.offsetWidth;
+    var h = note.offsetHeight;
+    var mid = r.left + r.width / 2;
+    var left = Math.max(margin, Math.min(mid - w / 2, document.documentElement.clientWidth - margin - w));
+    var below = r.top - h - 10 < margin;
+    note.classList.toggle("below", below);
+    note.style.left = left + window.scrollX + "px";
+    note.style.top = (below ? r.bottom + 10 : r.top - h - 10) + window.scrollY + "px";
+    note.style.setProperty("--gloss-arrow", Math.max(14, Math.min(mid - left, w - 14)) + "px");
+  }
+
+  function close(refocus) {
+    if (!open) return;
+    var was = open;
+    open.setAttribute("aria-expanded", "false");
+    open = null;
+    note.hidden = true;
+    if (refocus) was.focus();
+  }
+
+  function show(button) {
+    if (open) open.setAttribute("aria-expanded", "false");
+    open = button;
+    title.textContent = button.dataset.glossTitle || "";
+    body.textContent = button.dataset.gloss;
+    note.hidden = false;
+    button.setAttribute("aria-expanded", "true");
+    place();
+  }
+
+  terms.forEach(function (span) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "gloss-term";
+    button.dataset.gloss = span.dataset.gloss;
+    if (span.dataset.glossTitle) button.dataset.glossTitle = span.dataset.glossTitle;
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", "gloss-note");
+    button.textContent = span.textContent;
+    button.addEventListener("click", function () {
+      if (open === button) close(false);
+      else show(button);
+    });
+    span.replaceWith(button);
+  });
+
+  document.addEventListener("click", function (e) {
+    if (open && !open.contains(e.target) && !note.contains(e.target)) close(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && open) close(true);
+  });
+  window.addEventListener("resize", place);
+  // A text-size choice or a prayer-form switch moves the word under the note.
+  if ("ResizeObserver" in window) new ResizeObserver(place).observe(document.body);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+})();
+
 // Initials have two independent decisions: their place in the prayer's
 // hierarchy, and their optical fit. CSS holds the font-specific letter
 // profiles; this enhancement identifies the letter and opening word without

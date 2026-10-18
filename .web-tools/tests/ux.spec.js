@@ -3714,6 +3714,51 @@ test("Triduum distinguishes silent prayers and the collect conclusion", async ({
   await expect(page.locator(".collect .secret-text")).toHaveCount(0);
 });
 
+// A newcomer's word in a rubric opens its note above the word, so the note
+// never covers the prayer it explains, and closes by a second tap, a tap
+// elsewhere, or Escape.
+test("a rubric's secretly opens its note above the word", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, `/lauds/${testDate}`, theme);
+    const rubric = page.locator("p.rubric", { hasText: "are said secretly." }).first();
+    const term = rubric.getByRole("button", { name: "secretly" });
+    await expect(rubric).toHaveText("The Our Father and Hail Mary are said secretly.");
+    await expect(term).toHaveAttribute("aria-expanded", "false");
+    const note = page.locator("#gloss-note");
+    await expect(note).toBeHidden();
+
+    await term.scrollIntoViewIfNeeded();
+    await term.click();
+    await expect(term).toHaveAttribute("aria-expanded", "true");
+    await expect(note).toBeVisible();
+    await expect(note).toContainText("Only the first words are said aloud.");
+    const [t, n] = [await term.boundingBox(), await note.boundingBox()];
+    expect(n.y + n.height).toBeLessThanOrEqual(t.y);
+    expect(n.x).toBeGreaterThanOrEqual(0);
+    expect(n.x + n.width).toBeLessThanOrEqual(390);
+
+    await term.click();
+    await expect(note).toBeHidden();
+    await term.click();
+    await page.keyboard.press("Escape");
+    await expect(note).toBeHidden();
+    await expect(term).toBeFocused();
+    await term.click();
+    await page.locator("h1").first().click();
+    await expect(note).toBeHidden();
+    await expect(term).toHaveAttribute("aria-expanded", "false");
+  }
+});
+
+// Compline's Our Father before the Confession has no voiced words, so its
+// rubric takes the whole-prayer note, not the incipit's.
+test("entirely in secret takes its own note", async ({ page }) => {
+  await openDatedPage(page, `/compline/${testDate}`);
+  await page.getByRole("button", { name: "entirely in secret" }).click();
+  await expect(page.locator("#gloss-note")).toContainText("The whole prayer, shown in grey, is said silently.");
+});
+
 test("home keeps feast and octave above the recovery link, including after midnight", async ({ page }) => {
   await openDatedPage(page, "/?date=2026-12-25");
   const order = () => page.locator(".home-day-head").evaluate(el => {

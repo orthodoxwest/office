@@ -2279,6 +2279,133 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--rubric);
 }
 
+/* A rubric term a newcomer stumbles on ("secretly"): app.js makes it a
+   button that opens its note (presentation::gloss). Marked with a hairline
+   in the rubric's own red at 40%, quiet beside the prayer; a dotted rule
+   read busier than anything else on the page, and a raised ring after the
+   word read as a footnote. Without the script it is the rubric's plain word. */
+button.gloss-term {
+  appearance: none;
+  position: relative;
+  margin: 0;
+  border: 0;
+  border-radius: 2px;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-decoration: underline solid color-mix(in srgb, currentColor 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.24em;
+  text-decoration-skip-ink: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.gloss-term[aria-expanded="true"] {
+  text-decoration-color: currentColor;
+}
+
+button.gloss-term:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* A finger needs more than one word of 0.9em type. */
+@media (pointer: coarse) {
+  button.gloss-term::before {
+    content: "";
+    position: absolute;
+    inset: -0.6rem -0.25rem;
+  }
+}
+
+/* The note opens above its term, so it never covers the prayer it explains;
+   below only where the top of the window leaves no room. A card of the
+   surface ruled in functional gold, like the other controls' panels, its
+   heading set as the rubric's small caps. */
+.gloss-note {
+  position: absolute;
+  z-index: 40;
+  box-sizing: border-box;
+  width: min(19rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.9rem 0.8rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--gold-line);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 var(--surface-edge),
+    0 0.4rem 1.1rem rgba(36, 28, 23, 0.16);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.gloss-note[hidden] {
+  display: none;
+}
+
+.gloss-note::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: var(--gloss-arrow, 50%);
+  width: 10px;
+  height: 10px;
+  margin-left: -6px;
+  background: var(--surface);
+  border-right: 1px solid var(--gold-line);
+  border-bottom: 1px solid var(--gold-line);
+  transform: rotate(45deg);
+}
+
+.gloss-note.below::after {
+  top: -6px;
+  bottom: auto;
+  transform: rotate(-135deg);
+}
+
+.gloss-title {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--rubric);
+  font-size: 0.95em;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+}
+
+.gloss-note p {
+  margin: 0;
+}
+
+/* On the night sky a plaster shadow vanishes; the card needs a deeper one. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .gloss-note {
+    box-shadow:
+      inset 0 1px 0 var(--surface-edge),
+      0 0.5rem 1.4rem rgba(0, 0, 0, 0.45);
+  }
+}
+
+:root[data-theme="dark"] .gloss-note {
+  box-shadow:
+    inset 0 1px 0 var(--surface-edge),
+    0 0.5rem 1.4rem rgba(0, 0, 0, 0.45);
+}
+
+@media print {
+  button.gloss-term {
+    text-decoration: none;
+  }
+
+  .gloss-note {
+    display: none;
+  }
+}
+
+
 .elements > :is(.psalm, .canticle, .hymn, .chapter, .preces, .marian-antiphon, .liturgical-block) {
   padding: 0;
   border: none;
