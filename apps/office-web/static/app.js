@@ -55,17 +55,20 @@ document.documentElement.classList.add("js");
 
 // A rubric term a newcomer stumbles on ("secretly") opens a short note. The
 // server marks the term and carries the note in its attributes
-// (presentation::gloss); here it becomes a button, and one note, shared by
-// every term, opens above the word so it never covers the prayer it
-// explains. A tap elsewhere or Escape closes it.
+// (presentation::gloss); here the term becomes a control, and one note,
+// shared by every term, opens above the word so it never covers the prayer
+// it explains. The term stays an inline span with a button's role: a real
+// <button> lays out as inline-block, which let the rubric's closing stop
+// wrap alone onto the next line. A tap elsewhere or Escape closes it.
 (function () {
-  var terms = document.querySelectorAll("span.gloss-term[data-gloss]");
+  var terms = document.querySelectorAll(".gloss-term[data-gloss]");
   if (!terms.length) return;
+  // Kept in the page and emptied rather than hidden, so a screen reader
+  // hears each note as it is written into the live region.
   var note = document.createElement("div");
-  note.className = "gloss-note";
+  note.className = "gloss-note closed";
   note.id = "gloss-note";
   note.setAttribute("role", "status");
-  note.hidden = true;
   var title = document.createElement("span");
   title.className = "gloss-title";
   var body = document.createElement("p");
@@ -75,13 +78,17 @@ document.documentElement.classList.add("js");
 
   function place() {
     if (!open) return;
-    var r = open.getBoundingClientRect();
+    // A term wrapped over two lines points from its first line above, or
+    // from its last line below.
+    var rects = open.getClientRects();
+    if (!rects.length) return;
     var margin = 12;
     var w = note.offsetWidth;
     var h = note.offsetHeight;
+    var below = rects[0].top - h - 10 < margin;
+    var r = below ? rects[rects.length - 1] : rects[0];
     var mid = r.left + r.width / 2;
     var left = Math.max(margin, Math.min(mid - w / 2, document.documentElement.clientWidth - margin - w));
-    var below = r.top - h - 10 < margin;
     note.classList.toggle("below", below);
     note.style.left = left + window.scrollX + "px";
     note.style.top = (below ? r.bottom + 10 : r.top - h - 10) + window.scrollY + "px";
@@ -93,39 +100,58 @@ document.documentElement.classList.add("js");
     var was = open;
     open.setAttribute("aria-expanded", "false");
     open = null;
-    note.hidden = true;
+    note.classList.add("closed");
+    title.textContent = "";
+    body.textContent = "";
     if (refocus) was.focus();
   }
 
-  function show(button) {
+  function show(term) {
     if (open) open.setAttribute("aria-expanded", "false");
-    open = button;
-    title.textContent = button.dataset.glossTitle || "";
-    body.textContent = button.dataset.gloss;
-    note.hidden = false;
-    button.setAttribute("aria-expanded", "true");
-    place();
+    open = term;
+    title.textContent = "";
+    body.textContent = "";
+    term.setAttribute("aria-expanded", "true");
+    // Written a frame after it was emptied, so reopening the same term is
+    // still a change the live region announces.
+    requestAnimationFrame(function () {
+      if (open !== term) return;
+      title.textContent = term.dataset.glossTitle || "";
+      body.textContent = term.dataset.gloss;
+      note.classList.remove("closed");
+      place();
+    });
   }
 
-  terms.forEach(function (span) {
-    var button = document.createElement("button");
-    button.type = "button";
-    button.className = "gloss-term";
-    button.dataset.gloss = span.dataset.gloss;
-    if (span.dataset.glossTitle) button.dataset.glossTitle = span.dataset.glossTitle;
-    button.setAttribute("aria-expanded", "false");
-    button.setAttribute("aria-controls", "gloss-note");
-    button.textContent = span.textContent;
-    button.addEventListener("click", function () {
-      if (open === button) close(false);
-      else show(button);
+  function toggle(term) {
+    if (open === term) close(false);
+    else show(term);
+  }
+
+  terms.forEach(function (term) {
+    term.setAttribute("role", "button");
+    term.setAttribute("tabindex", "0");
+    term.setAttribute("aria-expanded", "false");
+    term.setAttribute("aria-controls", "gloss-note");
+    term.addEventListener("click", function () { toggle(term); });
+    term.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle(term);
+      }
     });
-    span.replaceWith(button);
   });
 
-  document.addEventListener("click", function (e) {
+  // iOS Safari sends no click for a tap on plain text, so a tap elsewhere is
+  // heard on pointerup (as the header's overlays hear it); click stays for
+  // the keyboard and finds the note already closed after a mouse.
+  function outside(e) {
     if (open && !open.contains(e.target) && !note.contains(e.target)) close(false);
+  }
+  document.addEventListener("pointerup", function (e) {
+    if (e.button === 0) outside(e);
   });
+  document.addEventListener("click", outside);
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && open) close(true);
   });

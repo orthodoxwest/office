@@ -311,18 +311,19 @@ fn render_rubric_spans(spans: &[RubricSpan], class: &str) -> String {
 }
 
 /// A rubric's instruction text, its glossed terms marked with their notes. The note rides in
-/// attributes, so the page's words are the rubric's own; app.js makes each term a button that
-/// opens it.
+/// attributes, so the page's words are the rubric's own; app.js makes each term a control that
+/// opens it. Typeset whole before it is split, so a quote beside a term takes the right curl.
 fn rubric_text(text: &str) -> String {
+    let typeset = typeset(text);
     let mut sb = String::new();
-    for run in gloss_runs(text) {
+    for run in gloss_runs(&typeset) {
         match run {
-            GlossRun::Text(t) => sb.push_str(&esc_text(t)),
+            GlossRun::Text(t) => sb.push_str(&html_escape_string(t)),
             GlossRun::Term(t, gloss) => sb.push_str(&format!(
                 "<span class=\"gloss-term\" data-gloss-title=\"{}\" data-gloss=\"{}\">{}</span>",
                 esc_text(gloss.title),
                 esc_text(gloss.note),
-                esc_text(t)
+                html_escape_string(t)
             )),
         }
     }

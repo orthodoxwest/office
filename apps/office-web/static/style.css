@@ -2280,21 +2280,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 /* A rubric term a newcomer stumbles on ("secretly"): app.js makes it a
-   button that opens its note (presentation::gloss). Marked with a hairline
+   control that opens its note (presentation::gloss). Marked with a hairline
    in the rubric's own red at 40%, quiet beside the prayer; a dotted rule
    read busier than anything else on the page, and a raised ring after the
    word read as a footnote. Without the script it is the rubric's plain word. */
-button.gloss-term {
-  appearance: none;
+.gloss-term[role="button"] {
   position: relative;
-  margin: 0;
-  border: 0;
   border-radius: 2px;
-  padding: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
   cursor: pointer;
   text-decoration: underline solid color-mix(in srgb, currentColor 40%, transparent);
   text-decoration-thickness: 1px;
@@ -2303,18 +2295,18 @@ button.gloss-term {
   -webkit-tap-highlight-color: transparent;
 }
 
-button.gloss-term[aria-expanded="true"] {
+.gloss-term[aria-expanded="true"] {
   text-decoration-color: currentColor;
 }
 
-button.gloss-term:focus-visible {
+.gloss-term:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
 /* A finger needs more than one word of 0.9em type. */
 @media (pointer: coarse) {
-  button.gloss-term::before {
+  .gloss-term[role="button"]::before {
     content: "";
     position: absolute;
     inset: -0.6rem -0.25rem;
@@ -2343,8 +2335,15 @@ button.gloss-term:focus-visible {
   text-align: left;
 }
 
-.gloss-note[hidden] {
-  display: none;
+/* Closed, the note stays in the page as an empty live region, out of sight. */
+.gloss-note.closed {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .gloss-note::after {
@@ -2380,6 +2379,14 @@ button.gloss-term:focus-visible {
   margin: 0;
 }
 
+/* Forced colours paint every word in one ink, so the silent words keep the
+   system's grey that the note names. */
+@media (forced-colors: active) {
+  .secret-text {
+    color: GrayText;
+  }
+}
+
 /* On the night sky a plaster shadow vanishes; the card needs a deeper one. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .gloss-note {
@@ -2396,7 +2403,7 @@ button.gloss-term:focus-visible {
 }
 
 @media print {
-  button.gloss-term {
+  .gloss-term[role="button"] {
     text-decoration: none;
   }
 

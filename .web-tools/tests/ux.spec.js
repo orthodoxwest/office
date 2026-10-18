@@ -3725,13 +3725,14 @@ test("a rubric's secretly opens its note above the word", async ({ page }) => {
     const term = rubric.getByRole("button", { name: "secretly" });
     await expect(rubric).toHaveText("The Our Father and Hail Mary are said secretly.");
     await expect(term).toHaveAttribute("aria-expanded", "false");
+    // Closed, the note is an empty live region clipped out of sight.
     const note = page.locator("#gloss-note");
-    await expect(note).toBeHidden();
+    await expect(note).toHaveClass(/closed/);
 
     await term.scrollIntoViewIfNeeded();
     await term.click();
     await expect(term).toHaveAttribute("aria-expanded", "true");
-    await expect(note).toBeVisible();
+    await expect(note).not.toHaveClass(/closed/);
     await expect(note).toContainText("Only the first words are said aloud.");
     const [t, n] = [await term.boundingBox(), await note.boundingBox()];
     expect(n.y + n.height).toBeLessThanOrEqual(t.y);
@@ -3739,16 +3740,39 @@ test("a rubric's secretly opens its note above the word", async ({ page }) => {
     expect(n.x + n.width).toBeLessThanOrEqual(390);
 
     await term.click();
-    await expect(note).toBeHidden();
+    await expect(note).toHaveClass(/closed/);
     await term.click();
     await page.keyboard.press("Escape");
-    await expect(note).toBeHidden();
+    await expect(note).toHaveClass(/closed/);
     await expect(term).toBeFocused();
+    // A tap on the prayer's plain text, which iOS answers with no click.
     await term.click();
-    await page.locator("h1").first().click();
-    await expect(note).toBeHidden();
+    await expect(note).not.toHaveClass(/closed/);
+    const prayer = await page.locator(".secret-text").first().boundingBox();
+    await page.touchscreen.tap(prayer.x + 20, prayer.y + prayer.height / 2);
+    await expect(note).toHaveClass(/closed/);
     await expect(term).toHaveAttribute("aria-expanded", "false");
   }
+});
+
+// The term stays inline: as a <button> it laid out as inline-block, and the
+// rubric's closing stop wrapped alone onto the next line.
+test("a glossed term keeps the rubric's stop on its line", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, "/lauds/2026-04-09");
+  const rubric = page.locator("p.rubric", { hasText: "are said secretly." }).first();
+  await expect(rubric.getByRole("button", { name: "secretly" })).toBeVisible();
+  const tops = await rubric.evaluate((p) => {
+    const term = p.querySelector(".gloss-term");
+    const stop = term.nextSibling;
+    const range = document.createRange();
+    range.setStart(stop, 0);
+    range.setEnd(stop, 1);
+    const rects = term.getClientRects();
+    return { term: rects[rects.length - 1].top, stop: range.getBoundingClientRect().top, text: stop.data };
+  });
+  expect(tops.text).toBe(".");
+  expect(Math.abs(tops.stop - tops.term)).toBeLessThan(2);
 });
 
 // Compline's Our Father before the Confession has no voiced words, so its

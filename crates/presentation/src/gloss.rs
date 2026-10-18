@@ -51,15 +51,15 @@ pub fn gloss_runs(text: &str) -> Vec<GlossRun<'_>> {
 
 /// The earliest whole-word term at or after `from`; at one position the longest term wins.
 fn next_term(text: &str, from: usize) -> Option<(usize, &'static Gloss)> {
+    // ASCII lowercasing keeps every byte where it was, so indices carry back to `text`.
     let lower = text.to_ascii_lowercase();
-    let b = lower.as_bytes();
     let mut best: Option<(usize, &'static Gloss)> = None;
     for gloss in GLOSSES {
         let mut at = from;
         while let Some(found) = lower.get(at..).and_then(|rest| rest.find(gloss.term)) {
             let i = at + found;
             let end = i + gloss.term.len();
-            let whole = (i == 0 || !word_byte(b[i - 1])) && (end == b.len() || !word_byte(b[end]));
+            let whole = !lower[..i].chars().next_back().is_some_and(word_char) && !lower[end..].chars().next().is_some_and(word_char);
             if whole {
                 if best.is_none_or(|(j, _)| i < j) {
                     best = Some((i, gloss));
@@ -72,8 +72,9 @@ fn next_term(text: &str, from: usize) -> Option<(usize, &'static Gloss)> {
     best
 }
 
-fn word_byte(b: u8) -> bool {
-    b.is_ascii_alphanumeric() || b == b'\''
+/// Letters of any script and both apostrophes belong to a word.
+fn word_char(c: char) -> bool {
+    c.is_alphanumeric() || c == '\'' || c == '’'
 }
 
 #[cfg(test)]
@@ -131,6 +132,9 @@ mod tests {
     #[test]
     fn only_whole_words_are_glossed() {
         assert!(terms("The secretlyness of it.").is_empty());
+        assert!(terms("désecretly").is_empty());
+        assert!(terms("secretly’s").is_empty());
+        assert_eq!(terms("«secretly»"), ["secretly"]);
         assert!(terms("Then the Officiant makes Confession:").is_empty());
         assert_eq!(gloss_runs(""), [GlossRun::Text("")]);
     }
