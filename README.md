@@ -162,6 +162,12 @@ on the canonical host. Every page names its canonical URL without `?form=` and
 carries Open Graph tags for link previews; dated days and hours, ordo years
 other than this one and the next, and error pages are `noindex`.
 
+### Public API
+
+`/api/v1/…` serves days and months of the ordo as JSON for other sites to lay
+out themselves; [API.md](API.md) is the reference. It answers on every host
+without forwarding, and any origin may read it.
+
 ### Usage metrics
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from
