@@ -445,9 +445,12 @@ struct BlockRow: View {
                 // A rubric term's note opens over the word, so it never covers the prayer it
                 // explains (the web's `.gloss-note`); a tap elsewhere puts it away.
                 prose
-                    .glossPopover(
+                    // The arrow on the card's bottom edge, pointing down to the word; iOS may still
+                    // place the card itself where the room above is short.
+                    .popover(
                         isPresented: Binding(get: { openGloss != nil }, set: { if !$0 { openGloss = nil } }),
-                        anchor: glossRect
+                        attachmentAnchor: .rect(.rect(glossRect)),
+                        arrowEdge: .bottom
                     ) {
                         if shownGloss < glosses.count { GlossCard(gloss: glosses[shownGloss]) }
                     }
@@ -456,19 +459,6 @@ struct BlockRow: View {
                 // A sigil hung into the margin ("All:") takes the room it hangs into.
                 prose.padding(.leading, -spec.hang)
             }
-        }
-    }
-}
-
-extension View {
-    /// A term's note over the word, its arrow on the card's bottom edge pointing down to it. iOS 17
-    /// ignores a popover's arrow edge and places the card itself.
-    @ViewBuilder
-    fileprivate func glossPopover<Content: View>(isPresented: Binding<Bool>, anchor: CGRect, @ViewBuilder content: @escaping () -> Content) -> some View {
-        if #available(iOS 18.0, *) {
-            popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(anchor)), arrowEdges: .bottom, content: content)
-        } else {
-            popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(anchor)), arrowEdge: .bottom, content: content)
         }
     }
 }
