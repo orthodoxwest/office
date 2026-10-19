@@ -14,6 +14,7 @@ use corpus::lines::{
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
 use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
+use presentation::gloss::{Gloss, GlossRun, gloss_runs};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -106,11 +107,14 @@ pub enum RunStyle {
 pub struct Run {
     pub text: String,
     pub style: RunStyle,
+    /// A rubric term a newcomer stumbles on ("secretly"), and the note a tap on it opens, as the
+    /// web's `.gloss-term` (presentation::gloss).
+    pub gloss: Option<&'static Gloss>,
 }
 
 impl Run {
     fn new(text: impl Into<String>, style: RunStyle) -> Run {
-        Run { text: text.into(), style }
+        Run { text: text.into(), style, gloss: None }
     }
 }
 
@@ -366,7 +370,7 @@ fn chant_runs(line: &str) -> Vec<Run> {
 
 fn rubric(elem: &OfficeElement) -> Block {
     if elem.rubric_spans.is_empty() {
-        return Block::new(BlockKind::Rubric, text_runs(&elem.text));
+        return Block::new(BlockKind::Rubric, rubric_text_runs(&elem.text));
     }
     rubric_block(&elem.rubric_spans)
 }
@@ -377,10 +381,24 @@ fn rubric_block(spans: &[RubricSpan]) -> Block {
         if span.prayed {
             runs.extend(cross_runs(&span.text, RunStyle::Prayed));
         } else {
-            runs.extend(text_runs(&span.text));
+            runs.extend(rubric_text_runs(&span.text));
         }
     }
     Block::new(BlockKind::Rubric, runs)
+}
+
+/// A rubric's instruction text, each glossed term a run of its own carrying its note, as the
+/// web's `rubric_text`. Typeset whole before it is split, so a quote beside a term takes the
+/// right curl.
+fn rubric_text_runs(s: &str) -> Vec<Run> {
+    let text = typeset(s);
+    gloss_runs(&text)
+        .into_iter()
+        .map(|run| match run {
+            GlossRun::Text(t) => Run::new(t, RunStyle::Plain),
+            GlossRun::Term(t, gloss) => Run { gloss: Some(gloss), ..Run::new(t, RunStyle::Plain) },
+        })
+        .collect()
 }
 
 /// Posture cues at one anchor, each a run followed by a space.

@@ -17,6 +17,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -134,9 +139,21 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
 @Composable
 fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, cross: Boolean = false) {
     // One stop for a screen reader, in words (spoken): the drawn initial and gutter marks are for the eye.
+    // A rubric's glossed terms ("secretly") and the one whose note is open; TalkBack opens a
+    // note from the block's actions, as the drawn hairline is for the eye.
+    val glossed = glosses(block)
+    var open by remember(block) { mutableStateOf<Int?>(null) }
     val m = if (block.kind == BlockKind.GAP) modifier else modifier.clearAndSetSemantics {
         contentDescription = spoken(block)
         if (block.kind == BlockKind.HEADING || block.kind == BlockKind.COMMEMORATION_HEADING) heading()
+        if (glossed.isNotEmpty()) {
+            customActions = glossed.map { (i, gloss) -> CustomAccessibilityAction("Explain “${gloss.title.lowercase()}”") { open = i; true } }
+        }
+    }
+    @Composable
+    fun rubricText(modifier: Modifier, style: TextStyle) {
+        if (glossed.isEmpty()) Text(runs(block), modifier, style = style)
+        else GlossedText(runs(block), block, open, { open = it }, modifier, style)
     }
     val p = LocalPalette.current
     val text = Type.body.copy(color = p.text)
@@ -156,18 +173,16 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             style = text.copy(color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center),
         )
         BlockKind.CHAPTER_REF, BlockKind.SCRIPTURE_REF -> Text(runs(block), m.fillMaxWidth(), style = Type.reference.copy(color = p.rubric))
-        BlockKind.RUBRIC -> Text(runs(block), m.fillMaxWidth(), style = Type.rubric.copy(color = p.rubric))
+        BlockKind.RUBRIC -> rubricText(m.fillMaxWidth(), Type.rubric.copy(color = p.rubric))
         // Under the antiphon's words, past its "Ant." (the antiphon's hanging indent, which scales with text).
-        BlockKind.ANTIPHON_NOTE -> Text(
-            runs(block),
+        BlockKind.ANTIPHON_NOTE -> rubricText(
             m.fillMaxWidth().padding(start = with(LocalDensity.current) { 21.6.sp.toDp() }),
-            style = Type.rubric.copy(color = p.rubric),
+            Type.rubric.copy(color = p.rubric),
         )
         // Under an announcement, centred beneath its words.
-        BlockKind.ANNOUNCEMENT_NOTE -> Text(
-            runs(block),
+        BlockKind.ANNOUNCEMENT_NOTE -> rubricText(
             m.fillMaxWidth().padding(horizontal = 4.dp),
-            style = Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center),
+            Type.rubric.copy(color = p.rubric, textAlign = TextAlign.Center),
         )
         BlockKind.SPEAKER -> Text(runs(block), m.fillMaxWidth(), style = Type.speaker.copy(color = p.rubric))
         // Body antiphons hang left: the sigil opens the line, wrapped lines clear it. An announcement's
@@ -651,10 +666,12 @@ private fun ItemLabel(block: BlockView, modifier: Modifier, style: TextStyle) {
 fun runs(block: BlockView): AnnotatedString {
     val p = LocalPalette.current
     return buildAnnotatedString {
-        for (run in block.runs) {
+        for ((i, run) in block.runs.withIndex()) {
             val style = runStyle(run.style, p)
             if (run.style == RunStyle.POSTURE) pushStringAnnotation(POSTURE, run.text)
+            if (run.gloss != null) pushStringAnnotation(GLOSS, i.toString())
             if (style == null) append(run.text) else withStyle(style) { append(run.text) }
+            if (run.gloss != null) pop()
             if (run.style == RunStyle.POSTURE) pop()
         }
     }

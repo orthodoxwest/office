@@ -744,7 +744,15 @@ impl From<render_blocks::Block> for BlockView {
             marker: b.marker,
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
-            runs: b.runs.into_iter().map(|r| RunView { text: r.text, style: r.style.into() }).collect(),
+            runs: b
+                .runs
+                .into_iter()
+                .map(|r| RunView {
+                    text: r.text,
+                    style: r.style.into(),
+                    gloss: r.gloss.map(|g| GlossView { title: g.title.to_string(), note: g.note.to_string() }),
+                })
+                .collect(),
         }
     }
 }
@@ -753,6 +761,16 @@ impl From<render_blocks::Block> for BlockView {
 pub struct RunView {
     pub text: String,
     pub style: RunStyle,
+    /// A rubric term's note, opened by a tap on the term (presentation::gloss).
+    #[uniffi(default = None)]
+    pub gloss: Option<GlossView>,
+}
+
+/// A rubric term's note: its heading and its words.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct GlossView {
+    pub title: String,
+    pub note: String,
 }
 
 /// `render_blocks::BlockKind`, for the bindings.

@@ -268,10 +268,43 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         return true
     }
 
-    func draw(in ctx: CGContext) {
+    /// A glossed rubric term ("secretly"): its note, its ink, and its box on each line it runs over.
+    struct GlossTerm {
+        let note: GlossNote
+        let color: UIColor
+        let rects: [CGRect]
+    }
+
+    /// The text's glossed terms, in order, their boxes in the view.
+    lazy var glossTerms: [GlossTerm] = {
+        var out: [GlossTerm] = []
+        storage.enumerateAttribute(.gloss, in: NSRange(location: 0, length: storage.length)) { value, range, _ in
+            guard let note = value as? GlossNote else { return }
+            let color = storage.attribute(.foregroundColor, at: range.location, effectiveRange: nil) as? UIColor ?? .label
+            let glyphs = manager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            var rects: [CGRect] = []
+            manager.enumerateEnclosingRects(forGlyphRange: glyphs, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: container) { r, _ in
+                rects.append(r.offsetBy(dx: 0, dy: self.top))
+            }
+            out.append(GlossTerm(note: note, color: color, rects: rects))
+        }
+        return out
+    }()
+
+    func draw(in ctx: CGContext, openGloss: Int? = nil) {
         let glyphs = manager.glyphRange(for: container)
         manager.drawBackground(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
         manager.drawGlyphs(forGlyphRange: glyphs, at: CGPoint(x: 0, y: top))
+        // Each glossed term's hairline in its own red at 40%, solid while its note is open, 0.24em
+        // under the baseline (the web's `.gloss-term`).
+        let rise = spec.font.pointSize * 0.24
+        for (i, term) in glossTerms.enumerated() {
+            ctx.setFillColor(term.color.withAlphaComponent(i == openGloss ? 1 : 0.4).cgColor)
+            for r in term.rects {
+                let y = r.minY + baseline + rise
+                ctx.fill(CGRect(x: r.minX, y: y - 0.5, width: r.width, height: 1))
+            }
+        }
         guard let initial = spec.initial, let origin = capOrigin, let font = capFont else { return }
         ProseLayout.paint(initial.letter, font, at: origin, color: initial.color, in: ctx)
     }
@@ -313,10 +346,18 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
 }
 
 /// The view that draws a laid-out spec, keeping the last layout for its width.
-final class ProseView: UIView {
+final class ProseView: UIView, UIGestureRecognizerDelegate {
     var spec: ProseSpec? {
         didSet { if spec != oldValue { setNeedsDisplay() } }
     }
+
+    /// The glossed term whose note is open, by its order in the text.
+    var openGloss: Int? {
+        didSet { if openGloss != oldValue { setNeedsDisplay() } }
+    }
+
+    /// A tap on a glossed term, with its box in the view on the line it starts.
+    var onGloss: ((Int, CGRect) -> Void)?
 
     private var cache: ProseLayout?
 
@@ -326,6 +367,50 @@ final class ProseView: UIView {
         backgroundColor = .clear
         contentMode = .redraw
         isAccessibilityElement = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        tap.delegate = self
+        addGestureRecognizer(tap)
+    }
+
+    /// The glossed term under `point`, with a finger's slop about one word of rubric type.
+    private func gloss(at point: CGPoint) -> (Int, CGRect)? {
+        guard let spec else { return nil }
+        for (i, term) in layout(spec, width: bounds.width).glossTerms.enumerated() {
+            if let hit = term.rects.first(where: { $0.insetBy(dx: -6, dy: -10).contains(point) }) {
+                return (i, term.rects.first ?? hit)
+            }
+        }
+        return nil
+    }
+
+    // Only a tap on a term is this view's; any other touch goes on to the page.
+    override func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
+        gloss(at: recognizer.location(in: self)) != nil
+    }
+
+    @objc private func tapped(_ recognizer: UITapGestureRecognizer) {
+        guard let hit = gloss(at: recognizer.location(in: self)) else { return }
+        onGloss?(hit.0, hit.1)
+    }
+
+    /// VoiceOver opens a term's note from the block's actions, as the drawn hairline is for the eye.
+    func updateGlossActions() {
+        guard let spec, bounds.width > 0 else {
+            accessibilityCustomActions = nil
+            return
+        }
+        let terms = layout(spec, width: bounds.width).glossTerms
+        accessibilityCustomActions = terms.isEmpty ? nil : terms.enumerated().map { i, term in
+            UIAccessibilityCustomAction(name: "Explain “\(term.note.title.lowercased())”") { [weak self] _ in
+                self?.onGloss?(i, term.rects.first ?? .zero)
+                return true
+            }
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateGlossActions()
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
@@ -339,7 +424,7 @@ final class ProseView: UIView {
 
     override func draw(_ rect: CGRect) {
         guard let spec, let ctx = UIGraphicsGetCurrentContext() else { return }
-        layout(spec, width: bounds.width).draw(in: ctx)
+        layout(spec, width: bounds.width).draw(in: ctx, openGloss: openGloss)
     }
 }
 
@@ -348,13 +433,19 @@ struct Prose: UIViewRepresentable {
     let spec: ProseSpec
     var spoken: String?
     var header = false
+    /// A rubric's open glossed term, and what a tap on a term does.
+    var openGloss: Int?
+    var onGloss: ((Int, CGRect) -> Void)?
 
     func makeUIView(context: Context) -> ProseView { ProseView() }
 
     func updateUIView(_ view: ProseView, context: Context) {
         view.spec = spec
+        view.openGloss = openGloss
+        view.onGloss = onGloss
         view.accessibilityLabel = spoken ?? spec.text.string
         view.accessibilityTraits = header ? [.staticText, .header] : .staticText
+        view.updateGlossActions()
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: ProseView, context: Context) -> CGSize? {

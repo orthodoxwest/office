@@ -74,6 +74,27 @@ private func setting(_ kind: BlockKind) -> Setting {
 extension NSAttributedString.Key {
     /// Marks a posture cue's run, so a divided opening can keep the cue with its mediant.
     static let posture = NSAttributedString.Key("org.orthodoxwest.office.posture")
+    /// Marks a glossed rubric term's run ("secretly") with its note, as the web's `.gloss-term`.
+    static let gloss = NSAttributedString.Key("org.orthodoxwest.office.gloss")
+}
+
+/// A rubric term's note (presentation::gloss), carried on its run; equal by its words, so a
+/// spec compares equal across renders.
+final class GlossNote: NSObject {
+    let title: String
+    let note: String
+
+    init(_ gloss: GlossView) {
+        title = gloss.title
+        note = gloss.note
+    }
+
+    override func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? GlossNote else { return false }
+        return title == other.title && note == other.note
+    }
+
+    override var hash: Int { title.hashValue ^ note.hashValue }
 }
 
 /// A block's runs as styled text in `style`, each run in its web class's colour and face.
@@ -131,6 +152,7 @@ func runs(_ block: BlockView, _ style: TextStyle, color: Color, _ p: Palette, _ 
             a[.kern] = 0.02 * size * 0.774
             a[.foregroundColor] = UIColor(p.muted)
         }
+        if let gloss = run.gloss { a[.gloss] = GlossNote(gloss) }
         out.append(NSAttributedString(string: run.text, attributes: a))
     }
     return out
@@ -376,13 +398,26 @@ struct BlockRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @Environment(\.ranked) private var ranked
+    /// A rubric's glossed term whose note is open, and that term's box.
+    @State private var openGloss: Int?
+    @State private var glossRect: CGRect = .zero
 
     var body: some View {
         if block.kind == .gap {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
         } else {
             let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked)
-            let prose = Prose(spec: spec, spoken: spoken(block), header: block.kind == .heading || block.kind == .commemorationHeading)
+            let glosses = block.runs.compactMap(\.gloss)
+            let prose = Prose(
+                spec: spec,
+                spoken: spoken(block),
+                header: block.kind == .heading || block.kind == .commemorationHeading,
+                openGloss: openGloss,
+                onGloss: glosses.isEmpty ? nil : { i, rect in
+                    glossRect = rect
+                    openGloss = openGloss == i ? nil : i
+                }
+            )
             if block.kind == .itemLabel, let latin = block.runs.firstIndex(where: { $0.style == .latin }), latin > 0 {
                 // A psalm's number and its Latin incipit share a line, a dot between them. When the
                 // line cannot hold both, the incipit stands on its own line beneath and the dot goes
@@ -403,11 +438,54 @@ struct BlockRow: View {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
                 prose.frame(maxWidth: column ?? .infinity).frame(maxWidth: .infinity)
+            } else if !glosses.isEmpty {
+                // A rubric term's note opens over the word, so it never covers the prayer it
+                // explains (the web's `.gloss-note`); a tap elsewhere puts it away.
+                prose
+                    .popover(
+                        isPresented: Binding(get: { openGloss != nil }, set: { if !$0 { openGloss = nil } }),
+                        attachmentAnchor: .rect(.rect(glossRect)),
+                        arrowEdge: .top
+                    ) {
+                        if let i = openGloss, i < glosses.count { GlossCard(gloss: glosses[i]) }
+                    }
+                    .padding(.leading, -spec.hang)
             } else {
                 // A sigil hung into the margin ("All:") takes the room it hangs into.
                 prose.padding(.leading, -spec.hang)
             }
         }
+    }
+}
+
+/**
+ * A rubric term's note, as the web's `.gloss-note`: a card of the surface, its heading in the
+ * rubric's red small caps over the note in the text's ink, 19rem wide.
+ */
+private struct GlossCard: View {
+    let gloss: GlossView
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: m.px(3.2)) {
+            Text(gloss.title)
+                .font(Font(garamond(14.44 * m.type, smallCaps: true)))
+                .kerning(0.72 * m.type)
+                .foregroundStyle(p.rubric)
+            Text(gloss.note)
+                .font(Font(garamond(15.2 * m.type)))
+                .lineSpacing(3 * m.type)
+                .foregroundStyle(p.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, m.px(14.4))
+        .padding(.top, m.px(11.2))
+        .padding(.bottom, m.px(12.8))
+        .frame(width: m.px(304), alignment: .leading)
+        .presentationCompactAdaptation(.popover)
+        .presentationBackground(p.surface)
+        .accessibilityElement(children: .combine)
     }
 }
 

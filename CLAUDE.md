@@ -67,6 +67,14 @@ scripts/
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
 ```
 
+## Keeping the fronts in sync
+
+The web (in Chromium and Safari), the iOS app and the Android app stay in step: a change a reader
+can see or use on one front lands on the others in the same PR. Shared words go in
+`presentation`, shared structure in `render-blocks` (its tests hold the apps to the web's
+words), and each front draws them in its own idiom. When a front truly cannot follow yet, the
+PR says so and an issue tracks the rest.
+
 ## Reference materials & verification
 
 `../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026) and rubrics
