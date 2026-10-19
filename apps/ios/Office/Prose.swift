@@ -360,6 +360,7 @@ final class ProseView: UIView, UIGestureRecognizerDelegate {
     var onGloss: ((Int, CGRect) -> Void)?
 
     private var cache: ProseLayout?
+    private var glossTap: UITapGestureRecognizer!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -367,9 +368,9 @@ final class ProseView: UIView, UIGestureRecognizerDelegate {
         backgroundColor = .clear
         contentMode = .redraw
         isAccessibilityElement = true
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
-        tap.delegate = self
-        addGestureRecognizer(tap)
+        glossTap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        glossTap.delegate = self
+        addGestureRecognizer(glossTap)
     }
 
     /// The glossed term under `point`, with a finger's slop about one word of rubric type.
@@ -383,9 +384,12 @@ final class ProseView: UIView, UIGestureRecognizerDelegate {
         return nil
     }
 
-    // Only a tap on a term is this view's; any other touch goes on to the page.
+    // Only a tap on a term is this view's; any other touch goes on to the page. UIKit asks the
+    // touched view about its ancestors' recognizers too (the page's scroll), so those keep the
+    // default answer.
     override func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
-        gloss(at: recognizer.location(in: self)) != nil
+        guard recognizer === glossTap else { return super.gestureRecognizerShouldBegin(recognizer) }
+        return gloss(at: recognizer.location(in: self)) != nil
     }
 
     @objc private func tapped(_ recognizer: UITapGestureRecognizer) {

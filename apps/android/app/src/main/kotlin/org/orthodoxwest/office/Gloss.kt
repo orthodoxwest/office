@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -84,6 +86,8 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
     // The live coordinates, read as the popup places itself: they follow the page as it scrolls.
     val coordinates = remember { arrayOfNulls<LayoutCoordinates>(1) }
     val terms = text.getStringAnnotations(GLOSS, 0, text.length)
+    // Read as a tap lands: the tap handler lives across opens and closes.
+    val currentOpen by rememberUpdatedState(open)
     val rise = with(density) { style.fontSize.toPx() * 0.24f }
     Box(modifier) {
         Text(
@@ -107,7 +111,7 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
                     detectTapGestures { at ->
                         val l = layout ?: return@detectTapGestures
                         val hit = terms.firstOrNull { t -> termRects(l, t.start, t.end).any { it.inflate(slop).contains(at) } }
-                        if (hit != null) onOpen(hit.item.toInt().takeIf { it != open })
+                        if (hit != null) onOpen(hit.item.toInt().takeIf { it != currentOpen })
                     }
                 },
             style = style,
@@ -149,10 +153,14 @@ private fun termRects(l: TextLayoutResult, start: Int, end: Int): List<Rect> {
     return out
 }
 
-/** Places the note above its term's first line, or below its last where the window's top is too near. */
+/**
+ * Places the note above its term's first line, or below its last where the window's top (below
+ * the status bar, `top`) is too near.
+ */
 private class NotePosition(
     val rects: () -> List<Rect>,
     val room: Int,
+    val top: Int,
     val margin: Int,
     val gap: Int,
     val arrowInset: Float,
@@ -165,7 +173,7 @@ private class NotePosition(
         if (rs.isEmpty()) return IntOffset(anchorBounds.left, anchorBounds.top)
         val w = popupContentSize.width - 2 * room
         val h = popupContentSize.height - 2 * room
-        val isBelow = rs.first().top - h - gap < margin
+        val isBelow = rs.first().top - h - gap < top + margin
         val r = if (isBelow) rs.last() else rs.first()
         val mid = r.center.x
         val left = (mid - w / 2f).coerceIn(margin.toFloat(), max(margin, windowSize.width - margin - w).toFloat())
@@ -181,8 +189,10 @@ private fun GlossNote(gloss: GlossView, rects: () -> List<Rect>, onDismiss: () -
     val p = LocalPalette.current
     val density = LocalDensity.current
     val current by rememberUpdatedState(rects)
+    // The page runs under the status bar; the note stays clear of it.
+    val inset = WindowInsets.safeDrawing.getTop(density)
     val position = with(density) {
-        remember(gloss) { NotePosition({ current() }, ShadowRoom.roundToPx(), NoteMargin.roundToPx(), NoteGap.roundToPx(), 14.dp.toPx()) }
+        remember(gloss, inset) { NotePosition({ current() }, ShadowRoom.roundToPx(), inset, NoteMargin.roundToPx(), NoteGap.roundToPx(), 14.dp.toPx()) }
     }
     // The web's shadows: plaster `0 .4rem 1.1rem` at 16%; on the night sky a deeper black.
     val shadow = if (p.dark) {

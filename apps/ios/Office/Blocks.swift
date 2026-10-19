@@ -401,6 +401,8 @@ struct BlockRow: View {
     /// A rubric's glossed term whose note is open, and that term's box.
     @State private var openGloss: Int?
     @State private var glossRect: CGRect = .zero
+    /// The last term opened, kept while its note closes so the card does not empty as it goes.
+    @State private var shownGloss = 0
 
     var body: some View {
         if block.kind == .gap {
@@ -415,6 +417,7 @@ struct BlockRow: View {
                 openGloss: openGloss,
                 onGloss: glosses.isEmpty ? nil : { i, rect in
                     glossRect = rect
+                    if openGloss != i { shownGloss = i }
                     openGloss = openGloss == i ? nil : i
                 }
             )
@@ -442,18 +445,30 @@ struct BlockRow: View {
                 // A rubric term's note opens over the word, so it never covers the prayer it
                 // explains (the web's `.gloss-note`); a tap elsewhere puts it away.
                 prose
-                    .popover(
+                    .glossPopover(
                         isPresented: Binding(get: { openGloss != nil }, set: { if !$0 { openGloss = nil } }),
-                        attachmentAnchor: .rect(.rect(glossRect)),
-                        arrowEdge: .top
+                        anchor: glossRect
                     ) {
-                        if let i = openGloss, i < glosses.count { GlossCard(gloss: glosses[i]) }
+                        if shownGloss < glosses.count { GlossCard(gloss: glosses[shownGloss]) }
                     }
                     .padding(.leading, -spec.hang)
             } else {
                 // A sigil hung into the margin ("All:") takes the room it hangs into.
                 prose.padding(.leading, -spec.hang)
             }
+        }
+    }
+}
+
+extension View {
+    /// A term's note over the word, its arrow on the card's bottom edge pointing down to it. iOS 17
+    /// ignores a popover's arrow edge and places the card itself.
+    @ViewBuilder
+    fileprivate func glossPopover<Content: View>(isPresented: Binding<Bool>, anchor: CGRect, @ViewBuilder content: @escaping () -> Content) -> some View {
+        if #available(iOS 18.0, *) {
+            popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(anchor)), arrowEdges: .bottom, content: content)
+        } else {
+            popover(isPresented: isPresented, attachmentAnchor: .rect(.rect(anchor)), arrowEdge: .bottom, content: content)
         }
     }
 }
