@@ -3687,7 +3687,11 @@ test('private greetings are not repeated after preces when switching offline or 
       return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
     };
     expect(await countPrivateResponses()).toBe(privateCount);
-    const omittedGreeting = page.locator('.leader-slot[data-leader-slot="greeting"][data-leaders="deacon priest"]');
+    // The Chapter Office after Prime has its own greeting, shown only when chosen.
+    const chapter = '[data-martyrology-variant~="chapter"]';
+    const omittedGreeting = page.locator(
+      `.leader-slot[data-leader-slot="greeting"][data-leaders="deacon priest"]:not(${chapter}):not(${chapter} *)`,
+    );
     await expect(omittedGreeting).toHaveCount(1);
     await expect(omittedGreeting).not.toBeVisible();
     await context.setOffline(true);
