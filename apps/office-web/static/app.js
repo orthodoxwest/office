@@ -1863,11 +1863,10 @@ function usageBeaconBody(scope) {
 
   // currentHourInfo returns the office most likely being prayed at the given
   // local time, plus a day offset (0 or -1) locating which calendar day it
-  // belongs to. Boundaries mirror current_hour_entry in handlers.rs: midnight-2am
+  // belongs to. Boundaries mirror presentation::current_hour_entry: midnight-2am
   // belongs to the previous day's Compline, not the day that has just begun.
   // One ordered table drives both the current-office choice and its next
-  // refresh boundary. Keep it aligned with current_hour_entry in handlers.rs;
-  // midnight Compline belongs to the preceding calendar day.
+  // refresh boundary.
   var OFFICE_SCHEDULE = [
     { start: 0, slug: "compline", label: "Compline", offset: -1 },
     { start: 2, slug: "lauds", label: "Lauds", offset: 0 },

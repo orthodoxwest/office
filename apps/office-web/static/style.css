@@ -2705,17 +2705,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-left: 0.25em;
 }
 
-.psalm-text {
-  font-family: "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", "Office Cross", Georgia, "Times New Roman", serif;
-  font-size: 1rem;
-  line-height: 1.75;
-  white-space: pre-wrap;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
 /* ── Psalm / canticle verse structure ── */
 
 .psalm-verses {
@@ -4347,7 +4336,6 @@ body.season-eastertide {
      sung lineation without turning each verse into a ladder of isolated
      lines. The verse-number gutter must share the exact line box. */
   .hymn-verses,
-  .psalm-text,
   .psalm-verses,
   .psalm-verses .verse-num,
   .gloria-patri {
