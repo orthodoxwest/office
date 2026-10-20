@@ -132,7 +132,7 @@ pub const ABOUT: &[AboutBlock] = &[
          reading offline. [Reminders](/reminders) can call you to the hours you keep. In Settings (in the Menu on a \
          phone) you can choose the Nave, the church by day, or the Apse, its vault by night, change the text size, \
          and have Prime read the Martyrology, the saints of the coming day. Your settings are kept on your device. \
-         The app counts pages read without knowing who reads them; there are no accounts and no advertising. See \
+         The app counts hours prayed without knowing who prayed them; there are no accounts and no advertising. See \
          [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
