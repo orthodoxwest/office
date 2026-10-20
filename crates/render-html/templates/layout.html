@@ -60,6 +60,25 @@
         }
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
       } catch (e) {}
+      {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
+           that used the Office before that was recorded holds "before"): home offers the
+           introduction beside Change date. Before the first record, any stored setting or an
+           offline copy marks an old reader, as app.js has it. Days are New York days, the first
+           day's own, counted whole as the apps count them. #}
+      try {
+        var firstDay = localStorage.getItem("office-first-counted"), newcomer = false;
+        if (firstDay === null) {
+          newcomer = !(navigator.serviceWorker && navigator.serviceWorker.controller);
+          for (var k = 0; newcomer && k < localStorage.length; k++) newcomer = !/^office-/.test(localStorage.key(k) || "");
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(firstDay)) {
+          var parts = {};
+          new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" })
+            .formatToParts(new Date()).forEach(function (part) { parts[part.type] = part.value; });
+          var days = (Date.UTC(+parts.year, parts.month - 1, +parts.day) - Date.parse(firstDay + "T00:00:00Z")) / 864e5;
+          newcomer = days >= 0 && days < 7;
+        }
+        if (newcomer) document.documentElement.setAttribute("data-newcomer", "");
+      } catch (e) {}
     })();
   </script>
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
@@ -123,6 +142,7 @@
           {%- endif %}
           <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
+          <a class="nav-secondary{% if p == "about" %} active{% endif %}" href="/about" data-nav="about"{% if p == "about" %} aria-current="page"{% endif %}>{{ about_menu }}</a>
         </nav>
         {# Phone-only: the preference controls, at the foot of the menu so
              the landing page stays quiet. Wide screens have the Settings

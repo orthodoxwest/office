@@ -180,6 +180,7 @@ jobs:
             shoot "$phone" "ordo-$theme" -page ordo -theme "$theme"
             shoot "$phone" "year-$theme" -page year -theme "$theme"
             shoot "$phone" "reminders-$theme" -page reminders -theme "$theme"
+            shoot "$phone" "about-$theme" -page about -theme "$theme"
           done
           # Eastertide's warmer gilding.
           DATE=2026-04-12 shoot "$phone" "easter-nave" -page hour -hour lauds -theme nave

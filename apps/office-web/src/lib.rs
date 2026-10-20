@@ -54,6 +54,7 @@ enum Route {
     Ics,
     Reminders,
     Privacy,
+    About,
     Beta,
     Calendar,
     Robots,
@@ -118,6 +119,7 @@ impl Server {
                 Route::UsageDashboard
                 | Route::Reminders
                 | Route::Privacy
+                | Route::About
                 | Route::Beta
                 | Route::Calendar
                 | Route::Robots
@@ -136,6 +138,7 @@ impl Server {
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
+            Route::About => self.about(&req),
             Route::Beta => self.beta(&req),
             Route::Calendar => self.calendar(&req),
             Route::Robots => crawl::robots(&site),
@@ -167,6 +170,7 @@ impl Server {
             .route("/office.ics", endpoint(Route::Ics))
             .route("/reminders", endpoint(Route::Reminders))
             .route("/privacy", endpoint(Route::Privacy))
+            .route("/about", endpoint(Route::About))
             .route("/beta", endpoint(Route::Beta))
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
@@ -255,7 +259,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/beta", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/about", "/beta", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");
@@ -335,7 +339,7 @@ mod routing_tests {
         assert_eq!(status, StatusCode::OK);
         assert!(robots.contains("Disallow: /admin/") && robots.contains("Sitemap: https://example.org/sitemap.xml"), "{robots}");
         let (_, sitemap) = get("example.org", "/sitemap.xml").await;
-        for page in ["/", "/lauds", "/compline", "/privacy"] {
+        for page in ["/", "/lauds", "/compline", "/privacy", "/about"] {
             assert!(sitemap.contains(&format!("<loc>https://example.org{page}</loc>")), "{page}: {sitemap}");
         }
         assert!(!sitemap.contains("<loc>https://example.org/calendar</loc>"), "the bare ordo address only redirects");

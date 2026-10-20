@@ -88,6 +88,22 @@ class WideScreenshotTest {
 
     @Test fun reminders() { show(Page.Reminders, ThemeChoice.NAVE); shoot("reminders") }
 
+    @Test fun aboutPage() { show(Page.About, ThemeChoice.NAVE); shoot("about") }
+
+    /** About closes the header's links on home, as on every page but an hour. */
+    @Test
+    fun aboutInTheHeader() {
+        show(Page.Home(lent), ThemeChoice.NAVE)
+        compose.onNodeWithText("ABOUT").assertExists()
+    }
+
+    /** A wide hour's header is full with the seven hours, so About is left out of it, as on the web. */
+    @Test
+    fun aboutLeavesAWideHoursHeader() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
+        compose.onAllNodesWithText("ABOUT").assertCountEquals(0)
+    }
+
     /** The theme and text size wait under the header's Settings; no page ends in them. */
     @Test
     fun settings() {

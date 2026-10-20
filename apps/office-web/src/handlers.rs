@@ -12,9 +12,9 @@ use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
-    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
-    TabulaRow,
+    AboutData, BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader,
+    LeaderForm, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData,
+    TabulaData, TabulaRow,
 };
 
 use crate::Server;
@@ -232,6 +232,20 @@ impl Server {
             Ok(body) => html(status, body),
             // Preserve the response status if the error page itself cannot render.
             Err(_) => html(status, String::new()),
+        }
+    }
+
+    pub fn about(&self, req: &Req) -> Response<Body> {
+        let data = AboutData::new(Chrome {
+            page: "about".into(),
+            nav_date: self.nav_date_now(req),
+            site: req.site.into(),
+            canonical: "/about".into(),
+            ..Chrome::default()
+        });
+        match self.pages.about(&data) {
+            Ok(body) => html(StatusCode::OK, body),
+            Err(e) => render_failed(&e),
         }
     }
 

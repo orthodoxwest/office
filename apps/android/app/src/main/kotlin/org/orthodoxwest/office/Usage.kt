@@ -11,6 +11,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -89,6 +90,23 @@ class Usage(
             ?: (if (prefs.contains(DAY)) BEFORE else day).also { prefs.edit().putString(FIRST, it).apply() }
     }
 
+    /**
+     * Days since the reporting day the app was first opened, for home's first-week introduction
+     * (`aboutNewcomer`), or -1 for an installation from before first days were kept. The day is
+     * kept apart from the beacon's first day, which waits for the install to settle: writing that
+     * one here would count a reader who prays in their first hours as returning the next day.
+     * The day stays on the phone and is never sent.
+     */
+    fun daysSinceFirst(): Int {
+        val today = LocalDate.now(clock.withZone(REPORTING))
+        val first = synchronized(prefs) {
+            prefs.getString(OPENED, null) ?: prefs.getString(FIRST, null)
+                ?: (if (prefs.contains(DAY)) BEFORE else today.toString()).also { prefs.edit().putString(OPENED, it).apply() }
+        }
+        if (first == BEFORE) return -1
+        return runCatching { ChronoUnit.DAYS.between(LocalDate.parse(first), today).toInt() }.getOrDefault(-1)
+    }
+
     /** The reporting day's identifier: kept all day, replaced the next. */
     private fun idFor(day: String): String = synchronized(prefs) {
         prefs.getString(ID, null)?.takeIf { prefs.getString(DAY, null) == day }
@@ -100,8 +118,17 @@ class Usage(
         private const val ID = "usage-id"
         private const val FIRST = "usage-first"
         private const val BEFORE = "before"
+        private const val OPENED = "about-first"
         private const val ENDPOINT = "usage-endpoint"
         private val REPORTING: ZoneId = ZoneId.of("America/New_York")
+        private const val USAGE_PATH = "/api/usage"
+
+        /**
+         * The site's address, for the pages the app leaves to it (About's Privacy): the usage
+         * endpoint's host, which follows the site to the address a reply names.
+         */
+        fun site(prefs: SharedPreferences): String =
+            (synchronized(prefs) { prefs.getString(ENDPOINT, null) } ?: usageEndpoint()).removeSuffix(USAGE_PATH)
 
         /** One beacon at a time, off the main thread. */
         private val sender: Executor = Executors.newSingleThreadExecutor { Thread(it, "usage").apply { isDaemon = true } }

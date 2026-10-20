@@ -344,9 +344,9 @@ private struct FrontispieceLayout: Layout {
 /**
  * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
  * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
- * rules, the lining thinned.
+ * rules, the lining thinned. The About page's table of the hours takes the same.
  */
-private struct FrontispieceInk {
+struct FrontispieceInk {
     let frame: Color
     let rule: Color
     let band: Color
@@ -475,7 +475,24 @@ private struct Frontispiece: View {
                 // the season, and the picker the card's width.
                 Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
                 let change = Disclosure(label: "Change date", open: picking, style: .label(11.2, 0.1)) { togglePicker() }
-                if view.season.isEmpty {
+                if aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst()) {
+                    // In a reader's first week the introduction stands before Change date as its
+                    // twin, in its label's size, tracking and ink, and takes the season's place
+                    // (each hour's header still names it), as on the web.
+                    let introduction = Button { model.open(.about) } label: {
+                        Text(aboutPage.introduction.uppercased()).type(.label(11.2, 0.1)).foregroundStyle(p.muted)
+                            .padding(.horizontal, m.px(8))
+                            .frame(minHeight: 44)
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityLabel(aboutPage.introduction)
+                    .accessibilityHint("Opens About the Office")
+                    // The web's 1rem gap, less the labels' own padding.
+                    SeasonLine(spacing: m.px(11.2), above: 0, stacked: picking) {
+                        introduction
+                        change
+                    }
+                } else if view.season.isEmpty {
                     change
                 } else {
                     let season = Text(view.season.uppercased()).type(.label(11.2, 0.12)).foregroundStyle(p.muted)
