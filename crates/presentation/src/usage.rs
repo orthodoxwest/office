@@ -21,7 +21,7 @@ pub const ENDPOINT_HEADER: &str = "office-usage-endpoint";
 pub const MAX_BEACON: usize = 128;
 
 /// The seven hours, as the usage store names its office scopes.
-pub const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub const HOURS: [&str; 7] = liturgy::HOUR_NAMES;
 
 /// Single-purpose scopes counted beside the hours: the ordo (calendar) page
 /// and turning reminders on (the web's generated feed link).

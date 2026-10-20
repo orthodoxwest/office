@@ -233,6 +233,31 @@ pub fn hour_names() -> Vec<String> {
     HOUR_NAMES.iter().map(|h| h.to_string()).collect()
 }
 
+/// A prayer form as the hour's chooser offers it: its value, the control's label ("Private"),
+/// and the chooser's phrase ("Praying privately").
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct PrayerFormChoice {
+    pub value: String,
+    pub label: String,
+    pub phrase: String,
+}
+
+/// The prayer forms, in the chooser's order.
+#[uniffi::export]
+pub fn prayer_form_choices() -> Vec<PrayerFormChoice> {
+    PrayerForm::ALL
+        .into_iter()
+        .map(|f| PrayerFormChoice { value: f.as_str().into(), label: f.label().into(), phrase: f.phrase().into() })
+        .collect()
+}
+
+/// Whether `hour`'s prayers before and after the Office open until the reader chooses
+/// (`presentation::prayers_open_by_default`).
+#[uniffi::export]
+pub fn prayers_open_by_default(hour: String) -> bool {
+    presentation::prayers_open_by_default(&hour)
+}
+
 /// A reader's way through an hour's words, for home's mark of the hours prayed
 /// (`presentation::Reading`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]
