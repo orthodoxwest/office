@@ -4,7 +4,8 @@ use std::io::Write;
 
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
 use liturgy::PrayerForm;
-use office::{Day, Engine, resolve_office_days};
+use office::prime::AfterPrime;
+use office::{ComposeOptions, Day, Engine, resolve_office_days};
 use tools::fs::FsData;
 
 fn parse_year(args: &[String], command: &str) -> Result<i32, String> {
@@ -69,11 +70,28 @@ pub fn take_prayer_form(args: &[String]) -> Result<(Vec<String>, PrayerForm), St
 /// Prints one composed hour as plain text.
 pub fn cmd_hour(hour_name: &str, data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
     let (args, form) = take_prayer_form(args)?;
-    let arg = args.first().ok_or_else(|| format!("usage: office {hour_name} YYYY-MM-DD [--form private|deacon|priest]"))?;
+    // `--after-prime on|chapter`: the Settings choice of what follows Prime.
+    let mut after_prime = AfterPrime::Rubric;
+    let mut rest = Vec::new();
+    let mut iter = args.iter();
+    while let Some(arg) = iter.next() {
+        if arg == "--after-prime" {
+            let value = iter.next().ok_or("--after-prime requires off, on, or chapter")?;
+            after_prime = AfterPrime::ALL.into_iter().find(|a| a.as_str() == value).ok_or("--after-prime requires off, on, or chapter")?;
+        } else {
+            rest.push(arg.clone());
+        }
+    }
+    let args = rest;
+    let arg = args
+        .first()
+        .ok_or_else(|| format!("usage: office {hour_name} YYYY-MM-DD [--form private|deacon|priest] [--after-prime off|on|chapter]"))?;
     let date = Date::parse(arg).ok_or_else(|| format!("invalid date (use YYYY-MM-DD): {arg}"))?;
     let (days, moveable, engine) = build_year(data, date.year()).map_err(|e| format!("composing {hour_name}: {e}"))?;
     let day = days.get(date.ordinal() as usize - 1).ok_or_else(|| format!("composing {hour_name}: date out of range"))?;
-    let hour = engine.compose_hour(hour_name, day, &moveable, form).map_err(|e| format!("composing {hour_name}: {e}"))?;
+    let hour = engine
+        .compose_hour_with_options(hour_name, day, &moveable, &ComposeOptions { form, after_prime })
+        .map_err(|e| format!("composing {hour_name}: {e}"))?;
     write!(out, "{}", render_text::format_office_hour(&hour)).map_err(|e| e.to_string())
 }
 

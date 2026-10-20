@@ -56,9 +56,10 @@
   </div>
   <div class="elements">
     {% if leader_forms %}
-    {#- A section the Martyrology changes carries both readings; the reader's
-         Settings choice (data-martyrology on the root) shows one. #}
-    {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
+    {#- At Prime, a section the After Prime setting changes carries each reading, and the
+         Capitular Office's sections are carried for it alone, their elements tagged
+         data-martyrology-variant; the reader's choice (data-martyrology on the root) shows one. #}
+    {%- macro leader_section_html(section) %}{{ section.html|safe }}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
       <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>

@@ -1,10 +1,11 @@
 import Foundation
 
 /**
- * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
- * the page shown, the appearance and prayer form it is read in, and at Prime whether the
- * Martyrology was shown, once a day. The beacon's words come from the Rust core, so the server
- * reads the app's as it reads the web's, and only today's pages (a day either side) count.
+ * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"): the
+ * page shown, the appearance and prayer form it is read in, and at Prime the reader's After Prime
+ * choice on a day with a Martyrology reading, once a day. The beacon's words come from
+ * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
+ * (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
@@ -42,13 +43,13 @@ final class Usage {
         self.post = post
     }
 
-    /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one.
-    func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil) {
+    /// `afterPrime` is Prime's `HourView.afterPrime`: the reader's After Prime choice, if it had a reading.
+    func record(_ event: UsageEvent, dark: Bool, form: String, afterPrime: String? = nil) {
         guard enabled else { return }
         let date = now()
         let day = Usage.reportingDay(date)
         let first = firstDay(day) == day
-        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first) else { return }
+        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, afterPrime: afterPrime, first: first) else { return }
         let key = day + " " + body
         lock.lock()
         let fresh = sent.insert(key).inserted

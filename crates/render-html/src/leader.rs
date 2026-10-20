@@ -13,9 +13,47 @@ pub struct LeaderSection {
     pub collapsible: bool,
     /// Trusted markup.
     pub html: String,
-    /// The section as read with the Martyrology at Prime, when that differs; empty otherwise.
-    /// Trusted markup.
-    pub martyrology_html: String,
+}
+
+/// Tags each top-level element of `html` with `data-martyrology-variant`, the space-separated
+/// After Prime choices (`off`, `on`, `chapter`) it is read under. The variants stay the hour's
+/// own children, so its layout rules apply to them as to any other prayer. `html` is the
+/// renderer's own well-formed markup, whose text and attribute values escape `<` and `>`.
+pub fn mark_after_prime(html: &str, choices: &str) -> String {
+    const VOID: [&str; 4] = ["br", "hr", "img", "wbr"];
+    let attr = format!(" data-martyrology-variant=\"{}\"", html_escape_string(choices));
+    let mut out = String::with_capacity(html.len() + 64);
+    let mut depth = 0usize;
+    let mut rest = html;
+    while let Some(lt) = rest.find('<') {
+        out.push_str(&rest[..lt]);
+        let tag = &rest[lt..];
+        let end = tag.find('>').map_or(tag.len(), |i| i + 1);
+        let (open, after) = tag.split_at(end);
+        if open.starts_with("</") {
+            depth = depth.saturating_sub(1);
+            out.push_str(open);
+        } else if open.starts_with("<!") {
+            out.push_str(open);
+        } else {
+            let name_end = open[1..].find(|c: char| !c.is_ascii_alphanumeric()).map_or(open.len(), |i| i + 1);
+            let name = &open[1..name_end];
+            let opens = !VOID.contains(&name) && !open.ends_with("/>");
+            if depth == 0 {
+                out.push_str(&open[..name_end]);
+                out.push_str(&attr);
+                out.push_str(&open[name_end..]);
+            } else {
+                out.push_str(open);
+            }
+            if opens {
+                depth += 1;
+            }
+        }
+        rest = after;
+    }
+    out.push_str(rest);
+    out
 }
 
 /// Aligns the private, deacon, and priest compositions of one hour. A
@@ -111,12 +149,7 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
                 return Err("unmatched leader elements".into());
             }
         }
-        sections.push(LeaderSection {
-            label: section.label.clone(),
-            collapsible: section.collapsible,
-            html,
-            martyrology_html: String::new(),
-        });
+        sections.push(LeaderSection { label: section.label.clone(), collapsible: section.collapsible, html });
     }
     Ok(sections)
 }
@@ -149,6 +182,17 @@ mod tests {
     fn sections(hours: &[OfficeHour]) -> Result<Vec<super::LeaderSection>, String> {
         let forms: Vec<(PrayerForm, &OfficeHour)> = hours.iter().map(|h| (h.form, h)).collect();
         leader_sections(&forms)
+    }
+
+    #[test]
+    fn after_prime_marks_only_top_level_elements() {
+        let html = "<h2 class=\"section-heading\">Short Lesson</h2><div class=\"chapter\"><p>A<br>B &lt;i&gt;</p></div><hr/><p class=\"rubric\">C</p>";
+        assert_eq!(
+            super::mark_after_prime(html, "on chapter"),
+            "<h2 data-martyrology-variant=\"on chapter\" class=\"section-heading\">Short Lesson</h2>\
+             <div data-martyrology-variant=\"on chapter\" class=\"chapter\"><p>A<br>B &lt;i&gt;</p></div>\
+             <hr data-martyrology-variant=\"on chapter\"/><p data-martyrology-variant=\"on chapter\" class=\"rubric\">C</p>"
+        );
     }
 
     #[test]

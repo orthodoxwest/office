@@ -183,10 +183,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
-    /// Whether Prime reads the next day's Martyrology; off by default.
-    @Published private(set) var martyrology: Bool
-    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
-    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
+    /// What follows Prime: the Martyrology's rubric (the default), its reading, or the Capitular Office.
+    @Published private(set) var afterPrime: AfterPrime
+    /// The Prime last composed, and its After Prime choice (nil: it had no Martyrology reading), for the usage beacon.
+    @Published private(set) var primeAfterPrime: (page: Page, choice: String?)?
     /// The ornament season of each home or hour composed on the way back, which retints the
     /// gilding of the chrome over it (the menu's painted line), as the page's own.
     @Published private(set) var seasons: [Page: String] = [:]
@@ -212,7 +212,9 @@ final class AppModel: ObservableObject {
         form = UserDefaults.standard.string(forKey: "form").flatMap { f in prayerForms.contains { $0.value == f } ? f : nil } ?? "private"
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
-        martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        // The earlier On/Off setting ("martyrology") stands until the reader chooses again.
+        afterPrime = UserDefaults.standard.string(forKey: "after-prime").flatMap(AfterPrime.init(rawValue:))
+            ?? (UserDefaults.standard.bool(forKey: "martyrology") ? .martyrology : .off)
         prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
     }
 
@@ -289,16 +291,16 @@ final class AppModel: ObservableObject {
         defaults.set(value.rawValue, forKey: "text-size")
     }
 
-    func chooseMartyrology(_ value: Bool) {
+    func chooseAfterPrime(_ value: AfterPrime) {
         step = nil
-        martyrology = value
-        defaults.set(value, forKey: "martyrology")
+        afterPrime = value
+        defaults.set(value.rawValue, forKey: "after-prime")
     }
 
-    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    /// Notes what an hour page shows, once composed: at Prime, the After Prime choice it was read in.
     func composed(_ view: HourView, page: Page) {
         guard view.hour == "prime" else { return }
-        primeMartyrology = (page, view.martyrology)
+        primeAfterPrime = (page, view.afterPrime)
     }
 
     /// The ornament season of the page shown: its own once composed, else none.
@@ -312,10 +314,10 @@ final class AppModel: ObservableObject {
         if now != seasons { seasons = now }
     }
 
-    /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
-    func martyrologyShown(on page: Page) -> Bool? {
-        guard let prime = primeMartyrology, prime.page == page else { return nil }
-        return prime.shown
+    /// `page`'s After Prime choice: nil unless it is the Prime last composed, with a Martyrology reading.
+    func afterPrimeShown(on page: Page) -> String? {
+        guard let prime = primeAfterPrime, prime.page == page else { return nil }
+        return prime.choice
     }
 
     /// Called when the app comes forward, and every minute while it is in front: the hour or the

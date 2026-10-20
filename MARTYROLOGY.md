@@ -1,12 +1,14 @@
 # Prime Martyrology pilot
 
 Prime normally ends with a rubric pointing to the Martyrology. A reader who
-turns **Martyrology** on in Settings (off by default; web, Android and iOS)
-instead hears the reviewed announcement for the **following civil date**, if
+chooses **Martyrology** under **After Prime** in Settings (Nothing by default;
+web, Android and iOS) instead hears the reviewed announcement for the **following civil date**, if
 one exists, along with the common conclusion and response. Otherwise, and in
 all CLI output, the rubric stays. The Triduum still suppresses the whole
 section. Readings follow civil dates regardless of feast transfers; nothing
-else in the calendar or other hours changes.
+else in the calendar or other hours changes. Choosing **Chapter** says the
+Capitular Office (Diurnal pp. 10–14, `ordinary/chapter-office/`), which reads
+the Martyrology within it; see "The Capitular Office" below.
 
 The trial covers the whole civil year except the held days below, read at
 Prime on the preceding day; try `/prime/2026-09-07` with the setting on. Terse
@@ -27,19 +29,40 @@ keeps are listed. Both rules are proposed answers awaiting clergy confirmation
 (#475, #477).
 
 On the web the setting lives in the browser (`office-martyrology` in
-localStorage, like the theme), so the page never varies by reader: Prime carries
-the Martyrology section twice, as the rubric and as the reading
-(`data-martyrology-variant`), and the root's `data-martyrology` shows one before
-first paint. The offline copy therefore serves either setting. The native apps
-compose Prime again when the setting changes. Programmatic use goes through
-`Engine::compose_hour_with_options` with
-`ComposeOptions { martyrology: true, ..Default::default() }`. The earlier
-`?preview=martyrology` URL flag is retired and ignored. Making the section
-collapsible is a separate decision.
+localStorage, like the theme: `off`, `on` for the Martyrology, the value the
+earlier On/Off setting kept, or `chapter`), so the page never varies by reader:
+Prime carries what follows it for every choice, each variant's elements tagged
+with the choices that read them (`data-martyrology-variant="on chapter"`), and
+the root's `data-martyrology` shows one before first paint. The offline copy
+therefore serves every setting. The native apps compose Prime again when the
+setting changes. Programmatic use goes through
+`Engine::compose_hour_with_options` with `ComposeOptions { after_prime:
+AfterPrime::Martyrology, ..Default::default() }`, and the CLI takes
+`--after-prime on|chapter`. The earlier `?preview=martyrology` URL flag is
+retired and ignored. Making the section collapsible is a separate decision.
 
-The usage report's **Martyrology at Prime** breakdown (`martyrology:shown|hidden`)
-counts Prime readers on days with a reading, by whether the setting showed it;
-see DEPLOYMENT.md, "Usage metrics".
+The usage report's **Martyrology at Prime** breakdown
+(`martyrology:shown|hidden|chapter`) counts Prime readers on days with a
+reading, by their After Prime choice; see DEPLOYMENT.md, "Usage metrics".
+
+## The Capitular Office
+
+The Diurnal brackets what follows *May the souls of the faithful* at Prime as
+"the Capitular Office of Religious Communities. If the Capitular Office is not
+said, Prime ends here" (p. 10), so it is off unless chosen. When chosen, Prime
+leaves out its own *May the souls of the faithful*, which ends the Office's
+Blessing instead (p. 13), and gives the form said out of Choir by one person:
+*Lord, grant a blessing* before the Benediction (p. 11; *Sir, ask a blessing*
+when a priest leads), and the Short Lesson in place of the reading of the Holy
+Rule. The Short Lesson is the season's in the Sunday and Ferial Office (pp.
+11–12), and None's chapter with *But thou, O Lord* in the Office of a feast or
+octave, Our Lady's Saturday, the three privileged Vigils, the Sundays within
+the Octaves of Christmas, the Epiphany, the Ascension and Corpus Christi, and the
+Friday after the Ascension's Octave. The Diurnal's seasons leave out only
+Christmas Eve to January 13; a feria there takes None's chapter too. The Prayer
+Book collect the Diurnal prints after the Collect (P B) is left out, as at Prime
+itself, and the Lesser Litany is the shared Kyrie. The Office is not said in
+the Triduum or on All Souls, whose Prime has its own conclusion (p. 653).
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
 DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name and

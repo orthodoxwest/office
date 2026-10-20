@@ -52,9 +52,9 @@ worker; apps, when they had reported before. `client:browser|pwa|android|ios` se
 the web app installed to a home screen, and the native apps. The server also counts a
 first-day visit under `new-client:<client>`, so new readers split by client; no beacon sends it.
 Prime, on a day
-with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
-reader's Settings choice (off by default) read it or left the rubric, which
-measures the reading's exposure (see MARTYROLOGY.md). Each counts once per browser per day, so a reader who
+with a Martyrology reading, also reports `martyrology:shown|hidden|chapter`: whether the
+reader's After Prime choice (Nothing by default) read it, left the rubric, or said the
+Capitular Office (which reads it), which measures the reading's exposure (see MARTYROLOGY.md). Each counts once per browser per day, so a reader who
 switches mid-day counts on both sides and a pair can exceed the daily total;
 clients with an older cached `app.js` report none, so a pair can also fall
 short. The report draws each pair as a day-by-day mix band, since one period

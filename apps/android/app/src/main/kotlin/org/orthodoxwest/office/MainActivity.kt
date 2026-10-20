@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
             val dissolve = rememberDissolve()
             Box(Modifier.fillMaxSize().dissolving(dissolve)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
-                    CompositionLocalProvider(LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) }) {
+                    CompositionLocalProvider(LocalAfterPrime provides AfterPrimeChoice(vm.afterPrime) { a -> if (a != vm.afterPrime) vm.chooseAfterPrime(a) }) {
                         OfficeApp(
                             shown = vm.shown,
                             behind = vm.behind,

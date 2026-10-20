@@ -427,10 +427,12 @@ function usageBeaconBody(scope) {
   var installed = navigator.standalone === true ||
     (!!window.matchMedia && window.matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches);
   var clientToken = installed ? " client:pwa" : " client:browser";
-  // Prime, on a day with a Martyrology reading: whether the reader's setting
-  // shows it or leaves the rubric in its place.
-  var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
-    ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
+  // Prime, on a day with a Martyrology reading: whether the reader's After
+  // Prime setting shows it, leaves the rubric in its place, or says the
+  // Capitular Office.
+  var afterPrime = document.documentElement.getAttribute("data-martyrology");
+  var martyrologyToken = scope === "prime" && document.querySelector('[data-martyrology-variant~="on"]:not([data-martyrology-variant~="off"])')
+    ? (afterPrime === "chapter" ? " martyrology:chapter" : afterPrime === "on" ? " martyrology:shown" : " martyrology:hidden")
     : "";
   clientToken = martyrologyToken + usageVisitToken() + clientToken;
   if (!window.matchMedia) {
@@ -693,15 +695,19 @@ function usageBeaconBody(scope) {
     });
   });
 
-  // Martyrology at Prime: Off (the default) / On. The same contract as the
-  // text size: localStorage only, so every reader's Prime page (and its
-  // offline copy) is the same; the pre-paint script in layout.html sets
-  // data-martyrology, and style.css shows the rubric or the reading.
+  // After Prime: Nothing (off, the default) / Martyrology (on) / Chapter
+  // (the Capitular Office). The same contract as the text size: localStorage
+  // only, so every reader's Prime page (and its offline copy) is the same;
+  // the pre-paint script in layout.html sets data-martyrology, and style.css
+  // shows the rubric, the reading or the Capitular Office.
   var MARTYROLOGY_KEY = "office-martyrology";
+  var afterPrimeChoice = function (value) {
+    return value === "on" || value === "chapter" ? value : "off";
+  };
 
   var paintMartyrologyChoice = function (choice) {
-    if (choice === "on") {
-      document.documentElement.setAttribute("data-martyrology", "on");
+    if (choice !== "off") {
+      document.documentElement.setAttribute("data-martyrology", choice);
     } else {
       document.documentElement.removeAttribute("data-martyrology");
     }
@@ -714,13 +720,13 @@ function usageBeaconBody(scope) {
   try {
     storedMartyrology = localStorage.getItem(MARTYROLOGY_KEY);
   } catch {
-    // Blocked storage: the Martyrology stays off.
+    // Blocked storage: nothing follows Prime.
   }
-  paintMartyrologyChoice(storedMartyrology === "on" ? "on" : "off");
+  paintMartyrologyChoice(afterPrimeChoice(storedMartyrology));
 
   document.querySelectorAll(".martyrology-option[data-martyrology-choice]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var choice = btn.getAttribute("data-martyrology-choice") === "on" ? "on" : "off";
+      var choice = afterPrimeChoice(btn.getAttribute("data-martyrology-choice"));
       paintMartyrologyChoice(choice);
       try {
         localStorage.setItem(MARTYROLOGY_KEY, choice);

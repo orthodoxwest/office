@@ -226,6 +226,21 @@ enum ThemeChoice: String, CaseIterable, Identifiable {
 }
 
 /// The menu's Text row, scaling the whole page as the web scales its root (93%, 100%, 110%).
+/// What follows Prime, stored as the web stores it: the Martyrology's rubric (off), the next
+/// day's Martyrology read (on), or the Capitular Office with the Martyrology in it (chapter).
+enum AfterPrime: String, CaseIterable, Identifiable {
+    case off, martyrology = "on", chapter
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .off: return "Nothing"
+        case .martyrology: return "Martyrology"
+        case .chapter: return "Chapter"
+        }
+    }
+}
+
 enum TextSize: String, CaseIterable, Identifiable {
     case small, standard = "default", large
 

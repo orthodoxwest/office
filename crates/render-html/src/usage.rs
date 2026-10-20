@@ -255,7 +255,7 @@ pub const TREND_LABELS: [(&str, &str, &[&str]); 7] = [
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
-    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
+    ("martyrology", "Martyrology at Prime", &["Shown", "Hidden", "Chapter Office"]),
     ("visit", "New or returning", &["New", "Returning"]),
     ("new-client", "New readers by client", &["Browser", "Web app", "Android", "iOS"]),
 ];

@@ -250,8 +250,8 @@ private struct InlineNav: View {
 /**
  * The site menu's panel: on an hour, the day's hours (2/3/2 as on home, a hairline between the
  * bands); the Ordo and Reminders, the current page underlined in the lining's terracotta; then
- * the Theme, Text and Martyrology rows, muted, the current choice in the accent over the gilding's
- * rule. `prefsOnly` is the wide header's Settings: the Theme, Text and Martyrology rows alone. Its
+ * the Theme, Text and After Prime rows, muted, the current choice in the accent over the gilding's
+ * rule. `prefsOnly` is the wide header's Settings: the Theme, Text and After Prime rows alone. Its
  * top edge is the painted line, which follows the season of the page shown.
  */
 struct MenuPanel: View {
@@ -308,25 +308,26 @@ struct MenuPanel: View {
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            // The Martyrology at Prime: Off and On under the last two themes, the longer label
-            // taking the first theme's cell, as on the web.
-            HStack(spacing: 0) {
-                Text("MARTYROLOGY").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
-                    .lineLimit(1).fixedSize()
+            // What follows Prime: the row's name on a line of its own, and Nothing, Martyrology
+            // and Chapter across the whole row, as on the web (Martyrology is wider than a
+            // theme's cell). Its tracking is a little closer than the themes' for that word.
+            VStack(alignment: .leading, spacing: 0) {
+                Text("AFTER PRIME").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
                     .padding(.leading, m.px(10.4))
-                    .frame(width: m.px(54), alignment: .leading)
+                    .padding(.top, m.px(8.8))
                     .accessibilityHidden(true)
-                Color.clear.frame(maxWidth: .infinity, minHeight: 44)
-                ForEach([false, true], id: \.self) { on in
-                    cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), spoken: "Martyrology at Prime \(on ? "on" : "off")") {
-                        guard on != model.martyrology else { return }
-                        chose()
-                        model.chooseMartyrology(on)
+                HStack(spacing: 0) {
+                    ForEach(AfterPrime.allCases) { a in
+                        cell(a.label.uppercased(), a == model.afterPrime, .label(12, 0.02), spoken: "After Prime: \(a.label)") {
+                            guard a != model.afterPrime else { return }
+                            chose()
+                            model.chooseAfterPrime(a)
+                        }
                     }
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            hint("On reads the saints of the coming day at Prime.")
+            hint("Martyrology reads the saints of the coming day. Chapter adds the Chapter Office of religious houses, said alone, with the Martyrology in it.")
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
@@ -375,7 +376,9 @@ struct MenuPanel: View {
     /// `[aria-pressed="true"]`), marked as the current hour is on home.
     private func cell(_ label: String, _ current: Bool, _ style: TextStyle, spoken: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
+            // One line: Martyrology, the longest word, shrinks a little on the narrowest phone.
             Text(label).type(style).foregroundStyle(current ? p.accent : p.muted)
+                .lineLimit(1).minimumScaleFactor(0.85)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .goldUnderline(current, o.flat)
         }

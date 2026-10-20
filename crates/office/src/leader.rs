@@ -44,6 +44,11 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
                 "opening" if leader == PrayerForm::Priest => {
                     Some(vec![leader_element(ElementType::Versicle, "compline-opening-choir", t)?])
                 }
+                // The Capitular Office's Benediction at the Short Lesson
+                // (Diurnal p. 11).
+                "chapter-blessing" if leader == PrayerForm::Priest => {
+                    Some(vec![leader_element(ElementType::Versicle, "chapter-blessing-choir", t)?])
+                }
                 "confession" if leader == PrayerForm::Priest => Some(priest_confession(t)?),
                 "confession" if leader == PrayerForm::Deacon => {
                     let mut common = elem.clone();

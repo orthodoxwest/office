@@ -109,7 +109,7 @@ func compose<V>(_ load: @escaping () throws -> V) async -> Result<V, Error> {
     }
 }
 
-/// An hour of a day, in the reader's prayer form, and Prime with the Martyrology when the reader reads it.
+/// An hour of a day, in the reader's prayer form, and Prime with what the reader has follow it.
 struct HourPage: View {
     let date: CivilDate
     let hour: String
@@ -117,20 +117,20 @@ struct HourPage: View {
 
     var body: some View {
         let form = model.form
-        let martyrology = model.martyrology
-        let composition = "\(form) \(martyrology)"
-        // Another prayer form, or the Martyrology turned on or off, is the same page composed
+        let afterPrime = model.afterPrime
+        let composition = "\(form) \(afterPrime.rawValue)"
+        // Another prayer form, or another After Prime choice, is the same page composed
         // again: the reader keeps their place and the sections they opened.
         Loaded(key: "\(date.iso) \(hour) \(composition)", place: "\(date.iso) \(hour)", motion: model.motion(to: .hour(date, hour))) { () throws -> ComposedHour in
-            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
+            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, afterPrime: afterPrime.rawValue)
             return ComposedHour(view: view, composition: composition)
         } content: { (composed: ComposedHour) in
             let view = composed.view
             HourScreen(view: view, date: date, composition: composed.composition)
                 // Reported whenever the page comes forward (an earlier Prime gone back to
-                // included), and again when its Martyrology is turned on or off.
+                // included), and again when its After Prime choice changes.
                 .onAppear { model.composed(view, page: .hour(date, hour)) }
-                .onChange(of: view.martyrology) { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.afterPrime) { model.composed(view, page: .hour(date, hour)) }
                 .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .hour(date, hour)) }
         }
         .background(PlasterWall())
@@ -141,7 +141,7 @@ struct HourPage: View {
     }
 }
 
-/// An hour as composed, and the prayer form and Martyrology setting it was composed in.
+/// An hour as composed, and the prayer form and After Prime choice it was composed in.
 private struct ComposedHour {
     let view: HourView
     let composition: String
@@ -177,7 +177,7 @@ private func sectionKeys(_ sections: [SectionView]) -> [String] {
 }
 
 /**
- * Where the reader was when the prayer form or the Martyrology changed, as the web's prayer form
+ * Where the reader was when the prayer form or the After Prime choice changed, as the web's prayer form
  * notes it (leader.js): the office's rows then on screen, top-most first, each with the anchor
  * that would stand it where it stood; and every row's id, to tell whether the office changed.
  */
@@ -198,7 +198,7 @@ private final class PrayedSoFar {
 struct HourScreen: View {
     let view: HourView
     let date: CivilDate
-    /// The prayer form and Martyrology setting `view` was composed in.
+    /// The prayer form and After Prime choice `view` was composed in.
     let composition: String
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
@@ -212,7 +212,7 @@ struct HourScreen: View {
     @State private var width: CGFloat = 0
     @State private var headerHeight: CGFloat = 0
     @State private var epilogueHeight: CGFloat = 0
-    /// Where the reader was when the prayer form or the Martyrology changed, until the hour is
+    /// Where the reader was when the prayer form or the After Prime choice changed, until the hour is
     /// composed again.
     @State private var held: Held?
     @State private var prayed = PrayedSoFar()
@@ -316,7 +316,7 @@ struct HourScreen: View {
             // The row the reader is at stays where it stood while the office changes around it, as
             // the web's prayer form keeps the first element on screen in its place.
             .onChange(of: model.form) { hold() }
-            .onChange(of: model.martyrology) { hold() }
+            .onChange(of: model.afterPrime) { hold() }
             .onChange(of: composition) { restore(scroll) }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
@@ -384,7 +384,7 @@ struct HourScreen: View {
     }
 
     /**
-     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
+     * Notes the rows on screen as the prayer form or the After Prime choice changes, while the hour shown
      * is still the one composed before.
      */
     private func hold() {
@@ -404,7 +404,7 @@ struct HourScreen: View {
         guard let was = held else { return }
         held = nil
         let ids = rows.map(\.id)
-        // The office reads the same in this form (the Martyrology away from Prime): nothing moved.
+        // The office reads the same in this form (After Prime away from Prime): nothing moved.
         guard ids != was.ids else { return }
         let present = Set(ids)
         guard let mark = was.marks.first(where: { present.contains($0.id) }) else { return }

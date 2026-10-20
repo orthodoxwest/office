@@ -6,7 +6,7 @@ use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
-use crate::leader::leader_sections;
+use crate::leader::{LeaderSection, leader_sections, mark_after_prime};
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
 use crate::view::{BetaData, CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
@@ -69,32 +69,24 @@ impl Pages {
 
     /// A composed hour. With leader forms, the forms' sections are aligned
     /// into one page.
-    /// `martyrology` is the same hour composed with the Martyrology read at Prime, or empty when
-    /// there is none to read: a section it changes carries both readings, and the reader's
-    /// setting shows one of them, so the page itself never depends on the setting.
+    /// `after_prime` holds Prime composed for the reader's other After Prime choices (`on`, the
+    /// Martyrology read; `chapter`, the Capitular Office), each with every form, or nothing when
+    /// a choice changes nothing that day. A section a choice changes carries each reading, a
+    /// section it adds is carried for it alone, and the reader's setting shows one of them, so
+    /// the page itself never depends on the setting.
     pub fn hour(
         &self,
         data: &mut HourData,
         forms: &[(liturgy::PrayerForm, &liturgy::OfficeHour)],
-        martyrology: &[(liturgy::PrayerForm, &liturgy::OfficeHour)],
+        after_prime: &[(&str, &[(liturgy::PrayerForm, &liturgy::OfficeHour)])],
     ) -> Result<String, String> {
         if !data.leader_forms.is_empty() {
-            let mut sections = leader_sections(forms)?;
-            if !martyrology.is_empty() {
-                let read = leader_sections(martyrology)?;
-                if read.len() != sections.len() {
-                    return Err("martyrology section mismatch".into());
-                }
-                for (section, read) in sections.iter_mut().zip(read) {
-                    if read.label != section.label || read.collapsible != section.collapsible {
-                        return Err("martyrology section mismatch".into());
-                    }
-                    if read.html != section.html {
-                        section.martyrology_html = read.html;
-                    }
-                }
+            let sections = leader_sections(forms)?;
+            let mut variants = Vec::new();
+            for (choice, hours) in after_prime {
+                variants.push((*choice, leader_sections(hours)?));
             }
-            data.leader_sections = sections;
+            data.leader_sections = if variants.is_empty() { sections } else { after_prime_sections(sections, &variants)? };
         }
         self.render("hour.html", data)
     }
@@ -127,6 +119,80 @@ impl Pages {
         self.render("usage.html", data)
     }
 }
+
+/// One page's sections for every After Prime choice: `base` is Prime with the rubric (`off`), and
+/// each variant is Prime for another choice. A variant's sections are the base's with, at most,
+/// one run of its own inserted (the Capitular Office's, after the Martyrology).
+fn after_prime_sections(base: Vec<LeaderSection>, variants: &[(&str, Vec<LeaderSection>)]) -> Result<Vec<LeaderSection>, String> {
+    let same = |a: &LeaderSection, b: &LeaderSection| a.label == b.label && a.collapsible == b.collapsible;
+    // Each row: the base section, or a section of a variant's own; its html under each choice.
+    let mut rows: Vec<(LeaderSection, Vec<(&str, String)>)> = base
+        .into_iter()
+        .map(|s| {
+            let html = s.html.clone();
+            (s, vec![("off", html)])
+        })
+        .collect();
+    let base_rows = rows.len();
+    for (choice, sections) in variants {
+        let n = base_rows;
+        if sections.len() < n {
+            return Err("after-prime section mismatch".into());
+        }
+        let based: Vec<usize> = (0..rows.len()).filter(|&i| rows[i].1.iter().any(|(c, _)| *c == "off")).collect();
+        let mut prefix = 0;
+        while prefix < n && same(&rows[based[prefix]].0, &sections[prefix]) {
+            prefix += 1;
+        }
+        let mut suffix = 0;
+        while prefix + suffix < n && same(&rows[based[n - 1 - suffix]].0, &sections[sections.len() - 1 - suffix]) {
+            suffix += 1;
+        }
+        if prefix + suffix != n {
+            return Err("after-prime section mismatch".into());
+        }
+        for i in 0..n {
+            let section = if i < prefix { &sections[i] } else { &sections[sections.len() - n + i] };
+            rows[based[i]].1.push((choice, section.html.clone()));
+        }
+        let own = &sections[prefix..sections.len() - suffix];
+        let at = if prefix == 0 { 0 } else { based[prefix - 1] + 1 };
+        for (k, section) in own.iter().enumerate() {
+            rows.insert(at + k, (section.clone(), vec![(choice, section.html.clone())]));
+        }
+    }
+    let mut out = Vec::new();
+    for (section, htmls) in rows {
+        let base = htmls.iter().find(|(c, _)| *c == "off").map(|(_, h)| h.clone());
+        let Some(base) = base else {
+            // A variant's own section: its heading goes with it.
+            let choices: Vec<&str> = htmls.iter().map(|(c, _)| *c).collect();
+            let heading = if section.label.is_empty() { String::new() } else { render_section_heading(&section.label) };
+            let html = mark_after_prime(&format!("{heading}{}", htmls[0].1), &choices.join(" "));
+            out.push(LeaderSection { label: String::new(), collapsible: section.collapsible, html });
+            continue;
+        };
+        // Every choice reads the base where its own composition is missing or the same.
+        let mut groups: Vec<(Vec<&str>, String)> = Vec::new();
+        for choice in AFTER_PRIME_CHOICES {
+            let html = htmls.iter().find(|(c, _)| *c == choice).map_or(&base, |(_, h)| h);
+            match groups.iter_mut().find(|(_, h)| h == html) {
+                Some((choices, _)) => choices.push(choice),
+                None => groups.push((vec![choice], html.clone())),
+            }
+        }
+        let html = if groups.len() == 1 {
+            base
+        } else {
+            groups.iter().map(|(choices, html)| mark_after_prime(html, &choices.join(" "))).collect()
+        };
+        out.push(LeaderSection { html, ..section });
+    }
+    Ok(out)
+}
+
+/// The After Prime choices, as the setting stores them.
+const AFTER_PRIME_CHOICES: [&str; 3] = ["off", "on", "chapter"];
 
 // Template escaping and the undated brand link.
 #[cfg(test)]

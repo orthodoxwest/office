@@ -58,7 +58,8 @@
         } else if (s === "default") {
           document.documentElement.removeAttribute("data-text-size");
         }
-        if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
+        var afterPrime = localStorage.getItem("office-martyrology");
+        if (afterPrime === "on" || afterPrime === "chapter") document.documentElement.setAttribute("data-martyrology", afterPrime);
       } catch (e) {}
     })();
   </script>
