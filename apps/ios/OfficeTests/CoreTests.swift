@@ -18,6 +18,19 @@ final class CoreTests: XCTestCase {
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })
         XCTAssertEqual(gapBefore(blocks[heading - 1], blocks[heading]), 38)
     }
+
+    /// A rubric's "secretly" carries its note, as the web's `.gloss-term`, and the typesetter finds
+    /// its box to draw the hairline and anchor the note.
+    func testARubricsSecretlyCarriesItsNote() throws {
+        let blocks = try Office.core.get().compose(hour: "lauds", year: 2026, month: 3, day: 15, form: "private").sections.flatMap(\.blocks)
+        let rubric = try XCTUnwrap(blocks.first { $0.kind == .rubric && $0.runs.contains { $0.gloss != nil } })
+        let term = try XCTUnwrap(rubric.runs.first { $0.gloss != nil })
+        XCTAssertEqual(term.text, "secretly")
+        XCTAssertEqual(term.gloss?.title, "Secretly")
+        let layout = ProseLayout(spec: proseSpec(rubric, .nave, .of(.nave, season: ""), Metrics()), width: 358)
+        XCTAssertEqual(layout.glossTerms.count, 1)
+        XCTAssertFalse(layout.glossTerms[0].rects.isEmpty)
+    }
 }
 
 /// What VoiceOver says for the office: every word, and none of the marks meant for the eye.
