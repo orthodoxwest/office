@@ -18,8 +18,8 @@ const GROUP_CALENDAR: &str = "calendar";
 const GROUP_OFFICE: &str = "office";
 const GROUP_HOURS: &str = "hours";
 const GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
-pub(super) const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-pub(super) const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
+pub(super) use office::HOUR_NAMES;
+pub(super) const PRAYER_FORMS: [&str; 3] = liturgy::PrayerForm::NAMES;
 
 /// Groups this engine can produce so far.
 const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];

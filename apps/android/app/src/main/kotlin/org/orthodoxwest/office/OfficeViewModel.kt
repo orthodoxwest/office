@@ -28,13 +28,12 @@ import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.UsageEvent
 import org.orthodoxwest.office.core.hourNames
+import org.orthodoxwest.office.core.prayerFormChoices
 
-/** The prayer forms: value, the control's label, and the chooser's phrase (hour.html). */
-val PRAYER_FORMS = listOf(
-    Triple("private", "Private", "Praying privately"),
-    Triple("deacon", "Deacon", "With others, led by a deacon"),
-    Triple("priest", "Priest", "With others, led by a priest"),
-)
+/** The prayer forms: value, the control's label, and the chooser's phrase, as the web's. */
+val PRAYER_FORMS: List<Triple<String, String, String>> by lazy {
+    prayerFormChoices().map { Triple(it.value, it.label, it.phrase) }
+}
 
 /** Capitalizes an hour's name: "lauds" → "Lauds". */
 fun hourLabel(hour: String): String = hour.replaceFirstChar { it.titlecase() }

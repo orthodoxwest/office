@@ -72,6 +72,8 @@ pub struct LeaderForm {
     /// "private", "deacon", or "priest".
     pub form: String,
     pub label: String,
+    /// The chooser's words for the form: "Praying privately".
+    pub phrase: String,
     pub report_url: String,
 }
 
@@ -102,6 +104,9 @@ pub struct HourData {
     /// The single form's sections, when there are no leader forms.
     pub sections: Vec<SectionView>,
     pub hour_name: String,
+    /// Whether the prayers before and after the Office start open
+    /// ([`presentation::prayers_open_by_default`]).
+    pub prayers_open: bool,
     pub date_str: String,
     pub date_slug: String,
     pub prev_link: String,
