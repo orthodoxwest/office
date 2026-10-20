@@ -103,6 +103,26 @@ fn secret_words_and_the_cross_are_their_own_runs() {
     assert_eq!(styles(&blocks(&e)[0]), [RunStyle::Plain, RunStyle::Prayed]);
 }
 
+/// A rubric's glossed term is a run of its own carrying its note, as the web's `.gloss-term`;
+/// quoted prayer words are never glossed.
+#[test]
+fn a_rubric_s_glossed_term_carries_its_note() {
+    let mut e = elem(ElementType::Rubric, "Our Father is said secretly.");
+    e.rubric_spans =
+        vec![RubricSpan { text: "Our Father".into(), prayed: true }, RubricSpan { text: " is said secretly.".into(), prayed: false }];
+    let out = blocks(&e);
+    let texts: Vec<&str> = out[0].runs.iter().map(|r| r.text.as_str()).collect();
+    assert_eq!(texts, ["Our Father", " is said ", "secretly", "."]);
+    let glossed: Vec<&str> = out[0].runs.iter().filter_map(|r| r.gloss.map(|g| g.title)).collect();
+    assert_eq!(glossed, ["Secretly"]);
+    assert_eq!(out[0].runs[2].style, RunStyle::Plain);
+
+    let whole = blocks(&elem(ElementType::Rubric, "Our Father entirely in secret. Then confession is made:"));
+    let gloss = whole[0].runs.iter().find_map(|r| r.gloss).expect("glossed");
+    assert_eq!(gloss.title, "Entirely in secret");
+    assert!(blocks(&elem(ElementType::Rubric, "All kneel."))[0].runs.iter().all(|r| r.gloss.is_none()));
+}
+
 #[test]
 fn a_hymn_s_rubrics_stand_in_its_column_and_its_amen_folds_in() {
     let out = blocks(&elem(
@@ -180,9 +200,14 @@ fn blocks_carry_the_same_text_as_the_web() {
             for hour_name in HOUR_NAMES {
                 let hour = engine.compose_hour(hour_name, day, &moveable, form).expect("compose");
                 for section in &hour.sections {
-                    let web = squeeze(&html_text(&render_html::html::render_section_elements(&section.elements)));
-                    let native: String = element_blocks(&section.elements).iter().map(|b| squeeze(&b.plain_text())).collect();
+                    let html = render_html::html::render_section_elements(&section.elements);
+                    let web = squeeze(&html_text(&html));
+                    let section_blocks = element_blocks(&section.elements);
+                    let native: String = section_blocks.iter().map(|b| squeeze(&b.plain_text())).collect();
                     assert_eq!(native, web, "{hour_name} {} {} section {:?}", day.date, form.as_str(), section.label);
+                    // Every rubric term the web glosses, the apps gloss too.
+                    let glossed = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some()).count();
+                    assert_eq!(glossed, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} glosses", day.date);
                     checked += 1;
                 }
             }

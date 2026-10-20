@@ -71,6 +71,15 @@ private struct Card {
         wall.addPath(shape(d, dy: dy))
         return wall
     }
+
+    /// The head's springing, where its curves meet the sides.
+    var spring: CGFloat { origin.y + arch.rise * size.width }
+
+    /// The wall outside the head offset by `d` (inward, so negative) and dropped `dy`, inside the
+    /// head's own sides and above its springing (the web's `.home-arch-shade::before`).
+    func head(_ d: CGFloat, dy: CGFloat) -> Path {
+        outside(d, dy: dy).intersection(Path(CGRect(x: origin.x - d, y: 0, width: size.width + 2 * d, height: spring + dy)), eoFill: true)
+    }
 }
 
 /// Draws `path` blurred, for a CSS blur of `blur`: its Gaussian's deviation is half the radius.
@@ -154,7 +163,10 @@ struct Niche: View {
  * A phone's frontispiece: a painted panel under the pointed head `arch`, in the niche's family
  * (`.home-hero`), its courses outermost first: a soft halo of the wall's ground that keeps the
  * field off it, the day's colour as a ring at its edge (`ring`), the frame, then the panel with
- * the shade its head casts and, by day, the light caught under the head's edge.
+ * the shade its head casts and, by day, the light caught under the head's edge. By night (the
+ * web's Apse phone panel) the frame is a course of slate lit from above, the panel stands a step
+ * above the sky with moonlight under the cross, its shade is soft and wide, and the card casts a
+ * shadow on the sky instead of the halo.
  */
 struct Panel: View {
     let arch: Arch
@@ -167,16 +179,34 @@ struct Panel: View {
             let rem: CGFloat = 16
             let card = Card(arch: arch, full: full)
             let outer = card.shape(1.5)
-            // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg), by night 0.35rem and
-            // 0.6rem: the second blurs the first again, so it reaches as far as the two in
-            // quadrature.
-            let (near, far): (CGFloat, CGFloat) = p.dark ? (0.35, 0.6) : (0.5, 0.75)
-            blurred(ctx, outer, p.bg, (near * near + far * far).squareRoot() * rem)
-            blurred(ctx, outer, p.bg, near * rem)
+            if p.dark {
+                // drop-shadow(0 0 0.35rem bg) drop-shadow(0 0.5rem 1rem black 70%): a clearing
+                // of the sky's own colour that keeps the stars off the card's edge, over the
+                // shadow the card casts on the sky. The second shadow is cast by the card and its
+                // clearing, so it reaches as far as the two in quadrature.
+                let spread: CGFloat = (0.35 * 0.35 + 1).squareRoot()
+                blurred(ctx, card.shape(1.5, dy: 0.5 * rem), .black.opacity(0.7), spread * rem)
+                blurred(ctx, outer, p.bg, 0.35 * rem)
+            } else {
+                // drop-shadow(0 0 0.5rem bg) drop-shadow(0 0 0.75rem bg): the second blurs the
+                // first again, so it reaches as far as the two in quadrature.
+                let spread: CGFloat = (0.5 * 0.5 + 0.75 * 0.75).squareRoot()
+                blurred(ctx, outer, p.bg, spread * rem)
+                blurred(ctx, outer, p.bg, 0.5 * rem)
+            }
             ctx.fill(outer, with: .color(ring))
             ctx.fill(card.shape(0), with: .color(p.surface))
-            ctx.fill(card.shape(0), with: .color(frame))
-            let face = card.shape(-1)
+            if p.dark {
+                // --arch-stone: the slate course, lit from above, from the courses' top (2rem
+                // above the point) to the springing, and level below it.
+                let top = card.origin.y - 2 * rem
+                let stone = Gradient(colors: [Color(rgb: 58, 72, 94, 1), Color(rgb: 42, 54, 72, 1)])
+                ctx.fill(card.shape(0), with: .linearGradient(stone, startPoint: CGPoint(x: 0, y: top), endPoint: CGPoint(x: 0, y: card.spring)))
+            } else {
+                ctx.fill(card.shape(0), with: .color(frame))
+            }
+            let inset: CGFloat = p.dark ? -5 : -1
+            let face = card.shape(inset)
             ctx.fill(face, with: .color(p.surface))
             ctx.drawLayer { inside in
                 inside.clip(to: face)
@@ -188,10 +218,29 @@ struct Panel: View {
                     let at = CGPoint(x: card.origin.x + (card.size.width - fitted.width) / 2, y: card.origin.y + (card.size.height - fitted.height) / 2)
                     inside.draw(image, in: CGRect(origin: at, size: fitted))
                 }
-                // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
-                blurred(inside, card.outside(-1, dy: 0.3 * rem), NicheTokens.of(p).recess, 0.4 * rem, eoFill: true)
-                if !p.dark {
-                    // drop-shadow(0 1px 0 white 45%), by day: the light caught under the head's edge.
+                if p.dark {
+                    // --panel-glow: moonlight under the cross, radii the panel's width and 1.06
+                    // of it, centred 0.39 of it below the courses' top (2rem above the point).
+                    // The web lays it under the plaster and veils both by half; laid over the
+                    // baked plaster at half its strength it lifts the panel as much and keeps
+                    // the trowel marks.
+                    let w = card.size.width
+                    let center = CGPoint(x: card.origin.x + w / 2, y: card.origin.y + 0.39 * w - 2 * rem)
+                    var glow = inside
+                    glow.translateBy(x: center.x, y: center.y)
+                    glow.scaleBy(x: 1, y: 1.06)
+                    let moon = Gradient(colors: [Color(rgb: 150, 178, 220, 0.1), Color(rgb: 150, 178, 220, 0)])
+                    glow.fill(Path(ellipseIn: CGRect(x: -w, y: -w, width: 2 * w, height: 2 * w)), with: .radialGradient(moon, center: .zero, startRadius: 0, endRadius: w))
+                    // drop-shadow(0 1px 0 moonlit 14%) drop-shadow(0 0.25rem 1rem black 30%):
+                    // the head's shade soft and wide, and over it the light under the head's edge.
+                    // The course casts them from round the head only: the web paints it down the
+                    // sides and foot on the panel, under no shade.
+                    blurred(inside, card.head(inset, dy: 0.25 * rem), .black.opacity(0.3), rem)
+                    inside.fill(card.head(inset, dy: 1), with: .color(Color(rgb: 200, 214, 234, 0.14)))
+                } else {
+                    // drop-shadow(0 0.3rem 0.4rem recess): the shade the head casts on the panel.
+                    blurred(inside, card.outside(-1, dy: 0.3 * rem), NicheTokens.of(p).recess, 0.4 * rem, eoFill: true)
+                    // drop-shadow(0 1px 0 white 45%): the light caught under the head's edge.
                     inside.fill(card.outside(-1, dy: 1), with: .color(.white.opacity(0.45)), style: FillStyle(eoFill: true))
                 }
             }

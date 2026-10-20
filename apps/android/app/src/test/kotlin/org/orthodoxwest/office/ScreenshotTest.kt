@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
+import java.time.Instant
 import java.time.LocalDate
+import java.util.TimeZone
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -266,7 +268,61 @@ class ScreenshotTest {
         captureScreenRoboImage("build/screenshots/menu-about-nave.png")
     }
 
+    /** Lauds, Sext, Vespers and Compline chosen, reminders on, following the sun at a place read today. */
+    private fun bySun(latitude: Double, longitude: Double): ReminderSettings {
+        val s = ReminderStore(ApplicationProvider.getApplicationContext()).load()
+        val chosen = setOf("lauds", "sext", "vespers", "compline")
+        return s.copy(
+            on = true,
+            hours = s.hours.map { it.copy(chosen = it.hour in chosen) },
+            followSun = true,
+            place = StoredPlace(latitude, longitude, Instant.now()),
+        )
+    }
+
+    /** The sun's times are the phone's zone's; these places keep their own. */
+    private fun inZone(id: String, block: () -> Unit) {
+        val before = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone(id))
+        try { block() } finally { TimeZone.setDefault(before) }
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1700dp-xxhdpi")
+    fun remindersBySunNave() = inZone("America/New_York") {
+        show(Page.Reminders, ThemeChoice.NAVE, today = midsummer, reminders = bySun(39.9526, -75.1652))
+        shoot("reminders-sun-nave")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1700dp-xxhdpi")
+    fun remindersBySunApse() = inZone("America/New_York") {
+        show(Page.Reminders, ThemeChoice.APSE, today = midsummer, reminders = bySun(39.9526, -75.1652))
+        shoot("reminders-sun-apse")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1700dp-xxhdpi")
+    fun remindersBySunFarNorth() = inZone("America/Anchorage") {
+        show(Page.Reminders, ThemeChoice.NAVE, today = midsummer, reminders = bySun(64.84, -147.72))
+        shoot("reminders-sun-fairbanks")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1700dp-xxhdpi")
+    fun remindersBySunWithoutLocation() = inZone("America/New_York") {
+        show(
+            Page.Reminders,
+            ThemeChoice.NAVE,
+            today = midsummer,
+            reminders = bySun(39.9526, -75.1652).copy(place = null),
+            status = ReminderStatus(notificationsAllowed = true, exactAllowed = true, locationAllowed = false),
+        )
+        shoot("reminders-sun-no-location")
+    }
+
     companion object {
+        private val midsummer = LocalDate.of(2026, 6, 21)
         private val core by lazy { OfficeCore() }
     }
 }

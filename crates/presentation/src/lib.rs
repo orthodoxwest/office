@@ -5,6 +5,8 @@
 //! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
 pub mod about;
+pub mod gloss;
+pub mod sun;
 pub mod usage;
 
 use calendar::{CalendarDay, Color, Date, Rank, Season};
