@@ -1465,7 +1465,7 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
       const rects = (sel) =>
         Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => {
           const r = el.getBoundingClientRect();
-          return { left: r.left, width: r.width, height: r.height };
+          return { left: r.left, width: r.width, height: r.height, fits: el.scrollWidth <= el.clientWidth };
         });
       return {
         themes: rects(".theme-option[data-theme-choice]"),
@@ -1483,17 +1483,15 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
     .toBeGreaterThanOrEqual(44);
   const cells = await measure();
   const all = [...cells.themes, ...cells.sizes, ...cells.martyrology];
-  expect(all).toHaveLength(8);
+  expect(all).toHaveLength(9);
   expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
   cells.themes.forEach((r, i) => {
     expect(Math.abs(r.left - cells.sizes[i].left)).toBeLessThan(1);
     expect(Math.abs(r.width - cells.sizes[i].width)).toBeLessThan(1);
   });
-  // Off and On sit under the last two themes.
-  cells.martyrology.forEach((r, i) => {
-    expect(Math.abs(r.left - cells.themes[i + 1].left)).toBeLessThan(1);
-    expect(Math.abs(r.width - cells.themes[i + 1].width)).toBeLessThan(1);
-  });
+  // After Prime's Nothing, Martyrology and Chapter share their own row, each word whole.
+  expect(cells.martyrology.every((r) => r.fits)).toBe(true);
+  cells.martyrology.slice(1).forEach((r, i) => expect(r.left).toBeGreaterThan(cells.martyrology[i].left));
   expect(await overflows()).toBe(false);
   await page.locator(".site-menu > summary").click();
 
@@ -3282,7 +3280,7 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.close();
 });
 
-test("the Martyrology at Prime is a Settings choice, off by default, that holds offline", async ({ browser, baseURL, browserName }) => {
+test("what follows Prime is a Settings choice, nothing by default, that holds offline", async ({ browser, baseURL, browserName }) => {
   test.skip(browserName === "webkit", "Playwright's WebKit fails any navigation once context.setOffline(true) is set, even one its service worker would answer; service-worker offline emulation works only in Chromium");
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
@@ -3310,18 +3308,32 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       await expect(button).toHaveAttribute("aria-pressed", "true");
     }
 
-    await choosePreference(page, "On");
+    const chapter = page.getByRole("heading", { name: "Chapter Office", exact: true });
+    await expect(chapter).toBeHidden();
+
+    await choosePreference(page, "Martyrology");
     await expect(reading).toBeVisible();
     await expect(rubric).toBeHidden();
+    await expect(chapter).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
     // Remembered, and the same page serves both settings, offline too.
     await context.setOffline(true);
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
-    await choosePreference(page, "Off");
+    // The Chapter Office reads the Martyrology within it, and its Blessing ends
+    // with the faithful departed in place of Prime's own versicle.
+    await choosePreference(page, "Chapter");
+    await expect(page.locator("html")).toHaveAttribute("data-martyrology", "chapter");
+    await expect(reading).toBeVisible();
+    await expect(chapter).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Short Lesson", exact: true })).toBeVisible();
+    await expect(page.locator(".elements").getByText("May the souls of the faithful, through the mercy of God, rest in peace.", { exact: true })).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("chapter");
+    await choosePreference(page, "Nothing");
     await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
+    await expect(chapter).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
   } finally {
     await context.close();

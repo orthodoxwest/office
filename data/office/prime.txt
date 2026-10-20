@@ -435,6 +435,100 @@ Condition = not-triduum,not-office-of-the-dead
 Type = rubric
 Ref = ordinary/prime/martyrology-rubric
 
+# The Capitular Office, said out of Choir (Diurnal pp. 10-14), when the reader
+# chooses it in Settings; Prime composes these sections only then. It begins
+# after the Martyrology, and May the souls of the faithful above is not said.
+[Chapter-Office]
+Condition = not-triduum,not-office-of-the-dead
+Label = Chapter Office
+
+Type = versicle
+Ref = ordinary/chapter-office/precious-in-the-sight
+
+Type = rubric
+Ref = ordinary/chapter-office/without-let-us-pray-rubric
+
+Type = collect
+Ref = ordinary/chapter-office/holy-mary-collect
+
+Type = versicle
+Ref = ordinary/chapter-office/make-speed
+
+Type = rubric
+Ref = ordinary/chapter-office/thrice-rubric
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = dialogue
+Ref = ordinary/shared/kyrie
+
+Type = partly-secret-lord-prayer
+Ref = ordinary/shared/our-father
+
+Type = versicle
+Ref = ordinary/chapter-office/show-thy-servants
+
+Type = prayer
+Ref = shared/leader/let-us-pray
+
+Type = collect
+Ref = ordinary/chapter-office/collect
+
+# Lord, grant a blessing out of Choir; Sir, ask a blessing when a priest leads.
+Type = officiant-blessing
+Ref = ordinary/chapter-office/lesson-blessing
+
+[Chapter-Office-Lesson]
+Condition = not-triduum,not-office-of-the-dead
+Label = Short Lesson
+
+# The day chooses the lesson (prime.rs): the season's, or None's chapter.
+Type = chapter
+Ref = ordinary/chapter-office/short-lesson-per-annum
+
+Type = versicle
+Ref = ordinary/prime/preces-our-help
+
+Type = versicle
+Ref = ordinary/chapter-office/bless-ye
+
+Type = blessing
+Ref = ordinary/chapter-office/blessing
+
+[Chapter-Office-Departed]
+Condition = not-triduum,not-office-of-the-dead
+
+Type = prayer
+Ref = ordinary/chapter-office/commemorate-brethren
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace
+
+Type = psalm
+Ref = psalms/130
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = prayer
+Ref = shared/leader/dead-pre-collect-prayers
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
+
+Type = collect
+Ref = ordinary/chapter-office/departed-collect
+
+Type = versicle
+Ref = ordinary/chapter-office/rest-eternal
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace
+
 [Prime-Conclusion-Dead]
 # Diurnal p. 653: said even out of choir when the Martyrology is omitted.
 Condition = office-of-the-dead

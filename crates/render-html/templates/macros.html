@@ -36,12 +36,14 @@
   <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
   <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
 </div>
-{# Reading the next day's Martyrology at Prime; off by default. Worded
-   options set like the themes, under the last two of them. #}
-<div class="martyrology-switch" role="group" aria-label="Martyrology at Prime">
-  <span class="pref-label" aria-hidden="true">Martyrology</span>
-  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Off</button>
-  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
-  <p class="pref-hint">On reads the saints of the coming day at Prime.</p>
+{# What follows Prime: nothing but the Martyrology's rubric (the default), the
+   next day's Martyrology, or the Capitular Office with the Martyrology in it.
+   Worded options set like the themes, under them. #}
+<div class="martyrology-switch" role="group" aria-label="After Prime">
+  <span class="pref-label" aria-hidden="true">After Prime</span>
+  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Nothing</button>
+  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">Martyrology</button>
+  <button type="button" class="theme-option martyrology-option" data-martyrology-choice="chapter" title="Say the Chapter Office after Prime" aria-pressed="false">Chapter</button>
+  <p class="pref-hint">Martyrology reads the saints of the coming day. Chapter adds the Chapter Office of religious houses, said alone, with the Martyrology in it.</p>
 </div>
 {% endmacro %}

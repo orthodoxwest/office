@@ -1,0 +1,126 @@
+# The Capitular (Chapter) Office after Prime, Monastic Diurnal pp. 10–14,
+# said out of Choir. Prime composes it after the Martyrology when the reader
+# chooses it in Settings (After Prime: Chapter); see crates/office/src/prime.rs.
+# The Prayer Book collect the Diurnal prints after the Collect (p. 11, "P B")
+# is left out, as at Prime itself. The Lesser Litany is the shared Kyrie.
+
+[precious-in-the-sight]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+V. Right dear in the sight of the Lord.
+R. Is the death of his Saints.
+
+[without-let-us-pray-rubric]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+Then immediately without Let us pray:
+
+[holy-mary-collect]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+May holy Mary and all the Saints intercede for us to the Lord: that we may be worthy to obtain from him help and salvation, who liveth and reigneth for ever and ever.
+R. Amen.
+
+[make-speed]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+V. O God, ✠ make speed to save me.
+R. O Lord, make haste to help me.
+
+[thrice-rubric]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+This is said thrice; then follows:
+
+[show-thy-servants]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 10
+V. Show thy servants thy work, O Lord, and their children thy glory.
+R. And the glorious Majesty of the Lord our God be upon us; prosper thou the work of our hands upon us, O prosper thou our handy-work.
+V. Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. As it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+[collect]
+# SOURCE: Monastic Diurnal, Monday at Prime, pp. 10–11
+O Lord God, King of heaven and earth, vouchsafe this day to direct and sanctify, to rule and govern our hearts and bodies, our thoughts, words, and deeds, in the ways of thy laws, and in the works of thy commandments; that by thy help we may be saved and delivered both now and ever, O Saviour of the world. Who livest and reignest, world without end.
+R. Amen.
+
+[lesson-blessing]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 11
+# Out of Choir, when Prime is recited by one person only, the Benediction at
+# the Short Lesson is preceded by Lord, grant a blessing. Led in choir, it is
+# shared/leader/chapter-blessing-choir.
+V. Lord, grant a blessing.
+Blessing. The Lord Almighty order our days and our doings in his peace.
+R. Amen.
+
+[short-lesson-per-annum]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 11
+# From January 14 through the Saturday before the I Sunday in Lent, from
+# Monday through Wednesday after Trinity Sunday, and from the Friday after the
+# Octave of Corpus Christi through the Saturday before Advent Sunday.
+!2 Thess. 3:5
+The Lord direct your hearts and bodies into the love of God, and into the patient waiting for Christ.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[short-lesson-advent]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+# From the I Sunday in Advent through the last day before Christmas Eve.
+!Isa. 33:2
+O Lord, be gracious unto us; we have waited for thee: be thou our arm every morning, our salvation also in the time of trouble.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[short-lesson-lent]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+# From the I Sunday in Lent through the Saturday before Passion Sunday.
+!Isa. 55:6
+Seek ye the Lord while he may be found, call ye upon him while he is near.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[short-lesson-passiontide]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+# From Passion Sunday through Wednesday in Holy Week.
+!Isa. 50:6, 7
+I hid not my face from shame and spitting: for the Lord God will help me; therefore shall I not be confounded.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[short-lesson-paschaltide]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+# From Easter Day through the Vigil of the Ascension.
+!Col. 3:1, 2
+If ye then be risen with Christ, seek those things which are above, where Christ sitteth on the right hand of God. Set your affection on things above, not on things on the earth.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[short-lesson-ending]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+# Said after None's chapter when it is taken for the Short Lesson.
+But thou, O Lord, have mercy upon us.
+R. Thanks be to God.
+
+[bless-ye]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 12
+V. Bless ye.
+R. May God bless us.
+
+[blessing]
+# SOURCE: Monastic Diurnal, Monday at Prime, pp. 12–13
+Blessing. The Lord bless us, defend us from all evil, and bring us to life everlasting. And may the souls of the faithful, through the mercy of God, rest in peace.
+R. Amen.
+
+[commemorate-brethren]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 13
+# Printed as the Diurnal has it; the wording for oblates and lay readers is #714.
+Let us commemorate all the brethren (sisters), kinsfolk, and benefactors of our Order.
+
+[rest-eternal]
+# SOURCE: Monastic Diurnal, Monday at Prime, p. 14
+V. Rest eternal grant unto them, O Lord.
+R. And let light perpetual shine upon them.
+
+[departed-collect]
+# SOURCE: Monastic Diurnal, Monday at Prime, pp. 13–14
+# "Brethren ... of our Congregation" as printed; see #714.
+# Printed "Through."; the conclusion is the General Rubrics' (XII, p. xxxi).
+O God, the Giver of pardon and the Author of man's salvation: we humbly beseech thy mercy to grant that the brethren (sisters), kinsfolk, and benefactors of our Congregation who have departed out of this world, blessed Mary ever Virgin and all thy Saints praying for them, may attain to the fellowship of everlasting blessedness.
+Through thy Son Jesus Christ our Lord, who with thee in the unity of the Holy
+Spirit, liveth and reigneth God, world without end.
+R. Amen.

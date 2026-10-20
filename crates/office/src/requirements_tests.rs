@@ -571,7 +571,7 @@ fn martyrology_announcements_follow_the_calendar() {
         ("vigil-10-31", "vigil-of-all-saints"),
         ("vigil-11-29", "vigil-of-st-andrew"),
     ];
-    let options = crate::ComposeOptions { martyrology: true, ..Default::default() };
+    let options = crate::ComposeOptions { after_prime: crate::prime::AfterPrime::Martyrology, ..Default::default() };
     let mut announced = HashSet::new();
     for y in 2026..=2053 {
         let (days, moveable) = year(y);
@@ -1656,5 +1656,74 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
             assert!(text.starts_with(incipit), "{date} {name}");
             assert_eq!(text.ends_with(", alleluia."), paschal, "{date} {name}: {text}");
         }
+    }
+}
+
+/// Diurnal pp. 10–14: the Capitular Office follows the Martyrology, *May the souls of the
+/// faithful* then ends its Blessing rather than Prime, and the Short Lesson said out of Choir
+/// is the season's in the Sunday and Ferial Office and None's chapter, with *But thou*, in the
+/// Office of a feast or octave and on the days the rubric names.
+#[test]
+fn chapter_office_follows_prime_with_the_days_short_lesson() {
+    use crate::prime::{AfterPrime, says_chapter_office};
+    let options = |after_prime| crate::ComposeOptions { after_prime, ..Default::default() };
+    let (days, moveable) = year(2026);
+    let refs = |h: &liturgy::OfficeHour| -> Vec<String> {
+        h.sections.iter().flat_map(|s| &s.elements).flat_map(|e| e.source_refs.iter().cloned().chain([e.source_ref.clone()])).collect()
+    };
+    let faithful = "shared/formulas/faithful-departed";
+    for day in &days {
+        let plain = engine().compose_hour_with_options("prime", day, &moveable, &options(AfterPrime::Rubric)).unwrap();
+        let said = engine().compose_hour_with_options("prime", day, &moveable, &options(AfterPrime::ChapterOffice)).unwrap();
+        assert!(!says_chapter_office(&plain), "{}: only when chosen", day.date);
+        let ordinary = !crate::hourdef::is_triduum(day) && !crate::psalmody::is_office_of_the_dead(day);
+        assert_eq!(says_chapter_office(&said), ordinary, "{}", day.date);
+        if !ordinary {
+            continue;
+        }
+        assert!(refs(&plain).iter().any(|r| r == faithful), "{}: Prime ends with the faithful", day.date);
+        assert!(!refs(&said).iter().any(|r| r == faithful), "{}: the Blessing says it instead", day.date);
+        assert_eq!(
+            crate::prime::reads_martyrology(&said),
+            crate::prime::reads_martyrology(
+                &engine().compose_hour_with_options("prime", day, &moveable, &options(AfterPrime::Martyrology)).unwrap()
+            )
+        );
+    }
+    let lesson = |m: i32, d: i32| {
+        let day = &days[Date::new(2026, m, d).ordinal() as usize - 1];
+        let said = engine().compose_hour_with_options("prime", day, &moveable, &options(AfterPrime::ChapterOffice)).unwrap();
+        let section = said.sections.iter().find(|s| s.label == "Short Lesson").unwrap();
+        let e = &section.elements[0];
+        assert!(e.text.ends_with("But thou, O Lord, have mercy upon us.\nR. Thanks be to God."), "{m}-{d}: {}", e.text);
+        e.label.clone()
+    };
+    let none = |m: i32, d: i32| {
+        let day = &days[Date::new(2026, m, d).ordinal() as usize - 1];
+        let h = engine().compose_hour("none", day, &moveable, PrayerForm::Private).unwrap();
+        h.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == ElementType::Chapter).unwrap().label.clone()
+    };
+    for (m, d, want) in [
+        (1, 14, ""),             // St Hilary: a feast
+        (2, 21, "2 Thess. 3:5"), // a Saturday in Septuagesima
+        (3, 22, "Isa. 55:6"),    // IV Sunday in Lent
+        (3, 31, "Isa. 50:6, 7"), // Tuesday after Passion Sunday
+        (4, 1, "Isa. 50:6, 7"),  // Wednesday in Holy Week
+        (5, 13, "Col. 3:1, 2"),  // an Easter feria
+        (5, 23, ""),             // within the Octave of the Ascension
+        (5, 24, ""),             // the Sunday within it
+        (5, 29, ""),             // the Friday after its Octave
+        (5, 30, ""),             // the Vigil of Pentecost
+        (6, 8, "2 Thess. 3:5"),  // Monday after Trinity Sunday
+        (6, 12, ""),             // within the Octave of Corpus Christi
+        (6, 19, "2 Thess. 3:5"), // the Friday after its Octave
+        (10, 17, ""),            // the Saturday Office of Our Lady
+        (10, 20, "2 Thess. 3:5"),
+        (11, 29, "Isa. 33:2"), // I Sunday of Advent
+        (12, 23, "Isa. 33:2"),
+        (12, 24, ""), // the Vigil of the Nativity
+    ] {
+        let want = if want.is_empty() { none(m, d) } else { want.to_string() };
+        assert_eq!(lesson(m, d), want, "2026-{m}-{d}");
     }
 }

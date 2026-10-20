@@ -65,10 +65,10 @@ static VERSE_RANGE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:^|[:, 
 /// Each book as the Monastic Diurnal names it over a chapter or canticle: a
 /// point after an abbreviation, and the short books written out. Ecclesiasticus
 /// is "Ecclus." pending the ruling asked in #694 ("Ecclus." or "Sir.").
-const SCRIPTURE_BOOKS: [&str; 37] = [
+const SCRIPTURE_BOOKS: [&str; 38] = [
     "Gen.", "Exod.", "Deut.", "1 Sam.", "1 Chron.", "Tobit", "Judith", "Prov.", "Cant.", "Wisdom", "Ecclus.", "Isa.", "Jer.", "Lam.",
     "Ezek.", "Dan.", "Joel", "Hab.", "Zech.", "Mal.", "Luke", "Acts", "Rom.", "1 Cor.", "2 Cor.", "Gal.", "Ephes.", "Phil.", "Col.",
-    "1 Thess.", "1 Tim.", "Titus", "Heb.", "James", "1 Pet.", "1 John", "Rev.",
+    "1 Thess.", "2 Thess.", "1 Tim.", "Titus", "Heb.", "James", "1 Pet.", "1 John", "Rev.",
 ];
 static INDEXED_ANTIPHON_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"/psalm-antiphon(-[0-9]+)?$").expect("valid regex"));
 

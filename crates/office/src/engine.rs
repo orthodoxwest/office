@@ -11,6 +11,7 @@ use crate::conclusion::apply_conclusion;
 use crate::concurrence::VespersOwner;
 use crate::day::Day;
 use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_triduum_form};
+use crate::prime::AfterPrime;
 use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
 use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
 use crate::texts::{OfficeTexts, load_texts};
@@ -25,18 +26,18 @@ pub fn hour_definition_names() -> Vec<&'static str> {
     HOUR_NAMES.iter().copied().chain([HOLY_SATURDAY_VESPERS_DEFINITION]).collect()
 }
 
-/// Per-composition choices. The default is private prayer without the
-/// optional Martyrology at Prime.
+/// Per-composition choices. The default is private prayer with only the
+/// Martyrology's rubric after Prime.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ComposeOptions {
     pub form: PrayerForm,
-    /// Read the next day's Martyrology at Prime (a reader's setting).
-    pub martyrology: bool,
+    /// What follows Prime (a reader's setting).
+    pub after_prime: AfterPrime,
 }
 
 impl Default for ComposeOptions {
     fn default() -> ComposeOptions {
-        ComposeOptions { form: PrayerForm::Private, martyrology: false }
+        ComposeOptions { form: PrayerForm::Private, after_prime: AfterPrime::Rubric }
     }
 }
 
@@ -66,7 +67,7 @@ impl Engine {
 
     /// Composes the named hour for the given day in the given prayer form.
     pub fn compose_hour(&self, hour_name: &str, day: &Day, moveable: &MoveableDates, form: PrayerForm) -> Result<OfficeHour, String> {
-        self.compose_hour_with_options(hour_name, day, moveable, &ComposeOptions { form, martyrology: false })
+        self.compose_hour_with_options(hour_name, day, moveable, &ComposeOptions { form, after_prime: AfterPrime::Rubric })
     }
 
     /// Composes with the reader's choices. They stay local to this
@@ -89,7 +90,7 @@ impl Engine {
         let composed = match hour_name {
             "lauds" => major::compose_major_hour(day, sections, t, Some(moveable), &major::MajorHourOptions::lauds()),
             "vespers" => vespers::compose_vespers(day, sections, t, Some(moveable)),
-            "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable), options.martyrology)),
+            "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable), options.after_prime)),
             "compline" => Ok(compline::compose_compline(day, sections, t, Some(moveable))),
             "terce" => Ok(minor::compose_minor_hour("Terce", day, sections, t, Some(moveable))),
             "sext" => Ok(minor::compose_minor_hour("Sext", day, sections, t, Some(moveable))),
@@ -354,6 +355,7 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
         "officiant-greeting" => oe.leader_slot = "greeting".to_string(),
         "officiant-confession" => oe.leader_slot = "confession".to_string(),
         "officiant-opening" => oe.leader_slot = "opening".to_string(),
+        "officiant-blessing" => oe.leader_slot = "chapter-blessing".to_string(),
         "secret-prayer" => oe.voice = voice::build_prayer_voice(&elem.reference, &oe.text, false),
         // The Triduum's concluding Our Father is entirely silent (p. 313).
         "silent-prayer" => oe.voice = vec![VoiceSpan::new(oe.text.clone(), false, None)],
@@ -652,7 +654,7 @@ fn map_element_type(kind: &str) -> ElementType {
         "canticle" => ElementType::Canticle,
         "hymn" | "proper-hymn" => ElementType::Hymn,
         "antiphon" | "marian" | "proper-antiphon" => ElementType::Antiphon,
-        "versicle" | "officiant-greeting" | "officiant-opening" | "proper-versicle" => ElementType::Versicle,
+        "versicle" | "officiant-greeting" | "officiant-opening" | "officiant-blessing" | "proper-versicle" => ElementType::Versicle,
         "response" | "proper-responsory" => ElementType::Response,
         "prayer" | "secret-prayer" | "silent-prayer" | "partly-secret-prayer" | "officiant-confession" => ElementType::Prayer,
         "corporate-lord-prayer" | "partly-secret-lord-prayer" => ElementType::CorporateLordPrayer,
