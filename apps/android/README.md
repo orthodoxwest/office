@@ -140,7 +140,7 @@ the ten-minute wait, and the posted notification, its clock time and when it cle
 
 ## Usage counts
 
-The app is counted in the web's daily usage report (the top-level README, "Usage metrics"), in
+The app is counted in the web's daily usage report (DEPLOYMENT.md, "Usage metrics"), in
 the same words: `Usage.kt` posts one beacon, built by the Rust core (`usage_beacon`), when a
 page is shown, its theme or prayer form changes, or the reader comes back. Home and the reminders
 page count toward the day's readers, an hour and the ordo in their own columns, and turning

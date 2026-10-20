@@ -269,7 +269,7 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
 
 /// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
 /// of a Double office (General Rubrics I.4 / XXIV.8).
-pub fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
+fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
     if hour_name != "lauds" && hour_name != "vespers" {
         return false;
     }
@@ -368,7 +368,7 @@ pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
 
 /// The seasonal Marian antiphon slug for this hour. Its boundaries fall at
 /// hours of the civil day the hour is said on, so I Vespers keeps its eve.
-pub fn marian_antiphon_selection(day: &Day, hour_name: &str) -> &'static str {
+fn marian_antiphon_selection(day: &Day, hour_name: &str) -> &'static str {
     let civil = day.civil_date();
     seasonal::marian_antiphon(civil, hour_name, &MoveableDates::compute(civil.year()))
 }
@@ -675,7 +675,7 @@ fn format_label(kind: &str, reference: &str) -> String {
     let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
     match kind {
         "psalm" => psalm_label(&name),
-        "canticle" | "hymn" => title_case(&name),
+        "canticle" | "hymn" => calendar::builder::title_case(&name),
         _ => String::new(),
     }
 }
@@ -710,7 +710,7 @@ pub fn canticle_label(reference: &str, text: &str) -> String {
 /// it ("Psalm 147 (147b)"). The numbers are joined by no-break spaces. The
 /// joins and splits are those recorded in
 /// data/latin-incipits.txt.
-pub fn psalm_label(name: &str) -> String {
+fn psalm_label(name: &str) -> String {
     let name = name.trim_start_matches('0');
     let digits = name.find(|c: char| !c.is_ascii_digit()).unwrap_or(name.len());
     let (number, part) = name.split_at(digits);
@@ -739,7 +739,7 @@ pub fn psalm_label(name: &str) -> String {
 }
 
 /// A leading "!" line is the chapter's scripture reference.
-pub fn extract_chapter_ref(text: &str) -> (String, String) {
+fn extract_chapter_ref(text: &str) -> (String, String) {
     if let Some((first, rest)) = text.split_once('\n') {
         let first = first.trim();
         if let Some(r) = first.strip_prefix('!') {
@@ -763,23 +763,9 @@ fn substitute_hymn_doxology(hymn: &str, doxology: &str) -> String {
     }
 }
 
-pub fn title_case(s: &str) -> String {
-    s.split_whitespace()
-        .map(|w| {
-            let mut c = w.chars();
-            match c.next() {
-                Some(f) => f.to_uppercase().chain(c).collect(),
-                None => String::new(),
-            }
-        })
-        .collect::<Vec<String>>()
-        .join(" ")
-}
-
 /// The first "[… not found: …]" marker in rendered text. The composer renders
-/// such a marker instead of failing when no corpus text resolves; callers that
-/// check whole calendars (the golden digest, the audit sweep) treat it as an
-/// error.
+/// such a marker when no corpus text resolves, and `compose_hour_with_options`
+/// turns the first one into an error.
 pub fn unresolved_marker(text: &str) -> Option<&str> {
     let mid = text.find(" not found: ")?;
     let start = text[..mid].rfind('[')?;
