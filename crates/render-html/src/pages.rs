@@ -55,6 +55,9 @@ impl Pages {
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
         env.add_function("static", move |name: String| asset_url(&name));
+        // The About page's names in the menu and on home, as the apps set them.
+        env.add_global("about_menu", presentation::about::ABOUT_MENU);
+        env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);
         env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
         Ok(Pages { env })
     }

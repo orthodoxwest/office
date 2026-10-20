@@ -291,8 +291,13 @@ struct MenuPanel: View {
                     link("ORDO", nav.ordoCurrent, style, action: nav.onOrdo)
                     // Habit setup and the page for newcomers, not hours: quieter than the Ordo, as on the web.
                     link("REMINDERS", nav.remindersCurrent, .label(11.52, 0.04), action: nav.onReminders)
-                    link(aboutPage.menu.uppercased(), nav.aboutCurrent, .label(11.52, 0.04), action: nav.onAbout)
                 }
+                // About in the first half of a row of its own, as the web's grid and Android set it.
+                HStack(spacing: 0) {
+                    link(aboutPage.menu.uppercased(), nav.aboutCurrent, .label(11.52, 0.04), action: nav.onAbout)
+                    Color.clear.frame(maxWidth: .infinity, maxHeight: 0)
+                }
+                .padding(.top, m.px(2.4))
                 Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             }
             HStack(spacing: 0) {

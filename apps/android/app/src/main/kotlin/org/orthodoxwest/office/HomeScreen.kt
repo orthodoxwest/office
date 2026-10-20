@@ -456,7 +456,7 @@ private fun Frontispiece(
                             Text(
                                 introduction.uppercase(),
                                 (if (picking) Modifier.fillMaxWidth().wrapContentWidth() else Modifier).alignByBaseline()
-                                    .heightIn(min = 44.dp).tap(onClick = onIntroduction).padding(horizontal = 8.dp)
+                                    .heightIn(min = 44.dp).tap(label = introduction, action = "open About the Office", onClick = onIntroduction).padding(horizontal = 8.dp)
                                     .wrapContentHeight(Alignment.CenterVertically),
                                 style = Type.control.copy(color = p.muted),
                             )

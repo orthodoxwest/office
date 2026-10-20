@@ -91,14 +91,18 @@ class Usage(
     }
 
     /**
-     * Days since the reporting day the app was first counted, for home's first-week introduction
-     * (`aboutNewcomer`), or -1 for an installation from before first days were kept. Asked before
-     * any beacon, or in a build that never reports, it keeps today as the first day, as the first
-     * beacon would: the day stays on the phone and is never sent.
+     * Days since the reporting day the app was first opened, for home's first-week introduction
+     * (`aboutNewcomer`), or -1 for an installation from before first days were kept. The day is
+     * kept apart from the beacon's first day, which waits for the install to settle: writing that
+     * one here would count a reader who prays in their first hours as returning the next day.
+     * The day stays on the phone and is never sent.
      */
     fun daysSinceFirst(): Int {
         val today = LocalDate.now(clock.withZone(REPORTING))
-        val first = firstDay(today.toString())
+        val first = synchronized(prefs) {
+            prefs.getString(OPENED, null) ?: prefs.getString(FIRST, null)
+                ?: (if (prefs.contains(DAY)) BEFORE else today.toString()).also { prefs.edit().putString(OPENED, it).apply() }
+        }
         if (first == BEFORE) return -1
         return runCatching { ChronoUnit.DAYS.between(LocalDate.parse(first), today).toInt() }.getOrDefault(-1)
     }
@@ -114,6 +118,7 @@ class Usage(
         private const val ID = "usage-id"
         private const val FIRST = "usage-first"
         private const val BEFORE = "before"
+        private const val OPENED = "about-first"
         private const val ENDPOINT = "usage-endpoint"
         private val REPORTING: ZoneId = ZoneId.of("America/New_York")
         private const val USAGE_PATH = "/api/usage"

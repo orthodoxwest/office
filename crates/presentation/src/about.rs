@@ -59,9 +59,9 @@ pub const ABOUT_NEWCOMER_DAYS: i64 = 7;
 
 /// The seven hours in home's three periods, with when each is said.
 pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
-    ("Morning", &[("lauds", "at daybreak"), ("prime", "about 6 am")]),
+    ("Morning", &[("lauds", "at daybreak"), ("prime", "about 7 am")]),
     ("Day", &[("terce", "about 9 am"), ("sext", "at noon"), ("none", "about 3 pm")]),
-    ("Evening", &[("vespers", "toward sunset"), ("compline", "at bedtime")]),
+    ("Evening", &[("vespers", "toward sunset"), ("compline", "late in the evening")]),
 ];
 
 /// The page, in reading order.
@@ -72,13 +72,13 @@ pub const ABOUT: &[AboutBlock] = &[
          Each hour here is already put together for its day, with the feast, the season and the psalms in place, so \
          you need only begin.",
     ),
-    AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 119:164" },
+    AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 118 (119):164" },
     AboutBlock::Heading("An ancient prayer"),
     AboutBlock::Paragraph(
         "The Church has prayed at set hours since the Apostles, who kept the hours of prayer they had known in \
          Israel. The Holy Spirit came at Pentecost at the third hour; St Peter went up to pray at the sixth; St Peter \
          and St John went into the Temple at the ninth, “the hour of prayer.” By the third century Tertullian and St \
-         Cyprian of Carthage write of prayer at the third, sixth and ninth hours, and at morning and evening. In the \
+         Cyprian of Carthage wrote of prayer at the third, sixth and ninth hours, and at morning and evening. In the \
          deserts of Egypt and Palestine the monks made the psalms their unceasing prayer, and St John Cassian carried \
          their way of prayer to the West.",
     ),
@@ -108,10 +108,10 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Key { mark: "℣. ℟.", ink: KeyInk::Rubric, text: "mark a versicle and its response. Praying alone, you say both." },
     AboutBlock::Key { mark: "✠", ink: KeyInk::Rubric, text: "marks where to make the sign of the cross." },
     AboutBlock::Key {
-        mark: "Fainter type",
+        mark: "Grey type",
         ink: KeyInk::Unsaid,
-        text: "marks secret prayers, said silently. Where only the first and last words stand out, as in some Our \
-               Fathers, those words are said aloud and the rest in silence.",
+        text: "is said silently. A secret prayer’s opening words stand out and are said aloud, the rest in silence; \
+               some Our Fathers and Creeds also end aloud, with a closing line in full type.",
     },
     AboutBlock::Key {
         mark: "Prayer form,",
@@ -120,19 +120,20 @@ pub const ABOUT: &[AboutBlock] = &[
     },
     AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(
-        "Each day keeps a feast or the office of its season, as the archdiocesan ordo appoints, and the home page \
-         wears the day’s liturgical color. The [Ordo](/calendar) sets out the year a month at a time: each day’s \
-         feast, rank and color, its fasts, and how each hour is kept. A key explains its marks, and the year’s \
-         first page gives the moveable feasts and Ember days.",
+        "Each day keeps a feast or the office of its season, as the archdiocese’s printed ordo appoints, and the home \
+         page wears the day’s liturgical color. The app’s [Ordo](/calendar) sets out the year a month at a time: each \
+         day’s feast, rank and color, its fasts, and the antiphons and commemorations of Lauds and Vespers. A key \
+         explains its marks, and the year’s title page gives the moveable feasts and Ember days.",
     ),
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalm translation is from the Coverdale Psalter, and the texts are checked against the printed diurnal. \
-         Installed on a phone, the Office works without a connection, and [Reminders](/reminders) can call you to the \
-         hours you keep. In Settings (in the Menu on a phone) you can choose the Nave, the church by day, or the \
-         Apse, its vault by night, change the text size, and have Prime read the Martyrology, the saints of the coming \
-         day. Your choices stay on your device: there are no accounts and no advertising; see [Privacy](/privacy). \
-         If you find a mistake, please tell us through the \
+        "The psalm translation is from the Coverdale Psalter, and each text is checked against the printed book it \
+         comes from. The phone apps work without a connection, and the website keeps the coming two weeks for \
+         reading offline. [Reminders](/reminders) can call you to the hours you keep. In Settings (in the Menu on a \
+         phone) you can choose the Nave, the church by day, or the Apse, its vault by night, change the text size, \
+         and have Prime read the Martyrology, the saints of the coming day. Your settings are kept on your device. \
+         The app counts pages read without knowing who reads them; there are no accounts and no advertising. See \
+         [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
 ];

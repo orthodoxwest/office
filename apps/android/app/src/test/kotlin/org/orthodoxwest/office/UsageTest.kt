@@ -121,9 +121,11 @@ class UsageTest {
         assertEquals(0, quiet.daysSinceFirst())
         now = Instant.parse("2026-03-21T15:00:00Z")
         assertEquals(6, quiet.daysSinceFirst())
-        // The first beacon reports the day already kept.
+        // The introduction's day is not the beacon's: a reader whose first hours went uncounted
+        // is still new on the day their first beacon goes out.
         usage().record(UsageEvent.Home(CivilDate(2026, 3, 21)), dark = false, form = "private")
-        assertTrue(posted.single().second.contains("visit:returning"))
+        assertTrue(posted.single().second.contains("visit:first"))
+        assertEquals(6, quiet.daysSinceFirst())
     }
 
     @Test

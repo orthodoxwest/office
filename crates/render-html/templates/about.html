@@ -28,7 +28,7 @@
   {%- elif b.kind == "hours" %}
   <div class="about-hours">
     {%- for period in about_hours %}
-    <section class="about-hour-group" aria-label="{{ period.label }}">
+    <section class="about-hour-group">
       <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
       <dl>
         {%- for h in period.hours %}

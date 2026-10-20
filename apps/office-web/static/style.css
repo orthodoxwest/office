@@ -1719,7 +1719,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* Season and date control share one baseline, so naming the season costs no
    extra line in the title stack. Once the disclosure is open it claims the
    whole row and the date picker keeps its full width. Without a season it
-   claims the row shut as well, so the picker does not narrow as it folds. */
+   claims the row shut as well, so the picker does not narrow as it folds;
+   the introduction, hidden after a reader's first week, does not count. */
 .home-day-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1727,7 +1728,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   gap: 0 1rem;
 }
 
-.home-day-meta .home-date-nav:is([open], :only-child) {
+.home-day-meta .home-date-nav:is([open], :only-child),
+html:not([data-newcomer]) .home-day-meta .home-introduction:first-child + .home-date-nav {
   flex: 1 0 100%;
 }
 
@@ -6510,6 +6512,9 @@ body.season-eastertide {
    as home's table of periods (the period labels in the frieze's green earth
    thinned, the frame in the lining) and the verse as red work. */
 .about {
+  /* Grey type on the plaster: the hours set it on their paper field, so here
+     the Nave takes the muted ink to keep its contrast. */
+  --unsaid-on-plaster: var(--muted);
   --frontispiece-rule: rgba(107, 58, 31, 0.22);
   --frontispiece-band: color-mix(in srgb, var(--inscription-ground) 9%, transparent);
   --panel-rule: color-mix(in srgb, var(--lining) 45%, transparent);
@@ -6520,12 +6525,14 @@ body.season-eastertide {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .about {
+    --unsaid-on-plaster: var(--unsaid);
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
   }
 }
 
 :root[data-theme="dark"] .about {
+  --unsaid-on-plaster: var(--unsaid);
   --frontispiece-rule: rgba(208, 176, 106, 0.24);
   --frontispiece-band: rgba(208, 176, 106, 0.045);
 }
@@ -6631,6 +6638,7 @@ body.season-eastertide {
 }
 
 .about-hour {
+  position: relative;
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr);
   align-items: baseline;
@@ -6649,6 +6657,13 @@ body.season-eastertide {
 .about-hour dt a {
   color: var(--text);
   text-decoration: none;
+}
+
+/* The whole row opens its hour, as on home and in the apps. */
+.about-hour dt a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 
 .about-hour dd {
@@ -6688,7 +6703,7 @@ body.season-eastertide {
 }
 
 .about-key-unsaid {
-  color: var(--unsaid);
+  color: var(--unsaid-on-plaster);
 }
 
 /* The privacy policy: the reminders page's measure and headings, set as prose. */
@@ -8529,6 +8544,21 @@ body.page-home::before {
     font-size: 11pt;
     color: #000;
     background: #fff;
+  }
+
+  /* The prose pages print in the Nave's inks whatever the screen's theme. */
+  .about,
+  .privacy {
+    --text: #241c17;
+    --accent: #6b3a1f;
+    --gold: #9a7328;
+    --gold-line: #c9ac72;
+    --muted: #6b5d54;
+    --unsaid: #786b62;
+    --unsaid-on-plaster: #6b5d54;
+    --rubric: #8b1a1a;
+    --lining: #a85a48;
+    --titulus: #93412c;
   }
 
   main,

@@ -3215,9 +3215,12 @@ test("home introduces the Office to a reader in their first week", async ({ page
   await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(-6));
   await page.goto(home);
   await expect(introduction).toBeVisible();
-  await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(-8));
-  await page.goto(home);
-  await expect(introduction).toBeHidden();
+  // Seven whole New York days on, the week is over; a first day ahead of today never counts.
+  for (const offset of [-7, 1]) {
+    await page.evaluate((day) => localStorage.setItem("office-first-counted", day), easternDay(offset));
+    await page.goto(home);
+    await expect(introduction).toBeHidden();
+  }
   await page.evaluate(() => localStorage.setItem("office-first-counted", "before"));
   await page.goto(home);
   await expect(introduction).toBeHidden();
