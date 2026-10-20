@@ -43,7 +43,7 @@ retired and ignored. Making the section collapsible is a separate decision.
 
 The usage report's **Martyrology at Prime** breakdown
 (`martyrology:shown|hidden|chapter`) counts Prime readers on days with a
-reading, by their After Prime choice; see README, "Usage metrics".
+reading, by their After Prime choice; see DEPLOYMENT.md, "Usage metrics".
 
 ## The Capitular Office
 

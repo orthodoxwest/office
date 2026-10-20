@@ -1,8 +1,8 @@
 import Foundation
 
 /**
- * The daily usage counts, reported as the web reports them (README, "Usage metrics"): the page
- * shown, the appearance and prayer form it is read in, and at Prime the reader's After Prime
+ * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"): the
+ * page shown, the appearance and prayer form it is read in, and at Prime the reader's After Prime
  * choice on a day with a Martyrology reading, once a day. The beacon's words come from
  * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
  * (a day either side) count.

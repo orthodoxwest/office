@@ -42,6 +42,8 @@ tools/
   genplaster.py            Texture generator; source photograph stays in ../resources/
   genarch.py               Home frontispiece's pointed head: clip-path polygons in style.css, and
                            the arcs' figures for the native apps (Arch.kt, Arch.swift)
+  gencross.py              Subsets the ✠ glyph from Noto Sans Symbols for the web and apps
+  gengaramond.py           Builds the apps' heavier EB Garamond text faces from the variable fonts
 data/
   feasts/                  Feast definitions (INI-like format)
   texts/                   Liturgical texts
@@ -62,7 +64,12 @@ scripts/
   diurnal-pages.py         Render/index page images; OCR only locates pages
   diurnal-transcribe.py    Read provenance-queue entries from pages and apply agreed wording
   diurnal-discover.py      Find printed propers behind runtime fallbacks
-  golden.py               Check/regenerate snapshots using the Rust CLI
+  diurnal-conform.py       Re-apply section conventions to pipeline-written texts and re-attest
+  golden.py                Check/regenerate snapshots using the Rust CLI
+  update_golden.py         The update-golden workflow's merge-and-publish step
+  project-status.py        Clergy-facing status report (`make project-status`)
+  sweep-targets.py         Delete target/ in idle checkouts (`make sweep-targets`)
+  pua-digits.py            Recover old-style digits from the 2025 AWRV cycle draft PDFs
   verify-psalms.py         Read-only comparison with the official BCP Psalter
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
 ```
@@ -151,13 +158,13 @@ These aren't mutually exclusive — an issue can need a ruling *and* turn into a
 
 ```bash
 make build       # Build binary
-make test        # Run all tests (includes golden)
+make test        # Rust and Python tests, including the rendered-hour goldens
 make lint        # Run Clippy
 make fmt         # Reformat Rust source
 make fmt-check   # Check Rust formatting
 make check       # Formatting, Clippy, JS lint, tests, data validation and text lint
 make serve       # Start web server on :8080
-make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
+make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for YEAR (default 2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files (fails on any unverified or stale corpus entry)
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)

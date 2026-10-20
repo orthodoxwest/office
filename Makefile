@@ -1,11 +1,11 @@
-.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-screenshots ios
+.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-bundle android-screenshots ios discover-resume
 
 .DEFAULT_GOAL := help
 
 YEAR ?= 2026
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-28s %s\n", $$1, $$2}'
 
 build: ## Build the Rust binary
 	cargo build --locked --release -p office-cli
@@ -54,7 +54,6 @@ transcribe-report: ## Print markdown for RUN=<run-id-or-directory>
 discover: build ## Prepare a scan work queue; SLOTS=collect,chapter-lauds narrows the search
 	python3 scripts/diurnal-discover.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(MONTH),--month "$(MONTH)",) $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(SLOTS),--slots "$(SLOTS)",)
 
-.PHONY: discover-resume
 discover-resume: build ## Read the next 3 prepared tasks; APPLY=1 enables existing application checks
 	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
 	python3 scripts/diurnal-discover.py resume "$(RUN)" $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(filter 1,$(RETRY)),--retry,) $(if $(filter 1,$(APPLY)),--apply,)
@@ -133,9 +132,11 @@ CHANT ?=
 CHANT_FLAG = $(if $(CHANT),--chant,)
 
 tex: build ## Generate .tex for HOUR [DATE] [CHANT=1] (e.g., make tex HOUR=lauds DATE=2026-03-11)
+	@test -n "$(HOUR)" || (echo "HOUR is required (e.g. HOUR=lauds)" >&2; exit 2)
 	./office tex $(CHANT_FLAG) $(HOUR) $(DATE)
 
 pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOUR=compline CHANT=1)
+	@test -n "$(HOUR)" || (echo "HOUR is required (e.g. HOUR=lauds)" >&2; exit 2)
 	mkdir -p output
 	./office tex $(CHANT_FLAG) $(HOUR) $(DATE) > output/$(HOUR)-$(DATE).tex
 	lualatex --shell-escape --interaction=nonstopmode --output-directory=output output/$(HOUR)-$(DATE).tex
