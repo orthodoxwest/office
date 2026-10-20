@@ -28,7 +28,7 @@ pub const HOURS: [&str; 7] = liturgy::HOUR_NAMES;
 pub const EXTRA_SCOPES: [&str; 2] = ["ordo", "reminders"];
 
 /// The prayer forms an office page reports.
-pub const PRAYER_FORMS: &[&str] = &["private", "deacon", "priest"];
+pub const PRAYER_FORMS: &[&str] = &liturgy::PrayerForm::NAMES;
 
 /// A dimension family and its values.
 pub struct Dimension<'a> {

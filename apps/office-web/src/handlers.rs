@@ -656,7 +656,9 @@ mod tests {
 
     // app.js writes the browser's beacon by hand in presentation::usage's vocabulary: every
     // "family:value" it can send is one the server reads, and it names every family a browser
-    // reports (new-client is the server's own).
+    // reports (new-client is the server's own). The test reads the code from usageVisitToken to
+    // the next top-level IIFE, takes each double-quoted string that opens " family:", and finds
+    // the prayer forms as one array literal; keep app.js's beacon code in that shape.
     #[test]
     fn client_beacon_tokens_match_server() {
         use presentation::usage::{DIMENSIONS, PRAYER_FORMS};

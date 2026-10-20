@@ -412,7 +412,10 @@ pub enum PrayerForm {
 impl PrayerForm {
     pub const ALL: [PrayerForm; 3] = [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest];
 
-    pub fn as_str(self) -> &'static str {
+    /// The forms' values, in [`PrayerForm::ALL`]'s order.
+    pub const NAMES: [&'static str; 3] = [PrayerForm::Private.as_str(), PrayerForm::Deacon.as_str(), PrayerForm::Priest.as_str()];
+
+    pub const fn as_str(self) -> &'static str {
         match self {
             PrayerForm::Private => "private",
             PrayerForm::Deacon => "deacon",
