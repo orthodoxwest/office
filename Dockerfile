@@ -1,4 +1,4 @@
-ARG RUST_VERSION=1.94.1
+ARG RUST_VERSION=1.99.1
 FROM rust:${RUST_VERSION}-bookworm AS builder
 WORKDIR /usr/src/app
 COPY . .

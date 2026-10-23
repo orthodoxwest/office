@@ -21,7 +21,7 @@ remembered choice for that visit. Each hour ends with a link to report a problem
 
 ## Run locally
 
-Install Rust 1.94.1 (the version CI and the deployment image use), a C compiler for bundled
+Install Rust 1.94.1 (the version CI uses; the deployment image builds with 1.99.1), a C compiler for bundled
 SQLite, and Make. On Windows, use WSL.
 
 ```bash
