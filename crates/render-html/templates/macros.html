@@ -26,8 +26,9 @@
   <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
   <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
   <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
-  {# The names are the church's, so a line says what they are: a phone shows no titles. #}
-  <p class="pref-hint">Nave is the church by day, Apse its vault by night. Default follows your device.</p>
+  {# The names are the church's, so a line says what they are: a phone shows no titles.
+     It sets them in small caps, as the buttons are set in capitals. #}
+  <p class="pref-hint"><span class="pref-name">Nave</span> is the church by day, and <span class="pref-name">Apse</span> is its vault by night. <span class="pref-name">Default</span> follows your device.</p>
 </div>
 {# Glyphs carry the meaning visually; aria-label/title carry the words. #}
 <div class="text-size-switch" role="group" aria-label="Text size">
@@ -42,6 +43,6 @@
   <span class="pref-label" aria-hidden="true">Martyrology</span>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Off</button>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
-  <p class="pref-hint">On reads the saints of the coming day at Prime.</p>
+  <p class="pref-hint">Includes a reading of the following day’s saints at Prime.</p>
 </div>
 {% endmacro %}
