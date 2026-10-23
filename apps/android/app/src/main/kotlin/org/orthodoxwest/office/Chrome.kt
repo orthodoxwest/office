@@ -89,6 +89,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -98,6 +99,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -480,7 +482,16 @@ fun MenuPanel(
                     ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
-                PrefHint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+                PrefHint(
+                    buildAnnotatedString {
+                        prefName("Nave")
+                        append(" is the church by day, and ")
+                        prefName("Apse")
+                        append(" is its vault by night. ")
+                        prefName("Default")
+                        append(" follows your device.")
+                    },
+                )
                 Hairline(p.surfaceEdge)
                 MenuRow {
                     Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
@@ -511,10 +522,15 @@ fun MenuPanel(
                         MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
-                PrefHint("On reads the saints of the coming day at Prime.")
+                PrefHint(AnnotatedString("Includes a reading of the following day’s saints at Prime."))
             }
         }
     }
+}
+
+/** A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`). */
+private fun AnnotatedString.Builder.prefName(name: String) {
+    withStyle(SpanStyle(fontStyle = FontStyle.Normal, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.05.em)) { append(name) }
 }
 
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
@@ -523,7 +539,7 @@ private val ShadowRise: Dp = 9.dp
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable
-private fun PrefHint(text: String) {
+private fun PrefHint(text: AnnotatedString) {
     val p = LocalPalette.current
     Text(
         text,

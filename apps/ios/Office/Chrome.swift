@@ -296,7 +296,8 @@ struct MenuPanel: View {
                 }
             }
             // The names are the church's, so a line says what they are, as on the web.
-            hint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+            hint(name("Nave") + Text(" is the church by day, and ") + name("Apse") + Text(" is its vault by night. ")
+                + name("Default") + Text(" follows your device."))
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
@@ -326,7 +327,7 @@ struct MenuPanel: View {
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            hint("On reads the saints of the coming day at Prime.")
+            hint(Text("Includes a reading of the following day’s saints at Prime."))
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
@@ -342,12 +343,17 @@ struct MenuPanel: View {
     }
 
     /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
-    private func hint(_ s: String) -> some View {
-        Text(s).type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
+    private func hint(_ t: Text) -> some View {
+        t.type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, m.px(10.4))
             .padding(.top, m.px(7.2))
             .padding(.bottom, m.px(9.6))
+    }
+
+    /// A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`).
+    private func name(_ s: String) -> Text {
+        Text(s).font(Font(garamond(12.8 * m.type, smallCaps: true))).tracking(0.05 * 12.8 * m.type)
     }
 
     private func rowLabel(_ s: String) -> some View {

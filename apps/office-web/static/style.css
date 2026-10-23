@@ -724,6 +724,13 @@ summary:focus-visible {
   line-height: 1.35;
 }
 
+/* A button's name in its hint, upright in small caps as the button is in capitals. */
+.pref-name {
+  font-style: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.05em;
+}
+
 .pref-label {
   display: flex;
   align-items: center;
