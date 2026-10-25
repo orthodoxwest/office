@@ -4,6 +4,7 @@
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
+pub mod chant;
 pub mod commemoration;
 pub mod compline;
 pub mod conclusion;

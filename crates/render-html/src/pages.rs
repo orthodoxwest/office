@@ -55,7 +55,16 @@ impl Pages {
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
         env.add_function("static", move |name: String| asset_url(&name));
         env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
+        env.add_global("chant", false);
         Ok(Pages { env })
+    }
+
+    /// Offers the Chant setting in the menu: the data holds a score for a hymn or Marian
+    /// antiphon (office::chant::offers_chant).
+    #[must_use]
+    pub fn with_chant(mut self, offered: bool) -> Pages {
+        self.env.add_global("chant", offered);
+        self
     }
 
     fn render<T: serde::Serialize>(&self, template: &str, data: &T) -> Result<String, String> {

@@ -3,6 +3,7 @@
 #
 #   build/OfficeCore.xcframework   the engine and embedded corpus, for iPhone and the simulator
 #   build/generated/office_mobile.swift   the UniFFI bindings, compiled into the app
+#   build/generated/Neuma.swift   neuma's bindings (chant engraving), built as the Neuma module
 #
 # The Swift is generated from the host library, as Android's Kotlin is: the bindings are the
 # same for every target. Run from anywhere; `xcodegen generate` then reads build/ from here.
@@ -28,10 +29,11 @@ done
 cargo build --locked --release -p mobile-ffi --lib
 cargo run --locked --release -p mobile-ffi --features bindgen --bin uniffi-bindgen -- \
   generate --library target/release/liboffice_mobile.dylib --language swift --out-dir "$out/bindings"
-mv "$out/bindings/office_mobile.swift" "$out/generated/"
-mv "$out/bindings/office_mobileFFI.h" "$out/include/"
-# Xcode finds a static XCFramework's module by this name, beside its header.
-mv "$out/bindings/office_mobileFFI.modulemap" "$out/include/module.modulemap"
+mv "$out/bindings/office_mobile.swift" "$out/bindings/Neuma.swift" "$out/generated/"
+mv "$out/bindings/office_mobileFFI.h" "$out/bindings/NeumaFFI.h" "$out/include/"
+# Xcode finds a static XCFramework's modules by this name, beside their headers: the library
+# carries both crates' exports, so one map declares both.
+cat "$out/bindings/office_mobileFFI.modulemap" "$out/bindings/NeumaFFI.modulemap" > "$out/include/module.modulemap"
 rm -r "$out/bindings"
 
 args=()

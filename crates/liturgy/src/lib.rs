@@ -223,6 +223,61 @@ pub struct OfficeElement {
     /// The opening words of a psalm or canticle that the antiphon before it
     /// has just said, and so are not repeated.
     pub unrepeated: Option<Unrepeated>,
+    /// The chant score that sets this element's sung words: a hymn's first
+    /// stanza or every stanza, or a Marian antiphon's antiphon. Renderers offer
+    /// it in place of those words when the reader sings; the text stays beside it.
+    pub score: Option<ChantScore>,
+}
+
+/// A chant score attached to an element.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ChantScore {
+    /// The score's GABC.
+    pub gabc: std::sync::Arc<str>,
+    /// What of the element it sets.
+    pub sets: ScoreSpan,
+}
+
+impl ChantScore {
+    /// A whole hymn's score parted stanza by stanza at its double bars `(::)`, each part with the
+    /// header and the opening clef; a part that is only an Amen stays with the one before it. A
+    /// score of one stanza or an antiphon is one part.
+    pub fn stanza_parts(&self) -> Vec<String> {
+        let gabc: &str = &self.gabc;
+        let Some((header, body)) = gabc.split_once("%%") else { return vec![gabc.to_string()] };
+        if self.sets != ScoreSpan::WholeHymn {
+            return vec![gabc.to_string()];
+        }
+        let body = body.trim();
+        let clef = body.split_whitespace().next().filter(|c| c.starts_with("(c") || c.starts_with("(f")).unwrap_or("");
+        let mut parts: Vec<String> = Vec::new();
+        for chunk in body.split_inclusive("(::)").map(str::trim).filter(|c| !c.is_empty()) {
+            let words = chunk.trim_start_matches(clef).trim_start().to_lowercase();
+            let amen = words.starts_with("a(") && words.contains("men") && chunk.len() < 40;
+            match parts.last_mut() {
+                Some(last) if amen => {
+                    last.push(' ');
+                    last.push_str(chunk);
+                }
+                _ => parts.push(chunk.to_string()),
+            }
+        }
+        parts
+            .into_iter()
+            .map(|p| if p.starts_with(clef) { format!("{header}%%\n{p}") } else { format!("{header}%%\n{clef} {p}") })
+            .collect()
+    }
+}
+
+/// The words a score sets.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ScoreSpan {
+    /// A hymn's first stanza, the rest sung to its tune from the text.
+    FirstStanza,
+    /// Every stanza of a hymn, its Amen too.
+    WholeHymn,
+    /// A Marian antiphon's antiphon, up to its ℣.
+    Antiphon,
 }
 
 /// Words that open a psalm or canticle exactly as its antiphon does: once the
@@ -277,6 +332,7 @@ impl OfficeElement {
             is_commemoration: false,
             announce: false,
             unrepeated: None,
+            score: None,
         }
     }
 

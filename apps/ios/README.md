@@ -63,6 +63,9 @@ open apps/ios/Office.xcodeproj
 `build-core.sh` builds the Rust core as a static library for iPhone and the simulator, bundles
 them as `build/OfficeCore.xcframework`, and generates the UniFFI bindings,
 `build/generated/office_mobile.swift`, from the host library as Android's Kotlin is generated.
+The same library carries neuma's chant engraving; its bindings (`build/generated/Neuma.swift`)
+build as their own `Neuma` module, imported only by `Score.swift`, since its `Page` and `Item`
+would otherwise meet the app's own names.
 `project.yml` is the XcodeGen spec; the `.xcodeproj` is generated, not checked in. The app
 shares the web's faces with the Android app (`apps/android/app/src/main/res/font/`).
 

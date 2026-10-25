@@ -254,6 +254,11 @@ class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
 
+/** The reader's Chant setting, offered only once a text has a score. */
+class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
+
+val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
+
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
  * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
@@ -523,6 +528,19 @@ fun MenuPanel(
                     }
                 }
                 PrefHint(AnnotatedString("Includes a reading of the following day’s saints at Prime."))
+                // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+                val chant = LocalChant.current
+                if (chant.offered) {
+                    Hairline(p.surfaceEdge)
+                    MenuRow {
+                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        Spacer(Modifier.weight(1f))
+                        listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
+                            MenuCell(label, on == chant.on, Type.label(12f, 0.06f)) { chant.onChange(on) }
+                        }
+                    }
+                    PrefHint(AnnotatedString("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is in hand."))
+                }
             }
         }
     }

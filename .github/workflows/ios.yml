@@ -116,7 +116,7 @@ jobs:
           done
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.94.1
+        uses: dtolnay/rust-toolchain@1.99.1
         with:
           targets: aarch64-apple-ios, aarch64-apple-ios-sim
 

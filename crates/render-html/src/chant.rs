@@ -1,0 +1,160 @@
+//! Chant scores as HTML: neuma engraves a score's SVG on the server at a few widths measured in
+//! the hymn's own text size, and a container query shows the widest that fits its column, so a
+//! score reflows with the page and the reader's text size without script or WebAssembly.
+//!
+//! A score sits beside the words it sets: the page carries both, marked `data-chant-variant`, and
+//! the reader's Chant setting (`data-chant` on the root) shows one (style.css).
+
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
+
+use liturgy::ChantScore;
+use neuma::{Chant, ChantOptions, Initial, LayoutOptions, SvgOptions};
+
+use crate::escape::html_escape_string;
+
+/// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
+const LYRIC_SPACES: f32 = 2.45;
+/// SVG units per staff space (neuma's default scale).
+const SCALE: f32 = 6.0;
+/// The column widths a score is laid out for, in lyric ems. style.css's container queries name
+/// the same widths; the narrowest also scales down to fit a narrower column.
+pub const WIDTHS_EM: [u16; 4] = [17, 22, 28, 36];
+
+/// A score in place of the words it sets: one SVG per width, the widest that fits shown. The
+/// group is announced by `words`, the text it sets, rather than by each SVG.
+pub fn score_html(gabc: &Arc<str>, words: &str) -> String {
+    format!(
+        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
+        html_escape_string(words.trim()),
+        engraved(gabc, true)
+    )
+}
+
+/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`): each stanza from a new
+/// line with its number, the first alone taking the initial. `stanzas` are the stanzas' words,
+/// for their labels; parts that do not pair with them make one score, as written.
+pub fn whole_hymn_html(score: &ChantScore, stanzas: &[String]) -> String {
+    let parts = score.stanza_parts();
+    if parts.len() != stanzas.len() {
+        return score_html(&score.gabc, &stanzas.join(" "));
+    }
+    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
+    for (i, (part, words)) in parts.iter().zip(stanzas).enumerate() {
+        out.push_str(&format!(
+            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+            html_escape_string(words.trim()),
+            if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
+            engraved(&Arc::from(part.as_str()), i == 0)
+        ));
+    }
+    out.push_str("</div>");
+    out
+}
+
+/// The score's SVGs, engraved once per score and initial.
+fn engraved(gabc: &Arc<str>, initial: bool) -> String {
+    type Cache = Mutex<HashMap<(Arc<str>, bool), String>>;
+    static CACHE: OnceLock<Cache> = OnceLock::new();
+    let cache = CACHE.get_or_init(Default::default);
+    let key = (gabc.clone(), initial);
+    if let Some(svgs) = cache.lock().ok().and_then(|c| c.get(&key).cloned()) {
+        return svgs;
+    }
+    let svgs = engrave(gabc, initial);
+    if let Ok(mut c) = cache.lock() {
+        c.insert(key, svgs.clone());
+    }
+    svgs
+}
+
+/// The SVGs, each sized in ems so that its lyrics are set at the text's size.
+fn engrave(gabc: &str, initial: bool) -> String {
+    let options =
+        if initial { ChantOptions::default() } else { ChantOptions::default().with_initial(Initial::None).with_annotation(false) };
+    let chant = Chant::with_options(gabc, options);
+    // Ids and classes unique to this score, so scores on one page never share a definition.
+    let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });
+    let mut out = String::new();
+    for em in WIDTHS_EM {
+        let units_per_em = LYRIC_SPACES * SCALE;
+        let layout = chant.layout_with(f32::from(em) * units_per_em, &LayoutOptions::default().with_scale(SCALE));
+        let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(format!("{prefix}w{em}")));
+        let (w, h) = (layout_width(&svg), layout_height(&svg));
+        out.push_str(&format!(
+            "<div class=\"chant-width chant-width-{em}\" style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
+            w / units_per_em,
+            strip_label(&svg)
+        ));
+    }
+    out
+}
+
+/// The `<svg>` without its own label: the score's group carries the words.
+fn strip_label(svg: &str) -> String {
+    let Some(start) = svg.find(" role=\"img\" aria-label=\"") else { return svg.to_string() };
+    let rest = &svg[start + " role=\"img\" aria-label=\"".len()..];
+    let Some(end) = rest.find('"') else { return svg.to_string() };
+    format!("{} aria-hidden=\"true\" focusable=\"false\"{}", &svg[..start], &rest[end + 1..])
+}
+
+fn svg_attr(svg: &str, name: &str) -> f32 {
+    let pat = format!(" {name}=\"");
+    svg.find(&pat).and_then(|i| svg[i + pat.len()..].split('"').next()).and_then(|v| v.parse().ok()).unwrap_or(1.0)
+}
+
+fn layout_width(svg: &str) -> f32 {
+    svg_attr(svg, "width")
+}
+
+fn layout_height(svg: &str) -> f32 {
+    svg_attr(svg, "height")
+}
+
+/// A short stable hash for the score's id prefix.
+fn fnv(s: &str) -> u32 {
+    s.bytes().fold(0x811c_9dc5_u32, |h, b| (h ^ u32::from(b)).wrapping_mul(0x0100_0193))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use liturgy::ScoreSpan;
+
+    const HYMN: &str = "name: Te lucis;\n%%\n(c4) TO(g) thee,(g) be(h)fore(j) the(h) close(g) of(h) day,(g.) (::)";
+
+    #[test]
+    fn a_score_offers_every_width_announced_by_its_words() {
+        let html = score_html(&Arc::from(HYMN), "To thee, before the close of day,");
+        assert!(html.starts_with(
+            "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"To thee, before the close of day,\">"
+        ));
+        for em in WIDTHS_EM {
+            assert!(html.contains(&format!("chant-width-{em}\"")), "{em}");
+        }
+        assert_eq!(html.matches("<svg").count(), WIDTHS_EM.len());
+        assert_eq!(html.matches("aria-hidden=\"true\"").count(), WIDTHS_EM.len());
+        assert!(!html.contains("aria-label=\"TO"), "the SVGs' own labels are dropped");
+        assert!(!html.contains("<style"), "style.css themes the score");
+    }
+
+    #[test]
+    fn a_whole_hymn_parts_at_its_double_bars_keeping_the_amen() {
+        let score = ChantScore {
+            gabc: Arc::from("name: t;\n%%\n(c4) One(g) two.(g) (::) Three(g) four.(g) (::) A(gh)men.(g) (::)"),
+            sets: ScoreSpan::WholeHymn,
+        };
+        let parts = score.stanza_parts();
+        assert_eq!(parts.len(), 2, "{parts:?}");
+        assert!(parts[1].starts_with("name: t;\n%%\n(c4) Three") && parts[1].ends_with("A(gh)men.(g) (::)"), "{}", parts[1]);
+        let html = whole_hymn_html(&score, &["One two.".into(), "Three four. Amen.".into()]);
+        assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
+        assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
+    }
+
+    #[test]
+    fn widths_are_set_in_lyric_ems() {
+        let html = score_html(&Arc::from(HYMN), "x");
+        assert!(html.contains("style=\"width:17.000em;"), "{html}");
+    }
+}

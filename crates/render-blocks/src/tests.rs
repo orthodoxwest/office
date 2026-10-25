@@ -2,8 +2,8 @@ use std::path::Path;
 
 use calendar::{CalendarData, Date, MoveableDates};
 use liturgy::{
-    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, Unrepeated,
-    VoiceSpan,
+    ChantScore, ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan,
+    ScoreSpan, Unrepeated, VoiceSpan,
 };
 use office::{Engine, HOUR_NAMES};
 use tools::fs::FsData;
@@ -214,4 +214,122 @@ fn blocks_carry_the_same_text_as_the_web() {
         }
     }
     assert!(checked > 10_000, "only {checked} sections checked");
+}
+
+const HYMN: &str = "To thee before the close of day,\nCreator of the world, we pray\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
+const MARIAN: &str = "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness and our hope.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy.\n\nLet us pray.\n\nAlmighty, everlasting God, who didst prepare.";
+
+fn scored(kind: ElementType, text: &str, gabc: &str, sets: ScoreSpan) -> OfficeElement {
+    let mut e = elem(kind, text);
+    if kind == ElementType::Antiphon {
+        e.label = "Salve Regina".into();
+        e.slot_ref = "marian-antiphon".into();
+    }
+    e.score = Some(ChantScore { gabc: gabc.into(), sets });
+    e
+}
+
+/// The words a front shows with Chant off, or (`on`) the words its scores set and the text around them.
+fn shown(out: &[Block], on: bool) -> String {
+    let hidden = if on { ChantVariant::Off } else { ChantVariant::On };
+    out.iter().filter(|b| b.chant != hidden).map(|b| squeeze(&b.plain_text())).collect()
+}
+
+/// The web's words with Chant on: each score by its stanza number and label, the words it
+/// replaces left out.
+fn web_chant_on(html: &str) -> String {
+    let mut out = String::new();
+    let mut rest = html;
+    while let Some(i) = rest.find('<') {
+        out.push_str(&squeeze(&html_text(&rest[..i])));
+        rest = &rest[i..];
+        let tag = &rest[..rest.find('>').unwrap() + 1];
+        let name: String = tag[1..].chars().take_while(char::is_ascii_alphanumeric).collect();
+        let score = tag.contains("class=\"chant-score");
+        if score || tag.contains("data-chant-variant=\"off\"") {
+            let end = element_end(rest, &name);
+            if score {
+                let element = &rest[..end];
+                if let Some(n) = element.split("class=\"chant-stanza-number\" aria-hidden=\"true\">").nth(1) {
+                    out.push_str(n.split('<').next().unwrap());
+                }
+                out.push_str(&squeeze(&html_text(tag.split("aria-label=\"").nth(1).unwrap().split('"').next().unwrap())));
+            }
+            rest = &rest[end..];
+        } else {
+            rest = &rest[tag.len()..];
+        }
+    }
+    out.push_str(&squeeze(&html_text(rest)));
+    out
+}
+
+/// Where the `name` element that `html` opens with closes.
+fn element_end(html: &str, name: &str) -> usize {
+    let (open, close) = (format!("<{name}"), format!("</{name}>"));
+    let mut depth = 0;
+    let mut i = 0;
+    while i < html.len() {
+        if html[i..].starts_with(&open) {
+            depth += 1;
+        } else if html[i..].starts_with(&close) {
+            depth -= 1;
+            if depth == 0 {
+                return i + close.len();
+            }
+        }
+        i += html[i..].chars().next().map_or(1, char::len_utf8);
+    }
+    html.len()
+}
+
+#[test]
+fn a_hymn_s_tune_stands_before_the_stanza_it_sets() {
+    let gabc = "name: t;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (;) Cre(g)a(h)tor(j) of(h) the(g) world,(h) we(g) pray(g.) (::)";
+    let e = scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::FirstStanza);
+    let out = blocks(&e);
+    let kinds: Vec<(BlockKind, ChantVariant)> = out.iter().map(|b| (b.kind, b.chant)).collect();
+    assert_eq!(
+        kinds,
+        [
+            (BlockKind::Heading, ChantVariant::Always),
+            (BlockKind::Score, ChantVariant::On),
+            (BlockKind::Stanza, ChantVariant::Off),
+            (BlockKind::Stanza, ChantVariant::Always)
+        ]
+    );
+    assert!(out[1].drop_cap && out[1].score == gabc);
+    assert_eq!(out[1].plain_text(), "To thee before the close of day, Creator of the world, we pray");
+}
+
+#[test]
+fn a_whole_hymn_is_a_score_per_stanza_numbered_after_the_first() {
+    let gabc = "name: t;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (::) From(g) all(h) ill(j) dreams(h) de(g)fend(h) our(g) eyes,(g.) (::) A(gh)men.(g) (::)";
+    let out = blocks(&scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::WholeHymn));
+    let scores: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Score).collect();
+    assert_eq!(scores.len(), 2);
+    assert!(scores[0].drop_cap && scores[0].marker.is_empty());
+    assert!(!scores[1].drop_cap && scores[1].marker == "2.");
+    assert!(scores[1].score.ends_with("A(gh)men.(g) (::)"), "{}", scores[1].score);
+    assert!(out.iter().filter(|b| b.kind == BlockKind::Stanza).all(|b| b.chant == ChantVariant::Off));
+}
+
+/// With Chant off a scored piece reads as it did unscored; with it on, the blocks name what the
+/// web's scores set, around the same unscored text.
+#[test]
+fn scored_blocks_carry_the_web_s_words_either_way() {
+    let hymn_gabc = "name: t;\n%%\n(c4) To(g) thee(h) (::) From(g) all(h) A(g)men.(g) (::)";
+    let marian_gabc = "name: t;\n%%\n(c4) Hail,(g) ho(h)ly(g) Queen.(g) (::)";
+    for e in [
+        scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::FirstStanza),
+        scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::WholeHymn),
+        scored(ElementType::Antiphon, MARIAN, marian_gabc, ScoreSpan::Antiphon),
+    ] {
+        let unscored = OfficeElement { score: None, ..e.clone() };
+        let out = blocks(&e);
+        assert_eq!(shown(&out, false), shown(&blocks(&unscored), false), "{:?}", e.score);
+        let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
+        assert_eq!(shown(&out, false), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
+        assert_eq!(shown(&out, true), web_chant_on(&html), "{:?}", e.score);
+    }
 }

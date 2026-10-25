@@ -702,14 +702,16 @@ summary:focus-visible {
 
 /* Off and On sit under the last two themes; the longer label takes the
    first theme's cell. */
-.site-prefs .martyrology-switch {
+.site-prefs .martyrology-switch,
+.site-prefs .chant-switch {
   display: grid;
   grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
   align-items: stretch;
   border-top: 1px solid var(--surface-edge);
 }
 
-.site-prefs .martyrology-switch .pref-label {
+.site-prefs .martyrology-switch .pref-label,
+.site-prefs .chant-switch .pref-label {
   grid-column: 1 / 3;
 }
 
@@ -8617,6 +8619,55 @@ body.page-home::before {
    paint, as the prayer forms are chosen. */
 :root:not([data-martyrology="on"]) [data-martyrology-variant="on"],
 :root[data-martyrology="on"] [data-martyrology-variant="off"] { display: none !important; }
+
+/* A hymn or Marian antiphon with a score carries it beside the words it sets;
+   the reader's Chant setting (off by default) shows one, before first paint. */
+:root:not([data-chant="on"]) [data-chant-variant="on"],
+:root[data-chant="on"] [data-chant-variant="off"] { display: none !important; }
+
+/* The score: neuma's SVG at a few widths in lyric ems (render-html chant.rs),
+   the widest that fits the column shown, so lyrics stay at the text's size
+   and reflow with the column and the reader's text size. Staves are ruled in
+   the lining, as the books rule them; notes and lyrics take the page's ink. */
+.chant-score {
+  container-type: inline-size;
+  margin: 0 0 0.75rem;
+  color: var(--text);
+}
+.chant-width { display: none; max-width: 100%; }
+.chant-width svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chant-width-17 { display: block; }
+@container (min-width: 22em) { .chant-width-17 { display: none; } .chant-width-22 { display: block; } }
+@container (min-width: 28em) { .chant-width-22 { display: none; } .chant-width-28 { display: block; } }
+@container (min-width: 36em) { .chant-width-28 { display: none; } .chant-width-36 { display: block; } }
+.chant-score svg { fill: currentColor; }
+.chant-score svg [class$="-staff"],
+.chant-score svg [class$="-ledger"] { fill: var(--lining); }
+.chant-score svg [class$="-rubric"] { fill: var(--rubric, var(--lining)); }
+.chant-score svg [class$="-sign"] { stroke: currentColor; stroke-width: 0.04em; }
+.chant-score svg text {
+  font-family: "EB Garamond", "EB Garamond Georgia", serif;
+  font-variant-ligatures: none;
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+}
+/* A whole hymn engraved: each stanza from a new line, its number in the
+   rubric red at the head of its first staff. */
+.chant-hymn { margin: 0 0 0.75rem; }
+.chant-stanza { position: relative; margin-top: 1.4rem; }
+.chant-stanza:first-child { margin-top: 0; }
+.chant-stanza-number {
+  position: absolute;
+  left: 0;
+  top: -1.1em;
+  color: var(--rubric);
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+/* A hymn's verse column is as wide as its longest line; with its tune shown
+   it takes the full measure so the score has room. */
+:root[data-chant="on"] .hymn-verses:has(> .chant-score) { width: auto; }
 
 /* The cached hour contains every officiant form. Select before first paint;
    display:none also removes inactive words from print and accessibility. */

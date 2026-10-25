@@ -41,6 +41,10 @@ func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
     // A hymn's rubric keeps a stanza's distance from the stanzas around it.
     if cur.kind == .hymnRubric && prev.kind == .stanza { return 12 }
     if cur.kind == .stanza && prev.kind == .hymnRubric { return 12 }
+    // A whole hymn's scores stand apart, room above each for its number (the web's `.chant-stanza`,
+    // 1.4rem); the stanzas after a tune keep a stanza's distance from it.
+    if cur.kind == .score && prev.kind == .score { return 22.4 }
+    if cur.kind == .stanza && prev.kind == .score { return 12 }
     if cur.startsElement { return 14 }
     return 4.8
 }
@@ -407,6 +411,8 @@ struct BlockRow: View {
     var body: some View {
         if block.kind == .gap {
             Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
+        } else if block.kind == .score {
+            ScoreRow(block: block)
         } else {
             let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked)
             let glosses = block.runs.compactMap(\.gloss)

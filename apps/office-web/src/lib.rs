@@ -68,7 +68,9 @@ impl Server {
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
         let version = pwa::compute_version(data_dir);
-        let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
+        let pages = Pages::new(pwa::asset_url)
+            .map_err(|e| format!("parsing templates: {e}"))?
+            .with_chant(office::chant::offers_chant(&engine.texts));
         Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None, canonical: None })
     }
 

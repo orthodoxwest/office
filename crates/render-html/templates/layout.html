@@ -26,7 +26,7 @@
   <meta name="twitter:card" content="summary_large_image">
   {% endif %}
   {# Apply stored appearance before CSS to avoid a flash.
-       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
+       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
     (function () {
       {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
@@ -34,7 +34,7 @@
         var carry = /^#office-carry=(.*)$/.exec(location.hash);
         if (carry) {
           new URLSearchParams(decodeURIComponent(carry[1])).forEach(function (value, key) {
-            if (/^office-(theme|text-size|prayer-form|martyrology)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
+            if (/^office-(theme|text-size|prayer-form|martyrology|chant)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
           });
           history.replaceState(null, "", location.pathname + location.search);
         }
@@ -59,6 +59,7 @@
           document.documentElement.removeAttribute("data-text-size");
         }
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
+        if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
     })();
   </script>

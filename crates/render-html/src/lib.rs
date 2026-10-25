@@ -2,6 +2,7 @@
 //! and the page templates. It touches neither the calendar nor the office engine, and review
 //! metadata arrives as plain data.
 
+pub mod chant;
 pub mod escape;
 pub mod html;
 pub mod leader;

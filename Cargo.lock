@@ -795,11 +795,35 @@ dependencies = [
  "corpus",
  "liturgy",
  "miniz_oxide",
+ "neuma-mobile",
  "office",
  "presentation",
  "render-blocks",
  "tools",
  "uniffi",
+]
+
+[[package]]
+name = "neuma"
+version = "0.1.0"
+source = "git+https://github.com/orthodoxwest/neuma?rev=33b00c37df2c72596ae5ed2773b98a4a3e716eb1#33b00c37df2c72596ae5ed2773b98a4a3e716eb1"
+
+[[package]]
+name = "neuma-mobile"
+version = "0.1.0"
+source = "git+https://github.com/orthodoxwest/neuma?rev=33b00c37df2c72596ae5ed2773b98a4a3e716eb1#33b00c37df2c72596ae5ed2773b98a4a3e716eb1"
+dependencies = [
+ "neuma",
+ "neuma-tones",
+ "uniffi",
+]
+
+[[package]]
+name = "neuma-tones"
+version = "0.1.0"
+source = "git+https://github.com/orthodoxwest/neuma?rev=33b00c37df2c72596ae5ed2773b98a4a3e716eb1#33b00c37df2c72596ae5ed2773b98a4a3e716eb1"
+dependencies = [
+ "neuma",
 ]
 
 [[package]]
@@ -820,6 +844,7 @@ dependencies = [
  "corpus",
  "data-format",
  "liturgy",
+ "neuma",
  "serde_json",
 ]
 
@@ -999,6 +1024,7 @@ dependencies = [
  "data-format",
  "liturgy",
  "minijinja",
+ "neuma",
  "office",
  "presentation",
  "serde",

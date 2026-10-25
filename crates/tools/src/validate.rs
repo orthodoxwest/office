@@ -244,6 +244,7 @@ pub fn validate_texts(src: &dyn DataSource) -> Vec<String> {
     for key in texts.corpus.missing_incipits() {
         errs.push(format!("no Latin incipit in data/latin-incipits.txt for: {key}"));
     }
+    errs.extend(office::chant::validate_scores(&texts));
     errs.sort();
     errs
 }

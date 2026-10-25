@@ -30,7 +30,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   commemorations and its hours), and the year's frontispiece (the Tabula Temporaria, each
   date leading to its day in the ordo). The site menu carries the day's hours, the Ordo and
   Reminders, and the Theme (Default / Nave / Apse), Text (A A A) and Martyrology (Off / On)
-  rows. The date picker's title turns its
+  rows, and Chant (Off / On) once a hymn or Marian antiphon has a score: neuma (its bindings in
+  `org.orthodoxwest.neuma`, from the same library) engraves the score and `Score.kt` draws it. The date picker's title turns its
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
@@ -271,7 +272,7 @@ though JNA ships its own native library for more. The corpus goes into the libra
 Build types: `debug` (debuggable, for Android Studio) and `preview` (optimized, non-debuggable,
 what the prerelease ships). Both use the `.preview` application ID. `preview` and `release` are
 shrunk by R8; JNA binds the generated bindings by name, so `app/proguard-rules.pro` keeps JNA
-and `org.orthodoxwest.office.core` whole. The screenshot and reminder tests run against `debug`,
+and `org.orthodoxwest.office.core` and `org.orthodoxwest.neuma` whole. The screenshot and reminder tests run against `debug`,
 so a change to those rules wants a look at a `preview` build on a phone.
 
 ## Screenshots without a device

@@ -13,7 +13,7 @@ use crate::http::{header_value, redirect, response, set};
 
 /// The `localStorage` keys a browser navigation carries to the canonical origin; the layout's
 /// head script imports them from the `#office-carry=` fragment.
-pub const CARRIED_KEYS: [&str; 4] = ["office-theme", "office-text-size", "office-prayer-form", "office-martyrology"];
+pub const CARRIED_KEYS: [&str; 5] = ["office-theme", "office-text-size", "office-prayer-form", "office-martyrology", "office-chant"];
 
 /// A canonical host as configured: a bare host name with an optional port.
 pub fn parse_host(raw: &str) -> Option<String> {
