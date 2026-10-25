@@ -27,11 +27,14 @@ struct ScoreRow: View {
                 Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
                     .accessibilityHidden(true)
             }
+            // A custos may reach past the measure: the whole score is fitted to the column.
+            let fit = page.map { $0.width > Float(width) ? width / CGFloat($0.width) : 1 } ?? 1
             Canvas { context, _ in
+                context.scaleBy(x: fit, y: fit)
                 if let page { draw(page, in: &context) }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: page.map { CGFloat($0.height) } ?? 0)
+            .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         }
         .accessibilityElement(children: .ignore)

@@ -60,8 +60,10 @@ fun Score(block: BlockView, modifier: Modifier) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val width = constraints.maxWidth.toFloat()
             val page = remember(block.score, block.dropCap, width, lyric) { engrave(block.score, block.dropCap, width, lyric) }
-            Canvas(Modifier.fillMaxWidth().height(with(density) { page.height.toDp() })) {
-                drawScore(page, ScoreInks(text = p.text, staff = p.lining, rubric = p.rubric), faces)
+            // A custos may reach past the measure: the whole score is fitted to the column.
+            val fit = if (page.width > width) width / page.width else 1f
+            Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
+                scale(fit, Offset.Zero) { drawScore(page, ScoreInks(text = p.text, staff = p.lining, rubric = p.rubric), faces) }
             }
         }
     }
