@@ -4,6 +4,9 @@ import UIKit
 /// The reading measure's side gutter (`--page-gutter` on a phone).
 let gutter: CGFloat = 16
 
+/// The lines under the Martyrology and Chant rows, as the web's (`presentation`).
+private let prefHints = preferenceHints()
+
 /// Wide screens keep the web's prayer measure (`.elements`, 38rem).
 let measure: CGFloat = 608
 
@@ -327,7 +330,7 @@ struct MenuPanel: View {
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            hint(Text("Includes a reading of the following day’s saints at Prime."))
+            hint(Text(prefHints.martyrology))
             // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
             if model.offersChant {
                 HStack(spacing: 0) {
@@ -346,7 +349,7 @@ struct MenuPanel: View {
                     }
                 }
                 .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-                hint(Text("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available."))
+                hint(Text(prefHints.chant))
             }
         }
         .padding(m.px(10.4))

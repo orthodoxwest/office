@@ -43,7 +43,7 @@
   <span class="pref-label" aria-hidden="true">Martyrology</span>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Off</button>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
-  <p class="pref-hint">Includes a reading of the following day’s saints at Prime.</p>
+  <p class="pref-hint">{{ martyrology_hint }}</p>
 </div>
 {# Chant notation for the hymn's tune and the Marian antiphon, where a score is available; off by
    default, and kept out of sight until the data holds a score (office::chant::offers_chant). #}
@@ -52,7 +52,7 @@
   <span class="pref-label" aria-hidden="true">Chant</span>
   <button type="button" class="theme-option chant-option" data-chant-choice="off" title="Hymns and antiphons as text" aria-pressed="false">Off</button>
   <button type="button" class="theme-option chant-option" data-chant-choice="on" title="Show chant notation" aria-pressed="false">On</button>
-  <p class="pref-hint">Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available.</p>
+  <p class="pref-hint">{{ chant_hint }}</p>
 </div>
 {% endif %}
 {% endmacro %}

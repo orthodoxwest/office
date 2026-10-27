@@ -313,6 +313,13 @@ fn the_apps_offer_the_webs_prayer_forms() {
 }
 
 #[test]
+fn the_apps_give_the_webs_setting_hints() {
+    let hints = preference_hints();
+    assert_eq!(hints.martyrology, presentation::MARTYROLOGY_HINT);
+    assert_eq!(hints.chant, presentation::CHANT_HINT);
+}
+
+#[test]
 fn the_apps_open_the_webs_prayers_by_default() {
     let open: Vec<_> = hour_names().into_iter().filter(|h| prayers_open_by_default(h.clone())).collect();
     assert_eq!(open, ["lauds", "prime", "vespers"]);

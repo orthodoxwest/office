@@ -297,6 +297,19 @@ pub fn prayers_open_by_default(hour: String) -> bool {
     presentation::prayers_open_by_default(&hour)
 }
 
+/// The lines under the menu's settings that need saying, as the web prints them
+/// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct PreferenceHints {
+    pub martyrology: String,
+    pub chant: String,
+}
+
+#[uniffi::export]
+pub fn preference_hints() -> PreferenceHints {
+    PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
+}
+
 /// A reader's way through an hour's words, for home's mark of the hours prayed
 /// (`presentation::Reading`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]

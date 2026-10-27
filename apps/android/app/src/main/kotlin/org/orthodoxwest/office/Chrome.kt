@@ -112,6 +112,7 @@ import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.preferenceHints
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
 val Gutter: Dp = 16.dp
@@ -527,7 +528,7 @@ fun MenuPanel(
                         MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
-                PrefHint(AnnotatedString("Includes a reading of the following day’s saints at Prime."))
+                PrefHint(AnnotatedString(PREF_HINTS.martyrology))
                 // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
                 val chant = LocalChant.current
                 if (chant.offered) {
@@ -539,7 +540,7 @@ fun MenuPanel(
                             MenuCell(label, on == chant.on, Type.label(12f, 0.06f)) { chant.onChange(on) }
                         }
                     }
-                    PrefHint(AnnotatedString("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available."))
+                    PrefHint(AnnotatedString(PREF_HINTS.chant))
                 }
             }
         }
@@ -554,6 +555,9 @@ private fun AnnotatedString.Builder.prefName(name: String) {
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
 private val ShadowRoom: Dp = 16.dp
 private val ShadowRise: Dp = 9.dp
+
+/** The lines under the Martyrology and Chant rows, as the web's (`presentation`). */
+private val PREF_HINTS by lazy { preferenceHints() }
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable
