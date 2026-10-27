@@ -79,10 +79,6 @@ struct FindScreen: View {
                     Text(view.count).type(Scale.small.sized(14.4, line: 21)).foregroundStyle(p.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .feastColumn(m, wide: wide).padding(.top, m.px(14))
-                        // Said as it changes, as the web's `role="status"`.
-                        .onChange(of: view.count) { _, count in
-                            AccessibilityNotification.Announcement(count).post()
-                        }
                 }
                 ForEach(view.results, id: \.id) { r in
                     result(r).feastColumn(m, wide: wide).padding(.top, m.px(16))
@@ -91,6 +87,11 @@ struct FindScreen: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
+        // Said as it changes, as the web's `role="status"`; on the page, which stays while the
+        // count comes and goes.
+        .onChange(of: view.count) { _, count in
+            if !count.isEmpty { AccessibilityNotification.Announcement(count).post() }
+        }
     }
 
     private func result(_ r: FeastResultView) -> some View {

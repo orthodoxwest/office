@@ -3941,3 +3941,16 @@ test("escaped page links retain navigation and report query values", async ({ pa
   await page.locator(".next-hour").click();
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
 });
+
+test("a feast's page leads back to the search that found it", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  await page.locator(".find-name").first().click();
+  await expect(page).toHaveURL(/\/feast\//);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find?q=raphael");
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+
+  // Reached otherwise, it leads to the empty search.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
+});

@@ -60,7 +60,9 @@ struct Year {
 pub struct OfficeCore {
     engine: Engine,
     calendar: CalendarData,
-    year: Mutex<Option<Arc<Year>>>,
+    /// The two years last composed: a feast's page reads its day and that of its eve, and the
+    /// reader moves between this year's pages and a feast's next keeping.
+    years: Mutex<Vec<Arc<Year>>>,
     /// Every feast a reader can look up, and each year's keeping of them.
     feasts: FeastIndex,
     keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
@@ -74,7 +76,7 @@ impl OfficeCore {
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
         let feasts = FeastIndex::new(&calendar);
-        Ok(Arc::new(OfficeCore { engine, calendar, year: Mutex::new(None), feasts, keepings: Mutex::new(HashMap::new()) }))
+        Ok(Arc::new(OfficeCore { engine, calendar, years: Mutex::new(Vec::new()), feasts, keepings: Mutex::new(HashMap::new()) }))
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
@@ -224,15 +226,20 @@ impl OfficeCore {
 
 impl OfficeCore {
     fn year(&self, year: i32) -> Result<Arc<Year>, OfficeError> {
-        let mut cached = self.year.lock().map_err(|e| failed(e.to_string()))?;
-        if let Some(y) = cached.as_ref().filter(|y| y.year == year) {
-            return Ok(Arc::clone(y));
+        let mut cached = self.years.lock().map_err(|e| failed(e.to_string()))?;
+        if let Some(at) = cached.iter().position(|y| y.year == year) {
+            let y = cached.remove(at);
+            cached.push(Arc::clone(&y));
+            return Ok(y);
         }
         let cal = build_calendar(year, &self.calendar).map_err(failed)?;
         let office = resolve_office_days(&cal);
         let days = cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect();
         let y = Arc::new(Year { year, days, moveable: MoveableDates::compute(year) });
-        *cached = Some(Arc::clone(&y));
+        if cached.len() == 2 {
+            cached.remove(0);
+        }
+        cached.push(Arc::clone(&y));
         Ok(y)
     }
 }

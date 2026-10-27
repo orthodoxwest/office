@@ -107,23 +107,26 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
         }
         out.texts.push(FeastText { label, text, common, prayer });
     };
-    let antiphons = grouped(antiphons);
-    let versicles = grouped(versicles);
+    // With no I Vespers read, the day's Vespers are simply its Vespers.
+    let first_read = antiphons.iter().chain(&versicles).any(|(p, _)| *p == Place::FirstVespers);
+    let name = |places: &[Place]| places_name(places, first_read);
+    let antiphons = grouped(antiphons, &own);
+    // A versicle's label is the same in a commemoration, so its hours are not kept apart.
+    let versicles = grouped(versicles, &[]);
     // Each hour's antiphon, then its versicle, in the order they are said.
     for place in [Place::FirstVespers, Place::Lauds, Place::SecondVespers] {
-        if let Some((places, text)) = antiphons.iter().find(|(p, _)| p[0] == place) {
+        for (places, text) in antiphons.iter().filter(|(p, _)| p[0] == place) {
             // In the feast's own hour the antiphon is the canticle's; in a commemoration, its own.
             let what = match places.as_slice() {
-                p if p.iter().all(|p| !own.contains(p)) => " · Antiphon",
-                p if !p.iter().all(|p| own.contains(p)) => "",
+                p if !own.contains(&p[0]) => " · Antiphon",
                 [Place::Lauds] => " · Benedictus",
                 p if !p.contains(&Place::Lauds) => " · Magnificat",
                 _ => "",
             };
-            push(format!("At {}{what}", places_name(places)), text.clone(), false);
+            push(format!("At {}{what}", name(places)), text.clone(), false);
         }
-        if let Some((places, text)) = versicles.iter().find(|(p, _)| p[0] == place) {
-            push(format!("Versicle at {}", places_name(places)), text.clone(), false);
+        for (places, text) in versicles.iter().filter(|(p, _)| p[0] == place) {
+            push(format!("Versicle at {}", name(places)), text.clone(), false);
         }
     }
     // The collect as Lauds says it, else as Vespers does.
@@ -177,11 +180,13 @@ fn common_of(source: &str) -> Option<Category> {
     Category::parse(common.strip_suffix("-paschal").unwrap_or(common)).ok()
 }
 
-/// Texts said alike at several hours, as one, at the first hour that says them.
-fn grouped(said: Vec<(Place, Sourced)>) -> Vec<(Vec<Place>, Sourced)> {
+/// Texts said alike at several hours, as one, at the first hour that says them. The feast's own
+/// hours and those it is commemorated in are kept apart, so that one label holds for each.
+fn grouped(said: Vec<(Place, Sourced)>, own: &[Place]) -> Vec<(Vec<Place>, Sourced)> {
     let mut out: Vec<(Vec<Place>, Sourced)> = Vec::new();
     for (place, text) in said {
-        match out.iter_mut().find(|(_, t)| t.0 == text.0) {
+        let alike = |(p, t): &&mut (Vec<Place>, Sourced)| t.0 == text.0 && own.contains(&p[0]) == own.contains(&place);
+        match out.iter_mut().find(alike) {
             Some((places, _)) => places.push(place),
             None => out.push((vec![place], text)),
         }
@@ -189,13 +194,14 @@ fn grouped(said: Vec<(Place, Sourced)>) -> Vec<(Vec<Place>, Sourced)> {
     out
 }
 
-/// "Lauds", "I Vespers", "Lauds and II Vespers": I and II Vespers together are simply Vespers,
-/// named after Lauds.
-fn places_name(places: &[Place]) -> String {
+/// "Lauds", "I Vespers", "Lauds and II Vespers", named in the order they are said. I and II Vespers
+/// together are simply Vespers, as II Vespers are when no I Vespers were read (`first_read`).
+fn places_name(places: &[Place], first_read: bool) -> String {
     if places.contains(&Place::FirstVespers) && places.contains(&Place::SecondVespers) {
-        return if places.contains(&Place::Lauds) { "Lauds and Vespers" } else { "Vespers" }.to_string();
+        return if places.contains(&Place::Lauds) { "Vespers and Lauds" } else { "Vespers" }.to_string();
     }
-    places.iter().map(|p| p.name()).collect::<Vec<_>>().join(" and ")
+    let name = |p: &Place| if *p == Place::SecondVespers && !first_read { "Vespers" } else { p.name() };
+    places.iter().map(name).collect::<Vec<_>>().join(" and ")
 }
 
 #[cfg(test)]
@@ -291,7 +297,7 @@ mod tests {
     #[test]
     fn i_vespers_take_the_feasts_own_versicle_before_the_commons() {
         let texts = Years::load().texts("chains-st-peter", "2026-08-01");
-        assert!(text(&texts, "Versicle at Lauds and Vespers").contains("Thou art Peter"), "{:?}", texts.texts);
+        assert!(text(&texts, "Versicle at Vespers and Lauds").contains("Thou art Peter"), "{:?}", texts.texts);
         assert!(text(&texts, "At I Vespers · Magnificat").starts_with("Thou art the shepherd"));
     }
 
@@ -320,5 +326,20 @@ mod tests {
         let texts = Years::load().texts("all-souls", "2027-11-02");
         assert!(text(&texts, "Collect").starts_with("O God, the Creator and Redeemer of all the faithful"));
         assert!(labels(&texts).iter().all(|l| !l.contains("Vespers")), "its evening is the octave's: {:?}", labels(&texts));
+    }
+
+    #[test]
+    fn a_day_without_i_vespers_names_its_vespers_plainly() {
+        let years = Years::load();
+        let ash = MoveableDates::compute(2027).ash_wednesday.to_string();
+        let texts = years.texts("ash-wednesday", &ash);
+        assert!(labels(&texts).iter().all(|l| !l.contains("II Vespers")), "{:?}", labels(&texts));
+        assert!(labels(&texts).iter().any(|l| l.contains("Vespers")), "{:?}", labels(&texts));
+    }
+
+    #[test]
+    fn the_hours_are_named_in_the_order_they_are_said() {
+        let texts = Years::load().texts("st-thomas-apostle", "2026-12-21");
+        assert!(labels(&texts).iter().all(|l| !l.contains("Lauds and Vespers")), "{:?}", labels(&texts));
     }
 }
