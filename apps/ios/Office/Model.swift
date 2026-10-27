@@ -6,12 +6,9 @@ enum Office {
     static let core: Result<OfficeCore, Error> = Result { try OfficeCore() }
 }
 
-/// The prayer forms: value, the control's label, and the chooser's phrase (hour.html).
-let prayerForms: [(value: String, label: String, phrase: String)] = [
-    ("private", "Private", "Praying privately"),
-    ("deacon", "Deacon", "With others, led by a deacon"),
-    ("priest", "Priest", "With others, led by a priest"),
-]
+/// The prayer forms: value, the control's label, and the chooser's phrase, as the web's.
+let prayerForms: [(value: String, label: String, phrase: String)] =
+    prayerFormChoices().map { (value: $0.value, label: $0.label, phrase: $0.phrase) }
 
 /// Capitalizes an hour's name: "lauds" → "Lauds".
 func hourLabel(_ hour: String) -> String { hour.prefix(1).uppercased() + hour.dropFirst() }

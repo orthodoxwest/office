@@ -899,6 +899,7 @@ dependencies = [
  "data-format",
  "liturgy",
  "office",
+ "presentation",
  "tools",
 ]
 
@@ -1038,6 +1039,7 @@ dependencies = [
  "calendar",
  "corpus",
  "liturgy",
+ "presentation",
 ]
 
 [[package]]

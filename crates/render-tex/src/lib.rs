@@ -1,7 +1,7 @@
 //! LuaLaTeX booklet rendering (half-letter) of a composed hour. The renderer does no file access:
 //! chant scores are found through a caller-supplied [`Chant`] lookup.
 
-use calendar::{Color, Season};
+use calendar::Color;
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use corpus::typography::typeset;
 use liturgy::{
@@ -9,9 +9,6 @@ use liturgy::{
 };
 
 const PREAMBLE: &str = include_str!("preamble.tex");
-
-const MONTHS: [&str; 12] =
-    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// Longest feast name the right-hand running head carries; a longer one gives
 /// way to the date so the head stays on one line.
@@ -48,14 +45,9 @@ pub fn format_office_hour_tex(hour: &OfficeHour, chant: Option<&Chant<'_>>) -> S
     b
 }
 
-fn long_date(hour: &OfficeHour) -> String {
-    let d = hour.date;
-    format!("{}, {} {}, {:04}", d.weekday().name(), MONTHS[d.month() as usize - 1], d.day(), d.year())
-}
-
 /// The running-head names and PDF metadata for this booklet.
 fn document_setup(hour: &OfficeHour) -> String {
-    let date = long_date(hour);
+    let date = presentation::long_date(hour.date);
     let day = if hour.feast.is_empty() || hour.feast.chars().count() > RUNNING_HEAD_FEAST_MAX { &date } else { &hour.feast };
     let mut b = format!("\n\\newcommand{{\\officehour}}{{{}}}\n", tex_line(&hour.hour));
     b.push_str(&format!("\\newcommand{{\\officeday}}{{{}}}\n", tex_line(day)));
@@ -71,28 +63,12 @@ fn title_block(hour: &OfficeHour) -> String {
     format!(
         "\\officetitle{{{}}}{{{}}}{{{}}}{{{}}}{{{}}}{{{}}}\n\n",
         tex_line(&hour.hour),
-        tex_line(&long_date(hour)),
+        tex_line(&presentation::long_date(hour.date)),
         tex_line(&hour.feast),
-        hour.season.map_or("", season_name),
+        hour.season.map_or_else(String::new, |s| presentation::season_label(s.as_str())),
         hour.color.map_or("", color_name),
         hour.color.map_or("", Color::as_str),
     )
-}
-
-/// The season as the web hour header names it: the tides by their season
-/// names, so none reads as the feast day, and the season after Pentecost
-/// unnamed, its Sundays and feasts naming themselves.
-fn season_name(season: Season) -> &'static str {
-    match season {
-        Season::Advent => "Advent",
-        Season::Christmas => "Christmastide",
-        Season::Epiphany => "Epiphanytide",
-        Season::Septuagesima => "Septuagesima",
-        Season::Lent => "Lent",
-        Season::Passiontide => "Passiontide",
-        Season::Easter => "Eastertide",
-        Season::Pentecost => "",
-    }
 }
 
 fn color_name(color: Color) -> &'static str {

@@ -454,6 +454,9 @@ pub struct OfficeSection {
     pub elements: Vec<OfficeElement>,
 }
 
+/// The seven hours, in canonical order.
+pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+
 /// How the office is prayed: privately or led by clergy.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PrayerForm {
@@ -465,7 +468,10 @@ pub enum PrayerForm {
 impl PrayerForm {
     pub const ALL: [PrayerForm; 3] = [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest];
 
-    pub fn as_str(self) -> &'static str {
+    /// The forms' values, in [`PrayerForm::ALL`]'s order.
+    pub const NAMES: [&'static str; 3] = [PrayerForm::Private.as_str(), PrayerForm::Deacon.as_str(), PrayerForm::Priest.as_str()];
+
+    pub const fn as_str(self) -> &'static str {
         match self {
             PrayerForm::Private => "private",
             PrayerForm::Deacon => "deacon",
@@ -489,6 +495,15 @@ impl PrayerForm {
             PrayerForm::Private => "Private",
             PrayerForm::Deacon => "Deacon",
             PrayerForm::Priest => "Priest",
+        }
+    }
+
+    /// The hour's chooser offers the form in these words.
+    pub fn phrase(self) -> &'static str {
+        match self {
+            PrayerForm::Private => "Praying privately",
+            PrayerForm::Deacon => "With others, led by a deacon",
+            PrayerForm::Priest => "With others, led by a priest",
         }
     }
 }

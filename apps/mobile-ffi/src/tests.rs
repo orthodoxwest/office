@@ -303,3 +303,17 @@ fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
 }
+
+#[test]
+fn the_apps_offer_the_webs_prayer_forms() {
+    let forms = prayer_form_choices();
+    let values: Vec<_> = forms.iter().map(|f| f.value.as_str()).collect();
+    assert_eq!(values, presentation::usage::PRAYER_FORMS);
+    assert_eq!(forms[0], PrayerFormChoice { value: "private".into(), label: "Private".into(), phrase: "Praying privately".into() });
+}
+
+#[test]
+fn the_apps_open_the_webs_prayers_by_default() {
+    let open: Vec<_> = hour_names().into_iter().filter(|h| prayers_open_by_default(h.clone())).collect();
+    assert_eq!(open, ["lauds", "prime", "vespers"]);
+}
