@@ -114,9 +114,10 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
         if let Some((places, text)) = antiphons.iter().find(|(p, _)| p[0] == place) {
             // In the feast's own hour the antiphon is the canticle's; in a commemoration, its own.
             let what = match places.as_slice() {
-                [p] if !own.contains(p) => " · Antiphon",
+                p if p.iter().all(|p| !own.contains(p)) => " · Antiphon",
+                p if !p.iter().all(|p| own.contains(p)) => "",
                 [Place::Lauds] => " · Benedictus",
-                [_] => " · Magnificat",
+                p if !p.contains(&Place::Lauds) => " · Magnificat",
                 _ => "",
             };
             push(format!("At {}{what}", places_name(places)), text.clone(), false);

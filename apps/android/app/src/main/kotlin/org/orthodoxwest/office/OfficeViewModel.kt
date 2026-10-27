@@ -270,7 +270,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         if (stack.size > 1 && stack[stack.lastIndex - 1].page is Page.Find) back() else open(Page.Find(""))
     }
 
-    /** Home for today, clearing the way back, as the brand link does.
+    /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
         motion = if (stack.size > 1) Motion.BACK else stepBetween(page, Page.Home(today))
         stack.clear()
