@@ -134,17 +134,21 @@ pub fn service_worker(version: &str) -> Response<Body> {
 mod tests {
     use super::*;
 
-    /// The chant engine app.js lays scores out with is built from the neuma the server engraves
+    /// The chant engine chant.js lays scores out with is built from the neuma the server engraves
     /// with; `make neuma-web` builds it again when the pin moves.
     #[test]
     fn the_browser_engine_is_the_pinned_neuma() {
         let cargo = include_str!("../../../Cargo.toml");
-        let rev = cargo
-            .lines()
-            .find(|l| l.starts_with("neuma = "))
-            .and_then(|l| l.split("rev = \"").nth(1))
-            .and_then(|r| r.split('"').next())
-            .expect("neuma's rev in Cargo.toml");
+        let pin = |dep: &str| {
+            cargo
+                .lines()
+                .find(|l| l.starts_with(&format!("{dep} = ")))
+                .and_then(|l| l.split("rev = \"").nth(1))
+                .and_then(|r| r.split('"').next())
+                .unwrap_or_else(|| panic!("{dep}'s rev in Cargo.toml"))
+        };
+        let rev = pin("neuma");
+        assert_eq!(pin("neuma-mobile"), rev, "the apps engrave with the same neuma as the web");
         let module = std::str::from_utf8(file("static/neuma.mjs").expect("static/neuma.mjs")).unwrap();
         let first = module.lines().next().unwrap();
         assert!(first.starts_with(&format!("// neuma {rev} ")), "static/neuma.mjs is not neuma {rev}; run make neuma-web: {first}");

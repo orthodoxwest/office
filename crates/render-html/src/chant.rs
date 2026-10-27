@@ -1,5 +1,5 @@
 //! Chant scores as HTML: neuma engraves a score's SVG on the server at one width measured in the
-//! hymn's own text size, for a page without script, and carries its GABC; app.js lays it out
+//! hymn's own text size, for a browser that can't run the engine, and carries its GABC; chant.js lays it out
 //! again in the browser with neuma's module (static/neuma.mjs) at its column's width, as the
 //! apps lay a score out at theirs, so a score fills its column and reflows with the page and the
 //! reader's text size.
@@ -16,9 +16,9 @@ use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 use crate::escape::html_escape_string;
 
 /// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
-/// app.js names the same.
+/// chant.js names the same.
 const LYRIC_SPACES: f32 = 2.45;
-/// SVG units per staff space (neuma's default scale). app.js names the same.
+/// SVG units per staff space (neuma's default scale). chant.js names the same.
 const SCALE: f32 = 6.0;
 /// The width, in lyric ems, of the score a page shows until its script lays the score out at
 /// the column's width, or without script: a phone's column is 15 to 20 em at the default text
@@ -72,7 +72,7 @@ fn engraved(gabc: &Arc<str>, initial: bool) -> String {
     svgs
 }
 
-/// How the page sets a score, as Score.kt, Score.swift and app.js do: a hyphen between every two
+/// How the page sets a score, as Score.kt, Score.swift and chant.js do: a hyphen between every two
 /// syllables, as English chant books mark them for a reader following the words; the initial
 /// three quarters of the Solesmes size and flush with the margin, to sit with the page's text
 /// initials; and the last staff ending at the final bar.
@@ -85,11 +85,11 @@ fn page_options() -> ChantOptions {
 }
 
 /// The initial's size as a share of the Solesmes one, which runs from the staff's top line to
-/// the lyrics (Score.kt, Score.swift and app.js name the same).
+/// the lyrics (Score.kt, Score.swift and chant.js name the same).
 const INITIAL_SCALE: f32 = 0.75;
 
 /// The score at [`FALLBACK_EM`], sized in ems so that its lyrics are set at the text's size, with
-/// what app.js lays it out again from: its GABC, whether it takes the initial, and its prefix.
+/// what chant.js lays it out again from: its GABC, whether it takes the initial, and its prefix.
 fn engrave(gabc: &str, initial: bool) -> String {
     let options = if initial { page_options() } else { page_options().with_initial(Initial::None).with_annotation(false) };
     let chant = Chant::with_options(gabc, options);
@@ -180,11 +180,11 @@ mod tests {
         assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
     }
 
-    /// app.js lays a score out again as the server does: at its lyric size and scale, with the
+    /// chant.js lays a score out again as the server does: at its lyric size and scale, with the
     /// page's options, the initial only where the server set one.
     #[test]
-    fn app_js_lays_a_score_out_as_the_server_does() {
-        let js = include_str!("../../../apps/office-web/static/app.js");
+    fn chant_js_lays_a_score_out_as_the_server_does() {
+        let js = include_str!("../../../apps/office-web/static/chant.js");
         for line in [
             format!("var LYRIC_SPACES = {LYRIC_SPACES};"),
             format!("var SCALE = {SCALE};"),
@@ -194,9 +194,9 @@ mod tests {
             "shortLastStaff: true,".to_string(),
             "style: false".to_string(),
         ] {
-            assert!(js.contains(&line), "app.js lacks {line:?}");
+            assert!(js.contains(&line), "chant.js lacks {line:?}");
         }
-        // The options app.js names are page_options()'s.
+        // The options chant.js names are page_options()'s.
         let style = page_options().style;
         assert_eq!(style.hyphens, Hyphens::EverySyllable);
         assert_eq!((style.initial_scale, style.initial_margin, style.short_last_staff), (INITIAL_SCALE, 0.0, true));

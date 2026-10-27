@@ -3990,4 +3990,14 @@ test("a chant score fills its column at every width and keeps its own when the e
   expect(fallback.laidOut).toBe(false);
   expect(fallback.score).toBeLessThanOrEqual(fallback.column + 0.5);
   expect(fallback.overflow).toBe(0);
+
+  // A browser too old for the engine never fetches it.
+  await page.unroute(/\/static\/neuma\.mjs/);
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  expect((await fit()).laidOut).toBe(false);
+  expect(fetched).toEqual([]);
 });

@@ -42,8 +42,8 @@ private const val LYRIC_SPACES = 2.45f
 
 /**
  * A chant score (a `BlockKind.SCORE` block, with the Chant setting on): neuma engraves its GABC
- * at the column's width with its lyrics at the hymn's text size, as the web's container query
- * picks the engraving that fits, and the staff takes the theme's lining, as the web's
+ * at the column's width with its lyrics at the hymn's text size, as the web's chant.js lays it
+ * out at its column's, and the staff takes the theme's lining, as the web's
  * `.chant-score` does. A whole hymn's stanzas after the first carry their number (the marker),
  * in the rubric's red above the score.
  */
