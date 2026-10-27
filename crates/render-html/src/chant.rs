@@ -1,6 +1,8 @@
-//! Chant scores as HTML: neuma engraves a score's SVG on the server at a few widths measured in
-//! the hymn's own text size, and a container query shows the widest that fits its column, so a
-//! score reflows with the page and the reader's text size without script or WebAssembly.
+//! Chant scores as HTML: neuma engraves a score's SVG on the server at one width measured in the
+//! hymn's own text size, for a browser that can't run the engine, and carries its GABC; chant.js lays it out
+//! again in the browser with neuma's module (static/neuma.mjs) at its column's width, as the
+//! apps lay a score out at theirs, so a score fills its column and reflows with the page and the
+//! reader's text size.
 //!
 //! A score sits beside the words it sets: the page carries both, marked `data-chant-variant`, and
 //! the reader's Chant setting (`data-chant` on the root) shows one (style.css).
@@ -14,15 +16,17 @@ use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 use crate::escape::html_escape_string;
 
 /// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
+/// chant.js names the same.
 const LYRIC_SPACES: f32 = 2.45;
-/// SVG units per staff space (neuma's default scale).
+/// SVG units per staff space (neuma's default scale). chant.js names the same.
 const SCALE: f32 = 6.0;
-/// The column widths a score is laid out for, in lyric ems. style.css's container queries name
-/// the same widths; the narrowest also scales down to fit a narrower column.
-pub const WIDTHS_EM: [u16; 4] = [17, 22, 28, 36];
+/// The width, in lyric ems, of the score a page shows until its script lays the score out at
+/// the column's width, or without script: a phone's column is 15 to 20 em at the default text
+/// size, and the score scales down to fit a narrower one.
+pub const FALLBACK_EM: u16 = 17;
 
-/// A score in place of the words it sets: one SVG per width, the widest that fits shown. The
-/// group is announced by `words`, the text it sets, rather than by each SVG.
+/// A score in place of the words it sets. The group is announced by `words`, the text it sets,
+/// rather than by its SVG.
 pub fn score_html(gabc: &Arc<str>, words: &str) -> String {
     format!(
         "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
@@ -68,7 +72,7 @@ fn engraved(gabc: &Arc<str>, initial: bool) -> String {
     svgs
 }
 
-/// How the page sets a score, as Score.kt and Score.swift do: a hyphen between every two
+/// How the page sets a score, as Score.kt, Score.swift and chant.js do: a hyphen between every two
 /// syllables, as English chant books mark them for a reader following the words; the initial
 /// three quarters of the Solesmes size and flush with the margin, to sit with the page's text
 /// initials; and the last staff ending at the final bar.
@@ -81,28 +85,28 @@ fn page_options() -> ChantOptions {
 }
 
 /// The initial's size as a share of the Solesmes one, which runs from the staff's top line to
-/// the lyrics (Score.kt and Score.swift name the same).
+/// the lyrics (Score.kt, Score.swift and chant.js name the same).
 const INITIAL_SCALE: f32 = 0.75;
 
-/// The SVGs, each sized in ems so that its lyrics are set at the text's size.
+/// The score at [`FALLBACK_EM`], sized in ems so that its lyrics are set at the text's size, with
+/// what chant.js lays it out again from: its GABC, whether it takes the initial, and its prefix.
 fn engrave(gabc: &str, initial: bool) -> String {
     let options = if initial { page_options() } else { page_options().with_initial(Initial::None).with_annotation(false) };
     let chant = Chant::with_options(gabc, options);
     // Ids and classes unique to this score, so scores on one page never share a definition.
     let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });
-    let mut out = String::new();
-    for em in WIDTHS_EM {
-        let units_per_em = LYRIC_SPACES * SCALE;
-        let layout = chant.layout_with(f32::from(em) * units_per_em, &LayoutOptions::default().with_scale(SCALE));
-        let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(format!("{prefix}w{em}")));
-        let (w, h) = (layout_width(&svg), layout_height(&svg));
-        out.push_str(&format!(
-            "<div class=\"chant-width chant-width-{em}\" style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
-            w / units_per_em,
-            strip_label(&svg)
-        ));
-    }
-    out
+    let units_per_em = LYRIC_SPACES * SCALE;
+    let layout = chant.layout_with(f32::from(FALLBACK_EM) * units_per_em, &LayoutOptions::default().with_scale(SCALE));
+    let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(prefix.clone()));
+    let (w, h) = (layout_width(&svg), layout_height(&svg));
+    format!(
+        "<div class=\"chant-width\" data-gabc=\"{}\" data-chant-initial=\"{}\" data-chant-prefix=\"{prefix}\" \
+         style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
+        html_escape_string(gabc),
+        u8::from(initial),
+        w / units_per_em,
+        strip_label(&svg)
+    )
 }
 
 /// The `<svg>` without its own label: the score's group carries the words.
@@ -139,18 +143,25 @@ mod tests {
     const HYMN: &str = "name: Te lucis;\n%%\n(c4) TO(g) thee,(g) be(h)fore(j) the(h) close(g) of(h) day,(g.) (::)";
 
     #[test]
-    fn a_score_offers_every_width_announced_by_its_words() {
+    fn a_score_carries_its_gabc_and_a_fallback_announced_by_its_words() {
         let html = score_html(&Arc::from(HYMN), "To thee, before the close of day,");
         assert!(html.starts_with(
             "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"To thee, before the close of day,\">"
         ));
-        for em in WIDTHS_EM {
-            assert!(html.contains(&format!("chant-width-{em}\"")), "{em}");
-        }
-        assert_eq!(html.matches("<svg").count(), WIDTHS_EM.len());
-        assert_eq!(html.matches("aria-hidden=\"true\"").count(), WIDTHS_EM.len());
-        assert!(!html.contains("aria-label=\"TO"), "the SVGs' own labels are dropped");
+        assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(HYMN))), "{html}");
+        assert!(html.contains(" data-chant-initial=\"1\" data-chant-prefix=\"chant"), "{html}");
+        assert_eq!(html.matches("<svg").count(), 1);
+        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 1);
+        assert!(!html.contains("aria-label=\"TO"), "the SVG's own label is dropped");
         assert!(!html.contains("<style"), "style.css themes the score");
+    }
+
+    #[test]
+    fn a_gabc_with_markup_in_it_stays_in_its_attribute() {
+        let gabc = "name: \"x\" & <y>;\n%%\n(c4) A(g) <i>b</i>(h) (::)";
+        let html = score_html(&Arc::from(gabc), "A b");
+        assert!(html.contains("data-gabc=\"name: &#34;x&#34; &amp; &lt;y&gt;;"), "{html}");
+        assert!(!html.contains("<i>b</i>"));
     }
 
     #[test]
@@ -165,6 +176,30 @@ mod tests {
         let html = whole_hymn_html(&score, &["One two.".into(), "Three four. Amen.".into()]);
         assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
+        assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
+        assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
+    }
+
+    /// chant.js lays a score out again as the server does: at its lyric size and scale, with the
+    /// page's options, the initial only where the server set one.
+    #[test]
+    fn chant_js_lays_a_score_out_as_the_server_does() {
+        let js = include_str!("../../../apps/office-web/static/chant.js");
+        for line in [
+            format!("var LYRIC_SPACES = {LYRIC_SPACES};"),
+            format!("var SCALE = {SCALE};"),
+            format!("initialScale: {INITIAL_SCALE},"),
+            "everyHyphen: true,".to_string(),
+            "initialMargin: 0,".to_string(),
+            "shortLastStaff: true,".to_string(),
+            "style: false".to_string(),
+        ] {
+            assert!(js.contains(&line), "chant.js lacks {line:?}");
+        }
+        // The options chant.js names are page_options()'s.
+        let style = page_options().style;
+        assert_eq!(style.hyphens, Hyphens::EverySyllable);
+        assert_eq!((style.initial_scale, style.initial_margin, style.short_last_staff), (INITIAL_SCALE, 0.0, true));
     }
 
     #[test]

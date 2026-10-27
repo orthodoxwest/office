@@ -3957,3 +3957,50 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await page.goto("/feast/st-raphael-of-brooklyn");
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
+
+test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  const fit = () => page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    const box = score.querySelector(".chant-width");
+    return {
+      column: score.clientWidth,
+      score: box.getBoundingClientRect().width,
+      laidOut: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  for (const width of [320, 390, 430, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/compline/2026-10-27");
+    await expect.poll(async () => (await fit()).laidOut, { message: `${width}px` }).toBe(true);
+    const f = await fit();
+    expect(Math.abs(f.score - f.column), `${width}px: ${JSON.stringify(f)}`).toBeLessThan(1);
+    expect(f.overflow, `${width}px`).toBe(0);
+  }
+  // A narrower window lays it out again.
+  await page.setViewportSize({ width: 360, height: 900 });
+  await expect.poll(async () => { const f = await fit(); return Math.abs(f.score - f.column) < 1; }).toBe(true);
+
+  // Without the engine the page's own score stands, inside the column.
+  await page.route(/\/static\/neuma\.mjs/, (route) => route.abort());
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  const fallback = await fit();
+  expect(fallback.laidOut).toBe(false);
+  expect(fallback.score).toBeLessThanOrEqual(fallback.column + 0.5);
+  expect(fallback.overflow).toBe(0);
+  // Back online, the next resize fetches it again and lays the score out.
+  await page.unroute(/\/static\/neuma\.mjs/);
+  await page.setViewportSize({ width: 380, height: 900 });
+  await expect.poll(async () => (await fit()).laidOut).toBe(true);
+
+  // A browser too old for the engine never fetches it.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  expect((await fit()).laidOut).toBe(false);
+  expect(fetched).toEqual([]);
+});
