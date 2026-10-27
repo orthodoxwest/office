@@ -52,6 +52,7 @@ fun Score(block: BlockView, modifier: Modifier) {
     val p = LocalPalette.current
     val density = LocalDensity.current
     val lyric = with(density) { Type.verse.fontSize.toPx() }
+    val ornament = LocalOrnament.current
     val faces = scoreFaces()
     Column(modifier.fillMaxWidth()) {
         if (block.marker.isNotEmpty()) {
@@ -63,7 +64,7 @@ fun Score(block: BlockView, modifier: Modifier) {
             // A custos may reach past the measure: the whole score is fitted to the column.
             val fit = if (page.width > width) width / page.width else 1f
             Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
-                scale(fit, Offset.Zero) { drawScore(page, ScoreInks(text = p.text, staff = p.lining, rubric = p.rubric), faces) }
+                scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces) }
             }
         }
     }
@@ -75,7 +76,22 @@ internal fun engrave(gabc: String, initial: Boolean, width: Float, lyric: Float)
         chant.layout(width, LayoutOptions(scale = lyric / LYRIC_SPACES)).use { it.page() }
     }
 
-internal class ScoreInks(val text: Color, val staff: Color, val rubric: Color)
+/**
+ * The theme's inks for a score, the web's `--chant-*` tokens (style.css): neumes a shade off the
+ * text's ink, lyrics in it, staves in the lining (thinned on a night ground), the initial gilt as
+ * every dropped initial is, the mode and rubric runs in the rubric's red.
+ */
+internal class ScoreInks(val note: Color, val text: Color, val staff: Color, val rubric: Color, val initial: Color) {
+    companion object {
+        fun of(p: Palette, ornament: Ornament) = ScoreInks(
+            note = mix(p.text, p.bg, 0.86f),
+            text = p.text,
+            staff = if (p.dark) mix(p.lining, p.bg, 0.62f) else p.lining,
+            rubric = p.rubric,
+            initial = ornament.flat,
+        )
+    }
+}
 
 internal class ScoreFaces(val regular: Typeface, val italic: Typeface)
 
@@ -99,7 +115,7 @@ private fun outline(id: Int): Path? = synchronized(outlines) {
 
 /** neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off. */
 internal fun DrawScope.drawScore(page: Page, inks: ScoreInks, faces: ScoreFaces) {
-    fun ink(role: Ink) = if (role == Ink.STAFF || role == Ink.LEDGER) inks.staff else inks.text
+    fun ink(role: Ink) = if (role == Ink.STAFF || role == Ink.LEDGER) inks.staff else inks.note
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     for (item in page.items) {
         when (item) {
@@ -114,7 +130,11 @@ internal fun DrawScope.drawScore(page: Page, inks: ScoreInks, faces: ScoreFaces)
                     paint.isFakeBoldText = run.bold
                     paint.textSize = item.size
                     paint.fontFeatureSettings = if (run.smallCaps) "'liga' 0, 'smcp' 1" else "'liga' 0"
-                    paint.color = (if (run.rubric || item.role == TextRole.RUBRIC) inks.rubric else inks.text).toArgb()
+                    paint.color = when {
+                        item.role == TextRole.INITIAL -> inks.initial
+                        run.rubric || item.role == TextRole.RUBRIC || item.role == TextRole.ANNOTATION -> inks.rubric
+                        else -> inks.text
+                    }.toArgb()
                     canvas.nativeCanvas.drawText(run.text, x, item.baseline, paint)
                     x += paint.measureText(run.text)
                 }

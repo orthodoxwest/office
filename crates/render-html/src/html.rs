@@ -7,7 +7,9 @@ use corpus::lines::{
     BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanzas, marian_antiphon_part, parse_block,
     parse_hymn, parse_psalm,
 };
-use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words};
+use liturgy::{
+    ChantScore, ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words,
+};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
@@ -469,7 +471,7 @@ fn render_marian_antiphon_scored(text: &str, score: Option<&Arc<str>>) -> String
         Some(gabc) => {
             let antiphon = marian_antiphon_part(chant);
             let rest = chant.trim_start()[antiphon.len()..].trim();
-            let words = antiphon.replace(" * ", " ").replace('\n', " ");
+            let words = ChantScore::spoken(antiphon);
             let mut sb = crate::chant::score_html(gabc, &words);
             sb.push_str("<div data-chant-variant=\"off\">");
             sb.push_str(&render_block(antiphon, Mode::PreserveFirstBlock, false));

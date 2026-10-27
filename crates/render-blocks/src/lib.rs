@@ -697,7 +697,7 @@ fn marian_antiphon(out: &mut Vec<Block>, text: &str, score: Option<&ChantScore>)
             // The score beside the antiphon's words (up to the ℣), as the web offers them.
             let antiphon = marian_antiphon_part(chant);
             let rest = chant.trim_start()[antiphon.len()..].trim();
-            out.push(Block::score(&score.gabc, &antiphon.replace(" * ", " ").replace('\n', " "), true));
+            out.push(Block::score(&score.gabc, &ChantScore::spoken(antiphon), true));
             let start = out.len();
             liturgical_block(out, antiphon, Mode::PreserveFirstBlock, false);
             for b in &mut out[start..] {

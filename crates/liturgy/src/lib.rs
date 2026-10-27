@@ -239,6 +239,12 @@ pub struct ChantScore {
 }
 
 impl ChantScore {
+    /// The words a score sets, as a screen reader should hear them: on one line, the pointing
+    /// asterisk left out wherever it falls (mid-line or ending one).
+    pub fn spoken(words: &str) -> String {
+        words.split_whitespace().filter(|w| *w != "*").collect::<Vec<_>>().join(" ")
+    }
+
     /// A whole hymn's score parted stanza by stanza at its double bars `(::)`, each part with the
     /// header and the opening clef; a part that is only an Amen stays with the one before it. A
     /// score of one stanza or an antiphon is one part.

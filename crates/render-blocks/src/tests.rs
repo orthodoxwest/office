@@ -336,3 +336,16 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
         assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
     }
 }
+
+/// A score is announced by the words it sets without the pointing asterisk, wherever it falls:
+/// Ave Regina caelorum's ends a line.
+#[test]
+fn a_score_s_label_leaves_out_the_pointing() {
+    let text = "Queen of the heavens, we hail thee *\nHail thee, Lady of all the Angels.\n\nV. Vouchsafe.\nR. Give me strength.";
+    let e = scored(ElementType::Antiphon, text, "name: t;\n%%\n(c4) Queen(f) (::)", ScoreSpan::Antiphon);
+    let label = "Queen of the heavens, we hail thee Hail thee, Lady of all the Angels.";
+    let score = blocks(&e).into_iter().find(|b| b.kind == BlockKind::Score).unwrap();
+    assert_eq!(score.plain_text(), label);
+    let html = render_html::html::render_section_elements(&[e]);
+    assert!(html.contains(&format!("aria-label=\"{label}\"")), "{html}");
+}

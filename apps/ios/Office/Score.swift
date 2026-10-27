@@ -16,12 +16,13 @@ private let lyricSpaces: Float = 2.45
 struct ScoreRow: View {
     let block: BlockView
     @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var width: CGFloat = 0
 
     var body: some View {
         let lyric = Float(Scale.verse.size * m.type)
-        let page = width > 0 ? Engraving.page(block.score, initial: block.dropCap, width: Float(width), lyric: lyric) : nil
+        let page = width > 0 ? Engraving.page(block.score, initial: block.dropCap, width: Float(width.rounded(.down)), lyric: lyric) : nil
         VStack(alignment: .leading, spacing: m.px(2)) {
             if !block.marker.isEmpty {
                 Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
@@ -41,9 +42,13 @@ struct ScoreRow: View {
         .accessibilityLabel(spoken(block))
     }
 
-    /// neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off.
+    /// neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off,
+    /// the initial gilt as every dropped initial is and the mode above it in the rubric's red.
     private func draw(_ page: Neuma.Page, in context: inout GraphicsContext) {
-        func ink(_ role: Ink) -> Color { role == .staff || role == .ledger ? p.lining : p.text }
+        // The web's --chant-* tokens (style.css): neumes a shade off the text's ink, staves in the
+        // lining (thinned on a night ground).
+        let (note, staff) = (mix(p.text, p.bg, 0.86), p.dark ? mix(p.lining, p.bg, 0.62) : p.lining)
+        func ink(_ role: Ink) -> Color { role == .staff || role == .ledger ? staff : note }
         for item in page.items {
             switch item {
             case let .glyph(glyph, x, y, scale, role, _):
@@ -58,7 +63,7 @@ struct ScoreRow: View {
                     line.append(NSAttributedString(string: run.text, attributes: [
                         .font: garamond(CGFloat(size), italic: run.italic, smallCaps: run.smallCaps),
                         .ligature: 0,
-                        .foregroundColor: UIColor(run.rubric || role == .rubric ? p.rubric : p.text),
+                        .foregroundColor: UIColor(role == .initial ? o.flat : run.rubric || role == .rubric || role == .annotation ? p.rubric : p.text),
                     ]))
                 }
                 context.withCGContext { cg in
@@ -84,6 +89,8 @@ private enum Engraving {
         lock.lock()
         defer { lock.unlock() }
         if let page = pages[key] { return page }
+        // Each rotation, Split View resize or text size engraves anew; keep the cache from growing without end.
+        if pages.count >= 64 { pages.removeAll() }
         let chant = Chant(gabc: gabc, options: ChantOptions(initial: initial ? 1 : 0, annotation: initial))
         let page = chant.layout(width: width, options: LayoutOptions(scale: lyric / lyricSpaces)).page()
         pages[key] = page
