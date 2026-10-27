@@ -201,10 +201,12 @@ fn blocks_carry_the_same_text_as_the_web() {
                 let hour = engine.compose_hour(hour_name, day, &moveable, form).expect("compose");
                 for section in &hour.sections {
                     let html = render_html::html::render_section_elements(&section.elements);
-                    let web = squeeze(&html_text(&html));
                     let section_blocks = element_blocks(&section.elements);
-                    let native: String = section_blocks.iter().map(|b| squeeze(&b.plain_text())).collect();
-                    assert_eq!(native, web, "{hour_name} {} {} section {:?}", day.date, form.as_str(), section.label);
+                    // A score's words (the Marian antiphon's, say) are read either way.
+                    for on in [false, true] {
+                        let (native, web) = (shown(&section_blocks, on), web_words(&html, on));
+                        assert_eq!(native, web, "{hour_name} {} {} section {:?} chant {on}", day.date, form.as_str(), section.label);
+                    }
                     // Every rubric term the web glosses, the apps gloss too.
                     let glossed = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some()).count();
                     assert_eq!(glossed, html.matches("class=\"gloss-term\"").count(), "{hour_name} {} glosses", day.date);
@@ -235,9 +237,9 @@ fn shown(out: &[Block], on: bool) -> String {
     out.iter().filter(|b| b.chant != hidden).map(|b| squeeze(&b.plain_text())).collect()
 }
 
-/// The web's words with Chant on: each score by its stanza number and label, the words it
-/// replaces left out.
-fn web_chant_on(html: &str) -> String {
+/// The web's words as a reader sees them with Chant `on` or off: with it on, each score by its
+/// stanza number and label, the words it replaces left out.
+fn web_words(html: &str, on: bool) -> String {
     let mut out = String::new();
     let mut rest = html;
     while let Some(i) = rest.find('<') {
@@ -245,8 +247,9 @@ fn web_chant_on(html: &str) -> String {
         rest = &rest[i..];
         let tag = &rest[..rest.find('>').unwrap() + 1];
         let name: String = tag[1..].chars().take_while(char::is_ascii_alphanumeric).collect();
-        let score = tag.contains("class=\"chant-score");
-        if score || tag.contains("data-chant-variant=\"off\"") {
+        let score = on && tag.contains("class=\"chant-score");
+        let hidden = if on { "data-chant-variant=\"off\"" } else { "data-chant-variant=\"on\"" };
+        if score || tag.contains(hidden) {
             let end = element_end(rest, &name);
             if score {
                 let element = &rest[..end];
@@ -330,6 +333,6 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
         assert_eq!(shown(&out, false), shown(&blocks(&unscored), false), "{:?}", e.score);
         let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
         assert_eq!(shown(&out, false), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
-        assert_eq!(shown(&out, true), web_chant_on(&html), "{:?}", e.score);
+        assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
     }
 }
