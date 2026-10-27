@@ -539,7 +539,7 @@ fun MenuPanel(
                             MenuCell(label, on == chant.on, Type.label(12f, 0.06f)) { chant.onChange(on) }
                         }
                     }
-                    PrefHint(AnnotatedString("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is in hand."))
+                    PrefHint(AnnotatedString("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available."))
                 }
             }
         }

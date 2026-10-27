@@ -346,7 +346,7 @@ struct MenuPanel: View {
                     }
                 }
                 .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-                hint(Text("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is in hand."))
+                hint(Text("Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available."))
             }
         }
         .padding(m.px(10.4))
