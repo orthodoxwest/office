@@ -1,4 +1,4 @@
-//! Chant scores as HTML: neuma engraves a score's SVG on the server at a few widths measured in
+//! Chant scores as HTML: neuma engraves a score's SVG on the server at a run of widths measured in
 //! the hymn's own text size, and a container query shows the widest that fits its column, so a
 //! score reflows with the page and the reader's text size without script or WebAssembly.
 //!
@@ -17,9 +17,12 @@ use crate::escape::html_escape_string;
 const LYRIC_SPACES: f32 = 2.45;
 /// SVG units per staff space (neuma's default scale).
 const SCALE: f32 = 6.0;
-/// The column widths a score is laid out for, in lyric ems. style.css's container queries name
-/// the same widths; the narrowest also scales down to fit a narrower column.
-pub const WIDTHS_EM: [u16; 4] = [17, 22, 28, 36];
+/// The column widths a score is laid out for, in lyric ems: one for each em across a phone's
+/// column (15 em on the narrowest, 20 on the widest, at the default text size), so a phone
+/// shows a score at most an em short of its column, and every other em beyond. style.css's
+/// container queries name the same widths; the narrowest also scales down to fit a narrower
+/// column.
+pub const WIDTHS_EM: [u16; 15] = [15, 16, 17, 18, 19, 20, 21, 22, 24, 26, 28, 30, 32, 34, 36];
 
 /// A score in place of the words it sets: one SVG per width, the widest that fits shown. The
 /// group is announced by `words`, the text it sets, rather than by each SVG.
@@ -165,6 +168,20 @@ mod tests {
         let html = whole_hymn_html(&score, &["One two.".into(), "Three four. Amen.".into()]);
         assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
+    }
+
+    #[test]
+    fn style_css_shows_each_width_until_the_next() {
+        let css = include_str!("../../../apps/office-web/static/style.css");
+        let (first, last) = (WIDTHS_EM[0], WIDTHS_EM[WIDTHS_EM.len() - 1]);
+        assert!(css.contains(&format!(".chant-width-{first} {{ display: block; }}\n")), "the narrowest shows without a query");
+        assert!(css.contains(&format!("@container (width >= {}em) {{ .chant-width-{first} {{ display: none; }} }}", WIDTHS_EM[1])));
+        for pair in WIDTHS_EM[1..].windows(2) {
+            let (em, next) = (pair[0], pair[1]);
+            assert!(css.contains(&format!("@container ({em}em <= width < {next}em) {{ .chant-width-{em} {{ display: block; }} }}")), "{em}");
+        }
+        assert!(css.contains(&format!("@container (width >= {last}em) {{ .chant-width-{last} {{ display: block; }} }}")));
+        assert_eq!(css.matches("{ .chant-width-").count(), WIDTHS_EM.len(), "no query names a width not engraved");
     }
 
     #[test]
