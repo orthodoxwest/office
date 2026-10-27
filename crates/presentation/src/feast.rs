@@ -545,7 +545,7 @@ pub fn rank_tone(r: Rank) -> &'static str {
     match r {
         Rank::Double1stClass | Rank::Double2ndClass | Rank::GreaterDouble => "greater",
         Rank::Double => "double",
-        _ => "",
+        Rank::SemiDouble | Rank::PrivilegedFeria | Rank::Simple | Rank::Commemoration => "",
     }
 }
 
