@@ -574,7 +574,9 @@ private let frameClear: CGFloat = measure + 80
 /**
  * The gold hairline across the top, in the season's ornament gold. The band scrolls away with
  * the page here, so the line runs along the screen's top edge, above the status bar: just below
- * it the line would strike through the text passing under the bar.
+ * it the line would strike through the text passing under the bar. On a screen with rounded
+ * corners it runs between them, so its first and last stretches are not lost behind the curve
+ * (as the Android app's, which reads the corners from the system).
  */
 private struct ProgressHairline: View {
     let reading: Reading
@@ -582,7 +584,9 @@ private struct ProgressHairline: View {
 
     var body: some View {
         GeometryReader { geo in
-            Rectangle().fill(o.flat).frame(width: geo.size.width * reading.ratio)
+            let clear = cornerReach(at: 1)
+            let span = max(0, geo.size.width - 2 * clear)
+            Rectangle().fill(o.flat).frame(width: span * reading.ratio).offset(x: span > 0 ? clear : 0)
         }
         .frame(height: 2)
         .allowsHitTesting(false)
@@ -590,6 +594,22 @@ private struct ProgressHairline: View {
         .accessibilityLabel("Progress through the prayer text")
         .accessibilityValue("\(Int((reading.ratio * 100).rounded())) percent")
     }
+}
+
+/**
+ * How far in from each side a screen's rounded top corner reaches, `y` points below its top edge.
+ * iOS does not give the corners' radius, but on every iPhone and iPad with rounded corners it is
+ * close to the deepest of the window's safe-area insets (the status bar's in portrait, the
+ * sensor housing's in landscape), from 39pt to 62pt on a phone; a screen whose insets are no
+ * deeper than the old 20pt status bar has square corners.
+ */
+@MainActor
+private func cornerReach(at y: CGFloat) -> CGFloat {
+    let window = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first?.windows.first
+    guard let insets = window?.safeAreaInsets else { return 0 }
+    let r = max(insets.top, insets.left, insets.right)
+    guard r > 20, y < r else { return 0 }
+    return r - (r * r - (r - y) * (r - y)).squareRoot()
 }
 
 /// The hour's title, framed; the day; and the date and prayer-form controls.
