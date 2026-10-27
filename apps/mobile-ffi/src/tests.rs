@@ -286,7 +286,7 @@ fn a_quick_scroll_does_not_pray_an_hour() {
 }
 
 #[test]
-fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
+fn chant_sets_the_hymn_and_marian_antiphon_where_a_score_is_in_hand() {
     let core = OfficeCore::new().unwrap();
     assert!(core.offers_chant());
     let blocks = |chant| {
@@ -296,9 +296,11 @@ fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
     let scores = |b: &[BlockView]| b.iter().filter(|b| b.kind == BlockKind::Score).map(|b| b.score.clone()).collect::<Vec<_>>();
     let (off, on) = (blocks(false), blocks(true));
     assert!(scores(&off).is_empty());
+    // Compline sets its hymn's tune and the Marian antiphon.
     let sung = scores(&on);
-    assert_eq!(sung.len(), 1);
-    assert!(sung[0].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[0]);
+    assert_eq!(sung.len(), 2);
+    assert!(sung[0].contains("To(h) thee,(j')"), "{}", sung[0]);
+    assert!(sung[1].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[1]);
     // The antiphon's words give way to the score; the rest of the hour stands as it was.
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
