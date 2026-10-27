@@ -1,0 +1,33 @@
+# Which tune is sung when, for a hymn with several scores (data/texts/chant/<key>/<tune>.gabc),
+# as the hymn indexes of the archdiocesan Lauds and Vespers books label them. Each [key] lists
+# its tunes as `tune = when`; the first whose `when` holds is sung, and the last is `otherwise`.
+#
+#   summer     Saturday Vespers' summer: from the Saturday before the III Sunday after Pentecost
+#              until the Saturday nearest 1 October (Vespers p. 219)
+#   doctor     an office of a Doctor (its feast's name calls the saint a Doctor)
+#   otherwise  any other time
+
+# O lux beata Trinitas: "The winter tune is used from the Octave of Epiphany through the Saturday
+# before Quinquagesima Sunday, and from the Saturday nearest the first day of October until
+# Advent" (Vespers p. 218).
+[ordinary/vespers/hymn-saturday]
+summer = summer
+winter = otherwise
+
+# Iste Confessor for a Confessor & Bishop (Vespers p. 638), and the tune for a Doctor (p. 639).
+# The Common of a Doctor sings this text at Vespers.
+[commons/confessor-bishop/hymn-vespers]
+doctor = doctor
+bishop = otherwise
+
+# Iste Confessor for a Confessor not a Bishop (Vespers p. 660), and the tune for a Doctor
+# (p. 661): Jerome, Bede, Ephrem, John Damascene.
+[commons/confessor/hymn-vespers]
+doctor = doctor
+confessor = otherwise
+
+# Jesu corona celsior for a Confessor not a Bishop (Lauds p. 677), and the tune for a Doctor
+# (p. 679).
+[commons/confessor/hymn-lauds]
+doctor = doctor
+confessor = otherwise
