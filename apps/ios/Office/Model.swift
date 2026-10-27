@@ -277,6 +277,20 @@ final class AppModel: ObservableObject {
         path[path.count - 1].page = .find(query)
     }
 
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    func findAgain() {
+        if path.count > 1, case .find = path[path.count - 2].page {
+            menuOpen = false
+            settingsOpen = false
+            path.removeLast()
+        } else {
+            open(.find(""))
+        }
+    }
+
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil

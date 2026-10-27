@@ -4018,6 +4018,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  /* Never wider than its column: the input's own width would widen a narrow header. */
+  min-width: 0;
   margin: 0;
   padding: 0 0.1rem;
   border-bottom: 1px solid var(--gold-line);
@@ -4035,6 +4037,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 .find-field input {
   flex: 1;
+  width: 0;
   min-width: 0;
   min-height: var(--touch-target);
   border: 0;

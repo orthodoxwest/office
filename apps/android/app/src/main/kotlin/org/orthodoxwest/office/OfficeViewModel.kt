@@ -193,6 +193,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /** The day the search or a feast page was last made on: their years and next keeping follow it. */
+    private var feastDay: LocalDate? = null
+
     init {
         load()
         // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
@@ -207,10 +210,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
-     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. Called
+     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
+     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
      * every minute and on every return to the app.
      */
     fun refreshClock() {
+        feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return
         val now = LocalDateTime.now()
@@ -257,7 +262,15 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
-    /** Home for today, clearing the way back, as the brand link does. */
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    fun findAgain() {
+        if (stack.size > 1 && stack[stack.lastIndex - 1].page is Page.Find) back() else open(Page.Find(""))
+    }
+
+    /** Home for today, clearing the way back, as the brand link does.
     fun goHome() {
         motion = if (stack.size > 1) Motion.BACK else stepBetween(page, Page.Home(today))
         stack.clear()
@@ -391,6 +404,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val visit = entry
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
+        feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
         loading = viewModelScope.launch {
             val content = try {

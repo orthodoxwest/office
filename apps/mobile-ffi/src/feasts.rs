@@ -3,13 +3,13 @@
 
 use std::sync::Arc;
 
-use calendar::Season;
+use calendar::Date;
 use corpus::typography::typeset;
-use office::feast::feast_texts;
+use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FEAST_WORDS, Keeping, YEARS_HEADING, YearIndex, YearKeeping, feast_date, feast_subtitle, is_feast_id, keeping_class,
-    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
-    row_date, search_years, texts_source, whole_office_label,
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, date_lead, feast_date,
+    feast_subtitle, is_entry, is_feast_id, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping,
+    next_label, rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::long_date;
 
@@ -104,8 +104,8 @@ pub struct FeastPageView {
     pub subtitle: String,
     /// "February 27", or "A moveable feast".
     pub date: String,
-    /// The feast has a date of its own, set after "Kept on".
-    pub fixed: bool,
+    /// "Kept on" or "Commemorated on", set before a date of its own; empty for a date that moves.
+    pub date_lead: String,
     /// For an observance kept by monastics and oblates only, what that means; else empty.
     pub monastic_note: String,
     /// For such an observance, the feast of the same saint everyone keeps, and "on March 21.".
@@ -125,7 +125,6 @@ pub struct FeastPageView {
 #[derive(Clone, Debug, uniffi::Record)]
 pub struct FeastWordsView {
     pub find_title: String,
-    pub kept_on: String,
     pub find_prompt: String,
     pub every_year: String,
     pub years_hint: String,
@@ -142,7 +141,6 @@ pub fn feast_words() -> FeastWordsView {
     let w = &FEAST_WORDS;
     FeastWordsView {
         find_title: w.find_title.into(),
-        kept_on: w.kept_on.into(),
         find_prompt: w.find_prompt.into(),
         every_year: w.every_year.into(),
         years_hint: w.years_hint.into(),
@@ -174,8 +172,8 @@ impl OfficeCore {
     pub fn find_feasts(&self, query: String, year: i32) -> Result<FindView, OfficeError> {
         let query: String = query.trim().chars().take(100).collect();
         let found = self.feasts.search(&query);
-        let mut results = Vec::with_capacity(found.len());
-        for e in found {
+        let mut results = Vec::with_capacity(found.len().min(MAX_RESULTS));
+        for e in found.iter().take(MAX_RESULTS) {
             let years = [year, year + 1].iter().map(|&y| self.keeping(y).map(|i| year_view(&i.keeping(e)))).collect::<Result<_, _>>()?;
             results.push(FeastResultView {
                 id: e.id.clone(),
@@ -187,11 +185,7 @@ impl OfficeCore {
                 years,
             });
         }
-        Ok(FindView {
-            subtitle: typeset(&search_years(year)),
-            count: if query.is_empty() { String::new() } else { results_count(results.len()) },
-            results,
-        })
+        Ok(FindView { subtitle: typeset(&search_years(year)), count: results_count(&query, found.len()), results })
     }
 
     /// The page of the feast `id` names, or none. `today` is the device's: the years begin with
@@ -204,15 +198,12 @@ impl OfficeCore {
         let years: Vec<YearKeeping> =
             (first..first + FEAST_PAGE_YEARS).map(|y| self.keeping(y).map(|i| i.keeping(entry))).collect::<Result<_, _>>()?;
         let next = next_keeping(&years, now);
-        let season_at = next.and_then(|k| k.date).or_else(|| years.iter().find_map(|k| k.date));
-        let season = match season_at {
-            Some(d) => self.keeping(d.year())?.day(d).map(|d| d.season),
-            None => None,
-        }
-        .unwrap_or(Season::Pentecost);
-        let texts = match (&entry.monastic, self.calendar.feasts.iter().find(|f| f.id == entry.id)) {
-            (None, Some(feast)) => feast_texts(feast, season, &self.engine.texts),
-            _ => Default::default(),
+        // The texts as the office says them the first of these years the feast is kept, else
+        // commemorated (the web's feast page).
+        let said = texts_keeping(&years).and_then(|k| Some((k.date?, matches!(k.keeping, Keeping::Kept | Keeping::Transferred { .. }))));
+        let texts = match said {
+            Some((d, _)) => self.texts_on(entry, d)?,
+            None => FeastTexts::default(),
         };
         let kept_by_all = self.feasts.kept_by_all(entry);
         Ok(Some(FeastPageView {
@@ -220,7 +211,7 @@ impl OfficeCore {
             name: typeset(&entry.name),
             subtitle: typeset(&feast_subtitle(entry)),
             date: feast_date(entry),
-            fixed: entry.fixed.is_some(),
+            date_lead: date_lead(entry).into(),
             monastic_note: if entry.monastic.is_some() { typeset(&monastic_note(entry)) } else { String::new() },
             kept_by_all: kept_by_all.map(|e| FeastLinkView { id: e.id.clone(), name: typeset(&e.name) }),
             kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),
@@ -235,7 +226,7 @@ impl OfficeCore {
             }),
             years_heading: YEARS_HEADING.into(),
             years: years.iter().map(year_view).collect(),
-            texts_source: typeset(&texts_source(entry.category, texts.proper, texts.common)),
+            texts_source: said.map(|(d, kept)| typeset(&texts_source(texts.proper, texts.common, d, kept))).unwrap_or_default(),
             texts: texts
                 .texts
                 .into_iter()
@@ -268,6 +259,17 @@ impl OfficeCore {
             keepings.clear();
         }
         Ok(Arc::clone(keepings.entry(year).or_insert(built)))
+    }
+
+    /// The feast's texts as the office says them on `date`, with the Vespers of the evening before.
+    fn texts_on(&self, entry: &FeastEntry, date: Date) -> Result<FeastTexts, OfficeError> {
+        let eve = date.add_days(-1);
+        let eve_year = self.year(eve.year())?;
+        let year = if eve.year() == date.year() { Arc::clone(&eve_year) } else { self.year(date.year())? };
+        let Some(day) = year.days.iter().find(|d| d.date == date) else { return Ok(FeastTexts::default()) };
+        let eve = eve_year.days.iter().find(|d| d.date == eve).map(|day| DayOf { day, moveable: &eve_year.moveable });
+        let is_it = |id: &str, name: &str| is_entry(entry, id, name);
+        Ok(feast_texts(&self.engine, &is_it, eve, DayOf { day, moveable: &year.moveable }))
     }
 
     /// The page id of the feast a day keeps or commemorates as `id` and `name`, or empty.

@@ -304,13 +304,15 @@ fn finds_a_feast_and_gives_its_page() {
     assert_eq!(brooklyn.years[0].note, "Friday after Ash Wednesday holds the day");
     assert_eq!(brooklyn.years[1].date, Some(CivilDate { year: 2027, month: 2, day: 27 }));
     assert!(core.find_feasts(String::new(), 2026).unwrap().count.is_empty());
+    assert!(core.find_feasts("S".into(), 2026).unwrap().count.is_empty(), "a first letter is not yet a search");
+    assert_eq!(core.find_feasts("zzqx".into(), 2026).unwrap().count, "No feast or saint by that name");
 
     let today = CivilDate { year: 2026, month: 10, day: 27 };
     let page = core.feast_page("st-raphael-of-brooklyn".into(), today).unwrap().unwrap();
     assert_eq!(page.years.len(), presentation::feast::FEAST_PAGE_YEARS as usize);
     assert_eq!(page.years[0].year, 2027, "this year's keeping is past");
     assert_eq!(page.next.as_ref().map(|n| n.date_label.as_str()), Some("Saturday, February 27, 2027"));
-    assert_eq!(page.texts_source, "From the Common of a Confessor and Bishop.");
+    assert_eq!(page.texts_source, "From the Common of a Confessor and Bishop. As said on Saturday, February 27, 2027.");
     let collect = page.texts.iter().find(|t| t.label == "Collect").unwrap();
     let words: String = collect.blocks.iter().flat_map(|b| &b.runs).map(|r| r.text.as_str()).collect();
     assert!(words.contains("blessed Raphael") && words.contains("world without end"), "{words}");

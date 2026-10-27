@@ -439,7 +439,7 @@ private struct Frontispiece: View {
                         // Each leads to its feast's page.
                         ForEach(Array(view.commemorations.enumerated()), id: \.offset) { i, c in
                             let id = i < view.commemorationIds.count ? view.commemorationIds[i] : ""
-                            let line = (i == 0 ? Text("") : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true)))) + Text(c).underline(!id.isEmpty)
+                            let line = (i == 0 ? Text("") : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true)))) + Text(c).underline(!id.isEmpty, color: p.goldLine)
                             if id.isEmpty {
                                 line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
                             } else {
@@ -651,8 +651,9 @@ private struct FeastName: View {
     let name: String
     let alias: String
     let style: TextStyle
-    /// Underlined, as a link to the feast's page.
+    /// Underlined in the gold line, as a link to the feast's page (the web's `.feast-link`).
     var linked = false
+    @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     private var italic: TextStyle {
@@ -663,16 +664,16 @@ private struct FeastName: View {
 
     var body: some View {
         if alias.isEmpty {
-            Text(name).underline(linked).type(style).multilineTextAlignment(.center)
+            Text(name).underline(linked, color: p.goldLine).type(style).multilineTextAlignment(.center)
         } else {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: m.px(style.size * 0.25)) {
-                    Text(name).underline(linked).type(style)
-                    Text(alias).underline(linked).type(italic)
+                    Text(name).underline(linked, color: p.goldLine).type(style)
+                    Text(alias).underline(linked, color: p.goldLine).type(italic)
                 }
                 VStack(spacing: 0) {
-                    Text(name).underline(linked).type(style).multilineTextAlignment(.center)
-                    Text(alias).underline(linked).type(italic).fixedSize()
+                    Text(name).underline(linked, color: p.goldLine).type(style).multilineTextAlignment(.center)
+                    Text(alias).underline(linked, color: p.goldLine).type(italic).fixedSize()
                 }
             }
             .accessibilityElement(children: .combine)

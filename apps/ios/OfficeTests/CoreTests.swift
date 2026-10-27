@@ -243,6 +243,13 @@ final class PlaceTests: XCTestCase {
         XCTAssertEqual(model.path.count, 3)
         model.search("raphael")
         XCTAssertEqual(model.page, .feast("st-benedict"), "only the search page takes words")
+        // A feast page's way to the search goes back to the words the reader found it by.
+        model.findAgain()
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .find("benedict")])
+        model.open(.feast("st-benedict"))
+        model.path.remove(at: 1)
+        model.findAgain()
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .feast("st-benedict"), .find("")])
     }
 
     func testCivilDatesStepAcrossMonths() {

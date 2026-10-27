@@ -3,12 +3,14 @@
 
 use axum::body::Body;
 use axum::http::{Response, StatusCode};
-use calendar::{Date, Season};
-use office::feast::feast_texts;
+use std::sync::Arc;
+
+use calendar::Date;
+use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FeastEntry, Keeping, YEARS_HEADING, YearKeeping, feast_date, feast_subtitle, is_feast_id, keeping_class,
-    keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count,
-    row_date, search_years, texts_source, whole_office_label,
+    FEAST_PAGE_YEARS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, date_lead, feast_date, feast_subtitle, is_entry,
+    is_feast_id, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone,
+    result_meta, results_count, row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::{date_slug, long_date};
 use render_html::links::{feast_link, find_link, home_from_feast};
@@ -47,8 +49,9 @@ impl Server {
         let query: String = raw.chars().take(MAX_QUERY).collect();
         let now = now_in(&self.user_location(req)).0;
         let year = now.year();
+        let found = self.cache.feasts().search(&query);
         let mut results = Vec::new();
-        for e in self.cache.feasts().search(&query) {
+        for e in found.iter().take(MAX_RESULTS) {
             let years = match self.keepings(e, [year, year + 1].into_iter()) {
                 Ok(y) => y,
                 Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
@@ -77,7 +80,7 @@ impl Server {
                 ..Chrome::default()
             },
             subtitle: search_years(year),
-            count: if query.is_empty() { String::new() } else { results_count(results.len()) },
+            count: results_count(&query, found.len()),
             query,
             results,
         };
@@ -111,19 +114,15 @@ impl Server {
             Err(e) => return failed(e),
         };
         let next = next_keeping(&years, now);
-        // The texts as said on the day it is next kept, in that day's season; a feast never kept
-        // in these years takes the season of its date in the first of them.
-        let season = match next.and_then(|k| k.date).or_else(|| years.iter().find_map(|k| k.date)) {
-            Some(d) => match self.season_of(d) {
-                Ok(s) => s,
+        // The texts as the office says them the first of these years the feast is kept, else
+        // commemorated.
+        let said = texts_keeping(&years).and_then(|k| Some((k.date?, matches!(k.keeping, Keeping::Kept | Keeping::Transferred { .. }))));
+        let texts = match said {
+            Some((d, _)) => match self.texts_on(entry, d) {
+                Ok(t) => t,
                 Err(e) => return failed(e),
             },
-            None => None,
-        };
-        let season = season.unwrap_or(Season::Pentecost);
-        let texts = match (&entry.monastic, self.cache.data().feasts.iter().find(|f| f.id == entry.id)) {
-            (None, Some(feast)) => feast_texts(feast, season, &self.engine.texts),
-            _ => Default::default(),
+            None => FeastTexts::default(),
         };
         let kept_by_all = self.cache.feasts().kept_by_all(entry);
         let whole_office = next
@@ -141,7 +140,7 @@ impl Server {
             name: entry.name.clone(),
             subtitle: feast_subtitle(entry),
             date: feast_date(entry),
-            fixed: entry.fixed.is_some(),
+            date_lead: date_lead(entry).into(),
             monastic_note: if entry.monastic.is_some() { monastic_note(entry) } else { String::new() },
             kept_by_all: kept_by_all.map(|e| LinkRow { label: e.name.clone(), href: feast_link(&e.id) }),
             kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),
@@ -156,7 +155,7 @@ impl Server {
             }),
             years_heading: YEARS_HEADING.into(),
             years: years.iter().map(|k| year_row(&entry.id, k)).collect(),
-            texts_source: texts_source(entry.category, texts.proper, texts.common),
+            texts_source: said.map(|(d, kept)| texts_source(texts.proper, texts.common, d, kept)).unwrap_or_default(),
             texts: texts
                 .texts
                 .into_iter()
@@ -170,9 +169,15 @@ impl Server {
         }
     }
 
-    fn season_of(&self, date: Date) -> Result<Option<Season>, String> {
-        let index = self.cache.keeping(date.year())?;
-        Ok(index.day(date).map(|d| d.season))
+    /// The feast's texts as the office says them on `date`, with the Vespers of the evening before.
+    fn texts_on(&self, entry: &FeastEntry, date: Date) -> Result<FeastTexts, String> {
+        let year = self.cache.get(date.year())?;
+        let eve = date.add_days(-1);
+        let eve_year = if eve.year() == date.year() { Arc::clone(&year) } else { self.cache.get(eve.year())? };
+        let Some(day) = year.days.iter().find(|d| d.date == date) else { return Ok(FeastTexts::default()) };
+        let eve = eve_year.days.iter().find(|d| d.date == eve).map(|day| DayOf { day, moveable: &eve_year.moveable });
+        let is_it = |id: &str, name: &str| is_entry(entry, id, name);
+        Ok(feast_texts(&self.engine, &is_it, eve, DayOf { day, moveable: &year.moveable }))
     }
 }
 
@@ -229,11 +234,12 @@ mod tests {
     fn a_feast_page_gives_its_years_and_its_texts() {
         let body = page("/feast/st-raphael-of-brooklyn");
         assert!(body.contains("<h1>St Raphael of Brooklyn</h1>"));
-        assert!(body.contains("Greater Double · White · Bishop &amp; Confessor"));
+        assert!(body.contains("Greater Double · White<"));
         assert!(body.contains(">The next eight years</h2>"));
         assert_eq!(body.matches(r#"class="find-year "#).count(), FEAST_PAGE_YEARS as usize);
         assert!(body.contains("From the Common of a Confessor and Bishop."));
-        for label in ["At I Vespers · Magnificat", "At Lauds · Benedictus", "At II Vespers · Magnificat", "Collect"] {
+        // Septuagesima's I Vespers take his evening, where he is commemorated.
+        for label in ["At I Vespers · Magnificat", "At Lauds · Benedictus", "At II Vespers · Antiphon", "Collect"] {
             assert!(body.contains(&format!("<h3>{label} <span")), "{label}");
         }
         assert!(body.contains("blessed Raphael, thy Confessor and Bishop") && body.contains("world without end"));

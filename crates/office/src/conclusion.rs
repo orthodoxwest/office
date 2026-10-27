@@ -12,6 +12,11 @@ fn conclusion_ref_for(source_ref: &str, t: &OfficeTexts) -> Option<String> {
     (!t.get(&r).is_empty()).then_some(r)
 }
 
+/// Whether a collect resolved from `refs` already carries its conclusion.
+pub fn is_concluded(refs: &[String]) -> bool {
+    refs.iter().any(|r| r.starts_with(CONCLUSION_FORM_REF))
+}
+
 /// Appends the appointed conclusion; returns the text and the refs used. A
 /// missing slot ("[…]") or an omission passes through unconcluded.
 pub fn apply_conclusion(text: &str, source_ref: &str, t: &OfficeTexts) -> (String, Vec<String>) {

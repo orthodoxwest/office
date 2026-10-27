@@ -45,11 +45,6 @@ impl YearCache {
         YearCache { data, entries: Mutex::new(Entries::default()), feasts, keepings: Mutex::new(HashMap::new()) }
     }
 
-    /// The calendar's feast definitions.
-    pub fn data(&self) -> &CalendarData {
-        &self.data
-    }
-
     /// Every feast a reader can look up.
     pub fn feasts(&self) -> &FeastIndex {
         &self.feasts

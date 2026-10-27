@@ -167,23 +167,35 @@ impl FeastIndex {
 
     /// The entries whose names (or aliases) hold every word of the query, each word the start of
     /// a word of the name: best match first, then the greater feast, then the calendar's order.
+    /// Every match is returned; a page lists the first [`MAX_RESULTS`]. A query that finds nothing
+    /// is tried again without a possessive's "s" ("st peters").
     pub fn search(&self, query: &str) -> Vec<&FeastEntry> {
         let q = normalize(query);
-        let words: Vec<&str> = q.split(' ').filter(|w| !w.is_empty()).collect();
         if q.chars().filter(|c| c.is_alphanumeric()).count() < MIN_QUERY {
             return Vec::new();
         }
+        let found = self.matches(&q);
+        if !found.is_empty() {
+            return found;
+        }
+        let singular: Vec<&str> = q.split(' ').map(|w| if w.len() > 3 { w.strip_suffix('s').unwrap_or(w) } else { w }).collect();
+        let singular = singular.join(" ");
+        if singular == q { found } else { self.matches(&singular) }
+    }
+
+    fn matches(&self, q: &str) -> Vec<&FeastEntry> {
+        let words: Vec<&str> = q.split(' ').filter(|w| !w.is_empty()).collect();
         let mut found: Vec<(u8, i32, usize, &FeastEntry)> = self
             .entries
             .iter()
             .enumerate()
             .filter_map(|(order, e)| {
-                let score = e.keys.iter().enumerate().filter_map(|(k, key)| match_score(key, &q, &words, k > 0)).min()?;
+                let score = e.keys.iter().enumerate().filter_map(|(k, key)| match_score(key, q, &words, k > 0)).min()?;
                 Some((score, -e.rank.weight(), order, e))
             })
             .collect();
         found.sort_by_key(|(score, rank, order, _)| (*score, *rank, *order));
-        found.into_iter().take(MAX_RESULTS).map(|(.., e)| e).collect()
+        found.into_iter().map(|(.., e)| e).collect()
     }
 }
 
@@ -200,7 +212,8 @@ fn match_score(key: &str, query: &str, words: &[&str], alias: bool) -> Option<u8
     } else {
         2
     };
-    Some(if alias { base + 3 } else { base })
+    // A familiar name said whole is as good as the feast's own ("easter").
+    Some(if alias && base > 0 { base + 3 } else { base })
 }
 
 /// Two dated entries of the same date whose names are the same saint.
@@ -218,6 +231,14 @@ fn duplicates(a: &FeastEntry, b: &FeastEntry) -> bool {
 pub fn normalize(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for c in s.chars() {
+        // A letter written with a separate accent ("e" and U+0301) is the letter.
+        if ('\u{300}'..='\u{36f}').contains(&c) {
+            continue;
+        }
+        if let Some(pair) = fold_ligature(c) {
+            out.push_str(pair);
+            continue;
+        }
         let c = fold_accent(c);
         if c == '&' {
             out.push_str(" and ");
@@ -236,6 +257,15 @@ pub fn normalize(s: &str) -> String {
         .join(" ")
 }
 
+fn fold_ligature(c: char) -> Option<&'static str> {
+    match c {
+        'æ' | 'Æ' => Some("ae"),
+        'œ' | 'Œ' => Some("oe"),
+        'ß' => Some("ss"),
+        _ => None,
+    }
+}
+
 fn fold_accent(c: char) -> char {
     match c {
         'à' | 'á' | 'â' | 'ã' | 'ä' | 'å' => 'a',
@@ -252,6 +282,10 @@ fn fold_accent(c: char) -> char {
         'Ç' => 'C',
         'ñ' => 'n',
         'Ñ' => 'N',
+        'ø' => 'o',
+        'Ø' => 'O',
+        'ł' => 'l',
+        'Ł' => 'L',
         '’' | '‘' => '\'',
         c => c,
     }
@@ -396,8 +430,6 @@ fn leap_shift(own: Date, kept: Date) -> bool {
 pub struct FeastWords {
     /// The search's title, and the way back to it.
     pub find_title: &'static str,
-    /// Before a fixed feast's date: "Kept on February 27".
-    pub kept_on: &'static str,
     /// The search field's prompt.
     pub find_prompt: &'static str,
     /// A result's link to its feast's page.
@@ -420,7 +452,6 @@ pub struct FeastWords {
 
 pub const FEAST_WORDS: FeastWords = FeastWords {
     find_title: "Find a feast",
-    kept_on: "Kept on",
     find_prompt: "Find a feast or saint",
     every_year: "Every year",
     years_hint: "Each date opens that day, with its hours.",
@@ -460,16 +491,31 @@ pub fn keeping_note(k: &Keeping) -> String {
     match k {
         Keeping::Kept => String::new(),
         Keeping::Transferred { from } => format!("from {}", month_day(*from)),
-        Keeping::Commemorated { holder } => format!("{holder} holds the day"),
-        Keeping::Monastic { parish } => format!("the parish keeps {}", parish_office(parish)),
+        Keeping::Commemorated { holder } => format!("{} holds the day", capitalized(&in_sentence(holder))),
+        Keeping::Monastic { parish } => format!("the parish keeps {}", in_sentence(parish)),
         Keeping::NotKept { holder } if holder.is_empty() => String::new(),
-        Keeping::NotKept { holder } => format!("{holder} holds the day"),
+        Keeping::NotKept { holder } => format!("{} holds the day", capitalized(&in_sentence(holder))),
     }
 }
 
-/// "Feria" reads as "a feria" in a sentence.
-fn parish_office(name: &str) -> String {
-    if name == "Feria" || name.ends_with(" feria") { format!("a {}", name.to_lowercase()) } else { name.to_string() }
+/// A day's name as it reads in a sentence: "Feria" as "a feria", "Easter feria" as "an Easter
+/// feria", "III Sunday after Pentecost" as "the III Sunday after Pentecost".
+fn in_sentence(name: &str) -> String {
+    if name == "Feria" {
+        return "a feria".to_string();
+    }
+    if name.ends_with(" feria") {
+        let article = if name.starts_with(['A', 'E', 'I', 'O', 'U']) { "an" } else { "a" };
+        return format!("{article} {name}");
+    }
+    let first = name.split(' ').next().unwrap_or_default();
+    let numbered = !first.is_empty() && first.chars().all(|c| matches!(c, 'I' | 'V' | 'X' | 'L'));
+    if numbered { format!("the {name}") } else { name.to_string() }
+}
+
+fn capitalized(s: &str) -> String {
+    let mut c = s.chars();
+    c.next().map(|f| f.to_uppercase().chain(c).collect()).unwrap_or_default()
 }
 
 /// "February 27".
@@ -482,34 +528,21 @@ pub fn row_date(d: Date) -> String {
     format!("{}, {} {}", &d.weekday().name()[..3], &MONTHS[d.month() as usize - 1][..3], d.day())
 }
 
-/// Where a feast falls: "February 27", or "A moveable feast".
+/// Where a feast falls: "February 27", or, for one whose date moves, so.
 pub fn feast_date(e: &FeastEntry) -> String {
     match e.fixed {
         Some(f) => format!("{} {}", MONTHS[f.month as usize - 1], f.day),
-        None => "A moveable feast".to_string(),
+        None => "Its date moves from year to year".to_string(),
     }
 }
 
-/// Whom or what the feast honours, as the feast page's subtitle names it; empty when the
-/// category says nothing a reader needs.
-pub fn category_label(c: Option<Category>) -> &'static str {
-    match c {
-        Some(Category::Lord) => "Feast of Our Lord",
-        Some(Category::BlessedVirgin) => "Feast of Our Lady",
-        Some(Category::Angel) => "Archangel",
-        Some(Category::Apostle) => "Apostle",
-        Some(Category::Evangelist) => "Evangelist",
-        Some(Category::Martyr) => "Martyr",
-        Some(Category::Martyrs) => "Martyrs",
-        Some(Category::BishopMartyr) => "Bishop & Martyr",
-        Some(Category::VirginMartyr) => "Virgin & Martyr",
-        Some(Category::ConfessorBishop) => "Bishop & Confessor",
-        Some(Category::ConfessorDoctor) => "Confessor & Doctor",
-        Some(Category::Confessor) => "Confessor",
-        Some(Category::Virgin) => "Virgin",
-        Some(Category::HolyWoman) => "Holy Woman",
-        Some(Category::Dedication) => "Dedication",
-        Some(Category::Feria) | Some(Category::Sunday) | None => "",
+/// The words before a fixed date on the feast page: "Kept on", or "Commemorated on" for a feast
+/// of the rank of a commemoration; empty for a date that moves.
+pub fn date_lead(e: &FeastEntry) -> &'static str {
+    match (e.fixed, e.rank) {
+        (None, _) => "",
+        (Some(_), Rank::Commemoration) => "Commemorated on",
+        (Some(_), _) => "Kept on",
     }
 }
 
@@ -533,10 +566,9 @@ pub fn common_name(c: Category) -> &'static str {
     }
 }
 
-/// A search result's line under its name: "February 27 · Bishop & Confessor".
+/// A search result's line under its name: "February 27", and for a monastic observance so.
 pub fn result_meta(e: &FeastEntry) -> String {
-    let what = if e.monastic.is_some() { "Monastics & Oblates only" } else { category_label(e.category) };
-    if what.is_empty() { feast_date(e) } else { format!("{} · {what}", feast_date(e)) }
+    if e.monastic.is_some() { format!("{} · Monastics & Oblates only", feast_date(e)) } else { feast_date(e) }
 }
 
 /// How the ordo marks a rank: "greater" (red, a greater double and above), "double" (blue), or
@@ -557,20 +589,29 @@ pub fn whole_office_label(d: Date) -> String {
     format!("the hours of {}", crate::long_date(d))
 }
 
-/// The feast page's subtitle: "Greater Double · White · Bishop & Confessor".
+/// The feast page's subtitle: "Greater Double · White". The Common its texts come from is named
+/// over them, from the office itself, rather than guessed from the feast's category.
 pub fn feast_subtitle(e: &FeastEntry) -> String {
-    let mut parts = vec![e.rank.display_name().to_string()];
-    match &e.monastic {
-        Some(_) => parts.push("Monastics & Oblates only".into()),
-        None => {
-            parts.push(crate::title_case(e.color.as_str()));
-            let c = category_label(e.category);
-            if !c.is_empty() {
-                parts.push(c.into());
-            }
-        }
+    let what = if e.monastic.is_some() { "Monastics & Oblates only".to_string() } else { crate::title_case(e.color.as_str()) };
+    format!("{} · {what}", e.rank.display_name())
+}
+
+/// The year the feast page reads its texts from: the first in which the feast is kept, else the
+/// first in which it is commemorated.
+pub fn texts_keeping(years: &[YearKeeping]) -> Option<&YearKeeping> {
+    let kept = |y: &&YearKeeping| matches!(y.keeping, Keeping::Kept | Keeping::Transferred { .. });
+    let commemorated = |y: &&YearKeeping| matches!(y.keeping, Keeping::Commemorated { .. });
+    years.iter().filter(|y| y.date.is_some()).find(kept).or_else(|| years.iter().filter(|y| y.date.is_some()).find(commemorated))
+}
+
+/// Whether a day's celebration or commemoration, by `id` and printed `name`, is `entry`: by id,
+/// else by name (a generated octave day, a commemoration printed under its saint's name).
+pub fn is_entry(entry: &FeastEntry, id: &str, name: &str) -> bool {
+    if id == entry.id {
+        return true;
     }
-    parts.join(" · ")
+    let key = normalize_commemoration_name(name);
+    !key.is_empty() && key == normalize_commemoration_name(&entry.name)
 }
 
 /// The feast page's note for a monastic observance.
@@ -604,26 +645,32 @@ pub fn next_keeping(years: &[YearKeeping], today: Date) -> Option<&YearKeeping> 
     years.iter().filter(|y| !matches!(y.keeping, Keeping::NotKept { .. })).find(|y| y.date.is_some_and(|d| d >= today))
 }
 
-/// The feast page's line over its texts. `proper` and `common` say whether any text came from
-/// the feast's own proper and from its Common.
-pub fn texts_source(category: Option<Category>, proper: bool, common: bool) -> String {
-    let common_name = category.map(common_name).unwrap_or_default();
-    match (proper, common && !common_name.is_empty()) {
-        (true, true) => format!("Proper to the feast; texts marked Common are from the {common_name}."),
-        (false, true) => format!("From the {common_name}."),
+/// The feast page's line over its texts: whether they are the feast's own (`proper`) or from a
+/// Common, and the day they are said as shown, `kept` or commemorated.
+pub fn texts_source(proper: bool, common: Option<Category>, said: Date, kept: bool) -> String {
+    let common_name = common.map(common_name).unwrap_or_default();
+    let source = match (proper, common_name.is_empty()) {
+        (true, false) => format!("Proper to the feast; texts marked Common are from the {common_name}."),
+        (false, false) => format!("From the {common_name}."),
         _ => "Proper to the feast.".to_string(),
-    }
+    };
+    let how = if kept { "As said" } else { "As said in its commemoration" };
+    format!("{source} {how} on {}.", crate::long_date(said))
 }
 
 /// How many years the feast page lists; [`YEARS_HEADING`] names it.
 pub const FEAST_PAGE_YEARS: i32 = 8;
 
-/// The search page's summary of what it found.
-pub fn results_count(n: usize) -> String {
+/// The search page's summary of the `n` feasts `query` found: nothing until it is long enough to
+/// search, so a first letter typed in the apps' live search does not read as no feast.
+pub fn results_count(query: &str, n: usize) -> String {
+    if normalize(query).chars().filter(|c| c.is_alphanumeric()).count() < MIN_QUERY {
+        return String::new();
+    }
     match n {
         0 => "No feast or saint by that name".into(),
         1 => "1 feast".into(),
-        n if n >= MAX_RESULTS => format!("The first {n} feasts"),
+        n if n > MAX_RESULTS => format!("The first {MAX_RESULTS} of {n} feasts"),
         n => format!("{n} feasts"),
     }
 }
@@ -647,6 +694,7 @@ mod tests {
         assert_eq!(normalize("Ss. Peter & Paul"), "st peter and paul");
         assert_eq!(normalize("Saint Rapha\u{eb}l"), "st raphael");
         assert_eq!(normalize("  St   Mary  Magdalene, Penitent "), "st mary magdalene penitent");
+        assert_eq!(normalize("Rapha\u{65}\u{308}l of Jud\u{e6}a"), "raphael of judaea");
     }
 
     #[test]
@@ -656,6 +704,7 @@ mod tests {
         assert_eq!(match_score("st raphael of brooklyn", "raphael", &words("raphael"), false), Some(1));
         assert_eq!(match_score("translation of st raphael", "raphael", &words("raphael"), false), Some(2));
         assert_eq!(match_score("candlemas", "candle", &words("candle"), true), Some(4));
+        assert_eq!(match_score("easter", "easter", &words("easter"), true), Some(0), "a familiar name said whole");
         assert_eq!(match_score("st raphael", "gabriel", &words("gabriel"), false), None);
     }
 
@@ -664,11 +713,23 @@ mod tests {
         let d = Date::new(2027, 4, 25);
         assert_eq!(keeping_note(&Keeping::Transferred { from: d }), "from April 25");
         assert_eq!(keeping_note(&Keeping::Commemorated { holder: "Quinquagesima Sunday".into() }), "Quinquagesima Sunday holds the day");
+        assert_eq!(keeping_note(&Keeping::Commemorated { holder: "Easter feria".into() }), "An Easter feria holds the day");
+        assert_eq!(keeping_note(&Keeping::NotKept { holder: "Feria".into() }), "A feria holds the day");
         assert_eq!(keeping_note(&Keeping::Monastic { parish: "Feria".into() }), "the parish keeps a feria");
+        assert_eq!(
+            keeping_note(&Keeping::Monastic { parish: "III Sunday after Pentecost".into() }),
+            "the parish keeps the III Sunday after Pentecost"
+        );
         assert_eq!(keeping_note(&Keeping::Kept), "");
         assert_eq!(row_date(Date::new(2027, 2, 27)), "Sat, Feb 27");
-        assert_eq!(texts_source(Some(Category::ConfessorBishop), false, true), "From the Common of a Confessor and Bishop.");
-        assert_eq!(texts_source(Some(Category::Apostle), true, false), "Proper to the feast.");
+        assert_eq!(
+            texts_source(false, Some(Category::ConfessorBishop), Date::new(2027, 2, 27), true),
+            "From the Common of a Confessor and Bishop. As said on Saturday, February 27, 2027."
+        );
+        assert_eq!(
+            texts_source(true, None, Date::new(2027, 1, 4), false),
+            "Proper to the feast. As said in its commemoration on Monday, January 4, 2027."
+        );
     }
 
     /// The data directory, read as the calendar loader reads it.

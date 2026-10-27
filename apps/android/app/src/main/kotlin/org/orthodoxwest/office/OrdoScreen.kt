@@ -342,6 +342,7 @@ fun OrdoYearScreen(
     onToday: () -> Unit,
     onYear: (Int) -> Unit,
     onDay: (LocalDate) -> Unit,
+    onFind: () -> Unit = {},
 ) {
     val p = LocalPalette.current
     val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
@@ -353,6 +354,7 @@ fun OrdoYearScreen(
     ) {
         item(key = "chrome") { chrome() }
         item(key = "header") { OrdoHeader(view.year, null, view.roman, today, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tabula") {
             Column(ordoColumn().padding(top = 40.dp)) {
                 TabulaHeading()

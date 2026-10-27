@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity() {
                             onFollowSun = ::followSun,
                             onAllowLocation = ::openAppSettings,
                             onSearch = vm::search,
+                            onFindAgain = vm::findAgain,
                             entries = vm.entries.map { it.id },
                         )
                     }
@@ -354,6 +355,7 @@ fun OfficeApp(
     onFollowSun: (Boolean) -> Unit = {},
     onAllowLocation: () -> Unit = {},
     onSearch: (String) -> Unit = {},
+    onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
     entries: List<Long>,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -538,7 +540,7 @@ fun OfficeApp(
                                 view = content.view,
                                 chrome = chrome,
                                 insets = insets,
-                                onFind = { onOpen(Page.Find("")) },
+                                onFind = onFindAgain,
                                 onFeast = { onOpen(Page.Feast(it)) },
                                 onDay = { onOpen(Page.Home(it)) },
                             )
@@ -551,6 +553,7 @@ fun OfficeApp(
                                 onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
+                                onFind = { onOpen(Page.Find("")) },
                             )
                             page is Page.Reminders -> RemindersScreen(
                                 settings = reminders,

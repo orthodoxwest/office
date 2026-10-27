@@ -327,7 +327,7 @@ pub struct FeastResult {
     pub rank_full: String,
     /// "is-greater" (a greater double or above), "is-double", or empty, as the ordo marks ranks.
     pub rank_class: String,
-    /// "February 27 · Bishop & Confessor".
+    /// "February 27", or "February 27 · Monastics & Oblates only".
     pub meta: String,
     pub years: Vec<FeastYearRow>,
 }
@@ -377,10 +377,10 @@ pub struct FeastPageData {
     pub chrome: Chrome,
     pub name: String,
     pub subtitle: String,
-    /// "February 27", or "A moveable feast".
+    /// "February 27", or "Its date moves from year to year".
     pub date: String,
-    /// The feast has a date of its own.
-    pub fixed: bool,
+    /// "Kept on" or "Commemorated on" before a date of its own; empty for a date that moves.
+    pub date_lead: String,
     pub monastic_note: String,
     /// For a monastic observance, the feast of the same saint everyone keeps.
     pub kept_by_all: Option<LinkRow>,

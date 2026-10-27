@@ -364,7 +364,8 @@ private fun Frontispiece(
                             .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(Alignment.Bottom),
                         style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
                     )
-                    // The day's feast leads to its page, underlined in gold as the web's `.feast-link`.
+                    // The day's feast leads to its page, underlined as the web's `.feast-link`, though in
+                    // its own ink: a text decoration takes no colour.
                     FeastName(
                         view.feastName,
                         view.feastAlias,

@@ -115,11 +115,13 @@ fun FindScreen(
                         Modifier.weight(1f).tap(action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
                         style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 27.sp, color = rankTone(r.rankTone, p)),
                     )
-                    Text(
-                        r.rank,
-                        Modifier.padding(start = 12.dp, top = 4.dp).semantics { contentDescription = r.rankFull },
-                        style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p)),
-                    )
+                    if (r.rank.isNotEmpty()) {
+                        Text(
+                            r.rank,
+                            Modifier.padding(start = 12.dp, top = 4.dp).semantics { contentDescription = r.rankFull },
+                            style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p)),
+                        )
+                    }
                 }
                 Text(
                     buildAnnotatedString {
@@ -175,8 +177,8 @@ fun FeastScreen(
         item(key = "facts") {
             Column(feastColumn().padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
-                    if (!view.fixed) AnnotatedString(view.date) else buildAnnotatedString {
-                        append(w.keptOn + " ")
+                    if (view.dateLead.isEmpty()) AnnotatedString(view.date) else buildAnnotatedString {
+                        append(view.dateLead + " ")
                         withStyle(SpanStyle(color = p.text)) { append(view.date) }
                     },
                     style = Type.body.copy(fontSize = 17.6.sp, lineHeight = 26.sp, color = p.muted),

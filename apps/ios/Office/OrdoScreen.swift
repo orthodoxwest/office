@@ -711,7 +711,7 @@ private struct Digest: View {
             if antiphon != nil || preces || suffrage { marks.type(line).foregroundStyle(p.muted) }
             // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
             ForEach(comms, id: \.self) { c in
-                let text = Text("Com. ") + Text(c.name).underline(!c.feastId.isEmpty) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”")
+                let text = Text("Com. ") + Text(c.name).underline(!c.feastId.isEmpty, color: p.goldLine) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”")
                 if c.feastId.isEmpty {
                     text.type(line).foregroundStyle(p.muted)
                 } else {
@@ -743,6 +743,7 @@ struct OrdoYearScreen: View {
             VStack(spacing: 0) {
                 SiteHeader()
                 OrdoHeader(year: Int(view.year), month: nil, roman: view.roman).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                SearchEntry { model.open(.find("")) }.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                 VStack(spacing: 0) {
                     TabulaHeading()
                     if wide {

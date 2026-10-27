@@ -79,7 +79,10 @@ struct FindScreen: View {
                     Text(view.count).type(Scale.small.sized(14.4, line: 21)).foregroundStyle(p.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .feastColumn(m, wide: wide).padding(.top, m.px(14))
-                        .accessibilityAddTraits(.updatesFrequently)
+                        // Said as it changes, as the web's `role="status"`.
+                        .onChange(of: view.count) { _, count in
+                            AccessibilityNotification.Announcement(count).post()
+                        }
                 }
                 ForEach(view.results, id: \.id) { r in
                     result(r).feastColumn(m, wide: wide).padding(.top, m.px(16))
@@ -99,8 +102,10 @@ struct FindScreen: View {
                         Text(r.name).type(Scale.body.sized(21.6, line: 27)).foregroundStyle(ink)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
-                            .padding(.leading, m.px(12)).padding(.top, m.px(4))
+                        if !r.rank.isEmpty {
+                            Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
+                                .padding(.leading, m.px(12)).padding(.top, m.px(4))
+                        }
                     }
                     (Text(r.meta + " · ") + Text(feastWordsShared.everyYear).foregroundColor(p.accent))
                         .type(Scale.small.sized(14.7, line: 21)).foregroundStyle(p.muted)
@@ -137,7 +142,7 @@ struct FeastScreen: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 SiteHeader()
-                Button { model.open(.find("")) } label: {
+                Button { model.findAgain() } label: {
                     Text("‹ \(w.findTitle)").type(Scale.small.sized(15.2, line: 20)).foregroundStyle(p.accent)
                         .padding(.vertical, m.px(12))
                         .frame(minHeight: 44)
@@ -165,8 +170,8 @@ struct FeastScreen: View {
         let w = feastWordsShared
         return VStack(alignment: .leading, spacing: m.px(14)) {
             Group {
-                if view.fixed {
-                    Text(w.keptOn + " ") + Text(view.date).foregroundColor(p.text)
+                if !view.dateLead.isEmpty {
+                    Text(view.dateLead + " ") + Text(view.date).foregroundColor(p.text)
                 } else {
                     Text(view.date)
                 }
@@ -205,13 +210,8 @@ struct FeastScreen: View {
             SectionHeading(text: w.textsHeading)
             Text(view.textsSource).type(TextStyle(size: 14.7, line: 21, italic: true)).foregroundStyle(p.muted).padding(.top, m.px(6))
             ForEach(Array(view.texts.enumerated()), id: \.offset) { _, t in
-                (Text(t.label).font(Font(TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true).uiFont(m))).foregroundColor(p.rubric)
-                    + Text(t.common ? "  " + w.commonMark : "").font(Font(TextStyle(size: 13.6, line: 22, italic: true).uiFont(m))).foregroundColor(p.muted))
-                    .tracking(0.8 * m.type)
-                    .lineSpacing(max(0, 22 * m.type - TextStyle(size: 16, line: 22).uiFont(m).lineHeight))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                TextLabel(label: t.label, common: t.common ? w.commonMark : "")
                     .padding(.top, m.px(18)).padding(.bottom, m.px(2))
-                    .accessibilityAddTraits(.isHeader)
                 ForEach(Array(t.blocks.enumerated()), id: \.offset) { _, b in BlockRow(block: b) }
             }
             if let whole = view.wholeOffice {
@@ -225,6 +225,24 @@ struct FeastScreen: View {
                 .accessibilityHint("Opens the day")
             }
         }
+    }
+}
+
+/// A text's label in the rubric's small capitals, and "Common" after it when the text is the Common's.
+private struct TextLabel: View {
+    let label: String
+    let common: String
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let caps = TextStyle(size: 16, line: 22, tracking: 0.8, smallCaps: true)
+        let name = Text(label).font(Font(caps.uiFont(m))).foregroundColor(p.rubric).tracking(0.8 * m.type)
+        let mark = Text(common.isEmpty ? "" : "  " + common).font(Font(TextStyle(size: 13.6, line: 22, italic: true).uiFont(m))).foregroundColor(p.muted)
+        return (name + mark)
+            .lineSpacing(max(0, caps.line * m.type - caps.uiFont(m).lineHeight))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
