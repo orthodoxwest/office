@@ -136,13 +136,15 @@ final class Usage {
 
 extension Page {
     /// The page as the usage count names it: the year's frontispiece is part of the ordo.
-    var usageEvent: UsageEvent {
+    /// What the page counts as; the search and the feast pages are not counted, as on the web.
+    var usageEvent: UsageEvent? {
         switch self {
         case let .home(d): return .home(date: d)
         case let .hour(d, h): return .hour(date: d, hour: h)
         case let .ordo(y, _, _): return .ordo(year: Int32(y))
         case let .year(y): return .ordo(year: Int32(y))
         case .reminders: return .remindersPage
+        case .find, .feast: return nil
         }
     }
 }

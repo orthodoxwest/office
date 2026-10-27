@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -84,6 +85,7 @@ fun HomeScreen(
     onDate: (LocalDate) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
+    onFeast: (String) -> Unit = {},
 ) {
     // Where the niche stands in the room, which the chapel light follows.
     var room by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -129,6 +131,7 @@ fun HomeScreen(
                             .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
                         HomeTier(desk = true, screen = screen, tall = tall, card = cardWidth, dyn = LocalDensity.current.fontScale),
                         niche = niche,
+                        onFeast = onFeast,
                     )
                     Footer(reserve = true)
                 }
@@ -144,6 +147,7 @@ fun HomeScreen(
                             view, date, today, onDate, onHour, onOrdoDay,
                             Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
                             HomeTier(desk = false, screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
+                            onFeast = onFeast,
                         )
                     },
                     footer = { Footer(gap = 29.6.dp, bottom = 25.6.dp, reserve = true) },
@@ -321,6 +325,7 @@ private fun Frontispiece(
     modifier: Modifier,
     tier: HomeTier,
     niche: NicheTokens? = null,
+    onFeast: (String) -> Unit = {},
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
@@ -359,7 +364,16 @@ private fun Frontispiece(
                             .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(Alignment.Bottom),
                         style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
                     )
-                    FeastName(view.feastName, view.feastAlias, tier.feast, Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure))
+                    // The day's feast leads to its page, underlined as the web's `.feast-link`, though in
+                    // its own ink: a text decoration takes no colour.
+                    FeastName(
+                        view.feastName,
+                        view.feastAlias,
+                        tier.feast,
+                        Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure)
+                            .then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
+                        linked = view.feastId.isNotEmpty(),
+                    )
                     if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
@@ -372,11 +386,12 @@ private fun Frontispiece(
                             // A second commemoration is joined to the first with "and", as the web's
                             // `.commemorations li + li::before`, so the list reads as a sentence.
                             view.commemorations.forEachIndexed { i, name ->
-                                val text = if (i == 0) AnnotatedString(name) else buildAnnotatedString {
-                                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("and ") }
-                                    append(name)
+                                val id = view.commemorationIds.getOrElse(i) { "" }
+                                val text = buildAnnotatedString {
+                                    if (i > 0) withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("and ") }
+                                    withStyle(SpanStyle(textDecoration = if (id.isEmpty()) null else TextDecoration.Underline)) { append(name) }
                                 }
-                                Text(text, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp))
+                                Text(text, if (id.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(id) }, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp))
                             }
                         }
                     }
@@ -528,9 +543,16 @@ private fun Frontispiece(
  * together.
  */
 @Composable
-private fun FeastName(name: String, alias: String, size: Float, modifier: Modifier) {
+private fun FeastName(name: String, alias: String, size: Float, modifier: Modifier, linked: Boolean = false) {
     val p = LocalPalette.current
-    val style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.25f).sp, color = p.accent, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading)
+    val style = Type.body.copy(
+        fontSize = size.sp,
+        lineHeight = (size * 1.25f).sp,
+        color = p.accent,
+        textAlign = TextAlign.Center,
+        lineBreak = LineBreak.Heading,
+        textDecoration = if (linked) TextDecoration.Underline else null,
+    )
     FlowRow(modifier.semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy((size * 0.25f).dp, Alignment.CenterHorizontally)) {
         Text(name, style = style)
         if (alias.isNotEmpty()) Text(alias, style = style.copy(fontStyle = FontStyle.Italic), softWrap = false)

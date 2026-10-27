@@ -1,5 +1,14 @@
 document.documentElement.classList.add("js");
 
+// A feast's page leads back to the search; reached from one, back to that search,
+// with the words the reader typed, as the apps' back does.
+(function () {
+  var back = document.querySelector(".find-back");
+  if (!back || !document.referrer) return;
+  var from = new URL(document.referrer);
+  if (from.origin === location.origin && from.pathname === back.pathname) back.href = from.pathname + from.search;
+})();
+
 // A psalm's number and its Latin incipit share a line, a dot between them.
 // When the line cannot hold both, the incipit stands on its own line beneath
 // and the dot goes: a separator ending a line alone separates nothing. CSS

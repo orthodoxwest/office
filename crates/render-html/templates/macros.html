@@ -46,3 +46,19 @@
   <p class="pref-hint">Includes a reading of the following day’s saints at Prime.</p>
 </div>
 {% endmacro %}
+{# The ordo's search for a feast by name: a plain form, so it works without script. `focus`
+   puts the cursor in it on the search page itself. #}
+{% macro feast_search(query="", focus=false) %}
+<form class="find-field" action="/calendar/find" method="get" role="search">
+  <svg class="find-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6 17 17"/></svg>
+  <label class="sr-only" for="find-q">{{ feast_words.find_prompt }}</label>
+  <input id="find-q" type="search" name="q" value="{{ query }}" placeholder="{{ feast_words.find_prompt }}" autocomplete="off" spellcheck="false" enterkeyhint="search"{% if focus and not query %} autofocus{% endif %}>
+  <button class="find-submit" type="submit">Find</button>
+</form>
+{% endmacro %}
+{# A feast's keeping year by year, each row leading to that day. #}
+{% macro feast_years(years) %}
+<ol class="find-years">
+  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span><span class="find-year-date">{{ y.date }}</span><span class="find-year-status is-{{ y.class }}"><b>{{ y.label }}</b>{% if y.note %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
+</ol>
+{% endmacro %}

@@ -70,8 +70,8 @@ func spokenDay(_ day: CivilDate, today: CivilDate) -> String {
 
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
- * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, and
- * the reminders.
+ * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
+ * reminders, the search for a feast, and a feast's page.
  */
 enum Page: Hashable {
     case home(CivilDate)
@@ -79,6 +79,8 @@ enum Page: Hashable {
     case ordo(year: Int, month: Int, day: Int)
     case year(Int)
     case reminders
+    case find(String)
+    case feast(String)
 
     /// Pages of one kind replace each other, as following a link does; another kind goes on top.
     var kind: Int {
@@ -88,6 +90,8 @@ enum Page: Hashable {
         case .ordo: return 2
         case .year: return 3
         case .reminders: return 4
+        case .find: return 5
+        case .feast: return 6
         }
     }
 
@@ -114,10 +118,14 @@ enum Page: Hashable {
         case let .ordo(y, m, d): return "ordo \(y) \(m) \(d)"
         case let .year(y): return "year \(y)"
         case .reminders: return "reminders"
+        case let .find(q): return "find \(q)"
+        case let .feast(id): return "feast \(id)"
         }
     }
 
     static func decode(_ s: String) -> Page? {
+        // A query keeps its own spaces.
+        if s.hasPrefix("find ") { return .find(String(s.dropFirst(5))) }
         let f = s.split(separator: " ").map(String.init)
         switch f.first {
         case "home": return f.count > 1 ? CivilDate.parse(f[1]).map(Page.home) : nil
@@ -129,6 +137,7 @@ enum Page: Hashable {
             return .ordo(year: y, month: m, day: f.count > 3 ? Int(f[3]) ?? 0 : 0)
         case "year": return f.count > 1 ? Int(f[1]).map(Page.year) : nil
         case "reminders": return .reminders
+        case "feast": return f.count > 1 ? .feast(f[1]) : nil
         default: return nil
         }
     }
@@ -261,6 +270,27 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The search's words changed: the search page takes them in place, with no move between pages.
+    func search(_ query: String) {
+        guard case let .find(q)? = path.last?.page, q != query else { return }
+        step = nil
+        path[path.count - 1].page = .find(query)
+    }
+
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    func findAgain() {
+        if path.count > 1, case .find = path[path.count - 2].page {
+            menuOpen = false
+            settingsOpen = false
+            path.removeLast()
+        } else {
+            open(.find(""))
+        }
+    }
+
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil
@@ -345,7 +375,8 @@ final class AppModel: ObservableObject {
 
     /**
      * What the launch asked for, for the simulator screenshots: `-page hour -hour lauds
-     * -date 2026-03-15` (or home, ordo, year, reminders), with `-today` fixing today.
+     * -date 2026-03-15` (or home, ordo, year, reminders; find with `-query`, feast with
+     * `-feast`), with `-today` fixing today.
      */
     func openFromLaunch() -> Bool {
         let d = UserDefaults.standard
@@ -357,6 +388,8 @@ final class AppModel: ObservableObject {
         case "ordo": path = visits([.ordo(year: Int(date.year), month: Int(date.month), day: 0)])
         case "year": path = visits([.year(Int(date.year))])
         case "reminders": path = visits([.reminders])
+        case "find": path = visits([.find(d.string(forKey: "query") ?? "")])
+        case "feast": path = visits([.feast(d.string(forKey: "feast") ?? "st-benedict")])
         default: path = []
         }
         // `-settings YES` opens the wide header's Settings, for its screenshot.

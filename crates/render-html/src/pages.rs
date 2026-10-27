@@ -5,19 +5,23 @@ use minijinja::value::Value;
 use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
-use crate::html::{render_section_heading, typeset};
+use crate::html::{render_flowing_block, render_liturgical_block, render_section_heading, typeset};
 use crate::leader::leader_sections;
 use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
-use crate::view::{BetaData, CalendarData, ErrorData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData};
+use crate::view::{
+    BetaData, CalendarData, ErrorData, FeastPageData, FindData, HomeData, HourData, NotFoundData, PrivacyData, RemindersData,
+};
 use presentation::{season_label, title_case};
 
-const TEMPLATES: [(&str, &str); 11] = [
+const TEMPLATES: [(&str, &str); 13] = [
     ("layout.html", include_str!("../templates/layout.html")),
     ("macros.html", include_str!("../templates/macros.html")),
     ("home.html", include_str!("../templates/home.html")),
     ("hour.html", include_str!("../templates/hour.html")),
     ("calendar.html", include_str!("../templates/calendar.html")),
+    ("find.html", include_str!("../templates/find.html")),
+    ("feast.html", include_str!("../templates/feast.html")),
     ("reminders.html", include_str!("../templates/reminders.html")),
     ("privacy.html", include_str!("../templates/privacy.html")),
     ("beta.html", include_str!("../templates/beta.html")),
@@ -50,6 +54,26 @@ impl Pages {
         env.add_filter("typeset", |s: String| typeset(&s));
         env.add_filter("titlecase", |s: String| title_case(&s));
         env.add_filter("season_label", |s: String| season_label(&s));
+        // A feast's antiphon, versicle or collect, set as the hours set it (℣/℟, the mediant).
+        env.add_filter("feast_text", |s: String| Value::from_safe_string(render_liturgical_block(&s)));
+        // A feast's collect, flowing as the hours set it.
+        env.add_filter("feast_prayer", |s: String| Value::from_safe_string(render_flowing_block(&s)));
+        let w = &presentation::feast::FEAST_WORDS;
+        env.add_global(
+            "feast_words",
+            Value::from_iter([
+                ("find_title", w.find_title),
+                ("find_prompt", w.find_prompt),
+                ("every_year", w.every_year),
+                ("years_hint", w.years_hint),
+                ("days_hours", w.days_hours),
+                ("texts_heading", w.texts_heading),
+                ("common_mark", w.common_mark),
+                ("whole_office", w.whole_office),
+                ("everyone_keeps", w.everyone_keeps),
+                ("monastic_heading", w.monastic_heading),
+            ]),
+        );
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
@@ -101,6 +125,14 @@ impl Pages {
 
     pub fn calendar(&self, data: &CalendarData) -> Result<String, String> {
         self.render("calendar.html", data)
+    }
+
+    pub fn find(&self, data: &FindData) -> Result<String, String> {
+        self.render("find.html", data)
+    }
+
+    pub fn feast(&self, data: &FeastPageData) -> Result<String, String> {
+        self.render("feast.html", data)
     }
 
     pub fn reminders(&self, data: &RemindersData) -> Result<String, String> {

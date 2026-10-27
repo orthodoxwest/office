@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish %}
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
 {% if view == "year" %}
 {# A link into the year from before the ordo was set a month to a page
      (/calendar/2026#d-2026-09-12, or #september) forwards to that month
@@ -37,6 +37,7 @@
       {% if year < 9999 %}<a href="{{ next_year_link|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
     </nav>
   </div>
+  {{ feast_search() }}
   {# One month to a page: the strip leads between them, its current month
        underlined. The whole year keeps it as in-page jumps. #}
   <nav class="month-jump" aria-label="Jump to month">
@@ -124,7 +125,7 @@
               {% if d.commemorations %}
               <div class="day-office-hour">
                 <dt>Day</dt>
-                <dd>{% for c in d.commemorations %}<span class="day-office-comm">Com. {{ c|typeset }}</span>{% endfor %}</dd>
+                <dd>{% for c in d.commemorations %}{% set href = d.commemoration_hrefs[loop.index0] if loop.index0 < d.commemoration_hrefs|length else "" %}<span class="day-office-comm">Com. {% if href %}<a class="feast-link" href="{{ href|url }}">{{ c|typeset }}</a>{% else %}{{ c|typeset }}{% endif %}</span>{% endfor %}</dd>
               </div>
               {% endif %}
               {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_comms %}
@@ -134,7 +135,7 @@
                   {% if d.benedictus_antiphon %}<span class="day-office-incipit">Ben. &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.lauds_preces %}<span class="day-office-badge">Preces</span>{% endif %}
                   {% if d.lauds_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
-                  {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}
@@ -152,7 +153,7 @@
                   {% if d.magnificat_antiphon %}<span class="day-office-incipit">Mag. &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.vespers_preces %}<span class="day-office-badge">Preces</span>{% endif %}
                   {% if d.vespers_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
-                  {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                  {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
               {% endif %}

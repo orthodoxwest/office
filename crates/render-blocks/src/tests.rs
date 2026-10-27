@@ -215,3 +215,37 @@ fn blocks_carry_the_same_text_as_the_web() {
     }
     assert!(checked > 10_000, "only {checked} sections checked");
 }
+
+/// A feast page's texts read the same on every front: each feast kept or commemorated in a year,
+/// as said that day.
+#[test]
+fn a_feasts_texts_carry_the_same_text_as_the_web() {
+    use office::feast::{DayOf, feast_texts};
+
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let cal = calendar::build_calendar(2027, &data).expect("calendar");
+    let offices = office::resolve_office_days(&cal);
+    let days: Vec<office::Day> = cal.days.into_iter().zip(offices).map(|(c, o)| office::Day::new(c, o)).collect();
+    let moveable = MoveableDates::compute(2027);
+    let mut checked = 0;
+    for (i, day) in days.iter().enumerate() {
+        let ids: Vec<String> = day.celebration.iter().chain(&day.commemorations).map(|f| f.id.clone()).collect();
+        for id in ids {
+            let is_it = |i: &str, _: &str| i == id;
+            let eve = i.checked_sub(1).map(|e| DayOf { day: &days[e], moveable: &moveable });
+            for t in feast_texts(&engine, &is_it, eve, DayOf { day, moveable: &moveable }).texts {
+                let html = if t.prayer {
+                    render_html::html::render_flowing_block(&t.text)
+                } else {
+                    render_html::html::render_liturgical_block(&t.text)
+                };
+                let native: String = text_blocks(&t.text, t.prayer).iter().map(|b| squeeze(&b.plain_text())).collect();
+                assert_eq!(native, squeeze(&html_text(&html)), "{id} {} {}", day.date, t.label);
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 1_000, "only {checked} texts checked");
+}

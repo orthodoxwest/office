@@ -69,6 +69,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.FeastPageView
+import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
@@ -139,6 +141,8 @@ class MainActivity : ComponentActivity() {
                             onAllowExact = ::openExactAlarmSettings,
                             onFollowSun = ::followSun,
                             onAllowLocation = ::openAppSettings,
+                            onSearch = vm::search,
+                            onFindAgain = vm::findAgain,
                             entries = vm.entries.map { it.id },
                         )
                     }
@@ -278,12 +282,16 @@ fun OfficeApp(
     onAllowLocation: () -> Unit = {},
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
+    find: FindView? = null,
+    feast: FeastPageView? = null,
 ) {
     val content = when {
         error != null -> Content.Failed(error)
         page is Page.Home -> home?.let(Content::Home)
         page is Page.Hour -> hour?.takeIf { it.hour == page.hour }?.let(Content::Hour)
         page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
+        page is Page.Find -> find?.let(Content::Find)
+        page is Page.Feast -> feast?.takeIf { it.id == page.id }?.let(Content::Feast)
         else -> Content.Drawn
     }
     OfficeApp(
@@ -346,6 +354,8 @@ fun OfficeApp(
     onAllowExact: () -> Unit,
     onFollowSun: (Boolean) -> Unit = {},
     onAllowLocation: () -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
     entries: List<Long>,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -420,11 +430,11 @@ fun OfficeApp(
                                 is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
                                 is Page.Ordo -> Page.Ordo(page.year, page.month)
                                 is Page.Year -> Page.Year(page.year)
-                                Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                                Page.Reminders, is Page.Find, is Page.Feast -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
                             },
                         )
                     },
-                    ordoCurrent = page is Page.Ordo || page is Page.Year,
+                    ordoCurrent = page is Page.Ordo || page is Page.Year || page is Page.Find || page is Page.Feast,
                     onReminders = { menu = false; onOpen(Page.Reminders) },
                     remindersCurrent = page is Page.Reminders,
                     settingsOpen = settings,
@@ -487,6 +497,7 @@ fun OfficeApp(
                                 onDate = { onOpen(Page.Home(it)) },
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
+                                onFeast = { onOpen(Page.Feast(it)) },
                             )
                             page is Page.Hour && content is Content.Hour -> HourScreen(
                                 view = content.view,
@@ -512,7 +523,26 @@ fun OfficeApp(
                                 onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Home(it)) },
+                                onFind = { onOpen(Page.Find("")) },
+                                onFeast = { onOpen(Page.Feast(it)) },
                                 focusDay = page.day,
+                            )
+                            page is Page.Find && content is Content.Find -> FindScreen(
+                                view = content.view,
+                                query = page.query,
+                                chrome = chrome,
+                                insets = insets,
+                                onQuery = onSearch,
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onDay = { onOpen(Page.Home(it)) },
+                            )
+                            page is Page.Feast && content is Content.Feast -> FeastScreen(
+                                view = content.view,
+                                chrome = chrome,
+                                insets = insets,
+                                onFind = onFindAgain,
+                                onFeast = { onOpen(Page.Feast(it)) },
+                                onDay = { onOpen(Page.Home(it)) },
                             )
                             page is Page.Year -> OrdoYearScreen(
                                 view = remember(page.year) { ordoYear(page.year) },
@@ -523,6 +553,7 @@ fun OfficeApp(
                                 onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
                                 onYear = { onOpen(Page.Year(it)) },
                                 onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
+                                onFind = { onOpen(Page.Find("")) },
                             )
                             page is Page.Reminders -> RemindersScreen(
                                 settings = reminders,

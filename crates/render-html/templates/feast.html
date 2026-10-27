@@ -1,0 +1,42 @@
+{% extends "layout.html" %}{% block title %}{{ name }} — Feasts{% endblock %}{% block description %}{{ name }}: {{ date }}, and how it is kept in the Benedictine Divine Office of the Antiochian Western Rite Vicariate in the years ahead.{% endblock %}{% block content %}{% from "macros.html" import headpiece, feast_years %}
+<div class="calendar feast-page">
+  <a class="find-back" href="/calendar/find">&lsaquo; {{ feast_words.find_title }}</a>
+  <div class="calendar-header find-header" id="calendar-top">
+    <div class="calendar-title">
+      {{ headpiece() }}
+      <h1>{{ name|typeset }}</h1>
+      <p class="calendar-subtitle">{{ subtitle|typeset }}</p>
+    </div>
+  </div>
+  <p class="feast-date">{% if date_lead %}{{ date_lead }} <b>{{ date }}</b>{% else %}{{ date }}{% endif %}</p>
+  {% if monastic_note %}
+  <div class="feast-monastic"><b>{{ feast_words.monastic_heading }}</b>{{ monastic_note|typeset }}</div>
+  {% if kept_by_all %}<p class="feast-see">{{ feast_words.everyone_keeps }} <a href="{{ kept_by_all.href|url }}">{{ kept_by_all.label|typeset }}</a> {{ kept_by_all_note }}</p>{% endif %}
+  {% endif %}
+  {% if next %}
+  <a class="feast-next day-color-{{ next.color }}" href="{{ next.href|url }}">
+    <span class="feast-next-label">{{ next.label }}</span>
+    <span class="feast-next-date">{{ next.date }}</span>
+    <span class="feast-next-go">{{ feast_words.days_hours }} &rsaquo;</span>
+  </a>
+  {% endif %}
+  <section class="feast-section" aria-labelledby="feast-years-heading">
+    <h2 id="feast-years-heading">{{ years_heading }}</h2>
+    <p class="feast-hint">{{ feast_words.years_hint }}</p>
+    {{ feast_years(years) }}
+  </section>
+  {% if texts %}
+  <section class="feast-section" aria-labelledby="feast-texts-heading">
+    <h2 id="feast-texts-heading">{{ feast_words.texts_heading }}</h2>
+    <p class="feast-source">{{ texts_source|typeset }}</p>
+    {% for t in texts %}
+    <div class="feast-text">
+      <h3>{{ t.label }}{% if t.common %} <span class="feast-text-common">{{ feast_words.common_mark }}</span>{% endif %}</h3>
+      {% if t.prayer %}{{ t.text|feast_prayer }}{% else %}{{ t.text|feast_text }}{% endif %}
+    </div>
+    {% endfor %}
+    {% if whole_office %}<p class="feast-see">{{ feast_words.whole_office }} <a href="{{ whole_office.href|url }}">{{ whole_office.label }}</a></p>{% endif %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

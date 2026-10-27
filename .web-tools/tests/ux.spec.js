@@ -363,10 +363,11 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
-        // date + go-to-today (historical days) + pray + 7 hours + change-date.
-        .slice(0, 11)
+        // date + the feast's page + go-to-today (historical days) + pray + 7 hours + change-date.
+        .slice(0, 12)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
+          if (element.matches(".feast-link")) return "feast";
           // Recovery chrome when the landing day is not local today — intentional
           // after the stale-day fix; sits in the day identity, before Pray now.
           if (element.matches(".not-today-link")) return "go-to-today";
@@ -383,6 +384,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
   // testDate is fixed in the past relative to "today", so Go to today is present.
   expect(order.focusables).toEqual([
     "date",
+    "feast",
     "go-to-today",
     "pray",
     "lauds",
@@ -3938,4 +3940,17 @@ test("escaped page links retain navigation and report query values", async ({ pa
   expect(url.searchParams.get("body")).toContain("lauds");
   await page.locator(".next-hour").click();
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
+});
+
+test("a feast's page leads back to the search that found it", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  await page.locator(".find-name").first().click();
+  await expect(page).toHaveURL(/\/feast\//);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find?q=raphael");
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+
+  // Reached otherwise, it leads to the empty search.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });

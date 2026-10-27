@@ -3195,11 +3195,15 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* ── Calendar page ── */
 
-.page-calendar {
+.page-calendar,
+.page-find,
+.page-feast {
   font-family: "Ordo Garamond", Georgia, "Times New Roman", "Ordo Cross", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
+.page-find main,
+.page-feast main { max-width: 44rem; }
 .calendar {
   display: grid;
   gap: 1rem;
@@ -4002,6 +4006,251 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     margin-bottom: 0.15rem;
     color: var(--accent);
   }
+}
+
+
+/* ── Finding a feast ──
+   The ordo's search field, the search page and a page per feast. A year's
+   row carries its day's colour on a rail, as the ordo's rows do, and leads
+   to that day. */
+
+.find-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* Never wider than its column: the input's own width would widen a narrow header. */
+  min-width: 0;
+  margin: 0;
+  padding: 0 0.1rem;
+  border-bottom: 1px solid var(--gold-line);
+  color: var(--muted);
+}
+.find-field:focus-within { box-shadow: inset 0 -1px var(--gold-line); }
+.find-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  fill: none;
+  stroke: var(--gold-line);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.find-field input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  min-height: var(--touch-target);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.05rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.find-field input:focus { outline: none; }
+.find-field:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.find-field input::placeholder { color: var(--muted); font-style: italic; opacity: 1; }
+.find-field input::-webkit-search-decoration { -webkit-appearance: none; }
+.find-submit {
+  min-height: var(--touch-target);
+  padding: 0 0.2rem 0 0.6rem;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.find-submit:hover { text-decoration: underline; text-decoration-color: var(--gold-line); }
+
+.find-page .calendar-header,
+.feast-page .calendar-header { grid-template-columns: minmax(0, 1fr); }
+.find-page .calendar-title,
+.feast-page .calendar-title { width: auto; }
+.feast-page h1 { color: var(--rubric); }
+
+.find-count { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.find-feast { padding: 0.2rem 0 1.1rem; border-bottom: 1px solid var(--border); }
+.find-feast:last-child { border-bottom: 0; }
+.find-feast-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.find-feast h2 { margin: 0; font-size: 1.35rem; font-weight: normal; line-height: 1.25; }
+.find-name { color: var(--text); text-decoration: none; }
+.find-name:hover { text-decoration: underline; text-decoration-color: var(--gold-line); text-underline-offset: 0.18em; }
+.find-name.is-greater { color: var(--rubric); }
+.find-rank { font-size: 0.95rem; color: var(--text); text-decoration: none; cursor: help; }
+.find-rank.is-greater { color: var(--rubric); }
+.find-rank.is-double { color: var(--kalendar-blue); }
+.find-meta { margin: 0.2rem 0 0.5rem; color: var(--muted); font-size: 0.92rem; }
+.find-meta a,
+.feast-see a,
+.feast-monastic a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-underline-offset: 0.2em;
+}
+
+.find-years { margin: 0; padding: 0; list-style: none; }
+.find-year {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.2rem 6.8rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0 0.6rem;
+  min-height: var(--touch-target);
+  padding: 0.5rem 0 0.5rem 0.85rem;
+  border-top: 1px dotted var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.find-years li:first-child .find-year { border-top: 0; }
+.find-year::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  width: 3px;
+  background: var(--day-color);
+}
+a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-color: var(--gold-line); text-underline-offset: 0.18em; }
+.find-year-num { color: var(--muted); font-variant-numeric: oldstyle-nums; }
+.find-year-date { white-space: nowrap; }
+.find-year-status { font-size: 0.95rem; }
+.find-year-status b { font-weight: normal; }
+.find-year-status.is-commemorated b { color: var(--rubric); }
+.find-year-status.is-transferred b { color: var(--kalendar-blue); }
+.find-year-status.is-monastic b { color: var(--titulus); font-style: italic; }
+.find-year-status.is-not-kept b { color: var(--muted); font-style: italic; }
+.find-year-note { display: block; color: var(--muted); font-size: 0.86rem; line-height: 1.3; }
+.find-year-go { color: var(--gold-line); }
+
+.find-back,
+.from-feast {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  justify-self: start;
+  color: var(--accent);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.find-back:hover,
+.from-feast:hover { text-decoration: underline; text-decoration-color: var(--gold-line); }
+.from-feast { margin: 0 0 0.2rem; }
+
+.feast-date { margin: 0; color: var(--muted); }
+.feast-date b { font-weight: normal; color: var(--text); }
+.feast-monastic {
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--gold-line);
+  background: var(--surface);
+  font-size: 0.97rem;
+  line-height: 1.45;
+}
+.feast-monastic b {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--titulus);
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+}
+.feast-see { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.feast-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.15rem 1rem;
+  padding: 0.8rem 1rem 0.85rem 1.1rem;
+  position: relative;
+  border: 1px solid var(--lining);
+  outline: 1px solid var(--lining);
+  outline-offset: 3px;
+  margin: 3px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+.feast-next::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--day-color);
+}
+.feast-next-label {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+.feast-next-date { font-size: 1.15rem; }
+.feast-next-go { color: var(--rubric); white-space: nowrap; }
+.feast-next:hover .feast-next-go { text-decoration: underline; text-decoration-color: var(--gold-line); }
+
+.feast-section { margin-top: 0.6rem; }
+.feast-section h2 {
+  margin: 0 0 0.3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--lining);
+  color: var(--titulus);
+  font-size: 1.25rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+.feast-hint,
+.feast-source { margin: 0.4rem 0 0.3rem; color: var(--muted); font-size: 0.9rem; }
+.feast-source { font-style: italic; }
+.feast-text { margin-top: 1rem; }
+.feast-text h3 {
+  margin: 0 0 0.15rem;
+  color: var(--rubric);
+  font-size: 1rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+}
+.feast-text-common {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  font-size: 0.85em;
+  font-style: italic;
+  font-variant: normal;
+  letter-spacing: 0;
+}
+.feast-text .liturgical-block { font-size: 1.08rem; line-height: 1.5; }
+.feast-text .liturgical-block p { margin: 0; }
+.feast-section .feast-see { margin-top: 1.1rem; }
+
+/* A day's feast and commemorations lead to their pages without reading as
+   links in running text. */
+.feast-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+.feast-link:hover { text-decoration-color: currentColor; }
+
+@media (max-width: 640px) {
+  .find-year { grid-template-columns: 2.8rem minmax(0, 1fr) auto; }
+  .find-year-status { grid-column: 2; }
+  .find-year-go { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+  .find-page .calendar-title,
+  .feast-page .calendar-title { text-align: center; }
 }
 
 
@@ -7578,12 +7827,14 @@ body.page-hour::before {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice))) {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice))) {
   background-color: var(--bg);
 }
 
 body.page-home,
 body.page-calendar,
+body.page-find,
+body.page-feast,
 body.page-reminders,
 body.page-usage,
 body.page-hour,
@@ -7591,7 +7842,7 @@ body.page-notice {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -7599,7 +7850,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
+html:where(:has(> body:is(.page-home, .page-calendar, .page-find, .page-feast, .page-reminders, .page-usage, .page-hour, .page-notice)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
@@ -7711,7 +7962,9 @@ html:where(:has(> body.page-hour))::before {
 }
 
 /* The ordo opens like the hours: its headpiece alone, no rule above. */
-.page-calendar .calendar-header {
+.page-calendar .calendar-header,
+.page-find .calendar-header,
+.page-feast .calendar-header {
   padding-top: 0.65rem;
 }
 
@@ -8417,6 +8670,8 @@ body.page-home::before {
 
   body.page-home,
   body.page-calendar,
+  body.page-find,
+  body.page-feast,
   body.page-reminders,
   .page-home .home-hero,
   .page-calendar .month-table tr,
