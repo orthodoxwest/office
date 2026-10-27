@@ -3,7 +3,9 @@
 //! `render-blocks` layouts, so Kotlin and Swift set styled text and never parse the corpus grammar.
 
 mod data;
+mod feasts;
 
+use std::collections::HashMap;
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
@@ -20,6 +22,8 @@ use presentation::{
 };
 
 pub use data::EmbeddedData;
+pub use feasts::*;
+use presentation::feast::{FeastIndex, YearIndex};
 use presentation::sun;
 
 uniffi::setup_scaffolding!();
@@ -57,6 +61,9 @@ pub struct OfficeCore {
     engine: Engine,
     calendar: CalendarData,
     year: Mutex<Option<Arc<Year>>>,
+    /// Every feast a reader can look up, and each year's keeping of them.
+    feasts: FeastIndex,
+    keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
 }
 
 #[uniffi::export]
@@ -66,7 +73,8 @@ impl OfficeCore {
         let src = EmbeddedData::new().map_err(failed)?;
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
-        Ok(Arc::new(OfficeCore { engine, calendar, year: Mutex::new(None) }))
+        let feasts = FeastIndex::new(&calendar);
+        Ok(Arc::new(OfficeCore { engine, calendar, year: Mutex::new(None), feasts, keepings: Mutex::new(HashMap::new()) }))
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
@@ -117,6 +125,8 @@ impl OfficeCore {
             ornament: ornament(Some(day.season)),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
+            feast_id: day.celebration.as_ref().map(|c| self.feast_id(&c.id, &c.name, shown)).unwrap_or_default(),
+            commemoration_ids: day.commemorations.iter().map(|c| self.feast_id(&c.id, &c.name, shown)).collect(),
             versicle: versicle.as_ref().map(|v| typeset(&v.versicle)).unwrap_or_default(),
             response: versicle.as_ref().map(|v| typeset(&v.response)).unwrap_or_default(),
             is_today: shown == now,
@@ -206,7 +216,7 @@ impl OfficeCore {
             .days
             .iter()
             .filter(|d| d.date.month() as i32 == month)
-            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable)))
+            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable), self))
             .collect();
         Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days })
     }
@@ -571,6 +581,10 @@ pub struct HomeView {
     /// "Fasting", "Abstinence" and the like, set as red work.
     pub penitential: Vec<String>,
     pub commemorations: Vec<String>,
+    /// The page id of the day's feast (`feast_page`), or empty when it has none.
+    pub feast_id: String,
+    /// Each commemoration's page id, in the same order, or empty.
+    pub commemoration_ids: Vec<String>,
     /// The day's versicle from Lauds and its response, without ℣. and ℟., for the head on a plain
     /// day; both empty otherwise.
     pub versicle: String,
@@ -600,6 +614,8 @@ pub struct OrdoMonthView {
 pub struct CommemorationView {
     pub name: String,
     pub incipit: String,
+    /// The commemorated feast's page id, or empty.
+    pub feast_id: String,
 }
 
 /// An observance the ordo brackets for monastics and oblates (the web's `.day-monastic`).
@@ -626,6 +642,8 @@ pub struct OrdoDayView {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    /// Each commemoration's page id, in the same order, or empty.
+    pub commemoration_ids: Vec<String>,
     pub monastic: Vec<MonasticView>,
     pub benedictus_antiphon: String,
     pub lauds_preces: bool,
@@ -640,9 +658,16 @@ pub struct OrdoDayView {
 }
 
 impl OrdoDayView {
-    fn new(d: &Day, o: office::summary::OrdoDay) -> OrdoDayView {
-        let comms =
-            |c: &[CommSummary]| c.iter().map(|c| CommemorationView { name: typeset(&c.name), incipit: typeset(&c.incipit) }).collect();
+    fn new(d: &Day, o: office::summary::OrdoDay, core: &OfficeCore) -> OrdoDayView {
+        let comms = |c: &[CommSummary]| {
+            c.iter()
+                .map(|c| CommemorationView {
+                    name: typeset(&c.name),
+                    incipit: typeset(&c.incipit),
+                    feast_id: core.feast_id("", &c.name, d.date),
+                })
+                .collect()
+        };
         let lauds = o.lauds.unwrap_or_else(empty_summary);
         let vespers = o.vespers.unwrap_or_else(empty_summary);
         OrdoDayView {
@@ -655,6 +680,7 @@ impl OrdoDayView {
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),
+            commemoration_ids: d.commemorations.iter().map(|c| core.feast_id(&c.id, &c.name, d.date)).collect(),
             monastic: d
                 .monastic
                 .iter()

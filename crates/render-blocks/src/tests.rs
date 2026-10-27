@@ -215,3 +215,27 @@ fn blocks_carry_the_same_text_as_the_web() {
     }
     assert!(checked > 10_000, "only {checked} sections checked");
 }
+
+/// A feast page's texts read the same on every front.
+#[test]
+fn a_feasts_texts_carry_the_same_text_as_the_web() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let mut checked = 0;
+    for feast in &data.feasts {
+        for season in [calendar::Season::Pentecost, calendar::Season::Easter] {
+            for t in office::feast::feast_texts(feast, season, &engine.texts).texts {
+                let html = if t.prayer {
+                    render_html::html::render_flowing_block(&t.text)
+                } else {
+                    render_html::html::render_liturgical_block(&t.text)
+                };
+                let native: String = text_blocks(&t.text, t.prayer).iter().map(|b| squeeze(&b.plain_text())).collect();
+                assert_eq!(native, squeeze(&html_text(&html)), "{} {}", feast.id, t.label);
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 1_000, "only {checked} texts checked");
+}

@@ -58,6 +58,22 @@ impl Pages {
         env.add_filter("feast_text", |s: String| Value::from_safe_string(render_liturgical_block(&s)));
         // A feast's collect, flowing as the hours set it.
         env.add_filter("feast_prayer", |s: String| Value::from_safe_string(render_flowing_block(&s)));
+        let w = &presentation::feast::FEAST_WORDS;
+        env.add_global(
+            "feast_words",
+            Value::from_iter([
+                ("find_title", w.find_title),
+                ("find_prompt", w.find_prompt),
+                ("every_year", w.every_year),
+                ("years_hint", w.years_hint),
+                ("days_hours", w.days_hours),
+                ("texts_heading", w.texts_heading),
+                ("common_mark", w.common_mark),
+                ("whole_office", w.whole_office),
+                ("everyone_keeps", w.everyone_keeps),
+                ("monastic_heading", w.monastic_heading),
+            ]),
+        );
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));

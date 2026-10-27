@@ -392,6 +392,43 @@ fn leap_shift(own: Date, kept: Date) -> bool {
 
 // ---- Words ----
 
+/// The fixed words of the search and the feast page, as every front sets them.
+pub struct FeastWords {
+    /// The search's title, and the way back to it.
+    pub find_title: &'static str,
+    /// The search field's prompt.
+    pub find_prompt: &'static str,
+    /// A result's link to its feast's page.
+    pub every_year: &'static str,
+    /// Over a feast's years, under their heading.
+    pub years_hint: &'static str,
+    /// The next keeping's way to that day.
+    pub days_hours: &'static str,
+    /// The heading over a feast's texts.
+    pub texts_heading: &'static str,
+    /// The mark on a text from the Common.
+    pub common_mark: &'static str,
+    /// Before the link to the day the texts are said in full.
+    pub whole_office: &'static str,
+    /// Before the feast everyone keeps, on a monastic observance's page.
+    pub everyone_keeps: &'static str,
+    /// The heading of a monastic observance's note.
+    pub monastic_heading: &'static str,
+}
+
+pub const FEAST_WORDS: FeastWords = FeastWords {
+    find_title: "Find a feast",
+    find_prompt: "Find a feast or saint",
+    every_year: "Every year",
+    years_hint: "Each date opens that day, with its hours.",
+    days_hours: "The day’s hours",
+    texts_heading: "Proper of the feast",
+    common_mark: "Common",
+    whole_office: "The whole office:",
+    everyone_keeps: "Everyone keeps",
+    monastic_heading: "Monastics & Oblates only",
+};
+
 /// The status a year's row leads with.
 pub fn keeping_label(k: &Keeping) -> &'static str {
     match k {
