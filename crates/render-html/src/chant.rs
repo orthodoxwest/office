@@ -178,7 +178,10 @@ mod tests {
         assert!(css.contains(&format!("@container (width >= {}em) {{ .chant-width-{first} {{ display: none; }} }}", WIDTHS_EM[1])));
         for pair in WIDTHS_EM[1..].windows(2) {
             let (em, next) = (pair[0], pair[1]);
-            assert!(css.contains(&format!("@container ({em}em <= width < {next}em) {{ .chant-width-{em} {{ display: block; }} }}")), "{em}");
+            assert!(
+                css.contains(&format!("@container ({em}em <= width < {next}em) {{ .chant-width-{em} {{ display: block; }} }}")),
+                "{em}"
+            );
         }
         assert!(css.contains(&format!("@container (width >= {last}em) {{ .chant-width-{last} {{ display: block; }} }}")));
         assert_eq!(css.matches("{ .chant-width-").count(), WIDTHS_EM.len(), "no query names a width not engraved");
