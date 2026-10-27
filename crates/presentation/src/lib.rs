@@ -154,7 +154,7 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
 pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
 
 /// The line under the menu's Chant setting, on every front.
-pub const CHANT_HINT: &str = "Sets the hymn’s tune and the Marian antiphon in chant notation, where a score is available.";
+pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 
 pub const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
