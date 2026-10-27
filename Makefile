@@ -1,4 +1,4 @@
-.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-bundle android-screenshots ios discover-resume
+.PHONY: help neuma-web build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-bundle android-screenshots ios discover-resume
 
 .DEFAULT_GOAL := help
 
@@ -163,6 +163,9 @@ parity: build ## Check every snapshot, including the 2026–2053 digest
 
 golden: build ## Regenerate rendered-office and assurance golden files
 	python3 scripts/golden.py
+
+neuma-web: ## Build neuma's browser module at the pinned rev into static/neuma.mjs (after moving the neuma pin)
+	scripts/build-neuma-web.sh
 
 android: ## Build the sideloadable Android preview APK (needs Android SDK/NDK and cargo-ndk; see apps/android/README.md)
 	cd apps/android && ./gradlew assemblePreview

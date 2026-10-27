@@ -134,6 +134,22 @@ pub fn service_worker(version: &str) -> Response<Body> {
 mod tests {
     use super::*;
 
+    /// The chant engine app.js lays scores out with is built from the neuma the server engraves
+    /// with; `make neuma-web` builds it again when the pin moves.
+    #[test]
+    fn the_browser_engine_is_the_pinned_neuma() {
+        let cargo = include_str!("../../../Cargo.toml");
+        let rev = cargo
+            .lines()
+            .find(|l| l.starts_with("neuma = "))
+            .and_then(|l| l.split("rev = \"").nth(1))
+            .and_then(|r| r.split('"').next())
+            .expect("neuma's rev in Cargo.toml");
+        let module = std::str::from_utf8(file("static/neuma.mjs").expect("static/neuma.mjs")).unwrap();
+        let first = module.lines().next().unwrap();
+        assert!(first.starts_with(&format!("// neuma {rev} ")), "static/neuma.mjs is not neuma {rev}; run make neuma-web: {first}");
+    }
+
     #[test]
     fn service_worker_learns_every_asset_stamp() {
         let resp = service_worker("build1");

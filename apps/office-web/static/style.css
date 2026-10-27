@@ -8892,35 +8892,20 @@ body.page-home::before {
 :root:not([data-chant="on"]) [data-chant-variant="on"],
 :root[data-chant="on"] [data-chant-variant="off"] { display: none !important; }
 
-/* The score: neuma's SVG at a width for each lyric em across a phone's
-   column and every other em beyond it (render-html chant.rs), the widest
-   that fits the column shown, so lyrics stay at the text's size
-   and reflow with the column and the reader's text size. Staves are ruled in
-   the lining, as the books rule them; the inks are the --chant-* tokens
-   beside the palette. */
+/* The score: neuma's SVG in lyric ems, so lyrics stay at the text's size.
+   The page carries it at one width (render-html chant.rs), scaled down to
+   fit a narrower column; app.js lays it out again at the column's width and
+   whenever that or the text size changes. Staves are ruled in the lining,
+   as the books rule them; the inks are the --chant-* tokens beside the
+   palette. Its width is the column's, never the score's (inline-size
+   containment), so the score follows the column and not the reverse. */
 .chant-score {
   container-type: inline-size;
   margin: 0 0 0.75rem;
   color: var(--chant-ink);
 }
-.chant-width { display: none; max-width: 100%; }
+.chant-width { max-width: 100%; }
 .chant-width svg { display: block; width: 100%; height: auto; overflow: visible; }
-.chant-width-15 { display: block; }
-@container (width >= 16em) { .chant-width-15 { display: none; } }
-@container (16em <= width < 17em) { .chant-width-16 { display: block; } }
-@container (17em <= width < 18em) { .chant-width-17 { display: block; } }
-@container (18em <= width < 19em) { .chant-width-18 { display: block; } }
-@container (19em <= width < 20em) { .chant-width-19 { display: block; } }
-@container (20em <= width < 21em) { .chant-width-20 { display: block; } }
-@container (21em <= width < 22em) { .chant-width-21 { display: block; } }
-@container (22em <= width < 24em) { .chant-width-22 { display: block; } }
-@container (24em <= width < 26em) { .chant-width-24 { display: block; } }
-@container (26em <= width < 28em) { .chant-width-26 { display: block; } }
-@container (28em <= width < 30em) { .chant-width-28 { display: block; } }
-@container (30em <= width < 32em) { .chant-width-30 { display: block; } }
-@container (32em <= width < 34em) { .chant-width-32 { display: block; } }
-@container (34em <= width < 36em) { .chant-width-34 { display: block; } }
-@container (width >= 36em) { .chant-width-36 { display: block; } }
 .chant-score svg { fill: currentColor; }
 .chant-score svg [class$="-staff"],
 .chant-score svg [class$="-ledger"] { fill: var(--chant-staff); }

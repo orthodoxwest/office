@@ -778,6 +778,100 @@ function usageBeaconBody(scope) {
     });
   });
 
+  // Chant scores: neuma lays each out at its column's width, as the apps do,
+  // and again when that or the text size changes. The page carries the score
+  // at one width for a page without script (render-html chant.rs); the engine
+  // is fetched only once a score is shown, and if it can't run, that stays.
+  (function () {
+    var boxes = Array.from(document.querySelectorAll(".chant-width[data-gabc]"));
+    var engineURL = document.querySelector('meta[name="neuma"]');
+    if (!boxes.length || !engineURL || !("ResizeObserver" in window) || typeof WebAssembly !== "object") return;
+    // Staff spaces per lyric em and SVG units per staff space, as chant.rs sets them.
+    var LYRIC_SPACES = 2.45;
+    var SCALE = 6;
+    var engine = null;
+    var failed = false;
+    var serial = 0;
+    var states = new Map();
+
+    var load = function () {
+      if (!engine) {
+        engine = import(engineURL.content).then(function (neuma) {
+          return neuma.init().then(function () { return neuma; });
+        });
+      }
+      return engine;
+    };
+
+    var layOut = function (neuma, box) {
+      var score = box.parentNode;
+      var width = score.clientWidth;
+      if (!width) return;
+      var em = parseFloat(getComputedStyle(score).fontSize);
+      var units = (width / em) * LYRIC_SPACES * SCALE;
+      var state = states.get(box);
+      if (!state) {
+        var initial = box.getAttribute("data-chant-initial") === "1";
+        // As chant.rs's page_options, and the apps' Score.kt and Score.swift.
+        var chant = new neuma.Chant(box.getAttribute("data-gabc"), {
+          initial: initial ? 1 : 0,
+          annotation: initial,
+          everyHyphen: true,
+          initialScale: 0.75,
+          initialMargin: 0,
+          shortLastStaff: true,
+        });
+        state = { chant: chant, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++, units: 0 };
+        states.set(box, state);
+      }
+      // A sliver of a unit changes no line; resizes within it are left alone.
+      if (Math.abs(state.units - units) < 0.5) return;
+      state.units = units;
+      var page = state.chant.layout(units, { scale: SCALE, prefix: state.prefix, ids: false, style: false });
+      box.style.width = (page.width / (LYRIC_SPACES * SCALE)).toFixed(3) + "em";
+      box.style.aspectRatio = page.width.toFixed(2) + "/" + page.height.toFixed(2);
+      box.innerHTML = page.svg;
+      page.free();
+      // The score's group carries the words it sets, not its SVG.
+      var svg = box.firstElementChild;
+      svg.removeAttribute("role");
+      svg.removeAttribute("aria-label");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+    };
+
+    var pending = new Set();
+    var scheduled = false;
+    var run = function () {
+      scheduled = false;
+      var due = Array.from(pending).filter(function (box) { return box.parentNode.clientWidth > 0; });
+      pending.clear();
+      if (!due.length || failed) return;
+      load().then(function (neuma) {
+        due.forEach(function (box) { layOut(neuma, box); });
+      }).catch(function () {
+        // No engine (offline before it was ever fetched, or no WebAssembly):
+        // the page's own score stands.
+        failed = true;
+      });
+    };
+    var schedule = function (box) {
+      pending.add(box);
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(run);
+    };
+
+    var byScore = new Map(boxes.map(function (box) { return [box.parentNode, box]; }));
+    var observer = new ResizeObserver(function (entries) {
+      entries.forEach(function (entry) { schedule(byScore.get(entry.target)); });
+    });
+    byScore.forEach(function (box, score) { observer.observe(score); });
+    // The text size can change the em without changing the column's width.
+    new MutationObserver(function () { boxes.forEach(schedule); })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ["data-text-size"] });
+  })();
+
   var offlineIndicator = document.createElement("div");
   offlineIndicator.className = "offline-indicator";
   offlineIndicator.textContent = "Offline";

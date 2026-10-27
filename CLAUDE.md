@@ -168,6 +168,7 @@ make fmt         # Reformat Rust source
 make fmt-check   # Check Rust formatting
 make check       # Formatting, Clippy, JS lint, tests, data validation and text lint
 make serve       # Start web server on :8080
+make neuma-web   # Rebuild static/neuma.mjs (the web's chant engine) after moving the neuma pin
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for YEAR (default 2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files (fails on any unverified or stale corpus entry)
