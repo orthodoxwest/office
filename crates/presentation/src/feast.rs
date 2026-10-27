@@ -157,11 +157,7 @@ impl FeastIndex {
                 d.min(365 - d)
             })
         };
-        self.entries
-            .iter()
-            .filter(|e| e.monastic.is_none() && named(e))
-            .filter(|e| distance(e) <= NAME_REACH)
-            .min_by_key(|e| distance(e))
+        self.entries.iter().filter(|e| e.monastic.is_none() && named(e)).filter(|e| distance(e) <= NAME_REACH).min_by_key(|e| distance(e))
     }
 
     /// For an observance kept by monastics and oblates only, the feast of the same saint that
