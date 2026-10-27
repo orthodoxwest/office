@@ -58,7 +58,11 @@ data/
   review/provenance.csv    Source/page attestations; citations only, never book contents
   review/prescreen.csv     Read-through suspicion flags bound to text versions (see REVIEWING.md)
   review/assurance-baseline.json  Intentional verified-text floor
-  texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
+  texts/chant/             GABC scores. The booklet's sit one level under psalms/, canticles/ and
+                           hymns/ by slug; the apps' sit at chant/<corpus key>/<tune>.gabc for a
+                           hymn or Marian antiphon (crates/office/src/chant.rs), and attach only
+                           where their words match the composed text. One tune per entry until a
+                           tune table says which is sung when; `make validate` checks them.
 scripts/
   DIURNAL-PIPELINE.md      Supported scanned-diurnal ingestion workflow and attestation semantics
   diurnal-pages.py         Render/index page images; OCR only locates pages

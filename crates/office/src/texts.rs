@@ -1,20 +1,25 @@
 //! Loading the text corpus the Office reads: `data/texts/`, the sidecars, and the appointment
 //! scopes.
 
+use std::collections::BTreeMap;
+
 use calendar::DataSource;
 use corpus::{Corpus, Sidecar, TextFile};
 
+use crate::chant::{Score, load_scores};
 use crate::scopes::AppointmentScopes;
 
-/// The corpus and the appointment scopes. `scopes` is `None` when
+/// The corpus, the appointment scopes and the chant scores. `scopes` is `None` when
 /// `appointment-scopes.json` does not exist, which is distinct from `[]`.
 #[derive(Clone, Debug)]
 pub struct OfficeTexts {
     pub corpus: Corpus,
     pub scopes: Option<AppointmentScopes>,
+    /// The scores under `data/texts/chant/`, by the corpus key each sets and then by tune.
+    pub scores: BTreeMap<String, BTreeMap<String, Score>>,
 }
 
-/// Loads `data/texts/` and its sidecars.
+/// Loads `data/texts/`, its sidecars and its chant scores.
 pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
     let mut files = Vec::new();
     for (rel, bytes) in src.walk("texts").map_err(|e| format!("loading texts: {e}"))? {
@@ -40,7 +45,8 @@ pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
         None => None,
         Some(raw) => Some(AppointmentScopes::load(&scopes_path, &raw, &corpus)?),
     };
-    Ok(OfficeTexts { corpus, scopes })
+    let scores = load_scores(src)?;
+    Ok(OfficeTexts { corpus, scopes, scores })
 }
 
 impl std::ops::Deref for OfficeTexts {
@@ -53,7 +59,7 @@ impl std::ops::Deref for OfficeTexts {
 impl OfficeTexts {
     /// A corpus without appointment scopes, for tests.
     pub fn from_corpus(corpus: Corpus) -> OfficeTexts {
-        OfficeTexts { corpus, scopes: None }
+        OfficeTexts { corpus, scopes: None, scores: BTreeMap::new() }
     }
 
     /// The appointment scope governing a seasonal fallback lookup, if any.

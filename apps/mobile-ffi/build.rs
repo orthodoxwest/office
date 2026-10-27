@@ -1,5 +1,5 @@
 //! Embeds the engine's data files: everything under `data/` except the review ledgers, Markdown
-//! notes, and chant scores. Entries are listed depth first, each directory's names in byte order,
+//! notes, and the booklet's own chant scores (the apps' scores, named by corpus key, go in). Entries are listed depth first, each directory's names in byte order,
 //! the order `DataSource::walk` promises. The files go in as one DEFLATE stream, about a fifth of
 //! their size, which the library inflates once when it loads the engine (data.rs).
 
@@ -7,7 +7,9 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
 fn embedded(rel: &str) -> bool {
-    !(rel.starts_with("review/") || rel.starts_with("texts/chant/") || rel.ends_with(".md"))
+    let booklet =
+        ["psalms/", "canticles/", "hymns/"].iter().any(|dir| rel.strip_prefix("texts/chant/").is_some_and(|r| r.starts_with(dir)));
+    !(rel.starts_with("review/") || booklet || rel.ends_with(".md"))
 }
 
 fn walk(dir: &Path, rel: &str, files: &mut Vec<(String, PathBuf)>) {

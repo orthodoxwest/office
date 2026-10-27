@@ -191,6 +191,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var textSize: TextSize
     /// Whether Prime reads the next day's Martyrology; off by default.
     @Published private(set) var martyrology: Bool
+    /// Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default.
+    @Published private(set) var chant: Bool
+    /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
+    let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
     /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
     @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
     /// The ornament season of each home or hour composed on the way back, which retints the
@@ -219,6 +223,7 @@ final class AppModel: ObservableObject {
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
         martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        chant = UserDefaults.standard.bool(forKey: "chant")
         prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
     }
 
@@ -320,6 +325,12 @@ final class AppModel: ObservableObject {
         step = nil
         martyrology = value
         defaults.set(value, forKey: "martyrology")
+    }
+
+    func chooseChant(_ value: Bool) {
+        step = nil
+        chant = value
+        defaults.set(value, forKey: "chant")
     }
 
     /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.

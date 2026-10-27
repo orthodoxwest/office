@@ -164,6 +164,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** Whether Prime reads the next day's Martyrology; off by default. */
     var martyrology: Boolean by mutableStateOf(prefs.getBoolean("martyrology", false))
         private set
+    /** Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default. */
+    var chant: Boolean by mutableStateOf(prefs.getBoolean("chant", false))
+        private set
+    /** Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global). */
+    var offersChant: Boolean by mutableStateOf(false)
+        private set
 
     /**
      * Each visit on the way back with its content, once composed: the page shown keeps the
@@ -303,6 +309,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
+    fun chooseChant(value: Boolean) {
+        chant = value
+        prefs.edit().putBoolean("chant", value).apply()
+        // Hours composed with the old setting are composed again when next shown.
+        contents.keys.retainAll(setOf(entry.id))
+        load()
+    }
+
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
@@ -409,6 +423,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         loading = viewModelScope.launch {
             val content = try {
                 val office = core.await()
+                offersChant = office.offersChant()
                 when (val page = visit.page) {
                     is Page.Home -> Content.Home(
                         withContext(Dispatchers.Default) {
@@ -417,7 +432,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {
-                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology)
+                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology, chant)
                         },
                     )
                     is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })

@@ -291,7 +291,7 @@ private fun unbroken(date: String): String {
  * CSS's color-mix in sRGB: `a` at `share` and `b` the rest, premultiplied, as CSS mixes
  * translucent colours.
  */
-private fun mix(a: Color, b: Color, share: Float): Color {
+internal fun mix(a: Color, b: Color, share: Float): Color {
     val alpha = a.alpha * share + b.alpha * (1 - share)
     if (alpha == 0f) return Color.Transparent
     fun channel(x: Float, y: Float) = (x * a.alpha * share + y * b.alpha * (1 - share)) / alpha

@@ -104,6 +104,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
                 commemoration_owner_id,
                 is_commemoration,
                 unrepeated,
+                score,
             } = e;
             content.str(kind.as_str());
             content.str(text);
@@ -114,6 +115,11 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
             presentation.bool(*announce);
             presentation.opt(unrepeated.as_ref().map(|u| format!("{}:{}", u.words, u.named)).as_deref());
             presentation.str(leader_slot);
+            // Only a scored element hashes its score, so digests of hours without chant stand.
+            if let Some(score) = score {
+                presentation.str(&score.gabc);
+                presentation.str(&format!("{:?}", score.sets));
+            }
             presentation.count(rubric_spans.len());
             for RubricSpan { text, prayed } in rubric_spans {
                 presentation.str(text);

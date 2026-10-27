@@ -1,8 +1,15 @@
 //! Text-to-HTML conversion of composed office elements: psalm verses, liturgical blocks, hymns, and
 //! the typography every run of display text passes through.
 
-use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
-use liturgy::{ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
+use std::sync::Arc;
+
+use corpus::lines::{
+    BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanzas, marian_antiphon_part, parse_block,
+    parse_hymn, parse_psalm,
+};
+use liturgy::{
+    ChantScore, ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words,
+};
 
 pub(crate) use corpus::typography::soften_drop_cap_opening;
 pub use corpus::typography::typeset;
@@ -86,7 +93,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str("<div class=\"marian-antiphon\"><h3 class=\"item-label\" lang=\"la\">");
                 sb.push_str(&esc_text(&elem.label));
                 sb.push_str("</h3>");
-                sb.push_str(&render_marian_antiphon(&elem.text));
+                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref().map(|s| &s.gabc)));
                 sb.push_str("</div>");
             }
         }
@@ -134,7 +141,15 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str(&esc_text(&elem.label));
                 sb.push_str("</p>");
             }
-            sb.push_str(&render_hymn_stanzas(&elem.text));
+            match &elem.score {
+                Some(score) if score.sets == ScoreSpan::WholeHymn => {
+                    sb.push_str(&crate::chant::whole_hymn_html(score, &hymn_sung_stanzas(&elem.text)));
+                    sb.push_str("<div data-chant-variant=\"off\">");
+                    sb.push_str(&render_hymn_stanzas(&elem.text));
+                    sb.push_str("</div>");
+                }
+                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref().map(|s| &s.gabc))),
+            }
             sb.push_str("</div>");
         }
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
@@ -442,15 +457,39 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
 }
 
 /// A Marian antiphon: its sung lines preserved, its collect flowing.
+#[cfg(test)]
 fn render_marian_antiphon(text: &str) -> String {
+    render_marian_antiphon_scored(text, None)
+}
+
+/// A Marian antiphon with its score, if it has one, offered beside the antiphon's words (up to
+/// the ℣); the ℣, ℟ and collect after it are the same either way.
+fn render_marian_antiphon_scored(text: &str, score: Option<&Arc<str>>) -> String {
     const INVITATION: &str = "\n\nLet us pray.\n\n";
+    let sung = |chant: &str| match score {
+        None => render_block(chant, Mode::PreserveFirstBlock, false),
+        Some(gabc) => {
+            let antiphon = marian_antiphon_part(chant);
+            let rest = chant.trim_start()[antiphon.len()..].trim();
+            let words = ChantScore::spoken(antiphon);
+            let mut sb = crate::chant::score_html(gabc, &words);
+            sb.push_str("<div data-chant-variant=\"off\">");
+            sb.push_str(&render_block(antiphon, Mode::PreserveFirstBlock, false));
+            sb.push_str("</div>");
+            if !rest.is_empty() {
+                sb.push_str("<div class=\"liturgical-gap\"></div>");
+                sb.push_str(&render_block(rest, Mode::PreserveFirstBlock, false));
+            }
+            sb
+        }
+    };
     match text.split_once(INVITATION) {
         Some((chant, collect)) if !collect.trim().is_empty() => format!(
             "{}<div class=\"liturgical-gap\"></div><p class=\"plain-line\">Let us pray.</p><div class=\"liturgical-gap\"></div><div class=\"collect\">{}</div>",
-            render_block(chant, Mode::PreserveFirstBlock, false),
+            sung(chant),
             render_flowing_block(collect)
         ),
-        _ => render_block(text, Mode::PreserveFirstBlock, false),
+        _ => sung(text),
     }
 }
 
@@ -574,6 +613,12 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
 /// A hymn: one paragraph per stanza, one span per metrical line, a
 /// standalone Amen folded into the verse before it.
 pub fn render_hymn_stanzas(text: &str) -> String {
+    render_hymn_stanzas_scored(text, None)
+}
+
+/// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
+/// beside the stanza's words, and the reader's Chant setting shows one.
+pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -594,8 +639,15 @@ pub fn render_hymn_stanzas(text: &str) -> String {
             continue;
         }
         let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
+        let variant = match score.filter(|_| opening) {
+            Some(gabc) => {
+                sb.push_str(&crate::chant::score_html(gabc, &stanza.join(" ")));
+                " data-chant-variant=\"off\""
+            }
+            None => "",
+        };
         opening = false;
-        sb.push_str(&format!("<p class=\"{class}\">"));
+        sb.push_str(&format!("<p class=\"{class}\"{variant}>"));
         let join_amen = hymn.stanzas.get(i + 1).is_some_and(|s| is_hymn_amen(s));
         for (j, line) in stanza.iter().enumerate() {
             sb.push_str("<span class=\"hymn-line\">");

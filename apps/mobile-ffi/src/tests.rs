@@ -14,8 +14,11 @@ fn the_embedded_corpus_is_the_data_directory() {
     let fs = repo_data();
     let data = EmbeddedData::new().unwrap();
     for dir in ["texts", "feasts", "office"] {
-        let embedded =
-            |rel: &str| !(rel.starts_with("chant/") || rel.ends_with(".md") || rel.rsplit('/').next().is_some_and(|n| n.starts_with('.')));
+        let embedded = |rel: &str| {
+            !(["chant/psalms/", "chant/canticles/", "chant/hymns/"].iter().any(|d| rel.starts_with(d))
+                || rel.ends_with(".md")
+                || rel.rsplit('/').next().is_some_and(|n| n.starts_with('.')))
+        };
         let want: Vec<_> = fs.walk(dir).unwrap().into_iter().filter(|(rel, _)| embedded(rel)).collect();
         let got = data.walk(dir).unwrap();
         let paths = |files: &[(String, Vec<u8>)]| files.iter().map(|(rel, _)| rel.clone()).collect::<Vec<_>>();
@@ -37,10 +40,13 @@ fn composes_what_the_web_composes() {
     let moveable = MoveableDates::compute(2026);
     for (month, day) in [(1, 6), (4, 3), (4, 5), (9, 30), (12, 25)] {
         for hour in hour_names() {
-            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), false).unwrap();
+            let view = core.compose(hour.clone(), 2026, month, day, "private".into(), false, false).unwrap();
             let date = Date::new(2026, month, day);
             let want = engine.compose_hour(&hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
-            let want_sections: Vec<SectionView> = render_blocks::hour_sections(&want).into_iter().map(SectionView::from).collect();
+            // With the Chant setting off, the apps leave out each score the web hides.
+            let mut sections = render_blocks::hour_sections(&want);
+            sections.iter_mut().for_each(|s| s.blocks.retain(|b| b.chant != render_blocks::ChantVariant::On));
+            let want_sections: Vec<SectionView> = sections.into_iter().map(SectionView::from).collect();
             assert_eq!(format!("{:?}", view.sections), format!("{want_sections:?}"), "{hour} 2026-{month}-{day}");
             assert_eq!(view.title, want.title);
         }
@@ -51,21 +57,21 @@ fn composes_what_the_web_composes() {
 fn the_martyrology_setting_reads_tomorrows_entry_at_prime() {
     let core = OfficeCore::new().unwrap();
     let text = |v: &HourView| format!("{:?}", v.sections);
-    let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false).unwrap();
-    let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true).unwrap();
+    let off = core.compose("prime".into(), 2026, 9, 7, "private".into(), false, false).unwrap();
+    let on = core.compose("prime".into(), 2026, 9, 7, "private".into(), true, false).unwrap();
     assert_eq!((off.martyrology, on.martyrology), (Some(false), Some(true)));
     assert!(!text(&off).contains("Martyrology for tomorrow, September 8") && text(&on).contains("Martyrology for tomorrow, September 8"));
     // Another hour, and a Prime without the Martyrology (Good Friday), have nothing to show.
-    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true).unwrap().martyrology, None);
+    assert_eq!(core.compose("lauds".into(), 2026, 9, 7, "private".into(), true, false).unwrap().martyrology, None);
     for setting in [false, true] {
-        assert_eq!(core.compose("prime".into(), 2026, 4, 10, "private".into(), setting).unwrap().martyrology, None);
+        assert_eq!(core.compose("prime".into(), 2026, 4, 10, "private".into(), setting, false).unwrap().martyrology, None);
     }
 }
 
 #[test]
 fn an_hour_of_a_first_class_day_is_framed() {
     let core = OfficeCore::new().unwrap();
-    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false).unwrap().first_class;
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false, false).unwrap().first_class;
     assert!(hour("lauds", 12, 25));
     // I Vespers takes the feast's rank; the Vigil's own Lauds is first class but violet.
     assert!(hour("vespers", 12, 24));
@@ -81,9 +87,9 @@ fn an_hour_of_a_first_class_day_is_framed() {
 #[test]
 fn rejects_bad_requests() {
     let core = OfficeCore::new().unwrap();
-    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false).is_err());
-    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), false).is_err());
-    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), false).is_err());
+    assert!(core.compose("matins".into(), 2026, 1, 1, "private".into(), false, false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 2, 30, "private".into(), false, false).is_err());
+    assert!(core.compose("lauds".into(), 2026, 1, 1, "bishop".into(), false, false).is_err());
 }
 
 fn civil(year: i32, month: i32, day: i32) -> CivilDate {
@@ -260,7 +266,7 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
 #[test]
 fn a_quick_scroll_does_not_pray_an_hour() {
     let core = OfficeCore::new().unwrap();
-    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), false).unwrap();
+    let hour = core.compose("compline".into(), 2026, 10, 7, "private".into(), false, false).unwrap();
     let words: Vec<f64> = hour.sections.iter().flat_map(|s| &s.blocks).map(|b| f64::from(block_words(b.clone()))).collect();
     let total: f64 = words.iter().sum();
     assert!(total > 300.0, "{total}");
@@ -280,11 +286,37 @@ fn a_quick_scroll_does_not_pray_an_hour() {
 }
 
 #[test]
+fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
+    let core = OfficeCore::new().unwrap();
+    assert!(core.offers_chant());
+    let blocks = |chant| {
+        let sections = core.compose("compline".into(), 2026, 10, 7, "private".into(), false, chant).unwrap().sections;
+        sections.into_iter().flat_map(|s| s.blocks).collect::<Vec<_>>()
+    };
+    let scores = |b: &[BlockView]| b.iter().filter(|b| b.kind == BlockKind::Score).map(|b| b.score.clone()).collect::<Vec<_>>();
+    let (off, on) = (blocks(false), blocks(true));
+    assert!(scores(&off).is_empty());
+    let sung = scores(&on);
+    assert_eq!(sung.len(), 1);
+    assert!(sung[0].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[0]);
+    // The antiphon's words give way to the score; the rest of the hour stands as it was.
+    let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
+    assert!(said(&off) && !said(&on));
+}
+
+#[test]
 fn the_apps_offer_the_webs_prayer_forms() {
     let forms = prayer_form_choices();
     let values: Vec<_> = forms.iter().map(|f| f.value.as_str()).collect();
     assert_eq!(values, presentation::usage::PRAYER_FORMS);
     assert_eq!(forms[0], PrayerFormChoice { value: "private".into(), label: "Private".into(), phrase: "Praying privately".into() });
+}
+
+#[test]
+fn the_apps_give_the_webs_setting_hints() {
+    let hints = preference_hints();
+    assert_eq!(hints.martyrology, presentation::MARTYROLOGY_HINT);
+    assert_eq!(hints.chant, presentation::CHANT_HINT);
 }
 
 #[test]

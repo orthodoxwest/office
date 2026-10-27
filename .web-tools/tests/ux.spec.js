@@ -41,13 +41,16 @@ async function fallbackInitials(page) {
 
 // Phones reach Appearance and Text size from the foot of the site menu; wide
 // screens from the header's Settings. Open whichever is showing, choose, and
-// close it again so later measurements see the page.
-async function choosePreference(page, name) {
+// close it again so later measurements see the page. A `group` (the buttons' class)
+// tells apart the settings that share a name, such as the Martyrology's and Chant's On.
+async function choosePreference(page, name, group) {
   const wide = await page.locator(".site-settings > summary").isVisible();
   const disclosure = page.locator(wide ? ".site-settings" : ".site-menu");
   const summary = disclosure.locator(":scope > summary");
   await summary.click();
-  await page.locator(wide ? ".settings-prefs" : ".menu-prefs").getByRole("button", { name, exact: true }).click();
+  const prefs = page.locator(wide ? ".settings-prefs" : ".menu-prefs");
+  const button = prefs.getByRole("button", { name, exact: true });
+  await (group ? button.and(page.locator(group)) : button).click();
   await summary.click();
   await expect(disclosure).not.toHaveAttribute("open", "");
 }
@@ -3312,7 +3315,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       await expect(button).toHaveAttribute("aria-pressed", "true");
     }
 
-    await choosePreference(page, "On");
+    await choosePreference(page, "On", ".martyrology-option");
     await expect(reading).toBeVisible();
     await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
@@ -3321,7 +3324,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
-    await choosePreference(page, "Off");
+    await choosePreference(page, "Off", ".martyrology-option");
     await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");

@@ -112,6 +112,7 @@ import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.preferenceHints
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
 val Gutter: Dp = 16.dp
@@ -253,6 +254,11 @@ val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
 class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
+
+/** The reader's Chant setting, offered only once a text has a score. */
+class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
+
+val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
@@ -522,7 +528,20 @@ fun MenuPanel(
                         MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
-                PrefHint(AnnotatedString("Includes a reading of the following day’s saints at Prime."))
+                PrefHint(AnnotatedString(PREF_HINTS.martyrology))
+                // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+                val chant = LocalChant.current
+                if (chant.offered) {
+                    Hairline(p.surfaceEdge)
+                    MenuRow {
+                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        Spacer(Modifier.weight(1f))
+                        listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
+                            MenuCell(label, on == chant.on, Type.label(12f, 0.06f)) { chant.onChange(on) }
+                        }
+                    }
+                    PrefHint(AnnotatedString(PREF_HINTS.chant))
+                }
             }
         }
     }
@@ -536,6 +555,9 @@ private fun AnnotatedString.Builder.prefName(name: String) {
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
 private val ShadowRoom: Dp = 16.dp
 private val ShadowRise: Dp = 9.dp
+
+/** The lines under the Martyrology and Chant rows, as the web's (`presentation`). */
+private val PREF_HINTS by lazy { preferenceHints() }
 
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable

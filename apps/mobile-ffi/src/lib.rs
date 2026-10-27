@@ -25,6 +25,9 @@ pub use data::EmbeddedData;
 pub use feasts::*;
 use presentation::feast::{FeastIndex, YearIndex};
 use presentation::sun;
+// neuma's own bindings (namespace `neuma`) ride in this library, so the apps engrave a
+// `BlockKind::Score` block with the one native library they already load.
+use neuma_mobile as _;
 
 uniffi::setup_scaffolding!();
 
@@ -81,9 +84,22 @@ impl OfficeCore {
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
     /// prayer form "private", "deacon", or "priest"; `martyrology` is the
-    /// reader's setting for reading the Martyrology at Prime.
-    #[uniffi::method(default(martyrology = false))]
-    pub fn compose(&self, hour: String, year: i32, month: i32, day: i32, form: String, martyrology: bool) -> Result<HourView, OfficeError> {
+    /// reader's setting for reading the Martyrology at Prime; `chant` the reader's Chant setting,
+    /// which shows a scored hymn or Marian antiphon as its score (`BlockKind::Score`) in place of
+    /// the words it sets.
+    #[uniffi::method(default(martyrology = false, chant = false))]
+    // The reader's settings stay plain arguments with defaults, so each app passes only its own.
+    #[allow(clippy::too_many_arguments)]
+    pub fn compose(
+        &self,
+        hour: String,
+        year: i32,
+        month: i32,
+        day: i32,
+        form: String,
+        martyrology: bool,
+        chant: bool,
+    ) -> Result<HourView, OfficeError> {
         let date =
             Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))?;
         let form = PrayerForm::parse(&form).map_err(failed)?;
@@ -93,11 +109,17 @@ impl OfficeCore {
             self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, martyrology }).map_err(failed)
         };
         let composed = compose(martyrology)?;
-        let mut view = HourView::new(&hour, &composed);
+        let mut view = HourView::new(&hour, &composed, chant);
         // Whether the setting had a reading to show or hide, as the usage beacon reports it.
         let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
         view.martyrology = has_reading.then_some(martyrology);
         Ok(view)
+    }
+
+    /// Whether any hymn or Marian antiphon has a score: until one does, the apps keep the Chant
+    /// setting out of sight, as the web does.
+    pub fn offers_chant(&self) -> bool {
+        office::chant::offers_chant(&self.engine.texts)
     }
 
     /// Home for a civil date, as the web's home handler builds it. `today`
@@ -273,6 +295,19 @@ pub fn prayer_form_choices() -> Vec<PrayerFormChoice> {
 #[uniffi::export]
 pub fn prayers_open_by_default(hour: String) -> bool {
     presentation::prayers_open_by_default(&hour)
+}
+
+/// The lines under the menu's settings that need saying, as the web prints them
+/// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct PreferenceHints {
+    pub martyrology: String,
+    pub chant: String,
+}
+
+#[uniffi::export]
+pub fn preference_hints() -> PreferenceHints {
+    PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
 }
 
 /// A reader's way through an hour's words, for home's mark of the hours prayed
@@ -754,7 +789,10 @@ pub struct HourView {
 }
 
 impl HourView {
-    fn new(hour_name: &str, hour: &OfficeHour) -> HourView {
+    /// The hour's view, each scored piece shown as its score with `chant` on and as its words
+    /// with it off.
+    fn new(hour_name: &str, hour: &OfficeHour, chant: bool) -> HourView {
+        let hidden = if chant { render_blocks::ChantVariant::Off } else { render_blocks::ChantVariant::On };
         let d = hour.date;
         HourView {
             hour: hour_name.to_string(),
@@ -766,7 +804,13 @@ impl HourView {
             ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             first_class: !rank_class(hour.rank, hour.color).is_empty(),
-            sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
+            sections: render_blocks::hour_sections(hour)
+                .into_iter()
+                .map(|mut s| {
+                    s.blocks.retain(|b| b.chant != hidden);
+                    SectionView::from(s)
+                })
+                .collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,
         }
@@ -793,6 +837,10 @@ pub struct BlockView {
     pub drop_cap: bool,
     pub starts_element: bool,
     pub runs: Vec<RunView>,
+    /// A `Score` block's GABC, for neuma to engrave (the runs are the words it sets); empty for
+    /// every other kind.
+    #[uniffi(default = "")]
+    pub score: String,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -802,6 +850,7 @@ impl From<render_blocks::Block> for BlockView {
             marker: b.marker,
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
+            score: b.score,
             runs: b
                 .runs
                 .into_iter()
@@ -856,6 +905,7 @@ pub enum BlockKind {
     Speaker,
     Stanza,
     HymnRubric,
+    Score,
     Gap,
 }
 
@@ -885,6 +935,7 @@ impl From<render_blocks::BlockKind> for BlockKind {
             K::Speaker => BlockKind::Speaker,
             K::Stanza => BlockKind::Stanza,
             K::HymnRubric => BlockKind::HymnRubric,
+            K::Score => BlockKind::Score,
             K::Gap => BlockKind::Gap,
         }
     }

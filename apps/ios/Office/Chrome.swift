@@ -4,6 +4,9 @@ import UIKit
 /// The reading measure's side gutter (`--page-gutter` on a phone).
 let gutter: CGFloat = 16
 
+/// The lines under the Martyrology and Chant rows, as the web's (`presentation`).
+private let prefHints = preferenceHints()
+
 /// Wide screens keep the web's prayer measure (`.elements`, 38rem).
 let measure: CGFloat = 608
 
@@ -327,7 +330,27 @@ struct MenuPanel: View {
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            hint(Text("Includes a reading of the following day’s saints at Prime."))
+            hint(Text(prefHints.martyrology))
+            // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+            if model.offersChant {
+                HStack(spacing: 0) {
+                    Text("CHANT").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
+                        .lineLimit(1).fixedSize()
+                        .padding(.leading, m.px(10.4))
+                        .frame(width: m.px(54), alignment: .leading)
+                        .accessibilityHidden(true)
+                    Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                    ForEach([false, true], id: \.self) { on in
+                        cell(on ? "ON" : "OFF", on == model.chant, .label(12, 0.06), spoken: "Chant \(on ? "on" : "off")") {
+                            guard on != model.chant else { return }
+                            chose()
+                            model.chooseChant(on)
+                        }
+                    }
+                }
+                .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
+                hint(Text(prefHints.chant))
+            }
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))

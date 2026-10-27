@@ -116,11 +116,12 @@ struct HourPage: View {
     var body: some View {
         let form = model.form
         let martyrology = model.martyrology
-        let composition = "\(form) \(martyrology)"
-        // Another prayer form, or the Martyrology turned on or off, is the same page composed
-        // again: the reader keeps their place and the sections they opened.
+        let chant = model.chant
+        let composition = "\(form) \(martyrology) \(chant)"
+        // Another prayer form, or the Martyrology or Chant turned on or off, is the same page
+        // composed again: the reader keeps their place and the sections they opened.
         Loaded(key: "\(date.iso) \(hour) \(composition)", place: "\(date.iso) \(hour)", motion: model.motion(to: .hour(date, hour))) { () throws -> ComposedHour in
-            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
+            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology, chant: chant)
             return ComposedHour(view: view, composition: composition)
         } content: { (composed: ComposedHour) in
             let view = composed.view
@@ -315,6 +316,7 @@ struct HourScreen: View {
             // the web's prayer form keeps the first element on screen in its place.
             .onChange(of: model.form) { hold() }
             .onChange(of: model.martyrology) { hold() }
+            .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.

@@ -228,6 +228,28 @@ pub fn parse_hymn(text: &str) -> Hymn {
     parsed
 }
 
+/// A hymn's stanzas as sung, each one line of words: rubric stanzas left out, a closing Amen
+/// joined to the stanza before it.
+pub fn hymn_sung_stanzas(text: &str) -> Vec<String> {
+    let mut stanzas: Vec<String> =
+        parse_hymn(text).stanzas.iter().filter(|s| hymn_rubric_stanza(s).is_none()).map(|s| s.join(" ")).collect();
+    let is_amen = |s: &str| s.trim().trim_end_matches(['.', '!', ' ']).eq_ignore_ascii_case("amen");
+    if stanzas.len() > 1 && stanzas.last().is_some_and(|s| is_amen(s)) {
+        let amen = stanzas.pop().unwrap_or_default();
+        if let Some(last) = stanzas.last_mut() {
+            last.push(' ');
+            last.push_str(&amen);
+        }
+    }
+    stanzas
+}
+
+/// A Marian antiphon's sung part: its text up to the first blank line, before its ℣.
+pub fn marian_antiphon_part(text: &str) -> &str {
+    let text = text.trim_start();
+    text.split_once("\n\n").map_or(text, |(antiphon, _)| antiphon).trim_end()
+}
+
 /// The instruction inside a /:...:/ hymn rubric, delimiters stripped.
 pub fn hymn_rubric_text(line: &str) -> Option<&str> {
     let s = line.trim();

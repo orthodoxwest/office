@@ -126,6 +126,10 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
         // A hymn's rubric keeps a stanza's distance from the stanzas around it.
         cur.kind == BlockKind.HYMN_RUBRIC && prev.kind == BlockKind.STANZA -> 12.dp
         cur.kind == BlockKind.STANZA && prev.kind == BlockKind.HYMN_RUBRIC -> 12.dp
+        // A whole hymn's scores stand apart, room above each for its number (the web's `.chant-stanza`,
+        // 1.4rem); the stanzas after a tune keep a stanza's distance from it.
+        cur.kind == BlockKind.SCORE && prev.kind == BlockKind.SCORE -> 22.4.dp
+        cur.kind == BlockKind.STANZA && prev.kind == BlockKind.SCORE -> 12.dp
         cur.startsElement -> 14.dp
         else -> 4.8.dp
     }
@@ -259,6 +263,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.PARAGRAPH -> {
             if (block.dropCap) Opening(block, text, m, textStart = VerseGutter) else Text(runs(block), m.fillMaxWidth(), style = text)
         }
+        BlockKind.SCORE -> Score(block, m)
         // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
         BlockKind.CHANT_LINE -> {
             val chant = text.copy(textIndent = TextIndent(restLine = 19.2.sp))
