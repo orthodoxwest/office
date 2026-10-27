@@ -104,6 +104,8 @@ pub struct FeastPageView {
     pub subtitle: String,
     /// "February 27", or "A moveable feast".
     pub date: String,
+    /// The feast has a date of its own, set after "Kept on".
+    pub fixed: bool,
     /// For an observance kept by monastics and oblates only, what that means; else empty.
     pub monastic_note: String,
     /// For such an observance, the feast of the same saint everyone keeps, and "on March 21.".
@@ -123,6 +125,7 @@ pub struct FeastPageView {
 #[derive(Clone, Debug, uniffi::Record)]
 pub struct FeastWordsView {
     pub find_title: String,
+    pub kept_on: String,
     pub find_prompt: String,
     pub every_year: String,
     pub years_hint: String,
@@ -139,6 +142,7 @@ pub fn feast_words() -> FeastWordsView {
     let w = &FEAST_WORDS;
     FeastWordsView {
         find_title: w.find_title.into(),
+        kept_on: w.kept_on.into(),
         find_prompt: w.find_prompt.into(),
         every_year: w.every_year.into(),
         years_hint: w.years_hint.into(),
@@ -216,6 +220,7 @@ impl OfficeCore {
             name: typeset(&entry.name),
             subtitle: typeset(&feast_subtitle(entry)),
             date: feast_date(entry),
+            fixed: entry.fixed.is_some(),
             monastic_note: if entry.monastic.is_some() { typeset(&monastic_note(entry)) } else { String::new() },
             kept_by_all: kept_by_all.map(|e| FeastLinkView { id: e.id.clone(), name: typeset(&e.name) }),
             kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),

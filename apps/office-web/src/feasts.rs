@@ -141,6 +141,7 @@ impl Server {
             name: entry.name.clone(),
             subtitle: feast_subtitle(entry),
             date: feast_date(entry),
+            fixed: entry.fixed.is_some(),
             monastic_note: if entry.monastic.is_some() { monastic_note(entry) } else { String::new() },
             kept_by_all: kept_by_all.map(|e| LinkRow { label: e.name.clone(), href: feast_link(&e.id) }),
             kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),

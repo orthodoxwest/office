@@ -63,6 +63,7 @@ impl Pages {
             "feast_words",
             Value::from_iter([
                 ("find_title", w.find_title),
+                ("kept_on", w.kept_on),
                 ("find_prompt", w.find_prompt),
                 ("every_year", w.every_year),
                 ("years_hint", w.years_hint),

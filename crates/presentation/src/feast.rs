@@ -396,6 +396,8 @@ fn leap_shift(own: Date, kept: Date) -> bool {
 pub struct FeastWords {
     /// The search's title, and the way back to it.
     pub find_title: &'static str,
+    /// Before a fixed feast's date: "Kept on February 27".
+    pub kept_on: &'static str,
     /// The search field's prompt.
     pub find_prompt: &'static str,
     /// A result's link to its feast's page.
@@ -418,6 +420,7 @@ pub struct FeastWords {
 
 pub const FEAST_WORDS: FeastWords = FeastWords {
     find_title: "Find a feast",
+    kept_on: "Kept on",
     find_prompt: "Find a feast or saint",
     every_year: "Every year",
     years_hint: "Each date opens that day, with its hours.",

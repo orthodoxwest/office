@@ -379,6 +379,8 @@ pub struct FeastPageData {
     pub subtitle: String,
     /// "February 27", or "A moveable feast".
     pub date: String,
+    /// The feast has a date of its own.
+    pub fixed: bool,
     pub monastic_note: String,
     /// For a monastic observance, the feast of the same saint everyone keeps.
     pub kept_by_all: Option<LinkRow>,

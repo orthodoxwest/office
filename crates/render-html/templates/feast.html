@@ -8,7 +8,7 @@
       <p class="calendar-subtitle">{{ subtitle|typeset }}</p>
     </div>
   </div>
-  <p class="feast-date">{% if date == "A moveable feast" %}{{ date }}{% else %}Kept on <b>{{ date }}</b>{% endif %}</p>
+  <p class="feast-date">{% if fixed %}{{ feast_words.kept_on }} <b>{{ date }}</b>{% else %}{{ date }}{% endif %}</p>
   {% if monastic_note %}
   <div class="feast-monastic"><b>{{ feast_words.monastic_heading }}</b>{{ monastic_note|typeset }}</div>
   {% if kept_by_all %}<p class="feast-see">{{ feast_words.everyone_keeps }} <a href="{{ kept_by_all.href|url }}">{{ kept_by_all.label|typeset }}</a> {{ kept_by_all_note }}</p>{% endif %}
