@@ -91,7 +91,14 @@ private enum Engraving {
         if let page = pages[key] { return page }
         // Each rotation, Split View resize or text size engraves anew; keep the cache from growing without end.
         if pages.count >= 64 { pages.removeAll() }
-        let chant = Chant(gabc: gabc, options: ChantOptions(initial: initial ? 1 : 0, annotation: initial))
+        // Set as the web sets it (`page_options` in render-html's chant.rs): a hyphen between every two
+        // syllables, the initial three quarters of the Solesmes size and flush with the margin, and the
+        // last staff ending at the final bar.
+        let options = ChantOptions(
+            initial: initial ? 1 : 0, annotation: initial, everyHyphen: true, initialScale: 0.75, initialMargin: 0,
+            shortLastStaff: true
+        )
+        let chant = Chant(gabc: gabc, options: options)
         let page = chant.layout(width: width, options: LayoutOptions(scale: lyric / lyricSpaces)).page()
         pages[key] = page
         return page

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use liturgy::ChantScore;
-use neuma::{Chant, ChantOptions, Initial, LayoutOptions, SvgOptions};
+use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 
 use crate::escape::html_escape_string;
 
@@ -68,10 +68,25 @@ fn engraved(gabc: &Arc<str>, initial: bool) -> String {
     svgs
 }
 
+/// How the page sets a score, as Score.kt and Score.swift do: a hyphen between every two
+/// syllables, as English chant books mark them for a reader following the words; the initial
+/// three quarters of the Solesmes size and flush with the margin, to sit with the page's text
+/// initials; and the last staff ending at the final bar.
+fn page_options() -> ChantOptions {
+    ChantOptions::default()
+        .with_hyphens(Hyphens::EverySyllable)
+        .with_initial_scale(INITIAL_SCALE)
+        .with_initial_margin(0.0)
+        .with_short_last_staff(true)
+}
+
+/// The initial's size as a share of the Solesmes one, which runs from the staff's top line to
+/// the lyrics (Score.kt and Score.swift name the same).
+const INITIAL_SCALE: f32 = 0.75;
+
 /// The SVGs, each sized in ems so that its lyrics are set at the text's size.
 fn engrave(gabc: &str, initial: bool) -> String {
-    let options =
-        if initial { ChantOptions::default() } else { ChantOptions::default().with_initial(Initial::None).with_annotation(false) };
+    let options = if initial { page_options() } else { page_options().with_initial(Initial::None).with_annotation(false) };
     let chant = Chant::with_options(gabc, options);
     // Ids and classes unique to this score, so scores on one page never share a definition.
     let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });

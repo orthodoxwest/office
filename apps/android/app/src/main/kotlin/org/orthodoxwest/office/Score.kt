@@ -70,9 +70,24 @@ fun Score(block: BlockView, modifier: Modifier) {
     }
 }
 
-/** The score laid out `width` pixels wide with its lyrics `lyric` pixels high; the first stanza alone takes the initial. */
+/**
+ * The score laid out `width` pixels wide with its lyrics `lyric` pixels high; the first stanza
+ * alone takes the initial. Set as the web sets it (`page_options` in render-html's chant.rs): a
+ * hyphen between every two syllables, the initial three quarters of the Solesmes size and flush
+ * with the margin, and the last staff ending at the final bar.
+ */
 internal fun engrave(gabc: String, initial: Boolean, width: Float, lyric: Float): Page =
-    Chant(gabc, ChantOptions(initial = if (initial) 1 else 0, annotation = initial)).use { chant ->
+    Chant(
+        gabc,
+        ChantOptions(
+            initial = if (initial) 1 else 0,
+            annotation = initial,
+            everyHyphen = true,
+            initialScale = 0.75f,
+            initialMargin = 0f,
+            shortLastStaff = true,
+        ),
+    ).use { chant ->
         chant.layout(width, LayoutOptions(scale = lyric / LYRIC_SPACES)).use { it.page() }
     }
 
