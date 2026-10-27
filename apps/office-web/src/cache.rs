@@ -4,9 +4,10 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
-use calendar::{CalendarData, MoveableDates};
+use calendar::{CalendarData, MoveableDates, build_calendar};
 use office::Engine;
 use office::day::Day;
+use presentation::feast::{FeastIndex, YearIndex};
 use render_html::view::MonthData;
 
 /// One year's office days, with each month's ordo rows built on first use.
@@ -28,11 +29,44 @@ struct Entries {
 pub struct YearCache {
     data: CalendarData,
     entries: Mutex<Entries>,
+    feasts: FeastIndex,
+    /// Each year's feasts and how they are kept, for search and the feast pages: the calendar
+    /// alone, with no hour composed.
+    keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
 }
+
+/// The feast pages reach this many years ahead and search two; a reader browsing far years
+/// starts the window afresh rather than growing it.
+const MAX_KEEPING_YEARS: usize = 12;
 
 impl YearCache {
     pub fn new(data: CalendarData) -> YearCache {
-        YearCache { data, entries: Mutex::new(Entries::default()) }
+        let feasts = FeastIndex::new(&data);
+        YearCache { data, entries: Mutex::new(Entries::default()), feasts, keepings: Mutex::new(HashMap::new()) }
+    }
+
+    /// The calendar's feast definitions.
+    pub fn data(&self) -> &CalendarData {
+        &self.data
+    }
+
+    /// Every feast a reader can look up.
+    pub fn feasts(&self) -> &FeastIndex {
+        &self.feasts
+    }
+
+    /// How every feast is kept in `year`.
+    pub fn keeping(&self, year: i32) -> Result<Arc<YearIndex>, String> {
+        if let Some(y) = self.keepings.lock().map_err(|e| e.to_string())?.get(&year) {
+            return Ok(Arc::clone(y));
+        }
+        // Built outside the lock: another year's reader does not wait on this one.
+        let built = Arc::new(YearIndex::new(year, build_calendar(year, &self.data)?.days));
+        let mut keepings = self.keepings.lock().map_err(|e| e.to_string())?;
+        if keepings.len() >= MAX_KEEPING_YEARS {
+            keepings.clear();
+        }
+        Ok(Arc::clone(keepings.entry(year).or_insert(built)))
     }
 
     /// The year's days, building them if the year is not cached. A year in
@@ -63,22 +97,22 @@ impl YearCache {
     /// proceed, and a month page never waits on the rest of its year.
     pub fn month(&self, year: i32, month: u32, engine: &Engine) -> Result<Arc<MonthData>, String> {
         let entry = self.get(year)?;
-        Ok(entry.month(month, engine))
+        Ok(entry.month(month, engine, &self.feasts))
     }
 
     /// Every month of the year, for the whole-year page.
     pub fn months(&self, year: i32, engine: &Engine) -> Result<Vec<Arc<MonthData>>, String> {
         let entry = self.get(year)?;
-        Ok((1..=12).map(|m| entry.month(m, engine)).collect())
+        Ok((1..=12).map(|m| entry.month(m, engine, &self.feasts)).collect())
     }
 }
 
 impl YearEntry {
-    fn month(&self, month: u32, engine: &Engine) -> Arc<MonthData> {
+    fn month(&self, month: u32, engine: &Engine, feasts: &FeastIndex) -> Arc<MonthData> {
         Arc::clone(self.months[month as usize - 1].get_or_init(|| {
             let start = self.days.iter().position(|d| d.date.month() == month).unwrap_or(self.days.len());
             let len = self.days[start..].iter().take_while(|d| d.date.month() == month).count();
-            Arc::new(crate::handlers::build_month(&self.days[start..start + len], engine, &self.moveable))
+            Arc::new(crate::handlers::build_month(&self.days[start..start + len], engine, &self.moveable, feasts))
         }))
     }
 }
@@ -105,7 +139,7 @@ mod tests {
         }
         let entry = cache.get(2026).unwrap();
         let september: Vec<Day> = entry.days.iter().filter(|d| d.date.month() == 9).cloned().collect();
-        assert_eq!(*results[0], crate::handlers::build_month(&september, engine, &entry.moveable));
+        assert_eq!(*results[0], crate::handlers::build_month(&september, engine, &entry.moveable, cache.feasts()));
         assert_eq!((results[0].name.as_str(), results[0].days.len()), ("September", 30));
         let year = cache.months(2026, engine).unwrap();
         assert_eq!(year.iter().map(|m| m.days.len()).sum::<usize>(), 365);

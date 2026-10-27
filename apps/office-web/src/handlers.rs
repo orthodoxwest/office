@@ -3,16 +3,17 @@
 
 use axum::body::Body;
 use axum::http::{HeaderMap, Method, Response, StatusCode, header};
-use calendar::MoveableDates;
+use calendar::{Date, MoveableDates};
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
 use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
-use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
+use presentation::feast::{FeastIndex, is_feast_id};
+use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_link, home_link, hour_link};
 use render_html::view::{
-    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
+    BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, LinkRow,
     MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
     TabulaRow,
 };
@@ -82,24 +83,32 @@ fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, St
 }
 
 /// An HTML page that revalidates on every request.
-fn html(status: StatusCode, body: String) -> Response<Body> {
+pub(crate) fn html(status: StatusCode, body: String) -> Response<Body> {
     let mut resp = response(status, body);
     set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
     set(&mut resp, header::CACHE_CONTROL, "no-cache");
     resp
 }
 
-fn render_failed(e: &str) -> Response<Body> {
+pub(crate) fn render_failed(e: &str) -> Response<Body> {
     crate::http::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-fn comm_rows(comms: &[CommSummary]) -> Vec<CommemorationRow> {
-    comms.iter().map(|c| CommemorationRow { name: c.name.clone(), incipit: c.incipit.clone() }).collect()
+/// The page of the feast a day keeps or commemorates as `id` and `name`, or empty.
+pub fn feast_href(feasts: &FeastIndex, id: &str, name: &str, date: Date) -> String {
+    feasts.find(id, name, date).map(|e| feast_link(&e.id)).unwrap_or_default()
+}
+
+fn comm_rows(comms: &[CommSummary], feasts: &FeastIndex, date: Date) -> Vec<CommemorationRow> {
+    comms
+        .iter()
+        .map(|c| CommemorationRow { name: c.name.clone(), incipit: c.incipit.clone(), href: feast_href(feasts, "", &c.name, date) })
+        .collect()
 }
 
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
 /// and Vespers digest. `days` are the month's days in order.
-pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> MonthData {
+pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
     let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
     for d in days {
@@ -115,6 +124,7 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
+            commemoration_hrefs: d.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, d.date)).collect(),
             commemorations: o.commemorations,
             monastic: d
                 .monastic
@@ -134,17 +144,22 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             row.benedictus_antiphon = lauds.gospel_ant;
             row.lauds_preces = lauds.preces;
             row.lauds_suffrage = lauds.suffrage;
-            row.lauds_comms = comm_rows(&lauds.comms);
+            row.lauds_comms = comm_rows(&lauds.comms, feasts, d.date);
         }
         if let Some(vespers) = o.vespers {
             row.magnificat_antiphon = vespers.gospel_ant;
             row.vespers_preces = vespers.preces;
             row.vespers_suffrage = vespers.suffrage;
-            row.vespers_comms = comm_rows(&vespers.comms);
+            row.vespers_comms = comm_rows(&vespers.comms, feasts, d.date);
         }
         // The day's commemorations open its office details; one its Lauds or Vespers names with
         // an antiphon is not named twice.
-        row.commemorations.retain(|c| !row.lauds_comms.iter().chain(&row.vespers_comms).any(|r| &r.name == c));
+        let named = |c: &String| row.lauds_comms.iter().chain(&row.vespers_comms).any(|r| &r.name == c);
+        let keep: Vec<bool> = row.commemorations.iter().map(|c| !named(c)).collect();
+        let mut keep_href = keep.iter();
+        row.commemoration_hrefs.retain(|_| *keep_href.next().unwrap_or(&true));
+        let mut keep_name = keep.iter();
+        row.commemorations.retain(|_| *keep_name.next().unwrap_or(&true));
         month.days.push(row);
     }
     month
@@ -209,7 +224,7 @@ fn tabula(year: i32) -> TabulaData {
 
 impl Server {
     /// The zone in the browser's `tz` cookie, else the host zone.
-    fn user_location(&self, req: &Req) -> TimeZone {
+    pub(crate) fn user_location(&self, req: &Req) -> TimeZone {
         match cookie(req.headers, "tz") {
             Some(name) => load_location(&name).unwrap_or_else(local),
             None => local(),
@@ -325,6 +340,10 @@ impl Server {
         let Versicle { versicle, response } = versicle.unwrap_or(Versicle { versicle: String::new(), response: String::new() });
         let hours = build_home_hours(&slug, invite.current);
         let (feast_name, feast_alias) = split_alias(&heading.feast);
+        let feasts = self.cache.feasts();
+        let from = req.query.get("from");
+        let from_feast =
+            is_feast_id(from).then(|| feasts.get(from)).flatten().map(|e| LinkRow { label: e.name.clone(), href: feast_link(&e.id) });
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -346,7 +365,10 @@ impl Server {
             today_link: home_link(&now_slug),
             feast_name: feast_name.into(),
             feast_alias: feast_alias.into(),
+            feast_href: day.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, date)).unwrap_or_default(),
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
+            commemoration_hrefs: day.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, date)).collect(),
+            from_feast,
             color: day.color.as_str().into(),
             season: heading.season,
             octave_note: heading.octave_note,
@@ -485,6 +507,9 @@ impl Server {
         let parts: Vec<&str> = path.split('/').collect();
         if parts.len() > 3 {
             return self.not_found_page(req);
+        }
+        if parts.get(1) == Some(&"find") {
+            return if parts.len() == 2 { self.find(req) } else { self.not_found_page(req) };
         }
         let now = now_in(&self.user_location(req)).0;
         if parts.len() == 1 {

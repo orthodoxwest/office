@@ -1,13 +1,15 @@
 //! What search engines read before the pages: `robots.txt` and the sitemap.
 //!
 //! The sitemap lists the pages worth finding, all of them undated but the ordo: today's day and
-//! hours, this year's ordo, reminders and privacy. Each dated day and hour is one link from those and carries
-//! `noindex` (see `Chrome::noindex`), so the endless run of dates stays out of search results.
+//! hours, this year's ordo, the feast search and each feast's page, reminders and privacy. Each
+//! dated day and hour is one link from those and carries `noindex` (see `Chrome::noindex`), so
+//! the endless run of dates stays out of search results.
 
 use axum::body::Body;
 use axum::http::{Response, StatusCode, header};
 
-use render_html::links::calendar_year_link;
+use presentation::feast::FeastIndex;
+use render_html::links::{calendar_year_link, feast_link, find_link};
 
 use crate::http::{response, set};
 
@@ -20,12 +22,14 @@ pub fn robots(site: &str) -> Response<Body> {
     text(body, "text/plain; charset=utf-8")
 }
 
-/// `/calendar` itself only redirects to the month, so the sitemap names `year`'s ordo.
-pub fn sitemap(site: &str, year: i32) -> Response<Body> {
+/// `/calendar` itself only redirects to the month, so the sitemap names `year`'s ordo. The
+/// search and every feast's page follow it.
+pub fn sitemap(site: &str, year: i32, feasts: &FeastIndex) -> Response<Body> {
     let site = site.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;");
     let mut body =
         String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
-    for page in PAGES.iter().map(|p| p.to_string()).chain([calendar_year_link(year)]) {
+    let feasts = feasts.entries().iter().map(|e| feast_link(&e.id));
+    for page in PAGES.iter().map(|p| p.to_string()).chain([calendar_year_link(year), find_link("")]).chain(feasts) {
         body.push_str(&format!("  <url><loc>{site}{page}</loc></url>\n"));
     }
     body.push_str("</urlset>\n");
