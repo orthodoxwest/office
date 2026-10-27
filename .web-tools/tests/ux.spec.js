@@ -2106,8 +2106,10 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
 
       const hymn = page.locator(".hymn");
       await expect(hymn.locator(".hymn-title")).toHaveText("Ave, maris stella");
-      const rubric = hymn.locator(".hymn-rubric");
+      const rubric = hymn.locator(".hymn-verses .hymn-rubric");
       await expect(rubric).toHaveText(instruction);
+      // The hymn's score, shown with Chant on, says it before the stanza too.
+      await expect(hymn.locator(".chant-hymn .hymn-rubric")).toHaveText(instruction);
       await expect(rubric).not.toContainText("/:");
       await expect(hymn.locator(".hymn-latin")).toHaveCount(0);
       await expect(hymn.locator(".hymn-stanza-opening .hymn-line").first()).toContainText(
@@ -2115,7 +2117,7 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
       );
 
       const geometry = await page.evaluate(() => {
-        const rubric = document.querySelector(".hymn .hymn-rubric");
+        const rubric = document.querySelector(".hymn .hymn-verses .hymn-rubric");
         const title = document.querySelector(".hymn .hymn-title");
         const verses = document.querySelector(".hymn .hymn-verses");
         const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
