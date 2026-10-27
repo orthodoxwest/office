@@ -84,6 +84,8 @@ struct OrdoScreen: View {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     SiteHeader().id("top")
                     OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                    // The web's search field under the ordo's title, which opens the search page.
+                    SearchEntry { model.open(.find("")) }.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                     rankKey.ordoColumn(m, wide: wide).padding(.bottom, m.px(15.6))
                     // The month's heading stays pinned while its days scroll under it (the web's
@@ -399,11 +401,13 @@ private struct DayRow: View {
     private var hasVespers: Bool { !d.magnificatAntiphon.isEmpty || d.vespersPreces || d.vespersSuffrage || !d.vespersComms.isEmpty || !d.vespersNote.isEmpty }
     private var hasDetails: Bool { !d.commemorations.isEmpty || hasLauds || d.hoursPreces || hasVespers }
 
-    /// The day's commemorations that open its office details: one its Lauds or Vespers already names
-    /// with an antiphon is not named twice (as the web's `build_month`).
-    private var dayComms: [String] {
+    /// The day's commemorations that open its office details, each with its feast's page: one its
+    /// Lauds or Vespers already names with an antiphon is not named twice (as the web's `build_month`).
+    private var dayComms: [CommemorationView] {
         let named = Set((d.laudsComms + d.vespersComms).map { $0.name })
-        return d.commemorations.filter { !named.contains($0) }
+        return d.commemorations.enumerated()
+            .map { i, name in CommemorationView(name: name, incipit: "", feastId: i < d.commemorationIds.count ? d.commemorationIds[i] : "") }
+            .filter { !named.contains($0.name) }
     }
 
     /// One stop for VoiceOver: the date, its colour and observances, and the feast.
@@ -664,16 +668,17 @@ private struct DayColumns: View {
 private struct Digest: View {
     let d: OrdoDayView
     /// The day's commemorations its Lauds and Vespers do not name, set first as the "Day".
-    let dayComms: [String]
+    let dayComms: [CommemorationView]
     let hasLauds: Bool
     let hasVespers: Bool
+    @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if !dayComms.isEmpty {
-                hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms.map { CommemorationView(name: $0, incipit: "") })
+                hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms)
             }
             if hasLauds {
                 hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, comms: d.laudsComms)
@@ -704,8 +709,18 @@ private struct Digest: View {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
             ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
             if antiphon != nil || preces || suffrage { marks.type(line).foregroundStyle(p.muted) }
+            // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
             ForEach(comms, id: \.self) { c in
-                Text("Com. \(c.name)" + (c.incipit.isEmpty ? "" : " “\(c.incipit)”")).type(line).foregroundStyle(p.muted)
+                let text = Text("Com. ") + Text(c.name).underline(!c.feastId.isEmpty) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”")
+                if c.feastId.isEmpty {
+                    text.type(line).foregroundStyle(p.muted)
+                } else {
+                    Button { model.open(.feast(c.feastId)) } label: {
+                        text.type(line).foregroundStyle(p.muted).multilineTextAlignment(.leading)
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityHint("Opens the feast's page")
+                }
             }
         }
         .padding(.bottom, m.px(4))

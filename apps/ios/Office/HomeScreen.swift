@@ -405,10 +405,21 @@ private struct Frontispiece: View {
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityHint("Opens the ordo")
-                FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
-                    .foregroundStyle(p.accent)
-                    .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
-                    .padding(.top, m.px(2))
+                // The day's feast leads to its page, underlined as the web's `.feast-link`.
+                Group {
+                    if view.feastId.isEmpty {
+                        FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast)
+                    } else {
+                        Button { model.open(.feast(view.feastId)) } label: {
+                            FeastName(name: view.feastName, alias: view.feastAlias, style: tier.feast, linked: true)
+                        }
+                        .buttonStyle(Quiet())
+                        .accessibilityHint("Opens the feast's page")
+                    }
+                }
+                .foregroundStyle(p.accent)
+                .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
+                .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
                     Text(view.octaveNote).type(Scale.small).foregroundStyle(p.muted).multilineTextAlignment(.center)
                 }
@@ -425,9 +436,19 @@ private struct Frontispiece: View {
                         Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(p.muted)
                         // A second commemoration is joined to the first with "and", as the web's
                         // `.commemorations li + li::before`, so the list reads as a sentence.
+                        // Each leads to its feast's page.
                         ForEach(Array(view.commemorations.enumerated()), id: \.offset) { i, c in
-                            (i == 0 ? Text(c) : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true))) + Text(c))
-                                .type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                            let id = i < view.commemorationIds.count ? view.commemorationIds[i] : ""
+                            let line = (i == 0 ? Text("") : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true)))) + Text(c).underline(!id.isEmpty)
+                            if id.isEmpty {
+                                line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                            } else {
+                                Button { model.open(.feast(id)) } label: {
+                                    line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                                }
+                                .buttonStyle(Quiet())
+                                .accessibilityHint("Opens the feast's page")
+                            }
                         }
                     }
                     .padding(.top, m.px(8))
@@ -630,6 +651,8 @@ private struct FeastName: View {
     let name: String
     let alias: String
     let style: TextStyle
+    /// Underlined, as a link to the feast's page.
+    var linked = false
     @Environment(\.metrics) private var m
 
     private var italic: TextStyle {
@@ -640,16 +663,16 @@ private struct FeastName: View {
 
     var body: some View {
         if alias.isEmpty {
-            Text(name).type(style).multilineTextAlignment(.center)
+            Text(name).underline(linked).type(style).multilineTextAlignment(.center)
         } else {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: m.px(style.size * 0.25)) {
-                    Text(name).type(style)
-                    Text(alias).type(italic)
+                    Text(name).underline(linked).type(style)
+                    Text(alias).underline(linked).type(italic)
                 }
                 VStack(spacing: 0) {
-                    Text(name).type(style).multilineTextAlignment(.center)
-                    Text(alias).type(italic).fixedSize()
+                    Text(name).underline(linked).type(style).multilineTextAlignment(.center)
+                    Text(alias).underline(linked).type(italic).fixedSize()
                 }
             }
             .accessibilityElement(children: .combine)
