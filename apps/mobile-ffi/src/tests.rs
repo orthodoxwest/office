@@ -363,6 +363,8 @@ fn days_name_their_feasts_pages() {
     let home = core.home(date, date, 9).unwrap();
     assert_eq!(home.commemoration_ids, ["st-raphael-of-brooklyn"]);
     assert_eq!(core.home(CivilDate { year: 2026, month: 12, day: 25 }, date, 9).unwrap().feast_id, "christmas");
+    // A vigil the calendar makes leads to its feast's page.
+    assert_eq!(core.home(CivilDate { year: 2026, month: 10, day: 27 }, date, 9).unwrap().feast_id, "ss-simon-jude");
     let month = core.ordo_month(2026, 2).unwrap();
     let day = &month.days[26];
     assert_eq!(day.commemoration_ids.len(), day.commemorations.len());

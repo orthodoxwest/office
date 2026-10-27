@@ -126,9 +126,31 @@ impl FeastIndex {
     /// is named so.
     pub fn by_name(&self, name: &str, near: Date) -> Option<&FeastEntry> {
         let key = normalize_commemoration_name(name);
-        if key.is_empty() {
-            return None;
-        }
+        self.nearest(near, |e| !key.is_empty() && normalize_commemoration_name(&e.name) == key)
+    }
+
+    /// The feast a day keeps or commemorates under `id` and `name`: its own entry, else the
+    /// feast of that name near `date` (a generated octave day, a commemoration printed under its
+    /// saint's name). Every front links a day's feast and commemorations by this. A vigil the
+    /// calendar makes for a feast ("Vigil of Ss Simon & Jude") has no page of its own and leads
+    /// to its feast's; a vigil with an office of its own (Christmas Eve) has its own page.
+    pub fn find(&self, id: &str, name: &str, date: Date) -> Option<&FeastEntry> {
+        self.get(id)
+            .filter(|e| e.monastic.is_none())
+            .or_else(|| self.by_name(name, date))
+            .or_else(|| self.get(id.strip_prefix("vigil-of-")?))
+            .or_else(|| self.vigils_feast(name.strip_prefix("Vigil of ")?, date))
+    }
+
+    /// The feast a vigil names without its titles ("St Lawrence" for "St Lawrence, Martyr").
+    fn vigils_feast(&self, short: &str, near: Date) -> Option<&FeastEntry> {
+        let key = normalize_commemoration_name(short);
+        let first = |e: &FeastEntry| normalize_commemoration_name(e.name.split(", ").next().unwrap_or_default());
+        self.nearest(near, |e| !key.is_empty() && e.fixed.is_some() && first(e) == key)
+    }
+
+    /// The everyone-kept entry nearest `near`, within [`NAME_REACH`] days, of those `named`.
+    fn nearest(&self, near: Date, named: impl Fn(&FeastEntry) -> bool) -> Option<&FeastEntry> {
         let distance = |e: &FeastEntry| {
             e.fixed.map_or(0, |f| {
                 let d = Date::new(near.year(), f.month as i32, f.day as i32).days_since(near).abs();
@@ -137,16 +159,9 @@ impl FeastIndex {
         };
         self.entries
             .iter()
-            .filter(|e| e.monastic.is_none() && normalize_commemoration_name(&e.name) == key)
+            .filter(|e| e.monastic.is_none() && named(e))
             .filter(|e| distance(e) <= NAME_REACH)
             .min_by_key(|e| distance(e))
-    }
-
-    /// The feast a day keeps or commemorates under `id` and `name`: its own entry, else the
-    /// feast of that name near `date` (a generated octave day, a commemoration printed under its
-    /// saint's name). Every front links a day's feast and commemorations by this.
-    pub fn find(&self, id: &str, name: &str, date: Date) -> Option<&FeastEntry> {
-        self.get(id).filter(|e| e.monastic.is_none()).or_else(|| self.by_name(name, date))
     }
 
     /// For an observance kept by monastics and oblates only, the feast of the same saint that
@@ -828,6 +843,18 @@ mod tests {
         assert!(feast_subtitle(benedict).contains("Monastics & Oblates only"));
         assert_eq!(index.kept_by_all(benedict).map(|e| e.id.as_str()), Some("st-benedict"));
         assert_eq!(index.by_name("St Raphael of Brooklyn", Date::new(2026, 2, 27)).map(|e| e.id.as_str()), Some("st-raphael-of-brooklyn"));
+    }
+
+    #[test]
+    fn a_vigil_leads_to_its_feast_unless_it_has_its_own_office() {
+        let (_, index) = setup();
+        let found = |id: &str, name: &str, date: Date| index.find(id, name, date).map(|e| e.id.as_str());
+        let eve = Date::new(2026, 10, 27);
+        assert_eq!(found("vigil-of-ss-simon-jude", "Vigil of Ss Simon & Jude", eve), Some("ss-simon-jude"));
+        // Commemorated under its name alone, as the ordo's digest names it.
+        assert_eq!(found("", "Vigil of Ss Simon & Jude", eve), Some("ss-simon-jude"));
+        assert_eq!(found("", "Vigil of St Laurence", Date::new(2026, 8, 9)), Some("st-lawrence"));
+        assert_eq!(found("vigil-pentecost", "Vigil of Pentecost", Date::new(2026, 5, 30)), Some("vigil-pentecost"));
     }
 
     #[test]
