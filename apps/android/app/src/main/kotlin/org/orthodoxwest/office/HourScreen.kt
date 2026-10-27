@@ -2,6 +2,8 @@ package org.orthodoxwest.office
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.view.RoundedCorner
 import android.view.View
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
@@ -77,6 +79,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.WeakHashMap
+import kotlin.math.max
+import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.HourView
@@ -288,10 +292,13 @@ private const val BEFORE_OFFICE = 3
  * keeps it full. The band scrolls away with the page here, so the line runs along the screen's top
  * edge, above the status bar's icons: just below them it would strike through the text passing
  * under the bar. Rows not yet laid out are taken at the average height of those that have been.
+ * On a screen with rounded corners the line runs between them, so its first and last stretches
+ * are not lost behind the curve: from the edges it read as starting only in the first psalm.
  */
 @Composable
 private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier) {
     val color = LocalOrnament.current.flat
+    val view = LocalView.current
     // Each row's height as last laid out, by index; begun again when the rows change in number
     // (a section opened or closed) or in width.
     val heights = remember { HashMap<Int, Int>() }
@@ -314,8 +321,32 @@ private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier)
                 progressBarRangeInfo = ProgressBarRangeInfo(ratio, 0f..1f)
                 contentDescription = "Progress through the prayer text"
             }
-            .drawBehind { drawRect(color, size = size.copy(width = size.width * ratio)) },
+            .drawBehind {
+                val (left, right) = clearOfCorners(view, size.width, size.height / 2)
+                drawRect(color, Offset(left, 0f), Size((right - left) * ratio, size.height))
+            },
     )
+}
+
+/**
+ * Where a line `y` px below the window's top edge, `width` px wide, leaves the screen's top
+ * rounded corners, from its left and from its right; the whole width where the screen tells
+ * of none (before Android 12, or square corners).
+ */
+private fun clearOfCorners(view: View, width: Float, y: Float): Pair<Float, Float> {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return 0f to width
+    val insets = view.rootWindowInsets ?: return 0f to width
+    // How far the corner's arc reaches in from its edge at this height.
+    fun reach(corner: RoundedCorner?): Float {
+        corner ?: return 0f
+        val above = corner.center.y - y
+        if (above <= 0f) return 0f
+        val r = corner.radius.toFloat()
+        return r - sqrt(max(0f, r * r - above * above))
+    }
+    val left = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT))
+    val right = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT))
+    return if (left + right >= width) 0f to width else left to width - right
 }
 
 /** How much of the office has passed the screen, from 0 to 1. */
