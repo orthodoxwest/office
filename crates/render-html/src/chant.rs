@@ -14,6 +14,7 @@ use liturgy::ChantScore;
 use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 
 use crate::escape::html_escape_string;
+use crate::html::typeset;
 
 /// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
 /// chant.js names the same.
@@ -26,11 +27,11 @@ const SCALE: f32 = 6.0;
 pub const FALLBACK_EM: u16 = 17;
 
 /// A score in place of the words it sets. The group is announced by `words`, the text it sets,
-/// rather than by its SVG.
+/// typeset as the page's text is, rather than by its SVG.
 pub fn score_html(gabc: &Arc<str>, words: &str) -> String {
     format!(
         "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
-        html_escape_string(words.trim()),
+        html_escape_string(&typeset(words.trim())),
         engraved(gabc, true)
     )
 }
@@ -47,7 +48,7 @@ pub fn whole_hymn_html(score: &ChantScore, stanzas: &[String]) -> String {
     for (i, (part, words)) in parts.iter().zip(stanzas).enumerate() {
         out.push_str(&format!(
             "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
-            html_escape_string(words.trim()),
+            html_escape_string(&typeset(words.trim())),
             if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
             engraved(&Arc::from(part.as_str()), i == 0)
         ));
