@@ -2787,10 +2787,12 @@ test("Tabula dates stay whole at the narrowest width and largest text", async ({
 });
 
 test("links into the year from before month pages still reach their day", async ({ page }) => {
-  await page.goto("/calendar/2026#d-2026-09-12");
+  // The year page replaces itself while it parses, so its own load never comes; WebKit has been
+  // seen to leave the goto waiting on it. The URL and viewport checks wait for the month page.
+  await page.goto("/calendar/2026#d-2026-09-12", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/09#d-2026-09-12$/);
   await expect(page.locator("#d-2026-09-12")).toBeInViewport();
-  await page.goto("/calendar/2026?form=priest#march");
+  await page.goto("/calendar/2026?form=priest#march", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/03\?form=priest$/);
   // The frontispiece itself, and its own anchors, stay put.
   await page.goto("/calendar/2026#tabula-heading");
