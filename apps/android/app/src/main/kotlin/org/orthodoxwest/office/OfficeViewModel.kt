@@ -23,6 +23,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
+import org.orthodoxwest.office.core.FeastPageView
+import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
@@ -43,7 +45,8 @@ fun LocalDate.toCivil(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
- * (brought to `day` when one is asked for, as the web's #d-date), and a year's frontispiece.
+ * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
+ * search for a feast, and a feast's page.
  */
 sealed interface Page {
     data class Home(val date: LocalDate) : Page
@@ -51,6 +54,8 @@ sealed interface Page {
     data class Ordo(val year: Int, val month: Int, val day: Int = 0) : Page
     data class Year(val year: Int) : Page
     data object Reminders : Page
+    data class Find(val query: String) : Page
+    data class Feast(val id: String) : Page
 }
 
 /** A page as saved state writes it: "hour 2026-03-15 vespers". */
@@ -60,9 +65,13 @@ fun Page.encode(): String = when (this) {
     is Page.Ordo -> "ordo $year $month $day"
     is Page.Year -> "year $year"
     Page.Reminders -> "reminders"
+    is Page.Find -> "find $query"
+    is Page.Feast -> "feast $id"
 }
 
 fun decodePage(s: String): Page? = runCatching {
+    // A query keeps its own spaces.
+    if (s.startsWith("find ")) return@runCatching Page.Find(s.removePrefix("find "))
     val f = s.split(" ")
     when (f[0]) {
         "home" -> Page.Home(LocalDate.parse(f[1]))
@@ -70,6 +79,7 @@ fun decodePage(s: String): Page? = runCatching {
         "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt(), f.getOrNull(3)?.toInt() ?: 0)
         "year" -> Page.Year(f[1].toInt())
         "reminders" -> Page.Reminders
+        "feast" -> Page.Feast(f[1])
         else -> null
     }
 }.getOrNull()
@@ -82,6 +92,8 @@ sealed interface Content {
     data class Home(val view: HomeView) : Content
     data class Hour(val view: HourView) : Content
     data class Ordo(val view: OrdoMonthView) : Content
+    data class Find(val view: FindView) : Content
+    data class Feast(val view: FeastPageView) : Content
 
     /** The year's frontispiece and the reminders, drawn from the page itself. */
     data object Drawn : Content
@@ -187,6 +199,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /** The day the search or a feast page was last made on: their years and next keeping follow it. */
+    private var feastDay: LocalDate? = null
+
     init {
         load()
         // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
@@ -201,10 +216,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
-     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. Called
+     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
+     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
      * every minute and on every return to the app.
      */
     fun refreshClock() {
+        feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return
         val now = LocalDateTime.now()
@@ -237,6 +254,26 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         stack.removeAt(stack.lastIndex)
         moved()
         return true
+    }
+
+    /**
+     * The search's words changed: the search page takes them in place, with no move between
+     * pages, and finds again.
+     */
+    fun search(query: String) {
+        val find = page as? Page.Find ?: return
+        if (find.query == query) return
+        stack[stack.lastIndex] = Entry(entry.id, Page.Find(query))
+        saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
+        load()
+    }
+
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    fun findAgain() {
+        if (stack.size > 1 && stack[stack.lastIndex - 1].page is Page.Find) back() else open(Page.Find(""))
     }
 
     /** Home for today, clearing the way back, as the brand link does. */
@@ -350,7 +387,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
      * once a day.
      */
     fun countVisit() {
+        // The search and the feast pages are not counted, as on the web.
         val event = when (val shown = page) {
+            is Page.Find, is Page.Feast -> return
             is Page.Home -> UsageEvent.Home(shown.date.toCivil())
             is Page.Hour -> UsageEvent.Hour(shown.date.toCivil(), shown.hour)
             is Page.Ordo -> UsageEvent.Ordo(shown.year)
@@ -379,6 +418,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val visit = entry
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
+        feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
         loading = viewModelScope.launch {
             val content = try {
@@ -396,6 +436,11 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         },
                     )
                     is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })
+                    is Page.Find -> Content.Find(withContext(Dispatchers.Default) { office.findFeasts(page.query, now.year) })
+                    is Page.Feast -> Content.Feast(
+                        withContext(Dispatchers.Default) { office.feastPage(page.id, now.toLocalDate().toCivil()) }
+                            ?: throw IllegalArgumentException("No feast by that name."),
+                    )
                     // The frontispiece is arithmetic, drawn at once from the page itself.
                     is Page.Year -> Content.Drawn
                     Page.Reminders -> {

@@ -7,6 +7,7 @@ mod crawl;
 // compiles it only to test it.
 #[cfg(test)]
 mod css;
+mod feasts;
 mod handlers;
 mod http;
 mod ics;
@@ -56,6 +57,7 @@ enum Route {
     Privacy,
     Beta,
     Calendar,
+    Feast,
     Robots,
     Sitemap,
     Root,
@@ -122,6 +124,7 @@ impl Server {
                 | Route::Privacy
                 | Route::Beta
                 | Route::Calendar
+                | Route::Feast
                 | Route::Robots
                 | Route::Sitemap
                 | Route::Root => {
@@ -140,8 +143,9 @@ impl Server {
             Route::Privacy => self.privacy(&req),
             Route::Beta => self.beta(&req),
             Route::Calendar => self.calendar(&req),
+            Route::Feast => self.feast(&req),
             Route::Robots => crawl::robots(&site),
-            Route::Sitemap => crawl::sitemap(&site, Server::local_year()),
+            Route::Sitemap => crawl::sitemap(&site, Server::local_year(), self.cache.feasts()),
             Route::Root => self.root(&req),
         }
     }
@@ -173,6 +177,9 @@ impl Server {
             .route("/calendar", endpoint(Route::Calendar))
             .route("/calendar/", endpoint(Route::Calendar))
             .route("/calendar/{*path}", endpoint(Route::Calendar))
+            .route("/feast", endpoint(Route::Feast))
+            .route("/feast/", endpoint(Route::Feast))
+            .route("/feast/{*path}", endpoint(Route::Feast))
             .route("/robots.txt", endpoint(Route::Robots))
             .route("/sitemap.xml", endpoint(Route::Sitemap))
             .fallback(move |req: Request| entry(Arc::clone(&self), Route::Root, req))

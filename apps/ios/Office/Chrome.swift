@@ -105,11 +105,11 @@ struct SiteNav {
             case let .home(d), let .hour(d, _): model.open(.ordo(year: Int(d.year), month: Int(d.month), day: Int(d.day)))
             case let .ordo(y, m, _): model.open(.ordo(year: y, month: m, day: 0))
             case let .year(y): model.open(.year(y))
-            case .reminders: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
+            case .reminders, .find, .feast: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
             }
         }
         switch page {
-        case .ordo, .year: ordoCurrent = true
+        case .ordo, .year, .find, .feast: ordoCurrent = true
         default: ordoCurrent = false
         }
         onReminders = { model.open(.reminders) }

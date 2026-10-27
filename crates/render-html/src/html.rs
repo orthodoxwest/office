@@ -301,7 +301,7 @@ pub fn render_liturgical_block(text: &str) -> String {
     render_block(text, Mode::PreserveLines, false)
 }
 
-fn render_flowing_block(text: &str) -> String {
+pub fn render_flowing_block(text: &str) -> String {
     render_block(text, Mode::Flow, false)
 }
 

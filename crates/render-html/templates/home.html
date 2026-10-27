@@ -1,5 +1,6 @@
 {% extends "layout.html" %}{% block title %}Daily Office — {{ date_str }}{% endblock %}{% block content %}
 <div class="home">
+  {% if from_feast %}<a class="from-feast" href="{{ from_feast.href|url }}">&lsaquo; {{ from_feast.label|typeset }}</a>{% endif %}
   <span class="sr-only">Liturgical color: {{ color }}</span>
   {# The source order is the frontispiece order at every width: day identity,
        prayer invitation, then the secondary date control. Keeping the visual
@@ -26,7 +27,7 @@
         {# A familiar name the ordo gives in parentheses ("(Corpus Christi)")
            is set apart from the name, so it is kept whole and, when the two
            cannot share a line, takes the next line of its own. #}
-        {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}</p>{% endif %}
+        {% if feast_name %}<p class="feast{% if feast_alias %} has-alias{% endif %}">{% if feast_href %}<a class="feast-link" href="{{ feast_href|url }}" title="About this feast">{% endif %}{% if feast_alias %}<span class="feast-name">{{ feast_name|typeset }}</span> <span class="feast-alias">{{ feast_alias|typeset }}</span>{% else %}{{ feast_name|typeset }}{% endif %}{% if feast_href %}</a>{% endif %}</p>{% endif %}
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
         {% if penitential %}
         <p class="penitential">
@@ -43,7 +44,7 @@
         <div class="commemorations">
           <span class="commemorations-label">Also</span>
           <ul>
-            {% for name in commemorations %}<li>{{ name|typeset }}</li>{% endfor %}
+            {% for name in commemorations %}<li>{% set href = commemoration_hrefs[loop.index0] if loop.index0 < commemoration_hrefs|length else "" %}{% if href %}<a class="feast-link" href="{{ href|url }}">{{ name|typeset }}</a>{% else %}{{ name|typeset }}{% endif %}</li>{% endfor %}
           </ul>
         </div>
         {% endif %}

@@ -250,6 +250,14 @@ pub fn element_blocks(elems: &[OfficeElement]) -> Vec<Block> {
     out
 }
 
+/// A text standing alone, as a feast's page sets its antiphons, versicles and collect: a prayer
+/// flows, anything else keeps its lines (`render_html` sets the same text the same way).
+pub fn text_blocks(text: &str, prayer: bool) -> Vec<Block> {
+    let mut out = Vec::new();
+    liturgical_block(&mut out, text, if prayer { Mode::Flow } else { Mode::PreserveLines }, false);
+    out
+}
+
 /// A section heading, separating a commemoration's lead-in from its feast.
 pub fn section_heading(label: &str) -> Block {
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {

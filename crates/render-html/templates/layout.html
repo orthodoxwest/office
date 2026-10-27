@@ -122,7 +122,7 @@
           <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
           <span class="nav-divider" aria-hidden="true"></span>
           {%- endif %}
-          <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
+          <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p in ["calendar", "find", "feast"] %} class="active"{% endif %}{% if p == "calendar" %} aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
         </nav>
         {# Phone-only: the preference controls, at the foot of the menu so
