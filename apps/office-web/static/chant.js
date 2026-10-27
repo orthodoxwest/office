@@ -7,9 +7,10 @@
 // A module script (layout.html), so a browser without modules never parses the
 // dynamic import below, and app.js stays readable to every browser.
 (function () {
-  // neuma.mjs is modern JavaScript (class static blocks, private methods);
-  // import maps came to every engine after those, so a browser that has them
-  // can run it, and one that hasn't is spared the download.
+  // neuma.mjs is modern JavaScript (class static blocks, private methods).
+  // Every engine that answers HTMLScriptElement.supports("importmap") runs it
+  // (Chrome 96, Firefox 108, Safari 16.4; static blocks came in 94, 93 and
+  // 16.4), and one that doesn't is spared the download.
   if (!("ResizeObserver" in window) || typeof WebAssembly !== "object") return;
   if (!(window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports("importmap"))) return;
   var engineURL = document.querySelector('meta[name="neuma"]');
@@ -19,15 +20,18 @@
   var LYRIC_SPACES = 2.45;
   var SCALE = 6;
   var engine = null;
+  var attempts = 0;
   var serial = 0;
   var states = new Map();
 
   var load = function () {
     if (!engine) {
-      engine = import(engineURL.content).then(function (neuma) {
+      // A failed fetch (offline, say) is tried again the next time a score is
+      // shown or resized. A document keeps a failed module for its URL, so each
+      // try names it afresh; the fragment never reaches the cache or server.
+      engine = import(engineURL.content + "#" + attempts++).then(function (neuma) {
         return neuma.init().then(function () { return neuma; });
       });
-      // A failed fetch (offline, say) is tried again the next time a score is shown.
       engine.catch(function () { engine = null; });
     }
     return engine;

@@ -3990,9 +3990,12 @@ test("a chant score fills its column at every width and keeps its own when the e
   expect(fallback.laidOut).toBe(false);
   expect(fallback.score).toBeLessThanOrEqual(fallback.column + 0.5);
   expect(fallback.overflow).toBe(0);
+  // Back online, the next resize fetches it again and lays the score out.
+  await page.unroute(/\/static\/neuma\.mjs/);
+  await page.setViewportSize({ width: 380, height: 900 });
+  await expect.poll(async () => (await fit()).laidOut).toBe(true);
 
   // A browser too old for the engine never fetches it.
-  await page.unroute(/\/static\/neuma\.mjs/);
   const fetched = [];
   page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
   await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
