@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.view.RoundedCorner
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -336,17 +337,19 @@ private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier)
 private fun clearOfCorners(view: View, width: Float, y: Float): Pair<Float, Float> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return 0f to width
     val insets = view.rootWindowInsets ?: return 0f to width
-    // How far the corner's arc reaches in from its edge at this height.
-    fun reach(corner: RoundedCorner?): Float {
-        corner ?: return 0f
-        val above = corner.center.y - y
-        if (above <= 0f) return 0f
-        val r = corner.radius.toFloat()
-        return r - sqrt(max(0f, r * r - above * above))
-    }
-    val left = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT))
-    val right = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT))
+    val left = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT), y)
+    val right = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT), y)
     return if (left + right >= width) 0f to width else left to width - right
+}
+
+/** How far a top corner's arc reaches in from its edge, `y` px below the top. */
+@RequiresApi(Build.VERSION_CODES.S)
+private fun reach(corner: RoundedCorner?, y: Float): Float {
+    corner ?: return 0f
+    val above = corner.center.y - y
+    if (above <= 0f) return 0f
+    val r = corner.radius.toFloat()
+    return r - sqrt(max(0f, r * r - above * above))
 }
 
 /** How much of the office has passed the screen, from 0 to 1. */
