@@ -219,6 +219,8 @@ fn blocks_carry_the_same_text_as_the_web() {
 }
 
 const HYMN: &str = "To thee before the close of day,\nCreator of the world, we pray\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
+/// A hymn with a rubric before a stanza, which the stanza's score does not carry.
+const HYMN_KNEELING: &str = "To thee before the close of day,\nCreator of the world, we pray\n\n/:The following stanza is said kneeling.:/\n\nFrom all ill dreams defend our eyes,\nFrom nightly fears and fantasies;\n\nAmen.";
 const MARIAN: &str = "Hail, holy Queen, * Mother of mercy,\nour life, our sweetness and our hope.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy.\n\nLet us pray.\n\nAlmighty, everlasting God, who didst prepare.";
 
 fn scored(kind: ElementType, text: &str, gabc: &str, sets: ScoreSpan) -> OfficeElement {
@@ -326,6 +328,7 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
     for e in [
         scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::FirstStanza),
         scored(ElementType::Hymn, HYMN, hymn_gabc, ScoreSpan::WholeHymn),
+        scored(ElementType::Hymn, HYMN_KNEELING, hymn_gabc, ScoreSpan::WholeHymn),
         scored(ElementType::Antiphon, MARIAN, marian_gabc, ScoreSpan::Antiphon),
     ] {
         let unscored = OfficeElement { score: None, ..e.clone() };
@@ -334,6 +337,7 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
         let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
         assert_eq!(shown(&out, false), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
         assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
+        assert_eq!(e.text.contains("kneeling"), shown(&out, true).contains("kneeling"), "a rubric shows with Chant on too");
     }
 }
 

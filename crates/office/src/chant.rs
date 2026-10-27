@@ -18,7 +18,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use calendar::DataSource;
-use corpus::lines::{hymn_rubric_stanza, marian_antiphon_part, parse_hymn};
+use corpus::lines::{hymn_rubric_stanza, hymn_sung_stanzas, marian_antiphon_part, parse_hymn};
 use liturgy::{ChantScore, ElementType, OfficeElement, OfficeHour, ScoreSpan};
 
 use crate::texts::OfficeTexts;
@@ -167,7 +167,8 @@ fn score_for(elem: &OfficeElement, t: &OfficeTexts) -> Option<ChantScore> {
 
 /// Problems with the scores: a key that names no text or an alias, a text that is not a hymn or
 /// Marian antiphon, several tunes before a tune table can choose among them, GABC neuma cannot
-/// read, or words that differ from the text's.
+/// read, words that differ from the text's, or a whole hymn whose double bars `(::)` do not part
+/// it stanza by stanza (the fronts would then show one long score, unnumbered).
 pub fn validate_scores(t: &OfficeTexts) -> Vec<String> {
     let mut errs = Vec::new();
     for (key, tunes) in &t.scores {
@@ -186,12 +187,20 @@ pub fn validate_scores(t: &OfficeTexts) -> Vec<String> {
             match t.canonical_ref(key) {
                 None => errs.push(format!("{path}: no corpus text {key}")),
                 Some(canonical) if canonical != key => errs.push(format!("{path}: {key} is an alias; name the score {canonical}")),
-                Some(_) => {
-                    if kind.span(t.get(key), &score.words).is_none() {
+                Some(_) => match kind.span(t.get(key), &score.words) {
+                    None => {
                         let want = kind.first_span_words(t.get(key));
                         errs.push(format!("{path}: its words differ from the text's: {}", first_difference(&score.words, &want)));
                     }
-                }
+                    Some(ScoreSpan::WholeHymn) => {
+                        let parts = ChantScore { gabc: score.gabc.clone(), sets: ScoreSpan::WholeHymn }.stanza_parts().len();
+                        let stanzas = hymn_sung_stanzas(t.get(key)).len();
+                        if parts != stanzas {
+                            errs.push(format!("{path}: its double bars part it into {parts} stanzas, but the text has {stanzas}"));
+                        }
+                    }
+                    Some(_) => {}
+                },
             }
         }
     }
@@ -299,5 +308,23 @@ mod engine_tests {
         engine.texts.scores.get_mut(KEY).unwrap().insert("festal".into(), Score::new(&gabc(&first)));
         assert!(compline_hymn(&engine).score.is_none());
         assert!(super::validate_scores(&engine.texts)[0].contains("several tunes"));
+    }
+
+    #[test]
+    fn a_whole_hymns_score_parts_at_each_stanza() {
+        let mut engine = Engine::load(&TestData("../../data".into())).unwrap();
+        let stanzas = corpus::lines::hymn_sung_stanzas(engine.texts.get(KEY));
+        assert!(stanzas.len() > 1);
+        let set = |engine: &mut Engine, gabc: String| {
+            engine.texts.scores.insert(KEY.into(), [("ferial".to_string(), Score::new(&gabc))].into());
+        };
+
+        set(&mut engine, gabc(&stanzas.join(" ")));
+        let errs = super::validate_scores(&engine.texts);
+        assert!(errs.len() == 1 && errs[0].contains(&format!("into 1 stanzas, but the text has {}", stanzas.len())), "{errs:?}");
+
+        let parted: Vec<String> = stanzas.iter().map(|s| gabc(s).split_once("(c4) ").unwrap().1.to_string()).collect();
+        set(&mut engine, format!("name: test;\n%%\n(c4) {}", parted.join(" ")));
+        assert!(super::validate_scores(&engine.texts).is_empty(), "{:?}", super::validate_scores(&engine.texts));
     }
 }

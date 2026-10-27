@@ -10,8 +10,8 @@ pub mod initials;
 pub use initials::{InitialFit, initial_fit, initial_size};
 
 use corpus::lines::{
-    BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanzas, marian_antiphon_part,
-    parse_block, parse_hymn, parse_psalm,
+    BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanza_rubrics, hymn_sung_stanzas,
+    marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
 use liturgy::{
@@ -755,11 +755,21 @@ fn corporate_lord_prayer(out: &mut Vec<Block>, elem: &OfficeElement) {
 fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
     let Some(score) = &elem.score else { return hymn_stanzas(out, &elem.text) };
     let stanzas = hymn_sung_stanzas(&elem.text);
+    let rubrics = hymn_sung_stanza_rubrics(&elem.text);
     let parts = score.stanza_parts();
     let start = out.len();
+    // The rubrics said before a stanza (kneeling for it), which a whole hymn's score does not carry.
+    let rubric_blocks = |out: &mut Vec<Block>, before: Option<&Vec<String>>| {
+        for r in before.into_iter().flatten() {
+            let mut block = Block::new(BlockKind::HymnRubric, text_runs(r));
+            block.chant = ChantVariant::On;
+            out.push(block);
+        }
+    };
     match score.sets {
         ScoreSpan::WholeHymn if parts.len() == stanzas.len() => {
             for (i, (part, words)) in parts.iter().zip(&stanzas).enumerate() {
+                rubric_blocks(out, rubrics.get(i));
                 let mut block = Block::score(part, words, i == 0);
                 if i > 0 {
                     block.marker = format!("{}.", i + 1);
@@ -773,6 +783,7 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
             }
         }
         ScoreSpan::WholeHymn => {
+            rubric_blocks(out, rubrics.first());
             out.push(Block::score(&score.gabc, &stanzas.join(" "), true));
             let text_start = out.len();
             hymn_stanzas(out, &elem.text);
