@@ -144,6 +144,12 @@ pub fn hour_versicle(hour: &OfficeHour) -> Option<Versicle> {
     Some(Versicle { versicle: line("V.")?, response: line("R.")? })
 }
 
+/// Whether an hour's prayers before and after the Office open until the reader chooses: Lauds,
+/// Prime and Vespers open theirs, the other hours keep them closed. Every front starts from this.
+pub fn prayers_open_by_default(hour: &str) -> bool {
+    matches!(hour, "lauds" | "prime" | "vespers")
+}
+
 pub const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -380,7 +386,7 @@ pub fn tabula(year: i32) -> TabulaRows {
         moveable: vec![
             date("Septuagesima Sunday", moveable.septuagesima),
             date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter Day", moveable.easter),
+            date("Easter (Pascha) Day", moveable.easter),
             date("Ascension Day", moveable.ascension),
             date("Pentecost", moveable.pentecost),
             date("Corpus Christi", moveable.corpus_christi),
@@ -403,6 +409,12 @@ pub fn year_roman(year: i32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lauds_prime_and_vespers_open_their_prayers() {
+        let open: Vec<_> = liturgy::HOUR_NAMES.into_iter().filter(|h| prayers_open_by_default(h)).collect();
+        assert_eq!(open, ["lauds", "prime", "vespers"]);
+    }
 
     #[test]
     fn query_escape_encodes_special_characters() {

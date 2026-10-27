@@ -43,7 +43,7 @@
       <fieldset disabled aria-describedby="leader-preference-note">
         <legend>How are you praying?</legend>
         <div class="leader-options">
-          {% for f in leader_forms %}<label class="leader-option"><input type="radio" name="office-prayer-form" value="{{ f.form }}"{% if f.form == "private" %} checked{% endif %}> <span>{% if f.form == "private" %}Praying privately{% elif f.form == "deacon" %}With others, led by a deacon{% else %}With others, led by a priest{% endif %}</span></label>{% endfor %}
+          {% for f in leader_forms %}<label class="leader-option"><input type="radio" name="office-prayer-form" value="{{ f.form }}"{% if f.form == "private" %} checked{% endif %}> <span>{{ f.phrase }}</span></label>{% endfor %}
         </div>
         <p id="leader-preference-note">Remembered on this device. Change it any time.</p>
       </fieldset>
@@ -61,7 +61,7 @@
     {%- macro leader_section_html(section) %}{% if section.martyrology_html %}<div data-martyrology-variant="off">{{ section.html|safe }}</div><div data-martyrology-variant="on">{{ section.martyrology_html|safe }}</div>{% else %}{{ section.html|safe }}{% endif %}{% endmacro %}
     {% for section in leader_sections %}
       {% if section.collapsible %}
-      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if prayers_open %} open{% endif %}>
         <summary>{{ section.label }}</summary>
         <div class="session-prayers-content">{{ leader_section_html(section) }}</div>
       </details>
@@ -73,7 +73,7 @@
     {% else %}
     {% for section in sections %}
       {% if section.collapsible %}
-      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+      <details class="session-prayers" data-prayers="{{ hour_name }}/{{ section.label }}"{% if prayers_open %} open{% endif %}>
         <summary>{{ section.label }}</summary>
         <div class="session-prayers-content">{{ section.html|safe }}</div>
       </details>

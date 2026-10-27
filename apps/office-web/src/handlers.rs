@@ -9,7 +9,7 @@ use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
 use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
-use office::{ComposeOptions, Engine};
+use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
 use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_link, home_link, hour_link};
 use render_html::view::{
@@ -23,7 +23,7 @@ use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
     MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
-    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias,
+    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias, title_case,
 };
 
 /// What a page handler reads from the request.
@@ -37,23 +37,11 @@ pub struct Req<'a> {
     pub site: &'a str,
 }
 
-const VALID_HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-
-const ORDERED_HOURS: [(&str, &str); 7] = [
-    ("Lauds", "lauds"),
-    ("Prime", "prime"),
-    ("Terce", "terce"),
-    ("Sext", "sext"),
-    ("None", "none"),
-    ("Vespers", "vespers"),
-    ("Compline", "compline"),
-];
-
 fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
-    ORDERED_HOURS
+    HOUR_NAMES
         .iter()
-        .map(|(name, slug)| HomeHourLink {
-            name: name.to_string(),
+        .map(|slug| HomeHourLink {
+            name: title_case(slug),
             slug: slug.to_string(),
             url: hour_link(slug, date_slug),
             is_current: *slug == current,
@@ -66,17 +54,17 @@ fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
 /// page of the day does not end in a blank.
 fn adjacent_hours(hour: &str, date: &str, tomorrow: &str) -> (String, String, String, String) {
     let mut out = (String::new(), String::new(), String::new(), String::new());
-    if let Some(i) = ORDERED_HOURS.iter().position(|(_, slug)| *slug == hour) {
+    if let Some(i) = HOUR_NAMES.iter().position(|slug| *slug == hour) {
         if i > 0 {
-            out.0 = ORDERED_HOURS[i - 1].0.to_string();
-            out.1 = hour_link(ORDERED_HOURS[i - 1].1, date);
+            out.0 = title_case(HOUR_NAMES[i - 1]);
+            out.1 = hour_link(HOUR_NAMES[i - 1], date);
         }
-        if i + 1 < ORDERED_HOURS.len() {
-            out.2 = ORDERED_HOURS[i + 1].0.to_string();
-            out.3 = hour_link(ORDERED_HOURS[i + 1].1, date);
+        if i + 1 < HOUR_NAMES.len() {
+            out.2 = title_case(HOUR_NAMES[i + 1]);
+            out.3 = hour_link(HOUR_NAMES[i + 1], date);
         } else {
-            out.2 = ORDERED_HOURS[0].0.to_string();
-            out.3 = hour_link(ORDERED_HOURS[0].1, tomorrow);
+            out.2 = title_case(HOUR_NAMES[0]);
+            out.3 = hour_link(HOUR_NAMES[0], tomorrow);
         }
     }
     out
@@ -387,7 +375,7 @@ impl Server {
     }
 
     fn hour(&self, req: &Req, hour_name: &str, date_str: &str) -> Response<Body> {
-        if !VALID_HOURS.contains(&hour_name) {
+        if !HOUR_NAMES.contains(&hour_name) {
             return self.not_found_page(req);
         }
         let dated = !date_str.is_empty() || !req.query.get("date").is_empty();
@@ -467,10 +455,12 @@ impl Server {
                 .map(|(form, h)| LeaderForm {
                     form: form.as_str().into(),
                     label: form.label().into(),
+                    phrase: form.phrase().into(),
                     report_url: report_url(h, hour_name, &date_str),
                 })
                 .collect(),
             hour_name: hour_name.into(),
+            prayers_open: presentation::prayers_open_by_default(hour_name),
             date_str: long_date(date),
             date_slug: date_str.clone(),
             prev_link: hour_link(hour_name, &date_slug(date.add_days(-1))),
@@ -687,6 +677,35 @@ mod tests {
         assert_eq!(constant("PRAYED_WORDS_PER_SECOND"), presentation::PRAYED_WORDS_PER_SECOND);
         assert_eq!(constant("PRAYED_SHARE"), presentation::PRAYED_SHARE);
         assert_eq!(constant("PRAYED_LONGEST_STEP"), presentation::PRAYED_LONGEST_STEP);
+    }
+
+    // app.js writes the browser's beacon by hand in presentation::usage's vocabulary: every
+    // "family:value" it can send is one the server reads, and it names every family a browser
+    // reports (new-client is the server's own). The test reads the code from usageVisitToken to
+    // the next top-level IIFE, takes each double-quoted string that opens " family:", and finds
+    // the prayer forms as one array literal; keep app.js's beacon code in that shape.
+    #[test]
+    fn client_beacon_tokens_match_server() {
+        use presentation::usage::{DIMENSIONS, PRAYER_FORMS};
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let start = src.find("function usageVisitToken").unwrap();
+        let beacon = &src[start..start + src[start..].find("\n(function () {").unwrap()];
+        let tokens: Vec<(&str, &str)> = beacon
+            .split('"')
+            .skip(1)
+            .step_by(2)
+            .filter_map(|s| s.strip_prefix(' ')?.split_once(':'))
+            .filter(|(key, value)| !key.contains(' ') && !value.contains(' '))
+            .collect();
+        for (key, value) in &tokens {
+            let family = DIMENSIONS.iter().find(|d| d.key == *key).unwrap_or_else(|| panic!("app.js sends unknown family {key}"));
+            assert!(value.is_empty() || family.values.contains(value), "app.js sends {key}:{value}");
+        }
+        for family in DIMENSIONS.iter().filter(|d| d.key != "new-client") {
+            assert!(tokens.iter().any(|(key, _)| *key == family.key), "app.js never sends {}", family.key);
+        }
+        let forms = format!("[{}]", PRAYER_FORMS.iter().map(|f| format!("\"{f}\"")).collect::<Vec<_>>().join(", "));
+        assert!(beacon.contains(&forms), "app.js's prayer forms are {forms}");
     }
 
     use axum::http::Uri;
