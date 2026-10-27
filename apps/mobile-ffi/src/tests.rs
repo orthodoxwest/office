@@ -278,3 +278,17 @@ fn a_quick_scroll_does_not_pray_an_hour() {
     }
     assert!(prayed_reading_done(slow, total, true) && !prayed_reading_done(slow, total, false));
 }
+
+#[test]
+fn the_apps_offer_the_webs_prayer_forms() {
+    let forms = prayer_form_choices();
+    let values: Vec<_> = forms.iter().map(|f| f.value.as_str()).collect();
+    assert_eq!(values, presentation::usage::PRAYER_FORMS);
+    assert_eq!(forms[0], PrayerFormChoice { value: "private".into(), label: "Private".into(), phrase: "Praying privately".into() });
+}
+
+#[test]
+fn the_apps_open_the_webs_prayers_by_default() {
+    let open: Vec<_> = hour_names().into_iter().filter(|h| prayers_open_by_default(h.clone())).collect();
+    assert_eq!(open, ["lauds", "prime", "vespers"]);
+}

@@ -16,8 +16,7 @@ use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_
 use crate::texts::{OfficeTexts, load_texts};
 use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, seasonal, vespers, voice};
 
-/// The seven hours, in canonical order.
-pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub use liturgy::HOUR_NAMES;
 pub const HOLY_SATURDAY_VESPERS_DEFINITION: &str = "vespers-holy-saturday";
 
 /// Every hour definition file, including exceptional forms.
