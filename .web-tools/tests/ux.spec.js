@@ -3974,8 +3974,11 @@ test("Chant On notes a hymn's first verse with the rest as verse, and All notes 
   await expect(tune).toBeHidden();
   await expect(every).toBeHidden();
 
+  // The engine measures the lyrics with the app's own Garamond's metrics, fetched with it.
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
   await choosePreference(page, "On", ".chant-option");
   await expect(page.locator("html")).toHaveAttribute("data-chant", "on");
+  await metrics;
   await expect(tune).toBeVisible();
   await expect(every).toBeHidden();
   // The tune over the first verse, its mode over it once, the other verses numbered after it.
