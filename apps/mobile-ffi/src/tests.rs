@@ -317,7 +317,7 @@ fn the_apps_give_the_webs_setting_hints() {
     let hints = preference_hints();
     assert_eq!(hints.martyrology, presentation::MARTYROLOGY_HINT);
     assert_eq!(hints.chant, presentation::CHANT_HINT);
-    assert_eq!(hints.chant_choices, ["Off", "On", "Every verse"]);
+    assert_eq!(hints.chant_choices, ["Off", "On", "All"]);
 }
 
 #[test]

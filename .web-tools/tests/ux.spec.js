@@ -3964,7 +3964,7 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
 
-test("Chant On notes a hymn's first verse with the rest as verse, and Every verse notes them all", async ({ page }) => {
+test("Chant On notes a hymn's first verse with the rest as verse, and All notes every verse", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openDatedPage(page, "/lauds/2026-10-28");
   const hymn = page.locator(".hymn");
@@ -3998,7 +3998,7 @@ test("Chant On notes a hymn's first verse with the rest as verse, and Every vers
   await expect(box).toHaveAttribute("data-chant-initial", "0");
   await expect.poll(() => box.locator("svg text").allTextContents().then((t) => t.join(" "))).not.toContain("heav");
 
-  await choosePreference(page, "Every verse", ".chant-option");
+  await choosePreference(page, "All", ".chant-option");
   await expect(page.locator("html")).toHaveAttribute("data-chant-verses", "every");
   await expect(tune).toBeHidden();
   await expect(every).toBeVisible();

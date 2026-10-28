@@ -741,7 +741,7 @@ function usageBeaconBody(scope) {
     });
   });
 
-  // Chant: Off (the default) / On / Every verse, offered once the data holds a
+  // Chant: Off (the default) / On / All (every verse), offered once the data holds a
   // score. The same contract as the Martyrology: localStorage only, so every
   // page (and its offline copy) carries the text and the scores alike; the
   // pre-paint script in layout.html sets data-chant (and data-chant-verses for
