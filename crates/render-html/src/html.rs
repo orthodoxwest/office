@@ -4,8 +4,7 @@
 use std::sync::Arc;
 
 use corpus::lines::{
-    BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanzas, marian_antiphon_part, parse_block,
-    parse_hymn, parse_psalm,
+    BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
 use liturgy::{
     ChantScore, ElementType, OfficeElement, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at, split_words,
@@ -143,7 +142,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
             match &elem.score {
                 Some(score) if score.sets == ScoreSpan::WholeHymn => {
-                    sb.push_str(&crate::chant::whole_hymn_html(score, &hymn_sung_stanzas(&elem.text)));
+                    sb.push_str(&crate::chant::whole_hymn_html(score, &elem.text));
                     sb.push_str("<div data-chant-variant=\"off\">");
                     sb.push_str(&render_hymn_stanzas(&elem.text));
                     sb.push_str("</div>");
@@ -663,7 +662,7 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> Strin
     sb
 }
 
-fn write_hymn_rubric(sb: &mut String, rubric: &str) {
+pub(crate) fn write_hymn_rubric(sb: &mut String, rubric: &str) {
     sb.push_str(&format!("<p class=\"rubric hymn-rubric\">{}</p>", esc_text(rubric)));
 }
 

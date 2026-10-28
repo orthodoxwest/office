@@ -6,10 +6,10 @@ use std::collections::BTreeMap;
 use calendar::DataSource;
 use corpus::{Corpus, Sidecar, TextFile};
 
-use crate::chant::{Score, load_scores};
+use crate::chant::{Score, TUNES_FILE, TuneTable, load_scores, parse_tunes};
 use crate::scopes::AppointmentScopes;
 
-/// The corpus, the appointment scopes and the chant scores. `scopes` is `None` when
+/// The corpus, the appointment scopes, the chant scores and the tune table. `scopes` is `None` when
 /// `appointment-scopes.json` does not exist, which is distinct from `[]`.
 #[derive(Clone, Debug)]
 pub struct OfficeTexts {
@@ -17,9 +17,11 @@ pub struct OfficeTexts {
     pub scopes: Option<AppointmentScopes>,
     /// The scores under `data/texts/chant/`, by the corpus key each sets and then by tune.
     pub scores: BTreeMap<String, BTreeMap<String, Score>>,
+    /// `data/chant-tunes.txt`: which of an entry's several tunes is sung when.
+    pub tunes: TuneTable,
 }
 
-/// Loads `data/texts/`, its sidecars and its chant scores.
+/// Loads `data/texts/`, its sidecars, its chant scores and the tune table.
 pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
     let mut files = Vec::new();
     for (rel, bytes) in src.walk("texts").map_err(|e| format!("loading texts: {e}"))? {
@@ -46,7 +48,11 @@ pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
         Some(raw) => Some(AppointmentScopes::load(&scopes_path, &raw, &corpus)?),
     };
     let scores = load_scores(src)?;
-    Ok(OfficeTexts { corpus, scopes, scores })
+    let tunes = match src.read(TUNES_FILE)? {
+        None => TuneTable::new(),
+        Some(raw) => parse_tunes(&src.display_path(TUNES_FILE), &raw)?,
+    };
+    Ok(OfficeTexts { corpus, scopes, scores, tunes })
 }
 
 impl std::ops::Deref for OfficeTexts {
@@ -59,7 +65,7 @@ impl std::ops::Deref for OfficeTexts {
 impl OfficeTexts {
     /// A corpus without appointment scopes, for tests.
     pub fn from_corpus(corpus: Corpus) -> OfficeTexts {
-        OfficeTexts { corpus, scopes: None, scores: BTreeMap::new() }
+        OfficeTexts { corpus, scopes: None, scores: BTreeMap::new(), tunes: TuneTable::new() }
     }
 
     /// The appointment scope governing a seasonal fallback lookup, if any.

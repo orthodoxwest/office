@@ -14,6 +14,9 @@ use liturgy::ChantScore;
 use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 
 use crate::escape::html_escape_string;
+use corpus::lines::{hymn_sung_stanza_rubrics, hymn_sung_stanzas};
+
+use crate::html::{typeset, write_hymn_rubric};
 
 /// Staff spaces per lyric em (neuma's default lyric size, GregorioTeX's 10 pt on its staff).
 /// chant.js names the same.
@@ -26,28 +29,35 @@ const SCALE: f32 = 6.0;
 pub const FALLBACK_EM: u16 = 17;
 
 /// A score in place of the words it sets. The group is announced by `words`, the text it sets,
-/// rather than by its SVG.
+/// typeset as the page's text is, rather than by its SVG.
 pub fn score_html(gabc: &Arc<str>, words: &str) -> String {
     format!(
         "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
-        html_escape_string(words.trim()),
+        html_escape_string(&typeset(words.trim())),
         engraved(gabc, true)
     )
 }
 
 /// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`): each stanza from a new
-/// line with its number, the first alone taking the initial. `stanzas` are the stanzas' words,
-/// for their labels; parts that do not pair with them make one score, as written.
-pub fn whole_hymn_html(score: &ChantScore, stanzas: &[String]) -> String {
+/// line with its number, the first alone taking the initial, and each after the rubrics said
+/// before it (kneeling for a stanza), which the score does not carry. Parts that do not pair
+/// with the hymn's stanzas make one score, as written.
+pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
+    let stanzas = hymn_sung_stanzas(text);
+    let rubrics = hymn_sung_stanza_rubrics(text);
     let parts = score.stanza_parts();
-    if parts.len() != stanzas.len() {
-        return score_html(&score.gabc, &stanzas.join(" "));
-    }
     let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
-    for (i, (part, words)) in parts.iter().zip(stanzas).enumerate() {
+    if parts.len() != stanzas.len() {
+        rubrics.first().into_iter().flatten().for_each(|r| write_hymn_rubric(&mut out, r));
+        out.push_str(&score_html(&score.gabc, &stanzas.join(" ")));
+        out.push_str("</div>");
+        return out;
+    }
+    for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
+        before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&format!(
             "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
-            html_escape_string(words.trim()),
+            html_escape_string(&typeset(words.trim())),
             if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
             engraved(&Arc::from(part.as_str()), i == 0)
         ));
@@ -157,6 +167,12 @@ mod tests {
     }
 
     #[test]
+    fn a_score_is_named_by_its_words_typeset() {
+        let html = score_html(&Arc::from("name: t;\n%%\n(c4) Heav(g)en's(h) King.(g) (::)"), "Heaven's King. ");
+        assert!(html.contains("aria-label=\"Heaven\u{2019}s King.\""), "{html}");
+    }
+
+    #[test]
     fn a_gabc_with_markup_in_it_stays_in_its_attribute() {
         let gabc = "name: \"x\" & <y>;\n%%\n(c4) A(g) <i>b</i>(h) (::)";
         let html = score_html(&Arc::from(gabc), "A b");
@@ -173,8 +189,12 @@ mod tests {
         let parts = score.stanza_parts();
         assert_eq!(parts.len(), 2, "{parts:?}");
         assert!(parts[1].starts_with("name: t;\n%%\n(c4) Three") && parts[1].ends_with("A(gh)men.(g) (::)"), "{}", parts[1]);
-        let html = whole_hymn_html(&score, &["One two.".into(), "Three four. Amen.".into()]);
+        let html = whole_hymn_html(&score, "/:Kneel.:/\n\nOne two.\n\nThree four.\n\nAmen.");
         assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
+        assert!(
+            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"on\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
+            "{html}"
+        );
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
         assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
         assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);

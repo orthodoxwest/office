@@ -25,7 +25,7 @@ fn the_embedded_corpus_is_the_data_directory() {
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
-    for file in ["appointment-scopes.json", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
+    for file in ["appointment-scopes.json", "chant-tunes.txt", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
         assert_eq!(data.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
     }
     assert_eq!(data.read("review/provenance.csv").unwrap(), None);
