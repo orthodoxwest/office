@@ -427,9 +427,11 @@ pub enum UsageEvent {
 /// The usage beacon for `event`, or none when it does not count: as on the web, only a page
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
-/// `martyrology` the hour's `HourView::martyrology`; `first` whether the installation is counted
-/// for the first time today.
-#[uniffi::export(default(martyrology = None, first = None))]
+/// `martyrology` and `chant` the hour's `HourView::martyrology` and `HourView::chant`; `first`
+/// whether the installation is counted for the first time today.
+#[uniffi::export(default(martyrology = None, first = None, chant = None))]
+// The page's facts stay plain arguments with defaults, so each app passes only what it knows.
+#[allow(clippy::too_many_arguments)]
 pub fn usage_beacon(
     event: UsageEvent,
     today: CivilDate,
@@ -438,6 +440,7 @@ pub fn usage_beacon(
     client: UsageClient,
     martyrology: Option<bool>,
     first: Option<bool>,
+    chant: Option<bool>,
 ) -> Option<String> {
     use presentation::usage::{App, app_beacon, current_day, current_year};
     let today = today.parse().ok()?;
@@ -452,7 +455,7 @@ pub fn usage_beacon(
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form, martyrology, first)
+    app_beacon(scope, app, dark, &form, martyrology, chant, first)
 }
 
 /// Where a release build of the apps posts its beacons until the server names another.
@@ -788,6 +791,9 @@ pub struct HourView {
     /// Prime's Martyrology: whether the reader's setting shows the day's reading, or none when
     /// there is no reading to show (another hour, the Triduum, a date not yet transcribed).
     pub martyrology: Option<bool>,
+    /// Whether the reader's Chant setting shows the hour's scores, or none when it has none to
+    /// show, as the usage beacon reports it.
+    pub chant: Option<bool>,
 }
 
 impl HourView {
@@ -796,6 +802,8 @@ impl HourView {
     fn new(hour_name: &str, hour: &OfficeHour, chant: bool) -> HourView {
         let hidden = if chant { render_blocks::ChantVariant::Off } else { render_blocks::ChantVariant::On };
         let d = hour.date;
+        let blocks = render_blocks::hour_sections(hour);
+        let scored = blocks.iter().flat_map(|s| &s.blocks).any(|b| b.chant == render_blocks::ChantVariant::On);
         HourView {
             hour: hour_name.to_string(),
             title: hour.title.clone(),
@@ -806,7 +814,7 @@ impl HourView {
             ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             first_class: !rank_class(hour.rank, hour.color).is_empty(),
-            sections: render_blocks::hour_sections(hour)
+            sections: blocks
                 .into_iter()
                 .map(|mut s| {
                     s.blocks.retain(|b| b.chant != hidden);
@@ -815,6 +823,7 @@ impl HourView {
                 .collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,
+            chant: scored.then_some(chant),
         }
     }
 }

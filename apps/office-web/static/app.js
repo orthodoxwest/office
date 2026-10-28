@@ -390,8 +390,8 @@ document.documentElement.classList.add("js");
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
-// also report the selected prayer form, and Prime whether its Martyrology is
-// shown. These describe how the page
+// also report the selected prayer form, Prime whether its Martyrology is
+// shown, and an hour with a score whether its notation is. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
@@ -441,7 +441,12 @@ function usageBeaconBody(scope) {
   var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
     ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
     : "";
-  clientToken = martyrologyToken + usageVisitToken() + clientToken;
+  // An hour with a scored hymn or Marian antiphon: whether the reader's Chant
+  // setting shows the notation or the words alone.
+  var chantToken = document.body.classList.contains("page-hour") && document.querySelector('[data-chant-variant="on"]')
+    ? (document.documentElement.getAttribute("data-chant") === "on" ? " chant:on" : " chant:off")
+    : "";
+  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken;
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }
@@ -775,6 +780,7 @@ function usageBeaconBody(scope) {
       } catch {
         // Private mode / blocked storage — the choice still applies for this page.
       }
+      window.dispatchEvent(new Event("officechantchange"));
     });
   });
 
@@ -2363,6 +2369,7 @@ function usageBeaconBody(scope) {
   window.addEventListener("online", record);
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
   window.addEventListener("officemartyrologychange", function () { engage(); record(); });
+  window.addEventListener("officechantchange", function () { engage(); record(); });
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();

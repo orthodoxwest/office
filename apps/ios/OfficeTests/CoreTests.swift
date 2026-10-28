@@ -420,6 +420,18 @@ final class UsageTests: XCTestCase {
         XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
     }
 
+    func testAnHourWithAScoreSaysWhetherItsNotationWasShown() {
+        let usage = usage()
+        usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: false)
+        usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: true)
+        usage.record(.home(date: today), dark: false, form: "private", chant: true)
+        XCTAssertEqual(posted.map { $0.body }, [
+            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios",
+            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios",
+            "site appearance:nave screen:mobile visit:first client:ios",
+        ])
+    }
+
     func testTheArchiveIsNotCounted() {
         let usage = usage()
         usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")

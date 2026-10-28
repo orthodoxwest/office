@@ -127,9 +127,10 @@ struct HourPage: View {
             let view = composed.view
             HourScreen(view: view, date: date, composition: composed.composition)
                 // Reported whenever the page comes forward (an earlier Prime gone back to
-                // included), and again when its Martyrology is turned on or off.
+                // included), and again when its Martyrology or Chant is turned on or off.
                 .onAppear { model.composed(view, page: .hour(date, hour)) }
                 .onChange(of: view.martyrology) { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.chant) { model.composed(view, page: .hour(date, hour)) }
                 .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .hour(date, hour)) }
         }
         .background(PlasterWall())

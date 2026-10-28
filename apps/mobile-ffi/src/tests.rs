@@ -222,7 +222,7 @@ fn reminders_can_follow_the_sun() {
 #[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -239,13 +239,15 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             "private".into(),
             UsageClient::Android,
             Some(true),
-            Some(false)
+            Some(false),
+            Some(true)
         )
         .as_deref(),
-        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown visit:returning client:android")
+        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown chant:on visit:returning client:android")
     );
     assert_eq!(
-        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true)).as_deref(),
+        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true), Some(false))
+            .as_deref(),
         Some("site appearance:apse screen:mobile visit:first client:ios")
     );
     // The archive, and anything the server would refuse, are not counted.
@@ -302,6 +304,10 @@ fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
     // The antiphon's words give way to the score; the rest of the hour stands as it was.
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
+    // The usage beacon's chant: the setting, on an hour with a score to show; none on one without.
+    let reported = |hour: &str, chant| core.compose(hour.into(), 2026, 10, 7, "private".into(), false, chant).unwrap().chant;
+    assert_eq!((reported("compline", false), reported("compline", true)), (Some(false), Some(true)));
+    assert_eq!((reported("terce", false), reported("terce", true)), (None, None));
 }
 
 #[test]

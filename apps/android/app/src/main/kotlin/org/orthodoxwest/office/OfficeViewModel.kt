@@ -383,7 +383,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme, its prayer
-     * form or the Martyrology setting changes, and on every return to the app. Each is counted
+     * form, the Martyrology or the Chant setting changes, and on every return to the app. Each is counted
      * once a day.
      */
     fun countVisit() {
@@ -396,9 +396,10 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             is Page.Year -> UsageEvent.Ordo(shown.year)
             Page.Reminders -> UsageEvent.RemindersPage
         }
-        // Prime reports whether its Martyrology was shown, once the hour on screen is this page's.
+        // Prime reports whether its Martyrology was shown, and an hour with a score whether its
+        // notation was, once the hour on screen is this page's.
         val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
-        usage.record(event, dark(), form, hour?.view?.martyrology)
+        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */

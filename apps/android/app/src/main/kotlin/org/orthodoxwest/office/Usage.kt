@@ -23,8 +23,8 @@ import org.orthodoxwest.office.core.usageEndpointHeader
 
 /**
  * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
- * the page shown, the appearance and prayer form it is read in, and at Prime whether the
- * Martyrology was shown, once a day. The beacon's words come from the Rust core, so the server
+ * the page shown, the appearance and prayer form it is read in, at Prime whether the
+ * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The beacon's words come from the Rust core, so the server
  * reads the app's as it reads the web's, and only today's pages (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
@@ -56,13 +56,16 @@ class Usage(
     /** Beacons already counted today by this process, as "day body". */
     private val sent = mutableSetOf<String>()
 
-    /** `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one. */
-    fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null) {
+    /**
+     * `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
+     * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any.
+     */
+    fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null, chant: Boolean? = null) {
         if (!enabled) return
         if (installed != null && Duration.between(installed, clock.instant()) < SETTLING) return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
         val first = firstDay(day) == day
-        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first) ?: return
+        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant) ?: return
         val key = "$day $body"
         synchronized(sent) {
             if (!sent.add(key)) return

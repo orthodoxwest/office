@@ -195,8 +195,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var chant: Bool
     /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
     let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
-    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
-    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
+    /// The hour last composed, whether its Martyrology was shown and whether its scores were (nil:
+    /// it had none to show), for the usage beacon.
+    @Published private(set) var lastHour: (page: Page, martyrology: Bool?, chant: Bool?)?
     /// The ornament season of each home or hour composed on the way back, which retints the
     /// gilding of the chrome over it (the menu's painted line), as the page's own.
     @Published private(set) var seasons: [Page: String] = [:]
@@ -333,10 +334,10 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "chant")
     }
 
-    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown,
+    /// and whether its scores were.
     func composed(_ view: HourView, page: Page) {
-        guard view.hour == "prime" else { return }
-        primeMartyrology = (page, view.martyrology)
+        lastHour = (page, view.martyrology, view.chant)
     }
 
     /// The ornament season of the page shown: its own once composed, else none.
@@ -352,8 +353,14 @@ final class AppModel: ObservableObject {
 
     /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
     func martyrologyShown(on page: Page) -> Bool? {
-        guard let prime = primeMartyrology, prime.page == page else { return nil }
-        return prime.shown
+        guard let hour = lastHour, hour.page == page else { return nil }
+        return hour.martyrology
+    }
+
+    /// Whether `page` showed its scores: nil unless it is the hour last composed, with a score.
+    func chantShown(on page: Page) -> Bool? {
+        guard let hour = lastHour, hour.page == page else { return nil }
+        return hour.chant
     }
 
     /// Called when the app comes forward, and every minute while it is in front: the hour or the
