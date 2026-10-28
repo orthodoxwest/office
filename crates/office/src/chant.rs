@@ -31,6 +31,9 @@ pub const CHANT_DIR: &str = "chant/";
 /// The tune table's path under `data/`.
 pub const TUNES_FILE: &str = "chant-tunes.txt";
 
+/// The one entry whose tunes change at Saturday Vespers' summer.
+const SATURDAY_VESPERS_HYMN: &str = "ordinary/vespers/hymn-saturday";
+
 /// The key prefix of the Marian antiphons.
 const MARIAN_PREFIX: &str = "ordinary/marian/";
 
@@ -134,7 +137,8 @@ pub fn load_scores(src: &dyn DataSource) -> Result<BTreeMap<String, BTreeMap<Str
 /// When the tune table sings a tune.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum When {
-    /// Saturday Vespers' summer ([`crate::hymn::saturday_vespers_hymn_is_summer`]).
+    /// Saturday Vespers' summer ([`crate::hymn::saturday_vespers_hymn_is_summer`]), which is not
+    /// Sunday Lauds' summer: so only [`SATURDAY_VESPERS_HYMN`] may name it.
     Summer,
     /// An office of a Doctor: its feast's name calls the saint one, as the ordo prints it.
     Doctor,
@@ -186,9 +190,16 @@ pub fn parse_tunes(path: &str, raw: &str) -> Result<TuneTable, String> {
         }
         let Some(k) = &key else { return Err(format!("{}: a row before any [key]", at())) };
         let (tune, when) = line.split_once('=').ok_or_else(|| format!("{}: expected `tune = when`", at()))?;
-        let when =
-            When::parse(when.trim()).ok_or_else(|| format!("{}: when is summer, doctor or otherwise, not {:?}", at(), when.trim()))?;
-        table.get_mut(k).expect("inserted").push((tune.trim().to_string(), when));
+        let (tune, when) = (tune.trim(), when.trim());
+        let when = When::parse(when).ok_or_else(|| format!("{}: when is summer, doctor or otherwise, not {when:?}", at()))?;
+        let rows = table.get_mut(k).expect("inserted");
+        if rows.iter().any(|(t, _)| t == tune) {
+            return Err(format!("{}: [{k}] names {tune} twice", at()));
+        }
+        if rows.iter().any(|(_, w)| *w == when) {
+            return Err(format!("{}: [{k}] has a second {when:?} row, which would never be sung", at()));
+        }
+        rows.push((tune.to_string(), when));
     }
     Ok(table)
 }
@@ -263,6 +274,11 @@ pub fn validate_scores(t: &OfficeTexts) -> Vec<String> {
         }
         if rows.iter().filter(|(_, w)| *w == When::Otherwise).count() != 1 || rows.last().is_none_or(|(_, w)| *w != When::Otherwise) {
             errs.push(format!("{TUNES_FILE}: [{key}] must end with one `otherwise` row"));
+        }
+        if key != SATURDAY_VESPERS_HYMN && rows.iter().any(|(_, w)| *w == When::Summer) {
+            errs.push(format!(
+                "{TUNES_FILE}: [{key}] sings at `summer`, which is Saturday Vespers' summer and only for [{SATURDAY_VESPERS_HYMN}]"
+            ));
         }
     }
     for (key, tunes) in &t.scores {
@@ -433,6 +449,27 @@ mod engine_tests {
     #[test]
     fn the_tune_table_sings_each_tune_when_the_books_say() {
         use std::collections::BTreeSet;
+        // Named here rather than found by the word, so a test of the word that misfires fails.
+        const DOCTORS: [&str; 18] = [
+            "St Ambrose of Milan",
+            "St Athanasius",
+            "St Augustine of Hippo",
+            "St Basil the Great",
+            "St Bede the Venerable",
+            "St Cyril of Alexandria",
+            "St Cyril of Jerusalem",
+            "St Ephrem the Syrian",
+            "St Gregory Nazianzen",
+            "St Gregory of Nyssa",
+            "St Gregory the Great",
+            "St Hilary",
+            "St Isidore of Seville",
+            "St Jerome",
+            "St John Chrysostom",
+            "St John Damascene",
+            "St Leo the Great",
+            "St Peter Chrysologus",
+        ];
         let engine = Engine::load(&TestData("../../data".into())).unwrap();
         let data = CalendarData::load(&TestData("../../data".into())).unwrap();
         let cal = build_calendar(2026, &data).unwrap();
@@ -452,7 +489,7 @@ mod engine_tests {
                 let want = match key {
                     "ordinary/vespers/hymn-saturday" if summer(day.date) => "summer",
                     "ordinary/vespers/hymn-saturday" => "winter",
-                    _ if hour.feast.contains("Doctor") => "doctor",
+                    _ if DOCTORS.iter().any(|d| hour.feast.starts_with(d)) => "doctor",
                     "commons/confessor-bishop/hymn-vespers" => "bishop",
                     _ => "confessor",
                 };
@@ -473,5 +510,41 @@ mod engine_tests {
         assert!(parse_tunes("t", "summer = summer").unwrap_err().contains("before any [key]"));
         assert!(parse_tunes("t", "[a]\nx = lent").unwrap_err().contains("not \"lent\""));
         assert!(parse_tunes("t", "[a]\n[a]").unwrap_err().contains("twice"));
+        assert!(parse_tunes("t", "[a]\nx = doctor\nx = otherwise").unwrap_err().contains("names x twice"));
+        assert!(parse_tunes("t", "[a]\nx = doctor\ny = doctor").unwrap_err().contains("never be sung"));
+    }
+
+    /// Validation refuses a table that cannot choose: a row for an entry with one tune, a tune
+    /// with no score, no closing `otherwise`, a score the table never sings, and Saturday's
+    /// summer anywhere but Saturday Vespers.
+    #[test]
+    fn validation_refuses_a_tune_table_that_cannot_choose() {
+        use super::{TUNES_FILE, When};
+        const SAT: &str = "ordinary/vespers/hymn-saturday";
+        let base = Engine::load(&TestData("../../data".into())).unwrap();
+        let errs = |edit: &dyn Fn(&mut Engine)| {
+            let mut engine = Engine::load(&TestData("../../data".into())).unwrap();
+            edit(&mut engine);
+            super::validate_scores(&engine.texts).into_iter().filter(|e| e.contains(TUNES_FILE)).collect::<Vec<_>>().join("\n")
+        };
+        assert_eq!(super::validate_scores(&base.texts), Vec::<String>::new());
+
+        let one_tune = base.texts.scores.iter().find(|(_, t)| t.len() == 1).map(|(k, _)| k.clone()).unwrap();
+        let e = errs(&|en| {
+            en.texts.tunes.insert(one_tune.clone(), vec![("archdiocesan".into(), When::Doctor), ("x".into(), When::Otherwise)]);
+        });
+        assert!(e.contains("has 1 tune(s)") && e.contains("names x, but there is no"), "{e}");
+
+        let e = errs(&|en| en.texts.tunes.get_mut(SAT).unwrap().reverse());
+        assert!(e.contains("must end with one `otherwise` row"), "{e}");
+
+        let e = errs(&|en| en.texts.tunes.get_mut(SAT).unwrap().truncate(1));
+        assert!(e.contains("winter.gabc: chant-tunes.txt never sings it"), "{e}");
+
+        let e = errs(&|en| {
+            let rows = en.texts.tunes.get_mut("commons/confessor/hymn-lauds").unwrap();
+            rows[0].1 = When::Summer;
+        });
+        assert!(e.contains("Saturday Vespers' summer"), "{e}");
     }
 }
