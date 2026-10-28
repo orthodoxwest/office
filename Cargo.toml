@@ -34,8 +34,8 @@ uniffi = "0.32"
 miniz_oxide = "0.9"
 # Chant engraving (square notation from GABC); the mobile crate is its UniFFI layer, linked into
 # mobile-ffi's one native library. Pinned to a commit: bump it deliberately.
-neuma = { git = "https://github.com/orthodoxwest/neuma", rev = "f4a56c818e288fbdfdef4046c611558fc8eaff4e", default-features = false, features = ["svg", "font-google"] }
-neuma-mobile = { git = "https://github.com/orthodoxwest/neuma", rev = "f4a56c818e288fbdfdef4046c611558fc8eaff4e" }
+neuma = { git = "https://github.com/orthodoxwest/neuma", rev = "a670a58384570e6a082143cceb3601769cc7acda", default-features = false, features = ["svg", "font-google"] }
+neuma-mobile = { git = "https://github.com/orthodoxwest/neuma", rev = "a670a58384570e6a082143cceb3601769cc7acda" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

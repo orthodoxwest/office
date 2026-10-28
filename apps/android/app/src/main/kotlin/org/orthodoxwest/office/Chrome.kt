@@ -542,9 +542,9 @@ fun MenuPanel(
                     Hairline(p.surfaceEdge)
                     MenuRow {
                         // Three choices, under the three themes.
-                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp).clearAndSetSemantics {}, style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                         CHANT_VALUES.zip(PREF_HINTS.chantChoices).forEach { (value, label) ->
-                            MenuCell(label.uppercase(), value == chant.choice, Type.label(12f, 0.06f)) { chant.onChange(value) }
+                            MenuCell(label.uppercase(), value == chant.choice, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(value) }
                         }
                     }
                     PrefHint(AnnotatedString(PREF_HINTS.chant))

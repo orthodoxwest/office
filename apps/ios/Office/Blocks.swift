@@ -445,13 +445,15 @@ struct BlockRow: View {
                 .accessibilityLabel(spoken(block))
             } else if block.kind == .stanza && !block.marker.isEmpty {
                 // A verse after a tune shown once: its number hangs in the rubric's red before its
-                // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`).
+                // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`), in an
+                // indent of its own so it stays inside a phone's margin.
                 prose.frame(maxWidth: column ?? .infinity)
+                    .padding(.leading, m.px(stanzaNumberHang))
                     .overlay(alignment: .topLeading) {
                         Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type)))
                             .foregroundStyle(p.rubric)
                             .frame(width: m.px(stanzaNumberHang - 4), alignment: .trailing)
-                            .offset(x: -m.px(stanzaNumberHang), y: m.px(3))
+                            .offset(y: m.px(3))
                             .accessibilityHidden(true)
                     }
                     .frame(maxWidth: .infinity)

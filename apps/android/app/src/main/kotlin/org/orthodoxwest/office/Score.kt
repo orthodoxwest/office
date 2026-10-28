@@ -70,7 +70,7 @@ private const val LYRIC_SPACES = 2.45f
  * words under the notes.
  */
 @Composable
-fun Score(block: BlockView, modifier: Modifier) {
+fun Score(block: BlockView, modifier: Modifier, spoken: String) {
     val p = LocalPalette.current
     val density = LocalDensity.current
     val lyric = with(density) { Type.verse.fontSize.toPx() }
@@ -80,24 +80,26 @@ fun Score(block: BlockView, modifier: Modifier) {
     val gabc = block.stanzas.getOrNull(verse) ?: block.score
     Box(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = HymnMax).fillMaxWidth()) {
-            if (block.marker.isNotEmpty()) {
-                Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
-            }
-            if (block.mode.isNotEmpty()) {
-                Text(
-                    block.mode,
-                    Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
-                    style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
-                )
-            }
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val width = constraints.maxWidth.toFloat()
-                val initial = block.dropCap && verse == 0
-                val page = remember(gabc, initial, block.phrases, width, lyric) { engrave(gabc, initial, block.phrases, width, lyric) }
-                // A custos may reach past the measure: the whole score is fitted to the column.
-                val fit = if (page.width > width) width / page.width else 1f
-                Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
-                    scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces, fit) }
+            Column(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = spoken }) {
+                if (block.marker.isNotEmpty()) {
+                    Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
+                }
+                if (block.mode.isNotEmpty()) {
+                    Text(
+                        block.mode,
+                        Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
+                        style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
+                    )
+                }
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val width = constraints.maxWidth.toFloat()
+                    val initial = block.dropCap && verse == 0
+                    val page = remember(gabc, initial, block.phrases, width, lyric) { engrave(gabc, initial, block.phrases, width, lyric) }
+                    // A custos may reach past the measure: the whole score is fitted to the column.
+                    val fit = if (page.width > width) width / page.width else 1f
+                    Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
+                        scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces, fit) }
+                    }
                 }
             }
             if (block.stanzas.size > 1) {

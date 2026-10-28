@@ -671,7 +671,7 @@ fn render_hymn(text: &str, scored: Scored) -> String {
         opening = false;
         sb.push_str(&format!("<p class=\"{class}\"{variant}>"));
         if matches!(scored, Scored::Tune(..)) {
-            sb.push_str(&format!("<span class=\"hymn-stanza-number\">{number}.</span>"));
+            sb.push_str(&format!("<span class=\"hymn-stanza-number\" aria-hidden=\"true\">{number}.</span>"));
         }
         let join_amen = hymn.stanzas.get(i + 1).is_some_and(|s| is_hymn_amen(s));
         for (j, line) in stanza.iter().enumerate() {

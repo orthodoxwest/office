@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
@@ -257,13 +256,14 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
             } else if (block.marker.isNotEmpty()) {
                 // A verse after a tune shown once: its number hangs in the rubric's red before its
                 // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`).
-                Box(inColumn) {
+                // It hangs in an indent of its own, so it stays inside a phone's margin.
+                Box(if (column != null) Modifier.widthIn(max = column + StanzaNumberHang) else Modifier) {
                     Text(
                         block.marker,
-                        Modifier.offset(x = -StanzaNumberHang).width(StanzaNumberHang - 4.dp).clearAndSetSemantics {},
+                        Modifier.width(StanzaNumberHang - 4.dp).clearAndSetSemantics {},
                         style = style.copy(color = p.rubric, fontSize = style.fontSize * 0.85f, textAlign = TextAlign.End, fontFeatureSettings = "onum"),
                     )
-                    Text(runs(block), Modifier.fillMaxWidth(), style = style)
+                    Text(runs(block), Modifier.padding(start = StanzaNumberHang).fillMaxWidth(), style = style)
                 }
             } else {
                 Text(runs(block), inColumn.fillMaxWidth(), style = style)
@@ -279,7 +279,8 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.PARAGRAPH -> {
             if (block.dropCap) Opening(block, text, m, textStart = VerseGutter) else Text(runs(block), m.fillMaxWidth(), style = text)
         }
-        BlockKind.SCORE -> Score(block, m)
+        // The score speaks its words as one stop; its verse strip stays a group of its own.
+        BlockKind.SCORE -> Score(block, modifier, spoken(block))
         // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
         BlockKind.CHANT_LINE -> {
             val chant = text.copy(textIndent = TextIndent(restLine = 19.2.sp))

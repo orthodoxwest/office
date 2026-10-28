@@ -8904,10 +8904,13 @@ body.page-home::before {
    whenever that or the text size changes. Staves are ruled in the lining,
    as the books rule them; the inks are the --chant-* tokens beside the
    palette. Its width is the column's, never the score's (inline-size
-   containment), so the score follows the column and not the reverse. */
+   containment), so the score follows the column and not the reverse; every
+   score keeps to a hymn's measure (.hymn-verses, 28rem), so a tune breaks the
+   same way shown once or verse by verse, as in the apps. */
 .chant-score {
   container-type: inline-size;
-  margin: 0 0 0.75rem;
+  max-width: 28rem;
+  margin: 0 auto 0.75rem;
   color: var(--chant-ink);
 }
 .chant-width { max-width: 100%; }
@@ -8982,7 +8985,9 @@ body.page-home::before {
 .chant-strip-verse:focus-visible { outline: 2px solid var(--rubric); outline-offset: 1px; }
 
 /* A later verse under a tune shown once: its number hangs in the rubric's red
-   before its first line, as a hymnal numbers its verses. */
+   before its first line, as a hymnal numbers its verses, in an indent of its
+   own so it stays inside a phone's margin. */
+.hymn-stanza:has(> .hymn-stanza-number) { padding-left: 1.5rem; }
 .hymn-stanza-number {
   float: left;
   margin-left: -1.5rem;
@@ -8993,9 +8998,10 @@ body.page-home::before {
   font-variant-numeric: oldstyle-nums;
 }
 
-/* A hymn's verse column is as wide as its longest line; its tune keeps to
-   the column, and on a narrow screen takes the full measure. */
-.hymn-verses:has(.chant-score) { width: 100%; }
+/* A hymn's verse column is as wide as its longest line; with its score shown
+   it takes the score's measure, so the tune is not squeezed to the verse.
+   Chant off, the score is hidden and the column stays fitted and centred. */
+:root[data-chant="on"] .hymn-verses:has(> .chant-score) { width: 100%; }
 
 /* The cached hour contains every officiant form. Select before first paint;
    display:none also removes inactive words from print and accessibility. */
