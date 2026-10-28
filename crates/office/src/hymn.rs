@@ -45,5 +45,13 @@ mod tests {
         assert!(saturday_vespers_hymn_is_summer(Date::new(2026, 6, 20)));
         assert!(saturday_vespers_hymn_is_summer(Date::new(2026, 9, 26)));
         assert!(!saturday_vespers_hymn_is_summer(Date::new(2026, 10, 3)));
+        // When 1 October is a Sunday, Monday or Tuesday, the nearest Saturday falls in September.
+        assert!(saturday_vespers_hymn_is_summer(Date::new(2028, 9, 23)));
+        assert!(!saturday_vespers_hymn_is_summer(Date::new(2028, 9, 30)));
+        assert!(saturday_vespers_hymn_is_summer(Date::new(2030, 9, 21)));
+        assert!(!saturday_vespers_hymn_is_summer(Date::new(2030, 9, 28)));
+        // 2033: 1 October is itself a Saturday, and winter.
+        assert!(saturday_vespers_hymn_is_summer(Date::new(2033, 9, 24)));
+        assert!(!saturday_vespers_hymn_is_summer(Date::new(2033, 10, 1)));
     }
 }
