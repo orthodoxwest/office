@@ -3148,7 +3148,8 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     // Leave for a page that never reports before changing the device: a
     // beacon still settling would otherwise re-report in the new appearance.
     await page.goto("/privacy");
-    return events[0];
+    // Whether today's Vespers has a score, and so reports chant:, is the day's.
+    return events[0].replace(/ chant:\w+/, "");
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
@@ -3218,7 +3219,7 @@ test.describe("on a screen with a mouse", () => {
       // Leave for a page that never reports before changing the device: a
       // beacon still settling would otherwise re-report in the new appearance.
       await page.goto("/privacy");
-      return events[0];
+      return events[0].replace(/ chant:\w+/, "");
     };
 
     expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser");
@@ -3571,6 +3572,30 @@ test('prayer-form metrics record the rendered form and subsequent switches only 
   await page.locator('.site-brand').click();
   await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
   expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('prayer-form:'))).toBe(true);
+});
+
+test('an hour with a score reports whether its chant notation is shown, and no other page does', async ({ page }) => {
+  const bodies = [];
+  await page.route('**/api/usage', async route => {
+    bodies.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const today = await serverTodaySlug(page);
+  // Compline closes with a scored Marian antiphon on every day but the Triduum's.
+  await page.goto(`/compline/${today}`);
+  const scored = await page.locator('[data-chant-variant="on"]').count() > 0;
+  await page.locator('.hour-header h1').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('compline '))).toBe(true);
+  expect(bodies[0].includes(' chant:off ')).toBe(scored);
+  expect(bodies[0]).not.toContain('chant:on');
+  if (scored) {
+    await choosePreference(page, 'On', '.chant-option');
+    await expect.poll(() => bodies.some(body => body.includes(' chant:on '))).toBe(true);
+  }
+  await page.goto('/');
+  await page.locator('.site-brand').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
+  expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('chant:'))).toBe(true);
 });
 
 test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL, browserName }) => {

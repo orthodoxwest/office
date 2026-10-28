@@ -54,7 +54,9 @@ first-day visit under `new-client:<client>`, so new readers split by client; no 
 Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which
-measures the reading's exposure (see MARTYROLOGY.md). Each counts once per browser per day, so a reader who
+measures the reading's exposure (see MARTYROLOGY.md). An hour with a scored hymn or Marian
+antiphon reports `chant:on|off`: whether the reader's Chant setting (off by default) showed the
+notation or the words alone. Each counts once per browser per day, so a reader who
 switches mid-day counts on both sides and a pair can exceed the daily total;
 clients with an older cached `app.js` report none, so a pair can also fall
 short. The report draws each pair as a day-by-day mix band, since one period

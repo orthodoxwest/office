@@ -195,8 +195,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var chant: Bool
     /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
     let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
-    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
-    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
+    /// What each hour composed on the way back shows, for the usage beacon: whether its Martyrology
+    /// was shown and whether its scores were (nil: it had none to show).
+    @Published private(set) var hourShows: [Page: HourShows] = [:]
     /// The ornament season of each home or hour composed on the way back, which retints the
     /// gilding of the chrome over it (the menu's painted line), as the page's own.
     @Published private(set) var seasons: [Page: String] = [:]
@@ -333,10 +334,13 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "chant")
     }
 
-    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown,
+    /// and whether its scores were.
     func composed(_ view: HourView, page: Page) {
-        guard view.hour == "prime" else { return }
-        primeMartyrology = (page, view.martyrology)
+        let kept = Set(pages)
+        var now = hourShows.filter { kept.contains($0.key) }
+        now[page] = HourShows(martyrology: view.martyrology, chant: view.chant)
+        if now != hourShows { hourShows = now }
     }
 
     /// The ornament season of the page shown: its own once composed, else none.
@@ -350,11 +354,11 @@ final class AppModel: ObservableObject {
         if now != seasons { seasons = now }
     }
 
-    /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
-    func martyrologyShown(on page: Page) -> Bool? {
-        guard let prime = primeMartyrology, prime.page == page else { return nil }
-        return prime.shown
-    }
+    /// Whether `page` showed its Martyrology: nil unless it is a Prime composed, with a reading.
+    func martyrologyShown(on page: Page) -> Bool? { hourShows[page]?.martyrology }
+
+    /// Whether `page` showed its scores: nil unless it is an hour composed, with a score.
+    func chantShown(on page: Page) -> Bool? { hourShows[page]?.chant }
 
     /// Called when the app comes forward, and every minute while it is in front: the hour or the
     /// date may have turned since home was composed.
@@ -407,4 +411,10 @@ final class AppModel: ObservableObject {
         settingsOpen = d.bool(forKey: "settings")
         return true
     }
+}
+
+/// What a composed hour shows that the usage beacon reports (nil: nothing of the kind to show).
+struct HourShows: Equatable {
+    let martyrology: Bool?
+    let chant: Bool?
 }
