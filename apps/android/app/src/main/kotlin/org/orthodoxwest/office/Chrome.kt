@@ -547,7 +547,8 @@ fun MenuPanel(
                             MenuCell(label.uppercase(), value == chant.choice, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(value) }
                         }
                     }
-                    PrefHint(AnnotatedString(PREF_HINTS.chant))
+                    // The choices it names, upright in small caps, as the Theme's hint names its own.
+                    PrefHint(buildAnnotatedString { PREF_HINTS.chant.forEach { if (it.name) prefName(it.text) else append(it.text) } })
                 }
             }
         }

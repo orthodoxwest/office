@@ -81,7 +81,7 @@ impl Pages {
         env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
         env.add_global("chant", false);
         env.add_global("martyrology_hint", presentation::MARTYROLOGY_HINT);
-        env.add_global("chant_hint", presentation::CHANT_HINT);
+        env.add_global("chant_hint", Value::from_serialize(presentation::CHANT_HINT));
         env.add_global("chant_choices", Value::from_serialize(presentation::CHANT_CHOICES));
         Ok(Pages { env })
     }

@@ -153,8 +153,15 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
 /// The line under the menu's Martyrology setting, on every front.
 pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
 
-/// The line under the menu's Chant setting, on every front.
-pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available: On notes a hymn’s first verse, All notes every verse.";
+/// The line under the menu's Chant setting, on every front, in runs: a run that names a choice
+/// (`true`) is set upright in small caps, as the menu's hints name their buttons.
+pub const CHANT_HINT: [(&str, bool); 5] = [
+    ("Shows the hymn and the Marian antiphon in chant notation, where notation is available: ", false),
+    ("On", true),
+    (" notes a hymn’s first verse, ", false),
+    ("All", true),
+    (" notes every verse.", false),
+];
 
 /// The Chant setting's choices, by the value each front stores, and the words its menu shows:
 /// off; on, a whole hymn's tune over its first verse and the others as verse, as the books set a

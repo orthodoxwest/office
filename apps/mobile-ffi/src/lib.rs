@@ -308,15 +308,23 @@ pub fn prayers_open_by_default(hour: String) -> bool {
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct PreferenceHints {
     pub martyrology: String,
-    pub chant: String,
+    pub chant: Vec<HintRun>,
     pub chant_choices: Vec<String>,
+}
+
+/// A run of a menu hint: its words, and whether they name one of the row's choices, set upright
+/// in small caps as the web's `.pref-name`.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct HintRun {
+    pub text: String,
+    pub name: bool,
 }
 
 #[uniffi::export]
 pub fn preference_hints() -> PreferenceHints {
     PreferenceHints {
         martyrology: presentation::MARTYROLOGY_HINT.into(),
-        chant: presentation::CHANT_HINT.into(),
+        chant: presentation::CHANT_HINT.iter().map(|&(text, name)| HintRun { text: text.into(), name }).collect(),
         chant_choices: presentation::CHANT_CHOICES.iter().map(|(_, label)| (*label).to_string()).collect(),
     }
 }

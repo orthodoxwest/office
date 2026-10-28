@@ -316,7 +316,9 @@ fn the_apps_offer_the_webs_prayer_forms() {
 fn the_apps_give_the_webs_setting_hints() {
     let hints = preference_hints();
     assert_eq!(hints.martyrology, presentation::MARTYROLOGY_HINT);
-    assert_eq!(hints.chant, presentation::CHANT_HINT);
+    let chant: Vec<(&str, bool)> = hints.chant.iter().map(|r| (r.text.as_str(), r.name)).collect();
+    assert_eq!(chant, presentation::CHANT_HINT);
+    assert_eq!(chant.iter().filter(|(_, name)| *name).map(|(t, _)| *t).collect::<Vec<_>>(), ["On", "All"]);
     assert_eq!(hints.chant_choices, ["Off", "On", "All"]);
 }
 

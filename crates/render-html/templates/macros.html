@@ -54,7 +54,7 @@
   {% for choice, label in chant_choices %}
   <button type="button" class="theme-option chant-option" data-chant-choice="{{ choice }}" aria-pressed="false">{{ label }}</button>
   {% endfor %}
-  <p class="pref-hint">{{ chant_hint }}</p>
+  <p class="pref-hint">{% for text, name in chant_hint %}{% if name %}<span class="pref-name">{{ text }}</span>{% else %}{{ text }}{% endif %}{% endfor %}</p>
 </div>
 {% endif %}
 {% endmacro %}

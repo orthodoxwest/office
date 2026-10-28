@@ -349,7 +349,8 @@ struct MenuPanel: View {
                     }
                 }
                 .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-                hint(Text(prefHints.chant))
+                // The choices it names, upright in small caps, as the Theme's hint names its own.
+                hint(prefHints.chant.reduce(Text("")) { $0 + ($1.name ? name($1.text) : Text($1.text)) })
             }
         }
         .padding(m.px(10.4))
