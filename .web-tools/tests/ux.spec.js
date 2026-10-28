@@ -3962,6 +3962,27 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
 
+test("Chant On notes every verse of a whole hymn under one mode heading", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openDatedPage(page, "/lauds/2026-10-28");
+  const scores = page.locator(".hymn .chant-hymn");
+  await expect(scores).toBeHidden();
+
+  // The engine measures the lyrics with the app's own Garamond's metrics, fetched with it.
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await choosePreference(page, "On", ".chant-option");
+  await expect(page.locator("html")).toHaveAttribute("data-chant", "on");
+  await metrics;
+  await expect(scores).toBeVisible();
+  expect(await scores.locator(".chant-stanza").count()).toBeGreaterThan(2);
+  // The mode once, over the first verse.
+  await expect(scores.locator(".chant-mode")).toHaveCount(1);
+  await expect(scores.locator(".chant-mode")).toHaveText(/^Mode [IVX]+$/);
+
+  await choosePreference(page, "Off", ".chant-option");
+  await expect(scores).toBeHidden();
+});
+
 test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
   const fit = () => page.evaluate(() => {

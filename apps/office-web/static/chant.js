@@ -14,6 +14,7 @@
   if (!("ResizeObserver" in window) || typeof WebAssembly !== "object") return;
   if (!(window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports("importmap"))) return;
   var engineURL = document.querySelector('meta[name="neuma"]');
+  var metricsURL = document.querySelector('meta[name="neuma-metrics"]');
   var boxes = Array.from(document.querySelectorAll(".chant-width[data-gabc]"));
   if (!boxes.length || !engineURL) return;
   // Staff spaces per lyric em and SVG units per staff space, as chant.rs sets them.
@@ -23,14 +24,32 @@
   var attempts = 0;
   var serial = 0;
   var states = new Map();
+  var font = "google";
 
   var load = function () {
     if (!engine) {
       // A failed fetch (offline, say) is tried again the next time a score is
       // shown or resized. A document keeps a failed module for its URL, so each
       // try names it afresh; the fragment never reaches the cache or server.
-      engine = import(engineURL.content + "#" + attempts++).then(function (neuma) {
-        return neuma.init().then(function () { return neuma; });
+      // The lyrics are measured in the face the page draws them in (the
+      // app's own Garamond, as chant.rs and the apps measure them), so the
+      // engine waits for its metrics; without them it measures Google's.
+      var metrics = metricsURL
+        ? fetch(metricsURL.content).then(function (r) { return r.ok ? r.arrayBuffer() : null; }).catch(function () { return null; })
+        : Promise.resolve(null);
+      engine = Promise.all([import(engineURL.content + "#" + attempts++), metrics]).then(function (got) {
+        var neuma = got[0];
+        return neuma.init().then(function () {
+          if (got[1]) {
+            try {
+              neuma.setLyricMetrics(new Uint8Array(got[1]));
+              font = "custom";
+            } catch {
+              // An unreadable table: Google's metrics, as before.
+            }
+          }
+          return neuma;
+        });
       });
       engine.catch(function () { engine = null; });
     }
@@ -45,15 +64,16 @@
     var units = (width / em) * LYRIC_SPACES * SCALE;
     var state = states.get(box);
     if (!state) {
-      var initial = box.getAttribute("data-chant-initial") === "1";
       // As chant.rs's page_options, and the apps' Score.kt and Score.swift.
       var chant = new neuma.Chant(box.getAttribute("data-gabc"), {
-        initial: initial ? 1 : 0,
-        annotation: initial,
+        initial: box.getAttribute("data-chant-initial") === "1" ? 1 : 0,
+        annotation: false,
+        font: font,
         everyHyphen: true,
-        initialScale: 0.75,
+        initialScale: 0.5,
         initialMargin: 0,
         shortLastStaff: true,
+        phraseLines: box.getAttribute("data-chant-phrases") === "1",
       });
       state = { chant: chant, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++, units: 0 };
       states.set(box, state);

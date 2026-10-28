@@ -501,7 +501,7 @@ private struct GlossCard: View {
 }
 
 /// The web's `.hymn-verses` max-width, 28rem.
-private let hymnMax: CGFloat = 448
+let hymnMax: CGFloat = 448
 
 /// Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
 /// hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.

@@ -158,6 +158,10 @@ pub struct Block {
     pub chant: ChantVariant,
     /// A `Score` block's GABC; empty for every other kind.
     pub score: String,
+    /// A hymn's score set phrase by phrase, each line of a verse on a staff of its own.
+    pub phrases: bool,
+    /// The mode a score's heading names ("Mode I"); empty for none.
+    pub mode: String,
 }
 
 impl Block {
@@ -170,6 +174,8 @@ impl Block {
             runs,
             chant: ChantVariant::Always,
             score: String::new(),
+            phrases: false,
+            mode: String::new(),
         }
     }
 
@@ -178,11 +184,13 @@ impl Block {
     }
 
     /// A score in place of `words`.
-    fn score(gabc: &str, words: &str, initial: bool) -> Block {
+    fn score(score: &ChantScore, gabc: &str, words: &str, initial: bool) -> Block {
         Block {
             drop_cap: initial,
             chant: ChantVariant::On,
             score: gabc.to_string(),
+            phrases: score.sets != ScoreSpan::Antiphon,
+            mode: if initial { score.mode_label().unwrap_or_default() } else { String::new() },
             ..Block::new(BlockKind::Score, vec![Run::new(typeset(words.trim()), RunStyle::Plain)])
         }
     }
@@ -705,7 +713,7 @@ fn marian_antiphon(out: &mut Vec<Block>, text: &str, score: Option<&ChantScore>)
             // The score beside the antiphon's words (up to the ℣), as the web offers them.
             let antiphon = marian_antiphon_part(chant);
             let rest = chant.trim_start()[antiphon.len()..].trim();
-            out.push(Block::score(&score.gabc, &ChantScore::spoken(antiphon), true));
+            out.push(Block::score(score, &score.gabc, &ChantScore::spoken(antiphon), true));
             let start = out.len();
             liturgical_block(out, antiphon, Mode::PreserveFirstBlock, false);
             for b in &mut out[start..] {
@@ -770,7 +778,7 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
         ScoreSpan::WholeHymn if parts.len() == stanzas.len() => {
             for (i, (part, words)) in parts.iter().zip(&stanzas).enumerate() {
                 rubric_blocks(out, rubrics.get(i));
-                let mut block = Block::score(part, words, i == 0);
+                let mut block = Block::score(score, part, words, i == 0);
                 if i > 0 {
                     block.marker = format!("{}.", i + 1);
                 }
@@ -784,7 +792,7 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
         }
         ScoreSpan::WholeHymn => {
             rubric_blocks(out, rubrics.first());
-            out.push(Block::score(&score.gabc, &stanzas.join(" "), true));
+            out.push(Block::score(score, &score.gabc, &stanzas.join(" "), true));
             let text_start = out.len();
             hymn_stanzas(out, &elem.text);
             for b in &mut out[text_start..] {
@@ -797,7 +805,7 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
             if let Some(at) = out[start..].iter().position(|b| b.kind == BlockKind::Stanza).map(|i| start + i) {
                 let words = out[at].plain_text().replace('\n', " ");
                 out[at].chant = ChantVariant::Off;
-                out.insert(at, Block::score(&score.gabc, &words, true));
+                out.insert(at, Block::score(score, &score.gabc, &words, true));
             }
         }
     }

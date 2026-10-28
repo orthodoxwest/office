@@ -571,7 +571,7 @@ fun spoken(block: BlockView): String {
 private const val CROSS_MARK = "\uE000"
 
 /** The web's `.hymn-verses` max-width, 28rem. */
-private val HymnMax: Dp = 448.dp
+internal val HymnMax: Dp = 448.dp
 
 /**
  * Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`

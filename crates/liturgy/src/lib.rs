@@ -245,6 +245,19 @@ impl ChantScore {
         words.split_whitespace().filter(|w| *w != "*").collect::<Vec<_>>().join(" ")
     }
 
+    /// The mode the score's `mode:` header names, as a chant book heads the piece: "Mode I".
+    /// None when it names none, or none a reader would recognize.
+    pub fn mode_label(&self) -> Option<String> {
+        let header = self.gabc.split_once("%%").map_or("", |(h, _)| h);
+        let value = header.lines().find_map(|l| l.trim().strip_prefix("mode:"))?.trim().trim_end_matches(';').trim();
+        const ROMAN: [&str; 8] = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+        let numeral = match value.parse::<usize>() {
+            Ok(n @ 1..=8) => ROMAN[n - 1].to_string(),
+            _ => ROMAN.iter().find(|r| r.eq_ignore_ascii_case(value))?.to_string(),
+        };
+        Some(format!("Mode {numeral}"))
+    }
+
     /// A whole hymn's score parted stanza by stanza at its double bars `(::)`, each part with the
     /// header and the opening clef; a part that is only an Amen stays with the one before it. A
     /// score of one stanza or an antiphon is one part.
@@ -534,6 +547,18 @@ pub struct OfficeHour {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_score_names_its_mode_in_roman_numerals() {
+        let mode = |header: &str| {
+            ChantScore { gabc: format!("name: t;\n{header}%%\n(c4) A(g) (::)").into(), sets: ScoreSpan::Antiphon }.mode_label()
+        };
+        assert_eq!(mode("mode: 1;\n").as_deref(), Some("Mode I"));
+        assert_eq!(mode("mode: 8;\n").as_deref(), Some("Mode VIII"));
+        assert_eq!(mode("mode: vi;\n").as_deref(), Some("Mode VI"));
+        assert_eq!(mode("mode: 9;\n"), None);
+        assert_eq!(mode(""), None);
+    }
 
     #[test]
     fn a_psalm_label_parts_its_word_from_its_numbers() {

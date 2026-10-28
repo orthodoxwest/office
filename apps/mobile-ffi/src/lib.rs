@@ -75,6 +75,8 @@ pub struct OfficeCore {
 impl OfficeCore {
     #[uniffi::constructor]
     pub fn new() -> Result<Arc<OfficeCore>, OfficeError> {
+        // Lyrics are measured in the app's own Garamond, as the web measures them.
+        neuma_mobile::set_lyric_metrics(presentation::CHANT_LYRIC_METRICS.to_vec());
         let src = EmbeddedData::new().map_err(failed)?;
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
@@ -841,6 +843,12 @@ pub struct BlockView {
     /// every other kind.
     #[uniffi(default = "")]
     pub score: String,
+    /// A hymn's score, set a line of verse to a staff (neuma's phrase lines).
+    #[uniffi(default = false)]
+    pub phrases: bool,
+    /// The mode over a score that opens its piece ("Mode I"); empty for none.
+    #[uniffi(default = "")]
+    pub mode: String,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -851,6 +859,8 @@ impl From<render_blocks::Block> for BlockView {
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
             score: b.score,
+            phrases: b.phrases,
+            mode: b.mode,
             runs: b
                 .runs
                 .into_iter()

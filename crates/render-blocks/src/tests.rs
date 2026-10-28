@@ -316,6 +316,7 @@ fn a_whole_hymn_is_a_score_per_stanza_numbered_after_the_first() {
     assert!(scores[0].drop_cap && scores[0].marker.is_empty());
     assert!(!scores[1].drop_cap && scores[1].marker == "2.");
     assert!(scores[1].score.ends_with("A(gh)men.(g) (::)"), "{}", scores[1].score);
+    assert!(scores.iter().all(|b| b.phrases));
     assert!(out.iter().filter(|b| b.kind == BlockKind::Stanza).all(|b| b.chant == ChantVariant::Off));
 }
 

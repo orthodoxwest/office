@@ -9,9 +9,10 @@ private let lyricSpaces: Float = 2.45
 /**
  * A chant score (a `.score` block, with the Chant setting on): neuma engraves its GABC at the
  * column's width with its lyrics at the hymn's text size, as the web's chant.js lays it out at its
- * column's, and the staff takes the theme's lining, as the web's `.chant-score` does.
- * A whole hymn's stanzas after the first carry their number (the marker), in the rubric's red
- * above the score.
+ * column's, and the staff takes a tint of the theme's lining, as the web's `.chant-score` does. The
+ * score keeps to the hymn's measure, as the web's `.hymn-verses`. The opening score carries its
+ * mode above it (`.chant-mode`), and a whole hymn's stanzas after the first carry their number
+ * (the marker), in the rubric's red above the score.
  */
 struct ScoreRow: View {
     let block: BlockView
@@ -22,17 +23,24 @@ struct ScoreRow: View {
 
     var body: some View {
         let lyric = Float(Scale.verse.size * m.type)
-        let page = width > 0 ? Engraving.page(block.score, initial: block.dropCap, width: Float(width.rounded(.down)), lyric: lyric) : nil
+        let page = width > 0
+            ? Engraving.page(block.score, initial: block.dropCap, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
+            : nil
         VStack(alignment: .leading, spacing: m.px(2)) {
             if !block.marker.isEmpty {
                 Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
-                    .accessibilityHidden(true)
+            }
+            if !block.mode.isEmpty {
+                Text(block.mode).font(Font(garamond(Scale.verse.size * 0.8 * m.type, smallCaps: true)))
+                    .tracking(Scale.verse.size * 0.06 * m.type)
+                    .foregroundStyle(p.rubric)
+                    .padding(.bottom, m.px(1))
             }
             // A custos may reach past the measure: the whole score is fitted to the column.
             let fit = page.map { $0.width > Float(width) ? width / CGFloat($0.width) : 1 } ?? 1
             Canvas { context, _ in
                 context.scaleBy(x: fit, y: fit)
-                if let page { draw(page, in: &context) }
+                if let page { draw(page, in: &context, fit: fit * displayScale) }
             }
             .frame(maxWidth: .infinity)
             .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
@@ -40,14 +48,19 @@ struct ScoreRow: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spoken(block))
+        .frame(maxWidth: m.px(hymnMax))
+        .frame(maxWidth: .infinity)
     }
 
+    @Environment(\.displayScale) private var displayScale
+
     /// neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off,
-    /// the initial gilt as every dropped initial is and the mode above it in the rubric's red.
-    private func draw(_ page: Neuma.Page, in context: inout GraphicsContext) {
-        // The web's --chant-* tokens (style.css): neumes a shade off the text's ink, staves in the
-        // lining (thinned on a night ground).
-        let (note, staff) = (mix(p.text, p.bg, 0.86), p.dark ? mix(p.lining, p.bg, 0.62) : p.lining)
+    /// the initial gilt as every dropped initial is. Drawn at `fit` device pixels to its unit: staff and ledger lines are
+    /// snapped to whole pixels, so every line of a staff is as crisp and as heavy as the others.
+    private func draw(_ page: Neuma.Page, in context: inout GraphicsContext, fit: CGFloat) {
+        // The web's --chant-* tokens (style.css): neumes in the text's ink, staves a tint of the
+        // lining (fainter on a night ground).
+        let (note, staff) = (p.text, mix(p.lining, p.bg, p.dark ? 0.5 : 0.72))
         func ink(_ role: Ink) -> Color { role == .staff || role == .ledger ? staff : note }
         for item in page.items {
             switch item {
@@ -56,7 +69,12 @@ struct ScoreRow: View {
                 let placed = CGAffineTransform(translationX: CGFloat(x), y: CGFloat(y)).scaledBy(x: CGFloat(scale), y: CGFloat(scale))
                 context.fill(path.applying(placed), with: .color(ink(role)))
             case let .rect(x, y, w, h, role, _):
-                context.fill(Path(CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(w), height: CGFloat(h))), with: .color(ink(role)))
+                var (top, height) = (CGFloat(y), CGFloat(h))
+                if role == .staff || role == .ledger, fit > 0 {
+                    top = (top * fit).rounded() / fit
+                    height = max(1, (height * fit).rounded()) / fit
+                }
+                context.fill(Path(CGRect(x: CGFloat(x), y: top, width: CGFloat(w), height: height)), with: .color(ink(role)))
             case let .text(x, baseline, size, runs, role, _):
                 let line = NSMutableAttributedString()
                 for run in runs {
@@ -83,20 +101,22 @@ private enum Engraving {
     private static var pages: [String: Neuma.Page] = [:]
     private static var outlines: [Int32: Path] = [:]
 
-    /// The score laid out `width` points wide with its lyrics `lyric` points high; the first stanza alone takes the initial.
-    static func page(_ gabc: String, initial: Bool, width: Float, lyric: Float) -> Neuma.Page {
-        let key = "\(initial) \(width) \(lyric)\n\(gabc)"
+    /// The score laid out `width` points wide with its lyrics `lyric` points high; the first stanza alone takes the
+    /// initial, and a hymn's phrases each take a staff.
+    static func page(_ gabc: String, initial: Bool, phrases: Bool, width: Float, lyric: Float) -> Neuma.Page {
+        let key = "\(initial) \(phrases) \(width) \(lyric)\n\(gabc)"
         lock.lock()
         defer { lock.unlock() }
         if let page = pages[key] { return page }
         // Each rotation, Split View resize or text size engraves anew; keep the cache from growing without end.
         if pages.count >= 64 { pages.removeAll() }
-        // Set as the web sets it (`page_options` in render-html's chant.rs): a hyphen between every two
-        // syllables, the initial three quarters of the Solesmes size and flush with the margin, and the
-        // last staff ending at the final bar.
+        // Set as the web sets it (`page_options` in render-html's chant.rs): lyrics measured in the app's
+        // own Garamond (the table the core sets, `.custom`); a hyphen between every two syllables; the
+        // initial half the Solesmes size and flush with the margin, the mode above the score rather than
+        // over it; the last staff ending at the final bar; and a hymn's phrases each on a staff of their own.
         let options = ChantOptions(
-            initial: initial ? 1 : 0, annotation: initial, everyHyphen: true, initialScale: 0.75, initialMargin: 0,
-            shortLastStaff: true
+            initial: initial ? 1 : 0, annotation: false, font: .custom, everyHyphen: true, initialScale: 0.5, initialMargin: 0,
+            shortLastStaff: true, phraseLines: phrases
         )
         let chant = Chant(gabc: gabc, options: options)
         let page = chant.layout(width: width, options: LayoutOptions(scale: lyric / lyricSpaces)).page()

@@ -3,14 +3,17 @@ package org.orthodoxwest.office
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -25,6 +28,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import org.orthodoxwest.neuma.Chant
@@ -32,6 +36,7 @@ import org.orthodoxwest.neuma.ChantOptions
 import org.orthodoxwest.neuma.Ink
 import org.orthodoxwest.neuma.Item
 import org.orthodoxwest.neuma.LayoutOptions
+import org.orthodoxwest.neuma.LyricFont
 import org.orthodoxwest.neuma.Page
 import org.orthodoxwest.neuma.TextRole
 import org.orthodoxwest.neuma.glyphOutline
@@ -43,9 +48,10 @@ private const val LYRIC_SPACES = 2.45f
 /**
  * A chant score (a `BlockKind.SCORE` block, with the Chant setting on): neuma engraves its GABC
  * at the column's width with its lyrics at the hymn's text size, as the web's chant.js lays it
- * out at its column's, and the staff takes the theme's lining, as the web's
- * `.chant-score` does. A whole hymn's stanzas after the first carry their number (the marker),
- * in the rubric's red above the score.
+ * out at its column's, and the staff takes a tint of the theme's lining, as the web's
+ * `.chant-score` does. The score keeps to the hymn's measure, as the web's `.hymn-verses`. The
+ * opening score carries its mode above it (`.chant-mode`), and a whole hymn's stanzas after the
+ * first carry their number (the marker), in the rubric's red above the score.
  */
 @Composable
 fun Score(block: BlockView, modifier: Modifier) {
@@ -54,17 +60,26 @@ fun Score(block: BlockView, modifier: Modifier) {
     val lyric = with(density) { Type.verse.fontSize.toPx() }
     val ornament = LocalOrnament.current
     val faces = scoreFaces()
-    Column(modifier.fillMaxWidth()) {
-        if (block.marker.isNotEmpty()) {
-            Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
-        }
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val width = constraints.maxWidth.toFloat()
-            val page = remember(block.score, block.dropCap, width, lyric) { engrave(block.score, block.dropCap, width, lyric) }
-            // A custos may reach past the measure: the whole score is fitted to the column.
-            val fit = if (page.width > width) width / page.width else 1f
-            Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
-                scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces) }
+    Box(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+        Column(Modifier.widthIn(max = HymnMax).fillMaxWidth()) {
+            if (block.marker.isNotEmpty()) {
+                Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
+            }
+            if (block.mode.isNotEmpty()) {
+                Text(
+                    block.mode,
+                    Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
+                    style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
+                )
+            }
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val width = constraints.maxWidth.toFloat()
+                val page = remember(block.score, block.dropCap, block.phrases, width, lyric) { engrave(block.score, block.dropCap, block.phrases, width, lyric) }
+                // A custos may reach past the measure: the whole score is fitted to the column.
+                val fit = if (page.width > width) width / page.width else 1f
+                Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
+                    scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces, fit) }
+                }
             }
         }
     }
@@ -72,36 +87,40 @@ fun Score(block: BlockView, modifier: Modifier) {
 
 /**
  * The score laid out `width` pixels wide with its lyrics `lyric` pixels high; the first stanza
- * alone takes the initial. Set as the web sets it (`page_options` in render-html's chant.rs): a
- * hyphen between every two syllables, the initial three quarters of the Solesmes size and flush
- * with the margin, and the last staff ending at the final bar.
+ * alone takes the initial. Set as the web sets it (`page_options` in render-html's chant.rs):
+ * lyrics measured in the app's own Garamond (the table the core sets, `LyricFont.CUSTOM`); a
+ * hyphen between every two syllables; the initial half the Solesmes size and flush with the
+ * margin, the mode above the score rather than over it; the last staff ending at the final bar;
+ * and a hymn's phrases each on a staff of their own.
  */
-internal fun engrave(gabc: String, initial: Boolean, width: Float, lyric: Float): Page =
+internal fun engrave(gabc: String, initial: Boolean, phrases: Boolean, width: Float, lyric: Float): Page =
     Chant(
         gabc,
         ChantOptions(
             initial = if (initial) 1 else 0,
-            annotation = initial,
+            annotation = false,
+            font = LyricFont.CUSTOM,
             everyHyphen = true,
-            initialScale = 0.75f,
+            initialScale = 0.5f,
             initialMargin = 0f,
             shortLastStaff = true,
+            phraseLines = phrases,
         ),
     ).use { chant ->
         chant.layout(width, LayoutOptions(scale = lyric / LYRIC_SPACES)).use { it.page() }
     }
 
 /**
- * The theme's inks for a score, the web's `--chant-*` tokens (style.css): neumes a shade off the
- * text's ink, lyrics in it, staves in the lining (thinned on a night ground), the initial gilt as
+ * The theme's inks for a score, the web's `--chant-*` tokens (style.css): neumes and lyrics in
+ * the text's ink, staves a tint of the lining (fainter on a night ground), the initial gilt as
  * every dropped initial is, the mode and rubric runs in the rubric's red.
  */
 internal class ScoreInks(val note: Color, val text: Color, val staff: Color, val rubric: Color, val initial: Color) {
     companion object {
         fun of(p: Palette, ornament: Ornament) = ScoreInks(
-            note = mix(p.text, p.bg, 0.86f),
+            note = p.text,
             text = p.text,
-            staff = if (p.dark) mix(p.lining, p.bg, 0.62f) else p.lining,
+            staff = mix(p.lining, p.bg, if (p.dark) 0.5f else 0.72f),
             rubric = p.rubric,
             initial = ornament.flat,
         )
@@ -128,16 +147,26 @@ private fun outline(id: Int): Path? = synchronized(outlines) {
     outlines.getOrPut(id) { glyphOutline(id)?.let { PathParser().parsePathString(it.path).toPath() } }
 }
 
-/** neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off. */
-internal fun DrawScope.drawScore(page: Page, inks: ScoreInks, faces: ScoreFaces) {
+/**
+ * neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with
+ * ligatures off. Drawn at `fit` of its size: staff and ledger lines are snapped to whole device
+ * pixels, so every line of a staff is as crisp and as heavy as the others.
+ */
+internal fun DrawScope.drawScore(page: Page, inks: ScoreInks, faces: ScoreFaces, fit: Float = 1f) {
     fun ink(role: Ink) = if (role == Ink.STAFF || role == Ink.LEDGER) inks.staff else inks.note
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG)
     for (item in page.items) {
         when (item) {
             is Item.Glyph -> outline(item.glyph)?.let { path ->
                 translate(item.x, item.y) { scale(item.scale, Offset.Zero) { drawPath(path, ink(item.role)) } }
             }
-            is Item.Rect -> drawRect(ink(item.role), Offset(item.x, item.y), Size(item.w, item.h))
+            is Item.Rect -> if (item.role == Ink.STAFF || item.role == Ink.LEDGER) {
+                val top = Math.round(item.y * fit) / fit
+                val height = maxOf(1, Math.round(item.h * fit)) / fit
+                drawRect(inks.staff, Offset(item.x, top), Size(item.w, height))
+            } else {
+                drawRect(ink(item.role), Offset(item.x, item.y), Size(item.w, item.h))
+            }
             is Item.Text -> drawIntoCanvas { canvas ->
                 var x = item.x
                 for (run in item.runs) {

@@ -340,11 +340,12 @@
      redeclares them: on the night ground the tituli are gilt. */
   --lining: #a85a48;
   /* A chant score's inks (.chant-score; Score.kt and Score.swift name the
-     same four): neumes a shade off the text's ink, so their solid heads sit
-     no heavier on the page than the words; staves in the lining; the initial
-     gilt as every dropped initial; the mode in the rubric's red. */
-  --chant-ink: color-mix(in srgb, var(--text) 86%, var(--bg));
-  --chant-staff: var(--lining);
+     same four): neumes in the text's own ink, so notes and words read as one
+     hand; staves a tint of the lining, ruled thinner than the stems so they
+     sit behind the notes; the initial gilt as every dropped initial; the
+     mode in the rubric's red. */
+  --chant-ink: var(--text);
+  --chant-staff: color-mix(in srgb, var(--lining) 72%, var(--bg));
   --chant-initial: var(--ornament);
   --chant-mode: var(--rubric);
   --titulus: #93412c;
@@ -4290,7 +4291,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --rubric: #d47070;
     --lining: #cf8c6a;
     /* The bright lining would outshine the notes on a night ground. */
-    --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
+    --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
     --titulus: #d8bc74;
     --kalendar-blue: #a9bedf;
     --moon-ink: #c9d0d9;
@@ -4349,7 +4350,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --rubric: #d47070;
   --lining: #cf8c6a;
   /* The bright lining would outshine the notes on a night ground. */
-  --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
+  --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
   --titulus: #d8bc74;
   --kalendar-blue: #a9bedf;
   --moon-ink: #c9d0d9;
@@ -8895,13 +8896,15 @@ body.page-home::before {
 /* The score: neuma's SVG in lyric ems, so lyrics stay at the text's size.
    The page carries it at one width (render-html chant.rs), scaled down to
    fit a narrower column; chant.js lays it out again at the column's width and
-   whenever that or the text size changes. Staves are ruled in the lining,
-   as the books rule them; the inks are the --chant-* tokens beside the
+   whenever that or the text size changes. Staves are ruled in a tint of the
+   lining, as the books rule them; the inks are the --chant-* tokens beside the
    palette. Its width is the column's, never the score's (inline-size
-   containment), so the score follows the column and not the reverse. */
+   containment), so the score follows the column and not the reverse. Every
+   score keeps to a hymn's measure (.hymn-verses, 28rem), as in the apps. */
 .chant-score {
   container-type: inline-size;
-  margin: 0 0 0.75rem;
+  max-width: 28rem;
+  margin: 0 auto 0.75rem;
   color: var(--chant-ink);
 }
 .chant-width { max-width: 100%; }
@@ -8934,6 +8937,17 @@ body.page-home::before {
   color: var(--rubric);
   font-size: 0.85em;
   line-height: 1;
+}
+
+/* The mode, once, over the first staff: small capitals in the rubric's red,
+   as the books head a hymn's tune. */
+.chant-mode {
+  margin: 0 0 0.2rem;
+  color: var(--chant-mode);
+  font-size: 0.8em;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 
 /* A hymn's verse column is as wide as its longest line; with its tune shown

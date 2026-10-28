@@ -28,7 +28,7 @@ node "$src/crates/neuma-wasm/build.mjs" "$work/node_modules/binaryen/bin/wasm-op
 
 out="$root/apps/office-web/static/neuma.mjs"
 {
-  echo "// neuma $rev (GABC and the Google EB Garamond's metrics only); scripts/build-neuma-web.sh"
+  echo "// neuma $rev (GABC, the Google EB Garamond's metrics and a page-supplied table); scripts/build-neuma-web.sh"
   cat "$src/crates/neuma-wasm/dist/neuma.mjs"
 } > "$out"
 echo "$out: $(wc -c < "$out") bytes"

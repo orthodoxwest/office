@@ -156,6 +156,12 @@ pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s 
 /// The line under the menu's Chant setting, on every front.
 pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 
+/// The metrics of the app's own EB Garamond (static/fonts, built by `neuma-metrics` from the faces
+/// tools/gengaramond.py writes), which every front measures a score's lyrics with, so the
+/// syllables sit where the notes put them: the server and the apps from here, chant.js from the
+/// same file.
+pub const CHANT_LYRIC_METRICS: &[u8] = include_bytes!("../../../apps/office-web/static/fonts/eb-garamond-lyrics.nmet");
+
 pub const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 

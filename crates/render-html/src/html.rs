@@ -1,8 +1,6 @@
 //! Text-to-HTML conversion of composed office elements: psalm verses, liturgical blocks, hymns, and
 //! the typography every run of display text passes through.
 
-use std::sync::Arc;
-
 use corpus::lines::{
     BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
@@ -92,7 +90,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str("<div class=\"marian-antiphon\"><h3 class=\"item-label\" lang=\"la\">");
                 sb.push_str(&esc_text(&elem.label));
                 sb.push_str("</h3>");
-                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref().map(|s| &s.gabc)));
+                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref()));
                 sb.push_str("</div>");
             }
         }
@@ -147,7 +145,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                     sb.push_str(&render_hymn_stanzas(&elem.text));
                     sb.push_str("</div>");
                 }
-                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref().map(|s| &s.gabc))),
+                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref())),
             }
             sb.push_str("</div>");
         }
@@ -463,15 +461,15 @@ fn render_marian_antiphon(text: &str) -> String {
 
 /// A Marian antiphon with its score, if it has one, offered beside the antiphon's words (up to
 /// the ℣); the ℣, ℟ and collect after it are the same either way.
-fn render_marian_antiphon_scored(text: &str, score: Option<&Arc<str>>) -> String {
+fn render_marian_antiphon_scored(text: &str, score: Option<&ChantScore>) -> String {
     const INVITATION: &str = "\n\nLet us pray.\n\n";
     let sung = |chant: &str| match score {
         None => render_block(chant, Mode::PreserveFirstBlock, false),
-        Some(gabc) => {
+        Some(score) => {
             let antiphon = marian_antiphon_part(chant);
             let rest = chant.trim_start()[antiphon.len()..].trim();
             let words = ChantScore::spoken(antiphon);
-            let mut sb = crate::chant::score_html(gabc, &words);
+            let mut sb = crate::chant::score_html(score, &score.gabc, &words);
             sb.push_str("<div data-chant-variant=\"off\">");
             sb.push_str(&render_block(antiphon, Mode::PreserveFirstBlock, false));
             sb.push_str("</div>");
@@ -617,7 +615,7 @@ pub fn render_hymn_stanzas(text: &str) -> String {
 
 /// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
 /// beside the stanza's words, and the reader's Chant setting shows one.
-pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> String {
+pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -639,8 +637,8 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> Strin
         }
         let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
         let variant = match score.filter(|_| opening) {
-            Some(gabc) => {
-                sb.push_str(&crate::chant::score_html(gabc, &stanza.join(" ")));
+            Some(score) => {
+                sb.push_str(&crate::chant::score_html(score, &score.gabc, &stanza.join(" ")));
                 " data-chant-variant=\"off\""
             }
             None => "",
