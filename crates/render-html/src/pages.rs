@@ -82,6 +82,7 @@ impl Pages {
         env.add_global("chant", false);
         env.add_global("martyrology_hint", presentation::MARTYROLOGY_HINT);
         env.add_global("chant_hint", presentation::CHANT_HINT);
+        env.add_global("chant_choices", Value::from_serialize(presentation::CHANT_CHOICES));
         Ok(Pages { env })
     }
 

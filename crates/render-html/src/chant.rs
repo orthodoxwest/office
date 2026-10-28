@@ -10,7 +10,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
-use liturgy::ChantScore;
+use liturgy::{ChantScore, ScoreSpan};
 use neuma::{Chant, ChantOptions, Hyphens, Initial, LayoutOptions, SvgOptions};
 
 use crate::escape::html_escape_string;
@@ -30,78 +30,135 @@ pub const FALLBACK_EM: u16 = 17;
 
 /// A score in place of the words it sets. The group is announced by `words`, the text it sets,
 /// typeset as the page's text is, rather than by its SVG.
-pub fn score_html(gabc: &Arc<str>, words: &str) -> String {
+pub fn score_html(score: &ChantScore, gabc: &Arc<str>, words: &str) -> String {
     format!(
-        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
+        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}{}</div>",
         html_escape_string(&typeset(words.trim())),
-        engraved(gabc, true)
+        mode_html(score, true),
+        engraved(gabc, true, phrased(score))
     )
 }
 
-/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`): each stanza from a new
-/// line with its number, the first alone taking the initial, and each after the rubrics said
-/// before it (kneeling for a stanza), which the score does not carry. Parts that do not pair
-/// with the hymn's stanzas make one score, as written.
+/// A whole hymn's tune over its first stanza (the books' way, with notes over the first verse):
+/// the score of `part`, the first of `parts`, announced by `words`, and the strip that sets any
+/// stanza's words under the notes instead (chant.js), each button carrying its stanza's GABC.
+pub fn tune_html(score: &ChantScore, parts: &[String], words: &str) -> String {
+    let mut out = format!(
+        "<div class=\"chant-score chant-tune-score\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+        html_escape_string(&typeset(words.trim())),
+        mode_html(score, true),
+        engraved(&Arc::from(parts[0].as_str()), true, phrased(score))
+    );
+    if parts.len() > 1 {
+        out.push_str("<div class=\"chant-strip\" role=\"group\" aria-label=\"The verse under the notes\">");
+        for (i, part) in parts.iter().enumerate() {
+            out.push_str(&format!(
+                "<button type=\"button\" class=\"chant-strip-verse\" aria-pressed=\"{}\" aria-label=\"Verse {n}\" data-gabc=\"{}\">{n}</button>",
+                i == 0,
+                html_escape_string(part),
+                n = i + 1
+            ));
+        }
+        out.push_str("</div>");
+    }
+    out
+}
+
+/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`), with notes over every
+/// verse: each stanza from a new line with its number, the first alone taking the initial, and
+/// each after the rubrics said before it (kneeling for a stanza), which the score does not carry.
+/// Parts that do not pair with the hymn's stanzas make one score, as written, shown either way.
 pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
     let stanzas = hymn_sung_stanzas(text);
     let rubrics = hymn_sung_stanza_rubrics(text);
     let parts = score.stanza_parts();
-    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
     if parts.len() != stanzas.len() {
+        let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
         rubrics.first().into_iter().flatten().for_each(|r| write_hymn_rubric(&mut out, r));
-        out.push_str(&score_html(&score.gabc, &stanzas.join(" ")));
+        out.push_str(&score_html(score, &score.gabc, &stanzas.join(" ")));
         out.push_str("</div>");
         return out;
     }
+    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"every\">");
     for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
         before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&format!(
-            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}{}</div>",
             html_escape_string(&typeset(words.trim())),
             if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
-            engraved(&Arc::from(part.as_str()), i == 0)
+            mode_html(score, i == 0),
+            engraved(&Arc::from(part.as_str()), i == 0, true)
         ));
     }
     out.push_str("</div>");
     out
 }
 
-/// The score's SVGs, engraved once per score and initial.
-fn engraved(gabc: &Arc<str>, initial: bool) -> String {
-    type Cache = Mutex<HashMap<(Arc<str>, bool), String>>;
+/// A hymn's score is set phrase by phrase, a line of verse to a staff; an antiphon's as prose.
+fn phrased(score: &ChantScore) -> bool {
+    score.sets != ScoreSpan::Antiphon
+}
+
+/// The mode over a score that opens its piece ("Mode I"), as the books head a chant.
+fn mode_html(score: &ChantScore, opening: bool) -> String {
+    match score.mode_label().filter(|_| opening) {
+        Some(mode) => format!("<p class=\"chant-mode\" aria-hidden=\"true\">{mode}</p>"),
+        None => String::new(),
+    }
+}
+
+/// The score's SVGs, engraved once per score, initial and phrasing.
+fn engraved(gabc: &Arc<str>, initial: bool, phrases: bool) -> String {
+    type Cache = Mutex<HashMap<(Arc<str>, bool, bool), String>>;
     static CACHE: OnceLock<Cache> = OnceLock::new();
     let cache = CACHE.get_or_init(Default::default);
-    let key = (gabc.clone(), initial);
+    let key = (gabc.clone(), initial, phrases);
     if let Some(svgs) = cache.lock().ok().and_then(|c| c.get(&key).cloned()) {
         return svgs;
     }
-    let svgs = engrave(gabc, initial);
+    let svgs = engrave(gabc, initial, phrases);
     if let Ok(mut c) = cache.lock() {
         c.insert(key, svgs.clone());
     }
     svgs
 }
 
-/// How the page sets a score, as Score.kt, Score.swift and chant.js do: a hyphen between every two
-/// syllables, as English chant books mark them for a reader following the words; the initial
-/// three quarters of the Solesmes size and flush with the margin, to sit with the page's text
-/// initials; and the last staff ending at the final bar.
-fn page_options() -> ChantOptions {
+/// The app's own Garamond's metrics ([`presentation::CHANT_LYRIC_METRICS`]), read once.
+fn lyric_metrics() -> Arc<neuma::MetricsTable> {
+    static TABLE: OnceLock<Arc<neuma::MetricsTable>> = OnceLock::new();
+    TABLE
+        .get_or_init(|| {
+            Arc::new(neuma::MetricsTable::from_bytes(presentation::CHANT_LYRIC_METRICS).expect("the lyric metrics table reads"))
+        })
+        .clone()
+}
+
+/// How the page sets a score, as Score.kt, Score.swift and chant.js do: lyrics measured in the
+/// app's own Garamond; a hyphen between every two syllables, as English chant books mark them
+/// for a reader following the words; the initial half the Solesmes size and flush with the
+/// margin, to sit with the page's text initials, the mode in the heading rather than over it;
+/// the last staff ending at the final bar; and a hymn's phrases each on a staff of its own.
+fn page_options(phrases: bool) -> ChantOptions {
     ChantOptions::default()
+        .with_measure(lyric_metrics())
         .with_hyphens(Hyphens::EverySyllable)
         .with_initial_scale(INITIAL_SCALE)
         .with_initial_margin(0.0)
+        .with_annotation(false)
         .with_short_last_staff(true)
+        .with_phrase_lines(phrases)
 }
 
 /// The initial's size as a share of the Solesmes one, which runs from the staff's top line to
-/// the lyrics (Score.kt, Score.swift and chant.js name the same).
-const INITIAL_SCALE: f32 = 0.75;
+/// the lyrics (Score.kt, Score.swift and chant.js name the same): about the height of the page's
+/// own dropped initials.
+const INITIAL_SCALE: f32 = 0.5;
 
 /// The score at [`FALLBACK_EM`], sized in ems so that its lyrics are set at the text's size, with
-/// what chant.js lays it out again from: its GABC, whether it takes the initial, and its prefix.
-fn engrave(gabc: &str, initial: bool) -> String {
-    let options = if initial { page_options() } else { page_options().with_initial(Initial::None).with_annotation(false) };
+/// what chant.js lays it out again from: its GABC, whether it takes the initial and is phrased,
+/// and its prefix.
+fn engrave(gabc: &str, initial: bool, phrases: bool) -> String {
+    let options = if initial { page_options(phrases) } else { page_options(phrases).with_initial(Initial::None) };
     let chant = Chant::with_options(gabc, options);
     // Ids and classes unique to this score, so scores on one page never share a definition.
     let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });
@@ -110,10 +167,11 @@ fn engrave(gabc: &str, initial: bool) -> String {
     let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(prefix.clone()));
     let (w, h) = (layout_width(&svg), layout_height(&svg));
     format!(
-        "<div class=\"chant-width\" data-gabc=\"{}\" data-chant-initial=\"{}\" data-chant-prefix=\"{prefix}\" \
+        "<div class=\"chant-width\" data-gabc=\"{}\" data-chant-initial=\"{}\" data-chant-phrases=\"{}\" data-chant-prefix=\"{prefix}\" \
          style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
         html_escape_string(gabc),
         u8::from(initial),
+        u8::from(phrases),
         w / units_per_em,
         strip_label(&svg)
     )
@@ -150,32 +208,43 @@ mod tests {
     use super::*;
     use liturgy::ScoreSpan;
 
-    const HYMN: &str = "name: Te lucis;\n%%\n(c4) TO(g) thee,(g) be(h)fore(j) the(h) close(g) of(h) day,(g.) (::)";
+    const HYMN: &str = "name: Te lucis;\nmode: 8;\n%%\n(c4) TO(g) thee,(g) be(h)fore(j) the(h) close(g) of(h) day,(g.) (::)";
+
+    fn score(gabc: &str, sets: ScoreSpan) -> ChantScore {
+        ChantScore { gabc: Arc::from(gabc), sets }
+    }
+
+    /// A score's HTML for its own GABC.
+    fn html_of(gabc: &str, sets: ScoreSpan, words: &str) -> String {
+        let score = score(gabc, sets);
+        score_html(&score, &score.gabc, words)
+    }
 
     #[test]
     fn a_score_carries_its_gabc_and_a_fallback_announced_by_its_words() {
-        let html = score_html(&Arc::from(HYMN), "To thee, before the close of day,");
+        let html = html_of(HYMN, ScoreSpan::FirstStanza, "To thee, before the close of day,");
         assert!(html.starts_with(
             "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"To thee, before the close of day,\">"
         ));
         assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(HYMN))), "{html}");
-        assert!(html.contains(" data-chant-initial=\"1\" data-chant-prefix=\"chant"), "{html}");
+        assert!(html.contains(" data-chant-initial=\"1\" data-chant-phrases=\"1\" data-chant-prefix=\"chant"), "{html}");
+        assert!(html.contains("<p class=\"chant-mode\" aria-hidden=\"true\">Mode VIII</p>"), "{html}");
         assert_eq!(html.matches("<svg").count(), 1);
-        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 1);
+        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 2, "the mode and the SVG");
         assert!(!html.contains("aria-label=\"TO"), "the SVG's own label is dropped");
         assert!(!html.contains("<style"), "style.css themes the score");
     }
 
     #[test]
     fn a_score_is_named_by_its_words_typeset() {
-        let html = score_html(&Arc::from("name: t;\n%%\n(c4) Heav(g)en's(h) King.(g) (::)"), "Heaven's King. ");
+        let html = html_of("name: t;\n%%\n(c4) Heav(g)en's(h) King.(g) (::)", ScoreSpan::FirstStanza, "Heaven's King. ");
         assert!(html.contains("aria-label=\"Heaven\u{2019}s King.\""), "{html}");
     }
 
     #[test]
     fn a_gabc_with_markup_in_it_stays_in_its_attribute() {
         let gabc = "name: \"x\" & <y>;\n%%\n(c4) A(g) <i>b</i>(h) (::)";
-        let html = score_html(&Arc::from(gabc), "A b");
+        let html = html_of(gabc, ScoreSpan::Antiphon, "A b");
         assert!(html.contains("data-gabc=\"name: &#34;x&#34; &amp; &lt;y&gt;;"), "{html}");
         assert!(!html.contains("<i>b</i>"));
     }
@@ -192,12 +261,34 @@ mod tests {
         let html = whole_hymn_html(&score, "/:Kneel.:/\n\nOne two.\n\nThree four.\n\nAmen.");
         assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
         assert!(
-            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"on\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
+            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"every\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
             "{html}"
         );
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
         assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
         assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
+    }
+
+    #[test]
+    fn a_tune_shown_once_carries_a_strip_of_its_verses() {
+        let score = score("name: t;\n%%\n(c4) One(g) two.(g) (::) Three(g) four.(g) (::)", ScoreSpan::WholeHymn);
+        let parts = score.stanza_parts();
+        let html = tune_html(&score, &parts, "One two.");
+        assert!(html.starts_with("<div class=\"chant-score chant-tune-score\" role=\"img\" aria-label=\"One two.\">"), "{html}");
+        assert_eq!(html.matches("<svg").count(), 1, "one score, for the first verse");
+        assert!(html.contains("<div class=\"chant-strip\" role=\"group\" aria-label=\"The verse under the notes\">"));
+        assert_eq!(html.matches("class=\"chant-strip-verse\"").count(), 2);
+        assert!(html.contains("aria-pressed=\"true\" aria-label=\"Verse 1\""));
+        assert!(html.contains("aria-pressed=\"false\" aria-label=\"Verse 2\""));
+        assert!(html.contains(&format!("data-gabc=\"{}\">2</button>", html_escape_string(&parts[1]))));
+    }
+
+    #[test]
+    fn an_antiphon_is_set_as_prose_and_a_hymn_line_by_line() {
+        let antiphon = html_of(HYMN, ScoreSpan::Antiphon, "x");
+        assert!(antiphon.contains(" data-chant-phrases=\"0\""), "{antiphon}");
+        let hymn = html_of(HYMN, ScoreSpan::WholeHymn, "x");
+        assert!(hymn.contains(" data-chant-phrases=\"1\""), "{hymn}");
     }
 
     /// chant.js lays a score out again as the server does: at its lyric size and scale, with the
@@ -212,19 +303,24 @@ mod tests {
             "everyHyphen: true,".to_string(),
             "initialMargin: 0,".to_string(),
             "shortLastStaff: true,".to_string(),
+            "annotation: false,".to_string(),
+            "phraseLines: box.getAttribute(\"data-chant-phrases\") === \"1\",".to_string(),
+            "font: font,".to_string(),
             "style: false".to_string(),
         ] {
             assert!(js.contains(&line), "chant.js lacks {line:?}");
         }
         // The options chant.js names are page_options()'s.
-        let style = page_options().style;
+        let style = page_options(true).style;
         assert_eq!(style.hyphens, Hyphens::EverySyllable);
         assert_eq!((style.initial_scale, style.initial_margin, style.short_last_staff), (INITIAL_SCALE, 0.0, true));
+        assert!(!style.annotation && style.phrase_lines);
+        assert!(!page_options(false).style.phrase_lines);
     }
 
     #[test]
     fn widths_are_set_in_lyric_ems() {
-        let html = score_html(&Arc::from(HYMN), "x");
+        let html = html_of(HYMN, ScoreSpan::FirstStanza, "x");
         assert!(html.contains("style=\"width:17.000em;"), "{html}");
     }
 }

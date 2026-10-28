@@ -154,7 +154,18 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
 pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
 
 /// The line under the menu's Chant setting, on every front.
-pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
+pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available: On notes a hymn’s first verse, Every verse notes them all.";
+
+/// The Chant setting's choices, by the value each front stores, and the words its menu shows:
+/// off; on, a whole hymn's tune over its first verse and the others as verse, as the books set a
+/// hymn; and notes over every verse.
+pub const CHANT_CHOICES: [(&str, &str); 3] = [("off", "Off"), ("on", "On"), ("every", "Every verse")];
+
+/// The metrics of the app's own EB Garamond (static/fonts, built by `neuma-metrics` from the faces
+/// tools/gengaramond.py writes), which every front measures a score's lyrics with, so the
+/// syllables sit where the notes put them: the server and the apps from here, chant.js from the
+/// same file.
+pub const CHANT_LYRIC_METRICS: &[u8] = include_bytes!("../../../apps/office-web/static/fonts/eb-garamond-lyrics.nmet");
 
 pub const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

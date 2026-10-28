@@ -56,8 +56,38 @@ impl Score {
             .filter(|d| d.severity == neuma::Severity::Error)
             .map(|d| format!("{}: {}", d.code, d.message))
             .collect();
-        Score { gabc: Arc::from(gabc), words: words(&chant.summary().text), errors }
+        Score { gabc: Arc::from(curl_apostrophes(gabc)), words: words(&chant.summary().text), errors }
     }
+}
+
+/// The GABC with its lyrics' apostrophes curled (`heaven's` to `heaven’s`), as the page typesets
+/// its text: the header, the notes in parentheses and the tags in angle brackets are left as
+/// written.
+pub fn curl_apostrophes(gabc: &str) -> String {
+    let Some(body_at) = gabc.find("%%").map(|i| i + 2) else { return gabc.to_string() };
+    let (header, body) = gabc.split_at(body_at);
+    let mut out = String::with_capacity(gabc.len() + 8);
+    out.push_str(header);
+    let mut closing = None;
+    for c in body.chars() {
+        match closing {
+            Some(end) => {
+                if c == end {
+                    closing = None;
+                }
+                out.push(c);
+            }
+            None => {
+                match c {
+                    '(' => closing = Some(')'),
+                    '<' => closing = Some('>'),
+                    _ => {}
+                }
+                out.push(if c == '\'' { '\u{2019}' } else { c });
+            }
+        }
+    }
+    out
 }
 
 /// What kind of sung text a corpus key names, if it is one the apps offer as chant.
@@ -375,6 +405,16 @@ mod engine_tests {
     use calendar::{CalendarData, MoveableDates, build_calendar};
     use corpus::lines::{hymn_rubric_stanza, parse_hymn};
     use liturgy::{ElementType, PrayerForm, ScoreSpan};
+
+    #[test]
+    fn lyrics_take_curly_apostrophes_and_the_rest_stays_as_written() {
+        let gabc = "name: Heaven's King;\n%%\n(c4) Heav(g)en's(h) A(g)pos(h)tles'(g) <i>don't</i>(h) (::)";
+        assert_eq!(
+            super::curl_apostrophes(gabc),
+            "name: Heaven's King;\n%%\n(c4) Heav(g)en\u{2019}s(h) A(g)pos(h)tles\u{2019}(g) <i>don\u{2019}t</i>(h) (::)"
+        );
+        assert_eq!(super::Score::new(gabc).words, super::Score::new(&super::curl_apostrophes(gabc)).words);
+    }
 
     use super::Score;
     use crate::{Day, Engine, resolve_office_days, testutil::TestData};

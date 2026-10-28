@@ -150,10 +150,11 @@ function ordoMonthPath(slug) {
   return "/calendar/" + slug.slice(0, 4) + "/" + slug.slice(5, 7);
 }
 
-// The chant engine is fetched only by a reader who shows a score, so it is
-// not precached; but a reader who has it keeps it across deploys, as offline
-// scores need it. carryAssets copies what a cache holds and fetches nothing.
-var CARRIED_ASSETS = [assetURL("/static/neuma.mjs")];
+// The chant engine and its lyric metrics are fetched only by a reader who
+// shows a score, so they are not precached; but a reader who has them keeps
+// them across deploys, as offline scores need them. carryAssets copies what a
+// cache holds and fetches nothing.
+var CARRIED_ASSETS = [assetURL("/static/neuma.mjs"), assetURL("/static/fonts/eb-garamond-lyrics.nmet")];
 
 function carryAssets(cache, urls) {
   return Promise.all(urls.map(function (u) {

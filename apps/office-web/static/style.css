@@ -340,11 +340,12 @@
      redeclares them: on the night ground the tituli are gilt. */
   --lining: #a85a48;
   /* A chant score's inks (.chant-score; Score.kt and Score.swift name the
-     same four): neumes a shade off the text's ink, so their solid heads sit
-     no heavier on the page than the words; staves in the lining; the initial
-     gilt as every dropped initial; the mode in the rubric's red. */
-  --chant-ink: color-mix(in srgb, var(--text) 86%, var(--bg));
-  --chant-staff: var(--lining);
+     same four): neumes in the text's own ink, so notes and words read as one
+     hand; staves a tint of the lining, ruled thinner than the stems so they
+     sit behind the notes; the initial gilt as every dropped initial; the
+     mode in the rubric's red. */
+  --chant-ink: var(--text);
+  --chant-staff: color-mix(in srgb, var(--lining) 72%, var(--bg));
   --chant-initial: var(--ornament);
   --chant-mode: var(--rubric);
   --titulus: #93412c;
@@ -709,7 +710,7 @@ summary:focus-visible {
 }
 
 /* Off and On sit under the last two themes; the longer label takes the
-   first theme's cell. */
+   first theme's cell. Chant's three choices sit under all three themes. */
 .site-prefs .martyrology-switch,
 .site-prefs .chant-switch {
   display: grid;
@@ -718,8 +719,7 @@ summary:focus-visible {
   border-top: 1px solid var(--surface-edge);
 }
 
-.site-prefs .martyrology-switch .pref-label,
-.site-prefs .chant-switch .pref-label {
+.site-prefs .martyrology-switch .pref-label {
   grid-column: 1 / 3;
 }
 
@@ -4290,7 +4290,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --rubric: #d47070;
     --lining: #cf8c6a;
     /* The bright lining would outshine the notes on a night ground. */
-    --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
+    --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
     --titulus: #d8bc74;
     --kalendar-blue: #a9bedf;
     --moon-ink: #c9d0d9;
@@ -4349,7 +4349,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --rubric: #d47070;
   --lining: #cf8c6a;
   /* The bright lining would outshine the notes on a night ground. */
-  --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
+  --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
   --titulus: #d8bc74;
   --kalendar-blue: #a9bedf;
   --moon-ink: #c9d0d9;
@@ -8891,6 +8891,12 @@ body.page-home::before {
    the reader's Chant setting (off by default) shows one, before first paint. */
 :root:not([data-chant="on"]) [data-chant-variant="on"],
 :root[data-chant="on"] [data-chant-variant="off"] { display: none !important; }
+/* A whole hymn comes twice with chant on: its tune over the first verse with
+   the rest in text, and every verse under the notes; Every verse chooses. */
+:root:not([data-chant="on"]) [data-chant-variant="tune"],
+:root:not([data-chant="on"]) [data-chant-variant="every"],
+:root[data-chant-verses="every"] [data-chant-variant="tune"],
+:root:not([data-chant-verses="every"]) [data-chant-variant="every"] { display: none !important; }
 
 /* The score: neuma's SVG in lyric ems, so lyrics stay at the text's size.
    The page carries it at one width (render-html chant.rs), scaled down to
@@ -8936,9 +8942,60 @@ body.page-home::before {
   line-height: 1;
 }
 
-/* A hymn's verse column is as wide as its longest line; with its tune shown
-   it takes the full measure so the score has room. */
-:root[data-chant="on"] .hymn-verses:has(> .chant-score) { width: auto; }
+/* The mode, once, over the first staff: small capitals in the rubric's red,
+   as the books head a hymn's tune. */
+.chant-mode {
+  margin: 0 0 0.2rem;
+  color: var(--chant-mode);
+  font-size: 0.8rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+/* Under the tune, the verses it can carry: tap a number and its words stand
+   under the notes. It needs the engine, so it waits for chant.js to say so. */
+.chant-strip { display: none; }
+:root.chant-live .chant-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: -0.25rem 0 0.9rem;
+}
+.chant-strip-verse {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--surface-edge);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-variant-numeric: oldstyle-nums;
+  cursor: pointer;
+}
+.chant-strip-verse[aria-pressed="true"] {
+  border-color: var(--rubric);
+  color: var(--rubric);
+}
+.chant-strip-verse:focus-visible { outline: 2px solid var(--rubric); outline-offset: 1px; }
+
+/* A later verse under a tune shown once: its number hangs in the rubric's red
+   before its first line, as a hymnal numbers its verses. */
+.hymn-stanza-number {
+  float: left;
+  margin-left: -1.5rem;
+  width: 1.2rem;
+  text-align: right;
+  color: var(--rubric);
+  font-size: 0.85em;
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* A hymn's verse column is as wide as its longest line; its tune keeps to
+   the column, and on a narrow screen takes the full measure. */
+.hymn-verses:has(.chant-score) { width: 100%; }
 
 /* The cached hour contains every officiant form. Select before first paint;
    display:none also removes inactive words from print and accessibility. */

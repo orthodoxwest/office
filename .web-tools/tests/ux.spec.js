@@ -2106,9 +2106,11 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
 
       const hymn = page.locator(".hymn");
       await expect(hymn.locator(".hymn-title")).toHaveText("Ave, maris stella");
-      const rubric = hymn.locator(".hymn-verses .hymn-rubric");
+      const rubric = hymn.locator('[data-chant-variant="off"] .hymn-verses .hymn-rubric');
       await expect(rubric).toHaveText(instruction);
-      // The hymn's score, shown with Chant on, says it before the stanza too.
+      // The hymn's scores, shown with Chant on, say it before the stanza too: the tune over
+      // the first verse and every verse notated.
+      await expect(hymn.locator('[data-chant-variant="tune"] .hymn-rubric')).toHaveText(instruction);
       await expect(hymn.locator(".chant-hymn .hymn-rubric")).toHaveText(instruction);
       await expect(rubric).not.toContainText("/:");
       await expect(hymn.locator(".hymn-latin")).toHaveCount(0);
@@ -2117,9 +2119,9 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
       );
 
       const geometry = await page.evaluate(() => {
-        const rubric = document.querySelector(".hymn .hymn-verses .hymn-rubric");
+        const rubric = document.querySelector('.hymn [data-chant-variant="off"] .hymn-verses .hymn-rubric');
         const title = document.querySelector(".hymn .hymn-title");
-        const verses = document.querySelector(".hymn .hymn-verses");
+        const verses = document.querySelector('.hymn [data-chant-variant="off"] .hymn-verses');
         const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
         const rs = getComputedStyle(rubric);
         const ts = getComputedStyle(title);
@@ -3960,6 +3962,57 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   // Reached otherwise, it leads to the empty search.
   await page.goto("/feast/st-raphael-of-brooklyn");
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
+});
+
+test("Chant On notes a hymn's first verse with the rest as verse, and Every verse notes them all", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openDatedPage(page, "/lauds/2026-10-28");
+  const hymn = page.locator(".hymn");
+  const tune = hymn.locator('[data-chant-variant="tune"]');
+  const every = hymn.locator('[data-chant-variant="every"]');
+  // Off by default: the hymn's words alone.
+  await expect(tune).toBeHidden();
+  await expect(every).toBeHidden();
+
+  await choosePreference(page, "On", ".chant-option");
+  await expect(page.locator("html")).toHaveAttribute("data-chant", "on");
+  await expect(tune).toBeVisible();
+  await expect(every).toBeHidden();
+  // The tune over the first verse, its mode over it once, the other verses numbered after it.
+  await expect(tune.locator(".chant-score")).toHaveCount(1);
+  await expect(tune.locator(".chant-mode")).toHaveText(/^Mode [IVX]+$/);
+  await expect(tune.locator(".hymn-stanza-number").first()).toHaveText("2.");
+  const verses = await tune.locator(".hymn-stanza").count();
+  expect(verses).toBeGreaterThan(2);
+
+  // Once the engine is at hand, the strip sets any verse's words under the notes.
+  const strip = tune.locator(".chant-strip");
+  await expect(strip).toBeVisible();
+  await expect(strip.getByRole("button")).toHaveCount(verses + 1);
+  const box = tune.locator(".chant-width");
+  const first = await box.getAttribute("data-gabc");
+  await strip.getByRole("button", { name: "Verse 2" }).click();
+  await expect(strip.getByRole("button", { name: "Verse 2" })).toHaveAttribute("aria-pressed", "true");
+  await expect(strip.getByRole("button", { name: "Verse 1" })).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(() => box.getAttribute("data-gabc")).not.toBe(first);
+  await expect(box).toHaveAttribute("data-chant-initial", "0");
+  await expect.poll(() => box.locator("svg text").allTextContents().then((t) => t.join(" "))).not.toContain("heav");
+
+  await choosePreference(page, "Every verse", ".chant-option");
+  await expect(page.locator("html")).toHaveAttribute("data-chant-verses", "every");
+  await expect(tune).toBeHidden();
+  await expect(every).toBeVisible();
+  await expect(every.locator(".chant-stanza")).toHaveCount(verses + 1);
+  expect(await page.evaluate(() => localStorage.getItem("office-chant"))).toBe("every");
+  // Remembered before first paint.
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-chant-verses", "every");
+  await expect(every).toBeVisible();
+
+  await choosePreference(page, "Off", ".chant-option");
+  await expect(page.locator("html")).not.toHaveAttribute("data-chant", "on");
+  await expect(page.locator("html")).not.toHaveAttribute("data-chant-verses", "every");
+  await expect(every).toBeHidden();
 });
 
 test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {

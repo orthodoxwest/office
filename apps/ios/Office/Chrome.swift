@@ -331,7 +331,8 @@ struct MenuPanel: View {
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
             hint(Text(prefHints.martyrology))
-            // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+            // Chant, laid out as the Theme's row (three choices under the three themes), once a hymn or
+            // Marian antiphon has a score.
             if model.offersChant {
                 HStack(spacing: 0) {
                     Text("CHANT").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
@@ -339,12 +340,11 @@ struct MenuPanel: View {
                         .padding(.leading, m.px(10.4))
                         .frame(width: m.px(54), alignment: .leading)
                         .accessibilityHidden(true)
-                    Color.clear.frame(maxWidth: .infinity, minHeight: 44)
-                    ForEach([false, true], id: \.self) { on in
-                        cell(on ? "ON" : "OFF", on == model.chant, .label(12, 0.06), spoken: "Chant \(on ? "on" : "off")") {
-                            guard on != model.chant else { return }
+                    ForEach(Array(zip(ChantChoice.allCases, prefHints.chantChoices)), id: \.0) { choice, label in
+                        cell(label.uppercased(), choice == model.chant, .label(12, 0.06), spoken: "Chant \(label.lowercased())") {
+                            guard choice != model.chant else { return }
                             chose()
-                            model.chooseChant(on)
+                            model.chooseChant(choice)
                         }
                     }
                 }

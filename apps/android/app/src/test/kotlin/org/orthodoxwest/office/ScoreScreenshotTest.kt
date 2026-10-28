@@ -36,7 +36,7 @@ class ScoreScreenshotTest {
         val blocks = Office.core.compose("compline", 2026, 10, 7, "private").sections.flatMap { it.blocks }
         val first = blocks.indexOfFirst { it.kind == BlockKind.STANZA }
         val shown = blocks.subList(first - 1, first + 2).toMutableList()
-        shown[1] = shown[1].copy(kind = BlockKind.SCORE, score = gabc)
+        shown[1] = shown[1].copy(kind = BlockKind.SCORE, score = gabc, phrases = true, mode = "Mode VIII")
         compose.setContent {
             OfficeTheme(choice = theme) {
                 Column(Modifier.padding(16.dp)) {
@@ -54,7 +54,7 @@ class ScoreScreenshotTest {
     /** neuma engraves the score through the app's own library: staves, notes and the words. */
     @Test
     fun engraves() {
-        val page = engrave(gabc, initial = true, width = 1000f, lyric = 60f)
+        val page = engrave(gabc, initial = true, phrases = true, width = 1000f, lyric = 60f)
         assertTrue(page.height > 0f && page.items.size > 40)
         assertTrue(page.altText, page.altText.startsWith("To thee, before the close of day"))
     }

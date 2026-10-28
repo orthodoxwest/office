@@ -443,6 +443,18 @@ struct BlockRow: View {
                 .frame(maxWidth: .infinity)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken(block))
+            } else if block.kind == .stanza && !block.marker.isEmpty {
+                // A verse after a tune shown once: its number hangs in the rubric's red before its
+                // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`).
+                prose.frame(maxWidth: column ?? .infinity)
+                    .overlay(alignment: .topLeading) {
+                        Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type)))
+                            .foregroundStyle(p.rubric)
+                            .frame(width: m.px(stanzaNumberHang - 4), alignment: .trailing)
+                            .offset(x: -m.px(stanzaNumberHang), y: m.px(3))
+                            .accessibilityHidden(true)
+                    }
+                    .frame(maxWidth: .infinity)
             } else if block.kind == .stanza || block.kind == .hymnRubric {
                 // The hymn's column, centred: the rag balanced by an equal indent on the left,
                 // as the web's fit-content `.hymn-verses`.
@@ -501,7 +513,9 @@ private struct GlossCard: View {
 }
 
 /// The web's `.hymn-verses` max-width, 28rem.
-private let hymnMax: CGFloat = 448
+let hymnMax: CGFloat = 448
+/// How far a verse's number hangs before its column (the web's `.hymn-stanza-number`, 1.5rem).
+private let stanzaNumberHang: CGFloat = 24
 
 /// Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
 /// hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.

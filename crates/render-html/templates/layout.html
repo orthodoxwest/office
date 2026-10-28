@@ -59,7 +59,9 @@
           document.documentElement.removeAttribute("data-text-size");
         }
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
-        if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
+        var c = localStorage.getItem("office-chant");
+        if (c === "on" || c === "every") document.documentElement.setAttribute("data-chant", "on");
+        if (c === "every") document.documentElement.setAttribute("data-chant-verses", "every");
       } catch (e) {}
     })();
   </script>
@@ -82,6 +84,7 @@
   {# chant.js lays chant scores out with neuma's engine, fetched only once one is shown. #}
   <script type="module" src="{{ static("chant.js")|url }}"></script>
   <meta name="neuma" content="{{ static("neuma.mjs")|url }}">
+  <meta name="neuma-metrics" content="{{ static("fonts/eb-garamond-lyrics.nmet")|url }}">
   {% if page == "usage" %}<script src="{{ static("usage.js")|url }}" defer></script>{% endif %}
 </head>
 {# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see

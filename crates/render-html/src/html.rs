@@ -1,8 +1,6 @@
 //! Text-to-HTML conversion of composed office elements: psalm verses, liturgical blocks, hymns, and
 //! the typography every run of display text passes through.
 
-use std::sync::Arc;
-
 use corpus::lines::{
     BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
@@ -92,7 +90,7 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
                 sb.push_str("<div class=\"marian-antiphon\"><h3 class=\"item-label\" lang=\"la\">");
                 sb.push_str(&esc_text(&elem.label));
                 sb.push_str("</h3>");
-                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref().map(|s| &s.gabc)));
+                sb.push_str(&render_marian_antiphon_scored(&elem.text, elem.score.as_ref()));
                 sb.push_str("</div>");
             }
         }
@@ -142,12 +140,19 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
             match &elem.score {
                 Some(score) if score.sets == ScoreSpan::WholeHymn => {
+                    let parts = score.stanza_parts();
+                    if parts.len() == corpus::lines::hymn_sung_stanzas(&elem.text).len() {
+                        sb.push_str("<div data-chant-variant=\"tune\">");
+                        sb.push_str(&render_hymn(&elem.text, Scored::Tune(score, &parts)));
+                        sb.push_str("</div>");
+                    }
                     sb.push_str(&crate::chant::whole_hymn_html(score, &elem.text));
                     sb.push_str("<div data-chant-variant=\"off\">");
                     sb.push_str(&render_hymn_stanzas(&elem.text));
                     sb.push_str("</div>");
                 }
-                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref().map(|s| &s.gabc))),
+                Some(score) => sb.push_str(&render_hymn(&elem.text, Scored::Opening(score))),
+                None => sb.push_str(&render_hymn_stanzas(&elem.text)),
             }
             sb.push_str("</div>");
         }
@@ -463,15 +468,15 @@ fn render_marian_antiphon(text: &str) -> String {
 
 /// A Marian antiphon with its score, if it has one, offered beside the antiphon's words (up to
 /// the ℣); the ℣, ℟ and collect after it are the same either way.
-fn render_marian_antiphon_scored(text: &str, score: Option<&Arc<str>>) -> String {
+fn render_marian_antiphon_scored(text: &str, score: Option<&ChantScore>) -> String {
     const INVITATION: &str = "\n\nLet us pray.\n\n";
     let sung = |chant: &str| match score {
         None => render_block(chant, Mode::PreserveFirstBlock, false),
-        Some(gabc) => {
+        Some(score) => {
             let antiphon = marian_antiphon_part(chant);
             let rest = chant.trim_start()[antiphon.len()..].trim();
             let words = ChantScore::spoken(antiphon);
-            let mut sb = crate::chant::score_html(gabc, &words);
+            let mut sb = crate::chant::score_html(score, &score.gabc, &words);
             sb.push_str("<div data-chant-variant=\"off\">");
             sb.push_str(&render_block(antiphon, Mode::PreserveFirstBlock, false));
             sb.push_str("</div>");
@@ -612,12 +617,23 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
 /// A hymn: one paragraph per stanza, one span per metrical line, a
 /// standalone Amen folded into the verse before it.
 pub fn render_hymn_stanzas(text: &str) -> String {
-    render_hymn_stanzas_scored(text, None)
+    render_hymn(text, Scored::No)
 }
 
-/// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
-/// beside the stanza's words, and the reader's Chant setting shows one.
-pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> String {
+/// What of a hymn a score sets, as its stanzas are rendered.
+#[derive(Clone, Copy)]
+enum Scored<'a> {
+    No,
+    /// The tune over the first stanza, offered beside its words: the reader's Chant setting
+    /// shows one.
+    Opening(&'a ChantScore),
+    /// A whole hymn's tune over the first stanza in place of its words, with the strip that
+    /// sets any stanza under the notes (the parts), and the other stanzas numbered to match.
+    Tune(&'a ChantScore, &'a [String]),
+}
+
+/// A hymn, its tune over the first stanza if it has a score.
+fn render_hymn(text: &str, scored: Scored) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -627,6 +643,7 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> Strin
         }
     }
     let mut opening = true;
+    let mut number = 0;
     for (i, stanza) in hymn.stanzas.iter().enumerate() {
         if is_hymn_amen(stanza) && i > 0 {
             continue;
@@ -637,16 +654,25 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&Arc<str>>) -> Strin
             }
             continue;
         }
+        number += 1;
         let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
-        let variant = match score.filter(|_| opening) {
-            Some(gabc) => {
-                sb.push_str(&crate::chant::score_html(gabc, &stanza.join(" ")));
+        let variant = match scored {
+            Scored::Opening(score) if opening => {
+                sb.push_str(&crate::chant::score_html(score, &score.gabc, &stanza.join(" ")));
                 " data-chant-variant=\"off\""
             }
-            None => "",
+            Scored::Tune(score, parts) if opening => {
+                sb.push_str(&crate::chant::tune_html(score, parts, &stanza.join(" ")));
+                opening = false;
+                continue;
+            }
+            Scored::No | Scored::Opening(_) | Scored::Tune(..) => "",
         };
         opening = false;
         sb.push_str(&format!("<p class=\"{class}\"{variant}>"));
+        if matches!(scored, Scored::Tune(..)) {
+            sb.push_str(&format!("<span class=\"hymn-stanza-number\">{number}.</span>"));
+        }
         let join_amen = hymn.stanzas.get(i + 1).is_some_and(|s| is_hymn_amen(s));
         for (j, line) in stanza.iter().enumerate() {
             sb.push_str("<span class=\"hymn-line\">");

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
@@ -251,7 +252,22 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.STANZA -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             val style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp))
             val inColumn = if (column != null) Modifier.width(column) else Modifier
-            if (block.dropCap) Opening(block, style, inColumn, textStart = 0.dp) else Text(runs(block), inColumn.fillMaxWidth(), style = style)
+            if (block.dropCap) {
+                Opening(block, style, inColumn, textStart = 0.dp)
+            } else if (block.marker.isNotEmpty()) {
+                // A verse after a tune shown once: its number hangs in the rubric's red before its
+                // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`).
+                Box(inColumn) {
+                    Text(
+                        block.marker,
+                        Modifier.offset(x = -StanzaNumberHang).width(StanzaNumberHang - 4.dp).clearAndSetSemantics {},
+                        style = style.copy(color = p.rubric, fontSize = style.fontSize * 0.85f, textAlign = TextAlign.End, fontFeatureSettings = "onum"),
+                    )
+                    Text(runs(block), Modifier.fillMaxWidth(), style = style)
+                }
+            } else {
+                Text(runs(block), inColumn.fillMaxWidth(), style = style)
+            }
         }
         // A rubric among the stanzas, centred in the hymn's column.
         BlockKind.HYMN_RUBRIC -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
@@ -570,8 +586,11 @@ fun spoken(block: BlockView): String {
 
 private const val CROSS_MARK = "\uE000"
 
+/** How far a verse's number hangs before its column (the web's `.hymn-stanza-number`, 1.5rem). */
+private val StanzaNumberHang: Dp = 24.dp
+
 /** The web's `.hymn-verses` max-width, 28rem. */
-private val HymnMax: Dp = 448.dp
+internal val HymnMax: Dp = 448.dp
 
 /**
  * Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
