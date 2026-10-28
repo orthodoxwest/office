@@ -24,8 +24,9 @@ import org.orthodoxwest.office.core.usageEndpointHeader
 /**
  * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
  * the page shown, the appearance and prayer form it is read in, at Prime whether the
- * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The beacon's words come from the Rust core, so the server
- * reads the app's as it reads the web's, and only today's pages (a day either side) count.
+ * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The
+ * beacon's words come from the Rust core, so the server reads the app's as it reads the web's,
+ * and only today's pages (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
