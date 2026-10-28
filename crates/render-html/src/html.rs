@@ -140,12 +140,19 @@ fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>)
             }
             match &elem.score {
                 Some(score) if score.sets == ScoreSpan::WholeHymn => {
+                    let parts = score.stanza_parts();
+                    if parts.len() == corpus::lines::hymn_sung_stanzas(&elem.text).len() {
+                        sb.push_str("<div data-chant-variant=\"tune\">");
+                        sb.push_str(&render_hymn(&elem.text, Scored::Tune(score, &parts)));
+                        sb.push_str("</div>");
+                    }
                     sb.push_str(&crate::chant::whole_hymn_html(score, &elem.text));
                     sb.push_str("<div data-chant-variant=\"off\">");
                     sb.push_str(&render_hymn_stanzas(&elem.text));
                     sb.push_str("</div>");
                 }
-                score => sb.push_str(&render_hymn_stanzas_scored(&elem.text, score.as_ref())),
+                Some(score) => sb.push_str(&render_hymn(&elem.text, Scored::Opening(score))),
+                None => sb.push_str(&render_hymn_stanzas(&elem.text)),
             }
             sb.push_str("</div>");
         }
@@ -610,12 +617,23 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
 /// A hymn: one paragraph per stanza, one span per metrical line, a
 /// standalone Amen folded into the verse before it.
 pub fn render_hymn_stanzas(text: &str) -> String {
-    render_hymn_stanzas_scored(text, None)
+    render_hymn(text, Scored::No)
 }
 
-/// A hymn whose tune, if it has a score, is offered over its first stanza: the score stands
-/// beside the stanza's words, and the reader's Chant setting shows one.
-pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> String {
+/// What of a hymn a score sets, as its stanzas are rendered.
+#[derive(Clone, Copy)]
+enum Scored<'a> {
+    No,
+    /// The tune over the first stanza, offered beside its words: the reader's Chant setting
+    /// shows one.
+    Opening(&'a ChantScore),
+    /// A whole hymn's tune over the first stanza in place of its words, with the strip that
+    /// sets any stanza under the notes (the parts), and the other stanzas numbered to match.
+    Tune(&'a ChantScore, &'a [String]),
+}
+
+/// A hymn, its tune over the first stanza if it has a score.
+fn render_hymn(text: &str, scored: Scored) -> String {
     let hymn = parse_hymn(text);
     let mut sb = String::from("<div class=\"hymn-verses\">");
     if !hymn.title.is_empty() {
@@ -625,6 +643,7 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> Str
         }
     }
     let mut opening = true;
+    let mut number = 0;
     for (i, stanza) in hymn.stanzas.iter().enumerate() {
         if is_hymn_amen(stanza) && i > 0 {
             continue;
@@ -635,16 +654,25 @@ pub fn render_hymn_stanzas_scored(text: &str, score: Option<&ChantScore>) -> Str
             }
             continue;
         }
+        number += 1;
         let class = if opening { "hymn-stanza hymn-stanza-opening" } else { "hymn-stanza" };
-        let variant = match score.filter(|_| opening) {
-            Some(score) => {
+        let variant = match scored {
+            Scored::Opening(score) if opening => {
                 sb.push_str(&crate::chant::score_html(score, &score.gabc, &stanza.join(" ")));
                 " data-chant-variant=\"off\""
             }
-            None => "",
+            Scored::Tune(score, parts) if opening => {
+                sb.push_str(&crate::chant::tune_html(score, parts, &stanza.join(" ")));
+                opening = false;
+                continue;
+            }
+            Scored::No | Scored::Opening(_) | Scored::Tune(..) => "",
         };
         opening = false;
         sb.push_str(&format!("<p class=\"{class}\"{variant}>"));
+        if matches!(scored, Scored::Tune(..)) {
+            sb.push_str(&format!("<span class=\"hymn-stanza-number\" aria-hidden=\"true\">{number}.</span>"));
+        }
         let join_amen = hymn.stanzas.get(i + 1).is_some_and(|s| is_hymn_amen(s));
         for (j, line) in stanza.iter().enumerate() {
             sb.push_str("<span class=\"hymn-line\">");

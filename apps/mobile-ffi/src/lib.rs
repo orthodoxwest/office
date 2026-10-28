@@ -88,8 +88,9 @@ impl OfficeCore {
     /// prayer form "private", "deacon", or "priest"; `martyrology` is the
     /// reader's setting for reading the Martyrology at Prime; `chant` the reader's Chant setting,
     /// which shows a scored hymn or Marian antiphon as its score (`BlockKind::Score`) in place of
-    /// the words it sets.
-    #[uniffi::method(default(martyrology = false, chant = false))]
+    /// the words it sets; and `every_verse` its choice of notes over every verse of a whole
+    /// hymn's score rather than its tune over the first (with the others as verse).
+    #[uniffi::method(default(martyrology = false, chant = false, every_verse = false))]
     // The reader's settings stay plain arguments with defaults, so each app passes only its own.
     #[allow(clippy::too_many_arguments)]
     pub fn compose(
@@ -101,6 +102,7 @@ impl OfficeCore {
         form: String,
         martyrology: bool,
         chant: bool,
+        every_verse: bool,
     ) -> Result<HourView, OfficeError> {
         let date =
             Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))?;
@@ -111,7 +113,7 @@ impl OfficeCore {
             self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, martyrology }).map_err(failed)
         };
         let composed = compose(martyrology)?;
-        let mut view = HourView::new(&hour, &composed, chant);
+        let mut view = HourView::new(&hour, &composed, chant, every_verse);
         // Whether the setting had a reading to show or hide, as the usage beacon reports it.
         let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
         view.martyrology = has_reading.then_some(martyrology);
@@ -300,16 +302,23 @@ pub fn prayers_open_by_default(hour: String) -> bool {
 }
 
 /// The lines under the menu's settings that need saying, as the web prints them
-/// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
+/// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`), and the Chant setting's
+/// choices as its row names them: off, on (a whole hymn's tune over its first verse) and
+/// every verse (`presentation::CHANT_CHOICES`).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct PreferenceHints {
     pub martyrology: String,
     pub chant: String,
+    pub chant_choices: Vec<String>,
 }
 
 #[uniffi::export]
 pub fn preference_hints() -> PreferenceHints {
-    PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
+    PreferenceHints {
+        martyrology: presentation::MARTYROLOGY_HINT.into(),
+        chant: presentation::CHANT_HINT.into(),
+        chant_choices: presentation::CHANT_CHOICES.iter().map(|(_, label)| (*label).to_string()).collect(),
+    }
 }
 
 /// A reader's way through an hour's words, for home's mark of the hours prayed
@@ -791,10 +800,9 @@ pub struct HourView {
 }
 
 impl HourView {
-    /// The hour's view, each scored piece shown as its score with `chant` on and as its words
-    /// with it off.
-    fn new(hour_name: &str, hour: &OfficeHour, chant: bool) -> HourView {
-        let hidden = if chant { render_blocks::ChantVariant::Off } else { render_blocks::ChantVariant::On };
+    /// The hour's view, each scored piece shown as its score with `chant` on (a whole hymn's
+    /// over `every` verse or over the first) and as its words with it off.
+    fn new(hour_name: &str, hour: &OfficeHour, chant: bool, every: bool) -> HourView {
         let d = hour.date;
         HourView {
             hour: hour_name.to_string(),
@@ -809,7 +817,7 @@ impl HourView {
             sections: render_blocks::hour_sections(hour)
                 .into_iter()
                 .map(|mut s| {
-                    s.blocks.retain(|b| b.chant != hidden);
+                    s.blocks.retain(|b| b.chant.shown(chant, every));
                     SectionView::from(s)
                 })
                 .collect(),
@@ -849,6 +857,10 @@ pub struct BlockView {
     /// The mode over a score that opens its piece ("Mode I"); empty for none.
     #[uniffi(default = "")]
     pub mode: String,
+    /// A whole hymn's tune over its first stanza: every stanza's GABC, so the reader may set any
+    /// of them under the notes (a strip of verse numbers under the score); empty otherwise.
+    #[uniffi(default = [])]
+    pub stanzas: Vec<String>,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -861,6 +873,7 @@ impl From<render_blocks::Block> for BlockView {
             score: b.score,
             phrases: b.phrases,
             mode: b.mode,
+            stanzas: b.stanzas,
             runs: b
                 .runs
                 .into_iter()

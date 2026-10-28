@@ -154,7 +154,12 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
 pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
 
 /// The line under the menu's Chant setting, on every front.
-pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
+pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available: On notes a hymn’s first verse, All notes every verse.";
+
+/// The Chant setting's choices, by the value each front stores, and the words its menu shows:
+/// off; on, a whole hymn's tune over its first verse and the others as verse, as the books set a
+/// hymn; and notes over every verse.
+pub const CHANT_CHOICES: [(&str, &str); 3] = [("off", "Off"), ("on", "On"), ("every", "All")];
 
 /// The metrics of the app's own EB Garamond (static/fonts, built by `neuma-metrics` from the faces
 /// tools/gengaramond.py writes), which every front measures a score's lyrics with, so the

@@ -255,10 +255,17 @@ class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
 
-/** The reader's Chant setting, offered only once a text has a score. */
-class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
+/**
+ * The reader's Chant setting, offered only once a text has a score: "off", "on" (a whole hymn's
+ * tune over its first verse) or "every" (notes over every verse), the web's stored values
+ * (`presentation::CHANT_CHOICES`).
+ */
+class ChantChoice(val offered: Boolean, val choice: String, val onChange: (String) -> Unit)
 
-val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
+val LocalChant = staticCompositionLocalOf { ChantChoice(false, "off") {} }
+
+/** The Chant setting's stored values, in the menu's order, beside `PreferenceHints.chantChoices`'s words. */
+val CHANT_VALUES = listOf("off", "on", "every")
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
@@ -529,15 +536,15 @@ fun MenuPanel(
                     }
                 }
                 PrefHint(AnnotatedString(PREF_HINTS.martyrology))
-                // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+                // Chant, laid out as the Theme's row, once a hymn or Marian antiphon has a score.
                 val chant = LocalChant.current
                 if (chant.offered) {
                     Hairline(p.surfaceEdge)
                     MenuRow {
-                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
-                        Spacer(Modifier.weight(1f))
-                        listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
-                            MenuCell(label, on == chant.on, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(on) }
+                        // Three choices, under the three themes.
+                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp).clearAndSetSemantics {}, style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        CHANT_VALUES.zip(PREF_HINTS.chantChoices).forEach { (value, label) ->
+                            MenuCell(label.uppercase(), value == chant.choice, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(value) }
                         }
                     }
                     PrefHint(AnnotatedString(PREF_HINTS.chant))

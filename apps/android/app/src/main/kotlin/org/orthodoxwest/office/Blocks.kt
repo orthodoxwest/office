@@ -251,7 +251,23 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.STANZA -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             val style = verse.copy(textIndent = TextIndent(restLine = 17.6.sp))
             val inColumn = if (column != null) Modifier.width(column) else Modifier
-            if (block.dropCap) Opening(block, style, inColumn, textStart = 0.dp) else Text(runs(block), inColumn.fillMaxWidth(), style = style)
+            if (block.dropCap) {
+                Opening(block, style, inColumn, textStart = 0.dp)
+            } else if (block.marker.isNotEmpty()) {
+                // A verse after a tune shown once: its number hangs in the rubric's red before its
+                // first line, as a hymnal numbers its verses (the web's `.hymn-stanza-number`).
+                // It hangs in an indent of its own, so it stays inside a phone's margin.
+                Box(if (column != null) Modifier.widthIn(max = column + StanzaNumberHang) else Modifier) {
+                    Text(
+                        block.marker,
+                        Modifier.width(StanzaNumberHang - 4.dp).clearAndSetSemantics {},
+                        style = style.copy(color = p.rubric, fontSize = style.fontSize * 0.85f, textAlign = TextAlign.End, fontFeatureSettings = "onum"),
+                    )
+                    Text(runs(block), Modifier.padding(start = StanzaNumberHang).fillMaxWidth(), style = style)
+                }
+            } else {
+                Text(runs(block), inColumn.fillMaxWidth(), style = style)
+            }
         }
         // A rubric among the stanzas, centred in the hymn's column.
         BlockKind.HYMN_RUBRIC -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
@@ -263,7 +279,8 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
         BlockKind.PARAGRAPH -> {
             if (block.dropCap) Opening(block, text, m, textStart = VerseGutter) else Text(runs(block), m.fillMaxWidth(), style = text)
         }
-        BlockKind.SCORE -> Score(block, m)
+        // The score speaks its words as one stop; its verse strip stays a group of its own.
+        BlockKind.SCORE -> Score(block, modifier, spoken(block))
         // A sung line's wrap hangs beneath its own start (`.chant-line`, 1.2rem).
         BlockKind.CHANT_LINE -> {
             val chant = text.copy(textIndent = TextIndent(restLine = 19.2.sp))
@@ -569,6 +586,9 @@ fun spoken(block: BlockView): String {
 }
 
 private const val CROSS_MARK = "\uE000"
+
+/** How far a verse's number hangs before its column (the web's `.hymn-stanza-number`, 1.5rem). */
+private val StanzaNumberHang: Dp = 24.dp
 
 /** The web's `.hymn-verses` max-width, 28rem. */
 internal val HymnMax: Dp = 448.dp

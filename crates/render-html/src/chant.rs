@@ -39,21 +39,47 @@ pub fn score_html(score: &ChantScore, gabc: &Arc<str>, words: &str) -> String {
     )
 }
 
-/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`): each stanza from a new
-/// line with its number, the first alone taking the initial, and each after the rubrics said
-/// before it (kneeling for a stanza), which the score does not carry. Parts that do not pair
-/// with the hymn's stanzas make one score, as written.
+/// A whole hymn's tune over its first stanza (the books' way, with notes over the first verse):
+/// the score of `part`, the first of `parts`, announced by `words`, and the strip that sets any
+/// stanza's words under the notes instead (chant.js), each button carrying its stanza's GABC.
+pub fn tune_html(score: &ChantScore, parts: &[String], words: &str) -> String {
+    let mut out = format!(
+        "<div class=\"chant-score chant-tune-score\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+        html_escape_string(&typeset(words.trim())),
+        mode_html(score, true),
+        engraved(&Arc::from(parts[0].as_str()), true, phrased(score))
+    );
+    if parts.len() > 1 {
+        out.push_str("<div class=\"chant-strip\" role=\"group\" aria-label=\"The verse under the notes\">");
+        for (i, part) in parts.iter().enumerate() {
+            out.push_str(&format!(
+                "<button type=\"button\" class=\"chant-strip-verse\" aria-pressed=\"{}\" aria-label=\"Verse {n}\" data-gabc=\"{}\">{n}</button>",
+                i == 0,
+                html_escape_string(part),
+                n = i + 1
+            ));
+        }
+        out.push_str("</div>");
+    }
+    out
+}
+
+/// A whole hymn's score set stanza by stanza (`ChantScore::stanza_parts`), with notes over every
+/// verse: each stanza from a new line with its number, the first alone taking the initial, and
+/// each after the rubrics said before it (kneeling for a stanza), which the score does not carry.
+/// Parts that do not pair with the hymn's stanzas make one score, as written, shown either way.
 pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
     let stanzas = hymn_sung_stanzas(text);
     let rubrics = hymn_sung_stanza_rubrics(text);
     let parts = score.stanza_parts();
-    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
     if parts.len() != stanzas.len() {
+        let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"on\">");
         rubrics.first().into_iter().flatten().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&score_html(score, &score.gabc, &stanzas.join(" ")));
         out.push_str("</div>");
         return out;
     }
+    let mut out = String::from("<div class=\"chant-hymn\" data-chant-variant=\"every\">");
     for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
         before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&format!(
@@ -235,12 +261,26 @@ mod tests {
         let html = whole_hymn_html(&score, "/:Kneel.:/\n\nOne two.\n\nThree four.\n\nAmen.");
         assert_eq!(html.matches("class=\"chant-score chant-stanza\"").count(), 2);
         assert!(
-            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"on\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
+            html.starts_with("<div class=\"chant-hymn\" data-chant-variant=\"every\"><p class=\"rubric hymn-rubric\">Kneel.</p>"),
             "{html}"
         );
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
         assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
         assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
+    }
+
+    #[test]
+    fn a_tune_shown_once_carries_a_strip_of_its_verses() {
+        let score = score("name: t;\n%%\n(c4) One(g) two.(g) (::) Three(g) four.(g) (::)", ScoreSpan::WholeHymn);
+        let parts = score.stanza_parts();
+        let html = tune_html(&score, &parts, "One two.");
+        assert!(html.starts_with("<div class=\"chant-score chant-tune-score\" role=\"img\" aria-label=\"One two.\">"), "{html}");
+        assert_eq!(html.matches("<svg").count(), 1, "one score, for the first verse");
+        assert!(html.contains("<div class=\"chant-strip\" role=\"group\" aria-label=\"The verse under the notes\">"));
+        assert_eq!(html.matches("class=\"chant-strip-verse\"").count(), 2);
+        assert!(html.contains("aria-pressed=\"true\" aria-label=\"Verse 1\""));
+        assert!(html.contains("aria-pressed=\"false\" aria-label=\"Verse 2\""));
+        assert!(html.contains(&format!("data-gabc=\"{}\">2</button>", html_escape_string(&parts[1]))));
     }
 
     #[test]

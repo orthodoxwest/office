@@ -3,16 +3,27 @@ package org.orthodoxwest.office
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -28,7 +39,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import org.orthodoxwest.neuma.Chant
@@ -50,36 +64,75 @@ private const val LYRIC_SPACES = 2.45f
  * at the column's width with its lyrics at the hymn's text size, as the web's chant.js lays it
  * out at its column's, and the staff takes a tint of the theme's lining, as the web's
  * `.chant-score` does. The score keeps to the hymn's measure, as the web's `.hymn-verses`. The
- * opening score carries its mode above it (`.chant-mode`), and a whole hymn's stanzas after the
- * first carry their number (the marker), in the rubric's red above the score.
+ * opening score carries its mode above it (`.chant-mode`); a whole hymn's stanzas after the first
+ * carry their number (the marker), in the rubric's red above the score; and a tune shown once
+ * carries a strip of its hymn's verses under it (`.chant-strip`), a tap setting that verse's
+ * words under the notes.
  */
 @Composable
-fun Score(block: BlockView, modifier: Modifier) {
+fun Score(block: BlockView, modifier: Modifier, spoken: String) {
     val p = LocalPalette.current
     val density = LocalDensity.current
     val lyric = with(density) { Type.verse.fontSize.toPx() }
     val ornament = LocalOrnament.current
     val faces = scoreFaces()
+    var verse by rememberSaveable(block.score) { mutableIntStateOf(0) }
+    val gabc = block.stanzas.getOrNull(verse) ?: block.score
     Box(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = HymnMax).fillMaxWidth()) {
-            if (block.marker.isNotEmpty()) {
-                Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
-            }
-            if (block.mode.isNotEmpty()) {
-                Text(
-                    block.mode,
-                    Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
-                    style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
-                )
-            }
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val width = constraints.maxWidth.toFloat()
-                val page = remember(block.score, block.dropCap, block.phrases, width, lyric) { engrave(block.score, block.dropCap, block.phrases, width, lyric) }
-                // A custos may reach past the measure: the whole score is fitted to the column.
-                val fit = if (page.width > width) width / page.width else 1f
-                Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
-                    scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces, fit) }
+            Column(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = spoken }) {
+                if (block.marker.isNotEmpty()) {
+                    Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
                 }
+                if (block.mode.isNotEmpty()) {
+                    Text(
+                        block.mode,
+                        Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
+                        style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
+                    )
+                }
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val width = constraints.maxWidth.toFloat()
+                    val initial = block.dropCap && verse == 0
+                    val page = remember(gabc, initial, block.phrases, width, lyric) { engrave(gabc, initial, block.phrases, width, lyric) }
+                    // A custos may reach past the measure: the whole score is fitted to the column.
+                    val fit = if (page.width > width) width / page.width else 1f
+                    Canvas(Modifier.fillMaxWidth().height(with(density) { (page.height * fit).toDp() })) {
+                        scale(fit, Offset.Zero) { drawScore(page, ScoreInks.of(p, ornament), faces, fit) }
+                    }
+                }
+            }
+            if (block.stanzas.size > 1) {
+                VerseStrip(block.stanzas.size, verse) { verse = it }
+            }
+        }
+    }
+}
+
+/** The verses a tune can carry, numbered: the one under the notes ringed in the rubric's red (`.chant-strip`). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun VerseStrip(count: Int, chosen: Int, choose: (Int) -> Unit) {
+    val p = LocalPalette.current
+    FlowRow(
+        Modifier.padding(top = 2.dp, bottom = 10.dp).semantics { contentDescription = "The verse under the notes" },
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        for (i in 0 until count) {
+            val on = i == chosen
+            Box(
+                Modifier
+                    .sizeIn(minWidth = 32.dp, minHeight = 32.dp)
+                    .border(1.dp, if (on) p.rubric else p.surfaceEdge, CircleShape)
+                    .selectable(selected = on, role = Role.RadioButton) { choose(i) }
+                    .semantics { contentDescription = "Verse ${i + 1}" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "${i + 1}",
+                    style = Type.verse.copy(color = if (on) p.rubric else p.muted, fontSize = Type.verse.fontSize * 0.85f, fontFeatureSettings = "onum"),
+                )
             }
         }
     }

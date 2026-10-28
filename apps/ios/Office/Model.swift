@@ -191,8 +191,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var textSize: TextSize
     /// Whether Prime reads the next day's Martyrology; off by default.
     @Published private(set) var martyrology: Bool
-    /// Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default.
-    @Published private(set) var chant: Bool
+    /// Whether a scored hymn or Marian antiphon shows its score in place of its words, and a whole hymn's notes
+    /// over its first verse or every verse; off by default.
+    @Published private(set) var chant: ChantChoice
     /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
     let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
     /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
@@ -223,7 +224,9 @@ final class AppModel: ObservableObject {
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
         martyrology = UserDefaults.standard.bool(forKey: "martyrology")
-        chant = UserDefaults.standard.bool(forKey: "chant")
+        // An install from before the third choice kept a plain on or off under "chant".
+        chant = UserDefaults.standard.string(forKey: "chant-choice").flatMap(ChantChoice.init(rawValue:))
+            ?? (UserDefaults.standard.bool(forKey: "chant") ? .on : .off)
         prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
     }
 
@@ -327,10 +330,10 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "martyrology")
     }
 
-    func chooseChant(_ value: Bool) {
+    func chooseChant(_ value: ChantChoice) {
         step = nil
         chant = value
-        defaults.set(value, forKey: "chant")
+        defaults.set(value.rawValue, forKey: "chant-choice")
     }
 
     /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
@@ -407,4 +410,10 @@ final class AppModel: ObservableObject {
         settingsOpen = d.bool(forKey: "settings")
         return true
     }
+}
+
+/// The reader's Chant setting: off, on (a whole hymn's tune over its first verse) or every verse, by the web's stored
+/// values (`presentation::CHANT_CHOICES`), in the menu's order beside `PreferenceHints.chantChoices`'s words.
+enum ChantChoice: String, CaseIterable {
+    case off, on, every
 }

@@ -203,9 +203,9 @@ fn blocks_carry_the_same_text_as_the_web() {
                     let html = render_html::html::render_section_elements(&section.elements);
                     let section_blocks = element_blocks(&section.elements);
                     // A score's words (the Marian antiphon's, say) are read either way.
-                    for on in [false, true] {
-                        let (native, web) = (shown(&section_blocks, on), web_words(&html, on));
-                        assert_eq!(native, web, "{hour_name} {} {} section {:?} chant {on}", day.date, form.as_str(), section.label);
+                    for chant in Chant::ALL {
+                        let (native, web) = (shown(&section_blocks, chant), web_words(&html, chant));
+                        assert_eq!(native, web, "{hour_name} {} {} section {:?} chant {chant:?}", day.date, form.as_str(), section.label);
                     }
                     // Every rubric term the web glosses, the apps gloss too.
                     let glossed = section_blocks.iter().flat_map(|b| &b.runs).filter(|r| r.gloss.is_some()).count();
@@ -233,15 +233,38 @@ fn scored(kind: ElementType, text: &str, gabc: &str, sets: ScoreSpan) -> OfficeE
     e
 }
 
-/// The words a front shows with Chant off, or (`on`) the words its scores set and the text around them.
-fn shown(out: &[Block], on: bool) -> String {
-    let hidden = if on { ChantVariant::Off } else { ChantVariant::On };
-    out.iter().filter(|b| b.chant != hidden).map(|b| squeeze(&b.plain_text())).collect()
+/// The reader's Chant setting: off, on with notes over the first verse, or over every verse.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Chant {
+    Off,
+    Tune,
+    Every,
 }
 
-/// The web's words as a reader sees them with Chant `on` or off: with it on, each score by its
-/// stanza number and label, the words it replaces left out.
-fn web_words(html: &str, on: bool) -> String {
+impl Chant {
+    const ALL: [Chant; 3] = [Chant::Off, Chant::Tune, Chant::Every];
+
+    fn on(self) -> bool {
+        self != Chant::Off
+    }
+}
+
+/// The words a front shows with Chant off, or with it on the words its scores set and the text
+/// around them.
+fn shown(out: &[Block], chant: Chant) -> String {
+    out.iter().filter(|b| b.chant.shown(chant.on(), chant == Chant::Every)).map(|b| squeeze(&b.plain_text())).collect()
+}
+
+/// The web's words as a reader sees them with the Chant setting `chant`: with it on, each score by
+/// its stanza number and label, the words it replaces left out, and no stanza strip (a control,
+/// not words).
+fn web_words(html: &str, chant: Chant) -> String {
+    let on = chant.on();
+    let hidden: &[&str] = match chant {
+        Chant::Off => &["data-chant-variant=\"on\"", "data-chant-variant=\"tune\"", "data-chant-variant=\"every\""],
+        Chant::Tune => &["data-chant-variant=\"off\"", "data-chant-variant=\"every\"", "class=\"chant-strip\""],
+        Chant::Every => &["data-chant-variant=\"off\"", "data-chant-variant=\"tune\""],
+    };
     let mut out = String::new();
     let mut rest = html;
     while let Some(i) = rest.find('<') {
@@ -250,8 +273,7 @@ fn web_words(html: &str, on: bool) -> String {
         let tag = &rest[..rest.find('>').unwrap() + 1];
         let name: String = tag[1..].chars().take_while(char::is_ascii_alphanumeric).collect();
         let score = on && tag.contains("class=\"chant-score");
-        let hidden = if on { "data-chant-variant=\"off\"" } else { "data-chant-variant=\"on\"" };
-        if score || tag.contains(hidden) {
+        if score || hidden.iter().any(|h| tag.contains(h)) {
             let end = element_end(rest, &name);
             if score {
                 let element = &rest[..end];
@@ -311,13 +333,31 @@ fn a_hymn_s_tune_stands_before_the_stanza_it_sets() {
 fn a_whole_hymn_is_a_score_per_stanza_numbered_after_the_first() {
     let gabc = "name: t;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (::) From(g) all(h) ill(j) dreams(h) de(g)fend(h) our(g) eyes,(g.) (::) A(gh)men.(g) (::)";
     let out = blocks(&scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::WholeHymn));
-    let scores: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Score).collect();
+    let scores: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Score && b.chant == ChantVariant::Every).collect();
     assert_eq!(scores.len(), 2);
     assert!(scores[0].drop_cap && scores[0].marker.is_empty());
     assert!(!scores[1].drop_cap && scores[1].marker == "2.");
     assert!(scores[1].score.ends_with("A(gh)men.(g) (::)"), "{}", scores[1].score);
-    assert!(scores.iter().all(|b| b.phrases));
-    assert!(out.iter().filter(|b| b.kind == BlockKind::Stanza).all(|b| b.chant == ChantVariant::Off));
+    assert!(scores.iter().all(|b| b.phrases && b.stanzas.is_empty()));
+    let off = |b: &&Block| b.kind == BlockKind::Stanza && b.chant == ChantVariant::Off;
+    assert_eq!(out.iter().filter(off).count(), 2);
+}
+
+/// Notes over the first verse, as the books set a hymn: the first stanza's score, which carries
+/// every stanza for the strip that sets any of them under the notes, and the others as verse,
+/// numbered to match.
+#[test]
+fn a_whole_hymn_s_tune_stands_over_its_first_stanza_with_the_rest_numbered() {
+    let gabc = "name: t;\nmode: 2;\n%%\n(c4) To(g) thee(h) be(j)fore(h) the(g) close(h) of(g) day,(g.) (::) From(g) all(h) ill(j) dreams(h) de(g)fend(h) our(g) eyes,(g.) (::) A(gh)men.(g) (::)";
+    let out = blocks(&scored(ElementType::Hymn, HYMN, gabc, ScoreSpan::WholeHymn));
+    let tune: Vec<&Block> = out.iter().filter(|b| b.chant == ChantVariant::Tune).collect();
+    let kinds: Vec<BlockKind> = tune.iter().map(|b| b.kind).collect();
+    assert_eq!(kinds, [BlockKind::Score, BlockKind::Stanza]);
+    assert!(tune[0].drop_cap && tune[0].phrases && tune[0].mode == "Mode II");
+    assert_eq!(tune[0].stanzas.len(), 2);
+    assert_eq!(tune[0].score, tune[0].stanzas[0]);
+    assert_eq!(tune[1].marker, "2.");
+    assert!(!tune[1].drop_cap);
 }
 
 /// With Chant off a scored piece reads as it did unscored; with it on, the blocks name what the
@@ -334,11 +374,13 @@ fn scored_blocks_carry_the_web_s_words_either_way() {
     ] {
         let unscored = OfficeElement { score: None, ..e.clone() };
         let out = blocks(&e);
-        assert_eq!(shown(&out, false), shown(&blocks(&unscored), false), "{:?}", e.score);
+        assert_eq!(shown(&out, Chant::Off), shown(&blocks(&unscored), Chant::Off), "{:?}", e.score);
         let html = render_html::html::render_section_elements(std::slice::from_ref(&e));
-        assert_eq!(shown(&out, false), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
-        assert_eq!(shown(&out, true), web_words(&html, true), "{:?}", e.score);
-        assert_eq!(e.text.contains("kneeling"), shown(&out, true).contains("kneeling"), "a rubric shows with Chant on too");
+        assert_eq!(shown(&out, Chant::Off), squeeze(&html_text(&render_html::html::render_section_elements(&[unscored]))));
+        for chant in [Chant::Tune, Chant::Every] {
+            assert_eq!(shown(&out, chant), web_words(&html, chant), "{:?} {chant:?}", e.score);
+            assert_eq!(e.text.contains("kneeling"), shown(&out, chant).contains("kneeling"), "a rubric shows with Chant on too");
+        }
     }
 }
 
