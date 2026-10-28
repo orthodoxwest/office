@@ -48,8 +48,6 @@
               // An unreadable table: Google's metrics, as before.
             }
           }
-          // The verse strip (style.css) works only with the engine at hand.
-          document.documentElement.classList.add("chant-live");
           return neuma;
         });
       });
@@ -66,12 +64,8 @@
     var units = (width / em) * LYRIC_SPACES * SCALE;
     var state = states.get(box);
     if (!state) {
-      state = { chant: null, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++, units: 0 };
-      states.set(box, state);
-    }
-    if (!state.chant) {
       // As chant.rs's page_options, and the apps' Score.kt and Score.swift.
-      state.chant = new neuma.Chant(box.getAttribute("data-gabc"), {
+      var chant = new neuma.Chant(box.getAttribute("data-gabc"), {
         initial: box.getAttribute("data-chant-initial") === "1" ? 1 : 0,
         annotation: false,
         font: font,
@@ -81,7 +75,8 @@
         shortLastStaff: true,
         phraseLines: box.getAttribute("data-chant-phrases") === "1",
       });
-      state.units = 0;
+      state = { chant: chant, prefix: box.getAttribute("data-chant-prefix") + "c" + serial++, units: 0 };
+      states.set(box, state);
     }
     // A sliver of a unit changes no line; resizes within it are left alone.
     if (Math.abs(state.units - units) < 0.5) return;
@@ -130,30 +125,6 @@
     entries.forEach(function (entry) { schedule(byScore.get(entry.target)); });
   });
   byScore.forEach(function (box, score) { observer.observe(score); });
-  // A tune shown once carries the strip of its hymn's verses: a tap sets that
-  // verse's words under the notes, the first alone with the initial, as the
-  // books letter only a hymn's opening.
-  document.querySelectorAll(".chant-strip").forEach(function (strip) {
-    var score = strip.previousElementSibling;
-    var box = score && byScore.has(score) ? byScore.get(score) : null;
-    if (!box) return;
-    strip.addEventListener("click", function (event) {
-      var button = event.target.closest(".chant-strip-verse");
-      if (!button || button.getAttribute("aria-pressed") === "true") return;
-      strip.querySelectorAll(".chant-strip-verse").forEach(function (other) {
-        other.setAttribute("aria-pressed", other === button ? "true" : "false");
-      });
-      var first = button === strip.querySelector(".chant-strip-verse");
-      box.setAttribute("data-gabc", button.getAttribute("data-gabc"));
-      box.setAttribute("data-chant-initial", first ? "1" : "0");
-      var state = states.get(box);
-      if (state && state.chant) {
-        state.chant.free();
-        state.chant = null;
-      }
-      schedule(box);
-    });
-  });
   // The text size can change the em without changing the column's width.
   new MutationObserver(function () { boxes.forEach(schedule); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ["data-text-size"] });

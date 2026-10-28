@@ -741,27 +741,17 @@ function usageBeaconBody(scope) {
     });
   });
 
-  // Chant: Off (the default) / On / All (every verse), offered once the data holds a
-  // score. The same contract as the Martyrology: localStorage only, so every
-  // page (and its offline copy) carries the text and the scores alike; the
-  // pre-paint script in layout.html sets data-chant (and data-chant-verses for
-  // every verse), and style.css shows one.
+  // Chant: Off (the default) / On, offered once the data holds a score. The
+  // same contract as the Martyrology: localStorage only, so every page (and
+  // its offline copy) carries the text and the score alike; the pre-paint
+  // script in layout.html sets data-chant, and style.css shows one.
   var CHANT_KEY = "office-chant";
-  var chantChoice = function (value) {
-    return value === "on" || value === "every" ? value : "off";
-  };
 
   var paintChantChoice = function (choice) {
-    var root = document.documentElement;
-    if (choice === "off") {
-      root.removeAttribute("data-chant");
+    if (choice === "on") {
+      document.documentElement.setAttribute("data-chant", "on");
     } else {
-      root.setAttribute("data-chant", "on");
-    }
-    if (choice === "every") {
-      root.setAttribute("data-chant-verses", "every");
-    } else {
-      root.removeAttribute("data-chant-verses");
+      document.documentElement.removeAttribute("data-chant");
     }
     document.querySelectorAll(".chant-option[data-chant-choice]").forEach(function (btn) {
       btn.setAttribute("aria-pressed", btn.getAttribute("data-chant-choice") === choice ? "true" : "false");
@@ -774,11 +764,11 @@ function usageBeaconBody(scope) {
   } catch {
     // Blocked storage: chant stays off.
   }
-  paintChantChoice(chantChoice(storedChant));
+  paintChantChoice(storedChant === "on" ? "on" : "off");
 
   document.querySelectorAll(".chant-option[data-chant-choice]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var choice = chantChoice(btn.getAttribute("data-chant-choice"));
+      var choice = btn.getAttribute("data-chant-choice") === "on" ? "on" : "off";
       paintChantChoice(choice);
       try {
         localStorage.setItem(CHANT_KEY, choice);

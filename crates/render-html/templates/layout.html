@@ -59,9 +59,7 @@
           document.documentElement.removeAttribute("data-text-size");
         }
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
-        var c = localStorage.getItem("office-chant");
-        if (c === "on" || c === "every") document.documentElement.setAttribute("data-chant", "on");
-        if (c === "every") document.documentElement.setAttribute("data-chant-verses", "every");
+        if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
     })();
   </script>

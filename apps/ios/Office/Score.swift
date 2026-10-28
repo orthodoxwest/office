@@ -11,9 +11,8 @@ private let lyricSpaces: Float = 2.45
  * column's width with its lyrics at the hymn's text size, as the web's chant.js lays it out at its
  * column's, and the staff takes a tint of the theme's lining, as the web's `.chant-score` does. The
  * score keeps to the hymn's measure, as the web's `.hymn-verses`. The opening score carries its
- * mode above it (`.chant-mode`); a whole hymn's stanzas after the first carry their number (the
- * marker), in the rubric's red above the score; and a tune shown once carries a strip of its
- * hymn's verses under it (`.chant-strip`), a tap setting that verse's words under the notes.
+ * mode above it (`.chant-mode`), and a whole hymn's stanzas after the first carry their number
+ * (the marker), in the rubric's red above the score.
  */
 struct ScoreRow: View {
     let block: BlockView
@@ -21,71 +20,39 @@ struct ScoreRow: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var width: CGFloat = 0
-    @State private var verse = 0
 
     var body: some View {
         let lyric = Float(Scale.verse.size * m.type)
-        let shown = block.stanzas.indices.contains(verse) ? verse : 0
-        let gabc = block.stanzas.isEmpty ? block.score : block.stanzas[shown]
         let page = width > 0
-            ? Engraving.page(gabc, initial: block.dropCap && shown == 0, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
+            ? Engraving.page(block.score, initial: block.dropCap, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
             : nil
         VStack(alignment: .leading, spacing: m.px(2)) {
-            VStack(alignment: .leading, spacing: m.px(2)) {
-                if !block.marker.isEmpty {
-                    Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
-                }
-                if !block.mode.isEmpty {
-                    Text(block.mode).font(Font(garamond(Scale.verse.size * 0.8 * m.type, smallCaps: true)))
-                        .tracking(Scale.verse.size * 0.06 * m.type)
-                        .foregroundStyle(p.rubric)
-                        .padding(.bottom, m.px(1))
-                }
-                // A custos may reach past the measure: the whole score is fitted to the column.
-                let fit = page.map { $0.width > Float(width) ? width / CGFloat($0.width) : 1 } ?? 1
-                Canvas { context, _ in
-                    context.scaleBy(x: fit, y: fit)
-                    if let page { draw(page, in: &context, fit: fit * displayScale) }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
-                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            if !block.marker.isEmpty {
+                Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(spoken(block))
-            if block.stanzas.count > 1 {
-                verseStrip(chosen: shown)
+            if !block.mode.isEmpty {
+                Text(block.mode).font(Font(garamond(Scale.verse.size * 0.8 * m.type, smallCaps: true)))
+                    .tracking(Scale.verse.size * 0.06 * m.type)
+                    .foregroundStyle(p.rubric)
+                    .padding(.bottom, m.px(1))
             }
+            // A custos may reach past the measure: the whole score is fitted to the column.
+            let fit = page.map { $0.width > Float(width) ? width / CGFloat($0.width) : 1 } ?? 1
+            Canvas { context, _ in
+                context.scaleBy(x: fit, y: fit)
+                if let page { draw(page, in: &context, fit: fit * displayScale) }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken(block))
         .frame(maxWidth: m.px(hymnMax))
         .frame(maxWidth: .infinity)
-        .onChange(of: block.score) { verse = 0 }
     }
 
     @Environment(\.displayScale) private var displayScale
-
-    /// The verses a tune can carry, numbered: the one under the notes ringed in the rubric's red (`.chant-strip`).
-    private func verseStrip(chosen: Int) -> some View {
-        HStack(spacing: m.px(4)) {
-            ForEach(block.stanzas.indices, id: \.self) { i in
-                let on = i == chosen
-                Button { verse = i } label: {
-                    Text("\(i + 1)").font(Font(garamond(Scale.verse.size * 0.85 * m.type)))
-                        .foregroundStyle(on ? p.rubric : p.muted)
-                        .frame(minWidth: m.px(32), minHeight: m.px(32))
-                        .overlay(Circle().strokeBorder(on ? p.rubric : p.surfaceEdge, lineWidth: 1))
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Verse \(i + 1)")
-                .accessibilityAddTraits(on ? .isSelected : [])
-            }
-        }
-        .padding(.top, m.px(2))
-        .padding(.bottom, m.px(10))
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("The verse under the notes")
-    }
 
     /// neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off,
     /// the initial gilt as every dropped initial is. Drawn at `fit` device pixels to its unit: staff and ledger lines are

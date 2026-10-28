@@ -45,15 +45,13 @@
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
   <p class="pref-hint">{{ martyrology_hint }}</p>
 </div>
-{# Chant notation for the hymn's tune and the Marian antiphon, where a score is available: off, on
-   (a whole hymn's tune over its first verse) or every verse (presentation::CHANT_CHOICES); off by
+{# Chant notation for the hymn's tune and the Marian antiphon, where a score is available; off by
    default, and kept out of sight until the data holds a score (office::chant::offers_chant). #}
 {% if chant %}
 <div class="chant-switch" role="group" aria-label="Chant">
   <span class="pref-label" aria-hidden="true">Chant</span>
-  {% for choice, label in chant_choices %}
-  <button type="button" class="theme-option chant-option" data-chant-choice="{{ choice }}" aria-pressed="false">{{ label }}</button>
-  {% endfor %}
+  <button type="button" class="theme-option chant-option" data-chant-choice="off" title="Hymns and antiphons as text" aria-pressed="false">Off</button>
+  <button type="button" class="theme-option chant-option" data-chant-choice="on" title="Show chant notation" aria-pressed="false">On</button>
   <p class="pref-hint">{{ chant_hint }}</p>
 </div>
 {% endif %}

@@ -116,7 +116,7 @@ class MainActivity : ComponentActivity() {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
                     CompositionLocalProvider(
                         LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) },
-                        LocalChant provides ChantChoice(vm.offersChant, vm.chant) { choice -> if (choice != vm.chant) vm.chooseChant(choice) },
+                        LocalChant provides ChantChoice(vm.offersChant, vm.chant) { on -> if (on != vm.chant) vm.chooseChant(on) },
                     ) {
                         OfficeApp(
                             shown = vm.shown,

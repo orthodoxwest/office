@@ -93,25 +93,6 @@ pub enum ChantVariant {
     Off,
     /// The score: shown with Chant on.
     On,
-    /// A whole hymn as the books set it, its tune over the first stanza and the rest as verse:
-    /// shown with Chant on, notes over the first verse (the default).
-    Tune,
-    /// A whole hymn engraved stanza by stanza: shown with Chant on, notes over every verse.
-    Every,
-}
-
-impl ChantVariant {
-    /// Whether the reader's settings show a block of this variant: `chant` on, and with it
-    /// notes over `every` verse or the first.
-    pub fn shown(self, chant: bool, every: bool) -> bool {
-        match self {
-            ChantVariant::Always => true,
-            ChantVariant::Off => !chant,
-            ChantVariant::On => chant,
-            ChantVariant::Tune => chant && !every,
-            ChantVariant::Every => chant && every,
-        }
-    }
 }
 
 /// How a run of text is set within its block.
@@ -181,9 +162,6 @@ pub struct Block {
     pub phrases: bool,
     /// The mode a score's heading names ("Mode I"); empty for none.
     pub mode: String,
-    /// A whole hymn's tune over its first stanza: every stanza's GABC, in order, so the reader
-    /// may set any of them under the notes; empty for every other block.
-    pub stanzas: Vec<String>,
 }
 
 impl Block {
@@ -198,7 +176,6 @@ impl Block {
             score: String::new(),
             phrases: false,
             mode: String::new(),
-            stanzas: Vec::new(),
         }
     }
 
@@ -781,10 +758,8 @@ fn corporate_lord_prayer(out: &mut Vec<Block>, elem: &OfficeElement) {
     mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
 }
 
-/// A hymn and its score, if it has one: the tune over the first stanza, or a whole hymn's score
-/// set two ways, as the books set it (its tune over the first stanza, which the reader may change,
-/// and the other stanzas as numbered verse) and stanza by stanza (each a score, numbered after
-/// the first), beside the words they set.
+/// A hymn and its score, if it has one: the tune over the first stanza, or every stanza engraved
+/// (each a score, numbered after the first), beside the words they set.
 fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
     let Some(score) = &elem.score else { return hymn_stanzas(out, &elem.text) };
     let stanzas = hymn_sung_stanzas(&elem.text);
@@ -795,35 +770,15 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
     let rubric_blocks = |out: &mut Vec<Block>, before: Option<&Vec<String>>| {
         for r in before.into_iter().flatten() {
             let mut block = Block::new(BlockKind::HymnRubric, text_runs(r));
-            block.chant = ChantVariant::Every;
+            block.chant = ChantVariant::On;
             out.push(block);
         }
     };
     match score.sets {
         ScoreSpan::WholeHymn if parts.len() == stanzas.len() => {
-            // The tune over the first stanza, the others numbered to match its stanza strip.
-            let tune_start = out.len();
-            hymn_stanzas(out, &elem.text);
-            let mut n = 0;
-            for b in &mut out[tune_start..] {
-                b.chant = ChantVariant::Tune;
-                if b.kind == BlockKind::Stanza {
-                    n += 1;
-                    if n == 1 {
-                        let mut tune = Block::score(score, &parts[0], &stanzas[0], true);
-                        tune.chant = ChantVariant::Tune;
-                        tune.stanzas = parts.clone();
-                        *b = tune;
-                    } else {
-                        b.marker = format!("{n}.");
-                    }
-                }
-            }
-            // Every stanza engraved.
             for (i, (part, words)) in parts.iter().zip(&stanzas).enumerate() {
                 rubric_blocks(out, rubrics.get(i));
                 let mut block = Block::score(score, part, words, i == 0);
-                block.chant = ChantVariant::Every;
                 if i > 0 {
                     block.marker = format!("{}.", i + 1);
                 }
@@ -836,11 +791,7 @@ fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
             }
         }
         ScoreSpan::WholeHymn => {
-            for r in rubrics.first().into_iter().flatten() {
-                let mut block = Block::new(BlockKind::HymnRubric, text_runs(r));
-                block.chant = ChantVariant::On;
-                out.push(block);
-            }
+            rubric_blocks(out, rubrics.first());
             out.push(Block::score(score, &score.gabc, &stanzas.join(" "), true));
             let text_start = out.len();
             hymn_stanzas(out, &elem.text);
