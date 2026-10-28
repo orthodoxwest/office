@@ -8896,8 +8896,8 @@ body.page-home::before {
 /* The score: neuma's SVG in lyric ems, so lyrics stay at the text's size.
    The page carries it at one width (render-html chant.rs), scaled down to
    fit a narrower column; chant.js lays it out again at the column's width and
-   whenever that or the text size changes. Staves are ruled in the lining,
-   as the books rule them; the inks are the --chant-* tokens beside the
+   whenever that or the text size changes. Staves are ruled in a tint of the
+   lining, as the books rule them; the inks are the --chant-* tokens beside the
    palette. Its width is the column's, never the score's (inline-size
    containment), so the score follows the column and not the reverse. Every
    score keeps to a hymn's measure (.hymn-verses, 28rem), as in the apps. */
@@ -8944,7 +8944,7 @@ body.page-home::before {
 .chant-mode {
   margin: 0 0 0.2rem;
   color: var(--chant-mode);
-  font-size: 0.8rem;
+  font-size: 0.8em;
   font-variant: small-caps;
   letter-spacing: 0.06em;
   line-height: 1.2;
