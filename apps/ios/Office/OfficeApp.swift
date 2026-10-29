@@ -70,6 +70,8 @@ struct RootView: View {
             page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
             martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page)
         )
+        // The header's measures scale with the reader's text, so the panels under it do too.
+        let m = Metrics(textSize: model.textSize, dynamicType: dynamicType)
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
@@ -82,8 +84,11 @@ struct RootView: View {
                         Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.menuOpen = false }
                             .accessibilityHidden(true)
                         MenuPanel()
-                            .padding(.top, 52)
-                            .padding(.horizontal, gutter)
+                            .padding(.top, m.px(52))
+                            .padding(.horizontal, m.px(gutter))
+                            // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
+                            .accessibilityAddTraits(.isModal)
+                            .accessibilityAction(.escape) { model.menuOpen = false }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
@@ -93,8 +98,10 @@ struct RootView: View {
                             .accessibilityHidden(true)
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         MenuPanel(prefsOnly: true)
-                            .padding(.top, 52)
-                            .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
+                            .padding(.top, m.px(52))
+                            .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
+                            .accessibilityAddTraits(.isModal)
+                            .accessibilityAction(.escape) { model.settingsOpen = false }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
@@ -107,7 +114,7 @@ struct RootView: View {
         .environment(\.palette, palette)
         // The page's season for the chrome over it (the menu); a home or an hour sets its own within.
         .environment(\.ornament, Ornament.of(palette, season: model.season))
-        .environment(\.metrics, Metrics(textSize: model.textSize, dynamicType: dynamicType))
+        .environment(\.metrics, m)
         .background(palette.bg.ignoresSafeArea())
         .tint(palette.accent)
         .preferredColorScheme(model.theme.scheme)

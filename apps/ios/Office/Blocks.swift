@@ -315,6 +315,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
             t.append(NSAttributedString(string: "\u{2028}", attributes: [.font: font]))
             t.append(text)
             spec.text = t
+            spec.firstIndent = gutter
             spec.restIndent = gutter
         } else {
             // The sigil set right in its gutter; the gutter keeps its stop at any size. "All:" is
@@ -327,7 +328,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
             t.append(NSAttributedString(string: "\t", attributes: [.font: font]))
             t.append(text)
             spec.text = t
-            let sigil = m.px(22)
+            let sigil = m.px(22.4)
             let width = CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(NSAttributedString(attributedString: mark)), nil, nil, nil))
             let hang = block.kind == .all ? min(m.px(allHang), max(0, width - sigil)) : word ? min(m.px(wordHang), max(0, width - sigil)) : 0
             let stop = max(sigil, width - hang) + hang

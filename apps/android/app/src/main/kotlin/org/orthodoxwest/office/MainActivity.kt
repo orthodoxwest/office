@@ -57,7 +57,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -464,8 +463,10 @@ fun OfficeApp(
                         )
                     }
                     if (front && LocalWide.current) {
-                        // Under the header's end: the nav shell is held to 68rem and centred.
-                        val width = LocalConfiguration.current.screenWidthDp.dp
+                        // Under the header's end: the nav shell is held to 68rem and centred. The width is
+                        // in the text size's dp, as the shell's 1088dp is, so the panel keeps to the
+                        // Settings button at every size.
+                        val width = this@BoxWithConstraints.maxWidth
                         MenuPanel(
                             visible = settings,
                             currentHour = null,

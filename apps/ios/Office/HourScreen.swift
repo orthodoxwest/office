@@ -231,14 +231,15 @@ struct HourScreen: View {
         let o = Ornament.of(p, season: view.ornament)
         // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
-        // keep their type. Only `type` steps, so the office's own spacing stands.
+        // keep their type. `type` carries the step, and the hour's rhythm, set in body lines, grows with it
+        // (the web's `--line: 1.6em`).
         let prayer: Metrics = {
             var scaled = m
             if width >= m.px(widePrayerFrom) { scaled.type *= widePrayerStep }
             return scaled
         }()
         let columns = hymnColumns(view.sections, p, o, prayer)
-        let index = model.hours.firstIndex(of: view.hour) ?? 0
+        let index = model.hours.firstIndex(of: view.hour) ?? -1
         let rows = self.rows
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
@@ -293,9 +294,9 @@ struct HourScreen: View {
                     }
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
-                        next: index + 1 < model.hours.count ? model.hours[index + 1] : nil,
+                        next: index >= 0 && index + 1 < model.hours.count ? model.hours[index + 1] : nil,
                         // Compline's next is the morrow's Lauds, as on the web.
-                        morrow: index + 1 == model.hours.count ? model.hours.first : nil,
+                        morrow: index >= 0 && index + 1 == model.hours.count ? model.hours.first : nil,
                         reportUrl: view.reportUrl,
                         date: date
                     )

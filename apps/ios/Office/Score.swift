@@ -27,9 +27,6 @@ struct ScoreRow: View {
             ? Engraving.page(block.score, initial: block.dropCap, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
             : nil
         VStack(alignment: .leading, spacing: m.px(2)) {
-            if !block.marker.isEmpty {
-                Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
-            }
             if !block.mode.isEmpty {
                 Text(block.mode).font(Font(garamond(Scale.verse.size * 0.8 * m.type, smallCaps: true)))
                     .tracking(Scale.verse.size * 0.06 * m.type)
@@ -45,6 +42,15 @@ struct ScoreRow: View {
             .frame(maxWidth: .infinity)
             .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        }
+        .overlay(alignment: .topLeading) {
+            // A stanza's number stands in the space above its staff and takes none of its own (the
+            // web's `.chant-stanza-number`, 1.1em up), so the stanzas keep the hymn's group apart.
+            if !block.marker.isEmpty {
+                Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
+                    .fixedSize()
+                    .alignmentGuide(.top) { $0[.bottom] + Scale.verse.size * 0.25 * m.type }
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spoken(block))

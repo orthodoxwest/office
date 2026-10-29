@@ -443,6 +443,12 @@ struct WallCopy: View {
  * 96×168. Tiled from the field's centre and from `seam` down it, and faded by `fade`'s stops of
  * (fraction, opacity) for the field's height in either theme.
  */
+/// The vault tile's edge for a field `width` wide (`--apse-tile`). The fields span the screen, so
+/// their width is the web's viewport.
+private func vaultTile(_ width: CGFloat) -> CGFloat {
+    width >= 2400 ? 960 : width >= 1800 ? 832 : width >= wideFrom ? 704 : 528
+}
+
 struct WallField: View {
     var seam: CGFloat = 0
     let fade: (_ height: CGFloat, _ dark: Bool) -> [(CGFloat, Double)]
@@ -455,7 +461,10 @@ struct WallField: View {
         let rosette = p.rubric.opacity(0.12)
         Canvas { ctx, size in
             ctx.drawLayer { layer in
-                let (w, h): (CGFloat, CGFloat) = dark ? (528, 528) : (96, 168)
+                // The vault's tile spreads as the screen widens (`--apse-tile`), so a painted ceiling
+                // never reads as a wallpaper of small stars; the stars are set on a 528pt tile.
+                let tile = vaultTile(size.width)
+                let (w, h): (CGFloat, CGFloat) = dark ? (tile, tile) : (96, 168)
                 // One tile centred on the field, as the web's masks are positioned; whole points
                 // keep the tiles' edges on the pixels, so shapes that cross them meet without a seam.
                 let x0 = ((size.width / 2 - w / 2).truncatingRemainder(dividingBy: w) - w).rounded()
@@ -469,6 +478,7 @@ struct WallField: View {
                         // Each tile keeps its own half of a shape drawn on both its edges, as the mask's repeat does.
                         t.clip(to: Path(CGRect(x: 0, y: 0, width: w, height: h)))
                         if dark {
+                            t.scaleBy(x: tile / 528, y: tile / 528)
                             for s in vaultStars { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
                         } else {
                             t.fill(powder, with: .color(rosette))

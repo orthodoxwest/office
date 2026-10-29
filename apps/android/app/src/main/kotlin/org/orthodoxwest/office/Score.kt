@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -63,7 +64,16 @@ fun Score(block: BlockView, modifier: Modifier) {
     Box(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = HymnMax).fillMaxWidth()) {
             if (block.marker.isNotEmpty()) {
-                Text(block.marker, Modifier.padding(bottom = 2.dp), style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f))
+                // A stanza's number stands in the space above its staff and takes none of its own (the
+                // web's `.chant-stanza-number`, 1.1em up), so the stanzas keep the hymn's group apart.
+                Text(
+                    block.marker,
+                    Modifier.layout { measurable, constraints ->
+                        val number = measurable.measure(constraints)
+                        layout(number.width, 0) { number.place(0, -number.height - (Type.verse.fontSize * 0.25f).roundToPx()) }
+                    },
+                    style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f),
+                )
             }
             if (block.mode.isNotEmpty()) {
                 Text(
