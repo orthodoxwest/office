@@ -87,6 +87,9 @@ The screenshots come from launch arguments:
 The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to
 the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
 
+A manual run with **store** ticked takes the same pages at the sizes App Store Connect asks for,
+on a 6.9-inch iPhone and a 13-inch iPad, and publishes them to `ci/ios-screenshots/<branch>-store`.
+
 ## Signing
 
 Simulator builds need none. Xcode's free provisioning runs the app on a phone of your own, from
@@ -109,7 +112,7 @@ version through without, so only a release should raise `MARKETING_VERSION`. Bui
 Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
 needs a Mac: the certificate is made with `openssl`, the rest on the web.
 
-1. **The app.** Under the organization's Apple Developer account, add the App ID
+1. **The app.** Under the Apple Developer account, add the App ID
    `org.orthodoxwest.office` (Certificates, Identifiers & Profiles → Identifiers; no
    capabilities). In App Store Connect, add a new iOS app with that bundle ID. Its store name
    must be unique across the App Store, so it may need to differ from the home-screen name
@@ -120,7 +123,7 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
 
    ```bash
    openssl req -new -newkey rsa:2048 -nodes -keyout dist.key -out dist.csr \
-     -subj "/emailAddress=you@example.org/CN=Organization Name/C=US"
+     -subj "/emailAddress=you@example.org/CN=Your Name/C=US"
    openssl x509 -inform der -in distribution.cer -out dist.pem
    openssl pkcs12 -export -legacy -inkey dist.key -in dist.pem -out dist.p12
    ```
@@ -148,3 +151,23 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
 
 The certificate and profile last a year. Renew both the same way and replace the three
 secrets; the API key does not expire.
+
+## The App Store
+
+A release is a TestFlight build submitted for App Review in App Store Connect; nothing in CI
+submits one. Before the first:
+
+- **The listing** (the app's App Store tab): subtitle, description, keywords, the Reference
+  category, a support URL, and the web's privacy page as the privacy policy
+  (`https://orthodoxwestbreviary.com/privacy`).
+- **App Privacy.** One data type: *Usage Data → Product Interaction*, used for *Analytics*, not
+  linked to the user, not used for tracking (the daily usage count, above). It must agree with
+  `PrivacyInfo.xcprivacy`, the privacy manifest every upload carries.
+- **Age rating**: no to every question, which gives 4+.
+- **Screenshots**: a manual run of the iOS workflow with **store** ticked (above).
+- **Pricing and availability**: free, in the countries chosen.
+
+Then pick the build in the version's Build section and submit it. Once a version is on sale,
+App Store Connect refuses further uploads under it, so raise `MARKETING_VERSION` (1.0.0 to
+1.0.1, say) straight after a release, or TestFlight stops receiving builds.
+

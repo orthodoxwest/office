@@ -34,6 +34,11 @@ on:
       - "apps/android/app/src/main/res/drawable-nodpi/**"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
+    inputs:
+      store:
+        description: "Shoot at the App Store's sizes (6.9-inch iPhone, 13-inch iPad)"
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-${{ github.event.pull_request.number || github.ref }}
@@ -92,8 +97,12 @@ jobs:
 
       - name: Choose and boot the simulators
         id: sim
+        env:
+          STORE: ${{ inputs.store }}
         run: |
-          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each.
+          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each. A manual
+          # run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
+          # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
           xcrun simctl list devices available -j > devices.json
           pick() {
             python3 - "$1" "$2" <<'PY'
@@ -106,7 +115,12 @@ jobs:
           print((exact or [d for d in found if d["name"].startswith(preferred)] or found)[0]["udid"])
           PY
           }
-          phone=$(pick iPhone 'iPhone 16') ipad=$(pick iPad 'iPad Pro 11')
+          if [ "$STORE" = true ]; then
+            phone=$(pick iPhone 'iPhone 16 Pro Max') ipad=$(pick iPad 'iPad Pro 13')
+          else
+            phone=$(pick iPhone 'iPhone 16') ipad=$(pick iPad 'iPad Pro 11')
+          fi
+          xcrun simctl list devices | grep -E "$phone|$ipad"
           echo "udid=$phone" >> "$GITHUB_OUTPUT"
           echo "ipad=$ipad" >> "$GITHUB_OUTPUT"
           # A simulator's first boot takes minutes, so both start now, behind the builds, and the
@@ -200,7 +214,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: ios-screenshots
+          name: ios-screenshots${{ inputs.store && '-store' || '' }}
           path: apps/ios/build/review/
           if-no-files-found: warn
 
@@ -209,7 +223,8 @@ jobs:
         if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}
+          # The store-size set beside the review set, not over it.
+          BRANCH: ci/ios-screenshots/${{ github.head_ref || github.ref_name }}${{ inputs.store && '-store' || '' }}
         run: |
           [ -d apps/ios/build/review ] || exit 0
           cd apps/ios/build/review
