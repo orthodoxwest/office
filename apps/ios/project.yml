@@ -80,6 +80,21 @@ targets:
         NSLocationWhenInUseUsageDescription: The Daily Office uses your location on this phone to time reminders by sunrise and sunset. It never leaves your phone.
         # Whether this build reports the daily usage count (Usage.swift): Release only.
         OfficeCountsUsage: $(OFFICE_COUNTS_USAGE)
+        # Long-pressing the icon offers the hours most kept at home, and the ordo, as Android's
+        # launcher shortcuts do (Shortcuts.swift); the glyphs are the web's, as Android's are.
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: lauds
+            UIApplicationShortcutItemTitle: Pray Lauds
+            UIApplicationShortcutItemIconFile: shortcut-lauds
+          - UIApplicationShortcutItemType: vespers
+            UIApplicationShortcutItemTitle: Pray Vespers
+            UIApplicationShortcutItemIconFile: shortcut-vespers
+          - UIApplicationShortcutItemType: compline
+            UIApplicationShortcutItemTitle: Pray Compline
+            UIApplicationShortcutItemIconFile: shortcut-compline
+          - UIApplicationShortcutItemType: ordo
+            UIApplicationShortcutItemTitle: This month in the ordo
+            UIApplicationShortcutItemIconFile: shortcut-ordo
         UIAppFonts:
           - eb_garamond_regular.ttf
           - eb_garamond_italic.ttf

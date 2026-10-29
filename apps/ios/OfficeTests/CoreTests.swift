@@ -29,6 +29,16 @@ final class CoreTests: XCTestCase {
     }
 
     /// A part's heading takes the rhythm's full step, a body line, which grows with the reader's text.
+    func testEachShortcutOpensTheDayItIsChosen() {
+        let sunday = CivilDate(year: 2026, month: 3, day: 15), monday = CivilDate(year: 2026, month: 3, day: 16)
+        XCTAssertEqual(Shortcuts.page("vespers", today: sunday, clockHour: 19), .hour(sunday, "vespers"))
+        XCTAssertEqual(Shortcuts.page(Shortcuts.ordo, today: sunday, clockHour: 19), .ordo(year: 2026, month: 3, day: 15))
+        // Compline after midnight is the day before's; Lauds at that hour is already the new day's.
+        XCTAssertEqual(Shortcuts.page("compline", today: monday, clockHour: 1), .hour(sunday, "compline"))
+        XCTAssertEqual(Shortcuts.page("lauds", today: monday, clockHour: 1), .hour(monday, "lauds"))
+        XCTAssertNil(Shortcuts.page("matins", today: sunday, clockHour: 19))
+    }
+
     func testTheGapsFollowTheSharedRhythm() throws {
         let blocks = try Office.core.get().compose(hour: "lauds", year: 2026, month: 3, day: 15, form: "private").sections.flatMap(\.blocks)
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })

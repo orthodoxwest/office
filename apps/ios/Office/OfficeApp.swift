@@ -23,7 +23,7 @@ struct OfficeApp: App {
     }
 }
 
-/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off.
+/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off; and the icon's shortcuts.
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
@@ -39,6 +39,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         return true
     }
 
+    /// The scene's delegate takes the icon's shortcuts (Shortcuts.swift); SwiftUI keeps the window.
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: nil, sessionRole: session.role)
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let info = response.notification.request.content.userInfo
         // Each reminder answered moves the schedule on, so one prayed from its notifications
@@ -51,7 +58,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
            let hour = info["hour"] as? String,
            let date = (info["date"] as? String).flatMap(CivilDate.parse) {
-            AppModel.shared.openedByReminder = true
+            AppModel.shared.openedExternally = true
             DispatchQueue.main.async { AppModel.shared.open(.hour(date, hour)) }
         }
         ReminderScheduler.sync(done: completionHandler)
@@ -136,7 +143,7 @@ struct RootView: View {
         .onAppear {
             guard !started else { return }
             started = true
-            if !model.openFromLaunch() && !model.openedByReminder && !wayBack.isEmpty { model.restore(wayBack) }
+            if !model.openFromLaunch() && !model.openedExternally && !wayBack.isEmpty { model.restore(wayBack) }
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
         // The page shown counts in the day's usage whenever it, how it is read (Prime's

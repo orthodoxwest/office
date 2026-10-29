@@ -18,6 +18,8 @@ native text, screen for screen:
 - **Reminders**: local notifications with the bell. Each names its hour and time ("Vespers ·
   6:00 PM", as Android's) and the day's feast, offers "Remind me in 10 min", and clears an hour
   after its office begins.
+- **Icon shortcuts**: long-pressing the app's icon offers Lauds, Vespers, Compline and this
+  month's ordo, with the web's glyphs, as Android's launcher shortcuts do (`Shortcuts.swift`).
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
