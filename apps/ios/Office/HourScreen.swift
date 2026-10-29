@@ -435,8 +435,8 @@ struct HourScreen: View {
                 if prev != nil {
                     space = block.space
                 } else if afterClosed {
-                    // Under a closed section's label: a part's heading a group's space below it.
-                    space = heading ? .group : .stanza
+                    // Under a closed section's label: its own space, at most a group's.
+                    space = spaceLines(space: block.space) < spaceLines(space: .group) ? block.space : .group
                 } else {
                     space = heading ? .bind : .none
                 }

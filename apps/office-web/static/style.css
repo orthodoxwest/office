@@ -2233,20 +2233,24 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   --space-section: var(--line);
 }
 
+/* The rules below place the hour's elements wherever they stand: in the list
+   itself, in the session prayers, or in a wrapper that only chooses between
+   readings (a prayer form's part, the Martyrology's two). A wrapper takes no
+   space of its own beyond what its first element would take. */
 .elements *,
 .session-prayers-content > * {
   margin-block: 0;
 }
 
 /* Element to element within a part. */
-:is(.elements, .session-prayers-content) > * + * {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > * + * {
   margin-top: var(--space-stanza);
 }
 
 /* A group of psalmody opens with its antiphon or psalm, and what follows a
    group's closing antiphon or the hymn stands a group's space below it. */
-.elements > * + :is(.antiphon, .psalm, .canticle),
-.elements > :is(.antiphon, .hymn) + * {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > * + :is(.antiphon, .psalm, .canticle),
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > :is(.antiphon, .hymn) + * {
   margin-top: var(--space-group);
 }
 
@@ -2254,22 +2258,22 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    opening antiphon (and the note on that antiphon), and its closing antiphon
    close under its last verse or Gloria. Two ANT. lines in a row then read as
    the end of one group and the start of the next, not as a stutter. */
-.elements > :is(.antiphon, .unrepeated-note) + :is(.psalm, .canticle),
-.elements > :is(.psalm, .canticle) + .antiphon:not(.antiphon-announce) {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > :is(.antiphon, .unrepeated-note) + :is(.psalm, .canticle),
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > :is(.psalm, .canticle) + .antiphon:not(.antiphon-announce) {
   margin-top: var(--space-bind);
 }
 
-.elements > .antiphon + .unrepeated-note {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > .antiphon + .unrepeated-note {
   margin-top: var(--space-line);
 }
 
 /* A heading, close to what it introduces, and closer still to a Marian
    antiphon's title, as the Hymn's heading to the hymn's. */
-.elements > .section-heading + * {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > .section-heading + * {
   margin-top: var(--space-bind);
 }
 
-.elements > .section-heading + .marian-antiphon {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > .section-heading + .marian-antiphon {
   margin-top: var(--space-line);
 }
 
@@ -2283,7 +2287,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* A part of the office: its heading, the Hymn's and the Chapter's included,
    under the small cross. The session prayers' headings keep their own air. */
-.elements > * + :is(.section-heading, .hymn, .chapter) {
+:is(.elements, .session-prayers-content, [data-martyrology-variant], .leader-slot > [data-leaders]) > * + :is(.section-heading, .hymn, .chapter),
+.elements > * + [data-martyrology-variant]:has(> .section-heading:first-child) {
   margin-top: var(--space-section);
 }
 
@@ -2291,9 +2296,14 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: 1.25rem;
 }
 
-/* Under a closed section's label, a part's heading stands a group below it. */
+/* Under a closed section's label, a part's heading stands a group below it,
+   and the label keeps no space of its own below. */
 .elements > .session-prayers:not([open]) + .section-heading {
   margin-top: var(--space-group);
+}
+
+.elements > .session-prayers:not([open]) > summary {
+  margin-bottom: 0;
 }
 
 /* Within an element, a head binds to what it introduces: a heading to its
@@ -2302,7 +2312,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: var(--space-bind);
 }
 
-:is(.hymn, .chapter) > .section-heading + * {
+:is(.hymn, .chapter) > .section-heading + :is(.hymn-latin, .hymn-title, .chapter-ref) {
   margin-top: var(--space-line);
 }
 
@@ -2395,6 +2405,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    list, and take the same cross: a threshold is a threshold wherever the
    markup nests it. */
 .elements > .section-heading:not(:first-child)::before,
+.elements > [data-martyrology-variant] > .section-heading::before,
 .elements > :is(.chapter, .hymn):not(:first-child) > .section-heading:first-child::before {
   content: "";
   display: block;

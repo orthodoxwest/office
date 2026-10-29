@@ -341,6 +341,35 @@ test("the hour's spaces are the rhythm's steps of the body line", async ({ page 
   }
 });
 
+test("the rhythm reaches into a prayer form's part and the Martyrology", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("office-prayer-form", "priest");
+    localStorage.setItem("office-martyrology", "on");
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/prime/2026-10-29");
+  const steps = await page.evaluate(() => {
+    const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+    const shown = (e) => e.getClientRects().length > 0;
+    const leaves = [...document.querySelectorAll(".elements p, .elements h2")].filter(shown);
+    const at = (text) => leaves.findIndex((e) => e.textContent.includes(text));
+    const above = (i) => (leaves[i].getBoundingClientRect().top - leaves[i - 1].getBoundingClientRect().bottom) / line;
+    const heading = at("Martyrology for tomorrow");
+    return {
+      confession: above(at("Then the Confession is repeated")),
+      absolution: above(at("After Confession has been made")),
+      martyrology: above(heading),
+      entry: above(heading + 1),
+      thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
+    };
+  });
+  // Each matches render_blocks::space_before for the same blocks.
+  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45 };
+  for (const [name, step] of Object.entries(expected)) {
+    expect(steps[name], name).toBeCloseTo(step, 1);
+  }
+});
+
 test("hour progress completes with the prayer, before the administrative epilogue", async ({
   page,
 }) => {

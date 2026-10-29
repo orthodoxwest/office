@@ -202,8 +202,8 @@ fun HourScreen(
                     val heading = block.kind == BlockKind.HEADING
                     val gap = when {
                         prev != null -> block.space.of(line)
-                        // Under a closed section's label: a part's heading a group's space below it.
-                        afterClosed -> (if (heading) Space.GROUP else Space.STANZA).of(line)
+                        // Under a closed section's label: its own space, at most a group's.
+                        afterClosed -> minOf(block.space.of(line), Space.GROUP.of(line))
                         else -> (if (heading) Space.BIND else Space.NONE).of(line)
                     }
                     // A small painted cross before each of the office's parts after the first, as the
