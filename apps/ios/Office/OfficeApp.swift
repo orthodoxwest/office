@@ -30,24 +30,37 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         center.delegate = self
         ReminderScheduler.register(center)
         ReminderScheduler.registerRefresh()
+        // A new zone or a clock set moves the sun's times and the day: the reminders follow at
+        // once, as Android's do on TIMEZONE_CHANGED and TIME_SET.
+        let changes: [Notification.Name] = [UIApplication.significantTimeChangeNotification, .NSSystemTimeZoneDidChange]
+        for name in changes {
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in ReminderScheduler.sync() }
+        }
         return true
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let info = response.notification.request.content.userInfo
+        // Each reminder answered moves the schedule on, so one prayed from its notifications
+        // without opening the app keeps ringing (Android refills from each reminder as it fires).
         if response.actionIdentifier == ReminderScheduler.snoozeAction {
-            ReminderScheduler.snooze(response.notification)
-        } else if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
-                  let hour = info["hour"] as? String,
-                  let date = (info["date"] as? String).flatMap(CivilDate.parse) {
+            // The app may be suspended once the handler is called: the snooze is added first.
+            ReminderScheduler.snooze(response.notification) { ReminderScheduler.sync(done: completionHandler) }
+            return
+        }
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+           let hour = info["hour"] as? String,
+           let date = (info["date"] as? String).flatMap(CivilDate.parse) {
+            AppModel.shared.openedByReminder = true
             DispatchQueue.main.async { AppModel.shared.open(.hour(date, hour)) }
         }
-        completionHandler()
+        ReminderScheduler.sync(done: completionHandler)
     }
 
     // A reminder that comes while the app is open still rings and shows.
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .list, .sound])
+        ReminderScheduler.sync()
     }
 }
 
@@ -121,7 +134,7 @@ struct RootView: View {
         .onAppear {
             guard !started else { return }
             started = true
-            if !model.openFromLaunch() && !wayBack.isEmpty { model.restore(wayBack) }
+            if !model.openFromLaunch() && !model.openedByReminder && !wayBack.isEmpty { model.restore(wayBack) }
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
         // The page shown counts in the day's usage whenever it, how it is read (Prime's

@@ -381,6 +381,10 @@ final class AppModel: ObservableObject {
         ([Page.home(root)] + pages).map(\.encoded).joined(separator: "\n")
     }
 
+    /// A reminder was tapped to open its hour: a launch then leaves the way back unrestored, so
+    /// the hour is not replaced by it, as Android's intent is not.
+    var openedByReminder = false
+
     func restore(_ saved: String) {
         let pages = saved.split(separator: "\n").compactMap { Page.decode(String($0)) }
         guard case let .home(d)? = pages.first else { return }

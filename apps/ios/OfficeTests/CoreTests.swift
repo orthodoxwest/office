@@ -295,6 +295,11 @@ final class ReminderTests: XCTestCase {
         XCTAssertEqual(content.categoryIdentifier, ReminderScheduler.category)
         XCTAssertEqual(content.userInfo["hour"] as? String, "lauds")
         XCTAssertEqual(content.userInfo["date"] as? String, "2026-03-15")
+        // "Lauds · 7:00 AM" (or 07:00): the office's own time, not the lead's.
+        XCTAssertEqual(content.title, ReminderScheduler.title("Lauds", office: first.office))
+        XCTAssertTrue(content.title.hasPrefix("Lauds · "))
+        XCTAssertEqual(calendar.component(.hour, from: first.office), 7)
+        XCTAssertNotNil(content.userInfo["office"] as? Double)
         XCTAssertNotNil(Bundle.main.url(forResource: "bell", withExtension: "caf"))
     }
 

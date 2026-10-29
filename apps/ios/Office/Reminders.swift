@@ -137,6 +137,8 @@ struct PlannedReminder: Equatable {
     let date: CivilDate
     let at: DateComponents
     let fireDate: Date
+    /// When the office begins: the title's time, and an hour after it the reminder clears.
+    let office: Date
     let title: String
     let feast: String
 }
@@ -171,21 +173,29 @@ enum ReminderScheduler {
                   let fire = calendar.date(byAdding: .minute, value: -settings.lead, to: officeDate),
                   fire > now else { continue }
             let at = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
-            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, title: r.title, feast: r.feast))
+            out.append(PlannedReminder(id: "reminder.\(r.date.iso).\(r.hour)", hour: r.hour, date: r.date, at: at, fireDate: fire, office: officeDate, title: r.title, feast: r.feast))
             if out.count == capacity { break }
         }
         return out
     }
 
-    /// The notification a reminder posts: "Vespers", then the day it keeps, with the bell.
+    /// How long after its office begins a reminder stays in Notification Center before a sync clears it (Android's `LINGER`).
+    static let linger: TimeInterval = 60 * 60
+
+    /// "Vespers · 6:00 PM": the clock time in the phone's 12- or 24-hour style, not an age that drifts and reads as past.
+    static func title(_ name: String, office: Date) -> String {
+        "\(name) · \(office.formatted(date: .omitted, time: .shortened))"
+    }
+
+    /// The notification a reminder posts: "Vespers · 6:00 PM", then the day it keeps, with the bell.
     static func content(_ r: PlannedReminder) -> UNMutableNotificationContent {
         let c = UNMutableNotificationContent()
-        c.title = r.title
+        c.title = title(r.title, office: r.office)
         c.body = r.feast
         c.sound = UNNotificationSound(named: UNNotificationSoundName("bell.caf"))
         c.categoryIdentifier = category
         c.threadIdentifier = "hours"
-        c.userInfo = ["hour": r.hour, "date": r.date.iso]
+        c.userInfo = ["hour": r.hour, "date": r.date.iso, "office": r.office.timeIntervalSince1970]
         return c
     }
 
@@ -200,6 +210,14 @@ enum ReminderScheduler {
         let center = UNUserNotificationCenter.current()
         DispatchQueue.global(qos: .utility).async {
             let planned = (try? Office.core.get()).flatMap { try? plan(ReminderStore.load(), now: now, core: $0) } ?? []
+            // Reminders whose office began over an hour ago are cleared, as Android's time out.
+            center.getDeliveredNotifications { delivered in
+                let past = delivered.filter { n in
+                    guard let office = n.request.content.userInfo["office"] as? Double else { return false }
+                    return now.timeIntervalSince1970 > office + linger
+                }
+                center.removeDeliveredNotifications(withIdentifiers: past.map(\.request.identifier))
+            }
             center.getPendingNotificationRequests { pending in
                 let wanted = Set(planned.map(\.id))
                 let stale = pending.map(\.identifier).filter { $0.hasPrefix("reminder.") && !wanted.contains($0) }
@@ -217,13 +235,13 @@ enum ReminderScheduler {
     }
 
     /// "Remind me in 10 min": the reminder is put away and rings again, with the same words, after the wait.
-    static func snooze(_ notification: UNNotification) {
+    static func snooze(_ notification: UNNotification, done: @escaping () -> Void = {}) {
         let center = UNUserNotificationCenter.current()
         let request = notification.request
         center.removeDeliveredNotifications(withIdentifiers: [request.identifier])
-        guard let again = request.content.mutableCopy() as? UNMutableNotificationContent else { return }
+        guard let again = request.content.mutableCopy() as? UNMutableNotificationContent else { return done() }
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: snooze, repeats: false)
-        center.add(UNNotificationRequest(identifier: "snooze.\(request.identifier)", content: again, trigger: trigger))
+        center.add(UNNotificationRequest(identifier: "snooze.\(request.identifier)", content: again, trigger: trigger)) { _ in done() }
     }
 
     /// Asks iOS to wake the app about twice a day to move the schedule on.
