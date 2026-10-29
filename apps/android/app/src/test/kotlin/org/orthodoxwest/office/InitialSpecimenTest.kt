@@ -18,6 +18,7 @@ import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.RunView
+import org.orthodoxwest.office.core.Space
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
@@ -53,7 +54,7 @@ class InitialSpecimenTest {
         val openings = listOf(
             pointed(BlockKind.VERSE, "Praise the Lord", " all ye heathen."),
             pointed(BlockKind.VERSE, "Lord thou hast been our refuge", " from one age."),
-            BlockView(BlockKind.PARAGRAPH, "", true, true, listOf(RunView("Be sober, be vigilant.", RunStyle.PLAIN))),
+            BlockView(BlockKind.PARAGRAPH, "", true, true, listOf(RunView("Be sober, be vigilant.", RunStyle.PLAIN)), space = Space.NONE),
             pointed(BlockKind.RESPONSE, "He shall deliver thee,", " From the snare of the hunter."),
         )
         compose.setContent {
@@ -67,7 +68,7 @@ class InitialSpecimenTest {
     }
 
     private fun pointed(kind: BlockKind, first: String, second: String) =
-        BlockView(kind, "", true, true, listOf(RunView(first, RunStyle.PLAIN), RunView("\u00a0*", RunStyle.MEDIANT), RunView(second, RunStyle.PLAIN)))
+        BlockView(kind, "", true, true, listOf(RunView(first, RunStyle.PLAIN), RunView("\u00a0*", RunStyle.MEDIANT), RunView(second, RunStyle.PLAIN)), space = Space.NONE)
 
     private fun verse(word: String) = BlockView(
         BlockKind.VERSE, "", true, true,
@@ -76,6 +77,7 @@ class InitialSpecimenTest {
             RunView(" *", RunStyle.MEDIANT),
             RunView(" praise his holy Name, for he is gracious, and his mercy endureth for ever.", RunStyle.PLAIN),
         ),
+        space = Space.NONE,
     )
 
     companion object {

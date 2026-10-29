@@ -802,8 +802,13 @@ impl HourView {
     fn new(hour_name: &str, hour: &OfficeHour, chant: bool) -> HourView {
         let hidden = if chant { render_blocks::ChantVariant::Off } else { render_blocks::ChantVariant::On };
         let d = hour.date;
-        let blocks = render_blocks::hour_sections(hour);
+        let mut blocks = render_blocks::hour_sections(hour);
         let scored = blocks.iter().flat_map(|s| &s.blocks).any(|b| b.chant == render_blocks::ChantVariant::On);
+        // Each block's space follows the block shown above it, the other setting's left out.
+        for s in &mut blocks {
+            s.blocks.retain(|b| b.chant != hidden);
+        }
+        render_blocks::space_blocks(blocks.iter_mut().flat_map(|s| &mut s.blocks));
         HourView {
             hour: hour_name.to_string(),
             title: hour.title.clone(),
@@ -814,13 +819,7 @@ impl HourView {
             ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             first_class: !rank_class(hour.rank, hour.color).is_empty(),
-            sections: blocks
-                .into_iter()
-                .map(|mut s| {
-                    s.blocks.retain(|b| b.chant != hidden);
-                    SectionView::from(s)
-                })
-                .collect(),
+            sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,
             chant: scored.then_some(chant),
@@ -858,6 +857,8 @@ pub struct BlockView {
     /// The mode over a score that opens its piece ("Mode I"); empty for none.
     #[uniffi(default = "")]
     pub mode: String,
+    /// The space above the block, after the block shown before it; [`space_lines`] sizes it.
+    pub space: Space,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -867,6 +868,7 @@ impl From<render_blocks::Block> for BlockView {
             marker: b.marker,
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
+            space: b.space.into(),
             score: b.score,
             phrases: b.phrases,
             mode: b.mode,
@@ -958,6 +960,52 @@ impl From<render_blocks::BlockKind> for BlockKind {
             K::Gap => BlockKind::Gap,
         }
     }
+}
+
+/// `render_blocks::Space`, a step of the hour's vertical rhythm, for the bindings.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Enum)]
+pub enum Space {
+    None,
+    Line,
+    Bind,
+    Stanza,
+    Group,
+    Section,
+}
+
+impl From<render_blocks::Space> for Space {
+    fn from(s: render_blocks::Space) -> Space {
+        use render_blocks::Space as S;
+        match s {
+            S::None => Space::None,
+            S::Line => Space::Line,
+            S::Bind => Space::Bind,
+            S::Stanza => Space::Stanza,
+            S::Group => Space::Group,
+            S::Section => Space::Section,
+        }
+    }
+}
+
+impl From<Space> for render_blocks::Space {
+    fn from(s: Space) -> render_blocks::Space {
+        use render_blocks::Space as S;
+        match s {
+            Space::None => S::None,
+            Space::Line => S::Line,
+            Space::Bind => S::Bind,
+            Space::Stanza => S::Stanza,
+            Space::Group => S::Group,
+            Space::Section => S::Section,
+        }
+    }
+}
+
+/// A step of the rhythm as a fraction of the prayer's body line: the apps multiply it by the
+/// line they set, so the space grows with the reader's text as the web's does.
+#[uniffi::export]
+pub fn space_lines(space: Space) -> f32 {
+    render_blocks::Space::from(space).lines()
 }
 
 /// `render_blocks::RunStyle`, for the bindings.

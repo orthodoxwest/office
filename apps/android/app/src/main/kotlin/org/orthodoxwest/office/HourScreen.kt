@@ -84,6 +84,7 @@ import kotlin.math.max
 import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
+import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.blockWords
 
@@ -158,6 +159,8 @@ fun HourScreen(
         val wide = maxWidth >= WidePrayerFrom
         val prayer = remember(base, wide) { if (wide) Density(base.density, base.fontScale * WidePrayerStep) else base }
         val columns = hymnColumns(view.sections, prayer)
+        // The unit of the office's rhythm: the body line at the prayer's size.
+        val line = prayer.bodyLine()
         LazyColumn(
             Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
             state = listState,
@@ -170,14 +173,18 @@ fun HourScreen(
             // Each block's space depends on the one before it, across sections.
             var prev: BlockView? = null
             var afterClosed = false
+            var afterOpen = false
             // Whether anything of the office stands above: its first part takes no cross.
             var begun = false
             view.sections.forEachIndexed { i, section ->
                 if (section.collapsible) {
                     val expanded = open[i] == true
+                    // A section's label stands as a part's heading does: a section's space above
+                    // it, unless it opens the hour, and a bind's below.
+                    val atTop = !begun
                     item(key = "toggle-$i") {
                         CompositionLocalProvider(LocalDensity provides prayer) { Row(
-                            Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                            Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = if (atTop) 0.dp else Space.SECTION.of(line), bottom = if (expanded) Space.BIND.of(line) else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap {
                                     unfolding = true
                                     open[i] = !expanded
@@ -192,15 +199,19 @@ fun HourScreen(
                     }
                     prev = null
                     afterClosed = !expanded
+                    afterOpen = expanded
                     begun = true
                     if (!expanded) return@forEachIndexed
                 }
                 section.blocks.forEachIndexed { j, block ->
                     val heading = block.kind == BlockKind.HEADING
                     val gap = when {
-                        prev != null -> gapBefore(prev, block)
-                        afterClosed -> if (heading) 23.2.dp else 14.dp
-                        else -> if (heading) 12.dp else 0.dp
+                        prev != null -> block.space.of(line)
+                        // Under a closed section's label: its own space, at most a group's.
+                        afterClosed -> minOf(block.space.of(line), Space.GROUP.of(line))
+                        // An open section's label holds the space below itself.
+                        afterOpen -> 0.dp
+                        else -> (if (heading) Space.BIND else Space.NONE).of(line)
                     }
                     // A small painted cross before each of the office's parts after the first, as the
                     // web's `.elements > .section-heading`: a section's heading, or a heading standing
@@ -210,6 +221,7 @@ fun HourScreen(
                     val cross = part && begun
                     begun = true
                     afterClosed = false
+                    afterOpen = false
                     item(key = "$i-$j") {
                         CompositionLocalProvider(LocalDensity provides prayer) {
                             Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross)

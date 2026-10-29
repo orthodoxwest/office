@@ -303,6 +303,85 @@ test("psalm spacing groups each antiphon with its own psalm", async ({ page }) =
   expect(spacing.gloriaGap).toBeGreaterThan(spacing.verseGap * 1.5);
 });
 
+// The hour's vertical rhythm (render_blocks::Space, which the apps share): each
+// space a step of the prayer's body line. Sext's run from the Alleluia through
+// the hymn into the first psalm is the page that showed the steps uneven.
+test("the hour's spaces are the rhythm's steps of the body line", async ({ page }) => {
+  for (const width of [390, 800, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/sext/2026-10-29");
+    const steps = await page.evaluate(() => {
+      const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+      const gap = (a, b) => (b.getBoundingClientRect().top - a.getBoundingClientRect().bottom) / line;
+      const q = (s) => document.querySelector(s);
+      const stanzas = [...document.querySelectorAll(".hymn .hymn-stanza")];
+      const hymn = q(".hymn");
+      const antiphon = hymn.nextElementSibling;
+      const psalm = antiphon.nextElementSibling;
+      return {
+        line,
+        prayer: parseFloat(getComputedStyle(q(".elements")).fontSize),
+        section: gap(hymn.previousElementSibling, hymn.querySelector(".section-heading")),
+        title: gap(hymn.querySelector(".section-heading"), q(".hymn-title")),
+        hymn: gap(q(".hymn-title"), stanzas[0]),
+        stanza: gap(stanzas[0], stanzas[1]),
+        group: gap(stanzas[stanzas.length - 1], antiphon),
+        antiphon: gap(antiphon, psalm.querySelector(".item-label")),
+        label: gap(psalm.querySelector(".item-label"), psalm.querySelector(".verse")),
+        verse: gap(...psalm.querySelectorAll(".verse")),
+        gloria: gap([...psalm.querySelectorAll(".verse")].pop(), psalm.querySelector(".gloria-patri")),
+      };
+    });
+    // The line is the prayer's body line, so the steps follow the text's size.
+    expect(steps.line).toBeCloseTo(steps.prayer * 1.6, 1);
+    const expected = { section: 1, title: 0.15, hymn: 0.3, stanza: 0.45, group: 0.75, antiphon: 0.3, label: 0.3, verse: 0.15, gloria: 0.45 };
+    for (const [name, step] of Object.entries(expected)) {
+      expect(steps[name], `${name} at ${width}px`).toBeCloseTo(step, 1);
+    }
+  }
+});
+
+test("the rhythm reaches into a prayer form's part and the Martyrology", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("office-prayer-form", "priest");
+    localStorage.setItem("office-martyrology", "on");
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/prime/2026-10-29");
+  const steps = await page.evaluate(() => {
+    const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+    const shown = (e) => e.getClientRects().length > 0;
+    const leaves = [...document.querySelectorAll(".elements p, .elements h2")].filter(shown);
+    const at = (text) => leaves.findIndex((e) => e.textContent.includes(text));
+    const above = (i) => (leaves[i].getBoundingClientRect().top - leaves[i - 1].getBoundingClientRect().bottom) / line;
+    const heading = at("Martyrology for tomorrow");
+    return {
+      confession: above(at("Then the Confession is repeated")),
+      absolution: above(at("After Confession has been made")),
+      martyrology: above(heading),
+      entry: above(heading + 1),
+      thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
+      // A section's label stands as a part's heading, as the apps' toggle row does.
+      label: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        const before = after.previousElementSibling.getBoundingClientRect();
+        return (box.top - before.bottom) / line;
+      })(),
+      under: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
+      })(),
+    };
+  });
+  // Each matches render_blocks::space_before for the same blocks.
+  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45, label: 1, under: 0.3 };
+  for (const [name, step] of Object.entries(expected)) {
+    expect(steps[name], name).toBeCloseTo(step, 1);
+  }
+});
+
 test("hour progress completes with the prayer, before the administrative epilogue", async ({
   page,
 }) => {
@@ -3938,14 +4017,16 @@ test("Office prayer instructions retain spacing and Marian collects share initia
   for (const theme of ["light", "dark"]) {
     await openDatedPage(page, "/vespers/2026-09-22", theme);
     const rubric = page.locator(".session-prayers-content > .rubric").last();
-    const gap = await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom);
-    expect(gap).toBeGreaterThanOrEqual(14);
+    // A stanza's step of the prayer's line (the rhythm's space between elements), on screen and paper.
+    const steps = () => rubric.evaluate(el => (el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)
+      / parseFloat(getComputedStyle(el).getPropertyValue("--line")));
+    expect(await steps()).toBeCloseTo(0.45, 1);
     const collect = page.locator(".marian-antiphon .collect .plain-line").first();
     await expect(collect).toHaveAttribute("data-initial", "A");
     await expect(collect.locator(".initial-word")).toHaveText("lmighty");
     await page.emulateMedia({ media: "print" });
     await expect(rubric).toBeVisible();
-    expect(await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(14);
+    expect(await steps()).toBeCloseTo(0.45, 1);
     await page.emulateMedia({ media: "screen" });
   }
 });

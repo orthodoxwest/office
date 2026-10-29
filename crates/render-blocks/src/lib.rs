@@ -162,6 +162,8 @@ pub struct Block {
     pub phrases: bool,
     /// The mode a score's heading names ("Mode I"); empty for none.
     pub mode: String,
+    /// The space above the block, after the block shown before it ([`space_blocks`]).
+    pub space: Space,
 }
 
 impl Block {
@@ -176,6 +178,7 @@ impl Block {
             score: String::new(),
             phrases: false,
             mode: String::new(),
+            space: Space::None,
         }
     }
 
@@ -206,6 +209,110 @@ impl Block {
     }
 }
 
+/// The steps of the hour's vertical rhythm, each a fraction of the prayer's body line, so the
+/// space grows with the text on every front. The web's `--space-*` properties (style.css) and the
+/// apps' gaps are these fractions of the line; a step's name says what it separates. The
+/// printed Monastic Diurnal steps the same way: lines of one unit set solid, a head close to
+/// what it introduces, stanzas and psalms half a line apart, a full line before a part.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Space {
+    /// Nothing between: the first block, or lines sung as one piece.
+    None,
+    /// The lines of one element: verse to verse, ℣ to ℟, a speaker to their words.
+    Line,
+    /// A head and what it introduces: a heading to its title, a psalm's label to its first
+    /// verse, an antiphon to its psalm, a psalm to its closing antiphon.
+    Bind,
+    /// Stanza to stanza, the Gloria Patri after its psalm, and one element to the next within
+    /// a part of the office.
+    Stanza,
+    /// Between groups within a part: the hymn to the psalmody, one psalm's group to the next.
+    Group,
+    /// Before a part of the office (its heading, under a small cross).
+    Section,
+}
+
+impl Space {
+    pub const ALL: [Space; 6] = [Space::None, Space::Line, Space::Bind, Space::Stanza, Space::Group, Space::Section];
+
+    /// The step as a fraction of the body line.
+    pub fn lines(self) -> f32 {
+        match self {
+            Space::None => 0.0,
+            Space::Line => 0.15,
+            Space::Bind => 0.3,
+            Space::Stanza => 0.45,
+            Space::Group => 0.75,
+            Space::Section => 1.0,
+        }
+    }
+
+    /// The step's name, as the web's `--space-*` property names it.
+    pub fn name(self) -> &'static str {
+        match self {
+            Space::None => "none",
+            Space::Line => "line",
+            Space::Bind => "bind",
+            Space::Stanza => "stanza",
+            Space::Group => "group",
+            Space::Section => "section",
+        }
+    }
+}
+
+/// The space above `cur`, after `prev`, the block shown before it (none for the first).
+pub fn space_before(prev: Option<&Block>, cur: &Block) -> Space {
+    prev.map_or(Space::None, |p| space_between(p.kind, p.starts_element, cur))
+}
+
+fn space_between(prev: BlockKind, prev_starts: bool, cur: &Block) -> Space {
+    use BlockKind as K;
+    let heading = |k: BlockKind| matches!(k, K::Heading | K::CommemorationHeading);
+    let antiphon = |k: BlockKind| matches!(k, K::Antiphon | K::AnnouncedAntiphon);
+    let note = |k: BlockKind| matches!(k, K::AntiphonNote | K::AnnouncementNote);
+    // A psalm's last line, before its closing antiphon: a verse, or the Gloria it absorbed.
+    let psalm_end = prev == K::Verse || (prev == K::GloriaPatri && !prev_starts);
+    match (prev, cur.kind) {
+        _ if heading(cur.kind) => Space::Section,
+        (_, K::LatinTitle | K::ChapterRef) if heading(prev) => Space::Line,
+        _ if heading(prev) => Space::Bind,
+        // A source's blank line: one stanza's space, all of it above the gap.
+        (_, K::Gap) => Space::Stanza,
+        (K::Gap, _) => Space::None,
+        (K::ItemLabel | K::LatinTitle | K::ChapterRef | K::ScriptureRef | K::CanticleSection, _) => Space::Bind,
+        _ if note(cur.kind) => Space::Line,
+        (_, K::ItemLabel) if antiphon(prev) || note(prev) => Space::Bind,
+        // A psalm after another under one antiphon, or a canticle after the opening versicles.
+        (_, K::ItemLabel) => Space::Group,
+        (K::Speaker, _) => Space::Line,
+        // A closing antiphon sits close under its psalm.
+        (_, K::Antiphon) if cur.starts_element && psalm_end => Space::Bind,
+        // An antiphon opens a group of psalmody: the threshold from what came before, the
+        // last group's closing antiphon or the hymn.
+        _ if antiphon(cur.kind) && cur.starts_element => Space::Group,
+        // What follows a closing antiphon or a hymn opens a group of its own.
+        _ if cur.starts_element && (antiphon(prev) || matches!(prev, K::Stanza | K::Score)) => Space::Group,
+        (K::Verse, K::GloriaPatri | K::CanticleSection) => Space::Stanza,
+        (K::Stanza | K::HymnRubric | K::Score, K::Stanza | K::HymnRubric) | (K::Stanza | K::HymnRubric, K::Score) => Space::Stanza,
+        // A new speaker's turn.
+        (_, K::Speaker) => Space::Stanza,
+        // A whole hymn engraved, stanza by stanza: room above each for its number.
+        (K::Score, K::Score) => Space::Group,
+        (K::ChantLine, K::ChantLine) => Space::None,
+        _ if cur.starts_element => Space::Stanza,
+        _ => Space::Line,
+    }
+}
+
+/// Sets each block's space after the block before it, across sections: the blocks as shown.
+pub fn space_blocks<'a>(blocks: impl IntoIterator<Item = &'a mut Block>) {
+    let mut prev = None;
+    for b in blocks {
+        b.space = prev.map_or(Space::None, |(kind, starts)| space_between(kind, starts, b));
+        prev = Some((b.kind, b.starts_element));
+    }
+}
+
 /// A section of an hour; a collapsible section opens closed under its label.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SectionBlocks {
@@ -219,7 +326,8 @@ pub struct SectionBlocks {
 /// the web.
 pub fn hour_sections(hour: &OfficeHour) -> Vec<SectionBlocks> {
     let compline = hour.hour.eq_ignore_ascii_case("compline");
-    hour.sections
+    let mut sections: Vec<SectionBlocks> = hour
+        .sections
         .iter()
         .enumerate()
         .map(|(i, section)| {
@@ -234,7 +342,9 @@ pub fn hour_sections(hour: &OfficeHour) -> Vec<SectionBlocks> {
             blocks.extend(element_blocks(&section.elements));
             SectionBlocks { label: section.label.clone(), collapsible: section.collapsible, blocks }
         })
-        .collect()
+        .collect();
+    space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));
+    sections
 }
 
 /// A section's elements, a psalm or canticle absorbing the doxology after it.
@@ -255,6 +365,7 @@ pub fn element_blocks(elems: &[OfficeElement]) -> Vec<Block> {
         }
         i += 1;
     }
+    space_blocks(&mut out);
     out
 }
 

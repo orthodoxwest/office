@@ -28,10 +28,13 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(home.commemorationIds, ["st-raphael-of-brooklyn"])
     }
 
-    func testTheGapsFollowTheWebsRhythm() throws {
+    /// A part's heading takes the rhythm's full step, a body line, which grows with the reader's text.
+    func testTheGapsFollowTheSharedRhythm() throws {
         let blocks = try Office.core.get().compose(hour: "lauds", year: 2026, month: 3, day: 15, form: "private").sections.flatMap(\.blocks)
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })
-        XCTAssertEqual(gapBefore(blocks[heading - 1], blocks[heading]), 38)
+        XCTAssertEqual(blocks[heading].space, .section)
+        XCTAssertEqual(Metrics().space(.section), 32)
+        XCTAssertEqual(Metrics(textSize: .large).space(.section), 32 * 1.1, accuracy: 0.001)
     }
 
     /// A rubric's "secretly" carries its note, as the web's `.gloss-term`, and the typesetter finds

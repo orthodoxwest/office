@@ -62,6 +62,8 @@ import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.RunStyle
 import org.orthodoxwest.office.core.SectionView
+import org.orthodoxwest.office.core.Space
+import org.orthodoxwest.office.core.spaceLines
 import org.orthodoxwest.office.core.capHeight
 import org.orthodoxwest.office.core.initialFit
 import org.orthodoxwest.office.core.initialProfileEm
@@ -94,46 +96,14 @@ private fun Modifier.sigilColumn(hang: Dp): Modifier = layout { measurable, cons
 /** Latin within a small-caps label is set in lower case italic, as the web's `.psalm-incipit`. */
 private const val NO_SMALL_CAPS = "'smcp' 0, 'c2sc' 0, lnum"
 
+/** The prayer's body line, the unit of the hour's rhythm, at this density and text size. */
+fun Density.bodyLine(): Dp = Type.body.lineHeight.toDp()
+
 /**
- * Space above `cur`, after `prev`, in the web's rhythm at a phone's width (measured from the
- * rendered hour): a clear threshold between psalm groups, air between elements, and the
- * lines of one element close together.
+ * A step of the hour's rhythm (`render_blocks::Space`, as the web's `--space-*`) sized by the body
+ * line, so the space between blocks grows with the reader's text.
  */
-fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
-    if (prev == null) return 0.dp
-    val heading = { b: BlockView -> b.kind == BlockKind.HEADING || b.kind == BlockKind.COMMEMORATION_HEADING }
-    val antiphon = { b: BlockView -> b.kind == BlockKind.ANTIPHON || b.kind == BlockKind.ANNOUNCED_ANTIPHON }
-    val note = { b: BlockView -> b.kind == BlockKind.ANTIPHON_NOTE || b.kind == BlockKind.ANNOUNCEMENT_NOTE }
-    return when {
-        heading(cur) -> 38.dp
-        heading(prev) -> if (cur.kind == BlockKind.CHAPTER_REF) 24.dp else 27.dp
-        cur.kind == BlockKind.GAP || prev.kind == BlockKind.GAP -> 4.8.dp
-        prev.kind == BlockKind.ITEM_LABEL -> 9.dp
-        // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-        note(cur) -> 2.4.dp
-        cur.kind == BlockKind.ITEM_LABEL -> if (antiphon(prev) || note(prev)) 10.dp else 30.dp
-        prev.kind == BlockKind.CHAPTER_REF -> 15.dp
-        prev.kind == BlockKind.LATIN_TITLE -> 8.dp
-        prev.kind == BlockKind.SPEAKER -> 3.2.dp
-        // A closing antiphon, then the next group's opening one: the threshold between groups.
-        antiphon(cur) && prev.kind == BlockKind.ANTIPHON -> 49.dp
-        // A closing antiphon sits close under its psalm's last verse or Gloria.
-        cur.kind == BlockKind.ANTIPHON && (prev.kind == BlockKind.VERSE || (prev.kind == BlockKind.GLORIA_PATRI && !prev.startsElement)) -> 6.dp
-        cur.kind == BlockKind.VERSE && prev.kind == BlockKind.VERSE -> 4.8.dp
-        // The Gloria Patri after a psalm's last verse.
-        cur.kind == BlockKind.GLORIA_PATRI && prev.kind == BlockKind.VERSE -> 13.6.dp
-        cur.kind == BlockKind.STANZA && prev.kind == BlockKind.STANZA -> 12.dp
-        // A hymn's rubric keeps a stanza's distance from the stanzas around it.
-        cur.kind == BlockKind.HYMN_RUBRIC && prev.kind == BlockKind.STANZA -> 12.dp
-        cur.kind == BlockKind.STANZA && prev.kind == BlockKind.HYMN_RUBRIC -> 12.dp
-        // A whole hymn's scores stand apart, room above each for its number (the web's `.chant-stanza`,
-        // 1.4rem); the stanzas after a tune keep a stanza's distance from it.
-        cur.kind == BlockKind.SCORE && prev.kind == BlockKind.SCORE -> 22.4.dp
-        cur.kind == BlockKind.STANZA && prev.kind == BlockKind.SCORE -> 12.dp
-        cur.startsElement -> 14.dp
-        else -> 4.8.dp
-    }
-}
+fun Space.of(line: Dp): Dp = line * spaceLines(this)
 
 /**
  * One block of a composed hour, styled after the web's classes for the same text. A hymn's
@@ -163,10 +133,11 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
     val text = Type.body.copy(color = p.text)
     val verse = Type.verse.copy(color = p.text)
     when (block.kind) {
-        BlockKind.GAP -> Spacer(m.height(8.dp))
+        // A source's blank line: its space is the block's own, above it.
+        BlockKind.GAP -> Spacer(m)
         // Tituli, as painted in red ochre on the limewash (gilt on the Apse night), clear of the rubrics' red.
         BlockKind.HEADING, BlockKind.COMMEMORATION_HEADING -> Column(m.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            if (cross) PaintedCross(Modifier.padding(bottom = 11.2.dp).size(9.92.dp))
+            if (cross) PaintedCross(Modifier.padding(bottom = Space.BIND.of(LocalDensity.current.bodyLine())).size(9.92.dp))
             val style = if (block.kind == BlockKind.COMMEMORATION_HEADING) Type.commemorationName else Type.heading
             Text(runs(block), Modifier.fillMaxWidth(), style = style.copy(color = p.titulus))
         }
