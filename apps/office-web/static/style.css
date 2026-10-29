@@ -2292,18 +2292,19 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: var(--space-section);
 }
 
+/* A section's label stands as a part's heading does: a section's space above
+   it, unless it opens the hour, and, open, a bind's below. */
 .elements > * + .session-prayers {
-  margin-top: 1.25rem;
+  margin-top: var(--space-section);
 }
 
-/* Under a closed section's label, a part's heading stands a group below it,
-   and the label keeps no space of its own below. */
+.elements > .session-prayers[open] > summary {
+  margin-bottom: var(--space-bind);
+}
+
+/* Under a closed section's label, a part's heading stands a group below it. */
 .elements > .session-prayers:not([open]) + .section-heading {
   margin-top: var(--space-group);
-}
-
-.elements > .session-prayers:not([open]) > summary {
-  margin-bottom: 0;
 }
 
 /* Within an element, a head binds to what it introduces: a heading to its
@@ -2386,11 +2387,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
      loose; a compact line box gives each transition a crisp centre while the
      margins below continue to carry the ceremonial breathing room. */
   line-height: 1.3;
-}
-
-.session-prayers summary {
-  margin-top: 1.45rem;
-  margin-bottom: 0.8rem;
 }
 
 .section-heading {
@@ -3184,10 +3180,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 .session-prayers[open] > summary::after {
   content: "▴";
-}
-
-.elements > .session-prayers:first-child > summary {
-  margin-top: 0;
 }
 
 /* ── Offline state ── */

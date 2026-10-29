@@ -154,12 +154,12 @@ private struct ComposedHour {
  * kind, marker and words, and which of the blocks so made in that section it is.
  */
 private enum Row: Identifiable {
-    case toggle(section: String, label: String, open: Bool)
+    case toggle(section: String, label: String, open: Bool, atTop: Bool)
     case block(BlockAt, BlockView, id: String, space: Space, cross: Bool)
 
     var id: String {
         switch self {
-        case let .toggle(key, _, _): return "toggle \(key)"
+        case let .toggle(key, _, _, _): return "toggle \(key)"
         case let .block(_, _, id, _, _): return id
         }
     }
@@ -254,7 +254,7 @@ struct HourScreen: View {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
                             switch row {
-                            case let .toggle(key, label, expanded):
+                            case let .toggle(key, label, expanded, atTop):
                                 Button {
                                     withAnimation(unfolding) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
@@ -269,8 +269,10 @@ struct HourScreen: View {
                                 .buttonStyle(Quiet())
                                 .accessibilityAddTraits(.isHeader)
                                 .accessibilityValue(expanded ? "Expanded" : "Collapsed")
-                                .padding(.top, m.px(5.6))
-                                .padding(.bottom, expanded ? m.px(12.8) : 0)
+                                // A section's label stands as a part's heading does: a section's
+                                // space above it, unless it opens the hour, and a bind's below.
+                                .padding(.top, atTop ? 0 : prayer.space(.section))
+                                .padding(.bottom, expanded ? prayer.space(.bind) : 0)
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
@@ -418,13 +420,15 @@ struct HourScreen: View {
         var out: [Row] = []
         var prev: BlockView?
         var afterClosed = false
+        var afterOpen = false
         for ((i, section), key) in zip(view.sections.enumerated(), sectionKeys(view.sections)) {
             if section.collapsible {
                 // A section new to this form opens as the hour's sections open.
                 let expanded = open[key] ?? SessionPrayers.opens(view.hour, section.label)
-                out.append(.toggle(section: key, label: section.label, open: expanded))
+                out.append(.toggle(section: key, label: section.label, open: expanded, atTop: out.isEmpty))
                 prev = nil
                 afterClosed = !expanded
+                afterOpen = expanded
                 if !expanded { continue }
             }
             // How many blocks of each make this section has had, so that two alike differ.
@@ -437,10 +441,14 @@ struct HourScreen: View {
                 } else if afterClosed {
                     // Under a closed section's label: its own space, at most a group's.
                     space = spaceLines(space: block.space) < spaceLines(space: .group) ? block.space : .group
+                } else if afterOpen {
+                    // An open section's label holds the space below itself.
+                    space = .none
                 } else {
                     space = heading ? .bind : .none
                 }
                 afterClosed = false
+                afterOpen = false
                 // Between the office's parts, one small painted cross: before each heading of the
                 // office's own (the web's `.elements > .section-heading`), the Hymn's and the
                 // Chapter's included, but the page's first.

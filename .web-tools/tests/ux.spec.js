@@ -361,10 +361,22 @@ test("the rhythm reaches into a prayer form's part and the Martyrology", async (
       martyrology: above(heading),
       entry: above(heading + 1),
       thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
+      // A section's label stands as a part's heading, as the apps' toggle row does.
+      label: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        const before = after.previousElementSibling.getBoundingClientRect();
+        return (box.top - before.bottom) / line;
+      })(),
+      under: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
+      })(),
     };
   });
   // Each matches render_blocks::space_before for the same blocks.
-  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45 };
+  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45, label: 1, under: 0.3 };
   for (const [name, step] of Object.entries(expected)) {
     expect(steps[name], name).toBeCloseTo(step, 1);
   }
