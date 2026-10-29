@@ -12,7 +12,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   # neuma's chant engraving bindings, linked from the same library as the core.
@@ -33,6 +33,9 @@ targets:
     sources:
       - path: Office
       - path: build/generated/office_mobile.swift
+      # The privacy manifest App Store Connect requires (what it declares is in the file).
+      - path: PrivacyInfo.xcprivacy
+        buildPhase: resources
       # The web's faces, shared with the Android app.
       - path: ../android/app/src/main/res/font/eb_garamond_regular.ttf
         buildPhase: resources
