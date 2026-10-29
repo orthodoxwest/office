@@ -2197,16 +2197,157 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .elements,
 .session-prayers-content {
   display: grid;
-  gap: 0.9rem;
   /* Comfortable reading measure for the office text on wide screens */
   max-width: 38rem;
   width: 100%;
   margin: 0 auto;
 }
 
-.elements > *,
+/* ── The hour's vertical rhythm ──
+   Every space between the hour's lines is one of a few steps, each a fraction
+   of the prayer's body line: render_blocks::Space, which also sizes the apps'
+   gaps, holds the same table. A step's name says what it separates:
+     line     .15  the lines of one element: verse to verse, ℣ to ℟
+     bind     .3   a head and what it introduces, an antiphon and its psalm
+     stanza   .45  stanza to stanza, the Gloria Patri, element to element
+     group    .75  the hymn to the psalmody, one psalm's group to the next
+     section  1    a part of the office, before its heading and cross
+   As in the printed Diurnal, a head sits closer to what it introduces than to
+   what precedes it, and the part's heading takes the only full line. Each
+   block carries the space above it and none below, so nothing collapses or
+   stacks, and these rules are the whole of the hour's vertical spacing. The
+   line is the prayer's own, so the reader's text size and the wide screen's
+   larger type move every step with it. */
+@property --line {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.elements {
+  --line: 1.6em;
+  --space-line: calc(var(--line) * 0.15);
+  --space-bind: calc(var(--line) * 0.3);
+  --space-stanza: calc(var(--line) * 0.45);
+  --space-group: calc(var(--line) * 0.75);
+  --space-section: var(--line);
+}
+
+.elements *,
 .session-prayers-content > * {
-  margin-bottom: 0;
+  margin-block: 0;
+}
+
+/* Element to element within a part. */
+:is(.elements, .session-prayers-content) > * + * {
+  margin-top: var(--space-stanza);
+}
+
+/* A group of psalmody opens with its antiphon or psalm, and what follows a
+   group's closing antiphon or the hymn stands a group's space below it. */
+.elements > * + :is(.antiphon, .psalm, .canticle),
+.elements > :is(.antiphon, .hymn) + * {
+  margin-top: var(--space-group);
+}
+
+/* An antiphon belongs to the psalm it frames: the psalm close under its
+   opening antiphon (and the note on that antiphon), and its closing antiphon
+   close under its last verse or Gloria. Two ANT. lines in a row then read as
+   the end of one group and the start of the next, not as a stutter. */
+.elements > :is(.antiphon, .unrepeated-note) + :is(.psalm, .canticle),
+.elements > :is(.psalm, .canticle) + .antiphon:not(.antiphon-announce) {
+  margin-top: var(--space-bind);
+}
+
+.elements > .antiphon + .unrepeated-note {
+  margin-top: var(--space-line);
+}
+
+/* A heading, close to what it introduces, and closer still to a Marian
+   antiphon's title, as the Hymn's heading to the hymn's. */
+.elements > .section-heading + * {
+  margin-top: var(--space-bind);
+}
+
+.elements > .section-heading + .marian-antiphon {
+  margin-top: var(--space-line);
+}
+
+/* A leader's part that the reader's prayer form leaves out (leader.js) passes
+   its place under the heading to what follows. */
+:root:is(:not([data-leader]), [data-leader="private"]) .elements > .section-heading + [data-leaders]:not([data-leaders~="private"]) + *,
+:root[data-leader="deacon"] .elements > .section-heading + [data-leaders]:not([data-leaders~="deacon"]) + *,
+:root[data-leader="priest"] .elements > .section-heading + [data-leaders]:not([data-leaders~="priest"]) + * {
+  margin-top: var(--space-bind);
+}
+
+/* A part of the office: its heading, the Hymn's and the Chapter's included,
+   under the small cross. The session prayers' headings keep their own air. */
+.elements > * + :is(.section-heading, .hymn, .chapter) {
+  margin-top: var(--space-section);
+}
+
+.elements > * + .session-prayers {
+  margin-top: 1.25rem;
+}
+
+/* Under a closed section's label, a part's heading stands a group below it. */
+.elements > .session-prayers:not([open]) + .section-heading {
+  margin-top: var(--space-group);
+}
+
+/* Within an element, a head binds to what it introduces: a heading to its
+   title, closer still, then the title or label to the text. */
+:is(.hymn, .chapter, .psalm, .canticle, .marian-antiphon) > * + * {
+  margin-top: var(--space-bind);
+}
+
+:is(.hymn, .chapter) > .section-heading + * {
+  margin-top: var(--space-line);
+}
+
+.psalm-verses > * + *,
+.liturgical-block > * + *,
+.prayer-speaker + * {
+  margin-top: var(--space-line);
+}
+
+/* The Gloria Patri after its psalm, a mid-canticle heading, a hymn's stanzas
+   and rubrics, and a new speaker's turn stand a stanza apart. */
+:is(.psalm, .canticle) > * + :is(.gloria-patri, .canticle-section),
+.hymn-verses > * + *,
+* + .prayer-turn {
+  margin-top: var(--space-stanza);
+}
+
+/* A source's blank line: a stanza's space, all of it above the line. */
+:is(.liturgical-block, .marian-antiphon) > * + .liturgical-gap {
+  margin-top: var(--space-stanza);
+}
+
+:is(.liturgical-block, .marian-antiphon) > .liturgical-gap + * {
+  margin-top: 0;
+}
+
+/* A Marian antiphon's sung lines are one piece. */
+.liturgical-block > .chant-line + .chant-line {
+  margin-top: 0;
+}
+
+/* A tune's score stands in for its stanza's words: whichever the Chant
+   setting shows takes the space the other would have had. */
+.hymn-verses > .chant-score:first-child + * {
+  margin-top: 0;
+}
+
+.hymn-verses > .hymn-latin + * {
+  margin-top: var(--space-bind);
+}
+
+/* A whole hymn engraved: each stanza's score a group apart, room above it for
+   its number. */
+.chant-hymn > * + .chant-stanza {
+  margin-top: var(--space-group);
 }
 
 /* Real small caps from EB Garamond's own smcp/c2sc glyphs. `text-transform:
@@ -2235,6 +2376,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
      loose; a compact line box gives each transition a crisp centre while the
      margins below continue to carry the ceremonial breathing room. */
   line-height: 1.3;
+}
+
+.session-prayers summary {
   margin-top: 1.45rem;
   margin-bottom: 0.8rem;
 }
@@ -2244,10 +2388,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-inline: auto;
   padding-top: 0;
   border-top: none;
-}
-
-.elements > .section-heading:first-child {
-  margin-top: 0;
 }
 
 /* Between the office's parts, one small painted cross as well as air. The
@@ -2260,7 +2400,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   display: block;
   width: 0.62rem;
   height: 0.62rem;
-  margin: 0 auto 0.7rem;
+  margin: 0 auto var(--space-bind);
   background: var(--lining);
   -webkit-mask: url("ornaments/cross.svg") center / contain no-repeat;
   mask: url("ornaments/cross.svg") center / contain no-repeat;
@@ -2446,7 +2586,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-style: normal;
   color: var(--text);
   max-width: 34rem;
-  margin: 0.25rem auto 0.95rem;
+  margin-inline: auto;
   padding: 0 0.25rem 0 1.35rem;
   text-indent: -1.35rem;
   line-height: 1.6;
@@ -2463,14 +2603,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-right: 0.3rem;
 }
 
-/* Opening half of a psalm/canticle frame when the office only announces the
-   antiphon (semi-double and below, or any hour other than Lauds/Vespers of a
-   Double): the printed line is the mediant-cut only, so it needs less trailing
-   air than a full closing antiphon. */
-.antiphon-announce {
-  margin-bottom: 0.55rem;
-}
-
 /* The seasonal opening Alleluia (or its penitential replacement) belongs to
    the opening rite, not a psalm frame, so it has no Ant. sigil or hanging
    antiphon indent. It completes the Gloria above it and keeps the Gloria's
@@ -2478,7 +2610,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
    centred it, while Lent's longer replacement filled the measure and sat
    left, one line of the rite moving across the page with the season. */
 .opening-acclamation {
-  margin: 0.25rem 0 0.7rem;
   line-height: 1.6;
   text-align: left;
 }
@@ -2497,51 +2628,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   width: 100%;
 }
 
-/* ── Antiphon grouping ──
-   An antiphon belongs to the psalm it frames, and spacing has to say so. The
-   .elements grid gives every child the same 0.9rem gap, so a psalm's closing
-   antiphon and the next psalm's opening antiphon sat the same distance apart
-   as each antiphon sat from its own psalm — two ANT. lines in a row then read
-   as a stutter rather than as the end of one psalm and the start of the next.
-
-   Each antiphon is pulled toward its own psalm and the slack is left between
-   groups. Negative margins because the grid gap, not the margin, is the
-   baseline rhythm here; :has() degrades to the old even spacing where it is
-   unsupported, which is merely the previous behaviour. */
-/* The opening antiphon keeps a little more air than the closing one: below it
-   sits a centred small-caps heading rather than body text, and at the closing
-   antiphon's distance the two collided. */
-.elements > .antiphon:has(+ .psalm),
-.elements > .antiphon:has(+ .canticle) {
-  margin-top: 0.45rem;
-  margin-bottom: -0.25rem;
-}
-
-.elements > .psalm + .antiphon,
-.elements > .canticle + .antiphon {
-  margin-top: -0.5rem;
-}
-
-/* Leave a clear threshold between complete psalm groups, including psalms
-   that share an antiphon and have no intervening announcement. */
-.elements > .antiphon + .antiphon:has(+ .psalm),
-.elements > .psalm + .psalm {
-  margin-top: 1.2rem;
-}
-
 /* The rubric that names a psalm's unrepeated opening annotates the antiphon
    above it, as the Diurnal sets it: tight under the antiphon's words (centred
-   under an announcement, hung past "Ant." under a full antiphon), with the
-   psalm's own air below. */
-.elements > .antiphon:has(+ .unrepeated-note) {
-  margin-top: 0.45rem;
-  margin-bottom: -0.75rem;
-}
-
+   under an announcement, hung past "Ant." under a full antiphon). */
 .elements > .unrepeated-note {
   width: 100%;
   max-width: 34rem;
-  margin: 0 auto -0.25rem;
+  margin-inline: auto;
   padding: 0 0.25rem 0 1.35rem;
   text-align: left;
 }
@@ -2550,10 +2643,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   width: auto;
   padding-left: 0.25rem;
   text-align: center;
-}
-
-.elements > .antiphon + .antiphon:has(+ .unrepeated-note) {
-  margin-top: 1.2rem;
 }
 
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
@@ -2566,7 +2655,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-align: center;
   letter-spacing: 0.07em;
   color: var(--muted);
-  margin-bottom: 0.35rem;
 }
 
 /* Psalm and canticle titles are the reader's immediate wayfinding within the
@@ -2633,7 +2721,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-style: italic;
   color: var(--muted);
   text-align: center;
-  margin-bottom: 0.5rem;
 }
 
 /* Hymn lines are short (~30–40 characters) and break where the metre says,
@@ -2658,7 +2745,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--muted);
   font-size: 0.9rem;
   text-align: center;
-  margin-bottom: 0.75rem;
 }
 
 /* Hymn-embedded /:...:/ instructions sit in the verse column as red roman
@@ -2669,11 +2755,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   width: 0;
   min-width: 100%;
   text-align: center;
-  margin: 0 0 0.75rem;
-}
-
-.hymn-stanza {
-  margin-bottom: 0.75rem;
 }
 
 /* Each source line remains a metrical line. If one must wrap on a narrow
@@ -2727,12 +2808,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 .psalm-verses {
   line-height: 1.75;
-  margin-top: 0.6rem;
-}
-
-/* Unnumbered first verse — full-width paragraph, carries drop cap */
-.psalm-verses .verse {
-  margin-bottom: 0.3rem;
 }
 
 /* After the two-line initial, a long opening returns to the same text edge
@@ -2823,23 +2898,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   padding-right: 0;
 }
 
-/* The doxology is sung to the psalm tone, so it keeps the verse's type and
-   indent — but it is not the last verse, and at the verse spacing it read as
-   an unnumbered continuation of it. Adjacent margins collapse here, so this
-   is the whole gap: enough to make the Gloria its own stanza, not so much
-   that it detaches from the psalm it closes. */
-.psalm > .gloria-patri,
-.canticle > .gloria-patri {
-  margin-top: 0.85rem;
-}
-
 /* Mid-canticle section break heading (e.g. the two-part structure of Deut 32) */
 .canticle-section {
   text-align: center;
   font-style: italic;
   font-size: 0.85em;
   color: var(--muted);
-  margin: 0.8rem 0 0;
 }
 
 /* Drop cap on the unnumbered opening verse of each psalm/canticle.
@@ -2906,21 +2970,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   line-height: 1.4;
   color: var(--rubric);
   text-align: center;
-  margin-top: -0.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.chapter .liturgical-block,
-.preces .liturgical-block,
-.marian-antiphon .liturgical-block {
-  margin-top: 0.45rem;
 }
 
 /* ── Liturgical-block (versicles, responses, prayers, chapters, Marian antiphons) ── */
-
-.liturgical-block > * {
-  margin-bottom: 0.3rem;
-}
 
 .versicle-line,
 .response-line,
@@ -3013,12 +3065,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-style: normal;
   font-size: 0.85em;
   line-height: 1.4;
-  margin-bottom: 0.4rem;
   text-align: center;
-}
-
-.liturgical-gap {
-  height: 0.5rem;
 }
 
 /* Secret prayers: spoken incipit (and optional tail) at full contrast;
@@ -3039,22 +3086,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Name each speaker, including the leader's replies to the people. These
    labels are part of the reading order and remain visible when printed. */
-.prayer-turn {
-  margin-block: 0.85rem;
-}
-
 .prayer-speaker {
   color: var(--rubric);
   font-size: 0.85em;
   font-variant: small-caps;
   letter-spacing: 0.055em;
   line-height: 1.3;
-  margin: 0 0 0.2rem;
   break-after: avoid;
-}
-
-.prayer-turn > .liturgical-block {
-  margin-block: 0;
 }
 
 /* The phone already gives the prayer a generous 20px book face. On a true
@@ -3077,20 +3115,10 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   }
 }
 
-/* Marian antiphons — labelled antiphon blocks containing the full office */
-.marian-antiphon {
-  margin: 1rem 0;
-}
-
-.marian-antiphon .item-label {
-  margin-bottom: 0.75rem;
-}
-
 /* Sung antiphon lines: each source line is its own block, so a wrapped
    remainder hangs under its own line and every line stays a discrete chant
    reference point. Tighter leading binds a wrap to its own line. */
 .marian-antiphon .chant-line {
-  margin: 0;
   padding-left: 1.2rem;
   text-indent: -1.2rem;
   line-height: 1.5;
@@ -3123,7 +3151,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   border: none;
   background: none;
   padding: 0;
-  margin-top: 0.35rem;
 }
 
 .session-prayers summary {
@@ -7624,12 +7651,6 @@ body.season-eastertide {
   text-indent: -1.1rem;
 }
 
-/* Dialogue responses finish the preceding utterance. Let the gutter carry
-   the speaker and keep the adjacent lines on one steady vertical rhythm. */
-.liturgical-block > :is(.versicle-line, .response-line, .all-line) {
-  margin-bottom: 0.25rem;
-}
-
 /* ── Desktop scrollbar ──
    A thin oak thumb on an unpainted track, so the browser's grey slab does not
    sit beside the plaster. Desktop only: touch scrollbars are transient
@@ -8904,7 +8925,7 @@ body.page-home::before {
 .chant-score {
   container-type: inline-size;
   max-width: 28rem;
-  margin: 0 auto 0.75rem;
+  margin-inline: auto;
   color: var(--chant-ink);
 }
 .chant-width { max-width: 100%; }
@@ -8927,9 +8948,7 @@ body.page-home::before {
 }
 /* A whole hymn engraved: each stanza from a new line, its number in the
    rubric red at the head of its first staff. */
-.chant-hymn { margin: 0 0 0.75rem; }
-.chant-stanza { position: relative; margin-top: 1.4rem; }
-.chant-stanza:first-child { margin-top: 0; }
+.chant-stanza { position: relative; }
 .chant-stanza-number {
   position: absolute;
   left: 0;

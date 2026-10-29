@@ -46,6 +46,8 @@ fn composes_what_the_web_composes() {
             // With the Chant setting off, the apps leave out each score the web hides.
             let mut sections = render_blocks::hour_sections(&want);
             sections.iter_mut().for_each(|s| s.blocks.retain(|b| b.chant != render_blocks::ChantVariant::On));
+            // Each space follows the block shown above it.
+            render_blocks::space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));
             let want_sections: Vec<SectionView> = sections.into_iter().map(SectionView::from).collect();
             assert_eq!(format!("{:?}", view.sections), format!("{want_sections:?}"), "{hour} 2026-{month}-{day}");
             assert_eq!(view.title, want.title);

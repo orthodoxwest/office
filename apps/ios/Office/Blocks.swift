@@ -10,43 +10,13 @@ private let allHang: CGFloat = 13.6
 /// How far "Blessing." may hang into a wide page's margin (`.sigil-word`, 4.25rem less ℣'s 1.4rem).
 private let wordHang: CGFloat = 45.6
 
-/**
- * Space above `cur`, after `prev`, in the web's rhythm at a phone's width (measured from the
- * rendered hour, as the Android app's `gapBefore`): a clear threshold between psalm groups, air
- * between elements, and the lines of one element close together.
- */
-func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
-    guard let prev else { return 0 }
-    let heading = { (b: BlockView) in b.kind == .heading || b.kind == .commemorationHeading }
-    let antiphon = { (b: BlockView) in b.kind == .antiphon || b.kind == .announcedAntiphon }
-    let note = { (b: BlockView) in b.kind == .antiphonNote || b.kind == .announcementNote }
-    if heading(cur) { return 38 }
-    if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
-    if cur.kind == .gap || prev.kind == .gap { return 4.8 }
-    if prev.kind == .itemLabel { return 9 }
-    // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-    if note(cur) { return 2.4 }
-    if cur.kind == .itemLabel { return antiphon(prev) || note(prev) ? 10 : 30 }
-    if prev.kind == .chapterRef { return 15 }
-    if prev.kind == .latinTitle { return 8 }
-    if prev.kind == .speaker { return 3.2 }
-    // A closing antiphon, then the next group's opening one: the threshold between groups.
-    if antiphon(cur) && prev.kind == .antiphon { return 49 }
-    // A closing antiphon sits close under its psalm's last verse or Gloria.
-    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .gloriaPatri && !prev.startsElement)) { return 6 }
-    if cur.kind == .verse && prev.kind == .verse { return 4.8 }
-    // The Gloria Patri after a psalm's last verse.
-    if cur.kind == .gloriaPatri && prev.kind == .verse { return 13.6 }
-    if cur.kind == .stanza && prev.kind == .stanza { return 12 }
-    // A hymn's rubric keeps a stanza's distance from the stanzas around it.
-    if cur.kind == .hymnRubric && prev.kind == .stanza { return 12 }
-    if cur.kind == .stanza && prev.kind == .hymnRubric { return 12 }
-    // A whole hymn's scores stand apart, room above each for its number (the web's `.chant-stanza`,
-    // 1.4rem); the stanzas after a tune keep a stanza's distance from it.
-    if cur.kind == .score && prev.kind == .score { return 22.4 }
-    if cur.kind == .stanza && prev.kind == .score { return 12 }
-    if cur.startsElement { return 14 }
-    return 4.8
+extension Metrics {
+    /**
+     * A step of the hour's rhythm (`render_blocks::Space`, as the web's `--space-*`) sized by the
+     * prayer's body line as set, so the space between blocks grows with the reader's text,
+     * Dynamic Type included.
+     */
+    func space(_ step: Space) -> CGFloat { CGFloat(spaceLines(space: step)) * Scale.body.line * type }
 }
 
 /// What a block is set in: its style, colour and alignment (the web's class for the same text).
@@ -410,7 +380,8 @@ struct BlockRow: View {
 
     var body: some View {
         if block.kind == .gap {
-            Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
+            // A source's blank line: its space is the block's own, above it.
+            Color.clear.frame(height: 0).accessibilityHidden(true)
         } else if block.kind == .score {
             ScoreRow(block: block)
         } else {

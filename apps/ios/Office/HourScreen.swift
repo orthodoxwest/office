@@ -155,7 +155,7 @@ private struct ComposedHour {
  */
 private enum Row: Identifiable {
     case toggle(section: String, label: String, open: Bool)
-    case block(BlockAt, BlockView, id: String, gap: CGFloat, cross: Bool)
+    case block(BlockAt, BlockView, id: String, space: Space, cross: Bool)
 
     var id: String {
         switch self {
@@ -274,14 +274,14 @@ struct HourScreen: View {
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
-                            case let .block(at, block, _, gap, cross):
+                            case let .block(at, block, _, space, cross):
                                 VStack(spacing: 0) {
                                     if cross {
-                                        PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
+                                        PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, prayer.space(.bind))
                                     }
                                     BlockRow(block: block, column: columns[at])
                                 }
-                                .padding(.top, m.px(gap))
+                                .padding(.top, prayer.space(space))
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
@@ -431,13 +431,14 @@ struct HourScreen: View {
             var made: [String: Int] = [:]
             for (j, block) in section.blocks.enumerated() {
                 let heading = block.kind == .heading
-                let gap: CGFloat
+                let space: Space
                 if prev != nil {
-                    gap = gapBefore(prev, block)
+                    space = block.space
                 } else if afterClosed {
-                    gap = heading ? 23.2 : 14
+                    // Under a closed section's label: a part's heading a group's space below it.
+                    space = heading ? .group : .stanza
                 } else {
-                    gap = heading ? 12 : 0
+                    space = heading ? .bind : .none
                 }
                 afterClosed = false
                 // Between the office's parts, one small painted cross: before each heading of the
@@ -447,7 +448,7 @@ struct HourScreen: View {
                 let make = "\(key)|\(block.kind)|\(block.marker)|\(block.runs.map(\.text).joined())"
                 let n = made[make, default: 0]
                 made[make] = n + 1
-                out.append(.block(BlockAt(section: i, block: j), block, id: "\(make)#\(n)", gap: gap, cross: part && !out.isEmpty))
+                out.append(.block(BlockAt(section: i, block: j), block, id: "\(make)#\(n)", space: space, cross: part && !out.isEmpty))
                 prev = block
             }
         }

@@ -388,3 +388,117 @@ fn a_feasts_texts_carry_the_same_text_as_the_web() {
     }
     assert!(checked > 1_000, "only {checked} texts checked");
 }
+
+/// Each block of `hour` on `date` in private prayer, as shown with Chant off: kind, opening an
+/// element, and its space.
+fn spaced(hour_name: &str, date: &str) -> Vec<(BlockKind, Space, String)> {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let date = Date::parse(date).expect("date");
+    let day = tools::year::office_days(&data, date.year()).expect("office days").into_iter().find(|d| d.date == date).expect("day");
+    let hour = engine.compose_hour(hour_name, &day, &MoveableDates::compute(date.year()), PrayerForm::Private).expect("compose");
+    let mut sections = hour_sections(&hour);
+    for s in &mut sections {
+        s.blocks.retain(|b| b.chant != ChantVariant::On);
+    }
+    space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));
+    sections.into_iter().flat_map(|s| s.blocks).map(|b| (b.kind, b.space, b.plain_text().chars().take(24).collect())).collect()
+}
+
+/// The steps rise in order, each a fraction of the body line no larger than a line.
+#[test]
+fn the_rhythm_steps_rise_within_a_line() {
+    for pair in Space::ALL.windows(2) {
+        assert!(pair[0] < pair[1] && pair[0].lines() < pair[1].lines(), "{pair:?}");
+    }
+    assert_eq!(Space::None.lines(), 0.0);
+    assert_eq!(Space::Section.lines(), 1.0);
+}
+
+/// Sext's run from the opening into the psalmody, the page that showed the rhythm uneven: the
+/// part's heading takes the only large space, the hymn's title sits close under it, and the
+/// hymn gives way to the psalmody by a group's threshold, the antiphon bound to its psalm.
+#[test]
+fn sext_moves_from_hymn_to_psalm_by_steps() {
+    let blocks = spaced("sext", "2026-10-29");
+    let at = |kind: BlockKind| blocks.iter().position(|b| b.0 == kind).unwrap_or_else(|| panic!("{kind:?} in {blocks:#?}"));
+    let hymn = blocks.iter().position(|b| b.0 == BlockKind::Heading && b.2 == "Hymn").expect("hymn heading");
+    let antiphon = at(BlockKind::AnnouncedAntiphon);
+    let steps: Vec<(BlockKind, Space)> = blocks[hymn - 1..antiphon + 4].iter().map(|b| (b.0, b.1)).collect();
+    use BlockKind as K;
+    assert_eq!(
+        steps,
+        [
+            (K::Paragraph, Space::Stanza),
+            (K::Heading, Space::Section),
+            (K::LatinTitle, Space::Line),
+            (K::Stanza, Space::Bind),
+            (K::Stanza, Space::Stanza),
+            (K::Stanza, Space::Stanza),
+            (K::AnnouncedAntiphon, Space::Group),
+            (K::ItemLabel, Space::Bind),
+            (K::Verse, Space::Bind),
+            (K::Verse, Space::Line),
+        ],
+        "{blocks:#?}"
+    );
+}
+
+/// Over a year's hours: a heading always opens with a part's space and nothing else does; the
+/// lines within an element never stand further apart than stanzas; and a group's threshold
+/// falls only where psalmody begins or ends.
+#[test]
+fn the_rhythm_holds_across_a_year() {
+    let src = FsData::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data"));
+    let engine = Engine::load(&src).expect("engine");
+    let data = CalendarData::load(&src).expect("calendar data");
+    let year = 2026;
+    let moveable = MoveableDates::compute(year);
+    let mut checked = 0;
+    for day in tools::year::office_days(&data, year).expect("office days") {
+        for hour_name in HOUR_NAMES {
+            let hour = engine.compose_hour(hour_name, &day, &moveable, PrayerForm::Private).expect("compose");
+            let blocks: Vec<Block> = hour_sections(&hour).into_iter().flat_map(|s| s.blocks).collect();
+            for (i, b) in blocks.iter().enumerate() {
+                let at =
+                    || format!("{hour_name} {} block {i} {:?} after {:?}", day.date, b.kind, blocks.get(i.wrapping_sub(1)).map(|p| p.kind));
+                let heading = matches!(b.kind, BlockKind::Heading | BlockKind::CommemorationHeading);
+                assert_eq!(heading && i > 0, b.space == Space::Section, "{}", at());
+                if !b.starts_element && !heading && b.kind != BlockKind::Score {
+                    assert!(b.space <= Space::Stanza, "{}", at());
+                }
+                if b.space == Space::Group {
+                    let prev = blocks[i - 1].kind;
+                    let psalmody = |k: BlockKind| {
+                        matches!(k, BlockKind::Antiphon | BlockKind::AnnouncedAntiphon | BlockKind::ItemLabel | BlockKind::Score)
+                    };
+                    assert!(psalmody(b.kind) || psalmody(prev) || prev == BlockKind::Stanza, "{}", at());
+                }
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 100_000, "only {checked} blocks checked");
+}
+
+/// The web sets the same steps: each `--space-*` property in style.css is the step's fraction of
+/// the prayer's line, so the web and the apps keep one rhythm.
+#[test]
+fn the_web_sets_the_same_steps() {
+    let css =
+        std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../apps/office-web/static/style.css")).expect("style.css");
+    for step in Space::ALL.into_iter().filter(|s| *s != Space::None) {
+        let property = format!("--space-{}:", step.name());
+        let at = css.find(&property).unwrap_or_else(|| panic!("{property} in style.css"));
+        let value = css[at + property.len()..].split(';').next().unwrap().trim();
+        let lines = if value == "var(--line)" {
+            1.0
+        } else {
+            let factor =
+                value.strip_prefix("calc(var(--line) * ").and_then(|v| v.strip_suffix(')')).unwrap_or_else(|| panic!("{property} {value}"));
+            factor.parse::<f32>().expect("factor")
+        };
+        assert_eq!(lines, step.lines(), "{property} {value}");
+    }
+}

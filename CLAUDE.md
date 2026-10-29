@@ -17,7 +17,9 @@ crates/
   render-tex/              LuaLaTeX booklet; caller supplies GABC lookup
   render-html/             HTML rendering, view models and minijinja templates
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
-                           word-for-word against render-html
+                           word-for-word against render-html. Holds the hour's vertical rhythm
+                           (Space: steps of the body line), which the apps and style.css's
+                           --space-* follow
   presentation/            Words every front shares: day, season and date names, the current-hour
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
                            the usage beacon's vocabulary (server, app.js and native apps)

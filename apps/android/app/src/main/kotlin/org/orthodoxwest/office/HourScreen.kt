@@ -84,6 +84,7 @@ import kotlin.math.max
 import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
+import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.blockWords
 
@@ -158,6 +159,8 @@ fun HourScreen(
         val wide = maxWidth >= WidePrayerFrom
         val prayer = remember(base, wide) { if (wide) Density(base.density, base.fontScale * WidePrayerStep) else base }
         val columns = hymnColumns(view.sections, prayer)
+        // The unit of the office's rhythm: the body line at the prayer's size.
+        val line = prayer.bodyLine()
         LazyColumn(
             Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
             state = listState,
@@ -198,9 +201,10 @@ fun HourScreen(
                 section.blocks.forEachIndexed { j, block ->
                     val heading = block.kind == BlockKind.HEADING
                     val gap = when {
-                        prev != null -> gapBefore(prev, block)
-                        afterClosed -> if (heading) 23.2.dp else 14.dp
-                        else -> if (heading) 12.dp else 0.dp
+                        prev != null -> block.space.of(line)
+                        // Under a closed section's label: a part's heading a group's space below it.
+                        afterClosed -> (if (heading) Space.GROUP else Space.STANZA).of(line)
+                        else -> (if (heading) Space.BIND else Space.NONE).of(line)
                     }
                     // A small painted cross before each of the office's parts after the first, as the
                     // web's `.elements > .section-heading`: a section's heading, or a heading standing

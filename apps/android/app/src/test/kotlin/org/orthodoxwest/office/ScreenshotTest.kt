@@ -137,6 +137,11 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h6000dp-xxhdpi")
     fun vespersEastertideTall() { show(Page.Hour(LocalDate.of(2026, 4, 12), "vespers"), ThemeChoice.NAVE); shoot("vespers-eastertide-tall") }
 
+    /** The hymn into the psalmody, where the rhythm's steps were first measured against the Diurnal. */
+    @Test
+    @Config(qualifiers = "w411dp-h4000dp-xxhdpi")
+    fun sextApseTall() { show(Page.Hour(LocalDate.of(2026, 10, 29), "sext"), ThemeChoice.APSE); shoot("sext-apse-tall") }
+
     @Test
     @Config(qualifiers = "w390dp-h2400dp-xxhdpi")
     fun ordoNave() { show(Page.Ordo(2026, 3), ThemeChoice.NAVE); shoot("ordo-nave") }

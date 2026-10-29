@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,8 @@ class ScoreScreenshotTest {
         compose.setContent {
             OfficeTheme(choice = theme) {
                 Column(Modifier.padding(16.dp)) {
-                    shown.forEachIndexed { i, b -> Block(b, Modifier.padding(top = gapBefore(shown.getOrNull(i - 1), b))) }
+                    val line = LocalDensity.current.bodyLine()
+                    shown.forEach { b -> Block(b, Modifier.padding(top = b.space.of(line))) }
                 }
             }
         }
