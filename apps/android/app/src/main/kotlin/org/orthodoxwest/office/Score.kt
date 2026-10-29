@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -70,7 +71,8 @@ fun Score(block: BlockView, modifier: Modifier) {
                     block.marker,
                     Modifier.layout { measurable, constraints ->
                         val number = measurable.measure(constraints)
-                        layout(number.width, 0) { number.place(0, -number.height - (Type.verse.fontSize * 0.25f).roundToPx()) }
+                        // Set by its baseline, as the web's line-height 1 box puts it.
+                        layout(number.width, 0) { number.place(0, -number[FirstBaseline] - (Type.verse.fontSize * 0.44f).roundToPx()) }
                     },
                     style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f),
                 )

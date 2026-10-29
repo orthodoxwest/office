@@ -436,6 +436,12 @@ struct WallCopy: View {
     }
 }
 
+/// The vault tile's edge for a field `width` wide (`--apse-tile`). The fields span the screen, so
+/// their width is the web's viewport.
+private func vaultTile(_ width: CGFloat) -> CGFloat {
+    width >= 2400 ? 960 : width >= 1800 ? 832 : width >= wideFrom ? 704 : 528
+}
+
 /**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the Apse
  * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding; by day the
@@ -443,12 +449,6 @@ struct WallCopy: View {
  * 96×168. Tiled from the field's centre and from `seam` down it, and faded by `fade`'s stops of
  * (fraction, opacity) for the field's height in either theme.
  */
-/// The vault tile's edge for a field `width` wide (`--apse-tile`). The fields span the screen, so
-/// their width is the web's viewport.
-private func vaultTile(_ width: CGFloat) -> CGFloat {
-    width >= 2400 ? 960 : width >= 1800 ? 832 : width >= wideFrom ? 704 : 528
-}
-
 struct WallField: View {
     var seam: CGFloat = 0
     let fade: (_ height: CGFloat, _ dark: Bool) -> [(CGFloat, Double)]

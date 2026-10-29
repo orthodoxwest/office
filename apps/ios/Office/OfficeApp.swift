@@ -100,6 +100,7 @@ struct RootView: View {
                             .padding(.top, m.px(52))
                             .padding(.horizontal, m.px(gutter))
                             // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
+                            .accessibilityElement(children: .contain)
                             .accessibilityAddTraits(.isModal)
                             .accessibilityAction(.escape) { model.menuOpen = false }
                     }
@@ -113,6 +114,7 @@ struct RootView: View {
                         MenuPanel(prefsOnly: true)
                             .padding(.top, m.px(52))
                             .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
+                            .accessibilityElement(children: .contain)
                             .accessibilityAddTraits(.isModal)
                             .accessibilityAction(.escape) { model.settingsOpen = false }
                     }

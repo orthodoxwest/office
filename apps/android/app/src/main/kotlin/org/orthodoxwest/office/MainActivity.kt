@@ -465,8 +465,8 @@ fun OfficeApp(
                     if (front && LocalWide.current) {
                         // Under the header's end: the nav shell is held to 68rem and centred. The width is
                         // in the text size's dp, as the shell's 1088dp is, so the panel keeps to the
-                        // Settings button at every size.
-                        val width = this@BoxWithConstraints.maxWidth
+                        // Settings button at every size; the shell stands between the side insets.
+                        val width = this@BoxWithConstraints.maxWidth - insets.calculateStartPadding(direction) - insets.calculateEndPadding(direction)
                         MenuPanel(
                             visible = settings,
                             currentHour = null,

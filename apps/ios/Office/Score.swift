@@ -46,10 +46,11 @@ struct ScoreRow: View {
         .overlay(alignment: .topLeading) {
             // A stanza's number stands in the space above its staff and takes none of its own (the
             // web's `.chant-stanza-number`, 1.1em up), so the stanzas keep the hymn's group apart.
+            // Set by its baseline, as the web's line-height 1 box puts it.
             if !block.marker.isEmpty {
                 Text(block.marker).font(Font(garamond(Scale.verse.size * 0.85 * m.type))).foregroundStyle(p.rubric)
                     .fixedSize()
-                    .alignmentGuide(.top) { $0[.bottom] + Scale.verse.size * 0.25 * m.type }
+                    .alignmentGuide(.top) { $0[.firstTextBaseline] + Scale.verse.size * numberRise * m.type }
             }
         }
         .accessibilityElement(children: .ignore)
@@ -140,3 +141,7 @@ private enum Engraving {
         return path
     }
 }
+
+/// How far above its staff a stanza's number stands, to its baseline, in the verse's em: the
+/// web's `.chant-stanza-number` box (0.85em, line-height 1) from 1.1em up.
+private let numberRise: CGFloat = 0.44

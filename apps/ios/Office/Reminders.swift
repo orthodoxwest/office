@@ -240,6 +240,8 @@ enum ReminderScheduler {
         let request = notification.request
         center.removeDeliveredNotifications(withIdentifiers: [request.identifier])
         guard let again = request.content.mutableCopy() as? UNMutableNotificationContent else { return done() }
+        // Kept a while once it rings again, as Android's lingers at least a snooze's length.
+        again.userInfo["office"] = Date(timeIntervalSinceNow: snooze).timeIntervalSince1970
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: snooze, repeats: false)
         center.add(UNNotificationRequest(identifier: "snooze.\(request.identifier)", content: again, trigger: trigger)) { _ in done() }
     }
