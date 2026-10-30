@@ -71,6 +71,11 @@ jobs:
           xcodebuild -version
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             echo "upload=false" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_REF" != refs/heads/master ]; then
+            # The build number counts commits, so a branch's upload would take a number master
+            # reaches later, and master's upload of it would be refused.
+            echo "::notice::Only master uploads to TestFlight; this branch's build is archived unsigned."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
           elif [ -n "$ASC_KEY_ID" ] && [ -n "$IOS_DIST_CERT_P12" ] && [ -n "$IOS_APPSTORE_PROFILE" ]; then
             echo "upload=true" >> "$GITHUB_OUTPUT"
           else
@@ -205,13 +210,23 @@ jobs:
           # Waits for App Store Connect to process the build, gives it to the group, and
           # submits it for beta review when its version needs one. A build number already
           # uploaded (a re-run of the same commit) is refused here.
-          fastlane pilot upload \
+          set -o pipefail
+          if ! fastlane pilot upload \
             --ipa "$(ls build/release/export/*.ipa)" \
             --api_key_path "$RUNNER_TEMP/asc.json" \
             --distribute_external true \
             --groups "$TESTFLIGHT_GROUP" \
             --notify_external_testers true \
-            --changelog "$notes"
+            --changelog "$notes" 2>&1 | tee "$RUNNER_TEMP/pilot.log"; then
+            # Apple reviews one build of a version at a time. A merge during the first build's
+            # review is uploaded and processed, but stays with internal testers; the next merge
+            # after the review passes reaches the group.
+            if grep -q 'already in beta review' "$RUNNER_TEMP/pilot.log"; then
+              echo "::notice::Build $BUILD is uploaded; an earlier build of this version is still in beta review, so it is not given to $TESTFLIGHT_GROUP."
+            else
+              exit 1
+            fi
+          fi
 
       - name: Remove the signing keychain
         if: always() && steps.signing.outputs.keychain != ''
