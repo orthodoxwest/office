@@ -139,7 +139,7 @@ jobs:
         run: |
           if [ "$UPLOAD" = true ]; then
             signing=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$TEAM" "CODE_SIGN_IDENTITY=Apple Distribution"
-                     "PROVISIONING_PROFILE_SPECIFIER=$PROFILE")
+                     "OFFICE_PROFILE=$PROFILE")
           else
             signing=(CODE_SIGNING_ALLOWED=NO)
           fi

@@ -112,6 +112,9 @@ targets:
       base:
         # The store app's: a TestFlight build is a pre-release of it, not an app beside it.
         PRODUCT_BUNDLE_IDENTIFIER: org.orthodoxwest.office
+        # The App Store profile the TestFlight workflow passes as OFFICE_PROFILE: the app's alone,
+        # since the Neuma framework takes none and refuses one set for every target.
+        PROVISIONING_PROFILE_SPECIFIER: $(OFFICE_PROFILE)
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
