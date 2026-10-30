@@ -71,6 +71,11 @@ jobs:
           xcodebuild -version
           if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
             echo "upload=false" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_REF" != refs/heads/master ]; then
+            # The build number counts commits, so a branch's upload would take a number master
+            # reaches later, and master's upload of it would be refused.
+            echo "::notice::Only master uploads to TestFlight; this branch's build is archived unsigned."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
           elif [ -n "$ASC_KEY_ID" ] && [ -n "$IOS_DIST_CERT_P12" ] && [ -n "$IOS_APPSTORE_PROFILE" ]; then
             echo "upload=true" >> "$GITHUB_OUTPUT"
           else

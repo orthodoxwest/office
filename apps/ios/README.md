@@ -147,10 +147,18 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
    | `ASC_KEY` | the `.p8` file's contents |
 
    The team ID is read from the profile. Keep `dist.key` and the `.p8` out of the repository.
-6. **TestFlight.** In the app's TestFlight tab, fill in Test Information (the beta review's
-   contact and a feedback email), add an external group named `Testers`, and turn on its
-   public link. Run the workflow from the Actions tab, or push to `master`; once Apple has
+6. **TestFlight.** In the app's TestFlight tab, fill in Test Information: the Beta App
+   Description, a feedback email, and the beta review contact's name, phone and email. Beta
+   review refuses a build without them. Run the workflow from the Actions tab on `master`, or
+   push to `master`. App Store Connect offers external groups only once a build exists, so after
+   the first upload add an external group named `Testers`, add that build to it by hand, and
+   turn on its public link; later builds go to the group by themselves. Once Apple has
    reviewed the first build, the link installs it.
+
+Only `master` uploads: a run from another branch archives unsigned, since a branch's commit
+count is a build number master reaches later. If a run fails after the upload (processing, or
+handing the build to the group), a re-run is refused at the upload; give the build to the group
+in App Store Connect, or with `fastlane pilot distribute --build_number N`.
 
 The certificate and profile last a year. Renew both the same way and replace the three
 secrets; the API key does not expire.
