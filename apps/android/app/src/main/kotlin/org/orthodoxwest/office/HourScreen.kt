@@ -154,7 +154,8 @@ fun HourScreen(
         val inset = if (view.firstClass && maxWidth < FrameClear) FrameInset else 0.dp
         // From 920dp the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
-        // keep their type. sp carries the step, so the office's own spacing in dp stands.
+        // keep their type. sp carries the step, and the hour's rhythm, set in body lines, grows with it
+        // (the web's `--line: 1.6em`).
         val base = LocalDensity.current
         val wide = maxWidth >= WidePrayerFrom
         val prayer = remember(base, wide) { if (wide) Density(base.density, base.fontScale * WidePrayerStep) else base }

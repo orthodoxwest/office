@@ -79,8 +79,11 @@ val VerseGutter: Dp = 28.8.dp
 private val SigilGap: Dp = 6.4.dp
 private val SigilColumn: Dp = VerseGutter - SigilGap
 
-/** How far a spelled-out sigil ("Blessing.") may hang into a wide screen's margin: all its extra width, at any text size. */
-private val WordHang: Dp = 72.dp
+/** How far "All:" may hang into the page's margin (`.sigil-all`, 2.25rem less ℣'s 1.4rem). */
+private val AllHang: Dp = 13.6.dp
+
+/** How far "Blessing." may hang into a wide screen's margin (`.sigil-word`, 4.25rem less ℣'s 1.4rem). */
+private val WordHang: Dp = 45.6.dp
 
 /**
  * A sigil set right-aligned in its column. A mark wider than the column hangs up to `hang` into
@@ -208,7 +211,7 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null, c
                 // "All:" hangs its extra width into the page gutter, keeping its words on that edge;
                 // from 1000dp "Blessing." hangs into the wide margin the same way (`.sigil-word`).
                 val hang = when {
-                    block.kind == BlockKind.ALL -> Gutter
+                    block.kind == BlockKind.ALL -> AllHang
                     block.marker.length > 2 -> WordHang
                     else -> 0.dp
                 }

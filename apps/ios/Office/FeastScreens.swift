@@ -213,7 +213,10 @@ struct FeastScreen: View {
             ForEach(Array(view.texts.enumerated()), id: \.offset) { _, t in
                 TextLabel(label: t.label, common: t.common ? w.commonMark : "")
                     .padding(.top, m.px(18)).padding(.bottom, m.px(2))
-                ForEach(Array(t.blocks.enumerated()), id: \.offset) { _, b in BlockRow(block: b) }
+                // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+                ForEach(Array(t.blocks.enumerated()), id: \.offset) { i, b in
+                    BlockRow(block: b).padding(.top, i == 0 ? 0 : m.space(b.space))
+                }
             }
             if let whole = view.wholeOffice {
                 Button { model.open(.home(whole.date)) } label: {

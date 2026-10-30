@@ -15,8 +15,11 @@ native text, screen for screen:
   and hymns a centred column.
 - **The ordo**: the month under its pinned heading (the wide table on an iPad), each day's
   office details (its commemorations and office digest), and the year's Tabula Temporaria.
-- **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
-  and offers "Remind me in 10 min".
+- **Reminders**: local notifications with the bell. Each names its hour and time ("Vespers ·
+  6:00 PM", as Android's) and the day's feast, offers "Remind me in 10 min", and clears an hour
+  after its office begins.
+- **Icon shortcuts**: long-pressing the app's icon offers Lauds, Vespers, Compline and this
+  month's ordo, with the web's glyphs, as Android's launcher shortcuts do (`Shortcuts.swift`).
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
@@ -37,8 +40,8 @@ The Office's text is set with TextKit (`Prose.swift`), not SwiftUI's `Text`:
 - an initial runs two lines deep beside the text, or stands raised when the text is short.
 
 iOS keeps at most 64 pending notifications for an app, so reminders are scheduled as far ahead
-as fit, up to four weeks. Every visit, and a background refresh about twice a day, move the
-schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
+as fit, up to four weeks. Every visit, each reminder answered or shown while the app is open, a
+change of time zone or clock, and a background refresh about twice a day, move the schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
 (`apps/android/tools/bake-bell.py`).
 
 ## Usage counts
