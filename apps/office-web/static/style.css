@@ -4278,6 +4278,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   padding: 0.3rem 0 0.3rem 0.75rem;
 }
 .feast-years .find-year::before { top: 0.4rem; bottom: 0.4rem; }
+.feast-years .find-year-go { grid-column: -1; }
 .feast-years .find-year-status { font-size: 0.9rem; }
 @media (min-width: 960px) {
   .page-feast main { max-width: 62rem; }
