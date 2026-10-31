@@ -312,6 +312,8 @@ pub struct FeastYearRow {
     pub label: String,
     /// "kept", "commemorated", "monastic", "transferred", "not-kept".
     pub class: String,
+    /// Kept as the feast usually is, so the feast page leaves the status unsaid.
+    pub usual: bool,
     /// Why it is kept so, or empty.
     pub note: String,
     /// The colour of that day's office.

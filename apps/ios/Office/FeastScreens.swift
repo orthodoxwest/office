@@ -125,9 +125,13 @@ struct FindScreen: View {
     }
 }
 
+/// The width from which the feast page sets its standing and years as a rail beside its texts.
+private let feastRailFrom: CGFloat = 960
+
 /**
- * A feast's page: its rank and date, the next day it is kept (leading to that day), how it is kept
- * in the next eight years, and its texts.
+ * A feast's page: its rank, then its standing (its date and the next day it is kept, leading to
+ * that day), its texts with the collect first, and how it is kept in the next eight years. On a wide
+ * screen the standing and the years make a rail beside the texts (style.css `.feast-body`).
  */
 struct FeastScreen: View {
     let view: FeastPageView
@@ -139,69 +143,55 @@ struct FeastScreen: View {
     private var note: TextStyle { Scale.small.sized(14.7, line: 21) }
 
     var body: some View {
-        let w = feastWordsShared
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                SiteHeader()
-                Button { model.findAgain() } label: {
-                    Text("‹ \(w.findTitle)").type(Scale.small.sized(15.2, line: 20)).foregroundStyle(p.accent)
-                        .padding(.vertical, m.px(12))
-                        .frame(minHeight: 44)
+        GeometryReader { geo in
+            let rail = geo.size.width >= feastRailFrom && !view.texts.isEmpty
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    SiteHeader()
+                    Group {
+                        back
+                        FeastHeader(title: view.name, subtitle: view.subtitle, ink: p.rubric)
+                    }
+                    .feastPageColumn(m, wide: wide, rail: rail)
+                    if rail {
+                        HStack(alignment: .top, spacing: 48) {
+                            texts.frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 0) {
+                                StandingBox(view: view)
+                                years.padding(.top, m.px(22))
+                            }
+                            .frame(width: 320)
+                        }
+                        .feastPageColumn(m, wide: wide, rail: true)
+                        .padding(.top, m.px(22))
+                    } else {
+                        StandingBox(view: view).feastColumn(m, wide: wide).padding(.top, m.px(22))
+                        if !view.texts.isEmpty {
+                            texts.feastColumn(m, wide: wide).padding(.top, m.px(22))
+                        }
+                        years.feastColumn(m, wide: wide).padding(.top, m.px(28))
+                    }
+                    Footer()
                 }
-                .buttonStyle(Quiet())
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .feastColumn(m, wide: wide)
-                FeastHeader(title: view.name, subtitle: view.subtitle, ink: p.rubric).feastColumn(m, wide: wide)
-                facts.feastColumn(m, wide: wide).padding(.top, m.px(14))
-                VStack(alignment: .leading, spacing: 0) {
-                    SectionHeading(text: view.yearsHeading)
-                    Text(w.yearsHint).type(note).foregroundStyle(p.muted).padding(.top, m.px(6)).padding(.bottom, m.px(4))
-                    ForEach(Array(view.years.enumerated()), id: \.offset) { i, y in YearRow(y: y, first: i == 0) }
-                }
-                .feastColumn(m, wide: wide).padding(.top, m.px(28))
-                if !view.texts.isEmpty {
-                    texts.feastColumn(m, wide: wide).padding(.top, m.px(28))
-                }
-                Footer()
             }
         }
     }
 
-    private var facts: some View {
-        let w = feastWordsShared
-        return VStack(alignment: .leading, spacing: m.px(14)) {
-            Group {
-                if !view.dateLead.isEmpty {
-                    Text(view.dateLead + " ") + Text(view.date).foregroundColor(p.text)
-                } else {
-                    Text(view.date)
-                }
-            }
-            .type(Scale.body.sized(17.6, line: 26)).foregroundStyle(p.muted)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            if !view.monasticNote.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(w.monasticHeading).type(TextStyle(size: 15.5, line: 22, tracking: 0.8, smallCaps: true)).foregroundStyle(p.titulus)
-                    Text(view.monasticNote).type(Scale.body.sized(15.5, line: 22.5)).foregroundStyle(p.text)
-                }
-                .padding(.leading, m.px(19)).padding(.trailing, m.px(16)).padding(.vertical, m.px(12))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(p.surface)
-                .overlay(alignment: .leading) { Rectangle().fill(p.goldLine).frame(width: 3) }
-                .accessibilityElement(children: .combine)
-                if let all = view.keptByAll {
-                    Button { model.open(.feast(all.id)) } label: {
-                        (Text(w.everyoneKeeps + " ") + Text(all.name).foregroundColor(p.accent) + Text(" " + view.keptByAllNote))
-                            .type(note).foregroundStyle(p.muted).multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .buttonStyle(Quiet())
-                    .accessibilityHint("Opens the feast's page")
-                }
-            }
-            if let next = view.next {
-                NextBox(next: next) { model.open(.home(next.date)) }
-            }
+    private var back: some View {
+        Button { model.findAgain() } label: {
+            Text("‹ \(feastWordsShared.findTitle)").type(Scale.small.sized(15.2, line: 20)).foregroundStyle(p.accent)
+                .padding(.vertical, m.px(12))
+                .frame(minHeight: 44)
+        }
+        .buttonStyle(Quiet())
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The next eight years, a compact reference: a row says its status only where it differs from the usual.
+    private var years: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeading(text: view.yearsHeading, small: true)
+            ForEach(Array(view.years.enumerated()), id: \.offset) { i, y in YearRow(y: y, first: i == 0, compact: true) }
         }
     }
 
@@ -229,6 +219,101 @@ struct FeastScreen: View {
                 .accessibilityHint("Opens the day")
             }
         }
+    }
+}
+
+extension View {
+    /// The feast page's column, or on the rail the wider one its texts and rail share (the web's 62rem).
+    func feastPageColumn(_ m: Metrics, wide: Bool, rail: Bool) -> some View {
+        Group {
+            if rail {
+                frame(maxWidth: 992).padding(.horizontal, 24).frame(maxWidth: .infinity)
+            } else {
+                feastColumn(m, wide: wide)
+            }
+        }
+    }
+}
+
+/**
+ * The feast's standing, framed as the invitation is (the lining ruled twice): for a monastic
+ * observance its heading, the feast everyone keeps and the note; then its date, and the next day it
+ * is kept, which a tap opens (`.feast-standing`).
+ */
+private struct StandingBox: View {
+    let view: FeastPageView
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let w = feastWordsShared
+        let monastic = !view.monasticNote.isEmpty
+        VStack(alignment: .leading, spacing: m.px(8)) {
+            if monastic {
+                Text(w.monasticHeading).type(TextStyle(size: 16, line: 22, tracking: 1, smallCaps: true)).foregroundStyle(p.titulus)
+                if let all = view.keptByAll {
+                    Button { model.open(.feast(all.id)) } label: {
+                        (Text(w.everyoneKeeps + " ") + Text(all.name).foregroundColor(p.accent) + Text(" " + view.keptByAllNote))
+                            .type(Scale.body.sized(16.8, line: 24)).foregroundStyle(p.text).multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(Quiet())
+                    .accessibilityHint("Opens the feast's page")
+                }
+                Text(view.monasticNote).type(Scale.small.sized(14.7, line: 20.6)).foregroundStyle(p.muted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Group {
+                if !view.dateLead.isEmpty {
+                    Text(view.dateLead + " ") + Text(view.date).foregroundColor(p.text)
+                } else {
+                    Text(view.date)
+                }
+            }
+            .type(Scale.body.sized(monastic ? 16 : 18.4, line: 26)).foregroundStyle(p.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let next = view.next {
+                Button { model.open(.home(next.date)) } label: { nextRow(next) }
+                    .buttonStyle(Quiet())
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(next.label): \(next.dateLabel)")
+                    .accessibilityHint("Opens the day")
+            }
+        }
+        .padding(.leading, m.px(17.6)).padding(.trailing, m.px(16))
+        .padding(.top, m.px(13.6)).padding(.bottom, m.px(15))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(p.surface)
+        .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1) }
+        .padding(3)
+        .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1).padding(-0.5) }
+    }
+
+    /// The next keeping under a dotted rule: its label, then its date with the way to the day, which
+    /// keeps to the date's line while it fits and takes the right of its own when not.
+    private func nextRow(_ next: NextKeepingView) -> some View {
+        let date = Text(next.dateLabel).type(Scale.body.sized(16.8, line: 25)).foregroundStyle(p.text).fixedSize()
+        let go = Text("\(feastWordsShared.daysHours) ›").type(Scale.body.sized(15.7, line: 25)).foregroundStyle(p.rubric).fixedSize()
+        return VStack(alignment: .leading, spacing: 0) {
+            DottedRule(color: p.border)
+            Text(next.label).type(TextStyle(size: 13.6, line: 18, tracking: 1.1, smallCaps: true)).foregroundStyle(p.muted)
+                .padding(.top, m.px(8.8))
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .lastTextBaseline, spacing: m.px(12.8)) {
+                    date
+                    Spacer(minLength: 0)
+                    go
+                }
+                VStack(alignment: .trailing, spacing: 0) {
+                    date.frame(maxWidth: .infinity, alignment: .leading)
+                    go
+                }
+            }
+            .padding(.top, m.px(2))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }
 
@@ -277,11 +362,12 @@ private struct FeastHeader: View {
 /// A section's heading in the tituli's small capitals over the lining (`.feast-section h2`).
 private struct SectionHeading: View {
     let text: String
+    var small = false
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
-        Text(text).type(TextStyle(size: 20, line: 26, tracking: 1.6, smallCaps: true)).foregroundStyle(p.titulus)
+        Text(text).type(small ? TextStyle(size: 16.8, line: 22, tracking: 1.3, smallCaps: true) : TextStyle(size: 20, line: 26, tracking: 1.6, smallCaps: true)).foregroundStyle(p.titulus)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, m.px(5))
             .overlay(alignment: .bottom) { Hairline(color: p.lining) }
@@ -289,49 +375,12 @@ private struct SectionHeading: View {
     }
 }
 
-/**
- * The next day the feast is kept, framed as the invitation is (the lining ruled twice), the day's
- * colour on its rail; a tap opens that day.
- */
-private struct NextBox: View {
-    let next: NextKeepingView
-    let action: () -> Void
-    @Environment(\.palette) private var p
-    @Environment(\.metrics) private var m
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(next.label).type(TextStyle(size: 13.6, line: 18, tracking: 1.1, smallCaps: true)).foregroundStyle(p.muted)
-                HStack(alignment: .lastTextBaseline, spacing: 0) {
-                    Text(next.dateLabel).type(Scale.body.sized(18.4, line: 25)).foregroundStyle(p.text)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("\(feastWordsShared.daysHours) ›").type(Scale.body.sized(16, line: 25)).foregroundStyle(p.rubric)
-                        .padding(.leading, m.px(12))
-                }
-                .padding(.top, m.px(2))
-            }
-            .padding(.leading, m.px(17.6)).padding(.trailing, m.px(16))
-            .padding(.top, m.px(12.8)).padding(.bottom, m.px(13.6))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(p.surface)
-            .overlay(alignment: .leading) { Rectangle().fill(titleColor(next.color, p)).frame(width: 3) }
-            .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1) }
-            .padding(3)
-            .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1).padding(-0.5) }
-        }
-        .buttonStyle(Quiet())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(next.label): \(next.dateLabel)")
-        .accessibilityHint("Opens the day")
-    }
-}
-
-/// A year's keeping: its year, date and status on the day's colour rail, leading to that day.
+/// A year's keeping: its year, date and status on the day's colour rail, leading to that day. A year
+/// kept as the feast usually is leaves its status unsaid; `compact` is the feast page's tighter row.
 private struct YearRow: View {
     let y: FeastYearView
     let first: Bool
+    var compact = false
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -366,7 +415,7 @@ private struct YearRow: View {
                 .padding(.leading, m.px(10))
             VStack(alignment: .leading, spacing: 0) {
                 Text(y.dateLabel).type(Scale.body.sized(17.6, line: 24)).foregroundStyle(p.text)
-                Text(y.label).type(TextStyle(size: 15.2, line: 21, italic: quiet)).foregroundStyle(keepingInk(y.kind, p))
+                if !y.usual { Text(y.label).type(TextStyle(size: 15.2, line: 21, italic: quiet)).foregroundStyle(keepingInk(y.kind, p)) }
                 if !y.note.isEmpty { Text(y.note).type(Scale.small.sized(13.8, line: 18)).foregroundStyle(p.muted) }
             }
             .multilineTextAlignment(.leading)
@@ -378,7 +427,7 @@ private struct YearRow: View {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.vertical, m.px(8))
+        .padding(.vertical, m.px(compact ? 5 : 8))
         .frame(minHeight: 44)
     }
 }

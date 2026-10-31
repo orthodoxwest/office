@@ -357,10 +357,16 @@ fn finds_a_feast_and_gives_its_page() {
     let words: String = collect.blocks.iter().flat_map(|b| &b.runs).map(|r| r.text.as_str()).collect();
     assert!(words.contains("blessed Raphael") && words.contains("world without end"), "{words}");
     assert!(page.whole_office.is_some());
+    assert_eq!(page.texts[0].label, "Collect", "the collect leads the texts, as on the web");
+    assert!(!found.results[0].years.iter().any(|y| y.usual), "the search says every year's status");
+    for y in &page.years {
+        assert_eq!(y.usual, y.kind == "kept", "{} {}: a year kept as usual leaves its status unsaid", y.year, y.kind);
+    }
 
     let benedict = core.feast_page("solemnity-st-benedict".into(), today).unwrap().unwrap();
     assert!(benedict.texts.is_empty() && !benedict.monastic_note.is_empty());
     assert_eq!(benedict.kept_by_all.map(|f| f.id), Some("st-benedict".into()));
+    assert!(benedict.years.iter().all(|y| y.usual), "a monastic observance is kept by monastics, as usual, every year");
     assert!(core.feast_page("no-such-feast".into(), today).unwrap().is_none());
 }
 

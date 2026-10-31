@@ -1,5 +1,5 @@
 //! A feast's own texts for its page, read from the office as it is said on a day the feast is kept
-//! or commemorated: the Gospel-canticle antiphons, the versicles and the collect, each from the
+//! or commemorated: the collect, then the Gospel-canticle antiphons and the versicles, each from the
 //! feast's proper or its Common, with the saint's name put in. Reading them from the composed hours
 //! keeps the page to what the office says, in that day's season.
 
@@ -113,6 +113,11 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
     let antiphons = grouped(antiphons, &own);
     // A versicle's label is the same in a commemoration, so its hours are not kept apart.
     let versicles = grouped(versicles, &[]);
+    // The collect first: it is the day's, said at every hour, and it names the feast. Then the
+    // texts of single hours. The collect as Lauds says it, else as Vespers does.
+    if let Some((_, collect)) = collects.iter().find(|(p, _)| *p == Place::Lauds).or_else(|| collects.first()) {
+        push("Collect".to_string(), collect.clone(), true);
+    }
     // Each hour's antiphon, then its versicle, in the order they are said.
     for place in [Place::FirstVespers, Place::Lauds, Place::SecondVespers] {
         for (places, text) in antiphons.iter().filter(|(p, _)| p[0] == place) {
@@ -128,10 +133,6 @@ pub fn feast_texts(engine: &Engine, is_it: &dyn Fn(&str, &str) -> bool, eve: Opt
         for (places, text) in versicles.iter().filter(|(p, _)| p[0] == place) {
             push(format!("Versicle at {}", name(places)), text.clone(), false);
         }
-    }
-    // The collect as Lauds says it, else as Vespers does.
-    if let Some((_, collect)) = collects.iter().find(|(p, _)| *p == Place::Lauds).or_else(|| collects.first()) {
-        push("Collect".to_string(), collect.clone(), true);
     }
     out
 }
@@ -263,12 +264,12 @@ mod tests {
         assert_eq!(
             labels(&texts),
             [
+                "Collect",
                 "At I Vespers · Magnificat",
                 "Versicle at I Vespers",
                 "At Lauds · Benedictus",
                 "Versicle at Lauds and II Vespers",
-                "At II Vespers · Antiphon",
-                "Collect"
+                "At II Vespers · Antiphon"
             ],
             "his II Vespers give way to Septuagesima's I Vespers, where he is commemorated"
         );

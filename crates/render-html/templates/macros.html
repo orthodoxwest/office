@@ -66,9 +66,10 @@
   <button class="find-submit" type="submit">Find</button>
 </form>
 {% endmacro %}
-{# A feast's keeping year by year, each row leading to that day. #}
+{# A feast's keeping year by year, each row leading to that day. A row kept as the feast usually
+   is leaves its status unsaid (the feast page's rows; the search's say every status). #}
 {% macro feast_years(years) %}
 <ol class="find-years">
-  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span><span class="find-year-date">{{ y.date }}</span><span class="find-year-status is-{{ y.class }}"><b>{{ y.label }}</b>{% if y.note %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
+  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span><span class="find-year-date">{{ y.date }}</span>{% if not y.usual or y.note %}<span class="find-year-status is-{{ y.class }}">{% if not y.usual %}<b>{{ y.label }}</b>{% endif %}{% if y.note %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% endif %}{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
 </ol>
 {% endmacro %}

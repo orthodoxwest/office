@@ -445,8 +445,6 @@ pub struct FeastWords {
     pub find_prompt: &'static str,
     /// A result's link to its feast's page.
     pub every_year: &'static str,
-    /// Over a feast's years, under their heading.
-    pub years_hint: &'static str,
     /// The next keeping's way to that day.
     pub days_hours: &'static str,
     /// The heading over a feast's texts.
@@ -465,7 +463,6 @@ pub const FEAST_WORDS: FeastWords = FeastWords {
     find_title: "Find a feast",
     find_prompt: "Find a feast or saint",
     every_year: "Every year",
-    years_hint: "Each date opens that day, with its hours.",
     days_hours: "The day’s hours",
     texts_heading: "Proper of the feast",
     common_mark: "Common",
@@ -494,6 +491,18 @@ pub fn keeping_class(k: &Keeping) -> &'static str {
         Keeping::Commemorated { .. } => "commemorated",
         Keeping::Monastic { .. } => "monastic",
         Keeping::NotKept { .. } => "not-kept",
+    }
+}
+
+/// Whether a year keeps the feast as it usually is: kept, or commemorated for a feast of that
+/// rank, or kept by monastics for their observance. The feast page leaves such a row's status
+/// unsaid, so that a year that differs (transferred, commemorated, not kept) stands out.
+pub fn is_usual(e: &FeastEntry, k: &Keeping) -> bool {
+    match k {
+        Keeping::Kept => e.monastic.is_none() && e.rank != Rank::Commemoration,
+        Keeping::Commemorated { .. } => e.monastic.is_none() && e.rank == Rank::Commemoration,
+        Keeping::Monastic { .. } => e.monastic.is_some(),
+        Keeping::Transferred { .. } | Keeping::NotKept { .. } => false,
     }
 }
 

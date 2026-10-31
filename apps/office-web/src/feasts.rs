@@ -9,8 +9,8 @@ use calendar::Date;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
     FEAST_PAGE_YEARS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearKeeping, date_lead, feast_date, feast_subtitle, is_entry,
-    is_feast_id, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone,
-    result_meta, results_count, row_date, search_years, texts_keeping, texts_source, whole_office_label,
+    is_feast_id, is_usual, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping, next_label,
+    rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source, whole_office_label,
 };
 use presentation::{date_slug, long_date};
 use render_html::links::{feast_link, find_link, home_from_feast};
@@ -24,13 +24,15 @@ use crate::web_time::now_in;
 const MAX_QUERY: usize = 100;
 
 /// A year's row, leading to that day's page with the way back to the feast.
-fn year_row(id: &str, k: &YearKeeping) -> FeastYearRow {
+/// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
+fn year_row(id: &str, k: &YearKeeping, usual: bool) -> FeastYearRow {
     FeastYearRow {
         year: k.year,
         date: k.date.map(row_date).unwrap_or_default(),
         href: k.date.map(|d| home_from_feast(&date_slug(d), id)).unwrap_or_default(),
         label: keeping_label(&k.keeping).into(),
         class: keeping_class(&k.keeping).into(),
+        usual,
         note: keeping_note(&k.keeping),
         color: k.color.as_str().into(),
     }
@@ -66,7 +68,7 @@ impl Server {
                     tone => format!("is-{tone}"),
                 },
                 meta: result_meta(e),
-                years: years.iter().map(|k| year_row(&e.id, k)).collect(),
+                years: years.iter().map(|k| year_row(&e.id, k, false)).collect(),
             });
         }
         let data = FindData {
@@ -154,7 +156,7 @@ impl Server {
                 })
             }),
             years_heading: YEARS_HEADING.into(),
-            years: years.iter().map(|k| year_row(&entry.id, k)).collect(),
+            years: years.iter().map(|k| year_row(&entry.id, k, is_usual(entry, &k.keeping))).collect(),
             texts_source: said.map(|(d, kept)| texts_source(texts.proper, texts.common, d, kept)).unwrap_or_default(),
             texts: texts
                 .texts
@@ -243,7 +245,12 @@ mod tests {
             assert!(body.contains(&format!("<h3>{label} <span")), "{label}");
         }
         assert!(body.contains("blessed Raphael, thy Confessor and Bishop") && body.contains("world without end"));
-        assert!(body.contains(r#"class="feast-next "#), "a feast kept every few years has a next keeping");
+        assert!(body.contains(r#"class="feast-next""#), "a feast kept every few years has a next keeping");
+        let collect = body.find("<h3>Collect").unwrap();
+        assert!(collect < body.find("<h3>At I Vespers").unwrap(), "the collect, the day's, comes before the texts of single hours");
+        assert!(collect < body.find(">The next eight years</h2>").unwrap(), "the texts come before the years");
+        // A year kept as usual leaves "Kept" unsaid; a year he is only commemorated says so.
+        assert!(!body.contains("<b>Kept</b>") && body.contains("<b>Commemorated</b>"));
         assert!(body.contains(r#"<link rel="canonical" href="#) && !body.contains("noindex"));
     }
 
@@ -254,7 +261,10 @@ mod tests {
         assert!(body.contains("Monastic Diurnal pp. 560–564"));
         assert!(body.contains(r#"Everyone keeps <a href="/feast/st-benedict">"#));
         assert!(!body.contains("Proper of the feast"), "its office is in the Monastic Diurnal, not this app");
-        assert!(body.contains("is-monastic"));
+        // Its years say what the parish keeps, not "Monastics & Oblates" eight times over.
+        assert!(body.contains("the parish keeps") && !body.contains("<b>Monastics &amp; Oblates</b>"));
+        let everyone = body.find("Everyone keeps").unwrap();
+        assert!(everyone < body.find("The ordo keeps this observance").unwrap(), "the feast everyone keeps leads");
     }
 
     #[test]

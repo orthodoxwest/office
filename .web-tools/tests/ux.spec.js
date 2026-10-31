@@ -4068,6 +4068,30 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
 
+test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  const left = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().left);
+  // A phone: one column, the standing, then the texts with the collect first, then the years.
+  const [standing, texts, years] = [await top(".feast-standing"), await top(".feast-texts"), await top(".feast-years")];
+  expect(standing).toBeLessThan(texts);
+  expect(texts).toBeLessThan(years);
+  await expect(page.locator(".feast-text h3").first()).toHaveText(/^Collect/);
+  await expect(page.locator(".feast-standing .feast-next")).toBeVisible();
+  // A year kept as usual says nothing more; one he is only commemorated says so.
+  await expect(page.locator(".feast-years .find-year-status b", { hasText: /^Kept$/ })).toHaveCount(0);
+  expect(await page.locator(".feast-years .find-year-status b", { hasText: "Commemorated" }).count()).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  // A wide screen: the standing and the years make a rail to the right of the texts.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
+  // (The standing's frame sits 3px in, its outer rule in the margin.)
+  expect(Math.abs(await left(".feast-years") - await left(".feast-standing"))).toBeLessThanOrEqual(4);
+  expect(await top(".feast-standing")).toBeLessThan(await top(".feast-years"));
+  expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
+});
+
 test("Chant On notes every verse of a whole hymn under one mode heading", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openDatedPage(page, "/lauds/2026-10-28");
