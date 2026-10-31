@@ -4092,7 +4092,7 @@ test("a feast's page leads with its standing, then its texts, then its years, be
   expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
 });
 
-test("Chant On notes every verse of a whole hymn under one mode heading", async ({ page }) => {
+test("Chant On notes every verse of a whole hymn, its mode's figure once over the initial", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openDatedPage(page, "/lauds/2026-10-28");
   const scores = page.locator(".hymn .chant-hymn");
@@ -4105,9 +4105,9 @@ test("Chant On notes every verse of a whole hymn under one mode heading", async 
   await metrics;
   await expect(scores).toBeVisible();
   expect(await scores.locator(".chant-stanza").count()).toBeGreaterThan(2);
-  // The mode once, over the first verse.
-  await expect(scores.locator(".chant-mode")).toHaveCount(1);
-  await expect(scores.locator(".chant-mode")).toHaveText(/^Mode [IVX]+$/);
+  // The mode once, as a figure the engine sets over the first verse's initial.
+  await expect(scores.locator("svg [class$='-annotation']")).toHaveCount(1);
+  await expect(scores.locator(".chant-stanza").first().locator("svg [class$='-annotation']")).toHaveText(/^[IVX]+$/);
 
   await choosePreference(page, "Off", ".chant-option");
   await expect(scores).toBeHidden();

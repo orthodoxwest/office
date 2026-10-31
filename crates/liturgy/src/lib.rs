@@ -245,17 +245,31 @@ impl ChantScore {
         words.split_whitespace().filter(|w| *w != "*").collect::<Vec<_>>().join(" ")
     }
 
-    /// The mode the score's `mode:` header names, as a chant book heads the piece: "Mode I".
-    /// None when it names none, or none a reader would recognize.
-    pub fn mode_label(&self) -> Option<String> {
+    /// The mode the score's `mode:` header names, as a roman figure ("I", "VIII"). None when it
+    /// names none, or none a reader would recognize.
+    pub fn mode_figure(&self) -> Option<&'static str> {
         let header = self.gabc.split_once("%%").map_or("", |(h, _)| h);
         let value = header.lines().find_map(|l| l.trim().strip_prefix("mode:"))?.trim().trim_end_matches(';').trim();
         const ROMAN: [&str; 8] = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
-        let numeral = match value.parse::<usize>() {
-            Ok(n @ 1..=8) => ROMAN[n - 1].to_string(),
-            _ => ROMAN.iter().find(|r| r.eq_ignore_ascii_case(value))?.to_string(),
-        };
-        Some(format!("Mode {numeral}"))
+        match value.parse::<usize>() {
+            Ok(n @ 1..=8) => Some(ROMAN[n - 1]),
+            _ => ROMAN.iter().find(|r| r.eq_ignore_ascii_case(value)).copied(),
+        }
+    }
+
+    /// `part` of this score (itself, or one of its [`stanza_parts`](Self::stanza_parts)) as the
+    /// opening score is engraved: its mode's figure written over the initial, as the chant books
+    /// head a piece, the engine's `annotation` header in capitals (the engine would print the
+    /// mode in small roman figures). Every front engraves it with the annotation shown.
+    pub fn with_mode_figure(&self, part: &str) -> String {
+        match (self.mode_figure(), part.split_once("%%")) {
+            (Some(figure), Some((header, body))) if !header.lines().any(|l| l.trim().starts_with("annotation:")) => {
+                let header = header.trim_end();
+                let sep = if header.is_empty() { "" } else { "\n" };
+                format!("{header}{sep}annotation: {figure};\n%%{body}")
+            }
+            _ => part.to_string(),
+        }
     }
 
     /// A whole hymn's score parted stanza by stanza at its double bars `(::)`, each part with the
@@ -550,14 +564,20 @@ mod tests {
 
     #[test]
     fn a_score_names_its_mode_in_roman_numerals() {
-        let mode = |header: &str| {
-            ChantScore { gabc: format!("name: t;\n{header}%%\n(c4) A(g) (::)").into(), sets: ScoreSpan::Antiphon }.mode_label()
-        };
-        assert_eq!(mode("mode: 1;\n").as_deref(), Some("Mode I"));
-        assert_eq!(mode("mode: 8;\n").as_deref(), Some("Mode VIII"));
-        assert_eq!(mode("mode: vi;\n").as_deref(), Some("Mode VI"));
-        assert_eq!(mode("mode: 9;\n"), None);
-        assert_eq!(mode(""), None);
+        let score = |header: &str| ChantScore { gabc: format!("name: t;\n{header}%%\n(c4) A(g) (::)").into(), sets: ScoreSpan::Antiphon };
+        assert_eq!(score("mode: 1;\n").mode_figure(), Some("I"));
+        assert_eq!(score("mode: 8;\n").mode_figure(), Some("VIII"));
+        assert_eq!(score("mode: vi;\n").mode_figure(), Some("VI"));
+        assert_eq!(score("mode: 9;\n").mode_figure(), None);
+        assert_eq!(score("").mode_figure(), None);
+        // The opening score carries it as the engine's annotation, over the initial.
+        let s = score("mode: 8;\n");
+        assert_eq!(s.with_mode_figure(&s.gabc), "name: t;\nmode: 8;\nannotation: VIII;\n%%\n(c4) A(g) (::)");
+        // A score without a mode, or one that writes its own annotation, stands as written.
+        let none = score("");
+        assert_eq!(none.with_mode_figure(&none.gabc), &*none.gabc);
+        let own = score("mode: 1;\nannotation: Hymn;\n");
+        assert_eq!(own.with_mode_figure(&own.gabc), &*own.gabc);
     }
 
     #[test]

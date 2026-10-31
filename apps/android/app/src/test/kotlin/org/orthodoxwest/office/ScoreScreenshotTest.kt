@@ -29,7 +29,7 @@ class ScoreScreenshotTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private val gabc = "name: Te lucis;\n%%\n(c4) To(e) thee,(f) be(h)fore(g) the(h) close(i) of(h) day,(g.) (;) " +
+    private val gabc = "name: Te lucis;\nmode: 8;\nannotation: VIII;\n%%\n(c4) To(e) thee,(f) be(h)fore(g) the(h) close(i) of(h) day,(g.) (;) " +
         "Cre(h)a(i)tor(j) of(i) the(h) world,(ih) we(g) pray(h.) (;) That(h) with(hg) thy(f) won(g)ted(h) fa(g)vour,(f) thou(e.) (;) " +
         "Wouldst(e) be(f) our(g) guard(h) and(gf) keep(e)er(f) now.(e.) (::)"
 
@@ -37,7 +37,7 @@ class ScoreScreenshotTest {
         val blocks = Office.core.compose("compline", 2026, 10, 7, "private").sections.flatMap { it.blocks }
         val first = blocks.indexOfFirst { it.kind == BlockKind.STANZA }
         val shown = blocks.subList(first - 1, first + 2).toMutableList()
-        shown[1] = shown[1].copy(kind = BlockKind.SCORE, score = gabc, phrases = true, mode = "Mode VIII")
+        shown[1] = shown[1].copy(kind = BlockKind.SCORE, score = gabc, phrases = true)
         compose.setContent {
             OfficeTheme(choice = theme) {
                 Column(Modifier.padding(16.dp)) {

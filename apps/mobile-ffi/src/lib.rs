@@ -847,16 +847,15 @@ pub struct BlockView {
     pub drop_cap: bool,
     pub starts_element: bool,
     pub runs: Vec<RunView>,
-    /// A `Score` block's GABC, for neuma to engrave (the runs are the words it sets); empty for
+
+    /// A `Score` block's GABC, for neuma to engrave (the runs are the words it sets), the
+    /// opening score's with its mode's figure as the annotation over the initial; empty for
     /// every other kind.
     #[uniffi(default = "")]
     pub score: String,
     /// A hymn's score, set a line of verse to a staff (neuma's phrase lines).
     #[uniffi(default = false)]
     pub phrases: bool,
-    /// The mode over a score that opens its piece ("Mode I"); empty for none.
-    #[uniffi(default = "")]
-    pub mode: String,
     /// The space above the block, after the block shown before it; [`space_lines`] sizes it.
     pub space: Space,
 }
@@ -871,7 +870,6 @@ impl From<render_blocks::Block> for BlockView {
             space: b.space.into(),
             score: b.score,
             phrases: b.phrases,
-            mode: b.mode,
             runs: b
                 .runs
                 .into_iter()

@@ -160,8 +160,6 @@ pub struct Block {
     pub score: String,
     /// A hymn's score set phrase by phrase, each line of a verse on a staff of its own.
     pub phrases: bool,
-    /// The mode a score's heading names ("Mode I"); empty for none.
-    pub mode: String,
     /// The space above the block, after the block shown before it ([`space_blocks`]).
     pub space: Space,
 }
@@ -177,7 +175,6 @@ impl Block {
             chant: ChantVariant::Always,
             score: String::new(),
             phrases: false,
-            mode: String::new(),
             space: Space::None,
         }
     }
@@ -191,9 +188,9 @@ impl Block {
         Block {
             drop_cap: initial,
             chant: ChantVariant::On,
-            score: gabc.to_string(),
+            // The opening score carries its mode's figure, which the engine sets over the initial.
+            score: if initial { score.with_mode_figure(gabc) } else { gabc.to_string() },
             phrases: score.sets != ScoreSpan::Antiphon,
-            mode: if initial { score.mode_label().unwrap_or_default() } else { String::new() },
             ..Block::new(BlockKind::Score, vec![Run::new(typeset(words.trim()), RunStyle::Plain)])
         }
     }
@@ -296,7 +293,8 @@ fn space_between(prev: BlockKind, prev_starts: bool, cur: &Block) -> Space {
         (K::Stanza | K::HymnRubric | K::Score, K::Stanza | K::HymnRubric) | (K::Stanza | K::HymnRubric, K::Score) => Space::Stanza,
         // A new speaker's turn.
         (_, K::Speaker) => Space::Stanza,
-        // A whole hymn engraved, stanza by stanza: room above each for its number.
+        // A whole hymn engraved, stanza by stanza: room above each for its number, to which
+        // each front adds a band of the number's own (style.css's `.chant-stanza` margin).
         (K::Score, K::Score) => Space::Group,
         (K::ChantLine, K::ChantLine) => Space::None,
         _ if cur.starts_element => Space::Stanza,

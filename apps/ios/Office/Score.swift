@@ -11,8 +11,9 @@ private let lyricSpaces: Float = 2.45
  * column's width with its lyrics at the hymn's text size, as the web's chant.js lays it out at its
  * column's, and the staff takes a tint of the theme's lining, as the web's `.chant-score` does. The
  * score keeps to the hymn's measure, as the web's `.hymn-verses`. The opening score carries its
- * mode above it (`.chant-mode`), and a whole hymn's stanzas after the first carry their number
- * (the marker), in the rubric's red above the score.
+ * mode's figure over the initial, which neuma engraves (its GABC's annotation, set by the core),
+ * and a whole hymn's stanzas after the first carry their number (the marker), in the rubric's red
+ * above the score.
  */
 struct ScoreRow: View {
     let block: BlockView
@@ -27,12 +28,6 @@ struct ScoreRow: View {
             ? Engraving.page(block.score, initial: block.dropCap, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
             : nil
         VStack(alignment: .leading, spacing: m.px(2)) {
-            if !block.mode.isEmpty {
-                Text(block.mode).font(Font(garamond(Scale.verse.size * 0.8 * m.type, smallCaps: true)))
-                    .tracking(Scale.verse.size * 0.06 * m.type)
-                    .foregroundStyle(p.rubric)
-                    .padding(.bottom, m.px(1))
-            }
             // A custos may reach past the measure: the whole score is fitted to the column.
             let fit = page.map { $0.width > Float(width) ? width / CGFloat($0.width) : 1 } ?? 1
             Canvas { context, _ in
@@ -53,6 +48,9 @@ struct ScoreRow: View {
                     .alignmentGuide(.top) { $0[.firstTextBaseline] + Scale.verse.size * numberRise * m.type }
             }
         }
+        // A numbered stanza takes a band above it for its number, clear of the last stanza's words
+        // (the web's `.chant-stanza` margin).
+        .padding(.top, block.marker.isEmpty ? 0 : Scale.verse.size * numberBand * m.type)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spoken(block))
         .frame(maxWidth: m.px(hymnMax))
@@ -67,7 +65,7 @@ struct ScoreRow: View {
     private func draw(_ page: Neuma.Page, in context: inout GraphicsContext, fit: CGFloat) {
         // The web's --chant-* tokens (style.css): neumes in the text's ink, staves a tint of the
         // lining (fainter on a night ground).
-        let (note, staff) = (p.text, mix(p.lining, p.bg, p.dark ? 0.5 : 0.72))
+        let (note, staff) = (p.text, mix(p.lining, p.bg, p.dark ? 0.62 : 0.82))
         func ink(_ role: Ink) -> Color { role == .staff || role == .ledger ? staff : note }
         for item in page.items {
             switch item {
@@ -119,11 +117,12 @@ private enum Engraving {
         if pages.count >= 64 { pages.removeAll() }
         // Set as the web sets it (`page_options` in render-html's chant.rs): lyrics measured in the app's
         // own Garamond (the table the core sets, `.custom`); a hyphen between every two syllables; the
-        // initial half the Solesmes size and flush with the margin, the mode above the score rather than
-        // over it; the last staff ending at the final bar; and a hymn's phrases each on a staff of their own.
+        // initial half the Solesmes size and flush with the margin, the mode's figure over it; the lyrics
+        // nearer their own staff than the next; the last staff ending at the final bar; and a hymn's
+        // phrases each on a staff of their own.
         let options = ChantOptions(
-            initial: initial ? 1 : 0, annotation: false, font: .custom, everyHyphen: true, initialScale: 0.5, initialMargin: 0,
-            shortLastStaff: true, phraseLines: phrases
+            initial: initial ? 1 : 0, font: .custom, everyHyphen: true, initialScale: 0.5, initialMargin: 0,
+            shortLastStaff: true, phraseLines: phrases, lyricDrop: 2.6
         )
         let chant = Chant(gabc: gabc, options: options)
         let page = chant.layout(width: width, options: LayoutOptions(scale: lyric / lyricSpaces)).page()
@@ -145,3 +144,7 @@ private enum Engraving {
 /// How far above its staff a stanza's number stands, to its baseline, in the verse's em: the
 /// web's `.chant-stanza-number` box (0.85em, line-height 1) from 1.1em up.
 private let numberRise: CGFloat = 0.44
+
+/// The band above a numbered stanza's score for its number, in the verse's em (style.css's
+/// `.chant-stanza`).
+private let numberBand: CGFloat = 0.4

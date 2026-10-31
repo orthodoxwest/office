@@ -64,14 +64,15 @@
     var units = (width / em) * LYRIC_SPACES * SCALE;
     var state = states.get(box);
     if (!state) {
-      // As chant.rs's page_options, and the apps' Score.kt and Score.swift.
+      // As chant.rs's page_options, and the apps' Score.kt and Score.swift: the mode's
+      // figure (the opening score's annotation header) over the initial, as the engine's default.
       var chant = new neuma.Chant(box.getAttribute("data-gabc"), {
         initial: box.getAttribute("data-chant-initial") === "1" ? 1 : 0,
-        annotation: false,
         font: font,
         everyHyphen: true,
         initialScale: 0.5,
         initialMargin: 0,
+        lyricDrop: 2.6,
         shortLastStaff: true,
         phraseLines: box.getAttribute("data-chant-phrases") === "1",
       });

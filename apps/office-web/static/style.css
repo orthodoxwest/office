@@ -345,7 +345,7 @@
      sit behind the notes; the initial gilt as every dropped initial; the
      mode in the rubric's red. */
   --chant-ink: var(--text);
-  --chant-staff: color-mix(in srgb, var(--lining) 72%, var(--bg));
+  --chant-staff: color-mix(in srgb, var(--lining) 82%, var(--bg));
   --chant-initial: var(--ornament);
   --chant-mode: var(--rubric);
   --titulus: #93412c;
@@ -2355,10 +2355,11 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: var(--space-bind);
 }
 
-/* A whole hymn engraved: each stanza's score a group apart, room above it for
-   its number. */
+/* A whole hymn engraved: each stanza's score a group apart, and a band of
+   0.4em above it for its number, clear of the last stanza's words (Score.kt
+   and Score.swift add the same band). */
 .chant-hymn > * + .chant-stanza {
-  margin-top: var(--space-group);
+  margin-top: calc(var(--space-group) + 0.4em);
 }
 
 /* Real small caps from EB Garamond's own smcp/c2sc glyphs. `text-transform:
@@ -4345,8 +4346,9 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --border: #2a3648;
     --rubric: #d47070;
     --lining: #cf8c6a;
-    /* The bright lining would outshine the notes on a night ground. */
-    --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
+    /* The bright lining would outshine the notes on a night ground; at 62% the
+       staff still reads at 3:1, below the notes. */
+    --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
     --titulus: #d8bc74;
     --kalendar-blue: #a9bedf;
     --moon-ink: #c9d0d9;
@@ -4404,8 +4406,9 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --border: #2a3648;
   --rubric: #d47070;
   --lining: #cf8c6a;
-  /* The bright lining would outshine the notes on a night ground. */
-  --chant-staff: color-mix(in srgb, var(--lining) 50%, var(--bg));
+  /* The bright lining would outshine the notes on a night ground; at 62% the
+     staff still reads at 3:1, below the notes. */
+  --chant-staff: color-mix(in srgb, var(--lining) 62%, var(--bg));
   --titulus: #d8bc74;
   --kalendar-blue: #a9bedf;
   --moon-ink: #c9d0d9;
@@ -8984,17 +8987,6 @@ body.page-home::before {
   color: var(--rubric);
   font-size: 0.85em;
   line-height: 1;
-}
-
-/* The mode, once, over the first staff: small capitals in the rubric's red,
-   as the books head a hymn's tune. */
-.chant-mode {
-  margin: 0 0 0.2rem;
-  color: var(--chant-mode);
-  font-size: 0.8em;
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
-  line-height: 1.2;
 }
 
 /* A hymn's verse column is as wide as its longest line; with its tune shown
