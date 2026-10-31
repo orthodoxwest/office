@@ -65,7 +65,6 @@ impl Pages {
                 ("find_title", w.find_title),
                 ("find_prompt", w.find_prompt),
                 ("every_year", w.every_year),
-                ("years_hint", w.years_hint),
                 ("days_hours", w.days_hours),
                 ("texts_heading", w.texts_heading),
                 ("common_mark", w.common_mark),

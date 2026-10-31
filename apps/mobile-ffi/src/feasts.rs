@@ -8,8 +8,9 @@ use corpus::typography::typeset;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
     FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, date_lead, feast_date,
-    feast_subtitle, is_entry, is_feast_id, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note, next_keeping,
-    next_label, rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source, whole_office_label,
+    feast_subtitle, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note,
+    next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source,
+    whole_office_label,
 };
 use presentation::long_date;
 
@@ -53,6 +54,8 @@ pub struct FeastYearView {
     pub label: String,
     /// "kept", "commemorated", "transferred", "monastic", "not-kept", for its colour.
     pub kind: String,
+    /// Kept as the feast usually is: the feast page leaves the status unsaid, as the web's does.
+    pub usual: bool,
     /// "Friday after Ash Wednesday holds the day", or empty.
     pub note: String,
     /// The colour of that day's office.
@@ -127,7 +130,6 @@ pub struct FeastWordsView {
     pub find_title: String,
     pub find_prompt: String,
     pub every_year: String,
-    pub years_hint: String,
     pub days_hours: String,
     pub texts_heading: String,
     pub common_mark: String,
@@ -143,7 +145,6 @@ pub fn feast_words() -> FeastWordsView {
         find_title: w.find_title.into(),
         find_prompt: w.find_prompt.into(),
         every_year: w.every_year.into(),
-        years_hint: w.years_hint.into(),
         days_hours: w.days_hours.into(),
         texts_heading: w.texts_heading.into(),
         common_mark: w.common_mark.into(),
@@ -153,13 +154,15 @@ pub fn feast_words() -> FeastWordsView {
     }
 }
 
-fn year_view(k: &YearKeeping) -> FeastYearView {
+/// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
+fn year_view(k: &YearKeeping, usual: bool) -> FeastYearView {
     FeastYearView {
         year: k.year,
         date: k.date.map(CivilDate::from),
         date_label: k.date.map(row_date).unwrap_or_default(),
         label: keeping_label(&k.keeping).into(),
         kind: keeping_class(&k.keeping).into(),
+        usual,
         note: typeset(&keeping_note(&k.keeping)),
         color: k.color.as_str().into(),
     }
@@ -174,7 +177,8 @@ impl OfficeCore {
         let found = self.feasts.search(&query);
         let mut results = Vec::with_capacity(found.len().min(MAX_RESULTS));
         for e in found.iter().take(MAX_RESULTS) {
-            let years = [year, year + 1].iter().map(|&y| self.keeping(y).map(|i| year_view(&i.keeping(e)))).collect::<Result<_, _>>()?;
+            let years =
+                [year, year + 1].iter().map(|&y| self.keeping(y).map(|i| year_view(&i.keeping(e), false))).collect::<Result<_, _>>()?;
             results.push(FeastResultView {
                 id: e.id.clone(),
                 name: typeset(&e.name),
@@ -225,7 +229,7 @@ impl OfficeCore {
                 })
             }),
             years_heading: YEARS_HEADING.into(),
-            years: years.iter().map(year_view).collect(),
+            years: years.iter().map(|k| year_view(k, is_usual(entry, &k.keeping))).collect(),
             texts_source: said.map(|(d, kept)| typeset(&texts_source(texts.proper, texts.common, d, kept))).unwrap_or_default(),
             texts: texts
                 .texts
