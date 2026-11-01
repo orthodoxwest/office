@@ -380,6 +380,7 @@ struct HourScreen: View {
             switch asked {
             case "hymn": return block.kind == .stanza
             case "psalm": return block.kind == .verse && block.dropCap
+            case "score": return block.kind == .score
             default: return false
             }
         }
