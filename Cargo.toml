@@ -25,7 +25,7 @@ serde_json = "1"
 regex = "1.13"
 sha2 = "0.11"
 serde = { version = "1", features = ["derive", "rc"] }
-minijinja = "3"
+minijinja = { version = "3", features = ["serde"] }
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal"] }
 rusqlite = { version = "0.41", features = ["bundled"] }

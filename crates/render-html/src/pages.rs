@@ -1,7 +1,8 @@
 //! Page templates with native MiniJinja HTML autoescaping and explicit URL filters
 //! (see [`crate::escape`]).
 
-use minijinja::value::Value;
+use minijinja::syntax::SyntaxConfig;
+use minijinja::value::{Serde, Value};
 use minijinja::{AutoEscape, Environment};
 
 use crate::escape::{url_norm, url_part, url_start};
@@ -41,7 +42,7 @@ impl Pages {
     /// and one that leaves them alone keeps them cached.
     pub fn new(asset_url: impl Fn(&str) -> String + Send + Sync + 'static) -> Result<Pages, String> {
         let mut env = Environment::new();
-        env.set_keep_trailing_newline(true);
+        env.set_syntax(SyntaxConfig::builder().keep_trailing_newline(true).build().map_err(|e| format!("building template syntax: {e}"))?);
         // Native HTML autoescaping also preserves trusted macro and fragment output.
         env.set_auto_escape_callback(|_| AutoEscape::Html);
         env.set_undefined_behavior(minijinja::UndefinedBehavior::Strict);
@@ -61,7 +62,7 @@ impl Pages {
         let w = &presentation::feast::FEAST_WORDS;
         env.add_global(
             "feast_words",
-            Value::from_iter([
+            Value::from_pairs([
                 ("find_title", w.find_title),
                 ("find_prompt", w.find_prompt),
                 ("every_year", w.every_year),
@@ -94,7 +95,7 @@ impl Pages {
 
     fn render<T: serde::Serialize>(&self, template: &str, data: &T) -> Result<String, String> {
         let tmpl = self.env.get_template(template).map_err(|e| e.to_string())?;
-        tmpl.render(Value::from_serialize(data)).map_err(|e| format!("rendering {template}: {e:#}"))
+        tmpl.render(Value::from(Serde(data))).map_err(|e| format!("rendering {template}: {e:#}"))
     }
 
     pub fn home(&self, data: &HomeData) -> Result<String, String> {
