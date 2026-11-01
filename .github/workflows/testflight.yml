@@ -236,7 +236,7 @@ jobs:
           security delete-keychain "$KEYCHAIN" || true
           rm -f "$RUNNER_TEMP/asc.json" "$RUNNER_TEMP/appstore.mobileprovision"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ios-release-log
