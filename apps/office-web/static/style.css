@@ -2358,7 +2358,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 /* A whole hymn engraved: each stanza's score a group apart, and a band of
    0.4em above it for its number, clear of the last stanza's words (Score.kt
    and Score.swift add the same band). */
-.chant-hymn > * + .chant-stanza {
+.chant-hymn > * + .chant-stanza:has(> .chant-stanza-number) {
   margin-top: calc(var(--space-group) + 0.4em);
 }
 
