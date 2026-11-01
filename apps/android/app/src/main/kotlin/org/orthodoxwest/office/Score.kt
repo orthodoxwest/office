@@ -30,8 +30,6 @@ import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import org.orthodoxwest.neuma.Chant
 import org.orthodoxwest.neuma.ChantOptions
@@ -47,13 +45,17 @@ import org.orthodoxwest.office.core.BlockView
 /** Staff spaces per lyric em: neuma's default lyric size, as the web's render-html/src/chant.rs. */
 private const val LYRIC_SPACES = 2.45f
 
+/** The band above a numbered stanza's score for its number, in the verse's em (style.css's `.chant-stanza`). */
+private const val NUMBER_BAND = 0.4f
+
 /**
  * A chant score (a `BlockKind.SCORE` block, with the Chant setting on): neuma engraves its GABC
  * at the column's width with its lyrics at the hymn's text size, as the web's chant.js lays it
  * out at its column's, and the staff takes a tint of the theme's lining, as the web's
  * `.chant-score` does. The score keeps to the hymn's measure, as the web's `.hymn-verses`. The
- * opening score carries its mode above it (`.chant-mode`), and a whole hymn's stanzas after the
- * first carry their number (the marker), in the rubric's red above the score.
+ * opening score carries its mode's figure over the initial, which neuma engraves (its GABC's
+ * annotation, set by the core), and a whole hymn's stanzas after the first carry their number
+ * (the marker), in the rubric's red above the score.
  */
 @Composable
 fun Score(block: BlockView, modifier: Modifier) {
@@ -63,7 +65,10 @@ fun Score(block: BlockView, modifier: Modifier) {
     val ornament = LocalOrnament.current
     val faces = scoreFaces()
     Box(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-        Column(Modifier.widthIn(max = HymnMax).fillMaxWidth()) {
+        // A numbered stanza takes a band above it for its number (`NUMBER_BAND`, the web's
+        // `.chant-stanza` margin), clear of the last stanza's words.
+        val band = if (block.marker.isEmpty()) 0f else lyric * NUMBER_BAND
+        Column(Modifier.padding(top = with(density) { band.toDp() }).widthIn(max = HymnMax).fillMaxWidth()) {
             if (block.marker.isNotEmpty()) {
                 // A stanza's number stands in the space above its staff and takes none of its own (the
                 // web's `.chant-stanza-number`, 1.1em up), so the stanzas keep the hymn's group apart.
@@ -75,13 +80,6 @@ fun Score(block: BlockView, modifier: Modifier) {
                         layout(number.width, 0) { number.place(0, -number[FirstBaseline] - (Type.verse.fontSize * 0.44f).roundToPx()) }
                     },
                     style = Type.rubric.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.85f),
-                )
-            }
-            if (block.mode.isNotEmpty()) {
-                Text(
-                    block.mode,
-                    Modifier.padding(bottom = 3.dp).clearAndSetSemantics {},
-                    style = Type.verse.copy(color = p.rubric, fontSize = Type.verse.fontSize * 0.8f, fontFeatureSettings = "smcp", letterSpacing = Type.verse.fontSize * 0.06f),
                 )
             }
             BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -102,21 +100,21 @@ fun Score(block: BlockView, modifier: Modifier) {
  * alone takes the initial. Set as the web sets it (`page_options` in render-html's chant.rs):
  * lyrics measured in the app's own Garamond (the table the core sets, `LyricFont.CUSTOM`); a
  * hyphen between every two syllables; the initial half the Solesmes size and flush with the
- * margin, the mode above the score rather than over it; the last staff ending at the final bar;
- * and a hymn's phrases each on a staff of their own.
+ * margin, the mode's figure over it; the lyrics nearer their own staff than the next; the last
+ * staff ending at the final bar; and a hymn's phrases each on a staff of their own.
  */
 internal fun engrave(gabc: String, initial: Boolean, phrases: Boolean, width: Float, lyric: Float): Page =
     Chant(
         gabc,
         ChantOptions(
             initial = if (initial) 1 else 0,
-            annotation = false,
             font = LyricFont.CUSTOM,
             everyHyphen = true,
             initialScale = 0.5f,
             initialMargin = 0f,
             shortLastStaff = true,
             phraseLines = phrases,
+            lyricDrop = 2.6f,
         ),
     ).use { chant ->
         chant.layout(width, LayoutOptions(scale = lyric / LYRIC_SPACES)).use { it.page() }
@@ -132,7 +130,7 @@ internal class ScoreInks(val note: Color, val text: Color, val staff: Color, val
         fun of(p: Palette, ornament: Ornament) = ScoreInks(
             note = p.text,
             text = p.text,
-            staff = mix(p.lining, p.bg, if (p.dark) 0.5f else 0.72f),
+            staff = mix(p.lining, p.bg, if (p.dark) 0.62f else 0.82f),
             rubric = p.rubric,
             initial = ornament.flat,
         )

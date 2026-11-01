@@ -32,10 +32,9 @@ pub const FALLBACK_EM: u16 = 17;
 /// typeset as the page's text is, rather than by its SVG.
 pub fn score_html(score: &ChantScore, gabc: &Arc<str>, words: &str) -> String {
     format!(
-        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}{}</div>",
+        "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"{}\">{}</div>",
         html_escape_string(&typeset(words.trim())),
-        mode_html(score, true),
-        engraved(gabc, true, phrased(score))
+        engraved(&Arc::from(score.with_mode_figure(gabc)), true, phrased(score))
     )
 }
 
@@ -57,11 +56,10 @@ pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
     for (i, ((part, words), before)) in parts.iter().zip(&stanzas).zip(&rubrics).enumerate() {
         before.iter().for_each(|r| write_hymn_rubric(&mut out, r));
         out.push_str(&format!(
-            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}{}</div>",
+            "<div class=\"chant-score chant-stanza\" role=\"img\" aria-label=\"{}\">{}{}</div>",
             html_escape_string(&typeset(words.trim())),
             if i > 0 { format!("<span class=\"chant-stanza-number\" aria-hidden=\"true\">{}.</span>", i + 1) } else { String::new() },
-            mode_html(score, i == 0),
-            engraved(&Arc::from(part.as_str()), i == 0, true)
+            engraved(&Arc::from(if i == 0 { score.with_mode_figure(part) } else { part.clone() }), i == 0, true)
         ));
     }
     out.push_str("</div>");
@@ -71,14 +69,6 @@ pub fn whole_hymn_html(score: &ChantScore, text: &str) -> String {
 /// A hymn's score is set phrase by phrase, a line of verse to a staff; an antiphon's as prose.
 fn phrased(score: &ChantScore) -> bool {
     score.sets != ScoreSpan::Antiphon
-}
-
-/// The mode over a score that opens its piece ("Mode I"), as the books head a chant.
-fn mode_html(score: &ChantScore, opening: bool) -> String {
-    match score.mode_label().filter(|_| opening) {
-        Some(mode) => format!("<p class=\"chant-mode\" aria-hidden=\"true\">{mode}</p>"),
-        None => String::new(),
-    }
 }
 
 /// The score's SVGs, engraved once per score, initial and phrasing.
@@ -110,15 +100,16 @@ fn lyric_metrics() -> Arc<neuma::MetricsTable> {
 /// How the page sets a score, as Score.kt, Score.swift and chant.js do: lyrics measured in the
 /// app's own Garamond; a hyphen between every two syllables, as English chant books mark them
 /// for a reader following the words; the initial half the Solesmes size and flush with the
-/// margin, to sit with the page's text initials, the mode in the heading rather than over it;
-/// the last staff ending at the final bar; and a hymn's phrases each on a staff of its own.
+/// margin, to sit with the page's text initials, the mode's figure over it (the opening score's
+/// `annotation`, `ChantScore::with_mode_figure`); the lyrics nearer their own staff than the
+/// next; the last staff ending at the final bar; and a hymn's phrases each on a staff of its own.
 fn page_options(phrases: bool) -> ChantOptions {
     ChantOptions::default()
         .with_measure(lyric_metrics())
         .with_hyphens(Hyphens::EverySyllable)
         .with_initial_scale(INITIAL_SCALE)
         .with_initial_margin(0.0)
-        .with_annotation(false)
+        .with_lyric_drop(LYRIC_DROP)
         .with_short_last_staff(true)
         .with_phrase_lines(phrases)
 }
@@ -127,6 +118,11 @@ fn page_options(phrases: bool) -> ChantOptions {
 /// the lyrics (Score.kt, Score.swift and chant.js name the same): about the height of the page's
 /// own dropped initials.
 const INITIAL_SCALE: f32 = 0.5;
+
+/// The lyric baseline's drop below the staff, in staff spaces (Score.kt, Score.swift and chant.js
+/// name the same): less than GregorioTeX's 3.3, so a staff's words sit with it and the open
+/// space falls between one line's words and the next staff.
+const LYRIC_DROP: f32 = 2.6;
 
 /// The score at [`FALLBACK_EM`], sized in ems so that its lyrics are set at the text's size, with
 /// what chant.js lays it out again from: its GABC, whether it takes the initial and is phrased,
@@ -200,11 +196,12 @@ mod tests {
         assert!(html.starts_with(
             "<div class=\"chant-score\" data-chant-variant=\"on\" role=\"img\" aria-label=\"To thee, before the close of day,\">"
         ));
-        assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(HYMN))), "{html}");
+        let opening = score(HYMN, ScoreSpan::FirstStanza).with_mode_figure(HYMN);
+        assert!(html.contains(&format!(" data-gabc=\"{}\"", html_escape_string(&opening))), "{html}");
         assert!(html.contains(" data-chant-initial=\"1\" data-chant-phrases=\"1\" data-chant-prefix=\"chant"), "{html}");
-        assert!(html.contains("<p class=\"chant-mode\" aria-hidden=\"true\">Mode VIII</p>"), "{html}");
+        assert!(html.contains(">VIII</text>"), "the mode's figure over the initial: {html}");
         assert_eq!(html.matches("<svg").count(), 1);
-        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 2, "the mode and the SVG");
+        assert_eq!(html.matches("aria-hidden=\"true\"").count(), 1, "the SVG");
         assert!(!html.contains("aria-label=\"TO"), "the SVG's own label is dropped");
         assert!(!html.contains("<style"), "style.css themes the score");
     }
@@ -241,6 +238,7 @@ mod tests {
         assert!(html.contains("<span class=\"chant-stanza-number\" aria-hidden=\"true\">2.</span>"));
         assert_eq!(html.matches(" data-chant-initial=\"1\"").count(), 1, "only the first stanza takes the initial");
         assert_eq!(html.matches(" data-chant-initial=\"0\"").count(), 1);
+        assert!(!html.contains("annotation:"), "a score without a mode takes no figure");
     }
 
     #[test]
@@ -263,7 +261,7 @@ mod tests {
             "everyHyphen: true,".to_string(),
             "initialMargin: 0,".to_string(),
             "shortLastStaff: true,".to_string(),
-            "annotation: false,".to_string(),
+            format!("lyricDrop: {LYRIC_DROP},"),
             "phraseLines: box.getAttribute(\"data-chant-phrases\") === \"1\",".to_string(),
             "font: font,".to_string(),
             "style: false".to_string(),
@@ -274,7 +272,8 @@ mod tests {
         let style = page_options(true).style;
         assert_eq!(style.hyphens, Hyphens::EverySyllable);
         assert_eq!((style.initial_scale, style.initial_margin, style.short_last_staff), (INITIAL_SCALE, 0.0, true));
-        assert!(!style.annotation && style.phrase_lines);
+        assert_eq!(style.lyric_drop, LYRIC_DROP);
+        assert!(style.annotation && style.phrase_lines);
         assert!(!page_options(false).style.phrase_lines);
     }
 

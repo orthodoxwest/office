@@ -2747,7 +2747,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   };
   // The frontispiece's strip leads to the month's own page.
   let page = await open("/calendar/2026");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^March\b/ }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
   page = await open("/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
@@ -2759,7 +2759,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
   // The whole year jumps within itself.
   page = await open("/calendar/2026/all");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
   await page.locator("#d-2026-03-01 .day-feast-name").click();
@@ -4092,7 +4092,7 @@ test("a feast's page leads with its standing, then its texts, then its years, be
   expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
 });
 
-test("Chant On notes every verse of a whole hymn under one mode heading", async ({ page }) => {
+test("Chant On notes every verse of a whole hymn, its mode's figure once over the initial", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await openDatedPage(page, "/lauds/2026-10-28");
   const scores = page.locator(".hymn .chant-hymn");
@@ -4105,9 +4105,9 @@ test("Chant On notes every verse of a whole hymn under one mode heading", async 
   await metrics;
   await expect(scores).toBeVisible();
   expect(await scores.locator(".chant-stanza").count()).toBeGreaterThan(2);
-  // The mode once, over the first verse.
-  await expect(scores.locator(".chant-mode")).toHaveCount(1);
-  await expect(scores.locator(".chant-mode")).toHaveText(/^Mode [IVX]+$/);
+  // The mode once, as a figure the engine sets over the first verse's initial.
+  await expect(scores.locator("svg [class$='-annotation']")).toHaveCount(1);
+  await expect(scores.locator(".chant-stanza").first().locator("svg [class$='-annotation']")).toHaveText(/^[IVX]+$/);
 
   await choosePreference(page, "Off", ".chant-option");
   await expect(scores).toBeHidden();
