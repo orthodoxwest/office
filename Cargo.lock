@@ -806,12 +806,12 @@ dependencies = [
 [[package]]
 name = "neuma"
 version = "0.1.0"
-source = "git+https://github.com/orthodoxwest/neuma?rev=02318dd9c0ac5e05e5729ce3cf754530e3588648#02318dd9c0ac5e05e5729ce3cf754530e3588648"
+source = "git+https://github.com/orthodoxwest/neuma?rev=41f1f59ba85a3cf183cfbd0ada078636812e2594#41f1f59ba85a3cf183cfbd0ada078636812e2594"
 
 [[package]]
 name = "neuma-mobile"
 version = "0.1.0"
-source = "git+https://github.com/orthodoxwest/neuma?rev=02318dd9c0ac5e05e5729ce3cf754530e3588648#02318dd9c0ac5e05e5729ce3cf754530e3588648"
+source = "git+https://github.com/orthodoxwest/neuma?rev=41f1f59ba85a3cf183cfbd0ada078636812e2594#41f1f59ba85a3cf183cfbd0ada078636812e2594"
 dependencies = [
  "neuma",
  "neuma-tones",
@@ -821,7 +821,7 @@ dependencies = [
 [[package]]
 name = "neuma-tones"
 version = "0.1.0"
-source = "git+https://github.com/orthodoxwest/neuma?rev=02318dd9c0ac5e05e5729ce3cf754530e3588648#02318dd9c0ac5e05e5729ce3cf754530e3588648"
+source = "git+https://github.com/orthodoxwest/neuma?rev=41f1f59ba85a3cf183cfbd0ada078636812e2594#41f1f59ba85a3cf183cfbd0ada078636812e2594"
 dependencies = [
  "neuma",
 ]

@@ -1,4 +1,4 @@
-// neuma 02318dd9c0ac5e05e5729ce3cf754530e3588648 (GABC, the Google EB Garamond's metrics and a page-supplied table); scripts/build-neuma-web.sh
+// neuma 41f1f59ba85a3cf183cfbd0ada078636812e2594 (GABC, the Google EB Garamond's metrics and a page-supplied table); scripts/build-neuma-web.sh
 // neuma: engraved Gregorian chant from GABC, in one self-contained ES module.
 //
 //   import { init, Chant } from "./neuma.mjs";
