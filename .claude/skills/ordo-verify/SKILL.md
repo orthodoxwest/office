@@ -10,7 +10,9 @@ an error-bearing PDF is not the target; a difference is a finding to diagnose.
 
 ## Authority and evidence
 
-Locate the available ordos in the resources directory; use the newest local
+Locate the available ordos in the resources directory (in a cloud session of the
+Daily Office project: the PDFs at the root of `/mnt/project-files/`, text extracts in
+`/mnt/project-files/sources/ordos/`; there is no 2020 ordo); use the newest local
 archdiocesan ordo for current practice. Set the comparison year explicitly
 rather than relying on script defaults. Older ordos are comparison witnesses,
 not grounds for overriding a newer appointment. A closed issue or an old
@@ -98,7 +100,12 @@ snapshots after reviewing why they changed. A documentation-only skill edit
 does not require a new annual parity sweep.
 
 Report comparable assertions, differences, cleared repair targets, and remaining
-uncertainty. Keep these measures distinct:
+uncertainty. For an engine or rule change, run the before/after comparison for
+every local ordo year, not just the one that prompted it, and state whether the
+change strictly improves parity: give strict agreement and agreement with known
+ordo errors excused side by side, and list any newly introduced differences. A
+fix keyed to a single year is not acceptable; generalize it or file a ruling.
+Keep these measures distinct:
 
 - Headline/incipit matches do not verify ranks, full wording, collects, psalmody,
   or complete office structure. Matins and Mass are outside this app's supported
