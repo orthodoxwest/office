@@ -2747,7 +2747,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   };
   // The frontispiece's strip leads to the month's own page.
   let page = await open("/calendar/2026");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^March\b/ }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
   page = await open("/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
@@ -2759,7 +2759,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
   // The whole year jumps within itself.
   page = await open("/calendar/2026/all");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
   await page.locator("#d-2026-03-01 .day-feast-name").click();
