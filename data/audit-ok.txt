@@ -168,13 +168,25 @@ lent-ember-friday psalm-antiphon
 lent-ember-saturday psalm-antiphon magnificat-antiphon
 # The September and Advent Ember days (dated feasts since #747; before it the
 # audit could not see them) take the ferial psalm antiphons likewise, and are
-# never commemorated. Their remaining gaps are tracked in #750.
-september-ember-wednesday psalm-antiphon commemoration-antiphon
-september-ember-friday psalm-antiphon commemoration-antiphon
-september-ember-saturday psalm-antiphon magnificat-antiphon commemoration-antiphon
-advent-ember-wednesday psalm-antiphon commemoration-antiphon
-advent-ember-friday psalm-antiphon commemoration-antiphon
-advent-ember-saturday psalm-antiphon magnificat-antiphon commemoration-antiphon
+# never commemorated. Their other gaps are where the Monastic Diurnal sends the
+# day elsewhere (#750):
+#
+# - Advent (pp. 176-178): the Benedictus and Magnificat antiphons are printed in
+#   the III Week of Advent and live in proper/advent-sunday-3 by weekday
+#   (benedictus-antiphon-wednesday and so on); the O antiphons replace the
+#   Magnificat antiphon from Dec. 17 ("If not O, p. 172"). Each Ember collect
+#   is said "at all the Hours until" (or "except") Vespers, and is collect-lauds
+#   here; at Vespers the book gives the "Collect of the preceding Sunday".
+# - September (pp. 425-426): the Ember collect is said "through None. At
+#   Vespers the Collect of the preceding Sunday is said", and no Magnificat
+#   antiphon is printed, so Vespers keeps the ferial one. Saturday's Benedictus
+#   antiphon is "as at Saturday Lauds, p. 80", from the Psalter.
+september-ember-wednesday psalm-antiphon magnificat-antiphon collect commemoration-antiphon
+september-ember-friday psalm-antiphon magnificat-antiphon collect commemoration-antiphon
+september-ember-saturday psalm-antiphon benedictus-antiphon magnificat-antiphon collect commemoration-antiphon
+advent-ember-wednesday psalm-antiphon benedictus-antiphon magnificat-antiphon collect commemoration-antiphon
+advent-ember-friday psalm-antiphon benedictus-antiphon magnificat-antiphon collect commemoration-antiphon
+advent-ember-saturday psalm-antiphon benedictus-antiphon magnificat-antiphon collect commemoration-antiphon
 
 # The Saturday Vespers books appoint the Saturday psalter for I Vespers of
 # these Sundays.
