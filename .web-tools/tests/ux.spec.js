@@ -3655,7 +3655,8 @@ test('prayer forms switch complete sequences and keep reports and print consiste
   await context.setOffline(true);
   await choosePrayerForm(page, 'deacon');
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
-  expect(await prayers.innerText()).toContain('Lord, grant a blessing');
+  expect(await prayers.innerText()).toContain('Sir, ask a blessing');
+  expect(await prayers.innerText()).not.toContain('Lord, grant a blessing');
   expect(await prayers.innerText()).not.toContain('your sins');
   await expect(page.locator('.prayer-speaker:visible')).toHaveText(['All']);
   await choosePrayerForm(page, 'priest');
