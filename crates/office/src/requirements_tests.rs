@@ -1658,3 +1658,26 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
         }
     }
 }
+
+#[test]
+fn compline_opening_and_confession_follow_who_leads() {
+    // Diurnal pp. 7–8, 146–148 (#691, #693): a deacon may bless, so he is asked
+    // "Sir, ask a blessing"; only a priest absolves, so only he takes the choir
+    // Confiteor. Said alone, the opening is "Lord, grant a blessing".
+    let (days, moveable) = year(2027);
+    let day = &days[Date::new(2027, 10, 19).ordinal() as usize - 1];
+    for (form, opening, choir_confession) in [
+        (PrayerForm::Private, "ordinary/compline/opening-versicle", false),
+        (PrayerForm::Deacon, "shared/leader/compline-opening-choir", false),
+        (PrayerForm::Priest, "shared/leader/compline-opening-choir", true),
+    ] {
+        let compline = engine().compose_hour("compline", day, &moveable, form).unwrap();
+        let refs: Vec<_> = compline.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+        assert_eq!(refs[0], opening, "{form:?}");
+        let prime = engine().compose_hour("prime", day, &moveable, form).unwrap();
+        for (name, hour) in [("compline", &compline), ("prime", &prime)] {
+            let choir = hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref == "shared/leader/confiteor-absolution-priest");
+            assert_eq!(choir, choir_confession, "{name} {form:?}");
+        }
+    }
+}
