@@ -80,7 +80,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
     for hash in [&mut *content, &mut *presentation, &mut *sources] {
         hash.count(sections.len());
     }
-    for OfficeSection { label, collapsible, elements } in sections {
+    for OfficeSection { label, collapsible, bare: _, elements } in sections {
         content.str(label);
         content.bool(*collapsible);
         for hash in [&mut *content, &mut *presentation, &mut *sources] {
@@ -349,7 +349,7 @@ mod tests {
             color: None,
             paschaltide: false,
             bare: false,
-            sections: vec![OfficeSection { label: String::new(), collapsible: false, elements: vec![e] }],
+            sections: vec![OfficeSection { label: String::new(), collapsible: false, bare: false, elements: vec![e] }],
             decisions: Vec::new(),
         }
     }

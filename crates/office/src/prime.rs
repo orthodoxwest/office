@@ -42,7 +42,7 @@ pub fn compose_prime(
             }
             append_hour_element(&mut elems, day, "prime", elem, t);
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     hour
 }

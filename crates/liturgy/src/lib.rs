@@ -484,6 +484,10 @@ pub fn split_words(s: &str, n: usize) -> (&str, &str, usize) {
 pub struct OfficeSection {
     pub label: String,
     pub collapsible: bool,
+    /// A bare section inside an hour that is not: Vespers of the Dead said straight after
+    /// Vespers of the day on the eve of All Souls (Diurnal pp. 641–642). Its initials take
+    /// the muted ink, as a bare hour's do; the page's frame and headpiece stay the day's.
+    pub bare: bool,
     pub elements: Vec<OfficeElement>,
 }
 

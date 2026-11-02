@@ -1277,6 +1277,39 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
   }
 });
 
+test("Vespers of the Dead on the eve of All Souls goes bare where it begins", async ({ page }) => {
+  // Diurnal pp. 641–642: Vespers of All Saints keep their gilding and frame;
+  // from "Vespers of the Dead" (section-bare) the caps take the muted ink.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-11-01", theme);
+    const got = await page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const heading = document.querySelector(".elements > .section-heading.section-bare");
+      const verses = [...document.querySelectorAll(".psalm-verses .verse:first-child")];
+      const after = (v) => heading.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING;
+      const cap = (v) => getComputedStyle(v, "::first-letter").color;
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        heading: heading && heading.textContent,
+        before: verses.filter((v) => !after(v)).map(cap),
+        within: verses.filter(after).map(cap),
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+      };
+    });
+    expect(got.bare).toBe(false);
+    expect(got.heading).toBe("Vespers of the Dead");
+    expect(got.before.length).toBeGreaterThan(0);
+    expect(got.within.length).toBe(6); // five psalms and the Magnificat
+    expect(got.before.every((c) => c === rgb(got.ornament))).toBe(true);
+    expect(got.within.every((c) => c === rgb(got.muted))).toBe(true);
+  }
+});
+
 test("the Apse lifts the hour's colour band as home lifts its card, and home spaces its fasting badges", async ({ page }) => {
   const band = async (path, theme) => {
     await openDatedPage(page, path, theme);

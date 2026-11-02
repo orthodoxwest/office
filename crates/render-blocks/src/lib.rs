@@ -311,11 +311,14 @@ pub fn space_blocks<'a>(blocks: impl IntoIterator<Item = &'a mut Block>) {
     }
 }
 
-/// A section of an hour; a collapsible section opens closed under its label.
+/// A section of an hour; a collapsible section opens closed under its label. A bare section
+/// (`OfficeSection::bare`, Vespers of the Dead after the day's Vespers) sets its initials in the
+/// muted ink, as the web's `section-bare` does.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SectionBlocks {
     pub label: String,
     pub collapsible: bool,
+    pub bare: bool,
     pub blocks: Vec<Block>,
 }
 
@@ -338,7 +341,7 @@ pub fn hour_sections(hour: &OfficeHour) -> Vec<SectionBlocks> {
                 }
             }
             blocks.extend(element_blocks(&section.elements));
-            SectionBlocks { label: section.label.clone(), collapsible: section.collapsible, blocks }
+            SectionBlocks { label: section.label.clone(), collapsible: section.collapsible, bare: section.bare, blocks }
         })
         .collect();
     space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));

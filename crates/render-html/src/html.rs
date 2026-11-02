@@ -61,13 +61,20 @@ pub fn render_section_elements(elems: &[OfficeElement]) -> String {
 
 /// A section heading, separating a commemoration's rubric from its feast.
 pub fn render_section_heading(label: &str) -> String {
+    render_section_heading_in(label, false)
+}
+
+/// A section heading; a bare section's (`OfficeSection::bare`) carries `section-bare`, from which
+/// the rest of the hour sets its initials in the muted ink (the bare sections close the hour).
+pub fn render_section_heading_in(label: &str, bare: bool) -> String {
+    let bare = if bare { " section-bare" } else { "" };
     if let Some(name) = label.strip_prefix("Commemoration of ").filter(|n| !n.is_empty()) {
         return format!(
-            "<h2 class=\"section-heading commemoration-heading\"><span class=\"commemoration-kicker\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
+            "<h2 class=\"section-heading commemoration-heading{bare}\"><span class=\"commemoration-kicker\">Commemoration of</span> <span class=\"commemoration-name\">{}</span></h2>",
             esc_text(name)
         );
     }
-    format!("<h2 class=\"section-heading\">{}</h2>", esc_text(label))
+    format!("<h2 class=\"section-heading{bare}\">{}</h2>", esc_text(label))
 }
 
 fn render_office_element(elem: &OfficeElement, doxology: Option<&OfficeElement>) -> String {

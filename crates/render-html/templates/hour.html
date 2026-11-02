@@ -66,7 +66,7 @@
         <div class="session-prayers-content">{{ leader_section_html(section) }}</div>
       </details>
       {% else %}
-      {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
+      {% if section.label %}{{ section_heading(section.label, section.bare) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
       {{ leader_section_html(section) }}
       {% endif %}
     {% endfor %}
@@ -78,7 +78,7 @@
         <div class="session-prayers-content">{{ section.html|safe }}</div>
       </details>
       {% else %}
-      {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
+      {% if section.label %}{{ section_heading(section.label, section.bare) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
       {{ section.html|safe }}
       {% endif %}
     {% endfor %}

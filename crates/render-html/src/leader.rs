@@ -11,6 +11,8 @@ use crate::html::render_section_elements;
 pub struct LeaderSection {
     pub label: String,
     pub collapsible: bool,
+    /// Vespers of the Dead after the day's Vespers (`OfficeSection::bare`).
+    pub bare: bool,
     /// Trusted markup.
     pub html: String,
     /// The section as read with the Martyrology at Prime, when that differs; empty otherwise.
@@ -47,7 +49,7 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
             let mut groups: Vec<&[OfficeElement]> = Vec::new();
             for (fi, (_, hour)) in forms.iter().enumerate() {
                 let s = &hour.sections[si];
-                if s.label != section.label || s.collapsible != section.collapsible {
+                if s.label != section.label || s.collapsible != section.collapsible || s.bare != section.bare {
                     return Err("leader section mismatch".into());
                 }
                 let start = positions[fi];
@@ -114,6 +116,7 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
         sections.push(LeaderSection {
             label: section.label.clone(),
             collapsible: section.collapsible,
+            bare: section.bare,
             html,
             martyrology_html: String::new(),
         });
@@ -143,7 +146,7 @@ mod tests {
             color: None,
             paschaltide: false,
             bare: false,
-            sections: vec![OfficeSection { label: String::new(), collapsible: false, elements }],
+            sections: vec![OfficeSection { label: String::new(), collapsible: false, bare: false, elements }],
             decisions: Vec::new(),
         }
     }
