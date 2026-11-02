@@ -106,7 +106,7 @@ class TokensTest {
 
     @Test
     fun seasonsRetintTheGilding() {
-        for ((season, css) in listOf("passiontide" to "body.season-passiontide", "eastertide" to "body.season-eastertide")) {
+        for ((season, css) in listOf("quiet" to "body.season-quiet", "passiontide" to "body.season-passiontide", "eastertide" to "body.season-eastertide")) {
             val block = rule(css)
             val o = ornament(Nave, season)
             check(block, "ornament", o.flat)
@@ -124,13 +124,14 @@ class TokensTest {
             assertEquals(null, value(dark, "inscription-ink"))
             check(block, "inscription-ink", d.ink)
             // Apse's gilt tituli take the season's gilding; Nave's painted ones stay. Nave's gold
-            // moon follows the season; Apse's silver veils in Passiontide and is restated at Eastertide.
+            // moon follows the season; Apse's silver goes quiet and veils with the gilding, and is
+            // restated at Eastertide.
             check(dark, "titulus", seasoned(Apse, season).titulus)
             assertEquals(Nave.titulus, seasoned(Nave, season).titulus)
             alias(block, "moon-ink", "ornament")
             assertEquals(o.flat, seasoned(Nave, season).moonInk)
-            if (season == "passiontide") assertEquals(d.flat, seasoned(Apse, season).moonInk)
-            else check(dark, "moon-ink", seasoned(Apse, season).moonInk)
+            if (season == "eastertide") check(dark, "moon-ink", seasoned(Apse, season).moonInk)
+            else assertEquals(d.flat, seasoned(Apse, season).moonInk)
         }
     }
 

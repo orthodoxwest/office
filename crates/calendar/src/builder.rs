@@ -378,28 +378,18 @@ fn octave_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast
     generated
 }
 
-/// The Advent and September Ember Days.
-fn remaining_ember_feasts(m: &MoveableDates, year: i32) -> Vec<Feast> {
-    let advent_wed = m.advent3.add_days(3);
-    let sep15 = Date::new(year, 9, 15);
-    let sep_wed = sep15.add_days((Weekday::Wednesday.number() - sep15.weekday().number() + 7) % 7);
-    let mut feasts = Vec::new();
-    for (season, wed) in [("advent", advent_wed), ("september", sep_wed)] {
-        for offset in [0, 2, 3] {
-            let date = wed.add_days(offset);
-            let weekday = date.weekday().name();
-            let mut f = Feast::synthetic(
-                format!("{season}-ember-{}", weekday.to_lowercase()),
-                format!("Ember {weekday} in {}", title_case(season)),
-                Rank::PrivilegedFeria,
-                Color::Violet,
-                Category::Feria,
-            );
-            f.fixed = fixed(date);
-            feasts.push(f);
+/// The Ember Wednesday of Advent (after the III Sunday) or of September (the one after the
+/// Exaltation of the Cross, September 14); the `advent-ember-*` and `september-ember-*` date
+/// rules of data/feasts/temporal.txt count their Friday and Saturday from it.
+fn ember_wednesday(season: &str, year: i32, m: &MoveableDates) -> Option<Date> {
+    match season {
+        "advent" => Some(m.advent3.add_days(3)),
+        "september" => {
+            let sep15 = Date::new(year, 9, 15);
+            Some(sep15.add_days((Weekday::Wednesday.number() - sep15.weekday().number() + 7) % 7))
         }
+        _ => None,
     }
-    feasts
 }
 
 /// Roman bissextile: in leap years, fixed feasts of Feb 24–28 move one day.
@@ -461,6 +451,16 @@ pub fn resolve_feast_date(feast: &Feast, year: i32, m: &MoveableDates) -> Option
     }
     if let Some(suffix) = rule.strip_prefix("pentecost-sunday-") {
         return Some(m.pentecost.add_days(7 * atoi_or_zero(suffix)));
+    }
+    // ^(advent|september)-ember-(wednesday|friday|saturday)$
+    if let Some((season, weekday)) = rule.split_once("-ember-") {
+        let offset = match weekday {
+            "wednesday" => 0,
+            "friday" => 2,
+            "saturday" => 3,
+            _ => return None,
+        };
+        return ember_wednesday(season, year, m).map(|wed| wed.add_days(offset));
     }
     None
 }
@@ -653,12 +653,8 @@ fn build_calendar_year(
         push_candidate(&mut candidates, f, year, &m);
     }
 
-    let synthetics: Vec<FeastRef> = vigil_feasts(&all_base, year, &m)
-        .into_iter()
-        .chain(octave_feasts(&all_base, year, &m))
-        .chain(remaining_ember_feasts(&m, year))
-        .map(Arc::new)
-        .collect();
+    let synthetics: Vec<FeastRef> =
+        vigil_feasts(&all_base, year, &m).into_iter().chain(octave_feasts(&all_base, year, &m)).map(Arc::new).collect();
     for f in &synthetics {
         push_candidate(&mut candidates, f, year, &m);
     }

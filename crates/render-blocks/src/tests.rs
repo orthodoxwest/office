@@ -152,6 +152,8 @@ fn compline_opens_with_a_heading_and_collapsible_sections_do_not() {
         feast: String::new(),
         rank: None,
         color: None,
+        paschaltide: false,
+        bare: false,
         sections: vec![
             OfficeSection { label: String::new(), collapsible: false, elements: vec![elem(ElementType::Prayer, "Pray, Father.")] },
             OfficeSection { label: "Before the Office".into(), collapsible: true, elements: vec![elem(ElementType::Prayer, "Open.")] },

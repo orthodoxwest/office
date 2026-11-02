@@ -255,6 +255,52 @@ Color = red
 Category = feria
 DateRule = easter+55
 
+# The Ember days of September (the week after the Exaltation of the Cross) and of Advent (the
+# week after the III Sunday). Their date rules count from the Ember Wednesday
+# (calendar::builder::ember_wednesday).
+
+[september-ember-wednesday]
+Name = Ember Wednesday in September
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = september-ember-wednesday
+
+[september-ember-friday]
+Name = Ember Friday in September
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = september-ember-friday
+
+[september-ember-saturday]
+Name = Ember Saturday in September
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = september-ember-saturday
+
+[advent-ember-wednesday]
+Name = Ember Wednesday in Advent
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = advent-ember-wednesday
+
+[advent-ember-friday]
+Name = Ember Friday in Advent
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = advent-ember-friday
+
+[advent-ember-saturday]
+Name = Ember Saturday in Advent
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = advent-ember-saturday
+
 [trinity-sunday]
 Name = The Feast of the Most Holy Trinity
 Rank = double-1st-class

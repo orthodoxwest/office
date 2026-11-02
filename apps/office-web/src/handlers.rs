@@ -22,8 +22,8 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle, invitation,
-    long_date, month_name, rank_class, report_url, season_class, season_str, split_alias, title_case,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_shows_versicle,
+    hour_gloss, hour_versicle, invitation, long_date, month_name, rank_class, report_url, season_str, split_alias, title_case,
 };
 
 /// What a page handler reads from the request.
@@ -338,8 +338,9 @@ impl Server {
                 nav_date: slug.clone(),
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
-                season_class: season_class(Some(day.season)).into(),
+                season_class: gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &entry.moveable)).into(),
                 rank_class: String::new(),
+                bare: false,
                 show_today: slug != now_slug,
                 // Today's page is the one to find; each dated day is one tap from it.
                 site: req.site.into(),
@@ -443,8 +444,9 @@ impl Server {
                 usage_when: date_str.clone(),
                 // The hour's own season: I Vespers of Easter on Holy Saturday
                 // is unveiled while that day's Lauds is still veiled.
-                season_class: season_class(hour.season).into(),
-                rank_class: rank_class(hour.rank, hour.color).into(),
+                season_class: gilding_class(hour.season, hour.color, hour.paschaltide).into(),
+                rank_class: rank_class(hour.rank, hour.color, hour.bare).into(),
+                bare: hour.bare,
                 show_today: date_str != today_slug,
                 site: req.site.into(),
                 canonical: if dated { hour_link(hour_name, &date_slug(date)) } else { hour_link(hour_name, "") },
@@ -941,29 +943,67 @@ mod tests {
             ("Palm Sunday", m.passion_sunday.add_days(7), "season-passiontide"),
             ("Good Friday", m.good_friday, "season-passiontide"),
             ("Holy Saturday", m.holy_saturday, "season-passiontide"),
-            // Lent proper keeps the ordinary gold.
-            ("Saturday before Passion Sunday", m.passion_sunday.add_days(-1), ""),
-            ("Ash Wednesday", m.ash_wednesday, ""),
-            // Bright: Easter Sunday through the eve of Pentecost.
+            // Quiet: Septuagesima, Lent and Advent, and the violet days elsewhere.
+            ("Septuagesima", m.septuagesima, "season-quiet"),
+            ("Ash Wednesday", m.ash_wednesday, "season-quiet"),
+            ("Saturday before Passion Sunday", m.passion_sunday.add_days(-1), "season-quiet"),
+            ("Rogation Monday", m.ascension.add_days(-3), "season-quiet"),
+            ("Advent Sunday", m.advent1, "season-quiet"),
+            // Rose lifts the quiet for the day.
+            ("Laetare", m.passion_sunday.add_days(-7), ""),
+            ("Gaudete", m.advent3, ""),
+            // Bright: Easter Sunday through the Saturday of the Pentecost octave.
             ("Easter Sunday", m.easter, "season-eastertide"),
             ("Easter Monday", m.easter.add_days(1), "season-eastertide"),
             ("Low Sunday", m.easter.add_days(7), "season-eastertide"),
             ("Ascension", m.ascension, "season-eastertide"),
             ("eve of Pentecost", m.pentecost.add_days(-1), "season-eastertide"),
-            ("Pentecost", m.pentecost, ""),
+            ("Pentecost", m.pentecost, "season-eastertide"),
+            ("Ember Saturday in Pentecost", m.pentecost.add_days(6), "season-eastertide"),
             ("Trinity Sunday", m.pentecost.add_days(7), ""),
+            ("Corpus Christi", m.pentecost.add_days(11), ""),
         ] {
             let slug = date_slug(date);
             for path in [format!("/lauds/{slug}"), format!("/?date={slug}")] {
                 let classes = body_classes(&path);
-                for class in ["season-passiontide", "season-eastertide"] {
+                for class in ["season-passiontide", "season-quiet", "season-eastertide"] {
                     assert_eq!(classes.iter().any(|c| c == class), class == want, "{what} ({path}): {class} in {classes:?}");
                 }
             }
         }
-        // Holy Saturday's Vespers is I Vespers of Easter: the ornament
-        // follows the hour on hour pages and the day on the home page.
+        // Holy Saturday's Vespers is I Vespers of Easter, and the Ember Saturday's I Vespers of
+        // Trinity ends Paschaltide: the ornament follows the hour on hour pages and the day on home.
         let classes = body_classes(&format!("/vespers/{}", date_slug(m.holy_saturday)));
         assert!(classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
+        let classes = body_classes(&format!("/vespers/{}", date_slug(m.pentecost.add_days(6))));
+        assert!(!classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
+    }
+
+    /// A bare hour (the Triduum's, the Office of the Dead's) is stamped `hour-bare` and never
+    /// framed; the days around it are not.
+    #[test]
+    fn bare_hours_take_off_their_leaf() {
+        let m = MoveableDates::compute(2026);
+        let bare = |path: &str| body_classes(path).iter().any(|c| c == "hour-bare");
+        let framed = |path: &str| body_classes(path).iter().any(|c| c == "rank-first-class");
+        for (what, date) in
+            [("Maundy Thursday", m.good_friday.add_days(-1)), ("Good Friday", m.good_friday), ("Holy Saturday", m.holy_saturday)]
+        {
+            for hour in ["lauds", "prime", "none"] {
+                let path = format!("/{hour}/{}", date_slug(date));
+                assert!(bare(&path) && !framed(&path), "{what}: {path}");
+            }
+        }
+        // All Souls' Day is bare without the veil; Holy Saturday's Vespers is Easter's, framed.
+        assert!(bare("/lauds/2026-11-02") && !framed("/lauds/2026-11-02"));
+        let easter_eve = format!("/vespers/{}", date_slug(m.holy_saturday));
+        assert!(!bare(&easter_eve) && framed(&easter_eve));
+        for path in [format!("/lauds/{}", date_slug(m.good_friday.add_days(-2))), "/lauds/2026-10-07".into(), "/?date=2026-04-10".into()] {
+            assert!(!bare(&path), "{path}");
+        }
+        // Laetare and the Annunciation in Lent: first class, but rose and violet are not framed,
+        // and a white feast in a penitential season is.
+        assert!(!framed(&format!("/lauds/{}", date_slug(m.passion_sunday.add_days(-7)))));
+        assert!(framed("/lauds/2026-03-25"));
     }
 }

@@ -84,6 +84,30 @@ fn an_hour_of_a_first_class_day_is_framed() {
     assert!(!hour("lauds", 3, 15));
     assert!(!hour("lauds", 2, 25));
     assert!(!hour("lauds", 4, 10));
+    // Nor rose (Laetare), nor a bare white hour (Maundy Thursday); a white feast in Lent is framed.
+    assert!(!hour("lauds", 3, 22));
+    assert!(!hour("lauds", 4, 9));
+    assert!(hour("lauds", 3, 25));
+}
+
+#[test]
+fn the_gilding_keeps_the_season_and_a_bare_hour_takes_off_its_leaf() {
+    let core = OfficeCore::new().unwrap();
+    let hour = |h: &str, m, d| core.compose(h.into(), 2026, m, d, "private".into(), false, false).unwrap();
+    let home = |m, d| core.home(civil(2026, m, d), civil(2026, m, d), 9).unwrap().ornament;
+    // Quiet through Lent and Advent and on a violet day; rose lifts it; Passiontide veils; an
+    // ordinary day keeps the gold.
+    assert_eq!((hour("lauds", 3, 11).ornament.as_str(), home(3, 11)), ("quiet", "quiet".into()));
+    assert_eq!((hour("lauds", 12, 1).ornament.as_str(), home(9, 16)), ("quiet", "quiet".into()));
+    assert_eq!((hour("lauds", 3, 22).ornament.as_str(), home(12, 13)), ("", "".into()));
+    assert_eq!(hour("lauds", 4, 10).ornament, "passiontide");
+    assert_eq!((hour("lauds", 10, 7).ornament.as_str(), home(10, 7)), ("", "".into()));
+    // Paschaltide runs through the Saturday of the Pentecost octave, whose I Vespers is Trinity's.
+    assert_eq!((hour("lauds", 6, 6).ornament.as_str(), home(6, 6)), ("eastertide", "eastertide".into()));
+    assert_eq!((hour("vespers", 6, 6).ornament.as_str(), home(6, 7)), ("", "".into()));
+    // Bare: the Triduum and All Souls; not the day before, nor Holy Saturday's Vespers (Easter's).
+    assert!(hour("lauds", 4, 9).bare && hour("prime", 4, 10).bare && hour("none", 4, 11).bare && hour("lauds", 11, 2).bare);
+    assert!(!hour("lauds", 4, 8).bare && !hour("vespers", 4, 11).bare && !hour("lauds", 10, 7).bare);
 }
 
 #[test]

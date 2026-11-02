@@ -31,7 +31,7 @@
         {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
         {% if penitential %}
         <p class="penitential">
-          {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
+          {% for label in penitential %}{% if not loop.first %} {% endif %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
         </p>
         {% endif %}
         {# The day's versicle from Lauds, on a day plain enough to have room

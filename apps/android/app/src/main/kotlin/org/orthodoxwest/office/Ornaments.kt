@@ -418,15 +418,17 @@ private fun DrawScope.tiles(w: Float, h: Float, seam: Float, draw: DrawScope.() 
  * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * (96×168) never scaled. Tiled from the field's centre and from `seam` down it, and faded by
- * `fade`'s stops of (fraction, alpha), for the field's size in either theme.
+ * `fade`'s stops of (fraction, alpha), for the field's size in either theme. Unlit, the vault
+ * has no stars: a bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 @Composable
-fun WallField(modifier: Modifier, seam: Dp = 0.dp, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
+fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
     val p = LocalPalette.current
     val star = LocalOrnament.current.flat
     val rosette = p.rubric.copy(alpha = 0.12f)
     Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
         if (p.dark) {
+            if (!lit) return@Canvas
             val tile = vaultTile(size.width.toDp()).toPx()
             val k = tile / 528f
             tiles(tile, tile, seam.toPx()) {

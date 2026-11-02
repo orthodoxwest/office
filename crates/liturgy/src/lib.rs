@@ -554,6 +554,15 @@ pub struct OfficeHour {
     /// at its I Vespers), or none on a feria.
     pub rank: Option<Rank>,
     pub color: Option<Color>,
+    /// Paschaltide at this hour: Eastertide, and the Octave of Pentecost through None of its
+    /// Saturday, while Regina caeli and the paschal alleluias are sung. The gilding keeps its
+    /// warm paschal leaf exactly as long (`presentation::gilding_class`).
+    pub paschaltide: bool,
+    /// An hour stripped of its furniture: the Triduum's form (Maundy Thursday's Lauds through
+    /// Holy Saturday's None), and the Office of the Dead. No opening, hymn, chapter or Gloria
+    /// Patri, so the page takes off its leaf too: no gilt initials, no sun or moon in the
+    /// headpiece, no festal frame (`presentation::rank_class`).
+    pub bare: bool,
     pub sections: Vec<OfficeSection>,
     pub decisions: Vec<Decision>,
 }

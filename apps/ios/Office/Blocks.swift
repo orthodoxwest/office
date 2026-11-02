@@ -199,15 +199,17 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     // The profiles are measured in the web's declared initial, not the size it is drawn at.
     let profile = size * CGFloat(initialProfileEm())
     let left = CGFloat(fit.hang) * profile
+    // The capital's ink: the gilding, or a bare hour's muted ink.
+    let paint = UIColor(o.cap ?? o.flat)
     // Raised: the brush's edge a point below (the web's 1px text-shadow at 30%), and the space after.
     let shadow = NSShadow()
     shadow.shadowOffset = CGSize(width: 0, height: 1)
     shadow.shadowBlurRadius = 0
-    shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
+    shadow.shadowColor = paint.withAlphaComponent(0.3)
     let raisedSize = size * CGFloat(raisedInitialSize())
     let raised = NSAttributedString(string: letter, attributes: [
         .font: garamond(raisedSize),
-        .foregroundColor: UIColor(o.flat),
+        .foregroundColor: paint,
         .shadow: shadow,
         .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,
     ])
@@ -221,7 +223,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
         tuck: CGFloat(fit.tuck) * size,
         rows: fit.depth > 0 ? 3 : 2,
         adapt: adapt,
-        color: UIColor(o.flat)
+        color: paint
     )
 }
 
