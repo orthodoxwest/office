@@ -60,7 +60,7 @@ struct ScoreRow: View {
     @Environment(\.displayScale) private var displayScale
 
     /// neuma's display list in the theme's inks: glyphs and rectangles, then lyrics in EB Garamond with ligatures off,
-    /// the initial gilt as every dropped initial is. Drawn at `fit` device pixels to its unit: staff and ledger lines are
+    /// the initial in the painted caps' ink as every dropped initial is (muted in a bare hour). Drawn at `fit` device pixels to its unit: staff and ledger lines are
     /// snapped to whole pixels, so every line of a staff is as crisp and as heavy as the others.
     private func draw(_ page: Neuma.Page, in context: inout GraphicsContext, fit: CGFloat) {
         // The web's --chant-* tokens (style.css): neumes in the text's ink, staves a tint of the
@@ -86,7 +86,7 @@ struct ScoreRow: View {
                     line.append(NSAttributedString(string: run.text, attributes: [
                         .font: garamond(CGFloat(size), italic: run.italic, smallCaps: run.smallCaps),
                         .ligature: 0,
-                        .foregroundColor: UIColor(role == .initial ? o.flat : run.rubric || role == .rubric || role == .annotation ? p.rubric : p.text),
+                        .foregroundColor: UIColor(role == .initial ? o.cap ?? o.flat : run.rubric || role == .rubric || role == .annotation ? p.rubric : p.text),
                     ]))
                 }
                 context.withCGContext { cg in

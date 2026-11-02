@@ -123,7 +123,7 @@ impl Pages {
                     return Err("martyrology section mismatch".into());
                 }
                 for (section, read) in sections.iter_mut().zip(read) {
-                    if read.label != section.label || read.collapsible != section.collapsible {
+                    if read.label != section.label || read.collapsible != section.collapsible || read.bare != section.bare {
                         return Err("martyrology section mismatch".into());
                     }
                     if read.html != section.html {

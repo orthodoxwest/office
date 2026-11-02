@@ -132,7 +132,8 @@ internal class ScoreInks(val note: Color, val text: Color, val staff: Color, val
             text = p.text,
             staff = mix(p.lining, p.bg, if (p.dark) 0.62f else 0.82f),
             rubric = p.rubric,
-            initial = ornament.flat,
+            // The painted caps' ink, so a bare hour's initial is muted as the web's --chant-initial.
+            initial = ornament.cap,
         )
     }
 }

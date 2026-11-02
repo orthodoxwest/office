@@ -52,7 +52,7 @@ fn append_vespers_of_the_dead(
     }
     // The page goes bare where the Office of the Dead begins, as the evening's Compline is.
     for section in &mut dead.sections {
-        section.bare = true;
+        section.bare = dead.bare;
     }
     hour.sections.extend(dead.sections);
     hour.decisions.extend(dead.decisions);
