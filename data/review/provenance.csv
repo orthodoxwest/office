@@ -2950,7 +2950,7 @@ psalms/144,97321dd57efc,Coverdale Psalter,Psalm 144,,verified,claude,2026-10-13,
 psalms/144a,cb9c795fbd2b,Coverdale Psalter,Psalm 144:1-8,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 137, 138."
 psalms/144b,eab0288b7b11,Coverdale Psalter,Psalm 144:9-15,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 137, 138."
 psalms/145,2a63e6c8d424,Coverdale Psalter,Psalm 145,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/145a,06500617d7d8,Coverdale Psalter,Psalm 145:1-13,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/145a,8c216da78982,Coverdale Psalter,Psalm 145:1-9,,verified,grok,2026-11-02,Trimmed to vv. 1-9 per Fr Jason (#751); text unchanged from verified 145a/145 vv. 1-9
 psalms/145b,cda4eed7b575,Coverdale Psalter,Psalm 145:10-21,,verified,codex,2026-07-14,Machine-verified against 1662 BCP
 psalms/146,2ac83dbcec48,Coverdale Psalter,Psalm 146,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, pp. 141, 142."
 psalms/147,08bf01a3f98d,Coverdale Psalter,Psalm 147,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
