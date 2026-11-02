@@ -195,6 +195,9 @@ jobs:
             shoot "$phone" "year-$theme" -page year -theme "$theme"
             shoot "$phone" "reminders-$theme" -page reminders -theme "$theme"
           done
+          # A saint's feast page, and Lent's Vespers hymn sung from its notation.
+          shoot "$phone" "feast-nave" -page feast -feast st-benedict -theme nave
+          shoot "$phone" "chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
           # Eastertide's warmer gilding.
           DATE=2026-04-12 shoot "$phone" "easter-nave" -page hour -hour lauds -theme nave
           # A first-class day's hour in its frame.
@@ -209,6 +212,8 @@ jobs:
             shoot "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
           done
           shoot "$ipad" "ipad-year-nave" -page year -theme nave
+          shoot "$ipad" "ipad-feast-nave" -page feast -feast st-benedict -theme nave
+          shoot "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
           shoot "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
 
       - uses: actions/upload-artifact@v7

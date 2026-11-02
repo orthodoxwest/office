@@ -85,7 +85,8 @@ The screenshots come from launch arguments:
   `-feast st-benedict`);
 - `-today` fixes today;
 - `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
-- `-anchor hymn` or `-anchor psalm` scrolls an hour to its first hymn or psalm.
+- `-anchor hymn`, `-anchor psalm` or `-anchor score` scrolls an hour to its first hymn, psalm or
+  chant notation (with `-chant YES`).
 
 The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to
 the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
