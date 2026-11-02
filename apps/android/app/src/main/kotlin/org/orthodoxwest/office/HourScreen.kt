@@ -148,6 +148,10 @@ fun HourScreen(
         }
     }
     PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
+    // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
+    // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
+    val gilding = LocalOrnament.current
+    CompositionLocalProvider(LocalOrnament provides if (view.bare) gilding.copy(cap = p.muted) else gilding) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
@@ -168,7 +172,7 @@ fun HourScreen(
             contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color))) }
+            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color, p))) }
             item(key = "chrome") { chrome() }
             item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
             // Each block's space depends on the one before it, across sections.
@@ -241,6 +245,8 @@ fun HourScreen(
                     next = next,
                     nextLabel = if (morrow) "Tomorrow" else "Next hour",
                     reportUrl = view.reportUrl,
+                    // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
+                    lit = !(view.bare && view.ornament == "passiontide"),
                     onPrevious = { onHour(date, it) },
                     onNext = { onHour(nextDate, it) },
                     onAllHours = onAllHours,
@@ -248,6 +254,7 @@ fun HourScreen(
             }
         }
         ProgressHairline(listState)
+    }
     }
 }
 
@@ -414,9 +421,12 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             // the same place on every hour. The cross's line is taller than the box, so the sign is
             // measured whole and centred over it, as the iOS frame does: held to the box's
             // height, the Text clipped the cross's lower half.
+            // A bare hour's headpiece carries no sun or moon, and the rule closes over the place
+            // where it stood; the little hours keep their cross, the one sign that is not an image.
+            val signless = view.bare && view.hour in setOf("lauds", "vespers", "compline")
             Box(Modifier.fillMaxWidth().height(16.8.dp), contentAlignment = Alignment.Center) {
-                DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
-                Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
+                DoubleRule(gap = if (signless) 0.dp else 40.dp, color = p.lining, heavy = true)
+                if (!signless) Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
             }
             Text(
                 view.title.uppercase(),
@@ -479,6 +489,7 @@ private fun Epilogue(
     next: String?,
     nextLabel: String,
     reportUrl: String,
+    lit: Boolean,
     onPrevious: (String) -> Unit,
     onNext: (String) -> Unit,
     onAllHours: () -> Unit,
@@ -503,7 +514,7 @@ private fun Epilogue(
         Box(Modifier.fillMaxWidth()) {
             // The field is phased from the seam where the ending's air (3.25rem) meets the
             // footer. By night it fades in over the first rem and thins down the footer.
-            WallField(Modifier.matchParentSize(), seam = EndingAir) { dark ->
+            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = lit) { dark ->
                 val seam = EndingAir.toPx() / size.height
                 if (dark) {
                     listOf(0f to 0f, 16.dp.toPx() / size.height to 1f, seam + 0.45f * (1f - seam) to 1f, seam + 0.8f * (1f - seam) to 0.5f, 1f to 0.25f)

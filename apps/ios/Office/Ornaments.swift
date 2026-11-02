@@ -447,10 +447,12 @@ private func vaultTile(_ width: CGFloat) -> CGFloat {
  * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * 96×168. Tiled from the field's centre and from `seam` down it, and faded by `fade`'s stops of
- * (fraction, opacity) for the field's height in either theme.
+ * (fraction, opacity) for the field's height in either theme. Unlit, the vault has no stars: a
+ * bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 struct WallField: View {
     var seam: CGFloat = 0
+    var lit: Bool = true
     let fade: (_ height: CGFloat, _ dark: Bool) -> [(CGFloat, Double)]
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -479,7 +481,7 @@ struct WallField: View {
                         t.clip(to: Path(CGRect(x: 0, y: 0, width: w, height: h)))
                         if dark {
                             t.scaleBy(x: tile / 528, y: tile / 528)
-                            for s in vaultStars { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
+                            for s in vaultStars where lit { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
                         } else {
                             t.fill(powder, with: .color(rosette))
                         }

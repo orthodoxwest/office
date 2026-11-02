@@ -16,9 +16,9 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle,
-    invitation, long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias,
-    title_case,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class,
+    home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, rank_class, reminder_description, reminder_summary, report_url,
+    season_label, split_alias, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -148,7 +148,7 @@ impl OfficeCore {
             octave_note: heading.octave_note,
             season: heading.season,
             color: day.color.as_str().to_string(),
-            ornament: ornament(Some(day.season)),
+            ornament: ornament(gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &year.moveable))),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
             feast_id: day.celebration.as_ref().map(|c| self.feast_id(&c.id, &c.name, shown)).unwrap_or_default(),
@@ -604,9 +604,10 @@ impl From<Date> for CivilDate {
     }
 }
 
-/// The ornament season that retints the gilding: "passiontide", "eastertide", or empty.
-fn ornament(season: Option<calendar::Season>) -> String {
-    season_class(season).trim_start_matches("season-").to_string()
+/// The ornament season that retints the gilding (`presentation::gilding_class`): "quiet",
+/// "passiontide", "eastertide", or empty for the ordinary gold.
+fn ornament(class: &str) -> String {
+    class.trim_start_matches("season-").to_string()
 }
 
 /// Home's frontispiece for one day.
@@ -777,14 +778,19 @@ pub struct HourView {
     pub season: String,
     /// The season as the hour header names it ("Lent", "Eastertide"); empty after Pentecost.
     pub season_label: String,
-    /// The ornament season: "passiontide", "eastertide", or empty.
+    /// The ornament season: "quiet", "passiontide", "eastertide", or empty.
     pub ornament: String,
     /// The liturgical color ("green"), empty when none.
     pub color: String,
     /// Whether the hour belongs to a first-class feast (a following feast's at its I Vespers; not
-    /// a violet or black first-class day), which the web frames between two painted lines
-    /// (`rank-first-class`).
+    /// a violet, black or rose first-class day, nor a bare hour), which the web frames between
+    /// two painted lines (`rank-first-class`).
     pub first_class: bool,
+    /// A bare hour, stripped of its hymn and Gloria Patri (the Triduum, the Office of the Dead):
+    /// the page takes off its leaf, as the web's `hour-bare` does. Its initials are set in the
+    /// muted ink, the headpiece carries no sun or moon and its rule closes, and on the Apse a
+    /// veiled bare hour's vault goes dark.
+    pub bare: bool,
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
@@ -816,9 +822,10 @@ impl HourView {
             feast: typeset(&hour.feast),
             season: hour.season.map(|s| s.as_str().to_string()).unwrap_or_default(),
             season_label: hour.season.map(|s| season_label(s.as_str())).unwrap_or_default(),
-            ornament: ornament(hour.season),
+            ornament: ornament(gilding_class(hour.season, hour.color, hour.paschaltide)),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
-            first_class: !rank_class(hour.rank, hour.color).is_empty(),
+            first_class: !rank_class(hour.rank, hour.color, hour.bare).is_empty(),
+            bare: hour.bare,
             sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,

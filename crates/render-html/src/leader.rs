@@ -141,6 +141,8 @@ mod tests {
             feast: String::new(),
             rank: None,
             color: None,
+            paschaltide: false,
+            bare: false,
             sections: vec![OfficeSection { label: String::new(), collapsible: false, elements }],
             decisions: Vec::new(),
         }
