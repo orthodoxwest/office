@@ -107,10 +107,12 @@ extension Color {
 
 /**
  * The gilding, which alone follows the season ("Seasonal ornament" in style.css): gold leaf
- * through most of the year, veiled in Passiontide, warmed at Eastertide. Functional gold
- * (controls, selections) stays `Palette.gold`. The painted rules are the lining's terracotta,
- * so `line` is `Palette.lining` except where a season gilds or veils it; the church veils its
- * images, not its walls.
+ * through most of the year, quiet through the penitential seasons and on the violet days, veiled
+ * in Passiontide, warmed at Eastertide. Functional gold (controls, selections) stays
+ * `Palette.gold`. The painted rules are the lining's terracotta, so `line` is `Palette.lining`
+ * except where a season gilds or veils it; the church veils its images, not its walls. `cap` is
+ * the initials' ink where it is not the gilding: a bare hour's (the Triduum, the Office of the
+ * Dead) are set in the muted ink, as the web's `--cap-ink`.
  */
 struct Ornament: Equatable {
     let flat: Color
@@ -118,11 +120,14 @@ struct Ornament: Equatable {
     let hi: Color
     let lo: Color
     let ink: Color
+    var cap: Color?
 
     static func of(_ p: Palette, season: String) -> Ornament {
         switch (season, p.dark) {
         case ("passiontide", true): return Ornament(flat: Color(hex: 0xB0A4C2), line: Color(hex: 0x565070), hi: Color(hex: 0xCAC1D7), lo: Color(hex: 0x988AAD), ink: Color(hex: 0xDDD6E8))
         case ("passiontide", false): return Ornament(flat: Color(hex: 0x756A7E), line: Color(hex: 0xB5AABD), hi: Color(hex: 0x8D8395), lo: Color(hex: 0x605469), ink: Color(hex: 0xDDD6E8))
+        case ("quiet", true): return Ornament(flat: Color(hex: 0xB7AA86), line: Color(hex: 0x5C5544), hi: Color(hex: 0xC6BB9A), lo: Color(hex: 0xA4976F), ink: Color(hex: 0xD9D0B4))
+        case ("quiet", false): return Ornament(flat: Color(hex: 0x857350), line: Color(hex: 0xB9AD90), hi: Color(hex: 0x978660), lo: Color(hex: 0x6C5C3C), ink: Color(hex: 0xD9D0B4))
         case ("eastertide", true): return Ornament(flat: Color(hex: 0xE6CF8C), line: Color(hex: 0x7A6A44), hi: Color(hex: 0xF2E2B1), lo: Color(hex: 0xD3B86F), ink: Color(hex: 0xF2E2B1))
         case ("eastertide", false): return Ornament(flat: Color(hex: 0xA4731A), line: Color(hex: 0xD0B06C), hi: Color(hex: 0xC8922D), lo: Color(hex: 0x886011), ink: Color(hex: 0xF2E2B1))
         case (_, true): return Ornament(flat: p.gold, line: p.lining, hi: Color(hex: 0xE7D295), lo: Color(hex: 0xC0A25A), ink: Color(hex: 0xECD9A0))
@@ -134,16 +139,16 @@ struct Ornament: Equatable {
 extension Palette {
     /**
      * The palette as the season leaves it ("Seasonal ornament" in style.css). Apse's tituli are
-     * gilt, so they veil in Passiontide and warm at Eastertide with the rest of the gilding; Nave's
-     * are painted and stay. The moon veils in Passiontide, and at Eastertide Nave's gold moon warms
-     * while Apse's silver keeps its own ink.
+     * gilt, so they go quiet, veil in Passiontide and warm at Eastertide with the rest of the
+     * gilding; Nave's are painted and stay. The moon goes quiet and veils with the gilding, and at
+     * Eastertide Nave's gold moon warms while Apse's silver keeps its own ink.
      */
     func seasoned(_ season: String) -> Palette {
-        guard season == "passiontide" || season == "eastertide" else { return self }
+        guard season == "quiet" || season == "passiontide" || season == "eastertide" else { return self }
         let o = Ornament.of(self, season: season)
         var p = self
         if dark { p.titulus = o.flat }
-        if season == "passiontide" || !dark { p.moonInk = o.flat }
+        if season != "eastertide" || !dark { p.moonInk = o.flat }
         return p
     }
 }
@@ -161,9 +166,10 @@ func dayColor(_ name: String) -> Color {
 }
 
 /// The band of the day's colour across an hour's top (`.color-band-*`): the rails' colours, but a
-/// white day's is the pale linen of a white vestment, in both themes.
-func bandColor(_ name: String) -> Color {
-    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name)
+/// white day's is the pale linen of a white vestment, in both themes; on the Apse night red, green,
+/// violet and black take home's lifts, so the band does not sink into the night.
+func bandColor(_ name: String, _ p: Palette) -> Color {
+    name == "white" ? Color(hex: 0xE8E0CC) : dayColor(name, p)
 }
 
 /// A day's colour as `.day-color-*` sets it on an hour's title and the ordo's rails: on the Apse

@@ -1147,17 +1147,18 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 });
 
 test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
-  // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦ and the drop caps. The timber course and the
-  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
-  // Both themes read one pair of leaf colours, because the ground is dark in
-  // each.
+  // Leaf lettering is gilding, so it goes quiet in Lent, veils in Passiontide
+  // and warms in Paschaltide like the ✦ and the drop caps. The timber course
+  // and the rubric-red ✠ do not move — the church veils its images, not its
+  // rubrics. Both themes read one pair of leaf colours, because the ground is
+  // dark in each.
   for (const theme of ["light", "dark"]) {
     const ink = {};
     const ground = {};
     const cross = {};
     for (const [season, date] of [
-      ["ordinary", testDate],
+      ["ordinary", "2026-10-07"],
+      ["quiet", testDate],
       ["passiontide", "2026-04-08"],
       ["eastertide", "2026-04-20"],
     ]) {
@@ -1175,23 +1176,21 @@ test("the inscription band keeps the season with the rest of the gilding", async
       cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
-    expect(ink.passiontide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.passiontide);
-    expect(ground.passiontide).toBe(ground.ordinary);
-    expect(ground.eastertide).toBe(ground.ordinary);
-    expect(cross.passiontide).toBe(cross.ordinary);
-    expect(cross.eastertide).toBe(cross.ordinary);
+    expect(new Set([ink.ordinary, ink.quiet, ink.passiontide, ink.eastertide]).size).toBe(4);
+    for (const season of ["quiet", "passiontide", "eastertide"]) {
+      expect(ground[season]).toBe(ground.ordinary);
+      expect(cross[season]).toBe(cross.ordinary);
+    }
   }
 });
 
 test("the hours' sun and moon and the Apse's gilt tituli keep the season", async ({ page }) => {
-  // The sun and moon are images, and Apse's tituli are gilt, so they veil
-  // and warm with the drop caps. Nave's tituli are painted red ochre and
-  // stay; Apse's moon is silver and keeps its own ink at Eastertide.
+  // The sun and moon are images, and Apse's tituli are gilt, so they go
+  // quiet, veil and warm with the drop caps. Nave's tituli are painted red
+  // ochre and stay; Apse's moon is silver and keeps its own ink at Eastertide.
   const ink = {};
   for (const theme of ["light", "dark"]) {
-    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"], ["eastertide", "2026-04-20"]]) {
+    for (const [season, date] of [["ordinary", "2026-10-07"], ["quiet", "2026-03-24"], ["passiontide", "2026-04-08"], ["eastertide", "2026-04-20"]]) {
       const context = await page.context().browser().newContext();
       const sheet = await context.newPage();
       await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
@@ -1204,20 +1203,95 @@ test("the hours' sun and moon and the Apse's gilt tituli keep the season", async
       ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
       await context.close();
     }
-    const [ordinary, veiled, paschal] = ["ordinary", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
-    expect(veiled.sun).not.toBe(ordinary.sun);
-    expect(paschal.sun).not.toBe(ordinary.sun);
+    const [ordinary, quiet, veiled, paschal] = ["ordinary", "quiet", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
+    expect(new Set([ordinary.sun, quiet.sun, veiled.sun, paschal.sun]).size).toBe(4);
+    expect(quiet.moon).not.toBe(ordinary.moon);
     expect(veiled.moon).not.toBe(ordinary.moon);
     if (theme === "dark") {
       expect(paschal.moon).toBe(ordinary.moon);
-      expect(veiled.titulus).not.toBe(ordinary.titulus);
-      expect(paschal.titulus).not.toBe(ordinary.titulus);
+      expect(new Set([ordinary.titulus, quiet.titulus, veiled.titulus, paschal.titulus]).size).toBe(4);
     } else {
       expect(paschal.moon).not.toBe(ordinary.moon);
-      expect(veiled.titulus).toBe(ordinary.titulus);
-      expect(paschal.titulus).toBe(ordinary.titulus);
+      for (const s of [quiet, veiled, paschal]) expect(s.titulus).toBe(ordinary.titulus);
     }
   }
+});
+
+test("a bare hour sets its capitals in the muted ink, puts out its sun, and darkens the Apse vault under the veil", async ({ page }) => {
+  // The Triduum's hours and the Office of the Dead are said without hymn or
+  // Gloria Patri, and the page takes off its leaf with them (hour-bare): the
+  // drop caps are set in --muted rather than the gilding, the headpiece
+  // carries no sun or moon and the title's rule closes over its place (the
+  // little hours keep their cross), and on the Apse a veiled bare hour's
+  // vault has no stars — the Triduum's, not All Souls', whose stars stay.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  const read = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const head = document.querySelector(".hour-header");
+      const sign = head.querySelector(".ornament-headpiece > span[data-sign]");
+      const cross = head.querySelector(".ornament-headpiece > span:not([data-sign])");
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        cap: getComputedStyle(document.querySelector(".psalm-verses .verse:first-child"), "::first-letter").color,
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+        sign: sign && getComputedStyle(sign).display,
+        cross: cross && getComputedStyle(cross).display,
+        rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
+        vault: body.getPropertyValue("--apse-vault").trim(),
+      };
+    });
+  };
+  for (const theme of ["light", "dark"]) {
+    const goodFriday = await read("/lauds/2026-04-10", theme);
+    expect(goodFriday.bare).toBe(true);
+    expect(goodFriday.cap).toBe(rgb(goodFriday.muted));
+    expect(goodFriday.sign).toBe("none");
+    expect(goodFriday.rule).toBe("0px");
+    expect(goodFriday.vault).toBe("none");
+    // Prime keeps its cross, and the rule its break.
+    const prime = await read("/prime/2026-04-10", theme);
+    expect(prime.bare).toBe(true);
+    expect(prime.cross).not.toBe("none");
+    expect(prime.rule).not.toBe("0px");
+    // All Souls is bare without the veil: the Apse's stars stay gold.
+    const allSouls = await read("/lauds/2026-11-02", theme);
+    expect(allSouls.bare).toBe(true);
+    expect(allSouls.cap).toBe(rgb(allSouls.muted));
+    expect(allSouls.sign).toBe("none");
+    expect(allSouls.vault === "none").toBe(theme === "light");
+    // A Lenten feria keeps its leaf, quiet; Holy Saturday's Vespers is Easter's.
+    for (const path of ["/lauds/2026-03-11", "/vespers/2026-04-11"]) {
+      const lit = await read(path, theme);
+      expect(lit.bare).toBe(false);
+      expect(lit.cap).toBe(rgb(lit.ornament));
+      expect(lit.sign).not.toBe("none");
+      expect(lit.rule).toBe("1.25rem");
+      expect(lit.vault === "none").toBe(theme === "light");
+    }
+  }
+});
+
+test("the Apse lifts the hour's colour band as home lifts its card, and home spaces its fasting badges", async ({ page }) => {
+  const band = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.locator(".color-band").evaluate((node) => getComputedStyle(node).backgroundColor);
+  };
+  // Violet (an Ember day) and red (an Ember day in Pentecost) sink into the night unlifted.
+  expect(await band("/lauds/2026-09-16", "light")).toBe("rgb(106, 58, 138)");
+  expect(await band("/lauds/2026-09-16", "dark")).toBe("rgb(141, 98, 173)");
+  expect(await band("/lauds/2026-06-03", "light")).toBe("rgb(176, 42, 36)");
+  expect(await band("/lauds/2026-06-03", "dark")).toBe("rgb(201, 80, 63)");
+  // White is the vestment's linen in both themes.
+  expect(await band("/lauds/2026-12-25", "dark")).toBe("rgb(232, 224, 204)");
+  // Ash Wednesday's two badges stand a space apart.
+  await openDatedPage(page, "/?date=2026-02-25");
+  expect(await page.locator(".penitential").evaluate((node) => node.textContent.trim().replace(/\s+/g, " "))).toBe("Fasting Abstinence");
 });
 
 // The lozenge carries the day's liturgical colour; the colour is the same in

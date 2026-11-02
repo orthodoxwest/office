@@ -264,10 +264,10 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
         Text(rest, modifier.fillMaxWidth().padding(start = textStart), style = style)
         return
     }
-    val ochre = LocalOrnament.current.flat
+    val ochre = LocalOrnament.current.cap
     val density = LocalDensity.current
-    // Flat ochre, as a painter laid it, with a hint of the brush's edge 1dp below; it veils and
-    // brightens with the season's gilding.
+    // Flat ochre, as a painter laid it, with a hint of the brush's edge 1dp below; it goes quiet,
+    // veils and brightens with the season's gilding, and a bare hour sets it in the muted ink.
     fun DrawScope.initial(letter: TextLayoutResult) {
         drawText(letter, color = ochre.copy(alpha = 0.3f), topLeft = Offset(0f, 1.dp.toPx()))
         drawText(letter, color = ochre)

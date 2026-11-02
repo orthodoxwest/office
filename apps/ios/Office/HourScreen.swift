@@ -228,7 +228,10 @@ struct HourScreen: View {
 
     var body: some View {
         let p = self.p.seasoned(view.ornament)
-        let o = Ornament.of(p, season: view.ornament)
+        var o = Ornament.of(p, season: view.ornament)
+        // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
+        // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
+        if view.bare { o.cap = p.muted }
         // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
         // keep their type. `type` carries the step, and the hour's rhythm, set in body lines, grows with it
@@ -247,7 +250,7 @@ struct HourScreen: View {
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    Rectangle().fill(bandColor(view.color)).frame(height: 3).accessibilityHidden(true)
+                    Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                     HourTitle(view: view, date: date, pageWidth: width)
@@ -650,9 +653,14 @@ private struct HourTitle: View {
                 // day's colour reaches the lower one's lozenge.
                 // One height whatever the sign (the web's 1.05rem headpiece), so the title stands
                 // at the same place on every hour.
+                // A bare hour's headpiece carries no sun or moon, and the rule closes over the
+                // place where it stood; the little hours keep their cross, the one sign that is
+                // not an image.
+                let sign = HourSign(hour: view.hour)
+                let signless = view.bare && sign != .cross
                 ZStack {
-                    DoubleRule(gap: 40, heavy: true)
-                    TitleSign(sign: HourSign(hour: view.hour))
+                    DoubleRule(gap: signless ? 0 : 40, heavy: true)
+                    if !signless { TitleSign(sign: sign) }
                 }
                 .frame(height: m.px(16.8))
                 Text(title).type(style).foregroundStyle(p.text)
@@ -853,7 +861,8 @@ private struct Epilogue: View {
                 .padding(.top, m.px(4.8))
             }
             .background(
-                WallField(seam: air) { h, dark in
+                // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
+                WallField(seam: air, lit: !(view.bare && view.ornament == "passiontide")) { h, dark in
                     let seam = air / h
                     return dark
                         ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]

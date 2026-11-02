@@ -1343,6 +1343,20 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 .color-band-black  { background: #3a3a3a; }
 .color-band-rose   { background: #c4607a; }
 
+/* Red, green, violet and black are mixed for limewash and sink into the Apse's
+   night, as they do on home's card; the hour's band takes home's lifts. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .color-band-red    { background: #c9503f; }
+  :root:not([data-theme="light"]) .color-band-green  { background: #4f8a52; }
+  :root:not([data-theme="light"]) .color-band-violet { background: #8d62ad; }
+  :root:not([data-theme="light"]) .color-band-black  { background: #8a94a0; }
+}
+
+:root[data-theme="dark"] .color-band-red    { background: #c9503f; }
+:root[data-theme="dark"] .color-band-green  { background: #4f8a52; }
+:root[data-theme="dark"] .color-band-violet { background: #8d62ad; }
+:root[data-theme="dark"] .color-band-black  { background: #8a94a0; }
+
 /* Thin vestment-trim band across the top of home and hour pages in the day's
    color. On notched phones in standalone mode the band extends up behind the
    status bar so it isn't clipped by the safe-area inset. */
@@ -4536,8 +4550,13 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 
    Passiontide (Passion Sunday through Holy Saturday): the church veils its
    images, and so does the page — the ornaments go from gold to a muted
-   violet-gray. Paschaltide (Easter Sunday through the eve of Pentecost): the
-   gold runs a shade warmer and more luminous, as gold leaf does in the light.
+   violet-gray. The penitential seasons — Advent, Septuagesima and Lent, their
+   feasts included — and every other violet day (the Ember days, the vigils,
+   the Rogation days) are quiet: the gold stays gold but loses its light, old
+   leaf in a dim church, a step short of the veil; a rose Sunday (Gaudete,
+   Laetare) lifts the quiet for the day. Paschaltide (Easter Sunday through the
+   Saturday of the Pentecost octave, as long as Regina caeli is sung): the gold
+   runs a shade warmer and more luminous, as gold leaf does in the light.
 
    Only --ornament / --ornament-line move. The liturgical color band still
    carries the day's color untouched, and the functional uses of gold —
@@ -4556,12 +4575,15 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
    does not move.
 
    The season class is stamped on <body> server-side per date
-   (render.SeasonClass), so it varies per URL and stays service-worker safe.
+   (presentation::gilding_class), so it varies per URL and stays
+   service-worker safe.
 
    Contrast, worst case (a drop cap sits immediately beside body text):
    nave    veiled  #756a7e on #fdf1e6 = 4.3:1  (gold baseline 3.6:1)
+   nave    quiet   #857350 on #fdf1e6 = 4.1:1
    nave    paschal #a4731a on #fdf1e6 = 3.5:1  (same lightness as gold, more chroma)
    apse    veiled  #b0a4c2 on #121c28 = 6.8:1  (gold baseline 8.7:1)
+   apse    quiet   #b7aa86 on #121c28 = 7.5:1
    apse    paschal #e6cf8c on #121c28 = 10.4:1 */
 
 /* The gilded caps take a gradient, so each season also carries a stop pair
@@ -4584,8 +4606,8 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
    sage and oxblood do not move — the church veils its images, not its walls.
 
    Contrast on the band, worst case:
-   nave ground #545f54  veiled #ddd6e8 = 4.7:1   paschal #f2e2b1 = 5.2:1
-   apse ground #263431  veiled #ddd6e8 = 8.8:1   paschal #f2e2b1 = 9.6:1 */
+   nave ground #545f54  veiled #ddd6e8 = 4.7:1   quiet #d9d0b4 = 4.3:1   paschal #f2e2b1 = 5.2:1
+   apse ground #263431  veiled #ddd6e8 = 8.8:1   quiet #d9d0b4 = 8.4:1   paschal #f2e2b1 = 9.6:1 */
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;
@@ -4594,6 +4616,19 @@ body.season-passiontide {
   --inscription-ink: #ddd6e8;
   /* Nave's moon is gold leaf and Apse's silver; both veil to the season's
      --ornament, resolved here on the body after the theme has set it. */
+  --moon-ink: var(--ornament);
+}
+
+/* Quiet: the gold's own hue with the chroma taken down and the lightness held,
+   so it reads as the same leaf unlit rather than as another colour; the pair
+   keeps the default's spread. On the Apse the leaf dims toward the plaster
+   of the walls. The moon goes with it on both, as it does under the veil. */
+body.season-quiet {
+  --ornament: #857350;
+  --ornament-line: #b9ad90;
+  --ornament-hi: #978660;
+  --ornament-lo: #6c5c3c;
+  --inscription-ink: #d9d0b4;
   --moon-ink: var(--ornament);
 }
 
@@ -4617,6 +4652,14 @@ body.season-eastertide {
     --titulus: #b0a4c2;
   }
 
+  :root:not([data-theme="light"]) body.season-quiet {
+    --ornament: #b7aa86;
+    --ornament-line: #5c5544;
+    --ornament-hi: #c6bb9a;
+    --ornament-lo: #a4976f;
+    --titulus: #b7aa86;
+  }
+
   :root:not([data-theme="light"]) body.season-eastertide {
     --ornament: #e6cf8c;
     --ornament-line: #7a6a44;
@@ -4635,6 +4678,14 @@ body.season-eastertide {
   --titulus: #b0a4c2;
 }
 
+:root[data-theme="dark"] body.season-quiet {
+  --ornament: #b7aa86;
+  --ornament-line: #5c5544;
+  --ornament-hi: #c6bb9a;
+  --ornament-lo: #a4976f;
+  --titulus: #b7aa86;
+}
+
 :root[data-theme="dark"] body.season-eastertide {
   --ornament: #e6cf8c;
   --ornament-line: #7a6a44;
@@ -4642,6 +4693,30 @@ body.season-eastertide {
   --ornament-lo: #d3b86f;
   --titulus: #e6cf8c;
   --moon-ink: #c9d0d9;
+}
+
+/* ── Bare hours ──
+   The hours of the Triduum and the Office of the Dead are said without hymn
+   or Gloria Patri, and the page takes off its leaf with them (hour-bare,
+   stamped on <body> from OfficeHour::bare). The painted caps are set in the
+   muted ink, as the lettering the painter left ungilt; the headpiece carries
+   no sun or moon, and the title's rule closes over the place where it stood
+   (the little hours keep their cross: it is the one sign that is not an
+   image). The first-class frame is already withheld (presentation::rank_class).
+   Apse's gilt tituli stay: they are the words themselves. Under the veil, a
+   bare hour's vault also goes dark on the Apse — the Triduum, not All Souls,
+   whose stars stay gold — until Holy Saturday's Vespers, which is Easter's. */
+body.hour-bare {
+  --cap-ink: var(--muted);
+  --chant-initial: var(--muted);
+}
+
+body.hour-bare .hour-header .ornament-headpiece > span[data-sign] {
+  display: none;
+}
+
+body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
+  --title-rule-break: 0px;
 }
 
 /* ── Narrow screens ── */
@@ -7209,8 +7284,9 @@ body.season-eastertide {
 
 /* ── Painted caps ──
    The drop caps are flat ochre, as a painter laid them, with a hint of the
-   brush's edge below. They read --ornament, so they veil in Passiontide and
-   brighten at Easter with the rest of the gilding. */
+   brush's edge below. They read --cap-ink, the body's --ornament, so they veil
+   in Passiontide, go quiet in Lent and brighten at Easter with the rest of the
+   gilding; a bare hour (below, "Bare hours") sets them in the muted ink. */
 .psalm-verses .verse:first-child::first-letter,
 .chapter .liturgical-block .plain-line:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
@@ -7219,8 +7295,8 @@ body.season-eastertide {
 .marian-antiphon .chant-line-opening::first-letter,
 .corporate-lord-prayer-officiant::first-letter,
 .short-responsory-opening .sigil-text::first-letter {
-  color: var(--ornament);
-  text-shadow: 0 1px 0 color-mix(in srgb, var(--ornament) 30%, transparent);
+  color: var(--cap-ink);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--cap-ink) 30%, transparent);
 }
 
 /* Native initial sizing follows the local leading (prose, psalm, or chant).
@@ -8241,6 +8317,10 @@ html:where(:has(> body.page-hour))::before {
 }
 
 body {
+  /* The painted caps' ink: the gilding, resolved here on the body so that a
+     season's class on <body> moves it ("Seasonal ornament"); a bare hour sets
+     it to the muted ink ("Bare hours"). */
+  --cap-ink: var(--ornament);
   --apse-vault: none;
   --apse-gild: none;
   --apse-ink: transparent;
@@ -8323,6 +8403,15 @@ body {
   --apse-ink: var(--ornament);
   --apse-gild: var(--apse-gilding);
   --apse-vault: var(--apse-star-tile);
+}
+
+/* A veiled bare hour (the Triduum; see "Bare hours") puts the stars out:
+   the vault is unlit, as the church is after Tenebrae. Stated after the
+   blocks above, which it matches in specificity. */
+body.hour-bare.season-passiontide {
+  --apse-ink: transparent;
+  --apse-gild: none;
+  --apse-vault: none;
 }
 
 /* The home vault is lit from the altar: stars nearest the frontispiece take

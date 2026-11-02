@@ -8,6 +8,7 @@ use crate::day::Day;
 use crate::engine::append_hour_element;
 use crate::hourdef::HourSection;
 use crate::lauds_psalmody::resolve_hour_psalmody;
+use crate::prime::is_bare;
 use crate::psalmody::compose_resolved_psalmody;
 use crate::texts::OfficeTexts;
 
@@ -44,6 +45,8 @@ pub fn compose_major_hour(
         feast: office_day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
         rank: office_day.celebration.as_deref().map(|c| c.rank),
         color: Some(office_day.color),
+        paschaltide: office_day.is_paschaltide(opts.hour_name),
+        bare: is_bare(&office_day, opts.hour_name),
         sections: Vec::new(),
         decisions: Vec::new(),
     };
