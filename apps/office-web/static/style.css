@@ -4719,6 +4719,18 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --title-rule-break: 0px;
 }
 
+/* A bare section in a gilt hour: Vespers of the Dead, said straight after
+   Vespers of All Saints on the eve of All Souls (Diurnal pp. 641–642). From
+   its heading (section-bare) to the end of the hour the caps take the muted
+   ink, as the evening's Compline does; the frame and headpiece above stay the
+   feast's. The bare sections close the hour, so the heading's later siblings
+   are all theirs. */
+.elements > .section-bare,
+.elements > .section-bare ~ * {
+  --cap-ink: var(--muted);
+  --chant-initial: var(--muted);
+}
+
 /* ── Narrow screens ── */
 
 @media (max-width: 540px) {

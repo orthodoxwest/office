@@ -919,7 +919,7 @@ mod tests {
         let ant = OfficeElement::new(ElementType::Antiphon, "Have mercy * upon me.");
         let psalm = OfficeElement::new(ElementType::Psalm, PSALM_67);
         let elements = vec![ant.clone(), psalm, ant];
-        let section = OfficeSection { label: String::new(), collapsible: false, elements: elements.clone() };
+        let section = OfficeSection { label: String::new(), collapsible: false, bare: false, elements: elements.clone() };
         let body = format_elements_tex(&elements, None);
         assert!(body.starts_with("\\antopen{"), "{body}");
         assert!(body.contains("\\antclose{"), "{body}");
@@ -1028,6 +1028,7 @@ mod tests {
         let section = OfficeSection {
             label: String::new(),
             collapsible: false,
+            bare: false,
             elements: vec![
                 OfficeElement::new(ElementType::Antiphon, "First antiphon."),
                 OfficeElement::new(ElementType::Psalm, "Psalm 1\n\nBLESSED is the man * that hath not walked.\n"),

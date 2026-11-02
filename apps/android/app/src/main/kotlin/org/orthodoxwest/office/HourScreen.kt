@@ -151,7 +151,10 @@ fun HourScreen(
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
     // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
     val gilding = LocalOrnament.current
-    CompositionLocalProvider(LocalOrnament provides if (view.bare) gilding.copy(cap = p.muted) else gilding) {
+    // A bare section in a gilt hour (Vespers of the Dead after Vespers of the day, the eve of All
+    // Souls) sets its capitals in the same muted ink, as the web's `section-bare`.
+    val bareGilding = gilding.copy(cap = p.muted)
+    CompositionLocalProvider(LocalOrnament provides if (view.bare) bareGilding else gilding) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
@@ -228,7 +231,8 @@ fun HourScreen(
                     afterClosed = false
                     afterOpen = false
                     item(key = "$i-$j") {
-                        CompositionLocalProvider(LocalDensity provides prayer) {
+                        val sectionGilding = if (view.bare || section.bare) bareGilding else gilding
+                        CompositionLocalProvider(LocalDensity provides prayer, LocalOrnament provides sectionGilding) {
                             Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross)
                         }
                     }

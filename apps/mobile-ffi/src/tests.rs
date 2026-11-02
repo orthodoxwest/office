@@ -108,6 +108,12 @@ fn the_gilding_keeps_the_season_and_a_bare_hour_takes_off_its_leaf() {
     // Bare: the Triduum and All Souls; not the day before, nor Holy Saturday's Vespers (Easter's).
     assert!(hour("lauds", 4, 9).bare && hour("prime", 4, 10).bare && hour("none", 4, 11).bare && hour("lauds", 11, 2).bare);
     assert!(!hour("lauds", 4, 8).bare && !hour("vespers", 4, 11).bare && !hour("lauds", 10, 7).bare);
+    // The eve of All Souls: Vespers of All Saints keep their leaf; Vespers of the Dead after
+    // them go bare section by section, from their heading to the end of the hour.
+    let eve = hour("vespers", 11, 1);
+    let first = eve.sections.iter().position(|s| s.bare).unwrap();
+    assert!(!eve.bare && first > 0 && eve.sections[first].label == "Vespers of the Dead");
+    assert!(eve.sections[first..].iter().all(|s| s.bare));
 }
 
 #[test]

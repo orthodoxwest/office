@@ -838,12 +838,22 @@ impl HourView {
 pub struct SectionView {
     pub label: String,
     pub collapsible: bool,
+    /// A bare section in a gilt hour (Vespers of the Dead after the day's Vespers on the eve of
+    /// All Souls): its initials take the muted ink, as a bare hour's do (the web's
+    /// `section-bare`).
+    #[uniffi(default = false)]
+    pub bare: bool,
     pub blocks: Vec<BlockView>,
 }
 
 impl From<render_blocks::SectionBlocks> for SectionView {
     fn from(s: render_blocks::SectionBlocks) -> SectionView {
-        SectionView { label: s.label, collapsible: s.collapsible, blocks: s.blocks.into_iter().map(BlockView::from).collect() }
+        SectionView {
+            label: s.label,
+            collapsible: s.collapsible,
+            bare: s.bare,
+            blocks: s.blocks.into_iter().map(BlockView::from).collect(),
+        }
     }
 }
 

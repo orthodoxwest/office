@@ -99,6 +99,7 @@ pub struct HourHeader {
 pub struct SectionView {
     pub label: String,
     pub collapsible: bool,
+    pub bare: bool,
     pub html: String,
 }
 

@@ -74,7 +74,7 @@ pub fn compose_major_hour(
                 _ => append_hour_element(&mut elems, &office_day, opts.hour_name, elem, t),
             }
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     Ok(hour)
 }

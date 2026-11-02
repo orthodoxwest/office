@@ -88,6 +88,9 @@ fn all_souls_vespers_is_a_continuous_office() {
             let boundary = hour.sections.iter().position(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL).unwrap();
             let preceding: Vec<_> = hour.sections[..boundary].iter().flat_map(|s| &s.elements).collect();
             let dead: Vec<_> = hour.sections[boundary..].iter().flat_map(|s| &s.elements).collect();
+            // The page goes bare where the Dead begin; the day's Vespers keep their gilding.
+            assert!(!hour.bare && hour.sections[..boundary].iter().all(|s| !s.bare), "{eve} {form:?}");
+            assert!(hour.sections[boundary..].iter().all(|s| s.bare), "{eve} {form:?}");
             assert_eq!(preceding.last().unwrap().source_ref, "shared/leader/benedicamus-domino", "{eve} {form:?}");
             assert_eq!(dead[0].source_ref, "proper/all-souls/psalm-antiphon-1-vespers", "{eve} {form:?}");
             assert_eq!(dead[1].source_ref, "psalms/116");

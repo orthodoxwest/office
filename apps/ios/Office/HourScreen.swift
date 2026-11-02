@@ -235,6 +235,13 @@ struct HourScreen: View {
             if view.bare { o.cap = p.muted }
             return o
         }()
+        // A bare section in a gilt hour (Vespers of the Dead after Vespers of the day, the eve of
+        // All Souls) sets its capitals in the same muted ink, as the web's `section-bare`.
+        let bareO: Ornament = {
+            var b = o
+            b.cap = p.muted
+            return b
+        }()
         // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
         // keep their type. `type` carries the step, and the hour's rhythm, set in body lines, grows with it
@@ -289,6 +296,7 @@ struct HourScreen: View {
                                         PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, prayer.space(.bind))
                                     }
                                     BlockRow(block: block, column: columns[at])
+                                        .environment(\.ornament, view.sections[at.section].bare ? bareO : o)
                                 }
                                 .padding(.top, prayer.space(space))
                                 .measured(m)

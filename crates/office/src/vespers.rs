@@ -50,6 +50,10 @@ fn append_vespers_of_the_dead(
     if let Some(first) = dead.sections.iter_mut().find(|s| !s.elements.is_empty()) {
         first.label = VESPERS_OF_THE_DEAD_LABEL.to_string();
     }
+    // The page goes bare where the Office of the Dead begins, as the evening's Compline is.
+    for section in &mut dead.sections {
+        section.bare = true;
+    }
     hour.sections.extend(dead.sections);
     hour.decisions.extend(dead.decisions);
     hour.decisions.push(Decision::new("vespers:appended-office-of-the-dead", "included", "all-souls"));

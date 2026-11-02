@@ -155,8 +155,18 @@ fn compline_opens_with_a_heading_and_collapsible_sections_do_not() {
         paschaltide: false,
         bare: false,
         sections: vec![
-            OfficeSection { label: String::new(), collapsible: false, elements: vec![elem(ElementType::Prayer, "Pray, Father.")] },
-            OfficeSection { label: "Before the Office".into(), collapsible: true, elements: vec![elem(ElementType::Prayer, "Open.")] },
+            OfficeSection {
+                label: String::new(),
+                collapsible: false,
+                bare: false,
+                elements: vec![elem(ElementType::Prayer, "Pray, Father.")],
+            },
+            OfficeSection {
+                label: "Before the Office".into(),
+                collapsible: true,
+                bare: false,
+                elements: vec![elem(ElementType::Prayer, "Open.")],
+            },
         ],
         decisions: Vec::new(),
     };
