@@ -24,7 +24,8 @@ pub fn apply_leader(hour: &mut OfficeHour, leader: PrayerForm, t: &OfficeTexts) 
             if !elem.leader_slot.is_empty() && recorded.insert(elem.leader_slot.clone()) {
                 // A priest absolves, so only he takes the choir Confiteor; a deacon may
                 // greet and bless, so he takes the clergy greeting and the blessing.
-                let choir = leader == PrayerForm::Priest || (elem.leader_slot != "confession" && leader == PrayerForm::Deacon);
+                let choir = leader == PrayerForm::Priest
+                    || (matches!(elem.leader_slot.as_str(), "greeting" | "opening") && leader == PrayerForm::Deacon);
                 hour.decisions.push(Decision::new(
                     format!("prayer-form:{}", elem.leader_slot),
                     if choir { "choir" } else { "private" },

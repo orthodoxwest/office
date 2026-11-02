@@ -1674,10 +1674,22 @@ fn compline_opening_and_confession_follow_who_leads() {
         let compline = engine().compose_hour("compline", day, &moveable, form).unwrap();
         let refs: Vec<_> = compline.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
         assert_eq!(refs[0], opening, "{form:?}");
+        let recorded = compline.decisions.iter().find(|d| d.rule == "prayer-form:opening").expect("opening decision");
+        assert_eq!(recorded.outcome, if form == PrayerForm::Private { "private" } else { "choir" }, "{form:?}");
         let prime = engine().compose_hour("prime", day, &moveable, form).unwrap();
         for (name, hour) in [("compline", &compline), ("prime", &prime)] {
             let choir = hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref == "shared/leader/confiteor-absolution-priest");
             assert_eq!(choir, choir_confession, "{name} {form:?}");
+        }
+    }
+    // The Triduum and All Souls have no opening blessing in any form
+    // (Diurnal pp. 316, 643).
+    for date in [Date::new(2027, 4, 29), Date::new(2026, 11, 1)] {
+        let (days, moveable) = year(date.year());
+        let day = &days[date.ordinal() as usize - 1];
+        for form in PrayerForm::ALL {
+            let hour = engine().compose_hour("compline", day, &moveable, form).unwrap();
+            assert!(hour.sections.iter().flat_map(|s| &s.elements).all(|e| e.leader_slot != "opening"), "{date} {form:?}");
         }
     }
 }
