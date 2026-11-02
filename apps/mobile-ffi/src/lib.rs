@@ -4,6 +4,8 @@
 
 mod data;
 mod feasts;
+#[cfg(test)]
+mod pack;
 
 use std::collections::HashMap;
 use std::fmt;

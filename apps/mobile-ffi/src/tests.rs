@@ -14,21 +14,33 @@ fn the_embedded_corpus_is_the_data_directory() {
     let fs = repo_data();
     let data = EmbeddedData::new().unwrap();
     for dir in ["texts", "feasts", "office"] {
-        let embedded = |rel: &str| {
-            !(["chant/psalms/", "chant/canticles/", "chant/hymns/"].iter().any(|d| rel.starts_with(d))
-                || rel.ends_with(".md")
-                || rel.rsplit('/').next().is_some_and(|n| n.starts_with('.')))
-        };
-        let want: Vec<_> = fs.walk(dir).unwrap().into_iter().filter(|(rel, _)| embedded(rel)).collect();
+        let want: Vec<_> = fs
+            .walk(dir)
+            .unwrap()
+            .into_iter()
+            .filter(|(rel, _)| pack::embedded(&format!("{dir}/{rel}")))
+            .map(|(rel, bytes)| (rel.clone(), pack::packed(&rel, bytes)))
+            .collect();
         let got = data.walk(dir).unwrap();
         let paths = |files: &[(String, Vec<u8>)]| files.iter().map(|(rel, _)| rel.clone()).collect::<Vec<_>>();
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
     for file in ["appointment-scopes.json", "chant-tunes.txt", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
-        assert_eq!(data.read(file).unwrap(), fs.read(file).unwrap(), "{file}");
+        let want = fs.read(file).unwrap().map(|s| String::from_utf8(pack::packed(file, s.into_bytes())).unwrap());
+        assert_eq!(data.read(file).unwrap(), want, "{file}");
     }
-    assert_eq!(data.read("review/provenance.csv").unwrap(), None);
+    for file in ["review/provenance.csv", "audit-ok.txt", "texts/chant/psalms/134.gabc"] {
+        assert_eq!(data.read(file).unwrap(), None, "{file}");
+    }
+}
+
+#[test]
+fn packing_keeps_all_but_comment_lines() {
+    let text = "[a]\n# SOURCE: note\nLine one\n  # indented note\nLine #2\r\n\n#last";
+    assert_eq!(pack::packed("texts/x.txt", text.as_bytes().to_vec()), b"[a]\nLine one\nLine #2\r\n\n");
+    assert_eq!(pack::packed("texts/x.gabc", text.as_bytes().to_vec()), text.as_bytes());
+    assert_eq!(pack::packed("appointment-scopes.json", b"# not a comment".to_vec()), b"# not a comment");
 }
 
 #[test]
