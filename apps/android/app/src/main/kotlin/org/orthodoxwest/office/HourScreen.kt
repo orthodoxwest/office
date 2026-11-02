@@ -245,6 +245,8 @@ fun HourScreen(
                     next = next,
                     nextLabel = if (morrow) "Tomorrow" else "Next hour",
                     reportUrl = view.reportUrl,
+                    // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
+                    lit = !(view.bare && view.ornament == "passiontide"),
                     onPrevious = { onHour(date, it) },
                     onNext = { onHour(nextDate, it) },
                     onAllHours = onAllHours,
@@ -487,6 +489,7 @@ private fun Epilogue(
     next: String?,
     nextLabel: String,
     reportUrl: String,
+    lit: Boolean,
     onPrevious: (String) -> Unit,
     onNext: (String) -> Unit,
     onAllHours: () -> Unit,
@@ -511,8 +514,7 @@ private fun Epilogue(
         Box(Modifier.fillMaxWidth()) {
             // The field is phased from the seam where the ending's air (3.25rem) meets the
             // footer. By night it fades in over the first rem and thins down the footer.
-            // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
-            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = !(view.bare && view.ornament == "passiontide")) { dark ->
+            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = lit) { dark ->
                 val seam = EndingAir.toPx() / size.height
                 if (dark) {
                     listOf(0f to 0f, 16.dp.toPx() / size.height to 1f, seam + 0.45f * (1f - seam) to 1f, seam + 0.8f * (1f - seam) to 0.5f, 1f to 0.25f)
