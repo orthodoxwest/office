@@ -1,20 +1,6 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 6 feast(s) ===
-
-  [base]
-  [f2] Ember Friday in Advent (advent-ember-friday)
-    missing: benedictus-antiphon, magnificat-antiphon, collect
-  [f2] Ember Friday in September (september-ember-friday)
-    missing: magnificat-antiphon, collect
-  [f2] Ember Saturday in Advent (advent-ember-saturday)
-    missing: benedictus-antiphon, collect
-  [f2] Ember Saturday in September (september-ember-saturday)
-    missing: benedictus-antiphon, collect
-  [f2] Ember Wednesday in Advent (advent-ember-wednesday)
-    missing: benedictus-antiphon, magnificat-antiphon, collect
-  [f2] Ember Wednesday in September (september-ember-wednesday)
-    missing: magnificat-antiphon, collect
+=== Missing propers: 0 feast(s) ===
 
 === Commons fallback: 0 feast(s) ===
 
