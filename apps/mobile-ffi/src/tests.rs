@@ -343,15 +343,21 @@ fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
     let (off, on) = (blocks(false), blocks(true));
     assert!(scores(&off).is_empty());
     let sung = scores(&on);
-    assert_eq!(sung.len(), 1);
-    assert!(sung[0].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[0]);
+    // Te lucis's first stanza (the Holy Rosary's doxology is not the score's) and the antiphon.
+    assert_eq!(sung.len(), 2, "{sung:?}");
+    assert!(sung[0].contains("To(h) thee,(j) be(j)fore(j)") && sung[0].ends_with("now.(g.) (::)"), "{}", sung[0]);
+    assert!(sung[1].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[1]);
     // The antiphon's words give way to the score; the rest of the hour stands as it was.
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
     // The usage beacon's chant: the setting, on an hour with a score to show; none on one without.
     let reported = |hour: &str, chant| core.compose(hour.into(), 2026, 10, 7, "private".into(), false, chant).unwrap().chant;
     assert_eq!((reported("compline", false), reported("compline", true)), (Some(false), Some(true)));
-    assert_eq!((reported("terce", false), reported("terce", true)), (None, None));
+    let reported_on =
+        |hour: &str, month, day, chant| core.compose(hour.into(), 2026, month, day, "private".into(), false, chant).unwrap().chant;
+    assert_eq!((reported("terce", false), reported("terce", true)), (Some(false), Some(true)));
+    // Good Friday's Terce sings no hymn.
+    assert_eq!((reported_on("terce", 4, 10, false), reported_on("terce", 4, 10, true)), (None, None));
 }
 
 #[test]
