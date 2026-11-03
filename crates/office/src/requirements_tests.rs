@@ -199,7 +199,7 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
                     assert_eq!(refs[i + 2], "shared/leader/let-us-pray");
                     assert_eq!(refs[i + 3], "proper/all-souls/prime-concluding-collect");
                 }
-                assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal", "shared/formulas/may-they-rest-in-peace"]);
+                assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal-versicle", "shared/formulas/may-they-rest-in-peace"]);
                 assert!(refs.iter().all(|r| !r.contains("martyrology")
                     && !r.contains("benedicamus")
                     && !r.contains("opening-versicle")
@@ -221,7 +221,7 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
             assert!(elements.iter().any(|e| e.kind == ElementType::Antiphon));
             assert!(elements.iter().any(|e| e.kind == ElementType::Hymn));
             assert!(elements.iter().any(|e| e.source_ref == "ordinary/shared/gloria-patri"));
-            assert!(elements.iter().all(|e| e.source_ref != "shared/formulas/rest-eternal"));
+            assert!(elements.iter().all(|e| !e.source_ref.starts_with("shared/formulas/rest-eternal")));
         }
     }
     // Diurnal p. 654: when All Souls is Saturday, the following Sunday

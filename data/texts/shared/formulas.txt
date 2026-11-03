@@ -34,9 +34,17 @@ R. Amen.
 # SOURCE: Monastic Diurnal.pdf, p. 72* (The Office of the Dead)
 # The Office of the Dead says no Gloria Patri. "At the end of all Psalms is
 # always said: Rest eternal grant unto them, O Lord. And let light perpetual
-# shine upon them, even if the Office be said for one person only."
-Rest eternal grant unto them, O Lord.
-And let light perpetual shine upon them.
+# shine upon them, even if the Office be said for one person only." It is pointed
+# like the Glory be (pp. 73*, 77*).
+Rest eternal * grant unto them, O Lord.
+And let light perpetual * shine upon them.
+
+[rest-eternal-versicle]
+# SOURCE: Monastic Diurnal.pdf, p. 81* (Vespers of the Dead); p. 106* (Lauds of the Dead)
+# After the Collect the Diurnal prints Rest eternal as a versicle and response, unlike
+# the pointed verses that end each psalm (rest-eternal above).
+V. Rest eternal grant unto them, O Lord.
+R. And let light perpetual shine upon them.
 
 [may-they-rest-in-peace]
 # SOURCE: Monastic Diurnal.pdf, p. 81* (The Office of the Dead, after the Collect)

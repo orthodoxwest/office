@@ -605,7 +605,7 @@ Ref = shared/formulas/closing-peace
 Condition = office-of-the-dead
 
 Type = versicle
-Ref = shared/formulas/rest-eternal
+Ref = shared/formulas/rest-eternal-versicle
 
 Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace

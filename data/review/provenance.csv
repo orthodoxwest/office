@@ -2922,7 +2922,7 @@ psalms/120,a29928f603f9,Coverdale Psalter,Psalm 120,,verified,codex,2026-07-10,M
 psalms/121,3048887dc9df,Coverdale Psalter,Psalm 121,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/122,8541c4ac2d30,Coverdale Psalter,Psalm 122,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/123,3680e855fd2f,Coverdale Psalter,Psalm 123,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 105."
-psalms/124,70098827906e,Coverdale Psalter,Psalm 124,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP; stray spaces before punctuation removed. v. 2 “thy were” corrected to “they were” per Diurnal p. 105 and 1662."
+psalms/124,70098827906e,Coverdale Psalter,Psalm 124,,verified,claude,2026-10-13,Machine-verified against 1662 BCP; stray spaces before punctuation removed. v. 2 “thy were” corrected to “they were” per Diurnal p. 105 and 1662.
 psalms/125,8f2f709969fd,Coverdale Psalter,Psalm 125,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/126,dd616ff087c6,Coverdale Psalter,Psalm 126,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 108."
 psalms/127,058ab0a5f68b,Coverdale Psalter,Psalm 127,,verified,claude,2026-10-13,"Machine-verified against 1662 BCP. Diurnal flex marks (†) read from page images, p. 108."
@@ -3109,7 +3109,8 @@ shared/formulas/paschal-little-hour-antiphon,1c4d79dcbae3,diurnal,Paschaltide Su
 shared/formulas/paschal-psalm-antiphon,d92894995670,Monastic Diurnal.pdf,"Monday at Lauds, In Paschaltide, Ant.; PDF pages 94",48,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 48.
 shared/formulas/paschal-sunday-psalm-antiphon,0ff0f24e480a,diurnal,Paschaltide Sunday psalter and Low Sunday,"35, 370",verified,codex,2026-09-16,"Direct page-image reading agrees with independent Sonnet reading, including counted Alleluias. Opening-antiphon dagger normalized to asterisk."
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,
-shared/formulas/rest-eternal,bf647dbb2752,diurnal,The Office of the Dead,72*,verified,claude,2026-08-21,
+shared/formulas/rest-eternal,ffeead7f639d,Monastic Diurnal.pdf,"The Office of the Dead, at the end of all Psalms; pointed as at pp. 73*, 77*",72*,verified,claude,2026-11-03,"Mediant asterisks added as the Diurnal points it after each psalm (pp. 73*, 77*); wording unchanged from the claude attestation of 2026-08-21."
+shared/formulas/rest-eternal-versicle,391f1f88316b,Monastic Diurnal.pdf,"Vespers of the Dead, after the Collect (also Lauds of the Dead, p. 106*)",81*,verified,claude,2026-11-03,Direct page-image review; V./R. as printed after the Collect.
 shared/formulas/triduum-collect-rubric,cf4e8cd190e6,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-10-11,"From the p. 313 rubric (read from the page image; the OCR layer is unreliable), reworded to serve every Hour of the Triduum; the Diurnal reads in a like voice, and sets an ellipsis. Its closing note on how the Hours end is left to the printed diurnal."
 shared/formulas/triduum-kneel-rubric,f1e30ab13d1b,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-10-11,"Excerpted for the app from the p. 313 rubric (read from the page image): all kneel, capitalised with a full stop; the whole rubric is left to the printed diurnal."
 shared/formulas/triduum-lauds-noise-rubric,ef9ab614dca9,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization
