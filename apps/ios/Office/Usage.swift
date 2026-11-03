@@ -1,11 +1,11 @@
 import Foundation
 
 /**
- * The daily usage counts, reported as the web reports them (README, "Usage metrics"): the page
- * shown, the appearance and prayer form it is read in, and at Prime whether the Martyrology was
- * shown, once a day. The beacon's words come from
- * the Rust core, so the server reads the app's as it reads the web's, and only today's pages
- * (a day either side) count.
+ * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
+ * the page shown, the appearance and prayer form it is read in, at Prime whether the
+ * Martyrology was shown, and on an hour with a score whether its notation was, once a day. The
+ * beacon's words come from the Rust core, so the server reads the app's as it reads the web's,
+ * and only today's pages (a day either side) count.
  *
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
@@ -44,13 +44,14 @@ final class Usage {
         self.post = post
     }
 
-    /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one.
-    func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil) {
+    /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
+    /// `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any.
+    func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil, chant: Bool? = nil) {
         guard enabled else { return }
         let date = now()
         let day = Usage.reportingDay(date)
         let first = Usage.firstDay(day, defaults) == day
-        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first) else { return }
+        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant) else { return }
         let key = day + " " + body
         lock.lock()
         let fresh = sent.insert(key).inserted
@@ -155,8 +156,8 @@ final class Usage {
 }
 
 extension Page {
-    /// The page as the usage count names it: the year's frontispiece is part of the ordo. About
-    /// is not counted, as the web counts only home, the hours, the ordo and the reminders.
+    /// The page as the usage count names it: the year's frontispiece is part of the ordo. About,
+    /// the search and the feast pages are not counted, as on the web.
     var usageEvent: UsageEvent? {
         switch self {
         case let .home(d): return .home(date: d)
@@ -164,7 +165,7 @@ extension Page {
         case let .ordo(y, _, _): return .ordo(year: Int32(y))
         case let .year(y): return .ordo(year: Int32(y))
         case .reminders: return .remindersPage
-        case .about: return nil
+        case .about, .find, .feast: return nil
         }
     }
 }

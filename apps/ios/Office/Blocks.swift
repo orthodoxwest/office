@@ -10,39 +10,13 @@ private let allHang: CGFloat = 13.6
 /// How far "Blessing." may hang into a wide page's margin (`.sigil-word`, 4.25rem less ℣'s 1.4rem).
 private let wordHang: CGFloat = 45.6
 
-/**
- * Space above `cur`, after `prev`, in the web's rhythm at a phone's width (measured from the
- * rendered hour, as the Android app's `gapBefore`): a clear threshold between psalm groups, air
- * between elements, and the lines of one element close together.
- */
-func gapBefore(_ prev: BlockView?, _ cur: BlockView) -> CGFloat {
-    guard let prev else { return 0 }
-    let heading = { (b: BlockView) in b.kind == .heading || b.kind == .commemorationHeading }
-    let antiphon = { (b: BlockView) in b.kind == .antiphon || b.kind == .announcedAntiphon }
-    let note = { (b: BlockView) in b.kind == .antiphonNote || b.kind == .announcementNote }
-    if heading(cur) { return 38 }
-    if heading(prev) { return cur.kind == .chapterRef ? 24 : 27 }
-    if cur.kind == .gap || prev.kind == .gap { return 4.8 }
-    if prev.kind == .itemLabel { return 9 }
-    // A note on the antiphon sits close under it, as the web's `.unrepeated-note`.
-    if note(cur) { return 2.4 }
-    if cur.kind == .itemLabel { return antiphon(prev) || note(prev) ? 10 : 30 }
-    if prev.kind == .chapterRef { return 15 }
-    if prev.kind == .latinTitle { return 8 }
-    if prev.kind == .speaker { return 3.2 }
-    // A closing antiphon, then the next group's opening one: the threshold between groups.
-    if antiphon(cur) && prev.kind == .antiphon { return 49 }
-    // A closing antiphon sits close under its psalm's last verse or Gloria.
-    if cur.kind == .antiphon && (prev.kind == .verse || (prev.kind == .gloriaPatri && !prev.startsElement)) { return 6 }
-    if cur.kind == .verse && prev.kind == .verse { return 4.8 }
-    // The Gloria Patri after a psalm's last verse.
-    if cur.kind == .gloriaPatri && prev.kind == .verse { return 13.6 }
-    if cur.kind == .stanza && prev.kind == .stanza { return 12 }
-    // A hymn's rubric keeps a stanza's distance from the stanzas around it.
-    if cur.kind == .hymnRubric && prev.kind == .stanza { return 12 }
-    if cur.kind == .stanza && prev.kind == .hymnRubric { return 12 }
-    if cur.startsElement { return 14 }
-    return 4.8
+extension Metrics {
+    /**
+     * A step of the hour's rhythm (`render_blocks::Space`, as the web's `--space-*`) sized by the
+     * prayer's body line as set, so the space between blocks grows with the reader's text,
+     * Dynamic Type included.
+     */
+    func space(_ step: Space) -> CGFloat { CGFloat(spaceLines(space: step)) * Scale.body.line * type }
 }
 
 /// What a block is set in: its style, colour and alignment (the web's class for the same text).
@@ -225,15 +199,17 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
     // The profiles are measured in the web's declared initial, not the size it is drawn at.
     let profile = size * CGFloat(initialProfileEm())
     let left = CGFloat(fit.hang) * profile
+    // The capital's ink: the gilding, or a bare hour's muted ink.
+    let paint = UIColor(o.cap ?? o.flat)
     // Raised: the brush's edge a point below (the web's 1px text-shadow at 30%), and the space after.
     let shadow = NSShadow()
     shadow.shadowOffset = CGSize(width: 0, height: 1)
     shadow.shadowBlurRadius = 0
-    shadow.shadowColor = UIColor(o.flat).withAlphaComponent(0.3)
+    shadow.shadowColor = paint.withAlphaComponent(0.3)
     let raisedSize = size * CGFloat(raisedInitialSize())
     let raised = NSAttributedString(string: letter, attributes: [
         .font: garamond(raisedSize),
-        .foregroundColor: UIColor(o.flat),
+        .foregroundColor: paint,
         .shadow: shadow,
         .kern: CGFloat(raisedInitialGap()) * raisedSize + CGFloat(fit.raisedTuck) * size,
     ])
@@ -247,7 +223,7 @@ private func initial(_ letter: String, _ style: TextStyle, _ o: Ornament, _ m: M
         tuck: CGFloat(fit.tuck) * size,
         rows: fit.depth > 0 ? 3 : 2,
         adapt: adapt,
-        color: UIColor(o.flat)
+        color: paint
     )
 }
 
@@ -341,6 +317,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
             t.append(NSAttributedString(string: "\u{2028}", attributes: [.font: font]))
             t.append(text)
             spec.text = t
+            spec.firstIndent = gutter
             spec.restIndent = gutter
         } else {
             // The sigil set right in its gutter; the gutter keeps its stop at any size. "All:" is
@@ -353,7 +330,7 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
             t.append(NSAttributedString(string: "\t", attributes: [.font: font]))
             t.append(text)
             spec.text = t
-            let sigil = m.px(22)
+            let sigil = m.px(22.4)
             let width = CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(NSAttributedString(attributedString: mark)), nil, nil, nil))
             let hang = block.kind == .all ? min(m.px(allHang), max(0, width - sigil)) : word ? min(m.px(wordHang), max(0, width - sigil)) : 0
             let stop = max(sigil, width - hang) + hang
@@ -406,7 +383,10 @@ struct BlockRow: View {
 
     var body: some View {
         if block.kind == .gap {
-            Color.clear.frame(height: m.px(8)).accessibilityHidden(true)
+            // A source's blank line: its space is the block's own, above it.
+            Color.clear.frame(height: 0).accessibilityHidden(true)
+        } else if block.kind == .score {
+            ScoreRow(block: block)
         } else {
             let spec = proseSpec(block, p, o, m, hangsWords: wide && !ranked)
             let glosses = block.runs.compactMap(\.gloss)
@@ -495,7 +475,7 @@ private struct GlossCard: View {
 }
 
 /// The web's `.hymn-verses` max-width, 28rem.
-private let hymnMax: CGFloat = 448
+let hymnMax: CGFloat = 448
 
 /// Slack on a hymn's column, so its longest line does not wrap on rounding. The web's `.hymn-line`
 /// hang adds nothing to the column: its padding and negative text-indent cancel in `fit-content`.

@@ -26,7 +26,7 @@
   <meta name="twitter:card" content="summary_large_image">
   {% endif %}
   {# Apply stored appearance before CSS to avoid a flash.
-       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology. #}
+       Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
     (function () {
       {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
@@ -34,7 +34,7 @@
         var carry = /^#office-carry=(.*)$/.exec(location.hash);
         if (carry) {
           new URLSearchParams(decodeURIComponent(carry[1])).forEach(function (value, key) {
-            if (/^office-(theme|text-size|prayer-form|martyrology)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
+            if (/^office-(theme|text-size|prayer-form|martyrology|chant)$/.test(key) && localStorage.getItem(key) === null) localStorage.setItem(key, value);
           });
           history.replaceState(null, "", location.pathname + location.search);
         }
@@ -59,6 +59,7 @@
           document.documentElement.removeAttribute("data-text-size");
         }
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
+        if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
       {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
            that used the Office before that was recorded holds "before"): home offers the
@@ -97,12 +98,16 @@
   <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{ static("leader.js")|url }}" defer></script>
   <script src="{{ static("app.js")|url }}" defer></script>
+  {# chant.js lays chant scores out with neuma's engine, fetched only once one is shown. #}
+  <script type="module" src="{{ static("chant.js")|url }}"></script>
+  <meta name="neuma" content="{{ static("neuma.mjs")|url }}">
+  <meta name="neuma-metrics" content="{{ static("fonts/eb-garamond-lyrics.nmet")|url }}">
   {% if page == "usage" %}<script src="{{ static("usage.js")|url }}" defer></script>{% endif %}
 </head>
 {# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
      that do not stand on a single day. #}
-<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}{% if rank_class %} {{ rank_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}{% if rank_class %} {{ rank_class }}{% endif %}{% if bare %} hour-bare{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
   {%- from "macros.html" import prefs %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
@@ -140,7 +145,7 @@
           <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
           <span class="nav-divider" aria-hidden="true"></span>
           {%- endif %}
-          <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
+          <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p in ["calendar", "find", "feast"] %} class="active"{% endif %}{% if p == "calendar" %} aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
           <a class="nav-secondary{% if p == "about" %} active{% endif %}" href="/about" data-nav="about"{% if p == "about" %} aria-current="page"{% endif %}>{{ about_menu }}</a>
         </nav>

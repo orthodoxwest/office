@@ -88,6 +88,9 @@ fn all_souls_vespers_is_a_continuous_office() {
             let boundary = hour.sections.iter().position(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL).unwrap();
             let preceding: Vec<_> = hour.sections[..boundary].iter().flat_map(|s| &s.elements).collect();
             let dead: Vec<_> = hour.sections[boundary..].iter().flat_map(|s| &s.elements).collect();
+            // The page goes bare where the Dead begin; the day's Vespers keep their gilding.
+            assert!(!hour.bare && hour.sections[..boundary].iter().all(|s| !s.bare), "{eve} {form:?}");
+            assert!(hour.sections[boundary..].iter().all(|s| s.bare), "{eve} {form:?}");
             assert_eq!(preceding.last().unwrap().source_ref, "shared/leader/benedicamus-domino", "{eve} {form:?}");
             assert_eq!(dead[0].source_ref, "proper/all-souls/psalm-antiphon-1-vespers", "{eve} {form:?}");
             assert_eq!(dead[1].source_ref, "psalms/116");
@@ -1655,6 +1658,41 @@ fn saturday_office_of_our_lady_vespers_versicle_and_christmastide_collect() {
             let text = antiphon(date, name);
             assert!(text.starts_with(incipit), "{date} {name}");
             assert_eq!(text.ends_with(", alleluia."), paschal, "{date} {name}: {text}");
+        }
+    }
+}
+
+#[test]
+fn compline_opening_and_confession_follow_who_leads() {
+    // Diurnal pp. 7–8, 146–148 (#691, #693): a deacon may bless, so he is asked
+    // "Sir, ask a blessing"; only a priest absolves, so only he takes the choir
+    // Confiteor. Said alone, the opening is "Lord, grant a blessing".
+    let (days, moveable) = year(2027);
+    let day = &days[Date::new(2027, 10, 19).ordinal() as usize - 1];
+    for (form, opening, choir_confession) in [
+        (PrayerForm::Private, "ordinary/compline/opening-versicle", false),
+        (PrayerForm::Deacon, "shared/leader/compline-opening-choir", false),
+        (PrayerForm::Priest, "shared/leader/compline-opening-choir", true),
+    ] {
+        let compline = engine().compose_hour("compline", day, &moveable, form).unwrap();
+        let refs: Vec<_> = compline.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+        assert_eq!(refs[0], opening, "{form:?}");
+        let recorded = compline.decisions.iter().find(|d| d.rule == "prayer-form:opening").expect("opening decision");
+        assert_eq!(recorded.outcome, if form == PrayerForm::Private { "private" } else { "choir" }, "{form:?}");
+        let prime = engine().compose_hour("prime", day, &moveable, form).unwrap();
+        for (name, hour) in [("compline", &compline), ("prime", &prime)] {
+            let choir = hour.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref == "shared/leader/confiteor-absolution-priest");
+            assert_eq!(choir, choir_confession, "{name} {form:?}");
+        }
+    }
+    // The Triduum and All Souls have no opening blessing in any form
+    // (Diurnal pp. 316, 643).
+    for date in [Date::new(2027, 4, 29), Date::new(2026, 11, 1)] {
+        let (days, moveable) = year(date.year());
+        let day = &days[date.ordinal() as usize - 1];
+        for form in PrayerForm::ALL {
+            let hour = engine().compose_hour("compline", day, &moveable, form).unwrap();
+            assert!(hour.sections.iter().flat_map(|s| &s.elements).all(|e| e.leader_slot != "opening"), "{date} {form:?}");
         }
     }
 }

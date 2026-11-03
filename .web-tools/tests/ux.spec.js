@@ -41,13 +41,16 @@ async function fallbackInitials(page) {
 
 // Phones reach Appearance and Text size from the foot of the site menu; wide
 // screens from the header's Settings. Open whichever is showing, choose, and
-// close it again so later measurements see the page.
-async function choosePreference(page, name) {
+// close it again so later measurements see the page. A `group` (the buttons' class)
+// tells apart the settings that share a name, such as the Martyrology's and Chant's On.
+async function choosePreference(page, name, group) {
   const wide = await page.locator(".site-settings > summary").isVisible();
   const disclosure = page.locator(wide ? ".site-settings" : ".site-menu");
   const summary = disclosure.locator(":scope > summary");
   await summary.click();
-  await page.locator(wide ? ".settings-prefs" : ".menu-prefs").getByRole("button", { name, exact: true }).click();
+  const prefs = page.locator(wide ? ".settings-prefs" : ".menu-prefs");
+  const button = prefs.getByRole("button", { name, exact: true });
+  await (group ? button.and(page.locator(group)) : button).click();
   await summary.click();
   await expect(disclosure).not.toHaveAttribute("open", "");
 }
@@ -300,6 +303,85 @@ test("psalm spacing groups each antiphon with its own psalm", async ({ page }) =
   expect(spacing.gloriaGap).toBeGreaterThan(spacing.verseGap * 1.5);
 });
 
+// The hour's vertical rhythm (render_blocks::Space, which the apps share): each
+// space a step of the prayer's body line. Sext's run from the Alleluia through
+// the hymn into the first psalm is the page that showed the steps uneven.
+test("the hour's spaces are the rhythm's steps of the body line", async ({ page }) => {
+  for (const width of [390, 800, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/sext/2026-10-29");
+    const steps = await page.evaluate(() => {
+      const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+      const gap = (a, b) => (b.getBoundingClientRect().top - a.getBoundingClientRect().bottom) / line;
+      const q = (s) => document.querySelector(s);
+      const stanzas = [...document.querySelectorAll(".hymn .hymn-stanza")];
+      const hymn = q(".hymn");
+      const antiphon = hymn.nextElementSibling;
+      const psalm = antiphon.nextElementSibling;
+      return {
+        line,
+        prayer: parseFloat(getComputedStyle(q(".elements")).fontSize),
+        section: gap(hymn.previousElementSibling, hymn.querySelector(".section-heading")),
+        title: gap(hymn.querySelector(".section-heading"), q(".hymn-title")),
+        hymn: gap(q(".hymn-title"), stanzas[0]),
+        stanza: gap(stanzas[0], stanzas[1]),
+        group: gap(stanzas[stanzas.length - 1], antiphon),
+        antiphon: gap(antiphon, psalm.querySelector(".item-label")),
+        label: gap(psalm.querySelector(".item-label"), psalm.querySelector(".verse")),
+        verse: gap(...psalm.querySelectorAll(".verse")),
+        gloria: gap([...psalm.querySelectorAll(".verse")].pop(), psalm.querySelector(".gloria-patri")),
+      };
+    });
+    // The line is the prayer's body line, so the steps follow the text's size.
+    expect(steps.line).toBeCloseTo(steps.prayer * 1.6, 1);
+    const expected = { section: 1, title: 0.15, hymn: 0.3, stanza: 0.45, group: 0.75, antiphon: 0.3, label: 0.3, verse: 0.15, gloria: 0.45 };
+    for (const [name, step] of Object.entries(expected)) {
+      expect(steps[name], `${name} at ${width}px`).toBeCloseTo(step, 1);
+    }
+  }
+});
+
+test("the rhythm reaches into a prayer form's part and the Martyrology", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("office-prayer-form", "priest");
+    localStorage.setItem("office-martyrology", "on");
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/prime/2026-10-29");
+  const steps = await page.evaluate(() => {
+    const line = parseFloat(getComputedStyle(document.querySelector(".elements")).getPropertyValue("--line"));
+    const shown = (e) => e.getClientRects().length > 0;
+    const leaves = [...document.querySelectorAll(".elements p, .elements h2")].filter(shown);
+    const at = (text) => leaves.findIndex((e) => e.textContent.includes(text));
+    const above = (i) => (leaves[i].getBoundingClientRect().top - leaves[i - 1].getBoundingClientRect().bottom) / line;
+    const heading = at("Martyrology for tomorrow");
+    return {
+      confession: above(at("Then the Confession is repeated")),
+      absolution: above(at("After Confession has been made")),
+      martyrology: above(heading),
+      entry: above(heading + 1),
+      thanks: above(leaves.findIndex((e, i) => i > heading && e.textContent.includes("Thanks be to God"))),
+      // A section's label stands as a part's heading, as the apps' toggle row does.
+      label: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        const before = after.previousElementSibling.getBoundingClientRect();
+        return (box.top - before.bottom) / line;
+      })(),
+      under: (() => {
+        const after = [...document.querySelectorAll(".session-prayers")].pop();
+        const box = after.querySelector("summary").getBoundingClientRect();
+        return (after.querySelector(".session-prayers-content p").getBoundingClientRect().top - box.bottom) / line;
+      })(),
+    };
+  });
+  // Each matches render_blocks::space_before for the same blocks.
+  const expected = { confession: 0.45, absolution: 0.45, martyrology: 1, entry: 0.3, thanks: 0.45, label: 1, under: 0.3 };
+  for (const [name, step] of Object.entries(expected)) {
+    expect(steps[name], name).toBeCloseTo(step, 1);
+  }
+});
+
 test("hour progress completes with the prayer, before the administrative epilogue", async ({
   page,
 }) => {
@@ -363,11 +445,12 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
-        // date + go-to-today (historical days) + pray + 7 hours + the first week's
-        // introduction + change-date.
-        .slice(0, 12)
+        // date + the feast's page + go-to-today (historical days) + pray + 7 hours + the first
+        // week's introduction + change-date.
+        .slice(0, 13)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
+          if (element.matches(".feast-link")) return "feast";
           // Recovery chrome when the landing day is not local today — intentional
           // after the stale-day fix; sits in the day identity, before Pray now.
           if (element.matches(".not-today-link")) return "go-to-today";
@@ -385,6 +468,7 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
   // testDate is fixed in the past relative to "today", so Go to today is present.
   expect(order.focusables).toEqual([
     "date",
+    "feast",
     "go-to-today",
     "pray",
     "lauds",
@@ -1067,17 +1151,18 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 });
 
 test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
-  // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦ and the drop caps. The timber course and the
-  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
-  // Both themes read one pair of leaf colours, because the ground is dark in
-  // each.
+  // Leaf lettering is gilding, so it goes quiet in Lent, veils in Passiontide
+  // and warms in Paschaltide like the ✦ and the drop caps. The timber course
+  // and the rubric-red ✠ do not move — the church veils its images, not its
+  // rubrics. Both themes read one pair of leaf colours, because the ground is
+  // dark in each.
   for (const theme of ["light", "dark"]) {
     const ink = {};
     const ground = {};
     const cross = {};
     for (const [season, date] of [
-      ["ordinary", testDate],
+      ["ordinary", "2026-10-07"],
+      ["quiet", testDate],
       ["passiontide", "2026-04-08"],
       ["eastertide", "2026-04-20"],
     ]) {
@@ -1095,23 +1180,21 @@ test("the inscription band keeps the season with the rest of the gilding", async
       cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
-    expect(ink.passiontide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.ordinary);
-    expect(ink.eastertide).not.toBe(ink.passiontide);
-    expect(ground.passiontide).toBe(ground.ordinary);
-    expect(ground.eastertide).toBe(ground.ordinary);
-    expect(cross.passiontide).toBe(cross.ordinary);
-    expect(cross.eastertide).toBe(cross.ordinary);
+    expect(new Set([ink.ordinary, ink.quiet, ink.passiontide, ink.eastertide]).size).toBe(4);
+    for (const season of ["quiet", "passiontide", "eastertide"]) {
+      expect(ground[season]).toBe(ground.ordinary);
+      expect(cross[season]).toBe(cross.ordinary);
+    }
   }
 });
 
 test("the hours' sun and moon and the Apse's gilt tituli keep the season", async ({ page }) => {
-  // The sun and moon are images, and Apse's tituli are gilt, so they veil
-  // and warm with the drop caps. Nave's tituli are painted red ochre and
-  // stay; Apse's moon is silver and keeps its own ink at Eastertide.
+  // The sun and moon are images, and Apse's tituli are gilt, so they go
+  // quiet, veil and warm with the drop caps. Nave's tituli are painted red
+  // ochre and stay; Apse's moon is silver and keeps its own ink at Eastertide.
   const ink = {};
   for (const theme of ["light", "dark"]) {
-    for (const [season, date] of [["ordinary", "2026-03-24"], ["passiontide", "2026-04-09"], ["eastertide", "2026-04-20"]]) {
+    for (const [season, date] of [["ordinary", "2026-10-07"], ["quiet", "2026-03-24"], ["passiontide", "2026-04-08"], ["eastertide", "2026-04-20"]]) {
       const context = await page.context().browser().newContext();
       const sheet = await context.newPage();
       await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
@@ -1124,20 +1207,128 @@ test("the hours' sun and moon and the Apse's gilt tituli keep the season", async
       ink[`${theme} ${season}`] = { sun, moon: await sign(), titulus };
       await context.close();
     }
-    const [ordinary, veiled, paschal] = ["ordinary", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
-    expect(veiled.sun).not.toBe(ordinary.sun);
-    expect(paschal.sun).not.toBe(ordinary.sun);
+    const [ordinary, quiet, veiled, paschal] = ["ordinary", "quiet", "passiontide", "eastertide"].map((s) => ink[`${theme} ${s}`]);
+    expect(new Set([ordinary.sun, quiet.sun, veiled.sun, paschal.sun]).size).toBe(4);
+    expect(quiet.moon).not.toBe(ordinary.moon);
     expect(veiled.moon).not.toBe(ordinary.moon);
     if (theme === "dark") {
       expect(paschal.moon).toBe(ordinary.moon);
-      expect(veiled.titulus).not.toBe(ordinary.titulus);
-      expect(paschal.titulus).not.toBe(ordinary.titulus);
+      expect(new Set([ordinary.titulus, quiet.titulus, veiled.titulus, paschal.titulus]).size).toBe(4);
     } else {
       expect(paschal.moon).not.toBe(ordinary.moon);
-      expect(veiled.titulus).toBe(ordinary.titulus);
-      expect(paschal.titulus).toBe(ordinary.titulus);
+      for (const s of [quiet, veiled, paschal]) expect(s.titulus).toBe(ordinary.titulus);
     }
   }
+});
+
+test("a bare hour sets its capitals in the muted ink, puts out its sun, and darkens the Apse vault under the veil", async ({ page }) => {
+  // The Triduum's hours and the Office of the Dead are said without hymn or
+  // Gloria Patri, and the page takes off its leaf with them (hour-bare): the
+  // drop caps are set in --muted rather than the gilding, the headpiece
+  // carries no sun or moon and the title's rule closes over its place (the
+  // little hours keep their cross), and on the Apse a veiled bare hour's
+  // vault has no stars — the Triduum's, not All Souls', whose stars stay.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  const read = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const head = document.querySelector(".hour-header");
+      const sign = head.querySelector(".ornament-headpiece > span[data-sign]");
+      const cross = head.querySelector(".ornament-headpiece > span:not([data-sign])");
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        cap: getComputedStyle(document.querySelector(".psalm-verses .verse:first-child"), "::first-letter").color,
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+        sign: sign && getComputedStyle(sign).display,
+        cross: cross && getComputedStyle(cross).display,
+        rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
+        vault: body.getPropertyValue("--apse-vault").trim(),
+      };
+    });
+  };
+  for (const theme of ["light", "dark"]) {
+    const goodFriday = await read("/lauds/2026-04-10", theme);
+    expect(goodFriday.bare).toBe(true);
+    expect(goodFriday.cap).toBe(rgb(goodFriday.muted));
+    expect(goodFriday.sign).toBe("none");
+    expect(goodFriday.rule).toBe("0px");
+    expect(goodFriday.vault).toBe("none");
+    // Prime keeps its cross, and the rule its break.
+    const prime = await read("/prime/2026-04-10", theme);
+    expect(prime.bare).toBe(true);
+    expect(prime.cross).not.toBe("none");
+    expect(prime.rule).not.toBe("0px");
+    // All Souls is bare without the veil: the Apse's stars stay gold.
+    const allSouls = await read("/lauds/2026-11-02", theme);
+    expect(allSouls.bare).toBe(true);
+    expect(allSouls.cap).toBe(rgb(allSouls.muted));
+    expect(allSouls.sign).toBe("none");
+    expect(allSouls.vault === "none").toBe(theme === "light");
+    // A Lenten feria keeps its leaf, quiet; Holy Saturday's Vespers is Easter's.
+    for (const path of ["/lauds/2026-03-11", "/vespers/2026-04-11"]) {
+      const lit = await read(path, theme);
+      expect(lit.bare).toBe(false);
+      expect(lit.cap).toBe(rgb(lit.ornament));
+      expect(lit.sign).not.toBe("none");
+      expect(lit.rule).toBe("1.25rem");
+      expect(lit.vault === "none").toBe(theme === "light");
+    }
+  }
+});
+
+test("Vespers of the Dead on the eve of All Souls goes bare where it begins", async ({ page }) => {
+  // Diurnal pp. 641–642: Vespers of All Saints keep their gilding and frame;
+  // from "Vespers of the Dead" (section-bare) the caps take the muted ink.
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-11-01", theme);
+    const got = await page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const heading = document.querySelector(".elements > .section-heading.section-bare");
+      const verses = [...document.querySelectorAll(".psalm-verses .verse:first-child")];
+      const after = (v) => heading.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING;
+      const cap = (v) => getComputedStyle(v, "::first-letter").color;
+      return {
+        bare: document.body.classList.contains("hour-bare"),
+        heading: heading && heading.textContent,
+        before: verses.filter((v) => !after(v)).map(cap),
+        within: verses.filter(after).map(cap),
+        muted: body.getPropertyValue("--muted").trim(),
+        ornament: body.getPropertyValue("--ornament").trim(),
+      };
+    });
+    expect(got.bare).toBe(false);
+    expect(got.heading).toBe("Vespers of the Dead");
+    expect(got.before.length).toBeGreaterThan(0);
+    expect(got.within.length).toBe(6); // five psalms and the Magnificat
+    expect(got.before.every((c) => c === rgb(got.ornament))).toBe(true);
+    expect(got.within.every((c) => c === rgb(got.muted))).toBe(true);
+  }
+});
+
+test("the Apse lifts the hour's colour band as home lifts its card, and home spaces its fasting badges", async ({ page }) => {
+  const band = async (path, theme) => {
+    await openDatedPage(page, path, theme);
+    return page.locator(".color-band").evaluate((node) => getComputedStyle(node).backgroundColor);
+  };
+  // Violet (an Ember day) and red (an Ember day in Pentecost) sink into the night unlifted.
+  expect(await band("/lauds/2026-09-16", "light")).toBe("rgb(106, 58, 138)");
+  expect(await band("/lauds/2026-09-16", "dark")).toBe("rgb(141, 98, 173)");
+  expect(await band("/lauds/2026-06-03", "light")).toBe("rgb(176, 42, 36)");
+  expect(await band("/lauds/2026-06-03", "dark")).toBe("rgb(201, 80, 63)");
+  // White is the vestment's linen in both themes.
+  expect(await band("/lauds/2026-12-25", "dark")).toBe("rgb(232, 224, 204)");
+  // Ash Wednesday's two badges stand a space apart.
+  await openDatedPage(page, "/?date=2026-02-25");
+  expect(await page.locator(".penitential").evaluate((node) => node.textContent.trim().replace(/\s+/g, " "))).toBe("Fasting Abstinence");
 });
 
 // The lozenge carries the day's liturgical colour; the colour is the same in
@@ -2105,8 +2296,10 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
 
       const hymn = page.locator(".hymn");
       await expect(hymn.locator(".hymn-title")).toHaveText("Ave, maris stella");
-      const rubric = hymn.locator(".hymn-rubric");
+      const rubric = hymn.locator(".hymn-verses .hymn-rubric");
       await expect(rubric).toHaveText(instruction);
+      // The hymn's score, shown with Chant on, says it before the stanza too.
+      await expect(hymn.locator(".chant-hymn .hymn-rubric")).toHaveText(instruction);
       await expect(rubric).not.toContainText("/:");
       await expect(hymn.locator(".hymn-latin")).toHaveCount(0);
       await expect(hymn.locator(".hymn-stanza-opening .hymn-line").first()).toContainText(
@@ -2114,7 +2307,7 @@ test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async
       );
 
       const geometry = await page.evaluate(() => {
-        const rubric = document.querySelector(".hymn .hymn-rubric");
+        const rubric = document.querySelector(".hymn .hymn-verses .hymn-rubric");
         const title = document.querySelector(".hymn .hymn-title");
         const verses = document.querySelector(".hymn .hymn-verses");
         const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
@@ -2665,7 +2858,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   };
   // The frontispiece's strip leads to the month's own page.
   let page = await open("/calendar/2026");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^March\b/ }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
   page = await open("/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
@@ -2677,7 +2870,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
   // The whole year jumps within itself.
   page = await open("/calendar/2026/all");
-  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
   await page.locator("#d-2026-03-01 .day-feast-name").click();
@@ -2786,10 +2979,12 @@ test("Tabula dates stay whole at the narrowest width and largest text", async ({
 });
 
 test("links into the year from before month pages still reach their day", async ({ page }) => {
-  await page.goto("/calendar/2026#d-2026-09-12");
+  // The year page replaces itself while it parses, so its own load never comes; WebKit has been
+  // seen to leave the goto waiting on it. The URL and viewport checks wait for the month page.
+  await page.goto("/calendar/2026#d-2026-09-12", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/09#d-2026-09-12$/);
   await expect(page.locator("#d-2026-09-12")).toBeInViewport();
-  await page.goto("/calendar/2026?form=priest#march");
+  await page.goto("/calendar/2026?form=priest#march", { waitUntil: "commit" });
   await expect(page).toHaveURL(/\/calendar\/2026\/03\?form=priest$/);
   // The frontispiece itself, and its own anchors, stay put.
   await page.goto("/calendar/2026#tabula-heading");
@@ -3149,7 +3344,8 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     // Leave for a page that never reports before changing the device: a
     // beacon still settling would otherwise re-report in the new appearance.
     await page.goto("/privacy");
-    return events[0];
+    // Whether today's Vespers has a score, and so reports chant:, is the day's.
+    return events[0].replace(/ chant:\w+/, "");
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
@@ -3248,7 +3444,7 @@ test.describe("on a screen with a mouse", () => {
       // Leave for a page that never reports before changing the device: a
       // beacon still settling would otherwise re-report in the new appearance.
       await page.goto("/privacy");
-      return events[0];
+      return events[0].replace(/ chant:\w+/, "");
     };
 
     expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser");
@@ -3349,7 +3545,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
       await expect(button).toHaveAttribute("aria-pressed", "true");
     }
 
-    await choosePreference(page, "On");
+    await choosePreference(page, "On", ".martyrology-option");
     await expect(reading).toBeVisible();
     await expect(rubric).toBeHidden();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
@@ -3358,7 +3554,7 @@ test("the Martyrology at Prime is a Settings choice, off by default, that holds 
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-martyrology", "on");
     await expect(reading).toBeVisible();
-    await choosePreference(page, "Off");
+    await choosePreference(page, "Off", ".martyrology-option");
     await expect(rubric).toBeVisible();
     await expect(reading).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem("office-martyrology"))).toBe("off");
@@ -3531,7 +3727,8 @@ test('prayer forms switch complete sequences and keep reports and print consiste
   await context.setOffline(true);
   await choosePrayerForm(page, 'deacon');
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
-  expect(await prayers.innerText()).toContain('Lord, grant a blessing');
+  expect(await prayers.innerText()).toContain('Sir, ask a blessing');
+  expect(await prayers.innerText()).not.toContain('Lord, grant a blessing');
   expect(await prayers.innerText()).not.toContain('your sins');
   await expect(page.locator('.prayer-speaker:visible')).toHaveText(['All']);
   await choosePrayerForm(page, 'priest');
@@ -3601,6 +3798,30 @@ test('prayer-form metrics record the rendered form and subsequent switches only 
   await page.locator('.site-brand').click();
   await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
   expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('prayer-form:'))).toBe(true);
+});
+
+test('an hour with a score reports whether its chant notation is shown, and no other page does', async ({ page }) => {
+  const bodies = [];
+  await page.route('**/api/usage', async route => {
+    bodies.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const today = await serverTodaySlug(page);
+  // Compline closes with a scored Marian antiphon on every day but the Triduum's.
+  await page.goto(`/compline/${today}`);
+  const scored = await page.locator('[data-chant-variant="on"]').count() > 0;
+  await page.locator('.hour-header h1').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('compline '))).toBe(true);
+  expect(bodies[0].includes(' chant:off ')).toBe(scored);
+  expect(bodies[0]).not.toContain('chant:on');
+  if (scored) {
+    await choosePreference(page, 'On', '.chant-option');
+    await expect.poll(() => bodies.some(body => body.includes(' chant:on '))).toBe(true);
+  }
+  await page.goto('/');
+  await page.locator('.site-brand').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
+  expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('chant:'))).toBe(true);
 });
 
 test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL, browserName }) => {
@@ -3943,14 +4164,16 @@ test("Office prayer instructions retain spacing and Marian collects share initia
   for (const theme of ["light", "dark"]) {
     await openDatedPage(page, "/vespers/2026-09-22", theme);
     const rubric = page.locator(".session-prayers-content > .rubric").last();
-    const gap = await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom);
-    expect(gap).toBeGreaterThanOrEqual(14);
+    // A stanza's step of the prayer's line (the rhythm's space between elements), on screen and paper.
+    const steps = () => rubric.evaluate(el => (el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)
+      / parseFloat(getComputedStyle(el).getPropertyValue("--line")));
+    expect(await steps()).toBeCloseTo(0.45, 1);
     const collect = page.locator(".marian-antiphon .collect .plain-line").first();
     await expect(collect).toHaveAttribute("data-initial", "A");
     await expect(collect.locator(".initial-word")).toHaveText("lmighty");
     await page.emulateMedia({ media: "print" });
     await expect(rubric).toBeVisible();
-    expect(await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(14);
+    expect(await steps()).toBeCloseTo(0.45, 1);
     await page.emulateMedia({ media: "screen" });
   }
 });
@@ -3977,4 +4200,109 @@ test("escaped page links retain navigation and report query values", async ({ pa
   expect(url.searchParams.get("body")).toContain("lauds");
   await page.locator(".next-hour").click();
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
+});
+
+test("a feast's page leads back to the search that found it", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  await page.locator(".find-name").first().click();
+  await expect(page).toHaveURL(/\/feast\//);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find?q=raphael");
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+
+  // Reached otherwise, it leads to the empty search.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
+});
+
+test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  const left = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().left);
+  // A phone: one column, the standing, then the texts with the collect first, then the years.
+  const [standing, texts, years] = [await top(".feast-standing"), await top(".feast-texts"), await top(".feast-years")];
+  expect(standing).toBeLessThan(texts);
+  expect(texts).toBeLessThan(years);
+  await expect(page.locator(".feast-text h3").first()).toHaveText(/^Collect/);
+  await expect(page.locator(".feast-standing .feast-next")).toBeVisible();
+  // A year kept as usual says nothing more; one he is only commemorated says so.
+  await expect(page.locator(".feast-years .find-year-status b", { hasText: /^Kept$/ })).toHaveCount(0);
+  expect(await page.locator(".feast-years .find-year-status b", { hasText: "Commemorated" }).count()).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  // A wide screen: the standing and the years make a rail to the right of the texts.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
+  // (The standing's frame sits 3px in, its outer rule in the margin.)
+  expect(Math.abs(await left(".feast-years") - await left(".feast-standing"))).toBeLessThanOrEqual(4);
+  expect(await top(".feast-standing")).toBeLessThan(await top(".feast-years"));
+  expect(Math.abs(await top(".feast-standing") - await top(".feast-texts"))).toBeLessThan(24);
+});
+
+test("Chant On notes every verse of a whole hymn, its mode's figure once over the initial", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openDatedPage(page, "/lauds/2026-10-28");
+  const scores = page.locator(".hymn .chant-hymn");
+  await expect(scores).toBeHidden();
+
+  // The engine measures the lyrics with the app's own Garamond's metrics, fetched with it.
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await choosePreference(page, "On", ".chant-option");
+  await expect(page.locator("html")).toHaveAttribute("data-chant", "on");
+  await metrics;
+  await expect(scores).toBeVisible();
+  expect(await scores.locator(".chant-stanza").count()).toBeGreaterThan(2);
+  // The mode once, as a figure the engine sets over the first verse's initial.
+  await expect(scores.locator("svg [class$='-annotation']")).toHaveCount(1);
+  await expect(scores.locator(".chant-stanza").first().locator("svg [class$='-annotation']")).toHaveText(/^[IVX]+$/);
+
+  await choosePreference(page, "Off", ".chant-option");
+  await expect(scores).toBeHidden();
+});
+
+test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  const fit = () => page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    const box = score.querySelector(".chant-width");
+    return {
+      column: score.clientWidth,
+      score: box.getBoundingClientRect().width,
+      laidOut: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  for (const width of [320, 390, 430, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/compline/2026-10-27");
+    await expect.poll(async () => (await fit()).laidOut, { message: `${width}px` }).toBe(true);
+    const f = await fit();
+    expect(Math.abs(f.score - f.column), `${width}px: ${JSON.stringify(f)}`).toBeLessThan(1);
+    expect(f.overflow, `${width}px`).toBe(0);
+  }
+  // A narrower window lays it out again.
+  await page.setViewportSize({ width: 360, height: 900 });
+  await expect.poll(async () => { const f = await fit(); return Math.abs(f.score - f.column) < 1; }).toBe(true);
+
+  // Without the engine the page's own score stands, inside the column.
+  await page.route(/\/static\/neuma\.mjs/, (route) => route.abort());
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  const fallback = await fit();
+  expect(fallback.laidOut).toBe(false);
+  expect(fallback.score).toBeLessThanOrEqual(fallback.column + 0.5);
+  expect(fallback.overflow).toBe(0);
+  // Back online, the next resize fetches it again and lays the score out.
+  await page.unroute(/\/static\/neuma\.mjs/);
+  await page.setViewportSize({ width: 380, height: 900 });
+  await expect.poll(async () => (await fit()).laidOut).toBe(true);
+
+  // A browser too old for the engine never fetches it.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
+  await openDatedPage(page, "/compline/2026-10-27");
+  await page.waitForTimeout(300);
+  expect((await fit()).laidOut).toBe(false);
+  expect(fetched).toEqual([]);
 });

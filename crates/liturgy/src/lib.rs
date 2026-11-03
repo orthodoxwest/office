@@ -223,6 +223,94 @@ pub struct OfficeElement {
     /// The opening words of a psalm or canticle that the antiphon before it
     /// has just said, and so are not repeated.
     pub unrepeated: Option<Unrepeated>,
+    /// The chant score that sets this element's sung words: a hymn's first
+    /// stanza or every stanza, or a Marian antiphon's antiphon. Renderers offer
+    /// it in place of those words when the reader sings; the text stays beside it.
+    pub score: Option<ChantScore>,
+}
+
+/// A chant score attached to an element.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ChantScore {
+    /// The score's GABC.
+    pub gabc: std::sync::Arc<str>,
+    /// What of the element it sets.
+    pub sets: ScoreSpan,
+}
+
+impl ChantScore {
+    /// The words a score sets, as a screen reader should hear them: on one line, the pointing
+    /// asterisk left out wherever it falls (mid-line or ending one).
+    pub fn spoken(words: &str) -> String {
+        words.split_whitespace().filter(|w| *w != "*").collect::<Vec<_>>().join(" ")
+    }
+
+    /// The mode the score's `mode:` header names, as a roman figure ("I", "VIII"). None when it
+    /// names none, or none a reader would recognize.
+    pub fn mode_figure(&self) -> Option<&'static str> {
+        let header = self.gabc.split_once("%%").map_or("", |(h, _)| h);
+        let value = header.lines().find_map(|l| l.trim().strip_prefix("mode:"))?.trim().trim_end_matches(';').trim();
+        const ROMAN: [&str; 8] = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+        match value.parse::<usize>() {
+            Ok(n @ 1..=8) => Some(ROMAN[n - 1]),
+            _ => ROMAN.iter().find(|r| r.eq_ignore_ascii_case(value)).copied(),
+        }
+    }
+
+    /// `part` of this score (itself, or one of its [`stanza_parts`](Self::stanza_parts)) as the
+    /// opening score is engraved: its mode's figure written over the initial, as the chant books
+    /// head a piece, the engine's `annotation` header in capitals (the engine would print the
+    /// mode in small roman figures). Every front engraves it with the annotation shown.
+    pub fn with_mode_figure(&self, part: &str) -> String {
+        match (self.mode_figure(), part.split_once("%%")) {
+            (Some(figure), Some((header, body))) if !header.lines().any(|l| l.trim().starts_with("annotation:")) => {
+                let header = header.trim_end();
+                let sep = if header.is_empty() { "" } else { "\n" };
+                format!("{header}{sep}annotation: {figure};\n%%{body}")
+            }
+            _ => part.to_string(),
+        }
+    }
+
+    /// A whole hymn's score parted stanza by stanza at its double bars `(::)`, each part with the
+    /// header and the opening clef; a part that is only an Amen stays with the one before it. A
+    /// score of one stanza or an antiphon is one part.
+    pub fn stanza_parts(&self) -> Vec<String> {
+        let gabc: &str = &self.gabc;
+        let Some((header, body)) = gabc.split_once("%%") else { return vec![gabc.to_string()] };
+        if self.sets != ScoreSpan::WholeHymn {
+            return vec![gabc.to_string()];
+        }
+        let body = body.trim();
+        let clef = body.split_whitespace().next().filter(|c| c.starts_with("(c") || c.starts_with("(f")).unwrap_or("");
+        let mut parts: Vec<String> = Vec::new();
+        for chunk in body.split_inclusive("(::)").map(str::trim).filter(|c| !c.is_empty()) {
+            let words = chunk.trim_start_matches(clef).trim_start().to_lowercase();
+            let amen = words.starts_with("a(") && words.contains("men") && chunk.len() < 40;
+            match parts.last_mut() {
+                Some(last) if amen => {
+                    last.push(' ');
+                    last.push_str(chunk);
+                }
+                _ => parts.push(chunk.to_string()),
+            }
+        }
+        parts
+            .into_iter()
+            .map(|p| if p.starts_with(clef) { format!("{header}%%\n{p}") } else { format!("{header}%%\n{clef} {p}") })
+            .collect()
+    }
+}
+
+/// The words a score sets.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ScoreSpan {
+    /// A hymn's first stanza, the rest sung to its tune from the text.
+    FirstStanza,
+    /// Every stanza of a hymn, its Amen too.
+    WholeHymn,
+    /// A Marian antiphon's antiphon, up to its ℣.
+    Antiphon,
 }
 
 /// Words that open a psalm or canticle exactly as its antiphon does: once the
@@ -277,6 +365,7 @@ impl OfficeElement {
             is_commemoration: false,
             announce: false,
             unrepeated: None,
+            score: None,
         }
     }
 
@@ -395,8 +484,15 @@ pub fn split_words(s: &str, n: usize) -> (&str, &str, usize) {
 pub struct OfficeSection {
     pub label: String,
     pub collapsible: bool,
+    /// A bare section inside an hour that is not: Vespers of the Dead said straight after
+    /// Vespers of the day on the eve of All Souls (Diurnal pp. 641–642). Its initials take
+    /// the muted ink, as a bare hour's do; the page's frame and headpiece stay the day's.
+    pub bare: bool,
     pub elements: Vec<OfficeElement>,
 }
+
+/// The seven hours, in canonical order.
+pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 
 /// How the office is prayed: privately or led by clergy.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -409,7 +505,10 @@ pub enum PrayerForm {
 impl PrayerForm {
     pub const ALL: [PrayerForm; 3] = [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest];
 
-    pub fn as_str(self) -> &'static str {
+    /// The forms' values, in [`PrayerForm::ALL`]'s order.
+    pub const NAMES: [&'static str; 3] = [PrayerForm::Private.as_str(), PrayerForm::Deacon.as_str(), PrayerForm::Priest.as_str()];
+
+    pub const fn as_str(self) -> &'static str {
         match self {
             PrayerForm::Private => "private",
             PrayerForm::Deacon => "deacon",
@@ -435,6 +534,15 @@ impl PrayerForm {
             PrayerForm::Priest => "Priest",
         }
     }
+
+    /// The hour's chooser offers the form in these words.
+    pub fn phrase(self) -> &'static str {
+        match self {
+            PrayerForm::Private => "Praying privately",
+            PrayerForm::Deacon => "With others, led by a deacon",
+            PrayerForm::Priest => "With others, led by a priest",
+        }
+    }
 }
 
 /// A composed hour ready for rendering.
@@ -450,6 +558,15 @@ pub struct OfficeHour {
     /// at its I Vespers), or none on a feria.
     pub rank: Option<Rank>,
     pub color: Option<Color>,
+    /// Paschaltide at this hour: Eastertide, and the Octave of Pentecost through None of its
+    /// Saturday, while Regina caeli and the paschal alleluias are sung. The gilding keeps its
+    /// warm paschal leaf exactly as long (`presentation::gilding_class`).
+    pub paschaltide: bool,
+    /// An hour stripped of its furniture: the Triduum's form (Maundy Thursday's Lauds through
+    /// Holy Saturday's None), and the Office of the Dead. No opening, hymn, chapter or Gloria
+    /// Patri, so the page takes off its leaf too: no gilt initials, no sun or moon in the
+    /// headpiece, no festal frame (`presentation::rank_class`).
+    pub bare: bool,
     pub sections: Vec<OfficeSection>,
     pub decisions: Vec<Decision>,
 }
@@ -457,6 +574,24 @@ pub struct OfficeHour {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_score_names_its_mode_in_roman_numerals() {
+        let score = |header: &str| ChantScore { gabc: format!("name: t;\n{header}%%\n(c4) A(g) (::)").into(), sets: ScoreSpan::Antiphon };
+        assert_eq!(score("mode: 1;\n").mode_figure(), Some("I"));
+        assert_eq!(score("mode: 8;\n").mode_figure(), Some("VIII"));
+        assert_eq!(score("mode: vi;\n").mode_figure(), Some("VI"));
+        assert_eq!(score("mode: 9;\n").mode_figure(), None);
+        assert_eq!(score("").mode_figure(), None);
+        // The opening score carries it as the engine's annotation, over the initial.
+        let s = score("mode: 8;\n");
+        assert_eq!(s.with_mode_figure(&s.gabc), "name: t;\nmode: 8;\nannotation: VIII;\n%%\n(c4) A(g) (::)");
+        // A score without a mode, or one that writes its own annotation, stands as written.
+        let none = score("");
+        assert_eq!(none.with_mode_figure(&none.gabc), &*none.gabc);
+        let own = score("mode: 1;\nannotation: Hymn;\n");
+        assert_eq!(own.with_mode_figure(&own.gabc), &*own.gabc);
+    }
 
     #[test]
     fn a_psalm_label_parts_its_word_from_its_numbers() {

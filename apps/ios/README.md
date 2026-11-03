@@ -15,8 +15,11 @@ native text, screen for screen:
   and hymns a centred column.
 - **The ordo**: the month under its pinned heading (the wide table on an iPad), each day's
   office details (its commemorations and office digest), and the year's Tabula Temporaria.
-- **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
-  and offers "Remind me in 10 min".
+- **Reminders**: local notifications with the bell. Each names its hour and time ("Vespers ·
+  6:00 PM", as Android's) and the day's feast, offers "Remind me in 10 min", and clears an hour
+  after its office begins.
+- **Icon shortcuts**: long-pressing the app's icon offers Lauds, Vespers, Compline and this
+  month's ordo, with the web's glyphs, as Android's launcher shortcuts do (`Shortcuts.swift`).
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
@@ -37,8 +40,8 @@ The Office's text is set with TextKit (`Prose.swift`), not SwiftUI's `Text`:
 - an initial runs two lines deep beside the text, or stands raised when the text is short.
 
 iOS keeps at most 64 pending notifications for an app, so reminders are scheduled as far ahead
-as fit, up to four weeks. Every visit, and a background refresh about twice a day, move the
-schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
+as fit, up to four weeks. Every visit, each reminder answered or shown while the app is open, a
+change of time zone or clock, and a background refresh about twice a day, move the schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
 (`apps/android/tools/bake-bell.py`).
 
 ## Usage counts
@@ -63,6 +66,9 @@ open apps/ios/Office.xcodeproj
 `build-core.sh` builds the Rust core as a static library for iPhone and the simulator, bundles
 them as `build/OfficeCore.xcframework`, and generates the UniFFI bindings,
 `build/generated/office_mobile.swift`, from the host library as Android's Kotlin is generated.
+The same library carries neuma's chant engraving; its bindings (`build/generated/Neuma.swift`)
+build as their own `Neuma` module, imported only by `Score.swift`, since its `Page` and `Item`
+would otherwise meet the app's own names.
 `project.yml` is the XcodeGen spec; the `.xcodeproj` is generated, not checked in. The app
 shares the web's faces with the Android app (`apps/android/app/src/main/res/font/`).
 
@@ -75,13 +81,18 @@ Each page is shot on an iPhone and an iPad, in both themes.
 The screenshots come from launch arguments:
 
 - `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
-  `home`, `ordo`, `year`, `reminders` or `about`;
+  `home`, `ordo`, `year`, `reminders` or `about`, and `find` (with `-query benedict`) or `feast`
+  (with `-feast st-benedict`);
 - `-today` fixes today;
 - `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
-- `-anchor hymn` or `-anchor psalm` scrolls an hour to its first hymn or psalm.
+- `-anchor hymn`, `-anchor psalm` or `-anchor score` scrolls an hour to its first hymn, psalm or
+  chant notation (with `-chant YES`).
 
 The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to
 the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
+
+A manual run with **store** ticked takes the same pages at the sizes App Store Connect asks for,
+on a 6.9-inch iPhone and a 13-inch iPad, and publishes them to `ci/ios-screenshots/<branch>-store`.
 
 ## Signing
 
@@ -105,7 +116,7 @@ version through without, so only a release should raise `MARKETING_VERSION`. Bui
 Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
 needs a Mac: the certificate is made with `openssl`, the rest on the web.
 
-1. **The app.** Under the organization's Apple Developer account, add the App ID
+1. **The app.** Under the Apple Developer account, add the App ID
    `org.orthodoxwest.office` (Certificates, Identifiers & Profiles → Identifiers; no
    capabilities). In App Store Connect, add a new iOS app with that bundle ID. Its store name
    must be unique across the App Store, so it may need to differ from the home-screen name
@@ -116,7 +127,7 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
 
    ```bash
    openssl req -new -newkey rsa:2048 -nodes -keyout dist.key -out dist.csr \
-     -subj "/emailAddress=you@example.org/CN=Organization Name/C=US"
+     -subj "/emailAddress=you@example.org/CN=Your Name/C=US"
    openssl x509 -inform der -in distribution.cer -out dist.pem
    openssl pkcs12 -export -legacy -inkey dist.key -in dist.pem -out dist.p12
    ```
@@ -137,10 +148,38 @@ needs a Mac: the certificate is made with `openssl`, the rest on the web.
    | `ASC_KEY` | the `.p8` file's contents |
 
    The team ID is read from the profile. Keep `dist.key` and the `.p8` out of the repository.
-6. **TestFlight.** In the app's TestFlight tab, fill in Test Information (the beta review's
-   contact and a feedback email), add an external group named `Testers`, and turn on its
-   public link. Run the workflow from the Actions tab, or push to `master`; once Apple has
+6. **TestFlight.** In the app's TestFlight tab, fill in Test Information: the Beta App
+   Description, a feedback email, and the beta review contact's name, phone and email. Beta
+   review refuses a build without them. Run the workflow from the Actions tab on `master`, or
+   push to `master`. App Store Connect offers external groups only once a build exists, so after
+   the first upload add an external group named `Testers`, add that build to it by hand, and
+   turn on its public link; later builds go to the group by themselves. Once Apple has
    reviewed the first build, the link installs it.
+
+Only `master` uploads: a run from another branch archives unsigned, since a branch's commit
+count is a build number master reaches later. If a run fails after the upload (processing, or
+handing the build to the group), a re-run is refused at the upload; give the build to the group
+in App Store Connect, or with `fastlane pilot distribute --build_number N`.
 
 The certificate and profile last a year. Renew both the same way and replace the three
 secrets; the API key does not expire.
+
+## The App Store
+
+A release is a TestFlight build submitted for App Review in App Store Connect; nothing in CI
+submits one. Before the first:
+
+- **The listing** (the app's App Store tab): subtitle, description, keywords, the Reference
+  category, a support URL, and the web's privacy page as the privacy policy
+  (`https://orthodoxwestbreviary.com/privacy`).
+- **App Privacy.** One data type: *Usage Data → Product Interaction*, used for *Analytics*, not
+  linked to the user, not used for tracking (the daily usage count, above). It must agree with
+  `PrivacyInfo.xcprivacy`, the privacy manifest every upload carries.
+- **Age rating**: no to every question, which gives 4+.
+- **Screenshots**: a manual run of the iOS workflow with **store** ticked (above).
+- **Pricing and availability**: free, in the countries chosen.
+
+Then pick the build in the version's Build section and submit it. Once a version is on sale,
+App Store Connect refuses further uploads under it, so raise `MARKETING_VERSION` (1.0.0 to
+1.0.1, say) straight after a release, or TestFlight stops receiving builds.
+

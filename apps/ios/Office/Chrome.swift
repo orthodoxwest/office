@@ -4,6 +4,9 @@ import UIKit
 /// The reading measure's side gutter (`--page-gutter` on a phone).
 let gutter: CGFloat = 16
 
+/// The lines under the Martyrology and Chant rows, as the web's (`presentation`).
+private let prefHints = preferenceHints()
+
 /// Wide screens keep the web's prayer measure (`.elements`, 38rem).
 let measure: CGFloat = 608
 
@@ -107,11 +110,11 @@ struct SiteNav {
             case let .home(d), let .hour(d, _): model.open(.ordo(year: Int(d.year), month: Int(d.month), day: Int(d.day)))
             case let .ordo(y, m, _): model.open(.ordo(year: y, month: m, day: 0))
             case let .year(y): model.open(.year(y))
-            case .reminders, .about: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
+            case .reminders, .about, .find, .feast: model.open(.ordo(year: Int(model.today.year), month: Int(model.today.month), day: Int(model.today.day)))
             }
         }
         switch page {
-        case .ordo, .year: ordoCurrent = true
+        case .ordo, .year, .find, .feast: ordoCurrent = true
         default: ordoCurrent = false
         }
         onReminders = { model.open(.reminders) }
@@ -311,7 +314,8 @@ struct MenuPanel: View {
                 }
             }
             // The names are the church's, so a line says what they are, as on the web.
-            hint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+            hint(name("Nave") + Text(" is the church by day, and ") + name("Apse") + Text(" is its vault by night. ")
+                + name("Default") + Text(" follows your device."))
             HStack(spacing: 0) {
                 rowLabel("TEXT")
                 ForEach(TextSize.allCases) { s in
@@ -341,7 +345,27 @@ struct MenuPanel: View {
                 }
             }
             .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
-            hint("On reads the saints of the coming day at Prime.")
+            hint(Text(prefHints.martyrology))
+            // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+            if model.offersChant {
+                HStack(spacing: 0) {
+                    Text("CHANT").type(.label(10.56, 0.08)).foregroundStyle(p.muted)
+                        .lineLimit(1).fixedSize()
+                        .padding(.leading, m.px(10.4))
+                        .frame(width: m.px(54), alignment: .leading)
+                        .accessibilityHidden(true)
+                    Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                    ForEach([false, true], id: \.self) { on in
+                        cell(on ? "ON" : "OFF", on == model.chant, .label(12, 0.06), spoken: "Chant \(on ? "on" : "off")") {
+                            guard on != model.chant else { return }
+                            chose()
+                            model.chooseChant(on)
+                        }
+                    }
+                }
+                .overlay(alignment: .top) { Hairline(color: p.surfaceEdge) }
+                hint(Text(prefHints.chant))
+            }
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
@@ -357,12 +381,17 @@ struct MenuPanel: View {
     }
 
     /// A quiet italic line under a row whose names need saying (the web's `.pref-hint`).
-    private func hint(_ s: String) -> some View {
-        Text(s).type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
+    private func hint(_ t: Text) -> some View {
+        t.type(TextStyle(size: 12.8, line: 17.3, italic: true)).foregroundStyle(p.muted)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, m.px(10.4))
             .padding(.top, m.px(7.2))
             .padding(.bottom, m.px(9.6))
+    }
+
+    /// A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`).
+    private func name(_ s: String) -> Text {
+        Text(s).font(Font(garamond(12.8 * m.type, smallCaps: true))).tracking(0.05 * 12.8 * m.type)
     }
 
     private func rowLabel(_ s: String) -> some View {

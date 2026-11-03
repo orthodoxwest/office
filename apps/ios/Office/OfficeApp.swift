@@ -6,7 +6,8 @@ import UserNotifications
  * The Divine Office on the shared Rust core, set as the web sets it.
  *
  * Launch arguments open a page at a date, for the simulator screenshots:
- * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`, `about`;
+ * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`,
+ * `about`, `find` (`-query`), `feast` (`-feast`);
  * `-today 2026-03-15` fixes today, and `-theme apse` or `-text-size large` choose the look.
  */
 @main
@@ -22,31 +23,51 @@ struct OfficeApp: App {
     }
 }
 
-/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off.
+/// Reminders: how a tapped one opens its hour, and how "Remind me in 10 min" puts one off; and the icon's shortcuts.
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         ReminderScheduler.register(center)
         ReminderScheduler.registerRefresh()
+        // A new zone or a clock set moves the sun's times and the day: the reminders follow at
+        // once, as Android's do on TIMEZONE_CHANGED and TIME_SET.
+        let changes: [Notification.Name] = [UIApplication.significantTimeChangeNotification, .NSSystemTimeZoneDidChange]
+        for name in changes {
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in ReminderScheduler.sync() }
+        }
         return true
+    }
+
+    /// The scene's delegate takes the icon's shortcuts (Shortcuts.swift); SwiftUI keeps the window.
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: nil, sessionRole: session.role)
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let info = response.notification.request.content.userInfo
+        // Each reminder answered moves the schedule on, so one prayed from its notifications
+        // without opening the app keeps ringing (Android refills from each reminder as it fires).
         if response.actionIdentifier == ReminderScheduler.snoozeAction {
-            ReminderScheduler.snooze(response.notification)
-        } else if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
-                  let hour = info["hour"] as? String,
-                  let date = (info["date"] as? String).flatMap(CivilDate.parse) {
+            // The app may be suspended once the handler is called: the snooze is added first.
+            ReminderScheduler.snooze(response.notification) { ReminderScheduler.sync(done: completionHandler) }
+            return
+        }
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+           let hour = info["hour"] as? String,
+           let date = (info["date"] as? String).flatMap(CivilDate.parse) {
+            AppModel.shared.openedExternally = true
             DispatchQueue.main.async { AppModel.shared.open(.hour(date, hour)) }
         }
-        completionHandler()
+        ReminderScheduler.sync(done: completionHandler)
     }
 
     // A reminder that comes while the app is open still rings and shows.
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .list, .sound])
+        ReminderScheduler.sync()
     }
 }
 
@@ -67,8 +88,10 @@ struct RootView: View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
         let visit = Visit(
             page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
-            martyrology: model.martyrologyShown(on: model.page)
+            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page)
         )
+        // The header's measures scale with the reader's text, so the panels under it do too.
+        let m = Metrics(textSize: model.textSize, dynamicType: dynamicType)
         GeometryReader { geo in
             NavigationStack(path: $model.path) {
                 HomePage(date: model.root)
@@ -81,8 +104,12 @@ struct RootView: View {
                         Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.menuOpen = false }
                             .accessibilityHidden(true)
                         MenuPanel()
-                            .padding(.top, 52)
-                            .padding(.horizontal, gutter)
+                            .padding(.top, m.px(52))
+                            .padding(.horizontal, m.px(gutter))
+                            // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
+                            .accessibilityElement(children: .contain)
+                            .accessibilityAddTraits(.isModal)
+                            .accessibilityAction(.escape) { model.menuOpen = false }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
@@ -92,8 +119,11 @@ struct RootView: View {
                             .accessibilityHidden(true)
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         MenuPanel(prefsOnly: true)
-                            .padding(.top, 52)
-                            .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
+                            .padding(.top, m.px(52))
+                            .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
+                            .accessibilityElement(children: .contain)
+                            .accessibilityAddTraits(.isModal)
+                            .accessibilityAction(.escape) { model.settingsOpen = false }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
@@ -106,22 +136,22 @@ struct RootView: View {
         .environment(\.palette, palette)
         // The page's season for the chrome over it (the menu); a home or an hour sets its own within.
         .environment(\.ornament, Ornament.of(palette, season: model.season))
-        .environment(\.metrics, Metrics(textSize: model.textSize, dynamicType: dynamicType))
+        .environment(\.metrics, m)
         .background(palette.bg.ignoresSafeArea())
         .tint(palette.accent)
         .preferredColorScheme(model.theme.scheme)
         .onAppear {
             guard !started else { return }
             started = true
-            if !model.openFromLaunch() && !wayBack.isEmpty { model.restore(wayBack) }
+            if !model.openFromLaunch() && !model.openedExternally && !wayBack.isEmpty { model.restore(wayBack) }
         }
         .onChange(of: model.saved) { _, saved in wayBack = saved }
         // The page shown counts in the day's usage whenever it, how it is read (Prime's
-        // Martyrology included), or the day changes while the app is in front; each once a day
+        // Martyrology and an hour's chant notation included), or the day changes while the app is in front; each once a day
         // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
             guard v.active, let event = v.page.usageEvent else { return }
-            Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology)
+            Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant)
         }
         .onReceive(minute) { _ in
             if phase == .active { model.refreshToday() }
@@ -154,6 +184,8 @@ private struct EntryPage: View {
         case let .year(y)?: YearPage(year: y)
         case .reminders?: RemindersPage()
         case .about?: AboutPage()
+        case let .find(q)?: FindPage(query: q)
+        case let .feast(id)?: FeastPage(id: id)
         // Gone from the way back, while the stack lets it go.
         case nil: Color.clear
         }
@@ -169,6 +201,8 @@ private struct Visit: Equatable {
     let active: Bool
     /// At Prime, whether its Martyrology was shown, once composed.
     let martyrology: Bool?
+    /// On an hour with a score, whether its notation was shown, once composed.
+    let chant: Bool?
 }
 
 /// The pages hide the navigation bar, as the web has none; the edge swipe back stays.

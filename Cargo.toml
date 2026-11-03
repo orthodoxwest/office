@@ -4,7 +4,7 @@ members = ["crates/data-format", "crates/calendar", "crates/corpus", "crates/lit
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.94"
+rust-version = "1.95"
 publish = false
 
 [workspace.dependencies]
@@ -25,13 +25,17 @@ serde_json = "1"
 regex = "1.13"
 sha2 = "0.11"
 serde = { version = "1", features = ["derive", "rc"] }
-minijinja = "2"
+minijinja = { version = "3", features = ["serde"] }
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal"] }
-rusqlite = { version = "0.40", features = ["bundled"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 uniffi = "0.32"
 miniz_oxide = "0.9"
+# Chant engraving (square notation from GABC); the mobile crate is its UniFFI layer, linked into
+# mobile-ffi's one native library. Pinned to a commit: bump it deliberately.
+neuma = { git = "https://github.com/orthodoxwest/neuma", rev = "41f1f59ba85a3cf183cfbd0ada078636812e2594", default-features = false, features = ["svg", "font-google"] }
+neuma-mobile = { git = "https://github.com/orthodoxwest/neuma", rev = "41f1f59ba85a3cf183cfbd0ada078636812e2594" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

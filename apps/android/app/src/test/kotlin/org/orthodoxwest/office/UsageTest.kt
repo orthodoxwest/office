@@ -76,6 +76,22 @@ class UsageTest {
     }
 
     @Test
+    fun anHourWithAScoreSaysWhetherItsNotationWasShown() {
+        val usage = usage()
+        usage.record(UsageEvent.Hour(today, "compline"), dark = false, form = "private", chant = false)
+        usage.record(UsageEvent.Hour(today, "compline"), dark = false, form = "private", chant = true)
+        usage.record(UsageEvent.Home(today), dark = false, form = "private", chant = true)
+        assertEquals(
+            listOf(
+                "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:android",
+                "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:android",
+                "site appearance:nave screen:mobile visit:first client:android",
+            ),
+            posted.map { it.second },
+        )
+    }
+
+    @Test
     fun theArchiveIsNotCounted() {
         val usage = usage()
         usage.record(UsageEvent.Hour(CivilDate(2019, 3, 4), "lauds"), dark = false, form = "private")

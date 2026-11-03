@@ -4,18 +4,16 @@ import UIKit
 
 /**
  * Whether an hour's prayers before or after the Office open, as the web's `office-prayers-open`:
- * the hour's default (Lauds, Prime and Vespers open, the other hours' closed) until the reader
+ * the core's default for the hour (Lauds, Prime and Vespers open, the rest closed) until the reader
  * opens or closes them, then that choice, kept on this device for the hour's section
  * ("sext/Prayers Before the Office"). A section a day leaves out (the Triduum's prayers after the
  * Office) keeps its choice for when it returns.
  */
 private enum SessionPrayers {
-    private static let openByDefault: Set<String> = ["lauds", "prime", "vespers"]
-
     private static func key(_ hour: String, _ label: String) -> String { "prayers-open.\(hour)/\(label)" }
 
     static func opens(_ hour: String, _ label: String) -> Bool {
-        UserDefaults.standard.object(forKey: key(hour, label)) as? Bool ?? openByDefault.contains(hour)
+        UserDefaults.standard.object(forKey: key(hour, label)) as? Bool ?? prayersOpenByDefault(hour: hour)
     }
 
     static func choose(_ hour: String, _ label: String, open: Bool) {
@@ -118,19 +116,21 @@ struct HourPage: View {
     var body: some View {
         let form = model.form
         let martyrology = model.martyrology
-        let composition = "\(form) \(martyrology)"
-        // Another prayer form, or the Martyrology turned on or off, is the same page composed
-        // again: the reader keeps their place and the sections they opened.
+        let chant = model.chant
+        let composition = "\(form) \(martyrology) \(chant)"
+        // Another prayer form, or the Martyrology or Chant turned on or off, is the same page
+        // composed again: the reader keeps their place and the sections they opened.
         Loaded(key: "\(date.iso) \(hour) \(composition)", place: "\(date.iso) \(hour)", motion: model.motion(to: .hour(date, hour))) { () throws -> ComposedHour in
-            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology)
+            let view = try Office.core.get().compose(hour: hour, year: date.year, month: date.month, day: date.day, form: form, martyrology: martyrology, chant: chant)
             return ComposedHour(view: view, composition: composition)
         } content: { (composed: ComposedHour) in
             let view = composed.view
             HourScreen(view: view, date: date, composition: composed.composition)
                 // Reported whenever the page comes forward (an earlier Prime gone back to
-                // included), and again when its Martyrology is turned on or off.
+                // included), and again when its Martyrology or Chant is turned on or off.
                 .onAppear { model.composed(view, page: .hour(date, hour)) }
                 .onChange(of: view.martyrology) { model.composed(view, page: .hour(date, hour)) }
+                .onChange(of: view.chant) { model.composed(view, page: .hour(date, hour)) }
                 .onChange(of: view.ornament, initial: true) { _, season in model.composed(season: season, page: .hour(date, hour)) }
         }
         .background(PlasterWall())
@@ -154,12 +154,12 @@ private struct ComposedHour {
  * kind, marker and words, and which of the blocks so made in that section it is.
  */
 private enum Row: Identifiable {
-    case toggle(section: String, label: String, open: Bool)
-    case block(BlockAt, BlockView, id: String, gap: CGFloat, cross: Bool)
+    case toggle(section: String, label: String, open: Bool, atTop: Bool)
+    case block(BlockAt, BlockView, id: String, space: Space, cross: Bool)
 
     var id: String {
         switch self {
-        case let .toggle(key, _, _): return "toggle \(key)"
+        case let .toggle(key, _, _, _): return "toggle \(key)"
         case let .block(_, _, id, _, _): return id
         }
     }
@@ -228,17 +228,31 @@ struct HourScreen: View {
 
     var body: some View {
         let p = self.p.seasoned(view.ornament)
-        let o = Ornament.of(p, season: view.ornament)
+        // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
+        // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
+        let o: Ornament = {
+            var o = Ornament.of(p, season: view.ornament)
+            if view.bare { o.cap = p.muted }
+            return o
+        }()
+        // A bare section in a gilt hour (Vespers of the Dead after Vespers of the day, the eve of
+        // All Souls) sets its capitals in the same muted ink, as the web's `section-bare`.
+        let bareO: Ornament = {
+            var b = o
+            b.cap = p.muted
+            return b
+        }()
         // From 920pt the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
-        // keep their type. Only `type` steps, so the office's own spacing stands.
+        // keep their type. `type` carries the step, and the hour's rhythm, set in body lines, grows with it
+        // (the web's `--line: 1.6em`).
         let prayer: Metrics = {
             var scaled = m
             if width >= m.px(widePrayerFrom) { scaled.type *= widePrayerStep }
             return scaled
         }()
         let columns = hymnColumns(view.sections, p, o, prayer)
-        let index = model.hours.firstIndex(of: view.hour) ?? 0
+        let index = model.hours.firstIndex(of: view.hour) ?? -1
         let rows = self.rows
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
@@ -246,7 +260,7 @@ struct HourScreen: View {
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    Rectangle().fill(bandColor(view.color)).frame(height: 3).accessibilityHidden(true)
+                    Rectangle().fill(bandColor(view.color, p)).frame(height: 3).accessibilityHidden(true)
                     SiteHeader()
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                     HourTitle(view: view, date: date, pageWidth: width)
@@ -254,7 +268,7 @@ struct HourScreen: View {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { n, row in
                         Group {
                             switch row {
-                            case let .toggle(key, label, expanded):
+                            case let .toggle(key, label, expanded, atTop):
                                 Button {
                                     withAnimation(unfolding) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
@@ -269,19 +283,22 @@ struct HourScreen: View {
                                 .buttonStyle(Quiet())
                                 .accessibilityAddTraits(.isHeader)
                                 .accessibilityValue(expanded ? "Expanded" : "Collapsed")
-                                .padding(.top, m.px(5.6))
-                                .padding(.bottom, expanded ? m.px(12.8) : 0)
+                                // A section's label stands as a part's heading does: a section's
+                                // space above it, unless it opens the hour, and a bind's below.
+                                .padding(.top, atTop ? 0 : prayer.space(.section))
+                                .padding(.bottom, expanded ? prayer.space(.bind) : 0)
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
-                            case let .block(at, block, _, gap, cross):
+                            case let .block(at, block, _, space, cross):
                                 VStack(spacing: 0) {
                                     if cross {
-                                        PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, m.px(11.2))
+                                        PaintedMark(.cross, size: m.px(9.92), color: p.lining).padding(.bottom, prayer.space(.bind))
                                     }
                                     BlockRow(block: block, column: columns[at])
+                                        .environment(\.ornament, view.sections[at.section].bare ? bareO : o)
                                 }
-                                .padding(.top, m.px(gap))
+                                .padding(.top, prayer.space(space))
                                 .measured(m)
                                 .padding(.horizontal, inset)
                                 .environment(\.metrics, prayer)
@@ -291,11 +308,13 @@ struct HourScreen: View {
                     }
                     Epilogue(
                         previous: index > 0 ? model.hours[index - 1] : nil,
-                        next: index + 1 < model.hours.count ? model.hours[index + 1] : nil,
+                        next: index >= 0 && index + 1 < model.hours.count ? model.hours[index + 1] : nil,
                         // Compline's next is the morrow's Lauds, as on the web.
-                        morrow: index + 1 == model.hours.count ? model.hours.first : nil,
+                        morrow: index >= 0 && index + 1 == model.hours.count ? model.hours.first : nil,
                         reportUrl: view.reportUrl,
-                        date: date
+                        date: date,
+                        // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
+                        lit: !(view.bare && view.ornament == "passiontide")
                     )
                     .read(Reading.ending, at: rows.count, into: reading)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { epilogueHeight = $0 }
@@ -317,6 +336,7 @@ struct HourScreen: View {
             // the web's prayer form keeps the first element on screen in its place.
             .onChange(of: model.form) { hold() }
             .onChange(of: model.martyrology) { hold() }
+            .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
@@ -376,6 +396,7 @@ struct HourScreen: View {
             switch asked {
             case "hymn": return block.kind == .stanza
             case "psalm": return block.kind == .verse && block.dropCap
+            case "score": return block.kind == .score
             default: return false
             }
         }
@@ -417,28 +438,35 @@ struct HourScreen: View {
         var out: [Row] = []
         var prev: BlockView?
         var afterClosed = false
+        var afterOpen = false
         for ((i, section), key) in zip(view.sections.enumerated(), sectionKeys(view.sections)) {
             if section.collapsible {
                 // A section new to this form opens as the hour's sections open.
                 let expanded = open[key] ?? SessionPrayers.opens(view.hour, section.label)
-                out.append(.toggle(section: key, label: section.label, open: expanded))
+                out.append(.toggle(section: key, label: section.label, open: expanded, atTop: out.isEmpty))
                 prev = nil
                 afterClosed = !expanded
+                afterOpen = expanded
                 if !expanded { continue }
             }
             // How many blocks of each make this section has had, so that two alike differ.
             var made: [String: Int] = [:]
             for (j, block) in section.blocks.enumerated() {
                 let heading = block.kind == .heading
-                let gap: CGFloat
+                let space: Space
                 if prev != nil {
-                    gap = gapBefore(prev, block)
+                    space = block.space
                 } else if afterClosed {
-                    gap = heading ? 23.2 : 14
+                    // Under a closed section's label: its own space, at most a group's.
+                    space = spaceLines(space: block.space) < spaceLines(space: .group) ? block.space : .group
+                } else if afterOpen {
+                    // An open section's label holds the space below itself.
+                    space = .none
                 } else {
-                    gap = heading ? 12 : 0
+                    space = heading ? .bind : .none
                 }
                 afterClosed = false
+                afterOpen = false
                 // Between the office's parts, one small painted cross: before each heading of the
                 // office's own (the web's `.elements > .section-heading`), the Hymn's and the
                 // Chapter's included, but the page's first.
@@ -446,7 +474,7 @@ struct HourScreen: View {
                 let make = "\(key)|\(block.kind)|\(block.marker)|\(block.runs.map(\.text).joined())"
                 let n = made[make, default: 0]
                 made[make] = n + 1
-                out.append(.block(BlockAt(section: i, block: j), block, id: "\(make)#\(n)", gap: gap, cross: part && !out.isEmpty))
+                out.append(.block(BlockAt(section: i, block: j), block, id: "\(make)#\(n)", space: space, cross: part && !out.isEmpty))
                 prev = block
             }
         }
@@ -574,7 +602,9 @@ private let frameClear: CGFloat = measure + 80
 /**
  * The gold hairline across the top, in the season's ornament gold. The band scrolls away with
  * the page here, so the line runs along the screen's top edge, above the status bar: just below
- * it the line would strike through the text passing under the bar.
+ * it the line would strike through the text passing under the bar. On a screen with rounded
+ * corners it runs between them, so its first and last stretches are not lost behind the curve
+ * (as the Android app's, which reads the corners from the system).
  */
 private struct ProgressHairline: View {
     let reading: Reading
@@ -582,7 +612,9 @@ private struct ProgressHairline: View {
 
     var body: some View {
         GeometryReader { geo in
-            Rectangle().fill(o.flat).frame(width: geo.size.width * reading.ratio)
+            let clear = cornerReach(at: 1)
+            let span = max(0, geo.size.width - 2 * clear)
+            Rectangle().fill(o.flat).frame(width: span * reading.ratio).offset(x: span > 0 ? clear : 0)
         }
         .frame(height: 2)
         .allowsHitTesting(false)
@@ -590,6 +622,22 @@ private struct ProgressHairline: View {
         .accessibilityLabel("Progress through the prayer text")
         .accessibilityValue("\(Int((reading.ratio * 100).rounded())) percent")
     }
+}
+
+/**
+ * How far in from each side a screen's rounded top corner reaches, `y` points below its top edge.
+ * iOS does not give the corners' radius, but on every iPhone and iPad with rounded corners it is
+ * close to the deepest of the window's safe-area insets (the status bar's in portrait, the
+ * sensor housing's in landscape), from 39pt to 62pt on a phone; a screen whose insets are no
+ * deeper than the old 20pt status bar has square corners.
+ */
+@MainActor
+private func cornerReach(at y: CGFloat) -> CGFloat {
+    let window = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first?.windows.first
+    guard let insets = window?.safeAreaInsets else { return 0 }
+    let r = max(insets.top, insets.left, insets.right)
+    guard r > 20, y < r else { return 0 }
+    return r - (r * r - (r - y) * (r - y)).squareRoot()
 }
 
 /// The hour's title, framed; the day; and the date and prayer-form controls.
@@ -619,9 +667,14 @@ private struct HourTitle: View {
                 // day's colour reaches the lower one's lozenge.
                 // One height whatever the sign (the web's 1.05rem headpiece), so the title stands
                 // at the same place on every hour.
+                // A bare hour's headpiece carries no sun or moon, and the rule closes over the
+                // place where it stood; the little hours keep their cross, the one sign that is
+                // not an image.
+                let sign = HourSign(hour: view.hour)
+                let signless = view.bare && sign != .cross
                 ZStack {
-                    DoubleRule(gap: 40, heavy: true)
-                    TitleSign(sign: HourSign(hour: view.hour))
+                    DoubleRule(gap: signless ? 0 : 40, heavy: true)
+                    if !signless { TitleSign(sign: sign) }
                 }
                 .frame(height: m.px(16.8))
                 Text(title).type(style).foregroundStyle(p.text)
@@ -774,6 +827,8 @@ private struct Epilogue: View {
     let morrow: String?
     let reportUrl: String
     let date: CivilDate
+    /// Whether the vault keeps its stars; a veiled bare hour's does not.
+    var lit: Bool = true
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -822,7 +877,7 @@ private struct Epilogue: View {
                 .padding(.top, m.px(4.8))
             }
             .background(
-                WallField(seam: air) { h, dark in
+                WallField(seam: air, lit: lit) { h, dark in
                     let seam = air / h
                     return dark
                         ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]

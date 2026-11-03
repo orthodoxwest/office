@@ -62,7 +62,7 @@ jobs:
         run: echo "version=0.1.$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.94.1
+        uses: dtolnay/rust-toolchain@1.99.1
         with:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 

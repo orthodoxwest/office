@@ -36,7 +36,7 @@ pub fn compose_minor_hour(
             }
             append_hour_element(&mut elems, day, &hour_name, elem, t);
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     hour
 }

@@ -23,7 +23,7 @@
     </p>
 {% endmacro %}
 
-{# Appearance, text-size and Martyrology preferences. Rendered twice by layout.html (the
+{# Appearance, text-size, Martyrology and Chant preferences. Rendered twice by layout.html (the
    header's Settings panel on wide screens, the foot of the site menu on
    phones); CSS shows one copy per width and app.js keeps every copy's
    aria-pressed in sync. The group aria-labels carry the names; the visible
@@ -34,8 +34,9 @@
   <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
   <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
   <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
-  {# The names are the church's, so a line says what they are: a phone shows no titles. #}
-  <p class="pref-hint">Nave is the church by day, Apse its vault by night. Default follows your device.</p>
+  {# The names are the church's, so a line says what they are: a phone shows no titles.
+     It sets them in small caps, as the buttons are set in capitals. #}
+  <p class="pref-hint"><span class="pref-name">Nave</span> is the church by day, and <span class="pref-name">Apse</span> is its vault by night. <span class="pref-name">Default</span> follows your device.</p>
 </div>
 {# Glyphs carry the meaning visually; aria-label/title carry the words. #}
 <div class="text-size-switch" role="group" aria-label="Text size">
@@ -50,6 +51,34 @@
   <span class="pref-label" aria-hidden="true">Martyrology</span>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="off" title="Prime gives the rubric for the Martyrology" aria-pressed="false">Off</button>
   <button type="button" class="theme-option martyrology-option" data-martyrology-choice="on" title="Read the Martyrology at Prime" aria-pressed="false">On</button>
-  <p class="pref-hint">On reads the saints of the coming day at Prime.</p>
+  <p class="pref-hint">{{ martyrology_hint }}</p>
 </div>
+{# Chant notation for the hymn's tune and the Marian antiphon, where a score is available; off by
+   default, and kept out of sight until the data holds a score (office::chant::offers_chant). #}
+{% if chant %}
+<div class="chant-switch" role="group" aria-label="Chant">
+  <span class="pref-label" aria-hidden="true">Chant</span>
+  <button type="button" class="theme-option chant-option" data-chant-choice="off" title="Hymns and antiphons as text" aria-pressed="false">Off</button>
+  <button type="button" class="theme-option chant-option" data-chant-choice="on" title="Show chant notation" aria-pressed="false">On</button>
+  <p class="pref-hint">{{ chant_hint }}</p>
+</div>
+{% endif %}
+{% endmacro %}
+{# The ordo's search for a feast by name: a plain form, so it works without script. `focus`
+   puts the cursor in it on the search page itself. #}
+{% macro feast_search(query="", focus=false) %}
+<form class="find-field" action="/calendar/find" method="get" role="search">
+  <svg class="find-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6 17 17"/></svg>
+  <label class="sr-only" for="find-q">{{ feast_words.find_prompt }}</label>
+  <input id="find-q" type="search" name="q" value="{{ query }}" placeholder="{{ feast_words.find_prompt }}" autocomplete="off" spellcheck="false" enterkeyhint="search"{% if focus and not query %} autofocus{% endif %}>
+  <button class="find-submit" type="submit">Find</button>
+</form>
+{% endmacro %}
+{# A feast's keeping year by year, each row leading to that day. A row kept as the feast usually
+   is leaves its status unsaid but for a screen reader (the feast page's rows; the search's say every
+   status). #}
+{% macro feast_years(years) %}
+<ol class="find-years">
+  {% for y in years %}<li>{% if y.href %}<a class="find-year day-color-{{ y.color }}" href="{{ y.href|url }}">{% else %}<span class="find-year day-color-{{ y.color }}">{% endif %}<span class="find-year-num">{{ y.year }}</span><span class="find-year-date">{{ y.date }}</span>{% if y.usual %}<span class="sr-only">{{ y.label }}</span>{% endif %}{% if not y.usual or y.note %}<span class="find-year-status is-{{ y.class }}">{% if not y.usual %}<b>{{ y.label }}</b>{% endif %}{% if y.note %}<span class="find-year-note">{{ y.note|typeset }}</span>{% endif %}</span>{% endif %}{% if y.href %}<span class="find-year-go" aria-hidden="true">&rsaquo;</span></a>{% else %}</span>{% endif %}</li>{% endfor %}
+</ol>
 {% endmacro %}

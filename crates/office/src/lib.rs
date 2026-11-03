@@ -4,12 +4,14 @@
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
+pub mod chant;
 pub mod commemoration;
 pub mod compline;
 pub mod conclusion;
 pub mod concurrence;
 pub mod day;
 pub mod engine;
+pub mod feast;
 pub mod hourdef;
 pub mod hymn;
 pub mod lauds_psalmody;

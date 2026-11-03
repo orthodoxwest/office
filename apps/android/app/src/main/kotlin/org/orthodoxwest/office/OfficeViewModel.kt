@@ -23,19 +23,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
+import org.orthodoxwest.office.core.FeastPageView
+import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.UsageEvent
 import org.orthodoxwest.office.core.aboutNewcomer
 import org.orthodoxwest.office.core.hourNames
+import org.orthodoxwest.office.core.prayerFormChoices
 
-/** The prayer forms: value, the control's label, and the chooser's phrase (hour.html). */
-val PRAYER_FORMS = listOf(
-    Triple("private", "Private", "Praying privately"),
-    Triple("deacon", "Deacon", "With others, led by a deacon"),
-    Triple("priest", "Priest", "With others, led by a priest"),
-)
+/** The prayer forms: value, the control's label, and the chooser's phrase, as the web's. */
+val PRAYER_FORMS: List<Triple<String, String, String>> by lazy {
+    prayerFormChoices().map { Triple(it.value, it.label, it.phrase) }
+}
 
 /** Capitalizes an hour's name: "lauds" → "Lauds". */
 fun hourLabel(hour: String): String = hour.replaceFirstChar { it.titlecase() }
@@ -46,7 +47,7 @@ fun LocalDate.toCivil(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
  * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
- * reminders, and About the Office.
+ * reminders, About the Office, the search for a feast, and a feast's page.
  */
 sealed interface Page {
     data class Home(val date: LocalDate) : Page
@@ -55,6 +56,8 @@ sealed interface Page {
     data class Year(val year: Int) : Page
     data object Reminders : Page
     data object About : Page
+    data class Find(val query: String) : Page
+    data class Feast(val id: String) : Page
 }
 
 /** A page as saved state writes it: "hour 2026-03-15 vespers". */
@@ -65,9 +68,13 @@ fun Page.encode(): String = when (this) {
     is Page.Year -> "year $year"
     Page.Reminders -> "reminders"
     Page.About -> "about"
+    is Page.Find -> "find $query"
+    is Page.Feast -> "feast $id"
 }
 
 fun decodePage(s: String): Page? = runCatching {
+    // A query keeps its own spaces.
+    if (s.startsWith("find ")) return@runCatching Page.Find(s.removePrefix("find "))
     val f = s.split(" ")
     when (f[0]) {
         "home" -> Page.Home(LocalDate.parse(f[1]))
@@ -76,6 +83,7 @@ fun decodePage(s: String): Page? = runCatching {
         "year" -> Page.Year(f[1].toInt())
         "reminders" -> Page.Reminders
         "about" -> Page.About
+        "feast" -> Page.Feast(f[1])
         else -> null
     }
 }.getOrNull()
@@ -88,6 +96,8 @@ sealed interface Content {
     data class Home(val view: HomeView) : Content
     data class Hour(val view: HourView) : Content
     data class Ordo(val view: OrdoMonthView) : Content
+    data class Find(val view: FindView) : Content
+    data class Feast(val view: FeastPageView) : Content
 
     /** The year's frontispiece, the reminders and About, drawn from the page itself. */
     data object Drawn : Content
@@ -158,6 +168,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** Whether Prime reads the next day's Martyrology; off by default. */
     var martyrology: Boolean by mutableStateOf(prefs.getBoolean("martyrology", false))
         private set
+    /** Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default. */
+    var chant: Boolean by mutableStateOf(prefs.getBoolean("chant", false))
+        private set
+    /** Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global). */
+    var offersChant: Boolean by mutableStateOf(false)
+        private set
 
     /**
      * Each visit on the way back with its content, once composed: the page shown keeps the
@@ -194,6 +210,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /** The day the search or a feast page was last made on: their years and next keeping follow it. */
+    private var feastDay: LocalDate? = null
+
     init {
         load()
         // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
@@ -208,10 +227,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
-     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. Called
+     * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
+     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
      * every minute and on every return to the app.
      */
     fun refreshClock() {
+        feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return
         val now = LocalDateTime.now()
@@ -246,6 +267,26 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         return true
     }
 
+    /**
+     * The search's words changed: the search page takes them in place, with no move between
+     * pages, and finds again.
+     */
+    fun search(query: String) {
+        val find = page as? Page.Find ?: return
+        if (find.query == query) return
+        stack[stack.lastIndex] = Entry(entry.id, Page.Find(query))
+        saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
+        load()
+    }
+
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    fun findAgain() {
+        if (stack.size > 1 && stack[stack.lastIndex - 1].page is Page.Find) back() else open(Page.Find(""))
+    }
+
     /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
         motion = if (stack.size > 1) Motion.BACK else stepBetween(page, Page.Home(today))
@@ -275,6 +316,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         martyrology = value
         prefs.edit().putBoolean("martyrology", value).apply()
         // Prime composed with the old setting is composed again when next shown.
+        contents.keys.retainAll(setOf(entry.id))
+        load()
+    }
+
+    fun chooseChant(value: Boolean) {
+        chant = value
+        prefs.edit().putBoolean("chant", value).apply()
+        // Hours composed with the old setting are composed again when next shown.
         contents.keys.retainAll(setOf(entry.id))
         load()
     }
@@ -345,11 +394,13 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     /**
      * Counts the page shown in the day's usage (Usage.kt): whenever it, its theme, its prayer
-     * form or the Martyrology setting changes, and on every return to the app. Each is counted
+     * form, the Martyrology or the Chant setting changes, and on every return to the app. Each is counted
      * once a day.
      */
     fun countVisit() {
+        // The search and the feast pages are not counted, as on the web.
         val event = when (val shown = page) {
+            is Page.Find, is Page.Feast -> return
             is Page.Home -> UsageEvent.Home(shown.date.toCivil())
             is Page.Hour -> UsageEvent.Hour(shown.date.toCivil(), shown.hour)
             is Page.Ordo -> UsageEvent.Ordo(shown.year)
@@ -358,9 +409,10 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             // The web counts no beacon for its about page.
             Page.About -> return
         }
-        // Prime reports whether its Martyrology was shown, once the hour on screen is this page's.
+        // Prime reports whether its Martyrology was shown, and an hour with a score whether its
+        // notation was, once the hour on screen is this page's.
         val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
-        usage.record(event, dark(), form, hour?.view?.martyrology)
+        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */
@@ -381,10 +433,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
         if (visit.page is Page.Home) newcomer = aboutNewcomer(usage.daysSinceFirst())
+        feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
         loading = viewModelScope.launch {
             val content = try {
                 val office = core.await()
+                offersChant = office.offersChant()
                 when (val page = visit.page) {
                     is Page.Home -> Content.Home(
                         withContext(Dispatchers.Default) {
@@ -393,10 +447,15 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {
-                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology)
+                            office.compose(page.hour, page.date.year, page.date.monthValue, page.date.dayOfMonth, form, martyrology, chant)
                         },
                     )
                     is Page.Ordo -> Content.Ordo(withContext(Dispatchers.Default) { office.ordoMonth(page.year, page.month) })
+                    is Page.Find -> Content.Find(withContext(Dispatchers.Default) { office.findFeasts(page.query, now.year) })
+                    is Page.Feast -> Content.Feast(
+                        withContext(Dispatchers.Default) { office.feastPage(page.id, now.toLocalDate().toCivil()) }
+                            ?: throw IllegalArgumentException("No feast by that name."),
+                    )
                     // The frontispiece is arithmetic, drawn at once from the page itself.
                     is Page.Year -> Content.Drawn
                     Page.Reminders -> {

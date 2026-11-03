@@ -17,6 +17,8 @@ pub struct Chrome {
     pub season_class: String,
     /// `rank-first-class` on a first-class day's hour, which is framed; empty otherwise.
     pub rank_class: String,
+    /// A bare hour (`OfficeHour::bare`): the page takes off its leaf (`hour-bare`).
+    pub bare: bool,
     pub show_today: bool,
     /// The site's origin (`https://host`), for the absolute addresses search engines and link
     /// previews read; empty on pages with no address of their own (errors, the usage report).
@@ -51,7 +53,13 @@ pub struct HomeData {
     /// ("(Corpus Christi)") or empty (`presentation::split_alias`).
     pub feast_name: String,
     pub feast_alias: String,
+    /// The day's feast's page, or empty when it has none (a feria, a Sunday of the season).
+    pub feast_href: String,
     pub commemorations: Vec<String>,
+    /// Each commemoration's page, in the same order, or empty.
+    pub commemoration_hrefs: Vec<String>,
+    /// The feast page the reader came from, offered as the way back.
+    pub from_feast: Option<LinkRow>,
     pub color: String,
     pub season: String,
     pub octave_note: String,
@@ -72,6 +80,8 @@ pub struct LeaderForm {
     /// "private", "deacon", or "priest".
     pub form: String,
     pub label: String,
+    /// The chooser's words for the form: "Praying privately".
+    pub phrase: String,
     pub report_url: String,
 }
 
@@ -89,6 +99,7 @@ pub struct HourHeader {
 pub struct SectionView {
     pub label: String,
     pub collapsible: bool,
+    pub bare: bool,
     pub html: String,
 }
 
@@ -102,6 +113,9 @@ pub struct HourData {
     /// The single form's sections, when there are no leader forms.
     pub sections: Vec<SectionView>,
     pub hour_name: String,
+    /// Whether the prayers before and after the Office start open
+    /// ([`presentation::prayers_open_by_default`]).
+    pub prayers_open: bool,
     pub date_str: String,
     pub date_slug: String,
     pub prev_link: String,
@@ -120,6 +134,8 @@ pub struct HourData {
 pub struct CommemorationRow {
     pub name: String,
     pub incipit: String,
+    /// The commemorated feast's page, or empty.
+    pub href: String,
 }
 
 /// An observance the ordo brackets for monastics and oblates, printed under the day's office.
@@ -147,6 +163,8 @@ pub struct DayRow {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    /// Each commemoration's page, in the same order, or empty.
+    pub commemoration_hrefs: Vec<String>,
     pub monastic: Vec<MonasticRow>,
     pub benedictus_antiphon: String,
     pub magnificat_antiphon: String,
@@ -370,4 +388,100 @@ pub struct ErrorData {
     pub chrome: Chrome,
     pub title: String,
     pub message: String,
+}
+
+/// A feast's keeping in one year, as a row leading to that day.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FeastYearRow {
+    pub year: i32,
+    /// "Sat, Feb 27", or empty when the feast has no date that year.
+    pub date: String,
+    /// The day's page, or empty.
+    pub href: String,
+    /// "Kept", "Commemorated", …
+    pub label: String,
+    /// "kept", "commemorated", "monastic", "transferred", "not-kept".
+    pub class: String,
+    /// Kept as the feast usually is, so the feast page leaves the status unsaid.
+    pub usual: bool,
+    /// Why it is kept so, or empty.
+    pub note: String,
+    /// The colour of that day's office.
+    pub color: String,
+}
+
+/// A feast in the search results.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FeastResult {
+    pub name: String,
+    pub href: String,
+    pub rank: String,
+    pub rank_full: String,
+    /// "is-greater" (a greater double or above), "is-double", or empty, as the ordo marks ranks.
+    pub rank_class: String,
+    /// "February 27", or "February 27 · Monastics & Oblates only".
+    pub meta: String,
+    pub years: Vec<FeastYearRow>,
+}
+
+/// The ordo's search: a feast by name, with how it is kept this year and next.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FindData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+    pub query: String,
+    pub subtitle: String,
+    /// What was found, or empty before a search.
+    pub count: String,
+    pub results: Vec<FeastResult>,
+}
+
+/// One of a feast's texts on its page.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FeastTextRow {
+    pub label: String,
+    pub text: String,
+    pub common: bool,
+    /// A prayer, set flowing; an antiphon or versicle keeps its lines.
+    pub prayer: bool,
+}
+
+/// A labelled link.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct LinkRow {
+    pub label: String,
+    pub href: String,
+}
+
+/// The next day a feast is kept, and the way to that day's hours.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct NextKeeping {
+    pub label: String,
+    pub date: String,
+    pub href: String,
+    pub color: String,
+}
+
+/// A feast's page: its rank and date, how it is kept in the years ahead, and its texts.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FeastPageData {
+    #[serde(flatten)]
+    pub chrome: Chrome,
+    pub name: String,
+    pub subtitle: String,
+    /// "February 27", or "Its date moves from year to year".
+    pub date: String,
+    /// "Kept on" or "Commemorated on" before a date of its own; empty for a date that moves.
+    pub date_lead: String,
+    pub monastic_note: String,
+    /// For a monastic observance, the feast of the same saint everyone keeps.
+    pub kept_by_all: Option<LinkRow>,
+    pub kept_by_all_note: String,
+    pub next: Option<NextKeeping>,
+    pub years_heading: String,
+    pub years: Vec<FeastYearRow>,
+    pub texts_source: String,
+    pub texts: Vec<FeastTextRow>,
+    /// The day whose hours say these texts in full, or none.
+    pub whole_office: Option<LinkRow>,
 }

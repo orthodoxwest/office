@@ -250,12 +250,13 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
 }
 
 /// Each family's breakdown: its heading and its values' labels, in the store's value order.
-pub const TREND_LABELS: [(&str, &str, &[&str]); 7] = [
+pub const TREND_LABELS: [(&str, &str, &[&str]); 8] = [
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
     ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
     ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
     ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
+    ("chant", "Chant notation", &["On", "Off"]),
     ("visit", "New or returning", &["New", "Returning"]),
     ("new-client", "New readers by client", &["Browser", "Web app", "Android", "iOS"]),
 ];
@@ -464,13 +465,14 @@ mod tests {
             ("prayer-form:priest", 2),
             ("client:ios", 3),
             ("martyrology:hidden", 6),
+            ("chant:on", 7),
         ]
         .into_iter()
         .map(|(k, v)| (k.to_string(), v))
         .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 7);
+        assert_eq!(groups.len(), 8);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
@@ -486,9 +488,10 @@ mod tests {
                 groups[1].points[1].counts[1],
                 groups[2].points[1].counts[2],
                 groups[3].points[1].counts[3],
-                groups[4].points[1].counts[1]
+                groups[4].points[1].counts[1],
+                groups[5].points[1].counts[0]
             ),
-            (5, 8, 2, 3, 6)
+            (5, 8, 2, 3, 6, 7)
         );
     }
 

@@ -39,7 +39,7 @@ collapsible is a separate decision.
 
 The usage report's **Martyrology at Prime** breakdown (`martyrology:shown|hidden`)
 counts Prime readers on days with a reading, by whether the setting showed it;
-see README, "Usage metrics".
+see DEPLOYMENT.md, "Usage metrics".
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
 DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name and

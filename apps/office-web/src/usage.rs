@@ -610,7 +610,7 @@ mod tests {
             headers.insert("x-office-usage", "1".parse().unwrap());
             headers.insert(header::USER_AGENT, agent.parse().unwrap());
             headers.insert(header::COOKIE, format!("office-usage={id}").parse().unwrap());
-            let body = app_beacon("lauds", app, false, "priest", None, Some(true)).unwrap().into_bytes();
+            let body = app_beacon("lauds", app, false, "priest", None, Some(app == App::Ios), Some(true)).unwrap().into_bytes();
             let response = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", None, Some(body.clone()));
             assert_eq!(response.status(), StatusCode::NO_CONTENT, "{agent}");
             assert!(response.headers().get(header::SET_COOKIE).is_none(), "{agent} was given a cookie");
@@ -629,6 +629,8 @@ mod tests {
             ("screen:mobile", 2),
             ("prayer-form:priest", 2),
             ("visit:first", 2),
+            ("chant:on", 1),
+            ("chant:off", 1),
             ("new-client:android", 1),
             ("new-client:ios", 1),
         ] {

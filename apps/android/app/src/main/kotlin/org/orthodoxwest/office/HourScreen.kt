@@ -2,7 +2,10 @@ package org.orthodoxwest.office
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.view.RoundedCorner
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -77,8 +80,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.WeakHashMap
+import kotlin.math.max
+import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
+import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.blockWords
 
@@ -142,37 +148,51 @@ fun HourScreen(
         }
     }
     PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
+    // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
+    // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
+    val gilding = LocalOrnament.current
+    // A bare section in a gilt hour (Vespers of the Dead after Vespers of the day, the eve of All
+    // Souls) sets its capitals in the same muted ink, as the web's `section-bare`.
+    val bareGilding = gilding.copy(cap = p.muted)
+    CompositionLocalProvider(LocalOrnament provides if (view.bare) bareGilding else gilding) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
         val inset = if (view.firstClass && maxWidth < FrameClear) FrameInset else 0.dp
         // From 920dp the prayer's text is a step larger, 21px for 20 (the web's `.elements` from
         // 920px, where it read a touch small on a laptop); the header, the title and the epilogue
-        // keep their type. sp carries the step, so the office's own spacing in dp stands.
+        // keep their type. sp carries the step, and the hour's rhythm, set in body lines, grows with it
+        // (the web's `--line: 1.6em`).
         val base = LocalDensity.current
         val wide = maxWidth >= WidePrayerFrom
         val prayer = remember(base, wide) { if (wide) Density(base.density, base.fontScale * WidePrayerStep) else base }
         val columns = hymnColumns(view.sections, prayer)
+        // The unit of the office's rhythm: the body line at the prayer's size.
+        val line = prayer.bodyLine()
         LazyColumn(
             Modifier.fillMaxSize().firstClassFrame(view.firstClass, listState, p.lining),
             state = listState,
             contentPadding = PaddingValues(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color))) }
+            item(key = "band") { Box(Modifier.fillMaxWidth().height(3.dp).background(bandColor(view.color, p))) }
             item(key = "chrome") { chrome() }
             item(key = "title") { Box(Modifier.padding(horizontal = inset)) { HourTitle(view, date, today, form, onDate, onForm) } }
             // Each block's space depends on the one before it, across sections.
             var prev: BlockView? = null
             var afterClosed = false
+            var afterOpen = false
             // Whether anything of the office stands above: its first part takes no cross.
             var begun = false
             view.sections.forEachIndexed { i, section ->
                 if (section.collapsible) {
                     val expanded = open[i] == true
+                    // A section's label stands as a part's heading does: a section's space above
+                    // it, unless it opens the hour, and a bind's below.
+                    val atTop = !begun
                     item(key = "toggle-$i") {
                         CompositionLocalProvider(LocalDensity provides prayer) { Row(
-                            Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                            Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = if (atTop) 0.dp else Space.SECTION.of(line), bottom = if (expanded) Space.BIND.of(line) else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap {
                                     unfolding = true
                                     open[i] = !expanded
@@ -187,15 +207,19 @@ fun HourScreen(
                     }
                     prev = null
                     afterClosed = !expanded
+                    afterOpen = expanded
                     begun = true
                     if (!expanded) return@forEachIndexed
                 }
                 section.blocks.forEachIndexed { j, block ->
                     val heading = block.kind == BlockKind.HEADING
                     val gap = when {
-                        prev != null -> gapBefore(prev, block)
-                        afterClosed -> if (heading) 23.2.dp else 14.dp
-                        else -> if (heading) 12.dp else 0.dp
+                        prev != null -> block.space.of(line)
+                        // Under a closed section's label: its own space, at most a group's.
+                        afterClosed -> minOf(block.space.of(line), Space.GROUP.of(line))
+                        // An open section's label holds the space below itself.
+                        afterOpen -> 0.dp
+                        else -> (if (heading) Space.BIND else Space.NONE).of(line)
                     }
                     // A small painted cross before each of the office's parts after the first, as the
                     // web's `.elements > .section-heading`: a section's heading, or a heading standing
@@ -205,8 +229,10 @@ fun HourScreen(
                     val cross = part && begun
                     begun = true
                     afterClosed = false
+                    afterOpen = false
                     item(key = "$i-$j") {
-                        CompositionLocalProvider(LocalDensity provides prayer) {
+                        val sectionGilding = if (view.bare || section.bare) bareGilding else gilding
+                        CompositionLocalProvider(LocalDensity provides prayer, LocalOrnament provides sectionGilding) {
                             Block(block, Modifier.animateItem(fadeInSpec = UNFOLD_FADE, placementSpec = placement, fadeOutSpec = FOLD_FADE).measure().padding(horizontal = inset).padding(top = gap), column = columns[i to j], cross = cross)
                         }
                     }
@@ -223,6 +249,8 @@ fun HourScreen(
                     next = next,
                     nextLabel = if (morrow) "Tomorrow" else "Next hour",
                     reportUrl = view.reportUrl,
+                    // Under the veil a bare hour's vault goes dark (the Triduum; All Souls keeps its stars).
+                    lit = !(view.bare && view.ornament == "passiontide"),
                     onPrevious = { onHour(date, it) },
                     onNext = { onHour(nextDate, it) },
                     onAllHours = onAllHours,
@@ -230,6 +258,7 @@ fun HourScreen(
             }
         }
         ProgressHairline(listState)
+    }
     }
 }
 
@@ -288,10 +317,13 @@ private const val BEFORE_OFFICE = 3
  * keeps it full. The band scrolls away with the page here, so the line runs along the screen's top
  * edge, above the status bar's icons: just below them it would strike through the text passing
  * under the bar. Rows not yet laid out are taken at the average height of those that have been.
+ * On a screen with rounded corners the line runs between them, so its first and last stretches
+ * are not lost behind the curve: from the edges it read as starting only in the first psalm.
  */
 @Composable
 private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier) {
     val color = LocalOrnament.current.flat
+    val view = LocalView.current
     // Each row's height as last laid out, by index; begun again when the rows change in number
     // (a section opened or closed) or in width.
     val heights = remember { HashMap<Int, Int>() }
@@ -314,8 +346,34 @@ private fun ProgressHairline(list: LazyListState, modifier: Modifier = Modifier)
                 progressBarRangeInfo = ProgressBarRangeInfo(ratio, 0f..1f)
                 contentDescription = "Progress through the prayer text"
             }
-            .drawBehind { drawRect(color, size = size.copy(width = size.width * ratio)) },
+            .drawBehind {
+                val (left, right) = clearOfCorners(view, size.width, size.height / 2)
+                drawRect(color, Offset(left, 0f), Size((right - left) * ratio, size.height))
+            },
     )
+}
+
+/**
+ * Where a line `y` px below the window's top edge, `width` px wide, leaves the screen's top
+ * rounded corners, from its left and from its right; the whole width where the screen tells
+ * of none (before Android 12, or square corners).
+ */
+private fun clearOfCorners(view: View, width: Float, y: Float): Pair<Float, Float> {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return 0f to width
+    val insets = view.rootWindowInsets ?: return 0f to width
+    val left = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT), y)
+    val right = reach(insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT), y)
+    return if (left + right >= width) 0f to width else left to width - right
+}
+
+/** How far a top corner's arc reaches in from its edge, `y` px below the top. */
+@RequiresApi(Build.VERSION_CODES.S)
+private fun reach(corner: RoundedCorner?, y: Float): Float {
+    corner ?: return 0f
+    val above = corner.center.y - y
+    if (above <= 0f) return 0f
+    val r = corner.radius.toFloat()
+    return r - sqrt(max(0f, r * r - above * above))
 }
 
 /** How much of the office has passed the screen, from 0 to 1. */
@@ -367,9 +425,12 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             // the same place on every hour. The cross's line is taller than the box, so the sign is
             // measured whole and centred over it, as the iOS frame does: held to the box's
             // height, the Text clipped the cross's lower half.
+            // A bare hour's headpiece carries no sun or moon, and the rule closes over the place
+            // where it stood; the little hours keep their cross, the one sign that is not an image.
+            val signless = view.bare && view.hour in setOf("lauds", "vespers", "compline")
             Box(Modifier.fillMaxWidth().height(16.8.dp), contentAlignment = Alignment.Center) {
-                DoubleRule(gap = 40.dp, color = p.lining, heavy = true)
-                Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
+                DoubleRule(gap = if (signless) 0.dp else 40.dp, color = p.lining, heavy = true)
+                if (!signless) Box(Modifier.wrapContentHeight(unbounded = true)) { HourSign(view.hour) }
             }
             Text(
                 view.title.uppercase(),
@@ -432,6 +493,7 @@ private fun Epilogue(
     next: String?,
     nextLabel: String,
     reportUrl: String,
+    lit: Boolean,
     onPrevious: (String) -> Unit,
     onNext: (String) -> Unit,
     onAllHours: () -> Unit,
@@ -456,7 +518,7 @@ private fun Epilogue(
         Box(Modifier.fillMaxWidth()) {
             // The field is phased from the seam where the ending's air (3.25rem) meets the
             // footer. By night it fades in over the first rem and thins down the footer.
-            WallField(Modifier.matchParentSize(), seam = EndingAir) { dark ->
+            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = lit) { dark ->
                 val seam = EndingAir.toPx() / size.height
                 if (dark) {
                     listOf(0f to 0f, 16.dp.toPx() / size.height to 1f, seam + 0.45f * (1f - seam) to 1f, seam + 0.8f * (1f - seam) to 0.5f, 1f to 0.25f)

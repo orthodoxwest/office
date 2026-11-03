@@ -1,5 +1,14 @@
 document.documentElement.classList.add("js");
 
+// A feast's page leads back to the search; reached from one, back to that search,
+// with the words the reader typed, as the apps' back does.
+(function () {
+  var back = document.querySelector(".find-back");
+  if (!back || !document.referrer) return;
+  var from = new URL(document.referrer);
+  if (from.origin === location.origin && from.pathname === back.pathname) back.href = from.pathname + from.search;
+})();
+
 // A psalm's number and its Latin incipit share a line, a dot between them.
 // When the line cannot hold both, the incipit stands on its own line beneath
 // and the dot goes: a separator ending a line alone separates nothing. CSS
@@ -381,8 +390,8 @@ document.documentElement.classList.add("js");
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
-// also report the selected prayer form, and Prime whether its Martyrology is
-// shown. These describe how the page
+// also report the selected prayer form, Prime whether its Martyrology is
+// shown, and an hour with a score whether its notation is. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
@@ -432,7 +441,12 @@ function usageBeaconBody(scope) {
   var martyrologyToken = scope === "prime" && document.querySelector("[data-martyrology-variant]")
     ? (document.documentElement.getAttribute("data-martyrology") === "on" ? " martyrology:shown" : " martyrology:hidden")
     : "";
-  clientToken = martyrologyToken + usageVisitToken() + clientToken;
+  // An hour with a scored hymn or Marian antiphon: whether the reader's Chant
+  // setting shows the notation or the words alone.
+  var chantToken = document.body.classList.contains("page-hour") && document.querySelector('[data-chant-variant="on"]')
+    ? (document.documentElement.getAttribute("data-chant") === "on" ? " chant:on" : " chant:off")
+    : "";
+  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken;
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }
@@ -729,6 +743,44 @@ function usageBeaconBody(scope) {
       }
       // Prime's usage beacon reports what is now on the page.
       window.dispatchEvent(new Event("officemartyrologychange"));
+    });
+  });
+
+  // Chant: Off (the default) / On, offered once the data holds a score. The
+  // same contract as the Martyrology: localStorage only, so every page (and
+  // its offline copy) carries the text and the score alike; the pre-paint
+  // script in layout.html sets data-chant, and style.css shows one.
+  var CHANT_KEY = "office-chant";
+
+  var paintChantChoice = function (choice) {
+    if (choice === "on") {
+      document.documentElement.setAttribute("data-chant", "on");
+    } else {
+      document.documentElement.removeAttribute("data-chant");
+    }
+    document.querySelectorAll(".chant-option[data-chant-choice]").forEach(function (btn) {
+      btn.setAttribute("aria-pressed", btn.getAttribute("data-chant-choice") === choice ? "true" : "false");
+    });
+  };
+
+  var storedChant = null;
+  try {
+    storedChant = localStorage.getItem(CHANT_KEY);
+  } catch {
+    // Blocked storage: chant stays off.
+  }
+  paintChantChoice(storedChant === "on" ? "on" : "off");
+
+  document.querySelectorAll(".chant-option[data-chant-choice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var choice = btn.getAttribute("data-chant-choice") === "on" ? "on" : "off";
+      paintChantChoice(choice);
+      try {
+        localStorage.setItem(CHANT_KEY, choice);
+      } catch {
+        // Private mode / blocked storage — the choice still applies for this page.
+      }
+      window.dispatchEvent(new Event("officechantchange"));
     });
   });
 
@@ -1863,11 +1915,10 @@ function usageBeaconBody(scope) {
 
   // currentHourInfo returns the office most likely being prayed at the given
   // local time, plus a day offset (0 or -1) locating which calendar day it
-  // belongs to. Boundaries mirror current_hour_entry in handlers.rs: midnight-2am
+  // belongs to. Boundaries mirror presentation::current_hour_entry: midnight-2am
   // belongs to the previous day's Compline, not the day that has just begun.
   // One ordered table drives both the current-office choice and its next
-  // refresh boundary. Keep it aligned with current_hour_entry in handlers.rs;
-  // midnight Compline belongs to the preceding calendar day.
+  // refresh boundary.
   var OFFICE_SCHEDULE = [
     { start: 0, slug: "compline", label: "Compline", offset: -1 },
     { start: 2, slug: "lauds", label: "Lauds", offset: 0 },
@@ -2318,6 +2369,7 @@ function usageBeaconBody(scope) {
   window.addEventListener("online", record);
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
   window.addEventListener("officemartyrologychange", function () { engage(); record(); });
+  window.addEventListener("officechantchange", function () { engage(); record(); });
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();

@@ -282,8 +282,9 @@ Sources:
 - The priest-led form uses the longer choir confession, with "grant you … your
   sins" in the absolution from the parish Compline draft (Compline Alex edit
   10-24 v.08.docx, p. 5), where the older Diurnal has "grant us … our sins".
-  That draft reserves "Sir, ask a blessing" for a priest; private and
-  deacon-led forms use "Lord, grant a blessing."
+  That draft reserves "Sir, ask a blessing" for a priest; by the maintainer's
+  ruling (#691) a deacon, who may bless, is asked for it too, and only the
+  private form uses "Lord, grant a blessing."
 - Deacon-led prayer assigns the shared confession and "our sins" prayers to
   everyone, following the feature's priest-only confession scope; the printed
   Out of Choir rubric doesn't name deacons. Speaker labels mark every turn,

@@ -10,6 +10,7 @@ publish.workspace = true
 data-format.workspace = true
 calendar.workspace = true
 liturgy.workspace = true
+presentation.workspace = true
 office.workspace = true
 
 [dev-dependencies]

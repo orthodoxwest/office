@@ -13,10 +13,38 @@ final class CoreTests: XCTestCase {
         XCTAssertTrue(vespers.sections.flatMap(\.blocks).contains { $0.kind == .versicle })
     }
 
-    func testTheGapsFollowTheWebsRhythm() throws {
+    /// A feast is found by name, and its page leads to the days it is kept, with its texts.
+    func testAFeastIsFoundAndItsPageLeadsToItsDays() throws {
+        let core = try Office.core.get()
+        let found = try core.findFeasts(query: "raphael", year: 2026)
+        let brooklyn = try XCTUnwrap(found.results.first)
+        XCTAssertEqual(brooklyn.id, "st-raphael-of-brooklyn")
+        let today = CivilDate(year: 2026, month: 10, day: 27)
+        let page = try XCTUnwrap(core.feastPage(id: brooklyn.id, today: today))
+        XCTAssertEqual(page.next?.date, CivilDate(year: 2027, month: 2, day: 27))
+        XCTAssertTrue(page.texts.contains { $0.label == "Collect" && !$0.blocks.isEmpty })
+        XCTAssertNil(try core.feastPage(id: "no-such-feast", today: today))
+        let home = try core.home(date: CivilDate(year: 2026, month: 2, day: 27), today: today, clockHour: 9)
+        XCTAssertEqual(home.commemorationIds, ["st-raphael-of-brooklyn"])
+    }
+
+    /// A part's heading takes the rhythm's full step, a body line, which grows with the reader's text.
+    func testEachShortcutOpensTheDayItIsChosen() {
+        let sunday = CivilDate(year: 2026, month: 3, day: 15), monday = CivilDate(year: 2026, month: 3, day: 16)
+        XCTAssertEqual(Shortcuts.page("vespers", today: sunday, clockHour: 19), .hour(sunday, "vespers"))
+        XCTAssertEqual(Shortcuts.page(Shortcuts.ordo, today: sunday, clockHour: 19), .ordo(year: 2026, month: 3, day: 15))
+        // Compline after midnight is the day before's; Lauds at that hour is already the new day's.
+        XCTAssertEqual(Shortcuts.page("compline", today: monday, clockHour: 1), .hour(sunday, "compline"))
+        XCTAssertEqual(Shortcuts.page("lauds", today: monday, clockHour: 1), .hour(monday, "lauds"))
+        XCTAssertNil(Shortcuts.page("matins", today: sunday, clockHour: 19))
+    }
+
+    func testTheGapsFollowTheSharedRhythm() throws {
         let blocks = try Office.core.get().compose(hour: "lauds", year: 2026, month: 3, day: 15, form: "private").sections.flatMap(\.blocks)
         let heading = try XCTUnwrap(blocks.indices.dropFirst().first { blocks[$0].kind == .heading })
-        XCTAssertEqual(gapBefore(blocks[heading - 1], blocks[heading]), 38)
+        XCTAssertEqual(blocks[heading].space, .section)
+        XCTAssertEqual(Metrics().space(.section), 32)
+        XCTAssertEqual(Metrics(textSize: .large).space(.section), 32 * 1.1, accuracy: 0.001)
     }
 
     func testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo() {
@@ -201,7 +229,10 @@ final class PlaceTests: XCTestCase {
     private let day = CivilDate(year: 2026, month: 3, day: 15)
 
     func testPagesRoundTripThroughSavedState() {
-        let pages: [Page] = [.home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders, .about]
+        let pages: [Page] = [
+            .home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders, .about,
+            .find(""), .find("st  benedict"), .feast("st-benedict"),
+        ]
         for page in pages { XCTAssertEqual(Page.decode(page.encoded), page) }
         XCTAssertNil(Page.decode("hour 2026-03-15 matins"))
         XCTAssertNil(Page.decode("ordo 2026 13 1"))
@@ -228,6 +259,29 @@ final class PlaceTests: XCTestCase {
         XCTAssertEqual(again.root, model.root)
         model.goHome()
         XCTAssertTrue(model.path.isEmpty)
+    }
+
+    /// The search takes its words in place: the same visit, with no move between pages.
+    func testTheSearchTakesItsWordsInPlace() {
+        let model = AppModel()
+        model.path = []
+        model.open(.ordo(year: 2026, month: 3, day: 0))
+        model.open(.find(""))
+        let visit = model.path[1].id
+        model.search("benedict")
+        XCTAssertEqual(model.path[1].id, visit)
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .find("benedict")])
+        model.open(.feast("st-benedict"))
+        XCTAssertEqual(model.path.count, 3)
+        model.search("raphael")
+        XCTAssertEqual(model.page, .feast("st-benedict"), "only the search page takes words")
+        // A feast page's way to the search goes back to the words the reader found it by.
+        model.findAgain()
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .find("benedict")])
+        model.open(.feast("st-benedict"))
+        model.path.remove(at: 1)
+        model.findAgain()
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .feast("st-benedict"), .find("")])
     }
 
     func testCivilDatesStepAcrossMonths() {
@@ -270,6 +324,11 @@ final class ReminderTests: XCTestCase {
         XCTAssertEqual(content.categoryIdentifier, ReminderScheduler.category)
         XCTAssertEqual(content.userInfo["hour"] as? String, "lauds")
         XCTAssertEqual(content.userInfo["date"] as? String, "2026-03-15")
+        // "Lauds · 7:00 AM" (or 07:00): the office's own time, not the lead's.
+        XCTAssertEqual(content.title, ReminderScheduler.title("Lauds", office: first.office))
+        XCTAssertTrue(content.title.hasPrefix("Lauds · "))
+        XCTAssertEqual(calendar.component(.hour, from: first.office), 7)
+        XCTAssertNotNil(content.userInfo["office"] as? Double)
         XCTAssertNotNil(Bundle.main.url(forResource: "bell", withExtension: "caf"))
     }
 
@@ -398,12 +457,27 @@ final class UsageTests: XCTestCase {
         XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
     }
 
+    func testAnHourWithAScoreSaysWhetherItsNotationWasShown() {
+        let usage = usage()
+        usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: false)
+        usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: true)
+        usage.record(.home(date: today), dark: false, form: "private", chant: true)
+        XCTAssertEqual(posted.map { $0.body }, [
+            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios",
+            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios",
+            "site appearance:nave screen:mobile visit:first client:ios",
+        ])
+    }
+
     func testTheArchiveIsNotCounted() {
         let usage = usage()
         usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
         usage.record(.ordo(year: 2031), dark: false, form: "private")
         usage.record(Page.year(2026).usageEvent!, dark: false, form: "private")
         XCTAssertNil(Page.about.usageEvent)
+        // The search and the feast pages are not counted, as on the web.
+        XCTAssertNil(Page.find("benedict").usageEvent)
+        XCTAssertNil(Page.feast("st-benedict").usageEvent)
         XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
     }
 

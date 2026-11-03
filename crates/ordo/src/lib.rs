@@ -1,18 +1,10 @@
 //! The text ordo (Tabula Temporaria plus a stanza per day) and the rubrics TSV the ordo
 //! cross-checks read.
 
-use calendar::{Date, Feast, MoveableDates, Rank, Tabula, Weekday};
+use calendar::{Feast, MoveableDates, Rank, Weekday};
 use liturgy::PrayerForm;
 use office::summary::{CommSummary, HourSummary, summarize_hour};
 use office::{Day, Engine, VespersOwner};
-
-const MONTHS: [&str; 12] =
-    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-/// "January 2".
-pub fn month_day(d: Date) -> String {
-    format!("{} {}", MONTHS[d.month() as usize - 1], d.day())
-}
 
 fn day_abbrev(wd: Weekday) -> &'static str {
     match wd {
@@ -174,7 +166,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
 pub fn format_calendar(days: &[Day], engine: Option<&Engine>, moveable: &MoveableDates) -> String {
     let mut lines = Vec::new();
     if let Some(first) = days.first() {
-        lines.push(format_tabula(first.date.year(), moveable));
+        lines.push(format_tabula(first.date.year()));
     }
     let mut current_month = 0;
     for day in days {
@@ -183,7 +175,7 @@ pub fn format_calendar(days: &[Day], engine: Option<&Engine>, moveable: &Moveabl
             if !lines.is_empty() {
                 lines.push(String::new());
             }
-            lines.push(MONTHS[current_month as usize - 1].to_uppercase());
+            lines.push(presentation::MONTHS[current_month as usize - 1].to_uppercase());
             lines.push("-".repeat(60));
         }
         lines.push(format_day(day, engine, moveable));
@@ -191,39 +183,21 @@ pub fn format_calendar(days: &[Day], engine: Option<&Engine>, moveable: &Moveabl
     lines.join("\n") + "\n"
 }
 
-/// The Tabula Temporaria block.
-pub fn format_tabula(year: i32, moveable: &MoveableDates) -> String {
-    let t = Tabula::compute(year);
-    let ember = |e: &calendar::computus::EmberSet| format!("{}, {}, {}", month_day(e.wed), e.fri.day(), e.sat.day());
+/// The Tabula Temporaria block, in the words every front gives it ([`presentation::tabula`]).
+pub fn format_tabula(year: i32) -> String {
+    let t = presentation::tabula(year);
     let mut b = String::new();
     b.push_str(&format!("TABULA TEMPORARIA — ANNO DOMINI {year}\n"));
     b.push_str(&"=".repeat(60));
     b.push('\n');
-    let row = |label: &str, value: String| format!("  {} {value}\n", pad(label, 28));
-    b.push_str(&row("Golden Number", calendar::computus::roman(t.golden_number)));
-    b.push_str(&row("Dominical Letter", t.dominical_letter.to_string()));
-    b.push_str(&row("Sundays after Epiphany", t.sundays_after_epiphany.to_string()));
-    b.push_str(&row("Sundays after Pentecost", t.sundays_after_pentecost.to_string()));
-    b.push('\n');
-    b.push_str("  MOVEABLE FEASTS\n");
-    let row4 = |label: &str, value: String| format!("    {} {value}\n", pad(label, 24));
-    for (label, d) in [
-        ("Septuagesima Sunday", moveable.septuagesima),
-        ("Ash Wednesday", moveable.ash_wednesday),
-        ("Easter (Pascha) Day", moveable.easter),
-        ("Ascension Day", moveable.ascension),
-        ("Pentecost", moveable.pentecost),
-        ("Corpus Christi", moveable.corpus_christi),
-        ("Advent Sunday", moveable.advent1),
-    ] {
-        b.push_str(&row4(label, month_day(d)));
+    for row in &t.figures {
+        b.push_str(&format!("  {} {}\n", pad(row.label, 28), row.value));
     }
-    b.push('\n');
-    b.push_str("  EMBER DAYS\n");
-    for (label, e) in
-        [("Spring (Lent)", &t.spring), ("Summer (Whitsun)", &t.summer), ("Autumn (Holy Cross)", &t.autumn), ("Winter (Advent)", &t.winter)]
-    {
-        b.push_str(&row4(label, ember(e)));
+    for (heading, rows) in [("MOVEABLE FEASTS", &t.moveable), ("EMBER DAYS", &t.ember)] {
+        b.push_str(&format!("\n  {heading}\n"));
+        for row in rows {
+            b.push_str(&format!("    {} {}\n", pad(row.label, 24), row.value));
+        }
     }
     b
 }

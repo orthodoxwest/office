@@ -30,7 +30,7 @@ pub fn compose_compline(day: &Day, sections: &[HourSection], t: &OfficeTexts, mo
         for elem in &section.elements {
             append_hour_element(&mut elems, section_day, "compline", elem, t);
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     hour
 }

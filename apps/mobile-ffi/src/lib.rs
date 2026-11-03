@@ -3,7 +3,11 @@
 //! `render-blocks` layouts, so Kotlin and Swift set styled text and never parse the corpus grammar.
 
 mod data;
+mod feasts;
+#[cfg(test)]
+mod pack;
 
+use std::collections::HashMap;
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
@@ -14,13 +18,18 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, home_shows_versicle, hour_gloss, hour_versicle,
-    invitation, long_date, rank_class, reminder_description, reminder_summary, report_url, season_class, season_label, split_alias,
-    title_case,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class,
+    home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, rank_class, reminder_description, reminder_summary, report_url,
+    season_label, split_alias, title_case,
 };
 
 pub use data::EmbeddedData;
+pub use feasts::*;
+use presentation::feast::{FeastIndex, YearIndex};
 use presentation::sun;
+// neuma's own bindings (namespace `neuma`) ride in this library, so the apps engrave a
+// `BlockKind::Score` block with the one native library they already load.
+use neuma_mobile as _;
 
 uniffi::setup_scaffolding!();
 
@@ -56,24 +65,45 @@ struct Year {
 pub struct OfficeCore {
     engine: Engine,
     calendar: CalendarData,
-    year: Mutex<Option<Arc<Year>>>,
+    /// The two years last composed: a feast's page reads its day and that of its eve, and the
+    /// reader moves between this year's pages and a feast's next keeping.
+    years: Mutex<Vec<Arc<Year>>>,
+    /// Every feast a reader can look up, and each year's keeping of them.
+    feasts: FeastIndex,
+    keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
 }
 
 #[uniffi::export]
 impl OfficeCore {
     #[uniffi::constructor]
     pub fn new() -> Result<Arc<OfficeCore>, OfficeError> {
+        // Lyrics are measured in the app's own Garamond, as the web measures them.
+        neuma_mobile::set_lyric_metrics(presentation::CHANT_LYRIC_METRICS.to_vec());
         let src = EmbeddedData::new().map_err(failed)?;
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
-        Ok(Arc::new(OfficeCore { engine, calendar, year: Mutex::new(None) }))
+        let feasts = FeastIndex::new(&calendar);
+        Ok(Arc::new(OfficeCore { engine, calendar, years: Mutex::new(Vec::new()), feasts, keepings: Mutex::new(HashMap::new()) }))
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
     /// prayer form "private", "deacon", or "priest"; `martyrology` is the
-    /// reader's setting for reading the Martyrology at Prime.
-    #[uniffi::method(default(martyrology = false))]
-    pub fn compose(&self, hour: String, year: i32, month: i32, day: i32, form: String, martyrology: bool) -> Result<HourView, OfficeError> {
+    /// reader's setting for reading the Martyrology at Prime; `chant` the reader's Chant setting,
+    /// which shows a scored hymn or Marian antiphon as its score (`BlockKind::Score`) in place of
+    /// the words it sets.
+    #[uniffi::method(default(martyrology = false, chant = false))]
+    // The reader's settings stay plain arguments with defaults, so each app passes only its own.
+    #[allow(clippy::too_many_arguments)]
+    pub fn compose(
+        &self,
+        hour: String,
+        year: i32,
+        month: i32,
+        day: i32,
+        form: String,
+        martyrology: bool,
+        chant: bool,
+    ) -> Result<HourView, OfficeError> {
         let date =
             Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))?;
         let form = PrayerForm::parse(&form).map_err(failed)?;
@@ -83,11 +113,17 @@ impl OfficeCore {
             self.engine.compose_hour_with_options(&hour, office_day, &year.moveable, &ComposeOptions { form, martyrology }).map_err(failed)
         };
         let composed = compose(martyrology)?;
-        let mut view = HourView::new(&hour, &composed);
+        let mut view = HourView::new(&hour, &composed, chant);
         // Whether the setting had a reading to show or hide, as the usage beacon reports it.
         let has_reading = if martyrology { reads_martyrology(&composed) } else { hour == "prime" && reads_martyrology(&compose(true)?) };
         view.martyrology = has_reading.then_some(martyrology);
         Ok(view)
+    }
+
+    /// Whether any hymn or Marian antiphon has a score: until one does, the apps keep the Chant
+    /// setting out of sight, as the web does.
+    pub fn offers_chant(&self) -> bool {
+        office::chant::offers_chant(&self.engine.texts)
     }
 
     /// Home for a civil date, as the web's home handler builds it. `today`
@@ -114,9 +150,11 @@ impl OfficeCore {
             octave_note: heading.octave_note,
             season: heading.season,
             color: day.color.as_str().to_string(),
-            ornament: ornament(Some(day.season)),
+            ornament: ornament(gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &year.moveable))),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
+            feast_id: day.celebration.as_ref().map(|c| self.feast_id(&c.id, &c.name, shown)).unwrap_or_default(),
+            commemoration_ids: day.commemorations.iter().map(|c| self.feast_id(&c.id, &c.name, shown)).collect(),
             versicle: versicle.as_ref().map(|v| typeset(&v.versicle)).unwrap_or_default(),
             response: versicle.as_ref().map(|v| typeset(&v.response)).unwrap_or_default(),
             is_today: shown == now,
@@ -206,7 +244,7 @@ impl OfficeCore {
             .days
             .iter()
             .filter(|d| d.date.month() as i32 == month)
-            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable)))
+            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable), self))
             .collect();
         Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days })
     }
@@ -214,15 +252,20 @@ impl OfficeCore {
 
 impl OfficeCore {
     fn year(&self, year: i32) -> Result<Arc<Year>, OfficeError> {
-        let mut cached = self.year.lock().map_err(|e| failed(e.to_string()))?;
-        if let Some(y) = cached.as_ref().filter(|y| y.year == year) {
-            return Ok(Arc::clone(y));
+        let mut cached = self.years.lock().map_err(|e| failed(e.to_string()))?;
+        if let Some(at) = cached.iter().position(|y| y.year == year) {
+            let y = cached.remove(at);
+            cached.push(Arc::clone(&y));
+            return Ok(y);
         }
         let cal = build_calendar(year, &self.calendar).map_err(failed)?;
         let office = resolve_office_days(&cal);
         let days = cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect();
         let y = Arc::new(Year { year, days, moveable: MoveableDates::compute(year) });
-        *cached = Some(Arc::clone(&y));
+        if cached.len() == 2 {
+            cached.remove(0);
+        }
+        cached.push(Arc::clone(&y));
         Ok(y)
     }
 }
@@ -231,6 +274,44 @@ impl OfficeCore {
 #[uniffi::export]
 pub fn hour_names() -> Vec<String> {
     HOUR_NAMES.iter().map(|h| h.to_string()).collect()
+}
+
+/// A prayer form as the hour's chooser offers it: its value, the control's label ("Private"),
+/// and the chooser's phrase ("Praying privately").
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct PrayerFormChoice {
+    pub value: String,
+    pub label: String,
+    pub phrase: String,
+}
+
+/// The prayer forms, in the chooser's order.
+#[uniffi::export]
+pub fn prayer_form_choices() -> Vec<PrayerFormChoice> {
+    PrayerForm::ALL
+        .into_iter()
+        .map(|f| PrayerFormChoice { value: f.as_str().into(), label: f.label().into(), phrase: f.phrase().into() })
+        .collect()
+}
+
+/// Whether `hour`'s prayers before and after the Office open until the reader chooses
+/// (`presentation::prayers_open_by_default`).
+#[uniffi::export]
+pub fn prayers_open_by_default(hour: String) -> bool {
+    presentation::prayers_open_by_default(&hour)
+}
+
+/// The lines under the menu's settings that need saying, as the web prints them
+/// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct PreferenceHints {
+    pub martyrology: String,
+    pub chant: String,
+}
+
+#[uniffi::export]
+pub fn preference_hints() -> PreferenceHints {
+    PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
 }
 
 /// A reader's way through an hour's words, for home's mark of the hours prayed
@@ -348,9 +429,11 @@ pub enum UsageEvent {
 /// The usage beacon for `event`, or none when it does not count: as on the web, only a page
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
-/// `martyrology` the hour's `HourView::martyrology`; `first` whether the installation is counted
-/// for the first time today.
-#[uniffi::export(default(martyrology = None, first = None))]
+/// `martyrology` and `chant` the hour's `HourView::martyrology` and `HourView::chant`; `first`
+/// whether the installation is counted for the first time today.
+#[uniffi::export(default(martyrology = None, first = None, chant = None))]
+// The page's facts stay plain arguments with defaults, so each app passes only what it knows.
+#[allow(clippy::too_many_arguments)]
 pub fn usage_beacon(
     event: UsageEvent,
     today: CivilDate,
@@ -359,6 +442,7 @@ pub fn usage_beacon(
     client: UsageClient,
     martyrology: Option<bool>,
     first: Option<bool>,
+    chant: Option<bool>,
 ) -> Option<String> {
     use presentation::usage::{App, app_beacon, current_day, current_year};
     let today = today.parse().ok()?;
@@ -373,7 +457,7 @@ pub fn usage_beacon(
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form, martyrology, first)
+    app_beacon(scope, app, dark, &form, martyrology, chant, first)
 }
 
 /// Where a release build of the apps posts its beacons until the server names another.
@@ -628,9 +712,10 @@ impl From<Date> for CivilDate {
     }
 }
 
-/// The ornament season that retints the gilding: "passiontide", "eastertide", or empty.
-fn ornament(season: Option<calendar::Season>) -> String {
-    season_class(season).trim_start_matches("season-").to_string()
+/// The ornament season that retints the gilding (`presentation::gilding_class`): "quiet",
+/// "passiontide", "eastertide", or empty for the ordinary gold.
+fn ornament(class: &str) -> String {
+    class.trim_start_matches("season-").to_string()
 }
 
 /// Home's frontispiece for one day.
@@ -652,6 +737,10 @@ pub struct HomeView {
     /// "Fasting", "Abstinence" and the like, set as red work.
     pub penitential: Vec<String>,
     pub commemorations: Vec<String>,
+    /// The page id of the day's feast (`feast_page`), or empty when it has none.
+    pub feast_id: String,
+    /// Each commemoration's page id, in the same order, or empty.
+    pub commemoration_ids: Vec<String>,
     /// The day's versicle from Lauds and its response, without ℣. and ℟., for the head on a plain
     /// day; both empty otherwise.
     pub versicle: String,
@@ -681,6 +770,8 @@ pub struct OrdoMonthView {
 pub struct CommemorationView {
     pub name: String,
     pub incipit: String,
+    /// The commemorated feast's page id, or empty.
+    pub feast_id: String,
 }
 
 /// An observance the ordo brackets for monastics and oblates (the web's `.day-monastic`).
@@ -707,6 +798,8 @@ pub struct OrdoDayView {
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
+    /// Each commemoration's page id, in the same order, or empty.
+    pub commemoration_ids: Vec<String>,
     pub monastic: Vec<MonasticView>,
     pub benedictus_antiphon: String,
     pub lauds_preces: bool,
@@ -721,9 +814,16 @@ pub struct OrdoDayView {
 }
 
 impl OrdoDayView {
-    fn new(d: &Day, o: office::summary::OrdoDay) -> OrdoDayView {
-        let comms =
-            |c: &[CommSummary]| c.iter().map(|c| CommemorationView { name: typeset(&c.name), incipit: typeset(&c.incipit) }).collect();
+    fn new(d: &Day, o: office::summary::OrdoDay, core: &OfficeCore) -> OrdoDayView {
+        let comms = |c: &[CommSummary]| {
+            c.iter()
+                .map(|c| CommemorationView {
+                    name: typeset(&c.name),
+                    incipit: typeset(&c.incipit),
+                    feast_id: core.feast_id("", &c.name, d.date),
+                })
+                .collect()
+        };
         let lauds = o.lauds.unwrap_or_else(empty_summary);
         let vespers = o.vespers.unwrap_or_else(empty_summary);
         OrdoDayView {
@@ -736,6 +836,7 @@ impl OrdoDayView {
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),
+            commemoration_ids: d.commemorations.iter().map(|c| core.feast_id(&c.id, &c.name, d.date)).collect(),
             monastic: d
                 .monastic
                 .iter()
@@ -785,25 +886,43 @@ pub struct HourView {
     pub season: String,
     /// The season as the hour header names it ("Lent", "Eastertide"); empty after Pentecost.
     pub season_label: String,
-    /// The ornament season: "passiontide", "eastertide", or empty.
+    /// The ornament season: "quiet", "passiontide", "eastertide", or empty.
     pub ornament: String,
     /// The liturgical color ("green"), empty when none.
     pub color: String,
     /// Whether the hour belongs to a first-class feast (a following feast's at its I Vespers; not
-    /// a violet or black first-class day), which the web frames between two painted lines
-    /// (`rank-first-class`).
+    /// a violet, black or rose first-class day, nor a bare hour), which the web frames between
+    /// two painted lines (`rank-first-class`).
     pub first_class: bool,
+    /// A bare hour, stripped of its hymn and Gloria Patri (the Triduum, the Office of the Dead):
+    /// the page takes off its leaf, as the web's `hour-bare` does. Its initials are set in the
+    /// muted ink, the headpiece carries no sun or moon and its rule closes, and on the Apse a
+    /// veiled bare hour's vault goes dark.
+    pub bare: bool,
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
     /// Prime's Martyrology: whether the reader's setting shows the day's reading, or none when
     /// there is no reading to show (another hour, the Triduum, a date not yet transcribed).
     pub martyrology: Option<bool>,
+    /// Whether the reader's Chant setting shows the hour's scores, or none when it has none to
+    /// show, as the usage beacon reports it.
+    pub chant: Option<bool>,
 }
 
 impl HourView {
-    fn new(hour_name: &str, hour: &OfficeHour) -> HourView {
+    /// The hour's view, each scored piece shown as its score with `chant` on and as its words
+    /// with it off.
+    fn new(hour_name: &str, hour: &OfficeHour, chant: bool) -> HourView {
+        let hidden = if chant { render_blocks::ChantVariant::Off } else { render_blocks::ChantVariant::On };
         let d = hour.date;
+        let mut blocks = render_blocks::hour_sections(hour);
+        let scored = blocks.iter().flat_map(|s| &s.blocks).any(|b| b.chant == render_blocks::ChantVariant::On);
+        // Each block's space follows the block shown above it, the other setting's left out.
+        for s in &mut blocks {
+            s.blocks.retain(|b| b.chant != hidden);
+        }
+        render_blocks::space_blocks(blocks.iter_mut().flat_map(|s| &mut s.blocks));
         HourView {
             hour: hour_name.to_string(),
             title: hour.title.clone(),
@@ -811,12 +930,14 @@ impl HourView {
             feast: typeset(&hour.feast),
             season: hour.season.map(|s| s.as_str().to_string()).unwrap_or_default(),
             season_label: hour.season.map(|s| season_label(s.as_str())).unwrap_or_default(),
-            ornament: ornament(hour.season),
+            ornament: ornament(gilding_class(hour.season, hour.color, hour.paschaltide)),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
-            first_class: !rank_class(hour.rank, hour.color).is_empty(),
-            sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
+            first_class: !rank_class(hour.rank, hour.color, hour.bare).is_empty(),
+            bare: hour.bare,
+            sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,
+            chant: scored.then_some(chant),
         }
     }
 }
@@ -825,12 +946,22 @@ impl HourView {
 pub struct SectionView {
     pub label: String,
     pub collapsible: bool,
+    /// A bare section in a gilt hour (Vespers of the Dead after the day's Vespers on the eve of
+    /// All Souls): its initials take the muted ink, as a bare hour's do (the web's
+    /// `section-bare`).
+    #[uniffi(default = false)]
+    pub bare: bool,
     pub blocks: Vec<BlockView>,
 }
 
 impl From<render_blocks::SectionBlocks> for SectionView {
     fn from(s: render_blocks::SectionBlocks) -> SectionView {
-        SectionView { label: s.label, collapsible: s.collapsible, blocks: s.blocks.into_iter().map(BlockView::from).collect() }
+        SectionView {
+            label: s.label,
+            collapsible: s.collapsible,
+            bare: s.bare,
+            blocks: s.blocks.into_iter().map(BlockView::from).collect(),
+        }
     }
 }
 
@@ -841,6 +972,17 @@ pub struct BlockView {
     pub drop_cap: bool,
     pub starts_element: bool,
     pub runs: Vec<RunView>,
+
+    /// A `Score` block's GABC, for neuma to engrave (the runs are the words it sets), the
+    /// opening score's with its mode's figure as the annotation over the initial; empty for
+    /// every other kind.
+    #[uniffi(default = "")]
+    pub score: String,
+    /// A hymn's score, set a line of verse to a staff (neuma's phrase lines).
+    #[uniffi(default = false)]
+    pub phrases: bool,
+    /// The space above the block, after the block shown before it; [`space_lines`] sizes it.
+    pub space: Space,
 }
 
 impl From<render_blocks::Block> for BlockView {
@@ -850,6 +992,9 @@ impl From<render_blocks::Block> for BlockView {
             marker: b.marker,
             drop_cap: b.drop_cap,
             starts_element: b.starts_element,
+            space: b.space.into(),
+            score: b.score,
+            phrases: b.phrases,
             runs: b
                 .runs
                 .into_iter()
@@ -904,6 +1049,7 @@ pub enum BlockKind {
     Speaker,
     Stanza,
     HymnRubric,
+    Score,
     Gap,
 }
 
@@ -933,9 +1079,56 @@ impl From<render_blocks::BlockKind> for BlockKind {
             K::Speaker => BlockKind::Speaker,
             K::Stanza => BlockKind::Stanza,
             K::HymnRubric => BlockKind::HymnRubric,
+            K::Score => BlockKind::Score,
             K::Gap => BlockKind::Gap,
         }
     }
+}
+
+/// `render_blocks::Space`, a step of the hour's vertical rhythm, for the bindings.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Enum)]
+pub enum Space {
+    None,
+    Line,
+    Bind,
+    Stanza,
+    Group,
+    Section,
+}
+
+impl From<render_blocks::Space> for Space {
+    fn from(s: render_blocks::Space) -> Space {
+        use render_blocks::Space as S;
+        match s {
+            S::None => Space::None,
+            S::Line => Space::Line,
+            S::Bind => Space::Bind,
+            S::Stanza => Space::Stanza,
+            S::Group => Space::Group,
+            S::Section => Space::Section,
+        }
+    }
+}
+
+impl From<Space> for render_blocks::Space {
+    fn from(s: Space) -> render_blocks::Space {
+        use render_blocks::Space as S;
+        match s {
+            Space::None => S::None,
+            Space::Line => S::Line,
+            Space::Bind => S::Bind,
+            Space::Stanza => S::Stanza,
+            Space::Group => S::Group,
+            Space::Section => S::Section,
+        }
+    }
+}
+
+/// A step of the rhythm as a fraction of the prayer's body line: the apps multiply it by the
+/// line they set, so the space grows with the reader's text as the web's does.
+#[uniffi::export]
+pub fn space_lines(space: Space) -> f32 {
+    render_blocks::Space::from(space).lines()
 }
 
 /// `render_blocks::RunStyle`, for the bindings.

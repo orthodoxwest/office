@@ -10,10 +10,14 @@ pub mod initials;
 pub use initials::{InitialFit, initial_fit, initial_size};
 
 use corpus::lines::{
-    BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
+    BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanza_rubrics, hymn_sung_stanzas,
+    marian_antiphon_part, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, VoiceSpan, posture_cues_at, split_words};
+use liturgy::{
+    ChantScore, ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, RubricSpan, ScoreSpan, VoiceSpan, posture_cues_at,
+    split_words,
+};
 use presentation::gloss::{Gloss, GlossRun, gloss_runs};
 
 /// What a block is, which decides its paragraph style.
@@ -70,8 +74,25 @@ pub enum BlockKind {
     /// A rubric among a hymn's stanzas ("The following stanza is said
     /// kneeling."), centred in the hymn's column, as the web's `.hymn-rubric`.
     HymnRubric,
+    /// A chant score (`Block::score`, GABC) in place of words the reader sings: a hymn's tune,
+    /// a stanza of a whole engraved hymn (its number the marker), or a Marian antiphon. Its runs
+    /// are the words it sets, for screen readers; `drop_cap` marks the score that takes the
+    /// initial.
+    Score,
     /// Vertical space between groups of lines; it has no runs.
     Gap,
+}
+
+/// Which of the reader's Chant settings shows a block: a scored piece carries its score and
+/// its words side by side, as the web's `data-chant-variant`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ChantVariant {
+    /// Shown either way.
+    Always,
+    /// Words a score sets: shown with Chant off.
+    Off,
+    /// The score: shown with Chant on.
+    On,
 }
 
 /// How a run of text is set within its block.
@@ -133,15 +154,45 @@ pub struct Block {
     /// elements than between the lines of one.
     pub starts_element: bool,
     pub runs: Vec<Run>,
+    /// Which Chant setting shows the block.
+    pub chant: ChantVariant,
+    /// A `Score` block's GABC; empty for every other kind.
+    pub score: String,
+    /// A hymn's score set phrase by phrase, each line of a verse on a staff of its own.
+    pub phrases: bool,
+    /// The space above the block, after the block shown before it ([`space_blocks`]).
+    pub space: Space,
 }
 
 impl Block {
     fn new(kind: BlockKind, runs: Vec<Run>) -> Block {
-        Block { kind, marker: String::new(), drop_cap: false, starts_element: false, runs }
+        Block {
+            kind,
+            marker: String::new(),
+            drop_cap: false,
+            starts_element: false,
+            runs,
+            chant: ChantVariant::Always,
+            score: String::new(),
+            phrases: false,
+            space: Space::None,
+        }
     }
 
     fn marked(kind: BlockKind, marker: &str, runs: Vec<Run>) -> Block {
-        Block { kind, marker: marker.to_string(), drop_cap: false, starts_element: false, runs }
+        Block { marker: marker.to_string(), ..Block::new(kind, runs) }
+    }
+
+    /// A score in place of `words`.
+    fn score(score: &ChantScore, gabc: &str, words: &str, initial: bool) -> Block {
+        Block {
+            drop_cap: initial,
+            chant: ChantVariant::On,
+            // The opening score carries its mode's figure, which the engine sets over the initial.
+            score: if initial { score.with_mode_figure(gabc) } else { gabc.to_string() },
+            phrases: score.sets != ScoreSpan::Antiphon,
+            ..Block::new(BlockKind::Score, vec![Run::new(typeset(words.trim()), RunStyle::Plain)])
+        }
     }
 
     /// The block's words as read: marker, then runs.
@@ -155,11 +206,119 @@ impl Block {
     }
 }
 
-/// A section of an hour; a collapsible section opens closed under its label.
+/// The steps of the hour's vertical rhythm, each a fraction of the prayer's body line, so the
+/// space grows with the text on every front. The web's `--space-*` properties (style.css) and the
+/// apps' gaps are these fractions of the line; a step's name says what it separates. The
+/// printed Monastic Diurnal steps the same way: lines of one unit set solid, a head close to
+/// what it introduces, stanzas and psalms half a line apart, a full line before a part.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Space {
+    /// Nothing between: the first block, or lines sung as one piece.
+    None,
+    /// The lines of one element: verse to verse, ℣ to ℟, a speaker to their words.
+    Line,
+    /// A head and what it introduces: a heading to its title, a psalm's label to its first
+    /// verse, an antiphon to its psalm, a psalm to its closing antiphon.
+    Bind,
+    /// Stanza to stanza, the Gloria Patri after its psalm, and one element to the next within
+    /// a part of the office.
+    Stanza,
+    /// Between groups within a part: the hymn to the psalmody, one psalm's group to the next.
+    Group,
+    /// Before a part of the office (its heading, under a small cross).
+    Section,
+}
+
+impl Space {
+    pub const ALL: [Space; 6] = [Space::None, Space::Line, Space::Bind, Space::Stanza, Space::Group, Space::Section];
+
+    /// The step as a fraction of the body line.
+    pub fn lines(self) -> f32 {
+        match self {
+            Space::None => 0.0,
+            Space::Line => 0.15,
+            Space::Bind => 0.3,
+            Space::Stanza => 0.45,
+            Space::Group => 0.75,
+            Space::Section => 1.0,
+        }
+    }
+
+    /// The step's name, as the web's `--space-*` property names it.
+    pub fn name(self) -> &'static str {
+        match self {
+            Space::None => "none",
+            Space::Line => "line",
+            Space::Bind => "bind",
+            Space::Stanza => "stanza",
+            Space::Group => "group",
+            Space::Section => "section",
+        }
+    }
+}
+
+/// The space above `cur`, after `prev`, the block shown before it (none for the first).
+pub fn space_before(prev: Option<&Block>, cur: &Block) -> Space {
+    prev.map_or(Space::None, |p| space_between(p.kind, p.starts_element, cur))
+}
+
+fn space_between(prev: BlockKind, prev_starts: bool, cur: &Block) -> Space {
+    use BlockKind as K;
+    let heading = |k: BlockKind| matches!(k, K::Heading | K::CommemorationHeading);
+    let antiphon = |k: BlockKind| matches!(k, K::Antiphon | K::AnnouncedAntiphon);
+    let note = |k: BlockKind| matches!(k, K::AntiphonNote | K::AnnouncementNote);
+    // A psalm's last line, before its closing antiphon: a verse, or the Gloria it absorbed.
+    let psalm_end = prev == K::Verse || (prev == K::GloriaPatri && !prev_starts);
+    match (prev, cur.kind) {
+        _ if heading(cur.kind) => Space::Section,
+        (_, K::LatinTitle | K::ChapterRef) if heading(prev) => Space::Line,
+        _ if heading(prev) => Space::Bind,
+        // A source's blank line: one stanza's space, all of it above the gap.
+        (_, K::Gap) => Space::Stanza,
+        (K::Gap, _) => Space::None,
+        (K::ItemLabel | K::LatinTitle | K::ChapterRef | K::ScriptureRef | K::CanticleSection, _) => Space::Bind,
+        _ if note(cur.kind) => Space::Line,
+        (_, K::ItemLabel) if antiphon(prev) || note(prev) => Space::Bind,
+        // A psalm after another under one antiphon, or a canticle after the opening versicles.
+        (_, K::ItemLabel) => Space::Group,
+        (K::Speaker, _) => Space::Line,
+        // A closing antiphon sits close under its psalm.
+        (_, K::Antiphon) if cur.starts_element && psalm_end => Space::Bind,
+        // An antiphon opens a group of psalmody: the threshold from what came before, the
+        // last group's closing antiphon or the hymn.
+        _ if antiphon(cur.kind) && cur.starts_element => Space::Group,
+        // What follows a closing antiphon or a hymn opens a group of its own.
+        _ if cur.starts_element && (antiphon(prev) || matches!(prev, K::Stanza | K::Score)) => Space::Group,
+        (K::Verse, K::GloriaPatri | K::CanticleSection) => Space::Stanza,
+        (K::Stanza | K::HymnRubric | K::Score, K::Stanza | K::HymnRubric) | (K::Stanza | K::HymnRubric, K::Score) => Space::Stanza,
+        // A new speaker's turn.
+        (_, K::Speaker) => Space::Stanza,
+        // A whole hymn engraved, stanza by stanza: room above each for its number, to which
+        // each front adds a band of the number's own (style.css's `.chant-stanza` margin).
+        (K::Score, K::Score) => Space::Group,
+        (K::ChantLine, K::ChantLine) => Space::None,
+        _ if cur.starts_element => Space::Stanza,
+        _ => Space::Line,
+    }
+}
+
+/// Sets each block's space after the block before it, across sections: the blocks as shown.
+pub fn space_blocks<'a>(blocks: impl IntoIterator<Item = &'a mut Block>) {
+    let mut prev = None;
+    for b in blocks {
+        b.space = prev.map_or(Space::None, |(kind, starts)| space_between(kind, starts, b));
+        prev = Some((b.kind, b.starts_element));
+    }
+}
+
+/// A section of an hour; a collapsible section opens closed under its label. A bare section
+/// (`OfficeSection::bare`, Vespers of the Dead after the day's Vespers) sets its initials in the
+/// muted ink, as the web's `section-bare` does.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SectionBlocks {
     pub label: String,
     pub collapsible: bool,
+    pub bare: bool,
     pub blocks: Vec<Block>,
 }
 
@@ -168,7 +327,8 @@ pub struct SectionBlocks {
 /// the web.
 pub fn hour_sections(hour: &OfficeHour) -> Vec<SectionBlocks> {
     let compline = hour.hour.eq_ignore_ascii_case("compline");
-    hour.sections
+    let mut sections: Vec<SectionBlocks> = hour
+        .sections
         .iter()
         .enumerate()
         .map(|(i, section)| {
@@ -181,9 +341,11 @@ pub fn hour_sections(hour: &OfficeHour) -> Vec<SectionBlocks> {
                 }
             }
             blocks.extend(element_blocks(&section.elements));
-            SectionBlocks { label: section.label.clone(), collapsible: section.collapsible, blocks }
+            SectionBlocks { label: section.label.clone(), collapsible: section.collapsible, bare: section.bare, blocks }
         })
-        .collect()
+        .collect();
+    space_blocks(sections.iter_mut().flat_map(|s| &mut s.blocks));
+    sections
 }
 
 /// A section's elements, a psalm or canticle absorbing the doxology after it.
@@ -204,6 +366,15 @@ pub fn element_blocks(elems: &[OfficeElement]) -> Vec<Block> {
         }
         i += 1;
     }
+    space_blocks(&mut out);
+    out
+}
+
+/// A text standing alone, as a feast's page sets its antiphons, versicles and collect: a prayer
+/// flows, anything else keeps its lines (`render_html` sets the same text the same way).
+pub fn text_blocks(text: &str, prayer: bool) -> Vec<Block> {
+    let mut out = Vec::new();
+    liturgical_block(&mut out, text, if prayer { Mode::Flow } else { Mode::PreserveLines }, false);
     out
 }
 
@@ -229,7 +400,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
                 out.push(Block::marked(kind, "Ant.", chant_runs(&elem.display_text())));
             } else {
                 out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
-                marian_antiphon(out, &elem.text);
+                marian_antiphon(out, &elem.text, elem.score.as_ref());
             }
         }
         ElementType::Psalm | ElementType::Canticle => {
@@ -265,7 +436,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
             if !elem.label.is_empty() {
                 out.push(Block::new(BlockKind::LatinTitle, text_runs_styled(&elem.label, RunStyle::Latin)));
             }
-            hymn_stanzas(out, &elem.text);
+            scored_hymn(out, elem);
         }
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
             liturgical_block(out, &elem.text, Mode::PreserveLines, false);
@@ -646,17 +817,35 @@ fn voice_block(out: &mut Vec<Block>, spans: &[VoiceSpan], mode: Mode) {
 }
 
 /// A Marian antiphon: its sung lines preserved, its collect flowing.
-fn marian_antiphon(out: &mut Vec<Block>, text: &str) {
+fn marian_antiphon(out: &mut Vec<Block>, text: &str, score: Option<&ChantScore>) {
     const INVITATION: &str = "\n\nLet us pray.\n\n";
+    let sung = |out: &mut Vec<Block>, chant: &str| match score {
+        None => liturgical_block(out, chant, Mode::PreserveFirstBlock, false),
+        Some(score) => {
+            // The score beside the antiphon's words (up to the ℣), as the web offers them.
+            let antiphon = marian_antiphon_part(chant);
+            let rest = chant.trim_start()[antiphon.len()..].trim();
+            out.push(Block::score(score, &score.gabc, &ChantScore::spoken(antiphon), true));
+            let start = out.len();
+            liturgical_block(out, antiphon, Mode::PreserveFirstBlock, false);
+            for b in &mut out[start..] {
+                b.chant = ChantVariant::Off;
+            }
+            if !rest.is_empty() {
+                out.push(Block::new(BlockKind::Gap, Vec::new()));
+                liturgical_block(out, rest, Mode::PreserveFirstBlock, false);
+            }
+        }
+    };
     match text.split_once(INVITATION) {
         Some((chant, collect)) if !collect.trim().is_empty() => {
-            liturgical_block(out, chant, Mode::PreserveFirstBlock, false);
+            sung(out, chant);
             out.push(Block::new(BlockKind::Gap, Vec::new()));
             out.push(Block::new(BlockKind::Paragraph, vec![Run::new("Let us pray.", RunStyle::Plain)]));
             out.push(Block::new(BlockKind::Gap, Vec::new()));
             liturgical_block(out, collect, Mode::Flow, false);
         }
-        _ => liturgical_block(out, text, Mode::PreserveFirstBlock, false),
+        _ => sung(out, text),
     }
 }
 
@@ -679,6 +868,59 @@ fn corporate_lord_prayer(out: &mut Vec<Block>, elem: &OfficeElement) {
     out.push(Block::new(BlockKind::Paragraph, chant_runs(&flow(&officiant))));
     out.push(Block::marked(BlockKind::Response, "℟.", chant_runs(&flow(&parts.response))));
     mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
+}
+
+/// A hymn and its score, if it has one: the tune over the first stanza, or every stanza engraved
+/// (each a score, numbered after the first), beside the words they set.
+fn scored_hymn(out: &mut Vec<Block>, elem: &OfficeElement) {
+    let Some(score) = &elem.score else { return hymn_stanzas(out, &elem.text) };
+    let stanzas = hymn_sung_stanzas(&elem.text);
+    let rubrics = hymn_sung_stanza_rubrics(&elem.text);
+    let parts = score.stanza_parts();
+    let start = out.len();
+    // The rubrics said before a stanza (kneeling for it), which a whole hymn's score does not carry.
+    let rubric_blocks = |out: &mut Vec<Block>, before: Option<&Vec<String>>| {
+        for r in before.into_iter().flatten() {
+            let mut block = Block::new(BlockKind::HymnRubric, text_runs(r));
+            block.chant = ChantVariant::On;
+            out.push(block);
+        }
+    };
+    match score.sets {
+        ScoreSpan::WholeHymn if parts.len() == stanzas.len() => {
+            for (i, (part, words)) in parts.iter().zip(&stanzas).enumerate() {
+                rubric_blocks(out, rubrics.get(i));
+                let mut block = Block::score(score, part, words, i == 0);
+                if i > 0 {
+                    block.marker = format!("{}.", i + 1);
+                }
+                out.push(block);
+            }
+            let text_start = out.len();
+            hymn_stanzas(out, &elem.text);
+            for b in &mut out[text_start..] {
+                b.chant = ChantVariant::Off;
+            }
+        }
+        ScoreSpan::WholeHymn => {
+            rubric_blocks(out, rubrics.first());
+            out.push(Block::score(score, &score.gabc, &stanzas.join(" "), true));
+            let text_start = out.len();
+            hymn_stanzas(out, &elem.text);
+            for b in &mut out[text_start..] {
+                b.chant = ChantVariant::Off;
+            }
+        }
+        ScoreSpan::FirstStanza | ScoreSpan::Antiphon => {
+            hymn_stanzas(out, &elem.text);
+            // The tune goes before the opening stanza, which it replaces with Chant on.
+            if let Some(at) = out[start..].iter().position(|b| b.kind == BlockKind::Stanza).map(|i| start + i) {
+                let words = out[at].plain_text().replace('\n', " ");
+                out[at].chant = ChantVariant::Off;
+                out.insert(at, Block::score(score, &score.gabc, &words, true));
+            }
+        }
+    }
 }
 
 /// A hymn: one block per stanza, a standalone Amen folded into the stanza before it.

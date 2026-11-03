@@ -5,11 +5,12 @@
 //! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
 pub mod about;
+pub mod feast;
 pub mod gloss;
 pub mod sun;
 pub mod usage;
 
-use calendar::{CalendarDay, Color, Date, Rank, Season};
+use calendar::{CalendarDay, Color, Date, MoveableDates, Rank, Season};
 use liturgy::{ElementType, OfficeHour};
 
 /// Capitalizes the first letter ("advent" → "Advent").
@@ -21,23 +22,46 @@ pub fn title_case(s: &str) -> String {
     }
 }
 
-/// The ornament body class for a season: Passiontide veils the gold,
-/// Paschaltide warms it, and every other season keeps the ordinary gold.
-pub fn season_class(season: Option<Season>) -> &'static str {
-    match season {
-        Some(Season::Passiontide) => "season-passiontide",
-        Some(Season::Easter) => "season-eastertide",
-        Some(Season::Advent | Season::Christmas | Season::Epiphany | Season::Septuagesima | Season::Lent | Season::Pentecost) | None => "",
+/// The ornament body class, the tint of the gilding, which follows the church's year as the
+/// church dresses its images ("Seasonal ornament" in style.css). In order of precedence:
+///
+/// - Passiontide veils the gold, from I Vespers of Passion Sunday through None of Holy Saturday,
+///   on a feast within it as on its ferias (the veils stay up for the Annunciation).
+/// - A rose day (Gaudete, Laetare) lifts the quiet: the church lets its flowers back for the day.
+/// - The penitential seasons, Advent, Septuagesima and Lent, feasts within them included, and
+///   any other violet day (the Ember days, the vigils, the Rogation days) take the quiet gilding:
+///   old gold without the light on it, a step short of the veil.
+/// - Paschaltide warms the gold, through the Octave of Pentecost, as long as Regina caeli is sung.
+/// - Every other day keeps the ordinary gold.
+pub fn gilding_class(season: Option<Season>, color: Option<Color>, paschaltide: bool) -> &'static str {
+    match (season, color) {
+        (Some(Season::Passiontide), _) => "season-passiontide",
+        (_, Some(Color::Rose)) => "",
+        (Some(Season::Advent | Season::Septuagesima | Season::Lent), _) | (_, Some(Color::Violet)) => "season-quiet",
+        _ if paschaltide => "season-eastertide",
+        _ => "",
     }
+}
+
+/// Paschaltide for a whole day, as home and the ordo keep it: Eastertide, and the Octave of
+/// Pentecost through its Saturday, whose None is Paschaltide's last hour (General Rubrics XXIV.3,
+/// XXXI.5). An hour's own answer is `OfficeHour::paschaltide`, which turns at that Saturday's
+/// I Vespers of Trinity.
+pub fn day_in_paschaltide(day: &CalendarDay, m: &MoveableDates) -> bool {
+    day.season == Season::Easter || (0..=6).contains(&day.date.days_since(m.pentecost))
 }
 
 /// The body class that frames a first-class feast's hour, or nothing. The ranking gives the
 /// penitential days of the first class the same rank for precedence (the Sundays of Lent, Ash
 /// Wednesday, Holy Week, the vigils), so the frame goes by the day's colour as well: a violet or
-/// black first-class day is kept, not kept festival.
-pub fn rank_class(rank: Option<Rank>, color: Option<Color>) -> &'static str {
+/// black first-class day is kept, not kept festival, and so is a rose one (Laetare is a Sunday of
+/// Lent relaxed, not a feast). A bare hour (`OfficeHour::bare`), stripped of its hymn and Gloria
+/// Patri, is never framed: Maundy Thursday and Holy Saturday are white for the Mass, and their
+/// Hours are Tenebrae's.
+pub fn rank_class(rank: Option<Rank>, color: Option<Color>, bare: bool) -> &'static str {
     match (rank, color) {
-        (Some(Rank::Double1stClass), Some(Color::Violet | Color::Black)) => "",
+        _ if bare => "",
+        (Some(Rank::Double1stClass), Some(Color::Violet | Color::Black | Color::Rose)) => "",
         (Some(Rank::Double1stClass), _) => "rank-first-class",
         _ => "",
     }
@@ -143,6 +167,24 @@ pub fn hour_versicle(hour: &OfficeHour) -> Option<Versicle> {
         |sigil: &str| el.text.lines().find_map(|l| l.trim().strip_prefix(sigil).map(|t| t.trim().to_string())).filter(|t| !t.is_empty());
     Some(Versicle { versicle: line("V.")?, response: line("R.")? })
 }
+
+/// Whether an hour's prayers before and after the Office open until the reader chooses: Lauds,
+/// Prime and Vespers open theirs, the other hours keep them closed. Every front starts from this.
+pub fn prayers_open_by_default(hour: &str) -> bool {
+    matches!(hour, "lauds" | "prime" | "vespers")
+}
+
+/// The line under the menu's Martyrology setting, on every front.
+pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
+
+/// The line under the menu's Chant setting, on every front.
+pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
+
+/// The metrics of the app's own EB Garamond (static/fonts, built by `neuma-metrics` from the faces
+/// tools/gengaramond.py writes), which every front measures a score's lyrics with, so the
+/// syllables sit where the notes put them: the server and the apps from here, chant.js from the
+/// same file.
+pub const CHANT_LYRIC_METRICS: &[u8] = include_bytes!("../../../apps/office-web/static/fonts/eb-garamond-lyrics.nmet");
 
 pub const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -380,7 +422,7 @@ pub fn tabula(year: i32) -> TabulaRows {
         moveable: vec![
             date("Septuagesima Sunday", moveable.septuagesima),
             date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter Day", moveable.easter),
+            date("Easter (Pascha) Day", moveable.easter),
             date("Ascension Day", moveable.ascension),
             date("Pentecost", moveable.pentecost),
             date("Corpus Christi", moveable.corpus_christi),
@@ -403,6 +445,12 @@ pub fn year_roman(year: i32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lauds_prime_and_vespers_open_their_prayers() {
+        let open: Vec<_> = liturgy::HOUR_NAMES.into_iter().filter(|h| prayers_open_by_default(h)).collect();
+        assert_eq!(open, ["lauds", "prime", "vespers"]);
+    }
 
     #[test]
     fn query_escape_encodes_special_characters() {
@@ -482,25 +530,58 @@ mod tests {
     }
 
     #[test]
-    fn season_class_veils_passiontide_and_brightens_paschaltide() {
-        assert_eq!(season_class(Some(Season::Passiontide)), "season-passiontide");
-        assert_eq!(season_class(Some(Season::Easter)), "season-eastertide");
-        for s in [Season::Advent, Season::Christmas, Season::Epiphany, Season::Septuagesima, Season::Lent, Season::Pentecost] {
-            assert_eq!(season_class(Some(s)), "", "{s:?}");
+    fn gilding_veils_passiontide_quiets_the_penitential_days_and_warms_paschaltide() {
+        use Color::*;
+        use Season::*;
+        let class = |s, c, p| gilding_class(Some(s), Some(c), p);
+        // The veil, on a feria and a feast alike: the Annunciation in Passiontide.
+        assert_eq!(class(Passiontide, Violet, false), "season-passiontide");
+        assert_eq!(class(Passiontide, White, false), "season-passiontide");
+        // Paschaltide: Eastertide, and the Octave of Pentecost while the hour is still paschal.
+        assert_eq!(class(Easter, White, true), "season-eastertide");
+        assert_eq!(class(Pentecost, Red, true), "season-eastertide");
+        assert_eq!(class(Pentecost, Red, false), "");
+        // The penitential seasons, their feasts included; and any other violet day.
+        for s in [Advent, Septuagesima, Lent] {
+            assert_eq!(class(s, Violet, false), "season-quiet", "{s:?}");
+            assert_eq!(class(s, White, false), "season-quiet", "{s:?}");
         }
-        assert_eq!(season_class(None), "");
+        assert_eq!(class(Pentecost, Violet, false), "season-quiet", "an Ember day in September");
+        assert_eq!(class(Easter, Violet, true), "season-quiet", "a Rogation day");
+        // Rose lifts the quiet; black and the Office of the Dead keep the ordinary gold.
+        assert_eq!(class(Lent, Rose, false), "");
+        assert_eq!(class(Advent, Rose, false), "");
+        assert_eq!(class(Pentecost, Black, false), "");
+        for s in [Christmas, Epiphany, Pentecost] {
+            assert_eq!(class(s, White, false), "", "{s:?}");
+        }
+        assert_eq!(gilding_class(None, None, false), "");
+    }
+
+    #[test]
+    fn a_day_is_in_paschaltide_through_the_saturday_of_the_pentecost_octave() {
+        let m = MoveableDates::compute(2026);
+        let day = |date: Date, season| CalendarDay { date, season, ..bare_day(season, "") };
+        assert!(day_in_paschaltide(&day(Date::new(2026, 4, 12), Season::Easter), &m));
+        assert!(day_in_paschaltide(&day(Date::new(2026, 5, 31), Season::Pentecost), &m));
+        assert!(day_in_paschaltide(&day(Date::new(2026, 6, 6), Season::Pentecost), &m));
+        assert!(!day_in_paschaltide(&day(Date::new(2026, 6, 7), Season::Pentecost), &m));
+        assert!(!day_in_paschaltide(&day(Date::new(2026, 4, 11), Season::Passiontide), &m));
     }
 
     #[test]
     fn rank_class_frames_only_first_class_feasts() {
-        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::White)), "rank-first-class");
-        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Red)), "rank-first-class");
-        // The penitential first-class days (Lent's Sundays, Ash Wednesday, Good Friday) are not framed.
-        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Violet)), "");
-        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Black)), "");
-        assert_eq!(rank_class(Some(Rank::Double2ndClass), Some(Color::White)), "");
-        assert_eq!(rank_class(Some(Rank::Simple), Some(Color::White)), "");
-        assert_eq!(rank_class(None, None), "");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::White), false), "rank-first-class");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Red), false), "rank-first-class");
+        // The penitential first-class days (Lent's Sundays, Ash Wednesday, Good Friday, Laetare) are not framed.
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Violet), false), "");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Black), false), "");
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::Rose), false), "");
+        // Nor a bare hour: Maundy Thursday's and Holy Saturday's white Hours are Tenebrae's.
+        assert_eq!(rank_class(Some(Rank::Double1stClass), Some(Color::White), true), "");
+        assert_eq!(rank_class(Some(Rank::Double2ndClass), Some(Color::White), false), "");
+        assert_eq!(rank_class(Some(Rank::Simple), Some(Color::White), false), "");
+        assert_eq!(rank_class(None, None, false), "");
     }
 
     #[test]

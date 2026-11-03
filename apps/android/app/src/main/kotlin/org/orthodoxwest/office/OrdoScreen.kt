@@ -93,6 +93,8 @@ fun OrdoScreen(
     onToday: () -> Unit,
     onYear: (Int) -> Unit,
     onDay: (LocalDate) -> Unit,
+    onFind: () -> Unit = {},
+    onFeast: (String) -> Unit = {},
     focusDay: Int = 0,
 ) {
     val p = LocalPalette.current
@@ -147,6 +149,8 @@ fun OrdoScreen(
     ) {
         item(key = "chrome") { chrome() }
         item(key = "header") { OrdoHeader(year, monthNumber, null, today, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        // The web's search field under the ordo's title, which opens the search page.
+        item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tools") {
             Row(ordoColumn().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -184,7 +188,7 @@ fun OrdoScreen(
             item(key = "wait") { Text("Preparing the month…", ordoColumn().padding(vertical = 32.dp), style = Type.small.copy(color = p.muted, textAlign = TextAlign.Center)) }
         } else {
             itemsIndexed(month.days, key = { _, d -> "d-${d.date.day}" }) { _, d ->
-                DayRow(d, LocalDate.of(d.date.year, d.date.month, d.date.day) == today, allDetails, onDay, ordoColumn())
+                DayRow(d, LocalDate.of(d.date.year, d.date.month, d.date.day) == today, allDetails, onDay, onFeast, ordoColumn())
             }
         }
         item(key = "continuation") {
@@ -321,8 +325,8 @@ private fun OrdoHeader(
     }
 }
 
-/** The first day's item in a month's list: after the chrome, header, tools, rank key and month heading (and a wide screen's column headings). */
-private const val FIRST_DAY_ITEM = 5
+/** The first day's item in a month's list: after the chrome, header, search, tools, rank key and month heading (and a wide screen's column headings). */
+private const val FIRST_DAY_ITEM = 6
 
 /**
  * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
@@ -338,6 +342,7 @@ fun OrdoYearScreen(
     onToday: () -> Unit,
     onYear: (Int) -> Unit,
     onDay: (LocalDate) -> Unit,
+    onFind: () -> Unit = {},
 ) {
     val p = LocalPalette.current
     val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
@@ -349,6 +354,7 @@ fun OrdoYearScreen(
     ) {
         item(key = "chrome") { chrome() }
         item(key = "header") { OrdoHeader(view.year, null, view.roman, today, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tabula") {
             Column(ordoColumn().padding(top = 40.dp)) {
                 TabulaHeading()
@@ -487,7 +493,7 @@ private fun MonthHeading(name: String, modifier: Modifier, onTop: () -> Unit) {
 }
 
 @Composable
-private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay: (LocalDate) -> Unit, modifier: Modifier) {
+private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay: (LocalDate) -> Unit, onFeast: (String) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
     val open = rememberSaveable(d.date, saver = Disclosures) { mutableStateMapOf<String, Boolean>() }
     val details = open["details"] ?: allDetails
@@ -509,7 +515,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
         // Shown for the whole month at once, the rows stay where they are.
-        Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d) }
+        Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d, onFeast) }
     }
     val anyOpen = details && hasDetails
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
@@ -737,10 +743,13 @@ private fun FeastName(d: OrdoDayView, style: TextStyle, modifier: Modifier) {
     )
 }
 
-/** The day's commemorations not already named with an antiphon at its Lauds or Vespers (the web's `build_month`). */
-private fun OrdoDayView.dayComms(): List<String> {
+/**
+ * The day's commemorations not already named with an antiphon at its Lauds or Vespers (the web's
+ * `build_month`), each with its feast's page.
+ */
+private fun OrdoDayView.dayComms(): List<CommemorationView> {
     val named = (laudsComms + vespersComms).map { it.name }.toSet()
-    return commemorations.filter { it !in named }
+    return commemorations.mapIndexed { i, name -> CommemorationView(name, "", commemorationIds.getOrElse(i) { "" }) }.filter { it.name !in named }
 }
 
 private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
@@ -756,26 +765,26 @@ private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) 
 
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable
-private fun Digest(d: OrdoDayView) {
+private fun Digest(d: OrdoDayView, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
     Column(
         Modifier.fillMaxWidth().padding(bottom = 8.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(8.dp),
     ) {
         // The day's commemorations first, under "Day", as the hours' rows are set.
         val day = d.dayComms()
-        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day.map { CommemorationView(it, "") })
+        if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day, onFeast = onFeast)
         if (d.hasLauds()) {
-            DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsComms)
+            DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsComms, onFeast)
         }
-        if (d.hoursPreces) DigestHour("Hours", emptyList(), null, preces = true, suffrage = false, comms = emptyList())
+        if (d.hoursPreces) DigestHour("Hours", emptyList(), null, preces = true, suffrage = false, comms = emptyList(), onFeast = onFeast)
         if (d.hasVespers()) {
-            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), d.magnificatAntiphon.takeIf { it.isNotEmpty() }?.let { "Mag. “$it”" }, d.vespersPreces, d.vespersSuffrage, d.vespersComms)
+            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), d.magnificatAntiphon.takeIf { it.isNotEmpty() }?.let { "Mag. “$it”" }, d.vespersPreces, d.vespersSuffrage, d.vespersComms, onFeast)
         }
     }
 }
 
 @Composable
-private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, comms: List<CommemorationView>) {
+private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
     val line = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)
     Column(Modifier.padding(bottom = 4.dp)) {
@@ -793,7 +802,18 @@ private fun DigestHour(name: String, notes: List<String>, antiphon: String?, pre
                 style = line,
             )
         }
-        comms.forEach { c -> Text("Com. ${c.name}" + if (c.incipit.isNotEmpty()) " “${c.incipit}”" else "", style = line) }
+        // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
+        comms.forEach { c ->
+            Text(
+                buildAnnotatedString {
+                    append("Com. ")
+                    withStyle(SpanStyle(textDecoration = if (c.feastId.isEmpty()) null else TextDecoration.Underline)) { append(c.name) }
+                    if (c.incipit.isNotEmpty()) append(" “${c.incipit}”")
+                },
+                if (c.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(c.feastId) },
+                style = line,
+            )
+        }
     }
 }
 

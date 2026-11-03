@@ -42,7 +42,7 @@ pub fn compose_prime(
             }
             append_hour_element(&mut elems, day, "prime", elem, t);
         }
-        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, bare: false, elements: elems });
     }
     hour
 }
@@ -144,6 +144,7 @@ fn martyrology_announcement_keys(date: Date) -> Vec<String> {
 
 /// An hour titled `name` for the day's own office.
 pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
+    let hour_name = name.to_lowercase();
     OfficeHour {
         form: PrayerForm::Private,
         date: day.date,
@@ -153,9 +154,18 @@ pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
         feast: day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
         rank: day.celebration.as_deref().map(|c| c.rank),
         color: Some(day.color),
+        paschaltide: day.is_paschaltide(&hour_name),
+        bare: is_bare(day, &hour_name),
         sections: Vec::new(),
         decisions: Vec::new(),
     }
+}
+
+/// Whether the hour is stripped of its furniture (`OfficeHour::bare`): the Triduum's form,
+/// which ends at None of Holy Saturday, and the Office of the Dead. Decided by the same
+/// predicates that strip the text, so the page cannot disagree with the office.
+pub fn is_bare(day: &Day, hour_name: &str) -> bool {
+    crate::hourdef::uses_triduum_form(day, hour_name) || crate::psalmody::is_office_of_the_dead(day)
 }
 
 /// Prime's antiphon rubric: feasts and Sundays take the first Lauds

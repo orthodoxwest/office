@@ -50,6 +50,7 @@ function assetURL(path) {
 var CORE_ASSETS = [
   assetURL("/static/style.css"),
   assetURL("/static/app.js"),
+  assetURL("/static/chant.js"),
   assetURL("/static/leader.js"),
   assetURL("/static/favicon.svg"),
   assetURL("/static/manifest.webmanifest"),
@@ -149,8 +150,26 @@ function ordoMonthPath(slug) {
   return "/calendar/" + slug.slice(0, 4) + "/" + slug.slice(5, 7);
 }
 
+// The chant engine and its lyric metrics are fetched only by a reader who
+// shows a score, so they are not precached; but a reader who has them keeps
+// them across deploys, as offline scores need them. carryAssets copies what a
+// cache holds and fetches nothing.
+var CARRIED_ASSETS = [assetURL("/static/neuma.mjs"), assetURL("/static/fonts/eb-garamond-lyrics.nmet")];
+
+function carryAssets(cache, urls) {
+  return Promise.all(urls.map(function (u) {
+    return caches.match(u).then(function (held) {
+      return held ? cache.put(u, held) : undefined;
+    }).catch(function () {});
+  }));
+}
+
 function precacheCore(cache) {
-  return Promise.all([precacheAssets(cache, CORE_ASSETS), precacheURLs(cache, todayShellURLs())]);
+  return Promise.all([
+    precacheAssets(cache, CORE_ASSETS),
+    carryAssets(cache, CARRIED_ASSETS),
+    precacheURLs(cache, todayShellURLs()),
+  ]);
 }
 
 self.addEventListener("install", function (event) {

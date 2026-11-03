@@ -89,6 +89,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -98,6 +99,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -110,6 +112,7 @@ import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.preferenceHints
 
 /** The reading measure's side gutter (`--page-gutter` on a phone). */
 val Gutter: Dp = 16.dp
@@ -251,6 +254,11 @@ val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
 class MartyrologyChoice(val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
+
+/** The reader's Chant setting, offered only once a text has a score. */
+class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
+
+val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
@@ -496,7 +504,16 @@ fun MenuPanel(
                     ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f)) { onTheme(t) } }
                 }
                 // The names are the church's, so a line says what they are, as on the web.
-                PrefHint("Nave is the church by day, Apse its vault by night. Default follows your device.")
+                PrefHint(
+                    buildAnnotatedString {
+                        prefName("Nave")
+                        append(" is the church by day, and ")
+                        prefName("Apse")
+                        append(" is its vault by night. ")
+                        prefName("Default")
+                        append(" follows your device.")
+                    },
+                )
                 Hairline(p.surfaceEdge)
                 MenuRow {
                     Text("TEXT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
@@ -527,19 +544,40 @@ fun MenuPanel(
                         MenuCell(label, on == martyrology.on, Type.label(12f, 0.06f)) { martyrology.onChange(on) }
                     }
                 }
-                PrefHint("On reads the saints of the coming day at Prime.")
+                PrefHint(AnnotatedString(PREF_HINTS.martyrology))
+                // Chant, laid out as the Martyrology's row, once a hymn or Marian antiphon has a score.
+                val chant = LocalChant.current
+                if (chant.offered) {
+                    Hairline(p.surfaceEdge)
+                    MenuRow {
+                        Text("CHANT", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
+                        Spacer(Modifier.weight(1f))
+                        listOf("OFF" to false, "ON" to true).forEach { (label, on) ->
+                            MenuCell(label, on == chant.on, Type.label(12f, 0.06f), spoken = "Chant ${label.lowercase()}") { chant.onChange(on) }
+                        }
+                    }
+                    PrefHint(AnnotatedString(PREF_HINTS.chant))
+                }
             }
         }
     }
+}
+
+/** A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`). */
+private fun AnnotatedString.Builder.prefName(name: String) {
+    withStyle(SpanStyle(fontStyle = FontStyle.Normal, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.05.em)) { append(name) }
 }
 
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
 private val ShadowRoom: Dp = 16.dp
 private val ShadowRise: Dp = 9.dp
 
+/** The lines under the Martyrology and Chant rows, as the web's (`presentation`). */
+private val PREF_HINTS by lazy { preferenceHints() }
+
 /** A quiet italic line under a menu row whose names need saying (the web's `.pref-hint`). */
 @Composable
-private fun PrefHint(text: String) {
+private fun PrefHint(text: AnnotatedString) {
     val p = LocalPalette.current
     Text(
         text,

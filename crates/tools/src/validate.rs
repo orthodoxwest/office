@@ -153,7 +153,7 @@ fn validate_semantics(feasts: &[Feast]) -> Vec<String> {
             && !is_valid_date_rule(rule)
         {
             errs.push(format!(
-                "Feast '{}' has unrecognized DateRule: {} (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)",
+                "Feast '{}' has unrecognized DateRule: {} (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, advent-ember-DAY, september-ember-DAY, holy-name, or last-sunday-october)",
                 f.id,
                 quote(rule)
             ));
@@ -216,6 +216,9 @@ fn is_valid_date_rule(rule: &str) -> bool {
     if let Some(s) = rule.strip_prefix("pentecost-sunday-") {
         return number(s).is_some_and(|n| n >= 1);
     }
+    if let Some((season, weekday)) = rule.split_once("-ember-") {
+        return matches!(season, "advent" | "september") && matches!(weekday, "wednesday" | "friday" | "saturday");
+    }
     rule == "holy-name" || rule == "last-sunday-october"
 }
 
@@ -244,6 +247,7 @@ pub fn validate_texts(src: &dyn DataSource) -> Vec<String> {
     for key in texts.corpus.missing_incipits() {
         errs.push(format!("no Latin incipit in data/latin-incipits.txt for: {key}"));
     }
+    errs.extend(office::chant::validate_scores(&texts));
     errs.sort();
     errs
 }

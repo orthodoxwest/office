@@ -6,12 +6,9 @@ enum Office {
     static let core: Result<OfficeCore, Error> = Result { try OfficeCore() }
 }
 
-/// The prayer forms: value, the control's label, and the chooser's phrase (hour.html).
-let prayerForms: [(value: String, label: String, phrase: String)] = [
-    ("private", "Private", "Praying privately"),
-    ("deacon", "Deacon", "With others, led by a deacon"),
-    ("priest", "Priest", "With others, led by a priest"),
-]
+/// The prayer forms: value, the control's label, and the chooser's phrase, as the web's.
+let prayerForms: [(value: String, label: String, phrase: String)] =
+    prayerFormChoices().map { (value: $0.value, label: $0.label, phrase: $0.phrase) }
 
 /// Capitalizes an hour's name: "lauds" → "Lauds".
 func hourLabel(_ hour: String) -> String { hour.prefix(1).uppercased() + hour.dropFirst() }
@@ -74,7 +71,7 @@ func spokenDay(_ day: CivilDate, today: CivilDate) -> String {
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
  * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
- * reminders, and About the Office.
+ * reminders, About the Office, the search for a feast, and a feast's page.
  */
 enum Page: Hashable {
     case home(CivilDate)
@@ -83,6 +80,8 @@ enum Page: Hashable {
     case year(Int)
     case reminders
     case about
+    case find(String)
+    case feast(String)
 
     /// Pages of one kind replace each other, as following a link does; another kind goes on top.
     var kind: Int {
@@ -93,6 +92,8 @@ enum Page: Hashable {
         case .year: return 3
         case .reminders: return 4
         case .about: return 5
+        case .find: return 6
+        case .feast: return 7
         }
     }
 
@@ -120,10 +121,14 @@ enum Page: Hashable {
         case let .year(y): return "year \(y)"
         case .reminders: return "reminders"
         case .about: return "about"
+        case let .find(q): return "find \(q)"
+        case let .feast(id): return "feast \(id)"
         }
     }
 
     static func decode(_ s: String) -> Page? {
+        // A query keeps its own spaces.
+        if s.hasPrefix("find ") { return .find(String(s.dropFirst(5))) }
         let f = s.split(separator: " ").map(String.init)
         switch f.first {
         case "home": return f.count > 1 ? CivilDate.parse(f[1]).map(Page.home) : nil
@@ -136,6 +141,7 @@ enum Page: Hashable {
         case "year": return f.count > 1 ? Int(f[1]).map(Page.year) : nil
         case "reminders": return .reminders
         case "about": return .about
+        case "feast": return f.count > 1 ? .feast(f[1]) : nil
         default: return nil
         }
     }
@@ -189,8 +195,13 @@ final class AppModel: ObservableObject {
     @Published private(set) var textSize: TextSize
     /// Whether Prime reads the next day's Martyrology; off by default.
     @Published private(set) var martyrology: Bool
-    /// The Prime last composed, and whether its Martyrology was shown (nil: it had none), for the usage beacon.
-    @Published private(set) var primeMartyrology: (page: Page, shown: Bool?)?
+    /// Whether a scored hymn or Marian antiphon shows its score in place of its words; off by default.
+    @Published private(set) var chant: Bool
+    /// Whether any text has a score, so the menu offers the Chant setting (as the web's `chant` global).
+    let offersChant: Bool = (try? Office.core.get().offersChant()) ?? false
+    /// What each hour composed on the way back shows, for the usage beacon: whether its Martyrology
+    /// was shown and whether its scores were (nil: it had none to show).
+    @Published private(set) var hourShows: [Page: HourShows] = [:]
     /// The ornament season of each home or hour composed on the way back, which retints the
     /// gilding of the chrome over it (the menu's painted line), as the page's own.
     @Published private(set) var seasons: [Page: String] = [:]
@@ -217,6 +228,7 @@ final class AppModel: ObservableObject {
         theme = UserDefaults.standard.string(forKey: "theme").flatMap(ThemeChoice.init(rawValue:)) ?? .system
         textSize = UserDefaults.standard.string(forKey: "text-size").flatMap(TextSize.init(rawValue:)) ?? .standard
         martyrology = UserDefaults.standard.bool(forKey: "martyrology")
+        chant = UserDefaults.standard.bool(forKey: "chant")
         prayed = Set(UserDefaults.standard.stringArray(forKey: "prayed") ?? [])
     }
 
@@ -268,6 +280,27 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The search's words changed: the search page takes them in place, with no move between pages.
+    func search(_ query: String) {
+        guard case let .find(q)? = path.last?.page, q != query else { return }
+        step = nil
+        path[path.count - 1].page = .find(query)
+    }
+
+    /**
+     * The way from a feast page to the search: back to the search the reader came from, with its
+     * words and results, or else a new one.
+     */
+    func findAgain() {
+        if path.count > 1, case .find = path[path.count - 2].page {
+            menuOpen = false
+            settingsOpen = false
+            path.removeLast()
+        } else {
+            open(.find(""))
+        }
+    }
+
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil
@@ -299,10 +332,19 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "martyrology")
     }
 
-    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown.
+    func chooseChant(_ value: Bool) {
+        step = nil
+        chant = value
+        defaults.set(value, forKey: "chant")
+    }
+
+    /// Notes what an hour page shows, once composed: at Prime, whether its Martyrology was shown,
+    /// and whether its scores were.
     func composed(_ view: HourView, page: Page) {
-        guard view.hour == "prime" else { return }
-        primeMartyrology = (page, view.martyrology)
+        let kept = Set(pages)
+        var now = hourShows.filter { kept.contains($0.key) }
+        now[page] = HourShows(martyrology: view.martyrology, chant: view.chant)
+        if now != hourShows { hourShows = now }
     }
 
     /// The ornament season of the page shown: its own once composed, else none.
@@ -316,11 +358,11 @@ final class AppModel: ObservableObject {
         if now != seasons { seasons = now }
     }
 
-    /// Whether `page` showed its Martyrology: nil unless it is the Prime last composed, with a reading.
-    func martyrologyShown(on page: Page) -> Bool? {
-        guard let prime = primeMartyrology, prime.page == page else { return nil }
-        return prime.shown
-    }
+    /// Whether `page` showed its Martyrology: nil unless it is a Prime composed, with a reading.
+    func martyrologyShown(on page: Page) -> Bool? { hourShows[page]?.martyrology }
+
+    /// Whether `page` showed its scores: nil unless it is an hour composed, with a score.
+    func chantShown(on page: Page) -> Bool? { hourShows[page]?.chant }
 
     /// Called when the app comes forward, and every minute while it is in front: the hour or the
     /// date may have turned since home was composed.
@@ -343,6 +385,10 @@ final class AppModel: ObservableObject {
         ([Page.home(root)] + pages).map(\.encoded).joined(separator: "\n")
     }
 
+    /// A reminder or an icon shortcut opened a page: a launch then leaves the way back unrestored,
+    /// so the page is not replaced by it, as Android's intent is not.
+    var openedExternally = false
+
     func restore(_ saved: String) {
         let pages = saved.split(separator: "\n").compactMap { Page.decode(String($0)) }
         guard case let .home(d)? = pages.first else { return }
@@ -352,7 +398,8 @@ final class AppModel: ObservableObject {
 
     /**
      * What the launch asked for, for the simulator screenshots: `-page hour -hour lauds
-     * -date 2026-03-15` (or home, ordo, year, reminders, about), with `-today` fixing today.
+     * -date 2026-03-15` (or home, ordo, year, reminders, about; find with `-query`, feast with
+     * `-feast`), with `-today` fixing today.
      */
     func openFromLaunch() -> Bool {
         let d = UserDefaults.standard
@@ -365,10 +412,18 @@ final class AppModel: ObservableObject {
         case "year": path = visits([.year(Int(date.year))])
         case "reminders": path = visits([.reminders])
         case "about": path = visits([.about])
+        case "find": path = visits([.find(d.string(forKey: "query") ?? "")])
+        case "feast": path = visits([.feast(d.string(forKey: "feast") ?? "st-benedict")])
         default: path = []
         }
         // `-settings YES` opens the wide header's Settings, for its screenshot.
         settingsOpen = d.bool(forKey: "settings")
         return true
     }
+}
+
+/// What a composed hour shows that the usage beacon reports (nil: nothing of the kind to show).
+struct HourShows: Equatable {
+    let martyrology: Bool?
+    let chant: Bool?
 }
