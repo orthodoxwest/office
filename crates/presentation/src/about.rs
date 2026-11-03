@@ -123,7 +123,9 @@ pub const ABOUT: &[AboutBlock] = &[
         "Each day keeps a feast or the office of its season, as the archdiocese’s printed ordo appoints, and the home \
          page wears the day’s liturgical color. The app’s [Ordo](/calendar) sets out the year a month at a time: each \
          day’s feast, rank and color, its fasts, and the antiphons and commemorations of Lauds and Vespers. A key \
-         explains its marks, and the year’s title page gives the moveable feasts and Ember days.",
+         explains its marks, and the year’s title page gives the moveable feasts and Ember days. You can search it \
+         for a feast or saint; each has a page with its collect, antiphons and versicles, and when it is kept in the \
+         years ahead.",
     ),
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
@@ -131,7 +133,8 @@ pub const ABOUT: &[AboutBlock] = &[
          comes from. The phone apps work without a connection, and the website keeps the coming two weeks for \
          reading offline. [Reminders](/reminders) can call you to the hours you keep. In Settings (in the Menu on a \
          phone) you can choose the Nave, the church by day, or the Apse, its vault by night, change the text size, \
-         and have Prime read the Martyrology, the saints of the coming day. Your settings are kept on your device. \
+         have Prime read the Martyrology, the saints of the coming day, and show the hymns and Marian antiphon in \
+         chant notation, where it is available. Your settings are kept on your device. \
          The app counts hours prayed without knowing who prayed them; there are no accounts and no advertising. See \
          [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
