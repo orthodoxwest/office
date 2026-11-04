@@ -26,7 +26,14 @@ fn the_embedded_corpus_is_the_data_directory() {
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
-    for file in ["appointment-scopes.json", "chant-tunes.txt", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
+    for file in [
+        "appointment-scopes.json",
+        "chant-doxologies.txt",
+        "chant-tunes.txt",
+        "collect-conclusions.txt",
+        "latin-incipits.txt",
+        "penitential.txt",
+    ] {
         let want = fs.read(file).unwrap().map(|s| String::from_utf8(pack::packed(file, s.into_bytes())).unwrap());
         assert_eq!(data.read(file).unwrap(), want, "{file}");
     }
@@ -343,10 +350,11 @@ fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let (off, on) = (blocks(false), blocks(true));
     assert!(scores(&off).is_empty());
     let sung = scores(&on);
-    // Te lucis's first stanza (the Holy Rosary's doxology is not the score's) and the antiphon.
-    assert_eq!(sung.len(), 2, "{sung:?}");
+    // Te lucis stanza by stanza, the Holy Rosary's doxology sung to the score's last, and the antiphon.
+    assert_eq!(sung.len(), 4, "{sung:?}");
     assert!(sung[0].contains("To(h) thee,(j) be(j)fore(j)") && sung[0].ends_with("now.(g.) (::)"), "{}", sung[0]);
-    assert!(sung[1].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[1]);
+    assert!(sung[2].contains("All(h) hon(j)our,(j) laud,(j)"), "{}", sung[2]);
+    assert!(sung[3].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[3]);
     // The antiphon's words give way to the score; the rest of the hour stands as it was.
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
