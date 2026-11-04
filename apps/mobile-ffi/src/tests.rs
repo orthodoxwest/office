@@ -332,7 +332,7 @@ fn a_quick_scroll_does_not_pray_an_hour() {
 }
 
 #[test]
-fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
+fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let core = OfficeCore::new().unwrap();
     assert!(core.offers_chant());
     let blocks = |chant| {
