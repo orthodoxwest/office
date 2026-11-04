@@ -1,0 +1,51 @@
+# The seasonal and proper hymn endings (doxologies) cut into sung syllables, so a hymn's score
+# can sing whichever ending the day takes to the notes of its own last stanza. The engine puts an
+# ending here in place of a hymn's own last stanza (engine.rs, substitute_hymn_doxology); a whole
+# hymn's score then sets the ending's syllables, in order, under the notes it prints for its own
+# last stanza, where both have the same count (Long Metre: four lines of eight).
+#
+# Each [key] names a corpus ending; its lines are the ending's words, `|` between the syllables
+# of a word (a hyphen stays part of the word: Vir|gin-|born). `make validate` checks the words
+# against the corpus text and that every ending the engine can substitute has a row.
+
+[seasonal/christmas/hymn-doxology]
+All hon|our, laud, and glo|ry be,
+O Je|su, Vir|gin-|born, to thee;
+All glo|ry, as is ev|er meet,
+To Fa|ther and to Pa|ra|clete.
+
+[seasonal/epiphany/hymn-doxology]
+All glo|ry, Lord, to thee we pay
+For thine E|piph|a|ny to|day;
+All glo|ry, as is ev|er meet,
+To Fa|ther and to Pa|ra|clete.
+
+[seasonal/easter/hymn-doxology-easter]
+To thee who, dead, a|gain dost live,
+All glo|ry, Lord, thy peo|ple give;
+All glo|ry, as is ev|er meet,
+To Fa|ther and to Pa|ra|clete.
+
+[seasonal/easter/hymn-doxology-ascension]
+All glo|ry, Lord, to thee we pay,
+As|cend|ing o'er the stars to|day;
+All glo|ry, as is ev|er meet,
+To Fa|ther and to Pa|ra|clete.
+
+[seasonal/pentecost/hymn-doxology-pentecost]
+To thee who, dead, a|gain dost live,
+All glo|ry, Lord, thy peo|ple give;
+Whom with the Fa|ther we a|dore
+And Ho|ly Ghost for ev|er|more.
+
+[proper/seven-sorrows-bvm/hymn-doxology]
+Glo|ry to thee, O Lord, we give,
+Who died to make thy ser|vants live;
+Whom with the Fa|ther we a|dore
+And Ho|ly Spi|rit ev|er|more.
+
+[proper/transfiguration/hymn-doxology]
+All glo|ry, Lord, to thee we pay,
+Trans|fig|ured on the mount to-|day;
+All glo|ry, as is ev|er meet,
+To Fa|ther and to Pa|ra|clete.

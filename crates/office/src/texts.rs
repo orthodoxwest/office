@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use calendar::DataSource;
 use corpus::{Corpus, Sidecar, TextFile};
 
-use crate::chant::{Score, TUNES_FILE, TuneTable, load_scores, parse_tunes};
+use crate::chant::{DOXOLOGIES_FILE, DoxologyTable, Score, TUNES_FILE, TuneTable, load_scores, parse_doxologies, parse_tunes};
 use crate::scopes::AppointmentScopes;
 
 /// The corpus, the appointment scopes, the chant scores and the tune table. `scopes` is `None` when
@@ -19,6 +19,8 @@ pub struct OfficeTexts {
     pub scores: BTreeMap<String, BTreeMap<String, Score>>,
     /// `data/chant-tunes.txt`: which of an entry's several tunes is sung when.
     pub tunes: TuneTable,
+    /// `data/chant-doxologies.txt`: the seasonal and proper hymn endings cut into syllables.
+    pub doxologies: DoxologyTable,
 }
 
 /// Loads `data/texts/`, its sidecars, its chant scores and the tune table.
@@ -52,7 +54,11 @@ pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
         None => TuneTable::new(),
         Some(raw) => parse_tunes(&src.display_path(TUNES_FILE), &raw)?,
     };
-    Ok(OfficeTexts { corpus, scopes, scores, tunes })
+    let doxologies = match src.read(DOXOLOGIES_FILE)? {
+        None => DoxologyTable::new(),
+        Some(raw) => parse_doxologies(&src.display_path(DOXOLOGIES_FILE), &raw)?,
+    };
+    Ok(OfficeTexts { corpus, scopes, scores, tunes, doxologies })
 }
 
 impl std::ops::Deref for OfficeTexts {
@@ -65,7 +71,7 @@ impl std::ops::Deref for OfficeTexts {
 impl OfficeTexts {
     /// A corpus without appointment scopes, for tests.
     pub fn from_corpus(corpus: Corpus) -> OfficeTexts {
-        OfficeTexts { corpus, scopes: None, scores: BTreeMap::new(), tunes: TuneTable::new() }
+        OfficeTexts { corpus, scopes: None, scores: BTreeMap::new(), tunes: TuneTable::new(), doxologies: DoxologyTable::new() }
     }
 
     /// The appointment scope governing a seasonal fallback lookup, if any.
