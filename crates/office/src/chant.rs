@@ -5,7 +5,9 @@
 //! every stanza; a Marian antiphon's sets the antiphon, up to its ℣. The composed hour carries a
 //! score only on an element whose sung words are the score's own, so a corpus edit or a composed
 //! change of wording (a doxology swapped by season) falls back to the text rather than
-//! underlaying the wrong words.
+//! underlaying the wrong words. A score of every stanza falls back to its first stanza where only
+//! the later stanzas changed (Christmastide's or Paschaltide's doxology), so the tune still heads
+//! the hymn on those days.
 //!
 //! An entry with several tunes is sung by the tune table, `data/chant-tunes.txt`, which says
 //! which tune is sung when, as the books' hymn indexes label them ("the summer tune", "tune for a
@@ -45,6 +47,9 @@ pub struct Score {
     pub words: Vec<String>,
     /// neuma's error diagnostics; a score with any fails validation.
     pub errors: Vec<String>,
+    /// A score of several stanzas cut at its first double bar, with the words that stanza sets:
+    /// what the hymn takes where a seasonal doxology parts the later stanzas from the score's.
+    pub first_stanza: Option<(Arc<str>, Vec<String>)>,
 }
 
 impl Score {
@@ -56,7 +61,14 @@ impl Score {
             .filter(|d| d.severity == neuma::Severity::Error)
             .map(|d| format!("{}: {}", d.code, d.message))
             .collect();
-        Score { gabc: Arc::from(curl_apostrophes(gabc)), words: words(&chant.summary().text), errors }
+        let gabc: Arc<str> = Arc::from(curl_apostrophes(gabc));
+        let parts = ChantScore { gabc: gabc.clone(), sets: ScoreSpan::WholeHymn }.stanza_parts();
+        let first_stanza = (parts.len() > 1).then(|| {
+            let first = parts[0].clone();
+            let sung = words(&neuma::Chant::new(&first).summary().text);
+            (Arc::from(first), sung)
+        });
+        Score { gabc, words: words(&chant.summary().text), errors, first_stanza }
     }
 }
 
@@ -278,8 +290,13 @@ fn score_for(elem: &OfficeElement, t: &OfficeTexts, date: Date, feast: &str) -> 
     if SungKind::of_key(key) != Some(wanted) {
         return None;
     }
-    let sets = wanted.span(&elem.text, &score.words)?;
-    Some(ChantScore { gabc: score.gabc.clone(), sets })
+    if let Some(sets) = wanted.span(&elem.text, &score.words) {
+        return Some(ChantScore { gabc: score.gabc.clone(), sets });
+    }
+    // Every stanza's score on a day whose later stanzas differ (another doxology): its first
+    // stanza still sets the hymn's first.
+    let (first, sung) = score.first_stanza.as_ref()?;
+    (wanted.span(&elem.text, sung)? == ScoreSpan::FirstStanza).then(|| ChantScore { gabc: first.clone(), sets: ScoreSpan::FirstStanza })
 }
 
 /// Problems with the scores: a key that names no text or an alias, a text that is not a hymn or
@@ -480,6 +497,29 @@ mod engine_tests {
         let parted: Vec<String> = stanzas.iter().map(|s| gabc(s).split_once("(c4) ").unwrap().1.to_string()).collect();
         set(&mut engine, format!("name: test;\n%%\n(c4) {}", parted.join(" ")));
         assert!(super::validate_scores(&engine.texts).is_empty(), "{:?}", super::validate_scores(&engine.texts));
+    }
+
+    /// A score of every stanza on a day whose later stanzas are not its own (Christmastide's
+    /// doxology, say) still sets the first stanza, cut at its first double bar.
+    #[test]
+    fn a_whole_hymns_score_sets_the_first_stanza_where_a_later_one_differs() {
+        let mut engine = Engine::load(&TestData("../../data".into())).unwrap();
+        let stanzas = corpus::lines::hymn_sung_stanzas(engine.texts.get(KEY));
+        let mut parted: Vec<String> = stanzas.iter().map(|s| gabc(s).split_once("(c4) ").unwrap().1.to_string()).collect();
+        let last = parted.len() - 1;
+        parted[last] = parted[last].replacen("(g)", "(g) Jesu(g)", 1);
+        let whole = format!("name: test;\n%%\n(c4) {}", parted.join(" "));
+        engine.texts.scores.insert(KEY.into(), [("ferial".to_string(), Score::new(&whole))].into());
+
+        let score = compline_hymn(&engine).score.expect("the first stanza is still scored");
+        assert_eq!(score.sets, ScoreSpan::FirstStanza);
+        assert_eq!(&*score.gabc, format!("name: test;\n%%\n(c4) {}", parted[0]));
+
+        // The first stanza changed too: plain words.
+        parted[0] = parted[0].replacen("(g)", "(g) Jesu(g)", 1);
+        let whole = format!("name: test;\n%%\n(c4) {}", parted.join(" "));
+        engine.texts.scores.insert(KEY.into(), [("ferial".to_string(), Score::new(&whole))].into());
+        assert!(compline_hymn(&engine).score.is_none());
     }
 
     /// The tune table sings O lux beata's summer tune from the Saturday before the III Sunday
