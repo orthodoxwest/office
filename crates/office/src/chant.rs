@@ -190,6 +190,9 @@ pub struct Syllable {
 /// The doxology table: each seasonal or proper hymn ending, by corpus key, cut into syllables.
 pub type DoxologyTable = BTreeMap<String, Vec<Syllable>>;
 
+/// The syllables of a line of the endings, which are all Long Metre (8.8.8.8).
+const LONG_METRE_LINE: usize = 8;
+
 /// Reads the doxology table: `[corpus key]` sections whose lines are the ending's words, `|`
 /// between the syllables of a word; `#` comments.
 pub fn parse_doxologies(path: &str, raw: &str) -> Result<DoxologyTable, String> {
@@ -209,6 +212,10 @@ pub fn parse_doxologies(path: &str, raw: &str) -> Result<DoxologyTable, String> 
         }
         let Some(k) = &key else { return Err(format!("{path}:{}: a line before any [key]", n + 1)) };
         let syllables = table.get_mut(k).expect("inserted");
+        let cut: usize = line.split_whitespace().map(|w| w.split('|').count()).sum();
+        if cut != LONG_METRE_LINE {
+            return Err(format!("{path}:{}: {cut} syllables; an ending's line has {LONG_METRE_LINE}", n + 1));
+        }
         for word in line.split_whitespace() {
             let parts: Vec<&str> = word.split('|').collect();
             if parts.iter().any(|p| p.is_empty()) {
@@ -296,6 +303,10 @@ fn with_doxology(text: &str, score: &Score, t: &OfficeTexts) -> Option<String> {
     for (j, (&i, syl)) in sung_at.iter().zip(doxology).enumerate() {
         toks[i].text = syl.text.clone();
         if j > 0 {
+            // A bar may fall only between words: one inside a word of the ending would part it.
+            if !doxology[j - 1].word_end && (sung_at[j - 1] + 1..i).any(|b| toks[b].notes.chars().any(|c| ",;:".contains(c))) {
+                return None;
+            }
             toks[i].lead = if doxology[j - 1].word_end { " ".into() } else { String::new() };
         }
     }
@@ -526,7 +537,9 @@ fn validate_doxologies(t: &OfficeTexts) -> Vec<String> {
             errs.push(format!("{DOXOLOGIES_FILE}: [{key}] {}", first_difference(&got, &want)));
         }
     }
-    for (key, text) in t.concrete() {
+    let mut keys: Vec<(&str, &str)> = t.concrete().collect();
+    keys.sort_unstable();
+    for (key, text) in keys {
         if is_ending(key) && !corpus::is_omitted(text) && !text.trim().is_empty() && !t.doxologies.contains_key(key) {
             errs.push(format!("{DOXOLOGIES_FILE}: no row for {key}, so a hymn's score cannot sing it"));
         }
@@ -718,9 +731,16 @@ mod engine_tests {
         assert!(score.gabc.ends_with("Pa(h)ra(g)clete.(g.) (::) A(ghg)men.(f.g.) (::)\n"), "{}", score.gabc);
         assert_eq!(Score::new(&score.gabc).words, words(&hymn_sung_stanzas(&hymn.text).join(" ")));
 
+        // A bar the score prints inside a word of the ending would part it: the first stanza instead.
+        let key = "ordinary/terce/hymn";
+        let barred = engine.texts.scores[key]["archdiocesan"].gabc.replacen("(::) O(h) Fa(h)ther,", "(::) O(h) Fa(h) (,) ther,", 2);
+        let saved = engine.texts.scores.insert(key.into(), [("archdiocesan".to_string(), Score::new(&barred))].into()).unwrap();
+        assert_eq!(hymn_on(&engine, "terce", ST_STEPHEN).score.expect("scored").sets, ScoreSpan::FirstStanza);
+        engine.texts.scores.insert(key.into(), saved);
+
+        // "honour" sung as one syllable: the same words, one syllable short of the stanza's notes.
         let nativity = engine.texts.doxologies.get_mut("seasonal/christmas/hymn-doxology").unwrap();
         let laud = nativity.iter().position(|s| s.text == "laud,").unwrap();
-        // "honour" sung as one syllable: the same words, one syllable short of the stanza's notes.
         nativity[laud - 2] = super::Syllable { text: "honour,".into(), word_end: true };
         nativity.remove(laud - 1);
         assert!(super::validate_scores(&engine.texts).is_empty());
@@ -729,12 +749,16 @@ mod engine_tests {
 
     #[test]
     fn the_doxology_table_reads_syllables_and_is_checked_against_the_corpus() {
-        let table = super::parse_doxologies("t", "# note\n[a/hymn-doxology]\nAll glo|ry, Vir|gin-|born\n").unwrap();
+        let table = super::parse_doxologies("t", "# note\n[a/hymn-doxology]\nAll glo|ry, Vir|gin-|born to thee\n").unwrap();
         let cut: Vec<(&str, bool)> = table["a/hymn-doxology"].iter().map(|s| (s.text.as_str(), s.word_end)).collect();
-        assert_eq!(cut, [("All", true), ("glo", false), ("ry,", true), ("Vir", false), ("gin-", false), ("born", true)]);
-        assert!(super::parse_doxologies("t", "[a]\nx\n[a]\n").unwrap_err().contains("twice"));
-        assert!(super::parse_doxologies("t", "glo|ry\n").unwrap_err().contains("before any"));
-        assert!(super::parse_doxologies("t", "[a]\nglo||ry\n").unwrap_err().contains("empty syllable"));
+        assert_eq!(
+            cut,
+            [("All", true), ("glo", false), ("ry,", true), ("Vir", false), ("gin-", false), ("born", true), ("to", true), ("thee", true)]
+        );
+        assert!(super::parse_doxologies("t", "[a]\n[a]\n").unwrap_err().contains("twice"));
+        assert!(super::parse_doxologies("t", "a b c d e f glo|ry\n").unwrap_err().contains("before any"));
+        assert!(super::parse_doxologies("t", "[a]\nglo||ry a b c d e\n").unwrap_err().contains("empty syllable"));
+        assert!(super::parse_doxologies("t", "[a]\nTo Fa|ther and to Paraclete.\n").unwrap_err().contains("6 syllables"));
 
         let mut engine = Engine::load(&TestData("../../data".into())).unwrap();
         assert!(super::validate_scores(&engine.texts).is_empty(), "{:?}", super::validate_scores(&engine.texts));
