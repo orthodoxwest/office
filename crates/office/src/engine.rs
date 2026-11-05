@@ -709,8 +709,9 @@ pub fn canticle_label(reference: &str, text: &str) -> String {
 /// split psalm carries in our psalter, so the reader with a Prayer Book finds
 /// it ("Psalm 147 (147b)"). The numbers are joined by no-break spaces. The
 /// joins and splits are those recorded in
-/// data/latin-incipits.txt.
-fn psalm_label(name: &str) -> String {
+/// data/latin-incipits.txt. Public for the printed diurnal (orthodoxwest/diurnal),
+/// whose pointers to the Psalms for Feasts name psalms by its Septuagint number.
+pub fn psalm_label(name: &str) -> String {
     let name = name.trim_start_matches('0');
     let digits = name.find(|c: char| !c.is_ascii_digit()).unwrap_or(name.len());
     let (number, part) = name.split_at(digits);
