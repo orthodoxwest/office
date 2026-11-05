@@ -239,6 +239,18 @@ Playwright rather than relying only on screenshots. Check home and an hour
 when shared CSS/chrome changes. Recheck seasonal colours only when changing
 ornament or theme tokens; measure paint cost when adding decoration.
 
+Check WebKit as well as Chromium (iOS Safari fires no `click` on non-interactive
+elements; use `pointerup` or a real control), at small and large system text
+sizes, and through any animation. Before building a substantial visual change,
+show a mock and a side-by-side of master and the proposal, in day and night,
+and wait for a choice; keep earlier rounds visible. Share images as attachments
+or an Artifact page, since the maintainer cannot open shared-folder paths.
+
+Port every visible change to `apps/android/` and `apps/ios/` in the same PR
+(tokens, ornaments, layout, settings), or say plainly which part waits and file
+an issue. Native code compiles only in CI here; confirm both app jobs passed.
+
+Run `npm --prefix .web-tools ci` once in a fresh checkout before `make test-ux`.
 Run `cargo test -p render-html -p office-web`, rebuild embedded assets,
 and run `make test-ux` for UI changes. CI runs behavior tests from
 `ux.spec.js`; add coverage there when warranted. Preserve meaningful
