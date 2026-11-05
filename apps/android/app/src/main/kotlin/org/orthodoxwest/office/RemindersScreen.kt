@@ -339,9 +339,9 @@ private fun Remark(text: String) {
     )
 }
 
-/** The web's headpiece, set to the left: a painted cross between two short rules. */
+/** The web's headpiece, set to the left: a painted cross between two short rules (Reminders, About). */
 @Composable
-private fun PlainHeadpiece() {
+fun PlainHeadpiece() {
     val ink = LocalPalette.current.lining
     val rule = ink.copy(alpha = 0.55f)
     Row(verticalAlignment = Alignment.CenterVertically) {

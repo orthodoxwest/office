@@ -29,6 +29,7 @@ import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.UsageEvent
+import org.orthodoxwest.office.core.aboutNewcomer
 import org.orthodoxwest.office.core.hourNames
 import org.orthodoxwest.office.core.prayerFormChoices
 
@@ -46,7 +47,7 @@ fun LocalDate.toCivil(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
  * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
- * search for a feast, and a feast's page.
+ * reminders, About the Office, the search for a feast, and a feast's page.
  */
 sealed interface Page {
     data class Home(val date: LocalDate) : Page
@@ -54,6 +55,7 @@ sealed interface Page {
     data class Ordo(val year: Int, val month: Int, val day: Int = 0) : Page
     data class Year(val year: Int) : Page
     data object Reminders : Page
+    data object About : Page
     data class Find(val query: String) : Page
     data class Feast(val id: String) : Page
 }
@@ -65,6 +67,7 @@ fun Page.encode(): String = when (this) {
     is Page.Ordo -> "ordo $year $month $day"
     is Page.Year -> "year $year"
     Page.Reminders -> "reminders"
+    Page.About -> "about"
     is Page.Find -> "find $query"
     is Page.Feast -> "feast $id"
 }
@@ -79,6 +82,7 @@ fun decodePage(s: String): Page? = runCatching {
         "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt(), f.getOrNull(3)?.toInt() ?: 0)
         "year" -> Page.Year(f[1].toInt())
         "reminders" -> Page.Reminders
+        "about" -> Page.About
         "feast" -> Page.Feast(f[1])
         else -> null
     }
@@ -95,7 +99,7 @@ sealed interface Content {
     data class Find(val view: FindView) : Content
     data class Feast(val view: FeastPageView) : Content
 
-    /** The year's frontispiece and the reminders, drawn from the page itself. */
+    /** The year's frontispiece, the reminders and About, drawn from the page itself. */
     data object Drawn : Content
     data class Failed(val message: String) : Content
 }
@@ -195,6 +199,13 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         private set
 
     val today: LocalDate get() = LocalDate.now()
+
+    /**
+     * Whether home offers the introduction: the reader's first week, counted from the day Usage
+     * keeps as the app's first. Asked again each time home is composed, so it ends on its day.
+     */
+    var newcomer: Boolean by mutableStateOf(false)
+        private set
 
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
@@ -395,6 +406,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             is Page.Ordo -> UsageEvent.Ordo(shown.year)
             is Page.Year -> UsageEvent.Ordo(shown.year)
             Page.Reminders -> UsageEvent.RemindersPage
+            // The web counts no beacon for its about page.
+            Page.About -> return
         }
         // Prime reports whether its Martyrology was shown, and an hour with a score whether its
         // notation was, once the hour on screen is this page's.
@@ -419,6 +432,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val visit = entry
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
+        if (visit.page is Page.Home) newcomer = aboutNewcomer(usage.daysSinceFirst())
         feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
         loading = viewModelScope.launch {
@@ -448,6 +462,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         refreshReminderStatus()
                         Content.Drawn
                     }
+                    Page.About -> Content.Drawn
                 }
             } catch (e: CancellationException) {
                 throw e

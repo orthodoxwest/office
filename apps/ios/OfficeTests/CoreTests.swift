@@ -47,6 +47,25 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(Metrics(textSize: .large).space(.section), 32 * 1.1, accuracy: 0.001)
     }
 
+    func testTheAboutPageHasTheSevenHoursAndLinksOnlyWhereTheAppCanGo() {
+        let page = about()
+        XCTAssertFalse(page.title.isEmpty)
+        XCTAssertEqual(page.periods.flatMap(\.hours).map(\.hour), hourNames())
+        XCTAssertEqual(page.periods.flatMap(\.hours).count, 7)
+        let links = page.blocks.flatMap(\.runs).map(\.link).filter { !$0.isEmpty }
+        XCTAssertFalse(links.isEmpty)
+        for link in links {
+            XCTAssertTrue(["/calendar", "/reminders", "/privacy"].contains(link) || link.hasPrefix("https://"), link)
+            XCTAssertNotNil(aboutLink(link), link)
+        }
+        // The privacy policy is the production site's until a beacon's reply names a new address.
+        UserDefaults().removePersistentDomain(forName: "about-tests")
+        let defaults = UserDefaults(suiteName: "about-tests")!
+        XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://orthodoxwestbreviary.com/privacy")!))
+        defaults.set("https://example.org/api/usage", forKey: "usage-endpoint")
+        XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
+    }
+
     /// A rubric's "secretly" carries its note, as the web's `.gloss-term`, and the typesetter finds
     /// its box to draw the hairline and anchor the note.
     func testARubricsSecretlyCarriesItsNote() throws {
@@ -211,7 +230,7 @@ final class PlaceTests: XCTestCase {
 
     func testPagesRoundTripThroughSavedState() {
         let pages: [Page] = [
-            .home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders,
+            .home(day), .hour(day, "vespers"), .ordo(year: 2026, month: 3, day: 15), .year(2027), .reminders, .about,
             .find(""), .find("st  benedict"), .feast("st-benedict"),
         ]
         for page in pages { XCTAssertEqual(Page.decode(page.encoded), page) }
@@ -455,6 +474,7 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: CivilDate(year: 2019, month: 3, day: 4), hour: "lauds"), dark: false, form: "private")
         usage.record(.ordo(year: 2031), dark: false, form: "private")
         usage.record(Page.year(2026).usageEvent!, dark: false, form: "private")
+        XCTAssertNil(Page.about.usageEvent)
         // The search and the feast pages are not counted, as on the web.
         XCTAssertNil(Page.find("benedict").usageEvent)
         XCTAssertNil(Page.feast("st-benedict").usageEvent)
@@ -512,6 +532,18 @@ final class UsageTests: XCTestCase {
         self.usage().record(.hour(date: today, hour: "compline"), dark: false, form: "private")
         let moved = "https://example.org/api/usage"
         XCTAssertEqual(endpoints, [usageEndpoint(), moved, moved, moved])
+    }
+
+    func testANewcomerIsOfferedTheIntroductionForAWeek() {
+        let defaults = UserDefaults(suiteName: suite)!
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 0)
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(6 * 86_400)), 6)
+        XCTAssertTrue(aboutNewcomer(daysSinceFirst: 6))
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(7 * 86_400))))
+        // An installation that reported before first days were kept is no newcomer.
+        defaults.set("before", forKey: "usage-first")
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
     }
 
     func testDebugBuildsNeverReport() {

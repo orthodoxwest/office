@@ -73,6 +73,7 @@ import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+import org.orthodoxwest.office.core.about
 import org.orthodoxwest.office.core.ordoYear
 
 /** The scrims `enableEdgeToEdge` gives a three-button navigation bar by default (Android 8–9). */
@@ -146,6 +147,7 @@ class MainActivity : ComponentActivity() {
                             onSearch = vm::search,
                             onFindAgain = vm::findAgain,
                             entries = vm.entries.map { it.id },
+                            newcomer = vm.newcomer,
                         )
                     }
                 }
@@ -253,7 +255,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
- * `hour` and `ordo` is its content, still.
+ * `hour` and `ordo` is its content, still. `newcomer` is a reader's first week.
  */
 @Composable
 fun OfficeApp(
@@ -284,6 +286,7 @@ fun OfficeApp(
     onAllowLocation: () -> Unit = {},
     entry: Long = 0,
     entries: List<Long> = listOf(entry),
+    newcomer: Boolean = false,
     find: FindView? = null,
     feast: FeastPageView? = null,
 ) {
@@ -322,13 +325,15 @@ fun OfficeApp(
         onFollowSun = onFollowSun,
         onAllowLocation = onAllowLocation,
         entries = entries,
+        newcomer = newcomer,
     )
 }
 
 /**
  * The app on its plaster wall: the page shown, under the shared header and menu. A new page
  * comes in as `motion` says, over the wall, once its content is ready; until then the page
- * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made.
+ * before it stays. With `onBack`, the back gesture draws the page `behind` in as it is made. In a
+ * reader's first week (`newcomer`) home offers the introduction.
  */
 @Composable
 fun OfficeApp(
@@ -359,7 +364,10 @@ fun OfficeApp(
     onSearch: (String) -> Unit = {},
     onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
     entries: List<Long>,
+    newcomer: Boolean = false,
 ) {
+    // About's words are the core's, the menu's name for the page and home's introduction among them.
+    val aboutView = remember { about() }
     var menu by remember { mutableStateOf(false) }
     // The wide header's Settings panel: the theme and text size.
     var settings by remember { mutableStateOf(false) }
@@ -432,13 +440,16 @@ fun OfficeApp(
                                 is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
                                 is Page.Ordo -> Page.Ordo(page.year, page.month)
                                 is Page.Year -> Page.Year(page.year)
-                                Page.Reminders, is Page.Find, is Page.Feast -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
+                                Page.Reminders, Page.About, is Page.Find, is Page.Feast -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
                             },
                         )
                     },
                     ordoCurrent = page is Page.Ordo || page is Page.Year || page is Page.Find || page is Page.Feast,
                     onReminders = { menu = false; onOpen(Page.Reminders) },
                     remindersCurrent = page is Page.Reminders,
+                    about = aboutView.menu,
+                    onAbout = { menu = false; onOpen(Page.About) },
+                    aboutCurrent = page is Page.About,
                     settingsOpen = settings,
                     onSettings = { settings = !settings },
                 )
@@ -454,6 +465,9 @@ fun OfficeApp(
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
@@ -475,6 +489,9 @@ fun OfficeApp(
                             onOrdoCurrent = nav.ordoCurrent,
                             onReminders = nav.onReminders,
                             onRemindersCurrent = nav.remindersCurrent,
+                            about = nav.about,
+                            onAbout = nav.onAbout,
+                            onAboutCurrent = nav.aboutCurrent,
                             theme = theme,
                             onTheme = onTheme,
                             textSize = textSize,
@@ -502,6 +519,8 @@ fun OfficeApp(
                                 onHour = { d, h -> onOpen(Page.Hour(d, h)) },
                                 onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
                                 onFeast = { onOpen(Page.Feast(it)) },
+                                introduction = aboutView.introduction.takeIf { newcomer },
+                                onIntroduction = { onOpen(Page.About) },
                             )
                             page is Page.Hour && content is Content.Hour -> HourScreen(
                                 view = content.view,
@@ -572,6 +591,13 @@ fun OfficeApp(
                                 today = today,
                                 onFollowSun = onFollowSun,
                                 onAllowLocation = onAllowLocation,
+                            )
+                            page is Page.About -> AboutScreen(
+                                view = aboutView,
+                                today = today,
+                                chrome = chrome,
+                                insets = insets,
+                                onOpen = onOpen,
                             )
                             else -> Message("Preparing the office…", insets)
                         }

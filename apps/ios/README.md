@@ -81,8 +81,8 @@ Each page is shot on an iPhone and an iPad, in both themes.
 The screenshots come from launch arguments:
 
 - `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
-  `home`, `ordo`, `year` or `reminders`, and `find` (with `-query benedict`) or `feast` (with
-  `-feast st-benedict`);
+  `home`, `ordo`, `year`, `reminders` or `about`, and `find` (with `-query benedict`) or `feast`
+  (with `-feast st-benedict`);
 - `-today` fixes today;
 - `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
 - `-anchor hymn`, `-anchor psalm` or `-anchor score` scrolls an hour to its first hymn, psalm or

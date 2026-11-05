@@ -71,7 +71,7 @@ func spokenDay(_ day: CivilDate, today: CivilDate) -> String {
 /**
  * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
  * (brought to `day` when one is asked for, as the web's #d-date), a year's frontispiece, the
- * reminders, the search for a feast, and a feast's page.
+ * reminders, About the Office, the search for a feast, and a feast's page.
  */
 enum Page: Hashable {
     case home(CivilDate)
@@ -79,6 +79,7 @@ enum Page: Hashable {
     case ordo(year: Int, month: Int, day: Int)
     case year(Int)
     case reminders
+    case about
     case find(String)
     case feast(String)
 
@@ -90,8 +91,9 @@ enum Page: Hashable {
         case .ordo: return 2
         case .year: return 3
         case .reminders: return 4
-        case .find: return 5
-        case .feast: return 6
+        case .about: return 5
+        case .find: return 6
+        case .feast: return 7
         }
     }
 
@@ -118,6 +120,7 @@ enum Page: Hashable {
         case let .ordo(y, m, d): return "ordo \(y) \(m) \(d)"
         case let .year(y): return "year \(y)"
         case .reminders: return "reminders"
+        case .about: return "about"
         case let .find(q): return "find \(q)"
         case let .feast(id): return "feast \(id)"
         }
@@ -137,6 +140,7 @@ enum Page: Hashable {
             return .ordo(year: y, month: m, day: f.count > 3 ? Int(f[3]) ?? 0 : 0)
         case "year": return f.count > 1 ? Int(f[1]).map(Page.year) : nil
         case "reminders": return .reminders
+        case "about": return .about
         case "feast": return f.count > 1 ? .feast(f[1]) : nil
         default: return nil
         }
@@ -394,7 +398,7 @@ final class AppModel: ObservableObject {
 
     /**
      * What the launch asked for, for the simulator screenshots: `-page hour -hour lauds
-     * -date 2026-03-15` (or home, ordo, year, reminders; find with `-query`, feast with
+     * -date 2026-03-15` (or home, ordo, year, reminders, about; find with `-query`, feast with
      * `-feast`), with `-today` fixing today.
      */
     func openFromLaunch() -> Bool {
@@ -407,6 +411,7 @@ final class AppModel: ObservableObject {
         case "ordo": path = visits([.ordo(year: Int(date.year), month: Int(date.month), day: 0)])
         case "year": path = visits([.year(Int(date.year))])
         case "reminders": path = visits([.reminders])
+        case "about": path = visits([.about])
         case "find": path = visits([.find(d.string(forKey: "query") ?? "")])
         case "feast": path = visits([.feast(d.string(forKey: "feast") ?? "st-benedict")])
         default: path = []
