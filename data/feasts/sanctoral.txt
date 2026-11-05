@@ -118,7 +118,7 @@ Month = 3
 Day = 12
 
 [st-patrick]
-Name = St Patrick
+Name = St Patrick, Bishop & Confessor
 Rank = double
 Color = white
 Category = confessor-bishop
@@ -536,7 +536,7 @@ Month = 11
 Day = 21
 
 [st-cecilia]
-Name = St Cecilia
+Name = St Cecilia, Virgin & Martyr
 Rank = double
 Color = red
 Category = virgin-martyr
@@ -580,7 +580,7 @@ OctaveDays = Day {n} within Conception Octave
 OctaveDay8 = Octave of the Conception of the B.V.M.
 
 [st-nicholas]
-Name = St Nicholas
+Name = St Nicholas, Bishop & Confessor
 Rank = double
 Color = white
 Category = confessor-bishop
@@ -1000,7 +1000,7 @@ Month = 2
 Day = 7
 
 [st-perpetua-felicitas]
-Name = St Perpetua & Felicitas, Martyrs
+Name = Ss Perpetua & Felicitas, Martyrs
 Rank = double
 Color = red
 Category = martyrs
@@ -1115,7 +1115,7 @@ Month = 7
 Day = 18
 
 [ss-cornelius-cyprian]
-Name = Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs
+Name = Ss Cornelius & Cyprian, Bishops & Martyrs
 Rank = double
 Color = red
 Category = martyrs
