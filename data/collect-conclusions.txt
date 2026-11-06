@@ -108,6 +108,9 @@ proper/st-stephen/commemoration-collect who-liveth
 # Same collect with the August wording adaptation (2026 ordo p. 86).
 proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
+# The supplemental collects sheet (Nov 2026, p. 4) prints "Who liveth": the
+# prayer ends on "thy Son, Jesus Christ our Lord".
+proper/comm-05-24-st-vincent-of-lerins-confessor/commemoration-collect who-liveth
 # Diurnal p. 538 prints Who with thee ... liveth.
 proper/vigil-of-nativity-john-baptist/collect who-liveth
 
