@@ -66,7 +66,8 @@ pub enum VespersOffice {
     /// I Vespers of the following day's office.
     First {
         feast: FeastRef,
-        /// The outgoing office's colour when the psalms stay with it and it has an office.
+        /// The following office's colour, or the outgoing office's when the psalms stay with it
+        /// and the day has an office of its own.
         color: Color,
         season: Season,
         /// The following day's octave context.

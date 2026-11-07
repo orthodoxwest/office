@@ -188,9 +188,12 @@ final class AppModel: ObservableObject {
     static let shared = AppModel()
 
     @Published var root: CivilDate
-    /// Every move along the way back, the edge swipe's included, puts the header's overlay away.
+    /// Every move to another visit, the edge swipe's included, puts the header's overlay away; a
+    /// page changed in place (the search's words) does not, as on Android.
     @Published var path: [Entry] = [] {
-        didSet { overlay = .none }
+        didSet {
+            if path.last?.id != oldValue.last?.id { overlay = .none }
+        }
     }
     /// How the page replaced in place last moves, and the page it moved to.
     @Published private(set) var step: (to: Page, motion: Motion)?
@@ -318,6 +321,8 @@ final class AppModel: ObservableObject {
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil
+        // Also from home itself, where `path` stays empty.
+        overlay = .none
         root = today
         path = []
     }

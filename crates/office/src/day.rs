@@ -11,7 +11,9 @@ use crate::concurrence::VespersDesignation;
 pub struct Day {
     pub cal: CalendarDay,
     pub vespers: VespersDesignation,
-    /// Which Vespers a synthetic office-day stands for; `None` on the civil day itself.
+    /// Which Vespers a synthetic office-day stands for, as `vespers_office_day` sets it. `None` on
+    /// the civil day, and on the synthetic days that need neither mark (the psalmody day of a
+    /// Vespers split at the Chapter, the Office of the Dead).
     pub evening: Option<Evening>,
 }
 
@@ -52,7 +54,9 @@ impl Day {
         self.evening == Some(Evening::First)
     }
 
-    /// Marks the day as a following feast's I Vespers, or no longer as one.
+    /// Marks the day as a following feast's I Vespers, or no longer as one. Marking it replaces an
+    /// `Evening::Second`, and with it the following office's commemoration id, which I Vespers
+    /// never carries.
     pub fn set_first_vespers(&mut self, first: bool) {
         if first {
             self.evening = Some(Evening::First);
