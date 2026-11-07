@@ -11,16 +11,18 @@
 //! not cued: the booklets give no pattern for them.
 
 use corpus::lines::{PsalmItem, parse_psalm};
-use liturgy::{ElementType, OfficeElement, OfficeHour, Posture, PostureAnchor, PostureCue};
+use liturgy::{ElementType, OfficeElement, Posture, PostureAnchor, PostureCue};
 
 use crate::Day;
+use crate::finish::Classified;
 use crate::psalmody::{is_office_of_the_dead, says_psalm_doxology};
 
 const GOSPEL_CANTICLES: [&str; 2] = ["canticles/benedictus", "canticles/magnificat"];
 const IN_TEXT_DOXOLOGY: &str = "Let us bless the Father";
 
 /// Marks the posture cues on the psalmody of Lauds and Vespers.
-pub fn mark_postures(hour: &mut OfficeHour, day: &Day, hour_name: &str) {
+pub fn mark_postures(classified: &mut Classified, day: &Day, hour_name: &str) {
+    let hour = classified.hour_mut();
     if hour_name != "lauds" && hour_name != "vespers" {
         return;
     }
