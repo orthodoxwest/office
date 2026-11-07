@@ -45,7 +45,7 @@ pub fn compose_compline(day: &Day, sections: &[HourSection], t: &OfficeTexts, mo
 /// ordos' plain "Preces" on such Saturdays implies (2022-07-23, 2025-11-29,
 /// 2026-08-08, 2026-11-28; "at Prime only" appears only before a feast).
 pub fn compline_office_day(day: &Day) -> Day {
-    if day.vespers.appended_office_of_the_dead { dead_office_day(day) } else { vespers_office_day(day) }
+    if day.vespers.appended_office_of_the_dead() { dead_office_day(day) } else { vespers_office_day(day) }
 }
 
 /// The display label of a Marian antiphon key.

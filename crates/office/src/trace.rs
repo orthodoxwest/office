@@ -67,8 +67,9 @@ impl Engine {
         let (mut owner_day, found) = commemoration_owner_day(day, owner_id);
         // The office day's first_vespers describes the incoming celebration,
         // never the commemoration, so it is re-derived for the owner.
-        owner_day.first_vespers =
-            found && hour_name == "vespers" && commemoration_takes_first_vespers(day, owner_day.celebration.as_deref(), reference);
+        owner_day.set_first_vespers(
+            found && hour_name == "vespers" && commemoration_takes_first_vespers(day, owner_day.celebration.as_deref(), reference),
+        );
         let mut t = trace(&owner_day, hour_name, reference, selected, &self.texts);
         if found
             && let Some(owner) = owner_day.celebration.as_deref()
@@ -111,7 +112,7 @@ fn commemoration_owner_day(day: &Day, owner_id: &str) -> (Day, bool) {
 fn commemoration_takes_first_vespers(day: &Day, comm: Option<&Feast>, reference: &str) -> bool {
     let Some(comm) = comm else { return false };
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
-        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id)
+        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id())
         || day.vespers.incoming_commemoration_ids.contains(&comm.id)
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
@@ -133,7 +134,7 @@ fn trace(day: &Day, hour_name: &str, reference: &str, selected: &str, t: &Office
         tr.canonical_owner = c.id.clone();
         tr.proper_ids = feast_proper_ids(c);
     }
-    tr.first_vespers = hour_name == "vespers" && day.first_vespers;
+    tr.first_vespers = hour_name == "vespers" && day.first_vespers();
     tr.direct_candidates = direct_proper_candidates(day, resolver_hour, resolver_slot, &tr.proper_ids);
     tr.direct_existing = tr.direct_candidates.iter().filter(|k| t.has(k)).cloned().collect();
     tr.selected_ref = selected.to_string();
@@ -163,7 +164,7 @@ fn resolution_coordinates<'a>(day: &Day, hour_name: &'a str, reference: &'a str,
 
 fn direct_proper_candidates(day: &Day, hour_name: &str, reference: &str, proper_ids: &[String]) -> Vec<String> {
     let mut refs = vec![reference.to_string()];
-    if hour_name == "vespers" && day.first_vespers && !reference.ends_with("-first") {
+    if hour_name == "vespers" && day.first_vespers() && !reference.ends_with("-first") {
         refs.insert(0, format!("{reference}-first"));
     }
     let mut out: Vec<String> = Vec::new();
@@ -234,7 +235,7 @@ fn resolution_reason(day: &Day, hour_name: &str, reference: &str, selected: &str
         "weekday-temporal"
     } else if selected.contains("-paschal/") {
         "paschal-proper"
-    } else if hour_name == "vespers" && day.first_vespers {
+    } else if hour_name == "vespers" && day.first_vespers() {
         "first-vespers"
     } else {
         "normal"

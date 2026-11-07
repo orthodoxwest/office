@@ -1131,66 +1131,76 @@ function usageBeaconBody(scope) {
     });
   };
 
-  // Ships closed; desktop CSS shows the nav regardless of [open]. Once
-  // scripting is available, keep [open] set on wide screens too (harmless
-  // cosmetically, but matches disclosure semantics) and re-collapse on any
-  // live resize back to narrow after a tap had opened it.
+  // The header's overlays, at most one open at a time: the phone menu below
+  // the breakpoint, the wide header's Settings above it. Each is a <details>,
+  // so its [open] holds the state; overlayOpen reads it as one of
+  // "menu", "settings" or null, and closeOverlay is the one way out, taken by
+  // a tap outside, Escape and crossing the breakpoint (a Settings left open
+  // on a narrow screen would otherwise come back when the screen widens).
+  // Above the breakpoint the menu's [open] is the desktop nav, not an
+  // overlay: it ships closed, desktop CSS shows the nav regardless, and
+  // script keeps [open] set there to match disclosure semantics.
+  // iOS and Android hold the same three states (Overlay in Model.swift and
+  // Chrome.kt).
   var siteMenu = document.querySelector(".site-menu");
-  if (siteMenu && "matchMedia" in window) {
-    var narrowMenu = window.matchMedia("(max-width: 700px)");
-    var syncSiteMenu = function () {
-      if (narrowMenu.matches) {
-        siteMenu.removeAttribute("open");
-      } else {
-        siteMenu.setAttribute("open", "");
+  var siteSettings = document.querySelector(".site-settings");
+  var narrowScreen = "matchMedia" in window ? window.matchMedia("(max-width: 700px)") : null;
+  var overlayOpen = function () {
+    if (narrowScreen && narrowScreen.matches) {
+      return siteMenu && siteMenu.open ? "menu" : null;
+    }
+    return siteSettings && siteSettings.open ? "settings" : null;
+  };
+  var overlayElement = function (overlay) {
+    return overlay === "menu" ? siteMenu : overlay === "settings" ? siteSettings : null;
+  };
+  var closeOverlay = function (focusSummary) {
+    var open = overlayElement(overlayOpen());
+    if (!open) {
+      return false;
+    }
+    open.removeAttribute("open");
+    var summary = focusSummary && open.querySelector("summary");
+    if (summary) {
+      summary.focus();
+    }
+    return true;
+  };
+
+  if (narrowScreen) {
+    var crossBreakpoint = function () {
+      if (siteSettings) {
+        siteSettings.removeAttribute("open");
+      }
+      if (siteMenu) {
+        if (narrowScreen.matches) {
+          siteMenu.removeAttribute("open");
+        } else {
+          siteMenu.setAttribute("open", "");
+        }
       }
     };
-    syncSiteMenu();
-    if (narrowMenu.addEventListener) {
-      narrowMenu.addEventListener("change", syncSiteMenu);
+    crossBreakpoint();
+    if (narrowScreen.addEventListener) {
+      narrowScreen.addEventListener("change", crossBreakpoint);
     }
-
-    // The phone menu is an overlay: a tap anywhere outside it, or Escape,
-    // puts it away. Taps inside (including the preferences) leave it open.
-    onTapOutside(siteMenu, function (e) {
-      if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
-        siteMenu.removeAttribute("open");
-        return true;
-      }
-      return false;
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
-        siteMenu.removeAttribute("open");
-        var summary = siteMenu.querySelector("summary");
-        if (summary) {
-          summary.focus();
-        }
-      }
-    });
   }
 
-  // The wide header's Settings is an overlay too: a tap outside it, or
-  // Escape, puts it away; a preference chosen inside leaves it open.
-  var siteSettings = document.querySelector(".site-settings");
-  if (siteSettings) {
-    onTapOutside(siteSettings, function (e) {
-      if (siteSettings.open && !siteSettings.contains(e.target)) {
-        siteSettings.removeAttribute("open");
-        return true;
-      }
-      return false;
+  // A tap outside the open overlay puts it away; taps inside (including the
+  // preferences) leave it open.
+  [siteMenu, siteSettings].forEach(function (overlay) {
+    if (!overlay) {
+      return;
+    }
+    onTapOutside(overlay, function (e) {
+      return overlayElement(overlayOpen()) === overlay && !overlay.contains(e.target) && closeOverlay(false);
     });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && siteSettings.open) {
-        siteSettings.removeAttribute("open");
-        var summary = siteSettings.querySelector("summary");
-        if (summary) {
-          summary.focus();
-        }
-      }
-    });
-  }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeOverlay(true);
+    }
+  });
 
   // Native disclosures start closed at every width, including without JS.
   // A deliberate bulk action is useful for comparing offices across the year.

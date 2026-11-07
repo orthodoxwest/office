@@ -261,6 +261,21 @@ class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean)
 val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
 
 /**
+ * The header's overlay, at most one open at a time: the menu on a narrow screen, the wide
+ * header's Settings on a wide one. A tap outside, Back, any move to another page and crossing the
+ * breakpoint all close it. The web holds the same three states (app.js) and so does iOS
+ * (Model.swift).
+ */
+enum class Overlay {
+    NONE,
+    MENU,
+    SETTINGS;
+
+    /** After a tap on `shown`'s control: it opens, in place of any other, or closes if it was open. */
+    fun toggled(shown: Overlay): Overlay = if (this == shown) NONE else shown
+}
+
+/**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
  * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
  * on a wide screen.

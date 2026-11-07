@@ -7,7 +7,7 @@ use calendar::{Category, Color, Date, Rank, Season};
 use data_format::{quote, scan_lines};
 use liturgy::OfficeElement;
 
-use crate::concurrence::{VespersDesignation, VespersOwner};
+use crate::concurrence::{VespersDesignation, VespersOffice};
 use crate::day::Day;
 use crate::hourdef::{HourElement, uses_triduum_form};
 use crate::proper::{feast_proper_ids, first_text, is_synthesized_feria, lookup_section_text};
@@ -158,7 +158,7 @@ pub fn select_psalmody_items(items: Vec<PsalmodyItem>, date: Date) -> Result<Vec
 }
 
 fn vespers_psalmody_candidates(day: &Day) -> Vec<String> {
-    if day.first_vespers {
+    if day.first_vespers() {
         vec![format!("{VESPERS_PSALMODY_REF}-first"), VESPERS_PSALMODY_REF.to_string()]
     } else {
         vec![VESPERS_PSALMODY_REF.to_string()]
@@ -244,7 +244,7 @@ pub fn resolve_vespers_psalmody(day: &Day, t: &OfficeTexts) -> Result<(Vec<Psalm
         return Ok((Vec::new(), source));
     }
     // Fixed-date appointments follow the civil evening.
-    let date = if day.first_vespers { day.date.add_days(-1) } else { day.date };
+    let date = if day.first_vespers() { day.date.add_days(-1) } else { day.date };
     let items = select_psalmody_items(items, date).map_err(|e| format!("invalid vespers psalmody declaration {}: {e}", quote(&source)))?;
     Ok((items, source))
 }
@@ -260,29 +260,26 @@ pub const VESPERS_OF_THE_DEAD_LABEL: &str = "Vespers of the Dead";
 /// The synthetic office of Vespers and Compline of the Dead on the eve of All
 /// Souls: black, without the civil day's commemorations.
 pub fn dead_office_day(day: &Day) -> Day {
-    let Some(feast) = day.vespers.appended_feast.clone() else { return day.clone() };
+    let Some(feast) = day.vespers.appended.clone() else { return day.clone() };
     let mut out = day.clone();
     out.celebration = Some(feast.clone());
     out.color = Color::Black;
     out.commemorations = Vec::new();
     out.feria_commemoration = None;
-    out.first_vespers = false;
-    out.following_office_commemoration_id = String::new();
+    out.evening = None;
     out.vespers = VespersDesignation {
-        owner: VespersOwner::IIOfPreceding,
-        feast: Some(feast.clone()),
-        color: Some(Color::Black),
-        season: Some(day.season),
-        within_octave_of: None,
+        office: VespersOffice::Second {
+            feast: feast.clone(),
+            color: Color::Black,
+            season: day.season,
+            following_commemorated: None,
+            following_octave_of: None,
+        },
         rule: "vespers:appended-office-of-the-dead".to_string(),
         decisions: Vec::new(),
         commemorations: Vec::new(),
-        following_office_commemoration_id: None,
         incoming_commemoration_ids: Vec::new(),
-        following_office_octave_of: None,
-        psalmody_from_preceding: false,
-        appended_office_of_the_dead: true,
-        appended_feast: Some(feast),
+        appended: Some(feast),
     };
     out
 }

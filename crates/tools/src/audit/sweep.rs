@@ -98,7 +98,7 @@ pub fn sweep_year(src: &dyn DataSource, year: i32) -> Result<SweepReport, String
 /// following day's feast.
 fn sweep_feast<'a>(day: &'a Day, hour_name: &str) -> Option<&'a Feast> {
     if hour_name == "vespers"
-        && let Some(f) = &day.vespers.feast
+        && let Some(f) = day.vespers.feast()
     {
         return Some(f);
     }

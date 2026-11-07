@@ -123,7 +123,7 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
         return None;
     }
     if !celebration.is_category(Category::Sunday) {
-        if day.vespers.owner == VespersOwner::IOfFollowing && is_day_within_octave(comm) {
+        if day.vespers.owner() == VespersOwner::IOfFollowing && is_day_within_octave(comm) {
             return Some(format!("proper/{parent}/{reference}-at-first-vespers"));
         }
         return None;
@@ -131,11 +131,11 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
     if day.within_octave_of.as_deref() != Some(parent) {
         return None;
     }
-    let context = match day.vespers.owner {
+    let context = match day.vespers.owner() {
         VespersOwner::IOfFollowing => "sunday-first-vespers".to_string(),
         VespersOwner::IIOfPreceding => {
             let mut c = "sunday-second-vespers".to_string();
-            if day.vespers.following_office_octave_of != day.within_octave_of {
+            if day.vespers.following_office_octave_of() != day.within_octave_of.as_deref() {
                 c.push_str("-before-other-office");
             }
             c
@@ -168,9 +168,9 @@ pub fn is_incoming_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &st
 /// Friday's II Vespers takes Friday's psalter antiphon (IV.4).
 fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
     let mut sunday = day.clone();
-    if !sunday.first_vespers {
+    if !sunday.first_vespers() {
         sunday.cal.date = day.date.add_days(1);
-        sunday.first_vespers = true;
+        sunday.set_first_vespers(true);
     }
     sunday.cal.celebration = Some(feast.clone());
     let slot = if reference == "commemoration-antiphon" { "magnificat-antiphon" } else { "versicle" };
@@ -181,7 +181,7 @@ fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, refere
 /// its own I-Vespers texts.
 pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &str) -> bool {
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
-        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id)
+        || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id())
         || day.vespers.incoming_commemoration_ids.contains(&comm.id)
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";

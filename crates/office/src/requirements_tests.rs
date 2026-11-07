@@ -228,8 +228,8 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
     // owns the evening instead of the All Saints octave.
     let (days, moveable) = year(2030);
     let day = &days[Date::new(2030, 11, 2).ordinal() as usize - 1];
-    assert_eq!(day.vespers.owner, crate::VespersOwner::IOfFollowing);
-    assert_eq!(day.vespers.feast.as_ref().unwrap().category, Some(Category::Sunday));
+    assert_eq!(day.vespers.owner(), crate::VespersOwner::IOfFollowing);
+    assert_eq!(day.vespers.feast().unwrap().category, Some(Category::Sunday));
     let evening = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
     assert!(!evening.sections.iter().any(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL));
 }
@@ -422,7 +422,7 @@ fn seasonal_little_hours_and_weekday_vespers_across_calendars() {
                     }
                 }
             }
-            if d.vespers.feast.is_none()
+            if d.vespers.feast().is_none()
                 && d.celebration.as_ref().is_none_or(|f| f.category == Some(Category::Feria))
                 && (1..=5).contains(&d.date.weekday().number())
                 && matches!(d.season, Season::Pentecost | Season::Epiphany | Season::Septuagesima)
@@ -1107,7 +1107,7 @@ fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
         let (days, moveable) = year(y);
         let day = &days[date.ordinal() as usize - 1];
         assert_eq!(day.celebration.as_ref().unwrap().id, "epiphany-sunday-1", "{date}");
-        assert_eq!(day.vespers.feast.as_ref().unwrap().id, "epiphany-octave-day", "{date}");
+        assert_eq!(day.vespers.feast().unwrap().id, "epiphany-octave-day", "{date}");
         let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
         let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
         let text = |comm: bool, slot: &str| {
@@ -1134,7 +1134,7 @@ fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
         let comms = |d: i32| {
             let date = Date::new(y, 2, d);
             let day = &days[date.ordinal() as usize - 1];
-            assert_eq!(day.vespers.feast.as_ref().unwrap().id, "purification-bvm", "{date}");
+            assert_eq!(day.vespers.feast().unwrap().id, "purification-bvm", "{date}");
             let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
             hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect::<Vec<_>>()
         };
@@ -1158,11 +1158,15 @@ fn anticipated_sunday_at_friday_second_vespers_takes_fridays_antiphon() {
     let friday_index = Date::new(2075, 2, 1).ordinal() as usize - 1;
     let sunday = days[friday_index + 1].commemorations.iter().find(|c| c.id == "epiphany-sunday-4-anticipated").unwrap().clone();
     let mut friday = days[friday_index].clone();
-    friday.vespers.owner = crate::concurrence::VespersOwner::IIOfPreceding;
-    friday.vespers.feast = friday.celebration.clone();
+    friday.vespers.office = crate::concurrence::VespersOffice::Second {
+        feast: friday.celebration.clone().unwrap(),
+        color: friday.color,
+        season: friday.season,
+        following_commemorated: None,
+        following_octave_of: None,
+    };
     friday.vespers.commemorations = vec![sunday.clone()];
     friday.vespers.incoming_commemoration_ids = vec![sunday.id.clone()];
-    friday.vespers.following_office_commemoration_id = None;
     let hour = engine().compose_hour("vespers", &friday, &moveable, PrayerForm::Private).unwrap();
     let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect();
     let antiphon = elements.iter().find(|e| e.commemoration_owner_id == sunday.id && e.slot_ref == "commemoration-antiphon").unwrap();
@@ -1445,7 +1449,7 @@ fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
         let ember = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
         assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
         assert!(ember.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
-        assert_eq!(eve.vespers.feast.as_ref().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
+        assert_eq!(eve.vespers.feast().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
         assert!(eve.vespers.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
     }
     for y in [2022, 2033] {

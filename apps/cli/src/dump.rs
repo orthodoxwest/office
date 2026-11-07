@@ -262,7 +262,11 @@ pub(crate) fn generate_year(
 
 /// `None` is serialized as null.
 fn opt(s: &Option<String>) -> Value {
-    s.as_ref().map_or(Value::Null, |s| Value::String(s.clone()))
+    opt_str(s.as_deref())
+}
+
+fn opt_str(s: Option<&str>) -> Value {
+    s.map_or(Value::Null, |s| Value::String(s.to_string()))
 }
 
 fn day_str(d: Date) -> Value {
@@ -464,19 +468,19 @@ fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
         "date": day_str(d.date),
         "marian_antiphon": {"lauds": marian("lauds"), "vespers": marian("vespers"), "compline": marian("compline")},
         "vespers": {
-            "owner": v.owner.as_str(),
-            "feast": feast(v.feast.as_deref()),
-            "color": v.color.map(|c| c.as_str()),
-            "season": v.season.map(|s| s.as_str()),
-            "within_octave_of": opt(&v.within_octave_of),
+            "owner": v.owner().as_str(),
+            "feast": feast(v.feast().map(|f| &**f)),
+            "color": v.color().map(|c| c.as_str()),
+            "season": v.season().map(|s| s.as_str()),
+            "within_octave_of": opt_str(v.within_octave_of()),
             "rule": v.rule,
             "decisions": decisions(&v.decisions),
             "commemorations": feasts(&v.commemorations),
-            "following_office_commemoration_id": opt(&v.following_office_commemoration_id),
-            "following_office_octave_of": opt(&v.following_office_octave_of),
-            "psalmody_from_preceding": v.psalmody_from_preceding,
-            "appended_office_of_the_dead": v.appended_office_of_the_dead,
-            "appended_feast": feast(v.appended_feast.as_deref()),
+            "following_office_commemoration_id": opt_str(v.following_office_commemoration_id()),
+            "following_office_octave_of": opt_str(v.following_office_octave_of()),
+            "psalmody_from_preceding": v.psalmody_from_preceding(),
+            "appended_office_of_the_dead": v.appended_office_of_the_dead(),
+            "appended_feast": feast(v.appended.as_deref()),
         },
     })
 }
