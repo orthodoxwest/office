@@ -1,6 +1,5 @@
 //! The day as the composers see it: the shared calendar day plus the Office's own resolution
-//! (Vespers) and the two fields that exist only on the synthetic office-day
-//! used while composing I Vespers.
+//! (Vespers) and, on the synthetic office-day of an evening, which Vespers it stands for.
 
 use std::ops::{Deref, DerefMut};
 
@@ -12,11 +11,22 @@ use crate::concurrence::VespersDesignation;
 pub struct Day {
     pub cal: CalendarDay,
     pub vespers: VespersDesignation,
-    /// Set only on the synthetic office-day of a following feast's I Vespers:
-    /// resolution then prefers "-first" ref variants.
-    pub first_vespers: bool,
-    /// Copied from Vespers onto the synthetic office-day ("" when absent).
-    pub following_office_commemoration_id: String,
+    /// Which Vespers a synthetic office-day stands for; `None` on the civil day itself.
+    pub evening: Option<Evening>,
+}
+
+/// The Vespers a synthetic office-day stands for.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Evening {
+    /// A following feast's I Vespers: `date` is the feast's, the hour is said the evening before,
+    /// and resolution prefers "-first" ref variants.
+    First,
+    /// II Vespers of the day's office.
+    Second {
+        /// The following celebration commemorated here, which takes its I-Vespers antiphon and
+        /// versicle (XIV.14).
+        following_commemorated: Option<String>,
+    },
 }
 
 impl Deref for Day {
@@ -34,7 +44,29 @@ impl DerefMut for Day {
 
 impl Day {
     pub fn new(cal: CalendarDay, office: crate::OfficeDay) -> Day {
-        Day { cal, vespers: office.vespers, first_vespers: false, following_office_commemoration_id: String::new() }
+        Day { cal, vespers: office.vespers, evening: None }
+    }
+
+    /// The synthetic office-day of a following feast's I Vespers.
+    pub fn first_vespers(&self) -> bool {
+        self.evening == Some(Evening::First)
+    }
+
+    /// Marks the day as a following feast's I Vespers, or no longer as one.
+    pub fn set_first_vespers(&mut self, first: bool) {
+        if first {
+            self.evening = Some(Evening::First);
+        } else if self.first_vespers() {
+            self.evening = None;
+        }
+    }
+
+    /// The following celebration commemorated at this II Vespers, from its I Vespers ("" when none).
+    pub fn following_office_commemoration_id(&self) -> &str {
+        match &self.evening {
+            Some(Evening::Second { following_commemorated: Some(id) }) => id,
+            _ => "",
+        }
     }
 
     /// The weekday of the psalter and weekday ordinary. At I Vespers the
@@ -46,7 +78,7 @@ impl Day {
 
     /// The civil date on which the hour is said: the eve at I Vespers.
     pub fn civil_date(&self) -> Date {
-        if self.first_vespers { self.date.add_days(-1) } else { self.date }
+        if self.first_vespers() { self.date.add_days(-1) } else { self.date }
     }
 
     /// The Saturday before Septuagesima, whose Vespers say Alleluia for the
@@ -85,7 +117,7 @@ impl Day {
     /// I Vespers of a Sunday, by the liturgical office date: Low Sunday is a
     /// feast of the Lord, but its I Vespers is still said on Saturday.
     pub fn is_sunday_first_vespers(&self) -> bool {
-        self.first_vespers && self.date.weekday() == Weekday::Sunday
+        self.first_vespers() && self.date.weekday() == Weekday::Sunday
     }
 
     pub fn celebration_id(&self) -> Option<&str> {

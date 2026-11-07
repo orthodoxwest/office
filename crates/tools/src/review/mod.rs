@@ -97,9 +97,9 @@ fn hex12(sum: &[u8]) -> String {
 /// evening's owner.
 pub fn unit_key(day: &Day, hour_name: &str) -> String {
     if hour_name == "vespers"
-        && let Some(f) = &day.vespers.feast
+        && let Some(f) = day.vespers.feast()
     {
-        if day.vespers.owner == VespersOwner::IOfFollowing {
+        if day.vespers.owner() == VespersOwner::IOfFollowing {
             return format!("{}-1v", f.id);
         }
         return f.id.clone();
@@ -126,7 +126,7 @@ pub fn celebration_name(day: &Day) -> String {
 
 pub fn celebration_rank(day: &Day, hour_name: &str) -> Option<Rank> {
     if hour_name == "vespers"
-        && let Some(f) = &day.vespers.feast
+        && let Some(f) = day.vespers.feast()
     {
         return Some(f.rank);
     }
@@ -137,8 +137,8 @@ pub fn celebration_rank(day: &Day, hour_name: &str) -> Option<Rank> {
 pub fn context_note(day: &Day, hour_name: &str) -> String {
     let mut parts = Vec::new();
     if hour_name == "vespers"
-        && day.vespers.owner == VespersOwner::IOfFollowing
-        && let Some(f) = &day.vespers.feast
+        && day.vespers.owner() == VespersOwner::IOfFollowing
+        && let Some(f) = day.vespers.feast()
     {
         parts.push(format!("I Vespers of {}", f.name));
     }

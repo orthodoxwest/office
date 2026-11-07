@@ -134,9 +134,9 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
         lines.push(format!("{INDENT}Hours   {}", preces_label(hours.preces)));
     }
     let v = &day.vespers;
-    let feast_name = || v.feast.as_deref().map_or("", |f| f.name.as_str()).to_string();
+    let feast_name = || v.feast().map_or("", |f| f.name.as_str()).to_string();
     if let Some(vespers) = compose("vespers") {
-        let owner = match v.owner {
+        let owner = match v.owner() {
             VespersOwner::IIOfPreceding => "II prec.".to_string(),
             VespersOwner::IOfFollowing => format!("I fol. ({})", feast_name()),
             VespersOwner::NotApplicable => String::new(),
@@ -144,7 +144,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
         let mag = if vespers.gospel_ant.is_empty() { String::new() } else { format!("Mag. {}", vespers.gospel_ant) };
         lines.push(format!("{INDENT}Vespers {}", join_bar(&[color_abbrev(vespers.color), &owner, &mag, suffrage_label(vespers.suffrage)])));
         lines.extend(comm_lines(&vespers.comms));
-        if v.appended_office_of_the_dead {
+        if v.appended_office_of_the_dead() {
             if day.celebration_is("all-saints") {
                 lines.push(format!("{INDENT}Vespers of the Dead after Let us bless the Lord"));
             } else {
@@ -153,9 +153,9 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
             lines.push(format!("{INDENT}Compline of the Dead"));
         }
     } else {
-        match v.owner {
-            VespersOwner::IIOfPreceding => lines.push(format!("{INDENT}Vespers: II prec. {}", color_abbrev(v.color))),
-            VespersOwner::IOfFollowing => lines.push(format!("{INDENT}Vespers: I fol. {} ({})", color_abbrev(v.color), feast_name())),
+        match v.owner() {
+            VespersOwner::IIOfPreceding => lines.push(format!("{INDENT}Vespers: II prec. {}", color_abbrev(v.color()))),
+            VespersOwner::IOfFollowing => lines.push(format!("{INDENT}Vespers: I fol. {} ({})", color_abbrev(v.color()), feast_name())),
             VespersOwner::NotApplicable => {}
         }
     }

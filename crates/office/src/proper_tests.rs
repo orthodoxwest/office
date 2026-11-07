@@ -42,7 +42,7 @@ fn paschal_commons_use_explicit_hymns() {
         let mut d = celebrating(date(2026, 4, 23), Season::Easter, feast("test-martyrs", Some(category)));
         let mut r = r;
         if r == "versicle-first" {
-            d.first_vespers = true;
+            d.set_first_vespers(true);
             r = "versicle";
         }
         let (text, source) = resolve(&d, hour, r, t);

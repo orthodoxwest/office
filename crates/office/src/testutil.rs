@@ -39,8 +39,7 @@ pub fn day(date: Date, season: Season) -> Day {
             monastic: Vec::new(),
         },
         vespers: VespersDesignation::unowned(),
-        first_vespers: false,
-        following_office_commemoration_id: String::new(),
+        evening: None,
     }
 }
 

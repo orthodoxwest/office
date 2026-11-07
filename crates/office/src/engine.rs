@@ -170,7 +170,7 @@ fn append_context_decisions(hour: &mut OfficeHour, day: &Day, hour_name: &str, m
     }
     match hour_name {
         "vespers" => {
-            let owner = match day.vespers.owner {
+            let owner = match day.vespers.owner() {
                 VespersOwner::NotApplicable => "not-applicable",
                 VespersOwner::IIOfPreceding => "second-of-preceding",
                 VespersOwner::IOfFollowing => "first-of-following",
@@ -220,7 +220,7 @@ fn append_evening_office_context_decisions(d: &mut Vec<Decision>, office_day: &D
         Some(o) => add(d, "office-context:octave", "within", o),
         None => add(d, "office-context:octave", "outside", ""),
     }
-    add(d, "office-context:first-vespers", if office_day.first_vespers { "yes" } else { "no" }, "");
+    add(d, "office-context:first-vespers", if office_day.first_vespers() { "yes" } else { "no" }, "");
 }
 
 /// Psalm groups "under one antiphon": within a run of psalm-bearing
