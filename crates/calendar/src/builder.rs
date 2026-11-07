@@ -666,8 +666,8 @@ fn build_calendar_year(
         }
     }
 
-    // Days 1–8 of each octave map to the parent; a later octave overwrites.
-    let mut octave_ranges: HashMap<Date, String> = HashMap::new();
+    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap.
+    let mut octave_ranges: HashMap<Date, Vec<FeastRef>> = HashMap::new();
     for f in all_base.iter().filter(|f| f.has_octave) {
         if let Some(parent) = resolve_feast_date(f, year, &m) {
             for n in 0..8 {
@@ -675,7 +675,7 @@ fn build_calendar_year(
                 if octave_ceases(f, date, &m) {
                     continue;
                 }
-                octave_ranges.insert(date, f.id.clone());
+                octave_ranges.entry(date).or_default().push(f.clone());
             }
         }
     }
@@ -722,7 +722,7 @@ fn build_calendar_year(
             day.color = bvm.color;
             day.celebration = Some(Arc::new(bvm));
         }
-        day.within_octave_of = octave_ranges.get(&current).cloned();
+        day.within_octave_of = octave_ranges.get(&current).and_then(|o| governing_octave(&day, o));
         day.feria_commemoration = feria_commemoration(&day, &m).map(Arc::new);
         days.push(day);
         current = current.add_days(1);
@@ -730,6 +730,44 @@ fn build_calendar_year(
 
     apply_penitential_rules(&mut days, rules, &anchor_dates).map_err(|e| format!("applying penitential rules: {e}"))?;
     Ok((days, pending))
+}
+
+/// The octave a day is within when several overlap: the one whose office is said, or else
+/// the worthier (General Rubrics VII.3: "If two Octaves happen to overlap ... the Office of
+/// the worthier Octave is said, with Commemoration of the other Octave"). The 2021 and 2024
+/// ordos keep the Sunday within the Octave of Corpus Christi, which falls within the Octave of
+/// Ss Peter & Paul, as Corpus Christi's, and 24 June 2021, within the Octave of Pentecost,
+/// as Pentecost's though St John Baptist's octave counts from that day.
+fn governing_octave(day: &CalendarDay, octaves: &[FeastRef]) -> Option<String> {
+    use crate::traits::octave_parent_id;
+    let said = day.celebration.as_deref().and_then(|c| if c.has_octave { Some(c.id.as_str()) } else { octave_parent_id(c) });
+    if let Some(parent) = said.and_then(|id| octaves.iter().find(|o| o.id == id)) {
+        return Some(parent.id.clone());
+    }
+    let worthier = |a: &FeastRef, b: &FeastRef| {
+        octave_class_weight(a.octave_class) > octave_class_weight(b.octave_class)
+            || (a.octave_class == b.octave_class && crate::occurrence::compare_feast_precedence(a, b))
+    };
+    let mut best: Option<&FeastRef> = None;
+    for o in octaves {
+        if best.is_none_or(|b| worthier(o, b)) {
+            best = Some(o);
+        }
+    }
+    best.map(|o| o.id.clone())
+}
+
+/// Rubrics VII.3's groups, worthiest first: the privileged octaves of the Lord, then the
+/// common octaves of I Class feasts, then the simple octaves of II Class feasts.
+fn octave_class_weight(class: crate::model::OctaveClass) -> u8 {
+    use crate::model::OctaveClass;
+    match class {
+        OctaveClass::PrivilegedFirst => 4,
+        OctaveClass::PrivilegedSecond => 3,
+        OctaveClass::PrivilegedThird => 2,
+        OctaveClass::Common => 1,
+        OctaveClass::Simple => 0,
+    }
 }
 
 #[cfg(test)]

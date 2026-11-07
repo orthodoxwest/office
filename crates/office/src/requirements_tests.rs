@@ -1696,3 +1696,49 @@ fn compline_opening_and_confession_follow_who_leads() {
         }
     }
 }
+
+/// General Rubrics VII.3: where two octaves overlap, "the Office of the worthier Octave is
+/// said, with Commemoration of the other Octave", so the day is within the octave whose office
+/// it says, or else the worthier. 2021 ordo: 24 June is Thursday within the Octave of Pentecost
+/// with the Baptist transferred; 30 June the Commemoration of St Paul with "Oct. Baptist"
+/// commemorated; 4 July the Sunday within the Octave of Corpus Christi on "Day VI within the
+/// Octave of Ss Peter & Paul". 2026 ordo: 1 July is the Octave of St John Baptist with "Day II
+/// within the Octave of Ss Peter & Paul".
+#[test]
+fn overlapping_octaves_follow_the_office_said() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, m, d, octave) in [
+        (2021, 6, 24, "pentecost"),
+        (2021, 6, 30, "ss-peter-paul"),
+        (2021, 7, 1, "corpus-christi"),
+        (2021, 7, 4, "corpus-christi"),
+        (2022, 6, 26, "corpus-christi"),
+        (2026, 7, 1, "nativity-john-baptist"),
+        (2027, 6, 24, "pentecost"),
+        (2027, 7, 4, "corpus-christi"),
+    ] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(day.within_octave_of.as_deref(), Some(octave), "{}", day.date);
+    }
+}
+
+/// The Sunday within the Octave of Corpus Christi commemorates the octave at II Vespers with
+/// "O how sweet" (Diurnal p. 421; 2023-2026 ordos) even when the Octave of Ss Peter & Paul or of
+/// St John Baptist overlaps it (2027 and 2022, which the 2022 ordo also places within Corpus
+/// Christi's octave).
+#[test]
+fn corpus_christi_sunday_keeps_its_octave_commemoration_under_another_octave() {
+    for date in [Date::new(2022, 6, 26), Date::new(2027, 7, 4)] {
+        let (days, moveable) = year(date.year());
+        let vespers = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let antiphon = vespers
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .find(|e| e.commemoration_owner_id.starts_with("corpus-christi") && e.slot_ref == "commemoration-antiphon")
+            .unwrap_or_else(|| panic!("{date}: no octave commemoration"));
+        assert_eq!(antiphon.source_ref, "proper/corpus-christi/commemoration-antiphon-sunday-second-vespers", "{date}");
+        assert!(antiphon.text.starts_with("O how sweet"), "{date}: {}", antiphon.text);
+    }
+}
