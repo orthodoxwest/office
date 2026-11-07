@@ -667,15 +667,18 @@ fn build_calendar_year(
     }
 
     // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap.
-    let mut octave_ranges: HashMap<Date, Vec<FeastRef>> = HashMap::new();
+    let mut octave_ranges: HashMap<Date, Vec<(Date, FeastRef)>> = HashMap::new();
     for f in all_base.iter().filter(|f| f.has_octave) {
         if let Some(parent) = resolve_feast_date(f, year, &m) {
             for n in 0..8 {
                 let date = parent.add_days(n);
-                if octave_ceases(f, date, &m) {
+                // Pentecost's octave ends with None of its Saturday (Rubrics VII.2): Trinity
+                // Sunday is not within it (2021 and 2024 ordos commemorate the Baptist's octave
+                // there, not Pentecost's).
+                if octave_ceases(f, date, &m) || (f.id == "pentecost" && n == 7) {
                     continue;
                 }
-                octave_ranges.entry(date).or_default().push(f.clone());
+                octave_ranges.entry(date).or_default().push((parent, f.clone()));
             }
         }
     }
@@ -734,27 +737,35 @@ fn build_calendar_year(
 
 /// The octave a day is within when several overlap: the one whose office is said, or else
 /// the worthier (General Rubrics VII.3: "If two Octaves happen to overlap ... the Office of
-/// the worthier Octave is said, with Commemoration of the other Octave"). The 2021 and 2024
-/// ordos keep the Sunday within the Octave of Corpus Christi, which falls within the Octave of
-/// Ss Peter & Paul, as Corpus Christi's, and 24 June 2021, within the Octave of Pentecost,
-/// as Pentecost's though St John Baptist's octave counts from that day.
-fn governing_octave(day: &CalendarDay, octaves: &[FeastRef]) -> Option<String> {
+/// the worthier Octave is said, with Commemoration of the other Octave"). The 2021 ordo keeps
+/// 4 July, the Sunday within the Octave of Corpus Christi and within the Octave of Ss Peter &
+/// Paul, as Corpus Christi's, and 24 June, within the Octave of Pentecost, as Pentecost's
+/// though St John Baptist's octave counts from that day. Equally worthy octaves (the Baptist's
+/// and Ss Peter & Paul's on a Sunday) go to the one begun first, the Baptist's, who precedes
+/// the Apostles in the rubrics' table of primary I Class feasts.
+fn governing_octave(day: &CalendarDay, octaves: &[(Date, FeastRef)]) -> Option<String> {
     use crate::traits::octave_parent_id;
     let said = day.celebration.as_deref().and_then(|c| if c.has_octave { Some(c.id.as_str()) } else { octave_parent_id(c) });
-    if let Some(parent) = said.and_then(|id| octaves.iter().find(|o| o.id == id)) {
+    if let Some((_, parent)) = said.and_then(|id| octaves.iter().find(|(_, o)| o.id == id)) {
         return Some(parent.id.clone());
     }
-    let worthier = |a: &FeastRef, b: &FeastRef| {
-        octave_class_weight(a.octave_class) > octave_class_weight(b.octave_class)
-            || (a.octave_class == b.octave_class && crate::occurrence::compare_feast_precedence(a, b))
+    let worthier = |(a_day, a): &(Date, FeastRef), (b_day, b): &(Date, FeastRef)| {
+        let (a_class, b_class) = (octave_class_weight(a.octave_class), octave_class_weight(b.octave_class));
+        if a_class != b_class {
+            return a_class > b_class;
+        }
+        if crate::occurrence::compare_feast_precedence(a, b) != crate::occurrence::compare_feast_precedence(b, a) {
+            return crate::occurrence::compare_feast_precedence(a, b);
+        }
+        a_day < b_day
     };
-    let mut best: Option<&FeastRef> = None;
+    let mut best: Option<&(Date, FeastRef)> = None;
     for o in octaves {
         if best.is_none_or(|b| worthier(o, b)) {
             best = Some(o);
         }
     }
-    best.map(|o| o.id.clone())
+    best.map(|(_, o)| o.id.clone())
 }
 
 /// Rubrics VII.3's groups, worthiest first: the privileged octaves of the Lord, then the
