@@ -160,10 +160,10 @@ struct SiteHeader: View {
                 } else if wide {
                     InlineNav(nav: nav)
                 } else {
-                    Button { model.menuOpen.toggle() } label: {
+                    Button { model.toggle(.menu) } label: {
                         HStack(spacing: 0) {
                             Text("MENU").type(Scale.menu).foregroundStyle(p.accent)
-                            Caret(open: model.menuOpen, color: p.accent)
+                            Caret(open: model.overlay == .menu, color: p.accent)
                         }
                         .padding(.leading, m.px(12.8))
                         .padding(.trailing, m.px(3.2))
@@ -171,7 +171,7 @@ struct SiteHeader: View {
                     }
                     .buttonStyle(Quiet())
                     .accessibilityLabel("Menu")
-                    .accessibilityValue(model.menuOpen ? "Expanded" : "Collapsed")
+                    .accessibilityValue(model.overlay == .menu ? "Expanded" : "Collapsed")
                 }
             }
             .padding(.horizontal, m.px(gutter))
@@ -219,10 +219,10 @@ private struct InlineNav: View {
             }
             // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
             if settings {
-                Button { model.settingsOpen.toggle() } label: {
+                Button { model.toggle(.settings) } label: {
                     HStack(spacing: 0) {
                         Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
-                        Caret(open: model.settingsOpen, color: p.muted)
+                        Caret(open: model.overlay == .settings, color: p.muted)
                     }
                     .padding(.leading, m.px(8.8))
                     .padding(.trailing, m.px(3.2))
@@ -230,7 +230,7 @@ private struct InlineNav: View {
                 }
                 .buttonStyle(Quiet())
                 .accessibilityLabel("Settings")
-                .accessibilityValue(model.settingsOpen ? "Expanded" : "Collapsed")
+                .accessibilityValue(model.overlay == .settings ? "Expanded" : "Collapsed")
             }
         }
     }

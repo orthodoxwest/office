@@ -1475,6 +1475,35 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(settings).not.toHaveAttribute("open", "");
 });
 
+// The header's overlays are one state: at most one is open, and crossing the
+// breakpoint puts it away, so a Settings opened wide does not come back after a
+// trip through the phone layout (iOS and Android hold the same Overlay).
+test("crossing the breakpoint puts the header's overlay away", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+  const menu = page.locator(".site-menu");
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").click();
+  await expect(settings).toHaveAttribute("open", "");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(menu).toHaveAttribute("open", "");
+
+  // Wide again: the menu is the desktop nav, and Settings stays shut.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await expect(menu).toHaveAttribute("open", "");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(page.locator(".settings-prefs")).toBeHidden();
+  // Escape still finds the overlay open now, whichever it is.
+  await settings.locator("summary").click();
+  await page.keyboard.press("Escape");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(settings.locator("summary")).toBeFocused();
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
