@@ -216,3 +216,8 @@ R. His salvation, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), January-June, p. 2; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of the Epiphany of our Lord.

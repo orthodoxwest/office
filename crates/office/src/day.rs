@@ -15,6 +15,8 @@ pub struct Day {
     /// the civil day, and on the synthetic days that need neither mark (the psalmody day of a
     /// Vespers split at the Chapter, the Office of the Dead).
     pub evening: Option<Evening>,
+    /// The feasts kept on the following civil day (`CalendarDay::kept`), for the Martyrology.
+    pub tomorrow: Vec<calendar::FeastRef>,
 }
 
 /// The Vespers a synthetic office-day stands for.
@@ -46,7 +48,7 @@ impl DerefMut for Day {
 
 impl Day {
     pub fn new(cal: CalendarDay, office: crate::OfficeDay) -> Day {
-        Day { cal, vespers: office.vespers, evening: None }
+        Day { cal, vespers: office.vespers, evening: None, tomorrow: office.tomorrow }
     }
 
     /// The synthetic office-day of a following feast's I Vespers.

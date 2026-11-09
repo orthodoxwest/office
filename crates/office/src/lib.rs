@@ -51,13 +51,20 @@ pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
 #[derive(Clone, Debug)]
 pub struct OfficeDay {
     pub vespers: VespersDesignation,
+    /// The feasts kept on the following civil day, which Prime's Martyrology announces.
+    pub tomorrow: Vec<calendar::FeastRef>,
 }
 
 /// Resolves the Office days of a built calendar year, in order. The Marian
 /// antiphon turns at an hour, not a day, and is chosen per hour
 /// (`seasonal::marian_antiphon`).
 pub fn resolve_office_days(cal: &YearCalendar) -> Vec<OfficeDay> {
-    concurrence::resolve_vespers(&cal.days, &cal.following_jan1).into_iter().map(|vespers| OfficeDay { vespers }).collect()
+    let tomorrows = cal.days.iter().skip(1).chain([&cal.following_jan1]).map(|d| d.kept.clone());
+    concurrence::resolve_vespers(&cal.days, &cal.following_jan1)
+        .into_iter()
+        .zip(tomorrows)
+        .map(|(vespers, tomorrow)| OfficeDay { vespers, tomorrow })
+        .collect()
 }
 
 #[cfg(test)]

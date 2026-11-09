@@ -1,7 +1,7 @@
 //! Prime.
 
 use calendar::date::is_leap_year;
-use calendar::{Category, Date, MoveableDates, Season, Weekday};
+use calendar::{Category, Date, MoveableDates, Season};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};
 
 use crate::day::Day;
@@ -32,8 +32,8 @@ pub fn compose_prime(
         }
         let mut elems = Vec::new();
         for elem in &section.elements {
-            if martyrology && section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
-                elems.extend(resolve_prime_martyrology(day, t));
+            if section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
+                elems.extend(if martyrology { resolve_prime_martyrology(day, t) } else { martyrology_rubric(day, t) });
                 continue;
             }
             if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" && !crate::psalmody::is_office_of_the_dead(day) {
@@ -59,7 +59,9 @@ const MONTH_NAMES: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// The next day's reviewed Martyrology entry. The static rubric remains the
-/// fallback while the per-date corpus is being populated.
+/// fallback while the per-date corpus is being populated. A feast kept today
+/// may have its announcement read before the date (All Souls, Diurnal p. 653);
+/// those kept tomorrow are announced in the first place after it.
 fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
     let next = day.date.add_days(1);
     let reference = martyrology_entry_key(next);
@@ -67,24 +69,17 @@ fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
     const RESPONSE: &str = "ordinary/martyrology/response";
     let (text, conclusion, response) = (t.get(&reference), t.get(CONCLUSION), t.get(RESPONSE));
     if text.is_empty() || conclusion.is_empty() || response.is_empty() {
-        return vec![resolve_element(&HourElement::new("rubric", MARTYROLOGY_RUBRIC), t)];
+        return martyrology_rubric(day, t);
     }
-    let sourced = |kind: ElementType, text: String, key: &str| OfficeElement {
-        source_ref: key.to_string(),
-        source_refs: vec![key.to_string()],
-        ..OfficeElement::new(kind, text)
-    };
-    let mut elements = vec![sourced(
+    let mut elements: Vec<OfficeElement> =
+        announcements(&day.kept, ANNOUNCEMENT_ON_DAY, t).into_iter().map(|(key, text)| sourced(ElementType::Reading, text, &key)).collect();
+    elements.push(sourced(
         ElementType::Heading,
         format!("Martyrology for tomorrow, {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()),
         &reference,
-    )];
-    // Announcements the AWRV keeps on this date come first.
-    for key in martyrology_announcement_keys(next) {
-        let announcement = t.get(&key);
-        if !announcement.is_empty() {
-            elements.push(sourced(ElementType::Reading, announcement.to_string(), &key));
-        }
+    ));
+    for (key, announcement) in announcements(&day.tomorrow, ANNOUNCEMENT, t) {
+        elements.push(sourced(ElementType::Reading, announcement, &key));
     }
     elements.extend([
         sourced(ElementType::Reading, text.to_string(), &reference),
@@ -92,6 +87,54 @@ fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
         sourced(ElementType::Response, format!("R. {response}"), RESPONSE),
     ]);
     elements
+}
+
+/// A feast's announcement read at Prime the day before, after the date
+/// ("in the 1st place", as the ordo prints Holy Name's).
+const ANNOUNCEMENT: &str = "martyrology-announcement";
+/// A feast's announcement read at Prime on its own day, before the date.
+const ANNOUNCEMENT_ON_DAY: &str = "martyrology-announcement-on-day";
+/// The rubric that, with the Martyrology not read, introduces an on-day
+/// announcement in place of the general rubric.
+const ANNOUNCEMENT_RUBRIC: &str = "martyrology-rubric";
+
+/// The rubric standing for the Martyrology. A feast kept today whose proper
+/// prints its own (All Souls, Diurnal p. 653) keeps that rubric and its
+/// announcement, as the book prints them.
+fn martyrology_rubric(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
+    let found = day.kept.iter().find_map(|feast| {
+        crate::proper::feast_proper_ids(feast).into_iter().find_map(|id| {
+            let rubric = format!("proper/{id}/{ANNOUNCEMENT_RUBRIC}");
+            let announcement = format!("proper/{id}/{ANNOUNCEMENT_ON_DAY}");
+            (!t.get(&rubric).is_empty() && !t.get(&announcement).is_empty()).then_some((rubric, announcement))
+        })
+    });
+    match found {
+        Some((rubric, announcement)) => vec![
+            resolve_element(&HourElement::new("rubric", &rubric), t),
+            sourced(ElementType::Reading, t.get(&announcement).to_string(), &announcement),
+        ],
+        None => vec![resolve_element(&HourElement::new("rubric", MARTYROLOGY_RUBRIC), t)],
+    }
+}
+
+/// The announcements `feasts` carry under `key`, in the calendar's order: the
+/// first of each feast's proper ids that has one.
+fn announcements(feasts: &[calendar::FeastRef], key: &str, t: &OfficeTexts) -> Vec<(String, String)> {
+    feasts
+        .iter()
+        .filter_map(|feast| {
+            crate::proper::feast_proper_ids(feast).into_iter().find_map(|id| {
+                let reference = format!("proper/{id}/{key}");
+                let text = t.get(&reference);
+                (!text.is_empty()).then(|| (reference.clone(), text.to_string()))
+            })
+        })
+        .collect()
+}
+
+fn sourced(kind: ElementType, text: String, key: &str) -> OfficeElement {
+    OfficeElement { source_ref: key.to_string(), source_refs: vec![key.to_string()], ..OfficeElement::new(kind, text) }
 }
 
 /// The printed day read for `date`. In a leap year the Martyrology keeps
@@ -105,41 +148,6 @@ fn martyrology_entry_key(date: Date) -> String {
         (2, 25..=29) if is_leap_year(date.year()) => format!("ordinary/martyrology/02-{:02}", day - 1),
         _ => format!("ordinary/martyrology/{month:02}-{day:02}"),
     }
-}
-
-/// Moveable announcements and vigils read on `date`, in order. Holy Name
-/// follows the calendar's rule (the Sunday of January 2–5, else January 2);
-/// every ordo since 2021 has it read "in the 1st place". A vigil is read on
-/// the day the calendar keeps it: printed the day before its feast, moved to
-/// Saturday from Sunday (except the Epiphany's, which keeps January 5), and,
-/// for St Matthias in a leap year, to February 24 (1916 ed., p. 14).
-fn martyrology_announcement_keys(date: Date) -> Vec<String> {
-    let mut keys = Vec::new();
-    let jan2 = Date::new(date.year(), 1, 2);
-    let holy_name = (0..=3).map(|i| jan2.add_days(i)).find(|d| d.weekday() == Weekday::Sunday).unwrap_or(jan2);
-    if date == holy_name {
-        keys.push("ordinary/martyrology/holy-name".to_string());
-    }
-    // In a leap year the printed 23rd moves to the 24th, so nothing is read
-    // from it on the 23rd.
-    let printed_vigil = |d: Date| match (d.month(), d.day()) {
-        (2, 23) if is_leap_year(d.year()) => None,
-        (2, day @ 24..=29) if is_leap_year(d.year()) => Some(format!("ordinary/martyrology/vigil-02-{:02}", day - 1)),
-        (month, day) => Some(format!("ordinary/martyrology/vigil-{month:02}-{day:02}")),
-    };
-    const KEPT_ON_SUNDAY: [&str; 1] = ["ordinary/martyrology/vigil-01-05"];
-    if let Some(own) = printed_vigil(date)
-        && (date.weekday() != Weekday::Sunday || KEPT_ON_SUNDAY.contains(&own.as_str()))
-    {
-        keys.push(own);
-    }
-    if date.weekday() == Weekday::Saturday
-        && let Some(sunday) = printed_vigil(date.add_days(1))
-        && !KEPT_ON_SUNDAY.contains(&sunday.as_str())
-    {
-        keys.push(sunday);
-    }
-    keys
 }
 
 /// An hour titled `name` for the day's own office.

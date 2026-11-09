@@ -477,9 +477,11 @@ fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
             within_octave_of: None,
             penitential: Default::default(),
             monastic: Vec::new(),
+            kept: Vec::new(),
         },
         vespers: office::concurrence::VespersDesignation::unowned(),
         evening: None,
+        tomorrow: Vec::new(),
     };
     let moveable = calendar::MoveableDates::compute(2026);
     for name in ["prime", "compline"] {

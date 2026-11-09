@@ -952,7 +952,8 @@ At Jerusalem, the first finding of the head of our Lord's Precursor.
 
 [02-24-bissextile]
 # SOURCE: Roman Martyrology (1916), January-June, p. 15; leap-year rubric; read on February 24 in leap years
-# The rubric's vigil of St Matthias comes from ordinary/martyrology/vigil-02-23 (moved to the 24th).
+# The rubric's vigil of St Matthias comes from proper/vigil-of-st-matthias/martyrology-announcement,
+# read on the 24th, where the calendar keeps the vigil.
 Also, the commemoration of many holy martyrs, confessors and virgins.
 
 [02-25]
@@ -6374,67 +6375,6 @@ The same day, St. Zoticus, Roman priest, who went to Constantinople, and took up
 At Ravenna, St. Barbatian, priest and confessor.
 
 The same day, St. Melania the Younger, who withdrew from Rome with her husband Pinian, and went to Jerusalem, where both embraced the religious life, she among the women consecrated to God, and he among the monks, and ended their career in peace.
-
-# Moveable announcement prescribed by the ordo, read in the first place.
-
-[holy-name]
-# SOURCE: 2026 archdiocesan ordo, p. 26 (also 2021-2025): "Today, in the Martyrology reading at Prime, in the 1st place"
-The Feast of the Most Holy Name of Jesus.
-
-# Vigil announcements. Prime reads one in the first place on the day the
-# calendar keeps the vigil: a common vigil falling on Sunday is read on the
-# Saturday before, and St Matthias's moves to February 24 in leap years
-# (January-June, p. 14). Keys name the printed date. Only vigils the AWRV
-# calendar keeps are listed (none for St Thomas); Christmas Eve's awaits the
-# Christmas announcement review.
-
-[vigil-01-05]
-# SOURCE: Roman Martyrology (1916), January-June, p. 2; announcement line
-The vigil of the Epiphany of our Lord.
-
-[vigil-02-23]
-# SOURCE: Roman Martyrology (1916), January-June, pp. 14-15; announcement line
-The vigil of the apostle St. Matthias.
-
-[vigil-06-23]
-# SOURCE: Roman Martyrology (1916), January-June, p. 46; announcement line
-The vigil of St. John the Baptist.
-
-[vigil-06-28]
-# SOURCE: Roman Martyrology (1916), January-June, p. 48; announcement line
-The vigil of the holy apostles Peter and Paul.
-
-[vigil-07-24]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 9; announcement line
-The vigil of St. James, apostle.
-
-[vigil-08-09]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 14; announcement line
-The vigil of St. Lawrence, martyr.
-
-[vigil-08-14]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 16; announcement line
-The vigil of the Assumption of the blessed Virgin Mary.
-
-[vigil-08-23]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 19; announcement line
-The vigil of St. Bartholomew, apostle.
-
-[vigil-09-20]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 28; announcement line
-The vigil of St. Matthew, apostle and evangelist.
-
-[vigil-10-27]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 38; announcement line
-The vigil of the holy apostles Simon and Jude.
-
-[vigil-10-31]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 39; announcement line
-The vigil of All Saints.
-
-[vigil-11-29]
-# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 47; announcement line
-The vigil of St. Andrew, apostle.
 
 [conclusion]
 # SOURCE: Roman Martyrology (1916), January-June, p. 1; common ending
