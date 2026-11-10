@@ -72,6 +72,7 @@ impl Pages {
                 ("whole_office", w.whole_office),
                 ("everyone_keeps", w.everyone_keeps),
                 ("monastic_heading", w.monastic_heading),
+                ("todays_hours", w.todays_hours),
             ]),
         );
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
