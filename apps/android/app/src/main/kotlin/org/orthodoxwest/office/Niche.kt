@@ -37,13 +37,13 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
- * frontispiece is set into the wall under a pointed head, with a stone moulding, the day's colour
- * as a trim, and the room lit toward it. Phones set it in a painted panel ([panel]).
+ * The wide home's niche and chapel light ("Home niche" in style.css): on a wide screen the
+ * frontispiece is one lancet niche cut into the wall, its head genarch's landscape [NicheArch] or
+ * upright [UprightArch], its size one scale ([nicheZoom]), and the room lit toward it. By day its
+ * depth is told by light on the reveal ([niche]); by night it is the phone's panel and apse sky
+ * ([panel], [sky]) on a plain wall, so the phone and the wide home are one building.
  */
 data class NicheTokens(
-    val stone: Color,
-    val edge: Color,
     val recess: Color,
     val sheen: Color,
     val warm: Color,
@@ -52,12 +52,21 @@ data class NicheTokens(
     val pool: Color,
     val shade: Color,
     val beam: Color,
+    /** The reveal by day (`--reveal-*`): shade on the left jamb, light on the right and the sill. */
+    val revealShade: Color = Color(0xFFCBBCAA),
+    val revealMid: Color = Color(0xFFE6DCCD),
+    val revealLit: Color = Color(0xFFFFFDF6),
+    val revealSill: Color = Color(0xFFFBF6EA),
+    val revealSillEdge: Color = Color(0xFFD9CCBA),
+    val revealSoffit: Color = Color(96, 66, 44).copy(alpha = 0.3f),
+    val arris: Color = Color(255, 253, 246).copy(alpha = 0.9f),
+    val arrisTurn: Color = Color(255, 253, 246).copy(alpha = 0.2f),
+    val arrisShade: Color = Color(96, 66, 44).copy(alpha = 0.34f),
+    val cast: Color = Color(84, 52, 30).copy(alpha = 0.3f),
 )
 
 fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
     NicheTokens(
-        stone = Color(0xFFE5DAC9),
-        edge = Color(63, 55, 47).copy(alpha = 0.3f),
         recess = Color(70, 40, 20).copy(alpha = 0.2f),
         sheen = Color.White.copy(alpha = 0.14f),
         warm = Color(232, 176, 84).copy(alpha = 0.2f),
@@ -68,8 +77,6 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
     )
 } else {
     NicheTokens(
-        stone = Color(0xFF243040),
-        edge = Color(208, 176, 106).copy(alpha = 0.3f),
         recess = Color.Black.copy(alpha = 0.42f),
         sheen = Color.Transparent,
         warm = Color(208, 176, 106).copy(alpha = 0.09f),
@@ -80,8 +87,80 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
     )
 }
 
-/** The niche's card width at a screen width: clamp(38rem, 10rem + 38vw, 48rem). */
-fun nicheWidth(screen: Dp): Dp = (160.dp + screen * 0.38f).coerceIn(608.dp, 768.dp)
+/**
+ * One layout's figures, in rem (16dp), as style.css's `.page-home main` gives them for it (each
+ * rule marked `NicheFigures.<name>`; TokensTest holds the two to each other and to Niche.swift):
+ * the card's width before the zoom, the niche's height at 1 on its heaviest day with the
+ * colophon's zoomed margin (on a short screen, down to the invitation), the air above it, the
+ * least zoom and the share of the screen's width it may take.
+ */
+data class NicheFigures(val card: Float, val fit: Float, val air: Float, val least: Float, val share: Float) {
+    companion object {
+        val Landscape = NicheFigures(card = 37.5f, fit = 47.25f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val LandscapeList = NicheFigures(card = 37.5f, fit = 61f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val Upright = NicheFigures(card = 34.5f, fit = 48.75f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val UprightList = NicheFigures(card = 34.5f, fit = 62.5f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val Short = NicheFigures(card = 37.5f, fit = 35.25f, air = 0.5f, least = 0.5f, share = 0.62f)
+
+        /** What is not zoomed above the niche (the header) and below it (the colophon), in rem. */
+        const val ABOVE = 5.0625f
+        const val BELOW = 6.375f
+        /** The list of seven on a screen on its side, from this high (an upright one's from 1000). */
+        const val LIST_LANDSCAPE = 1146f
+        /** A short screen, to this high: the niche is fitted down to the invitation. */
+        const val SHORT = 560f
+    }
+}
+
+/**
+ * The niche's layout at a size of screen (`width` by `height`, the height home has under the
+ * bars), as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or
+ * the list of seven, and one scale for the whole niche.
+ */
+class NicheLayout(width: Dp, height: Dp) {
+    /** An upright (or square) screen takes the taller head and a narrower lancet. */
+    val upright = height >= width
+    /** A short screen on its side (a phone turned) is fitted down to the invitation. */
+    val short = !upright && height.value <= NicheFigures.SHORT
+    /** Where the screen has the height, the hours stand one to a line. */
+    val list = if (upright) height >= 1000.dp else height.value >= NicheFigures.LIST_LANDSCAPE
+    val figures = when {
+        upright && list -> NicheFigures.UprightList
+        upright -> NicheFigures.Upright
+        list -> NicheFigures.LandscapeList
+        short -> NicheFigures.Short
+        else -> NicheFigures.Landscape
+    }
+    val arch = if (upright) UprightArch else NicheArch
+    /** The card's width before the zoom (`--card-w`). */
+    val card: Dp = (figures.card * 16f).dp
+    /** The air above the niche before the zoom (`--niche-air`). */
+    val air: Dp = (figures.air * 16f).dp
+    /** The list of seven's middle column (its label stands left of it), before the zoom. */
+    val listMiddle: Dp = if (upright) 118.4.dp else 108.dp
+    private val below = if (short) 0f else NicheFigures.BELOW
+    private val raw = (height.value - 16f * (NicheFigures.ABOVE + below)) / (16f * (figures.fit + figures.air))
+
+    /**
+     * The one scale (`--niche-zoom`): the height the screen leaves under the header and above the
+     * colophon over the niche's own on its heaviest day with the air above it, no more than a
+     * share of the screen's width, never under the least, and at most 1.5.
+     */
+    val zoom: Float = nicheZoom(raw, width.value, figures)
+
+    /**
+     * Whether the heaviest day fits with the colophon (`--niche-fits`). Where it does not, the
+     * colophon waits under the fold rather than being cut through by it; a short screen's always does.
+     */
+    val fits = !short && raw >= figures.least
+}
+
+/**
+ * `clamp(least, min(raw, share * width / card), 1.5)`, `raw` the height's ratio: style.css's
+ * `--niche-zoom`, and Niche.swift's `nicheZoom`.
+ */
+fun nicheZoom(raw: Float, width: Float, f: NicheFigures): Float =
+    maxOf(f.least, minOf(raw, f.share * width / (16f * f.card), 1.5f))
 
 /** Draws `path` blurred, for a CSS blur of `blur` (its Gaussian sigma is half the radius). */
 private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
@@ -101,56 +180,75 @@ private fun DrawScope.outside(shape: Path): Path {
 }
 
 /**
- * The niche behind the frontispiece, under the pointed head `a`, in the order the web's courses
- * stack, outermost first: the room's shade under the niche and a field of the Apse's ground round
- * both, the clearing, the moulding's edge and stone, the day's colour as a trim; then the frame
- * and the lit recess, with the shade its head casts. Each is the arch offset by its own distance.
- * The painted lining ([lining]) is the phone panel's, restated at the niche's scale.
+ * The niche by day behind the frontispiece, under the pointed head `a`, in the order the web's
+ * courses stack, outermost first: the arris where the wall turns into the recess, catching the
+ * light on the right and lost in shade on the left; the reveal (`--reveal`, 1.2rem), the left jamb
+ * in shade and the right lit, the soffit turning from the light toward the point, the sill between
+ * the jambs mitred at its corners and facing the light; the day's colour as one fillet at the back
+ * wall's edge (`fillet`); then the back wall, the phone's plaster under a warm glow and sheen, with
+ * the shade the head and left jamb cast on it. Each is the arch offset by its own distance. By
+ * night the niche is the phone's panel ([panel]) and its sky.
  */
-fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, day: Color, frame: Color) {
+fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, fillet: Color, plaster: ImageBitmap) {
     val rem = 16.dp.toPx()
     val px = 1.dp.toPx()
-    fun shape(d: Float) = archPath(a, size.width, d, size.height + d)
-    // The moulding's silhouette, the source of its halo: the clearing, or with none the stone's edge.
-    val outer = shape(if (t.clear != null) 1.25f * rem + px else 0.75f * rem + px)
-    t.clear?.let {
-        // drop-shadow(0 0 0.9rem clear) round the moulding and its shadow, as the second filter.
-        translate(0f, 1.25f * rem) { blurred(outer, it.copy(alpha = it.alpha * t.shade.alpha), 1.54f * rem) }
-        blurred(outer, it, 0.9f * rem)
+    val w = size.width
+    val h = size.height
+    val r = 1.2f * rem
+    fun shape(d: Float) = archPath(a, w, d, h + d)
+    // linear-gradient(100deg, ...) across the courses: near enough level, left to right.
+    drawPath(shape(r + 1.5f * px), Brush.horizontalGradient(0f to t.arrisShade, 0.36f to t.arrisShade, 0.52f to t.arrisTurn, 0.7f to t.arris, startX = -r, endX = w + r))
+    val reveal = shape(r)
+    drawPath(reveal, Brush.horizontalGradient(0f to t.revealShade, 0.34f to t.revealShade, 0.56f to t.revealMid, 0.8f to t.revealLit, startX = -r, endX = w + r))
+    clipPath(reveal) {
+        drawRect(Brush.verticalGradient(0f to t.revealSoffit, 1f to Color.Transparent, startY = -r, endY = 0.5f * w), topLeft = Offset(-r, -r), size = Size(w + 2 * r, 0.5f * w + r))
+        // The sill, mitred: from the jambs' outer corners in to the back wall's.
+        val sill = Path().apply {
+            moveTo(-r, h + r)
+            lineTo(w + r, h + r)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(sill, Brush.verticalGradient(0f to t.revealSillEdge, 0.35f to t.revealSill, 1f to t.revealSill, startY = h, endY = h + r))
     }
-    // drop-shadow(0 1.25rem 1.25rem chapel-shade): the niche's shade on the wall below it.
-    translate(0f, 1.25f * rem) { blurred(outer, t.shade, 1.25f * rem) }
-    t.clear?.let { drawPath(shape(1.25f * rem + px), it) }
-    drawPath(shape(0.75f * rem + px), t.edge)
-    drawPath(shape(0.75f * rem), t.stone)
-    // The day's colour is a hint at the niche's edge, not a second frame.
-    drawPath(shape(1.5.dp.toPx()), day)
-    // The frame, the card's edge drawn in its rule, and the recess 2dp inside it.
-    val edge = shape(0f)
-    drawPath(edge, p.surface)
-    drawPath(edge, frame)
-    val recess = shape(-2 * px)
-    drawPath(recess, p.surface)
-    clipPath(recess) {
-        // A warm pool under the head, and a sheen falling from it, laid from 2rem above the card
-        // as the web's courses are.
+    drawPath(shape(1.5f * px), fillet)
+    val face = shape(0f)
+    drawPath(face, p.surface)
+    clipPath(face) {
+        // The plaster, cover-fitted, then the warm pool under the head and the sheen falling from
+        // it, laid from 2rem above the card as the web's courses are.
+        val scale = maxOf(w / plaster.width, h / plaster.height)
+        val fitted = IntSize((plaster.width * scale).roundToInt(), (plaster.height * scale).roundToInt())
+        drawImage(plaster, dstOffset = IntOffset((w.roundToInt() - fitted.width) / 2, 0), dstSize = fitted)
         val top = -2f * rem
-        val height = size.height - top
-        val rx = size.width * 0.7f
+        val height = h - top
+        val rx = w * 0.7f
         val ry = height * 0.5f
-        val crown = Offset(size.width / 2f, top)
+        val crown = Offset(w / 2f, top)
         scale(1f, ry / rx, pivot = crown) {
             drawCircle(Brush.radialGradient(0f to t.warm, 0.72f to Color.Transparent, center = crown, radius = rx), radius = rx, center = crown)
         }
-        drawRect(
-            Brush.verticalGradient(0f to t.sheen, 0.3f to Color.Transparent, startY = top, endY = size.height),
-            topLeft = Offset(0f, top),
-            size = Size(size.width, height),
-        )
-        // drop-shadow(0 0.55rem 0.9rem recess): the wall outside the arch casts its shade in,
-        // and the recess lies in shadow under the head.
-        translate(0f, 0.55f * rem) { blurred(outside(recess), t.recess, 0.9f * rem) }
+        drawRect(Brush.verticalGradient(0f to t.sheen, 0.3f to Color.Transparent, startY = top, endY = h), topLeft = Offset(0f, top), size = Size(w, height))
+        // drop-shadow(0.5rem 0.7rem 0.8rem cast) drop-shadow(0.1rem 0.15rem 0.12rem cast): the head
+        // and the left jamb throw their shade on the back wall.
+        val wall = outside(face)
+        translate(0.5f * rem, 0.7f * rem) { blurred(wall, t.cast, 0.8f * rem) }
+        translate(0.1f * rem, 0.15f * rem) { blurred(wall, t.cast, 0.12f * rem) }
     }
+}
+
+/** Where the first-class fillet's leaf catches the light most (`--gilt-glint`): the reveal's lit plaster. */
+val GiltGlint = Color(0xFFFFFDF6)
+
+/**
+ * A first-class day's fillet of matte leaf round the niche's head by day (`.home-summary::before`),
+ * 3dp over the back wall's edge, open at the foot and down to this scope's foot (the frieze), as
+ * the parish's chancel arch is gilt; the jambs and the sill keep the day's fillet.
+ */
+fun DrawScope.giltHead(a: Arch, o: Ornament) {
+    val gilt = Brush.horizontalGradient(0f to mix(o.lo, o.hi, 0.6f), 0.3f to mix(o.lo, o.hi, 0.6f), 0.62f to o.hi, 0.82f to mix(o.hi, GiltGlint, 0.7f), 1f to o.hi)
+    drawPath(archPath(a, size.width, 0f, size.height, open = true), gilt, style = Stroke(3.dp.toPx(), miter = 2f))
 }
 
 /**

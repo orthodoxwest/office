@@ -25,8 +25,10 @@ val PhoneArch = Arch(rise = 0.44f, haunch = 0.3f, centre = 0.9f, depth = 0.78109
 val TallArch = Arch(rise = 0.56f, haunch = 0.4f, centre = 1f, depth = 0.535519f, radius = 1.204227f)
 /** The taller head, for a phone from 880 high: a 123° point. */
 val TallerArch = Arch(rise = 0.64f, haunch = 0.4f, centre = 1.05f, depth = 0.364522f, radius = 1.145236f)
-/** The niche head, for a wide screen's niche: a 146° point. */
-val NicheArch = Arch(rise = 0.4f, haunch = 0.24f, centre = 0.86f, depth = 0.795773f, radius = 1.248789f)
+/** The niche head, for a wide screen's niche on its side: a 137° point. */
+val NicheArch = Arch(rise = 0.5f, haunch = 0.34f, centre = 0.95f, depth = 0.632955f, radius = 1.219052f)
+/** The upright head, for a wide screen's niche held upright: a 125° point. */
+val UprightArch = Arch(rise = 0.62f, haunch = 0.38f, centre = 1.02f, depth = 0.372603f, radius = 1.120563f)
 // genarch:end
 
 private fun degrees(radians: Float): Float = radians * 180f / PI.toFloat()

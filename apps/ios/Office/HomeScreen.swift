@@ -45,9 +45,9 @@ struct HomeScreen: View {
                 // vault, clearing the header and thinning toward the foot; by day the powdering,
                 // cut square under the beam.
                 let top = geo.safeAreaInsets.top
-                // On a phone by night the stars are the apse's own, inside the arch (`Sky`): the
-                // wall outside it is plain dark plaster.
-                if !(p.dark && !wide) {
+                // By night the stars are the apse's own, inside the arch (`Sky`), on a phone and
+                // in the wide niche alike: the wall outside it is plain dark plaster.
+                if !p.dark {
                     WallField(seam: top) { h, dark in
                         func at(_ d: CGFloat) -> CGFloat { (top + d) / h }
                         return dark
@@ -64,21 +64,32 @@ struct HomeScreen: View {
                     // tiers go by the height home has and the screen's width, in the web's pixels.
                     let tall = geo.size.height
                     if let niche {
-                        let card = nicheWidth(screen)
+                        // Centred between the header and the foot, as the web's wide home: a
+                        // lancet for the screen's orientation at one scale, which the niche's
+                        // metrics carry, so every measure inside it, its type included, is zoomed
+                        // as the web's `zoom` does.
+                        let layout = NicheLayout(width: screen / m.layout, height: tall / m.layout)
+                        let zoomed = m.zoomed(layout.zoom)
+                        let heavy = (!view.penitential.isEmpty && !view.commemorations.isEmpty)
+                            || (!view.isToday && (!view.commemorations.isEmpty || !view.octaveNote.isEmpty || !view.penitential.isEmpty))
+                        // Where the heaviest day does not fit with the colophon (`--niche-fits`),
+                        // the header and niche take the screen and the colophon waits under the
+                        // fold, rather than being cut through by it.
                         VStack(spacing: 0) {
-                            SiteHeader()
-                            // Centred between the header and the foot, as the web's desktop home.
-                            Spacer(minLength: 0)
-                            // The moulding stands 0.75rem out from the card; room for it below the header.
-                            Frontispiece(view: view, date: date, tier: HomeTier(desk: true, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: niche)
-                                .background(GeometryReader { card in
-                                    Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
-                                })
-                                .frame(maxWidth: card)
-                                .padding(.horizontal, 24)
-                                .padding(.top, 40)
-                                .padding(.bottom, 12)
-                            Spacer(minLength: 0)
+                            VStack(spacing: 0) {
+                                SiteHeader()
+                                Spacer(minLength: 0)
+                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche)
+                                    .background(GeometryReader { card in
+                                        Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
+                                    })
+                                    .frame(maxWidth: zoomed.px(layout.card))
+                                    .environment(\.metrics, zoomed)
+                                    .padding(.horizontal, 24)
+                                    .padding(.top, zoomed.px(layout.air))
+                                Spacer(minLength: 0)
+                            }
+                            .frame(minHeight: layout.fits ? nil : tall)
                             Footer(reserve: true)
                         }
                         .frame(minHeight: tall)
@@ -89,7 +100,7 @@ struct HomeScreen: View {
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
                         PhoneHome(height: tall, foot: m.px(gutter)) {
                             SiteHeader()
-                            Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
+                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
@@ -149,11 +160,24 @@ private struct PhoneHome: Layout {
  * and the date stand lower in it, and the spare height is parted two to three above and below the
  * day rather than centred about it; from 880 more so. Its larger rows and controls go by width as
  * well, from 375 wide and 830 or 880 high: a narrower or shorter phone needs the height for the
- * lines its day wraps to. A wide screen's niche (`desk`) has its own. `card` is the card's width;
- * `dyn` the reader's Dynamic Type size over the text size's own scale, which `Metrics.type` carries.
+ * lines its day wraps to. A wide screen's niche (`wide`) has its own, before its zoom, which the
+ * niche's metrics carry (`NicheLayout`); a heavy day there (`heavy`: a fast with a commemoration,
+ * or a day opened from another with a fast, a commemoration or an octave) closes up its title so
+ * the niche keeps its height. `card` is the card's width; `dyn` the reader's Dynamic Type size
+ * over the text size's own scale, which `Metrics.type` carries.
  */
 struct HomeTier {
     let desk: Bool
+    /// The wide niche's hours one to a line (from 1000 high), else its glossed table.
+    let list: Bool
+    let heavy: Bool
+    private let upright: Bool
+    private let wideArch: Arch?
+    private let zoom: CGFloat
+    /// The list of seven's middle column.
+    let listMiddle: CGFloat
+    /// A short screen's niche (a phone on its side), fitted down to the invitation.
+    let shortScreen: Bool
     private let step: Int
     private let type: Int
     private let short: Bool
@@ -161,8 +185,16 @@ struct HomeTier {
     private let tall: CGFloat
     private let dyn: CGFloat
 
-    init(desk: Bool, screen: CGFloat, tall: CGFloat, card: CGFloat, dyn: CGFloat = 1) {
+    init(screen: CGFloat, tall: CGFloat, card: CGFloat, dyn: CGFloat = 1, wide: NicheLayout? = nil, heavy: Bool = false) {
+        let desk = wide != nil
         self.desk = desk
+        list = wide?.list ?? false
+        upright = wide?.upright ?? false
+        wideArch = wide?.arch
+        zoom = wide?.zoom ?? 1
+        listMiddle = wide?.listMiddle ?? 0
+        shortScreen = wide?.short ?? false
+        self.heavy = heavy
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
         short = !desk && tall <= 700
@@ -180,38 +212,54 @@ struct HomeTier {
      * commemorations follow in proportion. A style's size is scaled by `Metrics.type` when set, so
      * Dynamic Type is divided out of the fitted size here. The usual size at 375×667 gives the
      * sizes the head had (22, 17 and 14px), a tall phone the sizes its tier had (25 and 27px for
-     * the date). A niche keeps its own sizes.
+     * the date). A niche keeps its own sizes: the date 2.1rem, 2.3rem over the list of seven
+     * (2.2rem upright).
      */
+    /// A niche's small words never fall under 12 on the glass, however small the niche (a short
+    /// screen): each stands back from the zoom just enough, as the web's.
+    private func legible(_ size: CGFloat) -> CGFloat { max(size, 12 / zoom) }
+
     private func fitted(_ inline: CGFloat, _ height: CGFloat, _ lo: CGFloat, _ hi: CGFloat) -> CGFloat {
         min(max(max(inline, height) / dyn, lo), hi)
     }
     private var inline: CGFloat { card - 32 }
 
     private func pick<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[min(type, phone.count - 1)] }
-    private func rise<T>(_ niche: T, _ phone: T...) -> T { desk ? niche : phone[step] }
+    private func rise<T>(_ phone: T...) -> T { phone[step] }
 
-    var arch: Arch { rise(Arch.niche, Arch.phone, Arch.tall, Arch.taller) }
+    var arch: Arch { wideArch ?? rise(Arch.phone, Arch.tall, Arch.taller) }
     /**
      * The room under the point for the cross and air, before the date. On a phone the date's tap
      * box is a thumb's height with its line at the foot, so the room gives back the box's slack
      * above the line: the date stands where it stood centred in the box, the feast closer under it.
+     * An upright niche sets its title lower in its taller head; a heavy day closes it up.
      */
-    var headPad: CGFloat { rise(120, 86.4, 105.6, 118.4) - (desk ? 0 : (44 - date.line * dyn) / 2) }
-    var crownTop: CGFloat { rise(48, 33.6, 49.6, 54.4) }
-    var crownSize: CGFloat { rise(36, 30.4, 35.2, 40) }
+    var headPad: CGFloat {
+        if desk { return upright ? (heavy ? 118.4 : 144) : heavy ? 92.8 : 118.4 }
+        return rise(86.4, 105.6, 118.4) - (44 - date.line * dyn) / 2
+    }
+    var crownTop: CGFloat {
+        if desk { return upright ? (heavy ? 62.4 : 73.6) : heavy ? 44.8 : 57.6 }
+        return rise(33.6, 49.6, 54.4)
+    }
+    var crownSize: CGFloat { desk ? (heavy ? 32 : list ? 40 : 36.8) : rise(30.4, 35.2, 40) }
     /// Spare height under the head is parted 2:3 above and below the day, else the day is centred in it.
     var split: Bool { !desk && step > 0 }
-    var side: CGFloat { desk ? 28 : 16 }
-    private var lining: CGFloat { desk ? 26 : 12 }
+    var side: CGFloat { desk ? 36 : 16 }
+    /// The lining stands this far inside the card's edge: 20pt in the niche (`--lining-inset`).
+    var lining: CGFloat { desk ? 20 : 12 }
     /**
      * How far in from the card's edge the day's words stand: inside the lining's hairline (its
-     * inset, then 9pt) with 12pt of clear air, so a long feast name breaks rather than running
-     * over the lining.
+     * inset, then 9pt) with clear air (12pt, a rem in the niche), so a long feast name breaks
+     * rather than running over the lining.
      */
-    var dayClear: CGFloat { lining + 9 + 12 }
-    var bottom: CGFloat { desk ? 20 : 12 }
+    var dayClear: CGFloat { lining + 9 + (desk ? 16 : 12) }
+    var bottom: CGFloat { desk ? 17.6 : 12 }
     var date: TextStyle {
-        if desk { return Scale.body.sized(25.92, line: 31.1).tracked(0.39) }
+        if desk {
+            let size: CGFloat = list ? (upright ? 35.2 : 36.8) : 33.6
+            return Scale.body.sized(size, line: size * 1.2).tracked(size * 0.005)
+        }
         let size = fitted(0.07 * inline, 0.0292 * tall, 19.2, 32)
         return Scale.body.sized(size, line: size * 1.2).tracked(size * 0.01)
     }
@@ -227,51 +275,77 @@ struct HomeTier {
      */
     var dateMeasure: CGFloat? { desk ? nil : clear(headPad + 44 - date.line * dyn) }
     /**
-     * On a phone the weekday is a titulus in spaced small caps over the rest of the date set 10%
-     * larger (6% on a short phone), as the web's `.home-date-weekday` and `.home-date-rest`. A day
-     * with no room to give (two commemorations, or one opened from another day) closes the title
-     * up on a taller phone.
+     * The weekday is a titulus in spaced small caps over the rest of the date set 10% larger (6%
+     * on a short phone), as the web's `.home-date-weekday` and `.home-date-rest`. A day with no
+     * room to give (two commemorations, or one opened from another day) closes the title up on a
+     * taller phone. In the niche the weekday is half the date, tracked wider, over the date at its
+     * own size.
      */
     func weekday(heavy: Bool) -> TextStyle {
+        if desk {
+            let size = legible(0.5 * date.size)
+            return TextStyle(size: size, line: size * (heavy ? 1.4 : 1.7), tracking: size * 0.2, smallCaps: true)
+        }
         let size = max(0.66 * date.size, 15.2 / dyn)
         return TextStyle(size: size, line: size * (short ? 1.18 : heavy ? 1.06 : 1.5), tracking: size * 0.15, smallCaps: true)
     }
     func rest(heavy: Bool) -> TextStyle {
+        if desk { return Scale.body.sized(date.size, line: date.size * 1.1).tracked(date.tracking) }
         let size = date.size * (short ? 1.06 : heavy ? 1.02 : 1.1)
         return Scale.body.sized(size, line: size * (short ? 1.08 : heavy ? 1 : 1.12)).tracked(size * 0.005)
     }
     var feast: TextStyle {
-        if desk { return Scale.body.sized(18.72, line: 23.4) }
+        if desk {
+            let size = legible(list ? 22.72 : 21.12)
+            return Scale.body.sized(size, line: size * 1.25)
+        }
         let size = fitted(0.055 * inline, 0.0215 * tall, 15.2, 24)
         return Scale.body.sized(size, line: size * 1.25)
     }
     /**
      * The feast's measure, the head's width at its first line, when the day stands at the head's
-     * room: a long name breaks there rather than running over the lining further up the arch.
+     * room: a long name breaks there rather than running over the lining further up the arch. The
+     * niche's is 25rem.
      */
-    var feastMeasure: CGFloat? { desk ? nil : clear(headPad + 44 + 2) }
+    var feastMeasure: CGFloat? { desk ? 400 : clear(headPad + 44 + 2) }
     /// A short phone's commemorations give way, so a past date with them still fits.
     var commemoration: TextStyle {
         if short { return TextStyle(size: 13.6, line: 17.68) }
-        if desk { return TextStyle(size: 14, line: 20) }
+        if desk {
+            let size = legible(list ? 16.64 : 16)
+            return TextStyle(size: size, line: size * 1.4)
+        }
         let size = fitted(0.046 * inline, 0.0175 * tall, 12.8, 17.6)
         return TextStyle(size: size, line: size * 1.4)
     }
+    /// The fasts, as red work: a little larger in the niche.
+    var fast: TextStyle { desk ? TextStyle(size: legible(14.4), line: legible(14.4) * 1.6, tracking: 0.75, smallCaps: true) : TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true) }
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
     /// and inside the day's clearance of the lining.
     var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }
     var versicleMeasure: CGFloat { min(304, card - 2 * dayClear) }
     /// Below the day, to the band.
-    var dayGap: CGFloat { pick(16.8, 5.6, 12) }
-    var band: CGFloat { pick(12.8, 12.8, 12.8, 13.6) }
-    var bandPad: CGFloat { pick(3.2, 3.2, 3.2, 3.84) }
-    var bandGap: CGFloat { pick(15.2, 12, 16, 20) }
-    var pray: TextStyle { pick(Scale.body.sized(23.2, line: 30.16), Scale.body.sized(19.2, line: 24.96), Scale.body.sized(22.4, line: 29.12), Scale.body.sized(24, line: 31.2)).tracked(0.38) }
-    var prayPad: CGFloat { pick(13.8, 11.9, 13.5, 15.9) }
-    var prayGap: CGFloat { pick(15.2, 11.2, 20, 24) }
-    var row: CGFloat { pick(46, 44, 54.4, 62.4) }
-    var hour: CGFloat { pick(17.6, 15.68) }
-    var metaGap: CGFloat { pick(14.4, 8.8, 16, 19.2) }
+    var dayGap: CGFloat { pick(17.6, 5.6, 12) }
+    var band: CGFloat { pick(legible(14.4), 12.8, 12.8, 13.6) }
+    var bandTracking: CGFloat { desk ? 0.2 : 0.15 }
+    var bandPad: CGFloat { pick(2.56, 3.2, 3.2, 3.84) }
+    var bandGap: CGFloat { pick(17.6, 12, 16, 20) }
+    var pray: TextStyle { pick(Scale.body.sized(25.6, line: 33.28), Scale.body.sized(19.2, line: 24.96), Scale.body.sized(22.4, line: 29.12), Scale.body.sized(24, line: 31.2)).tracked(0.38) }
+    var prayPad: CGFloat { pick(15, 11.9, 13.5, 15.9) }
+    var prayGap: CGFloat { pick(14.4, 11.2, 20, 24) }
+    /// An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom).
+    var row: CGFloat { desk ? max(list ? 49.6 : 56, 44 / zoom) : pick(56, 44, 54.4, 62.4) }
+    var hour: CGFloat { desk ? legible(list ? 19.84 : 18.56) : 15.68 }
+    /// The hour that is now is larger in the niche, as well as lit and rubricated.
+    var hourNow: CGFloat { desk ? legible(list ? 22.72 : 21.12) : hour }
+    /// Every hour's gloss in the niche; a phone's only under the hour that is now.
+    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 12.48 }
+    /// The periods' labels: larger in the niche, where they stand beside the list.
+    var period: CGFloat { desk ? legible(list ? 15.2 : 13.76) : 11.52 }
+    var periodTracking: CGFloat { list ? 0.16 : desk ? 0.14 : 0.12 }
+    var metaGap: CGFloat { pick(8.8, 8.8, 16, 19.2) }
+    /// The season and "Change date" at the foot, in small caps.
+    var meta: CGFloat { desk ? legible(15.2) : 13.44 }
 }
 
 /// The date with its weekday and the rest each kept whole, so a break never parts a month from its day.
@@ -381,8 +455,8 @@ private struct Frontispiece: View {
     @State private var reserve: [String: CGRect] = [:]
     @Environment(\.reveal) private var reveal
 
-    /// By night a phone's head is the apse's sky (the web's `.home-sky`).
-    private var night: Bool { p.dark && !tier.desk }
+    /// By night the head is the apse's sky (the web's `.home-sky`), a phone's and the niche's alike.
+    private var night: Bool { p.dark }
     private var home: HomeInk { HomeInk.of(p) }
     /// The day's red work and muted ink, lifted on the sky to keep their contrast.
     private var rubric: Color { night ? home.skyRubric : p.rubric }
@@ -406,7 +480,7 @@ private struct Frontispiece: View {
         // thinned on a bare black day.
         let frontal = black ? p.lining.opacity(0.8) : view.color == "white" ? (night ? home.limeWhite : p.goldLine) : day
         let comma = view.dateLabel.range(of: ", ")
-        let heavy = view.commemorations.count > 1 || !view.isToday
+        let heavy = tier.desk ? tier.heavy : view.commemorations.count > 1 || !view.isToday
         FrontispieceLayout(tier: tier, m: m, open: picking ? 1 : 0) {
             // A lining painted round the head on the back wall, down to the inscription band:
             // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding. By
@@ -422,7 +496,11 @@ private struct Frontispiece: View {
                     Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
                 }
             } else {
-                Lining(arch: tier.arch, inset: m.px(desk ? 26 : 12), hairline: liningDay, pigmented: true)
+                ZStack {
+                    // A first-class niche by day gilds one fillet round its head, to the frieze.
+                    if desk && first { GiltHead(arch: tier.arch) }
+                    Lining(arch: tier.arch, inset: m.px(tier.lining), hairline: liningDay, pigmented: true)
+                }
             }
             // The consecration cross in the point of the head, with clear air round it: painted
             // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
@@ -441,8 +519,8 @@ private struct Frontispiece: View {
             // The day.
             VStack(spacing: 0) {
                 Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
-                    if let comma, !desk {
-                        // On a phone the weekday is a titulus over the rest of the date, the two a
+                    if let comma {
+                        // The weekday is a titulus over the rest of the date, on a phone the two a
                         // full thumb's height at least, as the web's, the rest at the foot so the
                         // feast stands close under it. A reader hears "Tuesday, November 10, 2026".
                         VStack(spacing: 0) {
@@ -456,7 +534,7 @@ private struct Frontispiece: View {
                                 .multilineTextAlignment(.center)
                                 .reserved("date")
                         }
-                        .frame(minHeight: m.px(44), alignment: .bottom)
+                        .frame(minHeight: desk ? nil : m.px(44), alignment: .bottom)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(view.dateLabel)
                     } else {
@@ -493,10 +571,10 @@ private struct Frontispiece: View {
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(rubric).reserved("fast " + t)
+                            Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
                         }
                     }
-                    .padding(.top, m.px(12))
+                    .padding(.top, m.px(desk && tier.heavy ? 0 : 12))
                 }
                 if !view.commemorations.isEmpty {
                     VStack(spacing: 0) {
@@ -562,7 +640,7 @@ private struct Frontispiece: View {
                 // The season and "Change date" share one line after the hours, centred (the web's
                 // `.home-day-meta`), in small caps, a gilt point between them. Open, the date
                 // control takes a line of its own beneath the season, and the picker the card's width.
-                let foot = TextStyle(size: 13.44, line: 20.16, tracking: 13.44 * 0.09, smallCaps: true)
+                let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
                 let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
                 if view.season.isEmpty {
                     change.padding(.top, m.px(tier.metaGap + 1))
@@ -612,9 +690,11 @@ private struct Frontispiece: View {
         .coordinateSpace(name: "frontispiece")
         .onPreferenceChange(ReserveKey.self) { reserve = $0 }
         .background {
-            if let niche {
-                // The niche: a pointed head, the stone moulding, the day's colour as its trim.
-                Niche(arch: tier.arch, t: niche, day: day, frame: frame)
+            if let niche, !p.dark {
+                // The niche by day: a lancet cut into the wall, its depth told by light on the
+                // reveal, the day's colour one fillet at the back wall's edge. By night it is the
+                // phone's panel, slate course and sky.
+                Niche(arch: tier.arch, t: niche, fillet: mix(day, niche.revealMid, 0.78))
             } else {
                 // The panel: the day's colour a little toward the frame as a ring at its edge, so
                 // a red or green day edges the head without outshouting the cross; by night the
@@ -655,7 +735,7 @@ private struct Frontispiece: View {
         // Gilt lozenges either side, 5pt squares on their points.
         Lozenged(
             text: "Pray the hours",
-            style: TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.15), smallCaps: true),
+            style: TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * tier.bandTracking, smallCaps: true),
             ink: o.ink,
             letters: LinearGradient(stops: [.init(color: mix(o.ink, .white, 0.7), location: 0.2), .init(color: o.ink, location: 0.58)], startPoint: .top, endPoint: .bottom)
         )
@@ -811,7 +891,9 @@ private struct PrayNow: View {
  * `.home-hour-links`): a firmer rule above and below and finer ones between the periods, by hand,
  * in the lining, and none upright. The periods are the margin's index in the quiet ink, with no
  * cell of their own; gilt points part the hours in a band. The hour that is now lies under a pool
- * of light with no edge, its name rubricated (`now`) and its gloss under it.
+ * of light with no edge, its name rubricated (`now`) and its gloss under it. In the wide niche
+ * every hour carries its gloss and the hour that is now is set larger as well, so it is not told by
+ * colour alone; from 1000 high the hours stand one to a line there (`HourList`).
  */
 private struct HourDirectory: View {
     let current: String
@@ -829,95 +911,41 @@ private struct HourDirectory: View {
 
     var body: some View {
         let desk = tier.desk
-        let label = TextStyle(size: 11.52, line: 18.43, tracking: 11.52 * 0.12, smallCaps: true)
+        let label = TextStyle(size: tier.period, line: tier.period * 1.6, tracking: tier.period * tier.periodTracking, smallCaps: true)
+        let labelInk = mix(p.accent, p.muted, desk ? 0.7 : 0.45)
         // One width for the three period labels, widened past the web's 83pt only when the
         // reader's font size needs it, so the hours still line up in columns.
         let font = label.uiFont(m)
         let widest = periods.map { ProseLayout.advance($0.label, font) + label.tracking * m.type * CGFloat($0.label.count) }.max() ?? 0
-        let labelWidth = max(widest + m.px(8), m.px(desk ? 84 : 83))
+        let labelWidth = max(widest + m.px(8), m.px(desk ? 80 : 83))
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
-                HStack(spacing: 0) {
-                    VStack(spacing: m.px(2)) {
-                        PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
-                        Text(row.label).type(label).foregroundStyle(mix(p.accent, p.muted, 0.45)).lineLimit(1).fixedSize()
-                    }
-                    .padding(.vertical, m.px(6))
-                    .padding(.leading, m.px(1.4))
-                    .frame(width: labelWidth)
-                    .frame(maxHeight: .infinity)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(row.label)
-                    .accessibilityAddTraits(.isHeader)
-                    Color.clear.frame(width: 1)
-                    HStack(spacing: 0) {
-                        ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
-                            let done = prayed.contains(h)
-                            let isNow = h == current
-                            let gloss = isNow ? note : ""
-                            Button { open(h) } label: {
-                                VStack(spacing: 0) {
-                                    // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
-                                    Text(hourLabel(h))
-                                        .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                        .foregroundStyle(done ? p.muted : isNow ? now : p.text)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
-                                        // An hour prayed today withdraws to the muted ink, a small gilt cross
-                                        // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
-                                        .overlay(alignment: .topTrailing) {
-                                            if done {
-                                                PaintedMark(.cross, size: m.px(7), color: p.gold)
-                                                    .offset(x: m.px(9), y: m.px(2))
-                                            }
-                                        }
-                                    // What the current hour is, for a newcomer, as the web's
-                                    // `.home-hour-link-note`; one line, which may overhang its cell a little.
-                                    if !gloss.isEmpty {
-                                        Text(gloss)
-                                            .type(TextStyle(size: 12.48, line: 14.35, italic: true))
-                                            .foregroundStyle(home.nowGloss)
-                                            .lineLimit(1)
-                                            .fixedSize()
-                                            .frame(width: 0)
-                                    }
-                                }
-                                .padding(.horizontal, m.px(2))
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across.
-                                .background {
-                                    if isNow {
-                                        Canvas { ctx, size in
-                                            let r = min(size.width + 8, 152) / 2
-                                            let ry = (size.height + 4) / 2
-                                            var pool = ctx
-                                            pool.translateBy(x: size.width / 2, y: size.height / 2)
-                                            pool.scaleBy(x: 1, y: ry / r)
-                                            pool.fill(
-                                                Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                                                with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
-                                            )
-                                        }
-                                        .padding(.horizontal, -8)
-                                        .padding(.vertical, -4)
-                                        .allowsHitTesting(false)
-                                    }
-                                }
-                                // A gilt point before every hour but the first of its band.
-                                .overlay(alignment: .leading) {
-                                    if j > 0 {
-                                        Rectangle().fill(o.flat.opacity(0.7)).frame(width: 3.5, height: 3.5)
-                                            .rotationEffect(.degrees(45))
-                                            .offset(x: -1.75)
-                                            .accessibilityHidden(true)
-                                    }
+                Group {
+                    if tier.list {
+                        HourList(period: row.period, label: row.label, hours: row.hours, current: current, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
+                    } else {
+                        HStack(spacing: 0) {
+                            VStack(spacing: m.px(2)) {
+                                PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
+                                    .scaleEffect(desk ? 1.12 : 1)
+                                Text(row.label).type(label).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+                            }
+                            .padding(.vertical, m.px(6))
+                            .padding(.leading, m.px(1.4))
+                            .frame(width: labelWidth)
+                            .frame(maxHeight: .infinity)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(row.label)
+                            .accessibilityAddTraits(.isHeader)
+                            Color.clear.frame(width: 1)
+                            HStack(spacing: 0) {
+                                ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
+                                    cell(h, j)
                                 }
                             }
-                            .buttonStyle(Quiet())
-                            .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+                            .frame(minHeight: m.px(tier.row))
                         }
                     }
-                    .frame(minHeight: m.px(tier.row))
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 1)
@@ -942,5 +970,206 @@ private struct HourDirectory: View {
             .frame(height: 2)
             .allowsHitTesting(false)
         }
+    }
+
+    /// One hour of a band: its name, its gloss (in the niche every hour's, on a phone the hour
+    /// that is now's), the pool of light on the hour that is now, a gilt point before it.
+    private func cell(_ h: String, _ j: Int) -> some View {
+        let desk = tier.desk
+        let done = prayed.contains(h)
+        let isNow = h == current
+        let gloss = desk ? hourNote(slug: h) : isNow ? note : ""
+        let size = isNow ? tier.hourNow : tier.hour
+        return Button { open(h) } label: {
+            VStack(spacing: 0) {
+                // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
+                Text(hourLabel(h))
+                    .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
+                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    // An hour prayed today withdraws to the muted ink, a small gilt cross
+                    // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
+                    .overlay(alignment: .topTrailing) {
+                        if done {
+                            PaintedMark(.cross, size: m.px(7), color: p.gold)
+                                .offset(x: m.px(9), y: m.px(2))
+                        }
+                    }
+                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`; one
+                // line, which may overhang its cell a little.
+                if !gloss.isEmpty {
+                    if tier.shortScreen {
+                        // Held at 12 in so small a niche, a gloss takes a second line rather than
+                        // running into its neighbour.
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .frame(width: 0)
+                    }
+                }
+            }
+            .padding(.horizontal, m.px(2))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
+            // (11rem in the niche).
+            .background {
+                if isNow {
+                    Canvas { ctx, size in
+                        let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
+                        let ry = (size.height + (desk ? 8 : 4)) / 2
+                        var pool = ctx
+                        pool.translateBy(x: size.width / 2, y: size.height / 2)
+                        pool.scaleBy(x: 1, y: ry / r)
+                        pool.fill(
+                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                            with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
+                        )
+                    }
+                    .padding(.horizontal, desk ? -12 : -8)
+                    .padding(.vertical, desk ? -8 : -4)
+                    .allowsHitTesting(false)
+                }
+            }
+            // A gilt point before every hour but the first of its band.
+            .overlay(alignment: .leading) {
+                if j > 0 {
+                    Rectangle().fill(o.flat.opacity(0.7)).frame(width: 3.5, height: 3.5)
+                        .rotationEffect(.degrees(45))
+                        .offset(x: -1.75)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .buttonStyle(Quiet())
+        .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+    }
+}
+
+/**
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
+ * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
+ * stand centred in the niche (`NicheLayout.listMiddle`).
+ */
+private struct HourList: View {
+    let period: Period
+    let label: String
+    let hours: [String]
+    let current: String
+    let prayed: Set<String>
+    let tier: HomeTier
+    let now: Color
+    let home: HomeInk
+    let labelStyle: TextStyle
+    let labelInk: Color
+    let open: (String) -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.ornament) private var o
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        HourListLayout(middle: m.px(tier.listMiddle)) {
+            VStack(spacing: m.px(4)) {
+                PeriodIcon(period: period, color: o.flat, alpha: 0.9).scaleEffect(1.25)
+                Text(label).type(labelStyle).foregroundStyle(labelInk).lineLimit(1).fixedSize()
+            }
+            .padding(.trailing, m.px(22.4))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(hours, id: \.self) { h in line(h) }
+            }
+            .padding(.vertical, m.px(4.8))
+        }
+    }
+
+    private func line(_ h: String) -> some View {
+        let done = prayed.contains(h)
+        let isNow = h == current
+        let gloss = hourNote(slug: h)
+        let size = isNow ? tier.hourNow : tier.hour
+        return Button { open(h) } label: {
+            HStack(spacing: 0) {
+                Text(hourLabel(h))
+                    .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
+                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .overlay(alignment: .topTrailing) {
+                        if done {
+                            PaintedMark(.cross, size: m.px(7), color: p.gold).offset(x: m.px(9), y: m.px(2))
+                        }
+                    }
+                    .frame(width: m.px(100.8), alignment: .leading)
+                Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 1.75), with: .color(o.flat.opacity(0.7))) }
+                    .frame(width: 5, height: 5)
+                    .padding(.trailing, m.px(13.6))
+                    .accessibilityHidden(true)
+                Text(gloss)
+                    .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                    .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+                Spacer(minLength: 0)
+            }
+            .frame(minHeight: m.px(tier.row))
+            // The pool of light under the hour that is now, from a little before its name.
+            .background(alignment: .leading) {
+                if isNow {
+                    Canvas { ctx, size in
+                        let r = m.px(136)
+                        let ry = size.height / 2
+                        var pool = ctx
+                        pool.translateBy(x: r - m.px(19.2), y: size.height / 2)
+                        pool.scaleBy(x: 1, y: ry / r)
+                        pool.fill(
+                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                            with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
+                        )
+                    }
+                    .frame(width: m.px(272))
+                    .padding(.vertical, -3)
+                    .allowsHitTesting(false)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(Quiet())
+        .accessibilityLabel([hourLabel(h), gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+    }
+}
+
+/**
+ * The list of seven's columns (the web's `minmax(0, 1fr) 6.75rem minmax(0, 1fr)`): the period's
+ * label right-aligned in the first, centred on the hours' height, and its hours across the other
+ * two. The hours take the height they need, so their rows grow with Dynamic Type.
+ */
+private struct HourListLayout: Layout {
+    let middle: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 600
+        let side = max(0, (width - middle) / 2)
+        let hours = subviews[1].sizeThatFits(ProposedViewSize(width: width - side, height: nil))
+        let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
+        return CGSize(width: width, height: max(hours.height, label.height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let side = max(0, (bounds.width - middle) / 2)
+        let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
+        subviews[0].place(at: CGPoint(x: bounds.minX + side, y: bounds.midY), anchor: .trailing, proposal: ProposedViewSize(width: side, height: label.height))
+        subviews[1].place(at: CGPoint(x: bounds.minX + side, y: bounds.minY), proposal: ProposedViewSize(width: bounds.width - side, height: nil))
     }
 }

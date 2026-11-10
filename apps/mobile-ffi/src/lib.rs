@@ -516,6 +516,13 @@ pub fn sun_available(latitude: f64) -> bool {
     sun::available(latitude)
 }
 
+/// What an hour is, for a newcomer: "Prayer as work begins" (`presentation::hour_gloss`). The
+/// wide home's niche sets every hour's under its name; empty for an unknown slug.
+#[uniffi::export]
+pub fn hour_note(slug: String) -> String {
+    hour_gloss(&slug).to_string()
+}
+
 /// Why the sun setting is greyed out, under its switch.
 #[uniffi::export]
 pub fn sun_unavailable_note() -> String {

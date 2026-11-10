@@ -6237,7 +6237,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 @media (min-width: 701px) {
   .page-home .home-hero {
-    --arch-rise: 0.4;
+    --arch-rise: 0.5;
   }
 
   .page-home .home-arch::before,
@@ -6249,55 +6249,51 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-sky {
     clip-path: polygon(
       0 100%,
-      calc(0%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
-      calc(0.155% + 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(0.617% + 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(1.381% + 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(2.436% + 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(3.769% + 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(5.364% + 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(7.198% + 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(9.25% + 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(11.545% + 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(13.879% + 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(16.252% + 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(18.662% + 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(21.108% + 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(23.589% + 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(26.103% - 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(28.649% - 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(31.226% - 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(33.831% - 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(36.465% - 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(39.125% - 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(41.81% - 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(44.518% - 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(47.249% - 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0443 * var(--arch-d)),
-      calc(52.751% + 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(55.482% + 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(58.19% + 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(60.875% + 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(63.535% + 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(66.169% + 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(68.774% + 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(71.351% + 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(73.897% + 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(76.411% - 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(78.892% - 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(81.338% - 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(83.748% - 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(86.121% - 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(88.455% - 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(90.75% - 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(92.802% - 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(94.636% - 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(96.231% - 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(97.564% - 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(98.619% - 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(99.383% - 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(99.845% - 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(100%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
+      calc(0%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
+      calc(0.11% + 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(0.438% + 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(0.984% + 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(1.743% + 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(2.71% + 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(3.879% + 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(5.242% + 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(6.792% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(8.517% + 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(10.406% + 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(13.295% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(16.269% + 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(19.325% - 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(22.462% - 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(25.674% - 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(28.959% - 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(32.313% - 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(35.734% - 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(39.216% - 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(42.757% - 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(46.353% - 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.076 * var(--arch-d)),
+      calc(53.647% + 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(57.243% + 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(60.784% + 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(64.266% + 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(67.687% + 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(71.041% + 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(74.326% + 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(77.538% + 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(80.675% + 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(83.731% - 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(86.705% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(89.594% - 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(91.483% - 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(93.208% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(94.758% - 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(96.121% - 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(97.29% - 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(98.257% - 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(99.016% - 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(99.562% - 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(99.89% - 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
       100% 100%);
   }
 
@@ -6309,163 +6305,372 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
       -10% 110%,
       -10% -10%,
       0 100%,
-      calc(0%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
-      calc(0.155% + 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(0.617% + 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(1.381% + 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(2.436% + 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(3.769% + 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(5.364% + 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(7.198% + 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(9.25% + 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(11.545% + 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(13.879% + 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(16.252% + 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(18.662% + 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(21.108% + 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(23.589% + 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(26.103% - 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(28.649% - 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(31.226% - 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(33.831% - 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(36.465% - 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(39.125% - 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(41.81% - 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(44.518% - 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(47.249% - 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0443 * var(--arch-d)),
-      calc(52.751% + 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(55.482% + 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(58.19% + 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(60.875% + 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(63.535% + 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(66.169% + 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(68.774% + 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(71.351% + 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(73.897% + 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(76.411% - 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(78.892% - 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(81.338% - 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(83.748% - 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(86.121% - 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(88.455% - 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(90.75% - 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(92.802% - 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(94.636% - 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(96.231% - 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(97.564% - 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(98.619% - 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(99.383% - 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(99.845% - 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(100%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
+      calc(0%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
+      calc(0.11% + 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(0.438% + 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(0.984% + 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(1.743% + 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(2.71% + 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(3.879% + 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(5.242% + 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(6.792% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(8.517% + 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(10.406% + 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(13.295% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(16.269% + 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(19.325% - 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(22.462% - 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(25.674% - 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(28.959% - 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(32.313% - 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(35.734% - 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(39.216% - 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(42.757% - 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(46.353% - 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.076 * var(--arch-d)),
+      calc(53.647% + 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(57.243% + 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(60.784% + 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(64.266% + 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(67.687% + 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(71.041% + 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(74.326% + 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(77.538% + 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(80.675% + 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(83.731% - 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(86.705% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(89.594% - 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(91.483% - 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(93.208% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(94.758% - 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(96.121% - 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(97.29% - 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(98.257% - 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(99.016% - 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(99.562% - 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(99.89% - 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
       100% 100%,
       0 100%);
   }
 
   .page-home .home-lining::before,
-  .page-home .home-lining::after {
+  .page-home .home-lining::after,
+  .page-home .home-summary::before {
     clip-path: polygon(
       0 100%,
-      calc(0%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
-      calc(0.155% + 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(0.617% + 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(1.381% + 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(2.436% + 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(3.769% + 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(5.364% + 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(7.198% + 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(9.25% + 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(11.545% + 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(13.879% + 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(16.252% + 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(18.662% + 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(21.108% + 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(23.589% + 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(26.103% - 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(28.649% - 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(31.226% - 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(33.831% - 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(36.465% - 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(39.125% - 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(41.81% - 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(44.518% - 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(47.249% - 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0443 * var(--arch-d)),
-      calc(52.751% + 0.2553 * var(--arch-d)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d)),
-      calc(55.482% + 0.2225 * var(--arch-d)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d)),
-      calc(58.19% + 0.1901 * var(--arch-d)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d)),
-      calc(60.875% + 0.1579 * var(--arch-d)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d)),
-      calc(63.535% + 0.126 * var(--arch-d)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d)),
-      calc(66.169% + 0.0944 * var(--arch-d)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d)),
-      calc(68.774% + 0.0631 * var(--arch-d)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d)),
-      calc(71.351% + 0.0322 * var(--arch-d)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d)),
-      calc(73.897% + 0.0017 * var(--arch-d)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d)),
-      calc(76.411% - 0.0284 * var(--arch-d)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d)),
-      calc(78.892% - 0.0582 * var(--arch-d)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d)),
-      calc(81.338% - 0.0875 * var(--arch-d)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d)),
-      calc(83.748% - 0.1164 * var(--arch-d)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d)),
-      calc(86.121% - 0.1449 * var(--arch-d)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d)),
-      calc(88.455% - 0.1729 * var(--arch-d)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d)),
-      calc(90.75% - 0.2004 * var(--arch-d)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d)),
-      calc(92.802% - 0.156 * var(--arch-d)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d)),
-      calc(94.636% - 0.1162 * var(--arch-d)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d)),
-      calc(96.231% - 0.0817 * var(--arch-d)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d)),
-      calc(97.564% - 0.0528 * var(--arch-d)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d)),
-      calc(98.619% - 0.0299 * var(--arch-d)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d)),
-      calc(99.383% - 0.0134 * var(--arch-d)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d)),
-      calc(99.845% - 0.0034 * var(--arch-d)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d)),
-      calc(100%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
+      calc(0%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
+      calc(0.11% + 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(0.438% + 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(0.984% + 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(1.743% + 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(2.71% + 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(3.879% + 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(5.242% + 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(6.792% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(8.517% + 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(10.406% + 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(13.295% + 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(16.269% + 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(19.325% - 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(22.462% - 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(25.674% - 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(28.959% - 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(32.313% - 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(35.734% - 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(39.216% - 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(42.757% - 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(46.353% - 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.076 * var(--arch-d)),
+      calc(53.647% + 0.3261 * var(--arch-d)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d)),
+      calc(57.243% + 0.2837 * var(--arch-d)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d)),
+      calc(60.784% + 0.2419 * var(--arch-d)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d)),
+      calc(64.266% + 0.2008 * var(--arch-d)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d)),
+      calc(67.687% + 0.1605 * var(--arch-d)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d)),
+      calc(71.041% + 0.1209 * var(--arch-d)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d)),
+      calc(74.326% + 0.0822 * var(--arch-d)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d)),
+      calc(77.538% + 0.0443 * var(--arch-d)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d)),
+      calc(80.675% + 0.0073 * var(--arch-d)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d)),
+      calc(83.731% - 0.0288 * var(--arch-d)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d)),
+      calc(86.705% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d)),
+      calc(89.594% - 0.0979 * var(--arch-d)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d)),
+      calc(91.483% - 0.0802 * var(--arch-d)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d)),
+      calc(93.208% - 0.0639 * var(--arch-d)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d)),
+      calc(94.758% - 0.0493 * var(--arch-d)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d)),
+      calc(96.121% - 0.0365 * var(--arch-d)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d)),
+      calc(97.29% - 0.0255 * var(--arch-d)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d)),
+      calc(98.257% - 0.0164 * var(--arch-d)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d)),
+      calc(99.016% - 0.0093 * var(--arch-d)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d)),
+      calc(99.562% - 0.0041 * var(--arch-d)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d)),
+      calc(99.89% - 0.001 * var(--arch-d)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
       100% 100%,
       calc(100% - var(--arch-t)) 100%,
-      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
-      calc(99.845% - 0.0034 * var(--arch-d) - 0.9936 * var(--arch-t)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d) + 0.1134 * var(--arch-t)),
-      calc(99.383% - 0.0134 * var(--arch-d) - 0.9743 * var(--arch-t)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d) + 0.2253 * var(--arch-t)),
-      calc(98.619% - 0.0299 * var(--arch-d) - 0.9425 * var(--arch-t)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d) + 0.3343 * var(--arch-t)),
-      calc(97.564% - 0.0528 * var(--arch-d) - 0.8985 * var(--arch-t)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d) + 0.439 * var(--arch-t)),
-      calc(96.231% - 0.0817 * var(--arch-d) - 0.8429 * var(--arch-t)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d) + 0.538 * var(--arch-t)),
-      calc(94.636% - 0.1162 * var(--arch-d) - 0.7765 * var(--arch-t)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d) + 0.6301 * var(--arch-t)),
-      calc(92.802% - 0.156 * var(--arch-d) - 0.7001 * var(--arch-t)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d) + 0.7141 * var(--arch-t)),
-      calc(90.75% - 0.2004 * var(--arch-d) - 0.6146 * var(--arch-t)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d) + 0.7888 * var(--arch-t)),
-      calc(88.455% - 0.1729 * var(--arch-d) - 0.5962 * var(--arch-t)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d) + 0.8028 * var(--arch-t)),
-      calc(86.121% - 0.1449 * var(--arch-d) - 0.5775 * var(--arch-t)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d) + 0.8164 * var(--arch-t)),
-      calc(83.748% - 0.1164 * var(--arch-d) - 0.5585 * var(--arch-t)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d) + 0.8295 * var(--arch-t)),
-      calc(81.338% - 0.0875 * var(--arch-d) - 0.5392 * var(--arch-t)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d) + 0.8422 * var(--arch-t)),
-      calc(78.892% - 0.0582 * var(--arch-d) - 0.5196 * var(--arch-t)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d) + 0.8544 * var(--arch-t)),
-      calc(76.411% - 0.0284 * var(--arch-d) - 0.4998 * var(--arch-t)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d) + 0.8662 * var(--arch-t)),
-      calc(73.897% + 0.0017 * var(--arch-d) - 0.4796 * var(--arch-t)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d) + 0.8775 * var(--arch-t)),
-      calc(71.351% + 0.0322 * var(--arch-d) - 0.4593 * var(--arch-t)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d) + 0.8883 * var(--arch-t)),
-      calc(68.774% + 0.0631 * var(--arch-d) - 0.4386 * var(--arch-t)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d) + 0.8987 * var(--arch-t)),
-      calc(66.169% + 0.0944 * var(--arch-d) - 0.4178 * var(--arch-t)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d) + 0.9086 * var(--arch-t)),
-      calc(63.535% + 0.126 * var(--arch-d) - 0.3967 * var(--arch-t)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d) + 0.918 * var(--arch-t)),
-      calc(60.875% + 0.1579 * var(--arch-d) - 0.3754 * var(--arch-t)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d) + 0.9269 * var(--arch-t)),
-      calc(58.19% + 0.1901 * var(--arch-d) - 0.3539 * var(--arch-t)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d) + 0.9353 * var(--arch-t)),
-      calc(55.482% + 0.2225 * var(--arch-d) - 0.3322 * var(--arch-t)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d) + 0.9432 * var(--arch-t)),
-      calc(52.751% + 0.2553 * var(--arch-d) - 0.3103 * var(--arch-t)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d) + 0.9506 * var(--arch-t)),
-      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.0443 * var(--arch-d) + 1.0443 * var(--arch-t)),
-      calc(47.249% - 0.2553 * var(--arch-d) + 0.3103 * var(--arch-t)) calc(var(--arch-lift) + 0.0086 * var(--arch-w) - 0.9506 * var(--arch-d) + 0.9506 * var(--arch-t)),
-      calc(44.518% - 0.2225 * var(--arch-d) + 0.3322 * var(--arch-t)) calc(var(--arch-lift) + 0.0179 * var(--arch-w) - 0.9432 * var(--arch-d) + 0.9432 * var(--arch-t)),
-      calc(41.81% - 0.1901 * var(--arch-d) + 0.3539 * var(--arch-t)) calc(var(--arch-lift) + 0.0278 * var(--arch-w) - 0.9353 * var(--arch-d) + 0.9353 * var(--arch-t)),
-      calc(39.125% - 0.1579 * var(--arch-d) + 0.3754 * var(--arch-t)) calc(var(--arch-lift) + 0.0383 * var(--arch-w) - 0.9269 * var(--arch-d) + 0.9269 * var(--arch-t)),
-      calc(36.465% - 0.126 * var(--arch-d) + 0.3967 * var(--arch-t)) calc(var(--arch-lift) + 0.0494 * var(--arch-w) - 0.918 * var(--arch-d) + 0.918 * var(--arch-t)),
-      calc(33.831% - 0.0944 * var(--arch-d) + 0.4178 * var(--arch-t)) calc(var(--arch-lift) + 0.0612 * var(--arch-w) - 0.9086 * var(--arch-d) + 0.9086 * var(--arch-t)),
-      calc(31.226% - 0.0631 * var(--arch-d) + 0.4386 * var(--arch-t)) calc(var(--arch-lift) + 0.0735 * var(--arch-w) - 0.8987 * var(--arch-d) + 0.8987 * var(--arch-t)),
-      calc(28.649% - 0.0322 * var(--arch-d) + 0.4593 * var(--arch-t)) calc(var(--arch-lift) + 0.0865 * var(--arch-w) - 0.8883 * var(--arch-d) + 0.8883 * var(--arch-t)),
-      calc(26.103% - 0.0017 * var(--arch-d) + 0.4796 * var(--arch-t)) calc(var(--arch-lift) + 0.1 * var(--arch-w) - 0.8775 * var(--arch-d) + 0.8775 * var(--arch-t)),
-      calc(23.589% + 0.0284 * var(--arch-d) + 0.4998 * var(--arch-t)) calc(var(--arch-lift) + 0.1141 * var(--arch-w) - 0.8662 * var(--arch-d) + 0.8662 * var(--arch-t)),
-      calc(21.108% + 0.0582 * var(--arch-d) + 0.5196 * var(--arch-t)) calc(var(--arch-lift) + 0.1288 * var(--arch-w) - 0.8544 * var(--arch-d) + 0.8544 * var(--arch-t)),
-      calc(18.662% + 0.0875 * var(--arch-d) + 0.5392 * var(--arch-t)) calc(var(--arch-lift) + 0.1441 * var(--arch-w) - 0.8422 * var(--arch-d) + 0.8422 * var(--arch-t)),
-      calc(16.252% + 0.1164 * var(--arch-d) + 0.5585 * var(--arch-t)) calc(var(--arch-lift) + 0.1599 * var(--arch-w) - 0.8295 * var(--arch-d) + 0.8295 * var(--arch-t)),
-      calc(13.879% + 0.1449 * var(--arch-d) + 0.5775 * var(--arch-t)) calc(var(--arch-lift) + 0.1763 * var(--arch-w) - 0.8164 * var(--arch-d) + 0.8164 * var(--arch-t)),
-      calc(11.545% + 0.1729 * var(--arch-d) + 0.5962 * var(--arch-t)) calc(var(--arch-lift) + 0.1932 * var(--arch-w) - 0.8028 * var(--arch-d) + 0.8028 * var(--arch-t)),
-      calc(9.25% + 0.2004 * var(--arch-d) + 0.6146 * var(--arch-t)) calc(var(--arch-lift) + 0.2107 * var(--arch-w) - 0.7888 * var(--arch-d) + 0.7888 * var(--arch-t)),
-      calc(7.198% + 0.156 * var(--arch-d) + 0.7001 * var(--arch-t)) calc(var(--arch-lift) + 0.2286 * var(--arch-w) - 0.7141 * var(--arch-d) + 0.7141 * var(--arch-t)),
-      calc(5.364% + 0.1162 * var(--arch-d) + 0.7765 * var(--arch-t)) calc(var(--arch-lift) + 0.2488 * var(--arch-w) - 0.6301 * var(--arch-d) + 0.6301 * var(--arch-t)),
-      calc(3.769% + 0.0817 * var(--arch-d) + 0.8429 * var(--arch-t)) calc(var(--arch-lift) + 0.2709 * var(--arch-w) - 0.538 * var(--arch-d) + 0.538 * var(--arch-t)),
-      calc(2.436% + 0.0528 * var(--arch-d) + 0.8985 * var(--arch-t)) calc(var(--arch-lift) + 0.2946 * var(--arch-w) - 0.439 * var(--arch-d) + 0.439 * var(--arch-t)),
-      calc(1.381% + 0.0299 * var(--arch-d) + 0.9425 * var(--arch-t)) calc(var(--arch-lift) + 0.3198 * var(--arch-w) - 0.3343 * var(--arch-d) + 0.3343 * var(--arch-t)),
-      calc(0.617% + 0.0134 * var(--arch-d) + 0.9743 * var(--arch-t)) calc(var(--arch-lift) + 0.3459 * var(--arch-w) - 0.2253 * var(--arch-d) + 0.2253 * var(--arch-t)),
-      calc(0.155% + 0.0034 * var(--arch-d) + 0.9936 * var(--arch-t)) calc(var(--arch-lift) + 0.3728 * var(--arch-w) - 0.1134 * var(--arch-d) + 0.1134 * var(--arch-t)),
-      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
+      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
+      calc(99.89% - 0.001 * var(--arch-d) - 0.9968 * var(--arch-t)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d) + 0.0803 * var(--arch-t)),
+      calc(99.562% - 0.0041 * var(--arch-d) - 0.9871 * var(--arch-t)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d) + 0.1601 * var(--arch-t)),
+      calc(99.016% - 0.0093 * var(--arch-d) - 0.9711 * var(--arch-t)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d) + 0.2388 * var(--arch-t)),
+      calc(98.257% - 0.0164 * var(--arch-d) - 0.9487 * var(--arch-t)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d) + 0.316 * var(--arch-t)),
+      calc(97.29% - 0.0255 * var(--arch-d) - 0.9203 * var(--arch-t)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d) + 0.3912 * var(--arch-t)),
+      calc(96.121% - 0.0365 * var(--arch-d) - 0.8859 * var(--arch-t)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d) + 0.4638 * var(--arch-t)),
+      calc(94.758% - 0.0493 * var(--arch-d) - 0.8458 * var(--arch-t)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d) + 0.5335 * var(--arch-t)),
+      calc(93.208% - 0.0639 * var(--arch-d) - 0.8002 * var(--arch-t)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d) + 0.5997 * var(--arch-t)),
+      calc(91.483% - 0.0802 * var(--arch-d) - 0.7495 * var(--arch-t)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d) + 0.662 * var(--arch-t)),
+      calc(89.594% - 0.0979 * var(--arch-d) - 0.6939 * var(--arch-t)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d) + 0.72 * var(--arch-t)),
+      calc(86.705% - 0.0639 * var(--arch-d) - 0.6702 * var(--arch-t)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d) + 0.7421 * var(--arch-t)),
+      calc(83.731% - 0.0288 * var(--arch-d) - 0.6458 * var(--arch-t)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d) + 0.7635 * var(--arch-t)),
+      calc(80.675% + 0.0073 * var(--arch-d) - 0.6208 * var(--arch-t)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d) + 0.784 * var(--arch-t)),
+      calc(77.538% + 0.0443 * var(--arch-d) - 0.595 * var(--arch-t)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d) + 0.8037 * var(--arch-t)),
+      calc(74.326% + 0.0822 * var(--arch-d) - 0.5687 * var(--arch-t)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d) + 0.8226 * var(--arch-t)),
+      calc(71.041% + 0.1209 * var(--arch-d) - 0.5417 * var(--arch-t)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d) + 0.8405 * var(--arch-t)),
+      calc(67.687% + 0.1605 * var(--arch-d) - 0.5142 * var(--arch-t)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d) + 0.8577 * var(--arch-t)),
+      calc(64.266% + 0.2008 * var(--arch-d) - 0.4862 * var(--arch-t)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d) + 0.8739 * var(--arch-t)),
+      calc(60.784% + 0.2419 * var(--arch-d) - 0.4576 * var(--arch-t)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d) + 0.8892 * var(--arch-t)),
+      calc(57.243% + 0.2837 * var(--arch-d) - 0.4286 * var(--arch-t)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d) + 0.9035 * var(--arch-t)),
+      calc(53.647% + 0.3261 * var(--arch-d) - 0.3991 * var(--arch-t)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d) + 0.9169 * var(--arch-t)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.076 * var(--arch-d) + 1.076 * var(--arch-t)),
+      calc(46.353% - 0.3261 * var(--arch-d) + 0.3991 * var(--arch-t)) calc(var(--arch-lift) + 0.0152 * var(--arch-w) - 0.9169 * var(--arch-d) + 0.9169 * var(--arch-t)),
+      calc(42.757% - 0.2837 * var(--arch-d) + 0.4286 * var(--arch-t)) calc(var(--arch-lift) + 0.0315 * var(--arch-w) - 0.9035 * var(--arch-d) + 0.9035 * var(--arch-t)),
+      calc(39.216% - 0.2419 * var(--arch-d) + 0.4576 * var(--arch-t)) calc(var(--arch-lift) + 0.049 * var(--arch-w) - 0.8892 * var(--arch-d) + 0.8892 * var(--arch-t)),
+      calc(35.734% - 0.2008 * var(--arch-d) + 0.4862 * var(--arch-t)) calc(var(--arch-lift) + 0.0677 * var(--arch-w) - 0.8739 * var(--arch-d) + 0.8739 * var(--arch-t)),
+      calc(32.313% - 0.1605 * var(--arch-d) + 0.5142 * var(--arch-t)) calc(var(--arch-lift) + 0.0874 * var(--arch-w) - 0.8577 * var(--arch-d) + 0.8577 * var(--arch-t)),
+      calc(28.959% - 0.1209 * var(--arch-d) + 0.5417 * var(--arch-t)) calc(var(--arch-lift) + 0.1083 * var(--arch-w) - 0.8405 * var(--arch-d) + 0.8405 * var(--arch-t)),
+      calc(25.674% - 0.0822 * var(--arch-d) + 0.5687 * var(--arch-t)) calc(var(--arch-lift) + 0.1302 * var(--arch-w) - 0.8226 * var(--arch-d) + 0.8226 * var(--arch-t)),
+      calc(22.462% - 0.0443 * var(--arch-d) + 0.595 * var(--arch-t)) calc(var(--arch-lift) + 0.1532 * var(--arch-w) - 0.8037 * var(--arch-d) + 0.8037 * var(--arch-t)),
+      calc(19.325% - 0.0073 * var(--arch-d) + 0.6208 * var(--arch-t)) calc(var(--arch-lift) + 0.1772 * var(--arch-w) - 0.784 * var(--arch-d) + 0.784 * var(--arch-t)),
+      calc(16.269% + 0.0288 * var(--arch-d) + 0.6458 * var(--arch-t)) calc(var(--arch-lift) + 0.2022 * var(--arch-w) - 0.7635 * var(--arch-d) + 0.7635 * var(--arch-t)),
+      calc(13.295% + 0.0639 * var(--arch-d) + 0.6702 * var(--arch-t)) calc(var(--arch-lift) + 0.2282 * var(--arch-w) - 0.7421 * var(--arch-d) + 0.7421 * var(--arch-t)),
+      calc(10.406% + 0.0979 * var(--arch-d) + 0.6939 * var(--arch-t)) calc(var(--arch-lift) + 0.2552 * var(--arch-w) - 0.72 * var(--arch-d) + 0.72 * var(--arch-t)),
+      calc(8.517% + 0.0802 * var(--arch-d) + 0.7495 * var(--arch-t)) calc(var(--arch-lift) + 0.2749 * var(--arch-w) - 0.662 * var(--arch-d) + 0.662 * var(--arch-t)),
+      calc(6.792% + 0.0639 * var(--arch-d) + 0.8002 * var(--arch-t)) calc(var(--arch-lift) + 0.2961 * var(--arch-w) - 0.5997 * var(--arch-d) + 0.5997 * var(--arch-t)),
+      calc(5.242% + 0.0493 * var(--arch-d) + 0.8458 * var(--arch-t)) calc(var(--arch-lift) + 0.3186 * var(--arch-w) - 0.5335 * var(--arch-d) + 0.5335 * var(--arch-t)),
+      calc(3.879% + 0.0365 * var(--arch-d) + 0.8859 * var(--arch-t)) calc(var(--arch-lift) + 0.3423 * var(--arch-w) - 0.4638 * var(--arch-d) + 0.4638 * var(--arch-t)),
+      calc(2.71% + 0.0255 * var(--arch-d) + 0.9203 * var(--arch-t)) calc(var(--arch-lift) + 0.367 * var(--arch-w) - 0.3912 * var(--arch-d) + 0.3912 * var(--arch-t)),
+      calc(1.743% + 0.0164 * var(--arch-d) + 0.9487 * var(--arch-t)) calc(var(--arch-lift) + 0.3925 * var(--arch-w) - 0.316 * var(--arch-d) + 0.316 * var(--arch-t)),
+      calc(0.984% + 0.0093 * var(--arch-d) + 0.9711 * var(--arch-t)) calc(var(--arch-lift) + 0.4188 * var(--arch-w) - 0.2388 * var(--arch-d) + 0.2388 * var(--arch-t)),
+      calc(0.438% + 0.0041 * var(--arch-d) + 0.9871 * var(--arch-t)) calc(var(--arch-lift) + 0.4456 * var(--arch-w) - 0.1601 * var(--arch-d) + 0.1601 * var(--arch-t)),
+      calc(0.11% + 0.001 * var(--arch-d) + 0.9968 * var(--arch-t)) calc(var(--arch-lift) + 0.4727 * var(--arch-w) - 0.0803 * var(--arch-d) + 0.0803 * var(--arch-t)),
+      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
+      var(--arch-t) 100%);
+  }
+}
+
+@media (min-width: 701px) and (orientation: portrait) {
+  .page-home .home-hero {
+    --arch-rise: 0.62;
+  }
+
+  .page-home .home-arch::before,
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge,
+  .page-home .home-hero::before,
+  .page-home .home-hero::after,
+  .page-home .home-arch-fill,
+  .page-home .home-sky {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      calc(0.053% + 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(0.211% + 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(0.474% + 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(0.842% + 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(1.313% + 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(1.885% + 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(2.559% + 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(3.33% + 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(4.198% + 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(5.16% + 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(7.901% + 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(10.847% - 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(13.992% - 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(17.33% - 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(20.853% - 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(24.553% - 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(28.422% - 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(32.453% - 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(36.635% - 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(40.96% - 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(45.418% - 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.1289 * var(--arch-d)),
+      calc(54.582% + 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(59.04% + 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(63.365% + 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(67.547% + 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(71.578% + 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(75.447% + 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(79.147% + 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(82.67% + 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(86.008% + 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(89.153% + 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(92.099% - 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(94.84% - 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(95.802% - 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(96.67% - 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(97.441% - 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(98.115% - 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(98.687% - 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(99.158% - 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(99.526% - 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(99.789% - 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(99.947% - 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      100% 100%);
+  }
+
+  .page-home .home-arch-shade::before {
+    clip-path: polygon(evenodd,
+      -10% -10%,
+      110% -10%,
+      110% 110%,
+      -10% 110%,
+      -10% -10%,
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      calc(0.053% + 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(0.211% + 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(0.474% + 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(0.842% + 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(1.313% + 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(1.885% + 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(2.559% + 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(3.33% + 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(4.198% + 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(5.16% + 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(7.901% + 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(10.847% - 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(13.992% - 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(17.33% - 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(20.853% - 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(24.553% - 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(28.422% - 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(32.453% - 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(36.635% - 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(40.96% - 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(45.418% - 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.1289 * var(--arch-d)),
+      calc(54.582% + 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(59.04% + 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(63.365% + 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(67.547% + 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(71.578% + 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(75.447% + 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(79.147% + 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(82.67% + 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(86.008% + 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(89.153% + 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(92.099% - 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(94.84% - 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(95.802% - 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(96.67% - 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(97.441% - 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(98.115% - 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(98.687% - 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(99.158% - 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(99.526% - 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(99.789% - 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(99.947% - 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      100% 100%,
+      0 100%);
+  }
+
+  .page-home .home-lining::before,
+  .page-home .home-lining::after,
+  .page-home .home-summary::before {
+    clip-path: polygon(
+      0 100%,
+      calc(0%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      calc(0.053% + 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(0.211% + 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(0.474% + 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(0.842% + 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(1.313% + 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(1.885% + 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(2.559% + 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(3.33% + 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(4.198% + 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(5.16% + 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(7.901% + 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(10.847% - 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(13.992% - 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(17.33% - 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(20.853% - 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(24.553% - 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(28.422% - 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(32.453% - 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(36.635% - 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(40.96% - 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(45.418% - 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.1289 * var(--arch-d)),
+      calc(54.582% + 0.4133 * var(--arch-d)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d)),
+      calc(59.04% + 0.3639 * var(--arch-d)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d)),
+      calc(63.365% + 0.316 * var(--arch-d)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d)),
+      calc(67.547% + 0.2697 * var(--arch-d)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d)),
+      calc(71.578% + 0.2251 * var(--arch-d)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d)),
+      calc(75.447% + 0.1822 * var(--arch-d)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d)),
+      calc(79.147% + 0.1412 * var(--arch-d)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d)),
+      calc(82.67% + 0.1022 * var(--arch-d)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d)),
+      calc(86.008% + 0.0652 * var(--arch-d)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d)),
+      calc(89.153% + 0.0304 * var(--arch-d)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d)),
+      calc(92.099% - 0.0022 * var(--arch-d)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d)),
+      calc(94.84% - 0.0326 * var(--arch-d)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d)),
+      calc(95.802% - 0.0265 * var(--arch-d)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d)),
+      calc(96.67% - 0.021 * var(--arch-d)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d)),
+      calc(97.441% - 0.0162 * var(--arch-d)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d)),
+      calc(98.115% - 0.0119 * var(--arch-d)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d)),
+      calc(98.687% - 0.0083 * var(--arch-d)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d)),
+      calc(99.158% - 0.0053 * var(--arch-d)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d)),
+      calc(99.526% - 0.003 * var(--arch-d)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d)),
+      calc(99.789% - 0.0013 * var(--arch-d)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d)),
+      calc(99.947% - 0.0003 * var(--arch-d)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d)),
+      calc(100%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      100% 100%,
+      calc(100% - var(--arch-t)) 100%,
+      calc(100% - 1 * var(--arch-t)) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
+      calc(99.947% - 0.0003 * var(--arch-d) - 0.9986 * var(--arch-t)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d) + 0.0527 * var(--arch-t)),
+      calc(99.789% - 0.0013 * var(--arch-d) - 0.9944 * var(--arch-t)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d) + 0.1052 * var(--arch-t)),
+      calc(99.526% - 0.003 * var(--arch-d) - 0.9875 * var(--arch-t)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d) + 0.1575 * var(--arch-t)),
+      calc(99.158% - 0.0053 * var(--arch-d) - 0.9778 * var(--arch-t)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d) + 0.2093 * var(--arch-t)),
+      calc(98.687% - 0.0083 * var(--arch-d) - 0.9655 * var(--arch-t)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d) + 0.2606 * var(--arch-t)),
+      calc(98.115% - 0.0119 * var(--arch-d) - 0.9504 * var(--arch-t)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d) + 0.3111 * var(--arch-t)),
+      calc(97.441% - 0.0162 * var(--arch-d) - 0.9327 * var(--arch-t)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d) + 0.3607 * var(--arch-t)),
+      calc(96.67% - 0.021 * var(--arch-d) - 0.9124 * var(--arch-t)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d) + 0.4094 * var(--arch-t)),
+      calc(95.802% - 0.0265 * var(--arch-d) - 0.8895 * var(--arch-t)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d) + 0.4569 * var(--arch-t)),
+      calc(94.84% - 0.0326 * var(--arch-d) - 0.8642 * var(--arch-t)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d) + 0.5031 * var(--arch-t)),
+      calc(92.099% - 0.0022 * var(--arch-d) - 0.8398 * var(--arch-t)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d) + 0.543 * var(--arch-t)),
+      calc(89.153% + 0.0304 * var(--arch-d) - 0.8135 * var(--arch-t)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d) + 0.5816 * var(--arch-t)),
+      calc(86.008% + 0.0652 * var(--arch-d) - 0.7854 * var(--arch-t)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d) + 0.619 * var(--arch-t)),
+      calc(82.67% + 0.1022 * var(--arch-d) - 0.7556 * var(--arch-t)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d) + 0.655 * var(--arch-t)),
+      calc(79.147% + 0.1412 * var(--arch-d) - 0.7242 * var(--arch-t)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d) + 0.6896 * var(--arch-t)),
+      calc(75.447% + 0.1822 * var(--arch-d) - 0.6911 * var(--arch-t)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d) + 0.7227 * var(--arch-t)),
+      calc(71.578% + 0.2251 * var(--arch-d) - 0.6566 * var(--arch-t)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d) + 0.7542 * var(--arch-t)),
+      calc(67.547% + 0.2697 * var(--arch-d) - 0.6206 * var(--arch-t)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d) + 0.7841 * var(--arch-t)),
+      calc(63.365% + 0.316 * var(--arch-d) - 0.5833 * var(--arch-t)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d) + 0.8122 * var(--arch-t)),
+      calc(59.04% + 0.3639 * var(--arch-d) - 0.5447 * var(--arch-t)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d) + 0.8386 * var(--arch-t)),
+      calc(54.582% + 0.4133 * var(--arch-d) - 0.5049 * var(--arch-t)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d) + 0.8632 * var(--arch-t)),
+      calc(50%) calc(var(--arch-lift) + 0 * var(--arch-w) - 1.1289 * var(--arch-d) + 1.1289 * var(--arch-t)),
+      calc(45.418% - 0.4133 * var(--arch-d) + 0.5049 * var(--arch-t)) calc(var(--arch-lift) + 0.0254 * var(--arch-w) - 0.8632 * var(--arch-d) + 0.8632 * var(--arch-t)),
+      calc(40.96% - 0.3639 * var(--arch-d) + 0.5447 * var(--arch-t)) calc(var(--arch-lift) + 0.0529 * var(--arch-w) - 0.8386 * var(--arch-d) + 0.8386 * var(--arch-t)),
+      calc(36.635% - 0.316 * var(--arch-d) + 0.5833 * var(--arch-t)) calc(var(--arch-lift) + 0.0824 * var(--arch-w) - 0.8122 * var(--arch-d) + 0.8122 * var(--arch-t)),
+      calc(32.453% - 0.2697 * var(--arch-d) + 0.6206 * var(--arch-t)) calc(var(--arch-lift) + 0.114 * var(--arch-w) - 0.7841 * var(--arch-d) + 0.7841 * var(--arch-t)),
+      calc(28.422% - 0.2251 * var(--arch-d) + 0.6566 * var(--arch-t)) calc(var(--arch-lift) + 0.1474 * var(--arch-w) - 0.7542 * var(--arch-d) + 0.7542 * var(--arch-t)),
+      calc(24.553% - 0.1822 * var(--arch-d) + 0.6911 * var(--arch-t)) calc(var(--arch-lift) + 0.1828 * var(--arch-w) - 0.7227 * var(--arch-d) + 0.7227 * var(--arch-t)),
+      calc(20.853% - 0.1412 * var(--arch-d) + 0.7242 * var(--arch-t)) calc(var(--arch-lift) + 0.2198 * var(--arch-w) - 0.6896 * var(--arch-d) + 0.6896 * var(--arch-t)),
+      calc(17.33% - 0.1022 * var(--arch-d) + 0.7556 * var(--arch-t)) calc(var(--arch-lift) + 0.2586 * var(--arch-w) - 0.655 * var(--arch-d) + 0.655 * var(--arch-t)),
+      calc(13.992% - 0.0652 * var(--arch-d) + 0.7854 * var(--arch-t)) calc(var(--arch-lift) + 0.299 * var(--arch-w) - 0.619 * var(--arch-d) + 0.619 * var(--arch-t)),
+      calc(10.847% - 0.0304 * var(--arch-d) + 0.8135 * var(--arch-t)) calc(var(--arch-lift) + 0.3409 * var(--arch-w) - 0.5816 * var(--arch-d) + 0.5816 * var(--arch-t)),
+      calc(7.901% + 0.0022 * var(--arch-d) + 0.8398 * var(--arch-t)) calc(var(--arch-lift) + 0.3842 * var(--arch-w) - 0.543 * var(--arch-d) + 0.543 * var(--arch-t)),
+      calc(5.16% + 0.0326 * var(--arch-d) + 0.8642 * var(--arch-t)) calc(var(--arch-lift) + 0.4288 * var(--arch-w) - 0.5031 * var(--arch-d) + 0.5031 * var(--arch-t)),
+      calc(4.198% + 0.0265 * var(--arch-d) + 0.8895 * var(--arch-t)) calc(var(--arch-lift) + 0.4464 * var(--arch-w) - 0.4569 * var(--arch-d) + 0.4569 * var(--arch-t)),
+      calc(3.33% + 0.021 * var(--arch-d) + 0.9124 * var(--arch-t)) calc(var(--arch-lift) + 0.4644 * var(--arch-w) - 0.4094 * var(--arch-d) + 0.4094 * var(--arch-t)),
+      calc(2.559% + 0.0162 * var(--arch-d) + 0.9327 * var(--arch-t)) calc(var(--arch-lift) + 0.4829 * var(--arch-w) - 0.3607 * var(--arch-d) + 0.3607 * var(--arch-t)),
+      calc(1.885% + 0.0119 * var(--arch-d) + 0.9504 * var(--arch-t)) calc(var(--arch-lift) + 0.5018 * var(--arch-w) - 0.3111 * var(--arch-d) + 0.3111 * var(--arch-t)),
+      calc(1.313% + 0.0083 * var(--arch-d) + 0.9655 * var(--arch-t)) calc(var(--arch-lift) + 0.521 * var(--arch-w) - 0.2606 * var(--arch-d) + 0.2606 * var(--arch-t)),
+      calc(0.842% + 0.0053 * var(--arch-d) + 0.9778 * var(--arch-t)) calc(var(--arch-lift) + 0.5405 * var(--arch-w) - 0.2093 * var(--arch-d) + 0.2093 * var(--arch-t)),
+      calc(0.474% + 0.003 * var(--arch-d) + 0.9875 * var(--arch-t)) calc(var(--arch-lift) + 0.5601 * var(--arch-w) - 0.1575 * var(--arch-d) + 0.1575 * var(--arch-t)),
+      calc(0.211% + 0.0013 * var(--arch-d) + 0.9944 * var(--arch-t)) calc(var(--arch-lift) + 0.58 * var(--arch-w) - 0.1052 * var(--arch-d) + 0.1052 * var(--arch-t)),
+      calc(0.053% + 0.0003 * var(--arch-d) + 0.9986 * var(--arch-t)) calc(var(--arch-lift) + 0.6 * var(--arch-w) - 0.0527 * var(--arch-d) + 0.0527 * var(--arch-t)),
+      calc(0% + 1 * var(--arch-t)) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
       var(--arch-t) 100%);
   }
 }
@@ -6945,152 +7150,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   justify-content: space-between;
 }
 
-@media (min-width: 701px) {
-  /* The niche is larger than the old card, and on big screens the whole of
-     it scales up (see "Home niche"); main widens to hold it. */
-  .page-home main {
-    --card-w: clamp(38rem, 10rem + 38vw, 48rem);
-    --niche-zoom: 1;
-    max-width: calc(var(--card-w) * var(--niche-zoom) + 3rem);
-  }
-
-  /* The niche: the frontispiece set into the wall. A pointed head lower
-     than the phone's (so a laptop keeps "Pray" on screen), a stone
-     moulding with dark edges, the day's colour as a trim just inside the
-     stone, and a shadow under the head so the panel reads as recessed. The
-     courses are the phone's layers, restated at the niche's scale; the
-     halo is the room's shade under the niche and a field of the wall's
-     colour round it. */
-  .page-home .home-hero {
-    --niche-background:
-      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
-      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
-      var(--surface);
-    --arch-ground: var(--niche-background);
-    --arch-frame: 2px;
-    --arch-halo: drop-shadow(0 1.25rem 1.25rem var(--chapel-shade)) drop-shadow(0 0 0.9rem var(--niche-clear));
-    --arch-shade: drop-shadow(0 0.55rem 0.9rem var(--niche-recess));
-    --pad-x: 1.75rem;
-    zoom: var(--niche-zoom);
-    max-width: var(--card-w);
-    /* The lining stands 26px inside the moulding; the cross sits in its
-       point and the date where the head has opened wide enough for it. */
-    --lining-inset: 26px;
-    --day-clear: calc(var(--lining-inset) + 9px + 0.75rem);
-    --crown-size: 2.25rem;
-    --crown-top: 3rem;
-    --head-pad: 7.5rem;
-    padding: 0 var(--pad-x) 1.25rem;
-  }
-
-  /* The niche's panel carries the phone's plaster under its glow and
-     sheen, veiled as the phone's is (--panel-plaster-veil, none by day).
-     The field runs down from the top at the card's width, taller than the
-     closed card, so opening Change date uncovers more wall rather than
-     stretching it; the mirrored tile repeats without a seam. */
-  .page-home .home-arch-fill {
-    background:
-      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
-      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
-      linear-gradient(
-        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent),
-        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent)
-      ),
-      url("plaster-panel.jpg") center top / 100% auto repeat-y,
-      var(--surface);
-    background-blend-mode: normal, normal, normal, soft-light, normal;
-  }
-
-  /* The moulding, outermost first: a clearing of the wall's colour, the
-     stone's dark edge, the stone, then the day's colour as a trim inside
-     it. */
-  .page-home .home-arch::before {
-    --arch-d: calc(0.75rem + 0.5rem + 1px);
-    background: var(--niche-clear);
-  }
-
-  .page-home .home-arch-edge {
-    --arch-d: calc(0.75rem + 1px);
-    display: block;
-    background: linear-gradient(var(--niche-edge), var(--niche-edge)), var(--niche-clear);
-  }
-
-  .page-home .home-arch::after {
-    --arch-d: 0.75rem;
-    display: block;
-    background: var(--niche-stone);
-  }
-
-  .page-home .home-hero::before {
-    --arch-d: 1.5px;
-    display: block;
-    z-index: -4;
-    background: linear-gradient(var(--day-color, var(--niche-edge)), var(--day-color, var(--niche-edge))), var(--niche-stone);
-  }
-
-  .page-home .home h1 {
-    max-width: none;
-    font-size: 1.62rem;
-    letter-spacing: 0.015em;
-  }
-
-  /* The niche's head is low and wide, and the day block sits deep in it:
-     the feast needs no fitted measure. */
-  .page-home .home .feast {
-    max-width: none;
-    font-size: 1.17rem;
-  }
-
-  .page-home .home-day-head {
-    margin-bottom: 0.9rem;
-  }
-
-  /* The band carries the heading at every width; desktop only widens the
-     bleed to match the frontispiece's larger side padding. */
-  .page-home .home-prayer-card h2 {
-    margin-inline: -1.75rem;
-    padding: 0.1rem 1.75rem 0.06rem;
-    margin-bottom: 0.95rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.17em;
-  }
-
-  .page-home .pray-now-wrap {
-    margin-bottom: 0.95rem;
-  }
-
-  /* The invitation leads the page: in a box this wide it needs more than
-     the date's second voice to do so. */
-  .page-home .pray-now,
-  .page-home .pray-now:hover {
-    padding-block: 0.85rem 0.9rem;
-    font-size: 1.45rem;
-  }
-
-  .page-home .home-hour-group {
-    grid-template-columns: 5.25rem minmax(0, 1fr);
-  }
-
-  .page-home .home-hour-group-label {
-    padding-inline: 0.5rem;
-    color: var(--accent);
-  }
-
-  .page-home .home-hour-link {
-    min-height: max(2.9rem, 46px);
-    padding-block: 0.45rem;
-  }
-
-  .page-home .home-hour-link-name {
-    font-size: 1.1rem;
-  }
-
-  .page-home .home-day-meta {
-    margin-top: 0.9rem;
-    padding-top: 0.45rem;
-  }
-}
-
 @media (max-width: 350px) {
   .page-home .home-hour-group {
     grid-template-columns: 1fr;
@@ -7210,7 +7269,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 }
 
-@media (max-width: 700px) and (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
     --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
     --arch-ground: #192436;
@@ -7232,26 +7291,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 }
 
-@media (max-width: 700px) {
-  :root[data-theme="dark"] .page-home .home-hero {
-    --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
-    --arch-ground: #192436;
-    --panel-glow: radial-gradient(ellipse 100% calc(1.06 * var(--arch-w)) at 50% calc(0.39 * var(--arch-w)), rgba(150, 178, 220, 0.2), transparent);
-    --panel-plaster-veil: 50%;
-    --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
-    --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
-    --rubric: #e08585;
-  }
+:root[data-theme="dark"] .page-home .home-hero {
+  --arch-stone: linear-gradient(180deg, #3a485e, #2a3648 calc(var(--arch-lift) + var(--arch-rise) * var(--arch-w)));
+  --arch-ground: #192436;
+  --panel-glow: radial-gradient(ellipse 100% calc(1.06 * var(--arch-w)) at 50% calc(0.39 * var(--arch-w)), rgba(150, 178, 220, 0.2), transparent);
+  --panel-plaster-veil: 50%;
+  --panel-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
+  --panel-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.7));
+  --rubric: #e08585;
+}
 
-  :root[data-theme="dark"] .page-home .home-arch-fill {
-    box-shadow: inset 0 0 0 4px #2a3648;
-  }
+:root[data-theme="dark"] .page-home .home-arch-fill {
+  box-shadow: inset 0 0 0 4px #2a3648;
+}
 
-  :root[data-theme="dark"] .page-home .home-arch-shade::before {
-    --arch-d: calc(-1 * var(--arch-frame) - 4px);
-    inset: 0 4px 4px;
-    background: var(--arch-stone);
-  }
+:root[data-theme="dark"] .page-home .home-arch-shade::before {
+  --arch-d: calc(-1 * var(--arch-frame) - 4px);
+  inset: 0 4px 4px;
+  background: var(--arch-stone);
 }
 
 @media (hover: hover) and (prefers-color-scheme: dark) {
@@ -8688,8 +8745,10 @@ body.rank-first-class .home-crown {
 .page-home .home-stars .s-mid { stop-color: var(--sky-leaf); }
 .page-home .home-stars .s-lo { stop-color: var(--sky-leaf-lo); }
 
-/* By night, on a phone. */
-@media (max-width: 700px) and (prefers-color-scheme: dark) {
+/* By night, at every width: the wide niche's head is the phone's sky (see
+   "The niche by night"). Home's starfield gives way to it, so the night has
+   one set of stars and the wall outside is plain plaster. */
+@media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body.page-home::before {
     display: none;
   }
@@ -8767,82 +8826,80 @@ body.rank-first-class .home-crown {
   }
 }
 
-@media (max-width: 700px) {
-  :root[data-theme="dark"] body.page-home::before {
-    display: none;
-  }
+:root[data-theme="dark"] body.page-home::before {
+  display: none;
+}
 
-  :root[data-theme="dark"] .page-home .home-hero {
-    --frontal: var(--day-color, var(--lining));
-  }
+:root[data-theme="dark"] .page-home .home-hero {
+  --frontal: var(--day-color, var(--lining));
+}
 
-  :root[data-theme="dark"] .page-home .home-hero.day-color-white {
-    --lining-day: var(--lime-white);
-    --frontal: var(--lime-white);
-  }
+:root[data-theme="dark"] .page-home .home-hero.day-color-white {
+  --lining-day: var(--lime-white);
+  --frontal: var(--lime-white);
+}
 
-  :root[data-theme="dark"] .page-home .home-sky {
-    display: block;
-  }
+:root[data-theme="dark"] .page-home .home-sky {
+  display: block;
+}
 
-  :root[data-theme="dark"] .page-home .home-arch::before {
-    background: var(--sky-rim);
-  }
+:root[data-theme="dark"] .page-home .home-arch::before {
+  background: var(--sky-rim);
+}
 
-  :root[data-theme="dark"] .page-home .home-lining {
-    --arch-d: -5px;
-    bottom: 0;
-  }
+:root[data-theme="dark"] .page-home .home-lining {
+  --arch-d: -5px;
+  bottom: 0;
+}
 
-  :root[data-theme="dark"] .page-home .home-lining::before {
-    --arch-t: 1.5px;
-    background: linear-gradient(180deg, var(--sky-leaf-lo), var(--sky-leaf-hi) 38%, var(--sky-leaf) 70%, var(--sky-leaf-lo));
-    -webkit-mask: none;
-    mask: none;
-    opacity: calc(0.9 * var(--leaf-catch));
-  }
+:root[data-theme="dark"] .page-home .home-lining::before {
+  --arch-t: 1.5px;
+  background: linear-gradient(180deg, var(--sky-leaf-lo), var(--sky-leaf-hi) 38%, var(--sky-leaf) 70%, var(--sky-leaf-lo));
+  -webkit-mask: none;
+  mask: none;
+  opacity: calc(0.9 * var(--leaf-catch));
+}
 
-  :root[data-theme="dark"] .page-home .home-lining::after {
-    --arch-d: -11px;
-    --arch-t: 1px;
-    left: 6px;
-    right: 6px;
-    -webkit-mask: none;
-    mask: none;
-    opacity: 0.85;
-  }
+:root[data-theme="dark"] .page-home .home-lining::after {
+  --arch-d: -11px;
+  --arch-t: 1px;
+  left: 6px;
+  right: 6px;
+  -webkit-mask: none;
+  mask: none;
+  opacity: 0.85;
+}
 
-  :root[data-theme="dark"] body.rank-first-class .home-lining::before {
-    --arch-t: 2px;
-    opacity: 1;
-  }
+:root[data-theme="dark"] body.rank-first-class .home-lining::before {
+  --arch-t: 2px;
+  opacity: 1;
+}
 
-  :root[data-theme="dark"] .page-home .home-crown,
-  :root[data-theme="dark"] body.rank-first-class .home-crown {
-    background: linear-gradient(150deg, var(--sky-leaf-hi), var(--sky-leaf) 55%, var(--sky-leaf-lo));
-    -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
-    mask: url("ornaments/consecration.svg") center / contain no-repeat;
-    opacity: calc(0.35 + 0.65 * var(--leaf-catch));
-  }
+:root[data-theme="dark"] .page-home .home-crown,
+:root[data-theme="dark"] body.rank-first-class .home-crown {
+  background: linear-gradient(150deg, var(--sky-leaf-hi), var(--sky-leaf) 55%, var(--sky-leaf-lo));
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  opacity: calc(0.35 + 0.65 * var(--leaf-catch));
+}
 
-  :root[data-theme="dark"] .page-home .home-hero.day-color-black :is(.home-stars, .home-lining) {
-    display: none;
-  }
+:root[data-theme="dark"] .page-home .home-hero.day-color-black :is(.home-stars, .home-lining) {
+  display: none;
+}
 
-  :root[data-theme="dark"] .page-home .home-hero.day-color-black .home-crown {
-    background: color-mix(in srgb, var(--muted) 70%, transparent);
-    opacity: 1;
-  }
+:root[data-theme="dark"] .page-home .home-hero.day-color-black .home-crown {
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
+  opacity: 1;
+}
 
-  :root[data-theme="dark"] .page-home .home-summary {
-    --muted: var(--sky-muted);
-    --rubric: var(--sky-rubric);
-  }
+:root[data-theme="dark"] .page-home .home-summary {
+  --muted: var(--sky-muted);
+  --rubric: var(--sky-rubric);
+}
 
-  :root[data-theme="dark"] .page-home .pray-now,
-  :root[data-theme="dark"] .page-home .pray-now:hover {
-    color: var(--lining-lifted);
-  }
+:root[data-theme="dark"] .page-home .pray-now,
+:root[data-theme="dark"] .page-home .pray-now:hover {
+  color: var(--lining-lifted);
 }
 
 @media (forced-colors: active) {
@@ -8857,6 +8914,20 @@ body.rank-first-class .home-crown {
   .page-home .pray-now::before,
   .page-home .home-hour-link.is-current::after {
     display: none;
+  }
+
+  /* The niche's reveal, arris and gilt fillet are light and leaf, which
+     forced colours would leave as stray bands round the system's frame. */
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge {
+    display: none !important;
+  }
+
+  /* On a phone the summary's ::before is a spacer, and stays. */
+  @media (min-width: 701px) {
+    .page-home .home-summary::before {
+      display: none !important;
+    }
   }
 
   .page-home .home-frieze-text {
@@ -8879,6 +8950,14 @@ body.rank-first-class .home-crown {
   .home-rules,
   .hour-rules {
     display: none;
+  }
+
+  /* The niche's gilt fillet is leaf, not ink (a phone's ::before is a
+     spacer, and stays). */
+  @media (min-width: 701px) {
+    .page-home .home-summary::before {
+      display: none;
+    }
   }
 
   .page-home .home-prayer-card h2.is-ruled {
@@ -9289,15 +9368,47 @@ html:where(:has(> body.page-hour))::before {
 }
 
 /* ── Home niche ──
-   On a desktop the home frontispiece is a small object in a large field. It
-   is treated as a niche set into the wall: the card's rules above give it a
-   round head, stone moulding and recess; here the room is lit toward it (a
-   warm pool, the edges in shade, a faint shaft from a high window), and on
-   large screens the whole niche scales up so it keeps its presence. Phones
-   keep the plain card. */
+   From 701px home is one lancet niche cut into the wall: the phone's panel
+   is not scaled up but stood in a recess proportioned to the screen. Its
+   head is tools/genarch.py's "niche" on a landscape screen (half its width)
+   and "upright" on an upright one (0.62); its size is one computed scale,
+   --niche-zoom, fitted so its heaviest day stands from under the header to
+   the colophon (a lighter day is centred in the same room). Where the
+   screen is too short for that at the least zoom (a laptop on a heavy day),
+   the hours still stand above the fold and the colophon waits below it.
+
+   By day the depth is told by light, not by a stone frame: the wall's own
+   plaster turns into the recess through a reveal lit from the upper left,
+   where the chapel's shaft falls (the left jamb and soffit in shade, the
+   right jamb lit, the sill brightest), and the head casts its shade on the
+   back wall. The day's colour is one painted fillet at the back wall's edge,
+   then the lining and its hairline as on the phone: three lines round the
+   head. By night the head is the phone's apse sky with its stars, slate
+   course and single leaf fillet (see "The apse's sky"), so the phone and
+   the wide home are one building, and the wall outside is plain plaster.
+
+   Inside, the day is a title (the weekday a titulus over the date), every
+   hour is glossed, and the room is lit toward the niche (a warm pool, the
+   edges in shade, a shaft from a high window). */
 :root {
-  --niche-stone: #e5dac9;
-  --niche-edge: rgba(63, 55, 47, 0.3);
+  /* The reveal, by day (by night the niche has none: it is the phone's
+     panel and sky). Shade on the left jamb and the soffit, light on the
+     right jamb and the sill, an arris catching the light where the wall
+     turns. */
+  --reveal-shade: #cbbcaa;
+  --reveal-mid: #e6dccd;
+  --reveal-lit: #fffdf6;
+  --reveal-sill: #fbf6ea;
+  --reveal-sill-edge: #d9ccba;
+  --reveal-soffit: rgba(96, 66, 44, 0.3);
+  --reveal-arris: rgba(255, 253, 246, 0.9);
+  --reveal-arris-turn: rgba(255, 253, 246, 0.2);
+  --reveal-arris-shade: rgba(96, 66, 44, 0.34);
+  --reveal-cast: rgba(84, 52, 30, 0.3);
+  /* Where the leaf of the first-class fillet catches the light most: the
+     reveal's own lit plaster. */
+  --gilt-glint: var(--reveal-lit);
+  --niche-wall-shade: rgba(88, 60, 38, 0.2);
   --niche-recess: rgba(70, 40, 20, 0.2);
   --niche-sheen: rgba(255, 255, 255, 0.14);
   --niche-warm: rgba(232, 176, 84, 0.2);
@@ -9311,8 +9422,7 @@ html:where(:has(> body.page-hour))::before {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --niche-stone: #243040;
-    --niche-edge: rgba(208, 176, 106, 0.3);
+    --niche-wall-shade: rgba(0, 0, 0, 0.3);
     --niche-recess: rgba(0, 0, 0, 0.42);
     --niche-sheen: transparent;
     --niche-warm: rgba(208, 176, 106, 0.09);
@@ -9324,8 +9434,7 @@ html:where(:has(> body.page-hour))::before {
 }
 
 :root[data-theme="dark"] {
-  --niche-stone: #243040;
-  --niche-edge: rgba(208, 176, 106, 0.3);
+  --niche-wall-shade: rgba(0, 0, 0, 0.3);
   --niche-recess: rgba(0, 0, 0, 0.42);
   --niche-sheen: transparent;
   --niche-warm: rgba(208, 176, 106, 0.09);
@@ -9335,12 +9444,190 @@ html:where(:has(> body.page-hour))::before {
   --chapel-beam: rgba(200, 214, 234, 0.08);
 }
 
+/* The niche's one scale. A registered number, so it is worked out once on
+   main, from the viewport, and inherited as a figure (a length's ratio,
+   tan(atan2(a, b)) = a / b, is a number in every engine that has the
+   trigonometric functions). The apps compute the same (Niche.kt's and
+   Niche.swift's nicheZoom). */
+@property --niche-zoom {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 @media (min-width: 701px) {
-  /* The phone panel's lining, restated for the niche: a 2px band and a
-     lighter hairline inside it, round the head only, ending at the
-     inscription band. 26px of plain plaster lies between it and the
-     moulding, so it reads as paint on the wall, not another edge of the
-     arch. */
+  /* The scale: the height the screen leaves, less what is not zoomed (the
+     header and its margin above main, --niche-above; the footer, its fixed
+     margin and the body's padding below, --niche-below), over what is: the
+     niche's height at 1 on its heaviest day with the footer's zoomed margin
+     (--niche-fit), and the air above it (--niche-air). No more than
+     --niche-share of the screen's width, and up to 1.5 on a large monitor.
+     It never falls under --niche-least: a laptop keeps a generous niche, its
+     hours above the fold, and on a day too heavy for the screen the
+     colophon waits under the fold (--niche-fits is 0 when the heaviest day
+     does not fit, and main then stands a screen tall) rather than being cut
+     through by it. One formula, which the apps share (Niche.kt's and
+     Niche.swift's nicheZoom); each layout gives its own figures, which
+     TokensTest holds the apps to. */
+  .page-home main {
+    --niche-above: 5.0625rem;
+    --niche-below: 6.375rem;
+    /* NicheFigures.landscape */
+    --card-w: 37.5rem;
+    --niche-fit: 47.25rem;
+    --niche-air: 1.6rem;
+    --niche-least: 0.96;
+    --niche-share: 0.62;
+    --niche-raw: tan(atan2(100vh - var(--niche-above) - var(--niche-below), var(--niche-fit) + var(--niche-air)));
+    --niche-zoom: clamp(var(--niche-least), min(var(--niche-raw), tan(atan2(var(--niche-share) * 100vw, var(--card-w)))), 1.5);
+    --niche-fits: clamp(0, (var(--niche-raw) - var(--niche-least)) * 1000 + 1, 1);
+    min-height: calc((1 - var(--niche-fits)) * (100vh - var(--niche-above)));
+    max-width: none;
+    padding-top: 0;
+  }
+
+  /* The small words never fall under 12px on the glass, however small the
+     niche (a short screen): each stands back from the zoom just enough. */
+  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-date-nav > summary) {
+    zoom: max(1, calc(12 / (var(--niche-zoom) * var(--floor-px))));
+  }
+
+  /* Each word's size at 1, in px (the table's; the list's are larger). */
+  .page-home .home-hero {
+    --floor-px: 13.76;
+  }
+
+  .page-home .home-hero .home-hour-link-name {
+    --floor-px: 18.56;
+  }
+
+  .page-home .home-hero :is(.commemorations, .octave-note) {
+    --floor-px: 16;
+  }
+
+  .page-home .home-hero :is(.penitential-badge, .home-frieze-text) {
+    --floor-px: 14.4;
+  }
+
+  .page-home .home-hero :is(.home-season, .home-date-nav > summary, .home-versicle) {
+    --floor-px: 15.2;
+  }
+
+  .page-home .home-hero .not-today-link {
+    --floor-px: 12.48;
+  }
+
+  .page-home .home-hero .home-date-weekday {
+    --floor-px: 16.8;
+  }
+
+  .page-home .home-hero .feast {
+    --floor-px: 21.12;
+  }
+
+  .page-home .home {
+    padding-top: calc(var(--niche-air) * var(--niche-zoom));
+  }
+
+  .page-home footer {
+    margin-top: calc(1rem * var(--niche-zoom) + 0.6rem);
+  }
+
+  .page-home .home-hero {
+    /* The panel's ground under its warm glow and sheen, the phone's plaster
+       laid under it (below). */
+    --niche-background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
+      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
+      var(--surface);
+    --arch-ground: var(--niche-background);
+    --arch-frame: 0px;
+    --pad-x: 2.25rem;
+    /* The niche is always the card's width, so the head is drawn to it
+       rather than to 100cqi: under zoom, WebKit resolves container units
+       on the glass and then zooms them again, which narrowed the head (and
+       shortened the niche) until app.js's --arch-cqi arrived. */
+    --arch-w: var(--card-w);
+    --reveal: 1.2rem;
+    --arch-lift: 3.5rem;
+    --lining-inset: 20px;
+    --day-clear: calc(var(--lining-inset) + 9px + 1rem);
+    --crown-size: 2.3rem;
+    --crown-top: 3.6rem;
+    --head-pad: 7.4rem;
+    /* A recess casts nothing on the wall it is cut into: the halo is only
+       the clearing that keeps the powdering off its edge. The head and the
+       left jamb throw their shade on the back wall. */
+    --arch-halo: drop-shadow(0 0 0.5rem var(--niche-clear)) drop-shadow(0 0 0.9rem var(--niche-clear));
+    --arch-shade: drop-shadow(0.5rem 0.7rem 0.8rem var(--reveal-cast)) drop-shadow(0.1rem 0.15rem 0.12rem var(--reveal-cast));
+    zoom: var(--niche-zoom);
+    max-width: var(--card-w);
+    padding: 0 var(--pad-x) 1.1rem;
+  }
+
+  /* The phone's plaster under the niche's glow and sheen, veiled as the
+     phone's is (--panel-plaster-veil, none by day). The field runs down
+     from the top at the card's width, taller than the closed card, so
+     opening Change date uncovers more wall rather than stretching it; the
+     mirrored tile repeats without a seam. */
+  .page-home .home-arch-fill {
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
+      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
+      linear-gradient(
+        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent),
+        color-mix(in srgb, var(--surface) var(--panel-plaster-veil, 0%), transparent)
+      ),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      var(--surface);
+    background-blend-mode: normal, normal, normal, soft-light, normal;
+  }
+
+  /* The courses, outermost first. The clearing. */
+  .page-home .home-arch::before {
+    --arch-d: calc(var(--reveal) + 0.3rem);
+    background: var(--niche-clear);
+  }
+
+  /* The arris, where the wall turns into the recess: it catches the light
+     on the right and at the sill, and is lost in shade on the left. */
+  .page-home .home-arch-edge {
+    --arch-d: calc(var(--reveal) + 1.5px);
+    display: block;
+    background: linear-gradient(100deg, var(--reveal-arris-shade) 0%, var(--reveal-arris-shade) 36%, var(--reveal-arris-turn) 52%, var(--reveal-arris) 70%);
+  }
+
+  /* The reveal itself: the sill between the jambs, mitred at its corners
+     and facing the light; the soffit turning from the light toward the
+     point; the wall's plaster through all of it. */
+  .page-home .home-arch::after {
+    --arch-d: var(--reveal);
+    display: block;
+    background:
+      linear-gradient(to bottom right, var(--reveal-shade) 49%, transparent 51%) left bottom / var(--reveal) var(--reveal) no-repeat,
+      linear-gradient(to bottom left, var(--reveal-lit) 49%, transparent 51%) right bottom / var(--reveal) var(--reveal) no-repeat,
+      linear-gradient(to bottom, var(--reveal-sill-edge) 0, var(--reveal-sill) 35%, var(--reveal-sill) 100%) center bottom / 100% var(--reveal) no-repeat,
+      linear-gradient(to bottom, var(--reveal-soffit) 0, transparent calc(var(--arch-lift) + 0.5 * var(--arch-w))),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      linear-gradient(98deg, var(--reveal-shade) 0%, var(--reveal-shade) 34%, var(--reveal-mid) 56%, var(--reveal-lit) 80%);
+    background-blend-mode: normal, normal, normal, normal, soft-light, normal;
+  }
+
+  /* The day's colour: one painted fillet at the back wall's edge. */
+  .page-home .home-hero::before {
+    --arch-d: 1.5px;
+    display: block;
+    z-index: -4;
+    background: color-mix(in srgb, var(--day-color, var(--reveal-shade)) 78%, var(--reveal-mid));
+  }
+
+  /* The back wall's own edge is the fillet: no frame is drawn. */
+  .page-home .home-hero::after {
+    content: none;
+  }
+
+  /* The lining, restated at the niche's scale: 20px of plain plaster
+     between it and the fillet, so it reads as paint on the wall. */
   .page-home .home-lining {
     --arch-d: calc(-1 * var(--lining-inset));
   }
@@ -9349,10 +9636,141 @@ html:where(:has(> body.page-hour))::before {
     --arch-d: calc(-1 * var(--lining-inset) - 8px);
   }
 
+  /* ── The day: a title in the head ──
+     The phone's titulus brought to the niche: the weekday in spaced small
+     caps over the date, the feast under it. */
+  .page-home .home-date-weekday {
+    display: block;
+    margin-right: -0.2em;
+    color: var(--titulus);
+    font-size: 0.5em;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.2em;
+    line-height: 1.7;
+  }
 
-  /* Chapel light: a warm pool where the niche stands and the room's edges
-     in shade. One fixed layer over the wall (and the Apse vault), under the
-     page, sized to the viewport. */
+  .page-home .home-date-comma {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .page-home .home-date-rest {
+    font-kerning: normal;
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
+
+  .page-home .home h1 {
+    max-width: none;
+    font-size: 2.1rem;
+    letter-spacing: 0.005em;
+    line-height: 1.1;
+  }
+
+  .page-home .home-date-link {
+    vertical-align: top;
+  }
+
+  .page-home .home .feast {
+    max-width: 25rem;
+    margin-top: 0.3rem;
+    font-size: 1.32rem;
+  }
+
+  .page-home .home .commemorations,
+  .page-home .home .octave-note {
+    font-size: 1rem;
+  }
+
+  .page-home .home-day-head {
+    gap: 0.2rem;
+    margin-bottom: 1.1rem;
+  }
+
+  /* ── Below the frieze ── */
+  .page-home .home-prayer-card h2 {
+    margin: 0.15rem calc(-1 * var(--pad-x)) 1.1rem;
+    padding: 0.16rem var(--pad-x) 0.12rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+  }
+
+  .page-home .pray-now-wrap {
+    margin-bottom: 0.9rem;
+  }
+
+  .page-home .pray-now,
+  .page-home .pray-now:hover {
+    padding-block: 0.85rem 0.9rem;
+    font-size: 1.6rem;
+  }
+
+  /* ── The hours, every one glossed ──
+     The phone's 2/3/2 table, each cell carrying its gloss under the name:
+     in a niche this narrow the table reads as a list again. The hour that
+     is now is larger as well as lit and rubricated, so it is not told by
+     colour alone now that every hour has a gloss. */
+  .page-home .home-hour-group {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
+
+  .page-home .home-hour-group-label {
+    padding-inline: 0 0.4rem;
+    color: color-mix(in srgb, var(--accent) 70%, var(--muted));
+    font-size: 0.86rem;
+    letter-spacing: 0.14em;
+  }
+
+  .page-home .home-period-ornament {
+    width: 1.35rem;
+    height: 0.9rem;
+  }
+
+  .page-home .home-hour-link {
+    /* A thumb's height on the glass at any zoom. */
+    min-height: max(3.5rem, calc(44px / var(--niche-zoom)));
+    padding-block: 0.45rem;
+    gap: 0.08rem;
+  }
+
+  .page-home .home-hour-link-name {
+    font-size: 1.16rem;
+  }
+
+  .page-home .home-hour-link-note,
+  .page-home .home-hour-link.is-current .home-hour-link-note {
+    display: block;
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+
+  .page-home .home-hour-link.is-current .home-hour-link-name {
+    font-size: 1.32rem;
+  }
+
+  .page-home .home-hour-link.is-current::after {
+    inset: -4px -6px;
+    max-width: 11rem;
+  }
+
+  .page-home .home-day-meta {
+    margin-top: 0.55rem;
+    padding-top: 0.2rem;
+  }
+
+  .page-home :is(.home-season, .home-day-meta .home-date-nav > summary) {
+    font-size: 0.95rem;
+  }
+
+  .page-home .penitential-badge {
+    font-size: 0.9rem;
+  }
+
+  /* The room's light: a warm pool where the niche stands and the shade
+     gathering at the wall's far ends. One fixed layer over the wall, under
+     the page, sized to the viewport. */
   body.page-home::after {
     content: "";
     position: fixed;
@@ -9360,8 +9778,8 @@ html:where(:has(> body.page-hour))::before {
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 40% 46% at 50% 54%, var(--chapel-pool), transparent 70%),
-      radial-gradient(ellipse 74% 80% at 50% 52%, transparent 34%, var(--chapel-shade) 100%);
+      radial-gradient(ellipse 34% 60% at 50% 52%, var(--chapel-pool), transparent 70%),
+      radial-gradient(ellipse 78% 90% at 50% 50%, transparent 40%, var(--chapel-shade) 100%);
   }
 
   /* A shaft of light from a high window, falling toward the niche and
@@ -9378,38 +9796,313 @@ html:where(:has(> body.page-hour))::before {
   }
 }
 
-/* Large screens: the niche keeps its share of the room. Zoom scales the
-   whole object (text, rules, moulding) together; the steps need both
-   width and height so a wide but short window never pushes "Pray" off. */
-/* A short laptop window (768px screens and less) steps the niche down a
-   little instead, so the hours and "Change date" are not left below the
-   fold. */
-@media (min-width: 701px) and (max-height: 820px) {
-  .page-home main { --niche-zoom: 0.9; }
+/* A heavy day (a fast with a commemoration, or a day opened from another
+   with a fast, a commemoration or an octave) closes up its title, so the
+   niche keeps its height. */
+@media (min-width: 701px) {
+  .page-home .home-hero:is(:has(.penitential):has(.commemorations), :has(.not-today-notice):has(.commemorations, .octave-note, .penitential)) {
+    --crown-top: 2.8rem;
+    --crown-size: 2rem;
+    --head-pad: 5.8rem;
+  }
+
+  .page-home .home-hero:is(:has(.penitential):has(.commemorations), :has(.not-today-notice):has(.commemorations, .octave-note, .penitential)) :is(.feast, .penitential, .not-today-notice) {
+    margin-top: 0;
+  }
+
+  .page-home .home-hero:is(:has(.penitential):has(.commemorations), :has(.not-today-notice):has(.commemorations, .octave-note, .penitential)) .home-date-weekday {
+    line-height: 1.4;
+  }
+
+  .page-home .home-hero:is(:has(.penitential):has(.commemorations), :has(.not-today-notice):has(.commemorations, .octave-note, .penitential)) .home-day-head {
+    gap: 0;
+    margin-bottom: 0.6rem;
+  }
 }
 
-/* A tablet held upright (an iPad's 768–1024px by 1024–1366px) left the
-   niche at a laptop's size, two-thirds of the width with a third of the
-   screen bare below it; it grows to fill the page the way the phone's
-   panel does, the steps leaving the hours and "Change date" in view. */
-@media (min-width: 760px) and (max-width: 1699px) and (min-height: 1060px) and (orientation: portrait) {
-  .page-home main { --niche-zoom: 1.18; }
+/* ── The list of seven ──
+   Where the screen has the height (an upright tablet, a monitor), the hours
+   stand one to a line, the name and its gloss on one baseline parted by a
+   gilt point, the periods in the margin beside their hours, ruled between
+   the periods as the table is. The list is set as a block centred in the
+   niche, not run from its left edge. On its side the niche takes the list
+   only where its heaviest day fits at the least zoom (1146px high); below
+   that the glossed table fits at a larger scale. */
+@media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait), (min-width: 701px) and (min-height: 1146px) {
+  .page-home main {
+    /* NicheFigures.landscapeList */
+    --card-w: 37.5rem;
+    --niche-fit: 61rem;
+    --niche-air: 1.6rem;
+    --niche-least: 0.96;
+    --niche-share: 0.62;
+  }
+
+  .page-home .home h1 {
+    font-size: 2.3rem;
+  }
+
+  .page-home .home .feast {
+    font-size: 1.42rem;
+  }
+
+  .page-home .home .commemorations,
+  .page-home .home .octave-note {
+    font-size: 1.04rem;
+  }
+
+  .page-home .home-hero {
+    --crown-size: 2.5rem;
+  }
+
+  /* The middle column is narrower than the hours' lines, so the label and
+     the hours, read as one block, stand centred in the niche. */
+  .page-home .home-hour-group {
+    grid-template-columns: minmax(0, 1fr) 6.75rem minmax(0, 1fr);
+  }
+
+  .page-home .home-hour-group-label {
+    grid-column: 1;
+    align-items: center;
+    gap: 0.3rem;
+    padding-inline: 0 1.4rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.16em;
+  }
+
+  .page-home .home-period-ornament {
+    width: 1.5rem;
+    height: 1rem;
+  }
+
+  .page-home .home-hour-group .home-hour-group-links,
+  .page-home .home-hour-group-day .home-hour-group-links {
+    grid-column: 2 / 4;
+    grid-template-columns: 1fr;
+    padding-block: 0.3rem;
+  }
+
+  .page-home .home-hour-link {
+    display: grid;
+    grid-template-columns: 6.3rem minmax(0, 1fr);
+    align-items: baseline;
+    align-content: center;
+    justify-content: start;
+    min-height: max(3.1rem, calc(44px / var(--niche-zoom)));
+    padding: 0.25rem 0 0.15rem;
+    text-align: left;
+  }
+
+  .page-home .home-hour-link-name {
+    justify-self: start;
+    font-size: 1.24rem;
+  }
+
+  .page-home .home-hour-link.is-current .home-hour-link-name {
+    font-size: 1.42rem;
+  }
+
+  .page-home .home-hour-link-note,
+  .page-home .home-hour-link.is-current .home-hour-link-note {
+    font-size: 1rem;
+  }
+
+  /* The gilt point stands between the name and its gloss, not between
+     neighbours. */
+  .page-home .home-hour-link + .home-hour-link::before {
+    content: none;
+  }
+
+  .page-home .home-hour-link-note::before {
+    content: "";
+    display: inline-block;
+    width: 3.5px;
+    height: 3.5px;
+    margin-right: 0.85rem;
+    background: var(--ornament);
+    opacity: 0.7;
+    transform: translateY(-0.22em) rotate(45deg);
+  }
+
+  .page-home .home-hour-link.is-current::after {
+    inset: -3px auto -3px -1.2rem;
+    width: 17rem;
+    max-width: none;
+    margin-inline: 0;
+  }
 }
 
-@media (min-width: 960px) and (max-width: 1699px) and (min-height: 1260px) and (orientation: portrait) {
-  .page-home main { --niche-zoom: 1.38; }
+/* Upright screens: the taller head, a narrower lancet, its title set lower
+   in the head. */
+@media (min-width: 701px) and (orientation: portrait) {
+  .page-home main {
+    /* NicheFigures.upright */
+    --card-w: 34.5rem;
+    --niche-fit: 48.75rem;
+    --niche-air: 2.4rem;
+    --niche-least: 0.9;
+    --niche-share: 0.8;
+  }
+
+  .page-home .home-hero:not(#x) {
+    --crown-top: 4.6rem;
+    --head-pad: 9rem;
+  }
+
+  .page-home .home-hero:not(#x):is(:has(.penitential):has(.commemorations), :has(.not-today-notice):has(.commemorations, .octave-note, .penitential)) {
+    --crown-top: 3.9rem;
+    --head-pad: 7.4rem;
+  }
 }
 
-@media (min-width: 1700px) and (min-height: 1000px) {
-  .page-home main { --niche-zoom: 1.12; }
+@media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait) {
+  .page-home main {
+    /* NicheFigures.uprightList */
+    --card-w: 34.5rem;
+    --niche-fit: 62.5rem;
+    --niche-air: 2.4rem;
+    --niche-least: 0.9;
+    --niche-share: 0.8;
+  }
+
+  .page-home .home h1 {
+    font-size: 2.2rem;
+  }
+
+  .page-home .home-hour-group {
+    grid-template-columns: minmax(0, 1fr) 7.4rem minmax(0, 1fr);
+  }
 }
 
-@media (min-width: 2100px) and (min-height: 1200px) {
-  .page-home main { --niche-zoom: 1.28; }
+/* A short screen (a phone on its side, a short window): the niche is
+   fitted down to the invitation rather than to its foot, so the day and
+   "Pray" stand above the fold on every day, and the colophon is always
+   below it. The small words keep 12px on the glass (above). */
+@media (min-width: 701px) and (max-height: 560px) {
+  .page-home main {
+    /* NicheFigures.short */
+    --card-w: 37.5rem;
+    --niche-fit: 35.25rem;
+    --niche-air: 0.5rem;
+    --niche-least: 0.5;
+    --niche-share: 0.62;
+    --niche-below: 0rem;
+    --niche-fits: 0;
+  }
+
+  /* Held at 12px in so small a niche, a gloss is wider than its hour's
+     cell: it takes a second line rather than running into its neighbour. */
+  .page-home .home-hour-link-note,
+  .page-home .home-hour-link.is-current .home-hour-link-note {
+    white-space: normal;
+    text-wrap: balance;
+  }
 }
 
-@media (min-width: 2500px) and (min-height: 1400px) {
-  .page-home main { --niche-zoom: 1.45; }
+/* A first-class day: one fillet of matte leaf round the head, as the
+   parish's chancel arch is gilt, ending at the frieze as the lining does;
+   the jambs and the sill keep the day's fillet. By night the sky's leaf
+   fillet is the one gold line already, and stands fully lit (see "The
+   apse's sky"). It veils with the ornament in Passiontide; the Triduum is
+   not first class here. */
+@media (min-width: 701px) {
+  body.rank-first-class.page-home .home-summary::before {
+    --arch-d: 1.5px;
+    --arch-t: 3px;
+    content: "";
+    position: absolute;
+    top: calc(-1 * var(--arch-lift));
+    right: calc(-1 * var(--pad-x) - var(--arch-d));
+    bottom: 0;
+    left: calc(-1 * var(--pad-x) - var(--arch-d));
+    z-index: -1;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 0%, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 30%, var(--ornament-hi) 62%, color-mix(in srgb, var(--ornament-hi) 70%, var(--gilt-glint)) 82%, var(--ornament-hi) 100%);
+    pointer-events: none;
+  }
+}
+
+/* ── The niche by night ──
+   The phone's night on the niche's lancet: the head is the apse's sky (its
+   rules are the phone's, "The apse's sky" and "The Apse's phone panel",
+   which hold at every width), so there is no reveal, no lit jamb and no
+   fillet at the wall's edge: the slate course rings the head, the panel
+   below the frieze is the blue plaster, and the bay keeps a soft shade on
+   the wall round it. The wall outside is plain moonlit plaster: home's
+   starfield is off, as on the phone, so the sky is in one place. */
+@media (min-width: 701px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-hero {
+    --arch-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.6rem 1.6rem rgba(0, 0, 0, 0.55));
+    --arch-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
+    --arch-frame: 1px;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch::after,
+  :root:not([data-theme="light"]) .page-home .home-hero::before {
+    display: none;
+  }
+
+  /* Hidden, not taken out: the themes keep one layout, box for box. */
+  :root:not([data-theme="light"]) .page-home .home-arch-edge {
+    visibility: hidden;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch::before {
+    --arch-d: 1.5px;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hero::after {
+    content: "";
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch-fill {
+    background:
+      linear-gradient(color-mix(in srgb, var(--arch-ground) 50%, transparent), color-mix(in srgb, var(--arch-ground) 50%, transparent)),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      var(--arch-ground);
+    background-blend-mode: normal, soft-light, normal;
+  }
+
+  :root:not([data-theme="light"]) body.rank-first-class.page-home .home-summary::before {
+    content: none;
+  }
+}
+
+@media (min-width: 701px) {
+  :root[data-theme="dark"] .page-home .home-hero {
+    --arch-halo: drop-shadow(0 0 0.35rem var(--bg)) drop-shadow(0 0.6rem 1.6rem rgba(0, 0, 0, 0.55));
+    --arch-shade: drop-shadow(0 1px 0 rgba(200, 214, 234, 0.14)) drop-shadow(0 0.25rem 1rem rgba(0, 0, 0, 0.3));
+    --arch-frame: 1px;
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch::after,
+  :root[data-theme="dark"] .page-home .home-hero::before {
+    display: none;
+  }
+
+  /* Hidden, not taken out: the themes keep one layout, box for box. */
+  :root[data-theme="dark"] .page-home .home-arch-edge {
+    visibility: hidden;
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch::before {
+    --arch-d: 1.5px;
+  }
+
+  :root[data-theme="dark"] .page-home .home-hero::after {
+    content: "";
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch-fill {
+    background:
+      linear-gradient(color-mix(in srgb, var(--arch-ground) 50%, transparent), color-mix(in srgb, var(--arch-ground) 50%, transparent)),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      var(--arch-ground);
+    background-blend-mode: normal, soft-light, normal;
+  }
+
+  :root[data-theme="dark"] body.rank-first-class.page-home .home-summary::before {
+    content: none;
+  }
 }
 
 /* ── Apse starfield ──

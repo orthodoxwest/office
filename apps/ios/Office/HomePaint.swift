@@ -211,6 +211,8 @@ struct SkyStar {
     private static let phone = parse(StarFields.phone)
     private static let tall = parse(StarFields.tall)
     private static let taller = parse(StarFields.taller)
+    private static let niche = parse(StarFields.niche)
+    private static let upright = parse(StarFields.upright)
 
     /// The stars of a head's field (tools/genstars.py), or none for a head with no sky.
     static func of(_ a: Arch) -> [SkyStar] {
@@ -218,13 +220,15 @@ struct SkyStar {
         case Arch.phone.rise: return phone
         case Arch.tall.rise: return tall
         case Arch.taller.rise: return taller
+        case Arch.niche.rise: return niche
+        case Arch.upright.rise: return upright
         default: return []
         }
     }
 }
 
 /**
- * The apse's sky inside a phone's head by night (the web's `.home-sky`, Android's `sky`): the
+ * The apse's sky inside the head by night, a phone's or the wide niche's (the web's `.home-sky`, Android's `sky`): the
  * slate from deep to light, a lighter and greener glow toward the frieze, and the vault's
  * brushwork (`sky_wash.jpg`) laid over it in soft light, clipped to the head inside the slate
  * course and down to the frieze (the view's foot). Then its gold-leaf stars, leaving out every
