@@ -129,6 +129,8 @@ proper/epiphany/collect through-same
 # Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
 proper/expectation-bvm/collect through-same
 proper/holy-name-jesus/collect through-same
+# Diurnal p. 282 prints Tuesday in Holy Week's Lauds collect with "Through the same".
+proper/holy-tuesday/collect through-same
 proper/motherhood-bvm/collect through-same
 proper/nativity-sunday-within-octave/collect through-same
 proper/palm-sunday/collect through-same
