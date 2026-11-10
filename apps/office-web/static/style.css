@@ -9226,7 +9226,7 @@ html:where(:has(> body.page-hour))::before {
   .page-home main {
     --card-w: 37.5rem;
     --niche-fit: 42rem;
-    --niche-chrome: 13.25rem;
+    --niche-chrome: 14rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
     --niche-air: 1.6rem;
