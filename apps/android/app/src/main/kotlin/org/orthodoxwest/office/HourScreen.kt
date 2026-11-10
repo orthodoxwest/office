@@ -439,34 +439,37 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
             )
             DoubleRule(lozenge = railColor(view.color, p), color = p.lining)
         }
-        val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
-        // On a phone the date stands on its own line above the day's name, so a line never ends on
-        // the separator (the web's `.hour-meta-part:first-child` to 700px); wide screens keep one line.
-        val metaLines = if (LocalWide.current || meta.size < 2) listOf(meta) else listOf(meta.take(1), meta.drop(1))
-        Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = meta.joinToString(". ") }, horizontalAlignment = Alignment.CenterHorizontally) {
-            // Date, day and season each wrap whole (the web's inline-block `.hour-meta-part`), so a
-            // line breaks between them, never inside a saint's title; the separator, tied to the
-            // part before it by a no-break space, ends its line. A part longer than the line still
-            // wraps within itself.
-            for (line in metaLines) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
-                    line.forEachIndexed { j, part ->
-                        Text(if (j < line.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
-                    }
+        // The date and the season share one muted line; the day's name stands under them in the
+        // text's ink, a size up, as home titles the day (the web's `.hour-meta-line` and
+        // `.hour-meta-feast`). The dot is tied to the date by a no-break space.
+        val line = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }.joinToString("\u00A0· ")
+        val said = listOf(line, view.feast).filter { it.isNotEmpty() }.joinToString(". ")
+        Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = said }, horizontalAlignment = Alignment.CenterHorizontally) {
+            // Each part whole; at the reader's largest sizes the season goes under the date.
+            val parts = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
+                parts.forEachIndexed { j, part ->
+                    Text(if (j < parts.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
                 }
+            }
+            if (view.feast.isNotEmpty()) {
+                Text(view.feast, Modifier.padding(top = 1.9.dp), style = Type.dayName.copy(color = p.text))
             }
         }
         if (date != today) {
             Text(
-                "GO TO TODAY",
+                "Go to today",
                 Modifier.padding(top = 5.6.dp).heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).goldUnderline(true, p.goldLine),
-                style = Type.menu.copy(color = p.accent),
+                style = Type.label(16f, 0.08f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS),
             )
         }
         // Side by side, or one above the other when the reader's font size leaves no room.
-        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-            Disclosure("Change date", picking, { picking = !picking; choosing = false })
-            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second)
+        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterHorizontally)) {
+            // In home's foot letter, each kept to one line: on a first-class day the frame narrows the
+            // measure and "Prayer form: Private" lost its caret to a line of its own. Where the two
+            // do not fit side by side, they stand one above the other, never broken inside one.
+            Disclosure("Change date", picking, { picking = !picking; choosing = false }, style = Type.smallCapsControl, upper = false)
+            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second, style = Type.smallCapsControl, upper = false)
         }
         // Previous · Today · Next keep to the edges up to 540dp, and gather in the middle above it.
         Unfold(picking) { DatePicker(date, today, centred = LocalConfiguration.current.screenWidthDp > 540) { picking = false; onDate(it) } }

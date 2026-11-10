@@ -447,6 +447,13 @@ fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: Dr
     }
 }
 
+/** A gilt point, as the web's `.home-hour-link + .home-hour-link::before`: the ornament's gold at 70%, 3.5dp on its corner. */
+@Composable
+fun GiltPoint(modifier: Modifier = Modifier) {
+    val o = LocalOrnament.current
+    Canvas(modifier.size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+}
+
 /** A hairline across the measure. */
 @Composable
 fun Hairline(color: Color, modifier: Modifier = Modifier) {

@@ -13,6 +13,13 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -35,6 +42,8 @@ data class HomeInk(
     val tabletWash: Color,
     val nowPool: Color,
     val nowGloss: Color,
+    /** Today's band in the ordo: the wash thinner, a band being ten times the tablet's area (`--today-wash`). */
+    val todayWash: Color,
     val skyDeep: Color = Color(0xFF172231),
     val sky: Color = Color(0xFF233440),
     val skyLow: Color = Color(0xFF2F474D),
@@ -67,9 +76,9 @@ val LeafMatteLo = Color(0xFF7D6248)
 val LeafShadow = Color(0xFF8A6A22)
 
 fun homeInk(p: Palette): HomeInk = if (p.dark) {
-    HomeInk(tabletWash = Color(132, 160, 204).copy(alpha = 0.12f), nowPool = Color(140, 170, 216).copy(alpha = 0.24f), nowGloss = Color(0xFFC3CCD8))
+    HomeInk(tabletWash = Color(132, 160, 204).copy(alpha = 0.12f), nowPool = Color(140, 170, 216).copy(alpha = 0.24f), nowGloss = Color(0xFFC3CCD8), todayWash = Color(132, 160, 204).copy(alpha = 0.11f))
 } else {
-    HomeInk(tabletWash = Ochre.copy(alpha = 0.19f), nowPool = Ochre.copy(alpha = 0.34f), nowGloss = mix(p.text, p.muted, 0.55f))
+    HomeInk(tabletWash = Ochre.copy(alpha = 0.19f), nowPool = Ochre.copy(alpha = 0.34f), nowGloss = mix(p.text, p.muted, 0.55f), todayWash = Ochre.copy(alpha = 0.12f))
 }
 
 /**
@@ -255,4 +264,28 @@ fun DrawScope.skyLining(arch: Arch, leaf: Leaf, catch: Float, hairline: Color, f
     val fillet = Brush.verticalGradient(0f to leaf.lo, 0.38f to leaf.hi, 0.7f to leaf.mid, 1f to leaf.lo, startY = -32f * u, endY = size.height)
     drawPath(archPath(arch, size.width, -5f * u - t / 2f, size.height, open = true), fillet, alpha = if (first) 1f else 0.9f * catch, style = Stroke(t, miter = 2f))
     drawPath(archPath(arch, size.width, -11.5f * u, size.height, open = true), hairline.copy(alpha = hairline.alpha * 0.85f), style = Stroke(u, miter = 2f))
+}
+
+/**
+ * An action set as home's invitation, not a filled slab (the web's `.reminder-subscribe`): the
+ * tablet's thin wash inside the lining's rule with a finer one 4dp inside it, its words in the
+ * lining, lifted by night. Reminders' "Turn on reminders".
+ */
+@androidx.compose.runtime.Composable
+fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, onClick: () -> Unit) {
+    val p = LocalPalette.current
+    val home = homeInk(p)
+    val tablet = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.tablet)
+    androidx.compose.foundation.layout.Box(
+        modifier.fillMaxWidth().heightIn(min = 46.dp).tap(onClick = onClick).drawBehind {
+            tabletWash(tablet, home.tabletWash)
+            val u = 1.dp.toPx()
+            drawRect(p.lining.copy(alpha = 0.78f), Offset(u / 2f, u / 2f), Size(size.width - u, size.height - u), style = Stroke(u))
+            val i = 4.dp.toPx() + u / 2f
+            drawRect(p.lining.copy(alpha = 0.36f), Offset(i, i), Size(size.width - 2 * i, size.height - 2 * i), style = Stroke(u))
+        }.padding(horizontal = 17.6.dp, vertical = 10.dp),
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+    ) {
+        androidx.compose.material3.Text(label, style = Type.body.copy(fontSize = 17.92.sp, lineHeight = 24.sp, letterSpacing = 0.21.sp, color = if (p.dark) home.liningLifted else p.lining))
+    }
 }

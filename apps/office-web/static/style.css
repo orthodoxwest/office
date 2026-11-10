@@ -396,6 +396,9 @@
      the text's ink withdrawn. Apse restates them in moonlit blue. */
   --ochre: #c9973f;
   --tablet-wash: color-mix(in srgb, var(--ochre) 19%, transparent);
+  /* Today's band in the ordo: the same pigment thinner, since a band is ten
+     times the tablet's area and at 19% read as a sticker. */
+  --today-wash: color-mix(in srgb, var(--ochre) 12%, transparent);
   --now-pool: color-mix(in srgb, var(--ochre) 34%, transparent);
   --now-gloss: color-mix(in srgb, var(--text) 55%, var(--muted));
   /* Gold leaf seen in the parish's photographs, soft and unburnished, a
@@ -1627,26 +1630,28 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-wrap: balance;
 }
 
-/* Date, day and season each wrap whole, so a phone breaks the line between
-   them rather than inside a saint's title ("St Michael the / Archangel").
-   A part longer than the line still wraps within itself. */
+/* The date and the season share one muted line, kept whole (the longest,
+   "Wednesday, February 24, 2027 · Septuagesima", fits a 320px phone inside
+   a first-class frame), so its dot is never stranded at a line's end. */
+.hour-meta-line {
+  display: block;
+  white-space: nowrap;
+}
+
 .hour-meta-part {
   display: inline-block;
 }
 
-/* On a phone the date stands on its own line above the day's name, so a
-   line never ends on the separator: with the parts kept whole, a third of
-   the hours' pages broke after the date and left its dot stranded at the
-   line's end ("Tuesday, March 31, 2026 ·"). A feria has only the date and
-   loses nothing; wider screens keep the one line. */
-@media (max-width: 700px) {
-  .hour-meta-part:first-child:not(:only-child) {
-    display: block;
-  }
-
-  .hour-meta-part:first-child + .hour-meta-sep {
-    display: none;
-  }
+/* The day's name under them in the text's ink, a size up, as home titles
+   the day: on Christmas the page said VESPERS and then whispered. A long
+   name wraps balanced. */
+.hour-meta-feast {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--text);
+  font-size: 1.08rem;
+  line-height: 1.3;
+  text-wrap: balance;
 }
 
 /* Recovery when the open document is not local today (historical browse, or a
@@ -1794,8 +1799,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 0.7rem;
 }
 
+/* Previous day and Next day stand at the grid's edges, so they read as the
+   day's turn and the month's arrows below as the month's. */
 .home-day-meta .home-date-nav .day-nav {
-  justify-content: flex-start;
+  justify-content: space-between;
+  max-width: calc(7 * var(--touch-target));
+  margin-inline: auto;
   margin-top: 0.35rem;
   margin-bottom: 0.15rem;
   padding-top: 0.4rem;
@@ -1881,6 +1890,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   grid-template-columns: minmax(0, calc(7 * var(--date-cell)));
   justify-content: center;
   margin: 0.3rem auto 0.4rem;
+  /* A hairline parts the day's turn above from the month's below. */
+  padding-top: 0.2rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
   color: var(--text);
   font-size: 0.95rem;
 }
@@ -2001,19 +2013,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: var(--rubric);
 }
 
+/* Today lies under a pool of light with no edge, as the hour that is now
+   does on home (`--now-pool`): ochre by day, moonlit blue by night, where
+   it is faint and the gold figure and rule carry it. */
 .date-picker-day[aria-current="date"],
 .date-picker-month[aria-current="date"] {
-  background: color-mix(in srgb, var(--gold) 10%, transparent);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.date-picker-day, .date-picker-month)[aria-current="date"] {
-    background: var(--apse-lift);
-  }
-}
-
-:root[data-theme="dark"] :is(.date-picker-day, .date-picker-month)[aria-current="date"] {
-  background: var(--apse-lift);
+  background: radial-gradient(closest-side, var(--now-pool), color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent);
 }
 
 /* The chosen day reads as the chosen prayer form does: oak ink on a gold
@@ -3329,17 +3334,18 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   font-size: 0.8rem;
 }
 .year-nav a:hover { text-decoration: underline; }
-/* The same short dividers used in the home hour index finish the year
-   control without enclosing its three touch targets in separate boxes. */
+/* The gilt points that part home's hours part the year control's three
+   touch targets, without enclosing them in separate boxes. */
 .year-nav a + a::before {
   content: "";
   position: absolute;
   left: -0.2rem;
   top: 50%;
-  width: 1px;
-  height: 0.8rem;
-  background: var(--border);
-  transform: translateY(-50%);
+  width: 3.5px;
+  height: 3.5px;
+  background: var(--ornament);
+  opacity: 0.7;
+  transform: translate(-50%, -50%) rotate(45deg);
   pointer-events: none;
 }
 .year-nav .calendar-today-link {
@@ -3729,12 +3735,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   background: color-mix(in srgb, var(--gold) 6%, transparent);
 }
 
-/* Today is painted, not selected: a ground of the frieze's wash ruled top
-   and bottom in the gold line, the day's number in gold. On the wide table
-   each cell carries the ground and the rules run on across the row; the
-   phone's card insets the ground 8px from the gutters (below). */
+/* Today is painted, not selected: home's invitation wash, thinner
+   (`--today-wash`), ruled top and bottom in the gold line, the day's number
+   in gold. By night it is moonlit blue, so today is found at a glance. On
+   the wide table each cell carries the ground and the rules run on across
+   the row; the phone's card thins it out toward the gutters (below). */
 .month-table tr.is-today > td {
-  background: var(--inscription-wash);
+  background: var(--today-wash);
   box-shadow:
     inset 0 1px 0 var(--gold-line),
     inset 0 -1px 0 var(--gold-line);
@@ -3996,12 +4003,13 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     position: relative;
     border-bottom: 1px solid var(--border);
   }
-  /* Today's ground and its gold rules, inset 8px from the gutters. */
+  /* Today's gold rules, inset 8px from the gutters, and its wash thinning
+     out toward them rather than stopping square. */
   .month-table tr.is-today > td {
     background:
       linear-gradient(var(--gold-line), var(--gold-line)) 8px 0 / calc(100% - 16px) 1px no-repeat,
       linear-gradient(var(--gold-line), var(--gold-line)) 8px 100% / calc(100% - 16px) 1px no-repeat,
-      linear-gradient(var(--inscription-wash), var(--inscription-wash)) 8px 0 / calc(100% - 16px) 100% no-repeat;
+      linear-gradient(90deg, transparent 8px, var(--today-wash) 56px, var(--today-wash) calc(100% - 56px), transparent calc(100% - 8px));
     box-shadow: none;
   }
   .month-table tr::before {
@@ -4229,7 +4237,8 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   border: 1px solid var(--lining);
   outline: 1px solid var(--lining);
   outline-offset: 3px;
-  background: var(--surface);
+  /* Home's invitation wash: ochre by day, moonlit blue by night. */
+  background: var(--tablet-wash);
 }
 .feast-standing p { margin: 0; }
 .feast-standing-label {
@@ -4393,9 +4402,6 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --surface: #172232;
     --surface-edge: rgba(208, 176, 106, 0.18);
     --pressed-wash: rgba(208, 176, 106, 0.12);
-    /* The current hour and today, marked on the vault in its own blue lifted:
-       the gold wash reads grey on the night. */
-    --apse-lift: rgba(132, 160, 204, 0.13);
     --page-material:
       radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
       radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
@@ -4416,6 +4422,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     /* Home's furniture by night: the invitation's wash and the current
        hour's pool are moonlit blue, the gloss lifted for it. */
     --tablet-wash: rgba(132, 160, 204, 0.12);
+    --today-wash: rgba(132, 160, 204, 0.11);
     --now-pool: rgba(140, 170, 216, 0.24);
     --now-gloss: #c3ccd8;
     /* The parish apse's painted sky, set by night in the head of a phone's
@@ -4475,7 +4482,6 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --surface: #172232;
   --surface-edge: rgba(208, 176, 106, 0.18);
   --pressed-wash: rgba(208, 176, 106, 0.12);
-  --apse-lift: rgba(132, 160, 204, 0.13);
   --page-material:
     radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
     radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
@@ -4494,6 +4500,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   /* Home's furniture by night: the invitation's wash and the current
      hour's pool are moonlit blue, the gloss lifted for it. */
   --tablet-wash: rgba(132, 160, 204, 0.12);
+  --today-wash: rgba(132, 160, 204, 0.11);
   --now-pool: rgba(140, 170, 216, 0.24);
   --now-gloss: #c3ccd8;
   /* The parish apse's painted sky, set by night in the head of a phone's
@@ -6552,7 +6559,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .page-home .home-day-meta .home-date-nav .day-nav {
-  justify-content: center;
+  justify-content: space-between;
 }
 
 @media (min-width: 701px) {
@@ -7036,19 +7043,51 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   align-items: center;
   justify-content: center;
   min-height: var(--touch-target);
-  max-width: 18rem;
-  border: 1px solid var(--accent);
-  border-radius: 2px;
-  padding: 0.55rem 0.8rem;
-  background: var(--accent);
-  color: var(--bg);
-  font-size: 0.92rem;
   line-height: 1.2;
   text-decoration: none;
 }
 
-.privacy a.beta-action:hover {
-  border-color: var(--text);
+/* An action is home's invitation, not a filled slab: a thin wash
+   (`tablet.png`, `--tablet-wash`) inside the lining's rule with a finer one
+   inside it, its words in the lining (lifted by night). Reminders' "Subscribe
+   in calendar app" and /beta's steps; the apps' "Turn on reminders". */
+.privacy a.beta-action,
+.reminder-subscribe {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--lining) 78%, transparent);
+  border-radius: 0;
+  outline: 1px solid color-mix(in srgb, var(--lining) 36%, transparent);
+  outline-offset: -5px;
+  padding: 0.6rem 1.1rem 0.64rem;
+  background: none;
+  color: var(--lining-lifted, var(--lining));
+  font-size: 1.12rem;
+  letter-spacing: 0.012em;
+}
+
+.privacy a.beta-action::before,
+.reminder-subscribe::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--tablet-wash);
+  -webkit-mask: url("tablet.png") center / 100% 100% no-repeat;
+  mask: url("tablet.png") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.privacy a.beta-action:hover,
+.reminder-subscribe:hover:not(.is-disabled) {
+  border-color: var(--lining);
+}
+
+@media (forced-colors: active) {
+  .privacy a.beta-action,
+  .reminder-subscribe {
+    border-color: LinkText;
+  }
 }
 
 .reminders fieldset {
@@ -7190,8 +7229,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .reminder-links {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.2rem 0.65rem;
   margin-bottom: 0.55rem;
 }
 
@@ -7201,39 +7241,40 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   align-items: center;
   justify-content: center;
   min-height: var(--touch-target);
-  border-radius: 2px;
-  padding: 0.55rem 0.8rem;
   font: inherit;
-  font-size: 0.92rem;
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
 }
 
 .reminder-subscribe {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--bg);
+  flex: 1 1 100%;
+  font-size: 1.12rem;
 }
 
+/* The second action is a worded link with the gold underline, as "Return
+   to the Daily Office" is on a notice. */
 .reminder-copy {
-  border: 1px solid var(--border);
+  border: 0;
+  padding: 0 0.1rem;
   background: transparent;
   color: var(--accent);
-}
-
-.reminder-subscribe:hover:not(.is-disabled),
-.reminder-copy:hover:not(:disabled) {
-  border-color: var(--text);
+  font-size: 1rem;
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
 }
 
 .reminder-subscribe.is-disabled,
 .reminder-copy:disabled {
-  border-color: var(--border);
-  background: transparent;
   color: var(--muted);
   cursor: default;
   opacity: 0.58;
+}
+
+.reminder-subscribe.is-disabled::before {
+  background: color-mix(in srgb, var(--tablet-wash) 50%, transparent);
 }
 
 #reminder-copied {
@@ -7318,14 +7359,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 @media (max-width: 540px) {
   .reminders h1 {
     font-size: 1.6rem;
-  }
-
-  .reminder-subscribe {
-    flex: 1 1 13rem;
-  }
-
-  .reminder-copy {
-    flex: 0 0 auto;
   }
 }
 
@@ -9734,6 +9767,44 @@ body.page-home::before {
 .leader-selector > summary::-webkit-details-marker { display: none; }
 .leader-selector > summary::after { content: "▾"; margin-inline-start: .1em; color: color-mix(in srgb, currentColor 70%, transparent); font-size: .85em; letter-spacing: 0; }
 .leader-selector[open] > summary::after { content: "▴"; }
+/* On an hour the two disclosures take home's foot letter, true small
+   capitals (not capitals shrunk to 0.72rem), and each keeps one line: on a
+   first-class day the frame narrows the measure by 24px, and "Prayer form:
+   Private ▾" dropped its caret onto a line of its own (390px) or broke after
+   the colon (375px). The pair closes up a little so it fits a 375px phone
+   on Christmas; at the reader's larger sizes it wraps between the two,
+   never inside one. "Go to today" follows. */
+.page-hour :is(.hour-date-nav, .leader-selector) > summary {
+  font-variant-caps: all-small-caps;
+  text-transform: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding-inline: 0.35rem;
+}
+.page-hour .leader-selector > summary { gap: 0.3em; }
+.page-hour .hour-context-controls { gap: 0 0.35rem; }
+.page-hour .hour-context-controls:has(> .leader-selector) { column-gap: 0.35rem; }
+/* Where the measure is narrower than the pair (a 320px phone, or the
+   reader's Large size inside a first-class frame), they stand one above the
+   other rather than overhang it. */
+.page-hour .hour-header { container: hour-header / inline-size; }
+@container hour-header (max-width: 19.6rem) {
+  .page-hour .hour-context-controls:has(> .leader-selector) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .page-hour .hour-context-controls:has(> .leader-selector) > details { display: block; }
+  .page-hour .hour-meta-line { white-space: normal; }
+}
+.page-hour .not-today-notice .not-today-link {
+  font-variant-caps: all-small-caps;
+  text-transform: none;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
 .leader-selector[open] { flex: 1 1 100%; }
 .leader-selector fieldset {
   text-align: left;

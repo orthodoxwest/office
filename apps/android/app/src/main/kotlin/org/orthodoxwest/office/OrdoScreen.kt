@@ -252,9 +252,10 @@ private fun OrdoHeader(
             val nav = Type.body.copy(fontSize = 12.8.sp, lineHeight = 20.5.sp, color = p.accent, fontFeatureSettings = "lnum")
             val cell = if (wide) Modifier else Modifier.weight(1f)
             Text("‹ ${year - 1}", cell.tap(label = "Previous year, ${year - 1}") { sameView(year - 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
-            Divider(p.border)
+            // Gilt points part the three, as they part home's hours.
+            GiltPoint()
             Text("Today", cell.tap(action = "open today in the ordo", onClick = onToday).padding(12.dp).goldUnderline(true, p.goldLine, if (wide) 12.dp else 24.dp), style = nav.copy(textAlign = TextAlign.Center))
-            Divider(p.border)
+            GiltPoint()
             Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
     }
@@ -523,8 +524,8 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
         unfolded()
     }
-    // Today is painted, not selected: a ground of the frieze's wash ruled top and bottom in the gold
-    // line, inset 8dp from the gutters, the day's number in gold.
+    // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
+    // gold line inset 8dp from the gutters and thinning out toward them, the day's number in gold.
     Column(
         modifier.then(
             if (!isToday) Modifier else Modifier.drawBehind {
@@ -532,7 +533,19 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
                 val w = 1.dp.toPx()
                 // Above the row's hairline.
                 val h = size.height - w
-                drawRect(p.inscriptionWash, Offset(inset, 0f), Size(size.width - 2 * inset, h))
+                val wash = homeInk(p).todayWash
+                drawRect(
+                    androidx.compose.ui.graphics.Brush.horizontalGradient(
+                        0f to wash.copy(alpha = 0f),
+                        (48.dp.toPx() / size.width) to wash,
+                        (1f - 48.dp.toPx() / size.width) to wash,
+                        1f to wash.copy(alpha = 0f),
+                        startX = inset,
+                        endX = size.width - inset,
+                    ),
+                    Offset(inset, 0f),
+                    Size(size.width - 2 * inset, h),
+                )
                 drawRect(p.goldLine, Offset(inset, 0f), Size(size.width - 2 * inset, w))
                 drawRect(p.goldLine, Offset(inset, h - w), Size(size.width - 2 * inset, w))
             },
@@ -622,14 +635,14 @@ private fun DayTableRow(
 ) {
     val p = LocalPalette.current
     val rail = railColor(d.color, p)
-    // Today is painted, not selected: the frieze's wash, ruled top and bottom in the gold line
-    // across the row, the day's number in gold.
+    // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
+    // gold line across the row, the day's number in gold.
     Column(
         modifier.then(
             if (!isToday) Modifier else Modifier.drawBehind {
                 val w = 1.dp.toPx()
                 val h = size.height - w
-                drawRect(p.inscriptionWash, size = Size(size.width, h))
+                drawRect(homeInk(p).todayWash, size = Size(size.width, h))
                 drawRect(p.goldLine, size = Size(size.width, w))
                 drawRect(p.goldLine, Offset(0f, h - w), Size(size.width, w))
             },

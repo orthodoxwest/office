@@ -186,6 +186,11 @@ pub fn prayers_open_by_default(hour: &str) -> bool {
 /// The line under the menu's Martyrology setting, on every front.
 pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s saints at Prime.";
 
+/// Change date's day links, worded on every front: beside the month's own arrows, "Previous"
+/// and "Next" alone did not say that they turn the day.
+pub const PREVIOUS_DAY: &str = "Previous day";
+pub const NEXT_DAY: &str = "Next day";
+
 /// The line under the menu's Chant setting, on every front.
 pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 

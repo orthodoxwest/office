@@ -408,12 +408,7 @@ private fun Tick(checked: Boolean) {
 }
 
 @Composable
-private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit) {
-    val p = LocalPalette.current
-    Box(modifier.fillMaxWidth().heightIn(min = 46.dp).background(p.accent).tap(onClick = onClick), contentAlignment = Alignment.Center) {
-        Text(label, style = Type.body.copy(fontSize = 17.sp, lineHeight = 24.sp, color = p.bg))
-    }
-}
+private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit) = TabletButton(label, modifier, onClick)
 
 @Composable
 private fun OutlineButton(label: String, modifier: Modifier, onClick: () -> Unit) {

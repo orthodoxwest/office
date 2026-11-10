@@ -144,13 +144,8 @@ struct RemindersScreen: View {
                 }
             }
         } else {
-            Button { turn(on: true) } label: {
-                Text("Turn on reminders").type(Scale.body.sized(17, line: 24)).foregroundStyle(p.bg)
-                    .frame(maxWidth: .infinity, minHeight: 46)
-                    .background(p.accent)
-            }
-            .buttonStyle(Quiet())
-            .padding(.top, m.px(12))
+            TabletButton(label: "Turn on reminders") { turn(on: true) }
+                .padding(.top, m.px(12))
         }
     }
 

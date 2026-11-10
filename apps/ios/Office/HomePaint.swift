@@ -16,6 +16,8 @@ struct HomeInk {
     let tabletWash: Color
     let nowPool: Color
     let nowGloss: Color
+    /// Today's band in the ordo: the wash thinner, a band being ten times the tablet's area (`--today-wash`).
+    let todayWash: Color
     var skyDeep = Color(hex: 0x172231)
     var sky = Color(hex: 0x233440)
     var skyLow = Color(hex: 0x2F474D)
@@ -27,8 +29,8 @@ struct HomeInk {
 
     static func of(_ p: Palette) -> HomeInk {
         p.dark
-            ? HomeInk(tabletWash: Color(rgb: 132, 160, 204, 0.12), nowPool: Color(rgb: 140, 170, 216, 0.24), nowGloss: Color(hex: 0xC3CCD8))
-            : HomeInk(tabletWash: ochre.opacity(0.19), nowPool: ochre.opacity(0.34), nowGloss: mix(p.text, p.muted, 0.55))
+            ? HomeInk(tabletWash: Color(rgb: 132, 160, 204, 0.12), nowPool: Color(rgb: 140, 170, 216, 0.24), nowGloss: Color(hex: 0xC3CCD8), todayWash: Color(rgb: 132, 160, 204, 0.11))
+            : HomeInk(tabletWash: ochre.opacity(0.19), nowPool: ochre.opacity(0.34), nowGloss: mix(p.text, p.muted, 0.55), todayWash: ochre.opacity(0.12))
     }
 }
 
@@ -309,5 +311,51 @@ extension View {
         background(GeometryReader { g in
             Color.clear.preference(key: ReserveKey.self, value: [key: g.frame(in: .named("frontispiece"))])
         })
+    }
+}
+
+/// A gilt point, as the web's `.home-hour-link + .home-hour-link::before`: the ornament's gold at 70%, 3.5pt on its corner.
+struct GiltPoint: View {
+    @Environment(\.ornament) private var o
+
+    var body: some View {
+        Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
+            .frame(width: 5, height: 5)
+            .accessibilityHidden(true)
+    }
+}
+
+/**
+ * An action set as home's invitation, not a filled slab (the web's `.reminder-subscribe`): the
+ * tablet's thin wash inside the lining's rule with a finer one 4pt inside it, its words in the
+ * lining, lifted by night. Reminders' "Turn on reminders".
+ */
+struct TabletButton: View {
+    let label: String
+    let action: () -> Void
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        let home = HomeInk.of(p)
+        Button(action: action) {
+            Text(label).type(Scale.body.sized(17.92, line: 24).tracked(0.21))
+                .foregroundStyle(p.dark ? home.liningLifted : p.lining)
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .padding(.horizontal, m.px(17.6))
+                .background {
+                    if let tablet = UIImage(named: "tablet.png") {
+                        Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(home.tabletWash).padding(1)
+                    }
+                }
+                .overlay {
+                    ZStack {
+                        Rectangle().strokeBorder(p.lining.opacity(0.78), lineWidth: 1)
+                        Rectangle().strokeBorder(p.lining.opacity(0.36), lineWidth: 1).padding(4)
+                    }
+                    .allowsHitTesting(false)
+                }
+        }
+        .buttonStyle(Quiet())
     }
 }

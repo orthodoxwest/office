@@ -1366,22 +1366,56 @@ test("hour titles stand at one height under the sun, the moon and the cross", as
   expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
 });
 
-// On a phone the date takes its own line above the day's name, so the
-// separator never ends a line; on a wide screen the parts share one line.
+// The date and the season share one muted line, so its separator never ends
+// a line; the day's name stands under them in the text's ink, a size up.
 test("the hour's date line never strands its separator", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-03-31");
   const parts = page.locator(".hour-meta-part");
   await expect(parts).toHaveCount(3);
+  await expect(page.locator(".hour-meta-sep")).toHaveCount(1);
   const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
-  const phone = await rows();
-  expect(phone[0]).toBeLessThan(phone[1]);
-  expect(phone[1]).toBe(phone[2]);
-  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
-  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const laptop = await rows();
-  expect(new Set(laptop).size).toBe(1);
-  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [date, season, feast] = await rows();
+    expect(date).toBe(season);
+    expect(feast).toBeGreaterThan(date);
+    await expect(page.locator(".hour-meta-sep")).toBeVisible();
+  }
+  const ink = await page.evaluate(() => {
+    const feast = getComputedStyle(document.querySelector(".hour-meta-feast"));
+    const meta = getComputedStyle(document.querySelector(".hour-meta"));
+    return { feast: feast.color, text: getComputedStyle(document.body).color, larger: parseFloat(feast.fontSize) > parseFloat(meta.fontSize) };
+  });
+  expect(ink.feast).toBe(ink.text);
+  expect(ink.larger).toBe(true);
+});
+
+// On a first-class day the frame narrows the measure: each disclosure under
+// the title keeps one line, its caret beside its words, and where the two do
+// not fit side by side they stand one above the other.
+test("the hour's disclosures never break inside themselves", async ({ page }) => {
+  for (const [width, size] of [[390, "default"], [375, "default"], [320, "default"], [375, "large"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+    await openDatedPage(page, "/vespers/2026-12-25");
+    const boxes = await page.locator(".hour-context-controls > details > summary").evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const tops = [...range.getClientRects()].filter((q) => q.width > 1).map((q) => q.top);
+        // Spans of other faces sit a pixel or two apart on one line; a second line is a line below.
+        const lines = 1 + tops.filter((t) => t - Math.min(...tops) > 8).length;
+        return { left: r.left, right: r.right, height: r.height, lines: Math.min(lines, 2) };
+      }),
+    );
+    for (const box of boxes) {
+      expect(box.lines, `${width} ${size}`).toBe(1);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.left).toBeGreaterThanOrEqual(0);
+      expect(box.right).toBeLessThanOrEqual(width);
+    }
+  }
 });
 
 // A psalm's Latin incipit shares the label's line with a dot between them,

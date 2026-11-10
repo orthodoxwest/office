@@ -268,6 +268,13 @@ object Type {
     val brand = label(14.4f, 0.08f)
     val menu = label(12.48f, 0.08f)
     val control = label(11.52f, 0.1f)
+    /**
+     * Home's foot letter, true small capitals: the season and "Change date" at home's foot, and an
+     * hour's two disclosures under its title (`.page-hour .hour-date-nav > summary`).
+     */
+    val smallCapsControl = label(14.4f, 0.08f).copy(fontFeatureSettings = ALL_SMALL_CAPS)
+    /** The day's name under an hour's title, in the text's ink (`.hour-meta-feast`). */
+    val dayName = face(17.28f, 22.46f).copy(textAlign = TextAlign.Center, lineBreak = androidx.compose.ui.text.style.LineBreak.Heading)
     val small = face(12.48f, 19.97f)
 }
 

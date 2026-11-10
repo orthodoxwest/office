@@ -607,6 +607,7 @@ fun Disclosure(
                 if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + cased(value)) }
             },
             style = (style ?: Type.control).copy(color = ink),
+            softWrap = style == null,
         )
         Caret(open, ink)
     }
@@ -660,19 +661,23 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
+        // "Previous day" and "Next day", worded (`presentation::PREVIOUS_DAY`), so they read as the
+        // day's turn and the month's arrows below as the month's; gathered, they stand at the
+        // grid's edges.
         Row(
-            Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
-            horizontalArrangement = if (centred) Arrangement.Center else Arrangement.Start,
+            (if (centred) Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7) else Modifier).fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("← Previous", Modifier.tap(label = "Previous day") { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
-            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
+            Text("← ${DAY_NAV.previous}", Modifier.tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Spacer(Modifier.weight(1f))
             if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
-            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
-            Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
+            Spacer(Modifier.weight(1f))
+            Text("${DAY_NAV.next} →", Modifier.tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
         }
         Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
-            Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+            // A hairline parts the day's turn above from the month's below.
+            Hairline(p.border.copy(alpha = p.border.alpha * 0.58f), Modifier.padding(top = 4.dp))
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 // A month's step in the days, a year's in the months; none past the picker's span.
                 val step = if (months) 12L else 1L
                 val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
@@ -737,8 +742,18 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
     }
 }
 
-/** Today's wash in the picker: the gold at a tenth on Nave; on the Apse the vault's blue lifted (`--apse-lift`), as gold reads grey on the night. */
-private fun todayWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.gold.copy(alpha = 0.1f)
+/** Change date's day links, worded as the web's. */
+private val DAY_NAV by lazy { org.orthodoxwest.office.core.dayNavWords() }
+
+/**
+ * Today in the picker lies under a pool of light with no edge, as the hour that is now does on
+ * home (`--now-pool`): ochre by day, moonlit blue by night.
+ */
+private fun Modifier.todayPool(p: Palette): Modifier = drawBehind {
+    val pool = homeInk(p).nowPool
+    val r = minOf(size.width, size.height) / 2f
+    drawCircle(androidx.compose.ui.graphics.Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = r), r, center)
+}
 
 private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     year < years.first -> YearMonth.of(years.first, 1)
@@ -771,7 +786,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
-                        .then(if (day == today) Modifier.background(todayWash(p)) else Modifier)
+                        .then(if (day == today) Modifier.todayPool(p) else Modifier)
                         .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
                             haptics.chose()
                             onPick(day)
@@ -811,7 +826,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.background(todayWash(p)) else Modifier)
+                                .then(if (today.year == year && today.monthValue == m) Modifier.todayPool(p) else Modifier)
                                 .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)

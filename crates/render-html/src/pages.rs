@@ -84,6 +84,8 @@ impl Pages {
         env.add_global("chant", false);
         env.add_global("martyrology_hint", presentation::MARTYROLOGY_HINT);
         env.add_global("chant_hint", presentation::CHANT_HINT);
+        env.add_global("previous_day", presentation::PREVIOUS_DAY);
+        env.add_global("next_day", presentation::NEXT_DAY);
         Ok(Pages { env })
     }
 

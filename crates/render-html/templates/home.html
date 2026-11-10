@@ -132,14 +132,14 @@
       <details class="hour-date-nav home-date-nav">
         <summary>Change date</summary>
         <nav class="day-nav" aria-label="Date navigation">
-          <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
+          <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
           <form class="date-jump-form" action="/" method="get">
             <label class="sr-only" for="home-date-jump">Jump to date</label>
             <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
             <button class="date-submit" type="submit">Go</button>
             {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
           </form>
-          <a href="{{ next_link|url }}" aria-label="Next day">Next &rarr;</a>
+          <a href="{{ next_link|url }}">{{ next_day }}<span aria-hidden="true">&nbsp;&rarr;</span></a>
         </nav>
       </details>
     </div>

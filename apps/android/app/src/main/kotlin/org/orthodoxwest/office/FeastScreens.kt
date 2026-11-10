@@ -264,7 +264,7 @@ private fun Standing(view: FeastPageView, onFeast: (String) -> Unit, onDay: (Loc
             val out = 3.dp.toPx() + s / 2f
             drawRect(p.lining, Offset(-out, -out), androidx.compose.ui.geometry.Size(size.width + 2 * out, size.height + 2 * out), style = Stroke(s))
             drawRect(p.lining, Offset(s / 2f, s / 2f), androidx.compose.ui.geometry.Size(size.width - s, size.height - s), style = Stroke(s))
-        }.background(p.surface).padding(start = 17.6.dp, end = 16.dp, top = 13.6.dp, bottom = 15.dp),
+        }.background(homeInk(p).tabletWash).padding(start = 17.6.dp, end = 16.dp, top = 13.6.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (monastic) {

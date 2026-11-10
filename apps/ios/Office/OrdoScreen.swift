@@ -261,7 +261,7 @@ private struct OrdoHeader: View {
         return HStack(spacing: 0) {
             Button { sameView(year - 1) } label: { cell("‹ \(String(year - 1))", nav) }
                 .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
-            VRule(color: p.border)
+            GiltPoint()
             Button { model.open(.ordo(year: Int(t.year), month: Int(t.month), day: Int(t.day))) } label: {
                 // Always underlined in the gold line, in any year, as the web's `.calendar-today-link`;
                 // the rule spans the cell, less its inset.
@@ -272,7 +272,7 @@ private struct OrdoHeader: View {
             }
             .buttonStyle(Quiet())
             .accessibilityHint("Opens today in the ordo")
-            VRule(color: p.border)
+            GiltPoint()
             Button { sameView(year + 1) } label: { cell("\(String(year + 1)) ›", nav) }
                 .buttonStyle(Quiet()).accessibilityLabel("Next year, \(String(year + 1))")
         }
@@ -614,17 +614,26 @@ private struct DayRow: View {
 }
 
 /**
- * Today in the ordo: a ground of the frieze's wash ruled top and bottom in the gold line, above the
- * row's hairline, `inset` from its sides.
+ * Today in the ordo: home's invitation wash, thinner (`--today-wash`), ruled top and bottom in the
+ * gold line, above the row's hairline, `inset` from its sides; with an inset (a phone's card) the
+ * wash thins out toward the gutters rather than stopping square.
  */
 private struct TodayBand: View {
     let inset: CGFloat
     @Environment(\.palette) private var p
 
     var body: some View {
+        let wash = HomeInk.of(p).todayWash
         VStack(spacing: 0) {
             Rectangle().fill(p.goldLine).frame(height: 1)
-            Rectangle().fill(p.inscriptionWash)
+            if inset > 0 {
+                GeometryReader { g in
+                    let edge = min(0.5, 48 / max(g.size.width, 1))
+                    Rectangle().fill(LinearGradient(stops: [.init(color: wash.opacity(0), location: 0), .init(color: wash, location: edge), .init(color: wash, location: 1 - edge), .init(color: wash.opacity(0), location: 1)], startPoint: .leading, endPoint: .trailing))
+                }
+            } else {
+                Rectangle().fill(wash)
+            }
             Rectangle().fill(p.goldLine).frame(height: 1)
         }
         .padding(.horizontal, inset)

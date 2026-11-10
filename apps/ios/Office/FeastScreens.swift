@@ -284,7 +284,8 @@ private struct StandingBox: View {
         .padding(.leading, m.px(17.6)).padding(.trailing, m.px(16))
         .padding(.top, m.px(13.6)).padding(.bottom, m.px(15))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(p.surface)
+        // Home's invitation wash: ochre by day, moonlit blue by night.
+        .background(HomeInk.of(p).tabletWash)
         .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1) }
         .padding(3)
         .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1).padding(-0.5) }

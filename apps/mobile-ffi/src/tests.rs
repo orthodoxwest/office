@@ -384,6 +384,13 @@ fn the_apps_give_the_webs_setting_hints() {
 }
 
 #[test]
+fn the_apps_word_change_dates_day_links_as_the_web() {
+    let words = day_nav_words();
+    assert_eq!(words.previous, "Previous day");
+    assert_eq!(words.next, "Next day");
+}
+
+#[test]
 fn the_apps_open_the_webs_prayers_by_default() {
     let open: Vec<_> = hour_names().into_iter().filter(|h| prayers_open_by_default(h.clone())).collect();
     assert_eq!(open, ["lauds", "prime", "vespers"]);

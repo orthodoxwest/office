@@ -502,6 +502,8 @@ struct Disclosure: View {
                 (Text(cased(label)) + Text(value.map { " " + cased($0) } ?? "").foregroundColor(p.text))
                     .type(style)
                     .foregroundStyle(ink)
+                    // Home's and an hour's small-caps disclosures keep one line.
+                    .fixedSize(horizontal: !upper, vertical: false)
                 Caret(open: open, color: ink)
             }
             .padding(.horizontal, m.px(8))
@@ -511,6 +513,9 @@ struct Disclosure: View {
         .accessibilityValue(open ? "Expanded" : "Collapsed")
     }
 }
+
+/// Change date's day links, worded as the web's.
+private let dayNav = dayNavWords()
 
 /// The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR).
 private let pickerYears = 1950...2150
@@ -554,18 +559,24 @@ struct DayPicker: View {
         let cell = max(m.px(44), 44)
         VStack(spacing: 0) {
             Hairline(color: p.border).padding(.horizontal, m.px(24))
-            HStack(spacing: centred ? m.px(5.6) : nil) {
-                Button { pick(shown.adding(days: -1)) } label: { Text("← Previous").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
-                    .buttonStyle(Quiet()).accessibilityLabel("Previous day")
-                if !centred { Spacer() }
+            // "Previous day" and "Next day", worded (`presentation::PREVIOUS_DAY`), so they read as
+            // the day's turn and the month's arrows below as the month's; gathered, they stand at
+            // the grid's edges.
+            HStack(spacing: 0) {
+                Button { pick(shown.adding(days: -1)) } label: { Text("← \(dayNav.previous)").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
+                    .buttonStyle(Quiet()).accessibilityLabel(dayNav.previous)
+                Spacer(minLength: 0)
                 if shown != today {
                     Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
                 }
-                if !centred { Spacer() }
-                Button { pick(shown.adding(days: 1)) } label: { Text("Next →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
-                    .buttonStyle(Quiet()).accessibilityLabel("Next day")
+                Spacer(minLength: 0)
+                Button { pick(shown.adding(days: 1)) } label: { Text("\(dayNav.next) →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
+                    .buttonStyle(Quiet()).accessibilityLabel(dayNav.next)
             }
+            .frame(maxWidth: centred ? 7 * cell : .infinity)
             .padding(.top, m.px(8))
+            // A hairline parts the day's turn above from the month's below.
+            Hairline(color: p.border.opacity(0.58)).frame(maxWidth: 7 * cell).padding(.top, m.px(4))
             // Seven thumb-wide days where they fit, centred; on a narrower column the week narrows
             // to it, the days keeping their height.
             VStack(spacing: 0) {
@@ -613,8 +624,12 @@ struct DayPicker: View {
         .padding(.top, m.px(8))
     }
 
-    /// Today's wash, in the days and the months: the gold thinned, or by night the vault's blue lifted (`--apse-lift`).
-    private var todayWash: Color { p.dark ? Color(hex: 0x84A0CC).opacity(0.13) : p.gold.opacity(0.1) }
+    /// Today, in the days and the months, lies under a pool of light with no edge, as the hour
+    /// that is now does on home (`--now-pool`): ochre by day, moonlit blue by night.
+    private var todayPool: some View {
+        let pool = HomeInk.of(p).nowPool
+        return RadialGradient(stops: [.init(color: pool, location: 0), .init(color: pool.opacity(0.55), location: 0.52), .init(color: pool.opacity(0), location: 1)], center: .center, startRadius: 0, endRadius: 22)
+    }
 
     private var title: String { months ? "\(year)" : "\(monthName(month)) \(year)" }
 
@@ -677,7 +692,7 @@ struct DayPicker: View {
                                     .foregroundStyle(i == 0 ? p.rubric : day == shown ? p.accent : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    .background(day == today ? todayWash : .clear)
+                                    .background { if day == today { todayPool } }
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel(spokenDay(day, today: today))
@@ -711,7 +726,7 @@ struct DayPicker: View {
                             Text(monthShort(mo).uppercased()).type(.label(11.5, 0.1)).foregroundStyle(chosen ? p.accent : p.text)
                                 .padding(.horizontal, m.px(14.4)).padding(.vertical, m.px(13))
                                 .goldUnderline(chosen, p.goldLine)
-                                .background(Int(today.year) == year && Int(today.month) == mo ? todayWash : .clear)
+                                .background { if Int(today.year) == year && Int(today.month) == mo { todayPool } }
                         }
                         .buttonStyle(Quiet())
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

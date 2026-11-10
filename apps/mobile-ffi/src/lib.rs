@@ -315,6 +315,18 @@ pub fn preference_hints() -> PreferenceHints {
     PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
 }
 
+/// Change date's day links, as the web words them (`presentation::PREVIOUS_DAY`, `NEXT_DAY`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct DayNavWords {
+    pub previous: String,
+    pub next: String,
+}
+
+#[uniffi::export]
+pub fn day_nav_words() -> DayNavWords {
+    DayNavWords { previous: presentation::PREVIOUS_DAY.into(), next: presentation::NEXT_DAY.into() }
+}
+
 /// A reader's way through an hour's words, for home's mark of the hours prayed
 /// (`presentation::Reading`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]
