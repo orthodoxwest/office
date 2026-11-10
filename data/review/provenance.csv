@@ -1665,6 +1665,7 @@ proper/holy-innocents/versicle-terce,6e4d900a617f,Monastic Diurnal.pdf,"The Holy
 proper/holy-innocents/versicle-vespers,2017b5df3a40,Monastic Diurnal.pdf,proper/holy-innocents/versicle-vespers,203,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading.
 proper/holy-monday/benedictus-antiphon,fa864f07f5c6,diurnal,,281,verified,codex,2026-09-22,Word-for-word after normalization
 proper/holy-monday/collect,1e36e8c217d9,diurnal,,281,verified,codex,2026-09-10,Word-for-word after normalization; first reader discarded as wrong-page because corpus was far
+proper/holy-monday/collect-vespers,b0fc2e4f3fb2,Monastic Diurnal.pdf,"Monday in Holy Week at Vespers, Collect after the Ant. on Magnificat; PDF page 328",282,verified,tim,2026-11-10,Direct page-image review; wording confirmed. Reported in #772.
 proper/holy-monday/magnificat-antiphon,74b2f0ea93d2,diurnal,,282,verified,codex,2026-09-22,Word-for-word after normalization
 proper/holy-monday/psalm-antiphon-1,0d5baaf36c3c,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization
 proper/holy-monday/psalm-antiphon-2,e6e34147754e,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization
@@ -1742,6 +1743,7 @@ proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Laud
 proper/holy-thursday/vespers-psalmody,a7b95031ab71,diurnal,Maundy Thursday at Vespers (this and the following day),315,verified,claude,2026-09-28,psalms and order match the printed page image
 proper/holy-tuesday/benedictus-antiphon,0528ed8de290,diurnal,,282,verified,codex,2026-09-22,Word-for-word after normalization
 proper/holy-tuesday/collect,e535931a938d,diurnal,,282,verified,codex,2026-09-11,Word-for-word after normalization
+proper/holy-tuesday/collect-vespers,0477cf357d4c,Monastic Diurnal.pdf,"Tuesday in Holy Week at Vespers, Collect after the Ant. on Magnificat; PDF page 329",283,verified,tim,2026-11-10,Direct page-image review; wording confirmed. Reported in #772.
 proper/holy-tuesday/magnificat-antiphon,8e6c3b5cc93b,diurnal,,283,verified,codex,2026-09-22,Word-for-word after normalization
 proper/holy-tuesday/psalm-antiphon-1,7acbc3bdb4f7,diurnal,,282,verified,codex,2026-09-11,Word-for-word after normalization
 proper/holy-tuesday/psalm-antiphon-2,d63d59000eb9,diurnal,,282,verified,codex,2026-09-13,Word-for-word after normalization
@@ -1750,6 +1752,7 @@ proper/holy-tuesday/psalm-antiphon-4,a8b637f968c0,diurnal,,282,verified,codex,20
 proper/holy-tuesday/psalm-antiphon-5,f4da0e2a7c50,diurnal,,282,verified,codex,2026-09-22,Word-for-word after normalization
 proper/holy-wednesday/benedictus-antiphon,42c16835ec0d,diurnal,,283,verified,codex,2026-09-11,Word-for-word after normalization
 proper/holy-wednesday/collect,98ec85d71613,diurnal,,284,verified,codex,2026-09-11,Word-for-word after normalization
+proper/holy-wednesday/collect-vespers,79fae990a161,Monastic Diurnal.pdf,"Wednesday in Holy Week at Vespers, Collect after the Ant. on Magnificat; PDF page 330",284,verified,tim,2026-11-10,Direct page-image review; wording confirmed. Reported in #772.
 proper/holy-wednesday/magnificat-antiphon,a6df56e663e6,diurnal,,284,verified,codex,2026-09-11,Word-for-word after normalization
 proper/holy-wednesday/psalm-antiphon-1,0efed3a3ac93,diurnal,,283,verified,codex,2026-09-11,Word-for-word after normalization
 proper/holy-wednesday/psalm-antiphon-2,4f0412823b18,diurnal,,283,verified,codex,2026-09-13,Word-for-word after normalization
