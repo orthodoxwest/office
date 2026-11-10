@@ -145,6 +145,7 @@ class MainActivity : ComponentActivity() {
                             onAllowLocation = ::openAppSettings,
                             onSearch = vm::search,
                             onFindAgain = vm::findAgain,
+                            pageUnder = vm::pageUnder,
                             entries = vm.entries.map { it.id },
                         )
                     }
@@ -286,6 +287,7 @@ fun OfficeApp(
     entries: List<Long> = listOf(entry),
     find: FindView? = null,
     feast: FeastPageView? = null,
+    pageUnder: (Long) -> Page? = { null },
 ) {
     val content = when {
         error != null -> Content.Failed(error)
@@ -321,6 +323,7 @@ fun OfficeApp(
         onAllowExact = onAllowExact,
         onFollowSun = onFollowSun,
         onAllowLocation = onAllowLocation,
+        pageUnder = pageUnder,
         entries = entries,
     )
 }
@@ -358,6 +361,7 @@ fun OfficeApp(
     onAllowLocation: () -> Unit = {},
     onSearch: (String) -> Unit = {},
     onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
+    pageUnder: (Long) -> Page? = { null },
     entries: List<Long>,
 ) {
     // The menu, or on a wide screen the header's Settings panel (the theme and text size).
@@ -553,6 +557,10 @@ fun OfficeApp(
                                 view = content.view,
                                 chrome = chrome,
                                 insets = insets,
+                                // Named for the day or the ordo it was opened from, and back to it as
+                                // Back goes (the web's `back_link`); else the search.
+                                back = feastBack(pageUnder(visit.entry.id), today),
+                                onBack = { onBack?.invoke() },
                                 onFind = onFindAgain,
                                 onFeast = { onOpen(Page.Feast(it)) },
                                 onDay = { onOpen(Page.Home(it)) },

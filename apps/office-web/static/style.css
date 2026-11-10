@@ -4288,11 +4288,8 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 .find-submit:hover { text-decoration: underline; text-decoration-color: var(--gold-line); }
 
-.find-page .calendar-header,
-.feast-page .calendar-header { grid-template-columns: minmax(0, 1fr); }
-.find-page .calendar-title,
-.feast-page .calendar-title { width: auto; }
-.feast-page h1 { color: var(--rubric); }
+.find-page .calendar-header { grid-template-columns: minmax(0, 1fr); }
+.find-page .calendar-title { width: auto; }
 
 .find-count { margin: 0; color: var(--muted); font-size: 0.9rem; }
 .find-feast { padding: 0.2rem 0 1.1rem; border-bottom: 1px solid var(--border); }
@@ -4367,25 +4364,165 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .from-feast:hover { text-decoration: underline; text-decoration-color: var(--gold-line); }
 .from-feast { margin: 0 0 0.2rem; }
 
-/* The feast page: its standing (the date it is kept and the next keeping, framed as the
-   invitation is) first, then its texts, then the years ahead as a compact reference. On a wide
-   screen the standing and the years make a rail beside the texts. */
+/* ── The feast page ──
+   A leaf of home's painted wall (see "Home: the painted page"). Its head is
+   home's day block turned about: there the day leads and the feast follows;
+   here the feast leads and its date is the titulus over it, under one
+   hand-ruled course of the lining with the consecration cross set in it.
+   Then its standing (the next keeping, drawn as home's invitation), its
+   texts, and the years ahead ruled as home's hours. From 760px the standing
+   and the years are a rail beside the texts. The rules are app.js's rule()
+   (seeds: head 51-58, standing 61-69, headings 71+, years 81+), each host's
+   own svg.feast-rules; a host so ruled carries .is-ruled and gives up the
+   CSS borders that stand without script. The apps' FeastScreens draw the
+   same with ruledLine. */
+.page-feast {
+  --feast-name: var(--rubric);
+  --feast-action: var(--rubric);
+}
+.page-feast .find-back {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.09em;
+}
+.feast-rules {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.feast-rules .r-lining { fill: var(--lining); }
+.feast-rules .r-frame { fill: color-mix(in srgb, var(--lining) 78%, transparent); }
+.feast-rules .r-inner { fill: color-mix(in srgb, var(--lining) 36%, transparent); }
+.feast-rules .r-day { fill: color-mix(in srgb, var(--frontal) 62%, transparent); }
+
+/* The head. The register follows the rank (presentation::feast::feast_register):
+   a first-class feast's cross is gilt and its course doubled with a finer
+   rule in its colour; another feast's cross is the lining through the
+   pigment; a commemoration or a monastic observance, notation on another
+   day's office, has a bare head and its name in ink, a size down. The rank
+   and colour stay written under the name, parted by a point of the colour. */
+.feast-head {
+  --frontal: var(--day-color, var(--lining));
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.3rem 0 0;
+  padding: 1.6rem 0.5rem 1.15rem;
+  border-top: 1px solid var(--lining);
+  text-align: center;
+}
+.feast-head.is-ruled { border-top-color: transparent; }
+.feast-head.day-color-white { --frontal: var(--ornament); }
+.feast-head.day-color-black { --frontal: color-mix(in srgb, var(--lining) 80%, transparent); }
+/* A lit place on the wall under the cross, with no edge: limewash by day,
+   moonlight by night. A black day is bare, as on home. */
+.feast-head::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2.5rem -1rem -1.5rem;
+  background: radial-gradient(ellipse 50% 46% at 50% 46%, rgba(255, 253, 248, 0.9), transparent);
+  pointer-events: none;
+}
+.feast-head.day-color-black::before,
+.feast-head.is-plain::before { content: none; }
+.feast-crown {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2.1rem;
+  height: 2.1rem;
+  transform: translate(-50%, -50%);
+  background: var(--lining);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  -webkit-mask-composite: source-in;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  mask-composite: intersect;
+}
+.feast-head.is-first .feast-crown {
+  width: 2.35rem;
+  height: 2.35rem;
+  background:
+    url("gild.png") 0 0 / 64px 64px,
+    linear-gradient(128deg, var(--ornament-hi) 8%, color-mix(in srgb, var(--ornament-hi) 55%, white) 30%, var(--ornament) 52%, var(--ornament-lo) 92%);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+}
+.feast-head.is-plain {
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.5rem 1rem;
+  border-top: 0;
+}
+.feast-head.is-plain .feast-crown { display: none; }
+.feast-titulus {
+  order: -1;
+  margin: 0 -0.15em 0 0; /* the last letter's tracking is not part of the word */
+  color: var(--titulus);
+  font-size: 1rem;
+  font-variant-caps: all-small-caps;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: 0.15em;
+  line-height: 1.5;
+}
+.feast-head h1 {
+  margin: 0.1rem 0 0;
+  color: var(--feast-name);
+  font-size: 1.95rem;
+  font-weight: normal;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+.feast-head.is-first h1 { font-size: 2.1rem; }
+.feast-head.is-plain h1 { color: var(--text); font-size: 1.7rem; }
+.feast-rank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0 0.6rem;
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  font-style: italic;
+}
+.feast-point {
+  flex: none;
+  width: 5.5px;
+  height: 5.5px;
+  background: var(--frontal);
+  transform: rotate(45deg);
+}
+@media (forced-colors: active) {
+  .feast-point,
+  .feast-years .find-year::before { forced-color-adjust: none; background: CanvasText; }
+}
+
 .feast-body { display: grid; gap: 1.4rem; grid-template-columns: minmax(0, 1fr); }
-/* The standing is drawn as home's invitation: the wash feathered by the
-   tablet mask so no edge of it lies on a rule, the lining's rule, and
-   inside it a finer rule in the colour of the day it is next kept (gold
-   on a white day, the lining thinned on a black one). */
+
+/* The standing is home's invitation: the wash feathered by the tablet mask
+   so no edge of it lies on a rule, the lining's frame, and inside it a finer
+   frame in the colour of the day it is next kept (gold on a white day, the
+   lining thinned on a black one), stopping short of the corners. It says one
+   thing: when the feast is next kept, and the way to that day. Its usual date
+   is the head's titulus. */
 .feast-standing {
   --frontal: var(--day-color, var(--lining));
   position: relative;
   isolation: isolate;
   display: grid;
-  gap: 0.5rem;
-  padding: calc(0.85rem + 4px) calc(1rem + 4px) calc(0.95rem + 4px) calc(1.1rem + 4px);
+  gap: 0.35rem;
+  padding: 0.85rem 1.1rem 0.95rem;
   border: 1px solid color-mix(in srgb, var(--lining) 78%, transparent);
+  text-align: center;
 }
-.feast-standing.day-color-white { --frontal: var(--gold-line); }
-.feast-standing.day-color-black { --frontal: color-mix(in srgb, var(--lining) 80%, transparent); }
+.feast-standing.day-color-white { --frontal: var(--ornament); }
+.feast-standing.day-color-black { --frontal: color-mix(in srgb, var(--lining) 80%, transparent); --tablet-wash: transparent; }
 .feast-standing::before,
 .feast-standing::after {
   content: "";
@@ -4393,7 +4530,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   pointer-events: none;
 }
 .feast-standing::before {
-  inset: 0;
+  inset: 1px;
   z-index: -1;
   background: var(--tablet-wash);
   -webkit-mask: url("tablet.png") center / 100% 100% no-repeat;
@@ -4403,37 +4540,51 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   inset: 3px;
   border: 1px solid color-mix(in srgb, var(--frontal) 50%, transparent);
 }
+.feast-standing.is-ruled { border-color: transparent; }
+.feast-standing.is-ruled::after { content: none; }
 .feast-standing p { margin: 0; }
-.feast-standing-label {
-  color: var(--titulus);
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
-}
-.feast-everyone { font-size: 1.05rem; }
-.feast-standing-note { color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
-.feast-date { color: var(--muted); font-size: 1.15rem; }
-.feast-date b { font-weight: normal; color: var(--text); }
-.is-monastic .feast-date { font-size: 1rem; }
 .feast-next {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.1rem 0.8rem;
-  padding-top: 0.55rem;
-  border-top: 1px dotted var(--border);
+  position: relative;
+  display: grid;
+  justify-items: center;
   color: var(--text);
   text-decoration: none;
 }
 .feast-next-label {
-  flex-basis: 100%;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-variant: small-caps;
-  letter-spacing: 0.08em;
+  margin-right: -0.15em;
+  color: var(--titulus);
+  font-size: 0.86rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.15em;
 }
-.feast-next-date { font-size: 1.05rem; white-space: nowrap; }
-.feast-next-go { margin-left: auto; color: var(--rubric); white-space: nowrap; }
-.feast-next:hover .feast-next-go { text-decoration: underline; text-decoration-color: var(--gold-line); }
+.feast-next-date {
+  font-size: 1.3rem;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.feast-next-go {
+  margin-top: 0.25rem;
+  color: var(--feast-action);
+  font-size: 1.2rem;
+  letter-spacing: 0.012em;
+}
+.feast-next:hover .feast-next-go { text-decoration: underline; text-decoration-color: var(--gold-line); text-underline-offset: 0.18em; }
+/* A monastic observance's standing keeps its explanation, as prose, and a
+   ruled hairline before the next keeping. */
+.feast-standing.is-monastic { gap: 0.5rem; padding: 1rem 1.15rem 0.9rem; text-align: left; }
+.feast-standing-label {
+  margin-right: -0.15em;
+  color: var(--titulus);
+  font-size: 0.95rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.feast-everyone { font-size: 1.05rem; }
+.feast-standing-note { color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
+.is-monastic .feast-next { margin-top: 0.3rem; padding-top: 0.7rem; border-top: 1px dotted var(--border); }
+.is-monastic .feast-next.is-ruled { border-top-color: transparent; }
 .feast-everyone a,
 .feast-see a {
   color: var(--accent);
@@ -4443,22 +4594,26 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 }
 .feast-see { margin: 1.1rem 0 0; color: var(--muted); font-size: 0.92rem; }
 
+/* The texts: each section's heading a titulus over one pen stroke, each
+   text's label in the tituli's ink (red ochre by day, gilt by night), the
+   collect opening on the hours' dropped initial. Nothing behind the prayer. */
 .feast-section h2 {
+  position: relative;
   margin: 0 0 0.3rem;
-  padding-bottom: 0.3rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--lining);
   color: var(--titulus);
-  font-size: 1.25rem;
+  font-size: 1.08rem;
   font-weight: normal;
-  font-variant: small-caps;
-  letter-spacing: 0.08em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.15em;
 }
-.feast-years h2 { font-size: 1.05rem; }
+.feast-section h2.is-ruled { border-bottom-color: transparent; }
 .feast-source { margin: 0.4rem 0 0.3rem; color: var(--muted); font-size: 0.9rem; font-style: italic; }
 .feast-text { margin-top: 1rem; }
 .feast-text h3 {
   margin: 0 0 0.15rem;
-  color: var(--rubric);
+  color: var(--titulus);
   font-size: 1rem;
   font-weight: normal;
   font-variant: small-caps;
@@ -4474,34 +4629,98 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 }
 .feast-text .liturgical-block { font-size: 1.08rem; line-height: 1.5; }
 .feast-text .liturgical-block p { margin: 0; }
+.feast-text.collect .liturgical-block .response-line { clear: left; }
+/* A black day is bare: its initial in the muted ink, as a bare hour's. */
+.feast-head.day-color-black ~ .feast-body { --cap-ink: var(--muted); }
 
-/* The years as a reference: a row says its status only where it differs from the feast's usual. */
+/* The years: ruled as home's hour table, above, below and between, never
+   upright, with no chevrons; a point in that year's day colour where the bar
+   was, and a row's status only where it differs from the feast's usual. A
+   row is one touch target tall, and pressed it lies under home's pool of
+   light. */
+.feast-years h2 { margin-bottom: 0; }
+.feast-years .find-years { position: relative; }
 .feast-years .find-year {
-  grid-template-columns: 2.7rem 6.4rem minmax(0, 1fr) auto;
-  min-height: 2.5rem;
-  padding: 0.3rem 0 0.3rem 0.75rem;
+  --frontal: var(--day-color, var(--lining));
+  grid-template-columns: 2.9rem 0.7rem minmax(0, 1fr);
+  align-items: baseline;
+  align-content: center;
+  gap: 0 0.55rem;
+  min-height: var(--touch-target);
+  padding: 0.42rem 0.3rem 0.38rem;
 }
-.feast-years .find-year::before { top: 0.4rem; bottom: 0.4rem; }
-.feast-years .find-year-go { grid-column: -1; }
-.feast-years .find-year-status { font-size: 0.9rem; }
-@media (min-width: 960px) {
+.feast-years .find-years.is-ruled .find-year { border-top-color: transparent; }
+.feast-years .find-year.day-color-white { --frontal: var(--ornament); }
+.feast-years .find-year::before {
+  position: static;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  width: 4.5px;
+  height: 4.5px;
+  background: var(--frontal);
+  opacity: 0.85;
+  transform: rotate(45deg);
+}
+.feast-years .find-year-num {
+  grid-column: 1;
+  grid-row: 1;
+  color: color-mix(in srgb, var(--titulus) 55%, var(--muted));
+  letter-spacing: 0.04em;
+}
+.feast-years .find-year-date { grid-column: 3; grid-row: 1; font-size: 1.08rem; }
+.feast-years .find-year-status { grid-column: 3; grid-row: 2; font-size: 0.92rem; }
+.feast-years .find-year-go { display: none; }
+.feast-years a.find-year:hover .find-year-date { text-decoration: none; }
+.feast-years a.find-year:is(:hover, :active) {
+  background: radial-gradient(ellipse 60% 90% at 30% 50%, var(--now-pool), transparent 75%);
+}
+
+/* From 760px the standing and the years are a rail beside the texts, so the
+   prayer keeps its measure on a tablet; on a first-class feast one upright
+   course (the lining and its colour) runs between them. */
+@media (min-width: 760px) {
   .page-feast main { max-width: 62rem; }
+  .feast-head h1 { font-size: 2.3rem; }
+  .feast-head.is-first h1 { font-size: 2.5rem; }
+  .feast-head.is-plain h1 { font-size: 1.95rem; }
   .feast-body {
-    grid-template-columns: minmax(0, 1fr) 20rem;
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) 17rem;
     grid-template-areas: "texts standing" "texts years";
     grid-template-rows: auto 1fr;
-    column-gap: 3rem;
+    column-gap: 2.5rem;
     align-items: start;
+    padding-top: 0.4rem;
   }
   .feast-body.no-texts { grid-template-columns: minmax(0, 36rem); grid-template-areas: "standing" "years"; justify-content: center; }
   .feast-standing { grid-area: standing; }
   .feast-texts { grid-area: texts; }
   .feast-years { grid-area: years; }
+  .feast-next-date { font-size: 1.2rem; }
 }
-@media (min-width: 960px), (max-width: 640px) {
-  .feast-years .find-year { grid-template-columns: 2.7rem minmax(0, 1fr) auto; }
-  .feast-years .find-year-status { grid-column: 2; }
-  .feast-years .find-year-go { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+@media (min-width: 960px) {
+  .feast-head { padding-bottom: 1.6rem; }
+  .feast-head h1 { font-size: 2.5rem; }
+  .feast-head.is-first h1 { font-size: 2.7rem; }
+  .feast-head.is-plain h1 { font-size: 2.1rem; }
+  .feast-body { grid-template-columns: minmax(0, 35rem) 19rem; justify-content: space-between; column-gap: 3rem; }
+  .feast-text .liturgical-block { font-size: 1.14rem; line-height: 1.55; }
+  .feast-next-date { font-size: 1.3rem; }
+}
+
+/* By night the name is in the text's ink, as home's date is, and the way on
+   in the lining, as home's invitation is. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-feast { --feast-name: var(--text); --feast-action: var(--lining); }
+  :root:not([data-theme="light"]) .feast-head::before {
+    background: radial-gradient(ellipse 50% 48% at 50% 46%, rgba(150, 178, 220, 0.17), transparent);
+  }
+}
+:root[data-theme="dark"] .page-feast { --feast-name: var(--text); --feast-action: var(--lining); }
+:root[data-theme="dark"] .feast-head::before {
+  background: radial-gradient(ellipse 50% 48% at 50% 46%, rgba(150, 178, 220, 0.17), transparent);
 }
 
 /* A day's feast and commemorations lead to their pages without reading as
@@ -4519,8 +4738,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   .find-year { grid-template-columns: 2.8rem minmax(0, 1fr) auto; }
   .find-year-status { grid-column: 2; }
   .find-year-go { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
-  .find-page .calendar-title,
-  .feast-page .calendar-title { text-align: center; }
+  .find-page .calendar-title { text-align: center; }
 }
 
 
@@ -9145,8 +9363,7 @@ html:where(:has(> body.page-hour))::before {
 
 /* The ordo opens like the hours: its headpiece alone, no rule above. */
 .page-calendar .calendar-header,
-.page-find .calendar-header,
-.page-feast .calendar-header {
+.page-find .calendar-header {
   padding-top: 0.65rem;
 }
 

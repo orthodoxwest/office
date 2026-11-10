@@ -11,7 +11,9 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
-use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_link, home_link, hour_link};
+use render_html::links::{
+    calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
+};
 use render_html::view::{
     BetaData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, LinkRow,
     MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
@@ -83,15 +85,25 @@ pub(crate) fn render_failed(e: &str) -> Response<Body> {
     crate::http::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-/// The page of the feast a day keeps or commemorates as `id` and `name`, or empty.
-pub fn feast_href(feasts: &FeastIndex, id: &str, name: &str, date: Date) -> String {
-    feasts.find(id, name, date).map(|e| feast_link(&e.id)).unwrap_or_default()
+/// The page of the feast a day keeps or commemorates as `id` and `name`, or empty, with the way
+/// back to `from` (see `links::feast_from`).
+pub fn feast_href(feasts: &FeastIndex, id: &str, name: &str, date: Date, from: &str) -> String {
+    feasts.find(id, name, date).map(|e| feast_from(&e.id, from)).unwrap_or_default()
+}
+
+/// The `from` a feast link on the ordo carries: the ordo's row for `date`.
+pub fn ordo_from(date: Date) -> String {
+    format!("ordo-{}", date_slug(date))
 }
 
 fn comm_rows(comms: &[CommSummary], feasts: &FeastIndex, date: Date) -> Vec<CommemorationRow> {
     comms
         .iter()
-        .map(|c| CommemorationRow { name: c.name.clone(), incipit: c.incipit.clone(), href: feast_href(feasts, "", &c.name, date) })
+        .map(|c| CommemorationRow {
+            name: c.name.clone(),
+            incipit: c.incipit.clone(),
+            href: feast_href(feasts, "", &c.name, date, &ordo_from(date)),
+        })
         .collect()
 }
 
@@ -113,7 +125,7 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feas
             feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
-            commemoration_hrefs: d.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, d.date)).collect(),
+            commemoration_hrefs: d.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, d.date, &ordo_from(d.date))).collect(),
             commemorations: o.commemorations,
             monastic: d
                 .monastic
@@ -356,9 +368,9 @@ impl Server {
             today_link: home_link(&now_slug),
             feast_name: feast_name.into(),
             feast_alias: feast_alias.into(),
-            feast_href: day.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, date)).unwrap_or_default(),
+            feast_href: day.celebration.as_ref().map(|c| feast_href(feasts, &c.id, &c.name, date, &slug)).unwrap_or_default(),
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
-            commemoration_hrefs: day.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, date)).collect(),
+            commemoration_hrefs: day.commemorations.iter().map(|c| feast_href(feasts, &c.id, &c.name, date, &slug)).collect(),
             from_feast,
             color: day.color.as_str().into(),
             season: heading.season,

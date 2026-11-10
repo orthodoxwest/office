@@ -145,22 +145,32 @@ fun ruledLine(x1: Float, y1: Float, x2: Float, y2: Float, w: Float, seed: Int, u
     }
 }
 
-/** The invitation's double frame (the web's `.pray-now` rules): the lining, then the frontal inside it, short of the corners. */
-fun DrawScope.invitationRules(lining: Color, frontal: Color) {
+/**
+ * The invitation's double frame (the web's `.pray-now` rules): the lining, then the frontal inside
+ * it, short of the corners. The feast page's standing is framed the same from its own seeds
+ * (`seed` 61), its lining unthinned by the caller and its frontal at `day`.
+ */
+fun DrawScope.invitationRules(lining: Color, frontal: Color, seed: Int = 21, day: Float = 0.5f) {
     val u = density
     val w = size.width
     val h = size.height
     val g = 3.5f * u
-    drawPath(ruledLine(0f, 0.5f * u, w, 0.5f * u, 1.25f * u, 21, u), lining)
-    drawPath(ruledLine(0f, h - 0.5f * u, w, h - 0.5f * u, 1.25f * u, 22, u), lining)
-    drawPath(ruledLine(0.5f * u, 0f, 0.5f * u, h, 1.25f * u, 23, u), lining)
-    drawPath(ruledLine(w - 0.5f * u, 0f, w - 0.5f * u, h, 1.25f * u, 24, u), lining)
-    val day = frontal.copy(alpha = frontal.alpha * 0.5f)
-    drawPath(ruledLine(g + 1.5f * u, g, w - g - 1.5f * u, g, 0.7f * u, 25, u), day)
-    drawPath(ruledLine(g + 1.5f * u, h - g, w - g - 1.5f * u, h - g, 0.7f * u, 26, u), day)
-    drawPath(ruledLine(g, g + 1.5f * u, g, h - g - 1.5f * u, 0.7f * u, 27, u), day)
-    drawPath(ruledLine(w - g, g + 1.5f * u, w - g, h - g - 1.5f * u, 0.7f * u, 28, u), day)
+    drawPath(ruledLine(0f, 0.5f * u, w, 0.5f * u, 1.25f * u, seed, u), lining)
+    drawPath(ruledLine(0f, h - 0.5f * u, w, h - 0.5f * u, 1.25f * u, seed + 1, u), lining)
+    drawPath(ruledLine(0.5f * u, 0f, 0.5f * u, h, 1.25f * u, seed + 2, u), lining)
+    drawPath(ruledLine(w - 0.5f * u, 0f, w - 0.5f * u, h, 1.25f * u, seed + 3, u), lining)
+    val inner = frontal.copy(alpha = frontal.alpha * day)
+    drawPath(ruledLine(g + 1.5f * u, g, w - g - 1.5f * u, g, 0.7f * u, seed + 4, u), inner)
+    drawPath(ruledLine(g + 1.5f * u, h - g, w - g - 1.5f * u, h - g, 0.7f * u, seed + 5, u), inner)
+    drawPath(ruledLine(g, g + 1.5f * u, g, h - g - 1.5f * u, 0.7f * u, seed + 6, u), inner)
+    drawPath(ruledLine(w - g, g + 1.5f * u, w - g, h - g - 1.5f * u, 0.7f * u, seed + 7, u), inner)
 }
+
+/**
+ * The gilt of a first-class feast's consecration cross by day (the web's `.home-crown` and
+ * `.feast-crown` gradient), in the season's gilding.
+ */
+fun giltBrush(o: Ornament): Brush = Brush.linearGradient(0.08f to o.hi, 0.3f to mix(o.hi, Color.White, 0.55f), 0.52f to o.flat, 0.92f to o.lo)
 
 /** The wash under the invitation, `tablet.png` stretched to it and tinted. */
 fun DrawScope.tabletWash(tablet: ImageBitmap, wash: Color) {

@@ -290,9 +290,18 @@ or impose a redesign on an unrelated change.
   of today's second line, from 1000px it is a note in the left margin, and
   between them it keeps the reserved line under the number. The phone's
   date and "Office details" boxes are drawn round them, not laid out (the
-  thumb-target test measures the drawn box). The feast page's standing is
-  drawn as home's invitation (feathered wash, the lining's rule, a finer
-  one in the colour of the day it is next kept).
+  thumb-target test measures the drawn box). The feast page is a leaf of
+  home's painted wall ("The feast page" in style.css and app.js,
+  `FeastScreens` in the apps): home's day block turned about, the feast's
+  name under its date as a titulus, beneath a ruled course of the lining
+  broken by the cross (gilt and doubled on a first-class feast; a
+  commemoration's or monastic observance's head is bare, its name in ink:
+  `presentation::feast::feast_register`), the rank and colour parted by a
+  point of the colour. Its standing is drawn as home's invitation and says
+  one thing, the next keeping (and when that is today); its years are ruled
+  as home's hours, with no chevrons or colour bars; from 760px the standing
+  and the years are a rail beside the texts. Its back link names the day or
+  the ordo's month it was opened from (`?from=`).
 - Filled actions are home's tablet, not slabs (`.reminder-subscribe`,
   `/beta`'s steps, the apps' "Turn on reminders"); a second action is a
   worded link with the gold underline. Reminders is ruled as home's hours

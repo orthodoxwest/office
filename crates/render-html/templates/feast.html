@@ -1,35 +1,35 @@
-{% extends "layout.html" %}{% block title %}{{ name }} — Feasts{% endblock %}{% block description %}{{ name }}: {{ date }}, and how it is kept in the Benedictine Divine Office of the Antiochian Western Rite Vicariate in the years ahead.{% endblock %}{% block content %}{% from "macros.html" import headpiece, feast_years %}
+{% extends "layout.html" %}{% block title %}{{ name }} — Feasts{% endblock %}{% block description %}{{ name }}: {{ date }}, and how it is kept in the Benedictine Divine Office of the Antiochian Western Rite Vicariate in the years ahead.{% endblock %}{% block content %}{% from "macros.html" import feast_years %}
 <div class="calendar feast-page">
-  <a class="find-back" href="/calendar/find">&lsaquo; {{ feast_words.find_title }}</a>
-  <div class="calendar-header find-header" id="calendar-top">
-    <div class="calendar-title">
-      {{ headpiece() }}
-      <h1>{{ name|typeset }}</h1>
-      <p class="calendar-subtitle">{{ subtitle|typeset }}</p>
-    </div>
-  </div>
+  <a class="find-back" href="{{ back.href|url }}">&lsaquo; {{ back.label|typeset }}</a>
+  <header class="feast-head is-{{ register }} day-color-{{ color }}" id="calendar-top">
+    <span class="feast-crown" aria-hidden="true"></span>
+    <h1>{{ name|typeset }}</h1>
+    <p class="feast-titulus">{{ titulus }}</p>
+    <p class="feast-rank">{% set parts = subtitle|split(" · ")|list %}{% for part in parts %}{% if not loop.first %}<span class="feast-point" aria-hidden="true"></span><span class="sr-only"> · </span>{% endif %}<span>{{ part|typeset }}</span>{% endfor %}</p>
+  </header>
   <div class="feast-body{% if not texts %} no-texts{% endif %}">
+    {% if monastic_note or next %}
     <div class="feast-standing{% if monastic_note %} is-monastic{% endif %}{% if next %} day-color-{{ next.color }}{% endif %}">
       {% if monastic_note %}
       <p class="feast-standing-label">{{ feast_words.monastic_heading }}</p>
       {% if kept_by_all %}<p class="feast-everyone">{{ feast_words.everyone_keeps }} <a href="{{ kept_by_all.href|url }}">{{ kept_by_all.label|typeset }}</a> {{ kept_by_all_note }}</p>{% endif %}
       <p class="feast-standing-note">{{ monastic_note|typeset }}</p>
       {% endif %}
-      <p class="feast-date">{% if date_lead %}{{ date_lead }} <b>{{ date }}</b>{% else %}{{ date }}{% endif %}</p>
       {% if next %}
       <a class="feast-next" href="{{ next.href|url }}">
         <span class="feast-next-label">{{ next.label }}</span>
         <span class="feast-next-date">{{ next.date }}</span>
-        <span class="feast-next-go">{{ feast_words.days_hours }} &rsaquo;</span>
+        <span class="feast-next-go">{% if next.today %}{{ feast_words.todays_hours }}{% else %}{{ feast_words.days_hours }}{% endif %} &rsaquo;</span>
       </a>
       {% endif %}
     </div>
+    {% endif %}
     {% if texts %}
     <section class="feast-section feast-texts" aria-labelledby="feast-texts-heading">
       <h2 id="feast-texts-heading">{{ feast_words.texts_heading }}</h2>
       <p class="feast-source">{{ texts_source|typeset }}</p>
       {% for t in texts %}
-      <div class="feast-text">
+      <div class="feast-text{% if loop.first and t.prayer %} collect{% endif %}">
         <h3>{{ t.label }}{% if t.common %} <span class="feast-text-common">{{ feast_words.common_mark }}</span>{% endif %}</h3>
         {% if t.prayer %}{{ t.text|feast_prayer }}{% else %}{{ t.text|feast_text }}{% endif %}
       </div>

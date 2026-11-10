@@ -4435,6 +4435,53 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
 
+test("a feast's page leads back to the day or the ordo it was opened from", async ({ page }) => {
+  await openDatedPage(page, "/?date=2026-02-27");
+  await page.locator(".home .feast-link").first().click();
+  await expect(page).toHaveURL(/\/feast\/st-raphael-of-brooklyn\?from=2026-02-27$/);
+  await expect(page.locator(".find-back")).toHaveText(/February 27$/);
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/\?date=2026-02-27$/);
+
+  await page.goto("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
+  await expect(page.locator(".find-back")).toHaveText(/Ordo, February 2026$/);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/2026/02#d-2026-02-27");
+});
+
+test("a feast's head is home's day block turned about, ruled with home's pen", async ({ page }) => {
+  await page.goto("/feast/annunciation");
+  const head = page.locator(".feast-head");
+  await expect(head).toHaveClass(/is-first/);
+  // The date is the titulus over the name, read after it.
+  const box = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  expect(await box(".feast-titulus")).toBeLessThan(await box(".feast-head h1"));
+  await expect(page.locator(".feast-titulus")).toHaveText("March 25");
+  // Each painted line is a pen stroke once script has run; the CSS borders stand down.
+  for (const host of [".feast-head", ".feast-standing", ".feast-texts > h2", ".feast-years .find-years"]) {
+    await expect(page.locator(host).first()).toHaveClass(/is-ruled/);
+  }
+  expect(await page.locator(".feast-years .find-years > svg.feast-rules path").count()).toBe(9);
+  // A greater double carries the cross in the lining; a monastic observance's head is bare.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-feast/);
+  await page.goto("/feast/solemnity-st-benedict");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-plain/);
+  await expect(page.locator(".feast-head > svg.feast-rules")).toHaveCount(0);
+});
+
+test("a feast's rules follow the reader's text size, and a feast never kept has no empty standing", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const frame = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return { height: n.offsetHeight, bottom: Math.max(...ys) };
+  });
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await expect.poll(async () => { const f = await frame(); return Math.abs(f.bottom - f.height) < 3; }).toBe(true);
+
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator(".feast-standing")).toHaveCount(0);
+});
+
 test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
   await page.goto("/feast/st-raphael-of-brooklyn");
   const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
@@ -4450,6 +4497,9 @@ test("a feast's page leads with its standing, then its texts, then its years, be
   expect(await page.locator(".feast-years .find-year-status b", { hasText: "Commemorated" }).count()).toBeGreaterThan(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 
+  // A tablet already has the rail, so the prayer keeps its measure.
+  await page.setViewportSize({ width: 820, height: 1180 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
   // A wide screen: the standing and the years make a rail to the right of the texts.
   await page.setViewportSize({ width: 1280, height: 900 });
   expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);

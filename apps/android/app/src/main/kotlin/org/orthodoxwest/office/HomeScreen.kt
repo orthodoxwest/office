@@ -432,7 +432,7 @@ private fun Frontispiece(
                 when {
                     night && black -> ConsecrationCross(Modifier.size(tier.crownSize), ink = muted.copy(alpha = 0.7f))
                     night -> ConsecrationCross(Modifier.size(tier.crownSize), brush = Brush.linearGradient(0f to leaf.hi, 0.55f to leaf.mid, 1f to leaf.lo), alpha = 0.35f + 0.65f * catch)
-                    first -> ConsecrationCross(Modifier.size(tier.crownSize), brush = Brush.linearGradient(0.08f to o.hi, 0.3f to mix(o.hi, Color.White, 0.55f), 0.52f to o.flat, 0.92f to o.lo))
+                    first -> ConsecrationCross(Modifier.size(tier.crownSize), brush = giltBrush(o))
                     else -> ConsecrationCross(Modifier.size(tier.crownSize), pigment = pigment)
                 }
             },

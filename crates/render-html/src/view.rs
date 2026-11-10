@@ -375,6 +375,8 @@ pub struct NextKeeping {
     pub date: String,
     pub href: String,
     pub color: String,
+    /// The next keeping is today: its way on is "Today's hours".
+    pub today: bool,
 }
 
 /// A feast's page: its rank and date, how it is kept in the years ahead, and its texts.
@@ -386,8 +388,14 @@ pub struct FeastPageData {
     pub subtitle: String,
     /// "February 27", or "Its date moves from year to year".
     pub date: String,
-    /// "Kept on" or "Commemorated on" before a date of its own; empty for a date that moves.
-    pub date_lead: String,
+    /// The titulus over the name: "February 27", or "Its date moves".
+    pub titulus: String,
+    /// "first", "feast" or "plain": how much the head carries (`presentation::feast::feast_register`).
+    pub register: String,
+    /// The feast's own colour.
+    pub color: String,
+    /// The way back: to the day or the ordo's month the page was opened from, else the search.
+    pub back: LinkRow,
     pub monastic_note: String,
     /// For a monastic observance, the feast of the same saint everyone keeps.
     pub kept_by_all: Option<LinkRow>,
