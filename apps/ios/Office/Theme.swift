@@ -60,7 +60,7 @@ struct Palette: Equatable {
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
         oak: Color(hex: 0x3F372F),
         materialHighlight: Color(rgb: 255, 255, 255, 0.38),
-        inscriptionGround: Color(hex: 0x545F54),
+        inscriptionGround: Color(hex: 0x4C574D),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
         plaster: "plaster_nave.jpg",

@@ -387,9 +387,26 @@
      ground is as pale as the letters allow at the band's small size; a
      near-black course read as a slab on the limewash (see "Seasonal
      ornament" for the seasons' inks). */
-  --inscription-ground: #545f54;
+  --inscription-ground: #4c574d;
   --inscription-edge: #5e2a27;
   --inscription-ink: #ecd9a0;
+  /* Home's painted furniture below the frieze (see "Home: the painted
+     page"): the invitation lies on a thin wash of yellow ochre, and the
+     hour that is now under a pool of the same light, with its gloss in
+     the text's ink withdrawn. Apse restates them in moonlit blue. */
+  --ochre: #c9973f;
+  --tablet-wash: color-mix(in srgb, var(--ochre) 19%, transparent);
+  --now-pool: color-mix(in srgb, var(--ochre) 34%, transparent);
+  --now-gloss: color-mix(in srgb, var(--text) 55%, var(--muted));
+  /* Gold leaf seen in the parish's photographs, soft and unburnished, a
+     little rosy, never yellow (the stars #93745a in shade to #d2ab8e in
+     light, the chancel arch #6c543d): the apse's leaf is the season's
+     gilding pair matted toward these. */
+  --leaf-matte-hi: #c9a182;
+  --leaf-matte: #a98765;
+  --leaf-matte-lo: #7d6248;
+  /* The darker leaf a gilt edge falls to (the frieze's lozenges). */
+  --leaf-shadow: #8a6a22;
   /* Side gutter for the reading column. The measure lives on main/footer so
      the header beam can span the full width (see .site-header). */
   --page-gutter: 1.5rem;
@@ -4396,6 +4413,28 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --oak-line: rgba(208, 176, 106, 0.16);
     --inscription-ground: #263431;
     --inscription-edge: #5c2b35;
+    /* Home's furniture by night: the invitation's wash and the current
+       hour's pool are moonlit blue, the gloss lifted for it. */
+    --tablet-wash: rgba(132, 160, 204, 0.12);
+    --now-pool: rgba(140, 170, 216, 0.24);
+    --now-gloss: #c3ccd8;
+    /* The parish apse's painted sky, set by night in the head of a phone's
+       arch: a slate blue with grey-green in its lights, sampled from the
+       client's photograph of the vault (#2b2e32 .. #373b3e .. #3f4449 in
+       daylight) and taken down for night, a step lighter and greener than
+       the wall (--bg) and greyer than the blue plaster below the frieze.
+       --sky-rim is the slate course's outer ring in shade; --lime-white a
+       white day's line on the sky, so the leaf fillet stays the one gold
+       line. The day's words on the sky take a lifted muted ink, rubric
+       and lining. */
+    --sky-deep: #172231;
+    --sky: #233440;
+    --sky-low: #2f474d;
+    --sky-rim: #0c131d;
+    --lime-white: #e9e3d0;
+    --sky-muted: #b9c3c8;
+    --sky-rubric: #f0a39c;
+    --lining-lifted: #e0a686;
   }
 }
 
@@ -4452,11 +4491,33 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --oak-line: rgba(208, 176, 106, 0.16);
   --inscription-ground: #263431;
   --inscription-edge: #5c2b35;
+  /* Home's furniture by night: the invitation's wash and the current
+     hour's pool are moonlit blue, the gloss lifted for it. */
+  --tablet-wash: rgba(132, 160, 204, 0.12);
+  --now-pool: rgba(140, 170, 216, 0.24);
+  --now-gloss: #c3ccd8;
+  /* The parish apse's painted sky, set by night in the head of a phone's
+     arch: a slate blue with grey-green in its lights, sampled from the
+     client's photograph of the vault (#2b2e32 .. #373b3e .. #3f4449 in
+     daylight) and taken down for night, a step lighter and greener than
+     the wall (--bg) and greyer than the blue plaster below the frieze.
+     --sky-rim is the slate course's outer ring in shade; --lime-white a
+     white day's line on the sky, so the leaf fillet stays the one gold
+     line. The day's words on the sky take a lifted muted ink, rubric
+     and lining. */
+  --sky-deep: #172231;
+  --sky: #233440;
+  --sky-low: #2f474d;
+  --sky-rim: #0c131d;
+  --lime-white: #e9e3d0;
+  --sky-muted: #b9c3c8;
+  --sky-rubric: #f0a39c;
+  --lining-lifted: #e0a686;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .home-prayer-card {
-    background: var(--surface);
+    background: transparent;
     box-shadow: none;
   }
 
@@ -4478,10 +4539,6 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     background: var(--surface);
   }
 
-  :root:not([data-theme="light"]) .home-hour-link.is-current {
-    background: var(--apse-lift);
-  }
-
   :root:not([data-theme="light"]) .pray-now {
     background: var(--accent);
     border-color: var(--accent);
@@ -4496,7 +4553,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 }
 
 :root[data-theme="dark"] .home-prayer-card {
-  background: var(--surface);
+  background: transparent;
   box-shadow: none;
 }
 
@@ -4513,10 +4570,6 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 
 :root[data-theme="dark"] .home-hour-link {
   background: var(--surface);
-}
-
-:root[data-theme="dark"] .home-hour-link.is-current {
-  background: var(--apse-lift);
 }
 
 :root[data-theme="dark"] .pray-now {
@@ -4606,7 +4659,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
    sage and oxblood do not move — the church veils its images, not its walls.
 
    Contrast on the band, worst case:
-   nave ground #545f54  veiled #ddd6e8 = 4.7:1   quiet #d9d0b4 = 4.3:1   paschal #f2e2b1 = 5.2:1
+   nave ground #4c574d  veiled #ddd6e8 = 5.3:1   quiet #d9d0b4 = 4.9:1   paschal #f2e2b1 = 5.9:1
    apse ground #263431  veiled #ddd6e8 = 8.8:1   quiet #d9d0b4 = 8.4:1   paschal #f2e2b1 = 9.6:1 */
 body.season-passiontide {
   --ornament: #756a7e;
@@ -4650,6 +4703,8 @@ body.season-eastertide {
     --ornament-hi: #cac1d7;
     --ornament-lo: #988aad;
     --titulus: #b0a4c2;
+    /* Home's current hour, on its pool of moonlight. */
+    --titulus-now: #cdc4dc;
   }
 
   :root:not([data-theme="light"]) body.season-quiet {
@@ -4658,6 +4713,7 @@ body.season-eastertide {
     --ornament-hi: #c6bb9a;
     --ornament-lo: #a4976f;
     --titulus: #b7aa86;
+    --titulus-now: #cfc39f;
   }
 
   :root:not([data-theme="light"]) body.season-eastertide {
@@ -4676,6 +4732,7 @@ body.season-eastertide {
   --ornament-hi: #cac1d7;
   --ornament-lo: #988aad;
   --titulus: #b0a4c2;
+  --titulus-now: #cdc4dc;
 }
 
 :root[data-theme="dark"] body.season-quiet {
@@ -4684,6 +4741,7 @@ body.season-eastertide {
   --ornament-hi: #c6bb9a;
   --ornament-lo: #a4976f;
   --titulus: #b7aa86;
+  --titulus-now: #cfc39f;
 }
 
 :root[data-theme="dark"] body.season-eastertide {
@@ -5237,7 +5295,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .page-home .home-arch-edge,
 .page-home .home-hero::before,
 .page-home .home-hero::after,
-.page-home .home-arch-fill {
+.page-home .home-arch-fill,
+.page-home .home-sky {
   clip-path: polygon(
     0 100%,
     calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
@@ -5414,7 +5473,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-arch-edge,
   .page-home .home-hero::before,
   .page-home .home-hero::after,
-  .page-home .home-arch-fill {
+  .page-home .home-arch-fill,
+  .page-home .home-sky {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
@@ -5600,7 +5660,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-arch-edge,
   .page-home .home-hero::before,
   .page-home .home-hero::after,
-  .page-home .home-arch-fill {
+  .page-home .home-arch-fill,
+  .page-home .home-sky {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.64 * var(--arch-w)),
@@ -5794,7 +5855,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-arch-edge,
   .page-home .home-hero::before,
   .page-home .home-hero::after,
-  .page-home .home-arch-fill {
+  .page-home .home-arch-fill,
+  .page-home .home-sky {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.4 * var(--arch-w)),
@@ -6267,14 +6329,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .page-home .home-hour-links {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  /* The tinted period labels form a quiet index column. Complete the outer
-     frame at every width so that column reads as deliberate table structure,
-     rather than three highlighted tabs left open to the page. The outer
-     frame is the lining, thinned; the rules within keep the surface ink. */
-  border-inline: 1px solid var(--panel-rule);
+  /* Ruled as a fine book rules a table: a firmer rule above and below,
+     finer ones between the periods, none upright. app.js draws them by
+     hand (.is-ruled, see "Home: the painted page"); without script they
+     are the borders below. The uprights keep their pixel, unpainted, so
+     the table's measure does not move between the two. */
+  border-inline: 1px solid transparent;
 }
 
 /* 5.2rem, not 4.4rem: "Morning" is the longest label and at 4.4rem it filled
@@ -6287,29 +6351,31 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-top: 1px solid var(--frontispiece-rule);
 }
 
-.page-home .home-hour-group:first-child {
+.page-home .home-hour-group:first-of-type {
   border-top-color: var(--panel-rule);
 }
 
-.page-home .home-hour-group:last-child {
+.page-home .home-hour-group:last-of-type {
   border-bottom: 1px solid var(--panel-rule);
 }
 
+/* The periods are the margin's index, in the quiet ink, with no cell of
+   their own: red is kept for the hour that is now. */
 .page-home .home-hour-group-label {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.16rem;
-  border-right: 1px solid var(--frontispiece-rule);
-  background: var(--frontispiece-band);
-  color: var(--muted);
+  border-right: 1px solid transparent;
+  background: none;
+  color: color-mix(in srgb, var(--accent) 45%, var(--muted));
   font-size: 0.72rem;
   font-weight: normal;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   line-height: 1.2;
-  padding: 0 0.4rem;
+  padding: 0 0.4rem 0 calc(0.4rem + 0.12em);
 }
 
 /* The rising sun, the sun and the moon mark the day's three periods, drawn
@@ -6321,7 +6387,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   width: 1.2rem;
   height: 0.8rem;
   fill: var(--ornament);
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
 .page-home .home-hour-group-links {
@@ -6351,17 +6417,20 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   text-align: center;
 }
 
-/* Short hairlines separate neighbouring hours within each band. Their clear
-   ends keep the unequal 2/3/2 groups from becoming continuous table columns. */
+/* Gilt points part neighbouring hours within each band, as the frieze's
+   phrases are parted: no upright rule, so the unequal 2/3/2 groups never
+   read as table columns. A point stands beside the current hour too, so
+   the row keeps its rhythm at every hour. */
 .page-home .home-hour-link + .home-hour-link::before {
   content: "";
   position: absolute;
   inset-inline-start: 0;
-  top: 50%;
-  width: 1px;
-  height: 1rem;
-  background: var(--frontispiece-rule);
-  transform: translateY(-50%);
+  top: calc(50% - 0.06em);
+  width: 3.5px;
+  height: 3.5px;
+  background: var(--ornament);
+  opacity: 0.7;
+  transform: translate(-50%, -50%) rotate(45deg);
   pointer-events: none;
 }
 
@@ -6386,16 +6455,29 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   outline-offset: 3px;
 }
 
+/* The hour that is now: the light rests on it, a pool with no edge (a
+   brushed patch read as a highlight box), and its name is rubricated. Its
+   gloss keeps one line: with no cell walls it may overhang a little. On the
+   wide niche the cell is wide, and the pool keeps its own size. */
 .page-home .home-hour-link.is-current {
-  background: rgba(107, 58, 31, 0.08);
-  box-shadow: inset 0 -1px 0 var(--ornament);
+  isolation: isolate;
+  background: none;
+  box-shadow: none;
 }
 
-/* The current hour's wash already divides it from its neighbours; a hairline
-   at its edge would sit half on the wash and half off it. */
-.page-home .home-hour-link.is-current::before,
-.page-home .home-hour-link.is-current + .home-hour-link::before {
-  visibility: hidden;
+.page-home .home-hour-link.is-current::after {
+  content: "";
+  position: absolute;
+  inset: -2px -4px;
+  z-index: -1;
+  max-width: 9.5rem;
+  margin-inline: auto;
+  background: radial-gradient(closest-side, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent 100%);
+  pointer-events: none;
+}
+
+.page-home .home-hour-link.is-current .home-hour-link-name {
+  color: var(--titulus-now, var(--titulus));
 }
 
 .page-home .home-hour-link-state {
@@ -6420,6 +6502,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 .page-home .home-hour-link.is-current .home-hour-link-note {
   display: block;
+  color: var(--now-gloss);
+  white-space: nowrap;
 }
 
 /* An hour prayed today (app.js): its name withdraws to the muted ink and a
@@ -6443,11 +6527,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   white-space: nowrap;
 }
 
+/* The foot: the season and "Change date", parted by a gilt point, under
+   the table's own closing rule. */
 .page-home .home-day-meta {
+  position: relative;
   justify-content: center;
+  align-items: center;
+  gap: 0;
   margin-top: 0.55rem;
   padding-top: 0.2rem;
-  border-top: 1px solid var(--frontispiece-rule);
+  border-top: 1px solid transparent;
 }
 
 .page-home .home-day-meta .home-date-nav {
@@ -6643,10 +6732,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     background: transparent;
   }
 
-  :root:not([data-theme="light"]) .page-home .home-hour-link.is-current {
-    background: var(--apse-lift);
-  }
-
   /* Red, green and violet are mixed for limewash and sink into the night;
      on the card they are lifted as white and black are. */
   :root:not([data-theme="light"]) .page-home :is(.home-hero, .home-summary).day-color-red { --day-color: #c9503f; }
@@ -6676,10 +6761,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 :root[data-theme="dark"] .page-home .home-hour-link {
   background: transparent;
-}
-
-:root[data-theme="dark"] .page-home .home-hour-link.is-current {
-  background: var(--apse-lift);
 }
 
 :root[data-theme="dark"] .page-home :is(.home-hero, .home-summary).day-color-red { --day-color: #c9503f; }
@@ -7690,8 +7771,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
   .page-home .pray-now,
   .page-home .pray-now:hover {
-    padding-block: 0.8rem;
-    font-size: 1.4rem;
+    padding-block: 0.68rem 0.72rem;
+    font-size: 1.55rem;
   }
 
   .page-home .pray-now-wrap {
@@ -7723,12 +7804,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     font-size: 0.85rem;
   }
 
-  .page-home .pray-now,
-  .page-home .pray-now:hover {
-    padding-block: 0.95rem;
-    font-size: 1.5rem;
-  }
-
   .page-home .pray-now-wrap {
     margin-bottom: 1.5rem;
   }
@@ -7743,6 +7818,516 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
   .page-home .home-day-meta {
     margin-top: 1.2rem;
+  }
+}
+
+/* ── Home: the painted page ──
+   The frontispiece as a wall painter would set it: the pigment lies
+   unevenly on the limewash (pigment.png, tools/genpaint.py, masks the
+   lining and the cross), the weekday is a titulus over a larger date, the
+   frieze is flat green earth with the wall's plaster faintly through it and
+   its letters' leaf catching the light at their heads, the invitation lies
+   on a thin wash in a ruled frame, and the hours are ruled as a fine book
+   rules a table. The rules are drawn by hand in app.js (`rule()`: a pen
+   whose weight breathes and which lifts at each end), in an aria-hidden SVG
+   per host; a host so ruled carries .is-ruled and gives up its CSS borders,
+   which stand without script. By night on a phone the head of the arch is
+   the parish apse's painted sky, with its gold-leaf stars (below). */
+.page-home .home-hero {
+  /* The frontal: the invitation's inner rule takes the day's colour, gold
+     on a white day by day and lime white by night (where the leaf fillet
+     is the one gold line). */
+  --frontal: var(--day-color, var(--lining));
+  /* How much light the leaf catches: the quiet seasons leave it unlit and
+     Passiontide veils it, over the season's own --ornament pair. */
+  --leaf-catch: 1;
+  --sky-leaf-hi: color-mix(in srgb, var(--ornament-hi) 74%, var(--leaf-matte-hi));
+  --sky-leaf: color-mix(in srgb, var(--ornament) 70%, var(--leaf-matte));
+  --sky-leaf-lo: color-mix(in srgb, var(--ornament-lo) 62%, var(--leaf-matte-lo));
+}
+
+.page-home .home-hero.day-color-white {
+  --frontal: var(--gold-line);
+}
+
+body.season-quiet .home-hero {
+  --leaf-catch: 0.6;
+}
+
+body.season-passiontide .home-hero {
+  --leaf-catch: 0.7;
+}
+
+/* A black day (the Triduum, All Souls) is bare: no wash, no leaf; the
+   rules alone, the frontal in the lining thinned. */
+.page-home .home-hero.day-color-black {
+  --tablet-wash: transparent;
+  --frontal: color-mix(in srgb, var(--lining) 80%, transparent);
+}
+
+.page-home .home-lining::before,
+.page-home .home-lining::after {
+  -webkit-mask: url("pigment.png") 0 0 / 128px 128px;
+  mask: url("pigment.png") 0 0 / 128px 128px;
+}
+
+/* The painted cross: the lining through the pigment. On a first-class
+   feast (presentation::home_first_class) it is gilt, the leaf's squares
+   over the season's gilding. */
+.page-home .home-crown {
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  -webkit-mask-composite: source-in;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat, url("pigment.png") 0 0 / 96px 96px;
+  mask-composite: intersect;
+}
+
+body.rank-first-class .home-crown {
+  background:
+    url("gild.png") 0 0 / 64px 64px,
+    linear-gradient(128deg, var(--ornament-hi) 8%, color-mix(in srgb, var(--ornament-hi) 55%, white) 30%, var(--ornament) 52%, var(--ornament-lo) 92%);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+}
+
+/* The day block: a title page, not two lines of one size. On a phone the
+   weekday is a titulus in spaced small caps over the date set larger; its
+   comma is kept for readers, not shown. The desktop's niche keeps the date
+   on one line. */
+.page-home .home-date-comma {
+  letter-spacing: 0;
+}
+
+@media (max-width: 700px) {
+  .page-home .home-date-weekday {
+    display: block;
+    margin-right: -0.15em; /* the last letter's tracking is not part of the word */
+    color: var(--titulus);
+    font-size: max(0.66em, 0.95rem);
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.15em;
+    line-height: 1.5;
+  }
+
+  .page-home .home-date-comma {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .page-home .home-date-rest {
+    font-size: 1.1em;
+    font-kerning: normal;
+    font-variant-numeric: oldstyle-nums proportional-nums;
+    letter-spacing: 0.005em;
+  }
+
+  /* The fitted measures above assumed a one-line date; the weekday now
+     has a line of its own and the rest of the date always fits. */
+  .page-home .home h1 {
+    max-width: none;
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+}
+
+/* A short phone: the titulus and the date together stand no taller than a
+   one-line date's 2.75rem tap box, so no day is taller than it was. */
+@media (max-width: 700px) and (max-height: 700px) {
+  .page-home .home-date-weekday {
+    line-height: 1.18;
+  }
+
+  .page-home .home-date-rest {
+    font-size: 1.06em;
+  }
+
+  .page-home .home h1 {
+    line-height: 1.08;
+  }
+
+  /* The two-line link's baseline must not open the heading's line box. */
+  .page-home .home-date-link {
+    vertical-align: top;
+  }
+}
+
+/* Taller phones keep the roomier title, except on the days that have no
+   room to give (two commemorations, or a day opened from another, which
+   adds "Go to today"): there the title closes up to a one-line date's
+   height. */
+@media (max-width: 700px) and (min-height: 701px) {
+  .page-home .home-day-head:is(:has(.commemorations li + li), :has(.not-today-notice:not([hidden]))) .home-date-weekday {
+    line-height: 1.06;
+  }
+
+  .page-home .home-day-head:is(:has(.commemorations li + li), :has(.not-today-notice:not([hidden]))) .home-date-rest {
+    font-size: 1.02em;
+  }
+
+  .page-home .home-day-head:is(:has(.commemorations li + li), :has(.not-today-notice:not([hidden]))) h1 {
+    line-height: 1;
+  }
+
+  .page-home .home-day-head:is(:has(.commemorations li + li), :has(.not-today-notice:not([hidden]))) .home-date-link {
+    vertical-align: top;
+  }
+}
+
+/* The feast's and commemorations' type is fitted to the arch and left as
+   it is (a hundredth of an em of tracking wrapped some names); their links
+   are underlined in the lining, finely. */
+.page-home :is(.feast-link, .commemorations .feast-link) {
+  text-decoration-color: color-mix(in srgb, var(--lining) 55%, transparent);
+  text-decoration-thickness: 0.6px;
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.17em;
+}
+
+/* The frieze: flat green earth with the wall's own plaster faintly through
+   it (a painted tile smeared at its ends), the letters leaf that catches a
+   little light at their heads and never darkens below the ink itself. */
+.page-home .home-prayer-card h2 {
+  position: relative;
+  background:
+    linear-gradient(color-mix(in srgb, var(--inscription-ground) 72%, transparent), color-mix(in srgb, var(--inscription-ground) 72%, transparent)),
+    url("plaster-panel.jpg") center 38% / 100% auto,
+    var(--inscription-ground);
+  background-blend-mode: normal, soft-light, normal;
+  letter-spacing: 0.15em;
+  word-spacing: -0.04em;
+}
+
+.page-home .home-prayer-card h2.is-ruled {
+  box-shadow: none;
+}
+
+.page-home .home-frieze-text {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--inscription-ink) 70%, white) 20%, var(--inscription-ink) 58%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page-home .home-prayer-card h2::before,
+.page-home .home-prayer-card h2::after {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--inscription-ink) 55%, white), var(--inscription-ink) 50%, color-mix(in srgb, var(--inscription-ink) 70%, var(--leaf-shadow)));
+}
+
+/* The hand-ruled lines (app.js), each host's own layer. */
+.page-home .home-rules {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.page-home .home-rules .r-edge { fill: var(--inscription-edge); }
+.page-home .home-rules .r-fillet { fill: color-mix(in srgb, var(--inscription-ink) 30%, transparent); }
+.page-home .home-rules .r-frame { fill: color-mix(in srgb, var(--lining) 78%, transparent); }
+.page-home .home-rules .r-inner { fill: color-mix(in srgb, var(--lining) 36%, transparent); }
+.page-home .home-rules .r-lining { fill: var(--lining); }
+.page-home .home-rules .r-day { fill: color-mix(in srgb, var(--frontal) 50%, transparent); }
+
+/* The invitation: a thin wash (tablet.png, feathered so no edge of it lies
+   on a rule) in a ruled frame, the frontal inside the lining. The quiet
+   seasons keep the ochre (a greyed wash read as a disabled button); only
+   the leaf goes quiet. It stays a full touch target on every day. */
+.page-home .pray-now,
+.page-home .pray-now:hover {
+  isolation: isolate;
+  min-height: var(--touch-target);
+  letter-spacing: 0.012em;
+}
+
+.page-home .pray-now::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--tablet-wash);
+  -webkit-mask: url("tablet.png") center / 100% 100% no-repeat;
+  mask: url("tablet.png") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.page-home .pray-now::after {
+  border-color: color-mix(in srgb, var(--frontal) 50%, transparent);
+}
+
+:root .page-home .pray-now.is-ruled,
+:root .page-home .pray-now.is-ruled:hover {
+  border-color: transparent;
+}
+
+.page-home .pray-now.is-ruled::after {
+  content: none;
+}
+
+.page-home .home-hour-links.is-ruled .home-hour-group {
+  border-color: transparent;
+}
+
+/* The foot: small caps, the season and "Change date" parted by a gilt
+   point. */
+.page-home :is(.home-season, .home-day-meta .home-date-nav > summary) {
+  font-size: 0.84rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.09em;
+  text-transform: none;
+}
+
+.page-home .home-season {
+  display: flex;
+  align-items: center;
+}
+
+.page-home .home-season::after {
+  content: "";
+  width: 3.5px;
+  height: 3.5px;
+  margin-inline: 0.9rem 0.55rem;
+  background: var(--ornament);
+  opacity: 0.7;
+  transform: rotate(45deg);
+}
+
+/* A short phone on a fast day with a commemoration gives up a few pixels
+   at each joint below the frieze, and the touch targets none. */
+@media (max-width: 700px) and (max-height: 700px) {
+  .page-home .home-hero:has(.penitential):has(.commemorations) .pray-now {
+    padding-block: 0.45rem 0.5rem;
+  }
+
+  .page-home .home-hero:has(.penitential):has(.commemorations) .pray-now-wrap {
+    margin-bottom: 0.45rem;
+  }
+
+  .page-home .home-hero:has(.penitential):has(.commemorations) .home-prayer-card h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .page-home .home-hero:has(.penitential):has(.commemorations) .home-day-meta {
+    margin-top: 0.15rem;
+    padding-top: 0;
+  }
+
+  .page-home .home-hero:has(.penitential):has(.commemorations) .penitential {
+    margin-top: 0.1rem;
+  }
+}
+
+/* The apse's sky. In the parish the half-dome over the altar is a slate
+   limewash scattered with gold-leaf stars; by night on a phone it is the
+   head of the arch, down to the frieze, and the wall outside is plain dark
+   plaster (the page's starfield gives way to it). Three layers: the
+   vault's own brushwork (sky-wash.jpg, tools/genplaster.py --sky-of, laid
+   in soft light as the panel's plaster is), a lighter and greener glow
+   toward the frieze, and the slate from deep to light. It is clipped to
+   the head inside the slate course (genarch's block), so it needs no
+   script. Round it one matte leaf fillet against the slate, then the day's
+   colour as a hairline: the lining's two layers, moved out; the terracotta
+   lining is the Nave's. The stars are app.js's, from one seeded field per
+   head (tools/genstars.py), left out where they would fall in the
+   painter's reserve round the day's words and the cross. By day, and on
+   the desktop's niche, there is no sky. */
+.page-home .home-sky {
+  --arch-d: -5px;
+  display: none;
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--arch-lift));
+  right: calc(-1 * var(--pad-x) - var(--arch-d));
+  bottom: calc(-0.15rem - 2px);
+  left: calc(-1 * var(--pad-x) - var(--arch-d));
+  background:
+    url("sky-wash.jpg") center top / max(100%, 23rem) auto repeat-y,
+    radial-gradient(ellipse 85% 60% at 50% 100%, var(--sky-low), transparent),
+    linear-gradient(180deg, var(--sky-deep) 10%, var(--sky) 90%);
+  background-blend-mode: soft-light, normal, normal;
+  pointer-events: none;
+}
+
+.page-home .home-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  opacity: var(--leaf-catch);
+  pointer-events: none;
+}
+
+.page-home .home-stars .s-hi { stop-color: var(--sky-leaf-hi); }
+.page-home .home-stars .s-mid { stop-color: var(--sky-leaf); }
+.page-home .home-stars .s-lo { stop-color: var(--sky-leaf-lo); }
+
+/* By night, on a phone. */
+@media (max-width: 700px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.page-home::before {
+    display: none;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hero {
+    --frontal: var(--day-color, var(--lining));
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hero.day-color-white {
+    --lining-day: var(--lime-white);
+    --frontal: var(--lime-white);
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-sky {
+    display: block;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-arch::before {
+    background: var(--sky-rim);
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-lining {
+    --arch-d: -5px;
+    bottom: 0;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-lining::before {
+    --arch-t: 1.5px;
+    background: linear-gradient(180deg, var(--sky-leaf-lo), var(--sky-leaf-hi) 38%, var(--sky-leaf) 70%, var(--sky-leaf-lo));
+    -webkit-mask: none;
+    mask: none;
+    opacity: calc(0.9 * var(--leaf-catch));
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-lining::after {
+    --arch-d: -11px;
+    --arch-t: 1px;
+    left: 6px;
+    right: 6px;
+    -webkit-mask: none;
+    mask: none;
+    opacity: 0.85;
+  }
+
+  :root:not([data-theme="light"]) body.rank-first-class .home-lining::before {
+    --arch-t: 2px;
+    opacity: 1;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-crown,
+  :root:not([data-theme="light"]) body.rank-first-class .home-crown {
+    background: linear-gradient(150deg, var(--sky-leaf-hi), var(--sky-leaf) 55%, var(--sky-leaf-lo));
+    -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+    mask: url("ornaments/consecration.svg") center / contain no-repeat;
+    opacity: calc(0.35 + 0.65 * var(--leaf-catch));
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hero.day-color-black :is(.home-stars, .home-lining) {
+    display: none;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hero.day-color-black .home-crown {
+    background: color-mix(in srgb, var(--muted) 70%, transparent);
+    opacity: 1;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-summary {
+    --muted: var(--sky-muted);
+    --rubric: var(--sky-rubric);
+  }
+
+  :root:not([data-theme="light"]) .page-home .pray-now,
+  :root:not([data-theme="light"]) .page-home .pray-now:hover {
+    color: var(--lining-lifted);
+  }
+}
+
+@media (max-width: 700px) {
+  :root[data-theme="dark"] body.page-home::before {
+    display: none;
+  }
+
+  :root[data-theme="dark"] .page-home .home-hero {
+    --frontal: var(--day-color, var(--lining));
+  }
+
+  :root[data-theme="dark"] .page-home .home-hero.day-color-white {
+    --lining-day: var(--lime-white);
+    --frontal: var(--lime-white);
+  }
+
+  :root[data-theme="dark"] .page-home .home-sky {
+    display: block;
+  }
+
+  :root[data-theme="dark"] .page-home .home-arch::before {
+    background: var(--sky-rim);
+  }
+
+  :root[data-theme="dark"] .page-home .home-lining {
+    --arch-d: -5px;
+    bottom: 0;
+  }
+
+  :root[data-theme="dark"] .page-home .home-lining::before {
+    --arch-t: 1.5px;
+    background: linear-gradient(180deg, var(--sky-leaf-lo), var(--sky-leaf-hi) 38%, var(--sky-leaf) 70%, var(--sky-leaf-lo));
+    -webkit-mask: none;
+    mask: none;
+    opacity: calc(0.9 * var(--leaf-catch));
+  }
+
+  :root[data-theme="dark"] .page-home .home-lining::after {
+    --arch-d: -11px;
+    --arch-t: 1px;
+    left: 6px;
+    right: 6px;
+    -webkit-mask: none;
+    mask: none;
+    opacity: 0.85;
+  }
+
+  :root[data-theme="dark"] body.rank-first-class .home-lining::before {
+    --arch-t: 2px;
+    opacity: 1;
+  }
+
+  :root[data-theme="dark"] .page-home .home-crown,
+  :root[data-theme="dark"] body.rank-first-class .home-crown {
+    background: linear-gradient(150deg, var(--sky-leaf-hi), var(--sky-leaf) 55%, var(--sky-leaf-lo));
+    -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+    mask: url("ornaments/consecration.svg") center / contain no-repeat;
+    opacity: calc(0.35 + 0.65 * var(--leaf-catch));
+  }
+
+  :root[data-theme="dark"] .page-home .home-hero.day-color-black :is(.home-stars, .home-lining) {
+    display: none;
+  }
+
+  :root[data-theme="dark"] .page-home .home-hero.day-color-black .home-crown {
+    background: color-mix(in srgb, var(--muted) 70%, transparent);
+    opacity: 1;
+  }
+
+  :root[data-theme="dark"] .page-home .home-summary {
+    --muted: var(--sky-muted);
+    --rubric: var(--sky-rubric);
+  }
+
+  :root[data-theme="dark"] .page-home .pray-now,
+  :root[data-theme="dark"] .page-home .pray-now:hover {
+    color: var(--lining-lifted);
+  }
+}
+
+@media (forced-colors: active) {
+  .page-home :is(.home-sky, .home-rules, .pray-now::before, .home-hour-link.is-current::after) {
+    display: none;
+  }
+
+  .page-home .home-frieze-text {
+    color: CanvasText;
   }
 }
 

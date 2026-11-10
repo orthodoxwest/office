@@ -18,7 +18,7 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_first_class,
     home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, rank_class, reminder_description, reminder_summary, report_url,
     season_label, split_alias, title_case,
 };
@@ -151,6 +151,7 @@ impl OfficeCore {
             season: heading.season,
             color: day.color.as_str().to_string(),
             ornament: ornament(gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &year.moveable))),
+            first_class: home_first_class(day, &year.moveable),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
             feast_id: day.celebration.as_ref().map(|c| self.feast_id(&c.id, &c.name, shown)).unwrap_or_default(),
@@ -628,6 +629,9 @@ pub struct HomeView {
     pub season: String,
     pub color: String,
     pub ornament: String,
+    /// A first-class feast as home keeps it (`presentation::home_first_class`): by day the cross is
+    /// gilt, by night the apse's stars stand a size larger and its leaf fillet is fully lit.
+    pub first_class: bool,
     /// "Fasting", "Abstinence" and the like, set as red work.
     pub penitential: Vec<String>,
     pub commemorations: Vec<String>,

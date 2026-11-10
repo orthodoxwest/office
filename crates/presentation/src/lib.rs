@@ -66,6 +66,16 @@ pub fn rank_class(rank: Option<Rank>, color: Option<Color>, bare: bool) -> &'sta
     }
 }
 
+/// Whether home keeps the day as a first-class feast: by day its consecration cross is gilt, by
+/// night the apse's stars stand a size larger and its leaf fillet is fully lit. The day's own rank
+/// and colour decide it, as [`rank_class`] frames an hour: a violet, black or rose first-class day
+/// is kept, not kept festival. Maundy Thursday and Holy Saturday are white for the Mass, but their
+/// Hours are Tenebrae's (`OfficeHour::bare`), so home keeps them bare too. Every front reads it.
+pub fn home_first_class(day: &CalendarDay, m: &MoveableDates) -> bool {
+    let triduum = (0..=m.holy_saturday.days_since(m.holy_thursday)).contains(&day.date.days_since(m.holy_thursday));
+    !rank_class(day.celebration.as_ref().map(|c| c.rank), Some(day.color), triduum).is_empty()
+}
+
 /// The season as an hour header names it, or nothing. A bare "Easter",
 /// "Christmas", "Epiphany" or "Pentecost" beside a date reads as that feast
 /// day, so the tides take their season names. The season after Pentecost is
@@ -581,6 +591,29 @@ mod tests {
         assert_eq!(rank_class(Some(Rank::Double2ndClass), Some(Color::White), false), "");
         assert_eq!(rank_class(Some(Rank::Simple), Some(Color::White), false), "");
         assert_eq!(rank_class(None, None, false), "");
+    }
+
+    #[test]
+    fn home_keeps_first_class_feasts_but_not_the_triduum_or_penitential_days() {
+        use calendar::{Category, Feast};
+        use std::sync::Arc;
+        // 2027: Pascha (Julian) is 2 May, so the Triduum is 29 April to 1 May.
+        let m = MoveableDates::compute(2027);
+        let day = |date: Date, rank, color| CalendarDay {
+            date,
+            celebration: Some(Arc::new(Feast::synthetic("x", "X", rank, color, Category::Lord))),
+            color,
+            ..bare_day(Season::Pentecost, "")
+        };
+        assert!(home_first_class(&day(Date::new(2027, 1, 7), Rank::Double1stClass, Color::White), &m));
+        assert!(home_first_class(&day(Date::new(2027, 6, 20), Rank::Double1stClass, Color::Red), &m));
+        assert!(!home_first_class(&day(Date::new(2027, 1, 7), Rank::Double2ndClass, Color::White), &m));
+        // Maundy Thursday and Holy Saturday are white, Good Friday black: all bare at home.
+        assert!(!home_first_class(&day(Date::new(2027, 4, 29), Rank::Double1stClass, Color::White), &m));
+        assert!(!home_first_class(&day(Date::new(2027, 4, 30), Rank::Double1stClass, Color::Black), &m));
+        assert!(!home_first_class(&day(Date::new(2027, 5, 1), Rank::Double1stClass, Color::White), &m));
+        assert!(!home_first_class(&day(Date::new(2027, 3, 14), Rank::Double1stClass, Color::Violet), &m));
+        assert!(!home_first_class(&bare_day(Season::Pentecost, ""), &m));
     }
 
     #[test]

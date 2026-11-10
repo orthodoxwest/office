@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -326,12 +325,15 @@ fun DrawScope.quatrefoil(topLeft: Offset, side: Float, color: Color) {
  * the hour's end, home's crown and the header's mark.
  */
 @Composable
-fun ConsecrationCross(modifier: Modifier) {
-    val ink = LocalPalette.current.lining
+fun ConsecrationCross(modifier: Modifier, ink: Color = LocalPalette.current.lining, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
     Canvas(modifier) {
+        // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
+        val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
+        val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
         fitted(40f, 40f) {
-            drawPath(ConsecrationRing, ink)
-            drawPath(ConsecrationArms, ink)
+            for (part in listOf(ConsecrationRing, ConsecrationArms)) {
+                if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
+            }
         }
     }
 }
@@ -449,10 +451,4 @@ fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: Dr
 @Composable
 fun Hairline(color: Color, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().height(1.dp).background(color))
-}
-
-/** A short vertical hairline between neighbouring items. */
-@Composable
-fun Divider(color: Color, height: Dp = 14.dp) {
-    Box(Modifier.width(1.dp).height(height).background(color))
 }

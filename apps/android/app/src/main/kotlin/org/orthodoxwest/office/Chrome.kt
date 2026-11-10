@@ -73,6 +73,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -587,16 +588,25 @@ private fun PrefHint(text: AnnotatedString) {
 
 /** A small uppercase disclosure label with its caret ("Change date ▾"), muted, in the accent while open. */
 @Composable
-fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String? = null, modifier: Modifier = Modifier) {
+fun Disclosure(
+    label: String,
+    open: Boolean,
+    onToggle: () -> Unit,
+    value: String? = null,
+    modifier: Modifier = Modifier,
+    style: TextStyle? = null,
+    upper: Boolean = true,
+) {
     val p = LocalPalette.current
-    val ink = if (open) p.accent else p.muted
+    val ink = if (open) p.accent else (style?.color?.takeIf { it.isSpecified } ?: p.muted)
+    val cased = { s: String -> if (upper) s.uppercase() else s }
     Row(modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             buildAnnotatedString {
-                append(label.uppercase())
-                if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + value.uppercase()) }
+                append(cased(label))
+                if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + cased(value)) }
             },
-            style = Type.control.copy(color = ink),
+            style = (style ?: Type.control).copy(color = ink),
         )
         Caret(open, ink)
     }

@@ -22,8 +22,9 @@ use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_shows_versicle,
-    hour_gloss, hour_versicle, invitation, long_date, month_name, rank_class, report_url, season_str, split_alias, title_case,
+    MONTHS, REMINDER_DEFAULTS, Versicle, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_first_class,
+    home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, month_name, rank_class, report_url, season_str, split_alias,
+    title_case,
 };
 
 /// What a page handler reads from the request.
@@ -339,7 +340,8 @@ impl Server {
                 usage_when: slug.clone(),
                 // The ornament follows the day itself, not the display season.
                 season_class: gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &entry.moveable)).into(),
-                rank_class: String::new(),
+                // Home keeps a first-class feast too: its cross gilt by day, its stars larger by night.
+                rank_class: if home_first_class(day, &entry.moveable) { "rank-first-class".into() } else { String::new() },
                 bare: false,
                 show_today: slug != now_slug,
                 // Today's page is the one to find; each dated day is one tap from it.

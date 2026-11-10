@@ -262,6 +262,8 @@ struct Lining: View {
     let arch: Arch
     let inset: CGFloat
     let hairline: Color
+    /// Home's lining lies unevenly on the limewash, through the pigment (`pigment.png`, as the web's mask).
+    var pigmented = false
     @Environment(\.palette) private var p
 
     var body: some View {
@@ -270,7 +272,12 @@ struct Lining: View {
             // may join the upper arcs there rather than drawing it out into a spike.
             func line(_ d: CGFloat, _ color: Color, width: CGFloat) {
                 let path = archPath(arch, width: size.width, outset: d - width / 2, foot: size.height, open: true)
-                ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: width, lineJoin: .miter, miterLimit: 2))
+                let style = StrokeStyle(lineWidth: width, lineJoin: .miter, miterLimit: 2)
+                if pigmented {
+                    throughPigment(ctx, path, ink: color, tile: 128, stroke: style)
+                } else {
+                    ctx.stroke(path, with: .color(color), style: style)
+                }
             }
             line(-inset, p.lining, width: 2)
             line(-inset - 8, hairline, width: 1)

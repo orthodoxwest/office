@@ -9,7 +9,7 @@ the date sits where the phone's head has opened wide enough for it, and the
 stylesheet's fitted date measure assumes this phone shape.
 
 Every layer of the frontispiece (the day's ring, the stone, the panel, the
-lining and its hairline) is the same arch offset by its own distance, as a
+apse's sky by night, the lining and its hairline) is the same arch offset by its own distance, as a
 moulding's lines are: each arc keeps its centre and gains or loses that
 distance from its radius, and the two upper arcs meet in a mitred point. So
 the polygons are written once, in terms of three custom properties the
@@ -184,7 +184,7 @@ def rules(name, shape):
         f".page-home .home-hero {{\n  --arch-rise: {num(shape['rise'])};\n}}\n\n"
         ".page-home .home-arch::before,\n.page-home .home-arch::after,\n"
         ".page-home .home-arch-edge,\n.page-home .home-hero::before,\n"
-        ".page-home .home-hero::after,\n.page-home .home-arch-fill {\n"
+        ".page-home .home-hero::after,\n.page-home .home-arch-fill,\n.page-home .home-sky {\n"
         f"  clip-path: polygon(\n    {silhouette});\n}}\n\n"
         ".page-home .home-arch-shade::before {\n"
         f"  clip-path: polygon(evenodd,\n    {outside});\n}}\n\n"

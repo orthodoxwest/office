@@ -80,7 +80,7 @@ val Nave = Palette(
     pressedWash = Color(107, 58, 31).copy(alpha = 0.09f),
     oak = Color(0xFF3F372F),
     materialHighlight = Color.White.copy(alpha = 0.38f),
-    inscriptionGround = Color(0xFF545F54),
+    inscriptionGround = Color(0xFF4C574D),
     inscriptionEdge = Color(0xFF5E2A27),
     inscriptionWash = Color(87, 94, 65).copy(alpha = 0.055f),
     lining = Color(0xFFA85A48),

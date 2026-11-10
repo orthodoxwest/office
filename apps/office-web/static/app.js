@@ -1923,6 +1923,257 @@ function usageBeaconBody(scope) {
     }).observe(hero);
   });
 
+  // Home: the painted page (style.css). Two things CSS cannot draw.
+  //
+  // The rules: the frieze's oxblood edges and leaf fillets, the invitation's
+  // double frame (the lining, and inside it the day's colour stopping short
+  // of the corners), and the hours' table, ruled above and below and between
+  // the periods, none upright. Each is a stroke of one pen: its weight
+  // breathes with the hand (seeded, so a line is the same on every visit)
+  // and it lifts to a point at each end. A host so ruled carries .is-ruled
+  // and gives up the CSS borders that stand without script.
+  //
+  // The stars: by night on a phone the head of the arch is the parish apse's
+  // painted sky. Its gold-leaf stars are one fixed field for each head
+  // (tools/genstars.py, ornaments/stars.json, fetched only when the sky is
+  // shown), and the painter keeps them off the words: every star that would
+  // touch a laid-out line of the day block (14px either side, 6px above and
+  // below), the cross, or the 9px above the frieze is left out. Measured
+  // again whenever the head's lines can move.
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    var NS = "http://www.w3.org/2000/svg";
+    var frieze = hero.querySelector(".home-prayer-card h2");
+    var prayNow = hero.querySelector(".pray-now");
+    var table = hero.querySelector(".home-hour-links");
+    var sky = hero.querySelector(".home-sky");
+    var head = hero.querySelector(".home-day-head");
+    var crown = hero.querySelector(".home-crown");
+
+    function seeded(seed) {
+      var s = seed >>> 0;
+      return function () {
+        s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+        return s / 4294967296;
+      };
+    }
+
+    // A stroke from (x1, y1) to (x2, y2), horizontal or vertical, w wide.
+    function rule(x1, y1, x2, y2, w, seed) {
+      var r = seeded(seed);
+      var horizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
+      var length = horizontal ? x2 - x1 : y2 - y1;
+      var n = Math.max(6, Math.round(length / 14));
+      var phase1 = r() * 6.28, phase2 = r() * 6.28, drift = (r() - 0.5) * 0.5;
+      var above = [], below = [];
+      for (var i = 0; i <= n; i += 1) {
+        var t = i / n, d = t * length;
+        // The pen lifts over the last 4.5px at each end.
+        var end = Math.min(1, Math.min(d, length - d) / 4.5);
+        var weight = w * (0.86 + 0.16 * Math.sin(phase1 + t * 5.1) + 0.08 * Math.sin(phase2 + t * 17)) * (0.35 + 0.65 * end);
+        // The line itself barely wanders.
+        var c = drift * (t - 0.5) + 0.12 * Math.sin(phase2 + t * 3.3);
+        above.push([d, c - weight / 2]);
+        below.push([d, c + weight / 2]);
+      }
+      return "M" + above.concat(below.reverse()).map(function (p) {
+        return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
+      }).join("L") + "Z";
+    }
+
+    function layer(host) {
+      var svg = host.querySelector(":scope > svg.home-rules");
+      if (!svg) {
+        svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("class", "home-rules");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        host.appendChild(svg);
+        host.classList.add("is-ruled");
+      }
+      svg.textContent = "";
+      return svg;
+    }
+
+    function stroke(svg, cls, d) {
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("class", cls);
+      path.setAttribute("d", d);
+      svg.appendChild(path);
+    }
+
+    function ruleAll() {
+      var w, h, svg;
+      if (frieze) {
+        w = frieze.offsetWidth;
+        h = frieze.offsetHeight;
+        svg = layer(frieze);
+        stroke(svg, "r-edge", rule(0, 0.6, w, 0.6, 1.3, 11));
+        stroke(svg, "r-edge", rule(0, h - 0.6, w, h - 0.6, 1.3, 12));
+        stroke(svg, "r-fillet", rule(0, 2.2, w, 2.2, 0.9, 13));
+        stroke(svg, "r-fillet", rule(0, h - 2.2, w, h - 2.2, 0.9, 14));
+      }
+      if (prayNow) {
+        var g = 3.5;
+        w = prayNow.offsetWidth;
+        h = prayNow.offsetHeight;
+        svg = layer(prayNow);
+        stroke(svg, "r-lining", rule(0, 0.5, w, 0.5, 1.25, 21));
+        stroke(svg, "r-lining", rule(0, h - 0.5, w, h - 0.5, 1.25, 22));
+        stroke(svg, "r-lining", rule(0.5, 0, 0.5, h, 1.25, 23));
+        stroke(svg, "r-lining", rule(w - 0.5, 0, w - 0.5, h, 1.25, 24));
+        // The frontal, finer, stopping short of the corners.
+        stroke(svg, "r-day", rule(g + 1.5, g, w - g - 1.5, g, 0.7, 25));
+        stroke(svg, "r-day", rule(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 26));
+        stroke(svg, "r-day", rule(g, g + 1.5, g, h - g - 1.5, 0.7, 27));
+        stroke(svg, "r-day", rule(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 28));
+      }
+      if (table) {
+        w = table.offsetWidth;
+        h = table.offsetHeight;
+        var top = table.getBoundingClientRect().top;
+        svg = layer(table);
+        stroke(svg, "r-frame", rule(0, 0.5, w, 0.5, 1.3, 31));
+        stroke(svg, "r-frame", rule(0, h - 0.5, w, h - 0.5, 1.3, 32));
+        Array.prototype.slice.call(table.querySelectorAll(".home-hour-group"), 1).forEach(function (group, i) {
+          var y = group.getBoundingClientRect().top - top + 0.5;
+          stroke(svg, "r-inner", rule(0, y, w, y, 0.9, 41 + i));
+        });
+      }
+    }
+
+    var fields = null;
+    var loading = false;
+    function load() {
+      if (loading || !window.fetch) {
+        return;
+      }
+      loading = true;
+      fetch(sky.getAttribute("data-stars")).then(function (resp) {
+        return resp.ok ? resp.json() : null;
+      }).then(function (data) {
+        fields = data;
+        schedule();
+      }).catch(function () {});
+    }
+
+    function placeStars() {
+      var old = sky.querySelector(":scope > svg.home-stars");
+      if (old) {
+        old.remove();
+      }
+      if (getComputedStyle(sky).display === "none") {
+        delete hero.dataset.stars;
+        return;
+      }
+      if (!fields) {
+        load();
+        return;
+      }
+      var cs = getComputedStyle(hero);
+      var list = fields[{ "0.44": "phone", "0.56": "tall", "0.64": "taller" }[cs.getPropertyValue("--arch-rise").trim()] || "phone"];
+      if (!list || !frieze) {
+        return;
+      }
+      var hr = hero.getBoundingClientRect();
+      var sr = sky.getBoundingClientRect();
+      var band = frieze.getBoundingClientRect().top - hr.top;
+      // The reserve: every laid-out line of the day block, and the cross.
+      var reserve = [];
+      var walker = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        var parent = node.parentElement;
+        if (!node.nodeValue.trim() || parent.closest(".sr-only, .home-date-comma, [hidden]")) {
+          continue;
+        }
+        // A second commemoration's "and" is generated, left of its text.
+        var item = parent.closest(".commemorations li");
+        var lead = item && item.previousElementSibling ? 2.6 * parseFloat(getComputedStyle(parent).fontSize) : 0;
+        var range = document.createRange();
+        range.selectNodeContents(node);
+        Array.prototype.forEach.call(range.getClientRects(), function (q) {
+          if (q.width > 1) {
+            reserve.push([q.left - hr.left - 14 - lead, q.top - hr.top - 6, q.right - hr.left + 14, q.bottom - hr.top + 6]);
+          }
+        });
+      }
+      if (crown) {
+        var c = crown.getBoundingClientRect();
+        reserve.push([c.left - hr.left - 11, c.top - hr.top - 11, c.right - hr.left + 11, c.bottom - hr.top + 11]);
+      }
+      // A first-class feast's stars stand a size larger and fully lit.
+      var first = document.body.classList.contains("rank-first-class");
+      var k = first ? 1.14 : 1;
+      var w = hr.width;
+      var svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "home-stars");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      svg.setAttribute("width", sr.width.toFixed(1));
+      svg.setAttribute("height", sr.height.toFixed(1));
+      // Leaf under a lamp: the stars nearest the day's words take the light.
+      var cardSpace = document.createElementNS(NS, "g");
+      cardSpace.setAttribute("transform", "translate(" + (hr.left - sr.left).toFixed(2) + " " + (hr.top - sr.top).toFixed(2) + ")");
+      cardSpace.innerHTML = '<defs><radialGradient id="home-leaf" gradientUnits="userSpaceOnUse" cx="' + (w / 2).toFixed(1) + '" cy="' + (band * 0.62).toFixed(1) + '" r="' + (w * 0.72).toFixed(1) + '"><stop class="s-hi" offset="0"/><stop class="s-mid" offset="0.6"/><stop class="s-lo" offset="1"/></radialGradient></defs>';
+      var count = 0;
+      list.forEach(function (star) {
+        var x = star[0] * w, y = star[1] * w, r = star[2] * k, outline = star[4];
+        if (y + r > band - 9) {
+          return;
+        }
+        if (reserve.some(function (q) { return x + r > q[0] && x - r < q[2] && y + r > q[1] && y - r < q[3]; })) {
+          return;
+        }
+        var points = [];
+        for (var i = 0; i < outline.length; i += 2) {
+          points.push((x + outline[i] * k).toFixed(2) + "," + (y + outline[i + 1] * k).toFixed(2));
+        }
+        var path = document.createElementNS(NS, "path");
+        path.setAttribute("d", "M" + points.join("L") + "Z");
+        path.setAttribute("fill", "url(#home-leaf)");
+        path.setAttribute("fill-opacity", first ? Math.min(1, star[3] + 0.25).toFixed(2) : String(star[3]));
+        cardSpace.appendChild(path);
+        count += 1;
+      });
+      svg.appendChild(cardSpace);
+      sky.appendChild(svg);
+      hero.dataset.stars = String(count);
+    }
+
+    var frame = 0;
+    function paint() {
+      frame = 0;
+      ruleAll();
+      if (sky && head) {
+        placeStars();
+      }
+    }
+    function schedule() {
+      if (!frame) {
+        frame = window.requestAnimationFrame(paint);
+      }
+    }
+    paint();
+    if (document.fonts) {
+      document.fonts.ready.then(schedule);
+    }
+    window.addEventListener("resize", schedule);
+    if ("ResizeObserver" in window) {
+      var watch = new ResizeObserver(schedule);
+      watch.observe(hero);
+      if (head) {
+        watch.observe(head);
+      }
+    }
+    // The sky comes and goes with the theme.
+    new MutationObserver(schedule).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    if (window.matchMedia) {
+      var scheme = window.matchMedia("(prefers-color-scheme: dark)");
+      if (scheme.addEventListener) {
+        scheme.addEventListener("change", schedule);
+      }
+    }
+  });
+
   // currentHourInfo returns the office most likely being prayed at the given
   // local time, plus a day offset (0 or -1) locating which calendar day it
   // belongs to. Boundaries mirror presentation::current_hour_entry: midnight-2am
@@ -1992,6 +2243,17 @@ function usageBeaconBody(scope) {
     }
   }
 
+  // The invitation's words, leaving its hand-ruled frame (an aria-hidden SVG
+  // child, see "Home: the painted page") in place.
+  function setPrayNowLabel(prayNow, label) {
+    var words = Array.prototype.find.call(prayNow.childNodes, function (n) { return n.nodeType === 3 && n.nodeValue.trim(); });
+    if (words) {
+      words.nodeValue = label;
+    } else {
+      prayNow.insertBefore(document.createTextNode(label), prayNow.firstChild);
+    }
+  }
+
   // updatePrayNow recomputes the "pray now" shortcut on the home page from the
   // device clock. The same value is rendered server-side, but the home page is
   // a cacheable document, so a cached copy would otherwise freeze whichever
@@ -2019,7 +2281,7 @@ function usageBeaconBody(scope) {
       setHourCurrent(link, isCurrent);
       if (isCurrent && prayNow) {
         prayNow.setAttribute("href", link.getAttribute("href"));
-        prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+        setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
         matched = true;
       }
     });
@@ -2028,7 +2290,7 @@ function usageBeaconBody(scope) {
       var offsetDate = new Date(now.getTime());
       offsetDate.setDate(offsetDate.getDate() + info.offset);
       prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
-      prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+      setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
       matched = true;
     }
 
@@ -2037,7 +2299,7 @@ function usageBeaconBody(scope) {
       if (lauds) {
         prayNow.setAttribute("href", lauds.getAttribute("href"));
       }
-      prayNow.textContent = "Open Lauds";
+      setPrayNowLabel(prayNow, "Open Lauds");
     }
   }
 

@@ -1544,6 +1544,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await expect(settings.locator("summary")).toBeFocused();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
   const rules = await page.evaluate(() => {
     const isVisibleRule = (width, style, color) => {
       const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
@@ -1555,48 +1556,43 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         alphaValue > 0
       );
     };
-    const directory = getComputedStyle(document.querySelector(".home-hour-links"));
-    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
-    const dividedHour = getComputedStyle(
-      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
-    );
-    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    const rule = (el, side) => {
+      const style = getComputedStyle(el);
+      return isVisibleRule(
+        style.getPropertyValue(`border-${side}-width`),
+        style.getPropertyValue(`border-${side}-style`),
+        style.getPropertyValue(`border-${side}-color`),
+      );
+    };
+    const directory = document.querySelector(".home-hour-links");
+    const label = document.querySelector(".home-hour-group-label");
+    const dividedHour = document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link");
+    const finalGroup = document.querySelector(".home-hour-group:last-of-type");
+    const point = getComputedStyle(dividedHour, "::before");
     return {
-      directoryLeft: isVisibleRule(
-        directory.borderLeftWidth,
-        directory.borderLeftStyle,
-        directory.borderLeftColor,
-      ),
-      directoryRight: isVisibleRule(
-        directory.borderRightWidth,
-        directory.borderRightStyle,
-        directory.borderRightColor,
-      ),
-      labelRight: isVisibleRule(
-        label.borderRightWidth,
-        label.borderRightStyle,
-        label.borderRightColor,
-      ),
-      // Full-height borders remain absent between the unequal 2/3/2 groups.
-      // Short decorative hairlines separate neighbours within each band.
-      dividedHourLeft: isVisibleRule(
-        dividedHour.borderLeftWidth,
-        dividedHour.borderLeftStyle,
-        dividedHour.borderLeftColor,
-      ),
-      finalGroupBottom: isVisibleRule(
-        finalGroup.borderBottomWidth,
-        finalGroup.borderBottomStyle,
-        finalGroup.borderBottomColor,
-      ),
+      // The table is ruled by hand (app.js), so its CSS borders stand down:
+      // a frame and the joints between bands, drawn as the painter's lines.
+      ruled: directory.classList.contains("is-ruled"),
+      ruledLines: directory.querySelectorAll(":scope > svg.home-rules path").length > 0,
+      directoryLeft: rule(directory, "left"),
+      directoryRight: rule(directory, "right"),
+      finalGroupBottom: rule(finalGroup, "bottom"),
+      // The periods are the margin's index with no cell or upright of their
+      // own, and neighbouring hours are parted by a gilt point, not a rule.
+      labelRight: rule(label, "right"),
+      dividedHourLeft: rule(dividedHour, "left"),
+      giltPoint: point.content !== "none" && parseFloat(point.width) < 5,
     };
   });
   expect(rules).toEqual({
-    directoryLeft: true,
-    directoryRight: true,
-    labelRight: true,
+    ruled: true,
+    ruledLines: true,
+    directoryLeft: false,
+    directoryRight: false,
+    finalGroupBottom: false,
+    labelRight: false,
     dividedHourLeft: false,
-    finalGroupBottom: true,
+    giltPoint: true,
   });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
@@ -1874,7 +1870,12 @@ test("themes never change layout", async ({ browser }) => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
       return {
-        boxes: [...document.querySelectorAll("body *")].map((el) => round(el.getBoundingClientRect())),
+        // Home's night sky is the Apse's material on a phone, as the vault is
+        // the page's, and the lining moves out to the sky's edge: painted
+        // layers, absolutely placed and aria-hidden, that move no other box.
+        boxes: [...document.querySelectorAll("body *")]
+          .filter((el) => !el.closest(".home-sky, .home-lining"))
+          .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
           return [...range.getClientRects()].map(round).join(";");

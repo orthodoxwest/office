@@ -488,15 +488,18 @@ struct Disclosure: View {
     let open: Bool
     var value: String?
     var style: TextStyle = Scale.control
+    /// Set in capitals, as the controls are; home's foot sets it in small caps instead.
+    var upper = true
     let toggle: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         let ink = open ? p.accent : p.muted
+        let cased = { (s: String) in upper ? s.uppercased() : s }
         Button(action: toggle) {
             HStack(spacing: 0) {
-                (Text(label.uppercased()) + Text(value.map { " " + $0.uppercased() } ?? "").foregroundColor(p.text))
+                (Text(cased(label)) + Text(value.map { " " + cased($0) } ?? "").foregroundColor(p.text))
                     .type(style)
                     .foregroundStyle(ink)
                 Caret(open: open, color: ink)

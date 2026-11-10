@@ -343,13 +343,19 @@ struct Lozenged: View {
     let text: String
     let style: TextStyle
     let ink: Color
+    /// The letters' own paint, where it is not flat `ink` (home's frieze: leaf lit at the heads).
+    var letters: LinearGradient?
     var diamond: CGFloat = 7.07
     @Environment(\.metrics) private var m
 
     var body: some View {
         HStack(spacing: m.px(12)) {
             Diamond(size: diamond, color: ink)
-            Text(text).type(style).foregroundStyle(ink)
+            if let letters {
+                Text(text).type(style).foregroundStyle(letters)
+            } else {
+                Text(text).type(style).foregroundStyle(ink)
+            }
             Diamond(size: diamond, color: ink)
         }
     }
@@ -528,16 +534,5 @@ struct Hairline: View {
 
     var body: some View {
         Rectangle().fill(color).frame(height: 1).frame(maxWidth: .infinity).accessibilityHidden(true)
-    }
-}
-
-/// A short vertical hairline between neighbouring items.
-struct VRule: View {
-    let color: Color
-    var height: CGFloat = 14
-    @Environment(\.metrics) private var m
-
-    var body: some View {
-        Rectangle().fill(color).frame(width: 1, height: m.px(height)).accessibilityHidden(true)
     }
 }

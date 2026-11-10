@@ -13,6 +13,10 @@ crossings came first and read as printed wallpaper.
   cannot read tokens, so painting it directly would freeze the stars
   through the seasons. A star crossing the tile's edge is drawn again on
   the far side, so the repeat is seamless.
+- On a phone by night home hides its field (`body.page-home::before`): the
+  stars there are the apse sky's inside the head (`.home-sky`, seeded per
+  head by `tools/genstars.py`, placed by app.js clear of the day's words),
+  so the night has one set of stars. The desktop's margins keep the field.
 - Home's field and the hours' ending read `--wall-field`, `--wall-ink`,
   `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-home-fade`,
   `--wall-home-light`, `--wall-end-fade`, `--wall-foot-fade`), declared on
