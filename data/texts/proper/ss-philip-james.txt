@@ -19,9 +19,6 @@ If ye had known me, * ye should have known my Father also, and from henceforth y
 
 [psalm-antiphon-5]
 @use proper/ss-philip-james/psalm-antiphon-4-first-vespers
-[psalm-antiphon-4-vespers]
-@use proper/ss-philip-james/psalm-antiphon-5
-
 [psalm-antiphon-1-first-vespers]
 @use proper/ss-philip-james/psalm-antiphon-1
 

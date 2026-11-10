@@ -36,9 +36,6 @@ Father, * I will that where I am, there may also my servant be.
 [psalm-antiphon-3-vespers]
 @use commons/martyr/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use commons/martyr/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of One Martyr) — parish noted manual
 He that hateth his life * in this world shall keep it unto life eternal.

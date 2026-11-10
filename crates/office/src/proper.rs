@@ -118,14 +118,37 @@ pub(crate) fn season_ref_candidates(refs: &[String], season: Option<Season>) -> 
 pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     let hour_candidates = if hour_name.is_empty() { Vec::new() } else { hour_ref_candidates(hour_name, reference) };
     let ref_cands = ref_candidates(reference);
-    for list in [season_ref_candidates(&hour_candidates, season), hour_candidates, season_ref_candidates(&ref_cands, season)] {
+    for list in [season_ref_candidates(&hour_candidates, season), hour_candidates] {
         let found = first_text(t, prefix, &list);
         if !found.0.is_empty() {
             return paschal_common_form(found, season, t);
         }
     }
-    paschal_common_form(first_text(t, prefix, &ref_cands), season, t)
+    // Vespers that take their antiphons from Lauds say them "omitting the
+    // fourth" (the Benedicite's), so the fourth psalm takes Lauds' fifth: the
+    // Diurnal's standing formula, printed some fifty times (pp. 162, 223, 451,
+    // 657, 16*, 46* …) and never otherwise. A tier with no fifth antiphon
+    // keeps its fourth.
+    if hour_name == "vespers" && reference == LAUDS_FOURTH {
+        let fifth = ref_candidates(LAUDS_FIFTH);
+        for list in [season_ref_candidates(&fifth, season), fifth] {
+            let found = first_text(t, prefix, &list);
+            if !found.0.is_empty() {
+                return paschal_common_form(found, season, t);
+            }
+        }
+    }
+    for list in [season_ref_candidates(&ref_cands, season), ref_cands.clone()] {
+        let found = first_text(t, prefix, &list);
+        if !found.0.is_empty() {
+            return paschal_common_form(found, season, t);
+        }
+    }
+    (String::new(), String::new())
 }
+
+const LAUDS_FOURTH: &str = "psalm-antiphon-4";
+const LAUDS_FIFTH: &str = "psalm-antiphon-5";
 
 /// In Paschaltide an `@use` into a Common reads that Common's paschal form
 /// when it has one, as the Common tier itself does (Diurnal p. 6*, §3): the

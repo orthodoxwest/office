@@ -25,9 +25,6 @@
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 645, 608, 617 (Common of One or Many Martyrs in Paschaltide)
 @use commons/apostle-paschal/psalm-antiphon-5
 
-[psalm-antiphon-4-vespers]
-@use commons/martyr-paschal/psalm-antiphon-5
-
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 646 (Common of One or Many Martyrs in Paschaltide)
 @use commons/apostle-paschal/chapter-lauds

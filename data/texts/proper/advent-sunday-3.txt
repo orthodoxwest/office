@@ -115,4 +115,6 @@ Blessed art thou, * O Mary, for thou hast believed the Lord: and there shall be 
 Before me * there was no God formed, neither shall there be after me: unto me every knee shall bow, and me shall every tongue confess.
 
 [psalm-antiphon-4-vespers]
+# Spelled out with 1-3 because I Vespers on Saturday reads only the -vespers set
+# (proper.rs, step 0.8); "omitting the fourth" (Diurnal p. 162).
 @use proper/advent-sunday-3/psalm-antiphon-5

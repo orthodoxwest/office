@@ -27,9 +27,6 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 # SOURCE: draft archdiocesan Lauds book, p. 394 (Chair of St Peter at Antioch)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
-[psalm-antiphon-4-vespers]
-@use proper/chair-peter-antioch/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 397 (Chair of St Peter at Antioch)
 Whatsoever * thou shalt bind on earth shall be bound in heaven: and whatsoever thou shalt loose on earth shall be loosed in heaven: saith the Lord unto Simon Peter.

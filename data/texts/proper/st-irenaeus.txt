@@ -95,7 +95,7 @@ O God, who gavest grace to blessed Irenaeus thy Martyr and Bishop to overcome fa
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

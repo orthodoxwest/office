@@ -30,9 +30,6 @@ And Jesus himself * was beginning about the age of thirty years, being, as it wa
 [psalm-antiphon-3-vespers]
 @use proper/solemnity-st-joseph/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/solemnity-st-joseph/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 287 (The Solemnity of Saint Joseph)
 Joseph, thou son of David * fear not to take unto thee Mary thy wife, for that which is conceived in her is of the Holy Ghost, alleluia.

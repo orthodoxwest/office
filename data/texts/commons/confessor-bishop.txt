@@ -37,9 +37,6 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
-[psalm-antiphon-4-vespers]
-@use commons/confessor-bishop/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 36* (Common of a Confessor and Bishop, At Lauds)
 Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.

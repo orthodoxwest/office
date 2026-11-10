@@ -24,9 +24,6 @@ Exalt ye * the King of kings, and sing a hymn unto God, alleluia.
 # SOURCE: draft archdiocesan Lauds book, p. 293 (The Ascension of Our Lord)
 While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use proper/ascension/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 297 (The Ascension of Our Lord)
 I ascend * unto my Father, and your Father: and to my God, and your God, alleluia.

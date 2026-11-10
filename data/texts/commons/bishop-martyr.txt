@@ -36,9 +36,6 @@ Father, * I will that where I am, there may also my servant be.
 [psalm-antiphon-3-vespers]
 @use commons/bishop-martyr/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use commons/bishop-martyr/psalm-antiphon-5
-
 [benedictus-antiphon]
 @use commons/martyr/benedictus-antiphon
 

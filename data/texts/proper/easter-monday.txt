@@ -84,7 +84,7 @@ O God, who in the Paschal festival hast given unto the world thy healing remedie
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
