@@ -225,9 +225,25 @@ or impose a redesign on an unrelated change.
   and the Tabula's are tituli; the year's figures sit on a painted tablet
   (`.tabula-figures`: the surface thinned, a frame ruled twice with
   quatrefoil knops, one mask over one pseudo-element); today is a painted
-  band (the frieze's wash inset 8px from the phone's gutters, ruled in
-  `--gold-line`, the number in gold), not a selected row, and carries no
-  further mark.
+  band (home's wash thinned, `--today-wash`, thinning toward the phone's
+  gutters, ruled in `--gold-line`, the number in gold), not a selected row.
+  No row keeps a line for "Today": on a phone it is said once at the right
+  of today's second line, from 1000px it is a note in the left margin, and
+  between them it keeps the reserved line under the number. The phone's
+  date and "Office details" boxes are drawn round them, not laid out (the
+  thumb-target test measures the drawn box). The feast page's standing is
+  drawn as home's invitation (feathered wash, the lining's rule, a finer
+  one in the colour of the day it is next kept).
+- Filled actions are home's tablet, not slabs (`.reminder-subscribe`,
+  `/beta`'s steps, the apps' "Turn on reminders"); a second action is a
+  worded link with the gold underline. Reminders is ruled as home's hours
+  (titulus over a lining rule, hairlines, a closing rule); a chosen time
+  is the accent's figures on the gold rule with the caret, the platform's
+  clock invisible over the field. Its foot carries the site's one link to
+  Privacy. By night the menu panel is home's blue plaster.
+- An hour's way on is set as home's hours: small-capital labels, names at
+  1.06rem, gilt points between the three, and one rule struck under them
+  with home's pen (`rule()` in app.js, seed 51; a border without script).
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's

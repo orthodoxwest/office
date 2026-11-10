@@ -13,6 +13,11 @@ crossings came first and read as printed wallpaper.
   cannot read tokens, so painting it directly would freeze the stars
   through the seasons. A star crossing the tile's edge is drawn again on
   the far side, so the repeat is seamless.
+- The hours' ending by night does not take this tile: it takes home's sky,
+  one seamless 384px tile of genstars.py's stars at the vault's own measured
+  density, never scaled (`ornaments/sky-tile.svg`, `--apse-sky-tile`,
+  `body.page-hour`'s `--wall-field`), in the apse's matte leaf. The wide
+  hours' side fields and the desktop home's margins keep `vault.svg`.
 - On a phone by night home hides its field (`body.page-home::before`): the
   stars there are the apse sky's inside the head (`.home-sky`, seeded per
   head by `tools/genstars.py`, placed by app.js clear of the day's words),
