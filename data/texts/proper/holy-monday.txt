@@ -30,6 +30,10 @@ Thou couldest have no power * at all against Me, except it were given thee from 
 # SOURCE: diurnal p. 281
 Grant, we beseech thee, Almighty God: that we, who by reason of our weakness do falter amid so many adversities, may take heart again through the interceding Passion of thine only-begotten Son.
 
+[collect-vespers]
+# SOURCE: diurnal p. 282 (Collect after the Ant. on Magnificat at Vespers); 2026 ordo
+Help us, O God of our salvation: and grant that we may come with joy to the commemoration of those benefits whereby thou hast vouchsafed to redeem us.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #

@@ -87,6 +87,7 @@ proper/holy-monday/collect who-liveth
 proper/holy-thursday/collect who-liveth
 proper/holy-saturday/collect who-liveth
 proper/holy-wednesday/collect who-liveth
+proper/holy-wednesday/collect-vespers who-liveth
 # The restored final Christ clauses are printed on pp. 265, 430, and 441.
 proper/laetare-sunday/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth

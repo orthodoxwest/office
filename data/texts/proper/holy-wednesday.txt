@@ -33,6 +33,10 @@ A maid said unto Peter, * Surely thou art one of them, for thy speech bewrayeth 
 # SOURCE: diurnal p. 284
 Grant, we beseech thee, Almighty God: that we, who are continually afflicted because of our transgressions, may be delivered by the Passion of thine only-begotten Son.
 
+[collect-vespers]
+# SOURCE: diurnal p. 284 (Collect after the Ant. on Magnificat at Vespers); 2026 ordo
+Almighty God, we beseech thee graciously to behold this thy family, for which our Lord Jesus Christ was contented to be betrayed, and given up into the hands of wicked men, and to suffer death upon the cross.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
