@@ -8645,6 +8645,55 @@ body.rank-first-class .home-crown {
   }
 }
 
+/* On paper the painted page stands down: the frieze's gilt letters (text
+   clipped to a gradient, which paper drops with the ground) are set in
+   ink, and the hand-ruled lines, drawn at the screen's width, give way to
+   the CSS rules they replace. */
+@media print {
+  .page-home .home-frieze-text {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--text);
+  }
+
+  .home-rules,
+  .hour-rules {
+    display: none;
+  }
+
+  .page-home .home-prayer-card h2.is-ruled {
+    box-shadow:
+      inset 0 1px 0 var(--inscription-edge),
+      inset 0 -1px 0 var(--inscription-edge);
+  }
+
+  :root .page-home .pray-now.is-ruled,
+  :root .page-home .pray-now.is-ruled:hover {
+    border-color: var(--panel-rule);
+  }
+
+  .page-home .pray-now.is-ruled::after {
+    content: "";
+  }
+
+  .page-home .home-hour-links.is-ruled .home-hour-group {
+    border-color: var(--frontispiece-rule);
+  }
+
+  .page-home .home-hour-links.is-ruled .home-hour-group:first-of-type {
+    border-top-color: var(--panel-rule);
+  }
+
+  .page-home .home-hour-links.is-ruled .home-hour-group:last-of-type {
+    border-bottom-color: var(--panel-rule);
+  }
+
+  .page-hour .hour-continuation.is-ruled {
+    border-bottom-color: color-mix(in srgb, var(--lining) 55%, transparent);
+  }
+}
+
 /* Commemorations retain one heading and their full spoken name. The rubric
    is a small-cap label; mixed-case names keep long titles quiet on phones. */
 .commemoration-heading .commemoration-kicker {
