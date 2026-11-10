@@ -68,22 +68,28 @@ struct HomeScreen: View {
                         // lancet for the screen's orientation at one scale, which the niche's
                         // metrics carry, so every measure inside it, its type included, is zoomed
                         // as the web's `zoom` does.
-                        let layout = NicheLayout(width: screen, height: tall)
+                        let layout = NicheLayout(width: screen / m.layout, height: tall / m.layout)
                         let zoomed = m.zoomed(layout.zoom)
                         let heavy = (!view.penitential.isEmpty && !view.commemorations.isEmpty)
                             || (!view.isToday && (!view.commemorations.isEmpty || !view.octaveNote.isEmpty || !view.penitential.isEmpty))
+                        // Where the heaviest day does not fit with the colophon (`--niche-fits`),
+                        // the header and niche take the screen and the colophon waits under the
+                        // fold, rather than being cut through by it.
                         VStack(spacing: 0) {
-                            SiteHeader()
-                            Spacer(minLength: 0)
-                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche)
-                                .background(GeometryReader { card in
-                                    Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
-                                })
-                                .frame(maxWidth: zoomed.px(layout.card))
-                                .environment(\.metrics, zoomed)
-                                .padding(.horizontal, 24)
-                                .padding(.top, zoomed.px(layout.air))
-                            Spacer(minLength: 0)
+                            VStack(spacing: 0) {
+                                SiteHeader()
+                                Spacer(minLength: 0)
+                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche)
+                                    .background(GeometryReader { card in
+                                        Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
+                                    })
+                                    .frame(maxWidth: zoomed.px(layout.card))
+                                    .environment(\.metrics, zoomed)
+                                    .padding(.horizontal, 24)
+                                    .padding(.top, zoomed.px(layout.air))
+                                Spacer(minLength: 0)
+                            }
+                            .frame(minHeight: layout.fits ? nil : tall)
                             Footer(reserve: true)
                         }
                         .frame(minHeight: tall)
@@ -167,6 +173,11 @@ struct HomeTier {
     let heavy: Bool
     private let upright: Bool
     private let wideArch: Arch?
+    private let zoom: CGFloat
+    /// The list of seven's middle column.
+    let listMiddle: CGFloat
+    /// A short screen's niche (a phone on its side), fitted down to the invitation.
+    let shortScreen: Bool
     private let step: Int
     private let type: Int
     private let short: Bool
@@ -180,6 +191,9 @@ struct HomeTier {
         list = wide?.list ?? false
         upright = wide?.upright ?? false
         wideArch = wide?.arch
+        zoom = wide?.zoom ?? 1
+        listMiddle = wide?.listMiddle ?? 0
+        shortScreen = wide?.short ?? false
         self.heavy = heavy
         step = desk ? 0 : tall >= 880 ? 2 : tall >= 800 ? 1 : 0
         type = desk || screen < 375 ? 0 : tall >= 880 ? 2 : tall >= 830 ? 1 : 0
@@ -201,6 +215,10 @@ struct HomeTier {
      * the date). A niche keeps its own sizes: the date 2.1rem, 2.3rem over the list of seven
      * (2.2rem upright).
      */
+    /// A niche's small words never fall under 12 on the glass, however small the niche (a short
+    /// screen): each stands back from the zoom just enough, as the web's.
+    private func legible(_ size: CGFloat) -> CGFloat { max(size, 12 / zoom) }
+
     private func fitted(_ inline: CGFloat, _ height: CGFloat, _ lo: CGFloat, _ hi: CGFloat) -> CGFloat {
         min(max(max(inline, height) / dyn, lo), hi)
     }
@@ -265,7 +283,7 @@ struct HomeTier {
      */
     func weekday(heavy: Bool) -> TextStyle {
         if desk {
-            let size = 0.5 * date.size
+            let size = legible(0.5 * date.size)
             return TextStyle(size: size, line: size * (heavy ? 1.4 : 1.7), tracking: size * 0.2, smallCaps: true)
         }
         let size = max(0.66 * date.size, 15.2 / dyn)
@@ -278,7 +296,7 @@ struct HomeTier {
     }
     var feast: TextStyle {
         if desk {
-            let size: CGFloat = list ? 22.72 : 21.12
+            let size = legible(list ? 22.72 : 21.12)
             return Scale.body.sized(size, line: size * 1.25)
         }
         let size = fitted(0.055 * inline, 0.0215 * tall, 15.2, 24)
@@ -294,21 +312,21 @@ struct HomeTier {
     var commemoration: TextStyle {
         if short { return TextStyle(size: 13.6, line: 17.68) }
         if desk {
-            let size: CGFloat = list ? 16.64 : 16
+            let size = legible(list ? 16.64 : 16)
             return TextStyle(size: size, line: size * 1.4)
         }
         let size = fitted(0.046 * inline, 0.0175 * tall, 12.8, 17.6)
         return TextStyle(size: size, line: size * 1.4)
     }
     /// The fasts, as red work: a little larger in the niche.
-    var fast: TextStyle { desk ? TextStyle(size: 14.4, line: 23.04, tracking: 0.75, smallCaps: true) : TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true) }
+    var fast: TextStyle { desk ? TextStyle(size: legible(14.4), line: legible(14.4) * 1.6, tracking: 0.75, smallCaps: true) : TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true) }
     /// The day's versicle, set only where a phone is over 700 high, a measure at most 19rem wide
     /// and inside the day's clearance of the lining.
     var versicle: TextStyle? { short ? nil : TextStyle(size: 15.36, line: 20.28, italic: true) }
     var versicleMeasure: CGFloat { min(304, card - 2 * dayClear) }
     /// Below the day, to the band.
     var dayGap: CGFloat { pick(17.6, 5.6, 12) }
-    var band: CGFloat { pick(14.4, 12.8, 12.8, 13.6) }
+    var band: CGFloat { pick(legible(14.4), 12.8, 12.8, 13.6) }
     var bandTracking: CGFloat { desk ? 0.2 : 0.15 }
     var bandPad: CGFloat { pick(2.56, 3.2, 3.2, 3.84) }
     var bandGap: CGFloat { pick(17.6, 12, 16, 20) }
@@ -316,18 +334,18 @@ struct HomeTier {
     var prayPad: CGFloat { pick(15, 11.9, 13.5, 15.9) }
     var prayGap: CGFloat { pick(14.4, 11.2, 20, 24) }
     /// An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom).
-    var row: CGFloat { list ? 49.6 : pick(56, 44, 54.4, 62.4) }
-    var hour: CGFloat { list ? 19.84 : pick(18.56, 15.68) }
+    var row: CGFloat { desk ? max(list ? 49.6 : 56, 44 / zoom) : pick(56, 44, 54.4, 62.4) }
+    var hour: CGFloat { desk ? legible(list ? 19.84 : 18.56) : 15.68 }
     /// The hour that is now is larger in the niche, as well as lit and rubricated.
-    var hourNow: CGFloat { list ? 22.72 : desk ? 21.12 : hour }
+    var hourNow: CGFloat { desk ? legible(list ? 22.72 : 21.12) : hour }
     /// Every hour's gloss in the niche; a phone's only under the hour that is now.
-    var gloss: CGFloat { list ? 16 : desk ? 13.76 : 12.48 }
+    var gloss: CGFloat { desk ? legible(list ? 16 : 13.76) : 12.48 }
     /// The periods' labels: larger in the niche, where they stand beside the list.
-    var period: CGFloat { list ? 15.2 : desk ? 13.76 : 11.52 }
+    var period: CGFloat { desk ? legible(list ? 15.2 : 13.76) : 11.52 }
     var periodTracking: CGFloat { list ? 0.16 : desk ? 0.14 : 0.12 }
     var metaGap: CGFloat { pick(8.8, 8.8, 16, 19.2) }
     /// The season and "Change date" at the foot, in small caps.
-    var meta: CGFloat { desk ? 15.2 : 13.44 }
+    var meta: CGFloat { desk ? legible(15.2) : 13.44 }
 }
 
 /// The date with its weekday and the rest each kept whole, so a break never parts a month from its day.
@@ -981,12 +999,23 @@ private struct HourDirectory: View {
                 // What the hour is, for a newcomer, as the web's `.home-hour-link-note`; one
                 // line, which may overhang its cell a little.
                 if !gloss.isEmpty {
-                    Text(gloss)
-                        .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                        .foregroundStyle(isNow ? home.nowGloss : p.muted)
-                        .lineLimit(1)
-                        .fixedSize()
-                        .frame(width: 0)
+                    if tier.shortScreen {
+                        // Held at 12 in so small a niche, a gloss takes a second line rather than
+                        // running into its neighbour.
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(gloss)
+                            .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
+                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .frame(width: 0)
+                    }
                 }
             }
             .padding(.horizontal, m.px(2))
@@ -1027,10 +1056,10 @@ private struct HourDirectory: View {
 }
 
 /**
- * One period of the niche's list of seven (the web's from 1000px high): its label in the margin
- * beside its hours, right of the margin's centre, and each hour on a line of its own, its name and
- * its gloss on one baseline parted by a gilt point, the list set as a block centred in the niche
- * (15.5rem either side of the label's column).
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
+ * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
+ * stand centred in the niche (`NicheLayout.listMiddle`).
  */
 private struct HourList: View {
     let period: Period
@@ -1049,27 +1078,20 @@ private struct HourList: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        GeometryReader { g in
-            let side = max(0, (g.size.width - m.px(248)) / 2)
-            HStack(spacing: 0) {
-                VStack(spacing: m.px(4)) {
-                    PeriodIcon(period: period, color: o.flat, alpha: 0.9).scaleEffect(1.25)
-                    Text(label).type(labelStyle).foregroundStyle(labelInk).lineLimit(1).fixedSize()
-                }
-                .padding(.trailing, m.px(22.4))
-                .frame(width: side, alignment: .trailing)
-                .frame(maxHeight: .infinity)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(label)
-                .accessibilityAddTraits(.isHeader)
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(hours, id: \.self) { h in line(h) }
-                }
-                .padding(.vertical, m.px(4.8))
-                .frame(maxWidth: .infinity, alignment: .leading)
+        HourListLayout(middle: m.px(tier.listMiddle)) {
+            VStack(spacing: m.px(4)) {
+                PeriodIcon(period: period, color: o.flat, alpha: 0.9).scaleEffect(1.25)
+                Text(label).type(labelStyle).foregroundStyle(labelInk).lineLimit(1).fixedSize()
             }
+            .padding(.trailing, m.px(22.4))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(hours, id: \.self) { h in line(h) }
+            }
+            .padding(.vertical, m.px(4.8))
         }
-        .frame(height: CGFloat(hours.count) * m.px(tier.row) + 2 * m.px(4.8))
     }
 
     private func line(_ h: String) -> some View {
@@ -1125,5 +1147,29 @@ private struct HourList: View {
         }
         .buttonStyle(Quiet())
         .accessibilityLabel([hourLabel(h), gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+    }
+}
+
+/**
+ * The list of seven's columns (the web's `minmax(0, 1fr) 6.75rem minmax(0, 1fr)`): the period's
+ * label right-aligned in the first, centred on the hours' height, and its hours across the other
+ * two. The hours take the height they need, so their rows grow with Dynamic Type.
+ */
+private struct HourListLayout: Layout {
+    let middle: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 600
+        let side = max(0, (width - middle) / 2)
+        let hours = subviews[1].sizeThatFits(ProposedViewSize(width: width - side, height: nil))
+        let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
+        return CGSize(width: width, height: max(hours.height, label.height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let side = max(0, (bounds.width - middle) / 2)
+        let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
+        subviews[0].place(at: CGPoint(x: bounds.minX + side, y: bounds.midY), anchor: .trailing, proposal: ProposedViewSize(width: side, height: label.height))
+        subviews[1].place(at: CGPoint(x: bounds.minX + side, y: bounds.minY), proposal: ProposedViewSize(width: bounds.width - side, height: nil))
     }
 }

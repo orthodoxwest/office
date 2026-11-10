@@ -137,21 +137,32 @@ fun HomeScreen(
                 val outer = LocalDensity.current
                 val heavy = (view.penitential.isNotEmpty() && view.commemorations.isNotEmpty()) ||
                     (!view.isToday && (view.commemorations.isNotEmpty() || view.octaveNote.isNotEmpty() || view.penitential.isNotEmpty()))
+                // Where the heaviest day does not fit with the colophon (`--niche-fits`), the header
+                // and niche take the screen and the colophon waits under the fold, rather than
+                // being cut through by it.
                 Column(
                     Modifier.fillMaxWidth().heightIn(min = tall),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    chrome()
-                    CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
-                        Frontispiece(
-                            view, date, today, onDate, onHour, onOrdoDay,
-                            Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
-                                .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
-                            HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
-                            niche = niche,
-                            onFeast = onFeast,
-                        )
+                    Column(
+                        Modifier.fillMaxWidth().then(if (layout.fits) Modifier else Modifier.heightIn(min = tall)),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        chrome()
+                        CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
+                            Frontispiece(
+                                view, date, today, onDate, onHour, onOrdoDay,
+                                Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
+                                    .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
+                                HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
+                                niche = niche,
+                                onFeast = onFeast,
+                            )
+                        }
+                        // Centred under the header: the niche's own room is the space below it.
+                        if (!layout.fits) Spacer(Modifier.height(0.dp))
                     }
                     Footer(reserve = true)
                 }
@@ -216,6 +227,16 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     /** The wide niche's hours one to a line (from 1000 high), else its glossed table. */
     val list = wide?.list == true
     private val upright = wide?.upright == true
+    private val zoom = wide?.zoom ?: 1f
+    /**
+     * A niche's small words never fall under 12 on the glass, however small the niche (a short
+     * screen): each stands back from the zoom just enough, as the web's.
+     */
+    private fun legible(size: Float) = maxOf(size, 12f / zoom)
+    /** The list of seven's middle column. */
+    val listMiddle = wide?.listMiddle ?: 0.dp
+    /** A short screen's niche (a phone on its side), fitted down to the invitation. */
+    val shortScreen = wide?.short == true
     private val step = if (desk) 0 else if (tall >= 880.dp) 2 else if (tall >= 800.dp) 1 else 0
     private val type = if (desk || screen < 375.dp) 0 else if (tall >= 880.dp) 2 else if (tall >= 830.dp) 1 else 0
     private fun <T> pick(niche: T, vararg phone: T): T = if (desk) niche else phone[minOf(type, phone.size - 1)]
@@ -280,12 +301,12 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
      * the niche the weekday is half the date, tracked wider, over the date at its own size.
      */
     private val short = !desk && tall <= 700.dp
-    fun weekday(): Float = if (desk) 0.5f * date else maxOf(0.66f * date, 15.2f / dyn)
+    fun weekday(): Float = if (desk) legible(0.5f * date) else maxOf(0.66f * date, 15.2f / dyn)
     val weekdayTracking = if (desk) 0.2f else 0.15f
     fun weekdayLine(heavy: Boolean): Float = if (desk) (if (heavy) 1.4f else 1.7f) else if (short) 1.18f else if (heavy) 1.06f else 1.5f
     fun rest(heavy: Boolean): Float = if (desk) date else date * if (short) 1.06f else if (heavy) 1.02f else 1.1f
     fun restLine(heavy: Boolean): Float = if (desk) 1.1f else if (short) 1.08f else if (heavy) 1f else 1.12f
-    val feast = if (desk) (if (list) 22.72f else 21.12f) else fitted(0.055f * inline, 0.0215f * tall.value, 15.2f, 24f)
+    val feast = if (desk) legible(if (list) 22.72f else 21.12f) else fitted(0.055f * inline, 0.0215f * tall.value, 15.2f, 24f)
     /**
      * The feast's measure, the head's width at its first line, when the day stands at the head's
      * room: a long name breaks there rather than running over the lining further up the arch. The
@@ -293,10 +314,10 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
      */
     val feastMeasure: Dp = if (desk) 400.dp else clear(card, headPad + 44.dp + 2.dp)
     /** A short phone's commemorations give way, so a past date with them still fits. */
-    val commemoration = if (!desk && tall <= 700.dp) 13.6f else if (desk) (if (list) 16.64f else 16f) else fitted(0.046f * inline, 0.0175f * tall.value, 12.8f, 17.6f)
+    val commemoration = if (!desk && tall <= 700.dp) 13.6f else if (desk) legible(if (list) 16.64f else 16f) else fitted(0.046f * inline, 0.0175f * tall.value, 12.8f, 17.6f)
     val commemorationLine = if (!desk && tall <= 700.dp) 1.3f else 1.4f
     /** The fasts, as red work: a little larger in the niche. */
-    val fast = if (desk) 14.4f else 0f
+    val fast = if (desk) legible(14.4f) else 0f
     /**
      * The day's versicle's size, set only where a phone is over 700 high, and its measure, at most
      * 19rem wide and inside the day's clearance of the lining.
@@ -305,7 +326,7 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     val versicleMeasure = minOf(304.dp, card - dayClear * 2)
     /** Below the day, to the band. */
     val dayGap = pick(17.6.dp, 5.6.dp, 12.dp)
-    val band = pick(14.4f, 12.8f, 12.8f, 13.6f)
+    val band = pick(legible(14.4f), 12.8f, 12.8f, 13.6f)
     val bandTracking = if (desk) 0.2f else 0.15f
     val bandPad = pick(2.56.dp, 3.2.dp, 3.2.dp, 3.84.dp)
     val bandGap = pick(17.6.dp, 12.dp, 16.dp, 20.dp)
@@ -320,18 +341,18 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     val prayBottom = pick(15.4.dp, 12.5.dp, 13.8.dp, 16.2.dp)
     val prayGap = pick(14.4.dp, 11.2.dp, 20.dp, 24.dp)
     /** An hour's row: the niche's table 3.5rem, its list 3.1rem (a thumb's height at its least zoom). */
-    val row = if (list) 49.6.dp else pick(56.dp, 44.dp, 54.4.dp, 62.4.dp)
-    val hour = if (list) 19.84f else pick(18.56f, 15.68f)
+    val row = if (desk) maxOf(if (list) 49.6.dp else 56.dp, (44f / zoom).dp) else pick(56.dp, 44.dp, 54.4.dp, 62.4.dp)
+    val hour = if (desk) legible(if (list) 19.84f else 18.56f) else 15.68f
     /** The hour that is now is larger in the niche, as well as lit and rubricated. */
-    val hourNow = if (list) 22.72f else if (desk) 21.12f else hour
+    val hourNow = if (desk) legible(if (list) 22.72f else 21.12f) else hour
     /** Every hour's gloss in the niche; a phone's only under the hour that is now. */
-    val gloss = if (list) 16f else if (desk) 13.76f else 12.48f
+    val gloss = if (desk) legible(if (list) 16f else 13.76f) else 12.48f
     /** The periods' labels: larger in the niche, where they stand beside the list. */
-    val period = if (list) 15.2f else if (desk) 13.76f else 11.52f
+    val period = if (desk) legible(if (list) 15.2f else 13.76f) else 11.52f
     val periodTracking = if (list) 0.16f else if (desk) 0.14f else 0.12f
     val metaGap = pick(8.8.dp, 8.8.dp, 16.dp, 19.2.dp)
     /** The season and "Change date" at the foot, in small caps. */
-    val meta = if (desk) 15.2f else 13.44f
+    val meta = if (desk) legible(15.2f) else 13.44f
 }
 
 /** The date with its weekday and the rest each kept whole, so a break never parts a month from its day. */
@@ -876,7 +897,9 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                                 // What the hour is, for a newcomer, as the web's `.home-hour-link-note`;
                                 // one line, which may overhang its cell a little.
                                 if (gloss.isNotEmpty()) {
-                                    Text(gloss, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1, softWrap = false)
+                                    // A short screen's gloss, held at 12 in so small a niche, takes a
+                                    // second line rather than running into its neighbour.
+                                    Text(gloss, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = if (tier.shortScreen) 2 else 1, softWrap = tier.shortScreen)
                                 }
                             }
                         }
@@ -889,10 +912,10 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
 }
 
 /**
- * One period of the niche's list of seven (the web's from 1000px high): its label in the margin
- * beside its hours, right of the margin's centre, and each hour on a line of its own, its name and
- * its gloss on one baseline parted by a gilt point, the list set as a block centred in the niche
- * (15.5rem either side of the label's column).
+ * One period of the niche's list of seven (the web's from 1000px high upright, 1146px on its
+ * side): its label in the margin beside its hours, and each hour on a line of its own, its name and
+ * its gloss on one baseline parted by a gilt point; the label and the hours, read as one block,
+ * stand centred in the niche ([NicheLayout.listMiddle]).
  */
 @Composable
 private fun HourList(
@@ -955,10 +978,10 @@ private fun HourList(
         modifier = Modifier.fillMaxWidth().padding(top = 1.dp)
             .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier),
     ) { (labels, lists), constraints ->
-        // grid-template-columns: 1fr 15.5rem 1fr, the label in the first column, the hours across
+        // grid-template-columns: 1fr middle 1fr, the label in the first column, the hours across
         // the other two.
         val width = constraints.maxWidth
-        val middle = 248.dp.roundToPx()
+        val middle = tier.listMiddle.roundToPx()
         val side = ((width - middle) / 2).coerceAtLeast(0)
         val list = lists.first().measure(Constraints(maxWidth = (width - side).coerceAtLeast(0)))
         val tag = labels.first().measure(Constraints(maxWidth = side))

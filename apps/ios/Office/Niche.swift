@@ -54,43 +54,77 @@ struct NicheTokens {
 }
 
 /**
- * The niche's layout at a size of screen (`width` by `height`, the height home has, in points),
- * as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or, from
- * 1000 high, the list of seven, and one scale for the whole niche. Android's `NicheLayout`.
+ * One layout's figures, in rem (16pt), as style.css's `.page-home main` gives them for it (each
+ * rule marked `NicheFigures.<name>`; Android's TokensTest holds the stylesheet, Niche.kt and this
+ * file to each other): the card's width before the zoom, the niche's height at 1 on its heaviest
+ * day with the colophon's zoomed margin (on a short screen, down to the invitation), the air above
+ * it, the least zoom and the share of the screen's width it may take.
+ */
+struct NicheFigures {
+    let card: CGFloat
+    let fit: CGFloat
+    let air: CGFloat
+    let least: CGFloat
+    let share: CGFloat
+
+    static let landscape = NicheFigures(card: 37.5, fit: 47.25, air: 1.6, least: 0.96, share: 0.62)
+    static let landscapeList = NicheFigures(card: 37.5, fit: 61, air: 1.6, least: 0.96, share: 0.62)
+    static let upright = NicheFigures(card: 34.5, fit: 48.75, air: 2.4, least: 0.9, share: 0.8)
+    static let uprightList = NicheFigures(card: 34.5, fit: 62.5, air: 2.4, least: 0.9, share: 0.8)
+    static let short = NicheFigures(card: 37.5, fit: 35.25, air: 0.5, least: 0.5, share: 0.62)
+
+    /// What is not zoomed above the niche (the header) and below it (the colophon), in rem.
+    static let above: CGFloat = 5.0625
+    static let below: CGFloat = 6.375
+    /// The list of seven on a screen on its side, from this high (an upright one's from 1000).
+    static let listLandscape: CGFloat = 1146
+    /// A short screen, to this high: the niche is fitted down to the invitation.
+    static let shortHeight: CGFloat = 560
+}
+
+/**
+ * The niche's layout at a size of screen (`width` by `height`, the height home has, in the web's
+ * pixels), as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or
+ * the list of seven, and one scale for the whole niche. Android's `NicheLayout`.
  */
 struct NicheLayout {
-    /// An upright screen takes the taller head and a narrower lancet.
+    /// An upright (or square) screen takes the taller head and a narrower lancet.
     let upright: Bool
+    /// A short screen on its side (a phone turned) is fitted down to the invitation.
+    let short: Bool
     /// Where the screen has the height, the hours stand one to a line.
     let list: Bool
+    let figures: NicheFigures
     /// The one scale (`--niche-zoom`).
     let zoom: CGFloat
+    /// Whether the heaviest day fits with the colophon (`--niche-fits`); where it does not, the
+    /// colophon waits under the fold rather than being cut through by it.
+    let fits: Bool
 
     init(width: CGFloat, height: CGFloat) {
-        upright = height > width
-        list = height >= 1000
-        let rem: CGFloat = 16
-        let fit = rem * (upright ? (list ? 57 : 45) : (list ? 54.2 : 42))
-        let chrome = rem * (upright ? 15.6 : list ? 14.75 : 14)
-        zoom = nicheZoom(width: width, height: height, chrome: chrome, fit: fit, share: upright ? 0.8 : 0.62, card: upright ? 552 : 600, least: upright ? 0.9 : 0.96)
+        upright = height >= width
+        short = !upright && height <= NicheFigures.shortHeight
+        list = upright ? height >= 1000 : height >= NicheFigures.listLandscape
+        figures = upright ? (list ? .uprightList : .upright) : list ? .landscapeList : short ? .short : .landscape
+        let below = short ? 0 : NicheFigures.below
+        let raw = (height - 16 * (NicheFigures.above + below)) / (16 * (figures.fit + figures.air))
+        zoom = nicheZoom(raw: raw, width: width, figures: figures)
+        fits = !short && raw >= figures.least
     }
 
     var arch: Arch { upright ? .upright : .niche }
     /// The card's width before the zoom (`--card-w`).
-    var card: CGFloat { upright ? 552 : 600 }
+    var card: CGFloat { figures.card * 16 }
     /// The air above the niche before the zoom (`--niche-air`).
-    var air: CGFloat { upright ? 38.4 : 25.6 }
+    var air: CGFloat { figures.air * 16 }
+    /// The list of seven's middle column (its label stands left of it), before the zoom.
+    var listMiddle: CGFloat { upright ? 118.4 : 108 }
 }
 
-/**
- * `clamp(least, min((height - chrome) / fit, share * width / card), 1.5)`: style.css's
- * `--niche-zoom`, and Niche.kt's `nicheZoom`. The height the screen leaves under the header, the
- * air and the colophon, over the niche's own height at 1 on its heaviest day, no more than a share
- * of the screen's width, never under the least (where every gloss is still 12 on the glass), and at
- * most 1.5.
- */
-func nicheZoom(width: CGFloat, height: CGFloat, chrome: CGFloat, fit: CGFloat, share: CGFloat, card: CGFloat, least: CGFloat) -> CGFloat {
-    max(least, min((height - chrome) / fit, share * width / card, 1.5))
+/// `clamp(least, min(raw, share * width / card), 1.5)`, `raw` the height's ratio: style.css's
+/// `--niche-zoom`, and Niche.kt's `nicheZoom`.
+func nicheZoom(raw: CGFloat, width: CGFloat, figures f: NicheFigures) -> CGFloat {
+    max(f.least, min(raw, f.share * width / (16 * f.card), 1.5))
 }
 
 extension Metrics {
@@ -233,6 +267,9 @@ struct Niche: View {
     }
 }
 
+/// Where the first-class fillet's leaf catches the light most (`--gilt-glint`): the reveal's lit plaster.
+let giltGlint = Color(hex: 0xFFFDF6)
+
 /**
  * A first-class day's fillet of matte leaf round the niche's head by day (`.home-summary::before`),
  * 3pt over the back wall's edge, open at the foot and down to this view's foot (the frieze), as the
@@ -248,7 +285,7 @@ struct GiltHead: View {
         Canvas { ctx, size in
             let gilt = Gradient(stops: [
                 .init(color: mix(o.lo, o.hi, 0.6), location: 0), .init(color: mix(o.lo, o.hi, 0.6), location: 0.3),
-                .init(color: o.hi, location: 0.62), .init(color: mix(o.hi, .white, 0.7), location: 0.82), .init(color: o.hi, location: 1),
+                .init(color: o.hi, location: 0.62), .init(color: mix(o.hi, giltGlint, 0.7), location: 0.82), .init(color: o.hi, location: 1),
             ])
             let path = archPath(arch, width: size.width, outset: 0, foot: size.height, open: true)
             ctx.stroke(path, with: .linearGradient(gilt, startPoint: .zero, endPoint: CGPoint(x: size.width, y: 0)), style: StrokeStyle(lineWidth: m.px(3), lineJoin: .miter, miterLimit: 2))

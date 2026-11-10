@@ -88,52 +88,79 @@ fun nicheTokens(p: Palette): NicheTokens = if (!p.dark) {
 }
 
 /**
- * The niche's layout at a size of screen (`width` by `height`, the height home has under the
- * bars), as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or,
- * from 1000 high, the list of seven, and one scale for the whole niche.
+ * One layout's figures, in rem (16dp), as style.css's `.page-home main` gives them for it (each
+ * rule marked `NicheFigures.<name>`; TokensTest holds the two to each other and to Niche.swift):
+ * the card's width before the zoom, the niche's height at 1 on its heaviest day with the
+ * colophon's zoomed margin (on a short screen, down to the invitation), the air above it, the
+ * least zoom and the share of the screen's width it may take.
  */
-class NicheLayout(width: Dp, height: Dp) {
-    /** An upright screen takes the taller head and a narrower lancet. */
-    val upright = height > width
-    /** Where the screen has the height, the hours stand one to a line. */
-    val list = height >= 1000.dp
-    val arch = if (upright) UprightArch else NicheArch
-    /** The card's width before the zoom (`--card-w`). */
-    val card: Dp = if (upright) 552.dp else 600.dp
-    /** The air above the niche before the zoom (`--niche-air`). */
-    val air: Dp = if (upright) 38.4.dp else 25.6.dp
+data class NicheFigures(val card: Float, val fit: Float, val air: Float, val least: Float, val share: Float) {
+    companion object {
+        val Landscape = NicheFigures(card = 37.5f, fit = 47.25f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val LandscapeList = NicheFigures(card = 37.5f, fit = 61f, air = 1.6f, least = 0.96f, share = 0.62f)
+        val Upright = NicheFigures(card = 34.5f, fit = 48.75f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val UprightList = NicheFigures(card = 34.5f, fit = 62.5f, air = 2.4f, least = 0.9f, share = 0.8f)
+        val Short = NicheFigures(card = 37.5f, fit = 35.25f, air = 0.5f, least = 0.5f, share = 0.62f)
 
-    /**
-     * The one scale (`--niche-zoom`): the height the screen leaves under the header, the air and
-     * the colophon, over the niche's own height at 1 on its heaviest day, no more than a share of
-     * the screen's width, never under the least (where every gloss is still 12 on the glass: a
-     * laptop's niche keeps its size and lets the colophon go under the fold), and at most 1.5.
-     */
-    val zoom: Float = run {
-        val rem = 16f
-        val fit = rem * when {
-            upright && list -> 57f
-            upright -> 45f
-            list -> 54.2f
-            else -> 42f
-        }
-        val chrome = rem * when {
-            upright -> 15.6f
-            list -> 14.75f
-            else -> 14f
-        }
-        val least = if (upright) 0.9f else 0.96f
-        val share = if (upright) 0.8f else 0.62f
-        nicheZoom(width.value, height.value, chrome, fit, share, card.value, least)
+        /** What is not zoomed above the niche (the header) and below it (the colophon), in rem. */
+        const val ABOVE = 5.0625f
+        const val BELOW = 6.375f
+        /** The list of seven on a screen on its side, from this high (an upright one's from 1000). */
+        const val LIST_LANDSCAPE = 1146f
+        /** A short screen, to this high: the niche is fitted down to the invitation. */
+        const val SHORT = 560f
     }
 }
 
 /**
- * `clamp(least, min((height - chrome) / fit, share * width / card), 1.5)`: style.css's
+ * The niche's layout at a size of screen (`width` by `height`, the height home has under the
+ * bars), as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or
+ * the list of seven, and one scale for the whole niche.
+ */
+class NicheLayout(width: Dp, height: Dp) {
+    /** An upright (or square) screen takes the taller head and a narrower lancet. */
+    val upright = height >= width
+    /** A short screen on its side (a phone turned) is fitted down to the invitation. */
+    val short = !upright && height.value <= NicheFigures.SHORT
+    /** Where the screen has the height, the hours stand one to a line. */
+    val list = if (upright) height >= 1000.dp else height.value >= NicheFigures.LIST_LANDSCAPE
+    val figures = when {
+        upright && list -> NicheFigures.UprightList
+        upright -> NicheFigures.Upright
+        list -> NicheFigures.LandscapeList
+        short -> NicheFigures.Short
+        else -> NicheFigures.Landscape
+    }
+    val arch = if (upright) UprightArch else NicheArch
+    /** The card's width before the zoom (`--card-w`). */
+    val card: Dp = (figures.card * 16f).dp
+    /** The air above the niche before the zoom (`--niche-air`). */
+    val air: Dp = (figures.air * 16f).dp
+    /** The list of seven's middle column (its label stands left of it), before the zoom. */
+    val listMiddle: Dp = if (upright) 118.4.dp else 108.dp
+    private val below = if (short) 0f else NicheFigures.BELOW
+    private val raw = (height.value - 16f * (NicheFigures.ABOVE + below)) / (16f * (figures.fit + figures.air))
+
+    /**
+     * The one scale (`--niche-zoom`): the height the screen leaves under the header and above the
+     * colophon over the niche's own on its heaviest day with the air above it, no more than a
+     * share of the screen's width, never under the least, and at most 1.5.
+     */
+    val zoom: Float = nicheZoom(raw, width.value, figures)
+
+    /**
+     * Whether the heaviest day fits with the colophon (`--niche-fits`). Where it does not, the
+     * colophon waits under the fold rather than being cut through by it; a short screen's always does.
+     */
+    val fits = !short && raw >= figures.least
+}
+
+/**
+ * `clamp(least, min(raw, share * width / card), 1.5)`, `raw` the height's ratio: style.css's
  * `--niche-zoom`, and Niche.swift's `nicheZoom`.
  */
-fun nicheZoom(width: Float, height: Float, chrome: Float, fit: Float, share: Float, card: Float, least: Float): Float =
-    maxOf(least, minOf((height - chrome) / fit, share * width / card, 1.5f))
+fun nicheZoom(raw: Float, width: Float, f: NicheFigures): Float =
+    maxOf(f.least, minOf(raw, f.share * width / (16f * f.card), 1.5f))
 
 /** Draws `path` blurred, for a CSS blur of `blur` (its Gaussian sigma is half the radius). */
 private fun DrawScope.blurred(path: Path, color: Color, blur: Float) {
@@ -211,13 +238,16 @@ fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, fillet: Color, plaster:
     }
 }
 
+/** Where the first-class fillet's leaf catches the light most (`--gilt-glint`): the reveal's lit plaster. */
+val GiltGlint = Color(0xFFFFFDF6)
+
 /**
  * A first-class day's fillet of matte leaf round the niche's head by day (`.home-summary::before`),
  * 3dp over the back wall's edge, open at the foot and down to this scope's foot (the frieze), as
  * the parish's chancel arch is gilt; the jambs and the sill keep the day's fillet.
  */
 fun DrawScope.giltHead(a: Arch, o: Ornament) {
-    val gilt = Brush.horizontalGradient(0f to mix(o.lo, o.hi, 0.6f), 0.3f to mix(o.lo, o.hi, 0.6f), 0.62f to o.hi, 0.82f to mix(o.hi, Color.White, 0.7f), 1f to o.hi)
+    val gilt = Brush.horizontalGradient(0f to mix(o.lo, o.hi, 0.6f), 0.3f to mix(o.lo, o.hi, 0.6f), 0.62f to o.hi, 0.82f to mix(o.hi, GiltGlint, 0.7f), 1f to o.hi)
     drawPath(archPath(a, size.width, 0f, size.height, open = true), gilt, style = Stroke(3.dp.toPx(), miter = 2f))
 }
 
