@@ -2895,7 +2895,7 @@ psalms/106,47921fb09cad,Coverdale Psalter,Psalm 106,,verified,claude,2026-10-06,
 psalms/107,7a3c4353642e,Coverdale Psalter,Psalm 107,,verified,claude,2026-10-07,Machine-verified against 1662 BCP; stray spaces before punctuation removed
 psalms/108,0458c545456c,Coverdale Psalter,Psalm 108,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/109,e9e1998e5ef4,Coverdale Psalter,Psalm 109,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
-psalms/110,eb6719f2bfd5,Coverdale Psalter,Psalm 110,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/110,b1dd9a61fc92,Coverdale Psalter,Psalm 110,,verified,grok,2026-11-10,Mediant asterisk in v. 6 moved after 'heathen' per Fr Jason (#778); words unchanged from verified 1662 BCP text
 psalms/111,ca83c6902586,Coverdale Psalter,Psalm 111,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/112,67e515f85391,Coverdale Psalter,Psalm 112,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/113,8ff16357e4ad,Coverdale Psalter,Psalm 113,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
