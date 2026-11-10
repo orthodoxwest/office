@@ -1,3 +1,8 @@
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 538 (June 23, Vigil of St John Baptist)
 Grant, we beseech thee, Almighty God, that thy household may walk in the way of salvation: and by following the exhortations of blessed John the Forerunner, may surely attain unto him whom he foretold, thy Son our Lord Jesus Christ.
+
+[martyrology-announcement]
+# SOURCE: Roman Martyrology (1916), January-June, p. 46; announcement line
+# Read at Prime the day before the calendar keeps the vigil, in the first place after the date.
+The vigil of St. John the Baptist.

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
 use calendar::{CalendarData, Category, Color, Date, MoveableDates, Season, build_calendar};
-use liturgy::{ElementType, PostureAnchor, PrayerForm};
+use liturgy::{ElementType, OfficeElement, PostureAnchor, PrayerForm};
 
 use crate::{Day, Engine, HOUR_NAMES, resolve_office_days, testutil::TestData};
 
@@ -194,13 +194,16 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
                 assert_eq!(collects.iter().map(|e| e.source_ref.as_str()).collect::<Vec<_>>(), expected_collects, "{context}");
                 assert!(collects.iter().all(|e| e.text.ends_with("R. Amen.")), "{context}");
                 if name == "prime" {
+                    // The Martyrology's rubric and announcement come between (Diurnal p. 653).
                     let i = refs.iter().position(|r| *r == "proper/all-souls/collect-prime").unwrap();
-                    assert_eq!(refs[i + 1], "proper/all-souls/prime-concluding-versicle");
-                    assert_eq!(refs[i + 2], "shared/leader/let-us-pray");
-                    assert_eq!(refs[i + 3], "proper/all-souls/prime-concluding-collect");
+                    assert_eq!(refs[i + 1], "proper/all-souls/martyrology-rubric");
+                    assert_eq!(refs[i + 2], "proper/all-souls/martyrology-announcement-on-day");
+                    assert_eq!(refs[i + 3], "proper/all-souls/prime-concluding-versicle");
+                    assert_eq!(refs[i + 4], "shared/leader/let-us-pray");
+                    assert_eq!(refs[i + 5], "proper/all-souls/prime-concluding-collect");
                 }
                 assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal-versicle", "shared/formulas/may-they-rest-in-peace"]);
-                assert!(refs.iter().all(|r| !r.contains("martyrology")
+                assert!(refs.iter().all(|r| (name == "prime" || !r.contains("martyrology"))
                     && !r.contains("benedicamus")
                     && !r.contains("opening-versicle")
                     && !r.contains("kyrie")));
@@ -555,27 +558,31 @@ fn psalmody_posture_cues_follow_the_parish_booklets() {
     }
 }
 
-/// #475/#477: the Martyrology announces Holy Name and each vigil on the day
-/// the calendar keeps it, including Sunday anticipation and St Matthias's
-/// leap-year move, whether or not the vigil has an office that day.
+/// #475/#477: the Martyrology announces Holy Name and each vigil from its
+/// proper on the day the calendar keeps it, including Sunday anticipation and
+/// St Matthias's leap-year move, whether or not the vigil has an office that
+/// day. All Souls' announcement (Diurnal p. 653) is read on its own day, before
+/// the date, including when it moves from a Sunday to Monday.
 #[test]
 fn martyrology_announcements_follow_the_calendar() {
     let vigils = [
-        ("vigil-01-05", "vigil-epiphany"),
-        ("vigil-02-23", "vigil-of-st-matthias"),
-        ("vigil-06-23", "vigil-of-nativity-john-baptist"),
-        ("vigil-06-28", "vigil-of-ss-peter-paul"),
-        ("vigil-07-24", "vigil-of-st-james-greater"),
-        ("vigil-08-09", "vigil-of-st-lawrence"),
-        ("vigil-08-14", "vigil-of-assumption-bvm"),
-        ("vigil-08-23", "vigil-of-st-bartholomew"),
-        ("vigil-09-20", "vigil-of-st-matthew"),
-        ("vigil-10-27", "vigil-of-ss-simon-jude"),
-        ("vigil-10-31", "vigil-of-all-saints"),
-        ("vigil-11-29", "vigil-of-st-andrew"),
+        "vigil-epiphany",
+        "vigil-of-st-matthias",
+        "vigil-of-nativity-john-baptist",
+        "vigil-of-ss-peter-paul",
+        "vigil-of-st-james-greater",
+        "vigil-of-st-lawrence",
+        "vigil-of-assumption-bvm",
+        "vigil-of-st-bartholomew",
+        "vigil-of-st-matthew",
+        "vigil-of-ss-simon-jude",
+        "vigil-of-all-saints",
+        "vigil-of-st-andrew",
     ];
+    const ALL_SOULS: &str = "proper/all-souls/martyrology-announcement-on-day";
     let options = crate::ComposeOptions { martyrology: true, ..Default::default() };
     let mut announced = HashSet::new();
+    let mut all_souls_moved = false;
     for y in 2026..=2053 {
         let (days, moveable) = year(y);
         for pair in days.windows(2) {
@@ -584,7 +591,8 @@ fn martyrology_announcements_follow_the_calendar() {
             if !crate::prime::reads_martyrology(&prime) {
                 continue;
             }
-            let refs: HashSet<&str> = prime.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+            let elements: Vec<&OfficeElement> = prime.sections.iter().flat_map(|s| &s.elements).collect();
+            let refs: HashSet<&str> = elements.iter().map(|e| e.source_ref.as_str()).collect();
             let details = tomorrow.occurrence_decisions.iter().filter_map(|d| d.detail.as_deref());
             let named: HashSet<&str> = tomorrow
                 .celebration
@@ -593,18 +601,51 @@ fn martyrology_announcements_follow_the_calendar() {
                 .map(|f| f.id.as_str())
                 .chain(details.flat_map(|d| d.split(|c: char| !(c.is_ascii_alphanumeric() || c == '-'))))
                 .collect();
-            for (key, id) in vigils {
-                let read = refs.contains(format!("ordinary/martyrology/{key}").as_str());
-                assert_eq!(read, named.contains(id), "{}: {key} vs calendar {id}", tomorrow.date);
+            for id in vigils {
+                let read = refs.contains(format!("proper/{id}/martyrology-announcement").as_str());
+                assert_eq!(read, named.contains(id), "{}: {id}", tomorrow.date);
                 if read {
-                    announced.insert(key);
+                    announced.insert(id);
                 }
             }
-            let holy_name = refs.contains("ordinary/martyrology/holy-name");
+            let holy_name = refs.contains("proper/holy-name-jesus/martyrology-announcement");
             assert_eq!(holy_name, tomorrow.celebration_is("holy-name-jesus"), "{}: Holy Name", tomorrow.date);
+            let all_souls = elements.iter().position(|e| e.source_ref == ALL_SOULS);
+            assert_eq!(all_souls.is_some(), today.celebration_is("all-souls"), "{}: All Souls", today.date);
+            if let Some(i) = all_souls {
+                assert_eq!(elements[i + 1].kind, ElementType::Heading, "{}: before the date", today.date);
+                all_souls_moved |= today.date.day() == 3;
+            }
         }
     }
     assert_eq!(announced.len(), vigils.len(), "every vigil is announced in some year");
+    assert!(all_souls_moved, "All Souls moved from a Sunday is announced on the Monday");
+}
+
+/// Diurnal p. 653: on All Souls the Martyrology follows Prime's Collect and
+/// precedes "The righteous shall be had"; not read, the book's rubric and the
+/// announcement stand for it.
+#[test]
+fn all_souls_prime_keeps_its_martyrology_announcement() {
+    let date = Date::new(2026, 11, 2);
+    let (days, moveable) = year(2026);
+    let day = &days[date.ordinal() as usize - 1];
+    let refs = |martyrology: bool| -> Vec<String> {
+        let options = crate::ComposeOptions { martyrology, ..Default::default() };
+        let prime = engine().compose_hour_with_options("prime", day, &moveable, &options).unwrap();
+        prime.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.clone()).collect()
+    };
+    let at = |refs: &[String], key: &str| refs.iter().position(|r| r == key).unwrap_or_else(|| panic!("{key} in {refs:?}"));
+    let off = refs(false);
+    let rubric = at(&off, "proper/all-souls/martyrology-rubric");
+    assert_eq!(off[rubric + 1], "proper/all-souls/martyrology-announcement-on-day");
+    assert!(rubric > at(&off, "proper/all-souls/collect-prime"));
+    assert!(rubric < at(&off, "proper/all-souls/prime-concluding-versicle"));
+    assert!(!off.iter().any(|r| r == "ordinary/prime/martyrology-rubric"));
+    let on = refs(true);
+    let announcement = at(&on, "proper/all-souls/martyrology-announcement-on-day");
+    assert_eq!(on[announcement + 1], "ordinary/martyrology/11-03");
+    assert!(at(&on, "ordinary/martyrology/response") < at(&on, "proper/all-souls/prime-concluding-versicle"));
 }
 
 /// The All Saints fast falls on the vigil only, anticipated with it to

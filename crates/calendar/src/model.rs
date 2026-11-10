@@ -466,6 +466,10 @@ pub struct CalendarDay {
     pub penitential: Penitential,
     /// Observances the ordo brackets for monastics and oblates on this date; notation only.
     pub monastic: Vec<MonasticObservance>,
+    /// Every feast kept on this date, after transfers, in occurrence order: the celebration, its
+    /// commemorations, and those occurrence leaves without office or commemoration (a vigil in
+    /// Advent or under a privileged day). The Martyrology announces from these.
+    pub kept: Vec<FeastRef>,
 }
 
 impl CalendarDay {

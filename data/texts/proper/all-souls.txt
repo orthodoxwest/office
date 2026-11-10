@@ -180,3 +180,13 @@ R. They will not be afraid of any evil tidings.
 # SOURCE: Monastic Diurnal.pdf, p. 653
 O God, the Giver of pardon and the Author of man's salvation: we humbly beseech thy mercy to grant that the souls of all the faithful who have departed out of this world, blessed Mary ever Virgin and all thy Saints praying for them, may attain to the fellowship of everlasting blessedness. Through Christ our Lord.
 R. Amen.
+
+[martyrology-rubric]
+# SOURCE: Monastic Diurnal.pdf, p. 653
+# Stands for the Martyrology on All Souls when it is not read, with the announcement below.
+Then, in Choir, the Martyrology beginning with the following announcement of All Souls' Day:
+
+[martyrology-announcement-on-day]
+# SOURCE: Monastic Diurnal.pdf, p. 653
+# Read at Prime on the day the calendar keeps All Souls, before the following day's date.
+On this day is made Commemoration of All the Faithful Departed, in which our common loving Mother the Church, having endeavoured to extol with due praises her children already rejoicing in heaven, now strives to assist, by earnest supplications to Christ her Lord and Spouse, those who still suffer in the pains of purgatory, that they may speedily attain unto the fellowship of the heavenly citizens.

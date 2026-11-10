@@ -213,3 +213,8 @@ R. And let us magnify his Name together, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[martyrology-announcement]
+# SOURCE: 2026 archdiocesan ordo, p. 26 (also 2021-2025): "Today, in the Martyrology reading at Prime, in the 1st place"
+# Read at Prime the day before, in the first place after the date.
+The Feast of the Most Holy Name of Jesus.

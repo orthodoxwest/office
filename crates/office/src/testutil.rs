@@ -37,9 +37,11 @@ pub fn day(date: Date, season: Season) -> Day {
             within_octave_of: None,
             penitential: Penitential::default(),
             monastic: Vec::new(),
+            kept: Vec::new(),
         },
         vespers: VespersDesignation::unowned(),
         evening: None,
+        tomorrow: Vec::new(),
     }
 }
 

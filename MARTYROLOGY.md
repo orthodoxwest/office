@@ -18,13 +18,31 @@ clergy review of their announcements. Held days keep the rubric.
 
 Leap years follow the source's bissextile rule (January–June, p. 15), as the
 calendar does for the feasts: February 24 reads `02-24-bissextile`, and
-February 25–29 read the printed 24th–28th. Holy Name (`holy-name`, worded as
-every ordo since 2021 prints it) and the vigils (`vigil-MM-DD`, keyed by
-printed date) are read in the first place on the day the calendar keeps them:
-a common vigil falling on Sunday on the Saturday before, the Epiphany's on
-January 5, and St Matthias's on February 24 in leap years. Only vigils the AWRV
-keeps are listed. Both rules are proposed answers awaiting clergy confirmation
-(#475, #477).
+February 25–29 read the printed 24th–28th.
+
+## Announcements
+
+A feast's announcement lives in its own proper, and Prime reads it on the day
+the calendar keeps the feast (`CalendarDay::kept`: the celebration, its
+commemorations, and a vigil occurrence leaves without office), so transfers
+and anticipations need no date rules of their own:
+
+- `martyrology-announcement` is read at Prime the day before, in the first
+  place after the date. Holy Name (`holy-name-jesus`, worded as every ordo
+  since 2021 prints it) and the vigils the AWRV keeps carry one: a common vigil
+  falling on Sunday is read on the Saturday before, the Epiphany's on
+  January 5, and St Matthias's on February 24 in leap years. Christmas Eve's
+  awaits the Christmas announcement review. Both rules are proposed answers
+  awaiting clergy confirmation (#475, #477).
+- `martyrology-announcement-on-day` is read at Prime on the feast itself,
+  before the date. All Souls carries one (Diurnal p. 653), so on a Monday when
+  November 2 is a Sunday. With the Martyrology off, a proper that also has a
+  `martyrology-rubric` prints that rubric and the announcement in place of the
+  general rubric, as the Diurnal does for All Souls.
+
+The 1916 Martyrology's other moveable-feast announcements (p. 2: Septuagesima
+through the Sacred Heart, Easter read before the date) fit these two keys; each
+waits on a check that the AWRV keeps the feast and on its reviewed wording.
 
 On the web the setting lives in the browser (`office-martyrology` in
 localStorage, like the theme), so the page never varies by reader: Prime carries
@@ -42,8 +60,9 @@ counts Prime readers on days with a reading, by whether the setting showed it;
 see DEPLOYMENT.md, "Usage metrics".
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
-DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name and
-every vigil are announced exactly on the days the calendar keeps them.
+DST, missing-text fallback, the Triduum, and (over 2026–2053) that Holy Name,
+every vigil and All Souls are announced exactly on the days the calendar keeps
+them.
 
 ## Eligibility
 
@@ -64,7 +83,7 @@ dates and order; retained wording is not edited.
   Review their AWRV observance and wording separately.
   A feast, octave or devotion announced on its Roman date stays only when the
   AWRV calendar keeps that observance on that date. Vigil lines are left out
-  of the day's entry; Prime adds them from `vigil-MM-DD` on the day the
+  of the day's entry; Prime adds them from the vigil's proper on the day the
   calendar keeps the vigil.
 - Absence from the AWRV office calendar is no reason to omit an eligible
   notice, and presence in it is no exception to the cutoff.
