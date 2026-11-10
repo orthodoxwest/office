@@ -2,13 +2,13 @@ import SwiftUI
 import UIKit
 
 /**
- * The desktop home's niche and chapel light ("Home niche" in style.css): on a wide screen the
- * frontispiece is set into the wall under a pointed head, with a stone moulding, the day's colour
- * as a trim, and the room lit toward it. Phones set it in a painted panel (`Panel`).
+ * The wide home's niche and chapel light ("Home niche" in style.css): on a wide screen the
+ * frontispiece is one lancet niche cut into the wall, its head genarch's landscape `Arch.niche` or
+ * `Arch.upright`, its size one scale (`nicheZoom`), and the room lit toward it. By day its depth is
+ * told by light on the reveal (`Niche`); by night it is the phone's panel and apse sky (`Panel`,
+ * `Sky`) on a plain wall, so the phone and the wide home are one building.
  */
 struct NicheTokens {
-    let stone: Color
-    let edge: Color
     let recess: Color
     let sheen: Color
     let warm: Color
@@ -17,12 +17,21 @@ struct NicheTokens {
     let pool: Color
     let shade: Color
     let beam: Color
+    /// The reveal by day (`--reveal-*`): shade on the left jamb, light on the right and the sill.
+    var revealShade = Color(hex: 0xCBBCAA)
+    var revealMid = Color(hex: 0xE6DCCD)
+    var revealLit = Color(hex: 0xFFFDF6)
+    var revealSill = Color(hex: 0xFBF6EA)
+    var revealSillEdge = Color(hex: 0xD9CCBA)
+    var revealSoffit = Color(rgb: 96, 66, 44, 0.3)
+    var arris = Color(rgb: 255, 253, 246, 0.9)
+    var arrisTurn = Color(rgb: 255, 253, 246, 0.2)
+    var arrisShade = Color(rgb: 96, 66, 44, 0.34)
+    var cast = Color(rgb: 84, 52, 30, 0.3)
 
     static func of(_ p: Palette) -> NicheTokens {
         if !p.dark {
             return NicheTokens(
-                stone: Color(hex: 0xE5DAC9),
-                edge: Color(rgb: 63, 55, 47, 0.3),
                 recess: Color(rgb: 70, 40, 20, 0.2),
                 sheen: Color(rgb: 255, 255, 255, 0.14),
                 warm: Color(rgb: 232, 176, 84, 0.2),
@@ -33,8 +42,6 @@ struct NicheTokens {
             )
         }
         return NicheTokens(
-            stone: Color(hex: 0x243040),
-            edge: Color(rgb: 208, 176, 106, 0.3),
             recess: Color(rgb: 0, 0, 0, 0.42),
             sheen: .clear,
             warm: Color(rgb: 208, 176, 106, 0.09),
@@ -46,8 +53,55 @@ struct NicheTokens {
     }
 }
 
-/// The niche's card width at a screen width: clamp(38rem, 10rem + 38vw, 48rem).
-func nicheWidth(_ screen: CGFloat) -> CGFloat { min(max(160 + screen * 0.38, 608), 768) }
+/**
+ * The niche's layout at a size of screen (`width` by `height`, the height home has, in points),
+ * as style.css's "Home niche" sets it: a landscape or upright lancet, the glossed table or, from
+ * 1000 high, the list of seven, and one scale for the whole niche. Android's `NicheLayout`.
+ */
+struct NicheLayout {
+    /// An upright screen takes the taller head and a narrower lancet.
+    let upright: Bool
+    /// Where the screen has the height, the hours stand one to a line.
+    let list: Bool
+    /// The one scale (`--niche-zoom`).
+    let zoom: CGFloat
+
+    init(width: CGFloat, height: CGFloat) {
+        upright = height > width
+        list = height >= 1000
+        let rem: CGFloat = 16
+        let fit = rem * (upright ? (list ? 57 : 45) : (list ? 54.2 : 42))
+        let chrome = rem * (upright ? 15.6 : list ? 14.75 : 14)
+        zoom = nicheZoom(width: width, height: height, chrome: chrome, fit: fit, share: upright ? 0.8 : 0.62, card: upright ? 552 : 600, least: upright ? 0.9 : 0.96)
+    }
+
+    var arch: Arch { upright ? .upright : .niche }
+    /// The card's width before the zoom (`--card-w`).
+    var card: CGFloat { upright ? 552 : 600 }
+    /// The air above the niche before the zoom (`--niche-air`).
+    var air: CGFloat { upright ? 38.4 : 25.6 }
+}
+
+/**
+ * `clamp(least, min((height - chrome) / fit, share * width / card), 1.5)`: style.css's
+ * `--niche-zoom`, and Niche.kt's `nicheZoom`. The height the screen leaves under the header, the
+ * air and the colophon, over the niche's own height at 1 on its heaviest day, no more than a share
+ * of the screen's width, never under the least (where every gloss is still 12 on the glass), and at
+ * most 1.5.
+ */
+func nicheZoom(width: CGFloat, height: CGFloat, chrome: CGFloat, fit: CGFloat, share: CGFloat, card: CGFloat, least: CGFloat) -> CGFloat {
+    max(least, min((height - chrome) / fit, share * width / card, 1.5))
+}
+
+extension Metrics {
+    /// These metrics at the niche's scale: every length and every size inside it, as the web's `zoom`.
+    func zoomed(_ z: CGFloat) -> Metrics {
+        var m = self
+        m.layout *= z
+        m.type *= z
+        return m
+    }
+}
 
 /// How far the niche's drawing runs beyond the card: the clearing, the moulding and their shadows.
 private let reach: CGFloat = 96
@@ -91,69 +145,114 @@ private func blurred(_ ctx: GraphicsContext, _ path: Path, _ color: Color, _ blu
 }
 
 /**
- * The niche behind the frontispiece, under the pointed head `arch`, in the order the web's
- * courses stack, outermost first: the room's shade under the niche and a field of the Apse's
- * ground round both, the clearing, the moulding's edge and stone, the day's colour as a trim;
- * then the frame and the lit recess, with the shade its head casts. Each is the arch offset by
- * its own distance.
+ * The niche by day behind the frontispiece, under the pointed head `arch`, in the order the web's
+ * courses stack, outermost first: the arris where the wall turns into the recess, catching the
+ * light on the right and lost in shade on the left; the reveal (`--reveal`, 1.2rem), the left jamb
+ * in shade and the right lit, the soffit turning from the light toward the point, the sill between
+ * the jambs mitred at its corners and facing the light; the day's colour as one fillet at the back
+ * wall's edge (`fillet`); then the back wall, the phone's plaster under a warm glow and sheen, with
+ * the shade the head and left jamb cast on it. Each is the arch offset by its own distance. By
+ * night the niche is the phone's panel (`Panel`) and its sky.
  */
 struct Niche: View {
     let arch: Arch
     let t: NicheTokens
-    let day: Color
-    let frame: Color
+    let fillet: Color
     @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
 
     var body: some View {
         Canvas { ctx, full in
-            let rem: CGFloat = 16
+            let rem = m.px(16)
             let card = Card(arch: arch, full: full)
             let o = card.origin, size = card.size
-            // The moulding's silhouette, the source of its halo: the clearing, or with none the
-            // stone's edge.
-            let outer = t.clear != nil ? 1.25 * rem + 1 : 0.75 * rem + 1
-            if let clear = t.clear {
-                // drop-shadow(0 0 0.9rem clear) round the moulding and its shadow (as deep as the
-                // night's shade), as the second filter.
-                blurred(ctx, card.shape(outer, dy: 1.25 * rem), clear.opacity(0.62), 1.54 * rem)
-                blurred(ctx, card.shape(outer), clear, 0.9 * rem)
+            let w = size.width, h = size.height
+            let r = 1.2 * rem
+            func across(_ stops: [Gradient.Stop]) -> GraphicsContext.Shading {
+                .linearGradient(Gradient(stops: stops), startPoint: CGPoint(x: o.x - r, y: 0), endPoint: CGPoint(x: o.x + w + r, y: 0))
             }
-            // drop-shadow(0 1.25rem 1.25rem chapel-shade): the niche's shade on the wall below it.
-            blurred(ctx, card.shape(outer, dy: 1.25 * rem), t.shade, 1.25 * rem)
-            if let clear = t.clear { ctx.fill(card.shape(1.25 * rem + 1), with: .color(clear)) }
-            ctx.fill(card.shape(0.75 * rem + 1), with: .color(t.edge))
-            ctx.fill(card.shape(0.75 * rem), with: .color(t.stone))
-            // The day's colour is a hint at the niche's edge, not a second frame.
-            ctx.fill(card.shape(1.5), with: .color(day))
-            // The frame, the card's edge drawn in its rule, and the recess 2pt inside it.
-            ctx.fill(card.shape(0), with: .color(p.surface))
-            ctx.fill(card.shape(0), with: .color(frame))
-            let recess = card.shape(-2)
-            ctx.fill(recess, with: .color(p.surface))
+            // linear-gradient(100deg, ...) across the courses: near enough level, left to right.
+            ctx.fill(card.shape(r + m.px(1.5)), with: across([.init(color: t.arrisShade, location: 0), .init(color: t.arrisShade, location: 0.36), .init(color: t.arrisTurn, location: 0.52), .init(color: t.arris, location: 0.7)]))
+            let reveal = card.shape(r)
+            ctx.fill(reveal, with: across([.init(color: t.revealShade, location: 0), .init(color: t.revealShade, location: 0.34), .init(color: t.revealMid, location: 0.56), .init(color: t.revealLit, location: 0.8)]))
             ctx.drawLayer { inside in
-                inside.clip(to: recess)
-                // A warm pool under the head, and a sheen falling from it, laid from 2rem above
-                // the card as the web's courses are.
+                inside.clip(to: reveal)
+                inside.fill(
+                    Path(CGRect(x: o.x - r, y: o.y - r, width: w + 2 * r, height: 0.5 * w + r)),
+                    with: .linearGradient(Gradient(colors: [t.revealSoffit, t.revealSoffit.opacity(0)]), startPoint: CGPoint(x: 0, y: o.y - r), endPoint: CGPoint(x: 0, y: o.y + 0.5 * w))
+                )
+                // The sill, mitred: from the jambs' outer corners in to the back wall's.
+                var sill = Path()
+                sill.move(to: CGPoint(x: o.x - r, y: o.y + h + r))
+                sill.addLine(to: CGPoint(x: o.x + w + r, y: o.y + h + r))
+                sill.addLine(to: CGPoint(x: o.x + w, y: o.y + h))
+                sill.addLine(to: CGPoint(x: o.x, y: o.y + h))
+                sill.closeSubpath()
+                inside.fill(sill, with: .linearGradient(Gradient(stops: [.init(color: t.revealSillEdge, location: 0), .init(color: t.revealSill, location: 0.35), .init(color: t.revealSill, location: 1)]), startPoint: CGPoint(x: 0, y: o.y + h), endPoint: CGPoint(x: 0, y: o.y + h + r)))
+            }
+            ctx.fill(card.shape(m.px(1.5)), with: .color(fillet))
+            let face = card.shape(0)
+            ctx.fill(face, with: .color(p.surface))
+            ctx.drawLayer { inside in
+                inside.clip(to: face)
+                // The plaster, cover-fitted, then the warm pool under the head and the sheen falling
+                // from it, laid from 2rem above the card as the web's courses are.
+                if let plaster = UIImage(named: p.panel) {
+                    let image = inside.resolve(Image(uiImage: plaster))
+                    let scale = max(w / image.size.width, h / image.size.height)
+                    let fitted = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+                    inside.draw(image, in: CGRect(origin: CGPoint(x: o.x + (w - fitted.width) / 2, y: o.y), size: fitted))
+                }
                 let top = o.y - 2 * rem
-                let height = size.height + 2 * rem
-                let rx = size.width * 0.7, ry = height * 0.5
+                let height = h + 2 * rem
+                let rx = w * 0.7, ry = height * 0.5
                 var pool = inside
-                pool.translateBy(x: o.x + size.width / 2, y: top)
+                pool.translateBy(x: o.x + w / 2, y: top)
                 pool.scaleBy(x: 1, y: ry / rx)
                 pool.fill(
                     Path(ellipseIn: CGRect(x: -rx, y: -rx, width: 2 * rx, height: 2 * rx)),
                     with: .radialGradient(Gradient(stops: [.init(color: t.warm, location: 0), .init(color: t.warm.opacity(0), location: 0.72)]), center: .zero, startRadius: 0, endRadius: rx)
                 )
                 inside.fill(
-                    Path(CGRect(x: o.x, y: top, width: size.width, height: height)),
+                    Path(CGRect(x: o.x, y: top, width: w, height: height)),
                     with: .linearGradient(Gradient(stops: [.init(color: t.sheen, location: 0), .init(color: t.sheen.opacity(0), location: 0.3)]), startPoint: CGPoint(x: 0, y: top), endPoint: CGPoint(x: 0, y: top + height))
                 )
-                // drop-shadow(0 0.55rem 0.9rem recess): the wall outside the arch casts its shade
-                // in, and the recess lies in shadow under the head.
-                blurred(inside, card.outside(-2, dy: 0.55 * rem), t.recess, 0.9 * rem, eoFill: true)
+                // drop-shadow(0.5rem 0.7rem 0.8rem cast) drop-shadow(0.1rem 0.15rem 0.12rem cast):
+                // the head and the left jamb throw their shade on the back wall.
+                var deep = inside
+                deep.translateBy(x: 0.5 * rem, y: 0)
+                blurred(deep, card.outside(0, dy: 0.7 * rem), t.cast, 0.8 * rem, eoFill: true)
+                var near = inside
+                near.translateBy(x: 0.1 * rem, y: 0)
+                blurred(near, card.outside(0, dy: 0.15 * rem), t.cast, 0.12 * rem, eoFill: true)
             }
         }
         .padding(-reach)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/**
+ * A first-class day's fillet of matte leaf round the niche's head by day (`.home-summary::before`),
+ * 3pt over the back wall's edge, open at the foot and down to this view's foot (the frieze), as the
+ * parish's chancel arch is gilt; the jambs and the sill keep the day's fillet. The view is the
+ * card's width, its top the card's.
+ */
+struct GiltHead: View {
+    let arch: Arch
+    @Environment(\.ornament) private var o
+    @Environment(\.metrics) private var m
+
+    var body: some View {
+        Canvas { ctx, size in
+            let gilt = Gradient(stops: [
+                .init(color: mix(o.lo, o.hi, 0.6), location: 0), .init(color: mix(o.lo, o.hi, 0.6), location: 0.3),
+                .init(color: o.hi, location: 0.62), .init(color: mix(o.hi, .white, 0.7), location: 0.82), .init(color: o.hi, location: 1),
+            ])
+            let path = archPath(arch, width: size.width, outset: 0, foot: size.height, open: true)
+            ctx.stroke(path, with: .linearGradient(gilt, startPoint: .zero, endPoint: CGPoint(x: size.width, y: 0)), style: StrokeStyle(lineWidth: m.px(3), lineJoin: .miter, miterLimit: 2))
+        }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
