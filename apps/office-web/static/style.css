@@ -9326,6 +9326,11 @@ html:where(:has(> body.page-hour))::before {
     --arch-ground: var(--niche-background);
     --arch-frame: 0px;
     --pad-x: 2.25rem;
+    /* The niche is always the card's width, so the head is drawn to it
+       rather than to 100cqi: under zoom, WebKit resolves container units
+       on the glass and then zooms them again, which narrowed the head (and
+       shortened the niche) until app.js's --arch-cqi arrived. */
+    --arch-w: var(--card-w);
     --reveal: 1.2rem;
     --arch-lift: 3.5rem;
     --lining-inset: 20px;

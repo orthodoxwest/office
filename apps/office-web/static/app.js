@@ -2175,7 +2175,11 @@ function rule(x1, y1, x2, y2, w, seed) {
         frame = window.requestAnimationFrame(paint);
       }
     }
-    paint();
+    // The first painting waits for the first frame, which waits for the
+    // stylesheet: WebKit can run this deferred script before style.css has
+    // applied, and the rules measured then were drawn across an unstyled page
+    // (the table's joints some 900px below it) until the next resize.
+    schedule();
     if (document.fonts) {
       document.fonts.ready.then(schedule);
     }
