@@ -488,9 +488,11 @@ private struct DayRow: View {
         disclosed
     }
 
-    /// "Today", in the small caps and gold of today's number.
+    /// "Today", in small caps and the gold of today's number, darkened by day (the web's
+    /// `--today-ink`): the gold reads 3.9:1 on limewash, too light for type this small.
     private var todayNote: some View {
-        Text("Today").type(TextStyle(size: 13.12, line: 18, tracking: 1.31, smallCaps: true)).foregroundStyle(p.gold)
+        Text("Today").type(TextStyle(size: 13.12, line: 18, tracking: 1.31, smallCaps: true))
+            .foregroundStyle(p.dark ? p.gold : Color(hex: 0x76561A))
             .accessibilityHidden(true)
     }
 

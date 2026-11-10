@@ -301,6 +301,9 @@
   --bg: #faf3e9;
   --accent: #6b3a1f;
   --gold: #9a7328;
+  /* The ordo's "Today" note: the gold is too light for small type on
+     limewash (3.9:1), so by day it darkens to 5.4:1; by night it is the gold. */
+  --today-ink: #76561a;
   --gold-line: #c9ac72;
   /* Ornament tokens: gold leaf by default, in both themes (the var() resolves
      against whichever --gold won the cascade on :root). Only the gilding reads
@@ -4195,7 +4198,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
     align-self: center;
     margin-left: auto;
     padding-right: 0.5rem;
-    color: var(--gold);
+    color: var(--today-ink);
     font-size: 0.82rem;
     font-variant-caps: all-small-caps;
     letter-spacing: 0.1em;
@@ -4555,6 +4558,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
     --plaster-strength: 52%;
     --accent: #d0b06a;
     --gold: #d8bc74;
+    --today-ink: var(--gold);
     --gold-line: #6a5c3a;
     --ornament-hi: #e7d295;
     --ornament-lo: #c0a25a;
@@ -4635,6 +4639,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   --plaster-strength: 52%;
   --accent: #d0b06a;
   --gold: #d8bc74;
+  --today-ink: var(--gold);
   --gold-line: #6a5c3a;
   --ornament-hi: #e7d295;
   --ornament-lo: #c0a25a;

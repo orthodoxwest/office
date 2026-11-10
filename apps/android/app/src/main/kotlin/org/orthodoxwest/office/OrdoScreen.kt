@@ -802,9 +802,12 @@ private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) 
     }
 }
 
-/** "Today", in the small caps and gold of today's number. */
+/**
+ * "Today", in small caps and the gold of today's number, darkened by day (the web's
+ * `--today-ink`): the gold reads 3.9:1 on limewash, too light for type this small.
+ */
 private val TodayNote: TextStyle
-    @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.gold, fontFeatureSettings = ALL_SMALL_CAPS)
+    @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.let { if (it.dark) it.gold else Color(0xFF76561A) }, fontFeatureSettings = ALL_SMALL_CAPS)
 
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable
