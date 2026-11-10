@@ -196,6 +196,36 @@ private fun parse(field: String): List<SkyStar> = field.split(';').map { star ->
 
 private val Fields by lazy { mapOf(PhoneArch to parse(StarFields.PHONE), TallArch to parse(StarFields.TALL), TallerArch to parse(StarFields.TALLER)) }
 
+/** The ending tile's edge, dp: never scaled (`ornaments/sky-tile.svg`). */
+const val SkyTile = 384f
+
+/**
+ * The hour's ending by night (tools/genstars.py's tile): each star of the tile as a path in dp
+ * from the tile's top left, with its leaf, and again across each edge it crosses, so the tile
+ * repeats without a seam as the web's mask does.
+ */
+val SkyTileStars: List<Pair<Float, Path>> by lazy {
+    parse(StarFields.TILE).flatMap { s ->
+        val x = s.x * SkyTile
+        val y = s.y * SkyTile
+        buildList {
+            for (ox in listOf(-SkyTile, 0f, SkyTile)) for (oy in listOf(-SkyTile, 0f, SkyTile)) {
+                val cx = x + ox
+                val cy = y + oy
+                if (cx < -12f || cx > SkyTile + 12f || cy < -12f || cy > SkyTile + 12f) continue
+                add(
+                    s.leaf to Path().apply {
+                        for (i in s.outline.indices step 2) {
+                            if (i == 0) moveTo(cx + s.outline[i], cy + s.outline[i + 1]) else lineTo(cx + s.outline[i], cy + s.outline[i + 1])
+                        }
+                        close()
+                    },
+                )
+            }
+        }
+    }
+}
+
 /** The stars of a head's field (tools/genstars.py), or none for a head with no sky. */
 fun skyStars(arch: Arch): List<SkyStar> = Fields[arch] ?: emptyList()
 

@@ -181,6 +181,31 @@ struct SkyStar {
         }
     }
 
+    /// The ending tile's edge, points: never scaled (`ornaments/sky-tile.svg`).
+    static let tileSize: CGFloat = 384
+
+    /// The hour's ending by night (tools/genstars.py's tile): each star as a path in points from
+    /// the tile's top left, with its leaf, and again across each edge it crosses, so the tile
+    /// repeats without a seam as the web's mask does.
+    static let tile: [(path: Path, leaf: Double)] = parse(StarFields.tile).flatMap { s -> [(path: Path, leaf: Double)] in
+        var out: [(path: Path, leaf: Double)] = []
+        for ox in [-tileSize, 0, tileSize] {
+            for oy in [-tileSize, 0, tileSize] {
+                let cx = s.x * tileSize + ox
+                let cy = s.y * tileSize + oy
+                guard cx > -12, cx < tileSize + 12, cy > -12, cy < tileSize + 12 else { continue }
+                var path = Path()
+                for i in stride(from: 0, to: s.outline.count - 1, by: 2) {
+                    let pt = CGPoint(x: cx + s.outline[i], y: cy + s.outline[i + 1])
+                    if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
+                }
+                path.closeSubpath()
+                out.append((path: path, leaf: Double(s.leaf)))
+            }
+        }
+        return out
+    }
+
     private static let phone = parse(StarFields.phone)
     private static let tall = parse(StarFields.tall)
     private static let taller = parse(StarFields.taller)

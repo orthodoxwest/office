@@ -2,6 +2,7 @@ package org.orthodoxwest.office
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,14 +13,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -30,23 +36,17 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -417,19 +417,28 @@ private fun DrawScope.tiles(w: Float, h: Float, seam: Float, draw: DrawScope.() 
 
 /**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the
- * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding; by day the
+ * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding, or with `sky`
+ * (the hour's ending) home's sky, its stars in the apse's matte leaf on one 384dp tile; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * (96×168) never scaled. Tiled from the field's centre and from `seam` down it, and faded by
  * `fade`'s stops of (fraction, alpha), for the field's size in either theme. Unlit, the vault
  * has no stars: a bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 @Composable
-fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
+fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, sky: Boolean = false, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
     val p = LocalPalette.current
-    val star = LocalOrnament.current.flat
+    val o = LocalOrnament.current
+    val star = o.flat
+    val leaf = remember(o) { Leaf(o).mid }
     val rosette = p.rubric.copy(alpha = 0.12f)
     Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
-        if (p.dark) {
+        if (p.dark && sky) {
+            if (!lit) return@Canvas
+            val tile = SkyTile.dp.toPx()
+            tiles(tile, tile, seam.toPx()) {
+                scale(density, density, pivot = Offset.Zero) { for ((alpha, s) in SkyTileStars) drawPath(s, leaf, alpha = alpha) }
+            }
+        } else if (p.dark) {
             if (!lit) return@Canvas
             val tile = vaultTile(size.width.toDp()).toPx()
             val k = tile / 528f

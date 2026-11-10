@@ -9312,6 +9312,32 @@ body {
   --apse-vault: var(--apse-star-tile);
 }
 
+/* The hour's ending by night takes home's sky, not the old vault tile: the
+   same long-armed four-point crosses and eight-point stars in the same
+   matte, slightly rosy leaf, one seamless tile at the vault's own measured
+   density and never scaled (tools/genstars.py, ornaments/sky-tile.svg).
+   The day's powdering (above) is more specific and keeps the day. The wide
+   hours' side fields keep --apse-vault. */
+body {
+  --apse-sky-tile: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body {
+    --apse-sky-tile: url("ornaments/sky-tile.svg");
+  }
+}
+
+:root[data-theme="dark"] body {
+  --apse-sky-tile: url("ornaments/sky-tile.svg");
+}
+
+body.page-hour {
+  --wall-field: var(--apse-sky-tile);
+  --wall-tile-size: 384px 384px;
+  --wall-ink: color-mix(in srgb, var(--apse-ink) 70%, var(--leaf-matte));
+}
+
 /* A veiled bare hour (the Triduum; see "Bare hours") puts the stars out:
    the vault is unlit, as the church is after Tenebrae. Stated after the
    blocks above, which it matches in specificity. */
@@ -9319,6 +9345,7 @@ body.hour-bare.season-passiontide {
   --apse-ink: transparent;
   --apse-gild: none;
   --apse-vault: none;
+  --apse-sky-tile: none;
 }
 
 /* The home vault is lit from the altar: stars nearest the frontispiece take

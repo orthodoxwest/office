@@ -82,6 +82,7 @@ var CORE_ASSETS = [
   assetURL("/static/gild.png"),
   assetURL("/static/sky-wash.jpg"),
   assetURL("/static/ornaments/stars.json"),
+  assetURL("/static/ornaments/sky-tile.svg"),
   // The painted ornaments style.css masks its colours through
   // (tools/genornaments.py).
   assetURL("/static/ornaments/consecration.svg"),

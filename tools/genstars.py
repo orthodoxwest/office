@@ -26,6 +26,15 @@ is at y = 0); radii and the outline's offsets are CSS px (dp, pt). Writes
   apps/office-web/static/ornaments/stars.json   {shape: [[x, y, r, leaf, [dx, dy, ...]], ...]}
   apps/android/.../Stars.kt, apps/ios/Office/Stars.swift   the same, as one string per shape
 
+and the same stars for the hour's ending by night: one seamless tile, TILE CSS
+px square and never scaled, at the vault's own measured density (the ending has
+no words in its middle to clear, so it takes the photograph's density, not the
+head's double), its stars drawn again across the tile's edges and kept the
+vault's closest apart across them too:
+
+  apps/office-web/static/ornaments/sky-tile.svg  each star a path at its leaf's opacity
+  Stars.kt / Stars.swift  `TILE`/`tile`: the same, x and y in tile widths
+
 Requires tools/requirements.txt. Seeded, so it regenerates byte for byte.
 Run from the repository root.
 """
@@ -60,6 +69,9 @@ GAP = NEAREST_P10 * K * 1.1                            # none closer than the va
 # The ray count over-reads the small stars as four-point (0.83); by eye it is about three in five.
 FOUR = 0.6
 SEEDS = {"phone": 1117, "tall": 1118, "taller": 1119}
+TILE = 384           # the ending's tile, CSS px: about one phone sky, a whole number of pixels
+TILE_SEED = 1121
+TILE_SVG = Path("apps/office-web/static/ornaments/sky-tile.svg")
 
 
 def outline(shape, w, h, d):
@@ -113,16 +125,48 @@ def field(name):
             continue
         if all((x - px) ** 2 + (y - py) ** 2 > GAP * GAP for px, py in pts):
             pts.append((x, y))
-    stars = []
-    for (x, y) in pts:
-        kind = 4 if rng.uniform() < FOUR else 8
-        # Radii from the photograph's diameters (p10..p90 of each kind), in CSS px.
-        r = float(rng.uniform(3.7, 5.2) if kind == 4 else rng.choice([5.6, 6.6, 8.0], p=[0.45, 0.4, 0.15]))
-        rot = rng.normal(0, 0.16)      # set by hand: none is plumb
-        poly = [round(v, 1) for p in glyph(kind, r, rot, rng) for v in p]
-        leaf = round(float(rng.uniform(0.62, 1.0)), 2)
-        stars.append([round(x / W, 4), round(y / W, 4), round(r, 2), leaf, poly])
-    return stars
+    return [star(rng, round(x / W, 4), round(y / W, 4)) for (x, y) in pts]
+
+
+def star(rng, x, y):
+    """One star at (x, y) as field() sets them: [x, y, r, leaf, outline offsets]."""
+    kind = 4 if rng.uniform() < FOUR else 8
+    # Radii from the photograph's diameters (p10..p90 of each kind), in CSS px.
+    r = float(rng.uniform(3.7, 5.2) if kind == 4 else rng.choice([5.6, 6.6, 8.0], p=[0.45, 0.4, 0.15]))
+    rot = rng.normal(0, 0.16)      # set by hand: none is plumb
+    poly = [round(v, 1) for p in glyph(kind, r, rot, rng) for v in p]
+    leaf = round(float(rng.uniform(0.62, 1.0)), 2)
+    return [x, y, round(r, 2), leaf, poly]
+
+
+def tile():
+    """The ending's seamless tile: the vault's density and closest spacing, measured round the
+    tile's edges as the repeat will set them."""
+    rng = np.random.default_rng(TILE_SEED)
+    want = int(round(DENSITY / 2 * TILE * TILE))
+    pts = []
+    while len(pts) < want:
+        x, y = rng.uniform(0, TILE), rng.uniform(0, TILE)
+        def apart(px, py):
+            dx = min(abs(x - px), TILE - abs(x - px))
+            dy = min(abs(y - py), TILE - abs(y - py))
+            return dx * dx + dy * dy > GAP * GAP
+        if all(apart(px, py) for px, py in pts):
+            pts.append((x, y))
+    return [star(rng, round(x / TILE, 4), round(y / TILE, 4)) for x, y in pts]
+
+
+def tile_svg(stars):
+    """The tile as a mask: each star, and its copies across the edges it crosses, at its leaf."""
+    parts = []
+    for x, y, r, leaf, poly in stars:
+        for ox in (-TILE, 0, TILE):
+            for oy in (-TILE, 0, TILE):
+                cx, cy = x * TILE + ox, y * TILE + oy
+                if -12 < cx < TILE + 12 and -12 < cy < TILE + 12:
+                    d = "M" + " ".join(f"{cx + poly[i]:.2f},{cy + poly[i + 1]:.2f}" for i in range(0, len(poly), 2)) + "Z"
+                    parts.append(f'<path d="{d}" fill-opacity="{leaf:.2f}"/>')
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {TILE} {TILE}">{"".join(parts)}</svg>\n'
 
 
 def num(v):
@@ -150,6 +194,8 @@ def kotlin(data):
         "internal object StarFields {",
     ]
     for name, stars in data.items():
+        if name == "tile":
+            lines.append(f"    /** The hour's ending by night: one {TILE}dp tile, x and y in tile widths (`ornaments/sky-tile.svg`). */")
         lines.append(f'    const val {name.upper()} = "{flat(stars)}"')
     lines.append("}")
     return "\n".join(lines) + "\n"
@@ -165,6 +211,8 @@ def swift(data):
         "enum StarFields {",
     ]
     for name, stars in data.items():
+        if name == "tile":
+            lines.append(f"    /// The hour's ending by night: one {TILE}pt tile, x and y in tile widths (`ornaments/sky-tile.svg`).")
         lines.append(f'    static let {name} = "{flat(stars)}"')
     lines.append("}")
     return "\n".join(lines) + "\n"
@@ -211,11 +259,13 @@ def main():
         return
     data = {name: field(name) for name in SEEDS}
     WEB.write_text(json.dumps(data, separators=(",", ":")) + "\n")
-    KOTLIN.write_text(kotlin(data))
-    SWIFT.write_text(swift(data))
-    for name, stars in data.items():
+    ending = tile()
+    TILE_SVG.write_text(tile_svg(ending))
+    KOTLIN.write_text(kotlin({**data, "tile": ending}))
+    SWIFT.write_text(swift({**data, "tile": ending}))
+    for name, stars in {**data, "tile": ending}.items():
         print(f"{name}: {len(stars)} stars")
-    print(f"{WEB}: {WEB.stat().st_size} bytes")
+    print(f"{WEB}: {WEB.stat().st_size} bytes; {TILE_SVG}: {TILE_SVG.stat().st_size} bytes")
 
 
 if __name__ == "__main__":

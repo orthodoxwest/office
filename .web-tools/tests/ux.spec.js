@@ -1244,6 +1244,8 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
         cross: cross && getComputedStyle(cross).display,
         rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
         vault: body.getPropertyValue("--apse-vault").trim(),
+        // The ending's field: home's sky tile by night, the powdering by day.
+        field: getComputedStyle(document.querySelector(".hour-epilogue"), "::before").maskImage,
       };
     });
   };
@@ -1254,6 +1256,7 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
     expect(goodFriday.sign).toBe("none");
     expect(goodFriday.rule).toBe("0px");
     expect(goodFriday.vault).toBe("none");
+    expect(goodFriday.field.includes("sky-tile.svg")).toBe(false);
     // Prime keeps its cross, and the rule its break.
     const prime = await read("/prime/2026-04-10", theme);
     expect(prime.bare).toBe(true);
@@ -1273,6 +1276,7 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
       expect(lit.sign).not.toBe("none");
       expect(lit.rule).toBe("1.25rem");
       expect(lit.vault === "none").toBe(theme === "light");
+      expect(lit.field.includes(theme === "light" ? "powder.svg" : "sky-tile.svg")).toBe(true);
     }
   }
 });

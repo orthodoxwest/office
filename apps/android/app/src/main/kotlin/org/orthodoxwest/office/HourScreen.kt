@@ -522,7 +522,7 @@ private fun Epilogue(
         Box(Modifier.fillMaxWidth()) {
             // The field is phased from the seam where the ending's air (3.25rem) meets the
             // footer. By night it fades in over the first rem and thins down the footer.
-            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = lit) { dark ->
+            WallField(Modifier.matchParentSize(), seam = EndingAir, lit = lit, sky = true) { dark ->
                 val seam = EndingAir.toPx() / size.height
                 if (dark) {
                     listOf(0f to 0f, 16.dp.toPx() / size.height to 1f, seam + 0.45f * (1f - seam) to 1f, seam + 0.8f * (1f - seam) to 0.5f, 1f to 0.25f)

@@ -884,7 +884,7 @@ private struct Epilogue: View {
                 .padding(.top, m.px(4.8))
             }
             .background(
-                WallField(seam: air, lit: lit) { h, dark in
+                WallField(seam: air, lit: lit, sky: true) { h, dark in
                     let seam = air / h
                     return dark
                         ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]
