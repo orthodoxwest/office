@@ -4482,6 +4482,33 @@ test("a feast's rules follow the reader's text size, and a feast never kept has 
   await expect(page.locator(".feast-standing")).toHaveCount(0);
 });
 
+test("a feast's rules are never drawn across an unstyled page", async ({ page }) => {
+  // WebKit can run the deferred script before a slow stylesheet applies; the
+  // rules then wait for the page's load rather than measuring bare markup.
+  await page.route(/style\.css/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      window.__early = {
+        rules: document.querySelectorAll("svg.feast-rules path").length,
+        styled: Boolean(getComputedStyle(document.documentElement).getPropertyValue("--bg")),
+      };
+    });
+  });
+  await page.goto("/feast/christmas");
+  // Chromium holds the script for the stylesheet; WebKit may not, and then
+  // nothing is ruled yet.
+  const early = await page.evaluate(() => window.__early);
+  expect(early.styled || early.rules === 0, JSON.stringify(early)).toBe(true);
+  const fits = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return ys.length > 0 && Math.abs(Math.max(...ys) - n.offsetHeight) < 3;
+  });
+  await expect.poll(fits).toBe(true);
+});
+
 test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
   await page.goto("/feast/st-raphael-of-brooklyn");
   const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
