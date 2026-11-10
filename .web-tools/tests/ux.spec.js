@@ -1398,6 +1398,8 @@ test("the hour's disclosures never break inside themselves", async ({ page }) =>
     await page.setViewportSize({ width, height: 844 });
     await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
     await openDatedPage(page, "/vespers/2026-12-25");
+    // The fallback face is wider than EB Garamond: measure the face the reader gets.
+    await page.evaluate(() => document.fonts.ready);
     const boxes = await page.locator(".hour-context-controls > details > summary").evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
