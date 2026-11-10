@@ -2937,7 +2937,7 @@ function rule(x1, y1, x2, y2, w, seed) {
       stroke(svg, "r-frame", rule(0, last.bottom - top - 0.5, w, last.bottom - top - 0.5, 1.3, 81 + rows.length));
     }
     var texts = body && body.querySelector(".feast-texts");
-    if (first && texts && standing) {
+    if (first && texts && standing && body) {
       svg = layer(body);
       if (window.matchMedia("(min-width: 760px)").matches) {
         var x = (texts.offsetLeft + texts.offsetWidth + standing.offsetLeft) / 2;
@@ -2949,12 +2949,17 @@ function rule(x1, y1, x2, y2, w, seed) {
   }
 
   ruleAll();
-  var width = page.offsetWidth;
-  window.addEventListener("resize", function () {
-    if (page.offsetWidth !== width) {
-      width = page.offsetWidth;
+  // Redrawn whenever the page's box changes: a new width, and the reader's
+  // text size, which moves every line without touching the window.
+  var size = page.offsetWidth + "x" + page.offsetHeight;
+  function remeasure() {
+    var now = page.offsetWidth + "x" + page.offsetHeight;
+    if (now !== size) {
+      size = now;
       ruleAll();
     }
-  });
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(page);
+  else window.addEventListener("resize", remeasure);
   if (document.fonts) document.fonts.ready.then(ruleAll);
 })();

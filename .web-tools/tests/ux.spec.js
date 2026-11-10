@@ -4284,12 +4284,25 @@ test("a feast's head is home's day block turned about, ruled with home's pen", a
     await expect(page.locator(host).first()).toHaveClass(/is-ruled/);
   }
   expect(await page.locator(".feast-years .find-years > svg.feast-rules path").count()).toBe(9);
-  // A commemoration's head is bare.
+  // A greater double carries the cross in the lining; a monastic observance's head is bare.
   await page.goto("/feast/st-raphael-of-brooklyn");
-  await expect(page.locator(".feast-head")).not.toHaveClass(/is-plain/);
+  await expect(page.locator(".feast-head")).toHaveClass(/is-feast/);
   await page.goto("/feast/solemnity-st-benedict");
   await expect(page.locator(".feast-head")).toHaveClass(/is-plain/);
   await expect(page.locator(".feast-head > svg.feast-rules")).toHaveCount(0);
+});
+
+test("a feast's rules follow the reader's text size, and a feast never kept has no empty standing", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const frame = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return { height: n.offsetHeight, bottom: Math.max(...ys) };
+  });
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await expect.poll(async () => { const f = await frame(); return Math.abs(f.bottom - f.height) < 3; }).toBe(true);
+
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator(".feast-standing")).toHaveCount(0);
 });
 
 test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {

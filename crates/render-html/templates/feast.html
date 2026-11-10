@@ -8,6 +8,7 @@
     <p class="feast-rank">{% set parts = subtitle|split(" · ")|list %}{% for part in parts %}{% if not loop.first %}<span class="feast-point" aria-hidden="true"></span><span class="sr-only"> · </span>{% endif %}<span>{{ part|typeset }}</span>{% endfor %}</p>
   </header>
   <div class="feast-body{% if not texts %} no-texts{% endif %}">
+    {% if monastic_note or next %}
     <div class="feast-standing{% if monastic_note %} is-monastic{% endif %}{% if next %} day-color-{{ next.color }}{% endif %}">
       {% if monastic_note %}
       <p class="feast-standing-label">{{ feast_words.monastic_heading }}</p>
@@ -22,6 +23,7 @@
       </a>
       {% endif %}
     </div>
+    {% endif %}
     {% if texts %}
     <section class="feast-section feast-texts" aria-labelledby="feast-texts-heading">
       <h2 id="feast-texts-heading">{{ feast_words.texts_heading }}</h2>

@@ -4498,6 +4498,10 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   background: var(--frontal);
   transform: rotate(45deg);
 }
+@media (forced-colors: active) {
+  .feast-point,
+  .feast-years .find-year::before { forced-color-adjust: none; background: CanvasText; }
+}
 
 .feast-body { display: grid; gap: 1.4rem; grid-template-columns: minmax(0, 1fr); }
 
