@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,11 +80,14 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import org.orthodoxwest.office.core.BlockKind
+import org.orthodoxwest.office.core.CivilDate
 import java.time.LocalDate
 import kotlinx.coroutines.delay
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FeastYearView
 import org.orthodoxwest.office.core.FindView
+import org.orthodoxwest.office.core.feastBackToDay
+import org.orthodoxwest.office.core.feastBackToOrdo
 import org.orthodoxwest.office.core.feastWords
 
 /** The search and feast page's fixed words, as every front sets them. */
@@ -161,6 +165,17 @@ fun FindScreen(
 }
 
 /**
+ * The name of a feast page's way back to the page under it (the web's `back_link`): "Today" or
+ * "November 10" for a day's page, "Ordo, November 2026" for the ordo's month, or null for the
+ * search or nothing, whose way back is the search.
+ */
+fun feastBack(under: Page?, today: LocalDate): String? = when (under) {
+    is Page.Home -> feastBackToDay(under.date.toCivil(), today.toCivil())
+    is Page.Ordo -> feastBackToOrdo(CivilDate(under.year, under.month, 1))
+    else -> null
+}
+
+/**
  * A feast's page, as the web's /feast/{id} ("The feast page" in style.css): a leaf of home's
  * painted wall. Its head is home's day block turned about, the feast leading and its usual date
  * the titulus over it; then its standing (the next day it is kept, leading to that day), its
@@ -176,6 +191,8 @@ fun FeastScreen(
     onFind: () -> Unit,
     onFeast: (String) -> Unit,
     onDay: (LocalDate) -> Unit,
+    back: String? = null,
+    onBack: () -> Unit = onFind,
 ) {
     val p = LocalPalette.current
     val w = FEAST_WORDS
@@ -201,8 +218,8 @@ fun FeastScreen(
         item(key = "back") {
             Box(column) {
                 Text(
-                    "‹ ${w.findTitle}",
-                    Modifier.heightIn(min = 44.dp).tap(onClick = onFind).padding(vertical = 12.dp),
+                    "‹ ${back ?: w.findTitle}",
+                    Modifier.heightIn(min = 44.dp).tap(onClick = if (back != null) onBack else onFind).padding(vertical = 12.dp),
                     style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.37.sp),
                 )
             }
@@ -500,9 +517,14 @@ private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier
             // The collect, the first text when a feast has one, opens as a collect does in the hours.
             val line = LocalDensity.current.bodyLine()
             val collect = n == 0 && t.prayer
-            t.blocks.forEachIndexed { i, b ->
-                val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
-                Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)))
+            // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the web's
+            // `--cap-ink` under `.feast-head.day-color-black`).
+            val gilding = LocalOrnament.current
+            CompositionLocalProvider(LocalOrnament provides if (view.color == "black") gilding.copy(cap = p.muted) else gilding) {
+                t.blocks.forEachIndexed { i, b ->
+                    val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
+                    Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)))
+                }
             }
         }
         view.wholeOffice?.let { whole ->

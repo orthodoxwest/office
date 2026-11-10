@@ -24,6 +24,8 @@ struct FindPage: View {
 /// A feast's page, as the web's /feast/{id}.
 struct FeastPage: View {
     let id: String
+    /// The visit on the way back, whose page under it the back link names.
+    var entry: Int? = nil
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
@@ -32,7 +34,7 @@ struct FeastPage: View {
             guard let view = try Office.core.get().feastPage(id: id, today: today) else { throw NoFeast() }
             return view
         } content: { view in
-            FeastScreen(view: view)
+            FeastScreen(view: view, entry: entry)
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -171,6 +173,7 @@ private struct Stroke: View {
  */
 struct FeastScreen: View {
     let view: FeastPageView
+    var entry: Int? = nil
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -244,9 +247,14 @@ struct FeastScreen: View {
         }
     }
 
+    /// Named for the day or the ordo the page was opened from, and back to it as the edge swipe
+    /// goes (the web's `back_link`); else the search.
     private var back: some View {
-        Button { model.findAgain() } label: {
-            Text("‹ \(feastWordsShared.findTitle)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
+        let to = entry.flatMap(model.feastBack)
+        return Button {
+            if let entry, to != nil { model.back(from: entry) } else { model.findAgain() }
+        } label: {
+            Text("‹ \(to ?? feastWordsShared.findTitle)").type(TextStyle(size: 15.2, line: 20, tracking: 1.37, smallCaps: true)).foregroundStyle(p.muted)
                 .padding(.vertical, m.px(12))
                 .frame(minHeight: 44)
         }
@@ -261,6 +269,13 @@ struct FeastScreen: View {
             SectionHeading(text: view.yearsHeading, seed: view.texts.isEmpty ? 71 : 72)
             FeastYears(years: view.years)
         }
+    }
+
+    /// The gilding the texts' initials take: a black day's capitals in the muted ink.
+    private var capInk: Ornament {
+        var o = self.o
+        if view.color == "black" { o.cap = p.muted }
+        return o
     }
 
     /// A text's blocks, the collect's opening on the hours' dropped initial (`.feast-text.collect`).
@@ -283,6 +298,9 @@ struct FeastScreen: View {
                 ForEach(Array(blocks(t, first: n == 0).enumerated()), id: \.offset) { i, b in
                     BlockRow(block: b).padding(.top, i == 0 ? 0 : m.space(b.space))
                 }
+                // A black day's initial is left ungilt, in the muted ink, as a bare hour's (the
+                // web's `--cap-ink` under `.feast-head.day-color-black`).
+                .environment(\.ornament, capInk)
             }
             if let whole = view.wholeOffice {
                 Button { model.open(.home(whole.date)) } label: {

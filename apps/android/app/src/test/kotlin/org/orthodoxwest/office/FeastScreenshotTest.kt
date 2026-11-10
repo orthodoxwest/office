@@ -1,6 +1,9 @@
 package org.orthodoxwest.office
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -31,7 +34,7 @@ class FeastScreenshotTest {
 
     private val today = LocalDate.of(2026, 10, 27)
 
-    private fun show(page: Page, theme: ThemeChoice, onOpen: (Page) -> Unit = {}) {
+    private fun show(page: Page, theme: ThemeChoice, under: Page? = null, onOpen: (Page) -> Unit = {}) {
         val find = (page as? Page.Find)?.let { core.findFeasts(it.query, today.year) }
         val feast = (page as? Page.Feast)?.let { core.feastPage(it.id, today.toCivil()) }
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
@@ -44,7 +47,7 @@ class FeastScreenshotTest {
                     reminders = ReminderStore(ApplicationProvider.getApplicationContext()).load(),
                     reminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
-                    find = find, feast = feast,
+                    find = find, feast = feast, pageUnder = { under },
                 )
             }
         }
@@ -134,6 +137,47 @@ class FeastScreenshotTest {
         shoot("feast-today")
         compose.onNodeWithText("${core_words.todaysHours} ›").performClick()
         assertEquals(Page.Home(day), opened)
+    }
+
+    // The way back names the page the feast page was opened from, as the web's `back_link`.
+    @Test
+    fun wayBackNamesWhereTheReaderCameFrom() {
+        assertEquals(core_words.backToday, feastBack(Page.Home(today), today))
+        assertEquals("February 27", feastBack(Page.Home(LocalDate.of(2027, 2, 27)), today))
+        assertEquals("Ordo, February 2026", feastBack(Page.Ordo(2026, 2, 27), today))
+        assertEquals("Ordo, March 2026", feastBack(Page.Ordo(2026, 3), today))
+        assertEquals(null, feastBack(Page.Find("raphael"), today))
+        assertEquals(null, feastBack(null, today))
+    }
+
+    // Opened from a day's page, the link names the day and goes back to it; from the search, to the search.
+    @Test
+    @Config(qualifiers = "w390dp-h844dp-xxhdpi")
+    fun wayBackGoesBack() {
+        val view = core.feastPage("st-raphael-of-brooklyn", today.toCivil())!!
+        var went = ""
+        var back by mutableStateOf<String?>("February 27")
+        compose.setContent {
+            OfficeTheme(choice = ThemeChoice.NAVE, season = "") {
+                FeastScreen(
+                    view, chrome = {}, insets = PaddingValues(), onFind = { went = "find" }, onFeast = {}, onDay = {},
+                    back = back, onBack = { went = "back" },
+                )
+            }
+        }
+        compose.onNodeWithText("‹ February 27").performClick()
+        assertEquals("back", went)
+        back = null
+        compose.onNodeWithText("‹ ${core_words.findTitle}").performClick()
+        assertEquals("find", went)
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h844dp-xxhdpi")
+    fun feastFromOrdo() {
+        show(Page.Feast("st-raphael-of-brooklyn"), ThemeChoice.NAVE, under = Page.Ordo(2026, 2, 27))
+        compose.onNodeWithText("‹ Ordo, February 2026").assertExists()
+        shoot("feast-from-ordo")
     }
 
     // The day's commemoration leads to its feast's page.

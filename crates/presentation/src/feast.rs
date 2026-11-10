@@ -576,11 +576,13 @@ pub fn feast_titulus(e: &FeastEntry) -> String {
 /// cross in the lining), or "plain" (a commemoration, or an observance for monastics only:
 /// notation on another day's office, so the head is bare and the name in ink).
 pub fn feast_register(e: &FeastEntry) -> &'static str {
+    if e.monastic.is_some() {
+        return "plain";
+    }
     match e.rank {
-        _ if e.monastic.is_some() => "plain",
         Rank::Commemoration => "plain",
         Rank::Double1stClass => "first",
-        _ => "feast",
+        Rank::Double2ndClass | Rank::GreaterDouble | Rank::Double | Rank::SemiDouble | Rank::PrivilegedFeria | Rank::Simple => "feast",
     }
 }
 

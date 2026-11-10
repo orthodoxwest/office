@@ -434,6 +434,18 @@ fn finds_a_feast_and_gives_its_page() {
 }
 
 #[test]
+fn a_feast_page_names_its_way_back() {
+    let today = CivilDate { year: 2026, month: 11, day: 10 };
+    assert_eq!(feast_back_to_day(today, today), feast_words().back_today);
+    assert_eq!(feast_back_to_day(today, today), "Today");
+    assert_eq!(feast_back_to_day(CivilDate { year: 2027, month: 2, day: 27 }, today), "February 27");
+    assert_eq!(feast_back_to_ordo(CivilDate { year: 2026, month: 11, day: 1 }), "Ordo, November 2026");
+    let no_day = CivilDate { year: 2026, month: 2, day: 30 };
+    assert_eq!(feast_back_to_day(no_day, today), "Find a feast");
+    assert_eq!(feast_back_to_ordo(no_day), "Find a feast");
+}
+
+#[test]
 fn days_name_their_feasts_pages() {
     let core = OfficeCore::new().unwrap();
     let date = CivilDate { year: 2026, month: 2, day: 27 };

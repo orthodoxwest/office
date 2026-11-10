@@ -7,10 +7,10 @@ use calendar::Date;
 use corpus::typography::typeset;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, feast_date, feast_register,
-    feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note, kept_by_all_note,
-    monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source,
-    whole_office_label,
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, back_to_day, back_to_ordo,
+    feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
+    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
+    texts_keeping, texts_source, whole_office_label,
 };
 use presentation::long_date;
 
@@ -145,6 +145,8 @@ pub struct FeastWordsView {
     pub everyone_keeps: String,
     pub monastic_heading: String,
     pub todays_hours: String,
+    /// The way back to today's page: "Today".
+    pub back_today: String,
 }
 
 #[uniffi::export]
@@ -161,7 +163,25 @@ pub fn feast_words() -> FeastWordsView {
         everyone_keeps: w.everyone_keeps.into(),
         monastic_heading: w.monastic_heading.into(),
         todays_hours: w.todays_hours.into(),
+        back_today: w.back_today.into(),
     }
+}
+
+/// The feast page's way back to the day's page it was opened from, as the web's: "Today" when
+/// `date` is `today`, else "November 10". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_day(date: CivilDate, today: CivilDate) -> String {
+    match (date.parse(), today.parse()) {
+        (Ok(d), Ok(t)) => back_to_day(d, t),
+        _ => FEAST_WORDS.find_title.into(),
+    }
+}
+
+/// The feast page's way back to the ordo's month it was opened from, any day of it: "Ordo,
+/// November 2026". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_ordo(date: CivilDate) -> String {
+    date.parse().map(back_to_ordo).unwrap_or_else(|_| FEAST_WORDS.find_title.into())
 }
 
 /// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
