@@ -3222,7 +3222,18 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       const count = await targets.count();
       expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
       for (let i = 0; i < Math.min(count, 12); i++) {
-        const box = await targets.nth(i).boundingBox();
+        // A target whose thumb box is drawn round it (an absolute ::before, as
+        // the header's links and the ordo's phone rows have) is measured by it.
+        const box = await targets.nth(i).evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return null;
+          const b = getComputedStyle(el, "::before");
+          if (b.content === "none" || b.position !== "absolute") return { width: r.width, height: r.height };
+          const px = (v) => (v.endsWith("px") ? parseFloat(v) : 0);
+          const width = Math.max(r.width, r.width - px(b.left) - px(b.right));
+          const height = Math.max(r.height, r.height - px(b.top) - px(b.bottom));
+          return { width, height };
+        });
         expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
         expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
         expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);

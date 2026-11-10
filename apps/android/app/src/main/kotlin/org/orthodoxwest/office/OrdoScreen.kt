@@ -47,7 +47,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -64,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -521,7 +524,15 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
     val anyOpen = details && hasDetails
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
     val body: @Composable ColumnScope.() -> Unit = {
-        Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+        // Today is said once, in the gold of its number, at the right of today's second line, which
+        // is otherwise empty: no row keeps a line for it.
+        Row(Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
+            buttons()
+            if (isToday) {
+                Spacer(Modifier.weight(1f))
+                Text("Today", Modifier.padding(end = 8.dp).clearAndSetSemantics {}, style = TodayNote)
+            }
+        }
         unfolded()
     }
     // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
@@ -551,13 +562,13 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             },
         ),
     ) {
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
+        // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 11.2.dp, bottom = 9.6.dp)) {
             // The day's liturgical colour as a rail beside its date.
-            Box(Modifier.width(3.dp).height(40.dp).background(railColor(d.color, p)))
+            Box(Modifier.padding(top = 1.6.dp).width(3.dp).height(37.6.dp).background(railColor(d.color, p)))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
-                if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.sp, lineHeight = 14.sp, color = p.accent))
             }
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.Top) {
@@ -635,6 +646,7 @@ private fun DayTableRow(
 ) {
     val p = LocalPalette.current
     val rail = railColor(d.color, p)
+    val margin = LocalConfiguration.current.screenWidthDp >= 1000
     // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
     // gold line across the row, the day's number in gold.
     Column(
@@ -650,6 +662,18 @@ private fun DayTableRow(
     ) {
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
+            // From 1000dp Today is a note in the margin beside today's band (the web's), taking no
+            // room in the row; narrower, the table has no margin and it stands under the number.
+            if (isToday && margin) {
+                Text(
+                    "Today",
+                    Modifier.clearAndSetSemantics {}.layout { m, c ->
+                        val note = m.measure(c.copy(minWidth = 0, maxWidth = Constraints.Infinity, minHeight = 0))
+                        layout(0, 0) { note.place(-note.width - 12.8.dp.roundToPx(), 1.6.dp.roundToPx()) }
+                    },
+                    style = TodayNote.copy(fontSize = 13.6.sp),
+                )
+            }
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
                     .drawBehind { drawRect(rail, Offset(0f, 1.6.dp.toPx()), Size(3.dp.toPx(), size.height - 1.6.dp.toPx())) }
@@ -658,7 +682,7 @@ private fun DayTableRow(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
-                if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.2.sp, lineHeight = 15.7.sp, color = p.accent))
+                if (isToday && !margin) Text("Today", style = Type.small.copy(fontSize = 11.2.sp, lineHeight = 15.7.sp, color = p.accent))
             }
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
@@ -770,11 +794,17 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 
 @Composable
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
-    Row(Modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = LocalPalette.current.muted))
+    // As tall as its type: no row keeps a 44dp line for it. Compose still answers a touch over the
+    // platform's whole minimum target round it, as the web draws its thumb box.
+    Row(Modifier.tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 18.sp, color = LocalPalette.current.muted))
         Caret(open, LocalPalette.current.muted)
     }
 }
+
+/** "Today", in the small caps and gold of today's number. */
+private val TodayNote: TextStyle
+    @Composable get() = Type.label(13.12f, 0.1f).copy(color = LocalPalette.current.gold, fontFeatureSettings = ALL_SMALL_CAPS)
 
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable

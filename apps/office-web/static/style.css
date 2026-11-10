@@ -4090,6 +4090,83 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 
+/* A row is as tall as its type. The hidden "Today" line and the 44px box
+   for Office details each reserved a line in every row; neither does now.
+   On the phone the date's and the summaries' thumb boxes are drawn round
+   them, not laid out (as the header's links are), and Today is said once,
+   in the gold of its number, at the right of today's second line, which
+   is otherwise empty: stamping it still never moves the page. */
+@media (max-width: 700px) {
+  .month-table .day-feast { padding: 0.7rem 0.25rem 0.6rem 0.5rem; }
+  .day-mobile-date {
+    position: relative;
+    min-height: 0;
+  }
+  .day-mobile-date::before {
+    content: "";
+    position: absolute;
+    inset: 0 -0.3rem -0.4rem;
+  }
+  .day-mobile-date::after { display: none; }
+  .month-table tr.is-today .day-disclosures::after,
+  .month-table tr.is-today .day-feast:not(:has(.day-disclosures summary))::after {
+    content: "Today";
+    grid-column: 3;
+    grid-row: 2;
+    align-self: center;
+    margin-left: auto;
+    padding-right: 0.5rem;
+    color: var(--gold);
+    font-size: 0.82rem;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.1em;
+  }
+  .day-disclosures {
+    align-items: center;
+    margin-top: 0.05rem;
+  }
+  /* The summary's drawn box is a whole thumb target: it clears the day's
+     name above and reaches down over the rule into the next row's top
+     margin, short of that row's date, standing over the next row. */
+  .day-disclosures summary {
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+    line-height: 1.5;
+  }
+  .day-disclosures summary::before {
+    content: "";
+    position: absolute;
+    inset: -0.3rem -0.6rem -1.35rem;
+  }
+  .month-table tr::before {
+    top: 0.8rem;
+    height: 2.35rem;
+  }
+}
+/* Wide, Today is a note in the margin beside today's band, so no row keeps
+   a line for it. Between the phone and 1000px the table has no margin to
+   hold it, and keeps the reserved line. */
+@media (min-width: 1000px) {
+  .month-table .day-num::after {
+    position: absolute;
+    top: 0.62rem;
+    right: 100%;
+    margin-right: 0.8rem;
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .month-table tr.day > td:first-child::before {
+    top: 0.45rem;
+    bottom: 0.45rem;
+  }
+}
+
 /* ── Finding a feast ──
    The ordo's search field, the search page and a page per feast. A year's
    row carries its day's colour on a rail, as the ordo's rows do, and leads
