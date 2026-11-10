@@ -459,6 +459,40 @@ function usageBeaconBody(scope) {
     (handheld ? " screen:mobile" : " screen:desktop") + leaderToken + clientToken;
 }
 
+// A painted rule: a stroke of one pen from (x1, y1) to (x2, y2), horizontal
+// or vertical, w wide. Its weight breathes with the hand (seeded, so a line
+// is the same on every visit, and on every front: the apps' ruledLine) and
+// it lifts to a point at each end. Home rules its frieze, invitation and
+// hours with it; the hours rule their way on.
+function seeded(seed) {
+  var s = seed >>> 0;
+  return function () {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+function rule(x1, y1, x2, y2, w, seed) {
+  var r = seeded(seed);
+  var horizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
+  var length = horizontal ? x2 - x1 : y2 - y1;
+  var n = Math.max(6, Math.round(length / 14));
+  var phase1 = r() * 6.28, phase2 = r() * 6.28, drift = (r() - 0.5) * 0.5;
+  var above = [], below = [];
+  for (var i = 0; i <= n; i += 1) {
+    var t = i / n, d = t * length;
+    // The pen lifts over the last 4.5px at each end.
+    var end = Math.min(1, Math.min(d, length - d) / 4.5);
+    var weight = w * (0.86 + 0.16 * Math.sin(phase1 + t * 5.1) + 0.08 * Math.sin(phase2 + t * 17)) * (0.35 + 0.65 * end);
+    // The line itself barely wanders.
+    var c = drift * (t - 0.5) + 0.12 * Math.sin(phase2 + t * 3.3);
+    above.push([d, c - weight / 2]);
+    below.push([d, c + weight / 2]);
+  }
+  return "M" + above.concat(below.reverse()).map(function (p) {
+    return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
+  }).join("L") + "Z";
+}
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
@@ -1949,37 +1983,6 @@ function usageBeaconBody(scope) {
     var head = hero.querySelector(".home-day-head");
     var crown = hero.querySelector(".home-crown");
 
-    function seeded(seed) {
-      var s = seed >>> 0;
-      return function () {
-        s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-        return s / 4294967296;
-      };
-    }
-
-    // A stroke from (x1, y1) to (x2, y2), horizontal or vertical, w wide.
-    function rule(x1, y1, x2, y2, w, seed) {
-      var r = seeded(seed);
-      var horizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
-      var length = horizontal ? x2 - x1 : y2 - y1;
-      var n = Math.max(6, Math.round(length / 14));
-      var phase1 = r() * 6.28, phase2 = r() * 6.28, drift = (r() - 0.5) * 0.5;
-      var above = [], below = [];
-      for (var i = 0; i <= n; i += 1) {
-        var t = i / n, d = t * length;
-        // The pen lifts over the last 4.5px at each end.
-        var end = Math.min(1, Math.min(d, length - d) / 4.5);
-        var weight = w * (0.86 + 0.16 * Math.sin(phase1 + t * 5.1) + 0.08 * Math.sin(phase2 + t * 17)) * (0.35 + 0.65 * end);
-        // The line itself barely wanders.
-        var c = drift * (t - 0.5) + 0.12 * Math.sin(phase2 + t * 3.3);
-        above.push([d, c - weight / 2]);
-        below.push([d, c + weight / 2]);
-      }
-      return "M" + above.concat(below.reverse()).map(function (p) {
-        return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
-      }).join("L") + "Z";
-    }
-
     function layer(host) {
       var svg = host.querySelector(":scope > svg.home-rules");
       if (!svg) {
@@ -2809,4 +2812,38 @@ function usageBeaconBody(scope) {
     last = Date.now();
   });
   window.setInterval(tick, 1000);
+})();
+
+// The end of an hour: its way on is ruled under with home's pen where the
+// wall's field begins, so the powdering and the vault are cut under a line
+// as they are under the header's beam (style.css "The way on"). Without
+// script the rule is a border.
+(function () {
+  var nav = document.querySelector(".page-hour .hour-continuation");
+  if (!nav) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var width = 0, height = 0;
+  function draw() {
+    var w = nav.offsetWidth, h = nav.offsetHeight;
+    if (!w || (w === width && h === height)) return;
+    width = w;
+    height = h;
+    var svg = nav.querySelector(":scope > svg.hour-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "hour-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      nav.appendChild(svg);
+      nav.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("d", rule(0, h - 0.5, w, h - 0.5, 1.2, 51));
+    svg.appendChild(path);
+  }
+  draw();
+  if ("ResizeObserver" in window) new ResizeObserver(draw).observe(nav);
+  else window.addEventListener("resize", draw);
+  if (document.fonts) document.fonts.ready.then(draw);
 })();

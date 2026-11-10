@@ -806,7 +806,10 @@ struct FormChooser: View {
 
 /**
  * The continuation after a page's content: the previous item, the way back to all of them, and
- * the next item. It carries no ornament of its own; an hour ends on its consecration cross above it.
+ * the next item. `ruled` sets it as home sets its hours (an hour's end, the web's
+ * `.page-hour .hour-continuation`): labels in true small capitals, the names a size up, home's gilt
+ * points between the three, and one rule struck under them with home's pen where the wall's field
+ * begins.
  */
 struct Continuation: View {
     let previousLabel: String
@@ -817,18 +820,21 @@ struct Continuation: View {
     let nextLabel: String
     let next: String?
     let onNext: () -> Void
+    var ruled = false
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
+    private func label(_ text: String) -> String { ruled ? text : text.uppercased() }
+
     var body: some View {
-        let small = TextStyle.label(11.2, 0.08)
-        let name = Scale.body.sized(16, line: 22)
+        let small = ruled ? TextStyle(size: 13.76, line: 18, tracking: 1.1, smallCaps: true) : TextStyle.label(11.2, 0.08)
+        let name = Scale.body.sized(ruled ? 16.96 : 16, line: 22)
         HStack(alignment: .center, spacing: 0) {
             Group {
                 if let previous {
                     Button(action: onPrevious) {
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(previousLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text(label(previousLabel)).type(small).foregroundStyle(p.muted)
                             Text("← \(previous)").type(name).foregroundStyle(p.accent)
                         }
                     }
@@ -839,17 +845,19 @@ struct Continuation: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if ruled && previous != nil { GiltPoint() }
             Button(action: onMiddle) {
-                Text(middle.uppercased()).type(.label(12.16, 0.06)).foregroundStyle(p.muted)
-                    .padding(.horizontal, m.px(6.4)).padding(.vertical, m.px(12))
+                Text(label(middle)).type(ruled ? small : .label(12.16, 0.06)).foregroundStyle(p.muted)
+                    .padding(.horizontal, m.px(ruled ? 12 : 6.4)).padding(.vertical, m.px(12))
             }
             .buttonStyle(Quiet())
             .accessibilityLabel(middle)
+            if ruled && next != nil { GiltPoint() }
             Group {
                 if let next {
                     Button(action: onNext) {
                         VStack(alignment: .trailing, spacing: 0) {
-                            Text(nextLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text(label(nextLabel)).type(small).foregroundStyle(p.muted)
                             Text("\(next) →").type(name).foregroundStyle(p.accent)
                         }
                     }
@@ -860,6 +868,15 @@ struct Continuation: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.top, ruled ? m.px(8.8) : 0).padding(.bottom, ruled ? m.px(9.6) : 0)
+        .background {
+            if ruled {
+                Canvas { ctx, size in
+                    ctx.fill(ruledLine(0, size.height - 0.5, size.width, size.height - 0.5, 1.2, seed: 51), with: .color(p.lining.opacity(0.55)))
+                }
+                .accessibilityHidden(true)
+            }
         }
     }
 }

@@ -901,8 +901,10 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
 }
 
 /**
- * The continuation after a page's content: the previous item, the way back to all of them, and
- * the next item, with no ornament of its own.
+ * The way on at a page's end: the previous and next with their labels, and the middle link between.
+ * `ruled` sets it as home sets its hours (an hour's end, the web's `.page-hour .hour-continuation`):
+ * labels in true small capitals, the names a size up, home's gilt points between the three, and
+ * one rule struck under them with home's pen where the wall's field begins.
  */
 @Composable
 fun Continuation(
@@ -915,22 +917,37 @@ fun Continuation(
     next: String?,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
+    ruled: Boolean = false,
 ) {
     val p = LocalPalette.current
-    val small = Type.label(11.2f, 0.08f).copy(color = p.muted)
-    val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.accent)
+    val small = if (ruled) Type.label(13.76f, 0.08f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS) else Type.label(11.2f, 0.08f).copy(color = p.muted)
+    val name = Type.body.copy(fontSize = if (ruled) 16.96.sp else 16.sp, lineHeight = 22.sp, color = p.accent)
+    val middleStyle = if (ruled) small else Type.label(12.16f, 0.06f).copy(color = p.muted)
+    val rule = p.lining.copy(alpha = 0.55f)
+    fun label(text: String) = if (ruled) text else text.uppercase()
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth()
+                .then(
+                    if (!ruled) Modifier else Modifier.drawBehind {
+                        val u = density
+                        drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.2f * u, 51, u), rule)
+                    }.padding(top = 8.8.dp, bottom = 9.6.dp),
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(Modifier.weight(1f).then(if (previous != null) Modifier.tap(label = "$previousLabel: $previous", onClick = onPrevious) else Modifier), horizontalAlignment = Alignment.Start) {
                 if (previous != null) {
-                    Text(previousLabel.uppercase(), style = small)
+                    Text(label(previousLabel), style = small)
                     Text("← $previous", style = name)
                 }
             }
-            Text(middle.uppercase(), Modifier.tap(label = middle, onClick = onMiddle).padding(horizontal = 6.4.dp, vertical = 12.dp), style = Type.label(12.16f, 0.06f).copy(color = p.muted))
+            if (ruled && previous != null) GiltPoint()
+            Text(label(middle), Modifier.tap(label = middle, onClick = onMiddle).padding(horizontal = if (ruled) 12.dp else 6.4.dp, vertical = 12.dp), style = middleStyle)
+            if (ruled && next != null) GiltPoint()
             Column(Modifier.weight(1f).then(if (next != null) Modifier.tap(label = "$nextLabel: $next", onClick = onNext) else Modifier), horizontalAlignment = Alignment.End) {
                 if (next != null) {
-                    Text(nextLabel.uppercase(), style = small)
+                    Text(label(nextLabel), style = small)
                     Text("$next →", style = name)
                 }
             }

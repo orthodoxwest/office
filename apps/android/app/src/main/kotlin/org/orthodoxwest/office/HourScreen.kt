@@ -504,8 +504,8 @@ private fun Epilogue(
     val p = LocalPalette.current
     val context = LocalContext.current
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        // The hour ends on one mark, as painted where the bishop anointed the walls; the links
-        // and the foot below carry no other.
+        // The hour ends on one mark, as painted where the bishop anointed the walls; the way on
+        // below is parted by home's gilt points and ruled under where the wall's field begins.
         ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
         Continuation(
             previousLabel = "Previous hour",
@@ -517,6 +517,7 @@ private fun Epilogue(
             next = next?.let(::hourLabel),
             onNext = { next?.let(onNext) },
             modifier = Modifier.measure().padding(top = 83.2.dp),
+            ruled = true,
         )
         Box(Modifier.fillMaxWidth()) {
             // The field is phased from the seam where the ending's air (3.25rem) meets the

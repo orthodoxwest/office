@@ -842,7 +842,8 @@ private struct Epilogue: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // One mark, as painted where the bishop anointed the walls: the links and foot below carry none.
+            // One mark, as painted where the bishop anointed the walls; the way on below is parted by
+            // home's gilt points and ruled under where the wall's field begins.
             PaintedMark(.consecration, size: m.px(40), color: p.lining)
                 .padding(.top, m.px(26.4))
             Continuation(
@@ -855,7 +856,8 @@ private struct Epilogue: View {
                 next: (next ?? morrow).map(hourLabel),
                 onNext: {
                     if let next { model.open(.hour(date, next)) } else if let morrow { model.open(.hour(date.adding(days: 1), morrow)) }
-                }
+                },
+                ruled: true
             )
             .measured(m)
             .padding(.top, m.px(83.2))
