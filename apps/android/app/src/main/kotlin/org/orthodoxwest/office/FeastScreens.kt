@@ -65,6 +65,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.style.LineBreak
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
+import org.orthodoxwest.office.core.BlockKind
 import java.time.LocalDate
 import kotlinx.coroutines.delay
 import org.orthodoxwest.office.core.FeastPageView
@@ -147,9 +161,12 @@ fun FindScreen(
 }
 
 /**
- * A feast's page, as the web's /feast/{id}: its rank, then its standing (its date and the next day it
- * is kept, leading to that day), its texts with the collect first, and how it is kept in the next
- * eight years.
+ * A feast's page, as the web's /feast/{id} ("The feast page" in style.css): a leaf of home's
+ * painted wall. Its head is home's day block turned about, the feast leading and its usual date
+ * the titulus over it; then its standing (the next day it is kept, leading to that day), its
+ * texts with the collect first, and how it is kept in the next eight years, ruled as home's
+ * hours. The lines are [ruledLine]'s, with the web's seeds: the head 51–58, the standing 61–69,
+ * the headings 71 on, the years 81 on.
  */
 @Composable
 fun FeastScreen(
@@ -164,9 +181,16 @@ fun FeastScreen(
     val w = FEAST_WORDS
     val listState = rememberSaveable(view.id, saver = LazyListState.Saver) { LazyListState() }
     BoxWithConstraints(Modifier.fillMaxSize()) {
-    val rail = maxWidth >= FeastRailFrom && view.texts.isNotEmpty()
-    // On the rail the page's back link and header span the texts and the rail together.
-    val column = if (rail) Modifier.widthIn(max = 992.dp).fillMaxWidth().padding(horizontal = 24.dp) else feastColumn()
+    val tablet = maxWidth >= FeastRailFrom
+    val desk = maxWidth >= FeastDeskFrom
+    val rail = tablet && view.texts.isNotEmpty()
+    val first = view.register == "first"
+    // From the rail's width the back link and the head span the texts and the rail together.
+    val column = if (tablet) Modifier.widthIn(max = 992.dp).fillMaxWidth().padding(horizontal = 24.dp) else feastColumn()
+    // With no texts the standing and the years keep one narrow column under the head.
+    val leaf = if (tablet) Modifier.widthIn(max = 624.dp).fillMaxWidth().padding(horizontal = 24.dp) else feastColumn()
+    val railWidth = if (desk) 304.dp else 272.dp
+    val frontal = feastFrontal(view.color)
     LazyColumn(
         Modifier.fillMaxSize(),
         state = listState,
@@ -179,35 +203,47 @@ fun FeastScreen(
                 Text(
                     "‹ ${w.findTitle}",
                     Modifier.heightIn(min = 44.dp).tap(onClick = onFind).padding(vertical = 12.dp),
-                    style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = p.accent),
+                    style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 1.37.sp),
                 )
             }
         }
-        item(key = "header") { FeastHeader(view.name, view.subtitle, ink = p.rubric, modifier = column) }
-        // The standing first, then the texts, then the years; on a wide screen the standing and the
-        // years make a rail beside the texts (style.css `.feast-body`).
+        item(key = "header") { FeastHead(view, frontal, size = if (desk) 2 else if (tablet) 1 else 0, modifier = column) }
+        // The standing first, then the texts, then the years; from 760dp the standing and the
+        // years make a rail beside the texts (style.css `.feast-body`), and on a first-class feast
+        // one upright course, the lining and the feast's colour, runs between them.
         if (rail) {
             item(key = "body") {
-                Row(Modifier.widthIn(max = 992.dp).fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp)) {
-                    FeastTexts(view, onDay, Modifier.weight(1f))
-                    Spacer(Modifier.width(48.dp))
-                    Column(Modifier.width(320.dp)) {
-                        Standing(view, onFeast, onDay)
-                        FeastYears(view, onDay, Modifier.padding(top = 22.dp))
+                Row(
+                    column.padding(top = 6.4.dp).drawBehind {
+                        if (!first) return@drawBehind
+                        val u = 1.dp.toPx()
+                        val railLeft = size.width - railWidth.toPx()
+                        val textsRight = if (desk) minOf(FeastTextsMax.toPx(), railLeft - 48f * u) else railLeft - 40f * u
+                        val x = (textsRight + railLeft) / 2f
+                        drawPath(ruledLine(x, 4f * u, x, size.height - 4f * u, 1.25f * u, 57, u), p.lining)
+                        drawPath(ruledLine(x + 3.5f * u, 6f * u, x + 3.5f * u, size.height - 6f * u, 0.8f * u, 58, u), frontal.copy(alpha = frontal.alpha * 0.62f))
+                    },
+                ) {
+                    Box(Modifier.weight(1f).padding(end = if (desk) 48.dp else 40.dp)) {
+                        FeastTexts(view, onDay, if (desk) Modifier.widthIn(max = FeastTextsMax) else Modifier)
+                    }
+                    Column(Modifier.width(railWidth)) {
+                        Standing(view, tablet && !desk, onFeast, onDay)
+                        FeastYears(view, seed = 72, onDay = onDay, modifier = Modifier.padding(top = 22.4.dp))
                     }
                 }
             }
         } else {
-            item(key = "standing") { Box(feastColumn().padding(top = 22.dp)) { Standing(view, onFeast, onDay) } }
-            if (view.texts.isNotEmpty()) item(key = "texts") { FeastTexts(view, onDay, feastColumn().padding(top = 22.dp)) }
-            item(key = "years") { FeastYears(view, onDay, feastColumn().padding(top = 28.dp)) }
+            item(key = "standing") { Box(leaf.padding(top = if (tablet) 6.4.dp else 0.dp)) { Standing(view, tablet && !desk, onFeast, onDay) } }
+            if (view.texts.isNotEmpty()) item(key = "texts") { FeastTexts(view, onDay, leaf.padding(top = 22.4.dp)) }
+            item(key = "years") { FeastYears(view, seed = if (view.texts.isEmpty()) 71 else 72, onDay = onDay, modifier = leaf.padding(top = 22.4.dp)) }
         }
         item(key = "footer") { Footer() }
     }
     }
 }
 
-/** A page's headpiece, its title in `ink`, and its subtitle, over a hairline (the ordo's header). */
+/** The search page's headpiece, its title in `ink`, and its subtitle, over a hairline (the ordo's header). */
 @Composable
 private fun FeastHeader(title: String, subtitle: String, ink: Color, modifier: Modifier) {
     val p = LocalPalette.current
@@ -228,105 +264,226 @@ private fun FeastHeader(title: String, subtitle: String, ink: Color, modifier: M
     }
 }
 
-/** A section's heading in the tituli's small capitals over the lining (`.feast-section h2`). */
+/**
+ * The colour a feast's or a day's paint takes on this page (the web's `--frontal`): the day's
+ * colour, the ornament's gold on a white day, and the lining thinned on a black one.
+ */
 @Composable
-private fun SectionHeading(text: String, small: Boolean = false) {
+private fun feastFrontal(color: String?): Color {
+    val p = LocalPalette.current
+    return when (color) {
+        null, "" -> p.lining
+        "white" -> LocalOrnament.current.flat
+        "black" -> p.lining.copy(alpha = 0.8f)
+        else -> railColor(color, p)
+    }
+}
+
+/** A point of paint: a small square stood on its corner (`.feast-point`, the years' point). */
+@Composable
+private fun PaintPoint(side: Dp, color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(side * 1.42f).clearAndSetSemantics {}) {
+        rotate(45f) { drawRect(color, Offset((size.width - side.toPx()) / 2f, (size.height - side.toPx()) / 2f), Size(side.toPx(), side.toPx())) }
+    }
+}
+
+/** A titulus: spaced small capitals in the tituli's ink, old-style figures among them. */
+@Composable
+private fun titulusType(size: Float, tracking: Float = 0.15f) =
+    Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.5f).sp, color = LocalPalette.current.titulus, fontFeatureSettings = "smcp, c2sc, onum", letterSpacing = (size * tracking).sp, textAlign = TextAlign.Center)
+
+/**
+ * The head (`.feast-head`): a ruled course of the lining broken by the consecration cross, the
+ * feast's usual date as a titulus, its name, and its rank and colour in italic parted by a point
+ * of its colour. The register follows the rank: a first-class feast's cross is gilt, its course
+ * doubled by a finer rule in its colour and its name a size up; a commemoration or a monastic
+ * observance (`plain`) has a bare head, its name in the text's ink a size down. A lit place lies
+ * on the wall behind it, with no edge, except on a plain or a black one. By night the name is in
+ * the text's ink. A screen reader hears the name, then the titulus, then the rank. `size` is 0 on
+ * a phone, 1 from the rail's width and 2 from the desk's.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FeastHead(view: FeastPageView, frontal: Color, size: Int, modifier: Modifier) {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    val first = view.register == "first"
+    val plain = view.register == "plain"
+    val lit = !plain && view.color != "black"
+    val pigment = ImageBitmap.imageResource(R.drawable.pigment)
+    val crown = if (first) 37.6.dp else 33.6.dp
+    val nameSize = when {
+        first -> floatArrayOf(33.6f, 40f, 43.2f)
+        plain -> floatArrayOf(27.2f, 31.2f, 33.6f)
+        else -> floatArrayOf(31.2f, 36.8f, 40f)
+    }[size]
+    val pool = if (p.dark) Color(150, 178, 220).copy(alpha = 0.17f) else Color(255, 253, 248).copy(alpha = 0.9f)
+    Box(modifier.padding(top = if (plain) 6.4.dp else 20.8.dp)) {
+        Column(
+            Modifier.fillMaxWidth().drawBehind {
+                val u = 1.dp.toPx()
+                val w = this.size.width
+                if (lit) {
+                    // radial-gradient(ellipse 50% 46% at 50% 46%, pool, transparent), over the head and a little beyond.
+                    val box = Rect(-16f * u, -40f * u, w + 16f * u, this.size.height + 24f * u)
+                    val centre = Offset(box.center.x, box.top + 0.46f * box.height)
+                    val rx = 0.5f * box.width
+                    val ry = (if (p.dark) 0.48f else 0.46f) * box.height
+                    scale(1f, ry / rx, pivot = centre) { drawCircle(Brush.radialGradient(0f to pool, 1f to Color.Transparent, center = centre, radius = rx), rx, centre) }
+                }
+                if (plain) return@drawBehind
+                val mid = w / 2f
+                val gap = (if (first) 27f else 24f) * u
+                drawPath(ruledLine(0f, 0.5f * u, mid - gap, 0.5f * u, 1.25f * u, 51, u), p.lining)
+                drawPath(ruledLine(mid + gap, 0.5f * u, w, 0.5f * u, 1.25f * u, 52, u), p.lining)
+                if (first) {
+                    val day = frontal.copy(alpha = frontal.alpha * 0.62f)
+                    drawPath(ruledLine(1.5f * u, 4f * u, mid - gap - 3f * u, 4f * u, 0.8f * u, 53, u), day)
+                    drawPath(ruledLine(mid + gap + 3f * u, 4f * u, w - 1.5f * u, 4f * u, 0.8f * u, 54, u), day)
+                }
+            }.padding(start = 8.dp, end = 8.dp, top = if (plain) 3.2.dp else 25.6.dp, bottom = if (plain) 16.dp else if (size == 2) 25.6.dp else 18.4.dp)
+                .semantics { isTraversalGroup = true },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(view.titulus, Modifier.semantics { traversalIndex = 1f }, style = titulusType(16f))
+            Text(
+                view.name,
+                Modifier.padding(top = 1.6.dp).semantics { heading(); traversalIndex = 0f },
+                style = Type.body.copy(
+                    fontSize = nameSize.sp, lineHeight = (nameSize * 1.14f).sp, color = if (plain || p.dark) p.text else p.rubric,
+                    textAlign = TextAlign.Center, lineBreak = LineBreak.Heading, fontFeatureSettings = "lnum",
+                ),
+            )
+            val rank = Type.small.copy(fontSize = 15.68.sp, lineHeight = 23.5.sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center)
+            FlowRow(
+                Modifier.padding(top = 8.8.dp).clearAndSetSemantics { contentDescription = view.subtitle; traversalIndex = 2f },
+                horizontalArrangement = Arrangement.spacedBy(9.6.dp, Alignment.CenterHorizontally),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                view.subtitle.split(" · ").forEachIndexed { i, part ->
+                    if (i > 0) PaintPoint(5.5.dp, frontal)
+                    Text(part, style = rank)
+                }
+            }
+        }
+        if (!plain) {
+            val cross = Modifier.align(Alignment.TopCenter).offset(y = -crown / 2).size(crown).clearAndSetSemantics {}
+            if (first) ConsecrationCross(cross, brush = giltBrush(o)) else ConsecrationCross(cross, pigment = pigment)
+        }
+    }
+}
+
+/** A section's heading: a titulus over one stroke of the pen (`.feast-section h2`). */
+@Composable
+private fun SectionHeading(text: String, seed: Int, gap: Dp = 4.8.dp) {
     val p = LocalPalette.current
     Text(
         text,
-        Modifier.fillMaxWidth().semantics { heading() }.drawBehind {
-            val w = 1.dp.toPx()
-            drawLine(p.lining, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
-        }.padding(bottom = 5.dp),
-        style = Type.body.copy(fontSize = if (small) 16.8.sp else 20.sp, lineHeight = if (small) 22.sp else 26.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = if (small) 1.3.sp else 1.6.sp),
+        Modifier.padding(bottom = gap).fillMaxWidth().semantics { heading() }.drawBehind {
+            val u = 1.dp.toPx()
+            drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.3f * u, seed, u), p.lining.copy(alpha = 0.78f))
+        }.padding(bottom = 6.4.dp),
+        style = titulusType(17.28f).copy(textAlign = TextAlign.Start),
     )
 }
 
 /** The width from which the feast page sets its standing and years as a rail beside its texts. */
-private val FeastRailFrom = 960.dp
+private val FeastRailFrom = 760.dp
+
+/** The width from which the texts keep their own measure and the rail stands off from them. */
+private val FeastDeskFrom = 960.dp
+private val FeastTextsMax = 560.dp
 
 /** The note's type under the feast page's headings. */
 @Composable
-private fun noteType() = Type.small.copy(fontSize = 14.7.sp, lineHeight = 21.sp, color = LocalPalette.current.muted)
+private fun noteType() = Type.small.copy(fontSize = 14.72.sp, lineHeight = 20.6.sp, color = LocalPalette.current.muted)
 
 /**
- * The feast's standing, framed as the invitation is (the lining ruled twice): for a monastic
- * observance its heading, the feast everyone keeps and the note; then its date, and the next day it
- * is kept, which a tap opens (`.feast-standing`).
+ * The feast's standing, drawn as home's invitation (`.feast-standing`): the wash feathered by the
+ * tablet mask, the lining's frame by hand, and inside it a finer frame in the colour of the day
+ * it is next kept, stopping short of the corners. It says one thing, centred: when the feast is
+ * next kept, and the way to that day, "Today's hours" when that is today. A monastic observance
+ * keeps its heading, the feast everyone keeps and its note as prose, with a ruled hairline before
+ * the next keeping. A black day has no wash. `narrow` is the tablet's rail.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Standing(view: FeastPageView, onFeast: (String) -> Unit, onDay: (LocalDate) -> Unit) {
+private fun Standing(view: FeastPageView, narrow: Boolean, onFeast: (String) -> Unit, onDay: (LocalDate) -> Unit) {
     val p = LocalPalette.current
     val w = FEAST_WORDS
     val monastic = view.monasticNote.isNotEmpty()
-    // Drawn as home's invitation: the wash feathered by the tablet mask, the lining's rule, and
-    // inside it a finer rule in the colour of the day it is next kept (gold on a white day, the
-    // lining thinned on a black one).
+    val next = view.next
+    if (!monastic && next == null) return
     val tablet = ImageBitmap.imageResource(R.drawable.tablet)
-    val wash = homeInk(p).tabletWash
-    val frontal = when (val c = view.next?.color) {
-        null -> p.lining
-        "white" -> p.goldLine
-        "black" -> p.lining.copy(alpha = 0.8f)
-        else -> dayColor(c)
-    }
+    val wash = if (next?.color == "black") Color.Transparent else homeInk(p).tabletWash
+    val frontal = feastFrontal(next?.color)
     Column(
         Modifier.fillMaxWidth().drawBehind {
             tabletWash(tablet, wash)
-            val s = 1.dp.toPx()
-            drawRect(p.lining.copy(alpha = 0.78f), Offset(s / 2f, s / 2f), androidx.compose.ui.geometry.Size(size.width - s, size.height - s), style = Stroke(s))
-            val i = 4.dp.toPx() + s / 2f
-            drawRect(frontal.copy(alpha = frontal.alpha * 0.5f), Offset(i, i), androidx.compose.ui.geometry.Size(size.width - 2 * i, size.height - 2 * i), style = Stroke(s))
-        }.padding(start = 21.6.dp, end = 20.dp, top = 17.6.dp, bottom = 19.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            invitationRules(p.lining, frontal, seed = 61, day = 0.62f)
+        }.padding(
+            start = if (monastic) 18.4.dp else 17.6.dp, end = if (monastic) 18.4.dp else 17.6.dp,
+            top = if (monastic) 16.dp else 13.6.dp, bottom = if (monastic) 14.4.dp else 15.2.dp,
+        ),
+        verticalArrangement = Arrangement.spacedBy(if (monastic) 8.dp else 5.6.dp),
     ) {
         if (monastic) {
-            Text(w.monasticHeading, style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 1.sp))
+            Text(w.monasticHeading, Modifier.fillMaxWidth().semantics { heading() }, style = titulusType(15.2f))
             view.keptByAll?.let { all ->
                 Text(
                     buildAnnotatedString {
                         append(w.everyoneKeeps + " ")
-                        withStyle(SpanStyle(color = p.accent)) { append(all.name) }
+                        withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append(all.name) }
                         append(" " + view.keptByAllNote)
                     },
                     Modifier.tap(action = "open the feast's page") { onFeast(all.id) },
                     style = Type.body.copy(fontSize = 16.8.sp, lineHeight = 24.sp, color = p.text),
                 )
             }
-            Text(view.monasticNote, style = noteType().copy(lineHeight = 20.6.sp))
+            Text(view.monasticNote, style = noteType())
         }
-        Text(
-            if (view.dateLead.isEmpty()) AnnotatedString(view.date) else buildAnnotatedString {
-                append(view.dateLead + " ")
-                withStyle(SpanStyle(color = p.text)) { append(view.date) }
-            },
-            style = Type.body.copy(fontSize = if (monastic) 16.sp else 18.4.sp, lineHeight = 26.sp, color = p.muted),
-        )
-        view.next?.let { next ->
-            Column(Modifier.fillMaxWidth().tap(label = "${next.label}: ${next.dateLabel}", action = "open the day") { onDay(next.date.toLocalDate()) }) {
-                DottedRule(p.border)
-                Text(next.label, Modifier.padding(top = 8.8.dp), style = Type.body.copy(fontSize = 13.6.sp, lineHeight = 18.sp, color = p.muted, fontFeatureSettings = "smcp", letterSpacing = 1.1.sp))
-                // The way to the day keeps to the date's line while it fits, and takes the right of its own when not.
-                FlowRow(Modifier.fillMaxWidth().padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(12.8.dp)) {
-                    Text(next.dateLabel, style = Type.body.copy(fontSize = 16.8.sp, lineHeight = 25.sp, color = p.text), softWrap = false)
-                    Text("${w.daysHours} ›", Modifier.weight(1f), style = Type.body.copy(fontSize = 15.7.sp, lineHeight = 25.sp, color = p.rubric, textAlign = TextAlign.End), softWrap = false)
-                }
+        next?.let {
+            val go = if (it.today) w.todaysHours else w.daysHours
+            Column(
+                Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .then(if (monastic) Modifier.padding(top = 4.8.dp) else Modifier)
+                    .tap(label = "${it.label}: ${it.dateLabel}. $go", action = "open the day") { onDay(it.date.toLocalDate()) }
+                    .then(
+                        if (!monastic) Modifier else Modifier.drawBehind {
+                            val u = 1.dp.toPx()
+                            drawPath(ruledLine(0f, 0.5f * u, size.width, 0.5f * u, 0.9f * u, 69, u), p.lining.copy(alpha = 0.36f))
+                        }.padding(top = 11.2.dp),
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(it.label, style = titulusType(13.76f))
+                Text(
+                    it.dateLabel,
+                    style = Type.body.copy(fontSize = if (narrow) 19.2.sp else 20.8.sp, lineHeight = if (narrow) 25.sp else 27.sp, color = p.text, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading, fontFeatureSettings = "onum"),
+                )
+                Text(
+                    "$go ›",
+                    Modifier.padding(top = 4.dp),
+                    style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 26.sp, letterSpacing = 0.23.sp, color = if (p.dark) p.lining else p.rubric, textAlign = TextAlign.Center),
+                )
             }
         }
     }
 }
 
-/** The feast's texts under their heading and source, the collect first, then the day it is said in full. */
+/**
+ * The feast's texts under their heading and source, the collect first, then the day it is said in
+ * full (`.feast-texts`). Each text's label is in the tituli's ink, and the collect opens on the
+ * hours' dropped initial.
+ */
 @Composable
 private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
     val w = FEAST_WORDS
     val note = noteType()
     Column(modifier) {
-        SectionHeading(w.textsHeading)
-        Text(view.textsSource, Modifier.padding(top = 6.dp), style = note.copy(fontStyle = FontStyle.Italic))
-        view.texts.forEach { t ->
+        SectionHeading(w.textsHeading, seed = 71)
+        Text(view.textsSource, Modifier.padding(top = 1.6.dp, bottom = 4.8.dp), style = note.copy(fontSize = 14.4.sp, fontStyle = FontStyle.Italic))
+        view.texts.forEachIndexed { n, t ->
             Text(
                 buildAnnotatedString {
                     append(t.label)
@@ -336,41 +493,105 @@ private fun FeastTexts(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier
                         }
                     }
                 },
-                Modifier.padding(top = 18.dp, bottom = 2.dp).semantics { heading() },
-                style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.rubric, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp),
+                Modifier.padding(top = 16.dp, bottom = 2.4.dp).semantics { heading() },
+                style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.titulus, fontFeatureSettings = "smcp", letterSpacing = 0.8.sp),
             )
             // Each text keeps the hour's rhythm between its blocks, a source's blank lines included.
+            // The collect, the first text when a feast has one, opens as a collect does in the hours.
             val line = LocalDensity.current.bodyLine()
-            t.blocks.forEachIndexed { i, b -> Block(b, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line))) }
+            val collect = n == 0 && t.prayer
+            t.blocks.forEachIndexed { i, b ->
+                val block = if (collect && i == 0 && b.kind == BlockKind.PARAGRAPH) b.copy(dropCap = true) else b
+                Block(block, Modifier.padding(top = if (i == 0) 0.dp else b.space.of(line)))
+            }
         }
         view.wholeOffice?.let { whole ->
             Text(
                 buildAnnotatedString {
                     append(w.wholeOffice + " ")
-                    withStyle(SpanStyle(color = p.accent)) { append(whole.label) }
+                    withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append(whole.label) }
                 },
-                Modifier.padding(top = 18.dp).tap(action = "open the day") { onDay(whole.date.toLocalDate()) },
+                Modifier.padding(top = 17.6.dp).heightIn(min = 44.dp).tap(action = "open the day") { onDay(whole.date.toLocalDate()) },
                 style = note,
             )
         }
     }
 }
 
-/** The next eight years, a compact reference: a row says its status only where it differs from the usual. */
+/**
+ * The next eight years, ruled as home's hour table (`.feast-years`): a firmer rule above and
+ * below and finer ones between, by hand, and none upright; no colour bars and no chevrons.
+ */
 @Composable
-private fun FeastYears(view: FeastPageView, onDay: (LocalDate) -> Unit, modifier: Modifier) {
+private fun FeastYears(view: FeastPageView, seed: Int, onDay: (LocalDate) -> Unit, modifier: Modifier) {
+    val p = LocalPalette.current
+    // Where each row starts, for the rules between them.
+    val tops = remember(view.years.size) { FloatArray(view.years.size) }
     Column(modifier) {
-        SectionHeading(view.yearsHeading, small = true)
-        view.years.forEachIndexed { i, y -> YearRow(y, first = i == 0, compact = true, onDay = onDay) }
+        SectionHeading(view.yearsHeading, seed = seed, gap = 0.dp)
+        Column(
+            Modifier.fillMaxWidth().drawBehind {
+                if (tops.isEmpty()) return@drawBehind
+                val u = 1.dp.toPx()
+                val frame = p.lining.copy(alpha = 0.78f)
+                tops.forEachIndexed { i, y ->
+                    drawPath(ruledLine(0f, y + 0.5f * u, size.width, y + 0.5f * u, (if (i == 0) 1.3f else 0.9f) * u, 81 + i, u), if (i == 0) frame else p.lining.copy(alpha = 0.36f))
+                }
+                drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.3f * u, 81 + tops.size, u), frame)
+            },
+        ) {
+            view.years.forEachIndexed { i, y -> FeastYearRow(y, Modifier.onGloballyPositioned { tops[i] = it.positionInParent().y }, onDay) }
+        }
     }
 }
 
 /**
- * A year's keeping: its year, date and status on the day's colour rail, leading to that day. A year
- * kept as the feast usually is leaves its status unsaid; `compact` is the feast page's tighter row.
+ * A year on the feast's page (`.feast-years .find-year`): its number in old-style figures, a point
+ * in that year's day colour, the date, and its status only where it differs from the feast's
+ * usual. The row is a touch target tall and leads to that day.
  */
 @Composable
-private fun YearRow(y: FeastYearView, first: Boolean, onDay: (LocalDate) -> Unit, compact: Boolean = false) {
+private fun FeastYearRow(y: FeastYearView, modifier: Modifier, onDay: (LocalDate) -> Unit) {
+    val p = LocalPalette.current
+    val date = y.date?.toLocalDate()
+    val spoken = listOf("${y.year}", y.dateLabel, y.label.takeUnless { y.usual }.orEmpty(), y.note).filter { it.isNotEmpty() }.joinToString(", ")
+    val point = when (y.color) {
+        "white" -> LocalOrnament.current.flat
+        "" -> p.lining
+        else -> railColor(y.color, p)
+    }
+    val dateStyle = Type.body.copy(fontSize = 17.28.sp, lineHeight = 25.sp, color = p.text)
+    Box(
+        modifier.fillMaxWidth().heightIn(min = 48.dp)
+            .then(if (date != null) Modifier.tap(label = spoken, action = "open the day") { onDay(date) } else Modifier.clearAndSetSemantics { contentDescription = spoken })
+            .padding(start = 4.8.dp, end = 4.8.dp, top = 6.7.dp, bottom = 6.1.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Row {
+            Text(
+                "${y.year}",
+                Modifier.width(46.4.dp).alignByBaseline(),
+                style = Type.body.copy(fontSize = 17.28.sp, lineHeight = 25.sp, color = mix(p.titulus, p.muted, 0.55f), fontFeatureSettings = "onum", letterSpacing = 0.69.sp),
+            )
+            // The point stands at the middle of the date's line.
+            Box(Modifier.padding(horizontal = 8.8.dp).width(11.2.dp).height(with(LocalDensity.current) { dateStyle.lineHeight.toDp() }), contentAlignment = Alignment.Center) {
+                PaintPoint(4.5.dp, point.copy(alpha = point.alpha * 0.85f))
+            }
+            Column(Modifier.weight(1f).alignByBaseline()) {
+                Text(y.dateLabel, style = dateStyle)
+                if (!y.usual) Text(y.label, style = Type.body.copy(fontSize = 14.72.sp, lineHeight = 21.sp, color = keepingInk(y.kind, p), fontStyle = if (y.kind == "monastic" || y.kind == "not-kept") FontStyle.Italic else FontStyle.Normal))
+                if (y.note.isNotEmpty()) Text(y.note, style = Type.small.copy(fontSize = 13.76.sp, lineHeight = 18.sp, color = p.muted))
+            }
+        }
+    }
+}
+
+/**
+ * A year's keeping in the search's results: its year, date and status on the day's colour rail,
+ * leading to that day.
+ */
+@Composable
+private fun YearRow(y: FeastYearView, first: Boolean, onDay: (LocalDate) -> Unit) {
     val p = LocalPalette.current
     val date = y.date?.toLocalDate()
     val spoken = listOf("${y.year}", y.dateLabel, y.label, y.note).filter { it.isNotEmpty() }.joinToString(", ")
@@ -379,7 +600,7 @@ private fun YearRow(y: FeastYearView, first: Boolean, onDay: (LocalDate) -> Unit
         Row(
             Modifier.fillMaxWidth().height(IntrinsicSize.Min).heightIn(min = 44.dp)
                 .then(if (date != null) Modifier.tap(label = spoken, action = "open the day") { onDay(date) } else Modifier.clearAndSetSemantics { contentDescription = spoken })
-                .padding(vertical = if (compact) 5.dp else 8.dp),
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.Top,
         ) {
             Box(Modifier.width(3.dp).fillMaxHeight().background(railColor(y.color, p)))

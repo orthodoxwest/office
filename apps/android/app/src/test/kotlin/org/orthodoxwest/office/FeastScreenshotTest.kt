@@ -69,12 +69,72 @@ class FeastScreenshotTest {
     @Config(qualifiers = "w390dp-h3200dp-xxhdpi")
     fun feastApse() { show(Page.Feast("st-raphael-of-brooklyn"), ThemeChoice.APSE); shoot("feast-apse") }
 
+    // A first-class feast: the gilt cross, the doubled course, the collect's initial.
     @Test
+    @Config(qualifiers = "w390dp-h2000dp-xxhdpi")
+    fun feastFirstNave() { show(Page.Feast("annunciation"), ThemeChoice.NAVE); shoot("feast-first-nave") }
+
+    @Test
+    @Config(qualifiers = "w390dp-h2000dp-xxhdpi")
+    fun feastFirstApse() { show(Page.Feast("annunciation"), ThemeChoice.APSE); shoot("feast-first-apse") }
+
+    // A black day is bare: no pool behind the head and no wash in the standing.
+    @Test
+    @Config(qualifiers = "w390dp-h2000dp-xxhdpi")
+    fun feastBlack() { show(Page.Feast("all-souls"), ThemeChoice.NAVE); shoot("feast-black") }
+
+    // A monastic observance: the bare head, and the standing's prose over the next keeping.
+    @Test
+    @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
     fun monasticFeast() { show(Page.Feast("solemnity-st-benedict"), ThemeChoice.NAVE); shoot("feast-monastic") }
 
     @Test
-    @Config(qualifiers = "w1024dp-h2400dp-xhdpi")
-    fun feastTablet() { show(Page.Feast("st-mark"), ThemeChoice.NAVE); shoot("feast-tablet") }
+    @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
+    fun monasticFeastApse() { show(Page.Feast("solemnity-st-benedict"), ThemeChoice.APSE); shoot("feast-monastic-apse") }
+
+    // The rail from 760dp, with a first-class feast's upright course, and the desk's wider one.
+    @Test
+    @Config(qualifiers = "w820dp-h1300dp-xhdpi")
+    fun feastTablet() { show(Page.Feast("annunciation"), ThemeChoice.NAVE); shoot("feast-tablet") }
+
+    @Test
+    @Config(qualifiers = "w820dp-h1300dp-xhdpi")
+    fun feastTabletApse() { show(Page.Feast("annunciation"), ThemeChoice.APSE); shoot("feast-tablet-apse") }
+
+    @Test
+    @Config(qualifiers = "w1024dp-h1300dp-xhdpi")
+    fun feastDesk() { show(Page.Feast("st-mark"), ThemeChoice.NAVE); shoot("feast-desk") }
+
+    // The head says the feast's usual date over its name, and the standing the next keeping alone.
+    @Test
+    @Config(qualifiers = "w390dp-h2000dp-xxhdpi")
+    fun headAndStanding() {
+        show(Page.Feast("annunciation"), ThemeChoice.NAVE)
+        val view = core.feastPage("annunciation", today.toCivil())!!
+        compose.onNodeWithText(view.titulus).assertExists()
+        compose.onNodeWithText(view.name).assertExists()
+        compose.onNodeWithText("${core_words.daysHours} ›").assertExists()
+        assertEquals("first", view.register)
+    }
+
+    // On the day itself the standing's way on is today's hours.
+    @Test
+    @Config(qualifiers = "w390dp-h2000dp-xxhdpi")
+    fun keptTodaySaysSo() {
+        val day = LocalDate.of(2027, 3, 25)
+        val view = core.feastPage("annunciation", day.toCivil())!!
+        assertEquals(true, view.next?.today)
+        var opened: Page? = null
+        compose.setContent {
+            OfficeTheme(choice = ThemeChoice.NAVE, season = "") {
+                FeastScreen(view, chrome = {}, insets = PaddingValues(), onFind = {}, onFeast = {}, onDay = { opened = Page.Home(it) })
+            }
+        }
+        compose.onNodeWithText("${core_words.todaysHours} ›").assertExists()
+        shoot("feast-today")
+        compose.onNodeWithText("${core_words.todaysHours} ›").performClick()
+        assertEquals(Page.Home(day), opened)
+    }
 
     // The day's commemoration leads to its feast's page.
     @Test
@@ -104,5 +164,6 @@ class FeastScreenshotTest {
 
     companion object {
         private val core by lazy { OfficeCore() }
+        private val core_words by lazy { org.orthodoxwest.office.core.feastWords() }
     }
 }
