@@ -17,11 +17,13 @@ crossings came first and read as printed wallpaper.
   one seamless 384px tile of genstars.py's stars at the vault's own measured
   density, never scaled (`ornaments/sky-tile.svg`, `--apse-sky-tile`,
   `body.page-hour`'s `--wall-field`), in the apse's matte leaf. The wide
-  hours' side fields and the desktop home's margins keep `vault.svg`.
-- On a phone by night home hides its field (`body.page-home::before`): the
-  stars there are the apse sky's inside the head (`.home-sky`, seeded per
-  head by `tools/genstars.py`, placed by app.js clear of the day's words),
-  so the night has one set of stars. The desktop's margins keep the field.
+  hours' side fields keep `vault.svg`.
+- By night home hides its field at every width (`body.page-home::before`):
+  the stars there are the apse sky's inside the head (`.home-sky`, seeded
+  per head by `tools/genstars.py`, the phone's three heads and the wide
+  niche's two, placed by app.js clear of the day's words), so the night has
+  one set of stars and the wall round the panel or niche is plain. The apps
+  leave `WallField` off whenever the palette is dark.
 - Home's field and the hours' ending read `--wall-field`, `--wall-ink`,
   `--wall-tile-size`, `--wall-leaf` and the fades (`--wall-home-fade`,
   `--wall-home-light`, `--wall-end-fade`, `--wall-foot-fade`), declared on
