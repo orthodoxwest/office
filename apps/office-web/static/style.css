@@ -7419,6 +7419,23 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   color: var(--accent);
 }
 
+/* The one way to Privacy from the site: a quiet line at the foot of the
+   page whose intro says nothing is stored. */
+.reminders-privacy {
+  margin-top: 1.6rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.reminders-privacy a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
 @media (max-width: 540px) {
   .reminders h1 {
     font-size: 1.6rem;
