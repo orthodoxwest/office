@@ -1246,6 +1246,11 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
         vault: body.getPropertyValue("--apse-vault").trim(),
         // The ending's field: home's sky tile by night, the powdering by day.
         field: getComputedStyle(document.querySelector(".hour-epilogue"), "::before").maskImage,
+        // What the ending's two fields paint: under the veil by night, nothing at all.
+        fieldInks: [
+          getComputedStyle(document.querySelector(".hour-epilogue"), "::before").backgroundColor,
+          getComputedStyle(document.querySelector("footer"), "::after").backgroundColor,
+        ],
       };
     });
   };
@@ -1257,11 +1262,14 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
     expect(goodFriday.rule).toBe("0px");
     expect(goodFriday.vault).toBe("none");
     expect(goodFriday.field.includes("sky-tile.svg")).toBe(false);
+    const clear = (ink) => ink === "transparent" || /rgba\(.*,\s*0\)$|\/ 0\)$/.test(ink);
+    if (theme === "dark") for (const ink of goodFriday.fieldInks) expect(clear(ink), ink).toBe(true);
     // Prime keeps its cross, and the rule its break.
     const prime = await read("/prime/2026-04-10", theme);
     expect(prime.bare).toBe(true);
     expect(prime.cross).not.toBe("none");
     expect(prime.rule).not.toBe("0px");
+    if (theme === "dark") for (const ink of prime.fieldInks) expect(clear(ink), ink).toBe(true);
     // All Souls is bare without the veil: the Apse's stars stay gold.
     const allSouls = await read("/lauds/2026-11-02", theme);
     expect(allSouls.bare).toBe(true);

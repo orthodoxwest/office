@@ -9349,6 +9349,9 @@ body.hour-bare.season-passiontide {
   --apse-gild: none;
   --apse-vault: none;
   --apse-sky-tile: none;
+  /* The ending's ink is mixed from --apse-ink with the leaf; with no tile
+     to mask it, that remainder would fill the field, so it goes too. */
+  --wall-ink: transparent;
 }
 
 /* The home vault is lit from the altar: stars nearest the frontispiece take
