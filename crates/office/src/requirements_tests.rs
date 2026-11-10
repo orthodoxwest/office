@@ -1751,3 +1751,44 @@ fn corpus_christi_sunday_keeps_its_octave_commemoration_under_another_octave() {
         assert!(antiphon.text.starts_with("O how sweet"), "{date}: {}", antiphon.text);
     }
 }
+
+#[test]
+fn pre_lenten_and_lenten_vespers_keep_the_psalter_antiphons() {
+    // #776. From Septuagesima to Palm Sunday Vespers takes "Ants. and Psalms
+    // of Sunday" (Diurnal pp. 237, 280), and Monday to Wednesday in Holy Week
+    // the weekday's (pp. 282-284; 2026 ordo, "Mon. Ps. (114-21)"): the proper
+    // antiphons are said "At Lauds and the Hours". The Sunday within the
+    // Octave of the Ascension is said as on the Feast (2026 ordo, 24 May).
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let antiphons = |name: &str, date: Date| {
+            let day = &days[date.ordinal() as usize - 1];
+            let hour = engine().compose_hour(name, day, &moveable, PrayerForm::Private).unwrap();
+            let refs: Vec<String> = hour
+                .sections
+                .into_iter()
+                .flat_map(|s| s.elements)
+                .filter(|e| !e.is_commemoration && e.slot_ref.starts_with("psalm-antiphon-"))
+                .map(|e| e.source_ref)
+                .collect();
+            (day.celebration.as_ref().map(|c| c.id.clone()).unwrap_or_default(), refs)
+        };
+        let mut checked = 0;
+        let sundays = (0..9).map(|w| moveable.easter.add_days(-63 + 7 * w));
+        for date in sundays.chain((1..=3).map(|d| moveable.easter.add_days(-7 + d))) {
+            let (id, vespers) = antiphons("vespers", date);
+            let (_, lauds) = antiphons("lauds", date);
+            let own = format!("proper/{id}/");
+            if !lauds.iter().any(|r| r.starts_with(&own)) || vespers.iter().any(|r| !r.starts_with(&own) && !r.starts_with("ordinary/")) {
+                continue; // a feast holds the day or its Vespers
+            }
+            assert!(!vespers.is_empty(), "{date}");
+            assert!(vespers.iter().all(|r| r.starts_with("ordinary/vespers/psalm-antiphon-")), "{date} {id}: {vespers:?}");
+            checked += 1;
+        }
+        assert!(checked >= 9, "{y}: {checked}");
+        let (id, vespers) = antiphons("vespers", moveable.easter.add_days(42));
+        assert_eq!(id, "ascension-sunday-within-octave", "{y}");
+        assert!(vespers.iter().all(|r| r.starts_with("proper/ascension")), "{y}: {vespers:?}");
+    }
+}
