@@ -160,8 +160,9 @@ or impose a redesign on an unrelated change.
   `--sky-rim`, a matte leaf fillet and the day's hairline (lime white on a
   white day, so the fillet stays the one gold line). Its gold-leaf stars
   are one fixed, seeded field per head (`tools/genstars.py`, measured from
-  the vault's photograph, the niche heads' fields a little more crowded so
-  the head reads as sky at its larger size; `ornaments/stars.json` and the
+  the vault's photograph; the niche heads' fields are sparser than the
+  phone's, 1.6 against 2.0 times the vault's density, as their heads are
+  larger; `ornaments/stars.json` and the
   apps' `Stars.kt`/`.swift`), and every front leaves out those in the
   painter's reserve: each line of the day's words padded 14×6px, the cross
   padded 11px, and 9px above the frieze. The leaf catches less light in the
@@ -211,29 +212,45 @@ or impose a redesign on an unrelated change.
   The niche's title is the phone's weekday titulus over the date; every
   hour carries its gloss (never under 12 CSS px on the glass), the hour
   that is now is set larger as well as lit and rubricated, and the period
-  labels are larger. Below 1000px high the hours are the glossed table;
-  from 1000px high they stand one to a line (the list of seven), label in
-  the margin beside its hours, name and gloss parted by a gilt point. A
-  heavy day (a fast with a commemoration, or a past date with a fast,
-  commemoration or octave) closes the title up so the niche keeps its
-  height.
+  labels are larger. The hours are the glossed table, or one to a line
+  (the list of seven: label in the margin beside its hours, name and gloss
+  parted by a gilt point, the two read as one block centred in the niche)
+  where the list's heaviest day fits: from 1000px high upright, 1146px on
+  its side. A heavy day (a fast with a commemoration, or a past date with a
+  fast, commemoration or octave) closes the title up.
   The whole niche scales with one computed zoom, no step tables:
-  `--niche-zoom: clamp(least, min((100vh - chrome) / fit, share × 100vw /
-  card), 1.5)` (CSS `tan(atan2())` divides lengths; `@property` makes it a
-  number). `--card-w` is 37.5rem landscape and 34.5rem upright; `fit` is
-  the niche's height at 1 on its heaviest day (42rem table, 54.2rem list;
-  45rem and 57rem upright); `chrome` the header, the air above and the
-  colophon (14rem, 14.75rem over the list, 15.6rem upright); `least` 0.96
-  landscape and 0.9 upright, where every gloss is still 12px, so a short
-  laptop keeps its niche and lets the colophon go under the fold; `share`
-  0.62 and 0.8 of the width. Compose (`nicheZoom` in `Niche.kt`, carried by
-  a zoomed `LocalDensity`) and SwiftUI (`nicheZoom` in `Niche.swift`,
-  carried by zoomed `Metrics`) use the same formula. Under `zoom`, app.js
-  places the hour rules from `offsetTop` (in the zoomed box's own pixels)
-  and divides star measures by the zoom; the phone keeps client rects so
-  it stays pixel-identical. At 1280×800 and 1180×820 the date, feast,
-  "Pray", all seven hours and their glosses stand above the fold on every
-  day of the year.
+  `--niche-zoom: clamp(least, min((100vh - above - below) / (fit + air),
+  share × 100vw / card), 1.5)` (CSS `tan(atan2())` divides lengths;
+  `@property` makes it a number). What is not zoomed stands apart from what
+  is: `above` the header and its margin (5.0625rem), `below` the footer, its
+  fixed margin and the body's padding (6.375rem); `fit` the niche's height
+  at 1 on its heaviest day of the year plus the footer's zoomed margin, and
+  `air` the zoomed space above it. Figures (`--card-w`, fit, air, least,
+  share): landscape 37.5, 47.25, 1.6rem, 0.96, 0.62; its list 37.5, 61; upright
+  34.5, 48.75, 2.4rem, 0.9, 0.8; its list 34.5, 62.5. Each rule is marked
+  `NicheFigures.<name>`, and Android's `TokensTest` holds style.css,
+  `Niche.kt` and `Niche.swift` to the same figures and `--reveal-*` colours.
+  Where the heaviest day fits, a lighter day is centred in the same room
+  and the colophon stands at the foot; where it does not (a laptop's
+  1280×800: the least keeps the niche near 576px wide), `--niche-fits` is 0
+  and main stands a screen tall, so the hours stay above the fold and the
+  colophon waits wholly under it, never cut through by it. A short screen
+  (701px wide and at most 560px high: a phone on its side) is fitted down to
+  the invitation instead (fit 35.25rem, least 0.5), so the day and "Pray"
+  are above the fold on every day; there every small word (glosses,
+  labels, weekday, feast, fasts, commemorations, frieze, foot) stands back
+  from the zoom just enough to keep 12px on the glass (an element `zoom` of
+  `max(1, 12 / (zoom × its size))`, `legible()` in the apps), hour targets
+  keep 44px, and a gloss wider than its cell takes a second line. Compose
+  (`nicheZoom` in `Niche.kt`, carried by a zoomed `LocalDensity`) and SwiftUI
+  (`nicheZoom` in `Niche.swift`, carried by zoomed `Metrics`) use the same
+  formula, and take a square screen as upright, as CSS's `orientation`
+  does. Under `zoom`, app.js places the hour rules from `offsetTop` (in the
+  zoomed box's own pixels) and divides star measures by the zoom; the phone
+  keeps client rects so it stays pixel-identical. At 1280×800, 1180×820,
+  1024×768 and 820×1180 the date, feast, "Pray" and all seven hours stand
+  above the fold on every day of the year; on the heaviest days "Change
+  date" and the niche's foot may not.
   Drawn architecture around it (columns, sconces, sills, arches) has been
   tried and read as illustration; prefer light and tone to objects. By day
   fills in its head (a mosaic conch, ochre voussoirs, glory rays) were
