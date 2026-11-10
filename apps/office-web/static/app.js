@@ -2925,11 +2925,11 @@ function rule(x1, y1, x2, y2, w, seed) {
       stroke(svg, "r-frame", rule(0, h2.offsetHeight - 0.5, h2.offsetWidth, h2.offsetHeight - 0.5, 1.3, 71 + i));
     });
     var list = page.querySelector(".feast-years .find-years");
-    if (list && list.children.length) {
+    if (list && list.querySelector(":scope > li")) {
       svg = layer(list);
       var top = list.getBoundingClientRect().top;
       w = list.offsetWidth;
-      var rows = Array.prototype.map.call(list.children, function (li) { return li.getBoundingClientRect(); });
+      var rows = Array.prototype.map.call(list.querySelectorAll(":scope > li"), function (li) { return li.getBoundingClientRect(); });
       rows.forEach(function (r, i) {
         stroke(svg, i ? "r-inner" : "r-frame", rule(0, r.top - top + 0.5, w, r.top - top + 0.5, i ? 0.9 : 1.3, 81 + i));
       });

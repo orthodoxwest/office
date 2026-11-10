@@ -4626,6 +4626,8 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .feast-text .liturgical-block { font-size: 1.08rem; line-height: 1.5; }
 .feast-text .liturgical-block p { margin: 0; }
 .feast-text.collect .liturgical-block .response-line { clear: left; }
+/* A black day is bare: its initial in the muted ink, as a bare hour's. */
+.feast-head.day-color-black ~ .feast-body { --cap-ink: var(--muted); }
 
 /* The years: ruled as home's hour table, above, below and between, never
    upright, with no chevrons; a point in that year's day colour where the bar
