@@ -1967,8 +1967,8 @@ function rule(x1, y1, x2, y2, w, seed) {
   // and it lifts to a point at each end. A host so ruled carries .is-ruled
   // and gives up the CSS borders that stand without script.
   //
-  // The stars: by night on a phone the head of the arch is the parish apse's
-  // painted sky. Its gold-leaf stars are one fixed field for each head
+  // The stars: by night the head of the arch is the parish apse's painted
+  // sky, on a phone and in the wide niche. Its gold-leaf stars are one fixed field for each head
   // (tools/genstars.py, ornaments/stars.json, fetched only when the sky is
   // shown), and the painter keeps them off the words: every star that would
   // touch a laid-out line of the day block (14px either side, 6px above and
@@ -2033,12 +2033,15 @@ function rule(x1, y1, x2, y2, w, seed) {
       if (table) {
         w = table.offsetWidth;
         h = table.offsetHeight;
-        var top = table.getBoundingClientRect().top;
         svg = layer(table);
         stroke(svg, "r-frame", rule(0, 0.5, w, 0.5, 1.3, 31));
         stroke(svg, "r-frame", rule(0, h - 0.5, w, h - 0.5, 1.3, 32));
+        // Each period's top in the table's own pixels (the groups' offset
+        // parent is the table), which are the SVG's: the wide niche is
+        // zoomed, and a client rect is measured on the glass, so a rule
+        // placed from one drifted down the table by the zoom.
         Array.prototype.slice.call(table.querySelectorAll(".home-hour-group"), 1).forEach(function (group, i) {
-          var y = group.getBoundingClientRect().top - top + 0.5;
+          var y = group.offsetTop + 0.5;
           stroke(svg, "r-inner", rule(0, y, w, y, 0.9, 41 + i));
         });
       }
@@ -2073,13 +2076,20 @@ function rule(x1, y1, x2, y2, w, seed) {
         return;
       }
       var cs = getComputedStyle(hero);
-      var list = fields[{ "0.44": "phone", "0.56": "tall", "0.64": "taller" }[cs.getPropertyValue("--arch-rise").trim()] || "phone"];
+      var list = fields[{ "0.44": "phone", "0.56": "tall", "0.64": "taller", "0.5": "niche", "0.62": "upright" }[cs.getPropertyValue("--arch-rise").trim()] || "phone"];
       if (!list || !frieze) {
         return;
       }
-      var hr = hero.getBoundingClientRect();
-      var sr = sky.getBoundingClientRect();
-      var band = frieze.getBoundingClientRect().top - hr.top;
+      // Client rects are measured on the glass; the wide niche is zoomed
+      // (--niche-zoom), and the stars are drawn in its own pixels, so every
+      // measure is taken back by the zoom (1 on a phone).
+      var zoom = hero.offsetWidth ? hero.getBoundingClientRect().width / hero.offsetWidth : 1;
+      function own(q) {
+        return { left: q.left / zoom, top: q.top / zoom, right: q.right / zoom, bottom: q.bottom / zoom, width: q.width / zoom, height: q.height / zoom };
+      }
+      var hr = own(hero.getBoundingClientRect());
+      var sr = own(sky.getBoundingClientRect());
+      var band = own(frieze.getBoundingClientRect()).top - hr.top;
       // The reserve: every laid-out line of the day block, and the cross.
       var reserve = [];
       var walker = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
@@ -2093,14 +2103,15 @@ function rule(x1, y1, x2, y2, w, seed) {
         var lead = item && item.previousElementSibling ? 2.6 * parseFloat(getComputedStyle(parent).fontSize) : 0;
         var range = document.createRange();
         range.selectNodeContents(node);
-        Array.prototype.forEach.call(range.getClientRects(), function (q) {
+        Array.prototype.forEach.call(range.getClientRects(), function (rect) {
+          var q = own(rect);
           if (q.width > 1) {
             reserve.push([q.left - hr.left - 14 - lead, q.top - hr.top - 6, q.right - hr.left + 14, q.bottom - hr.top + 6]);
           }
         });
       }
       if (crown) {
-        var c = crown.getBoundingClientRect();
+        var c = own(crown.getBoundingClientRect());
         reserve.push([c.left - hr.left - 11, c.top - hr.top - 11, c.right - hr.left + 11, c.bottom - hr.top + 11]);
       }
       // A first-class feast's stars stand a size larger and fully lit.

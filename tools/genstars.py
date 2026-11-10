@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""The apse sky's gold-leaf stars: one seeded field for each phone head.
+"""The apse sky's gold-leaf stars: one seeded field for each head.
 
-By night a phone's home sets the parish apse's painted sky inside the head of
-its arch, and these are its stars. A real ceiling does not reshuffle its stars
+By night home sets the parish apse's painted sky inside the head of its arch,
+on a phone and in the wide screens' niche alike, and these are its stars. A real ceiling does not reshuffle its stars
 each morning, so the field is fixed: a scatter with a floor on closeness (no
 lattice) inside the app's own arch (tools/genarch.py's shapes), kept clear of
 the leaf fillet and the day's hairline. Every front draws the same list and
@@ -19,6 +19,11 @@ a small boss, four long rays and four short. The median four-point star is set
 8 CSS px across, which makes the measured piece about one phone sky. The field
 is set at twice the measured density, because the day's words take the middle
 of the head as a reserve and at the vault's own density a feria kept 13 stars.
+The wide niche's heads (tools/genarch.py's "niche" and "upright") are fields of
+their own, laid out at the niche's width before its zoom: there the words take
+a smaller share of a larger head, so their field is set at 1.6 times the
+vault's density, and the stars keep the phone's size, so the two skies are one
+painter's.
 
 Coordinates are in card widths from the card's top left (the point of the head
 is at y = 0); radii and the outline's offsets are CSS px (dp, pt). Writes
@@ -60,15 +65,19 @@ CROP = (684, 804)
 STARS = 46
 FOUR_POINT_DIAMETER = 14.5
 NEAREST_P10 = 35.389
-W = 358.0            # the card at 390px; positions are stored in widths
-DEPTH = 1.75         # how far down the field runs, in widths (the frieze cuts it)
+# Each head's card, CSS px, at which its field is laid out (positions are stored in widths): the
+# phone's at 390px, the niches' at their measure (style.css "Home niche"); how far down each
+# field runs, in widths (the frieze cuts it); and its density over the vault's.
+WIDTH = {"phone": 358.0, "tall": 358.0, "taller": 358.0, "niche": 600.0, "upright": 552.0}
+DEPTH = {"phone": 1.75, "tall": 1.75, "taller": 1.75, "niche": 1.0, "upright": 1.15}
+CROWD = {"phone": 2.0, "tall": 2.0, "taller": 2.0, "niche": 1.6, "upright": 1.6}
 INSET = 19.0         # clear of the card's edge: the stone 5, the fillet, the hairline at 11, air
 K = 8.0 / FOUR_POINT_DIAMETER
-DENSITY = 2.0 * STARS / (CROP[0] * CROP[1] * K * K)     # stars per CSS px²
+DENSITY = STARS / (CROP[0] * CROP[1] * K * K)           # the vault's stars per CSS px²
 GAP = NEAREST_P10 * K * 1.1                            # none closer than the vault's closest
 # The ray count over-reads the small stars as four-point (0.83); by eye it is about three in five.
 FOUR = 0.6
-SEEDS = {"phone": 1117, "tall": 1118, "taller": 1119}
+SEEDS = {"phone": 1117, "tall": 1118, "taller": 1119, "niche": 1131, "upright": 1132}
 TILE = 384           # the ending's tile, CSS px: about one phone sky, a whole number of pixels
 TILE_SEED = 1121
 TILE_SVG = Path("apps/office-web/static/ornaments/sky-tile.svg")
@@ -112,11 +121,12 @@ def glyph(kind, r, rot, rng):
 def field(name):
     shape = genarch.SHAPES[name]
     rng = np.random.default_rng(SEEDS[name])
-    H, R = DEPTH * W, 4
+    W = WIDTH[name]
+    H, R = DEPTH[name] * W, 4
     im = Image.new("L", (int(W * R), int(H * R)), 0)
     ImageDraw.Draw(im).polygon([(x * R, y * R) for x, y in outline(shape, W, H + 50, -INSET)], fill=255)
     inside = np.asarray(im) > 0
-    want = int(round(DENSITY * inside.sum() / (R * R)))
+    want = int(round(CROWD[name] * DENSITY * inside.sum() / (R * R)))
     pts = []
     # Scattered, not packed: random, with only a floor on closeness.
     while len(pts) < want:
@@ -143,7 +153,7 @@ def tile():
     """The ending's seamless tile: the vault's density and closest spacing, measured round the
     tile's edges as the repeat will set them."""
     rng = np.random.default_rng(TILE_SEED)
-    want = int(round(DENSITY / 2 * TILE * TILE))
+    want = int(round(DENSITY * TILE * TILE))
     pts = []
     while len(pts) < want:
         x, y = rng.uniform(0, TILE), rng.uniform(0, TILE)

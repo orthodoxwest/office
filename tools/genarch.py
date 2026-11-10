@@ -4,12 +4,15 @@
 The head is a steep four-centred arch: short haunch arcs centred on the
 springing line, so the head leaves the jambs without a kink, then long upper
 arcs centred below it, meeting at the point. The phone's head rises 0.44 of
-the card's width, the wider niche's 0.40 so a laptop still shows the hours;
-the date sits where the phone's head has opened wide enough for it, and the
-stylesheet's fitted date measure assumes this phone shape.
+the card's width. From 701px the frontispiece is a lancet niche, its head
+proportioned to the screen's orientation: half its width on a landscape
+screen, 0.62 on an upright one. The date sits where the phone's head has
+opened wide enough for it, and the stylesheet's fitted date measure assumes
+this phone shape.
 
 Every layer of the frontispiece (the day's ring, the stone, the panel, the
-apse's sky by night, the lining and its hairline) is the same arch offset by its own distance, as a
+apse's sky by night, the lining and its hairline, a first-class niche's gilt
+fillet) is the same arch offset by its own distance, as a
 moulding's lines are: each arc keeps its centre and gains or loses that
 distance from its radius, and the two upper arcs meet in a mitred point. So
 the polygons are written once, in terms of three custom properties the
@@ -52,7 +55,9 @@ NATIVE_END = "// genarch:end"
 # from the left springing. The haunches are generous (an upper arc no more
 # than about four times their radius) and finely sampled, so the jamb eases
 # into the curve as a Gothic arch's does rather than turning on a tight,
-# faceted shoulder; the phone comes to a 144° point, the niche to 146°.
+# faceted shoulder; the phone comes to a 144° point, the landscape niche to
+# 137° and the upright one to 125°. The niches are drawn larger, so their
+# arcs are sampled more finely.
 # Changing the phone's shape means refitting the date's max-width in
 # style.css (".page-home .home h1").
 # A taller phone has height to spare under the card, so its head rises
@@ -62,7 +67,8 @@ SHAPES = {
     "phone": dict(rise=0.44, haunch=0.30, centre=0.90, haunch_steps=7, upper_steps=10),
     "tall": dict(rise=0.56, haunch=0.40, centre=1.0, haunch_steps=8, upper_steps=10),
     "taller": dict(rise=0.64, haunch=0.40, centre=1.05, haunch_steps=8, upper_steps=11),
-    "niche": dict(rise=0.40, haunch=0.24, centre=0.86, haunch_steps=8, upper_steps=16),
+    "niche": dict(rise=0.50, haunch=0.34, centre=0.95, haunch_steps=10, upper_steps=12),
+    "upright": dict(rise=0.62, haunch=0.38, centre=1.02, haunch_steps=10, upper_steps=12),
 }
 # Where each shape applies, in order (later ones win).
 MEDIA = {
@@ -70,11 +76,12 @@ MEDIA = {
     "tall": "(max-width: 700px) and (min-height: 800px)",
     "taller": "(max-width: 700px) and (min-height: 880px)",
     "niche": "(min-width: 701px)",
+    "upright": "(min-width: 701px) and (orientation: portrait)",
 }
 # The deepest inward layer each shape draws (the lining's hairline), in card
 # widths at the narrowest card: the samples next to the point must not cross
 # the centre line at that depth.
-DEEPEST = {"phone": 22 / 288, "tall": 22 / 288, "taller": 22 / 288, "niche": 40 / 600}
+DEEPEST = {"phone": 22 / 288, "tall": 22 / 288, "taller": 22 / 288, "niche": 36 / 480, "upright": 36 / 480}
 
 
 def solve(rise, haunch, centre, **_):
@@ -188,7 +195,7 @@ def rules(name, shape):
         f"  clip-path: polygon(\n    {silhouette});\n}}\n\n"
         ".page-home .home-arch-shade::before {\n"
         f"  clip-path: polygon(evenodd,\n    {outside});\n}}\n\n"
-        ".page-home .home-lining::before,\n.page-home .home-lining::after {\n"
+        ".page-home .home-lining::before,\n.page-home .home-lining::after,\n.page-home .home-summary::before {\n"
         f"  clip-path: polygon(\n    {band});\n}}\n"
     )
 
@@ -216,7 +223,8 @@ NATIVE_WHERE = {
     "phone": "a phone",
     "tall": "a phone from 800 high",
     "taller": "a phone from 880 high",
-    "niche": "a wide screen's niche",
+    "niche": "a wide screen's niche on its side",
+    "upright": "a wide screen's niche held upright",
 }
 
 
