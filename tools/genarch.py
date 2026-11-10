@@ -78,6 +78,9 @@ MEDIA = {
     "niche": "(min-width: 701px)",
     "upright": "(min-width: 701px) and (orientation: portrait)",
 }
+# The wide screen's niches, which alone gild a fillet round the head on a
+# first-class day (`.home-summary::before`).
+NICHES = ("niche", "upright")
 # The deepest inward layer each shape draws (the lining's hairline), in card
 # widths at the narrowest card: the samples next to the point must not cross
 # the centre line at that depth.
@@ -195,8 +198,10 @@ def rules(name, shape):
         f"  clip-path: polygon(\n    {silhouette});\n}}\n\n"
         ".page-home .home-arch-shade::before {\n"
         f"  clip-path: polygon(evenodd,\n    {outside});\n}}\n\n"
-        ".page-home .home-lining::before,\n.page-home .home-lining::after,\n.page-home .home-summary::before {\n"
-        f"  clip-path: polygon(\n    {band});\n}}\n"
+        ".page-home .home-lining::before,\n.page-home .home-lining::after"
+        # The first-class gilt fillet round the head is the niche's alone.
+        + (",\n.page-home .home-summary::before" if name in NICHES else "")
+        + f" {{\n  clip-path: polygon(\n    {band});\n}}\n"
     )
 
 

@@ -5557,8 +5557,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 .page-home .home-lining::before,
-.page-home .home-lining::after,
-.page-home .home-summary::before {
+.page-home .home-lining::after {
   clip-path: polygon(
     0 100%,
     calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
@@ -5740,8 +5739,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 
   .page-home .home-lining::before,
-  .page-home .home-lining::after,
-  .page-home .home-summary::before {
+  .page-home .home-lining::after {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
@@ -5932,8 +5930,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 
   .page-home .home-lining::before,
-  .page-home .home-lining::after,
-  .page-home .home-summary::before {
+  .page-home .home-lining::after {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.64 * var(--arch-w)),
@@ -8701,6 +8698,20 @@ body.rank-first-class .home-crown {
     display: none;
   }
 
+  /* The niche's reveal, arris and gilt fillet are light and leaf, which
+     forced colours would leave as stray bands round the system's frame. */
+  .page-home .home-arch::after,
+  .page-home .home-arch-edge {
+    display: none !important;
+  }
+
+  /* On a phone the summary's ::before is a spacer, and stays. */
+  @media (min-width: 701px) {
+    .page-home .home-summary::before {
+      display: none !important;
+    }
+  }
+
   .page-home .home-frieze-text {
     color: CanvasText;
   }
@@ -8721,6 +8732,14 @@ body.rank-first-class .home-crown {
   .home-rules,
   .hour-rules {
     display: none;
+  }
+
+  /* The niche's gilt fillet is leaf, not ink (a phone's ::before is a
+     spacer, and stays). */
+  @media (min-width: 701px) {
+    .page-home .home-summary::before {
+      display: none;
+    }
   }
 
   .page-home .home-prayer-card h2.is-ruled {
@@ -9136,8 +9155,10 @@ html:where(:has(> body.page-hour))::before {
    is not scaled up but stood in a recess proportioned to the screen. Its
    head is tools/genarch.py's "niche" on a landscape screen (half its width)
    and "upright" on an upright one (0.62); its size is one computed scale,
-   --niche-zoom, so it stands from under the header to
-   the colophon at every size, the same height on every day.
+   --niche-zoom, fitted so its heaviest day stands from under the header to
+   the colophon (a lighter day is centred in the same room). Where the
+   screen is too short for that at the least zoom (a laptop on a heavy day),
+   the hours still stand above the fold and the colophon waits below it.
 
    By day the depth is told by light, not by a stone frame: the wall's own
    plaster turns into the recess through a reveal lit from the upper left,
@@ -9167,6 +9188,9 @@ html:where(:has(> body.page-hour))::before {
   --reveal-arris-turn: rgba(255, 253, 246, 0.2);
   --reveal-arris-shade: rgba(96, 66, 44, 0.34);
   --reveal-cast: rgba(84, 52, 30, 0.3);
+  /* Where the leaf of the first-class fillet catches the light most: the
+     reveal's own lit plaster. */
+  --gilt-glint: var(--reveal-lit);
   --niche-wall-shade: rgba(88, 60, 38, 0.2);
   --niche-recess: rgba(70, 40, 20, 0.2);
   --niche-sheen: rgba(255, 255, 255, 0.14);
@@ -9215,24 +9239,73 @@ html:where(:has(> body.page-hour))::before {
 }
 
 @media (min-width: 701px) {
-  /* The scale: the height the screen leaves (less the header,
-     the air above the niche and the colophon: --niche-chrome) over
-     the niche's own height at 1 (--niche-fit, its heaviest day's), no more
-     than --niche-share of the screen's width, and up to 1.5 on a large
-     monitor. It never falls under --niche-least, where every gloss is still
-     12px on the glass: a laptop keeps a generous niche, its sill above the
-     fold, and lets the colophon go under it. One formula; each layout gives
-     its own figures. */
+  /* The scale: the height the screen leaves, less what is not zoomed (the
+     header and its margin above main, --niche-above; the footer, its fixed
+     margin and the body's padding below, --niche-below), over what is: the
+     niche's height at 1 on its heaviest day with the footer's zoomed margin
+     (--niche-fit), and the air above it (--niche-air). No more than
+     --niche-share of the screen's width, and up to 1.5 on a large monitor.
+     It never falls under --niche-least: a laptop keeps a generous niche, its
+     hours above the fold, and on a day too heavy for the screen the
+     colophon waits under the fold (--niche-fits is 0 when the heaviest day
+     does not fit, and main then stands a screen tall) rather than being cut
+     through by it. One formula, which the apps share (Niche.kt's and
+     Niche.swift's nicheZoom); each layout gives its own figures, which
+     TokensTest holds the apps to. */
   .page-home main {
+    --niche-above: 5.0625rem;
+    --niche-below: 6.375rem;
+    /* NicheFigures.landscape */
     --card-w: 37.5rem;
-    --niche-fit: 42rem;
-    --niche-chrome: 14rem;
+    --niche-fit: 47.25rem;
+    --niche-air: 1.6rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
-    --niche-air: 1.6rem;
-    --niche-zoom: clamp(var(--niche-least), min(tan(atan2(100vh - var(--niche-chrome), var(--niche-fit))), tan(atan2(var(--niche-share) * 100vw, var(--card-w)))), 1.5);
+    --niche-raw: tan(atan2(100vh - var(--niche-above) - var(--niche-below), var(--niche-fit) + var(--niche-air)));
+    --niche-zoom: clamp(var(--niche-least), min(var(--niche-raw), tan(atan2(var(--niche-share) * 100vw, var(--card-w)))), 1.5);
+    --niche-fits: clamp(0, (var(--niche-raw) - var(--niche-least)) * 1000 + 1, 1);
+    min-height: calc((1 - var(--niche-fits)) * (100vh - var(--niche-above)));
     max-width: none;
     padding-top: 0;
+  }
+
+  /* The small words never fall under 12px on the glass, however small the
+     niche (a short screen): each stands back from the zoom just enough. */
+  .page-home .home-hero :is(.home-date-weekday, .feast, .home-hour-link-name, .home-hour-link-note, .home-hour-group-label, .penitential-badge, .commemorations, .octave-note, .home-versicle, .home-frieze-text, .not-today-link, .home-season, .home-date-nav > summary) {
+    zoom: max(1, calc(12 / (var(--niche-zoom) * var(--floor-px))));
+  }
+
+  /* Each word's size at 1, in px (the table's; the list's are larger). */
+  .page-home .home-hero {
+    --floor-px: 13.76;
+  }
+
+  .page-home .home-hero .home-hour-link-name {
+    --floor-px: 18.56;
+  }
+
+  .page-home .home-hero :is(.commemorations, .octave-note) {
+    --floor-px: 16;
+  }
+
+  .page-home .home-hero :is(.penitential-badge, .home-frieze-text) {
+    --floor-px: 14.4;
+  }
+
+  .page-home .home-hero :is(.home-season, .home-date-nav > summary, .home-versicle) {
+    --floor-px: 15.2;
+  }
+
+  .page-home .home-hero .not-today-link {
+    --floor-px: 12.48;
+  }
+
+  .page-home .home-hero .home-date-weekday {
+    --floor-px: 16.8;
+  }
+
+  .page-home .home-hero .feast {
+    --floor-px: 21.12;
   }
 
   .page-home .home {
@@ -9434,7 +9507,8 @@ html:where(:has(> body.page-hour))::before {
   }
 
   .page-home .home-hour-link {
-    min-height: 3.5rem;
+    /* A thumb's height on the glass at any zoom. */
+    min-height: max(3.5rem, calc(44px / var(--niche-zoom)));
     padding-block: 0.45rem;
     gap: 0.08rem;
   }
@@ -9529,11 +9603,17 @@ html:where(:has(> body.page-hour))::before {
    stand one to a line, the name and its gloss on one baseline parted by a
    gilt point, the periods in the margin beside their hours, ruled between
    the periods as the table is. The list is set as a block centred in the
-   niche, not run from its left edge. */
-@media (min-width: 701px) and (min-height: 1000px) {
+   niche, not run from its left edge. On its side the niche takes the list
+   only where its heaviest day fits at the least zoom (1146px high); below
+   that the glossed table fits at a larger scale. */
+@media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait), (min-width: 701px) and (min-height: 1146px) {
   .page-home main {
-    --niche-fit: 54.2rem;
-    --niche-chrome: 14.75rem;
+    /* NicheFigures.landscapeList */
+    --card-w: 37.5rem;
+    --niche-fit: 61rem;
+    --niche-air: 1.6rem;
+    --niche-least: 0.96;
+    --niche-share: 0.62;
   }
 
   .page-home .home h1 {
@@ -9553,8 +9633,10 @@ html:where(:has(> body.page-hour))::before {
     --crown-size: 2.5rem;
   }
 
+  /* The middle column is narrower than the hours' lines, so the label and
+     the hours, read as one block, stand centred in the niche. */
   .page-home .home-hour-group {
-    grid-template-columns: minmax(0, 1fr) 15.5rem minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 6.75rem minmax(0, 1fr);
   }
 
   .page-home .home-hour-group-label {
@@ -9584,7 +9666,7 @@ html:where(:has(> body.page-hour))::before {
     align-items: baseline;
     align-content: center;
     justify-content: start;
-    min-height: 3.1rem;
+    min-height: max(3.1rem, calc(44px / var(--niche-zoom)));
     padding: 0.25rem 0 0.15rem;
     text-align: left;
   }
@@ -9632,12 +9714,12 @@ html:where(:has(> body.page-hour))::before {
    in the head. */
 @media (min-width: 701px) and (orientation: portrait) {
   .page-home main {
+    /* NicheFigures.upright */
     --card-w: 34.5rem;
-    --niche-fit: 45rem;
-    --niche-chrome: 15.6rem;
+    --niche-fit: 48.75rem;
+    --niche-air: 2.4rem;
     --niche-least: 0.9;
     --niche-share: 0.8;
-    --niche-air: 2.4rem;
   }
 
   .page-home .home-hero:not(#x) {
@@ -9653,7 +9735,12 @@ html:where(:has(> body.page-hour))::before {
 
 @media (min-width: 701px) and (min-height: 1000px) and (orientation: portrait) {
   .page-home main {
-    --niche-fit: 57rem;
+    /* NicheFigures.uprightList */
+    --card-w: 34.5rem;
+    --niche-fit: 62.5rem;
+    --niche-air: 2.4rem;
+    --niche-least: 0.9;
+    --niche-share: 0.8;
   }
 
   .page-home .home h1 {
@@ -9661,7 +9748,32 @@ html:where(:has(> body.page-hour))::before {
   }
 
   .page-home .home-hour-group {
-    grid-template-columns: minmax(0, 1fr) 15rem minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 7.4rem minmax(0, 1fr);
+  }
+}
+
+/* A short screen (a phone on its side, a short window): the niche is
+   fitted down to the invitation rather than to its foot, so the day and
+   "Pray" stand above the fold on every day, and the colophon is always
+   below it. The small words keep 12px on the glass (above). */
+@media (min-width: 701px) and (max-height: 560px) {
+  .page-home main {
+    /* NicheFigures.short */
+    --card-w: 37.5rem;
+    --niche-fit: 35.25rem;
+    --niche-air: 0.5rem;
+    --niche-least: 0.5;
+    --niche-share: 0.62;
+    --niche-below: 0rem;
+    --niche-fits: 0;
+  }
+
+  /* Held at 12px in so small a niche, a gloss is wider than its hour's
+     cell: it takes a second line rather than running into its neighbour. */
+  .page-home .home-hour-link-note,
+  .page-home .home-hour-link.is-current .home-hour-link-note {
+    white-space: normal;
+    text-wrap: balance;
   }
 }
 
@@ -9682,7 +9794,7 @@ html:where(:has(> body.page-hour))::before {
     bottom: 0;
     left: calc(-1 * var(--pad-x) - var(--arch-d));
     z-index: -1;
-    background: linear-gradient(100deg, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 0%, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 30%, var(--ornament-hi) 62%, color-mix(in srgb, var(--ornament-hi) 70%, white) 82%, var(--ornament-hi) 100%);
+    background: linear-gradient(100deg, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 0%, color-mix(in srgb, var(--ornament-lo) 60%, var(--ornament-hi)) 30%, var(--ornament-hi) 62%, color-mix(in srgb, var(--ornament-hi) 70%, var(--gilt-glint)) 82%, var(--ornament-hi) 100%);
     pointer-events: none;
   }
 }

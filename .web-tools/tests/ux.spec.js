@@ -789,13 +789,16 @@ test("the wide niche scales by one computed zoom, never under its least", async 
   expect(new Set(zooms.map((z) => z.toFixed(2))).size).toBeGreaterThan(2);
 });
 
-test("the wide niche sets the hours one to a line from 1000px high, a glossed table below", async ({ page }) => {
+test("the wide niche sets the hours one to a line where its heaviest day fits them, a glossed table below", async ({ page }) => {
+  // Upright from 1000px high; on its side from 1146px, where the list's
+  // heaviest day fits at the least zoom (below that it was clamped and ran
+  // under the fold).
   const rows = async () =>
     page.evaluate(() => {
       const top = (hour) => Math.round(document.querySelector(`.home-hour-link[data-hour="${hour}"]`).getBoundingClientRect().top);
       return { lauds: top("lauds"), prime: top("prime"), terce: top("terce"), none: top("none") };
     });
-  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1920, 1080, true], [820, 1180, true]]) {
+  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1728, 1030, false], [1920, 1080, false], [1920, 1200, true], [820, 1180, true]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
     const at = await rows();
@@ -805,6 +808,49 @@ test("the wide niche sets the hours one to a line from 1000px high, a glossed ta
     } else {
       expect(Math.abs(at.prime - at.lauds), `${width}x${height}: Lauds and Prime share a row`).toBeLessThanOrEqual(1);
       expect(Math.abs(at.none - at.terce), `${width}x${height}: Terce and None share a row`).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("the fold never cuts through the wide home's colophon, and a fitted niche never scrolls", async ({ page }) => {
+  // Where the zoom was held at its least, the colophon's tailpiece or words
+  // were sliced by the fold; where the niche fitted, a pixel or three of
+  // scroll remained. The colophon is now wholly in view or wholly below.
+  for (const [width, height] of [[1280, 800], [1180, 820], [1470, 830], [1440, 900], [1728, 1030], [1680, 1050], [1920, 1080], [820, 1180], [1024, 768]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const foot = await page.evaluate(() => {
+        const footer = document.querySelector("footer").getBoundingClientRect();
+        return { top: footer.top, bottom: footer.bottom, scroll: document.documentElement.scrollHeight - innerHeight };
+      });
+      const whole = foot.bottom <= height + 0.5;
+      expect(whole || foot.top >= height - 0.5, `${at}: colophon cut by the fold`).toBe(true);
+      if (whole) expect(foot.scroll, `${at}: no stray scroll`).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
+test("a phone on its side keeps the day and the invitation above the fold", async ({ page }) => {
+  // The niche's least zoom once left only the date and feast in view on a
+  // phone turned sideways; its small words still keep 12px on the glass.
+  for (const [width, height] of [[844, 390], [932, 430]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const view = await page.evaluate(() => {
+        const hero = document.querySelector(".home-hero");
+        const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+        const glass = (el) => parseFloat(getComputedStyle(el).fontSize) * zoom * (parseFloat(getComputedStyle(el).zoom) || 1);
+        return {
+          pray: document.querySelector(".pray-now").getBoundingClientRect().bottom,
+          smallest: Math.min(...[...document.querySelectorAll(".home-hour-link-note, .home-hour-group-label, .home-date-weekday")].map(glass)),
+        };
+      });
+      expect(view.pray, `${at}: "Pray" above the fold`).toBeLessThanOrEqual(height);
+      expect(view.smallest, `${at}: small words legible`).toBeGreaterThanOrEqual(11.95);
     }
   }
 });
@@ -2043,7 +2089,7 @@ test("themes never change layout", async ({ browser }) => {
         // it meets the reveal's fillet: painted layers, absolutely placed and
         // aria-hidden, that move no other box.
         boxes: [...document.querySelectorAll("body *")]
-          .filter((el) => !el.closest(".home-sky, .home-lining, .home-arch-fill"))
+          .filter((el) => !el.closest(".home-sky, .home-lining") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
           .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
