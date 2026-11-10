@@ -354,7 +354,17 @@ struct MenuPanel: View {
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
-        .background(p.surface)
+        .background {
+            // By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster),
+            // not a flat slab of the surface: the web's `.site-menu-panel` by night.
+            if p.dark, let plaster = UIImage(named: p.panel) {
+                Image(uiImage: plaster).resizable().scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .clipped()
+            } else {
+                p.surface
+            }
+        }
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         // The panel's top edge is the painted line (`--ornament-line`).
         .overlay(alignment: .top) { Rectangle().fill(o.line).frame(height: 2) }
@@ -488,17 +498,22 @@ struct Disclosure: View {
     let open: Bool
     var value: String?
     var style: TextStyle = Scale.control
+    /// Set in capitals, as the controls are; home's foot sets it in small caps instead.
+    var upper = true
     let toggle: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         let ink = open ? p.accent : p.muted
+        let cased = { (s: String) in upper ? s.uppercased() : s }
         Button(action: toggle) {
             HStack(spacing: 0) {
-                (Text(label.uppercased()) + Text(value.map { " " + $0.uppercased() } ?? "").foregroundColor(p.text))
+                (Text(cased(label)) + Text(value.map { " " + cased($0) } ?? "").foregroundColor(p.text))
                     .type(style)
                     .foregroundStyle(ink)
+                    // Home's and an hour's small-caps disclosures keep one line.
+                    .fixedSize(horizontal: !upper, vertical: false)
                 Caret(open: open, color: ink)
             }
             .padding(.horizontal, m.px(8))
@@ -508,6 +523,9 @@ struct Disclosure: View {
         .accessibilityValue(open ? "Expanded" : "Collapsed")
     }
 }
+
+/// Change date's day links, worded as the web's.
+private let dayNav = dayNavWords()
 
 /// The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR).
 private let pickerYears = 1950...2150
@@ -551,18 +569,24 @@ struct DayPicker: View {
         let cell = max(m.px(44), 44)
         VStack(spacing: 0) {
             Hairline(color: p.border).padding(.horizontal, m.px(24))
-            HStack(spacing: centred ? m.px(5.6) : nil) {
-                Button { pick(shown.adding(days: -1)) } label: { Text("← Previous").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
-                    .buttonStyle(Quiet()).accessibilityLabel("Previous day")
-                if !centred { Spacer() }
+            // "Previous day" and "Next day", worded (`presentation::PREVIOUS_DAY`), so they read as
+            // the day's turn and the month's arrows below as the month's; gathered, they stand at
+            // the grid's edges.
+            HStack(spacing: 0) {
+                Button { pick(shown.adding(days: -1)) } label: { Text("← \(dayNav.previous)").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
+                    .buttonStyle(Quiet()).accessibilityLabel(dayNav.previous)
+                Spacer(minLength: 0)
                 if shown != today {
                     Button { pick(today) } label: { Text("TODAY").type(Scale.control).foregroundStyle(p.muted).frame(minHeight: 44) }.buttonStyle(Quiet())
                 }
-                if !centred { Spacer() }
-                Button { pick(shown.adding(days: 1)) } label: { Text("Next →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(16)).frame(minHeight: 44) }
-                    .buttonStyle(Quiet()).accessibilityLabel("Next day")
+                Spacer(minLength: 0)
+                Button { pick(shown.adding(days: 1)) } label: { Text("\(dayNav.next) →").type(link).foregroundStyle(p.accent).padding(.horizontal, m.px(centred ? 4 : 16)).frame(minHeight: 44) }
+                    .buttonStyle(Quiet()).accessibilityLabel(dayNav.next)
             }
+            .frame(maxWidth: centred ? 7 * cell : .infinity)
             .padding(.top, m.px(8))
+            // A hairline parts the day's turn above from the month's below.
+            Hairline(color: p.border.opacity(0.58)).frame(maxWidth: 7 * cell).padding(.top, m.px(4))
             // Seven thumb-wide days where they fit, centred; on a narrower column the week narrows
             // to it, the days keeping their height.
             VStack(spacing: 0) {
@@ -610,8 +634,12 @@ struct DayPicker: View {
         .padding(.top, m.px(8))
     }
 
-    /// Today's wash, in the days and the months: the gold thinned, or by night the vault's blue lifted (`--apse-lift`).
-    private var todayWash: Color { p.dark ? Color(hex: 0x84A0CC).opacity(0.13) : p.gold.opacity(0.1) }
+    /// Today, in the days and the months, lies under a pool of light with no edge, as the hour
+    /// that is now does on home (`--now-pool`): ochre by day, moonlit blue by night.
+    private var todayPool: some View {
+        let pool = HomeInk.of(p).nowPool
+        return RadialGradient(stops: [.init(color: pool, location: 0), .init(color: pool.opacity(0.55), location: 0.52), .init(color: pool.opacity(0), location: 1)], center: .center, startRadius: 0, endRadius: 22)
+    }
 
     private var title: String { months ? "\(year)" : "\(monthName(month)) \(year)" }
 
@@ -674,7 +702,7 @@ struct DayPicker: View {
                                     .foregroundStyle(i == 0 ? p.rubric : day == shown ? p.accent : p.text)
                                     .goldUnderline(day == shown, p.goldLine)
                                     .frame(maxWidth: .infinity, minHeight: 44)
-                                    .background(day == today ? todayWash : .clear)
+                                    .background { if day == today { todayPool } }
                             }
                             .buttonStyle(Quiet())
                             .accessibilityLabel(spokenDay(day, today: today))
@@ -708,7 +736,7 @@ struct DayPicker: View {
                             Text(monthShort(mo).uppercased()).type(.label(11.5, 0.1)).foregroundStyle(chosen ? p.accent : p.text)
                                 .padding(.horizontal, m.px(14.4)).padding(.vertical, m.px(13))
                                 .goldUnderline(chosen, p.goldLine)
-                                .background(Int(today.year) == year && Int(today.month) == mo ? todayWash : .clear)
+                                .background { if Int(today.year) == year && Int(today.month) == mo { todayPool } }
                         }
                         .buttonStyle(Quiet())
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -778,7 +806,10 @@ struct FormChooser: View {
 
 /**
  * The continuation after a page's content: the previous item, the way back to all of them, and
- * the next item. It carries no ornament of its own; an hour ends on its consecration cross above it.
+ * the next item. `ruled` sets it as home sets its hours (an hour's end, the web's
+ * `.page-hour .hour-continuation`): labels in true small capitals, the names a size up, home's gilt
+ * points between the three, and one rule struck under them with home's pen where the wall's field
+ * begins.
  */
 struct Continuation: View {
     let previousLabel: String
@@ -789,18 +820,21 @@ struct Continuation: View {
     let nextLabel: String
     let next: String?
     let onNext: () -> Void
+    var ruled = false
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
+    private func label(_ text: String) -> String { ruled ? text : text.uppercased() }
+
     var body: some View {
-        let small = TextStyle.label(11.2, 0.08)
-        let name = Scale.body.sized(16, line: 22)
+        let small = ruled ? TextStyle(size: 13.76, line: 18, tracking: 1.1, smallCaps: true) : TextStyle.label(11.2, 0.08)
+        let name = Scale.body.sized(ruled ? 16.96 : 16, line: 22)
         HStack(alignment: .center, spacing: 0) {
             Group {
                 if let previous {
                     Button(action: onPrevious) {
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(previousLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text(label(previousLabel)).type(small).foregroundStyle(p.muted)
                             Text("← \(previous)").type(name).foregroundStyle(p.accent)
                         }
                     }
@@ -811,17 +845,19 @@ struct Continuation: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if ruled && previous != nil { GiltPoint() }
             Button(action: onMiddle) {
-                Text(middle.uppercased()).type(.label(12.16, 0.06)).foregroundStyle(p.muted)
-                    .padding(.horizontal, m.px(6.4)).padding(.vertical, m.px(12))
+                Text(label(middle)).type(ruled ? small : .label(12.16, 0.06)).foregroundStyle(p.muted)
+                    .padding(.horizontal, m.px(ruled ? 12 : 6.4)).padding(.vertical, m.px(12))
             }
             .buttonStyle(Quiet())
             .accessibilityLabel(middle)
+            if ruled && next != nil { GiltPoint() }
             Group {
                 if let next {
                     Button(action: onNext) {
                         VStack(alignment: .trailing, spacing: 0) {
-                            Text(nextLabel.uppercased()).type(small).foregroundStyle(p.muted)
+                            Text(label(nextLabel)).type(small).foregroundStyle(p.muted)
                             Text("\(next) →").type(name).foregroundStyle(p.accent)
                         }
                     }
@@ -832,6 +868,15 @@ struct Continuation: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.top, ruled ? m.px(8.8) : 0).padding(.bottom, ruled ? m.px(9.6) : 0)
+        .background {
+            if ruled {
+                Canvas { ctx, size in
+                    ctx.fill(ruledLine(0, size.height - 0.5, size.width, size.height - 0.5, 1.2, seed: 51), with: .color(p.lining.opacity(0.55)))
+                }
+                .accessibilityHidden(true)
+            }
         }
     }
 }

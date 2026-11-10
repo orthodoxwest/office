@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,20 +40,26 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -96,7 +103,10 @@ fun HomeScreen(
         // The wall's one field, fixed to the screen and phased from its top: by night the vault,
         // clearing the header and thinning toward the foot; by day the powdering, cut square under
         // the beam.
-        WallField(Modifier.fillMaxSize(), seam = top) { dark ->
+        // On a phone by night the stars are the apse's own, inside the arch (`sky`): the wall
+        // outside it is plain dark plaster.
+        val phoneNight = LocalPalette.current.dark && !LocalWide.current
+        if (!phoneNight) WallField(Modifier.fillMaxSize(), seam = top) { dark ->
             fun at(d: Dp) = (top + d).toPx() / size.height
             if (dark) {
                 listOf(0f to 0f, at(56.dp) to 0f, at(112.dp) to 1f, maxOf(0.78f, at(112.dp)) to 1f, 1f to 0.6f)
@@ -136,8 +146,9 @@ fun HomeScreen(
                     Footer(reserve = true)
                 }
             } else {
-                // A phone's card stands from the header to a little above the footer: whatever
-                // height home has beyond its own goes to the panel, above the band.
+                // A phone's card stands from the header to the screen's foot, short of it by the
+                // gutter: whatever height home has beyond its own goes to the panel, above the
+                // band. The phone's home has no colophon; the wide home keeps it.
                 val card = minOf(576.dp, screen) - Gutter * 2
                 PhoneHome(
                     tall,
@@ -150,7 +161,7 @@ fun HomeScreen(
                             onFeast = onFeast,
                         )
                     },
-                    footer = { Footer(gap = 29.6.dp, bottom = 25.6.dp, reserve = true) },
+                    foot = Gutter,
                 )
             }
         }
@@ -158,26 +169,22 @@ fun HomeScreen(
 }
 
 /**
- * A phone's home: the header, the card and the footer, at least `height` tall, the card given the
- * height left over as its least, so it stands from the header to a little above the footer.
+ * A phone's home: the header and the card, at least `height` tall, the card given the height left
+ * over above `foot` as its least, so it stands from the header to `foot` above the screen's foot.
  */
 @Composable
-private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composable () -> Unit, footer: @Composable () -> Unit) {
-    Layout(contents = listOf(header, card, footer), modifier = Modifier.fillMaxWidth()) { (headers, cards, footers), constraints ->
+private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composable () -> Unit, foot: Dp) {
+    Layout(contents = listOf(header, card), modifier = Modifier.fillMaxWidth()) { (headers, cards), constraints ->
         val width = constraints.maxWidth
         val loose = Constraints(maxWidth = width)
         val top = headers.map { it.measure(loose) }
-        val foot = footers.map { it.measure(loose) }
-        val spare = (height.roundToPx() - top.sumOf { it.height } - foot.sumOf { it.height }).coerceAtLeast(0)
+        val below = foot.roundToPx()
+        val spare = (height.roundToPx() - top.sumOf { it.height } - below).coerceAtLeast(0)
         val middle = cards.map { it.measure(Constraints(maxWidth = width, minHeight = spare)) }
-        val above = top.sumOf { it.height } + middle.sumOf { it.height }
-        val total = maxOf(above + foot.sumOf { it.height }, height.roundToPx())
+        val total = maxOf(top.sumOf { it.height } + middle.sumOf { it.height } + below, height.roundToPx())
         layout(width, total) {
             var y = 0
             (top + middle).forEach { it.place((width - it.width) / 2, y); y += it.height }
-            // The colophon at the foot of the screen.
-            y = total - foot.sumOf { it.height }
-            foot.forEach { it.place((width - it.width) / 2, y); y += it.height }
         }
     }
 }
@@ -245,7 +252,18 @@ private class HomeTier(val desk: Boolean, screen: Dp, tall: Dp, card: Dp, privat
      * phone's: a date too long for it breaks after the weekday, its second line lower where the
      * head is wider.
      */
-    val dateMeasure: Dp = if (desk) Dp.Unspecified else minOf(card * pick(0f, 0.233f, 0.3f) + 139.dp, clear(card, headPad + 44.dp - dateLine))
+    val dateMeasure: Dp = if (desk) Dp.Unspecified else clear(card, headPad + 44.dp - dateLine)
+    /**
+     * On a phone the weekday is a titulus in spaced small caps over the rest of the date set 10%
+     * larger (6% on a short phone), as the web's `.home-date-weekday` and `.home-date-rest`: the
+     * weekday's size and line, the rest's size and line. A day with no room to give (two
+     * commemorations, or one opened from another day) closes the title up on a taller phone.
+     */
+    private val short = !desk && tall <= 700.dp
+    fun weekday(): Float = maxOf(0.66f * date, 15.2f / dyn)
+    fun weekdayLine(heavy: Boolean): Float = if (short) 1.18f else if (heavy) 1.06f else 1.5f
+    fun rest(heavy: Boolean): Float = date * if (short) 1.06f else if (heavy) 1.02f else 1.1f
+    fun restLine(heavy: Boolean): Float = if (short) 1.08f else if (heavy) 1f else 1.12f
     val feast = if (desk) 18.72f else fitted(0.055f * inline, 0.0215f * tall.value, 15.2f, 24f)
     /**
      * The feast's measure, the head's width at its first line, when the day stands at the head's
@@ -288,28 +306,10 @@ private fun unbroken(date: String): String {
 }
 
 /**
- * CSS's color-mix in sRGB: `a` at `share` and `b` the rest, premultiplied, as CSS mixes
- * translucent colours.
+ * The frontispiece's frame (`.home-hero`), the same at every width; the rules within are ruled by
+ * hand in the lining (`HourDirectory`, `PrayNow`).
  */
-internal fun mix(a: Color, b: Color, share: Float): Color {
-    val alpha = a.alpha * share + b.alpha * (1 - share)
-    if (alpha == 0f) return Color.Transparent
-    fun channel(x: Float, y: Float) = (x * a.alpha * share + y * b.alpha * (1 - share)) / alpha
-    return Color(channel(a.red, b.red), channel(a.green, b.green), channel(a.blue, b.blue), alpha)
-}
-
-/**
- * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
- * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
- * rules, the lining thinned.
- */
-private class FrontispieceInk(val frame: Color, val rule: Color, val band: Color, val panelRule: Color)
-
-private fun frontispieceInk(p: Palette): FrontispieceInk = if (p.dark) {
-    FrontispieceInk(Color(208, 176, 106).copy(alpha = 0.34f), Color(208, 176, 106).copy(alpha = 0.24f), Color(208, 176, 106).copy(alpha = 0.045f), p.lining.copy(alpha = 0.45f))
-} else {
-    FrontispieceInk(Color(87, 52, 33).copy(alpha = 0.3f), Color(107, 58, 31).copy(alpha = 0.22f), p.inscriptionGround.copy(alpha = 0.09f), p.lining.copy(alpha = 0.45f))
-}
+private fun frontispieceFrame(p: Palette): Color = if (p.dark) Color(208, 176, 106).copy(alpha = 0.34f) else Color(87, 52, 33).copy(alpha = 0.3f)
 
 /** The phone panel's lining stands this far inside its edge (`--panel-inset`); the niche's 26dp. */
 private val PanelInset = 12.dp
@@ -329,7 +329,7 @@ private fun Frontispiece(
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
-    val ink = frontispieceInk(p)
+    val frame = frontispieceFrame(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
     // The picker's full height as it was last laid out, so the head can ease in step with its
@@ -343,27 +343,112 @@ private fun Frontispiece(
     // would be tan there, and takes the gold line by day.
     val liningDay = if (!p.dark && view.color == "white") p.goldLine else day
     val desk = tier.desk
-    // The day's red work. By night the phone panel's moonlight lifts the ground under it, so the
-    // rubric red is lifted with it to keep its contrast (the web's Apse phone panel).
-    val rubric = if (p.dark && !desk) Color(0xFFE08585) else p.rubric
+    val home = homeInk(p)
+    // By night a phone's head is the apse's sky (the web's `.home-sky`).
+    val night = p.dark && !desk
+    val season = view.ornament
+    val catch = leafCatch(season)
+    val leaf = Leaf(o)
+    val black = view.color == "black"
+    val first = view.firstClass
+    // The day's red work and muted ink, lifted on the sky to keep their contrast.
+    val rubric = if (night) home.skyRubric else p.rubric
+    val muted = if (night) home.skyMuted else p.muted
+    // The frontal: the day's colour inside the invitation's frame; on a white day gold by day and
+    // lime white by night on the sky, where the fillet is the one gold line; the lining thinned on
+    // a bare black day.
+    val frontal = when {
+        black -> p.lining.copy(alpha = 0.8f)
+        view.color == "white" -> if (night) home.limeWhite else p.goldLine
+        else -> day
+    }
+    val pigment = ImageBitmap.imageResource(R.drawable.pigment)
+    val wash = ImageBitmap.imageResource(R.drawable.sky_wash)
+    // The painter's reserve round the day's words, which the sky's stars keep clear of.
+    val reserve = remember { Reserve() }
     val side = tier.side
     Layout(
         contents = listOf<@Composable () -> Unit>(
-            // The consecration cross in the point of the head, with clear air round it.
-            { ConsecrationCross(Modifier.size(tier.crownSize)) },
-            // A lining painted round the head on the back wall, down to the inscription band.
-            { Spacer(Modifier.drawBehind { lining(tier.arch, (if (desk) 26.dp else PanelInset).toPx(), p.lining, liningDay) }) },
+            // The consecration cross in the point of the head, with clear air round it: painted
+            // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
+            {
+                when {
+                    night && black -> ConsecrationCross(Modifier.size(tier.crownSize), ink = muted.copy(alpha = 0.7f))
+                    night -> ConsecrationCross(Modifier.size(tier.crownSize), brush = Brush.linearGradient(0f to leaf.hi, 0.55f to leaf.mid, 1f to leaf.lo), alpha = 0.35f + 0.65f * catch)
+                    first -> ConsecrationCross(Modifier.size(tier.crownSize), brush = Brush.linearGradient(0.08f to o.hi, 0.3f to mix(o.hi, Color.White, 0.55f), 0.52f to o.flat, 0.92f to o.lo))
+                    else -> ConsecrationCross(Modifier.size(tier.crownSize), pigment = pigment)
+                }
+            },
+            // A lining painted round the head on the back wall, down to the inscription band; by
+            // night on a phone, the apse's sky with its stars, ringed by a leaf fillet and the day's
+            // hairline.
+            {
+                Spacer(
+                    Modifier.drawBehind {
+                        if (night) {
+                            val crown = tier.crownSize.toPx()
+                            val pad = 11.dp.toPx()
+                            val clear = reserve.rects.values.flatten().map { Rect(it.left - 14.dp.toPx(), it.top - 6.dp.toPx(), it.right + 14.dp.toPx(), it.bottom + 6.dp.toPx()) } +
+                                Rect((size.width - crown) / 2f - pad, tier.crownTop.toPx() - pad, (size.width + crown) / 2f + pad, tier.crownTop.toPx() + crown + pad)
+                            sky(tier.arch, size.height, wash, home, leaf, catch, stars = !black, first = first, reserve = clear)
+                            if (!black) skyLining(tier.arch, leaf, catch, if (view.color == "white") home.limeWhite else day, first)
+                        } else {
+                            lining(tier.arch, (if (desk) 26.dp else PanelInset).toPx(), p.lining, liningDay, pigment)
+                        }
+                    },
+                )
+            },
             // The day.
             {
                 Column(Modifier.fillMaxWidth().padding(horizontal = tier.dayClear), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        unbroken(view.dateLabel),
-                        // On a phone a full thumb's height, as the web's, its line at the foot so
-                        // the feast stands close under it.
-                        Modifier.widthIn(max = tier.dateMeasure).semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
-                            .heightIn(min = if (desk) 0.dp else 44.dp).wrapContentHeight(Alignment.Bottom),
-                        style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
-                    )
+                    val dateModifier = Modifier.semantics(mergeDescendants = true) { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
+                    val at = view.dateLabel.indexOf(", ")
+                    if (desk || at < 0) {
+                        Text(
+                            unbroken(view.dateLabel),
+                            dateModifier.widthIn(max = tier.dateMeasure),
+                            style = Type.body.copy(fontSize = tier.date.sp, lineHeight = (tier.date * 1.2f).sp, letterSpacing = tier.dateTracking.sp, color = p.text, textAlign = TextAlign.Center),
+                            onTextLayout = reserve.layout("date"),
+                        )
+                    } else {
+                        // On a phone the weekday is a titulus over the rest of the date, the two a full
+                        // thumb's height at least, as the web's, the rest at the foot so the feast
+                        // stands close under it. A reader hears "Tuesday, November 10, 2026".
+                        val heavy = view.commemorations.size > 1 || !view.isToday
+                        Column(
+                            dateModifier.heightIn(min = 44.dp).wrapContentHeight(Alignment.Bottom),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            val weekday = tier.weekday()
+                            Text(
+                                view.dateLabel.substring(0, at),
+                                reserve.at("weekday").semantics { contentDescription = view.dateLabel.substring(0, at + 1) },
+                                style = Type.body.copy(
+                                    fontSize = weekday.sp,
+                                    lineHeight = (weekday * tier.weekdayLine(heavy)).sp,
+                                    letterSpacing = (weekday * 0.15f).sp,
+                                    fontFeatureSettings = ALL_SMALL_CAPS,
+                                    color = p.titulus,
+                                    textAlign = TextAlign.Center,
+                                ),
+                                onTextLayout = reserve.layout("weekday"),
+                            )
+                            val rest = tier.rest(heavy)
+                            Text(
+                                unbroken(view.dateLabel.substring(at + 2)),
+                                reserve.at("date"),
+                                style = Type.body.copy(
+                                    fontSize = rest.sp,
+                                    lineHeight = (rest * tier.restLine(heavy)).sp,
+                                    letterSpacing = (rest * 0.005f).sp,
+                                    fontFeatureSettings = "onum, pnum",
+                                    color = p.text,
+                                    textAlign = TextAlign.Center,
+                                ),
+                                onTextLayout = reserve.layout("date"),
+                            )
+                        }
+                    }
                     // The day's feast leads to its page, underlined as the web's `.feast-link`, though in
                     // its own ink: a text decoration takes no colour.
                     FeastName(
@@ -373,16 +458,17 @@ private fun Frontispiece(
                         Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure)
                             .then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
                         linked = view.feastId.isNotEmpty(),
+                        reserve = reserve,
                     )
-                    if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
+                    if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, reserve.at("octave"), style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
                     if (view.penitential.isNotEmpty()) {
                         Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
-                            view.penitential.forEach { Text(it, style = Type.small.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp)) }
+                            view.penitential.forEachIndexed { i, it -> Text(it, reserve.at("fast$i"), style = Type.small.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i")) }
                         }
                     }
                     if (view.commemorations.isNotEmpty()) {
                         Column(Modifier.padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("ALSO", style = Type.label(10.56f, 0.1f).copy(color = p.muted))
+                            Text("ALSO", reserve.at("also"), style = Type.label(10.56f, 0.1f).copy(color = muted), onTextLayout = reserve.layout("also"))
                             // A second commemoration is joined to the first with "and", as the web's
                             // `.commemorations li + li::before`, so the list reads as a sentence.
                             view.commemorations.forEachIndexed { i, name ->
@@ -391,7 +477,12 @@ private fun Frontispiece(
                                     if (i > 0) withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("and ") }
                                     withStyle(SpanStyle(textDecoration = if (id.isEmpty()) null else TextDecoration.Underline)) { append(name) }
                                 }
-                                Text(text, if (id.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(id) }, style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp))
+                                Text(
+                                    text,
+                                    reserve.at("also$i").then(if (id.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(id) }),
+                                    style = Type.small.copy(color = p.text, textAlign = TextAlign.Center, fontSize = tier.commemoration.sp, lineHeight = (tier.commemoration * tier.commemorationLine).sp),
+                                    onTextLayout = reserve.layout("also$i"),
+                                )
                             }
                         }
                     }
@@ -403,8 +494,8 @@ private fun Frontispiece(
                 if (style != null && view.versicle.isNotEmpty()) {
                     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
                         Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
-                            VersicleLine("℣.", view.versicle, style, rubric)
-                            VersicleLine("℟.", view.response, style, rubric)
+                            VersicleLine("℣.", view.versicle, style, rubric, reserve, "versicle")
+                            VersicleLine("℟.", view.response, style, rubric, reserve, "response")
                         }
                     }
                 }
@@ -415,8 +506,9 @@ private fun Frontispiece(
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                         Text(
                             "GO TO TODAY",
-                            Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).goldUnderline(true, p.goldLine),
+                            Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).then(reserve.at("today")).goldUnderline(true, p.goldLine),
                             style = Type.menu.copy(color = p.accent),
+                            onTextLayout = reserve.layout("today"),
                         )
                     }
                 }
@@ -427,43 +519,49 @@ private fun Frontispiece(
                     // The inscription band: gilt letters on the frieze's green earth, between
                     // oxblood rules each with a gilt fillet inside it, its phrase parted from the
                     // frame by gilt lozenges 5dp square.
+                    // The inscription band: flat green earth between oxblood edges and leaf
+                    // fillets, ruled by hand (the web's `rule()`), its letters leaf that catches the
+                    // light at their heads.
                     Row(
                         Modifier
                             .throughPadding(side)
                             .background(p.inscriptionGround)
                             .drawBehind {
-                                drawLine(p.inscriptionEdge, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx())
-                                drawLine(p.inscriptionEdge, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-                                val fillet = o.ink.copy(alpha = 0.22f)
-                                drawLine(fillet, Offset(0f, 1.5.dp.toPx()), Offset(size.width, 1.5.dp.toPx()), 1.dp.toPx())
-                                drawLine(fillet, Offset(0f, size.height - 1.5.dp.toPx()), Offset(size.width, size.height - 1.5.dp.toPx()), 1.dp.toPx())
+                                val u = density
+                                val w = size.width
+                                val h = size.height
+                                drawPath(ruledLine(0f, 0.6f * u, w, 0.6f * u, 1.3f * u, 11, u), p.inscriptionEdge)
+                                drawPath(ruledLine(0f, h - 0.6f * u, w, h - 0.6f * u, 1.3f * u, 12, u), p.inscriptionEdge)
+                                val fillet = o.ink.copy(alpha = 0.3f)
+                                drawPath(ruledLine(0f, 2.2f * u, w, 2.2f * u, 0.9f * u, 13, u), fillet)
+                                drawPath(ruledLine(0f, h - 2.2f * u, w, h - 2.2f * u, 0.9f * u, 14, u), fillet)
                             }
                             .padding(vertical = tier.bandPad),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Lozenged("Pray the hours", Type.label(tier.band, if (desk) 0.17f else 0.16f).copy(color = o.ink, fontFeatureSettings = ALL_SMALL_CAPS), o.ink)
+                        val letters = Brush.verticalGradient(0.2f to mix(o.ink, Color.White, 0.7f), 0.58f to o.ink)
+                        Lozenged("Pray the hours", Type.label(tier.band, if (desk) 0.17f else 0.15f).copy(brush = letters, fontFeatureSettings = ALL_SMALL_CAPS), o.ink)
                     }
                     Spacer(Modifier.height(tier.bandGap))
-                    PrayNow(view.prayNowLabel, tier) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    PrayNow(view.prayNowLabel, tier, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
-                    HourDirectory(view.currentHour, view.currentHourNote, prayed, tier) { onHour(date, it) }
-                    // Season and date control share one baseline after the invitation (`.home-day-meta`);
-                    // once open, the control takes a row of its own under the season.
-                    Hairline(ink.rule, Modifier.padding(top = tier.metaGap))
-                    val season = view.season.uppercase()
-                    val seasonStyle = Type.label(11.2f, 0.12f).copy(color = p.muted)
+                    HourDirectory(view.currentHour, view.currentHourNote, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
+                    // Season and date control share one line after the hours (`.home-day-meta`), in
+                    // small caps, a gilt point between them; once open, the control takes a row of
+                    // its own under the season.
+                    Spacer(Modifier.height(tier.metaGap + 1.dp))
+                    val seasonStyle = Type.label(13.44f, 0.09f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
                     // One row throughout, so the control TalkBack just activated is the one that stays
                     // (the web's one <summary>); open, the season fills its line and the control wraps.
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)) {
-                        if (season.isNotEmpty()) {
-                            Text(
-                                season,
-                                (if (picking) Modifier.fillMaxWidth() else Modifier).alignByBaseline(),
-                                style = seasonStyle.copy(textAlign = TextAlign.Center),
-                            )
+                    FlowRow(horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.Center) {
+                        if (view.season.isNotEmpty()) {
+                            Row((if (picking) Modifier.fillMaxWidth() else Modifier).align(Alignment.CenterVertically), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                Text(view.season, style = seasonStyle.copy(textAlign = TextAlign.Center))
+                                if (!picking) Canvas(Modifier.padding(start = 14.4.dp, end = 8.8.dp).size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+                            }
                         }
-                        Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.alignByBaseline())
+                        Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.align(Alignment.CenterVertically), style = seasonStyle, upper = false)
                     }
                 }
             },
@@ -483,14 +581,14 @@ private fun Frontispiece(
                 }
             },
         ),
-        modifier = modifier.drawBehind {
+        modifier = modifier.onGloballyPositioned { reserve.root = it }.drawBehind {
             if (niche != null) {
                 // The niche: a pointed head, the stone moulding, the day's colour as its trim.
-                niche(tier.arch, niche, p, day, ink.frame)
+                niche(tier.arch, niche, p, day, frame)
             } else {
                 // The panel: the day's colour a little toward the frame as a ring at its edge, so
                 // a red or green day edges the head without outshouting the cross.
-                panel(tier.arch, p, mix(day, ink.frame, 0.7f), ink.frame, panelPlaster)
+                panel(tier.arch, p, if (night) home.skyRim else mix(day, frame, 0.7f), frame, panelPlaster)
             }
         },
     ) { slots, constraints ->
@@ -543,7 +641,7 @@ private fun Frontispiece(
  * together.
  */
 @Composable
-private fun FeastName(name: String, alias: String, size: Float, modifier: Modifier, linked: Boolean = false) {
+private fun FeastName(name: String, alias: String, size: Float, modifier: Modifier, linked: Boolean = false, reserve: Reserve? = null) {
     val p = LocalPalette.current
     val style = Type.body.copy(
         fontSize = size.sp,
@@ -554,14 +652,14 @@ private fun FeastName(name: String, alias: String, size: Float, modifier: Modifi
         textDecoration = if (linked) TextDecoration.Underline else null,
     )
     FlowRow(modifier.semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy((size * 0.25f).dp, Alignment.CenterHorizontally)) {
-        Text(name, style = style)
-        if (alias.isNotEmpty()) Text(alias, style = style.copy(fontStyle = FontStyle.Italic), softWrap = false)
+        Text(name, reserve?.at("feast") ?: Modifier, style = style, onTextLayout = reserve?.layout("feast") ?: {})
+        if (alias.isNotEmpty()) Text(alias, reserve?.at("alias") ?: Modifier, style = style.copy(fontStyle = FontStyle.Italic), softWrap = false, onTextLayout = reserve?.layout("alias") ?: {})
     }
 }
 
 /** A line of the day's versicle: its ℣ or ℟ upright in the rubrics' red (`rubric`), the words in italic, the text's ink a little withdrawn. */
 @Composable
-private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color) {
+private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Color, reserve: Reserve, key: String) {
     val p = LocalPalette.current
     Text(
         buildAnnotatedString {
@@ -577,7 +675,32 @@ private fun VersicleLine(sigil: String, words: String, size: Float, rubric: Colo
             textAlign = TextAlign.Center,
             lineBreak = LineBreak.Heading,
         ),
+        modifier = reserve.at(key),
+        onTextLayout = reserve.layout(key),
     )
+}
+
+/**
+ * The painter's reserve round the day's words (the web's, from `Range.getClientRects`): each
+ * laid-out line of the day block, by its text's layout, in the card's space (`root`). The sky's
+ * stars keep clear of it. Written as the text is placed, read only when the sky is drawn.
+ */
+private class Reserve {
+    var root: LayoutCoordinates? = null
+    val rects = mutableStateMapOf<String, List<Rect>>()
+    private val layouts = HashMap<String, TextLayoutResult>()
+
+    fun layout(key: String): (TextLayoutResult) -> Unit = { layouts[key] = it }
+
+    fun at(key: String): Modifier = Modifier.onGloballyPositioned { c ->
+        val r = root?.takeIf { it.isAttached } ?: return@onGloballyPositioned
+        val l = layouts[key] ?: return@onGloballyPositioned
+        val o = r.localPositionOf(c, Offset.Zero)
+        val lines = (0 until l.lineCount).filter { l.getLineRight(it) - l.getLineLeft(it) > 1f }.map {
+            Rect(o.x + l.getLineLeft(it), o.y + l.getLineTop(it), o.x + l.getLineRight(it), o.y + l.getLineBottom(it))
+        }
+        if (rects[key] != lines) rects[key] = lines
+    }
 }
 
 /** Runs through the card's side padding to the frame's inner edges, as the inscription band does. */
@@ -588,87 +711,106 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
 }
 
 /**
- * The invitation: a painted line with a thinner one 3dp inside it, as a panel's border is ruled
- * twice; neither veils with the season. Its words are the tituli's red ochre, or by night the
- * lining.
+ * The invitation: a thin wash (`tablet.png`, feathered so no edge of it lies on a rule) in a
+ * frame ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short
+ * of the corners; neither veils with the season, and a bare black day has no wash. Its words are
+ * the tituli's red ochre, or by night the lining, lifted on a phone (`lifted`).
  */
 @Composable
-private fun PrayNow(label: String, tier: HomeTier, onClick: () -> Unit) {
+private fun PrayNow(label: String, tier: HomeTier, frontal: Color, wash: Color, lifted: Color?, onClick: () -> Unit) {
     val p = LocalPalette.current
-    val inner = frontispieceInk(p).panelRule
+    val tablet = ImageBitmap.imageResource(R.drawable.tablet)
     Box(
         Modifier
             .fillMaxWidth()
+            .heightIn(min = 44.dp)
             .tap(onClick = onClick)
             .drawBehind {
-                val w = 1.dp.toPx()
-                drawRect(p.lining, Offset(w / 2f, w / 2f), size.copy(width = size.width - w, height = size.height - w), style = Stroke(w))
-                val i = w + 3.dp.toPx() + w / 2f
-                drawRect(inner, Offset(i, i), size.copy(width = size.width - 2 * i, height = size.height - 2 * i), style = Stroke(w))
+                tabletWash(tablet, wash)
+                invitationRules(p.lining, frontal)
             }
             .padding(top = tier.prayTop, bottom = tier.prayBottom, start = 13.8.dp, end = 13.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = 0.38.sp, color = if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+        Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = (tier.pray * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
     }
 }
 
-/** The current hour's wash: the oak at 8% on Nave; on the Apse the vault's blue lifted (`--apse-lift`). */
-private fun currentWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else Color(107, 58, 31).copy(alpha = 0.08f)
-
 /**
- * The hours by period in horizontal bands, the current one washed and underlined in gold: framed in the
- * lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ * The hours by period in horizontal bands, ruled as a fine book rules a table (the web's
+ * `.home-hour-links`): a firmer rule above and below and finer ones between the periods, by hand,
+ * in the lining, and none upright. The periods are the margin's index in the quiet ink, with no
+ * cell of their own; gilt points part the hours in a band. The hour that is now lies under a pool
+ * of light with no edge, its name rubricated (`now`) and its gloss under it.
  */
 @Composable
-private fun HourDirectory(current: String, note: String, prayed: Set<String>, tier: HomeTier, onHour: (String) -> Unit) {
-    val desk = tier.desk
+private fun HourDirectory(current: String, note: String, prayed: Set<String>, tier: HomeTier, now: Color, home: HomeInk, onHour: (String) -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
-    val ink = frontispieceInk(p)
-    // The desktop's labels are in the accent, their column 5.25rem.
-    val labelStyle = Type.label(11.52f, 0.08f).copy(color = if (desk) p.accent else p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
+    val labelStyle = Type.label(11.52f, 0.12f).copy(color = mix(p.accent, p.muted, 0.45f), fontFeatureSettings = ALL_SMALL_CAPS)
     // One width for the three period labels, widened past the web's 83dp only when the reader's
     // font size needs it, so the hours still line up in columns.
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
+    val desk = tier.desk
     val labelWidth = remember(labelStyle, density) {
         with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 84.dp else 83.dp)
     }
+    // Where the periods meet, for the rules between them.
+    val joints = remember { FloatArray(2) }
     Column(
         Modifier.fillMaxWidth().drawBehind {
-            val w = 1.dp.toPx()
-            drawRect(ink.panelRule, Offset(w / 2f, w / 2f), size.copy(width = size.width - w, height = size.height - w), style = Stroke(w))
+            val u = 1.dp.toPx()
+            val w = size.width
+            val h = size.height
+            val frame = p.lining.copy(alpha = 0.78f)
+            drawPath(ruledLine(0f, 0.5f * u, w, 0.5f * u, 1.3f * u, 31, u), frame)
+            drawPath(ruledLine(0f, h - 0.5f * u, w, h - 0.5f * u, 1.3f * u, 32, u), frame)
+            joints.forEachIndexed { i, y -> if (y > 0f) drawPath(ruledLine(0f, y + 0.5f * u, w, y + 0.5f * u, 0.9f * u, 41 + i, u), p.lining.copy(alpha = 0.36f)) }
         },
     ) {
         PERIODS.forEachIndexed { i, (period, label, hours) ->
-            if (i > 0) Hairline(ink.rule)
-            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Row(
+                Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp)
+                    .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier),
+            ) {
                 Column(
-                    Modifier.width(labelWidth).fillMaxHeight().background(ink.band).padding(vertical = 6.dp),
+                    Modifier.width(labelWidth).fillMaxHeight().padding(vertical = 6.dp).padding(start = 1.4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, o.flat)
+                    PeriodIcon(period, o.flat, alpha = 0.9f)
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
-                Box(Modifier.width(1.dp).fillMaxHeight().background(ink.rule))
+                Spacer(Modifier.width(1.dp))
                 Row(Modifier.weight(1f).heightIn(min = tier.row), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
-                        // The current hour's wash already divides it from its neighbours, so the
-                        // hairlines either side of it are hidden (their room kept), as the web's.
-                        if (j > 0) Divider(if (h == current || hours[j - 1] == current) Color.Transparent else ink.rule, 16.dp)
                         val done = h in prayed
-                        val now = h == current
-                        val gloss = if (now) note else ""
-                        val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { now }, "prayed".takeIf { done })
-                        // The current hour's whole cell takes the wash, with a line in the ornament's
-                        // gold across its foot (`.home-hour-link.is-current`); its name stays in the ink.
-                        val cell = if (now) Modifier.background(currentWash(p)).goldUnderline(true, o.flat) else Modifier
-                        Box(Modifier.weight(1f).fillMaxHeight().then(cell).tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) }, contentAlignment = Alignment.Center) {
+                        val isNow = h == current
+                        val gloss = if (isNow) note else ""
+                        val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { isNow }, "prayed".takeIf { done })
+                        // The light rests on the hour that is now: a pool with no edge, at most
+                        // 9.5rem across.
+                        val pool = if (isNow) Modifier.drawBehind {
+                            val r = minOf(size.width + 8.dp.toPx(), 152.dp.toPx()) / 2f
+                            val ry = (size.height + 4.dp.toPx()) / 2f
+                            scale(1f, ry / r, pivot = center) {
+                                drawCircle(Brush.radialGradient(0f to home.nowPool, 0.52f to home.nowPool.copy(alpha = home.nowPool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = r), r, center)
+                            }
+                        } else Modifier
+                        Box(
+                            Modifier.weight(1f).fillMaxHeight().then(pool).drawBehind {
+                                // A gilt point before every hour but the first of its band.
+                                if (j > 0) rotate(45f, Offset(0f, size.height / 2f)) {
+                                    val d = 3.5.dp.toPx()
+                                    drawRect(o.flat.copy(alpha = 0.7f), Offset(-d / 2f, size.height / 2f - d / 2f), Size(d, d))
+                                }
+                            }.tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) },
+                            contentAlignment = Alignment.Center,
+                        ) {
                             // An hour prayed today withdraws to the muted ink, a small gilt cross at its
                             // shoulder, as the web's `.is-prayed`; the cross takes no width.
-                            val ink = if (done) p.muted else p.text
+                            val ink = if (done) p.muted else if (isNow) now else p.text
                             val name = Type.body.copy(fontSize = tier.hour.sp, lineHeight = (tier.hour * 1.2f).sp, letterSpacing = 0.31.sp, color = ink)
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box {
@@ -682,9 +824,10 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                                     )
                                     if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = 9.dp, y = 2.dp).size(7.dp), ink = p.gold)
                                 }
-                                // What the current hour is, for a newcomer, as the web's `.home-hour-link-note`.
+                                // What the current hour is, for a newcomer, as the web's `.home-hour-link-note`;
+                                // one line, which may overhang its cell a little.
                                 if (gloss.isNotEmpty()) {
-                                    Text(gloss, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 14.35.sp, color = p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1)
+                                    Text(gloss, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 14.35.sp, color = home.nowGloss, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = 1, softWrap = false)
                                 }
                             }
                         }
@@ -692,5 +835,6 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                 }
             }
         }
+        Spacer(Modifier.height(1.dp))
     }
 }

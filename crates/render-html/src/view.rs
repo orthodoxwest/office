@@ -15,7 +15,8 @@ pub struct Chrome {
     /// ordo, or empty when the page is always current.
     pub usage_when: String,
     pub season_class: String,
-    /// `rank-first-class` on a first-class day's hour, which is framed; empty otherwise.
+    /// `rank-first-class` on a first-class day's hour, which is framed, and on its home
+    /// (`presentation::home_first_class`); empty otherwise.
     pub rank_class: String,
     /// A bare hour (`OfficeHour::bare`): the page takes off its leaf (`hour-bare`).
     pub bare: bool,

@@ -2,6 +2,7 @@ package org.orthodoxwest.office
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,17 +11,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -31,23 +36,17 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -326,12 +325,15 @@ fun DrawScope.quatrefoil(topLeft: Offset, side: Float, color: Color) {
  * the hour's end, home's crown and the header's mark.
  */
 @Composable
-fun ConsecrationCross(modifier: Modifier) {
-    val ink = LocalPalette.current.lining
+fun ConsecrationCross(modifier: Modifier, ink: Color = LocalPalette.current.lining, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
     Canvas(modifier) {
+        // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
+        val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
+        val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
         fitted(40f, 40f) {
-            drawPath(ConsecrationRing, ink)
-            drawPath(ConsecrationArms, ink)
+            for (part in listOf(ConsecrationRing, ConsecrationArms)) {
+                if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
+            }
         }
     }
 }
@@ -343,8 +345,8 @@ fun PaintedCross(modifier: Modifier, ink: Color = LocalPalette.current.lining) {
 }
 
 @Composable
-fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { alpha = 0.7f }) {
+fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier, alpha: Float = 0.7f) {
+    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { this.alpha = alpha }) {
         fitted(24f, 16f) { drawPath(period.path, color) }
     }
 }
@@ -415,19 +417,28 @@ private fun DrawScope.tiles(w: Float, h: Float, seam: Float, draw: DrawScope.() 
 
 /**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the
- * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding; by day the
+ * Apse vault, the hand-set stars of one tile each at its own opacity in the gilding, or with `sky`
+ * (the hour's ending) home's sky, its stars in the apse's matte leaf on one 384dp tile; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * (96×168) never scaled. Tiled from the field's centre and from `seam` down it, and faded by
  * `fade`'s stops of (fraction, alpha), for the field's size in either theme. Unlit, the vault
  * has no stars: a bare hour's under the veil, the Triduum's (the web's `hour-bare`).
  */
 @Composable
-fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
+fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, sky: Boolean = false, fade: DrawScope.(dark: Boolean) -> List<Pair<Float, Float>>) {
     val p = LocalPalette.current
-    val star = LocalOrnament.current.flat
+    val o = LocalOrnament.current
+    val star = o.flat
+    val leaf = remember(o) { Leaf(o).mid }
     val rosette = p.rubric.copy(alpha = 0.12f)
     Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
-        if (p.dark) {
+        if (p.dark && sky) {
+            if (!lit) return@Canvas
+            val tile = SkyTile.dp.toPx()
+            tiles(tile, tile, seam.toPx()) {
+                scale(density, density, pivot = Offset.Zero) { for ((alpha, s) in SkyTileStars) drawPath(s, leaf, alpha = alpha) }
+            }
+        } else if (p.dark) {
             if (!lit) return@Canvas
             val tile = vaultTile(size.width.toDp()).toPx()
             val k = tile / 528f
@@ -445,14 +456,15 @@ fun WallField(modifier: Modifier, seam: Dp = 0.dp, lit: Boolean = true, fade: Dr
     }
 }
 
+/** A gilt point, as the web's `.home-hour-link + .home-hour-link::before`: the ornament's gold at 70%, 3.5dp on its corner. */
+@Composable
+fun GiltPoint(modifier: Modifier = Modifier) {
+    val o = LocalOrnament.current
+    Canvas(modifier.size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+}
+
 /** A hairline across the measure. */
 @Composable
 fun Hairline(color: Color, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().height(1.dp).background(color))
-}
-
-/** A short vertical hairline between neighbouring items. */
-@Composable
-fun Divider(color: Color, height: Dp = 14.dp) {
-    Box(Modifier.width(1.dp).height(height).background(color))
 }

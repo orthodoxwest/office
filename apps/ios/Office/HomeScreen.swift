@@ -45,19 +45,23 @@ struct HomeScreen: View {
                 // vault, clearing the header and thinning toward the foot; by day the powdering,
                 // cut square under the beam.
                 let top = geo.safeAreaInsets.top
-                WallField(seam: top) { h, dark in
-                    func at(_ d: CGFloat) -> CGFloat { (top + d) / h }
-                    return dark
-                        ? [(0, 0), (at(56), 0), (at(112), 1), (max(0.78, at(112)), 1), (1, 0.6)]
-                        : [(0, 0), (at(64), 0), (at(64), 1), (1, 1)]
+                // On a phone by night the stars are the apse's own, inside the arch (`Sky`): the
+                // wall outside it is plain dark plaster.
+                if !(p.dark && !wide) {
+                    WallField(seam: top) { h, dark in
+                        func at(_ d: CGFloat) -> CGFloat { (top + d) / h }
+                        return dark
+                            ? [(0, 0), (at(56), 0), (at(112), 1), (max(0.78, at(112)), 1), (1, 0.6)]
+                            : [(0, 0), (at(64), 0), (at(64), 1), (1, 1)]
+                    }
+                    .ignoresSafeArea()
                 }
-                .ignoresSafeArea()
                 // A wide screen sets the frontispiece in a niche, and lights the room toward it.
                 if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
                 ScrollViewReader { scroll in
                 ScrollView {
-                    // Home is at least a screen tall, its colophon at the foot. The tiers go by
-                    // the height home has and the screen's width, in the web's pixels.
+                    // Home is at least a screen tall, a wide home's colophon at the foot. The
+                    // tiers go by the height home has and the screen's width, in the web's pixels.
                     let tall = geo.size.height
                     if let niche {
                         let card = nicheWidth(screen)
@@ -79,16 +83,16 @@ struct HomeScreen: View {
                         }
                         .frame(minHeight: tall)
                     } else {
-                        // A phone's card stands from the header to a little above the footer:
-                        // whatever height home has beyond its own goes to the panel, above the band.
+                        // A phone's card stands from the header to the screen's foot, short of it
+                        // by the gutter: whatever height home has beyond its own goes to the panel,
+                        // above the band. The phone's home has no colophon; the wide home keeps it.
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
-                        PhoneHome(height: tall) {
+                        PhoneHome(height: tall, foot: m.px(gutter)) {
                             SiteHeader()
                             Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
-                            Footer(gap: 29.6, bottom: 25.6, reserve: true)
                         }
                     }
                 }
@@ -109,25 +113,25 @@ private struct NicheFrameKey: PreferenceKey {
 }
 
 /**
- * A phone's home: the header, the card and the footer, at least `height` tall, the card offered
- * the height left over as its least, so it stands from the header to a little above the footer.
+ * A phone's home: the header and the card, at least `height` tall, the card offered the height
+ * left over above `foot` as its least, so it stands from the header to `foot` above the screen's foot.
  */
 private struct PhoneHome: Layout {
     let height: CGFloat
+    let foot: CGFloat
 
-    private func heights(_ width: CGFloat, _ subviews: Subviews) -> (header: CGFloat, card: CGFloat, footer: CGFloat, spare: CGFloat) {
+    private func heights(_ width: CGFloat, _ subviews: Subviews) -> (header: CGFloat, card: CGFloat, spare: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let header = subviews[0].sizeThatFits(free).height
-        let footer = subviews[2].sizeThatFits(free).height
-        let spare = max(0, height - header - footer)
+        let spare = max(0, height - header - foot)
         let card = subviews[1].sizeThatFits(ProposedViewSize(width: width, height: spare)).height
-        return (header, card, footer, spare)
+        return (header, card, spare)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? 390
         let h = heights(width, subviews)
-        return CGSize(width: width, height: max(h.header + h.card + h.footer, height))
+        return CGSize(width: width, height: max(h.header + h.card + foot, height))
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -135,8 +139,6 @@ private struct PhoneHome: Layout {
         let free = ProposedViewSize(width: bounds.width, height: nil)
         subviews[0].place(at: bounds.origin, proposal: free)
         subviews[1].place(at: CGPoint(x: bounds.minX, y: bounds.minY + h.header), proposal: ProposedViewSize(width: bounds.width, height: h.spare))
-        // The colophon at the foot of the screen.
-        subviews[2].place(at: CGPoint(x: bounds.minX, y: bounds.maxY - h.footer), proposal: free)
     }
 }
 
@@ -223,7 +225,21 @@ struct HomeTier {
      * phone's: a date too long for it breaks after the weekday, its second line lower where the
      * head is wider.
      */
-    var dateMeasure: CGFloat? { desk ? nil : min(card * pick(0, 0.233, 0.3) + 139, clear(headPad + 44 - date.line * dyn)) }
+    var dateMeasure: CGFloat? { desk ? nil : clear(headPad + 44 - date.line * dyn) }
+    /**
+     * On a phone the weekday is a titulus in spaced small caps over the rest of the date set 10%
+     * larger (6% on a short phone), as the web's `.home-date-weekday` and `.home-date-rest`. A day
+     * with no room to give (two commemorations, or one opened from another day) closes the title
+     * up on a taller phone.
+     */
+    func weekday(heavy: Bool) -> TextStyle {
+        let size = max(0.66 * date.size, 15.2 / dyn)
+        return TextStyle(size: size, line: size * (short ? 1.18 : heavy ? 1.06 : 1.5), tracking: size * 0.15, smallCaps: true)
+    }
+    func rest(heavy: Bool) -> TextStyle {
+        let size = date.size * (short ? 1.06 : heavy ? 1.02 : 1.1)
+        return Scale.body.sized(size, line: size * (short ? 1.08 : heavy ? 1 : 1.12)).tracked(size * 0.005)
+    }
     var feast: TextStyle {
         if desk { return Scale.body.sized(18.72, line: 23.4) }
         let size = fitted(0.055 * inline, 0.0215 * tall, 15.2, 24)
@@ -342,21 +358,11 @@ private struct FrontispieceLayout: Layout {
 }
 
 /**
- * The frontispiece's painted furniture (`.home-hero`), the same at every width: its frame, the
- * rules within, the period cells' wash (the frieze's green earth, thinned), and the panel's own
- * rules, the lining thinned.
+ * The frontispiece's frame (`.home-hero`), the same at every width; the rules within are ruled by
+ * hand in the lining (`HourDirectory`, `PrayNow`).
  */
-private struct FrontispieceInk {
-    let frame: Color
-    let rule: Color
-    let band: Color
-    let panelRule: Color
-
-    static func of(_ p: Palette) -> FrontispieceInk {
-        p.dark
-            ? FrontispieceInk(frame: Color(rgb: 208, 176, 106, 0.34), rule: Color(rgb: 208, 176, 106, 0.24), band: Color(rgb: 208, 176, 106, 0.045), panelRule: p.lining.opacity(0.45))
-            : FrontispieceInk(frame: Color(rgb: 87, 52, 33, 0.3), rule: Color(rgb: 107, 58, 31, 0.22), band: p.inscriptionGround.opacity(0.09), panelRule: p.lining.opacity(0.45))
-    }
+private func frontispieceFrame(_ p: Palette) -> Color {
+    p.dark ? Color(rgb: 208, 176, 106, 0.34) : Color(rgb: 87, 52, 33, 0.3)
 }
 
 private struct Frontispiece: View {
@@ -371,36 +377,96 @@ private struct Frontispiece: View {
     @State private var picking = false
     /// Whether the picker is laid out: from its opening until it has folded away.
     @State private var unfolded = false
+    /// The painter's reserve round the day's words, which the sky's stars keep clear of.
+    @State private var reserve: [String: CGRect] = [:]
     @Environment(\.reveal) private var reveal
 
-    /// The day's red work. By night the phone panel's moonlight lifts the ground under it, so the
-    /// rubric red is lifted with it to keep its contrast (the web's Apse phone panel).
-    private var rubric: Color { p.dark && !tier.desk ? Color(hex: 0xE08585) : p.rubric }
+    /// By night a phone's head is the apse's sky (the web's `.home-sky`).
+    private var night: Bool { p.dark && !tier.desk }
+    private var home: HomeInk { HomeInk.of(p) }
+    /// The day's red work and muted ink, lifted on the sky to keep their contrast.
+    private var rubric: Color { night ? home.skyRubric : p.rubric }
+    private var muted: Color { night ? home.skyMuted : p.muted }
 
     var body: some View {
         let day = dayColor(view.color, p)
         // The lining's inner line is the day's colour, beside the cross on the plaster; a white
         // day's would be tan there, and takes the gold line by day.
         let liningDay = !p.dark && view.color == "white" ? p.goldLine : day
-        let ink = FrontispieceInk.of(p)
+        let frame = frontispieceFrame(p)
         let desk = tier.desk
         let side = m.px(tier.side)
+        let home = self.home
+        let catchLight = leafCatch(view.ornament)
+        let leaf = Leaf(o)
+        let black = view.color == "black"
+        let first = view.firstClass
+        // The frontal: the day's colour inside the invitation's frame; on a white day gold by day
+        // and lime white by night on the sky, where the fillet is the one gold line; the lining
+        // thinned on a bare black day.
+        let frontal = black ? p.lining.opacity(0.8) : view.color == "white" ? (night ? home.limeWhite : p.goldLine) : day
+        let comma = view.dateLabel.range(of: ", ")
+        let heavy = view.commemorations.count > 1 || !view.isToday
         FrontispieceLayout(tier: tier, m: m, open: picking ? 1 : 0) {
             // A lining painted round the head on the back wall, down to the inscription band:
-            // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding.
-            Lining(arch: tier.arch, inset: m.px(desk ? 26 : 12), hairline: liningDay)
-            // The consecration cross in the point of the head, with clear air round it.
-            PaintedMark(.consecration, size: m.px(tier.crownSize), color: p.lining)
+            // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding. By
+            // night on a phone, the apse's sky with its stars, ringed by a leaf fillet and the
+            // day's hairline.
+            if night {
+                let crown = m.px(tier.crownSize)
+                let top = m.px(tier.crownTop)
+                GeometryReader { g in
+                    let w = g.size.width
+                    let clear = reserve.values.map { $0.insetBy(dx: -14, dy: -6) }
+                        + [CGRect(x: (w - crown) / 2 - 11, y: top - 11, width: crown + 22, height: crown + 22)]
+                    Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
+                }
+            } else {
+                Lining(arch: tier.arch, inset: m.px(desk ? 26 : 12), hairline: liningDay, pigmented: true)
+            }
+            // The consecration cross in the point of the head, with clear air round it: painted
+            // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
+            Group {
+                let size = m.px(tier.crownSize)
+                if night && black {
+                    Crown(size: size, ink: muted.opacity(0.7), shading: .color(muted.opacity(0.7)))
+                } else if night {
+                    Crown(size: size, ink: leaf.mid, shading: .linearGradient(Gradient(stops: [.init(color: leaf.hi, location: 0), .init(color: leaf.mid, location: 0.55), .init(color: leaf.lo, location: 1)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)), alpha: 0.35 + 0.65 * catchLight)
+                } else if first {
+                    Crown(size: size, ink: o.flat, shading: .linearGradient(Gradient(stops: [.init(color: o.hi, location: 0.08), .init(color: mix(o.hi, .white, 0.55), location: 0.3), .init(color: o.flat, location: 0.52), .init(color: o.lo, location: 0.92)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)))
+                } else {
+                    Crown(size: size, ink: p.lining)
+                }
+            }
             // The day.
             VStack(spacing: 0) {
                 Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
-                    Text(unbroken(view.dateLabel))
-                        .type(tier.date)
-                        .foregroundStyle(p.text)
-                        .multilineTextAlignment(.center)
-                        // On a phone a full thumb's height, as the web's, its line at the foot so
-                        // the feast stands close under it.
-                        .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44), alignment: .bottom)
+                    if let comma, !desk {
+                        // On a phone the weekday is a titulus over the rest of the date, the two a
+                        // full thumb's height at least, as the web's, the rest at the foot so the
+                        // feast stands close under it. A reader hears "Tuesday, November 10, 2026".
+                        VStack(spacing: 0) {
+                            Text(view.dateLabel[..<comma.lowerBound])
+                                .type(tier.weekday(heavy: heavy))
+                                .foregroundStyle(p.titulus)
+                                .reserved("weekday")
+                            Text(unbroken(String(view.dateLabel[comma.upperBound...])))
+                                .type(tier.rest(heavy: heavy))
+                                .foregroundStyle(p.text)
+                                .multilineTextAlignment(.center)
+                                .reserved("date")
+                        }
+                        .frame(minHeight: m.px(44), alignment: .bottom)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(view.dateLabel)
+                    } else {
+                        Text(unbroken(view.dateLabel))
+                            .type(tier.date)
+                            .foregroundStyle(p.text)
+                            .multilineTextAlignment(.center)
+                            .reserved("date")
+                            .frame(maxWidth: tier.dateMeasure.map { m.px($0) }, minHeight: tier.desk ? nil : m.px(44), alignment: .bottom)
+                    }
                 }
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)
@@ -418,22 +484,23 @@ private struct Frontispiece: View {
                     }
                 }
                 .foregroundStyle(p.accent)
+                .reserved("feast")
                 .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
                 .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
-                    Text(view.octaveNote).type(Scale.small).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                    Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
                 }
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
                         ForEach(view.penitential, id: \.self) { t in
-                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(rubric)
+                            Text(t).type(TextStyle(size: 12.48, line: 19.97, tracking: 0.75, smallCaps: true)).foregroundStyle(rubric).reserved("fast " + t)
                         }
                     }
                     .padding(.top, m.px(12))
                 }
                 if !view.commemorations.isEmpty {
                     VStack(spacing: 0) {
-                        Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(p.muted)
+                        Text("ALSO").type(.label(10.56, 0.1)).foregroundStyle(muted).reserved("also")
                         // A second commemoration is joined to the first with "and", as the web's
                         // `.commemorations li + li::before`, so the list reads as a sentence.
                         // Each leads to its feast's page.
@@ -441,10 +508,10 @@ private struct Frontispiece: View {
                             let id = i < view.commemorationIds.count ? view.commemorationIds[i] : ""
                             let line = (i == 0 ? Text("") : Text("and ").font(Font(garamond(tier.commemoration.size * m.type, italic: true)))) + Text(c).underline(!id.isEmpty, color: p.goldLine)
                             if id.isEmpty {
-                                line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                                line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center).reserved("also \(i)")
                             } else {
                                 Button { model.open(.feast(id)) } label: {
-                                    line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center)
+                                    line.type(tier.commemoration).foregroundStyle(p.text).multilineTextAlignment(.center).reserved("also \(i)")
                                 }
                                 .buttonStyle(Quiet())
                                 .accessibilityHint("Opens the feast's page")
@@ -461,8 +528,8 @@ private struct Frontispiece: View {
             ViewThatFits(in: .vertical) {
                 if let style = tier.versicle, !view.versicle.isEmpty {
                     VStack(spacing: 0) {
-                        versicleLine("℣.", view.versicle, style)
-                        versicleLine("℟.", view.response, style)
+                        versicleLine("℣.", view.versicle, style).reserved("versicle")
+                        versicleLine("℟.", view.response, style).reserved("response")
                     }
                     .frame(maxWidth: m.px(tier.versicleMeasure))
                     .padding(.top, m.px(12))
@@ -475,6 +542,7 @@ private struct Frontispiece: View {
                 if !view.isToday {
                     Button { model.open(.home(model.today)) } label: {
                         Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
+                            .reserved("today")
                             .goldUnderline(true, p.goldLine)
                             .padding(.vertical, m.px(12))
                     }
@@ -485,29 +553,37 @@ private struct Frontispiece: View {
             // The invitation and the hours, from the inscription band.
             VStack(spacing: 0) {
                 inscription(side: side)
-                PrayNow(label: view.prayNowLabel, tier: tier) {
+                PrayNow(label: view.prayNowLabel, tier: tier, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
-                HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier) { h in model.open(.hour(date, h)) }
+                HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
-                // The season and "Change date" share one line after the invitation, centred (the
-                // web's `.home-day-meta`). Open, the date control takes a line of its own beneath
-                // the season, and the picker the card's width.
-                Hairline(color: ink.rule).padding(.top, m.px(tier.metaGap))
-                let change = Disclosure(label: "Change date", open: picking, style: .label(11.2, 0.1)) { togglePicker() }
+                // The season and "Change date" share one line after the hours, centred (the web's
+                // `.home-day-meta`), in small caps, a gilt point between them. Open, the date
+                // control takes a line of its own beneath the season, and the picker the card's width.
+                let foot = TextStyle(size: 13.44, line: 20.16, tracking: 13.44 * 0.09, smallCaps: true)
+                let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
                 if view.season.isEmpty {
-                    change
+                    change.padding(.top, m.px(tier.metaGap + 1))
                 } else {
-                    let season = Text(view.season.uppercased()).type(.label(11.2, 0.12)).foregroundStyle(p.muted)
-                        .multilineTextAlignment(.center)
-                        .accessibilityLabel(view.season)
+                    let season = HStack(spacing: 0) {
+                        Text(view.season).type(foot).foregroundStyle(p.muted)
+                            .multilineTextAlignment(.center)
+                        if !picking {
+                            Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
+                                .frame(width: 5, height: 5)
+                                .padding(.leading, m.px(14.4))
+                                .accessibilityHidden(true)
+                        }
+                    }
                     // One layout either way, so "Change date" stays the control VoiceOver is on
                     // as it opens.
-                    SeasonLine(spacing: m.px(16), above: m.px(3.2), stacked: picking) {
+                    SeasonLine(spacing: m.px(8.8), above: m.px(3.2), stacked: picking) {
                         season
                         change
                     }
+                    .padding(.top, m.px(tier.metaGap + 1))
                 }
             }
             .padding(.horizontal, side)
@@ -533,14 +609,17 @@ private struct Frontispiece: View {
             .frame(maxWidth: .infinity)
             .id("disclosed")
         }
+        .coordinateSpace(name: "frontispiece")
+        .onPreferenceChange(ReserveKey.self) { reserve = $0 }
         .background {
             if let niche {
                 // The niche: a pointed head, the stone moulding, the day's colour as its trim.
-                Niche(arch: tier.arch, t: niche, day: day, frame: ink.frame)
+                Niche(arch: tier.arch, t: niche, day: day, frame: frame)
             } else {
                 // The panel: the day's colour a little toward the frame as a ring at its edge, so
-                // a red or green day edges the head without outshouting the cross.
-                Panel(arch: tier.arch, ring: mix(day, ink.frame, 0.7), frame: ink.frame)
+                // a red or green day edges the head without outshouting the cross; by night the
+                // slate course's outer ring in shade, round the sky.
+                Panel(arch: tier.arch, ring: night ? home.skyRim : mix(day, frame, 0.7), frame: frame)
             }
         }
     }
@@ -569,25 +648,31 @@ private struct Frontispiece: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// The inscription band: pale gilt letters on the frieze's green earth, between oxblood rules
-    /// each with a gilt fillet inside it, run through to the frame.
+    /// The inscription band: flat green earth between oxblood edges and leaf fillets, ruled by
+    /// hand (the web's `rule()`), its letters leaf that catches the light at their heads, run
+    /// through to the frame.
     private func inscription(side: CGFloat) -> some View {
         // Gilt lozenges either side, 5pt squares on their points.
-        Lozenged(text: "Pray the hours", style: TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.16), smallCaps: true), ink: o.ink)
+        Lozenged(
+            text: "Pray the hours",
+            style: TextStyle(size: tier.band, line: tier.band * 1.6, tracking: tier.band * (tier.desk ? 0.17 : 0.15), smallCaps: true),
+            ink: o.ink,
+            letters: LinearGradient(stops: [.init(color: mix(o.ink, .white, 0.7), location: 0.2), .init(color: o.ink, location: 0.58)], startPoint: .top, endPoint: .bottom)
+        )
         .padding(.vertical, m.px(tier.bandPad))
         .frame(maxWidth: .infinity)
         .background(p.inscriptionGround)
-        .overlay(alignment: .top) {
-            VStack(spacing: 0) {
-                Rectangle().fill(p.inscriptionEdge).frame(height: 1)
-                Rectangle().fill(o.ink.opacity(0.22)).frame(height: 1)
+        .overlay {
+            Canvas { ctx, size in
+                let w = size.width
+                let h = size.height
+                ctx.fill(ruledLine(0, 0.6, w, 0.6, 1.3, seed: 11), with: .color(p.inscriptionEdge))
+                ctx.fill(ruledLine(0, h - 0.6, w, h - 0.6, 1.3, seed: 12), with: .color(p.inscriptionEdge))
+                let fillet = o.ink.opacity(0.3)
+                ctx.fill(ruledLine(0, 2.2, w, 2.2, 0.9, seed: 13), with: .color(fillet))
+                ctx.fill(ruledLine(0, h - 2.2, w, h - 2.2, 0.9, seed: 14), with: .color(fillet))
             }
-        }
-        .overlay(alignment: .bottom) {
-            VStack(spacing: 0) {
-                Rectangle().fill(o.ink.opacity(0.22)).frame(height: 1)
-                Rectangle().fill(p.inscriptionEdge).frame(height: 1)
-            }
+            .allowsHitTesting(false)
         }
         .padding(.horizontal, -side)
         .accessibilityAddTraits(.isHeader)
@@ -682,31 +767,39 @@ private struct FeastName: View {
 }
 
 /**
- * The invitation: a painted line of the lining's terracotta with a thinner one 3pt inside it, as a
- * panel's border is ruled twice; neither veils with the season. Its words are the tituli's red
- * ochre, or by night the lining.
+ * The invitation: a thin wash (`tablet.png`, feathered so no edge of it lies on a rule) in a frame
+ * ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short of
+ * the corners; neither veils with the season, and a bare black day has no wash. Its words are the
+ * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`).
  */
 private struct PrayNow: View {
     let label: String
     let tier: HomeTier
+    let frontal: Color
+    let wash: Color
+    let lifted: Color?
     let action: () -> Void
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         Button(action: action) {
-            Text(label).type(tier.pray)
-                .foregroundStyle(p.dark ? p.lining : p.titulus)
+            Text(label).type(tier.pray.tracked(tier.pray.size * 0.012))
+                .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .padding(.vertical, m.px(tier.prayPad))
                 .padding(.horizontal, m.px(13.8))
-                .overlay {
-                    ZStack {
-                        Rectangle().strokeBorder(p.lining, lineWidth: 1)
-                        Rectangle().strokeBorder(FrontispieceInk.of(p).panelRule, lineWidth: 1).padding(4)
+                .background {
+                    if let tablet = UIImage(named: "tablet.png") {
+                        Image(uiImage: tablet).renderingMode(.template).resizable()
+                            .foregroundStyle(wash)
+                            .padding(1)
                     }
-                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    Canvas { ctx, size in invitationRules(ctx, size, lining: p.lining, frontal: frontal) }
+                        .allowsHitTesting(false)
                 }
         }
         .buttonStyle(Quiet())
@@ -714,8 +807,11 @@ private struct PrayNow: View {
 }
 
 /**
- * The hours by period in horizontal bands, the current one's cell washed over a gold line: framed
- * in the lining thinned, ruled within in the frontispiece's ink, the period cells in its wash.
+ * The hours by period in horizontal bands, ruled as a fine book rules a table (the web's
+ * `.home-hour-links`): a firmer rule above and below and finer ones between the periods, by hand,
+ * in the lining, and none upright. The periods are the margin's index in the quiet ink, with no
+ * cell of their own; gilt points part the hours in a band. The hour that is now lies under a pool
+ * of light with no edge, its name rubricated (`now`) and its gloss under it.
  */
 private struct HourDirectory: View {
     let current: String
@@ -724,6 +820,8 @@ private struct HourDirectory: View {
     /// The hours prayed on this day.
     let prayed: Set<String>
     let tier: HomeTier
+    let now: Color
+    let home: HomeInk
     let open: (String) -> Void
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -731,43 +829,38 @@ private struct HourDirectory: View {
 
     var body: some View {
         let desk = tier.desk
-        // The desktop's labels are in the accent, their column 5.25rem.
-        let label = TextStyle(size: 11.52, line: 18.43, tracking: 11.52 * 0.08, smallCaps: true)
+        let label = TextStyle(size: 11.52, line: 18.43, tracking: 11.52 * 0.12, smallCaps: true)
         // One width for the three period labels, widened past the web's 83pt only when the
         // reader's font size needs it, so the hours still line up in columns.
         let font = label.uiFont(m)
         let widest = periods.map { ProseLayout.advance($0.label, font) + label.tracking * m.type * CGFloat($0.label.count) }.max() ?? 0
         let labelWidth = max(widest + m.px(8), m.px(desk ? 84 : 83))
-        let ink = FrontispieceInk.of(p)
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
-                if i > 0 { Hairline(color: ink.rule) }
                 HStack(spacing: 0) {
                     VStack(spacing: m.px(2)) {
-                        PeriodIcon(period: row.period, color: o.flat)
-                        Text(row.label).type(label).foregroundStyle(desk ? p.accent : p.muted).lineLimit(1).fixedSize()
+                        PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
+                        Text(row.label).type(label).foregroundStyle(mix(p.accent, p.muted, 0.45)).lineLimit(1).fixedSize()
                     }
                     .padding(.vertical, m.px(6))
+                    .padding(.leading, m.px(1.4))
                     .frame(width: labelWidth)
                     .frame(maxHeight: .infinity)
-                    .background(ink.band)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(row.label)
                     .accessibilityAddTraits(.isHeader)
-                    Rectangle().fill(ink.rule).frame(width: 1)
+                    Color.clear.frame(width: 1)
                     HStack(spacing: 0) {
                         ForEach(Array(row.hours.enumerated()), id: \.offset) { j, h in
-                            // The current hour's wash already divides it from its neighbours, so the
-                            // hairlines at its edges stand down (`.is-current::before`), keeping their place.
-                            if j > 0 { VRule(color: h == current || row.hours[j - 1] == current ? .clear : ink.rule, height: 16) }
                             let done = prayed.contains(h)
-                            let gloss = h == current ? note : ""
+                            let isNow = h == current
+                            let gloss = isNow ? note : ""
                             Button { open(h) } label: {
                                 VStack(spacing: 0) {
                                     // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                                     Text(hourLabel(h))
                                         .type(TextStyle(size: tier.hour, line: tier.hour * 1.2, tracking: 0.31))
-                                        .foregroundStyle(done ? p.muted : p.text)
+                                        .foregroundStyle(done ? p.muted : isNow ? now : p.text)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                         // An hour prayed today withdraws to the muted ink, a small gilt cross
@@ -778,34 +871,76 @@ private struct HourDirectory: View {
                                                     .offset(x: m.px(9), y: m.px(2))
                                             }
                                         }
-                                    // What the current hour is, for a newcomer, as the web's `.home-hour-link-note`.
+                                    // What the current hour is, for a newcomer, as the web's
+                                    // `.home-hour-link-note`; one line, which may overhang its cell a little.
                                     if !gloss.isEmpty {
                                         Text(gloss)
                                             .type(TextStyle(size: 12.48, line: 14.35, italic: true))
-                                            .foregroundStyle(p.muted)
+                                            .foregroundStyle(home.nowGloss)
                                             .lineLimit(1)
-                                            .minimumScaleFactor(0.7)
+                                            .fixedSize()
+                                            .frame(width: 0)
                                     }
                                 }
                                 .padding(.horizontal, m.px(2))
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                // The current hour's whole cell is washed, a line of the ornament's gold
-                                // across its foot (`.home-hour-link.is-current`).
-                                .background(h == current ? currentWash : .clear)
-                                .goldUnderline(h == current, o.flat)
+                                // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across.
+                                .background {
+                                    if isNow {
+                                        Canvas { ctx, size in
+                                            let r = min(size.width + 8, 152) / 2
+                                            let ry = (size.height + 4) / 2
+                                            var pool = ctx
+                                            pool.translateBy(x: size.width / 2, y: size.height / 2)
+                                            pool.scaleBy(x: 1, y: ry / r)
+                                            pool.fill(
+                                                Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                                                with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
+                                            )
+                                        }
+                                        .padding(.horizontal, -8)
+                                        .padding(.vertical, -4)
+                                        .allowsHitTesting(false)
+                                    }
+                                }
+                                // A gilt point before every hour but the first of its band.
+                                .overlay(alignment: .leading) {
+                                    if j > 0 {
+                                        Rectangle().fill(o.flat.opacity(0.7)).frame(width: 3.5, height: 3.5)
+                                            .rotationEffect(.degrees(45))
+                                            .offset(x: -1.75)
+                                            .accessibilityHidden(true)
+                                    }
+                                }
                             }
                             .buttonStyle(Quiet())
-                            .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, h == current ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
+                            .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
                         }
                     }
                     .frame(minHeight: m.px(tier.row))
                 }
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 1)
+                // The rule above each band: the frame's above the first, finer ones between.
+                .overlay(alignment: .top) {
+                    Canvas { ctx, size in
+                        let rule = i == 0
+                            ? ruledLine(0, 0.5, size.width, 0.5, 1.3, seed: 31)
+                            : ruledLine(0, 0.5, size.width, 0.5, 0.9, seed: UInt32(41 + i - 1))
+                        ctx.fill(rule, with: .color(p.lining.opacity(i == 0 ? 0.78 : 0.36)))
+                    }
+                    .frame(height: 2)
+                    .allowsHitTesting(false)
+                }
             }
         }
-        .overlay(Rectangle().strokeBorder(ink.panelRule, lineWidth: 1).allowsHitTesting(false))
+        .padding(.bottom, 1)
+        .overlay(alignment: .bottom) {
+            Canvas { ctx, size in
+                ctx.fill(ruledLine(0, size.height - 0.5, size.width, size.height - 0.5, 1.3, seed: 32), with: .color(p.lining.opacity(0.78)))
+            }
+            .frame(height: 2)
+            .allowsHitTesting(false)
+        }
     }
-
-    /// The current hour's wash: the oak at 8%, or by night the vault's blue lifted (`--apse-lift`).
-    private var currentWash: Color { p.dark ? Color(rgb: 132, 160, 204, 0.13) : Color(rgb: 107, 58, 31, 0.08) }
 }

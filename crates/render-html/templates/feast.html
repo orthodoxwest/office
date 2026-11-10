@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="feast-body{% if not texts %} no-texts{% endif %}">
-    <div class="feast-standing{% if monastic_note %} is-monastic{% endif %}">
+    <div class="feast-standing{% if monastic_note %} is-monastic{% endif %}{% if next %} day-color-{{ next.color }}{% endif %}">
       {% if monastic_note %}
       <p class="feast-standing-label">{{ feast_words.monastic_heading }}</p>
       {% if kept_by_all %}<p class="feast-everyone">{{ feast_words.everyone_keeps }} <a href="{{ kept_by_all.href|url }}">{{ kept_by_all.label|typeset }}</a> {{ kept_by_all_note }}</p>{% endif %}

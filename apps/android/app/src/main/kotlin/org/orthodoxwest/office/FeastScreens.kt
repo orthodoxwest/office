@@ -5,9 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,16 +42,18 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -258,13 +260,25 @@ private fun Standing(view: FeastPageView, onFeast: (String) -> Unit, onDay: (Loc
     val p = LocalPalette.current
     val w = FEAST_WORDS
     val monastic = view.monasticNote.isNotEmpty()
+    // Drawn as home's invitation: the wash feathered by the tablet mask, the lining's rule, and
+    // inside it a finer rule in the colour of the day it is next kept (gold on a white day, the
+    // lining thinned on a black one).
+    val tablet = ImageBitmap.imageResource(R.drawable.tablet)
+    val wash = homeInk(p).tabletWash
+    val frontal = when (val c = view.next?.color) {
+        null -> p.lining
+        "white" -> p.goldLine
+        "black" -> p.lining.copy(alpha = 0.8f)
+        else -> dayColor(c)
+    }
     Column(
-        Modifier.fillMaxWidth().padding(3.dp).drawBehind {
+        Modifier.fillMaxWidth().drawBehind {
+            tabletWash(tablet, wash)
             val s = 1.dp.toPx()
-            val out = 3.dp.toPx() + s / 2f
-            drawRect(p.lining, Offset(-out, -out), androidx.compose.ui.geometry.Size(size.width + 2 * out, size.height + 2 * out), style = Stroke(s))
-            drawRect(p.lining, Offset(s / 2f, s / 2f), androidx.compose.ui.geometry.Size(size.width - s, size.height - s), style = Stroke(s))
-        }.background(p.surface).padding(start = 17.6.dp, end = 16.dp, top = 13.6.dp, bottom = 15.dp),
+            drawRect(p.lining.copy(alpha = 0.78f), Offset(s / 2f, s / 2f), androidx.compose.ui.geometry.Size(size.width - s, size.height - s), style = Stroke(s))
+            val i = 4.dp.toPx() + s / 2f
+            drawRect(frontal.copy(alpha = frontal.alpha * 0.5f), Offset(i, i), androidx.compose.ui.geometry.Size(size.width - 2 * i, size.height - 2 * i), style = Stroke(s))
+        }.padding(start = 21.6.dp, end = 20.dp, top = 17.6.dp, bottom = 19.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (monastic) {

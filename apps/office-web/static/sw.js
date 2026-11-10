@@ -74,6 +74,15 @@ var CORE_ASSETS = [
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
   assetURL("/static/leaf.png"),
+  // Home's painted materials (tools/genpaint.py) and, by night on a phone,
+  // the apse's sky and its stars (tools/genplaster.py --sky-of,
+  // tools/genstars.py).
+  assetURL("/static/pigment.png"),
+  assetURL("/static/tablet.png"),
+  assetURL("/static/gild.png"),
+  assetURL("/static/sky-wash.jpg"),
+  assetURL("/static/ornaments/stars.json"),
+  assetURL("/static/ornaments/sky-tile.svg"),
   // The painted ornaments style.css masks its colours through
   // (tools/genornaments.py).
   assetURL("/static/ornaments/consecration.svg"),

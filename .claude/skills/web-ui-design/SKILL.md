@@ -45,7 +45,8 @@ or impose a redesign on an unrelated change.
 - Current controls use a gold underline (the header's current page takes the
   lining's terracotta); disclosure carets take their label's ink at 70%.
   Keep Default / Nave / Apse labels and visible keyboard focus.
-- The starfield belongs to Apse home, the post-office epilogue, and, on
+- The starfield belongs to Apse home (on a phone, the apse sky inside the
+  head instead: see the painted page below), the post-office epilogue, and, on
   screens 1680px and wider, the margins beside an hour's prayer, which run
   down into the epilogue's field. By day the same home and epilogue fields
   carry the Nave's powdering instead: one six-petal rosette to each cell
@@ -75,7 +76,9 @@ or impose a redesign on an unrelated change.
   `.home-hour-link[data-hour]`, `.home-hour-link-name`) are used by app.js.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
-  across the unequal 2/3/2 groups.
+  across the unequal 2/3/2 groups. Nothing is appended after the groups
+  that a `:first-child`/`:last-child` rule would miss: the ruled layer is an
+  SVG, so the group rules use `:first-of-type`/`:last-of-type`.
 - On a phone home's frontispiece is a painted panel with a pointed head:
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by
@@ -125,17 +128,57 @@ or impose a redesign on an unrelated change.
   trailing familiar name in parentheses (`presentation::split_alias`) is
   set in italic beside the name, or on a line of its own, never broken.
   The date's tap box keeps its line at the foot, with `--head-pad` less
-  the box's slack, so the feast stands close under it. The panel's furniture is
-  ruled in the lining thinned (`--panel-rule`): the invitation's second
-  line 3px inside its border, the hour table's outer frame; the period
-  labels' cells take the frieze's green earth thinned. It must still fit a
-  375×667 viewport whole, so its cost was paid by the header's margin, the
-  footer's padding and gap, and the page's bottom padding.
+  the box's slack, so the feast stands close under it. On a phone the
+  weekday is a titulus in spaced small caps over the rest of the date set
+  larger (`.home-date-comma` keeps the comma for readers only).
+  **The painted page** ("Home: the painted page" in style.css, app.js's
+  block of that name, `HomePaint.kt`/`HomePaint.swift`): the panel's
+  furniture is paint on limewash, not hardware. Lines are ruled by hand:
+  app.js's `rule()` draws each as a seeded pen stroke that breathes and
+  lifts to a point at its ends (the apps' `ruledLine`, same seeds: frieze
+  11–14, invitation 21–28, hours 31, 32, 41+), laid in an `svg.home-rules`
+  and marking its host `.is-ruled` so the CSS borders stand down (they stay
+  the no-script fallback). The lining and the cross lie through the
+  pigment (`pigment.png`), the invitation on a thin wash (`tablet.png`,
+  `--tablet-wash`: ochre by day, moonlit blue by night; none on a bare
+  black day) in a double frame of the lining and the day's colour
+  (`--frontal`) stopping short of the corners. The hour table is ruled
+  above, below and between the periods, never upright; the period labels
+  have no cell; gilt points part the hours; the hour that is now lies
+  under a pool of light with no edge (`--now-pool`), its name in
+  `--titulus-now`. The frieze's letters are leaf lit at their heads; the
+  foot sets the season and "Change date" in small caps parted by a gilt
+  point. Masks come from `tools/genpaint.py`. On a first-class day
+  (`presentation::home_first_class`: the rank signal, excluding the
+  Triduum; `body.rank-first-class`, the apps' `HomeView.first_class`) the
+  cross is gilt (`gild.png`) and the night's stars a size larger and
+  fully lit.
+  **The apse sky.** On a phone by night (≤700px) the head is the parish
+  apse's painted sky (`.home-sky`): slate blue (`--sky-deep`, `--sky`,
+  `--sky-low`) with the vault's brushwork (`sky-wash.jpg`,
+  `tools/genplaster.py --sky-of`) in soft light, ringed by `--sky-rim`, a
+  matte leaf fillet and the day's hairline (lime white on a white day, so
+  the fillet stays the one gold line). Its gold-leaf stars are one fixed,
+  seeded field per head (`tools/genstars.py`, measured from the vault's
+  photograph; `ornaments/stars.json` and the apps' `Stars.kt`/`.swift`),
+  and every front leaves out those in the painter's reserve: each line of
+  the day's words padded 14×6px, the cross padded 11px, and 9px above the
+  frieze. The leaf catches less light in the quiet seasons and Passiontide
+  (`--leaf-catch`); a black day has no stars. The page's own starfield is
+  off there, so it reads as one night. The desktop niche keeps its plaster
+  head and the vault stays in the margins: the niche is a lit opening in
+  the starred wall, and a sky inside it read as a sticker. It must still fit a
+  375×667 viewport whole. The phone's home (700px and below, all three
+  fronts) carries no colophon: the arch alone stands from the header to the
+  screen's foot, short of it by the 16px side gutter (`--home-card-least`
+  on the web, `PhoneHome`'s `foot` in the apps), so a long day's heading
+  has that height to grow into. With it, every day of a year fits 375×667
+  and 390×844 as today; the wide home keeps its colophon.
   Taller phones get a taller design, not the small one stretched: from
   800px and 880px high the head rises further to a sharper point
-  (genarch's "tall" and "taller" shapes, 128° and 123°), the cross, date,
+  (genarch's "tall" and "taller" shapes, 131° and 123°), the cross, date,
   feast and invitation grow, the hours' rows get a fixed taller minimum
-  (never stretched), and the card stands down to just above the footer,
+  (never stretched), and the card stands down to the screen's foot,
   the spare height going to the head, two parts above the day block to
   three below so the title reads with the cross. The larger type waits
   for 375px wide and 830px high; narrower or shorter phones need the
@@ -175,8 +218,9 @@ or impose a redesign on an unrelated change.
   theme (the prayer form's radios, Reminders' checkboxes): a ruled box
   filled with oak inside a margin of ground, with `appearance: auto`
   restored under forced colours.
-- Every page closes on the footer's tailpiece (`footer::before`, a
-  quatrefoil between two painted rules, in the lining): the same geometry
+- Every page but the phone's home closes on the footer's tailpiece
+  (`footer::before`, a quatrefoil between two painted rules, in the
+  lining): the same geometry
   in both themes, so the footer never moves with the theme, and set in rem
   so the wide hours' vault seam (`--apse-rest-seam`) holds. The hours'
   "Report a problem" line is footer matter under the tailpiece and the
@@ -186,9 +230,25 @@ or impose a redesign on an unrelated change.
   and the Tabula's are tituli; the year's figures sit on a painted tablet
   (`.tabula-figures`: the surface thinned, a frame ruled twice with
   quatrefoil knops, one mask over one pseudo-element); today is a painted
-  band (the frieze's wash inset 8px from the phone's gutters, ruled in
-  `--gold-line`, the number in gold), not a selected row, and carries no
-  further mark.
+  band (home's wash thinned, `--today-wash`, thinning toward the phone's
+  gutters, ruled in `--gold-line`, the number in gold), not a selected row.
+  No row keeps a line for "Today": on a phone it is said once at the right
+  of today's second line, from 1000px it is a note in the left margin, and
+  between them it keeps the reserved line under the number. The phone's
+  date and "Office details" boxes are drawn round them, not laid out (the
+  thumb-target test measures the drawn box). The feast page's standing is
+  drawn as home's invitation (feathered wash, the lining's rule, a finer
+  one in the colour of the day it is next kept).
+- Filled actions are home's tablet, not slabs (`.reminder-subscribe`,
+  `/beta`'s steps, the apps' "Turn on reminders"); a second action is a
+  worded link with the gold underline. Reminders is ruled as home's hours
+  (titulus over a lining rule, hairlines, a closing rule); a chosen time
+  is the accent's figures on the gold rule with the caret, the platform's
+  clock invisible over the field. Its foot carries the site's one link to
+  Privacy. By night the menu panel is home's blue plaster.
+- An hour's way on is set as home's hours: small-capital labels, names at
+  1.06rem, gilt points between the three, and one rule struck under them
+  with home's pen (`rule()` in app.js, seed 51; a border without script).
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's

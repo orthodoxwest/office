@@ -135,6 +135,40 @@ class TokensTest {
         }
     }
 
+    /** Home's painted page (HomePaint.kt) takes the web's "Home: the painted page" tokens. */
+    @Test
+    fun homeInk() {
+        check(root, "ochre", Ochre)
+        check(root, "leaf-matte-hi", LeafMatteHi)
+        check(root, "leaf-matte", LeafMatte)
+        check(root, "leaf-matte-lo", LeafMatteLo)
+        check(root, "leaf-shadow", LeafShadow)
+        // Nave's wash and pool are thin ochre: 19% and 34% (`color-mix(... var(--ochre) N%, transparent)`).
+        assertEquals("color-mix(in srgb, var(--ochre) 19%, transparent)", value(root, "tablet-wash")?.trim())
+        assertEquals("color-mix(in srgb, var(--ochre) 34%, transparent)", value(root, "now-pool")?.trim())
+        assertEquals(Ochre.copy(alpha = 0.19f), homeInk(Nave).tabletWash)
+        assertEquals(Ochre.copy(alpha = 0.34f), homeInk(Nave).nowPool)
+        val dark = rule(":root[data-theme=\"dark\"]")
+        val ink = homeInk(Apse)
+        check(dark, "tablet-wash", ink.tabletWash)
+        check(dark, "now-pool", ink.nowPool)
+        check(dark, "now-gloss", ink.nowGloss)
+        check(dark, "sky-deep", ink.skyDeep)
+        check(dark, "sky", ink.sky)
+        check(dark, "sky-low", ink.skyLow)
+        check(dark, "sky-rim", ink.skyRim)
+        check(dark, "lime-white", ink.limeWhite)
+        check(dark, "sky-muted", ink.skyMuted)
+        check(dark, "sky-rubric", ink.skyRubric)
+        check(dark, "lining-lifted", ink.liningLifted)
+        // The current hour's name is lifted by night in the quiet seasons and Passiontide.
+        for (season in listOf("quiet", "passiontide")) {
+            check(rule(":root[data-theme=\"dark\"] body.season-$season"), "titulus-now", titulusNow(Apse, season))
+        }
+        assertEquals(Apse.titulus, titulusNow(Apse, "eastertide"))
+        assertEquals(Nave.titulus, titulusNow(Nave, "quiet"))
+    }
+
     /** Home's pointed heads are the web's, as tools/genarch.py writes them for both, in its order. */
     @Test
     fun arches() {

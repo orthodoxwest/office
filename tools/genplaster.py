@@ -20,6 +20,15 @@ a seam: --mirror-of apps/office-web/static/plaster.jpg --out
 The Apse vault's gold leaf varies star by star through a small tileable alpha
 mask: --leaf --out apps/office-web/static/leaf.png. Seeded, so it regenerates
 byte for byte.
+
+By night a phone's home sets the parish apse's painted sky in the head of its
+arch, and the sky carries the vault's own brushwork: --sky-of
+../resources/design/parish/apse-sky-close.jpg --out
+apps/office-web/static/sky-wash.jpg (copy it to the apps' drawable-nodpi/
+sky_wash.jpg). A clean piece of the vault left of the lamp's chain, its gold
+stars painted out, its light and colour removed (high-pass, grey, thin), set
+above its own mirror so it tiles down a tall head. The colour stays the sky's
+tokens; the image is laid over them in soft light, as the panel's plaster is.
 """
 import argparse
 from pathlib import Path
@@ -116,6 +125,24 @@ def leaf_field(size=64, feature=5.5, seed=11, levels=64):
     return Image.fromarray(pixels, "LA")
 
 
+def sky_wash(photo):
+    """The apse vault's brush strokes alone: stars painted out, the camera's grain softened away,
+    the photograph's light removed by a high pass, grey about the middle so it reads in soft light
+    as strokes felt more than seen, mirrored below itself so it tiles."""
+    from scipy import ndimage
+    k = max(photo.size) / 1400       # the piece was chosen on a 1400px thumbnail
+    box = tuple(int(v * k) for v in (350, 312, 585, 588))
+    a = np.asarray(photo.convert("RGB").crop(box)).astype(np.float32)
+    lum = a.mean(2)
+    hole = ndimage.binary_dilation((a[..., 0] > a[..., 2] + 14) & (a[..., 0] > 80), iterations=9)
+    fill = ndimage.gaussian_filter(np.where(hole, 0, lum), 14) / np.maximum(
+        ndimage.gaussian_filter((~hole).astype(np.float32), 14), 1e-3)
+    lum = ndimage.gaussian_filter(np.where(hole, fill, lum), 2.4)
+    hp = lum - ndimage.gaussian_filter(lum, 70)
+    hp = np.clip(hp / (hp.std() * 3.2), -1, 1)
+    return mirrored_field(Image.fromarray((128 + 32 * hp).astype(np.uint8), "L"))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--src", type=Path, default=Path("../resources/design/parish/nave-wall-plaster.jpg"))
@@ -127,12 +154,19 @@ def main():
     parser.add_argument("--leaf", action="store_true", help="write the vault's gold-leaf variation mask")
     parser.add_argument("--soft-of", type=Path, help="derive the softened field from this generated field")
     parser.add_argument("--mirror-of", type=Path, help="stack this generated field above its reflection")
+    parser.add_argument("--sky-of", type=Path, help="take the apse sky's brushwork from this photograph of the vault")
     parser.add_argument("--soft-radius", type=int, default=20, help="blur radius in field pixels")
     parser.add_argument("--soft-scale", type=int, default=8, help="downscale factor for the stored copy")
     args = parser.parse_args()
     if args.leaf:
         leaf_field().save(args.out, optimize=True)
         print("wrote", args.out)
+        return
+    if args.sky_of:
+        with Image.open(args.sky_of) as photo:
+            result = sky_wash(photo)
+        result.save(args.out, quality=args.quality, optimize=True)
+        print("wrote", args.out, result.size)
         return
     if args.mirror_of:
         with Image.open(args.mirror_of) as field:

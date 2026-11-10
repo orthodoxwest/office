@@ -284,10 +284,32 @@ private struct StandingBox: View {
         .padding(.leading, m.px(17.6)).padding(.trailing, m.px(16))
         .padding(.top, m.px(13.6)).padding(.bottom, m.px(15))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(p.surface)
-        .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1) }
-        .padding(3)
-        .overlay { Rectangle().strokeBorder(p.lining, lineWidth: 1).padding(-0.5) }
+        .padding(4)
+        // Drawn as home's invitation: the wash feathered by the tablet mask, the lining's rule, and
+        // inside it a finer rule in the colour of the day it is next kept (gold on a white day, the
+        // lining thinned on a black one).
+        .background {
+            if let tablet = UIImage(named: "tablet.png") {
+                Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(HomeInk.of(p).tabletWash).padding(1)
+            }
+        }
+        .overlay {
+            ZStack {
+                Rectangle().strokeBorder(p.lining.opacity(0.78), lineWidth: 1)
+                Rectangle().strokeBorder(frontal.opacity(0.5), lineWidth: 1).padding(4)
+            }
+            .allowsHitTesting(false)
+        }
+    }
+
+    /// The day it is next kept, in its colour inside the frame.
+    private var frontal: Color {
+        switch view.next?.color {
+        case nil: return p.lining
+        case "white": return p.goldLine
+        case "black": return p.lining.opacity(0.8)
+        case let c?: return dayColor(c)
+        }
     }
 
     /// The next keeping under a dotted rule: its label, then its date with the way to the day, which

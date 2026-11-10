@@ -11,6 +11,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
@@ -159,11 +160,19 @@ fun DrawScope.niche(a: Arch, t: NicheTokens, p: Palette, day: Color, frame: Colo
  * down to this scope's foot (the inscription band), so it reads as paint on the wall rather than
  * another edge of the arch. The scope is the card's width, its top the card's.
  */
-fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color) {
+fun DrawScope.lining(a: Arch, inset: Float, color: Color, hairline: Color, pigment: ImageBitmap? = null) {
     // A miter limit of 2 keeps the point sharp, and bevels the hair's-breadth step that may join
-    // the upper arcs there rather than drawing it out into a spike.
-    fun line(d: Float, weight: Float, ink: Color) =
-        drawPath(archPath(a, size.width, d - weight / 2f, size.height, open = true), ink, style = Stroke(weight, miter = 2f))
+    // the upper arcs there rather than drawing it out into a spike. The pigment lies unevenly on
+    // the limewash (pigment.png, as the web's mask).
+    val paint = pigment?.let { pigmentBrush(it, 128f) }
+    fun line(d: Float, weight: Float, ink: Color) {
+        val path = archPath(a, size.width, d - weight / 2f, size.height, open = true)
+        if (paint == null) {
+            drawPath(path, ink, style = Stroke(weight, miter = 2f))
+        } else {
+            drawPath(path, paint, style = Stroke(weight, miter = 2f), colorFilter = ColorFilter.tint(ink, BlendMode.SrcIn))
+        }
+    }
     line(-inset, 2.dp.toPx(), color)
     line(-inset - 8.dp.toPx(), 1.dp.toPx(), hairline)
 }

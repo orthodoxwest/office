@@ -234,24 +234,16 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   // preference tap inside it does not.
   await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer").click();
+  // The wall in the gutter at the screen's foot, beside the arch.
+  await page.mouse.click(4, (await page.evaluate(() => innerHeight)) - 4);
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's colophon sits at the foot of the screen, as on desktop, with the
-  // card above it rather than the colophon floating under the card.
-  const [card, footer] = await Promise.all([
-    page.locator(".home").boundingBox(),
-    page.locator("footer").boundingBox(),
-  ]);
-  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
-  const foot = await page.evaluate(
-    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
-  );
-  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
+  // The phone's home is the arch alone: the colophon is the wide home's.
+  await expect(page.locator("footer")).toBeHidden();
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
@@ -976,7 +968,7 @@ function tileEdgePx(size) {
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false, date = testDate }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -985,7 +977,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     });
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(`/?date=${testDate}`);
+    await sheet.goto(`/?date=${date}`);
     const seen = await sheet.evaluate((asToday) => {
       // The fixed test day is historical, so the server adds the recovery
       // line that local today's home never carries; drop it to measure the
@@ -993,7 +985,6 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const tailpiece = getComputedStyle(footerElement, "::before");
       // The pointed head's halo is a filter on its outer courses.
       const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
@@ -1001,11 +992,8 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        // The footer closes on its painted tailpiece in both themes, with
-        // the same geometry, so the footer never moves when the theme
-        // changes.
-        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
-        tailpieceShown: tailpiece.display !== "none",
+        // The phone's home carries no colophon; the wide home keeps it.
+        footerShown: getComputedStyle(footerElement).display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -1023,8 +1011,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.tailpieceShown).toBe(true);
-  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(apse.footerShown).toBe(false);
   expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
   // The night carries no powdering: its field is the vault alone.
@@ -1040,15 +1027,18 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     expect(vaultPaints(nave.stars)).toBe(false);
     expect(powderPaints(nave.stars)).toBe(true);
     expect(nave.position).toBe("fixed");
-    expect(nave.tailpieceShown).toBe(true);
+    expect(nave.footerShown).toBe(false);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
 
   // On the day itself a phone's home fits its viewport whole, every hour in
-  // reach without scrolling, on a 375x667 screen as well.
-  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
-  expect(small.scrolls).toBe(false);
+  // reach without scrolling, on a 375x667 screen as well, even on the year's
+  // longest heading (Gaudete with three commemorations and abstinence).
+  for (const date of [testDate, "2026-12-13"]) {
+    const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true, date });
+    expect(small.scrolls).toBe(false);
+  }
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -1244,6 +1234,13 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
         cross: cross && getComputedStyle(cross).display,
         rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
         vault: body.getPropertyValue("--apse-vault").trim(),
+        // The ending's field: home's sky tile by night, the powdering by day.
+        field: getComputedStyle(document.querySelector(".hour-epilogue"), "::before").maskImage,
+        // What the ending's two fields paint: under the veil by night, nothing at all.
+        fieldInks: [
+          getComputedStyle(document.querySelector(".hour-epilogue"), "::before").backgroundColor,
+          getComputedStyle(document.querySelector("footer"), "::after").backgroundColor,
+        ],
       };
     });
   };
@@ -1254,11 +1251,15 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
     expect(goodFriday.sign).toBe("none");
     expect(goodFriday.rule).toBe("0px");
     expect(goodFriday.vault).toBe("none");
+    expect(goodFriday.field.includes("sky-tile.svg")).toBe(false);
+    const clear = (ink) => ink === "transparent" || /rgba\(.*,\s*0\)$|\/ 0\)$/.test(ink);
+    if (theme === "dark") for (const ink of goodFriday.fieldInks) expect(clear(ink), ink).toBe(true);
     // Prime keeps its cross, and the rule its break.
     const prime = await read("/prime/2026-04-10", theme);
     expect(prime.bare).toBe(true);
     expect(prime.cross).not.toBe("none");
     expect(prime.rule).not.toBe("0px");
+    if (theme === "dark") for (const ink of prime.fieldInks) expect(clear(ink), ink).toBe(true);
     // All Souls is bare without the veil: the Apse's stars stay gold.
     const allSouls = await read("/lauds/2026-11-02", theme);
     expect(allSouls.bare).toBe(true);
@@ -1273,6 +1274,7 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
       expect(lit.sign).not.toBe("none");
       expect(lit.rule).toBe("1.25rem");
       expect(lit.vault === "none").toBe(theme === "light");
+      expect(lit.field.includes(theme === "light" ? "powder.svg" : "sky-tile.svg")).toBe(true);
     }
   }
 });
@@ -1366,22 +1368,58 @@ test("hour titles stand at one height under the sun, the moon and the cross", as
   expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
 });
 
-// On a phone the date takes its own line above the day's name, so the
-// separator never ends a line; on a wide screen the parts share one line.
+// The date and the season share one muted line, so its separator never ends
+// a line; the day's name stands under them in the text's ink, a size up.
 test("the hour's date line never strands its separator", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-03-31");
   const parts = page.locator(".hour-meta-part");
   await expect(parts).toHaveCount(3);
+  await expect(page.locator(".hour-meta-sep")).toHaveCount(1);
   const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
-  const phone = await rows();
-  expect(phone[0]).toBeLessThan(phone[1]);
-  expect(phone[1]).toBe(phone[2]);
-  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
-  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const laptop = await rows();
-  expect(new Set(laptop).size).toBe(1);
-  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [date, season, feast] = await rows();
+    expect(date).toBe(season);
+    expect(feast).toBeGreaterThan(date);
+    await expect(page.locator(".hour-meta-sep")).toBeVisible();
+  }
+  const ink = await page.evaluate(() => {
+    const feast = getComputedStyle(document.querySelector(".hour-meta-feast"));
+    const meta = getComputedStyle(document.querySelector(".hour-meta"));
+    return { feast: feast.color, text: getComputedStyle(document.body).color, larger: parseFloat(feast.fontSize) > parseFloat(meta.fontSize) };
+  });
+  expect(ink.feast).toBe(ink.text);
+  expect(ink.larger).toBe(true);
+});
+
+// On a first-class day the frame narrows the measure: each disclosure under
+// the title keeps one line, its caret beside its words, and where the two do
+// not fit side by side they stand one above the other.
+test("the hour's disclosures never break inside themselves", async ({ page }) => {
+  for (const [width, size] of [[390, "default"], [375, "default"], [320, "default"], [375, "large"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+    await openDatedPage(page, "/vespers/2026-12-25");
+    // The fallback face is wider than EB Garamond: measure the face the reader gets.
+    await page.evaluate(() => document.fonts.ready);
+    const boxes = await page.locator(".hour-context-controls > details > summary").evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const tops = [...range.getClientRects()].filter((q) => q.width > 1).map((q) => q.top);
+        // Spans of other faces sit a pixel or two apart on one line; a second line is a line below.
+        const lines = 1 + tops.filter((t) => t - Math.min(...tops) > 8).length;
+        return { left: r.left, right: r.right, height: r.height, lines: Math.min(lines, 2) };
+      }),
+    );
+    for (const box of boxes) {
+      expect(box.lines, `${width} ${size}`).toBe(1);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.left).toBeGreaterThanOrEqual(0);
+      expect(box.right).toBeLessThanOrEqual(width);
+    }
+  }
 });
 
 // A psalm's Latin incipit shares the label's line with a dot between them,
@@ -1544,6 +1582,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await expect(settings.locator("summary")).toBeFocused();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
   const rules = await page.evaluate(() => {
     const isVisibleRule = (width, style, color) => {
       const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
@@ -1555,48 +1594,43 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         alphaValue > 0
       );
     };
-    const directory = getComputedStyle(document.querySelector(".home-hour-links"));
-    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
-    const dividedHour = getComputedStyle(
-      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
-    );
-    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    const rule = (el, side) => {
+      const style = getComputedStyle(el);
+      return isVisibleRule(
+        style.getPropertyValue(`border-${side}-width`),
+        style.getPropertyValue(`border-${side}-style`),
+        style.getPropertyValue(`border-${side}-color`),
+      );
+    };
+    const directory = document.querySelector(".home-hour-links");
+    const label = document.querySelector(".home-hour-group-label");
+    const dividedHour = document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link");
+    const finalGroup = document.querySelector(".home-hour-group:last-of-type");
+    const point = getComputedStyle(dividedHour, "::before");
     return {
-      directoryLeft: isVisibleRule(
-        directory.borderLeftWidth,
-        directory.borderLeftStyle,
-        directory.borderLeftColor,
-      ),
-      directoryRight: isVisibleRule(
-        directory.borderRightWidth,
-        directory.borderRightStyle,
-        directory.borderRightColor,
-      ),
-      labelRight: isVisibleRule(
-        label.borderRightWidth,
-        label.borderRightStyle,
-        label.borderRightColor,
-      ),
-      // Full-height borders remain absent between the unequal 2/3/2 groups.
-      // Short decorative hairlines separate neighbours within each band.
-      dividedHourLeft: isVisibleRule(
-        dividedHour.borderLeftWidth,
-        dividedHour.borderLeftStyle,
-        dividedHour.borderLeftColor,
-      ),
-      finalGroupBottom: isVisibleRule(
-        finalGroup.borderBottomWidth,
-        finalGroup.borderBottomStyle,
-        finalGroup.borderBottomColor,
-      ),
+      // The table is ruled by hand (app.js), so its CSS borders stand down:
+      // a frame and the joints between bands, drawn as the painter's lines.
+      ruled: directory.classList.contains("is-ruled"),
+      ruledLines: directory.querySelectorAll(":scope > svg.home-rules path").length > 0,
+      directoryLeft: rule(directory, "left"),
+      directoryRight: rule(directory, "right"),
+      finalGroupBottom: rule(finalGroup, "bottom"),
+      // The periods are the margin's index with no cell or upright of their
+      // own, and neighbouring hours are parted by a gilt point, not a rule.
+      labelRight: rule(label, "right"),
+      dividedHourLeft: rule(dividedHour, "left"),
+      giltPoint: point.content !== "none" && parseFloat(point.width) < 5,
     };
   });
   expect(rules).toEqual({
-    directoryLeft: true,
-    directoryRight: true,
-    labelRight: true,
+    ruled: true,
+    ruledLines: true,
+    directoryLeft: false,
+    directoryRight: false,
+    finalGroupBottom: false,
+    labelRight: false,
     dividedHourLeft: false,
-    finalGroupBottom: true,
+    giltPoint: true,
   });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
@@ -1874,7 +1908,12 @@ test("themes never change layout", async ({ browser }) => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
       return {
-        boxes: [...document.querySelectorAll("body *")].map((el) => round(el.getBoundingClientRect())),
+        // Home's night sky is the Apse's material on a phone, as the vault is
+        // the page's, and the lining moves out to the sky's edge: painted
+        // layers, absolutely placed and aria-hidden, that move no other box.
+        boxes: [...document.querySelectorAll("body *")]
+          .filter((el) => !el.closest(".home-sky, .home-lining"))
+          .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
           return [...range.getClientRects()].map(round).join(";");
@@ -3185,7 +3224,18 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       const count = await targets.count();
       expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
       for (let i = 0; i < Math.min(count, 12); i++) {
-        const box = await targets.nth(i).boundingBox();
+        // A target whose thumb box is drawn round it (an absolute ::before, as
+        // the header's links and the ordo's phone rows have) is measured by it.
+        const box = await targets.nth(i).evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return null;
+          const b = getComputedStyle(el, "::before");
+          if (b.content === "none" || b.position !== "absolute") return { width: r.width, height: r.height };
+          const px = (v) => (v.endsWith("px") ? parseFloat(v) : 0);
+          const width = Math.max(r.width, r.width - px(b.left) - px(b.right));
+          const height = Math.max(r.height, r.height - px(b.top) - px(b.bottom));
+          return { width, height };
+        });
         expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
         expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
         expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);
@@ -4068,10 +4118,13 @@ test("home's versicle takes only the height its head has to spare", async ({ pag
       scrolls: document.documentElement.scrollHeight > innerHeight,
     }));
   };
-  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  // St Placidus's two lines fit a 412×735 phone without moving the hours, and
+  // so, with no colophon under the arch, do the Holy Angels' four.
   expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
-  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
-  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // On a narrow phone, where the day's lines wrap, they do not, so the head
+  // goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 320, 740)).toEqual({ shown: false, scrolls: false });
   expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
   // A 667px phone has none to spare.
   expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });

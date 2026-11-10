@@ -11,10 +11,11 @@
          their headpieces carry the sun and the moon in place of the cross. #}
     {{ headpiece("sun" if hour_name == "lauds" else ("moon" if hour_name in ["vespers", "compline"] else "")) }}
     <h1>{{ hour.title }}</h1>
-    {# The no-break space holds each dot to the part before it, so a wrapped
-         line never opens with a separator. #}
+    {# The date and the season share the muted line; the day's name stands
+         under them in the text's ink, as home titles the day. The no-break
+         space holds the dot to the date. #}
     {%- set season = hour.season|season_label %}
-    <p class="hour-meta"><span class="hour-meta-part">{{ date_str }}</span>{% if hour.feast %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ hour.feast|typeset }}</span>{% endif %}{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</p>
+    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{{ hour.feast|typeset }}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
@@ -27,14 +28,14 @@
     <details class="hour-date-nav">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
-        <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
+        <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
         <form class="date-jump-form" action="/{{ hour_name|urlnorm }}" method="get">
           <label class="sr-only" for="hour-date-jump">Jump to date</label>
           <input id="hour-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
           <button class="date-submit" type="submit">Go</button>
           {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
         </form>
-        <a href="{{ next_link|url }}" aria-label="Next day">Next &rarr;</a>
+        <a href="{{ next_link|url }}">{{ next_day }}<span aria-hidden="true">&nbsp;&rarr;</span></a>
       </nav>
     </details>
     {% if leader_forms %}

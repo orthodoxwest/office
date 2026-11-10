@@ -16,13 +16,17 @@
          desktop): decorative, outside the reading and focus order. #}
     <span class="home-crown" aria-hidden="true"></span>
     <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
+      {# By night on a phone, the apse's painted sky inside the head, down to
+           the frieze; app.js sets its gold-leaf stars in it, clear of the
+           day's words. Without script the sky has no stars. #}
+      <span class="home-sky" aria-hidden="true" data-stars="{{ static("ornaments/stars.json")|url }}"></span>
       {# A painted border on the niche's back wall, round its head. #}
       <div class="home-lining" aria-hidden="true"></div>
       <header class="home-day-head">
         <h1 id="home-date-heading">
           {# The phone's link is a flex box for its touch target: the date
              is one item inside it, so its words keep their spaces. #}
-          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{% set date_parts = date_str|split(", ", 1)|list %}{% if date_parts|length == 2 %}<span><span class="home-date-weekday">{{ date_parts[0] }},</span> <span class="home-date-rest">{{ date_parts[1] }}</span></span>{% else %}{{ date_str }}{% endif %}</a>
+          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{% set date_parts = date_str|split(", ", 1)|list %}{% if date_parts|length == 2 %}<span><span class="home-date-weekday">{{ date_parts[0] }}<span class="home-date-comma">,</span></span> <span class="home-date-rest">{{ date_parts[1] }}</span></span>{% else %}{{ date_str }}{% endif %}</a>
         </h1>
         {# A familiar name the ordo gives in parentheses ("(Corpus Christi)")
            is set apart from the name, so it is kept whole and, when the two
@@ -64,7 +68,7 @@
     </section>
 
     <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
-      <h2 id="home-pray-heading">Pray the hours</h2>
+      <h2 id="home-pray-heading"><span class="home-frieze-text">Pray the hours</span></h2>
       <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
@@ -128,14 +132,14 @@
       <details class="hour-date-nav home-date-nav">
         <summary>Change date</summary>
         <nav class="day-nav" aria-label="Date navigation">
-          <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
+          <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
           <form class="date-jump-form" action="/" method="get">
             <label class="sr-only" for="home-date-jump">Jump to date</label>
             <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
             <button class="date-submit" type="submit">Go</button>
             {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
           </form>
-          <a href="{{ next_link|url }}" aria-label="Next day">Next &rarr;</a>
+          <a href="{{ next_link|url }}">{{ next_day }}<span aria-hidden="true">&nbsp;&rarr;</span></a>
         </nav>
       </details>
     </div>

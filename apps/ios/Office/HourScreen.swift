@@ -660,7 +660,7 @@ private struct HourTitle: View {
         let font = style.uiFont(m)
         // The rules take the title's width, at least 24rem (the measure, on a phone), as the web's h1.
         let titleWidth = ProseLayout.advance(title, font) + style.tracking * m.type * CGFloat(title.count) + 2 * m.px(20.8)
-        let meta = [view.dateLabel, view.feast, view.seasonLabel].filter { !$0.isEmpty }
+        let meta = [view.dateLabel, view.seasonLabel].filter { !$0.isEmpty }
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 // The hour's sign is set into the title's upper rule, the rule itself its line; the
@@ -685,28 +685,29 @@ private struct HourTitle: View {
                 DoubleRule(lozengeColor: titleColor(view.color, p))
             }
             .frame(maxWidth: max(m.px(384), titleWidth))
-            // On a phone the date stands on its own line above the day's name, so a line never
-            // ends on the separator (the web's `.hour-meta-part:first-child` to 700px); a wide
-            // screen keeps one line. Each part is kept whole (`.hour-meta-part`), its separator
-            // bound to it by the no-break space, so a line breaks between parts, not inside one.
-            let metaLines: [[String]] = wide || meta.count < 2 ? [meta] : [[meta[0]], Array(meta.dropFirst())]
+            // The date and the season share one muted line, each kept whole (`.hour-meta-part`),
+            // its dot bound to the date by the no-break space; the day's name stands under them
+            // in the text's ink, a size up, as home titles the day (`.hour-meta-feast`).
             let space = ProseLayout.advance(" ", Scale.meta.uiFont(m))
             VStack(spacing: 0) {
-                ForEach(Array(metaLines.enumerated()), id: \.offset) { _, parts in
-                    MetaLine(space: space) {
-                        ForEach(Array(parts.enumerated()), id: \.offset) { i, part in
-                            Text(i < parts.count - 1 ? part + "\u{00a0}·" : part)
-                                .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
-                        }
+                MetaLine(space: space) {
+                    ForEach(Array(meta.enumerated()), id: \.offset) { i, part in
+                        Text(i < meta.count - 1 ? part + "\u{00a0}·" : part)
+                            .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
                     }
+                }
+                if !view.feast.isEmpty {
+                    Text(view.feast).type(Scale.dayName).foregroundStyle(p.text)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, m.px(1.9))
                 }
             }
             .padding(.top, m.px(2))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(meta.joined(separator: ". "))
+            .accessibilityLabel((meta + [view.feast]).filter { !$0.isEmpty }.joined(separator: ". "))
             if date != model.today {
                 Button { model.open(.hour(model.today, view.hour)) } label: {
-                    Text("GO TO TODAY").type(Scale.menu).foregroundStyle(p.accent)
+                    Text("Go to today").type(TextStyle(size: 16, line: 25.6, tracking: 1.28, smallCaps: true)).foregroundStyle(p.accent)
                         .goldUnderline(true, p.goldLine)
                         .padding(.vertical, m.px(12))
                 }
@@ -715,7 +716,7 @@ private struct HourTitle: View {
             }
             // Side by side, or one above the other when the reader's font size leaves no room.
             ViewThatFits(in: .horizontal) {
-                HStack(spacing: m.px(12)) { disclosures }
+                HStack(spacing: 0) { disclosures }
                 VStack(spacing: 0) { disclosures }
             }
             .padding(.top, m.px(4))
@@ -752,14 +753,18 @@ private struct HourTitle: View {
     }
 
     @ViewBuilder private var disclosures: some View {
-        Disclosure(label: "Change date", open: picking) {
+        // In home's foot letter, each kept to one line (`.page-hour .hour-date-nav > summary`): on
+        // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
+        // caret to a line of its own. Where the two do not fit side by side they stand one above
+        // the other, never broken inside one.
+        Disclosure(label: "Change date", open: picking, style: Scale.smallCapsControl, upper: false) {
             withAnimation(unfolding) {
                 picking.toggle()
                 choosing = false
             }
             if picking { reveal("disclosed") }
         }
-        Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label) {
+        Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
             withAnimation(unfolding) {
                 choosing.toggle()
                 picking = false
@@ -837,7 +842,8 @@ private struct Epilogue: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // One mark, as painted where the bishop anointed the walls: the links and foot below carry none.
+            // One mark, as painted where the bishop anointed the walls; the way on below is parted by
+            // home's gilt points and ruled under where the wall's field begins.
             PaintedMark(.consecration, size: m.px(40), color: p.lining)
                 .padding(.top, m.px(26.4))
             Continuation(
@@ -850,7 +856,8 @@ private struct Epilogue: View {
                 next: (next ?? morrow).map(hourLabel),
                 onNext: {
                     if let next { model.open(.hour(date, next)) } else if let morrow { model.open(.hour(date.adding(days: 1), morrow)) }
-                }
+                },
+                ruled: true
             )
             .measured(m)
             .padding(.top, m.px(83.2))
@@ -877,7 +884,7 @@ private struct Epilogue: View {
                 .padding(.top, m.px(4.8))
             }
             .background(
-                WallField(seam: air, lit: lit) { h, dark in
+                WallField(seam: air, lit: lit, sky: true) { h, dark in
                     let seam = air / h
                     return dark
                         ? [(0, 0), (m.px(16) / h, 1), (seam + 0.45 * (1 - seam), 1), (seam + 0.8 * (1 - seam), 0.5), (1, 0.25)]
