@@ -194,7 +194,15 @@ private fun parse(field: String): List<SkyStar> = field.split(';').map { star ->
     SkyStar(v[0], v[1], v[2], v[3], v.drop(4).toFloatArray())
 }
 
-private val Fields by lazy { mapOf(PhoneArch to parse(StarFields.PHONE), TallArch to parse(StarFields.TALL), TallerArch to parse(StarFields.TALLER)) }
+private val Fields by lazy {
+    mapOf(
+        PhoneArch to parse(StarFields.PHONE),
+        TallArch to parse(StarFields.TALL),
+        TallerArch to parse(StarFields.TALLER),
+        NicheArch to parse(StarFields.NICHE),
+        UprightArch to parse(StarFields.UPRIGHT),
+    )
+}
 
 /** The ending tile's edge, dp: never scaled (`ornaments/sky-tile.svg`). */
 const val SkyTile = 384f
@@ -230,7 +238,7 @@ val SkyTileStars: List<Pair<Float, Path>> by lazy {
 fun skyStars(arch: Arch): List<SkyStar> = Fields[arch] ?: emptyList()
 
 /**
- * The apse's sky inside a phone's head by night (the web's `.home-sky`): the slate from deep to
+ * The apse's sky inside the head by night, a phone's or the wide niche's (the web's `.home-sky`): the slate from deep to
  * light, a lighter and greener glow toward the frieze, and the vault's brushwork (`sky_wash.jpg`)
  * laid over it, clipped to the head inside the slate course and down to the frieze (`band`, from
  * the card's top). Then its gold-leaf stars, leaving out every one that would touch the painter's

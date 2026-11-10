@@ -172,7 +172,7 @@ class TokensTest {
     /** Home's pointed heads are the web's, as tools/genarch.py writes them for both, in its order. */
     @Test
     fun arches() {
-        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch)
+        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch, UprightArch)
         val rises = Regex("--arch-rise: ([0-9.]+);").findAll(css).map { it.groupValues[1].toFloat() }.toList()
         assertEquals(rises, arches.map { it.rise })
         for (a in arches) {
