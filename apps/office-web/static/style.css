@@ -6980,10 +6980,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    shadow on the panel, in the colour the stone's light has faded to by the
    springing. The moonlight lifts the ground under the day's red work, so
    the rubric red is lifted with it to keep its contrast. */
-/* The menu by night opens on the home panel's blue plaster, not a flat
-   slab of --surface: the same ground, the same limewash in soft light
-   under the same veil. By day the surface's own material carries it. */
-@media (prefers-color-scheme: dark) {
+/* The phone's menu by night opens on the home panel's blue plaster, not a
+   flat slab of --surface: the same ground, the same limewash in soft light
+   under the same veil. By day the surface's own material carries it. From
+   701px the panel is the header's inline row and takes no ground. */
+@media (max-width: 700px) and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .site-menu-panel {
     background:
       linear-gradient(rgba(25, 36, 54, 0.5), rgba(25, 36, 54, 0.5)),
@@ -6993,12 +6994,14 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   }
 }
 
-:root[data-theme="dark"] .site-menu-panel {
-  background:
-    linear-gradient(rgba(25, 36, 54, 0.5), rgba(25, 36, 54, 0.5)),
-    url("plaster-panel.jpg") center top / 100% auto repeat-y,
-    #192436;
-  background-blend-mode: normal, soft-light, normal;
+@media (max-width: 700px) {
+  :root[data-theme="dark"] .site-menu-panel {
+    background:
+      linear-gradient(rgba(25, 36, 54, 0.5), rgba(25, 36, 54, 0.5)),
+      url("plaster-panel.jpg") center top / 100% auto repeat-y,
+      #192436;
+    background-blend-mode: normal, soft-light, normal;
+  }
 }
 
 @media (max-width: 700px) and (prefers-color-scheme: dark) {
