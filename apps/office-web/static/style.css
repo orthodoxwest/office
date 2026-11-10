@@ -9702,10 +9702,14 @@ html:where(:has(> body.page-hour))::before {
     --arch-frame: 1px;
   }
 
-  :root:not([data-theme="light"]) .page-home .home-arch-edge,
   :root:not([data-theme="light"]) .page-home .home-arch::after,
   :root:not([data-theme="light"]) .page-home .home-hero::before {
     display: none;
+  }
+
+  /* Hidden, not taken out: the themes keep one layout, box for box. */
+  :root:not([data-theme="light"]) .page-home .home-arch-edge {
+    visibility: hidden;
   }
 
   :root:not([data-theme="light"]) .page-home .home-arch::before {
@@ -9736,10 +9740,14 @@ html:where(:has(> body.page-hour))::before {
     --arch-frame: 1px;
   }
 
-  :root[data-theme="dark"] .page-home .home-arch-edge,
   :root[data-theme="dark"] .page-home .home-arch::after,
   :root[data-theme="dark"] .page-home .home-hero::before {
     display: none;
+  }
+
+  /* Hidden, not taken out: the themes keep one layout, box for box. */
+  :root[data-theme="dark"] .page-home .home-arch-edge {
+    visibility: hidden;
   }
 
   :root[data-theme="dark"] .page-home .home-arch::before {

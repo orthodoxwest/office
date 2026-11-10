@@ -702,18 +702,146 @@ test("the niche's cross stands clear under the lining at every desktop width", a
 
 test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
   // At a laptop's size it took two-thirds of an iPad's width and left a third
-  // of the screen bare below it.
+  // of the screen bare below it. Upright, the niche is a lancet: narrower
+  // than the screen, but it takes the screen's height down to "Change date".
   for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
     const niche = await page.evaluate(() => {
       const hero = document.querySelector(".home-hero").getBoundingClientRect();
       const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
-      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+      return {
+        share: hero.width / innerWidth,
+        height: hero.height / innerHeight,
+        metaBottom: meta.bottom,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
     });
-    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.6);
+    expect(niche.height, `${width}x${height}: the niche takes the height`).toBeGreaterThan(0.75);
     expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
     expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
+// The wide niche's measures on the glass: the zoom (--niche-zoom) is the
+// hero's drawn width over its own, and a gloss's size is its computed size
+// at that zoom.
+async function nicheOnGlass(page) {
+  return page.evaluate(() => {
+    const hero = document.querySelector(".home-hero");
+    const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+    const bottom = (selector) => document.querySelector(selector).getBoundingClientRect().bottom;
+    const notes = [...document.querySelectorAll(".home-hour-link-note")];
+    return {
+      zoom,
+      notes: notes.filter((note) => note.checkVisibility()).length,
+      smallestNote: Math.min(...notes.map((note) => parseFloat(getComputedStyle(note).fontSize) * zoom)),
+      date: bottom("#home-date-heading"),
+      feast: bottom(".feast"),
+      pray: bottom(".pray-now"),
+      hours: Math.max(...[...document.querySelectorAll(".home-hour-link")].map((link) => link.getBoundingClientRect().bottom)),
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  });
+}
+
+test("the wide niche glosses every hour and keeps the day and the hours above the fold", async ({ page }) => {
+  // A laptop's niche once kept only the hour that is now glossed, and a
+  // short window lost the evening hours under the fold. Every gloss is at
+  // least 12px on the glass, whatever the zoom.
+  for (const [width, height] of [[1280, 800], [1180, 820], [1024, 768], [820, 1180], [768, 1024], [701, 900], [1440, 900], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-04"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const niche = await nicheOnGlass(page);
+      const at = `${width}x${height} ${date}`;
+      expect(niche.notes, `${at}: every hour glossed`).toBe(7);
+      expect(niche.smallestNote, `${at}: glosses legible`).toBeGreaterThanOrEqual(12);
+      for (const part of ["date", "feast", "pray", "hours"]) {
+        expect(niche[part], `${at}: ${part} above the fold`).toBeLessThanOrEqual(height);
+      }
+      expect(niche.overflow, at).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
+test("the wide niche scales by one computed zoom, never under its least", async ({ page }) => {
+  // One formula, not a table of steps: the height left under the chrome over
+  // the niche's own, capped by a share of the width; 0.96 at least on its
+  // side (0.9 upright) so a gloss never falls under 12px.
+  const zooms = [];
+  for (const [width, height, least] of [[1024, 700, 0.96], [1280, 800, 0.96], [1440, 900, 0.96], [1920, 1200, 0.96], [768, 900, 0.9], [820, 1180, 0.9]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const { zoom } = await nicheOnGlass(page);
+    expect(zoom, `${width}x${height}`).toBeGreaterThanOrEqual(least - 0.005);
+    expect(zoom, `${width}x${height}`).toBeLessThanOrEqual(1.5);
+    zooms.push(zoom);
+  }
+  // A taller screen of one width never gets a smaller niche.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const taller = (await nicheOnGlass(page)).zoom;
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect((await nicheOnGlass(page)).zoom).toBeGreaterThanOrEqual(taller);
+  expect(new Set(zooms.map((z) => z.toFixed(2))).size).toBeGreaterThan(2);
+});
+
+test("the wide niche sets the hours one to a line from 1000px high, a glossed table below", async ({ page }) => {
+  const rows = async () =>
+    page.evaluate(() => {
+      const top = (hour) => Math.round(document.querySelector(`.home-hour-link[data-hour="${hour}"]`).getBoundingClientRect().top);
+      return { lauds: top("lauds"), prime: top("prime"), terce: top("terce"), none: top("none") };
+    });
+  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1920, 1080, true], [820, 1180, true]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const at = await rows();
+    if (list) {
+      expect(at.prime, `${width}x${height}: Prime under Lauds`).toBeGreaterThan(at.lauds + 20);
+      expect(at.none, `${width}x${height}: None under Terce`).toBeGreaterThan(at.terce + 40);
+    } else {
+      expect(Math.abs(at.prime - at.lauds), `${width}x${height}: Lauds and Prime share a row`).toBeLessThanOrEqual(1);
+      expect(Math.abs(at.none - at.terce), `${width}x${height}: Terce and None share a row`).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("the zoomed niche's hand-ruled joints fall between the periods", async ({ page }) => {
+  // The joints were placed from client rects, measured on the glass, in the
+  // zoomed table's own pixels: under zoom they drifted off the joints.
+  for (const [width, height] of [[1280, 800], [820, 1180], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+    const drift = await page.evaluate(() => {
+      const joints = [...document.querySelectorAll(".home-hour-links > svg.home-rules path.r-inner")];
+      const groups = [...document.querySelectorAll(".home-hour-group")].slice(1);
+      return joints.map((joint, i) => {
+        const box = joint.getBoundingClientRect();
+        return Math.abs((box.top + box.bottom) / 2 - groups[i].getBoundingClientRect().top);
+      });
+    });
+    expect(drift.length, `${width}x${height}`).toBe(2);
+    for (const d of drift) expect(d, `${width}x${height}: joint on the period's edge`).toBeLessThanOrEqual(2);
+  }
+});
+
+test("the wide home by night is one sky inside the niche and a plain wall round it", async ({ page }) => {
+  for (const [width, height] of [[1280, 800], [820, 1180]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`, "dark");
+    await expect(page.locator(".home-sky svg.home-stars")).toHaveCount(1);
+    const night = await page.evaluate(() => ({
+      wall: getComputedStyle(document.body, "::before").display,
+      sky: getComputedStyle(document.querySelector(".home-sky")).display,
+      stars: document.querySelectorAll(".home-sky svg.home-stars path, .home-sky svg.home-stars use").length,
+    }));
+    expect(night.wall, `${width}x${height}: the margins' starfield is off`).toBe("none");
+    expect(night.sky, `${width}x${height}`).not.toBe("none");
+    expect(night.stars, `${width}x${height}: the head has its stars`).toBeGreaterThan(5);
   }
 });
 
@@ -906,11 +1034,12 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
     }
     expect(new Set(widths).size).toBe(1);
     // And it is the declared measure, not whatever the content happened to
-    // need: clamp(38rem, 10rem + 38vw, 48rem), scaled by the niche's zoom
-    // step (1.12 from 1700x1000).
-    const zoom = width >= 1700 ? 1.12 : 1;
-    const declared = Math.min(48 * 16, Math.max(38 * 16, 10 * 16 + 0.38 * width)) * zoom;
-    expect(Math.abs(widths[0] - declared)).toBeLessThanOrEqual(1);
+    // need: the landscape lancet's 37.5rem, scaled by the niche's zoom.
+    const zoom = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      return hero.getBoundingClientRect().width / hero.offsetWidth;
+    });
+    expect(Math.abs(widths[0] - 37.5 * 16 * zoom)).toBeLessThanOrEqual(1);
   }
 });
 
@@ -1908,11 +2037,13 @@ test("themes never change layout", async ({ browser }) => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
       return {
-        // Home's night sky is the Apse's material on a phone, as the vault is
-        // the page's, and the lining moves out to the sky's edge: painted
-        // layers, absolutely placed and aria-hidden, that move no other box.
+        // Home's night sky is the Apse's material, as the vault is the
+        // page's, the lining moves out to the sky's edge, and in the wide
+        // niche the panel sits inside the night's slate course where by day
+        // it meets the reveal's fillet: painted layers, absolutely placed and
+        // aria-hidden, that move no other box.
         boxes: [...document.querySelectorAll("body *")]
-          .filter((el) => !el.closest(".home-sky, .home-lining"))
+          .filter((el) => !el.closest(".home-sky, .home-lining, .home-arch-fill"))
           .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
