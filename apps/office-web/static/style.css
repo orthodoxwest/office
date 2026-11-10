@@ -8636,7 +8636,16 @@ body.rank-first-class .home-crown {
 }
 
 @media (forced-colors: active) {
-  .page-home :is(.home-sky, .home-rules, .pray-now::before, .home-hour-link.is-current::after) {
+  /* A pseudo-element cannot sit inside :is(), so each is its own selector.
+     The sky is shown by the night gates at (0,4,0); forced colours always
+     outrank them. */
+  .page-home .home-sky {
+    display: none !important;
+  }
+
+  .page-home .home-rules,
+  .page-home .pray-now::before,
+  .page-home .home-hour-link.is-current::after {
     display: none;
   }
 
