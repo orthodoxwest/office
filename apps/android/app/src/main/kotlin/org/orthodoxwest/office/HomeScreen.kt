@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
@@ -783,7 +782,7 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PeriodIcon(period, o.flat, Modifier.graphicsLayer { alpha = 0.9f / 0.7f })
+                    PeriodIcon(period, o.flat, alpha = 0.9f)
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Spacer(Modifier.width(1.dp))

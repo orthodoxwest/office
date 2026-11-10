@@ -841,7 +841,7 @@ private struct HourDirectory: View {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
                 HStack(spacing: 0) {
                     VStack(spacing: m.px(2)) {
-                        PeriodIcon(period: row.period, color: o.flat).opacity(0.9 / 0.7)
+                        PeriodIcon(period: row.period, color: o.flat, alpha: 0.9)
                         Text(row.label).type(label).foregroundStyle(mix(p.accent, p.muted, 0.45)).lineLimit(1).fixedSize()
                     }
                     .padding(.vertical, m.px(6))

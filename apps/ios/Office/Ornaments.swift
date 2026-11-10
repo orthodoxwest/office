@@ -365,6 +365,7 @@ struct Lozenged: View {
 struct PeriodIcon: View {
     let period: Period
     let color: Color
+    var alpha: Double = 0.7
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -372,7 +373,7 @@ struct PeriodIcon: View {
             ctx.fill(period.path.fitted(24, 16, in: CGRect(origin: .zero, size: size)), with: .color(color))
         }
         .frame(width: m.px(19), height: m.px(13))
-        .opacity(0.7)
+        .opacity(alpha)
         .accessibilityHidden(true)
     }
 }

@@ -345,8 +345,8 @@ fun PaintedCross(modifier: Modifier, ink: Color = LocalPalette.current.lining) {
 }
 
 @Composable
-fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier) {
-    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { alpha = 0.7f }) {
+fun PeriodIcon(period: Period, color: Color, modifier: Modifier = Modifier, alpha: Float = 0.7f) {
+    Canvas(modifier.size(19.dp, 13.dp).graphicsLayer { this.alpha = alpha }) {
         fitted(24f, 16f) { drawPath(period.path, color) }
     }
 }
