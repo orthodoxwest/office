@@ -89,6 +89,8 @@ pub struct FeastTextView {
     pub label: String,
     /// From the Common, marked so.
     pub common: bool,
+    /// A prayer (the collect), set flowing: the first opens on the hours' dropped initial.
+    pub prayer: bool,
     pub blocks: Vec<BlockView>,
 }
 
@@ -248,6 +250,7 @@ impl OfficeCore {
                 .map(|t| FeastTextView {
                     label: t.label,
                     common: t.common,
+                    prayer: t.prayer,
                     blocks: render_blocks::text_blocks(&t.text, t.prayer).into_iter().map(BlockView::from).collect(),
                 })
                 .collect(),

@@ -111,19 +111,20 @@ func ruledLine(_ x1: CGFloat, _ y1: CGFloat, _ x2: CGFloat, _ y2: CGFloat, _ w: 
 }
 
 /// The invitation's double frame (the web's `.pray-now` rules): the lining, then the frontal inside it, short of the corners.
-func invitationRules(_ ctx: GraphicsContext, _ size: CGSize, lining: Color, frontal: Color) {
+/// The feast page's standing is framed the same from its own seeds (61–68), its frontal a little fuller (`share`).
+func invitationRules(_ ctx: GraphicsContext, _ size: CGSize, lining: Color, frontal: Color, seed: UInt32 = 21, share: Double = 0.5) {
     let w = size.width
     let h = size.height
     let g: CGFloat = 3.5
-    ctx.fill(ruledLine(0, 0.5, w, 0.5, 1.25, seed: 21), with: .color(lining))
-    ctx.fill(ruledLine(0, h - 0.5, w, h - 0.5, 1.25, seed: 22), with: .color(lining))
-    ctx.fill(ruledLine(0.5, 0, 0.5, h, 1.25, seed: 23), with: .color(lining))
-    ctx.fill(ruledLine(w - 0.5, 0, w - 0.5, h, 1.25, seed: 24), with: .color(lining))
-    let day = frontal.opacity(0.5)
-    ctx.fill(ruledLine(g + 1.5, g, w - g - 1.5, g, 0.7, seed: 25), with: .color(day))
-    ctx.fill(ruledLine(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, seed: 26), with: .color(day))
-    ctx.fill(ruledLine(g, g + 1.5, g, h - g - 1.5, 0.7, seed: 27), with: .color(day))
-    ctx.fill(ruledLine(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, seed: 28), with: .color(day))
+    ctx.fill(ruledLine(0, 0.5, w, 0.5, 1.25, seed: seed), with: .color(lining))
+    ctx.fill(ruledLine(0, h - 0.5, w, h - 0.5, 1.25, seed: seed + 1), with: .color(lining))
+    ctx.fill(ruledLine(0.5, 0, 0.5, h, 1.25, seed: seed + 2), with: .color(lining))
+    ctx.fill(ruledLine(w - 0.5, 0, w - 0.5, h, 1.25, seed: seed + 3), with: .color(lining))
+    let day = frontal.opacity(share)
+    ctx.fill(ruledLine(g + 1.5, g, w - g - 1.5, g, 0.7, seed: seed + 4), with: .color(day))
+    ctx.fill(ruledLine(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, seed: seed + 5), with: .color(day))
+    ctx.fill(ruledLine(g, g + 1.5, g, h - g - 1.5, 0.7, seed: seed + 6), with: .color(day))
+    ctx.fill(ruledLine(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, seed: seed + 7), with: .color(day))
 }
 
 /**
