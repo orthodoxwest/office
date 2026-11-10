@@ -4306,16 +4306,37 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
    invitation is) first, then its texts, then the years ahead as a compact reference. On a wide
    screen the standing and the years make a rail beside the texts. */
 .feast-body { display: grid; gap: 1.4rem; grid-template-columns: minmax(0, 1fr); }
+/* The standing is drawn as home's invitation: the wash feathered by the
+   tablet mask so no edge of it lies on a rule, the lining's rule, and
+   inside it a finer rule in the colour of the day it is next kept (gold
+   on a white day, the lining thinned on a black one). */
 .feast-standing {
+  --frontal: var(--day-color, var(--lining));
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 0.5rem;
-  margin: 3px;
-  padding: 0.85rem 1rem 0.95rem 1.1rem;
-  border: 1px solid var(--lining);
-  outline: 1px solid var(--lining);
-  outline-offset: 3px;
-  /* Home's invitation wash: ochre by day, moonlit blue by night. */
+  padding: calc(0.85rem + 4px) calc(1rem + 4px) calc(0.95rem + 4px) calc(1.1rem + 4px);
+  border: 1px solid color-mix(in srgb, var(--lining) 78%, transparent);
+}
+.feast-standing.day-color-white { --frontal: var(--gold-line); }
+.feast-standing.day-color-black { --frontal: color-mix(in srgb, var(--lining) 80%, transparent); }
+.feast-standing::before,
+.feast-standing::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.feast-standing::before {
+  inset: 0;
+  z-index: -1;
   background: var(--tablet-wash);
+  -webkit-mask: url("tablet.png") center / 100% 100% no-repeat;
+  mask: url("tablet.png") center / 100% 100% no-repeat;
+}
+.feast-standing::after {
+  inset: 3px;
+  border: 1px solid color-mix(in srgb, var(--frontal) 50%, transparent);
 }
 .feast-standing p { margin: 0; }
 .feast-standing-label {
