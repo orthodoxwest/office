@@ -234,24 +234,16 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   // preference tap inside it does not.
   await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer").click();
+  // The wall in the gutter at the screen's foot, beside the arch.
+  await page.mouse.click(4, (await page.evaluate(() => innerHeight)) - 4);
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's colophon sits at the foot of the screen, as on desktop, with the
-  // card above it rather than the colophon floating under the card.
-  const [card, footer] = await Promise.all([
-    page.locator(".home").boundingBox(),
-    page.locator("footer").boundingBox(),
-  ]);
-  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
-  const foot = await page.evaluate(
-    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
-  );
-  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
+  // The phone's home is the arch alone: the colophon is the wide home's.
+  await expect(page.locator("footer")).toBeHidden();
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
@@ -976,7 +968,7 @@ function tileEdgePx(size) {
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false, date = testDate }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -985,7 +977,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     });
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(`/?date=${testDate}`);
+    await sheet.goto(`/?date=${date}`);
     const seen = await sheet.evaluate((asToday) => {
       // The fixed test day is historical, so the server adds the recovery
       // line that local today's home never carries; drop it to measure the
@@ -993,7 +985,6 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const tailpiece = getComputedStyle(footerElement, "::before");
       // The pointed head's halo is a filter on its outer courses.
       const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
@@ -1001,11 +992,8 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        // The footer closes on its painted tailpiece in both themes, with
-        // the same geometry, so the footer never moves when the theme
-        // changes.
-        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
-        tailpieceShown: tailpiece.display !== "none",
+        // The phone's home carries no colophon; the wide home keeps it.
+        footerShown: getComputedStyle(footerElement).display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -1023,8 +1011,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.tailpieceShown).toBe(true);
-  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(apse.footerShown).toBe(false);
   expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
   // The night carries no powdering: its field is the vault alone.
@@ -1040,15 +1027,18 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     expect(vaultPaints(nave.stars)).toBe(false);
     expect(powderPaints(nave.stars)).toBe(true);
     expect(nave.position).toBe("fixed");
-    expect(nave.tailpieceShown).toBe(true);
+    expect(nave.footerShown).toBe(false);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
 
   // On the day itself a phone's home fits its viewport whole, every hour in
-  // reach without scrolling, on a 375x667 screen as well.
-  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
-  expect(small.scrolls).toBe(false);
+  // reach without scrolling, on a 375x667 screen as well, even on the year's
+  // longest heading (Gaudete with three commemorations and abstinence).
+  for (const date of [testDate, "2026-12-13"]) {
+    const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true, date });
+    expect(small.scrolls).toBe(false);
+  }
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -4128,10 +4118,13 @@ test("home's versicle takes only the height its head has to spare", async ({ pag
       scrolls: document.documentElement.scrollHeight > innerHeight,
     }));
   };
-  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  // St Placidus's two lines fit a 412×735 phone without moving the hours, and
+  // so, with no colophon under the arch, do the Holy Angels' four.
   expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
-  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
-  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // On a narrow phone, where the day's lines wrap, they do not, so the head
+  // goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 320, 740)).toEqual({ shown: false, scrolls: false });
   expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
   // A 667px phone has none to spare.
   expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });

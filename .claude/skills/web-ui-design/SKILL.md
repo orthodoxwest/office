@@ -168,13 +168,17 @@ or impose a redesign on an unrelated change.
   off there, so it reads as one night. The desktop niche keeps its plaster
   head and the vault stays in the margins: the niche is a lit opening in
   the starred wall, and a sky inside it read as a sticker. It must still fit a
-  375×667 viewport whole, so its cost was paid by the header's margin, the
-  footer's padding and gap, and the page's bottom padding.
+  375×667 viewport whole. The phone's home (700px and below, all three
+  fronts) carries no colophon: the arch alone stands from the header to the
+  screen's foot, short of it by the 16px side gutter (`--home-card-least`
+  on the web, `PhoneHome`'s `foot` in the apps), so a long day's heading
+  has that height to grow into. With it, every day of a year fits 375×667
+  and 390×844 as today; the wide home keeps its colophon.
   Taller phones get a taller design, not the small one stretched: from
   800px and 880px high the head rises further to a sharper point
   (genarch's "tall" and "taller" shapes, 131° and 123°), the cross, date,
   feast and invitation grow, the hours' rows get a fixed taller minimum
-  (never stretched), and the card stands down to just above the footer,
+  (never stretched), and the card stands down to the screen's foot,
   the spare height going to the head, two parts above the day block to
   three below so the title reads with the cross. The larger type waits
   for 375px wide and 830px high; narrower or shorter phones need the
@@ -214,8 +218,9 @@ or impose a redesign on an unrelated change.
   theme (the prayer form's radios, Reminders' checkboxes): a ruled box
   filled with oak inside a margin of ground, with `appearance: auto`
   restored under forced colours.
-- Every page closes on the footer's tailpiece (`footer::before`, a
-  quatrefoil between two painted rules, in the lining): the same geometry
+- Every page but the phone's home closes on the footer's tailpiece
+  (`footer::before`, a quatrefoil between two painted rules, in the
+  lining): the same geometry
   in both themes, so the footer never moves with the theme, and set in rem
   so the wide hours' vault seam (`--apse-rest-seam`) holds. The hours'
   "Report a problem" line is footer matter under the tailpiece and the

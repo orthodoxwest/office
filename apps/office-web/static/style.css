@@ -928,30 +928,13 @@ summary:focus-visible {
     display: none;
   }
 
-  /* The colophon sits at the foot of the screen, as on desktop, rather than
-     floating under the card: home is a column at least a screen tall whose
-     main takes the slack. The wall between card and colophon is powdered by
-     day and starred by night, so it reads as wall, not as an empty band.
-     svh, so the foot holds still as the browser's toolbars come and go. */
-  .page-home {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-height: 100svh;
-  }
-
-  .page-home main {
-    flex: 1 0 auto;
-    min-height: 0;
-  }
-
+  /* The phone's home is the arch alone: no colophon under it (the wide home
+     keeps its own), so a long day's heading has the screen's foot to grow
+     into. The arch's foot stands off the screen's edge by the side gutter. */
   .page-home footer {
-    --footer-gap: 1.25rem;
-    padding-block: 0.6rem;
+    display: none;
   }
 
-  /* The phone's home fits its viewport with nothing to spare; the arched
-     head and the tailpiece are paid for here and in the header's margin. */
   body.page-home {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
@@ -7941,13 +7924,17 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    hours get rows a thumb can find without becoming slack. */
 @media (max-width: 700px) {
   /* Whatever height that leaves goes to the panel above the band, so the
-     card stands from the header to a little above the footer's tailpiece
-     (the header, footer and that air are about 10.9rem). A 667px screen
-     has none to give. */
+     card stands from the header to the screen's foot, short of it by the
+     side gutter (the header with its margin and that gutter are 5.35rem;
+     the phone's home has no colophon). */
+  .page-home {
+    --home-card-least: calc(100svh - 5.35rem - env(safe-area-inset-bottom));
+  }
+
   .page-home .home-hero {
     display: flex;
     flex-direction: column;
-    min-height: calc(100svh - 10.9rem);
+    min-height: var(--home-card-least);
     box-sizing: border-box;
   }
 
@@ -7976,7 +7963,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
         color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent),
         color-mix(in srgb, var(--arch-ground) var(--panel-plaster-veil), transparent)
       ),
-      url("plaster-panel.jpg") center top / max(100%, calc((100svh - 10.9rem) * 800 / 1063)) auto repeat-y,
+      url("plaster-panel.jpg") center top / max(100%, calc(var(--home-card-least) * 800 / 1063)) auto repeat-y,
       var(--panel-glow, linear-gradient(transparent, transparent)),
       var(--arch-ground);
     background-blend-mode: normal, soft-light, normal, normal;

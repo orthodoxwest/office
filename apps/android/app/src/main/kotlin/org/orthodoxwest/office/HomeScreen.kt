@@ -146,8 +146,9 @@ fun HomeScreen(
                     Footer(reserve = true)
                 }
             } else {
-                // A phone's card stands from the header to a little above the footer: whatever
-                // height home has beyond its own goes to the panel, above the band.
+                // A phone's card stands from the header to the screen's foot, short of it by the
+                // gutter: whatever height home has beyond its own goes to the panel, above the
+                // band. The phone's home has no colophon; the wide home keeps it.
                 val card = minOf(576.dp, screen) - Gutter * 2
                 PhoneHome(
                     tall,
@@ -160,7 +161,7 @@ fun HomeScreen(
                             onFeast = onFeast,
                         )
                     },
-                    footer = { Footer(gap = 29.6.dp, bottom = 25.6.dp, reserve = true) },
+                    foot = Gutter,
                 )
             }
         }
@@ -168,26 +169,22 @@ fun HomeScreen(
 }
 
 /**
- * A phone's home: the header, the card and the footer, at least `height` tall, the card given the
- * height left over as its least, so it stands from the header to a little above the footer.
+ * A phone's home: the header and the card, at least `height` tall, the card given the height left
+ * over above `foot` as its least, so it stands from the header to `foot` above the screen's foot.
  */
 @Composable
-private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composable () -> Unit, footer: @Composable () -> Unit) {
-    Layout(contents = listOf(header, card, footer), modifier = Modifier.fillMaxWidth()) { (headers, cards, footers), constraints ->
+private fun PhoneHome(height: Dp, header: @Composable () -> Unit, card: @Composable () -> Unit, foot: Dp) {
+    Layout(contents = listOf(header, card), modifier = Modifier.fillMaxWidth()) { (headers, cards), constraints ->
         val width = constraints.maxWidth
         val loose = Constraints(maxWidth = width)
         val top = headers.map { it.measure(loose) }
-        val foot = footers.map { it.measure(loose) }
-        val spare = (height.roundToPx() - top.sumOf { it.height } - foot.sumOf { it.height }).coerceAtLeast(0)
+        val below = foot.roundToPx()
+        val spare = (height.roundToPx() - top.sumOf { it.height } - below).coerceAtLeast(0)
         val middle = cards.map { it.measure(Constraints(maxWidth = width, minHeight = spare)) }
-        val above = top.sumOf { it.height } + middle.sumOf { it.height }
-        val total = maxOf(above + foot.sumOf { it.height }, height.roundToPx())
+        val total = maxOf(top.sumOf { it.height } + middle.sumOf { it.height } + below, height.roundToPx())
         layout(width, total) {
             var y = 0
             (top + middle).forEach { it.place((width - it.width) / 2, y); y += it.height }
-            // The colophon at the foot of the screen.
-            y = total - foot.sumOf { it.height }
-            foot.forEach { it.place((width - it.width) / 2, y); y += it.height }
         }
     }
 }

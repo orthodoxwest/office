@@ -60,8 +60,8 @@ struct HomeScreen: View {
                 if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
                 ScrollViewReader { scroll in
                 ScrollView {
-                    // Home is at least a screen tall, its colophon at the foot. The tiers go by
-                    // the height home has and the screen's width, in the web's pixels.
+                    // Home is at least a screen tall, a wide home's colophon at the foot. The
+                    // tiers go by the height home has and the screen's width, in the web's pixels.
                     let tall = geo.size.height
                     if let niche {
                         let card = nicheWidth(screen)
@@ -83,16 +83,16 @@ struct HomeScreen: View {
                         }
                         .frame(minHeight: tall)
                     } else {
-                        // A phone's card stands from the header to a little above the footer:
-                        // whatever height home has beyond its own goes to the panel, above the band.
+                        // A phone's card stands from the header to the screen's foot, short of it
+                        // by the gutter: whatever height home has beyond its own goes to the panel,
+                        // above the band. The phone's home has no colophon; the wide home keeps it.
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
-                        PhoneHome(height: tall) {
+                        PhoneHome(height: tall, foot: m.px(gutter)) {
                             SiteHeader()
                             Frontispiece(view: view, date: date, tier: HomeTier(desk: false, screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
-                            Footer(gap: 29.6, bottom: 25.6, reserve: true)
                         }
                     }
                 }
@@ -113,25 +113,25 @@ private struct NicheFrameKey: PreferenceKey {
 }
 
 /**
- * A phone's home: the header, the card and the footer, at least `height` tall, the card offered
- * the height left over as its least, so it stands from the header to a little above the footer.
+ * A phone's home: the header and the card, at least `height` tall, the card offered the height
+ * left over above `foot` as its least, so it stands from the header to `foot` above the screen's foot.
  */
 private struct PhoneHome: Layout {
     let height: CGFloat
+    let foot: CGFloat
 
-    private func heights(_ width: CGFloat, _ subviews: Subviews) -> (header: CGFloat, card: CGFloat, footer: CGFloat, spare: CGFloat) {
+    private func heights(_ width: CGFloat, _ subviews: Subviews) -> (header: CGFloat, card: CGFloat, spare: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let header = subviews[0].sizeThatFits(free).height
-        let footer = subviews[2].sizeThatFits(free).height
-        let spare = max(0, height - header - footer)
+        let spare = max(0, height - header - foot)
         let card = subviews[1].sizeThatFits(ProposedViewSize(width: width, height: spare)).height
-        return (header, card, footer, spare)
+        return (header, card, spare)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? 390
         let h = heights(width, subviews)
-        return CGSize(width: width, height: max(h.header + h.card + h.footer, height))
+        return CGSize(width: width, height: max(h.header + h.card + foot, height))
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -139,8 +139,6 @@ private struct PhoneHome: Layout {
         let free = ProposedViewSize(width: bounds.width, height: nil)
         subviews[0].place(at: bounds.origin, proposal: free)
         subviews[1].place(at: CGPoint(x: bounds.minX, y: bounds.minY + h.header), proposal: ProposedViewSize(width: bounds.width, height: h.spare))
-        // The colophon at the foot of the screen.
-        subviews[2].place(at: CGPoint(x: bounds.minX, y: bounds.maxY - h.footer), proposal: free)
     }
 }
 
