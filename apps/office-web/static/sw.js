@@ -307,6 +307,11 @@ function canonicalCacheKey(url) {
   if (CALENDAR_RE.test(path)) {
     return path;
   }
+  // A feast's page is one page whichever day or month of the ordo opened it
+  // (`?from=` names only the way back), so one copy serves them all offline.
+  if (path.indexOf("/feast/") === 0) {
+    return path;
+  }
   return path + url.search;
 }
 

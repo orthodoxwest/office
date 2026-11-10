@@ -7,10 +7,10 @@ use calendar::Date;
 use corpus::typography::typeset;
 use office::feast::{DayOf, FeastTexts, feast_texts};
 use presentation::feast::{
-    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, date_lead, feast_date,
-    feast_subtitle, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note, kept_by_all_note, monastic_note,
-    next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years, texts_keeping, texts_source,
-    whole_office_label,
+    FEAST_PAGE_YEARS, FEAST_WORDS, FeastEntry, Keeping, MAX_RESULTS, YEARS_HEADING, YearIndex, YearKeeping, back_to_day, back_to_ordo,
+    feast_date, feast_register, feast_subtitle, feast_titulus, is_entry, is_feast_id, is_usual, keeping_class, keeping_label, keeping_note,
+    kept_by_all_note, monastic_note, next_keeping, next_label, rank_tone, result_meta, results_count, row_date, search_years,
+    texts_keeping, texts_source, whole_office_label,
 };
 use presentation::long_date;
 
@@ -78,6 +78,8 @@ pub struct NextKeepingView {
     /// "Saturday, February 27, 2027".
     pub date_label: String,
     pub color: String,
+    /// The next keeping is today: its way on is "Today's hours".
+    pub today: bool,
 }
 
 /// One of the feast's texts, laid out as the hours lay out theirs.
@@ -87,6 +89,8 @@ pub struct FeastTextView {
     pub label: String,
     /// From the Common, marked so.
     pub common: bool,
+    /// A prayer (the collect), set flowing: the first opens on the hours' dropped initial.
+    pub prayer: bool,
     pub blocks: Vec<BlockView>,
 }
 
@@ -107,8 +111,12 @@ pub struct FeastPageView {
     pub subtitle: String,
     /// "February 27", or "A moveable feast".
     pub date: String,
-    /// "Kept on" or "Commemorated on", set before a date of its own; empty for a date that moves.
-    pub date_lead: String,
+    /// The titulus over the name: "February 27", or "Its date moves".
+    pub titulus: String,
+    /// "first", "feast" or "plain": how much the head carries (`presentation::feast::feast_register`).
+    pub register: String,
+    /// The feast's own colour.
+    pub color: String,
     /// For an observance kept by monastics and oblates only, what that means; else empty.
     pub monastic_note: String,
     /// For such an observance, the feast of the same saint everyone keeps, and "on March 21.".
@@ -136,6 +144,9 @@ pub struct FeastWordsView {
     pub whole_office: String,
     pub everyone_keeps: String,
     pub monastic_heading: String,
+    pub todays_hours: String,
+    /// The way back to today's page: "Today".
+    pub back_today: String,
 }
 
 #[uniffi::export]
@@ -151,7 +162,26 @@ pub fn feast_words() -> FeastWordsView {
         whole_office: w.whole_office.into(),
         everyone_keeps: w.everyone_keeps.into(),
         monastic_heading: w.monastic_heading.into(),
+        todays_hours: w.todays_hours.into(),
+        back_today: w.back_today.into(),
     }
+}
+
+/// The feast page's way back to the day's page it was opened from, as the web's: "Today" when
+/// `date` is `today`, else "November 10". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_day(date: CivilDate, today: CivilDate) -> String {
+    match (date.parse(), today.parse()) {
+        (Ok(d), Ok(t)) => back_to_day(d, t),
+        _ => FEAST_WORDS.find_title.into(),
+    }
+}
+
+/// The feast page's way back to the ordo's month it was opened from, any day of it: "Ordo,
+/// November 2026". A date that is no date gives the search's name.
+#[uniffi::export]
+pub fn feast_back_to_ordo(date: CivilDate) -> String {
+    date.parse().map(back_to_ordo).unwrap_or_else(|_| FEAST_WORDS.find_title.into())
 }
 
 /// `usual` leaves its status unsaid, as the feast page does for a year kept as the feast usually is.
@@ -215,17 +245,20 @@ impl OfficeCore {
             name: typeset(&entry.name),
             subtitle: typeset(&feast_subtitle(entry)),
             date: feast_date(entry),
-            date_lead: date_lead(entry).into(),
+            titulus: feast_titulus(entry),
+            register: feast_register(entry).into(),
+            color: entry.color.as_str().into(),
             monastic_note: if entry.monastic.is_some() { typeset(&monastic_note(entry)) } else { String::new() },
             kept_by_all: kept_by_all.map(|e| FeastLinkView { id: e.id.clone(), name: typeset(&e.name) }),
             kept_by_all_note: kept_by_all.map(kept_by_all_note).unwrap_or_default(),
             next: next.and_then(|k| {
                 let d = k.date?;
                 Some(NextKeepingView {
-                    label: next_label(&k.keeping).into(),
+                    label: next_label(&k.keeping, d == now).into(),
                     date: CivilDate::from(d),
                     date_label: long_date(d),
                     color: k.color.as_str().into(),
+                    today: d == now,
                 })
             }),
             years_heading: YEARS_HEADING.into(),
@@ -237,6 +270,7 @@ impl OfficeCore {
                 .map(|t| FeastTextView {
                     label: t.label,
                     common: t.common,
+                    prayer: t.prayer,
                     blocks: render_blocks::text_blocks(&t.text, t.prayer).into_iter().map(BlockView::from).collect(),
                 })
                 .collect(),

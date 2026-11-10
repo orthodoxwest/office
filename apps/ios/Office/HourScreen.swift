@@ -777,9 +777,10 @@ private struct HourTitle: View {
 /**
  * A line of the hour's date, day and season (`.hour-meta-part`), each kept whole: as many to a line
  * as fit, centred, so a line breaks between parts and never inside one, unless a part alone is
- * wider than the line, which then wraps within itself. `space` follows each part's separator.
+ * wider than the line, which then wraps within itself. `space` follows each part's separator. The feast
+ * page's rank line is set the same.
  */
-private struct MetaLine: Layout {
+struct MetaLine: Layout {
     let space: CGFloat
 
     private typealias Row = (items: [(index: Int, size: CGSize)], width: CGFloat, height: CGFloat)

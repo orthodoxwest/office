@@ -189,7 +189,7 @@ private struct EntryPage: View {
         case let .year(y)?: YearPage(year: y)
         case .reminders?: RemindersPage()
         case let .find(q)?: FindPage(query: q)
-        case let .feast(id)?: FeastPage(id: id)
+        case let .feast(id)?: FeastPage(id: id, entry: entry)
         // Gone from the way back, while the stack lets it go.
         case nil: Color.clear
         }

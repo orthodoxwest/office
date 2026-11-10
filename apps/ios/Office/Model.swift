@@ -318,6 +318,27 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /**
+     * The name of a feast page's way back to the page under its visit `entry` (the web's
+     * `back_link`): "Today" or "November 10" for a day's page, "Ordo, November 2026" for the
+     * ordo's month, or nil for the search or anything else, whose way back is the search.
+     */
+    func feastBack(_ entry: Int) -> String? {
+        guard let at = path.firstIndex(where: { $0.id == entry }) else { return nil }
+        let under: Page = at == 0 ? .home(root) : path[at - 1].page
+        switch under {
+        case let .home(d): return feastBackToDay(date: d, today: today)
+        case let .ordo(y, m, _): return feastBackToOrdo(date: CivilDate(year: Int32(y), month: Int32(m), day: 1))
+        default: return nil
+        }
+    }
+
+    /// Back from the visit `entry` to the page under it, as the edge swipe goes.
+    func back(from entry: Int) {
+        guard path.last?.id == entry else { return }
+        path.removeLast()
+    }
+
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil

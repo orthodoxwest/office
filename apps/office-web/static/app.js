@@ -2848,3 +2848,118 @@ function rule(x1, y1, x2, y2, w, seed) {
   else window.addEventListener("resize", draw);
   if (document.fonts) document.fonts.ready.then(draw);
 })();
+
+// The feast page (style.css "The feast page"): ruled with home's pen. The
+// head's course of the lining, broken by the cross (and on a first-class
+// feast doubled by a finer rule in its colour); the standing's double frame,
+// as home's invitation; one stroke under each section's heading; the years
+// ruled above, below and between, as home's hours; and on a first-class feast
+// from 760px an upright course between the texts and the rail. Without
+// script each is a CSS border.
+(function () {
+  var page = document.querySelector(".page-feast .feast-page");
+  if (!page) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var head = page.querySelector(".feast-head");
+  var standing = page.querySelector(".feast-standing");
+  var body = page.querySelector(".feast-body");
+  var first = head && head.classList.contains("is-first");
+  var plain = head && head.classList.contains("is-plain");
+
+  function layer(host) {
+    var svg = host.querySelector(":scope > svg.feast-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "feast-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      host.appendChild(svg);
+      host.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    return svg;
+  }
+
+  function stroke(svg, cls, d) {
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("class", cls);
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+  }
+
+  function ruleAll() {
+    var w, h, svg;
+    if (head && !plain) {
+      w = head.offsetWidth;
+      svg = layer(head);
+      var mid = w / 2, gap = first ? 27 : 24;
+      stroke(svg, "r-lining", rule(0, 0.5, mid - gap, 0.5, 1.25, 51));
+      stroke(svg, "r-lining", rule(mid + gap, 0.5, w, 0.5, 1.25, 52));
+      if (first) {
+        stroke(svg, "r-day", rule(1.5, 4, mid - gap - 3, 4, 0.8, 53));
+        stroke(svg, "r-day", rule(mid + gap + 3, 4, w - 1.5, 4, 0.8, 54));
+      }
+    }
+    if (standing) {
+      var g = 3.5;
+      w = standing.offsetWidth;
+      h = standing.offsetHeight;
+      svg = layer(standing);
+      stroke(svg, "r-lining", rule(0, 0.5, w, 0.5, 1.25, 61));
+      stroke(svg, "r-lining", rule(0, h - 0.5, w, h - 0.5, 1.25, 62));
+      stroke(svg, "r-lining", rule(0.5, 0, 0.5, h, 1.25, 63));
+      stroke(svg, "r-lining", rule(w - 0.5, 0, w - 0.5, h, 1.25, 64));
+      // The frontal, finer, stopping short of the corners.
+      stroke(svg, "r-day", rule(g + 1.5, g, w - g - 1.5, g, 0.7, 65));
+      stroke(svg, "r-day", rule(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 66));
+      stroke(svg, "r-day", rule(g, g + 1.5, g, h - g - 1.5, 0.7, 67));
+      stroke(svg, "r-day", rule(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 68));
+      var next = standing.classList.contains("is-monastic") && standing.querySelector(".feast-next");
+      if (next) {
+        svg = layer(next);
+        stroke(svg, "r-inner", rule(0, 0.5, next.offsetWidth, 0.5, 0.9, 69));
+      }
+    }
+    page.querySelectorAll(".feast-section > h2").forEach(function (h2, i) {
+      svg = layer(h2);
+      stroke(svg, "r-frame", rule(0, h2.offsetHeight - 0.5, h2.offsetWidth, h2.offsetHeight - 0.5, 1.3, 71 + i));
+    });
+    var list = page.querySelector(".feast-years .find-years");
+    if (list && list.querySelector(":scope > li")) {
+      svg = layer(list);
+      var top = list.getBoundingClientRect().top;
+      w = list.offsetWidth;
+      var rows = Array.prototype.map.call(list.querySelectorAll(":scope > li"), function (li) { return li.getBoundingClientRect(); });
+      rows.forEach(function (r, i) {
+        stroke(svg, i ? "r-inner" : "r-frame", rule(0, r.top - top + 0.5, w, r.top - top + 0.5, i ? 0.9 : 1.3, 81 + i));
+      });
+      var last = rows[rows.length - 1];
+      stroke(svg, "r-frame", rule(0, last.bottom - top - 0.5, w, last.bottom - top - 0.5, 1.3, 81 + rows.length));
+    }
+    var texts = body && body.querySelector(".feast-texts");
+    if (first && texts && standing && body) {
+      svg = layer(body);
+      if (window.matchMedia("(min-width: 760px)").matches) {
+        var x = (texts.offsetLeft + texts.offsetWidth + standing.offsetLeft) / 2;
+        h = body.offsetHeight;
+        stroke(svg, "r-lining", rule(x, 4, x, h - 4, 1.25, 57));
+        stroke(svg, "r-day", rule(x + 3.5, 6, x + 3.5, h - 6, 0.8, 58));
+      }
+    }
+  }
+
+  ruleAll();
+  // Redrawn whenever the page's box changes: a new width, and the reader's
+  // text size, which moves every line without touching the window.
+  var size = page.offsetWidth + "x" + page.offsetHeight;
+  function remeasure() {
+    var now = page.offsetWidth + "x" + page.offsetHeight;
+    if (now !== size) {
+      size = now;
+      ruleAll();
+    }
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(page);
+  else window.addEventListener("resize", remeasure);
+  if (document.fonts) document.fonts.ready.then(ruleAll);
+})();
