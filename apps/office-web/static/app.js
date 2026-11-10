@@ -2232,8 +2232,9 @@ function rule(x1, y1, x2, y2, w, seed) {
       link.setAttribute("aria-current", "time");
       if (!state) {
         state = document.createElement("span");
-        // sr-only to match the server-rendered marker in home.html: the tinted
-        // cell and the "Pray {hour}" invitation carry "now" visually.
+        // sr-only to match the server-rendered marker in home.html: the pool
+        // of light under the hour and the "Pray {hour}" invitation carry
+        // "now" visually.
         state.className = "home-hour-link-state sr-only";
         state.textContent = "Now";
         link.appendChild(state);

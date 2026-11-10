@@ -172,7 +172,7 @@ or impose a redesign on an unrelated change.
   footer's padding and gap, and the page's bottom padding.
   Taller phones get a taller design, not the small one stretched: from
   800px and 880px high the head rises further to a sharper point
-  (genarch's "tall" and "taller" shapes, 128° and 123°), the cross, date,
+  (genarch's "tall" and "taller" shapes, 131° and 123°), the cross, date,
   feast and invitation grow, the hours' rows get a fixed taller minimum
   (never stretched), and the card stands down to just above the footer,
   the spare height going to the head, two parts above the day block to

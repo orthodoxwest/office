@@ -297,14 +297,10 @@ private struct TimeSheet: View {
     }
 }
 
-/**
- * A group of the page's controls under its name, set as home's "Pray the hours" band: the name
- * in small caps between gilt lozenges, a gold fillet above and below, and the rows on the page
- * itself beneath. A screen reader takes the name as the group's heading.
- */
 /// A group of the page's controls under its name, ruled as home's hours are and as the web's
 /// Reminders fieldsets: the name in the titulus's small caps over a rule of the lining, the rows
-/// on the page itself, parted by hairlines, and a closing rule.
+/// on the page itself, parted by hairlines, and a closing rule. A screen reader takes the name as
+/// the group's heading.
 private struct Band<Content: View>: View {
     let name: String
     @ViewBuilder let content: Content
