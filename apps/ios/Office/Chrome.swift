@@ -354,7 +354,17 @@ struct MenuPanel: View {
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
-        .background(p.surface)
+        .background {
+            // By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster),
+            // not a flat slab of the surface: the web's `.site-menu-panel` by night.
+            if p.dark, let plaster = UIImage(named: p.panel) {
+                Image(uiImage: plaster).resizable().scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .clipped()
+            } else {
+                p.surface
+            }
+        }
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         // The panel's top edge is the painted line (`--ornament-line`).
         .overlay(alignment: .top) { Rectangle().fill(o.line).frame(height: 2) }

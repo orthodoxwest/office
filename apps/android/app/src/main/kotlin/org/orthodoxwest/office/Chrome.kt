@@ -65,25 +65,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -98,7 +100,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -445,6 +449,7 @@ fun MenuPanel(
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
+    val plaster = ImageBitmap.imageResource(p.panel)
     // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
     // window until it has gone.
     val shown = remember { MutableTransitionState(false) }
@@ -471,6 +476,7 @@ fun MenuPanel(
                     .dropShadow(RectangleShape, Shadow(radius = 16.dp, color = Color(36, 28, 23).copy(alpha = 0.09f), offset = DpOffset(0.dp, 7.2.dp)))
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
+                    .then(if (p.dark) Modifier.drawBehind { nightPlaster(plaster) } else Modifier)
                     .border(1.dp, p.border)
                     // The panel's top edge is the painted line (`--ornament-line`), with the surface's
                     // edge catching the light just inside it (`inset 0 1px 0 var(--surface-edge)`).
@@ -566,6 +572,18 @@ fun MenuPanel(
 /** A button's name in its hint, upright in small caps as the button is in capitals (the web's `.pref-name`). */
 private fun AnnotatedString.Builder.prefName(name: String) {
     withStyle(SpanStyle(fontStyle = FontStyle.Normal, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.05.em)) { append(name) }
+}
+
+/**
+ * By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster, its ground,
+ * limewash and veil), not a flat slab of the surface: the web's `.site-menu-panel` by night. The
+ * plaster is fitted to the panel's width from the top, and covers it.
+ */
+private fun DrawScope.nightPlaster(plaster: ImageBitmap) {
+    val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
+    val w = kotlin.math.ceil(plaster.width * scale).toInt()
+    val h = kotlin.math.ceil(plaster.height * scale).toInt()
+    drawImage(plaster, dstOffset = IntOffset((size.width.toInt() - w) / 2, 0), dstSize = IntSize(w, h))
 }
 
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
