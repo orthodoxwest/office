@@ -56,7 +56,8 @@ struct RemindersScreen: View {
                     }
                     .padding(.top, m.px(28))
                     Band(name: "Days") {
-                        FlowRow(spacing: m.px(18)) {
+                        // One week to a line, as the month grid sets its week: each day's name over its box.
+                        HStack(spacing: 0) {
                             ForEach(reminderWeek, id: \.self) { d in
                                 let on = settings.days.contains(d)
                                 Button {
@@ -65,11 +66,12 @@ struct RemindersScreen: View {
                                     if on { s.days.remove(d) } else { s.days.insert(d) }
                                     change(s)
                                 } label: {
-                                    HStack(spacing: m.px(8)) {
+                                    VStack(spacing: m.px(4)) {
+                                        Text(DateFormatter.english.shortWeekdaySymbols[d - 1]).type(text.sized(15.2, line: 20)).foregroundStyle(p.text)
                                         Tick(checked: on)
-                                        Text(DateFormatter.english.shortWeekdaySymbols[d - 1]).type(text).foregroundStyle(p.text)
                                     }
-                                    .frame(minHeight: 44)
+                                    .padding(.top, m.px(6)).padding(.bottom, m.px(8))
+                                    .frame(maxWidth: .infinity, minHeight: 44)
                                 }
                                 .buttonStyle(Quiet())
                                 .accessibilityLabel(DateFormatter.english.weekdaySymbols[d - 1])
@@ -91,20 +93,20 @@ struct RemindersScreen: View {
                             HStack(spacing: 0) {
                                 Text(reminderLeads.first { $0.minutes == settings.lead }?.label ?? "").type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
                                 Spacer(minLength: 8)
-                                Caret(open: false, color: p.text)
+                                Caret(open: false, color: p.goldLine, share: 1)
                             }
-                            .padding(.horizontal, m.px(12))
-                            .padding(.vertical, m.px(8))
-                            .frame(width: m.px(220))
-                            .background(p.bg)
-                            .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+                            // A worded line with the app's caret, not a boxed field.
+                            .padding(.leading, m.px(2)).padding(.trailing, m.px(4))
+                            .frame(maxWidth: .infinity, minHeight: 46)
+                            .contentShape(Rectangle())
                         }
                         .accessibilityLabel("Remind me")
                         .accessibilityValue(reminderLeads.first { $0.minutes == settings.lead }?.label ?? "")
                     }
                     .padding(.top, m.px(28))
-                    DoubleRule().padding(.top, m.px(28))
-                    Text("On this phone").type(text.sized(22, line: 28)).foregroundStyle(p.text).padding(.top, m.px(16)).accessibilityAddTraits(.isHeader)
+                    // The web's "Your calendar link": a titulus over the tablet, no rule between.
+                    Text("On this phone").type(TextStyle(size: 13.12, line: 21, tracking: 1.57, smallCaps: true)).foregroundStyle(p.titulus)
+                        .frame(maxWidth: .infinity).padding(.top, m.px(32)).accessibilityAddTraits(.isHeader)
                     phoneSwitch
                 }
                 .measured(m)
@@ -130,7 +132,8 @@ struct RemindersScreen: View {
     @ViewBuilder private var phoneSwitch: some View {
         if settings.on {
             let idle = !settings.hours.contains(where: \.chosen) || settings.days.isEmpty
-            Text(idle ? "Reminders are on, but no hour or day is chosen." : "Reminders are on.").type(Scale.body).foregroundStyle(p.muted).padding(.top, m.px(8))
+            Text(idle ? "Reminders are on, but no hour or day is chosen." : "Reminders are on.").type(Scale.body).foregroundStyle(p.muted)
+                .multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, m.px(8))
             Button { turn(on: false) } label: {
                 Text("Turn off reminders").type(Scale.body.sized(16, line: 22)).foregroundStyle(p.accent)
                     .padding(.horizontal, m.px(16)).frame(minHeight: 44)
@@ -175,17 +178,23 @@ struct RemindersScreen: View {
                 } else {
                     let label = clock(h.hourOfDay, h.minute)
                     if h.chosen {
+                        // The accent's figures on the chosen control's gold rule, with the caret that
+                        // says the time can be changed (the web's time field).
                         Button { editing = h } label: {
-                            Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.text)
-                                .padding(.horizontal, m.px(10)).padding(.vertical, m.px(5))
-                                .background(p.bg)
-                                .overlay(Rectangle().stroke(p.border, lineWidth: 1))
+                            HStack(spacing: 0) {
+                                Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.accent)
+                                Caret(open: false, color: p.goldLine, share: 1)
+                            }
+                            .padding(.horizontal, m.px(2)).padding(.vertical, m.px(3))
+                            .overlay(alignment: .bottom) { Rectangle().fill(p.goldLine).frame(height: 1) }
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(Quiet())
                         .accessibilityLabel("\(h.name) at \(label)")
                         .accessibilityHint("Changes the time")
                     } else {
-                        Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.muted.opacity(0.6)).padding(.horizontal, m.px(11))
+                        Text(label).type(TextStyle(size: 20, line: 32, lining: true)).foregroundStyle(p.muted.opacity(0.55)).padding(.trailing, m.px(15))
                             .accessibilityHidden(true)
                     }
                 }
@@ -293,6 +302,9 @@ private struct TimeSheet: View {
  * in small caps between gilt lozenges, a gold fillet above and below, and the rows on the page
  * itself beneath. A screen reader takes the name as the group's heading.
  */
+/// A group of the page's controls under its name, ruled as home's hours are and as the web's
+/// Reminders fieldsets: the name in the titulus's small caps over a rule of the lining, the rows
+/// on the page itself, parted by hairlines, and a closing rule.
 private struct Band<Content: View>: View {
     let name: String
     @ViewBuilder let content: Content
@@ -300,19 +312,17 @@ private struct Band<Content: View>: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
+        let rule = p.lining.opacity(0.6)
         VStack(alignment: .leading, spacing: 0) {
-            // Home's band is gilt on its green earth; on the bare page the gold reads where the gilt would fade.
-            Lozenged(text: name, style: TextStyle(size: 11, line: 17.6, tracking: 1.76, smallCaps: true), ink: p.gold)
-                .padding(.vertical, m.px(7))
-                .frame(maxWidth: .infinity)
-                .overlay(alignment: .top) { Rectangle().fill(p.goldLine).frame(height: 1) }
-                .overlay(alignment: .bottom) { Rectangle().fill(p.goldLine).frame(height: 1) }
-                .accessibilityElement(children: .combine)
+            Text(name).type(TextStyle(size: 13.12, line: 21, tracking: 1.57, smallCaps: true)).foregroundStyle(p.titulus)
+                .padding(.bottom, m.px(5))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .bottom) { Rectangle().fill(rule).frame(height: 1) }
                 .accessibilityAddTraits(.isHeader)
                 .accessibilitySortPriority(1)
             VStack(alignment: .leading, spacing: 0) { content }
-                .padding(.top, m.px(6))
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .bottom) { Rectangle().fill(rule).frame(height: 1) }
         }
         .accessibilityElement(children: .contain)
     }
@@ -358,7 +368,6 @@ private struct TimesGroup: View {
                 Note(text: "Allow location to time reminders by the sun.", action: "Open settings", perform: allowLocation)
                     .padding(.bottom, m.px(6))
             }
-            Hairline(color: p.border)
         }
     }
 
@@ -489,46 +498,5 @@ private struct Note: View {
         .padding(.leading, m.px(12))
         .overlay(alignment: .leading) { Rectangle().fill(p.goldLine).frame(width: 1) }
         .padding(.top, m.px(16))
-    }
-}
-
-/// Items set in lines, as many to a line as fit, as a flex row wraps.
-struct FlowRow: Layout {
-    var spacing: CGFloat
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let rows = arrange(proposal.width ?? .infinity, subviews)
-        let width = rows.map { $0.width }.max() ?? 0
-        return CGSize(width: proposal.width ?? width, height: rows.reduce(0) { $0 + $1.height })
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var y = bounds.minY
-        for row in arrange(bounds.width, subviews) {
-            var x = bounds.minX
-            for i in row.items {
-                let size = subviews[i].sizeThatFits(.unspecified)
-                subviews[i].place(at: CGPoint(x: x, y: y + (row.height - size.height) / 2), proposal: .unspecified)
-                x += size.width + spacing
-            }
-            y += row.height
-        }
-    }
-
-    private func arrange(_ width: CGFloat, _ subviews: Subviews) -> [(items: [Int], width: CGFloat, height: CGFloat)] {
-        var rows: [(items: [Int], width: CGFloat, height: CGFloat)] = []
-        var current: (items: [Int], width: CGFloat, height: CGFloat) = ([], 0, 0)
-        for (i, view) in subviews.enumerated() {
-            let size = view.sizeThatFits(.unspecified)
-            let next = current.items.isEmpty ? size.width : current.width + spacing + size.width
-            if next > width && !current.items.isEmpty {
-                rows.append(current)
-                current = ([i], size.width, size.height)
-            } else {
-                current = (current.items + [i], next, max(current.height, size.height))
-            }
-        }
-        if !current.items.isEmpty { rows.append(current) }
-        return rows
     }
 }
