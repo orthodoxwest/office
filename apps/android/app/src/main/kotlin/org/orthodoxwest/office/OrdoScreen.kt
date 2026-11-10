@@ -530,7 +530,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             buttons()
             if (isToday) {
                 Spacer(Modifier.weight(1f))
-                Text("Today", Modifier.padding(end = 8.dp).clearAndSetSemantics {}, style = TodayNote)
+                Text("Today", Modifier.padding(end = 8.dp).semantics { hideFromAccessibility() }, style = TodayNote)
             }
         }
         unfolded()
@@ -667,7 +667,7 @@ private fun DayTableRow(
             if (isToday && margin) {
                 Text(
                     "Today",
-                    Modifier.clearAndSetSemantics {}.layout { m, c ->
+                    Modifier.semantics { hideFromAccessibility() }.layout { m, c ->
                         val note = m.measure(c.copy(minWidth = 0, maxWidth = Constraints.Infinity, minHeight = 0))
                         layout(0, 0) { note.place(-note.width - 12.8.dp.roundToPx(), 1.6.dp.roundToPx()) }
                     },
