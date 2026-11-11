@@ -163,6 +163,13 @@ impl Server {
         }
     }
 
+    /// Composes `year`'s calendar months ahead of the first request for them.
+    fn warm_year(&self, year: i32) {
+        if let Err(e) = self.cache.months(year, &self.engine) {
+            eprintln!("warn: pre-warming cache for {year}: {e}");
+        }
+    }
+
     /// The build stamp on the service worker and its page cache, computed
     /// on first use. [`run`] computes it in the background as soon as the
     /// server listens; a request that comes first waits for it.
@@ -233,24 +240,31 @@ pub fn listen(addr: &str) -> Result<std::net::TcpListener, String> {
     listener.map_err(|e| format!("listen tcp {addr}: {e}"))
 }
 
-/// Serves on `listener` (from [`listen`]) until the process ends. The build
-/// version is hashed in the background, then the current year's calendar
-/// page and the next year's are composed so the first visit to either is
-/// fast: composing a year takes about half a second, and the next year is
-/// one tap from the ordo and enters the offline precache each December.
+/// How long after starting the server waits to compose next year's calendar,
+/// so that a machine fresh from a deploy spends its CPU on the readers in front
+/// of it first.
+const NEXT_YEAR_WARM_DELAY: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// Serves on `listener` (from [`listen`]) until the process ends. In the
+/// background the build version is hashed and the current year's calendar
+/// page composed at once, so the first visit to it is fast (a year takes
+/// about half a second, nearly all of it composing each day's Lauds, Prime
+/// and Vespers for the ordo's digest). Next year's follows a minute later: it
+/// is one tap from the ordo and enters the offline precache each December.
 pub fn run(server: Server, listener: std::net::TcpListener) -> Result<(), String> {
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().map_err(|e| e.to_string())?;
     runtime.block_on(async {
         let server = Arc::new(server);
+        let year = Server::local_year();
         let warm = Arc::clone(&server);
         tokio::task::spawn_blocking(move || {
             warm.version();
-            let year = Server::local_year();
-            for year in [year, year + 1] {
-                if let Err(e) = warm.cache.months(year, &warm.engine) {
-                    eprintln!("warn: pre-warming cache for {year}: {e}");
-                }
-            }
+            warm.warm_year(year);
+        });
+        let warm = Arc::clone(&server);
+        tokio::spawn(async move {
+            tokio::time::sleep(NEXT_YEAR_WARM_DELAY).await;
+            let _ = tokio::task::spawn_blocking(move || warm.warm_year(year + 1)).await;
         });
         listener.set_nonblocking(true).map_err(|e| format!("listen: {e}"))?;
         let listener = tokio::net::TcpListener::from_std(listener).map_err(|e| format!("listen: {e}"))?;

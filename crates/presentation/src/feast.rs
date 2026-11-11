@@ -56,6 +56,35 @@ pub struct FeastEntry {
     pub monastic: Option<MonasticNote>,
     /// Normalized names it answers to: its own, then its aliases.
     keys: Vec<String>,
+    /// Its name, and the name before its titles ("St Lawrence"), as a printed commemoration is
+    /// matched: worked out once, since the ordo looks up every day's commemorations by them.
+    commemoration_key: String,
+    short_key: String,
+}
+
+impl FeastEntry {
+    fn new(
+        id: &str,
+        name: &str,
+        rank: Rank,
+        color: Color,
+        category: Option<Category>,
+        fixed: Option<MonthDay>,
+        monastic: Option<MonasticNote>,
+    ) -> FeastEntry {
+        FeastEntry {
+            id: id.to_string(),
+            name: name.to_string(),
+            rank,
+            color,
+            category,
+            fixed,
+            monastic,
+            keys: vec![normalize(name)],
+            commemoration_key: normalize_commemoration_name(name),
+            short_key: normalize_commemoration_name(name.split(", ").next().unwrap_or_default()),
+        }
+    }
 }
 
 /// Every feast and observance a reader can look up, in calendar order.
@@ -72,16 +101,7 @@ impl FeastIndex {
     pub fn new(data: &CalendarData) -> FeastIndex {
         let mut entries: Vec<FeastEntry> = Vec::new();
         for f in &data.feasts {
-            let entry = FeastEntry {
-                id: f.id.clone(),
-                name: f.name.clone(),
-                rank: f.rank,
-                color: f.color,
-                category: f.category,
-                fixed: f.fixed,
-                monastic: None,
-                keys: vec![normalize(&f.name)],
-            };
+            let entry = FeastEntry::new(&f.id, &f.name, f.rank, f.color, f.category, f.fixed, None);
             match entries.iter().position(|e| duplicates(e, &entry)) {
                 Some(i) if entry.rank.weight() > entries[i].rank.weight() => entries[i] = entry,
                 Some(_) => {}
@@ -89,16 +109,8 @@ impl FeastIndex {
             }
         }
         for m in &data.monastic {
-            entries.push(FeastEntry {
-                id: m.id.clone(),
-                name: m.name.clone(),
-                rank: m.rank,
-                color: Color::White,
-                category: None,
-                fixed: Some(m.fixed),
-                monastic: Some(MonasticNote { office: m.office.clone().unwrap_or_default() }),
-                keys: vec![normalize(&m.name)],
-            });
+            let monastic = MonasticNote { office: m.office.clone().unwrap_or_default() };
+            entries.push(FeastEntry::new(&m.id, &m.name, m.rank, Color::White, None, Some(m.fixed), Some(monastic)));
         }
         for (alias, id) in ALIASES {
             if let Some(e) = entries.iter_mut().find(|e| e.id == id) {
@@ -126,7 +138,7 @@ impl FeastIndex {
     /// is named so.
     pub fn by_name(&self, name: &str, near: Date) -> Option<&FeastEntry> {
         let key = normalize_commemoration_name(name);
-        self.nearest(near, |e| !key.is_empty() && normalize_commemoration_name(&e.name) == key)
+        self.nearest(near, |e| !key.is_empty() && e.commemoration_key == key)
     }
 
     /// The feast a day keeps or commemorates under `id` and `name`: its own entry, else the
@@ -145,8 +157,7 @@ impl FeastIndex {
     /// The feast a vigil names without its titles ("St Lawrence" for "St Lawrence, Martyr").
     fn vigils_feast(&self, short: &str, near: Date) -> Option<&FeastEntry> {
         let key = normalize_commemoration_name(short);
-        let first = |e: &FeastEntry| normalize_commemoration_name(e.name.split(", ").next().unwrap_or_default());
-        self.nearest(near, |e| !key.is_empty() && e.fixed.is_some() && first(e) == key)
+        self.nearest(near, |e| !key.is_empty() && e.fixed.is_some() && e.short_key == key)
     }
 
     /// The everyone-kept entry nearest `near`, within [`NAME_REACH`] days, of those `named`.
