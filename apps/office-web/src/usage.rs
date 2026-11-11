@@ -289,23 +289,20 @@ fn advertise(resp: &mut Response<Body>, canonical: Option<&str>) {
     }
 }
 
-/// The cookie holding the reporting day a browser was first counted. The page's own mark
+/// Two flags, never a date, keep a browser's first day where Safari keeps it. The page's own mark
 /// (`office-first-counted`) lives in script storage, which Safari erases after seven days without
-/// a visit; this one is set by the server, which Safari keeps, and renewed with the same day on
-/// every beacon so it outlasts its 400 days for a reader who keeps coming. A browser that brings a day before today is returning whatever its
-/// page says. The day is read and dropped, never stored, so nothing links one day to another.
-const SINCE_COOKIE: &str = "office-since";
-
-/// Whether `value` is a reporting day as the since cookie writes it ("2026-11-11").
-fn valid_day(value: &str) -> bool {
-    let b = value.as_bytes();
-    b.len() == 10 && b[4] == b'-' && b[7] == b'-' && b.iter().enumerate().all(|(i, c)| i == 4 || i == 7 || c.is_ascii_digit())
-}
+/// a visit; cookies the server sets survive that. `office-seen` says the server has counted this
+/// browser before (renewed on every beacon, so it outlasts its 400 days for a reader who keeps
+/// coming); `office-new`, set beside it the first time, lapses at the reporting day's midnight. A
+/// browser seen before and no longer new is returning whatever its page says. Each holds only
+/// "1", the same for every browser, so nothing sent links one day to another.
+const SEEN_COOKIE: &str = "office-seen";
+const NEW_COOKIE: &str = "office-new";
 
 /// A beacon's dimensions with its first visit made returning when the browser was counted on an
-/// earlier reporting day than `today`, by its since cookie.
-fn settle_visit(mut dimensions: Vec<String>, since: Option<&str>, today: &str) -> Vec<String> {
-    if since.is_some_and(|s| s < today) {
+/// earlier reporting day: seen before, and its new flag lapsed.
+fn settle_visit(mut dimensions: Vec<String>, seen: bool, new: bool) -> Vec<String> {
+    if seen && !new {
         for d in &mut dimensions {
             if d == "visit:first" {
                 *d = "visit:returning".to_string();
@@ -313,6 +310,13 @@ fn settle_visit(mut dimensions: Vec<String>, since: Option<&str>, today: &str) -
         }
     }
     dimensions
+}
+
+/// Seconds from `now` to the next reporting day's start, New York's midnight.
+fn until_midnight(now: jiff::Timestamp) -> i64 {
+    let z = now.to_zoned(eastern());
+    let next = z.date().tomorrow().ok().and_then(|d| d.to_zoned(eastern()).ok());
+    next.map_or(86_400, |n| (n.timestamp().as_second() - now.as_second()).max(1))
 }
 
 /// `POST /api/usage`: one page view's beacon. `canonical` is the site's canonical host, if set.
@@ -370,15 +374,19 @@ fn event_at(
     const COOKIE: &str = "office-usage";
     let mut resp = response(StatusCode::NO_CONTENT, Body::empty());
     let secure = if header_value(headers, "x-forwarded-proto") == "https" { "; Secure" } else { "" };
-    let today = presentation::date_slug(eastern_day(now));
-    let since = cookie(headers, SINCE_COOKIE).filter(|d| valid_day(d));
-    let dimensions = settle_visit(event.dimensions, since.as_deref(), &today);
+    let seen = cookie(headers, SEEN_COOKIE).as_deref() == Some("1");
+    let new = cookie(headers, NEW_COOKIE).as_deref() == Some("1");
+    let dimensions = settle_visit(event.dimensions, seen, new);
     // Only a browser sends an Origin; the apps keep their own first day and take no cookies.
     if !origin.is_empty() {
-        let day = since.as_deref().unwrap_or(&today);
-        let value = format!("{SINCE_COOKIE}={day}; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict");
-        if let Ok(v) = header::HeaderValue::from_str(&value) {
-            resp.headers_mut().append(header::SET_COOKIE, v);
+        let mut flags = vec![format!("{SEEN_COOKIE}=1; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict")];
+        if !seen {
+            flags.push(format!("{NEW_COOKIE}=1; Path=/api/usage; Max-Age={}; HttpOnly{secure}; SameSite=Strict", until_midnight(now)));
+        }
+        for flag in flags {
+            if let Ok(v) = header::HeaderValue::from_str(&flag) {
+                resp.headers_mut().append(header::SET_COOKIE, v);
+            }
         }
     }
     let id = match cookie(headers, COOKIE).filter(|id| valid_browser_id(id)) {
@@ -690,12 +698,13 @@ mod tests {
     }
 
     // Safari erases a page's storage after seven days without a visit, so a weekly reader's page
-    // says it is new again; the server's own cookie remembers the day it was first counted.
+    // says it is new again; two server-set flags remember that the browser was counted before.
     #[test]
     fn a_browser_counted_on_an_earlier_day_is_returning_whatever_its_page_says() {
-        let db = TempDb::new("since");
+        let db = TempDb::new("seen");
         let store = db.open();
-        let now = eastern_at(2026, 11, 11, 9, 0);
+        // 9 p.m. in New York: three hours to the reporting day's end.
+        let now = eastern_at(2026, 11, 11, 21, 0);
         let post = |cookies: &str, body: &str| {
             let mut headers = HeaderMap::new();
             headers.insert("x-office-usage", "1".parse().unwrap());
@@ -707,29 +716,27 @@ mod tests {
             }
             event_at(now, Some(&store), &Method::POST, &headers, "office.example", None, Some(body.as_bytes().to_vec()))
         };
-        let set_cookies = |r: &Response<Body>| {
-            r.headers().get_all(header::SET_COOKIE).iter().map(|v| v.to_str().unwrap().to_string()).collect::<Vec<_>>()
+        let flags = |r: &Response<Body>| {
+            r.headers()
+                .get_all(header::SET_COOKIE)
+                .iter()
+                .map(|v| v.to_str().unwrap().to_string())
+                .filter(|c| !c.starts_with("office-usage="))
+                .collect::<Vec<_>>()
         };
-        // A new browser is given both cookies, the since cookie naming today.
+        let seen = "office-seen=1; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict";
+        // A browser the server has not met is given both flags, the new one until midnight.
         let fresh = post("", "lauds visit:first client:browser");
-        let cookies = set_cookies(&fresh);
-        assert!(cookies.iter().any(|c| c.starts_with("office-usage=")), "{cookies:?}");
-        assert!(
-            cookies.contains(&"office-since=2026-11-11; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict".to_string()),
-            "{cookies:?}"
-        );
-        // Counted earlier, its storage since erased: returning, and the cookie is renewed with
-        // its own day.
-        let id = "0123456789abcdef0123456789abcdef";
-        let erased = post(&format!("office-usage={id}; office-since=2026-11-02"), "vespers visit:first client:browser");
-        assert_eq!(set_cookies(&erased), ["office-since=2026-11-02; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict"]);
-        // Counted first today, it stays new all day.
-        let today = post("office-usage=fedcba9876543210fedcba9876543210; office-since=2026-11-11", "site visit:first client:pwa");
-        assert!(set_cookies(&today).iter().all(|c| c.starts_with("office-since=2026-11-11;")));
-        // A browser from before the cookie, or with a garbled one, keeps its page's word and is
-        // given the cookie.
-        let garbled = post("office-usage=00112233445566778899aabbccddeeff; office-since=yesterday", "site visit:first client:browser");
-        assert!(set_cookies(&garbled).iter().any(|c| c.starts_with("office-since=2026-11-11;")));
+        assert_eq!(flags(&fresh), [seen, "office-new=1; Path=/api/usage; Max-Age=10800; HttpOnly; Secure; SameSite=Strict"]);
+        // Later the same day it is still new.
+        let later = post("office-usage=fedcba9876543210fedcba9876543210; office-seen=1; office-new=1", "site visit:first client:pwa");
+        assert_eq!(flags(&later), [seen]);
+        // Seen on an earlier day, its storage since erased: returning, and the seen flag renewed.
+        let erased = post("office-usage=0123456789abcdef0123456789abcdef; office-seen=1", "vespers visit:first client:browser");
+        assert_eq!(flags(&erased), [seen]);
+        // A garbled flag is no flag.
+        let garbled = post("office-usage=00112233445566778899aabbccddeeff; office-seen=2026-11-02", "site visit:first client:browser");
+        assert_eq!(flags(&garbled).len(), 2);
         let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
         for (scope, n) in [("site", 4), ("visit:first", 3), ("visit:returning", 1), ("new-client:browser", 2), ("new-client:pwa", 1)] {
             assert_eq!(sum(scope), n, "{scope}");
@@ -737,15 +744,16 @@ mod tests {
     }
 
     #[test]
-    fn since_days_are_read_strictly() {
-        for (value, ok) in [("2026-11-02", true), ("2026-1-02", false), ("2026/11/02", false), ("2026-11-0x", false), ("", false)] {
-            assert_eq!(valid_day(value), ok, "{value:?}");
-        }
+    fn the_new_flag_lapses_at_new_york_midnight() {
+        assert_eq!(until_midnight(eastern_at(2026, 11, 11, 23, 59)), 60);
+        assert_eq!(until_midnight(eastern_at(2026, 11, 11, 0, 0)), 86_400);
+        // The night the clocks go back is 25 hours long.
+        assert_eq!(until_midnight(eastern_at(2026, 11, 1, 0, 0)), 90_000);
         let dims = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
         let first = dims(&["visit:first", "client:browser"]);
-        assert_eq!(settle_visit(first.clone(), Some("2026-11-10"), "2026-11-11"), dims(&["visit:returning", "client:browser"]));
-        assert_eq!(settle_visit(first.clone(), Some("2026-11-11"), "2026-11-11"), first);
-        assert_eq!(settle_visit(first.clone(), None, "2026-11-11"), first);
+        assert_eq!(settle_visit(first.clone(), true, false), dims(&["visit:returning", "client:browser"]));
+        assert_eq!(settle_visit(first.clone(), true, true), first);
+        assert_eq!(settle_visit(first.clone(), false, false), first);
     }
 
     #[test]
