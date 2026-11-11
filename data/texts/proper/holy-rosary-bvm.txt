@@ -61,19 +61,19 @@ The Virgin Mary * is exalted above the choirs of Angels: and upon her head a cro
 # --- optional ---
 #
 [psalm-antiphon-1-vespers]
-# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 1); II Vespers all as at I except the hymn and versicle (p. 622)
+# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 1); II Vespers all as at I except the hymn, versicle and Magnificat antiphon (p. 622)
 Who is this * that is beautiful as a dove, like a rose that is planted by the rivers of waters?
 
 [psalm-antiphon-2-vespers]
-# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 2); II Vespers all as at I except the hymn and versicle (p. 622)
+# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 2); II Vespers all as at I except the hymn, versicle and Magnificat antiphon (p. 622)
 Mighty Virgin, * like the tower of David, whereon there hang a thousand bucklers, all shields of mighty men.
 
 [psalm-antiphon-3-vespers]
-# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 3); II Vespers all as at I except the hymn and versicle (p. 622)
+# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 3); II Vespers all as at I except the hymn, versicle and Magnificat antiphon (p. 622)
 Hail Mary, * thou that art full of grace; the Lord is with thee: blessed art thou among women.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 4); II Vespers all as at I except the hymn and versicle (p. 622)
+# SOURCE: monastic diurnal, p. 618 (Holy Rosary, At I Vespers, Ant. 4); II Vespers all as at I except the hymn, versicle and Magnificat antiphon (p. 622)
 The daughters of Sion * saw her adorned with garlands of roses, and proclaimed her most blessed.
 
 [chapter-lauds]
@@ -146,18 +146,6 @@ R. That we may be made worthy of the promises of Christ.
 #
 # [vespers-psalmody-first]
 # I Vespers psalmody table when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

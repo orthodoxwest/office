@@ -242,15 +242,3 @@ R. And of his peace there shall be no end.
 #
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.

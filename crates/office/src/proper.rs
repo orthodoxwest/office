@@ -130,7 +130,8 @@ pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str
     // 657, 16*, 46* …) and never otherwise. A tier with no fifth antiphon
     // keeps its fourth.
     if hour_name == "vespers" && reference == LAUDS_FOURTH {
-        let fifth = ref_candidates(LAUDS_FIFTH);
+        // Only the fifth itself: the generic `psalm-antiphon` is not Lauds' fifth.
+        let fifth = vec![LAUDS_FIFTH.to_string()];
         for list in [season_ref_candidates(&fifth, season), fifth] {
             let found = first_text(t, prefix, &list);
             if !found.0.is_empty() {
@@ -138,7 +139,8 @@ pub fn lookup_section_text(prefix: &str, season: Option<Season>, hour_name: &str
             }
         }
     }
-    for list in [season_ref_candidates(&ref_cands, season), ref_cands.clone()] {
+    let seasonal = season_ref_candidates(&ref_cands, season);
+    for list in [seasonal, ref_cands] {
         let found = first_text(t, prefix, &list);
         if !found.0.is_empty() {
             return paschal_common_form(found, season, t);
