@@ -67,9 +67,9 @@ pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
 /// The page, in reading order.
 pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Intro(
-        "The Divine Office is the Church’s prayer through the day: psalms, hymns, Scripture and prayers said at set \
-         hours, morning to night. This is the Benedictine Office as the Antiochian Western Rite Vicariate prays it. \
-         Each hour here is already put together for its day, with the feast, the season and the psalms in place, so \
+        "The Divine Office is the Church’s prayer through the day: psalms, hymns, and prayers said at set \
+         hours, morning to night. This is the Benedictine Office as used in the Antiochian Western Rite Vicariate. \
+         Each hour is assembled for the day, with the feast, the season and the psalms in place, so \
          you need only begin.",
     ),
     AboutBlock::Verse { text: "“Seven times a day do I praise thee.”", cite: "Psalm 118 (119):164" },
@@ -83,10 +83,10 @@ pub const ABOUT: &[AboutBlock] = &[
          their way of prayer to the West.",
     ),
     AboutBlock::Paragraph(
-        "In the sixth century St Benedict of Nursia set the hours in order in his Rule for monks, taking the \
+        "In the sixth century St Benedict of Nursia established his Rule for monks, taking the \
          Psalmist’s “seven times a day” as his measure and giving out the whole Psalter in each week. His life was \
-         written by St Gregory the Great, whom the East honors as St Gregory the Dialogist, and St Benedict is kept \
-         as a saint in East and West alike. His Rule spread through the monasteries of the West in the centuries \
+         written by St Gregory the Great, whom the East honors as St Gregory the Dialogist. \
+         The Benedictine Office spread through the monasteries of the West in the centuries \
          before the Great Schism. Since 1958 the Antiochian Archdiocese has kept a Western Rite, and within it the \
          Benedictine hours are prayed again in the Orthodox Church.",
     ),
@@ -95,7 +95,7 @@ pub const ABOUT: &[AboutBlock] = &[
     AboutBlock::Note("The night office, Matins, is not yet included."),
     AboutBlock::Heading("Where to begin"),
     AboutBlock::Paragraph(
-        "No one is expected to keep every hour at once. Many begin with one, Lauds in the morning or Compline at \
+        "No one is expected to keep every hour at once. Many begin with one, Prime in the morning or Compline at \
          night, and add others as they can. Your parish priest can help you determine an appropriate prayer rule. The \
          button on the home page always opens the hour for the time of day.",
     ),
@@ -120,22 +120,20 @@ pub const ABOUT: &[AboutBlock] = &[
     },
     AboutBlock::Heading("The Ordo"),
     AboutBlock::Paragraph(
-        "Each day keeps a feast or the office of its season, as the archdiocese’s printed ordo appoints, and the home \
-         page wears the day’s liturgical color. The app’s [Ordo](/calendar) sets out the year a month at a time: each \
-         day’s feast, rank and color, its fasts, and the antiphons and commemorations of Lauds and Vespers. A key \
-         explains its marks, and the year’s title page gives the moveable feasts and Ember days. You can search it \
-         for a feast or saint; each has a page with its collect, antiphons and versicles, and when it is kept in the \
-         years ahead.",
+        "Each day keeps a feast or the office of its season, as the archdiocese’s printed ordo appoints. \
+         The app’s [Ordo](/calendar) sets out the year a month at a time: each \
+         day’s feast, rank and color, its fasts, and the antiphons and commemorations of Lauds and Vespers. \
+         You can search it for a feast or saint. Each has a page with its collect, antiphons and versicles, \
+         and when it is kept in the years ahead.",
     ),
     AboutBlock::Heading("This app"),
     AboutBlock::Paragraph(
-        "The psalm translation is from the Coverdale Psalter, and each text is checked against the printed book it \
-         comes from. The phone apps work without a connection, and the website keeps the coming two weeks for \
-         reading offline. [Reminders](/reminders) can call you to the hours you keep. In Settings (in the Menu on a \
-         phone) you can choose the Nave, the church by day, or the Apse, its vault by night, change the text size, \
-         have Prime read the Martyrology, the saints of the coming day, and show the hymns and Marian antiphon in \
-         chant notation, where it is available. Your settings are kept on your device. \
-         The app counts hours prayed without knowing who prayed them; there are no accounts and no advertising. See \
+        "The psalm translation is from the Coverdale Psalter, and each text is checked against the printed books they \
+         come from. The mobile apps work without a connection. [Reminders](/reminders) can call you to the hours \
+         you keep. In Settings (in the Menu on a phone) you can change the theme and text size, \
+         have Prime include the Martyrology (the saints of the coming day), and show the office with \
+         chant notation where it is available. Your settings are kept on your device. \
+         There are no accounts and no advertising. See \
          [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
