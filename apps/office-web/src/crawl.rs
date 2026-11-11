@@ -1,9 +1,9 @@
 //! What search engines read before the pages: `robots.txt` and the sitemap.
 //!
 //! The sitemap lists the pages worth finding, all of them undated but the ordo: today's day and
-//! hours, this year's ordo, the feast search and each feast's page, reminders and privacy. Each
-//! dated day and hour is one link from those and carries `noindex` (see `Chrome::noindex`), so
-//! the endless run of dates stays out of search results.
+//! hours, this year's ordo, the feast search and each feast's page, reminders, privacy and
+//! about. Each dated day and hour is one link from those and carries `noindex` (see
+//! `Chrome::noindex`), so the endless run of dates stays out of search results.
 
 use axum::body::Body;
 use axum::http::{Response, StatusCode, header};
@@ -14,7 +14,8 @@ use render_html::links::{calendar_year_link, feast_link, find_link};
 use crate::http::{response, set};
 
 /// The undated pages; the ordo's year is added per request.
-const PAGES: [&str; 10] = ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy"];
+const PAGES: [&str; 11] =
+    ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy", "/about"];
 
 /// Crawl everything a reader sees; skip the usage report, the beacon and the reminder feed.
 pub fn robots(site: &str) -> Response<Body> {

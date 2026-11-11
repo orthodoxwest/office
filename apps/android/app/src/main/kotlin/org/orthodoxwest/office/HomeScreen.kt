@@ -85,7 +85,10 @@ private val PERIODS = listOf(
     Triple(Period.EVENING, "Evening", listOf("vespers", "compline")),
 )
 
-/** Home: the day's frontispiece, the invitation to pray, and the hours of the day. */
+/**
+ * Home: the day's frontispiece, the invitation to pray, and the hours of the day. In a reader's
+ * first week `introduction` names the link to About beside Change date.
+ */
 @Composable
 fun HomeScreen(
     view: HomeView,
@@ -97,6 +100,8 @@ fun HomeScreen(
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
     onFeast: (String) -> Unit = {},
+    introduction: String? = null,
+    onIntroduction: () -> Unit = {},
 ) {
     // Where the niche stands in the room, which the chapel light follows.
     var room by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -153,7 +158,7 @@ fun HomeScreen(
                         chrome()
                         CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
                             Frontispiece(
-                                view, date, today, onDate, onHour, onOrdoDay,
+                                view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
                                 Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
                                     .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
                                 HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
@@ -176,7 +181,7 @@ fun HomeScreen(
                     header = chrome,
                     card = {
                         Frontispiece(
-                            view, date, today, onDate, onHour, onOrdoDay,
+                            view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
                             Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
                             HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                             onFeast = onFeast,
@@ -379,6 +384,8 @@ private fun Frontispiece(
     onDate: (LocalDate) -> Unit,
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
+    introduction: String?,
+    onIntroduction: () -> Unit,
     modifier: Modifier,
     tier: HomeTier,
     niche: NicheTokens? = null,
@@ -615,9 +622,14 @@ private fun Frontispiece(
                     // One row throughout, so the control TalkBack just activated is the one that stays
                     // (the web's one <summary>); open, the season fills its line and the control wraps.
                     FlowRow(horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.Center) {
-                        if (view.season.isNotEmpty()) {
-                            Row((if (picking) Modifier.fillMaxWidth() else Modifier).align(Alignment.CenterVertically), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                                Text(view.season, style = seasonStyle.copy(textAlign = TextAlign.Center))
+                        // A reader's first week: the introduction stands in the season's place
+                        // (each hour's header still names it), in the same small capitals and with
+                        // the same gilt point after it, and opens About.
+                        val lead = introduction ?: view.season
+                        if (lead.isNotEmpty()) {
+                            val leadModifier = if (introduction == null) Modifier else Modifier.heightIn(min = 44.dp).tap(action = "open About the Office", onClick = onIntroduction)
+                            Row((if (picking) Modifier.fillMaxWidth() else Modifier).align(Alignment.CenterVertically).then(leadModifier), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center))
                                 if (!picking) Canvas(Modifier.padding(start = 14.4.dp, end = 8.8.dp).size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
                             }
                         }

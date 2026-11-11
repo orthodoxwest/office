@@ -14,7 +14,7 @@
  *
  * Page strategy (per URL class):
  *   - Dated hours, /?date=YYYY-MM-DD, ordo pages (/calendar/YYYY, /MM, /all),
- *     /reminders →
+ *     /reminders, /about →
  *     stale-while-revalidate (serve precache immediately, refresh in background).
  *   - Undated /, /lauds, /calendar → redirect to today's dated equivalent so
  *     navigation shares the same cache keys the precache fills.
@@ -146,7 +146,7 @@ function precacheAssets(cache, urls) {
 
 function todayShellURLs() {
   var today = localDateSlug(new Date());
-  var urls = ["/?date=" + today, "/reminders"];
+  var urls = ["/?date=" + today, "/reminders", "/about"];
   for (var h = 0; h < HOURS.length; h++) {
     urls.push("/" + HOURS[h] + "/" + today);
   }
@@ -275,7 +275,7 @@ function datedEquivalent(url) {
 // from the versioned Cache bucket immediately (revalidated in background).
 function isSWRPage(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
+  if (path === "/reminders" || path === "/about") {
     return true;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
@@ -294,8 +294,8 @@ function isSWRPage(url) {
 // trailing-slash and theme variants land on the same precache entry.
 function canonicalCacheKey(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
-    return "/reminders";
+  if (path === "/reminders" || path === "/about") {
+    return path;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
     return "/?date=" + url.searchParams.get("date");
@@ -403,6 +403,7 @@ function offlineResponse() {
     "<span class=\"nav-divider\" aria-hidden=\"true\"></span>" +
     "<a href=\"/calendar\" data-nav=\"calendar\">Ordo</a>" +
     "<a class=\"nav-secondary\" href=\"/reminders\" data-nav=\"reminders\">Reminders</a>" +
+    "<a class=\"nav-secondary\" href=\"/about\" data-nav=\"about\">About</a>" +
     "</nav></details>" +
     "</div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
@@ -625,7 +626,7 @@ function precacheUpcoming() {
           d.setDate(d.getDate() + 1);
         }
         urls = urls.concat(ordo);
-        urls.push("/reminders");
+        urls.push("/reminders", "/about");
         return pruneOldPages(cache, today).then(function () {
           return uncachedURLs(cache, urls);
         }).then(function (missing) {

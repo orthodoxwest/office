@@ -642,17 +642,31 @@ private struct Frontispiece: View {
                 // control takes a line of its own beneath the season, and the picker the card's width.
                 let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
                 let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
-                if view.season.isEmpty {
+                // In a reader's first week the introduction to About stands in the season's place
+                // (each hour's header still names it), in the same small caps and gilt point, as
+                // on the web.
+                let newcomer = aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst())
+                if view.season.isEmpty && !newcomer {
                     change.padding(.top, m.px(tier.metaGap + 1))
                 } else {
-                    let season = HStack(spacing: 0) {
-                        Text(view.season).type(foot).foregroundStyle(p.muted)
+                    let lead = HStack(spacing: 0) {
+                        Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
                             .multilineTextAlignment(.center)
                         if !picking {
                             Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
                                 .frame(width: 5, height: 5)
                                 .padding(.leading, m.px(14.4))
                                 .accessibilityHidden(true)
+                        }
+                    }
+                    let season = Group {
+                        if newcomer {
+                            Button { model.open(.about) } label: { lead.frame(minHeight: 44).contentShape(Rectangle()) }
+                                .buttonStyle(Quiet())
+                                .accessibilityLabel(aboutPage.introduction)
+                                .accessibilityHint("Opens About the Office")
+                        } else {
+                            lead
                         }
                     }
                     // One layout either way, so "Change date" stays the control VoiceOver is on

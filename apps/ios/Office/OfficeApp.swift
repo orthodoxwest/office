@@ -7,7 +7,7 @@ import UserNotifications
  *
  * Launch arguments open a page at a date, for the simulator screenshots:
  * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`,
- * `find` (`-query`), `feast` (`-feast`);
+ * `about`, `find` (`-query`), `feast` (`-feast`);
  * `-today 2026-03-15` fixes today, and `-theme apse` or `-text-size large` choose the look.
  */
 @main
@@ -188,6 +188,7 @@ private struct EntryPage: View {
         case let .ordo(y, m, d)?: OrdoPage(year: y, month: m, day: d)
         case let .year(y)?: YearPage(year: y)
         case .reminders?: RemindersPage()
+        case .about?: AboutPage()
         case let .find(q)?: FindPage(query: q)
         case let .feast(id)?: FeastPage(id: id, entry: entry)
         // Gone from the way back, while the stack lets it go.

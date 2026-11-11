@@ -282,8 +282,8 @@ enum class Overlay {
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
- * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
- * on a wide screen.
+ * hour page, then the Ordo, Reminders and About (`about` is its name, the core's). The menu sets
+ * it out on a phone, the header inline on a wide screen.
  */
 class SiteNav(
     val hours: List<String>,
@@ -293,6 +293,9 @@ class SiteNav(
     val ordoCurrent: Boolean,
     val onReminders: () -> Unit,
     val remindersCurrent: Boolean,
+    val about: String,
+    val onAbout: () -> Unit,
+    val aboutCurrent: Boolean,
     val settingsOpen: Boolean = false,
     val onSettings: () -> Unit = {},
 )
@@ -380,6 +383,9 @@ private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = t
             }
             link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
             link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
+            // A wide hour's header is full with the seven hours: About is left to the other pages'
+            // headers, as on the web.
+            if (nav.onHour == null) link(nav.about, nav.aboutCurrent, secondary = true, onClick = nav.onAbout)
         }
         // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
         if (settings) {
@@ -402,9 +408,9 @@ private fun MenuRow(content: @Composable RowScope.() -> Unit) {
 }
 
 /**
- * A menu cell, muted until it is the one: a `page` (an hour, the Ordo, Reminders) is in ink over
- * the lining's rule when current, a chosen setting in the accent over the ornament's (`--ornament`).
- * `spoken` names a cell drawn as a glyph.
+ * A menu cell, muted until it is the one: a `page` (an hour, the Ordo, Reminders, About) is in ink
+ * over the lining's rule when current, a chosen setting in the accent over the ornament's
+ * (`--ornament`). `spoken` names a cell drawn as a glyph.
  */
 @Composable
 private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, page: Boolean = false, spoken: String? = null, onClick: () -> Unit) {
@@ -423,10 +429,10 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 
 /**
  * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home, a hairline between
- * the bands); the Ordo and Reminders; then the Theme, Text and Martyrology rows, the current choice
- * in the accent over the ornament's rule. The pages are muted, the current one underlined in the
- * lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the header's
- * end at `end`.
+ * the bands); the Ordo, Reminders and About; then the Theme, Text and Martyrology rows, the current
+ * choice in the accent over the ornament's rule. The pages are muted, the current one underlined in
+ * the lining. `prefsOnly` is the wide header's Settings: the preference rows alone, under the
+ * header's end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -436,6 +442,9 @@ fun MenuPanel(
     onOrdoCurrent: Boolean,
     onReminders: () -> Unit,
     onRemindersCurrent: Boolean,
+    about: String,
+    onAbout: () -> Unit,
+    onAboutCurrent: Boolean,
     theme: ThemeChoice,
     onTheme: (ThemeChoice) -> Unit,
     textSize: TextSize,
@@ -501,6 +510,13 @@ fun MenuPanel(
                         MenuCell("ORDO", onOrdoCurrent, nav, page = true, onClick = onOrdo)
                         // Habit setup, not an hour: quieter than the Ordo, as on the web (`.nav-secondary`).
                         MenuCell("REMINDERS", onRemindersCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onReminders)
+                    }
+                    // About as quiet as Reminders, in the first half of a row of its own, as the
+                    // web's grid sets it.
+                    Spacer(Modifier.height(2.4.dp))
+                    MenuRow {
+                        MenuCell(about.uppercase(), onAboutCurrent, Type.label(11.52f, 0.04f), page = true, onClick = onAbout)
+                        Spacer(Modifier.weight(1f))
                     }
                     Hairline(p.border, Modifier.padding(top = 6.4.dp))
                     Spacer(Modifier.height(6.4.dp))
