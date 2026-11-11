@@ -49,10 +49,11 @@ today: each keeps that day on the device (`office-first-counted` in localStorage
 in the apps) and sends only the word, so nothing links one day to the next. Browsers that used
 the Office before it existed count as returning when they hold a setting or the service
 worker; apps, when they had reported before. Safari erases a page's storage after seven days
-without a visit, and an installed web app does not share it with the browser, so the server also
-sets `office-since` (HttpOnly, on `/api/usage`, 400 days) to the day it first counted a browser;
-a beacon bringing an earlier day counts as returning whatever its page says. The day is read and
-dropped, never stored. Neither app reports until its installation is two hours old: Play's
+without a visit, so the server also sets `office-since` (HttpOnly, on `/api/usage`, 400 days,
+renewed with the same day on every beacon) to the day it first counted a browser; a beacon
+bringing an earlier day counts as returning whatever its page says. The day travels with every
+browser beacon, but is read and dropped, never stored. An iOS Home Screen web app has its own
+cookies as well as its own storage, so installing one still counts as new once. Neither app reports until its installation is two hours old: Play's
 pre-launch phones and the devices Apple checks each TestFlight upload on are fresh installs that
 are gone within the hour, and each counted as a new reader. `client:browser|pwa|android|ios` separates a browser tab,
 the web app installed to a home screen, and the native apps. The server also counts a
@@ -121,7 +122,9 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
 (30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`); the
-apps send their own daily ID in its place.
+apps send their own daily ID in its place. `office-since` holds the reporting day the browser
+was first counted (400 days, same attributes), read to settle `visit:first` and never stored;
+the apps get neither cookie.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept

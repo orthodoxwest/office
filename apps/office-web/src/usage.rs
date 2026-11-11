@@ -291,8 +291,8 @@ fn advertise(resp: &mut Response<Body>, canonical: Option<&str>) {
 
 /// The cookie holding the reporting day a browser was first counted. The page's own mark
 /// (`office-first-counted`) lives in script storage, which Safari erases after seven days without
-/// a visit and an installed web app does not share with the browser; this one is set by the
-/// server, which Safari keeps. A browser that brings a day before today is returning whatever its
+/// a visit; this one is set by the server, which Safari keeps, and renewed with the same day on
+/// every beacon so it outlasts its 400 days for a reader who keeps coming. A browser that brings a day before today is returning whatever its
 /// page says. The day is read and dropped, never stored, so nothing links one day to another.
 const SINCE_COOKIE: &str = "office-since";
 
@@ -374,8 +374,9 @@ fn event_at(
     let since = cookie(headers, SINCE_COOKIE).filter(|d| valid_day(d));
     let dimensions = settle_visit(event.dimensions, since.as_deref(), &today);
     // Only a browser sends an Origin; the apps keep their own first day and take no cookies.
-    if since.is_none() && !origin.is_empty() {
-        let value = format!("{SINCE_COOKIE}={today}; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict");
+    if !origin.is_empty() {
+        let day = since.as_deref().unwrap_or(&today);
+        let value = format!("{SINCE_COOKIE}={day}; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict");
         if let Ok(v) = header::HeaderValue::from_str(&value) {
             resp.headers_mut().append(header::SET_COOKIE, v);
         }
@@ -717,13 +718,14 @@ mod tests {
             cookies.contains(&"office-since=2026-11-11; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict".to_string()),
             "{cookies:?}"
         );
-        // Counted earlier, its storage since erased: returning, and the cookie is not renewed.
+        // Counted earlier, its storage since erased: returning, and the cookie is renewed with
+        // its own day.
         let id = "0123456789abcdef0123456789abcdef";
         let erased = post(&format!("office-usage={id}; office-since=2026-11-02"), "vespers visit:first client:browser");
-        assert!(set_cookies(&erased).is_empty(), "{:?}", set_cookies(&erased));
+        assert_eq!(set_cookies(&erased), ["office-since=2026-11-02; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict"]);
         // Counted first today, it stays new all day.
         let today = post("office-usage=fedcba9876543210fedcba9876543210; office-since=2026-11-11", "site visit:first client:pwa");
-        assert!(set_cookies(&today).is_empty());
+        assert!(set_cookies(&today).iter().all(|c| c.starts_with("office-since=2026-11-11;")));
         // A browser from before the cookie, or with a garbled one, keeps its page's word and is
         // given the cookie.
         let garbled = post("office-usage=00112233445566778899aabbccddeeff; office-since=yesterday", "site visit:first client:browser");

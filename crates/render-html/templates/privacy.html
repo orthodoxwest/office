@@ -15,14 +15,18 @@
     and how it was shown: the light or dark appearance, a phone or a larger
     screen, a browser, the installed web app or a native app, the prayer form,
     at Prime whether the Martyrology was read, and whether today is the first
-    day this browser or app has opened the Office (only yes or no is sent; the
-    date you started stays on your device). The server adds one to that day’s
+    day this browser or app has opened the Office (an app sends only yes or no
+    and keeps the date it started on your device). The server adds one to that day’s
     totals. Each page counts once a day.
   </p>
   <p>
     To count a reader once rather than at every page, the website keeps a random
     identifier in a cookie used for nothing else and sent only with these notes,
-    and each app makes a fresh random identifier every day. The server stores
+    and each app makes a fresh random identifier every day. The website also keeps
+    the date this browser was first counted in a second cookie, sent only with
+    these notes, because some browsers erase a page’s own storage after a week
+    away; the server reads it to tell a returning reader from a new one and does
+    not store it. The server stores
     only a fingerprint of that identifier combined with the date, deletes those
     after two days, and keeps only the daily totals, so nothing it keeps ties one
     day’s reading to another’s. Your browser’s ordinary description of itself is
@@ -51,6 +55,6 @@
     <a href="https://github.com/orthodoxwest/office/issues/new">project’s issue tracker</a>.
     If this policy changes, this page will say so.
   </p>
-  <p class="privacy-updated">Last updated 7 October 2026.</p>
+  <p class="privacy-updated">Last updated 11 November 2026.</p>
 </div>
 {% endblock %}

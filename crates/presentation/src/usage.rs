@@ -52,7 +52,8 @@ pub const DIMENSIONS: [Dimension<'static>; 8] = [
     // the notation or the words alone.
     Dimension { key: "chant", values: CHANT },
     // Whether this browser or installation is counted for the first time today. The device
-    // remembers the day it was first counted; nothing sent links one day to another.
+    // remembers the day it was first counted; a browser's office-since cookie also carries it to
+    // the server, which reads it and stores nothing (office-web's usage.rs).
     Dimension { key: "visit", values: VISITS },
     // The client of a first-day visit, so new readers can be told apart by client. The server
     // derives it from a beacon's `visit:first` and `client` ([`new_client`]); no client sends it.
