@@ -24,9 +24,6 @@ Among them that are born * of women, there hath not risen a greater than John th
 # SOURCE: draft archdiocesan Lauds book, pp. 467–468 (The Nativity of St John Baptist)
 Thou, child, * shalt be called the prophet of the Highest; for thou shalt go before the face of the Lord, to prepare his ways.
 
-[psalm-antiphon-4-vespers]
-@use proper/nativity-john-baptist/psalm-antiphon-5
-
 [psalm-antiphon-1-first-vespers]
 @use proper/nativity-john-baptist/commemoration-antiphon
 [psalm-antiphon-2-first-vespers]

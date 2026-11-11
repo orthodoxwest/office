@@ -29,9 +29,6 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 # SOURCE: draft archdiocesan Lauds book, p. 656 (Common of a Confessor and Bishop, Paschaltide)
 Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
 
-[psalm-antiphon-4-vespers]
-@use commons/confessor-bishop-paschal/psalm-antiphon-5
-
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop, Paschaltide)
 R. The Lord loved him and adorned him, * alleluia, alleluia.

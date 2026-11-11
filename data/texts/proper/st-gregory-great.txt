@@ -27,9 +27,6 @@ O ye servants of the Lord, * bless ye the Lord: your servant Gregory hath risen 
 # SOURCE: draft archdiocesan Lauds book, p. 405 (St Gregory the Great)
 Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
 
-[psalm-antiphon-4-vespers]
-@use proper/st-gregory-great/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 487
 Gregory, * when he looked upon the youthful Angles, said: They have the countenance of Angels, and such as these should be of the fellowship of the Angels in heaven.

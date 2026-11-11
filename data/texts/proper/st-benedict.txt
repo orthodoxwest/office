@@ -160,11 +160,6 @@ R. Holy Father Benedict.
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-[psalm-antiphon-4-vespers]
-# Diurnal p. 493: I Vespers takes the "Ants. of Lauds, omitting the fourth"; II Vespers
-# "All as at I Vespers, p. 493" (p. 497); 2026 ordo 21 Mar: Ant.(495).
-@use proper/st-benedict/psalm-antiphon-5
-
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.

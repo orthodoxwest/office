@@ -21,9 +21,6 @@
 [psalm-antiphon-5]
 @use commons/virgin-martyr-paschal/psalm-antiphon-5
 
-[psalm-antiphon-4-vespers]
-@use commons/virgin-paschal/psalm-antiphon-5
-
 [benedictus-antiphon]
 @use commons/virgin-martyr-paschal/benedictus-antiphon
 

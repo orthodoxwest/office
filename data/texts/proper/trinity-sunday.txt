@@ -37,9 +37,6 @@ Of whom are all things, * through whom are all things, in whom are all things: t
 [psalm-antiphon-3-vespers]
 @use proper/trinity-sunday/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/trinity-sunday/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 317 (The Feast of the Most Holy Trinity)
 Blessed be * the holy Creator and Governor of all things, the holy and undivided Trinity, both now and ever, and to endless ages of ages.

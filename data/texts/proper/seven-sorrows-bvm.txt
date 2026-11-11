@@ -30,9 +30,6 @@ Stay me with flagons, * comfort me with apples; for I am sick of love.
 [psalm-antiphon-3-vespers]
 @use proper/seven-sorrows-bvm/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/seven-sorrows-bvm/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 Come ye, * and let us go up to the mountain of the Lord, and see if there be any sorrow like unto my sorrow.

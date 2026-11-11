@@ -28,6 +28,20 @@ The nation and kingdom * that will not serve thee shall perish; yea, those natio
 [psalm-antiphon]
 @use proper/christ-the-king/psalm-antiphon-1
 
+[psalm-antiphon-1-vespers]
+# II Vespers: "All as at I Vespers, except" the versicle and Magnificat antiphon
+# (Diurnal p. 631); 2026 ordo 25 Oct: "As at 1 Vesp., (627f)".
+@use proper/christ-the-king/psalm-antiphon-1-first-vespers
+
+[psalm-antiphon-2-vespers]
+@use proper/christ-the-king/psalm-antiphon-2-first-vespers
+
+[psalm-antiphon-3-vespers]
+@use proper/christ-the-king/psalm-antiphon-3-first-vespers
+
+[psalm-antiphon-4-vespers]
+@use proper/christ-the-king/psalm-antiphon-4-first-vespers
+
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 515 (I Vespers, Christ the King)
 He shall be called * the Peaceful One, and his throne shall be established for ever and ever.
@@ -228,15 +242,3 @@ R. And of his peace there shall be no end.
 #
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).

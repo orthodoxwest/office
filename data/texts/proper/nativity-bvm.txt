@@ -21,10 +21,6 @@ With all our heart and soul, * let us sing glory unto Christ on this holy solemn
 # SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
 
-[psalm-antiphon-4-vespers]
-# I and II Vespers: "Ants. of Lauds, omitting the fourth" (diurnal p. 595).
-@use proper/nativity-bvm/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 To-day let us celebrate * with due solemnity the Nativity of God's Mother, the ever Virgin Mary: from whom the Son of the Highest proceeded, alleluia.

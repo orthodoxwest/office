@@ -24,9 +24,6 @@ Then answered Peter, * and said unto Jesus, Lord, it is good for us to be here.
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 506, 439 (The Transfiguration of Our Lord Jesus Christ)
 While he yet spake, * behold, a bright cloud overshadowed them.
 
-[psalm-antiphon-4-vespers]
-@use proper/transfiguration/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 583
 And behold a voice * out of the cloud, which said, This is my beloved Son, in whom I am well pleased; hear ye him, alleluia.

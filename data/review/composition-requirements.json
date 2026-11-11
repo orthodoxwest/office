@@ -3477,21 +3477,21 @@
         "date": "2027-02-26",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
       },
       {
         "date": "2030-02-26",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
       },
       {
         "date": "2030-02-27",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
       },
       {
@@ -3505,14 +3505,14 @@
         "date": "2027-04-06",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
       },
       {
         "date": "2027-04-07",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
       },
       {
@@ -3526,8 +3526,84 @@
         "date": "2028-04-07",
         "hour": "vespers",
         "slot": "psalm-antiphon-4",
-        "ref": "commons/confessor-bishop/psalm-antiphon-4-vespers",
+        "ref": "commons/confessor-bishop/psalm-antiphon-5",
         "contains": "Good and faithful servant"
+      }
+    ]
+  },
+  {
+    "id": "vespers-lauds-antiphons-omit-fourth",
+    "source": "Monastic Diurnal, passim: Vespers that take the antiphons of Lauds say them \"omitting the fourth\" (St Martin p. 657, St Lucy p. 451, Annunciation p. 502, St Clement p. 667, St Agnes p. 459, Assumption pp. 588, 590; #777), so the fourth psalm takes Lauds' fifth wherever no Vespers antiphon is given. The Holy Rosary has its own Vespers antiphons (p. 618; II Vespers as at I, p. 622) and Christ the King's II Vespers are all as at I (p. 631; 2026 ordo 25 Oct).",
+    "cases": [
+      {
+        "date": "2026-11-10",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-martin-tours/psalm-antiphon-5",
+        "contains": "Martin is received"
+      },
+      {
+        "date": "2026-11-11",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-martin-tours/psalm-antiphon-5",
+        "contains": "Martin is received"
+      },
+      {
+        "date": "2027-12-13",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-lucy/psalm-antiphon-5",
+        "contains": "O my sister Lucy,"
+      },
+      {
+        "date": "2026-03-25",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/annunciation/psalm-antiphon-5",
+        "contains": "Behold the handmaid of the Lord;"
+      },
+      {
+        "date": "2026-11-23",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-clement-i/psalm-antiphon-5",
+        "contains": "All the nations"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/st-agnes-rome/psalm-antiphon-5",
+        "contains": "Rejoice with me"
+      },
+      {
+        "date": "2026-08-15",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/assumption-bvm/psalm-antiphon-5",
+        "contains": "Thou art fair"
+      },
+      {
+        "date": "2026-10-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/holy-rosary-bvm/psalm-antiphon-1-vespers",
+        "contains": "Who is this"
+      },
+      {
+        "date": "2026-10-07",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-4",
+        "ref": "proper/holy-rosary-bvm/psalm-antiphon-4-vespers",
+        "contains": "The daughters of Sion"
+      },
+      {
+        "date": "2026-10-25",
+        "hour": "vespers",
+        "slot": "psalm-antiphon-1",
+        "ref": "proper/christ-the-king/psalm-antiphon-1-vespers",
+        "contains": "He shall be called"
       }
     ]
   },

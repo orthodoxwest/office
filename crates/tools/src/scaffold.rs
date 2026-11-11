@@ -111,7 +111,10 @@ pub const OPTIONAL_KEYS: [Key; 53] = [
     opt("psalm-antiphon-1-vespers", "Vespers-only override for psalm antiphon 1."),
     opt("psalm-antiphon-2-vespers", "Vespers-only override for psalm antiphon 2."),
     opt("psalm-antiphon-3-vespers", "Vespers-only override for psalm antiphon 3."),
-    opt("psalm-antiphon-4-vespers", "Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5)."),
+    opt(
+        "psalm-antiphon-4-vespers",
+        "Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.",
+    ),
     opt("psalm-antiphon-5-vespers", "Vespers-only override for psalm antiphon 5."),
     opt("psalm-antiphon-1-first-vespers", "I Vespers override for psalm antiphon 1."),
     opt("psalm-antiphon-2-first-vespers", "I Vespers override for psalm antiphon 2."),

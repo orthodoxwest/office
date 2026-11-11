@@ -115,4 +115,6 @@ Art thou he * that should come, or do we look for another? Go and shew John thos
 Come, O Lord, in peace, * visit us with thy salvation, that we may rejoice before thee with a perfect heart.
 
 [psalm-antiphon-4-vespers]
+# Spelled out with 1-3 because I Vespers on Saturday reads only the -vespers set
+# (proper.rs, step 0.8); "omitting the fourth" (Diurnal p. 162).
 @use proper/advent-sunday-2/psalm-antiphon-5

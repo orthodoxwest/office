@@ -38,9 +38,6 @@ The Apostles * did speak with other tongues the wonderful works of God, alleluia
 [psalm-antiphon-3-vespers]
 @use proper/pentecost/psalm-antiphon-3
 
-[psalm-antiphon-4-vespers]
-@use proper/pentecost/psalm-antiphon-5
-
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 307 (The Feast of Pentecost)
 Receive ye * the Holy Ghost: whosesoever sins ye remit, they are remitted unto them, alleluia.

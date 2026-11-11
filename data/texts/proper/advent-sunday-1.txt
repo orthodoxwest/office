@@ -53,6 +53,8 @@ Let us walk honestly, as in the day; not in rioting and drunkenness, not in cham
 R. Thanks be to God.
 
 [psalm-antiphon-4-vespers]
+# Spelled out with 1-3 because I Vespers on Saturday reads only the -vespers set
+# (proper.rs, step 0.8); "omitting the fourth" (Diurnal p. 162).
 @use proper/advent-sunday-1/psalm-antiphon-5
 
 [chapter-vespers]

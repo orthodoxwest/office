@@ -21,10 +21,6 @@ With eyes and hands * ever raised toward heaven, his undaunted spirit ceased not
 # SOURCE: monastic diurnal, p. 657 (St Martin, At Lauds)
 Martin is received, * rejoicing, into the bosom of Abraham: Martin, poor and lowly here on earth, entereth rich into heaven, and is saluted with heavenly songs.
 
-[psalm-antiphon-4-vespers]
-# At Vespers the Lauds antiphons are used omitting the fourth (Fr Jason, #777).
-@use proper/st-martin-tours/psalm-antiphon-5
-
 [benedictus-antiphon]
 @use proper/st-martin-tours/magnificat-antiphon-first
 
@@ -89,7 +85,7 @@ O blessed Martin, * whose righteous soul possesseth Paradise; whereat the Angels
 # Vespers-only override for psalm antiphon 3.
 #
 # [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+# Vespers-only override for psalm antiphon 4; without one, Vespers takes Lauds antiphon 5, omitting the fourth.
 #
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
