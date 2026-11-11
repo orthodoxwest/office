@@ -1,31 +1,23 @@
-# flyctl launch added from .gitignore
-# Binaries
-office
-**/*.exe
-**/*.exe~
-**/*.dll
-**/*.so
-**/*.dylib
+# The image builds office-cli from the workspace and copies data/, so the build
+# context is only what that needs. Everything else stays out, so a local
+# `fly deploy` uploads the same few dozen MB as a clean clone, whatever build
+# output, app builds or caches the checkout has accumulated.
+*
+!Cargo.toml
+!Cargo.lock
+!crates/
+!apps/cli/
+!apps/office-web/
+# A workspace member, so Cargo needs its manifest and sources to load the workspace.
+!apps/mobile-ffi/
+!data/
 
-# Test binary
-**/*.test
-
-# Output
-output
-
-# IDE
-**/.idea
-**/.vscode
-**/*.swp
-**/*.swo
-**/*~
-
-# OS
+# Build output and caches anywhere inside what is kept.
+**/target
+**/build
+**/node_modules
+**/.gradle
+**/__pycache__
 **/.DS_Store
-**/Thumbs.db
-fly.toml
-
-# Local caches and development tools
-target
-.git
-.web-tools/node_modules
+**/*.swp
+**/*~
