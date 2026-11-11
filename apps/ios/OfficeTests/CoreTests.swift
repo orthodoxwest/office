@@ -567,10 +567,15 @@ final class UsageTests: XCTestCase {
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(6 * 86_400)), 6)
         XCTAssertTrue(aboutNewcomer(daysSinceFirst: 6))
         XCTAssertFalse(aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(7 * 86_400))))
-        // An installation that reported before first days were kept is no newcomer.
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
+        // An installation that reported before first days were kept is no newcomer, whether its
+        // first day is still to be kept or the beacon's first day was kept as "before".
+        UserDefaults().removePersistentDomain(forName: suite)
+        defaults.set("2026-03-10", forKey: "usage-day")
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
+        UserDefaults().removePersistentDomain(forName: suite)
         defaults.set("before", forKey: "usage-first")
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
-        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
     }
 
     // A device Apple checks a build on is done with it soon after installing; a reader's later
