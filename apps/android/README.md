@@ -249,10 +249,12 @@ code; if the group's name changes in Play Console, change `crates/render-html/te
 
 ### Listing screenshots
 
-`StoreScreenshotTest` renders the listing's phone screenshots at 1080×1920 into
-`app/build/screenshots/store/` (`make android-screenshots`; CI's `android-screenshots`
-artifact carries them). Re-shoot after a visible change and replace them under *Main store
-listing*.
+`StoreScreenshotTest` renders the listing's screenshots into `app/build/screenshots/store/`
+(`make android-screenshots`; CI's `android-screenshots` artifact carries them), all 9:16
+portrait: the phone at 1080×1920 and the 7-inch and 10-inch tablets at 1224×2176 and 1800×3200.
+Files are numbered in upload order. The pages and the day follow the App Store's set in
+`.github/workflows/ios.yml`, so both stores show the same screens; change them together. Re-shoot
+after a visible change and replace them under *Main store listing*.
 
 ## Building locally
 
