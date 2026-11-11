@@ -14,12 +14,31 @@ import Foundation
  * day's first week. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only Release builds report (`OfficeCountsUsage`,
  * set in project.yml); Debug builds, and so the tests and the simulator screenshots, never do.
+ * Nor does a device Apple installs each uploaded TestFlight build on fresh, to check it: each
+ * would count as a new reader, about one for every build. Nothing on those devices says so, but
+ * each is done with the build soon after installing it, so an installation reports only once it
+ * is `settling` old, as Android's does.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
  */
 final class Usage {
-    static let shared = Usage()
+    static let shared = Usage(installed: Usage.installedAt())
+
+    /**
+     * How old an installation must be before it reports, as Android's `Usage.SETTLING`. A
+     * reader's first hours on a new install go uncounted, and every page after them counts as
+     * usual (as New, on the first such day). An update keeps the install date, so testers who
+     * update keep counting.
+     */
+    static let settling: TimeInterval = 2 * 3600
+
+    /// When this app was installed on the device: its Documents folder's creation, which an
+    /// update keeps. Nil, counting at once, if the system does not say.
+    static func installedAt() -> Date? {
+        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
+        return (try? FileManager.default.attributesOfItem(atPath: documents.path))?[.creationDate] as? Date
+    }
 
     /// Posts `body` to `endpoint`, then reports whether it counted and the endpoint the reply named.
     typealias Post = (_ endpoint: String, _ id: String, _ body: String, _ done: @escaping (Bool, String?) -> Void) -> Void
@@ -27,6 +46,8 @@ final class Usage {
     private let enabled: Bool
     private let defaults: UserDefaults
     private let now: () -> Date
+    /// When this installation was installed; nil counts at once.
+    private let installed: Date?
     private let post: Post
     /// Beacons already counted today by this process, as "day body".
     private var sent = Set<String>()
@@ -36,11 +57,13 @@ final class Usage {
         enabled: Bool = Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String == "YES",
         defaults: UserDefaults = .standard,
         now: @escaping () -> Date = Date.init,
+        installed: Date? = nil,
         post: @escaping Post = Usage.send
     ) {
         self.enabled = enabled
         self.defaults = defaults
         self.now = now
+        self.installed = installed
         self.post = post
     }
 
@@ -49,6 +72,7 @@ final class Usage {
     func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil, chant: Bool? = nil) {
         guard enabled else { return }
         let date = now()
+        if let installed, date.timeIntervalSince(installed) < Usage.settling { return }
         let day = Usage.reportingDay(date)
         let first = Usage.firstDay(day, defaults) == day
         guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant) else { return }
@@ -70,9 +94,8 @@ final class Usage {
         }
     }
 
-    /// The reporting day the app was first opened, kept in every build (it is never sent), as
-    /// the web's `office-first-counted` is kept whether or not a beacon goes. An installation
-    /// that reported before this was kept (it holds a day's identifier) is from an earlier day.
+    /// The reporting day the app was first counted. An installation that reported before this
+    /// was kept (it holds a day's identifier) is from an earlier day.
     private static func firstDay(_ day: String, _ defaults: UserDefaults) -> String {
         if let first = defaults.string(forKey: "usage-first") { return first }
         let first = defaults.string(forKey: "usage-day") == nil ? day : "before"
@@ -81,10 +104,17 @@ final class Usage {
     }
 
     /// Reporting days since the app was first opened, as `aboutNewcomer` reads them: -1 for an
-    /// installation from before first days were kept.
+    /// installation from before first days were kept. The day is kept apart from the beacon's
+    /// first day, which waits for the install to settle: writing that one here would count a
+    /// reader who prays in their first hours as returning the next day. It stays on the phone.
     static func daysSinceFirst(defaults: UserDefaults = .standard, now: Date = Date()) -> Int32 {
         let today = reportingDay(now)
-        guard let first = CivilDate.parse(firstDay(today, defaults)), let day = CivilDate.parse(today) else { return -1 }
+        let opened = defaults.string(forKey: "about-first") ?? defaults.string(forKey: "usage-first") ?? {
+            let first = defaults.string(forKey: "usage-day") == nil ? today : "before"
+            defaults.set(first, forKey: "about-first")
+            return first
+        }()
+        guard let first = CivilDate.parse(opened), let day = CivilDate.parse(today) else { return -1 }
         return Int32(civil.dateComponents([.day], from: first.date, to: day.date).day ?? -1)
     }
 

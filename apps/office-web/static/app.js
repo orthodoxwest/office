@@ -407,7 +407,8 @@ document.documentElement.classList.add("js");
 // Whether this browser first opened the Office today. It keeps that reporting day locally (a
 // browser that used the Office before this was recorded, shown by a stored setting or the
 // offline copy, keeps "before"); only first or returning is sent, so nothing links one day's
-// beacon to another's. The mark is made on the first page load, counted or not, so a later page
+// beacon to another's. Safari erases this storage after a week away, so the server also keeps
+// two dateless flags (usage.rs) that say whether it has counted this browser before. The mark is made on the first page load, counted or not, so a later page
 // served by the offline copy is not mistaken for an old reader. Without storage nothing is said.
 var USAGE_FIRST_KEY = "office-first-counted";
 function usageVisitToken() {

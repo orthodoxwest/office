@@ -567,10 +567,42 @@ final class UsageTests: XCTestCase {
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(6 * 86_400)), 6)
         XCTAssertTrue(aboutNewcomer(daysSinceFirst: 6))
         XCTAssertFalse(aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst(defaults: defaults, now: now.addingTimeInterval(7 * 86_400))))
-        // An installation that reported before first days were kept is no newcomer.
+        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
+        // An installation that reported before first days were kept is no newcomer, whether its
+        // first day is still to be kept or the beacon's first day was kept as "before".
+        let clean = { for key in ["about-first", "usage-first", "usage-day"] { defaults.removeObject(forKey: key) } }
+        clean()
+        defaults.set("2026-03-10", forKey: "usage-day")
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
+        clean()
         defaults.set("before", forKey: "usage-first")
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
-        XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
+    }
+
+    // A device Apple checks a build on is done with it soon after installing; a reader's later
+    // pages count, as New.
+    func testAFreshInstallationWaitsBeforeReporting() {
+        let usage = Usage(enabled: true, defaults: UserDefaults(suiteName: suite)!, now: { [unowned self] in self.now },
+                          installed: now.addingTimeInterval(-600)) { [unowned self] _, id, body, done in
+            self.posted.append((id, body))
+            done(true, nil)
+        }
+        usage.record(.home(date: today), dark: false, form: "private")
+        XCTAssertTrue(posted.isEmpty)
+        now = now.addingTimeInterval(Usage.settling)
+        usage.record(.home(date: today), dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+    }
+
+    // Home's introduction counts days from the first opening; the count waits for the install to
+    // settle, and a reader who first opens the app late in the evening is still New the next day.
+    func testOpeningTheAppDoesNotSpendItsFirstDay() {
+        let defaults = UserDefaults(suiteName: suite)!
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 0)
+        now = now.addingTimeInterval(86_400)
+        usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 1)
     }
 
     func testDebugBuildsNeverReport() {

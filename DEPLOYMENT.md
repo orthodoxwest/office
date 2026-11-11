@@ -48,7 +48,14 @@ reader's ordination. `visit:first|returning` says whether this browser or instal
 today: each keeps that day on the device (`office-first-counted` in localStorage, `usage-first`
 in the apps) and sends only the word, so nothing links one day to the next. Browsers that used
 the Office before it existed count as returning when they hold a setting or the service
-worker; apps, when they had reported before. `client:browser|pwa|android|ios` separates a browser tab,
+worker; apps, when they had reported before. Safari erases a page's storage after seven days
+without a visit, so the server also sets two flags of its own: `office-seen=1` (400 days, renewed on
+every beacon) and, beside it the first time, `office-new=1`, which lapses at New York's midnight.
+A browser that brings the first without the second was counted on an earlier day, and counts as
+returning whatever its page says. Both hold only `1`, so no date is sent. An iOS Home Screen web app has its own
+cookies as well as its own storage, so installing one still counts as new once. Neither app reports until its installation is two hours old: Play's
+pre-launch phones and the devices Apple checks each TestFlight upload on are fresh installs that
+are gone within the hour, and each counted as a new reader. `client:browser|pwa|android|ios` separates a browser tab,
 the web app installed to a home screen, and the native apps. The server also counts a
 first-day visit under `new-client:<client>`, so new readers split by client; no beacon sends it.
 Prime, on a day
@@ -115,7 +122,8 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
 (30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`); the
-apps send their own daily ID in its place.
+apps send their own daily ID in its place. `office-seen` and `office-new` (same attributes) hold only `1`
+and settle `visit:first` as above; the apps get none of these cookies.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept
