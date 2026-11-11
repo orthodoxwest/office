@@ -21,7 +21,7 @@
 //! (`chant/psalms/067.gabc`) are the booklet's own and are not loaded here.
 
 use std::collections::BTreeMap;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use calendar::DataSource;
 use calendar::Date;
@@ -46,35 +46,65 @@ const SATURDAY_VESPERS_HYMN: &str = "ordinary/vespers/hymn-saturday";
 const MARIAN_PREFIX: &str = "ordinary/marian/";
 
 /// One score: its GABC, the words it sets, and what neuma could not read.
+///
+/// Reading the scores with neuma is most of the time loading the corpus takes (all of them
+/// together take longer than the texts), so each is read when it is first asked about: a front
+/// that starts up reads only the scores of the hours it composes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Score {
+    /// The GABC as written in the file.
+    source: Arc<str>,
+    /// The GABC with its lyrics' apostrophes curled, as the fronts set it.
     pub gabc: Arc<str>,
-    /// The sung words, normalized by [`words`].
-    pub words: Vec<String>,
-    /// neuma's error diagnostics; a score with any fails validation.
-    pub errors: Vec<String>,
-    /// A score of several stanzas cut at its first double bar, with the words that stanza sets:
-    /// what the hymn takes where a seasonal doxology parts the later stanzas from the score's.
-    pub first_stanza: Option<(Arc<str>, Vec<String>)>,
+    read: OnceLock<ReadScore>,
+}
+
+/// What neuma reads from a score.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ReadScore {
+    words: Vec<String>,
+    errors: Vec<String>,
+    first_stanza: Option<(Arc<str>, Vec<String>)>,
 }
 
 impl Score {
     pub fn new(gabc: &str) -> Score {
-        let chant = neuma::Chant::new(gabc);
-        let errors = chant
-            .diagnostics()
-            .iter()
-            .filter(|d| d.severity == neuma::Severity::Error)
-            .map(|d| format!("{}: {}", d.code, d.message))
-            .collect();
-        let gabc: Arc<str> = Arc::from(curl_apostrophes(gabc));
-        let parts = ChantScore { gabc: gabc.clone(), sets: ScoreSpan::WholeHymn }.stanza_parts();
-        let first_stanza = (parts.len() > 1).then(|| {
-            let first = parts[0].clone();
-            let sung = words(&neuma::Chant::new(&first).summary().text);
-            (Arc::from(first), sung)
-        });
-        Score { gabc, words: words(&chant.summary().text), errors, first_stanza }
+        Score { source: Arc::from(gabc), gabc: Arc::from(curl_apostrophes(gabc)), read: OnceLock::new() }
+    }
+
+    fn read(&self) -> &ReadScore {
+        self.read.get_or_init(|| {
+            let chant = neuma::Chant::new(&self.source);
+            let errors = chant
+                .diagnostics()
+                .iter()
+                .filter(|d| d.severity == neuma::Severity::Error)
+                .map(|d| format!("{}: {}", d.code, d.message))
+                .collect();
+            let parts = ChantScore { gabc: self.gabc.clone(), sets: ScoreSpan::WholeHymn }.stanza_parts();
+            let first_stanza = (parts.len() > 1).then(|| {
+                let first = parts[0].clone();
+                let sung = words(&neuma::Chant::new(&first).summary().text);
+                (Arc::from(first), sung)
+            });
+            ReadScore { words: words(&chant.summary().text), errors, first_stanza }
+        })
+    }
+
+    /// The sung words, normalized by [`words`].
+    pub fn words(&self) -> &[String] {
+        &self.read().words
+    }
+
+    /// neuma's error diagnostics; a score with any fails validation.
+    pub fn errors(&self) -> &[String] {
+        &self.read().errors
+    }
+
+    /// A score of several stanzas cut at its first double bar, with the words that stanza sets:
+    /// what the hymn takes where a seasonal doxology parts the later stanzas from the score's.
+    pub fn first_stanza(&self) -> Option<&(Arc<str>, Vec<String>)> {
+        self.read().first_stanza.as_ref()
     }
 }
 
@@ -268,14 +298,14 @@ fn with_doxology(text: &str, score: &Score, t: &OfficeTexts) -> Option<String> {
         return None;
     }
     let earlier = words(&stanzas[..n - 1].join(" "));
-    if !score.words.starts_with(&earlier) {
+    if !score.words().starts_with(&earlier) {
         return None;
     }
     let last = words(&stanzas[n - 1]);
     let amen = last.last().is_some_and(|w| w == "amen");
     let sung = if amen { &last[..last.len() - 1] } else { &last[..] };
     let doxology = t.doxologies.values().find(|d| syllable_words(d) == sung)?;
-    if score.words.last().is_some_and(|w| w == "amen") != amen {
+    if score.words().last().is_some_and(|w| w == "amen") != amen {
         return None;
     }
     // The score's last stanza follows its (n - 1)th double bar.
@@ -400,7 +430,7 @@ fn sung_tune<'a>(key: &str, tunes: &'a BTreeMap<String, Score>, t: &OfficeTexts,
 
 /// Whether an entry can be sung: one tune, or several with rows in the tune table.
 fn singable(key: &str, tunes: &BTreeMap<String, Score>, t: &OfficeTexts) -> bool {
-    (tunes.len() == 1 || t.tunes.contains_key(key)) && tunes.values().all(|s| s.errors.is_empty())
+    (tunes.len() == 1 || t.tunes.contains_key(key)) && tunes.values().all(|s| s.errors().is_empty())
 }
 
 /// Whether any hymn or Marian antiphon has a score to offer: until one does, the fronts keep the
@@ -435,7 +465,7 @@ fn score_for(elem: &OfficeElement, t: &OfficeTexts, date: Date, feast: &str) -> 
     if SungKind::of_key(key) != Some(wanted) {
         return None;
     }
-    if let Some(sets) = wanted.span(&elem.text, &score.words) {
+    if let Some(sets) = wanted.span(&elem.text, score.words()) {
         return Some(ChantScore { gabc: score.gabc.clone(), sets });
     }
     // Every stanza's score on a day that takes another ending: the ending to the score's notes for
@@ -445,7 +475,7 @@ fn score_for(elem: &OfficeElement, t: &OfficeTexts, date: Date, feast: &str) -> 
     {
         return Some(ChantScore { gabc: Arc::from(gabc), sets: ScoreSpan::WholeHymn });
     }
-    let (first, sung) = score.first_stanza.as_ref()?;
+    let (first, sung) = score.first_stanza()?;
     (wanted.span(&elem.text, sung)? == ScoreSpan::FirstStanza).then(|| ChantScore { gabc: first.clone(), sets: ScoreSpan::FirstStanza })
 }
 
@@ -488,7 +518,7 @@ pub fn validate_scores(t: &OfficeTexts) -> Vec<String> {
         }
         for (tune, score) in tunes {
             let path = format!("texts/{CHANT_DIR}{key}/{tune}.gabc");
-            for e in &score.errors {
+            for e in score.errors() {
                 errs.push(format!("{path}: {e}"));
             }
             let Some(kind) = SungKind::of_key(key) else {
@@ -498,10 +528,10 @@ pub fn validate_scores(t: &OfficeTexts) -> Vec<String> {
             match t.canonical_ref(key) {
                 None => errs.push(format!("{path}: no corpus text {key}")),
                 Some(canonical) if canonical != key => errs.push(format!("{path}: {key} is an alias; name the score {canonical}")),
-                Some(_) => match kind.span(t.get(key), &score.words) {
+                Some(_) => match kind.span(t.get(key), score.words()) {
                     None => {
                         let want = kind.first_span_words(t.get(key));
-                        errs.push(format!("{path}: its words differ from the text's: {}", first_difference(&score.words, &want)));
+                        errs.push(format!("{path}: its words differ from the text's: {}", first_difference(score.words(), &want)));
                     }
                     Some(ScoreSpan::WholeHymn) => {
                         let parts = ChantScore { gabc: score.gabc.clone(), sets: ScoreSpan::WholeHymn }.stanza_parts().len();
@@ -590,8 +620,8 @@ mod tests {
     #[test]
     fn a_score_reads_its_words_and_errors() {
         let score = Score::new("name: t;\n%%\n(c4) To(g) thee,(h) be(j)fore(h) the(g) close(h) of(g) day.(g.) (::)");
-        assert!(score.errors.is_empty(), "{:?}", score.errors);
-        assert_eq!(score.words, words("To thee, before the close of day."));
+        assert!(score.errors().is_empty(), "{:?}", score.errors());
+        assert_eq!(score.words(), words("To thee, before the close of day."));
     }
 }
 
@@ -608,7 +638,7 @@ mod engine_tests {
             super::curl_apostrophes(gabc),
             "name: Heaven's King;\n%%\n(c4) Heav(g)en\u{2019}s(h) A(g)pos(h)tles\u{2019}(g) <i>don\u{2019}t</i>(h) (::)"
         );
-        assert_eq!(super::Score::new(gabc).words, super::Score::new(&super::curl_apostrophes(gabc)).words);
+        assert_eq!(super::Score::new(gabc).words(), super::Score::new(&super::curl_apostrophes(gabc)).words());
         let special = "%%\n(c4) <sp>'ae</sp>ter(g)na's(h) <v>it's</v>(g) (::)";
         assert_eq!(super::curl_apostrophes(special), "%%\n(c4) <sp>'ae</sp>ter(g)na\u{2019}s(h) <v>it's</v>(g) (::)");
     }
@@ -729,7 +759,7 @@ mod engine_tests {
             score.gabc
         );
         assert!(score.gabc.ends_with("Pa(h)ra(g)clete.(g.) (::) A(ghg)men.(f.g.) (::)\n"), "{}", score.gabc);
-        assert_eq!(Score::new(&score.gabc).words, words(&hymn_sung_stanzas(&hymn.text).join(" ")));
+        assert_eq!(Score::new(&score.gabc).words(), words(&hymn_sung_stanzas(&hymn.text).join(" ")));
 
         // A bar the score prints inside a word of the ending would part it: the first stanza instead.
         let key = "ordinary/terce/hymn";
