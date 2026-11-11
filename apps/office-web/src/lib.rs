@@ -16,8 +16,8 @@ pub mod pwa;
 pub mod usage;
 pub mod web_time;
 
-use std::path::Path;
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, OnceLock};
 
 use axum::Router;
 use axum::body::Body;
@@ -39,7 +39,10 @@ pub struct Server {
     engine: Engine,
     cache: YearCache,
     pages: Pages,
-    version: String,
+    /// Hashing the binary and the data takes as long as loading the engine,
+    /// so it waits until the server listens; see [`Server::version`].
+    version: OnceLock<String>,
+    data_dir: PathBuf,
     usage: Option<Store>,
     /// The host every other host forwards to; see [`moved`].
     canonical: Option<String>,
@@ -70,11 +73,18 @@ impl Server {
         let src = FsData::new(data_dir);
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
-        let version = pwa::compute_version(data_dir);
         let pages = Pages::new(pwa::asset_url)
             .map_err(|e| format!("parsing templates: {e}"))?
             .with_chant(office::chant::offers_chant(&engine.texts));
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None, canonical: None })
+        Ok(Server {
+            engine,
+            cache: YearCache::new(calendar),
+            pages,
+            version: OnceLock::new(),
+            data_dir: data_dir.to_path_buf(),
+            usage: None,
+            canonical: None,
+        })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A
@@ -139,7 +149,7 @@ impl Server {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, self.canonical.as_deref(), body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
             Route::Static => pwa::serve_static(&path, query.get("v")),
-            Route::ServiceWorker => pwa::service_worker(&self.version),
+            Route::ServiceWorker => pwa::service_worker(self.version()),
             Route::Ics => self.ics(&query, &ics::base_url(headers, host)),
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
@@ -153,9 +163,11 @@ impl Server {
         }
     }
 
-    /// The build stamp on the service worker and its page cache.
+    /// The build stamp on the service worker and its page cache, computed
+    /// on first use. [`run`] computes it in the background as soon as the
+    /// server listens; a request that comes first waits for it.
     pub fn version(&self) -> &str {
-        &self.version
+        self.version.get_or_init(|| pwa::compute_version(&self.data_dir))
     }
 }
 
@@ -208,28 +220,31 @@ async fn entry(server: Arc<Server>, route: Route, req: Request) -> Response<Body
     }
 }
 
-/// An address of the form `:8080` listens on every interface.
-async fn listen(addr: &str) -> Result<tokio::net::TcpListener, String> {
-    if let Some(port) = addr.strip_prefix(':') {
-        if let Ok(l) = tokio::net::TcpListener::bind(format!("[::]:{port}")).await {
-            return Ok(l);
+/// Binds `addr` before the server loads, so that connections arriving while
+/// it loads wait in the backlog instead of being refused. An address of the
+/// form `:8080` listens on every interface.
+pub fn listen(addr: &str) -> Result<std::net::TcpListener, String> {
+    let listener = match addr.strip_prefix(':') {
+        Some(port) => {
+            std::net::TcpListener::bind(format!("[::]:{port}")).or_else(|_| std::net::TcpListener::bind(format!("0.0.0.0:{port}")))
         }
-        return tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await.map_err(|e| format!("listen tcp {addr}: {e}"));
-    }
-    tokio::net::TcpListener::bind(addr).await.map_err(|e| format!("listen tcp {addr}: {e}"))
+        None => std::net::TcpListener::bind(addr),
+    };
+    listener.map_err(|e| format!("listen tcp {addr}: {e}"))
 }
 
-/// Serves until the process ends. The current year's calendar page, then
-/// the next year's, are composed in the background so the first visit to
-/// either is fast: composing a year takes about half a second, and the next
-/// year is one tap from the ordo and enters the offline precache each
-/// December.
-pub fn run(server: Server, addr: &str) -> Result<(), String> {
+/// Serves on `listener` (from [`listen`]) until the process ends. The build
+/// version is hashed in the background, then the current year's calendar
+/// page and the next year's are composed so the first visit to either is
+/// fast: composing a year takes about half a second, and the next year is
+/// one tap from the ordo and enters the offline precache each December.
+pub fn run(server: Server, listener: std::net::TcpListener) -> Result<(), String> {
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().map_err(|e| e.to_string())?;
     runtime.block_on(async {
         let server = Arc::new(server);
         let warm = Arc::clone(&server);
         tokio::task::spawn_blocking(move || {
+            warm.version();
             let year = Server::local_year();
             for year in [year, year + 1] {
                 if let Err(e) = warm.cache.months(year, &warm.engine) {
@@ -237,7 +252,8 @@ pub fn run(server: Server, addr: &str) -> Result<(), String> {
                 }
             }
         });
-        let listener = listen(addr).await?;
+        listener.set_nonblocking(true).map_err(|e| format!("listen: {e}"))?;
+        let listener = tokio::net::TcpListener::from_std(listener).map_err(|e| format!("listen: {e}"))?;
         let app = server.router();
         axum::serve(listener, app).await.map_err(|e| format!("server error: {e}"))
     })

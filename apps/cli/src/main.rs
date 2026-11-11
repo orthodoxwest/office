@@ -22,11 +22,15 @@ Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, 
 /// Starts the web server and blocks: `serve [ADDR]`, ":8080" by default.
 fn cmd_serve(data: &tools::fs::FsData, args: &[String], _out: &mut dyn Write) -> Result<(), String> {
     let addr = args.first().map(String::as_str).unwrap_or(":8080");
+    let started = std::time::Instant::now();
+    // Bound first: requests that arrive while the corpus loads wait rather than fail.
+    let listener = office_web::listen(addr)?;
+    eprintln!("Listening on http://localhost{addr}");
     let mut server = office_web::Server::new(&data.dir).map_err(|e| format!("creating server: {e}"))?;
     server.open_usage_from_env();
     server.canonical_host_from_env();
-    eprintln!("Listening on http://localhost{addr}");
-    office_web::run(server, addr)
+    eprintln!("Ready in {} ms", started.elapsed().as_millis());
+    office_web::run(server, listener)
 }
 
 fn main() -> ExitCode {
