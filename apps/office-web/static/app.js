@@ -853,10 +853,11 @@ function rule(x1, y1, x2, y2, w, seed) {
   // (after sleep/wake or a network change) and would otherwise show the
   // offline banner — and serve stale pages — while fully online. /sw.js is
   // used because the service worker passes it straight through to the
-  // network instead of answering from cache.
+  // network instead of answering from cache. HEAD, so a page view does not
+  // download the worker's ten kilobytes only to learn the network is there.
   function checkOnline() {
     var url = "/sw.js?online-check=" + Date.now();
-    var options = { cache: "no-store" };
+    var options = { cache: "no-store", method: "HEAD" };
     var timer;
 
     if ("AbortController" in window) {
