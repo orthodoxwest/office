@@ -135,16 +135,124 @@ class TokensTest {
         }
     }
 
+    /** Home's painted page (HomePaint.kt) takes the web's "Home: the painted page" tokens. */
+    @Test
+    fun homeInk() {
+        check(root, "ochre", Ochre)
+        check(root, "leaf-matte-hi", LeafMatteHi)
+        check(root, "leaf-matte", LeafMatte)
+        check(root, "leaf-matte-lo", LeafMatteLo)
+        check(root, "leaf-shadow", LeafShadow)
+        // Nave's wash and pool are thin ochre: 19% and 34% (`color-mix(... var(--ochre) N%, transparent)`).
+        assertEquals("color-mix(in srgb, var(--ochre) 19%, transparent)", value(root, "tablet-wash")?.trim())
+        assertEquals("color-mix(in srgb, var(--ochre) 34%, transparent)", value(root, "now-pool")?.trim())
+        assertEquals(Ochre.copy(alpha = 0.19f), homeInk(Nave).tabletWash)
+        assertEquals(Ochre.copy(alpha = 0.34f), homeInk(Nave).nowPool)
+        val dark = rule(":root[data-theme=\"dark\"]")
+        val ink = homeInk(Apse)
+        check(dark, "tablet-wash", ink.tabletWash)
+        check(dark, "now-pool", ink.nowPool)
+        check(dark, "now-gloss", ink.nowGloss)
+        check(dark, "sky-deep", ink.skyDeep)
+        check(dark, "sky", ink.sky)
+        check(dark, "sky-low", ink.skyLow)
+        check(dark, "sky-rim", ink.skyRim)
+        check(dark, "lime-white", ink.limeWhite)
+        check(dark, "sky-muted", ink.skyMuted)
+        check(dark, "sky-rubric", ink.skyRubric)
+        check(dark, "lining-lifted", ink.liningLifted)
+        // The current hour's name is lifted by night in the quiet seasons and Passiontide.
+        for (season in listOf("quiet", "passiontide")) {
+            check(rule(":root[data-theme=\"dark\"] body.season-$season"), "titulus-now", titulusNow(Apse, season))
+        }
+        assertEquals(Apse.titulus, titulusNow(Apse, "eastertide"))
+        assertEquals(Nave.titulus, titulusNow(Nave, "quiet"))
+    }
+
     /** Home's pointed heads are the web's, as tools/genarch.py writes them for both, in its order. */
     @Test
     fun arches() {
-        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch)
+        val arches = listOf(PhoneArch, TallArch, TallerArch, NicheArch, UprightArch)
         val rises = Regex("--arch-rise: ([0-9.]+);").findAll(css).map { it.groupValues[1].toFloat() }.toList()
         assertEquals(rises, arches.map { it.rise })
         for (a in arches) {
             // Each upper arc leaves its haunch at a tangent and passes through the point.
             assertEquals(a.radius, a.haunch + hypot(a.centre - a.haunch, a.depth), 1e-5f)
             assertEquals(a.radius, hypot(a.centre - 0.5f, a.rise + a.depth), 1e-5f)
+        }
+    }
+
+    private val swift = File("../../ios/Office/Niche.swift").readText()
+
+    /**
+     * The niche's zoom figures are the web's: each `NicheFigures.<name>` rule in style.css, the
+     * Kotlin figures and Niche.swift's, and the unzoomed header and colophon round them.
+     */
+    @Test
+    fun nicheFigures() {
+        val kotlin = mapOf(
+            "landscape" to NicheFigures.Landscape,
+            "landscapeList" to NicheFigures.LandscapeList,
+            "upright" to NicheFigures.Upright,
+            "uprightList" to NicheFigures.UprightList,
+            "short" to NicheFigures.Short,
+        )
+        fun number(block: String, token: String) = (value(block, token) ?: error("--$token missing")).trim().removeSuffix("rem").toFloat()
+        val swiftFigures = Regex("static let (\\w+) = NicheFigures\\(card: ([0-9.]+), fit: ([0-9.]+), air: ([0-9.]+), least: ([0-9.]+), share: ([0-9.]+)\\)")
+            .findAll(swift).associate { m -> m.groupValues[1] to m.groupValues.drop(2).map { it.toFloat() } }
+        assertEquals(kotlin.keys, swiftFigures.keys)
+        for ((name, f) in kotlin) {
+            val at = css.indexOf("/* NicheFigures.$name */").also { assertTrue("no NicheFigures.$name rule", it >= 0) }
+            val block = css.substring(at, css.indexOf("}", at))
+            val web = listOf(number(block, "card-w"), number(block, "niche-fit"), number(block, "niche-air"), number(block, "niche-least"), number(block, "niche-share"))
+            val app = listOf(f.card, f.fit, f.air, f.least, f.share)
+            assertEquals("NicheFigures.$name", web, app)
+            assertEquals("Niche.swift's $name", web, swiftFigures[name])
+        }
+        val main = css.substring(css.indexOf("--niche-above:") - 40, css.indexOf("/* NicheFigures.landscape */"))
+        assertEquals(NicheFigures.ABOVE, number(main, "niche-above"))
+        assertEquals(NicheFigures.BELOW, number(main, "niche-below"))
+        assertTrue(swift.contains("static let above: CGFloat = ${NicheFigures.ABOVE}"))
+        assertTrue(swift.contains("static let below: CGFloat = ${NicheFigures.BELOW}"))
+        // The list on a screen on its side, and the short screen, from the same heights.
+        assertTrue(css.contains("(min-width: 701px) and (min-height: ${NicheFigures.LIST_LANDSCAPE.toInt()}px)"))
+        assertTrue(css.contains("(min-width: 701px) and (max-height: ${NicheFigures.SHORT.toInt()}px)"))
+        assertTrue(swift.contains("static let listLandscape: CGFloat = ${NicheFigures.LIST_LANDSCAPE.toInt()}"))
+        assertTrue(swift.contains("static let shortHeight: CGFloat = ${NicheFigures.SHORT.toInt()}"))
+    }
+
+    /** The niche's reveal by day is the web's `--reveal-*`, in Kotlin and in Niche.swift. */
+    @Test
+    fun reveal() {
+        val block = css.substring(css.indexOf("--reveal-shade:") - 200, css.indexOf("--reveal-cast:") + 60)
+        val t = nicheTokens(Nave)
+        val tokens = mapOf(
+            "reveal-shade" to ("revealShade" to t.revealShade),
+            "reveal-mid" to ("revealMid" to t.revealMid),
+            "reveal-lit" to ("revealLit" to t.revealLit),
+            "reveal-sill" to ("revealSill" to t.revealSill),
+            "reveal-sill-edge" to ("revealSillEdge" to t.revealSillEdge),
+            "reveal-soffit" to ("revealSoffit" to t.revealSoffit),
+            "reveal-arris" to ("arris" to t.arris),
+            "reveal-arris-turn" to ("arrisTurn" to t.arrisTurn),
+            "reveal-arris-shade" to ("arrisShade" to t.arrisShade),
+            "reveal-cast" to ("cast" to t.cast),
+        )
+        for ((token, pair) in tokens) {
+            val (swiftName, color) = pair
+            check(block, token, color)
+            // Niche.swift: `var revealShade = Color(hex: 0xCBBCAA)` or `Color(rgb: 96, 66, 44, 0.3)`.
+            val decl = Regex("var $swiftName = Color\\((hex: 0x([0-9A-Fa-f]{6})|rgb: ([0-9]+), ([0-9]+), ([0-9]+), ([0-9.]+))\\)").find(swift)
+                ?: error("Niche.swift: no $swiftName")
+            val g = decl.groupValues
+            val got = if (g[2].isNotEmpty()) {
+                val hex = g[2].toInt(16)
+                floatArrayOf((hex shr 16 and 255).toFloat(), (hex shr 8 and 255).toFloat(), (hex and 255).toFloat(), 1f)
+            } else {
+                floatArrayOf(g[3].toFloat(), g[4].toFloat(), g[5].toFloat(), g[6].toFloat())
+            }
+            val want = parse(value(block, token)!!)
+            for (i in 0..3) assertEquals("Niche.swift $swiftName vs --$token", want[i], got[i], 0.01f)
         }
     }
 }

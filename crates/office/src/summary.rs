@@ -113,9 +113,9 @@ pub fn ordo_day(day: &Day, engine: &Engine, moveable: &MoveableDates) -> OrdoDay
         lauds: summarize("lauds"),
         hours_preces: summarize("prime").is_some_and(|h| h.preces),
         vespers: summarize("vespers"),
-        vespers_note: match day.vespers.owner {
+        vespers_note: match day.vespers.owner() {
             VespersOwner::IIOfPreceding => "II Vespers of preceding".to_string(),
-            VespersOwner::IOfFollowing => day.vespers.feast.as_ref().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
+            VespersOwner::IOfFollowing => day.vespers.feast().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
             VespersOwner::NotApplicable => String::new(),
         },
     }

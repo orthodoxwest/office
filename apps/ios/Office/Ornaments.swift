@@ -343,13 +343,19 @@ struct Lozenged: View {
     let text: String
     let style: TextStyle
     let ink: Color
+    /// The letters' own paint, where it is not flat `ink` (home's frieze: leaf lit at the heads).
+    var letters: LinearGradient?
     var diamond: CGFloat = 7.07
     @Environment(\.metrics) private var m
 
     var body: some View {
         HStack(spacing: m.px(12)) {
             Diamond(size: diamond, color: ink)
-            Text(text).type(style).foregroundStyle(ink)
+            if let letters {
+                Text(text).type(style).foregroundStyle(letters)
+            } else {
+                Text(text).type(style).foregroundStyle(ink)
+            }
             Diamond(size: diamond, color: ink)
         }
     }
@@ -359,6 +365,7 @@ struct Lozenged: View {
 struct PeriodIcon: View {
     let period: Period
     let color: Color
+    var alpha: Double = 0.7
     @Environment(\.metrics) private var m
 
     var body: some View {
@@ -366,7 +373,7 @@ struct PeriodIcon: View {
             ctx.fill(period.path.fitted(24, 16, in: CGRect(origin: .zero, size: size)), with: .color(color))
         }
         .frame(width: m.px(19), height: m.px(13))
-        .opacity(0.7)
+        .opacity(alpha)
         .accessibilityHidden(true)
     }
 }
@@ -444,7 +451,8 @@ private func vaultTile(_ width: CGFloat) -> CGFloat {
 
 /**
  * The field a page's wall carries (apse-vault.md), home's and the hour's ending: by night the Apse
- * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding; by day the
+ * vault, the hand-set stars of its 528pt tile each at its own opacity in the gilding, or with `sky`
+ * (the hour's ending) home's sky, its stars in the apse's matte leaf on one 384pt tile; by day the
  * Nave's powdering, one rosette to each cell of a quincunx in the rubrics' red at 12%, its tile
  * 96×168. Tiled from the field's centre and from `seam` down it, and faded by `fade`'s stops of
  * (fraction, opacity) for the field's height in either theme. Unlit, the vault has no stars: a
@@ -453,6 +461,8 @@ private func vaultTile(_ width: CGFloat) -> CGFloat {
 struct WallField: View {
     var seam: CGFloat = 0
     var lit: Bool = true
+    /// The hour's ending: by night home's sky, its stars in the apse's matte leaf on one 384pt tile.
+    var sky: Bool = false
     let fade: (_ height: CGFloat, _ dark: Bool) -> [(CGFloat, Double)]
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -460,12 +470,13 @@ struct WallField: View {
     var body: some View {
         let dark = p.dark
         let star = o.flat
+        let leaf = Leaf(o).mid
         let rosette = p.rubric.opacity(0.12)
         Canvas { ctx, size in
             ctx.drawLayer { layer in
                 // The vault's tile spreads as the screen widens (`--apse-tile`), so a painted ceiling
                 // never reads as a wallpaper of small stars; the stars are set on a 528pt tile.
-                let tile = vaultTile(size.width)
+                let tile = sky ? SkyStar.tileSize : vaultTile(size.width)
                 let (w, h): (CGFloat, CGFloat) = dark ? (tile, tile) : (96, 168)
                 // One tile centred on the field, as the web's masks are positioned; whole points
                 // keep the tiles' edges on the pixels, so shapes that cross them meet without a seam.
@@ -479,7 +490,9 @@ struct WallField: View {
                         t.translateBy(x: x, y: y)
                         // Each tile keeps its own half of a shape drawn on both its edges, as the mask's repeat does.
                         t.clip(to: Path(CGRect(x: 0, y: 0, width: w, height: h)))
-                        if dark {
+                        if dark && sky {
+                            for s in SkyStar.tile where lit { t.fill(s.path, with: .color(leaf.opacity(s.leaf))) }
+                        } else if dark {
                             t.scaleBy(x: tile / 528, y: tile / 528)
                             for s in vaultStars where lit { t.fill(s.path, with: .color(star.opacity(s.opacity))) }
                         } else {
@@ -528,16 +541,5 @@ struct Hairline: View {
 
     var body: some View {
         Rectangle().fill(color).frame(height: 1).frame(maxWidth: .infinity).accessibilityHidden(true)
-    }
-}
-
-/// A short vertical hairline between neighbouring items.
-struct VRule: View {
-    let color: Color
-    var height: CGFloat = 14
-    @Environment(\.metrics) private var m
-
-    var body: some View {
-        Rectangle().fill(color).frame(width: 1, height: m.px(height)).accessibilityHidden(true)
     }
 }

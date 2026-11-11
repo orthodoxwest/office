@@ -199,7 +199,7 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
                     assert_eq!(refs[i + 2], "shared/leader/let-us-pray");
                     assert_eq!(refs[i + 3], "proper/all-souls/prime-concluding-collect");
                 }
-                assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal", "shared/formulas/may-they-rest-in-peace"]);
+                assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal-versicle", "shared/formulas/may-they-rest-in-peace"]);
                 assert!(refs.iter().all(|r| !r.contains("martyrology")
                     && !r.contains("benedicamus")
                     && !r.contains("opening-versicle")
@@ -221,15 +221,15 @@ fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
             assert!(elements.iter().any(|e| e.kind == ElementType::Antiphon));
             assert!(elements.iter().any(|e| e.kind == ElementType::Hymn));
             assert!(elements.iter().any(|e| e.source_ref == "ordinary/shared/gloria-patri"));
-            assert!(elements.iter().all(|e| e.source_ref != "shared/formulas/rest-eternal"));
+            assert!(elements.iter().all(|e| !e.source_ref.starts_with("shared/formulas/rest-eternal")));
         }
     }
     // Diurnal p. 654: when All Souls is Saturday, the following Sunday
     // owns the evening instead of the All Saints octave.
     let (days, moveable) = year(2030);
     let day = &days[Date::new(2030, 11, 2).ordinal() as usize - 1];
-    assert_eq!(day.vespers.owner, crate::VespersOwner::IOfFollowing);
-    assert_eq!(day.vespers.feast.as_ref().unwrap().category, Some(Category::Sunday));
+    assert_eq!(day.vespers.owner(), crate::VespersOwner::IOfFollowing);
+    assert_eq!(day.vespers.feast().unwrap().category, Some(Category::Sunday));
     let evening = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
     assert!(!evening.sections.iter().any(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL));
 }
@@ -422,7 +422,7 @@ fn seasonal_little_hours_and_weekday_vespers_across_calendars() {
                     }
                 }
             }
-            if d.vespers.feast.is_none()
+            if d.vespers.feast().is_none()
                 && d.celebration.as_ref().is_none_or(|f| f.category == Some(Category::Feria))
                 && (1..=5).contains(&d.date.weekday().number())
                 && matches!(d.season, Season::Pentecost | Season::Epiphany | Season::Septuagesima)
@@ -1107,7 +1107,7 @@ fn sunday_within_the_octave_yields_to_the_epiphany_octave_day() {
         let (days, moveable) = year(y);
         let day = &days[date.ordinal() as usize - 1];
         assert_eq!(day.celebration.as_ref().unwrap().id, "epiphany-sunday-1", "{date}");
-        assert_eq!(day.vespers.feast.as_ref().unwrap().id, "epiphany-octave-day", "{date}");
+        assert_eq!(day.vespers.feast().unwrap().id, "epiphany-octave-day", "{date}");
         let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
         let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
         let text = |comm: bool, slot: &str| {
@@ -1134,7 +1134,7 @@ fn sunday_anticipated_on_a_saturday_feast_has_no_second_vespers() {
         let comms = |d: i32| {
             let date = Date::new(y, 2, d);
             let day = &days[date.ordinal() as usize - 1];
-            assert_eq!(day.vespers.feast.as_ref().unwrap().id, "purification-bvm", "{date}");
+            assert_eq!(day.vespers.feast().unwrap().id, "purification-bvm", "{date}");
             let hour = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
             hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect::<Vec<_>>()
         };
@@ -1158,11 +1158,15 @@ fn anticipated_sunday_at_friday_second_vespers_takes_fridays_antiphon() {
     let friday_index = Date::new(2075, 2, 1).ordinal() as usize - 1;
     let sunday = days[friday_index + 1].commemorations.iter().find(|c| c.id == "epiphany-sunday-4-anticipated").unwrap().clone();
     let mut friday = days[friday_index].clone();
-    friday.vespers.owner = crate::concurrence::VespersOwner::IIOfPreceding;
-    friday.vespers.feast = friday.celebration.clone();
+    friday.vespers.office = crate::concurrence::VespersOffice::Second {
+        feast: friday.celebration.clone().unwrap(),
+        color: friday.color,
+        season: friday.season,
+        following_commemorated: None,
+        following_octave_of: None,
+    };
     friday.vespers.commemorations = vec![sunday.clone()];
     friday.vespers.incoming_commemoration_ids = vec![sunday.id.clone()];
-    friday.vespers.following_office_commemoration_id = None;
     let hour = engine().compose_hour("vespers", &friday, &moveable, PrayerForm::Private).unwrap();
     let elements: Vec<_> = hour.sections.into_iter().flat_map(|s| s.elements).filter(|e| e.is_commemoration).collect();
     let antiphon = elements.iter().find(|e| e.commemoration_owner_id == sunday.id && e.slot_ref == "commemoration-antiphon").unwrap();
@@ -1445,7 +1449,7 @@ fn advent_ember_wednesday_takes_the_office_from_the_conception_octave() {
         let ember = &days[Date::new(y, 12, 15).ordinal() as usize - 1];
         assert_eq!(ember.celebration.as_deref().map(|c| c.id.as_str()), Some("advent-ember-wednesday"), "{y}");
         assert!(ember.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
-        assert_eq!(eve.vespers.feast.as_ref().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
+        assert_eq!(eve.vespers.feast().map(|f| f.id.as_str()), Some("conception-bvm-octave-day-7"), "{y}");
         assert!(eve.vespers.commemorations.iter().any(|c| c.id == "conception-bvm-octave-day"), "{y}");
     }
     for y in [2022, 2033] {
@@ -1694,5 +1698,97 @@ fn compline_opening_and_confession_follow_who_leads() {
             let hour = engine().compose_hour("compline", day, &moveable, form).unwrap();
             assert!(hour.sections.iter().flat_map(|s| &s.elements).all(|e| e.leader_slot != "opening"), "{date} {form:?}");
         }
+    }
+}
+
+/// General Rubrics VII.3: where two octaves overlap, "the Office of the worthier Octave is
+/// said, with Commemoration of the other Octave", so the day is within the octave whose office
+/// it says, or else the worthier. 2021 ordo: 24 June is Thursday within the Octave of Pentecost
+/// with the Baptist transferred; 30 June the Commemoration of St Paul with "Oct. Baptist"
+/// commemorated; 4 July the Sunday within the Octave of Corpus Christi on "Day VI within the
+/// Octave of Ss Peter & Paul"; Trinity Sunday, 27 June, is past Pentecost's octave (Rubrics
+/// VII.2) and within the Baptist's ("Comm. ... Baptist" at II Vespers). 2018 and 2026 ordos: 1
+/// July is the Octave of St John Baptist with Ss Peter & Paul's octave commemorated. A Sunday
+/// within both common octaves (30 June 2041) is the Baptist's, the first begun.
+#[test]
+fn overlapping_octaves_follow_the_office_said() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for (y, m, d, octave) in [
+        (2021, 6, 24, "pentecost"),
+        (2021, 6, 27, "nativity-john-baptist"),
+        (2026, 6, 7, ""),
+        (2021, 6, 30, "ss-peter-paul"),
+        (2021, 7, 1, "corpus-christi"),
+        (2021, 7, 4, "corpus-christi"),
+        (2022, 6, 26, "corpus-christi"),
+        (2026, 7, 1, "nativity-john-baptist"),
+        (2027, 6, 24, "pentecost"),
+        (2027, 7, 4, "corpus-christi"),
+        (2041, 6, 30, "nativity-john-baptist"),
+    ] {
+        let cal = build_calendar(y, &data).unwrap();
+        let day = cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(day.within_octave_of.as_deref(), Some(octave).filter(|o| !o.is_empty()), "{}", day.date);
+    }
+}
+
+/// The Sunday within the Octave of Corpus Christi commemorates the octave at II Vespers with
+/// "O how sweet" (Diurnal p. 421; 2023-2026 ordos) even when the Octave of Ss Peter & Paul or of
+/// St John Baptist overlaps it (2027 and 2022). The 2017-2022 ordos print "O sacred banquet" on
+/// this Sunday in every year, overlapping or not; the newest ordos govern.
+#[test]
+fn corpus_christi_sunday_keeps_its_octave_commemoration_under_another_octave() {
+    for date in [Date::new(2022, 6, 26), Date::new(2027, 7, 4)] {
+        let (days, moveable) = year(date.year());
+        let vespers = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let antiphon = vespers
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .find(|e| e.commemoration_owner_id.starts_with("corpus-christi") && e.slot_ref == "commemoration-antiphon")
+            .unwrap_or_else(|| panic!("{date}: no octave commemoration"));
+        assert_eq!(antiphon.source_ref, "proper/corpus-christi/commemoration-antiphon-sunday-second-vespers", "{date}");
+        assert!(antiphon.text.starts_with("O how sweet"), "{date}: {}", antiphon.text);
+    }
+}
+
+#[test]
+fn pre_lenten_and_lenten_vespers_keep_the_psalter_antiphons() {
+    // #776. From Septuagesima to Palm Sunday Vespers takes "Ants. and Psalms
+    // of Sunday" (Diurnal pp. 237, 280), and Monday to Wednesday in Holy Week
+    // the weekday's (pp. 282-284; 2026 ordo, "Mon. Ps. (114-21)"): the proper
+    // antiphons are said "At Lauds and the Hours". The Sunday within the
+    // Octave of the Ascension is said as on the Feast (2026 ordo, 24 May).
+    for y in 2026..=2030 {
+        let (days, moveable) = year(y);
+        let antiphons = |name: &str, date: Date| {
+            let day = &days[date.ordinal() as usize - 1];
+            let hour = engine().compose_hour(name, day, &moveable, PrayerForm::Private).unwrap();
+            let refs: Vec<String> = hour
+                .sections
+                .into_iter()
+                .flat_map(|s| s.elements)
+                .filter(|e| !e.is_commemoration && e.slot_ref.starts_with("psalm-antiphon-"))
+                .map(|e| e.source_ref)
+                .collect();
+            (day.celebration.as_ref().map(|c| c.id.clone()).unwrap_or_default(), refs)
+        };
+        let mut checked = 0;
+        let sundays = (0..9).map(|w| moveable.easter.add_days(-63 + 7 * w));
+        for date in sundays.chain((1..=3).map(|d| moveable.easter.add_days(-7 + d))) {
+            let (id, vespers) = antiphons("vespers", date);
+            let (_, lauds) = antiphons("lauds", date);
+            let own = format!("proper/{id}/");
+            if !lauds.iter().any(|r| r.starts_with(&own)) || vespers.iter().any(|r| !r.starts_with(&own) && !r.starts_with("ordinary/")) {
+                continue; // a feast holds the day or its Vespers
+            }
+            assert!(!vespers.is_empty(), "{date}");
+            assert!(vespers.iter().all(|r| r.starts_with("ordinary/vespers/psalm-antiphon-")), "{date} {id}: {vespers:?}");
+            checked += 1;
+        }
+        assert!(checked >= 9, "{y}: {checked}");
+        let (id, vespers) = antiphons("vespers", moveable.easter.add_days(42));
+        assert_eq!(id, "ascension-sunday-within-octave", "{y}");
+        assert!(vespers.iter().all(|r| r.starts_with("proper/ascension")), "{y}: {vespers:?}");
     }
 }

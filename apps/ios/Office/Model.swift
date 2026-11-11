@@ -165,6 +165,14 @@ extension CivilDate {
 enum Motion { case next, previous, fade }
 
 /**
+ * The header's overlay, at most one open at a time: the menu on a narrow screen, the wide
+ * header's Settings on a wide one. A tap outside, the escape scrub, any move to another page
+ * and crossing the breakpoint all close it. The web holds the same three states (app.js) and
+ * so does Android (Chrome.kt).
+ */
+enum Overlay { case none, menu, settings }
+
+/**
  * One place on the way back. While a page of the same kind replaces its page it stays the same
  * visit to the navigation stack, so the screen changes in place rather than pushing.
  */
@@ -184,12 +192,17 @@ final class AppModel: ObservableObject {
     static let shared = AppModel()
 
     @Published var root: CivilDate
-    @Published var path: [Entry] = []
+    /// Every move to another visit, the edge swipe's included, puts the header's overlay away; a
+    /// page changed in place (the search's words) does not, as on Android.
+    @Published var path: [Entry] = [] {
+        didSet {
+            if path.last?.id != oldValue.last?.id { overlay = .none }
+        }
+    }
     /// How the page replaced in place last moves, and the page it moved to.
     @Published private(set) var step: (to: Page, motion: Motion)?
-    @Published var menuOpen = false
-    /// The wide header's Settings panel.
-    @Published var settingsOpen = false
+    /// The header's open overlay, if any.
+    @Published private(set) var overlay = Overlay.none
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
@@ -265,10 +278,20 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Opens `shown` if another overlay or none is open, and closes it if it is.
+    func toggle(_ shown: Overlay) {
+        overlay = overlay == shown ? .none : shown
+    }
+
+    /// Closes the header's overlay.
+    func closeOverlay() {
+        overlay = .none
+    }
+
     /// Opens `next` over the current page; a page of the same kind replaces it, as a link would.
     func open(_ next: Page) {
-        menuOpen = false
-        settingsOpen = false
+        // Also when `next` is the page shown, which leaves `path` as it is.
+        overlay = .none
         if next == page { return }
         if next.kind == page.kind {
             // Replaced in place, as a link is followed: the same visit, so no push; the page
@@ -293,19 +316,38 @@ final class AppModel: ObservableObject {
      */
     func findAgain() {
         if path.count > 1, case .find = path[path.count - 2].page {
-            menuOpen = false
-            settingsOpen = false
             path.removeLast()
         } else {
             open(.find(""))
         }
     }
 
+    /**
+     * The name of a feast page's way back to the page under its visit `entry` (the web's
+     * `back_link`): "Today" or "November 10" for a day's page, "Ordo, November 2026" for the
+     * ordo's month, or nil for the search or anything else, whose way back is the search.
+     */
+    func feastBack(_ entry: Int) -> String? {
+        guard let at = path.firstIndex(where: { $0.id == entry }) else { return nil }
+        let under: Page = at == 0 ? .home(root) : path[at - 1].page
+        switch under {
+        case let .home(d): return feastBackToDay(date: d, today: today)
+        case let .ordo(y, m, _): return feastBackToOrdo(date: CivilDate(year: Int32(y), month: Int32(m), day: 1))
+        default: return nil
+        }
+    }
+
+    /// Back from the visit `entry` to the page under it, as the edge swipe goes.
+    func back(from entry: Int) {
+        guard path.last?.id == entry else { return }
+        path.removeLast()
+    }
+
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         step = nil
-        menuOpen = false
-        settingsOpen = false
+        // Also from home itself, where `path` stays empty.
+        overlay = .none
         root = today
         path = []
     }
@@ -417,7 +459,7 @@ final class AppModel: ObservableObject {
         default: path = []
         }
         // `-settings YES` opens the wide header's Settings, for its screenshot.
-        settingsOpen = d.bool(forKey: "settings")
+        overlay = d.bool(forKey: "settings") ? .settings : .none
         return true
     }
 }

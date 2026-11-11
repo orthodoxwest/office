@@ -459,6 +459,40 @@ function usageBeaconBody(scope) {
     (handheld ? " screen:mobile" : " screen:desktop") + leaderToken + clientToken;
 }
 
+// A painted rule: a stroke of one pen from (x1, y1) to (x2, y2), horizontal
+// or vertical, w wide. Its weight breathes with the hand (seeded, so a line
+// is the same on every visit, and on every front: the apps' ruledLine) and
+// it lifts to a point at each end. Home rules its frieze, invitation and
+// hours with it; the hours rule their way on.
+function seeded(seed) {
+  var s = seed >>> 0;
+  return function () {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+function rule(x1, y1, x2, y2, w, seed) {
+  var r = seeded(seed);
+  var horizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
+  var length = horizontal ? x2 - x1 : y2 - y1;
+  var n = Math.max(6, Math.round(length / 14));
+  var phase1 = r() * 6.28, phase2 = r() * 6.28, drift = (r() - 0.5) * 0.5;
+  var above = [], below = [];
+  for (var i = 0; i <= n; i += 1) {
+    var t = i / n, d = t * length;
+    // The pen lifts over the last 4.5px at each end.
+    var end = Math.min(1, Math.min(d, length - d) / 4.5);
+    var weight = w * (0.86 + 0.16 * Math.sin(phase1 + t * 5.1) + 0.08 * Math.sin(phase2 + t * 17)) * (0.35 + 0.65 * end);
+    // The line itself barely wanders.
+    var c = drift * (t - 0.5) + 0.12 * Math.sin(phase2 + t * 3.3);
+    above.push([d, c - weight / 2]);
+    below.push([d, c + weight / 2]);
+  }
+  return "M" + above.concat(below.reverse()).map(function (p) {
+    return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
+  }).join("L") + "Z";
+}
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
@@ -1131,66 +1165,76 @@ function usageBeaconBody(scope) {
     });
   };
 
-  // Ships closed; desktop CSS shows the nav regardless of [open]. Once
-  // scripting is available, keep [open] set on wide screens too (harmless
-  // cosmetically, but matches disclosure semantics) and re-collapse on any
-  // live resize back to narrow after a tap had opened it.
+  // The header's overlays, at most one open at a time: the phone menu below
+  // the breakpoint, the wide header's Settings above it. Each is a <details>,
+  // so its [open] holds the state; overlayOpen reads it as one of
+  // "menu", "settings" or null, and closeOverlay is the one way out, taken by
+  // a tap outside, Escape and crossing the breakpoint (a Settings left open
+  // on a narrow screen would otherwise come back when the screen widens).
+  // Above the breakpoint the menu's [open] is the desktop nav, not an
+  // overlay: it ships closed, desktop CSS shows the nav regardless, and
+  // script keeps [open] set there to match disclosure semantics.
+  // iOS and Android hold the same three states (Overlay in Model.swift and
+  // Chrome.kt).
   var siteMenu = document.querySelector(".site-menu");
-  if (siteMenu && "matchMedia" in window) {
-    var narrowMenu = window.matchMedia("(max-width: 700px)");
-    var syncSiteMenu = function () {
-      if (narrowMenu.matches) {
-        siteMenu.removeAttribute("open");
-      } else {
-        siteMenu.setAttribute("open", "");
+  var siteSettings = document.querySelector(".site-settings");
+  var narrowScreen = "matchMedia" in window ? window.matchMedia("(max-width: 700px)") : null;
+  var overlayOpen = function () {
+    if (narrowScreen && narrowScreen.matches) {
+      return siteMenu && siteMenu.open ? "menu" : null;
+    }
+    return siteSettings && siteSettings.open ? "settings" : null;
+  };
+  var overlayElement = function (overlay) {
+    return overlay === "menu" ? siteMenu : overlay === "settings" ? siteSettings : null;
+  };
+  var closeOverlay = function (focusSummary) {
+    var open = overlayElement(overlayOpen());
+    if (!open) {
+      return false;
+    }
+    open.removeAttribute("open");
+    var summary = focusSummary && open.querySelector("summary");
+    if (summary) {
+      summary.focus();
+    }
+    return true;
+  };
+
+  if (narrowScreen) {
+    var crossBreakpoint = function () {
+      if (siteSettings) {
+        siteSettings.removeAttribute("open");
+      }
+      if (siteMenu) {
+        if (narrowScreen.matches) {
+          siteMenu.removeAttribute("open");
+        } else {
+          siteMenu.setAttribute("open", "");
+        }
       }
     };
-    syncSiteMenu();
-    if (narrowMenu.addEventListener) {
-      narrowMenu.addEventListener("change", syncSiteMenu);
+    crossBreakpoint();
+    if (narrowScreen.addEventListener) {
+      narrowScreen.addEventListener("change", crossBreakpoint);
     }
-
-    // The phone menu is an overlay: a tap anywhere outside it, or Escape,
-    // puts it away. Taps inside (including the preferences) leave it open.
-    onTapOutside(siteMenu, function (e) {
-      if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
-        siteMenu.removeAttribute("open");
-        return true;
-      }
-      return false;
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
-        siteMenu.removeAttribute("open");
-        var summary = siteMenu.querySelector("summary");
-        if (summary) {
-          summary.focus();
-        }
-      }
-    });
   }
 
-  // The wide header's Settings is an overlay too: a tap outside it, or
-  // Escape, puts it away; a preference chosen inside leaves it open.
-  var siteSettings = document.querySelector(".site-settings");
-  if (siteSettings) {
-    onTapOutside(siteSettings, function (e) {
-      if (siteSettings.open && !siteSettings.contains(e.target)) {
-        siteSettings.removeAttribute("open");
-        return true;
-      }
-      return false;
+  // A tap outside the open overlay puts it away; taps inside (including the
+  // preferences) leave it open.
+  [siteMenu, siteSettings].forEach(function (overlay) {
+    if (!overlay) {
+      return;
+    }
+    onTapOutside(overlay, function (e) {
+      return overlayElement(overlayOpen()) === overlay && !overlay.contains(e.target) && closeOverlay(false);
     });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && siteSettings.open) {
-        siteSettings.removeAttribute("open");
-        var summary = siteSettings.querySelector("summary");
-        if (summary) {
-          summary.focus();
-        }
-      }
-    });
-  }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeOverlay(true);
+    }
+  });
 
   // Native disclosures start closed at every width, including without JS.
   // A deliberate bulk action is useful for comparing offices across the year.
@@ -1913,6 +1957,255 @@ function usageBeaconBody(scope) {
     }).observe(hero);
   });
 
+  // Home: the painted page (style.css). Two things CSS cannot draw.
+  //
+  // The rules: the frieze's oxblood edges and leaf fillets, the invitation's
+  // double frame (the lining, and inside it the day's colour stopping short
+  // of the corners), and the hours' table, ruled above and below and between
+  // the periods, none upright. Each is a stroke of one pen: its weight
+  // breathes with the hand (seeded, so a line is the same on every visit)
+  // and it lifts to a point at each end. A host so ruled carries .is-ruled
+  // and gives up the CSS borders that stand without script.
+  //
+  // The stars: by night the head of the arch is the parish apse's painted
+  // sky, on a phone and in the wide niche. Its gold-leaf stars are one fixed field for each head
+  // (tools/genstars.py, ornaments/stars.json, fetched only when the sky is
+  // shown), and the painter keeps them off the words: every star that would
+  // touch a laid-out line of the day block (14px either side, 6px above and
+  // below), the cross, or the 9px above the frieze is left out. Measured
+  // again whenever the head's lines can move.
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    var NS = "http://www.w3.org/2000/svg";
+    var frieze = hero.querySelector(".home-prayer-card h2");
+    var prayNow = hero.querySelector(".pray-now");
+    var table = hero.querySelector(".home-hour-links");
+    var sky = hero.querySelector(".home-sky");
+    var head = hero.querySelector(".home-day-head");
+    var crown = hero.querySelector(".home-crown");
+
+    // The wide niche's zoom (--niche-zoom), 1 on a phone.
+    function heroZoom() {
+      return parseFloat(getComputedStyle(hero).zoom) || 1;
+    }
+
+    function layer(host) {
+      var svg = host.querySelector(":scope > svg.home-rules");
+      if (!svg) {
+        svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("class", "home-rules");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        host.appendChild(svg);
+        host.classList.add("is-ruled");
+      }
+      svg.textContent = "";
+      return svg;
+    }
+
+    function stroke(svg, cls, d) {
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("class", cls);
+      path.setAttribute("d", d);
+      svg.appendChild(path);
+    }
+
+    function ruleAll() {
+      var w, h, svg;
+      if (frieze) {
+        w = frieze.offsetWidth;
+        h = frieze.offsetHeight;
+        svg = layer(frieze);
+        stroke(svg, "r-edge", rule(0, 0.6, w, 0.6, 1.3, 11));
+        stroke(svg, "r-edge", rule(0, h - 0.6, w, h - 0.6, 1.3, 12));
+        stroke(svg, "r-fillet", rule(0, 2.2, w, 2.2, 0.9, 13));
+        stroke(svg, "r-fillet", rule(0, h - 2.2, w, h - 2.2, 0.9, 14));
+      }
+      if (prayNow) {
+        var g = 3.5;
+        w = prayNow.offsetWidth;
+        h = prayNow.offsetHeight;
+        svg = layer(prayNow);
+        stroke(svg, "r-lining", rule(0, 0.5, w, 0.5, 1.25, 21));
+        stroke(svg, "r-lining", rule(0, h - 0.5, w, h - 0.5, 1.25, 22));
+        stroke(svg, "r-lining", rule(0.5, 0, 0.5, h, 1.25, 23));
+        stroke(svg, "r-lining", rule(w - 0.5, 0, w - 0.5, h, 1.25, 24));
+        // The frontal, finer, stopping short of the corners.
+        stroke(svg, "r-day", rule(g + 1.5, g, w - g - 1.5, g, 0.7, 25));
+        stroke(svg, "r-day", rule(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 26));
+        stroke(svg, "r-day", rule(g, g + 1.5, g, h - g - 1.5, 0.7, 27));
+        stroke(svg, "r-day", rule(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 28));
+      }
+      if (table) {
+        w = table.offsetWidth;
+        h = table.offsetHeight;
+        var top = table.getBoundingClientRect().top;
+        var zoomed = heroZoom() !== 1;
+        svg = layer(table);
+        stroke(svg, "r-frame", rule(0, 0.5, w, 0.5, 1.3, 31));
+        stroke(svg, "r-frame", rule(0, h - 0.5, w, h - 0.5, 1.3, 32));
+        // Each period's top in the table's own pixels, which are the SVG's.
+        // The wide niche is zoomed and a client rect is measured on the
+        // glass, so a rule placed from one drifted down the table by the
+        // zoom: there the group's offsetTop (its offset parent is the
+        // table) places it. The phone's panel is not zoomed, and keeps the
+        // client rect's fraction of a pixel.
+        Array.prototype.slice.call(table.querySelectorAll(".home-hour-group"), 1).forEach(function (group, i) {
+          var y = zoomed ? group.offsetTop + 0.5 : group.getBoundingClientRect().top - top + 0.5;
+          stroke(svg, "r-inner", rule(0, y, w, y, 0.9, 41 + i));
+        });
+      }
+    }
+
+    var fields = null;
+    var loading = false;
+    function load() {
+      if (loading || !window.fetch) {
+        return;
+      }
+      loading = true;
+      fetch(sky.getAttribute("data-stars")).then(function (resp) {
+        return resp.ok ? resp.json() : null;
+      }).then(function (data) {
+        fields = data;
+        schedule();
+      }).catch(function () {});
+    }
+
+    function placeStars() {
+      var old = sky.querySelector(":scope > svg.home-stars");
+      if (old) {
+        old.remove();
+      }
+      if (getComputedStyle(sky).display === "none") {
+        delete hero.dataset.stars;
+        return;
+      }
+      if (!fields) {
+        load();
+        return;
+      }
+      var cs = getComputedStyle(hero);
+      var list = fields[{ "0.44": "phone", "0.56": "tall", "0.64": "taller", "0.5": "niche", "0.62": "upright" }[cs.getPropertyValue("--arch-rise").trim()] || "phone"];
+      if (!list || !frieze) {
+        return;
+      }
+      // Client rects are measured on the glass; the wide niche is zoomed
+      // (--niche-zoom), and the stars are drawn in its own pixels, so every
+      // measure is taken back by the zoom (1 on a phone).
+      var zoom = heroZoom();
+      function own(q) {
+        return { left: q.left / zoom, top: q.top / zoom, right: q.right / zoom, bottom: q.bottom / zoom, width: q.width / zoom, height: q.height / zoom };
+      }
+      var hr = own(hero.getBoundingClientRect());
+      var sr = own(sky.getBoundingClientRect());
+      var band = own(frieze.getBoundingClientRect()).top - hr.top;
+      // The reserve: every laid-out line of the day block, and the cross.
+      var reserve = [];
+      var walker = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        var parent = node.parentElement;
+        if (!node.nodeValue.trim() || parent.closest(".sr-only, .home-date-comma, [hidden]")) {
+          continue;
+        }
+        // A second commemoration's "and" is generated, left of its text.
+        var item = parent.closest(".commemorations li");
+        var lead = item && item.previousElementSibling ? 2.6 * parseFloat(getComputedStyle(parent).fontSize) : 0;
+        var range = document.createRange();
+        range.selectNodeContents(node);
+        Array.prototype.forEach.call(range.getClientRects(), function (rect) {
+          var q = own(rect);
+          if (q.width > 1) {
+            reserve.push([q.left - hr.left - 14 - lead, q.top - hr.top - 6, q.right - hr.left + 14, q.bottom - hr.top + 6]);
+          }
+        });
+      }
+      if (crown) {
+        var c = own(crown.getBoundingClientRect());
+        reserve.push([c.left - hr.left - 11, c.top - hr.top - 11, c.right - hr.left + 11, c.bottom - hr.top + 11]);
+      }
+      // A first-class feast's stars stand a size larger and fully lit.
+      var first = document.body.classList.contains("rank-first-class");
+      var k = first ? 1.14 : 1;
+      var w = hr.width;
+      var svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "home-stars");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      svg.setAttribute("width", sr.width.toFixed(1));
+      svg.setAttribute("height", sr.height.toFixed(1));
+      // Leaf under a lamp: the stars nearest the day's words take the light.
+      var cardSpace = document.createElementNS(NS, "g");
+      cardSpace.setAttribute("transform", "translate(" + (hr.left - sr.left).toFixed(2) + " " + (hr.top - sr.top).toFixed(2) + ")");
+      cardSpace.innerHTML = '<defs><radialGradient id="home-leaf" gradientUnits="userSpaceOnUse" cx="' + (w / 2).toFixed(1) + '" cy="' + (band * 0.62).toFixed(1) + '" r="' + (w * 0.72).toFixed(1) + '"><stop class="s-hi" offset="0"/><stop class="s-mid" offset="0.6"/><stop class="s-lo" offset="1"/></radialGradient></defs>';
+      var count = 0;
+      list.forEach(function (star) {
+        var x = star[0] * w, y = star[1] * w, r = star[2] * k, outline = star[4];
+        if (y + r > band - 9) {
+          return;
+        }
+        if (reserve.some(function (q) { return x + r > q[0] && x - r < q[2] && y + r > q[1] && y - r < q[3]; })) {
+          return;
+        }
+        var points = [];
+        for (var i = 0; i < outline.length; i += 2) {
+          points.push((x + outline[i] * k).toFixed(2) + "," + (y + outline[i + 1] * k).toFixed(2));
+        }
+        var path = document.createElementNS(NS, "path");
+        path.setAttribute("d", "M" + points.join("L") + "Z");
+        path.setAttribute("fill", "url(#home-leaf)");
+        path.setAttribute("fill-opacity", first ? Math.min(1, star[3] + 0.25).toFixed(2) : String(star[3]));
+        cardSpace.appendChild(path);
+        count += 1;
+      });
+      svg.appendChild(cardSpace);
+      sky.appendChild(svg);
+      hero.dataset.stars = String(count);
+    }
+
+    var frame = 0;
+    function paint() {
+      frame = 0;
+      ruleAll();
+      if (sky && head) {
+        placeStars();
+      }
+    }
+    function schedule() {
+      if (!frame) {
+        frame = window.requestAnimationFrame(paint);
+      }
+    }
+    // WebKit can run this deferred script before style.css has applied, and
+    // rules measured then were drawn across an unstyled page (the table's
+    // joints some 900px below it) until the next resize. The hero is a
+    // container only once the stylesheet stands: paint now if it is, else
+    // when the page has loaded (its stylesheet with it).
+    if (getComputedStyle(hero).containerType === "inline-size") {
+      paint();
+    } else {
+      window.addEventListener("load", paint);
+    }
+    if (document.fonts) {
+      document.fonts.ready.then(schedule);
+    }
+    window.addEventListener("resize", schedule);
+    if ("ResizeObserver" in window) {
+      var watch = new ResizeObserver(schedule);
+      watch.observe(hero);
+      if (head) {
+        watch.observe(head);
+      }
+    }
+    // The sky comes and goes with the theme.
+    new MutationObserver(schedule).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    if (window.matchMedia) {
+      var scheme = window.matchMedia("(prefers-color-scheme: dark)");
+      if (scheme.addEventListener) {
+        scheme.addEventListener("change", schedule);
+      }
+    }
+  });
+
   // currentHourInfo returns the office most likely being prayed at the given
   // local time, plus a day offset (0 or -1) locating which calendar day it
   // belongs to. Boundaries mirror presentation::current_hour_entry: midnight-2am
@@ -1968,8 +2261,9 @@ function usageBeaconBody(scope) {
       link.setAttribute("aria-current", "time");
       if (!state) {
         state = document.createElement("span");
-        // sr-only to match the server-rendered marker in home.html: the tinted
-        // cell and the "Pray {hour}" invitation carry "now" visually.
+        // sr-only to match the server-rendered marker in home.html: the pool
+        // of light under the hour and the "Pray {hour}" invitation carry
+        // "now" visually.
         state.className = "home-hour-link-state sr-only";
         state.textContent = "Now";
         link.appendChild(state);
@@ -1979,6 +2273,17 @@ function usageBeaconBody(scope) {
       if (state) {
         state.parentNode.removeChild(state);
       }
+    }
+  }
+
+  // The invitation's words, leaving its hand-ruled frame (an aria-hidden SVG
+  // child, see "Home: the painted page") in place.
+  function setPrayNowLabel(prayNow, label) {
+    var words = Array.prototype.find.call(prayNow.childNodes, function (n) { return n.nodeType === 3 && n.nodeValue.trim(); });
+    if (words) {
+      words.nodeValue = label;
+    } else {
+      prayNow.insertBefore(document.createTextNode(label), prayNow.firstChild);
     }
   }
 
@@ -2009,7 +2314,7 @@ function usageBeaconBody(scope) {
       setHourCurrent(link, isCurrent);
       if (isCurrent && prayNow) {
         prayNow.setAttribute("href", link.getAttribute("href"));
-        prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+        setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
         matched = true;
       }
     });
@@ -2018,7 +2323,7 @@ function usageBeaconBody(scope) {
       var offsetDate = new Date(now.getTime());
       offsetDate.setDate(offsetDate.getDate() + info.offset);
       prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
-      prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+      setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
       matched = true;
     }
 
@@ -2027,7 +2332,7 @@ function usageBeaconBody(scope) {
       if (lauds) {
         prayNow.setAttribute("href", lauds.getAttribute("href"));
       }
-      prayNow.textContent = "Open Lauds";
+      setPrayNowLabel(prayNow, "Open Lauds");
     }
   }
 
@@ -2537,4 +2842,153 @@ function usageBeaconBody(scope) {
     last = Date.now();
   });
   window.setInterval(tick, 1000);
+})();
+
+// The end of an hour: its way on is ruled under with home's pen where the
+// wall's field begins, so the powdering and the vault are cut under a line
+// as they are under the header's beam (style.css "The way on"). Without
+// script the rule is a border.
+(function () {
+  var nav = document.querySelector(".page-hour .hour-continuation");
+  if (!nav) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var width = 0, height = 0;
+  function draw() {
+    var w = nav.offsetWidth, h = nav.offsetHeight;
+    if (!w || (w === width && h === height)) return;
+    width = w;
+    height = h;
+    var svg = nav.querySelector(":scope > svg.hour-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "hour-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      nav.appendChild(svg);
+      nav.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("d", rule(0, h - 0.5, w, h - 0.5, 1.2, 51));
+    svg.appendChild(path);
+  }
+  draw();
+  if ("ResizeObserver" in window) new ResizeObserver(draw).observe(nav);
+  else window.addEventListener("resize", draw);
+  if (document.fonts) document.fonts.ready.then(draw);
+})();
+
+// The feast page (style.css "The feast page"): ruled with home's pen. The
+// head's course of the lining, broken by the cross (and on a first-class
+// feast doubled by a finer rule in its colour); the standing's double frame,
+// as home's invitation; one stroke under each section's heading; the years
+// ruled above, below and between, as home's hours; and on a first-class feast
+// from 760px an upright course between the texts and the rail. Without
+// script each is a CSS border.
+(function () {
+  var page = document.querySelector(".page-feast .feast-page");
+  if (!page) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var head = page.querySelector(".feast-head");
+  var standing = page.querySelector(".feast-standing");
+  var body = page.querySelector(".feast-body");
+  var first = head && head.classList.contains("is-first");
+  var plain = head && head.classList.contains("is-plain");
+
+  function layer(host) {
+    var svg = host.querySelector(":scope > svg.feast-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "feast-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      host.appendChild(svg);
+      host.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    return svg;
+  }
+
+  function stroke(svg, cls, d) {
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("class", cls);
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+  }
+
+  function ruleAll() {
+    var w, h, svg;
+    if (head && !plain) {
+      w = head.offsetWidth;
+      svg = layer(head);
+      var mid = w / 2, gap = first ? 27 : 24;
+      stroke(svg, "r-lining", rule(0, 0.5, mid - gap, 0.5, 1.25, 51));
+      stroke(svg, "r-lining", rule(mid + gap, 0.5, w, 0.5, 1.25, 52));
+      if (first) {
+        stroke(svg, "r-day", rule(1.5, 4, mid - gap - 3, 4, 0.8, 53));
+        stroke(svg, "r-day", rule(mid + gap + 3, 4, w - 1.5, 4, 0.8, 54));
+      }
+    }
+    if (standing) {
+      var g = 3.5;
+      w = standing.offsetWidth;
+      h = standing.offsetHeight;
+      svg = layer(standing);
+      stroke(svg, "r-lining", rule(0, 0.5, w, 0.5, 1.25, 61));
+      stroke(svg, "r-lining", rule(0, h - 0.5, w, h - 0.5, 1.25, 62));
+      stroke(svg, "r-lining", rule(0.5, 0, 0.5, h, 1.25, 63));
+      stroke(svg, "r-lining", rule(w - 0.5, 0, w - 0.5, h, 1.25, 64));
+      // The frontal, finer, stopping short of the corners.
+      stroke(svg, "r-day", rule(g + 1.5, g, w - g - 1.5, g, 0.7, 65));
+      stroke(svg, "r-day", rule(g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 66));
+      stroke(svg, "r-day", rule(g, g + 1.5, g, h - g - 1.5, 0.7, 67));
+      stroke(svg, "r-day", rule(w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 68));
+      var next = standing.classList.contains("is-monastic") && standing.querySelector(".feast-next");
+      if (next) {
+        svg = layer(next);
+        stroke(svg, "r-inner", rule(0, 0.5, next.offsetWidth, 0.5, 0.9, 69));
+      }
+    }
+    page.querySelectorAll(".feast-section > h2").forEach(function (h2, i) {
+      svg = layer(h2);
+      stroke(svg, "r-frame", rule(0, h2.offsetHeight - 0.5, h2.offsetWidth, h2.offsetHeight - 0.5, 1.3, 71 + i));
+    });
+    var list = page.querySelector(".feast-years .find-years");
+    if (list && list.querySelector(":scope > li")) {
+      svg = layer(list);
+      var top = list.getBoundingClientRect().top;
+      w = list.offsetWidth;
+      var rows = Array.prototype.map.call(list.querySelectorAll(":scope > li"), function (li) { return li.getBoundingClientRect(); });
+      rows.forEach(function (r, i) {
+        stroke(svg, i ? "r-inner" : "r-frame", rule(0, r.top - top + 0.5, w, r.top - top + 0.5, i ? 0.9 : 1.3, 81 + i));
+      });
+      var last = rows[rows.length - 1];
+      stroke(svg, "r-frame", rule(0, last.bottom - top - 0.5, w, last.bottom - top - 0.5, 1.3, 81 + rows.length));
+    }
+    var texts = body && body.querySelector(".feast-texts");
+    if (first && texts && standing && body) {
+      svg = layer(body);
+      if (window.matchMedia("(min-width: 760px)").matches) {
+        var x = (texts.offsetLeft + texts.offsetWidth + standing.offsetLeft) / 2;
+        h = body.offsetHeight;
+        stroke(svg, "r-lining", rule(x, 4, x, h - 4, 1.25, 57));
+        stroke(svg, "r-day", rule(x + 3.5, 6, x + 3.5, h - 6, 0.8, 58));
+      }
+    }
+  }
+
+  ruleAll();
+  // Redrawn whenever the page's box changes: a new width, and the reader's
+  // text size, which moves every line without touching the window.
+  var size = page.offsetWidth + "x" + page.offsetHeight;
+  function remeasure() {
+    var now = page.offsetWidth + "x" + page.offsetHeight;
+    if (now !== size) {
+      size = now;
+      ruleAll();
+    }
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(page);
+  else window.addEventListener("resize", remeasure);
+  if (document.fonts) document.fonts.ready.then(ruleAll);
 })();

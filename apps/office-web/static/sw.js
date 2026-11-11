@@ -74,6 +74,15 @@ var CORE_ASSETS = [
   assetURL("/static/plaster-soft.jpg"),
   assetURL("/static/plaster-wide-soft.jpg"),
   assetURL("/static/leaf.png"),
+  // Home's painted materials (tools/genpaint.py) and, by night on a phone,
+  // the apse's sky and its stars (tools/genplaster.py --sky-of,
+  // tools/genstars.py).
+  assetURL("/static/pigment.png"),
+  assetURL("/static/tablet.png"),
+  assetURL("/static/gild.png"),
+  assetURL("/static/sky-wash.jpg"),
+  assetURL("/static/ornaments/stars.json"),
+  assetURL("/static/ornaments/sky-tile.svg"),
   // The painted ornaments style.css masks its colours through
   // (tools/genornaments.py).
   assetURL("/static/ornaments/consecration.svg"),
@@ -296,6 +305,11 @@ function canonicalCacheKey(url) {
     return "/" + hourMatch[1] + "/" + hourMatch[2];
   }
   if (CALENDAR_RE.test(path)) {
+    return path;
+  }
+  // A feast's page is one page whichever day or month of the ordo opened it
+  // (`?from=` names only the way back), so one copy serves them all offline.
+  if (path.indexOf("/feast/") === 0) {
     return path;
   }
   return path + url.search;

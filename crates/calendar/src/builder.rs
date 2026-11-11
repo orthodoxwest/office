@@ -666,16 +666,19 @@ fn build_calendar_year(
         }
     }
 
-    // Days 1–8 of each octave map to the parent; a later octave overwrites.
-    let mut octave_ranges: HashMap<Date, String> = HashMap::new();
+    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap.
+    let mut octave_ranges: HashMap<Date, Vec<(Date, FeastRef)>> = HashMap::new();
     for f in all_base.iter().filter(|f| f.has_octave) {
         if let Some(parent) = resolve_feast_date(f, year, &m) {
             for n in 0..8 {
                 let date = parent.add_days(n);
-                if octave_ceases(f, date, &m) {
+                // Pentecost's octave ends with None of its Saturday (Rubrics VII.2): Trinity
+                // Sunday is not within it (2021 and 2024 ordos commemorate the Baptist's octave
+                // there, not Pentecost's).
+                if octave_ceases(f, date, &m) || (f.id == "pentecost" && n == 7) {
                     continue;
                 }
-                octave_ranges.insert(date, f.id.clone());
+                octave_ranges.entry(date).or_default().push((parent, f.clone()));
             }
         }
     }
@@ -722,7 +725,7 @@ fn build_calendar_year(
             day.color = bvm.color;
             day.celebration = Some(Arc::new(bvm));
         }
-        day.within_octave_of = octave_ranges.get(&current).cloned();
+        day.within_octave_of = octave_ranges.get(&current).and_then(|o| governing_octave(&day, o));
         day.feria_commemoration = feria_commemoration(&day, &m).map(Arc::new);
         days.push(day);
         current = current.add_days(1);
@@ -730,6 +733,52 @@ fn build_calendar_year(
 
     apply_penitential_rules(&mut days, rules, &anchor_dates).map_err(|e| format!("applying penitential rules: {e}"))?;
     Ok((days, pending))
+}
+
+/// The octave a day is within when several overlap: the one whose office is said, or else
+/// the worthier (General Rubrics VII.3: "If two Octaves happen to overlap ... the Office of
+/// the worthier Octave is said, with Commemoration of the other Octave"). The 2021 ordo keeps
+/// 4 July, the Sunday within the Octave of Corpus Christi and within the Octave of Ss Peter &
+/// Paul, as Corpus Christi's, and 24 June, within the Octave of Pentecost, as Pentecost's
+/// though St John Baptist's octave counts from that day. Equally worthy octaves (the Baptist's
+/// and Ss Peter & Paul's on a Sunday) go to the one begun first, the Baptist's, who precedes
+/// the Apostles in the rubrics' table of primary I Class feasts.
+fn governing_octave(day: &CalendarDay, octaves: &[(Date, FeastRef)]) -> Option<String> {
+    use crate::traits::octave_parent_id;
+    let said = day.celebration.as_deref().and_then(|c| if c.has_octave { Some(c.id.as_str()) } else { octave_parent_id(c) });
+    if let Some((_, parent)) = said.and_then(|id| octaves.iter().find(|(_, o)| o.id == id)) {
+        return Some(parent.id.clone());
+    }
+    let worthier = |(a_day, a): &(Date, FeastRef), (b_day, b): &(Date, FeastRef)| {
+        let (a_class, b_class) = (octave_class_weight(a.octave_class), octave_class_weight(b.octave_class));
+        if a_class != b_class {
+            return a_class > b_class;
+        }
+        if crate::occurrence::compare_feast_precedence(a, b) != crate::occurrence::compare_feast_precedence(b, a) {
+            return crate::occurrence::compare_feast_precedence(a, b);
+        }
+        a_day < b_day
+    };
+    let mut best: Option<&(Date, FeastRef)> = None;
+    for o in octaves {
+        if best.is_none_or(|b| worthier(o, b)) {
+            best = Some(o);
+        }
+    }
+    best.map(|(_, o)| o.id.clone())
+}
+
+/// Rubrics VII.3's groups, worthiest first: the privileged octaves of the Lord, then the
+/// common octaves of I Class feasts, then the simple octaves of II Class feasts.
+fn octave_class_weight(class: crate::model::OctaveClass) -> u8 {
+    use crate::model::OctaveClass;
+    match class {
+        OctaveClass::PrivilegedFirst => 4,
+        OctaveClass::PrivilegedSecond => 3,
+        OctaveClass::PrivilegedThird => 2,
+        OctaveClass::Common => 1,
+        OctaveClass::Simple => 0,
+    }
 }
 
 #[cfg(test)]

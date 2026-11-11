@@ -194,7 +194,7 @@ class ScreenshotTest {
     @Test
     fun datePicker() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
-        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        compose.onNodeWithText("Change date", substring = true).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
     }
@@ -202,7 +202,7 @@ class ScreenshotTest {
     @Test
     fun datePickerMonths() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
-        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        compose.onNodeWithText("Change date", substring = true).performClick()
         compose.onNodeWithText("MARCH 2026").performClick()
         compose.waitForIdle()
         shoot("date-picker-months-nave")
@@ -212,7 +212,7 @@ class ScreenshotTest {
     @Test
     fun prayerForm() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE)
-        compose.onNodeWithText("PRAYER FORM", substring = true).performClick()
+        compose.onNodeWithText("Prayer form", substring = true).performClick()
         compose.waitForIdle()
         shoot("prayer-form-nave")
     }

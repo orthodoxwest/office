@@ -114,6 +114,7 @@ supported key):
 | `[commemoration-antiphon]`, `[commemoration-versicle]` | When commemorated |
 | `[commemoration-collect]` | When commemorated (defaults to `[collect]`) |
 | `[benedictus-antiphon-monday]`, `[collect-monday]`, `[collect-vespers-monday]`, … | In a Sunday's proper: that week's feria (the Lauds collect serves through None; a Lenten feria's Vespers collect only at Vespers, and when the feria is commemorated there) |
+| `[collect-vespers]` | In a day's own proper (the Lenten Ember Wednesday and Friday; Monday–Wednesday in Holy Week): the collect at Vespers, and when the day is commemorated there; `[collect]` still serves Lauds through None |
 
 ### Directives
 

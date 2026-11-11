@@ -73,6 +73,7 @@ impl Pages {
                 ("whole_office", w.whole_office),
                 ("everyone_keeps", w.everyone_keeps),
                 ("monastic_heading", w.monastic_heading),
+                ("todays_hours", w.todays_hours),
             ]),
         );
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
@@ -85,6 +86,8 @@ impl Pages {
         env.add_global("chant", false);
         env.add_global("martyrology_hint", presentation::MARTYROLOGY_HINT);
         env.add_global("chant_hint", presentation::CHANT_HINT);
+        env.add_global("previous_day", presentation::PREVIOUS_DAY);
+        env.add_global("next_day", presentation::NEXT_DAY);
         // The About page's names in the menu and on home, as the apps set them.
         env.add_global("about_menu", presentation::about::ABOUT_MENU);
         env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);

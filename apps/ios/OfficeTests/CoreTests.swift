@@ -284,6 +284,33 @@ final class PlaceTests: XCTestCase {
         XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 3, day: 0), .feast("st-benedict"), .find("")])
     }
 
+    /// A feast page's way back names the page it was opened from and goes back to it, as the web's.
+    func testAFeastPageNamesItsWayBack() {
+        let model = AppModel()
+        model.path = []
+        model.open(.feast("st-raphael-of-brooklyn"))
+        let fromHome = model.path[0].id
+        let today = feastWordsShared.backToday
+        XCTAssertEqual(model.feastBack(fromHome), model.root == model.today ? today : feastBackToDay(date: model.root, today: model.today))
+        model.back(from: fromHome)
+        XCTAssertTrue(model.path.isEmpty, "back to home, not a new home over the feast")
+
+        model.open(.ordo(year: 2026, month: 2, day: 27))
+        model.open(.feast("st-raphael-of-brooklyn"))
+        XCTAssertEqual(model.feastBack(model.path[1].id), "Ordo, February 2026")
+        model.open(.home(CivilDate(year: 2027, month: 2, day: 27)))
+        model.open(.feast("st-raphael-of-brooklyn"))
+        XCTAssertEqual(model.feastBack(model.path[3].id), "February 27")
+        model.back(from: model.path[1].id)
+        XCTAssertEqual(model.path.count, 4, "only the page in front goes back")
+        model.back(from: model.path[3].id)
+        XCTAssertEqual(model.page, .home(CivilDate(year: 2027, month: 2, day: 27)))
+
+        model.open(.find("raphael"))
+        model.open(.feast("st-raphael-of-brooklyn"))
+        XCTAssertNil(model.feastBack(model.path[4].id), "from the search the way back is the search")
+    }
+
     func testCivilDatesStepAcrossMonths() {
         XCTAssertEqual(CivilDate(year: 2026, month: 2, day: 28).adding(days: 1), CivilDate(year: 2026, month: 3, day: 1))
         XCTAssertEqual(CivilDate(year: 2026, month: 3, day: 15).weekday, 1)

@@ -146,6 +146,7 @@ class MainActivity : ComponentActivity() {
                             onAllowLocation = ::openAppSettings,
                             onSearch = vm::search,
                             onFindAgain = vm::findAgain,
+                            pageUnder = vm::pageUnder,
                             entries = vm.entries.map { it.id },
                             newcomer = vm.newcomer,
                         )
@@ -289,6 +290,7 @@ fun OfficeApp(
     newcomer: Boolean = false,
     find: FindView? = null,
     feast: FeastPageView? = null,
+    pageUnder: (Long) -> Page? = { null },
 ) {
     val content = when {
         error != null -> Content.Failed(error)
@@ -324,6 +326,7 @@ fun OfficeApp(
         onAllowExact = onAllowExact,
         onFollowSun = onFollowSun,
         onAllowLocation = onAllowLocation,
+        pageUnder = pageUnder,
         entries = entries,
         newcomer = newcomer,
     )
@@ -363,14 +366,16 @@ fun OfficeApp(
     onAllowLocation: () -> Unit = {},
     onSearch: (String) -> Unit = {},
     onFindAgain: () -> Unit = { onOpen(Page.Find("")) },
+    pageUnder: (Long) -> Page? = { null },
     entries: List<Long>,
     newcomer: Boolean = false,
 ) {
     // About's words are the core's, the menu's name for the page and home's introduction among them.
     val aboutView = remember { about() }
-    var menu by remember { mutableStateOf(false) }
-    // The wide header's Settings panel: the theme and text size.
-    var settings by remember { mutableStateOf(false) }
+    // The menu, or on a wide screen the header's Settings panel (the theme and text size).
+    var overlay by remember { mutableStateOf(Overlay.NONE) }
+    // Whatever moves to another page puts it away, a link in the page as well as the header's.
+    LaunchedEffect(entries.lastOrNull()) { overlay = Overlay.NONE }
     // Each visit keeps its own scroll position and open sections, for Back and for a return
     // after Android has closed the app; a visit's state goes when it leaves the way back.
     val visits = rememberSaveableStateHolder()
@@ -389,8 +394,7 @@ fun OfficeApp(
         PredictiveBackHandler(enabled = entries.size > 1) { progress ->
             val under = behind
             try {
-                menu = false
-                settings = false
+                overlay = Overlay.NONE
                 if (under != null) {
                     revealing = true
                     progress.collect { screen.seekTo(it.progress, under) }
@@ -409,7 +413,11 @@ fun OfficeApp(
     }
     // The web's desktop composition from its breakpoint up: a tablet, or a phone on its side.
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        CompositionLocalProvider(LocalWide provides (maxWidth >= WideFrom), LocalRanked provides (maxWidth >= WideFrom && maxWidth < RankedBelow), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
+        // The menu belongs to the narrow screen and Settings to the wide one: neither survives a
+        // rotation or resize across the breakpoint, to come back later unasked.
+        val wide = maxWidth >= WideFrom
+        LaunchedEffect(wide) { overlay = Overlay.NONE }
+        CompositionLocalProvider(LocalWide provides wide, LocalRanked provides (maxWidth >= WideFrom && maxWidth < RankedBelow), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
             PlasterWall()
             // The wall runs under the bars; the page keeps clear of them at the sides (the screens
             // take the top and bottom themselves, so their backgrounds run under the bars).
@@ -430,9 +438,9 @@ fun OfficeApp(
                 val nav = SiteNav(
                     hours = hours,
                     currentHour = onHourPage?.hour,
-                    onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
+                    onHour = onHourPage?.let { h -> { name: String -> overlay = Overlay.NONE; onOpen(Page.Hour(h.date, name)) } },
                     onOrdo = {
-                        menu = false
+                        overlay = Overlay.NONE
                         // The ordo at the day shown, as the web's /calendar opens at today's row.
                         onOpen(
                             when (page) {
@@ -445,20 +453,25 @@ fun OfficeApp(
                         )
                     },
                     ordoCurrent = page is Page.Ordo || page is Page.Year || page is Page.Find || page is Page.Feast,
-                    onReminders = { menu = false; onOpen(Page.Reminders) },
+                    onReminders = { overlay = Overlay.NONE; onOpen(Page.Reminders) },
                     remindersCurrent = page is Page.Reminders,
                     about = aboutView.menu,
-                    onAbout = { menu = false; onOpen(Page.About) },
+                    onAbout = { overlay = Overlay.NONE; onOpen(Page.About) },
                     aboutCurrent = page is Page.About,
-                    settingsOpen = settings,
-                    onSettings = { settings = !settings },
+                    settingsOpen = overlay == Overlay.SETTINGS,
+                    onSettings = { overlay = overlay.toggled(Overlay.SETTINGS) },
                 )
                 val chrome: @Composable () -> Unit = {
-                    SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
+                    SiteHeader(
+                        onHome = { overlay = Overlay.NONE; onHome() },
+                        menuOpen = overlay == Overlay.MENU,
+                        onMenu = { overlay = overlay.toggled(Overlay.MENU) },
+                        nav = nav,
+                    )
                     // Only the page in front opens the menu: the one leaving keeps none.
                     if (front && !LocalWide.current) {
                         MenuPanel(
-                            visible = menu,
+                            visible = overlay == Overlay.MENU,
                             currentHour = nav.currentHour,
                             onHour = nav.onHour,
                             onOrdo = nav.onOrdo,
@@ -472,7 +485,7 @@ fun OfficeApp(
                             onTheme = onTheme,
                             textSize = textSize,
                             onTextSize = onTextSize,
-                            onDismiss = { menu = false },
+                            onDismiss = { overlay = Overlay.NONE },
                             topOffset = insets.calculateTopPadding() + 52.dp,
                         )
                     }
@@ -482,7 +495,7 @@ fun OfficeApp(
                         // Settings button at every size; the shell stands between the side insets.
                         val width = this@BoxWithConstraints.maxWidth - insets.calculateStartPadding(direction) - insets.calculateEndPadding(direction)
                         MenuPanel(
-                            visible = settings,
+                            visible = overlay == Overlay.SETTINGS,
                             currentHour = null,
                             onHour = null,
                             onOrdo = nav.onOrdo,
@@ -496,7 +509,7 @@ fun OfficeApp(
                             onTheme = onTheme,
                             textSize = textSize,
                             onTextSize = onTextSize,
-                            onDismiss = { settings = false },
+                            onDismiss = { overlay = Overlay.NONE },
                             topOffset = insets.calculateTopPadding() + 52.dp,
                             prefsOnly = true,
                             end = ((width - 1088.dp) / 2).coerceAtLeast(0.dp) + Gutter,
@@ -563,6 +576,10 @@ fun OfficeApp(
                                 view = content.view,
                                 chrome = chrome,
                                 insets = insets,
+                                // Named for the day or the ordo it was opened from, and back to it as
+                                // Back goes (the web's `back_link`); else the search.
+                                back = feastBack(pageUnder(visit.entry.id), today),
+                                onBack = { onBack?.invoke() },
                                 onFind = onFindAgain,
                                 onFeast = { onOpen(Page.Feast(it)) },
                                 onDay = { onOpen(Page.Home(it)) },

@@ -76,8 +76,8 @@ class AccessibilityTest {
     @Test
     fun theDatePickerNamesEachDay() {
         show(Page.Hour(lent, "vespers"))
-        compose.onNodeWithText("CHANGE DATE", substring = true).assert(state("Collapsed")).performClick()
-        compose.onNodeWithText("CHANGE DATE", substring = true).assert(state("Expanded"))
+        compose.onNodeWithText("Change date", substring = true).assert(state("Collapsed")).performClick()
+        compose.onNodeWithText("Change date", substring = true).assert(state("Expanded"))
         compose.onNodeWithContentDescription("Sunday, March 15, today").assertIsSelected()
         compose.onNodeWithContentDescription("Previous month").assert(role(Role.Button))
         // The prayer form's legend is set in capitals, as the web's `.leader-selector legend`.
@@ -112,7 +112,7 @@ class AccessibilityTest {
     @Test
     fun aNewcomerIsOfferedTheIntroduction() {
         show(Page.Home(lent), newcomer = true)
-        compose.onNodeWithText("INTRODUCTION").assert(role(Role.Button))
+        compose.onNodeWithText("Introduction").assert(role(Role.Button))
     }
 
     /** Android's largest font size (200%), for review beside the default captures. */

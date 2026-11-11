@@ -43,8 +43,8 @@ mod testutil;
 
 use calendar::YearCalendar;
 
-pub use concurrence::{VespersDesignation, VespersOwner};
-pub use day::Day;
+pub use concurrence::{VespersDesignation, VespersOffice, VespersOwner, VespersPsalms};
+pub use day::{Day, Evening};
 pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.

@@ -60,7 +60,7 @@ struct Palette: Equatable {
         pressedWash: Color(rgb: 107, 58, 31, 0.09),
         oak: Color(hex: 0x3F372F),
         materialHighlight: Color(rgb: 255, 255, 255, 0.38),
-        inscriptionGround: Color(hex: 0x545F54),
+        inscriptionGround: Color(hex: 0x4C574D),
         inscriptionEdge: Color(hex: 0x5E2A27),
         inscriptionWash: Color(rgb: 87, 94, 65, 0.055),
         plaster: "plaster_nave.jpg",
@@ -363,6 +363,10 @@ enum Scale {
     static let brand = TextStyle.label(14.4, 0.08)
     static let menu = TextStyle.label(12.48, 0.08)
     static let control = TextStyle.label(11.52, 0.1)
+    /// Home's foot letter, true small capitals: an hour's two disclosures under its title.
+    static let smallCapsControl = TextStyle(size: 14.4, line: 23.04, tracking: 14.4 * 0.08, smallCaps: true)
+    /// The day's name under an hour's title, in the text's ink (`.hour-meta-feast`).
+    static let dayName = TextStyle(size: 17.28, line: 22.46)
 }
 
 // The page's palette, gilding, measures and composition, as the Android app's composition locals.

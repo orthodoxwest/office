@@ -457,6 +457,10 @@ pub struct FeastWords {
     pub everyone_keeps: &'static str,
     /// The heading of a monastic observance's note.
     pub monastic_heading: &'static str,
+    /// The next keeping's way to its day, when that day is today.
+    pub todays_hours: &'static str,
+    /// The way back to today's page, from a feast reached there.
+    pub back_today: &'static str,
 }
 
 pub const FEAST_WORDS: FeastWords = FeastWords {
@@ -469,6 +473,8 @@ pub const FEAST_WORDS: FeastWords = FeastWords {
     whole_office: "The whole office:",
     everyone_keeps: "Everyone keeps",
     monastic_heading: "Monastics & Oblates only",
+    todays_hours: "Today’s hours",
+    back_today: "Today",
 };
 
 /// The status a year's row leads with.
@@ -556,14 +562,38 @@ pub fn feast_date(e: &FeastEntry) -> String {
     }
 }
 
-/// The words before a fixed date on the feast page: "Kept on", or "Commemorated on" for a feast
-/// of the rank of a commemoration; empty for a date that moves.
-pub fn date_lead(e: &FeastEntry) -> &'static str {
-    match (e.fixed, e.rank) {
-        (None, _) => "",
-        (Some(_), Rank::Commemoration) => "Commemorated on",
-        (Some(_), _) => "Kept on",
+/// The titulus over a feast's name, as home sets the weekday over the date: "March 25", or, for
+/// a feast whose date moves, so.
+pub fn feast_titulus(e: &FeastEntry) -> String {
+    match e.fixed {
+        Some(f) => format!("{} {}", MONTHS[f.month as usize - 1], f.day),
+        None => "Its date moves".to_string(),
     }
+}
+
+/// How much the feast page's head carries, by what the feast is: "first" (a double of the first
+/// class: the cross gilt, the course doubled), "feast" (a feast with an office of its own: the
+/// cross in the lining), or "plain" (a commemoration, or an observance for monastics only:
+/// notation on another day's office, so the head is bare and the name in ink).
+pub fn feast_register(e: &FeastEntry) -> &'static str {
+    if e.monastic.is_some() {
+        return "plain";
+    }
+    match e.rank {
+        Rank::Commemoration => "plain",
+        Rank::Double1stClass => "first",
+        Rank::Double2ndClass | Rank::GreaterDouble | Rank::Double | Rank::SemiDouble | Rank::PrivilegedFeria | Rank::Simple => "feast",
+    }
+}
+
+/// The feast page's way back to the day it was opened from: "Today", or "November 10".
+pub fn back_to_day(d: Date, today: Date) -> String {
+    if d == today { FEAST_WORDS.back_today.to_string() } else { month_day(d) }
+}
+
+/// The feast page's way back to the ordo's month it was opened from: "Ordo, November 2026".
+pub fn back_to_ordo(d: Date) -> String {
+    format!("Ordo, {} {}", MONTHS[d.month() as usize - 1], crate::format_year(d.year()))
 }
 
 /// The Common a category's texts come from, as the Diurnal names it.
@@ -649,13 +679,17 @@ pub fn kept_by_all_note(e: &FeastEntry) -> String {
     format!("on {}.", feast_date(e))
 }
 
-/// The feast page's heading over the next date it is kept, by how it is kept then.
-pub fn next_label(k: &Keeping) -> &'static str {
-    match k {
-        Keeping::Kept | Keeping::Transferred { .. } => "Next kept",
-        Keeping::Commemorated { .. } => "Next commemorated",
-        Keeping::Monastic { .. } => "Next kept by monastics and oblates",
-        Keeping::NotKept { .. } => "",
+/// The feast page's heading over the next date it is kept, by how it is kept then, and whether
+/// that day is `today`.
+pub fn next_label(k: &Keeping, today: bool) -> &'static str {
+    match (k, today) {
+        (Keeping::Kept | Keeping::Transferred { .. }, false) => "Next kept",
+        (Keeping::Kept | Keeping::Transferred { .. }, true) => "Kept today",
+        (Keeping::Commemorated { .. }, false) => "Next commemorated",
+        (Keeping::Commemorated { .. }, true) => "Commemorated today",
+        (Keeping::Monastic { .. }, false) => "Next kept by monastics and oblates",
+        (Keeping::Monastic { .. }, true) => "Kept today by monastics and oblates",
+        (Keeping::NotKept { .. }, _) => "",
     }
 }
 
@@ -708,6 +742,17 @@ pub fn is_feast_id(id: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_feast_pages_words_for_its_head_and_its_ways_back() {
+        let today = Date::new(2026, 11, 10);
+        assert_eq!(back_to_day(today, today), "Today");
+        assert_eq!(back_to_day(Date::new(2027, 2, 27), today), "February 27");
+        assert_eq!(back_to_ordo(today), "Ordo, November 2026");
+        assert_eq!(next_label(&Keeping::Kept, false), "Next kept");
+        assert_eq!(next_label(&Keeping::Kept, true), "Kept today");
+        assert_eq!(next_label(&Keeping::Commemorated { holder: "Feria".into() }, true), "Commemorated today");
+    }
 
     #[test]
     fn normalize_meets_the_readers_spelling() {

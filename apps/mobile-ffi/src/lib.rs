@@ -18,7 +18,7 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{ComposeOptions, Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_in_paschaltide, day_name, gilding_class, home_first_class,
     home_shows_versicle, hour_gloss, hour_versicle, invitation, long_date, rank_class, reminder_description, reminder_summary, report_url,
     season_label, split_alias, title_case,
 };
@@ -151,6 +151,7 @@ impl OfficeCore {
             season: heading.season,
             color: day.color.as_str().to_string(),
             ornament: ornament(gilding_class(Some(day.season), Some(day.color), day_in_paschaltide(day, &year.moveable))),
+            first_class: home_first_class(day, &year.moveable),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
             feast_id: day.celebration.as_ref().map(|c| self.feast_id(&c.id, &c.name, shown)).unwrap_or_default(),
@@ -312,6 +313,18 @@ pub struct PreferenceHints {
 #[uniffi::export]
 pub fn preference_hints() -> PreferenceHints {
     PreferenceHints { martyrology: presentation::MARTYROLOGY_HINT.into(), chant: presentation::CHANT_HINT.into() }
+}
+
+/// Change date's day links, as the web words them (`presentation::PREVIOUS_DAY`, `NEXT_DAY`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct DayNavWords {
+    pub previous: String,
+    pub next: String,
+}
+
+#[uniffi::export]
+pub fn day_nav_words() -> DayNavWords {
+    DayNavWords { previous: presentation::PREVIOUS_DAY.into(), next: presentation::NEXT_DAY.into() }
 }
 
 /// A reader's way through an hour's words, for home's mark of the hours prayed
@@ -501,6 +514,13 @@ pub struct SunPlace {
 #[uniffi::export]
 pub fn sun_available(latitude: f64) -> bool {
     sun::available(latitude)
+}
+
+/// What an hour is, for a newcomer: "Prayer as work begins" (`presentation::hour_gloss`). The
+/// wide home's niche sets every hour's under its name; empty for an unknown slug.
+#[uniffi::export]
+pub fn hour_note(slug: String) -> String {
+    hour_gloss(&slug).to_string()
 }
 
 /// Why the sun setting is greyed out, under its switch.
@@ -734,6 +754,9 @@ pub struct HomeView {
     pub season: String,
     pub color: String,
     pub ornament: String,
+    /// A first-class feast as home keeps it (`presentation::home_first_class`): by day the cross is
+    /// gilt, by night the apse's stars stand a size larger and its leaf fillet is fully lit.
+    pub first_class: bool,
     /// "Fasting", "Abstinence" and the like, set as red work.
     pub penitential: Vec<String>,
     pub commemorations: Vec<String>,

@@ -98,10 +98,10 @@ struct RootView: View {
                     .navigationDestination(for: Entry.self) { entry in EntryPage(entry: entry.id) }
             }
             .overlay(alignment: .topTrailing) {
-                if model.menuOpen && geo.size.width < wideFrom {
+                if model.overlay == .menu && geo.size.width < wideFrom {
                     ZStack(alignment: .topTrailing) {
                         // A tap anywhere else closes the menu.
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.menuOpen = false }
+                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
                             .accessibilityHidden(true)
                         MenuPanel()
                             .padding(.top, m.px(52))
@@ -109,13 +109,13 @@ struct RootView: View {
                             // Modal to VoiceOver, as Android's popup is to TalkBack; the scrub closes it.
                             .accessibilityElement(children: .contain)
                             .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.menuOpen = false }
+                            .accessibilityAction(.escape) { model.closeOverlay() }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
-                if model.settingsOpen && geo.size.width >= wideFrom {
+                if model.overlay == .settings && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
-                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.settingsOpen = false }
+                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.closeOverlay() }
                             .accessibilityHidden(true)
                         // Under the header's end: the nav shell is held to 68rem and centred.
                         MenuPanel(prefsOnly: true)
@@ -123,13 +123,18 @@ struct RootView: View {
                             .padding(.trailing, max(0, (geo.size.width - m.px(1088)) / 2) + m.px(gutter))
                             .accessibilityElement(children: .contain)
                             .accessibilityAddTraits(.isModal)
-                            .accessibilityAction(.escape) { model.settingsOpen = false }
+                            .accessibilityAction(.escape) { model.closeOverlay() }
                     }
                     .transition(.opacity.combined(with: .offset(y: -8)))
                 }
             }
-            .animation(.easeOut(duration: 0.15), value: model.menuOpen)
-            .animation(.easeOut(duration: 0.15), value: model.settingsOpen)
+            .animation(.easeOut(duration: 0.15), value: model.overlay)
+            // The menu belongs to the narrow screen and Settings to the wide one: neither survives
+            // a rotation or resize across the breakpoint, to come back later unasked.
+            // (A width of zero is the geometry before its first layout, not a side.)
+            .onChange(of: geo.size.width > 0 ? geo.size.width >= wideFrom : nil) { was, _ in
+                if was != nil { model.closeOverlay() }
+            }
             .environment(\.wide, geo.size.width >= wideFrom)
             .environment(\.ranked, geo.size.width >= wideFrom && geo.size.width < rankedBelow)
         }
@@ -185,7 +190,7 @@ private struct EntryPage: View {
         case .reminders?: RemindersPage()
         case .about?: AboutPage()
         case let .find(q)?: FindPage(query: q)
-        case let .feast(id)?: FeastPage(id: id)
+        case let .feast(id)?: FeastPage(id: id, entry: entry)
         // Gone from the way back, while the stack lets it go.
         case nil: Color.clear
         }

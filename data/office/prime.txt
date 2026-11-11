@@ -449,7 +449,7 @@ Type = collect
 Ref = proper/all-souls/prime-concluding-collect
 
 Type = versicle
-Ref = shared/formulas/rest-eternal
+Ref = shared/formulas/rest-eternal-versicle
 
 Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace

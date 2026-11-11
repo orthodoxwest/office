@@ -53,6 +53,14 @@ targets:
         buildPhase: resources
       - path: ../android/app/src/main/res/drawable-nodpi/panel_apse.jpg
         buildPhase: resources
+      # Home's painted page (tools/genpaint.py, tools/genplaster.py --sky-of): the pigment and
+      # the invitation's wash as masks, and the apse sky's brushwork.
+      - path: ../android/app/src/main/res/drawable-nodpi/pigment.png
+        buildPhase: resources
+      - path: ../android/app/src/main/res/drawable-nodpi/tablet.png
+        buildPhase: resources
+      - path: ../android/app/src/main/res/drawable-nodpi/sky_wash.jpg
+        buildPhase: resources
     dependencies:
       - framework: build/OfficeCore.xcframework
         embed: false

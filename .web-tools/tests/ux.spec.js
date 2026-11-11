@@ -234,24 +234,16 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   // preference tap inside it does not.
   await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer").click();
+  // The wall in the gutter at the screen's foot, beside the arch.
+  await page.mouse.click(4, (await page.evaluate(() => innerHeight)) - 4);
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(menu).not.toHaveAttribute("open", "");
   await expect(page.locator(".site-menu > summary")).toBeFocused();
 
-  // Home's colophon sits at the foot of the screen, as on desktop, with the
-  // card above it rather than the colophon floating under the card.
-  const [card, footer] = await Promise.all([
-    page.locator(".home").boundingBox(),
-    page.locator("footer").boundingBox(),
-  ]);
-  expect(footer.y).toBeGreaterThanOrEqual(card.y + card.height);
-  const foot = await page.evaluate(
-    () => innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom),
-  );
-  expect(Math.abs(footer.y + footer.height - foot)).toBeLessThan(2);
+  // The phone's home is the arch alone: the colophon is the wide home's.
+  await expect(page.locator("footer")).toBeHidden();
 
   // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
@@ -713,18 +705,192 @@ test("the niche's cross stands clear under the lining at every desktop width", a
 
 test("an upright tablet's niche fills the page and keeps the hours in view", async ({ page }) => {
   // At a laptop's size it took two-thirds of an iPad's width and left a third
-  // of the screen bare below it.
+  // of the screen bare below it. Upright, the niche is a lancet: narrower
+  // than the screen, but it takes the screen's height down to "Change date".
   for (const [width, height] of [[820, 1180], [834, 1194], [1024, 1366]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`);
     const niche = await page.evaluate(() => {
       const hero = document.querySelector(".home-hero").getBoundingClientRect();
       const meta = document.querySelector(".home-date-nav > summary").getBoundingClientRect();
-      return { share: hero.width / innerWidth, metaBottom: meta.bottom, overflow: document.documentElement.scrollWidth - innerWidth };
+      return {
+        share: hero.width / innerWidth,
+        height: hero.height / innerHeight,
+        metaBottom: meta.bottom,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
     });
-    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.8);
+    expect(niche.share, `${width}x${height}`).toBeGreaterThan(0.6);
+    expect(niche.height, `${width}x${height}: the niche takes the height`).toBeGreaterThan(0.75);
     expect(niche.metaBottom, `${width}x${height}: "Change date" in view`).toBeLessThan(height);
     expect(niche.overflow, `${width}x${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
+// The wide niche's measures on the glass: the zoom (--niche-zoom) is the
+// hero's drawn width over its own, and a gloss's size is its computed size
+// at that zoom.
+async function nicheOnGlass(page) {
+  return page.evaluate(() => {
+    const hero = document.querySelector(".home-hero");
+    const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+    const bottom = (selector) => document.querySelector(selector).getBoundingClientRect().bottom;
+    const notes = [...document.querySelectorAll(".home-hour-link-note")];
+    return {
+      zoom,
+      notes: notes.filter((note) => note.checkVisibility()).length,
+      smallestNote: Math.min(...notes.map((note) => parseFloat(getComputedStyle(note).fontSize) * zoom)),
+      date: bottom("#home-date-heading"),
+      feast: bottom(".feast"),
+      pray: bottom(".pray-now"),
+      hours: Math.max(...[...document.querySelectorAll(".home-hour-link")].map((link) => link.getBoundingClientRect().bottom)),
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  });
+}
+
+test("the wide niche glosses every hour and keeps the day and the hours above the fold", async ({ page }) => {
+  // A laptop's niche once kept only the hour that is now glossed, and a
+  // short window lost the evening hours under the fold. Every gloss is at
+  // least 12px on the glass, whatever the zoom.
+  for (const [width, height] of [[1280, 800], [1180, 820], [1024, 768], [820, 1180], [768, 1024], [701, 900], [1440, 900], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-04"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const niche = await nicheOnGlass(page);
+      const at = `${width}x${height} ${date}`;
+      expect(niche.notes, `${at}: every hour glossed`).toBe(7);
+      expect(niche.smallestNote, `${at}: glosses legible`).toBeGreaterThanOrEqual(12);
+      for (const part of ["date", "feast", "pray", "hours"]) {
+        expect(niche[part], `${at}: ${part} above the fold`).toBeLessThanOrEqual(height);
+      }
+      expect(niche.overflow, at).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
+test("the wide niche scales by one computed zoom, never under its least", async ({ page }) => {
+  // One formula, not a table of steps: the height left under the chrome over
+  // the niche's own, capped by a share of the width; 0.96 at least on its
+  // side (0.9 upright) so a gloss never falls under 12px.
+  const zooms = [];
+  for (const [width, height, least] of [[1024, 700, 0.96], [1280, 800, 0.96], [1440, 900, 0.96], [1920, 1200, 0.96], [768, 900, 0.9], [820, 1180, 0.9]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const { zoom } = await nicheOnGlass(page);
+    expect(zoom, `${width}x${height}`).toBeGreaterThanOrEqual(least - 0.005);
+    expect(zoom, `${width}x${height}`).toBeLessThanOrEqual(1.5);
+    zooms.push(zoom);
+  }
+  // A taller screen of one width never gets a smaller niche.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const taller = (await nicheOnGlass(page)).zoom;
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect((await nicheOnGlass(page)).zoom).toBeGreaterThanOrEqual(taller);
+  expect(new Set(zooms.map((z) => z.toFixed(2))).size).toBeGreaterThan(2);
+});
+
+test("the wide niche sets the hours one to a line where its heaviest day fits them, a glossed table below", async ({ page }) => {
+  // Upright from 1000px high; on its side from 1146px, where the list's
+  // heaviest day fits at the least zoom (below that it was clamped and ran
+  // under the fold).
+  const rows = async () =>
+    page.evaluate(() => {
+      const top = (hour) => Math.round(document.querySelector(`.home-hour-link[data-hour="${hour}"]`).getBoundingClientRect().top);
+      return { lauds: top("lauds"), prime: top("prime"), terce: top("terce"), none: top("none") };
+    });
+  for (const [width, height, list] of [[1280, 800, false], [1180, 820, false], [1728, 1030, false], [1920, 1080, false], [1920, 1200, true], [820, 1180, true]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const at = await rows();
+    if (list) {
+      expect(at.prime, `${width}x${height}: Prime under Lauds`).toBeGreaterThan(at.lauds + 20);
+      expect(at.none, `${width}x${height}: None under Terce`).toBeGreaterThan(at.terce + 40);
+    } else {
+      expect(Math.abs(at.prime - at.lauds), `${width}x${height}: Lauds and Prime share a row`).toBeLessThanOrEqual(1);
+      expect(Math.abs(at.none - at.terce), `${width}x${height}: Terce and None share a row`).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("the fold never cuts through the wide home's colophon, and a fitted niche never scrolls", async ({ page }) => {
+  // Where the zoom was held at its least, the colophon's tailpiece or words
+  // were sliced by the fold; where the niche fitted, a pixel or three of
+  // scroll remained. The colophon is now wholly in view or wholly below.
+  for (const [width, height] of [[1280, 800], [1180, 820], [1470, 830], [1440, 900], [1728, 1030], [1680, 1050], [1920, 1080], [820, 1180], [1024, 768]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const foot = await page.evaluate(() => {
+        const footer = document.querySelector("footer").getBoundingClientRect();
+        return { top: footer.top, bottom: footer.bottom, scroll: document.documentElement.scrollHeight - innerHeight };
+      });
+      const whole = foot.bottom <= height + 0.5;
+      expect(whole || foot.top >= height - 0.5, `${at}: colophon cut by the fold`).toBe(true);
+      if (whole) expect(foot.scroll, `${at}: no stray scroll`).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
+test("a phone on its side keeps the day and the invitation above the fold", async ({ page }) => {
+  // The niche's least zoom once left only the date and feast in view on a
+  // phone turned sideways; its small words still keep 12px on the glass.
+  for (const [width, height] of [[844, 390], [932, 430]]) {
+    await page.setViewportSize({ width, height });
+    for (const date of [testDate, "2026-12-13"]) {
+      await openDatedPage(page, `/?date=${date}`);
+      const at = `${width}x${height} ${date}`;
+      const view = await page.evaluate(() => {
+        const hero = document.querySelector(".home-hero");
+        const zoom = hero.getBoundingClientRect().width / hero.offsetWidth;
+        const glass = (el) => parseFloat(getComputedStyle(el).fontSize) * zoom * (parseFloat(getComputedStyle(el).zoom) || 1);
+        return {
+          pray: document.querySelector(".pray-now").getBoundingClientRect().bottom,
+          smallest: Math.min(...[...document.querySelectorAll(".home-hour-link-note, .home-hour-group-label, .home-date-weekday")].map(glass)),
+        };
+      });
+      expect(view.pray, `${at}: "Pray" above the fold`).toBeLessThanOrEqual(height);
+      expect(view.smallest, `${at}: small words legible`).toBeGreaterThanOrEqual(11.95);
+    }
+  }
+});
+
+test("the zoomed niche's hand-ruled joints fall between the periods", async ({ page }) => {
+  // The joints were placed from client rects, measured on the glass, in the
+  // zoomed table's own pixels: under zoom they drifted off the joints.
+  for (const [width, height] of [[1280, 800], [820, 1180], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+    const drift = await page.evaluate(() => {
+      const joints = [...document.querySelectorAll(".home-hour-links > svg.home-rules path.r-inner")];
+      const groups = [...document.querySelectorAll(".home-hour-group")].slice(1);
+      return joints.map((joint, i) => {
+        const box = joint.getBoundingClientRect();
+        return Math.abs((box.top + box.bottom) / 2 - groups[i].getBoundingClientRect().top);
+      });
+    });
+    expect(drift.length, `${width}x${height}`).toBe(2);
+    for (const d of drift) expect(d, `${width}x${height}: joint on the period's edge`).toBeLessThanOrEqual(2);
+  }
+});
+
+test("the wide home by night is one sky inside the niche and a plain wall round it", async ({ page }) => {
+  for (const [width, height] of [[1280, 800], [820, 1180]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`, "dark");
+    await expect(page.locator(".home-sky svg.home-stars")).toHaveCount(1);
+    const night = await page.evaluate(() => ({
+      wall: getComputedStyle(document.body, "::before").display,
+      sky: getComputedStyle(document.querySelector(".home-sky")).display,
+      stars: document.querySelectorAll(".home-sky svg.home-stars path, .home-sky svg.home-stars use").length,
+    }));
+    expect(night.wall, `${width}x${height}: the margins' starfield is off`).toBe("none");
+    expect(night.sky, `${width}x${height}`).not.toBe("none");
+    expect(night.stars, `${width}x${height}: the head has its stars`).toBeGreaterThan(5);
   }
 });
 
@@ -918,11 +1084,12 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
     }
     expect(new Set(widths).size).toBe(1);
     // And it is the declared measure, not whatever the content happened to
-    // need: clamp(38rem, 10rem + 38vw, 48rem), scaled by the niche's zoom
-    // step (1.12 from 1700x1000).
-    const zoom = width >= 1700 ? 1.12 : 1;
-    const declared = Math.min(48 * 16, Math.max(38 * 16, 10 * 16 + 0.38 * width)) * zoom;
-    expect(Math.abs(widths[0] - declared)).toBeLessThanOrEqual(1);
+    // need: the landscape lancet's 37.5rem, scaled by the niche's zoom.
+    const zoom = await page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      return hero.getBoundingClientRect().width / hero.offsetWidth;
+    });
+    expect(Math.abs(widths[0] - 37.5 * 16 * zoom)).toBeLessThanOrEqual(1);
   }
 });
 
@@ -980,7 +1147,7 @@ function tileEdgePx(size) {
 test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ width = 390, height, theme, scheme, asToday = false }) => {
+  const read = async ({ width = 390, height, theme, scheme, asToday = false, date = testDate }) => {
     const context = await page.context().browser().newContext({
       viewport: { width, height },
       isMobile: true,
@@ -989,7 +1156,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     });
     const sheet = await context.newPage();
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
-    await sheet.goto(`/?date=${testDate}`);
+    await sheet.goto(`/?date=${date}`);
     const seen = await sheet.evaluate((asToday) => {
       // The fixed test day is historical, so the server adds the recovery
       // line that local today's home never carries; drop it to measure the
@@ -997,7 +1164,6 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       if (asToday) document.querySelectorAll(".not-today-notice").forEach((notice) => notice.remove());
       const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const tailpiece = getComputedStyle(footerElement, "::before");
       // The pointed head's halo is a filter on its outer courses.
       const halo = getComputedStyle(document.querySelector(".home-arch"));
       return {
@@ -1005,11 +1171,8 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         position: field.position,
         tileSize: field.maskSize || field.webkitMaskSize,
         phase: field.maskPosition || field.webkitMaskPosition,
-        // The footer closes on its painted tailpiece in both themes, with
-        // the same geometry, so the footer never moves when the theme
-        // changes.
-        tailpiece: tailpiece.maskImage || tailpiece.webkitMaskImage,
-        tailpieceShown: tailpiece.display !== "none",
+        // The phone's home carries no colophon; the wide home keeps it.
+        footerShown: getComputedStyle(footerElement).display !== "none",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
         pageBg: getComputedStyle(document.documentElement).backgroundColor,
@@ -1027,8 +1190,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 528, h: 528 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
-  expect(apse.tailpieceShown).toBe(true);
-  expect(apse.tailpiece).toContain("ornaments/tailpiece.svg");
+  expect(apse.footerShown).toBe(false);
   expect(apse.cardHalo).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
   // The night carries no powdering: its field is the vault alone.
@@ -1044,15 +1206,18 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     expect(vaultPaints(nave.stars)).toBe(false);
     expect(powderPaints(nave.stars)).toBe(true);
     expect(nave.position).toBe("fixed");
-    expect(nave.tailpieceShown).toBe(true);
+    expect(nave.footerShown).toBe(false);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
 
   // On the day itself a phone's home fits its viewport whole, every hour in
-  // reach without scrolling, on a 375x667 screen as well.
-  const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true });
-  expect(small.scrolls).toBe(false);
+  // reach without scrolling, on a 375x667 screen as well, even on the year's
+  // longest heading (Gaudete with three commemorations and abstinence).
+  for (const date of [testDate, "2026-12-13"]) {
+    const small = await read({ width: 375, height: 667, theme: "light", scheme: "light", asToday: true, date });
+    expect(small.scrolls).toBe(false);
+  }
 
   // Representative phone corners (short, mid, tall). Tile size and top-centre
   // origin must not depend on viewport; a full width×height matrix is CI cost
@@ -1248,6 +1413,13 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
         cross: cross && getComputedStyle(cross).display,
         rule: getComputedStyle(head).getPropertyValue("--title-rule-break").trim(),
         vault: body.getPropertyValue("--apse-vault").trim(),
+        // The ending's field: home's sky tile by night, the powdering by day.
+        field: getComputedStyle(document.querySelector(".hour-epilogue"), "::before").maskImage,
+        // What the ending's two fields paint: under the veil by night, nothing at all.
+        fieldInks: [
+          getComputedStyle(document.querySelector(".hour-epilogue"), "::before").backgroundColor,
+          getComputedStyle(document.querySelector("footer"), "::after").backgroundColor,
+        ],
       };
     });
   };
@@ -1258,11 +1430,15 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
     expect(goodFriday.sign).toBe("none");
     expect(goodFriday.rule).toBe("0px");
     expect(goodFriday.vault).toBe("none");
+    expect(goodFriday.field.includes("sky-tile.svg")).toBe(false);
+    const clear = (ink) => ink === "transparent" || /rgba\(.*,\s*0\)$|\/ 0\)$/.test(ink);
+    if (theme === "dark") for (const ink of goodFriday.fieldInks) expect(clear(ink), ink).toBe(true);
     // Prime keeps its cross, and the rule its break.
     const prime = await read("/prime/2026-04-10", theme);
     expect(prime.bare).toBe(true);
     expect(prime.cross).not.toBe("none");
     expect(prime.rule).not.toBe("0px");
+    if (theme === "dark") for (const ink of prime.fieldInks) expect(clear(ink), ink).toBe(true);
     // All Souls is bare without the veil: the Apse's stars stay gold.
     const allSouls = await read("/lauds/2026-11-02", theme);
     expect(allSouls.bare).toBe(true);
@@ -1277,6 +1453,7 @@ test("a bare hour sets its capitals in the muted ink, puts out its sun, and dark
       expect(lit.sign).not.toBe("none");
       expect(lit.rule).toBe("1.25rem");
       expect(lit.vault === "none").toBe(theme === "light");
+      expect(lit.field.includes(theme === "light" ? "powder.svg" : "sky-tile.svg")).toBe(true);
     }
   }
 });
@@ -1370,22 +1547,58 @@ test("hour titles stand at one height under the sun, the moon and the cross", as
   expect(Math.abs((await titleTop("vespers")) - lauds)).toBeLessThan(0.5);
 });
 
-// On a phone the date takes its own line above the day's name, so the
-// separator never ends a line; on a wide screen the parts share one line.
+// The date and the season share one muted line, so its separator never ends
+// a line; the day's name stands under them in the text's ink, a size up.
 test("the hour's date line never strands its separator", async ({ page }) => {
   await openDatedPage(page, "/lauds/2026-03-31");
   const parts = page.locator(".hour-meta-part");
   await expect(parts).toHaveCount(3);
+  await expect(page.locator(".hour-meta-sep")).toHaveCount(1);
   const rows = async () => parts.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
-  const phone = await rows();
-  expect(phone[0]).toBeLessThan(phone[1]);
-  expect(phone[1]).toBe(phone[2]);
-  await expect(page.locator(".hour-meta-sep").first()).toBeHidden();
-  await expect(page.locator(".hour-meta-sep").nth(1)).toBeVisible();
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const laptop = await rows();
-  expect(new Set(laptop).size).toBe(1);
-  await expect(page.locator(".hour-meta-sep").first()).toBeVisible();
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [date, season, feast] = await rows();
+    expect(date).toBe(season);
+    expect(feast).toBeGreaterThan(date);
+    await expect(page.locator(".hour-meta-sep")).toBeVisible();
+  }
+  const ink = await page.evaluate(() => {
+    const feast = getComputedStyle(document.querySelector(".hour-meta-feast"));
+    const meta = getComputedStyle(document.querySelector(".hour-meta"));
+    return { feast: feast.color, text: getComputedStyle(document.body).color, larger: parseFloat(feast.fontSize) > parseFloat(meta.fontSize) };
+  });
+  expect(ink.feast).toBe(ink.text);
+  expect(ink.larger).toBe(true);
+});
+
+// On a first-class day the frame narrows the measure: each disclosure under
+// the title keeps one line, its caret beside its words, and where the two do
+// not fit side by side they stand one above the other.
+test("the hour's disclosures never break inside themselves", async ({ page }) => {
+  for (const [width, size] of [[390, "default"], [375, "default"], [320, "default"], [375, "large"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+    await openDatedPage(page, "/vespers/2026-12-25");
+    // The fallback face is wider than EB Garamond: measure the face the reader gets.
+    await page.evaluate(() => document.fonts.ready);
+    const boxes = await page.locator(".hour-context-controls > details > summary").evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const tops = [...range.getClientRects()].filter((q) => q.width > 1).map((q) => q.top);
+        // Spans of other faces sit a pixel or two apart on one line; a second line is a line below.
+        const lines = 1 + tops.filter((t) => t - Math.min(...tops) > 8).length;
+        return { left: r.left, right: r.right, height: r.height, lines: Math.min(lines, 2) };
+      }),
+    );
+    for (const box of boxes) {
+      expect(box.lines, `${width} ${size}`).toBe(1);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.left).toBeGreaterThanOrEqual(0);
+      expect(box.right).toBeLessThanOrEqual(width);
+    }
+  }
 });
 
 // A psalm's Latin incipit shares the label's line with a dot between them,
@@ -1479,6 +1692,35 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(settings).not.toHaveAttribute("open", "");
 });
 
+// The header's overlays are one state: at most one is open, and crossing the
+// breakpoint puts it away, so a Settings opened wide does not come back after a
+// trip through the phone layout (iOS and Android hold the same Overlay).
+test("crossing the breakpoint puts the header's overlay away", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await openDatedPage(page, `/lauds?date=${testDate}`);
+  const menu = page.locator(".site-menu");
+  const settings = page.locator(".site-settings");
+  await settings.locator("summary").click();
+  await expect(settings).toHaveAttribute("open", "");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(menu).toHaveAttribute("open", "");
+
+  // Wide again: the menu is the desktop nav, and Settings stays shut.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await expect(menu).toHaveAttribute("open", "");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(page.locator(".settings-prefs")).toBeHidden();
+  // Escape still finds the overlay open now, whichever it is.
+  await settings.locator("summary").click();
+  await page.keyboard.press("Escape");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(settings.locator("summary")).toBeFocused();
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
@@ -1519,6 +1761,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await expect(settings.locator("summary")).toBeFocused();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
   const rules = await page.evaluate(() => {
     const isVisibleRule = (width, style, color) => {
       const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
@@ -1530,48 +1773,43 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         alphaValue > 0
       );
     };
-    const directory = getComputedStyle(document.querySelector(".home-hour-links"));
-    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
-    const dividedHour = getComputedStyle(
-      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
-    );
-    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    const rule = (el, side) => {
+      const style = getComputedStyle(el);
+      return isVisibleRule(
+        style.getPropertyValue(`border-${side}-width`),
+        style.getPropertyValue(`border-${side}-style`),
+        style.getPropertyValue(`border-${side}-color`),
+      );
+    };
+    const directory = document.querySelector(".home-hour-links");
+    const label = document.querySelector(".home-hour-group-label");
+    const dividedHour = document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link");
+    const finalGroup = document.querySelector(".home-hour-group:last-of-type");
+    const point = getComputedStyle(dividedHour, "::before");
     return {
-      directoryLeft: isVisibleRule(
-        directory.borderLeftWidth,
-        directory.borderLeftStyle,
-        directory.borderLeftColor,
-      ),
-      directoryRight: isVisibleRule(
-        directory.borderRightWidth,
-        directory.borderRightStyle,
-        directory.borderRightColor,
-      ),
-      labelRight: isVisibleRule(
-        label.borderRightWidth,
-        label.borderRightStyle,
-        label.borderRightColor,
-      ),
-      // Full-height borders remain absent between the unequal 2/3/2 groups.
-      // Short decorative hairlines separate neighbours within each band.
-      dividedHourLeft: isVisibleRule(
-        dividedHour.borderLeftWidth,
-        dividedHour.borderLeftStyle,
-        dividedHour.borderLeftColor,
-      ),
-      finalGroupBottom: isVisibleRule(
-        finalGroup.borderBottomWidth,
-        finalGroup.borderBottomStyle,
-        finalGroup.borderBottomColor,
-      ),
+      // The table is ruled by hand (app.js), so its CSS borders stand down:
+      // a frame and the joints between bands, drawn as the painter's lines.
+      ruled: directory.classList.contains("is-ruled"),
+      ruledLines: directory.querySelectorAll(":scope > svg.home-rules path").length > 0,
+      directoryLeft: rule(directory, "left"),
+      directoryRight: rule(directory, "right"),
+      finalGroupBottom: rule(finalGroup, "bottom"),
+      // The periods are the margin's index with no cell or upright of their
+      // own, and neighbouring hours are parted by a gilt point, not a rule.
+      labelRight: rule(label, "right"),
+      dividedHourLeft: rule(dividedHour, "left"),
+      giltPoint: point.content !== "none" && parseFloat(point.width) < 5,
     };
   });
   expect(rules).toEqual({
-    directoryLeft: true,
-    directoryRight: true,
-    labelRight: true,
+    ruled: true,
+    ruledLines: true,
+    directoryLeft: false,
+    directoryRight: false,
+    finalGroupBottom: false,
+    labelRight: false,
     dividedHourLeft: false,
-    finalGroupBottom: true,
+    giltPoint: true,
   });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
@@ -1849,7 +2087,14 @@ test("themes never change layout", async ({ browser }) => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
       return {
-        boxes: [...document.querySelectorAll("body *")].map((el) => round(el.getBoundingClientRect())),
+        // Home's night sky is the Apse's material, as the vault is the
+        // page's, the lining moves out to the sky's edge, and in the wide
+        // niche the panel sits inside the night's slate course where by day
+        // it meets the reveal's fillet: painted layers, absolutely placed and
+        // aria-hidden, that move no other box.
+        boxes: [...document.querySelectorAll("body *")]
+          .filter((el) => !el.closest(".home-sky, .home-lining") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
+          .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
           return [...range.getClientRects()].map(round).join(";");
@@ -3160,7 +3405,18 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       const count = await targets.count();
       expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
       for (let i = 0; i < Math.min(count, 12); i++) {
-        const box = await targets.nth(i).boundingBox();
+        // A target whose thumb box is drawn round it (an absolute ::before, as
+        // the header's links and the ordo's phone rows have) is measured by it.
+        const box = await targets.nth(i).evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return null;
+          const b = getComputedStyle(el, "::before");
+          if (b.content === "none" || b.position !== "absolute") return { width: r.width, height: r.height };
+          const px = (v) => (v.endsWith("px") ? parseFloat(v) : 0);
+          const width = Math.max(r.width, r.width - px(b.left) - px(b.right));
+          const height = Math.max(r.height, r.height - px(b.top) - px(b.bottom));
+          return { width, height };
+        });
         expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
         expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
         expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);
@@ -4078,10 +4334,13 @@ test("home's versicle takes only the height its head has to spare", async ({ pag
       scrolls: document.documentElement.scrollHeight > innerHeight,
     }));
   };
-  // St Placidus's two lines fit a 412×735 phone without moving the hours.
+  // St Placidus's two lines fit a 412×735 phone without moving the hours, and
+  // so, with no colophon under the arch, do the Holy Angels' four.
   expect(await open("2026-10-05", 412, 735)).toEqual({ shown: true, scrolls: false });
-  // The Holy Angels' four lines do not, so the head goes without them; a taller phone has room.
-  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: false, scrolls: false });
+  expect(await open("2026-10-02", 412, 735)).toEqual({ shown: true, scrolls: false });
+  // On a narrow phone, where the day's lines wrap, they do not, so the head
+  // goes without them; a taller phone has room.
+  expect(await open("2026-10-02", 320, 740)).toEqual({ shown: false, scrolls: false });
   expect(await open("2026-10-02", 430, 932)).toEqual({ shown: true, scrolls: false });
   // A 667px phone has none to spare.
   expect(await open("2026-10-05", 375, 667)).toEqual({ shown: false, scrolls: false });
@@ -4215,6 +4474,53 @@ test("a feast's page leads back to the search that found it", async ({ page }) =
   await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/find");
 });
 
+test("a feast's page leads back to the day or the ordo it was opened from", async ({ page }) => {
+  await openDatedPage(page, "/?date=2026-02-27");
+  await page.locator(".home .feast-link").first().click();
+  await expect(page).toHaveURL(/\/feast\/st-raphael-of-brooklyn\?from=2026-02-27$/);
+  await expect(page.locator(".find-back")).toHaveText(/February 27$/);
+  await page.locator(".find-back").click();
+  await expect(page).toHaveURL(/\/\?date=2026-02-27$/);
+
+  await page.goto("/feast/st-raphael-of-brooklyn?from=ordo-2026-02-27");
+  await expect(page.locator(".find-back")).toHaveText(/Ordo, February 2026$/);
+  await expect(page.locator(".find-back")).toHaveAttribute("href", "/calendar/2026/02#d-2026-02-27");
+});
+
+test("a feast's head is home's day block turned about, ruled with home's pen", async ({ page }) => {
+  await page.goto("/feast/annunciation");
+  const head = page.locator(".feast-head");
+  await expect(head).toHaveClass(/is-first/);
+  // The date is the titulus over the name, read after it.
+  const box = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
+  expect(await box(".feast-titulus")).toBeLessThan(await box(".feast-head h1"));
+  await expect(page.locator(".feast-titulus")).toHaveText("March 25");
+  // Each painted line is a pen stroke once script has run; the CSS borders stand down.
+  for (const host of [".feast-head", ".feast-standing", ".feast-texts > h2", ".feast-years .find-years"]) {
+    await expect(page.locator(host).first()).toHaveClass(/is-ruled/);
+  }
+  expect(await page.locator(".feast-years .find-years > svg.feast-rules path").count()).toBe(9);
+  // A greater double carries the cross in the lining; a monastic observance's head is bare.
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-feast/);
+  await page.goto("/feast/solemnity-st-benedict");
+  await expect(page.locator(".feast-head")).toHaveClass(/is-plain/);
+  await expect(page.locator(".feast-head > svg.feast-rules")).toHaveCount(0);
+});
+
+test("a feast's rules follow the reader's text size, and a feast never kept has no empty standing", async ({ page }) => {
+  await page.goto("/feast/st-raphael-of-brooklyn");
+  const frame = () => page.locator(".feast-standing").evaluate((n) => {
+    const ys = [...n.querySelectorAll(":scope > svg.feast-rules path")].map((p) => p.getBBox()).map((b) => b.y + b.height);
+    return { height: n.offsetHeight, bottom: Math.max(...ys) };
+  });
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await expect.poll(async () => { const f = await frame(); return Math.abs(f.bottom - f.height) < 3; }).toBe(true);
+
+  await page.goto("/feast/comm-12-25-st-anastasia-virgin-and-martyr");
+  await expect(page.locator(".feast-standing")).toHaveCount(0);
+});
+
 test("a feast's page leads with its standing, then its texts, then its years, beside them when wide", async ({ page }) => {
   await page.goto("/feast/st-raphael-of-brooklyn");
   const top = (sel) => page.locator(sel).first().evaluate((n) => n.getBoundingClientRect().top);
@@ -4230,6 +4536,9 @@ test("a feast's page leads with its standing, then its texts, then its years, be
   expect(await page.locator(".feast-years .find-year-status b", { hasText: "Commemorated" }).count()).toBeGreaterThan(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 
+  // A tablet already has the rail, so the prayer keeps its measure.
+  await page.setViewportSize({ width: 820, height: 1180 });
+  expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);
   // A wide screen: the standing and the years make a rail to the right of the texts.
   await page.setViewportSize({ width: 1280, height: 900 });
   expect(await left(".feast-standing")).toBeGreaterThan(await left(".feast-texts") + 300);

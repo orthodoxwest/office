@@ -287,6 +287,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         if (stack.size > 1 && stack[stack.lastIndex - 1].page is Page.Find) back() else open(Page.Find(""))
     }
 
+    /** The page under the visit `id` on the way back, which a feast page names as its way back. */
+    fun pageUnder(id: Long): Page? = stack.getOrNull(stack.indexOfFirst { it.id == id } - 1)?.page
+
     /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
         motion = if (stack.size > 1) Motion.BACK else stepBetween(page, Page.Home(today))

@@ -428,14 +428,14 @@ MARCH
            Lauds   v · Ben. Jesus went thence · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. O woman · No Suff.
-               Com. St Perpetua & Felicitas, Martyrs ("For theirs is the kingdom of heaven")
+               Com. Ss Perpetua & Felicitas, Martyrs ("For theirs is the kingdom of heaven")
   6  Fri  L§ Ember Friday in Lent                       [f2]  v
-           St Perpetua & Felicitas, Martyrs (d)
+           Ss Perpetua & Felicitas, Martyrs (d)
            Lauds   v · Ben. An Angel of the Lord · No Preces · No Suff.
-               Com. St Perpetua & Felicitas, Martyrs ("The very hairs of your head")
+               Com. Ss Perpetua & Felicitas, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers v · Mag. He that made me whole · No Suff.
-               Com. St Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
+               Com. Ss Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
   7  Sat  L§ Ember Saturday in Lent                     [f2]  v
            Lauds   v · Ben. And Jesus taketh his disciples · No Preces · Suff.
            Hours   Preces
@@ -486,17 +486,17 @@ MARCH
            Lauds   v · Ben. Verily I say unto you · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. But Jesus, passing · No Suff.
-               Com. St Patrick ("O thou Priest and Bishop")
+               Com. St Patrick, Bishop & Confessor ("O thou Priest and Bishop")
                Com. St Joseph of Arimathea, Confessor ("I will liken him")
  17  Tue  L§ Tuesday after Lent III                     [f2]  v
-           St Patrick (d)
+           St Patrick, Bishop & Confessor (d)
            St Joseph of Arimathea, Confessor (com)
            Lauds   v · Ben. If two of you · No Preces · No Suff.
-               Com. St Patrick ("Well done")
+               Com. St Patrick, Bishop & Confessor ("Well done")
                Com. St Joseph of Arimathea, Confessor ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers v · Mag. Where two or three · No Suff.
-               Com. St Patrick ("The Lord loved him")
+               Com. St Patrick, Bishop & Confessor ("The Lord loved him")
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. St Edward, King & Martyr ("This is a Martyr")
  18  Wed  L§ Wednesday after Lent III                   [f2]  v
@@ -711,10 +711,10 @@ APRIL
                Com. II Sunday after Easter ("I am")
  26  Sun     II Sunday after Easter                     [sd]  w
            Day IV within the Octave of St George (sd)
-           St Cletus & Marcellinus, Martyrs (com)
+           Ss Cletus & Marcellinus, Martyrs (com)
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. Day IV within the Octave of St George ("Daughters of Jerusalem")
-               Com. St Cletus & Marcellinus, Martyrs ("Daughters of Jerusalem")
+               Com. Ss Cletus & Marcellinus, Martyrs ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers w · II prec. · Mag. I am · No Suff.
                Com. Day IV within the Octave of St George ("O ye holy and righteous")
@@ -1383,9 +1383,9 @@ AUGUST
            Vespers w · I fol. (The Transfiguration of Our Lord Jesus Christ) · Mag. Christ Jesus · No Suff.
                Com. Dedication of Our Lady of the Snows ("O holy Mary")
   6  Thu     The Transfiguration of Our Lord Jesus Christ [2cl] w
-           Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (com)
+           Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs (com)
            Lauds   w · Ben. And behold a voice · No Preces · No Suff.
-               Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("He that hateth his life")
+               Com. Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. And when the disciples heard it · No Suff.
   7  Fri  L  Feria                                            g
@@ -1627,16 +1627,16 @@ SEPTEMBER
                Com. St Nicomedes, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Sorrow oppresseth me · No Suff.
-               Com. Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
+               Com. Ss Cornelius & Cyprian, Bishops & Martyrs ("For theirs is the kingdom of heaven")
  16  Wed  L§ Ember Wednesday in September               [f2]  v
-           Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs (d)
+           Ss Cornelius & Cyprian, Bishops & Martyrs (d)
            Ss Euphemia, Lucy & Geminian, Martyrs (com)
            Lauds   v · Ben. This kind · No Preces · No Suff.
-               Com. Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs ("The very hairs of your head")
+               Com. Ss Cornelius & Cyprian, Bishops & Martyrs ("The very hairs of your head")
                Com. Ss Euphemia, Lucy & Geminian, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers g · Mag. The Lord · No Suff.
-               Com. Ss Cornelius (Bishop) & Cyprian (Bishop), Martyrs ("In the heavenly kingdom")
+               Com. Ss Cornelius & Cyprian, Bishops & Martyrs ("In the heavenly kingdom")
  17  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve · No Preces · Suff.
            Hours   Preces
@@ -2042,15 +2042,15 @@ NOVEMBER
            Hours   No Preces
            Vespers g · I fol. (XXIV & Last Sunday after Pentecost) · Mag. I have set watchmen · No Suff.
                Com. Presentation of the Blessed Virgin Mary ("O ever blessed Mother of God")
-               Com. St Cecilia ("It is secret")
+               Com. St Cecilia, Virgin & Martyr ("It is secret")
  22  Sun     XXIV & Last Sunday after Pentecost         [sd]  g
-           St Cecilia (d)
+           St Cecilia, Virgin & Martyr (d)
            Lauds   g · Ben. When ye, therefore, shall see · No Preces · No Suff.
-               Com. St Cecilia ("When the dawn of day was breaking")
+               Com. St Cecilia, Virgin & Martyr ("When the dawn of day was breaking")
            Hours   No Preces
            Vespers g · II prec. · Mag. Verily I say unto you · No Suff.
                Com. St Clement I, Bishop & Martyr ("Let us all pray")
-               Com. St Cecilia ("This noble maiden")
+               Com. St Cecilia, Virgin & Martyr ("This noble maiden")
                Com. St Felicitas, Martyr ("The kingdom of heaven")
  23  Mon     St Clement I, Bishop & Martyr              [d]   r
            St Felicitas, Martyr (com)
@@ -2133,15 +2133,15 @@ DECEMBER
                Com. St Sabbas of Judæa, Abbot ("Well done, good and faithful servant")
            Hours   Preces
            Vespers v · I fol. (II Sunday of Advent) · Mag. Come, O Lord, in peace · No Suff.
-               Com. St Nicholas ("O thou Priest and Bishop")
+               Com. St Nicholas, Bishop & Confessor ("O thou Priest and Bishop")
   6  Sun  L  II Sunday of Advent                        [2cl] v
-           St Nicholas (d)
+           St Nicholas, Bishop & Confessor (d)
            Lauds   v · Ben. Now when John · No Preces · No Suff.
-               Com. St Nicholas ("Well done")
+               Com. St Nicholas, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers v · II prec. · Mag. Art thou he · No Suff.
                Com. St Ambrose of Milan, Bishop, Confessor & Doctor ("O Teacher right excellent")
-               Com. St Nicholas ("The Lord loved him")
+               Com. St Nicholas, Bishop & Confessor ("The Lord loved him")
   7  Mon  L§ St Ambrose of Milan, Bishop, Confessor & Doctor [gd]  w
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. Monday after Advent II ("From heaven there cometh")

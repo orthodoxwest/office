@@ -26,7 +26,14 @@ fn the_embedded_corpus_is_the_data_directory() {
         assert_eq!(paths(&got), paths(&want), "{dir}");
         assert!(got == want, "{dir}: contents differ");
     }
-    for file in ["appointment-scopes.json", "chant-tunes.txt", "collect-conclusions.txt", "latin-incipits.txt", "penitential.txt"] {
+    for file in [
+        "appointment-scopes.json",
+        "chant-doxologies.txt",
+        "chant-tunes.txt",
+        "collect-conclusions.txt",
+        "latin-incipits.txt",
+        "penitential.txt",
+    ] {
         let want = fs.read(file).unwrap().map(|s| String::from_utf8(pack::packed(file, s.into_bytes())).unwrap());
         assert_eq!(data.read(file).unwrap(), want, "{file}");
     }
@@ -152,6 +159,8 @@ fn home_invites_to_the_current_office_only_today() {
     assert_eq!(home.color, "violet");
     assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
     assert_eq!(home.current_hour_note, "Evening prayer");
+    assert_eq!(crate::hour_note("prime".into()), "Prayer as work begins");
+    assert_eq!(crate::hour_note("matins".into()), "");
     // Compline after midnight belongs to yesterday, and marks no hour today.
     let late = core.home(today, today, 1).unwrap();
     assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
@@ -332,7 +341,7 @@ fn a_quick_scroll_does_not_pray_an_hour() {
 }
 
 #[test]
-fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
+fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let core = OfficeCore::new().unwrap();
     assert!(core.offers_chant());
     let blocks = |chant| {
@@ -343,15 +352,22 @@ fn chant_sets_the_marian_antiphon_where_a_score_is_in_hand() {
     let (off, on) = (blocks(false), blocks(true));
     assert!(scores(&off).is_empty());
     let sung = scores(&on);
-    assert_eq!(sung.len(), 1);
-    assert!(sung[0].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[0]);
+    // Te lucis stanza by stanza, the Holy Rosary's doxology sung to the score's last, and the antiphon.
+    assert_eq!(sung.len(), 4, "{sung:?}");
+    assert!(sung[0].contains("To(h) thee,(j) be(j)fore(j)") && sung[0].ends_with("now.(g.) (::)"), "{}", sung[0]);
+    assert!(sung[2].contains("All(h) hon(j)our,(j) laud,(j)"), "{}", sung[2]);
+    assert!(sung[3].contains("Ma(c)ry(e) we(g) hail(h) thee(g.)"), "{}", sung[3]);
     // The antiphon's words give way to the score; the rest of the hour stands as it was.
     let said = |b: &[BlockView]| b.iter().any(|b| b.kind != BlockKind::Score && b.runs.iter().any(|r| r.text.contains("Mary our comfort")));
     assert!(said(&off) && !said(&on));
     // The usage beacon's chant: the setting, on an hour with a score to show; none on one without.
     let reported = |hour: &str, chant| core.compose(hour.into(), 2026, 10, 7, "private".into(), false, chant).unwrap().chant;
     assert_eq!((reported("compline", false), reported("compline", true)), (Some(false), Some(true)));
-    assert_eq!((reported("terce", false), reported("terce", true)), (None, None));
+    let reported_on =
+        |hour: &str, month, day, chant| core.compose(hour.into(), 2026, month, day, "private".into(), false, chant).unwrap().chant;
+    assert_eq!((reported("terce", false), reported("terce", true)), (Some(false), Some(true)));
+    // Good Friday's Terce sings no hymn.
+    assert_eq!((reported_on("terce", 4, 10, false), reported_on("terce", 4, 10, true)), (None, None));
 }
 
 #[test]
@@ -367,6 +383,13 @@ fn the_apps_give_the_webs_setting_hints() {
     let hints = preference_hints();
     assert_eq!(hints.martyrology, presentation::MARTYROLOGY_HINT);
     assert_eq!(hints.chant, presentation::CHANT_HINT);
+}
+
+#[test]
+fn the_apps_word_change_dates_day_links_as_the_web() {
+    let words = day_nav_words();
+    assert_eq!(words.previous, "Previous day");
+    assert_eq!(words.next, "Next day");
 }
 
 #[test]
@@ -410,6 +433,18 @@ fn finds_a_feast_and_gives_its_page() {
     assert_eq!(benedict.kept_by_all.map(|f| f.id), Some("st-benedict".into()));
     assert!(benedict.years.iter().all(|y| y.usual), "a monastic observance is kept by monastics, as usual, every year");
     assert!(core.feast_page("no-such-feast".into(), today).unwrap().is_none());
+}
+
+#[test]
+fn a_feast_page_names_its_way_back() {
+    let today = CivilDate { year: 2026, month: 11, day: 10 };
+    assert_eq!(feast_back_to_day(today, today), feast_words().back_today);
+    assert_eq!(feast_back_to_day(today, today), "Today");
+    assert_eq!(feast_back_to_day(CivilDate { year: 2027, month: 2, day: 27 }, today), "February 27");
+    assert_eq!(feast_back_to_ordo(CivilDate { year: 2026, month: 11, day: 1 }), "Ordo, November 2026");
+    let no_day = CivilDate { year: 2026, month: 2, day: 30 };
+    assert_eq!(feast_back_to_day(no_day, today), "Find a feast");
+    assert_eq!(feast_back_to_ordo(no_day), "Find a feast");
 }
 
 #[test]

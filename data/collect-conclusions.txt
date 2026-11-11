@@ -87,6 +87,7 @@ proper/holy-monday/collect who-liveth
 proper/holy-thursday/collect who-liveth
 proper/holy-saturday/collect who-liveth
 proper/holy-wednesday/collect who-liveth
+proper/holy-wednesday/collect-vespers who-liveth
 # The restored final Christ clauses are printed on pp. 265, 430, and 441.
 proper/laetare-sunday/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth
@@ -108,6 +109,9 @@ proper/st-stephen/commemoration-collect who-liveth
 # Same collect with the August wording adaptation (2026 ordo p. 86).
 proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
+# The supplemental collects sheet (Nov 2026, p. 4) prints "Who liveth": the
+# prayer ends on "thy Son, Jesus Christ our Lord".
+proper/comm-05-24-st-vincent-of-lerins-confessor/commemoration-collect who-liveth
 # Diurnal p. 538 prints Who with thee ... liveth.
 proper/vigil-of-nativity-john-baptist/collect who-liveth
 
@@ -125,6 +129,8 @@ proper/epiphany/collect through-same
 # Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
 proper/expectation-bvm/collect through-same
 proper/holy-name-jesus/collect through-same
+# Diurnal p. 282 prints Tuesday in Holy Week's Lauds collect with "Through the same".
+proper/holy-tuesday/collect through-same
 proper/motherhood-bvm/collect through-same
 proper/nativity-sunday-within-octave/collect through-same
 proper/palm-sunday/collect through-same

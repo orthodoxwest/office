@@ -39,8 +39,10 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
   takes the web's desktop composition: the header's links inline, ending in Settings for the
-  theme and text size; home's frontispiece set in the niche, with its pointed head, stone
-  moulding and day-coloured trim, centred in the room with the chapel's light on it
+  theme and text size; home's frontispiece set in one lancet niche for the screen's
+  orientation, its depth told by light on the reveal by day and the phone's apse sky by night,
+  every hour glossed (one to a line from 1000dp high), the whole at one computed scale
+  (`nicheZoom`, the web's `--niche-zoom`), centred in the room with the chapel's light on it
   (`Niche.kt`); the ordo as the desktop table; the
   Tabula's figures in one line and its tables side by side; from 1000dp "Blessing." hangs into
   the margin as "All:" does, where below it stands above its words. `WideScreenshotTest` renders them

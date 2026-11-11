@@ -2,13 +2,9 @@ package org.orthodoxwest.office
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -75,7 +71,6 @@ private val WEEK = DayOfWeek.entries.toList()
  * The reminders page, set as the web's: the hours with their times, the days, how long before;
  * then, where the web gives a calendar link, the switch that asks the phone itself.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RemindersScreen(
     settings: ReminderSettings,
@@ -136,33 +131,47 @@ fun RemindersScreen(
                         if (bySun != null) {
                             SunTime(label, h, h.chosen)
                         } else if (h.chosen) {
-                            Text(
-                                label,
-                                Modifier.border(1.dp, p.border).background(p.bg).tap(label = "${h.name} at $label", action = "change the time") { editing = h }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                                style = body.copy(fontFeatureSettings = "lnum"),
-                            )
+                            // The accent's figures on the chosen control's gold rule, with the caret
+                            // that says the time can be changed (the web's time field).
+                            Row(
+                                Modifier.heightIn(min = 44.dp).tap(label = "${h.name} at $label", action = "change the time") { editing = h },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Row(
+                                    Modifier.drawBehind {
+                                        val w = 1.dp.toPx()
+                                        drawLine(p.goldLine, Offset(0f, size.height - w / 2), Offset(size.width, size.height - w / 2), w)
+                                    }.padding(start = 2.dp, end = 2.dp, top = 3.dp, bottom = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(label, style = body.copy(color = p.accent, fontFeatureSettings = "lnum, tnum"))
+                                    Caret(false, p.goldLine, lighter = false)
+                                }
+                            }
                         } else {
-                            Text(label, Modifier.padding(horizontal = 11.dp), style = body.copy(color = p.muted.copy(alpha = 0.6f), fontFeatureSettings = "lnum"))
+                            Text(label, Modifier.padding(end = 15.dp), style = body.copy(color = p.muted.copy(alpha = 0.55f), fontFeatureSettings = "lnum, tnum"))
                         }
                     }
                     if (sun != null && h.chosen && h.hour == "compline") ComplineNote(sun[h.hour]?.takeIf { it != h.time }?.format(clock))
                 }
             }
             Group("Days", Modifier.padding(top = 28.dp)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                // One week to a line, as the month grid sets its week: each day's name over its box.
+                Row(Modifier.fillMaxWidth()) {
                     WEEK.forEach { d ->
                         val on = d in settings.days
-                        Row(
-                            Modifier.heightIn(min = 44.dp).check(on) {
+                        Column(
+                            Modifier.weight(1f).heightIn(min = 44.dp).check(on) {
                                 haptics.toggled(it)
                                 onChange(settings.copy(days = if (it) settings.days + d else settings.days - d))
                             }
-                                .semantics { contentDescription = d.getDisplayName(JavaTextStyle.FULL, Locale.US) },
-                            verticalAlignment = Alignment.CenterVertically,
+                                .semantics { contentDescription = d.getDisplayName(JavaTextStyle.FULL, Locale.US) }
+                                .padding(top = 6.dp, bottom = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
+                            Text(d.getDisplayName(JavaTextStyle.SHORT, Locale.US), style = body.copy(fontSize = 15.2.sp, lineHeight = 20.sp))
+                            Spacer(Modifier.height(4.dp))
                             Tick(on)
-                            Text(d.getDisplayName(JavaTextStyle.SHORT, Locale.US), Modifier.padding(start = 8.dp), style = body)
                         }
                     }
                 }
@@ -170,13 +179,14 @@ fun RemindersScreen(
             Group("Remind me", Modifier.padding(top = 28.dp)) {
                 var open by remember { mutableStateOf(false) }
                 Box {
+                    // A worded line with the app's caret, not a boxed field.
                     Row(
-                        Modifier.border(1.dp, p.border).background(p.bg).tap(action = "choose when") { open = true }.disclosed(open)
-                            .padding(horizontal = 12.dp, vertical = 8.dp).width(220.dp),
+                        Modifier.fillMaxWidth().heightIn(min = 46.dp).tap(action = "choose when") { open = true }.disclosed(open)
+                            .padding(start = 2.dp, end = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(REMINDER_LEADS.first { it.first == settings.lead }.second, Modifier.weight(1f), style = body.copy(fontFeatureSettings = "lnum"))
-                        Caret(open, p.text)
+                        Caret(open, p.goldLine, lighter = false)
                     }
                     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
                         REMINDER_LEADS.forEach { (minutes, label) ->
@@ -185,13 +195,17 @@ fun RemindersScreen(
                     }
                 }
             }
-            DoubleRule(Modifier.padding(top = 28.dp))
-            Text("On this phone", Modifier.padding(top = 16.dp), style = body.copy(fontSize = 22.sp, lineHeight = 28.sp))
+            // The web's "Your calendar link": a titulus over the tablet, no rule between.
+            Text(
+                "On this phone",
+                Modifier.fillMaxWidth().padding(top = 32.dp).semantics { heading() },
+                style = Type.label(13.12f, 0.12f).copy(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS, textAlign = androidx.compose.ui.text.style.TextAlign.Center),
+            )
             if (settings.on) {
                 Text(
                     if (settings.hours.none { it.chosen } || settings.days.isEmpty()) "Reminders are on, but no hour or day is chosen." else "Reminders are on.",
-                    Modifier.padding(top = 8.dp),
-                    style = body.copy(color = p.muted),
+                    Modifier.fillMaxWidth().padding(top = 8.dp),
+                    style = body.copy(color = p.muted, textAlign = androidx.compose.ui.text.style.TextAlign.Center),
                 )
                 OutlineButton("Turn off reminders", Modifier.padding(top = 12.dp), onTurnOff)
                 if (!status.notificationsAllowed) {
@@ -278,7 +292,6 @@ private fun Times(
             Note("Allow location to time reminders by the sun.", "Open settings", onAllowLocation)
             Spacer(Modifier.height(6.dp))
         }
-        Hairline(p.border)
     }
 }
 
@@ -352,29 +365,32 @@ fun PlainHeadpiece() {
 }
 
 /**
- * A group of the page's controls under its name, set as home's "Pray the hours" band: the name
- * in small caps between gilt lozenges, a gold fillet above and below, and the rows on the page
- * itself beneath. A screen reader takes the name as the group's heading.
+ * A group of the page's controls under its name, ruled as home's hours are and as the web's
+ * Reminders fieldsets: the name in the titulus's small caps over a rule of the lining, the rows on
+ * the page itself, parted by hairlines, and a closing rule. A screen reader takes the name as the
+ * group's heading.
  */
 @Composable
 private fun Group(name: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val p = LocalPalette.current
-    // Home's band is gilt on its green earth; on the bare page the gold reads where the gilt would fade.
-    Column(modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
-        Lozenged(
+    val rule = p.lining.copy(alpha = 0.6f)
+    Column(
+        modifier.fillMaxWidth().semantics { isTraversalGroup = true }.drawBehind {
+            val w = 1.dp.toPx()
+            drawLine(rule, Offset(0f, size.height - w / 2), Offset(size.width, size.height - w / 2), w)
+        },
+    ) {
+        Text(
             name,
-            Type.label(11f, 0.16f).copy(color = p.gold, fontFeatureSettings = ALL_SMALL_CAPS),
-            p.gold,
             Modifier.fillMaxWidth()
                 .drawBehind {
                     val w = 1.dp.toPx()
-                    drawLine(p.goldLine, Offset(0f, w / 2), Offset(size.width, w / 2), w)
-                    drawLine(p.goldLine, Offset(0f, size.height - w / 2), Offset(size.width, size.height - w / 2), w)
+                    drawLine(rule, Offset(0f, size.height - w / 2), Offset(size.width, size.height - w / 2), w)
                 }
-                .padding(vertical = 7.dp)
+                .padding(bottom = 5.dp)
                 .semantics { heading(); traversalIndex = -1f },
+            style = Type.label(13.12f, 0.12f).copy(color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS),
         )
-        Spacer(Modifier.height(6.dp))
         content()
     }
 }
@@ -408,12 +424,7 @@ private fun Tick(checked: Boolean) {
 }
 
 @Composable
-private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit) {
-    val p = LocalPalette.current
-    Box(modifier.fillMaxWidth().heightIn(min = 46.dp).background(p.accent).tap(onClick = onClick), contentAlignment = Alignment.Center) {
-        Text(label, style = Type.body.copy(fontSize = 17.sp, lineHeight = 24.sp, color = p.bg))
-    }
-}
+private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit) = TabletButton(label, modifier, onClick)
 
 @Composable
 private fun OutlineButton(label: String, modifier: Modifier, onClick: () -> Unit) {

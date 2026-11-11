@@ -158,13 +158,13 @@ fn octave_days_keep_second_vespers_but_not_under_a_first_class_feast() {
     prec.within_octave_of = Some("st-george".to_string());
     let mut fol = day(Some(&day6), &[]);
     fol.within_octave_of = Some("st-george".to_string());
-    assert_ne!(resolve_concurrence(&prec, &fol).owner, NotApplicable);
+    assert_ne!(resolve_concurrence(&prec, &fol).owner(), NotApplicable);
 
     // Diurnal §X: the common octave is not commemorated at I Vespers of St
     // Joseph's Solemnity (2026 ordo, 28 April; #378).
     let joseph = f("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor);
     let r = resolve_concurrence(&day(Some(&day6), &[]), &day(Some(&joseph), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
     assert_trace_rule(&r.decisions, "commemoration:first-vespers-first-class-common-octave-exclusion");
 }
@@ -175,7 +175,7 @@ fn first_class_first_vespers_commemorates_the_outgoing_sunday() {
     let sunday = f("pentecost-sunday-4", Rank::SemiDouble, Category::Sunday);
     let peter_paul = f("ss-peter-paul", Rank::Double1stClass, Category::Apostle);
     let r = resolve_concurrence(&day(Some(&sunday), &[]), &day(Some(&peter_paul), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(same_list(&r.commemorations, &[&sunday]), "{:?}", ids(&r.commemorations));
     assert_trace_rule(&r.decisions, "commemoration:first-vespers-first-class-sunday");
     let epiphany = f("epiphany", Rank::Double1stClass, Category::Lord);
@@ -190,18 +190,18 @@ fn saturday_bvm_commemorated_at_friday_double_ii_vespers() {
     let angels = f("guardian-angels", Rank::GreaterDouble, Category::Angel);
     let bvm = f("saturday-office-bvm", Rank::Simple, Category::BlessedVirgin);
     let r = resolve_concurrence(&day(Some(&angels), &[]), &day(Some(&bvm), &[]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert_eq!(r.rule, "concurrence:double-vs-octave-or-saturday-bvm");
     assert!(same_list(&r.commemorations, &[&bvm]), "{:?}", ids(&r.commemorations));
-    assert_eq!(r.following_office_commemoration_id.as_deref(), Some("saturday-office-bvm"));
+    assert_eq!(r.following_office_commemoration_id(), Some("saturday-office-bvm"));
     assert_trace_rule(&r.decisions, "commemoration:following-office-at-second-vespers-saturday-bvm");
 
     // Ordinary Double (not only Greater) keeps the same commemorations.
     let ordinary = f("some-double", Rank::Double, Category::Martyr);
     let r = resolve_concurrence(&day(Some(&ordinary), &[]), &day(Some(&bvm), &[]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(same_list(&r.commemorations, &[&bvm]), "{:?}", ids(&r.commemorations));
-    assert_eq!(r.following_office_commemoration_id.as_deref(), Some("saturday-office-bvm"));
+    assert_eq!(r.following_office_commemoration_id(), Some("saturday-office-bvm"));
 
     // Needs ruling (#666): a Friday feast of Our Lady keeps it as well (2025
     // ordo 12 Sep, Holy Name of Mary: "Comm. BVM ('O blessed Mother' 68*").
@@ -217,7 +217,7 @@ fn saturday_bvm_not_commemorated_at_second_class_ii_vespers() {
     let apostles = f("simon-jude", Rank::Double2ndClass, Category::Apostle);
     let bvm = f("saturday-office-bvm", Rank::Simple, Category::BlessedVirgin);
     let r = resolve_concurrence(&day(Some(&apostles), &[]), &day(Some(&bvm), &[]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
     assert_trace_rule(&r.decisions, "commemoration:following-office-at-second-vespers-simple-or-memorial");
 }
@@ -234,7 +234,7 @@ fn whitsun_and_easter_vespers_commemorate_the_next_days_double() {
     let boniface = f("st-boniface", Rank::Double, Category::Martyr);
     let leo = f("st-leo-i", Rank::Double, Category::ConfessorDoctor);
     let r = resolve_concurrence(&day(Some(&pentecost), &[]), &day(Some(&whit_monday), &[&boniface]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(same_list(&r.commemorations, &[&boniface]), "{:?}", ids(&r.commemorations));
     let r = resolve_concurrence(&day(Some(&easter_tuesday), &[]), &day(Some(&easter_wednesday), &[&leo]));
     assert!(same_list(&r.commemorations, &[&leo]), "{:?}", ids(&r.commemorations));
@@ -253,7 +253,7 @@ fn first_class_second_vespers_keep_only_todays_double() {
         with("commemoration-st-paul-apostle", Rank::GreaterDouble, Category::Apostle, |x| x.octave_of = Some("ss-peter-paul".to_string()));
     let sunday = f("pentecost-sunday-2", Rank::SemiDouble, Category::Sunday);
     let r = resolve_concurrence(&day(Some(&peter_paul), &[]), &day(Some(&sunday), &[&paul]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(same_list(&r.commemorations, &[&sunday]), "{:?}", ids(&r.commemorations));
 }
 
@@ -263,19 +263,19 @@ fn simple_preceding_and_nil_days() {
     let double = f("some-double", Rank::Double, Category::Martyr);
     // A Simple ends at None and is not commemorated (XIII.17, XIV.9).
     let r = resolve_concurrence(&day(Some(&simple), &[]), &day(Some(&double), &[]));
-    assert_eq!(r.owner, IOfFollowing);
-    assert!(Arc::ptr_eq(r.feast.as_ref().unwrap(), &double));
+    assert_eq!(r.owner(), IOfFollowing);
+    assert!(Arc::ptr_eq(r.feast().unwrap(), &double));
     assert!(r.commemorations.is_empty());
     // An incoming Simple is excluded at II Vespers (XIV.7-8).
     let r = resolve_concurrence(&day(Some(&double), &[]), &day(Some(&simple), &[]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(r.commemorations.is_empty());
     // A plain feria still yields to the following I Vespers.
     let r = resolve_concurrence(&day(None, &[]), &day(Some(&double), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(r.commemorations.is_empty());
     let r = resolve_concurrence(&day(Some(&double), &[]), &day(None, &[]));
-    assert_eq!(r.owner, IIOfPreceding);
+    assert_eq!(r.owner(), IIOfPreceding);
     assert!(r.commemorations.is_empty());
 }
 
@@ -349,7 +349,7 @@ fn outgoing_apostolic_companion() {
     let ordinary = named("named-only-companion", "Commemoration of St Paul", Rank::Commemoration, Category::Apostle);
     let sunday = f("lesser-sunday", Rank::SemiDouble, Category::Sunday);
     let r = resolve_concurrence(&day(Some(&outgoing), &[&companion, &ordinary]), &day(Some(&sunday), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(same_list(&r.commemorations, &[&outgoing, &companion]), "{:?}", ids(&r.commemorations));
     assert_trace_rule(&r.decisions, "commemoration:outgoing-apostolic-companion");
 
@@ -358,13 +358,13 @@ fn outgoing_apostolic_companion() {
     let second = f("second-class", Rank::Double2ndClass, Category::Apostle);
     let first = f("first-class", Rank::Double1stClass, Category::Lord);
     let r = resolve_concurrence(&day(Some(&second), &[&companion]), &day(Some(&first), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(same_list(&r.commemorations, &[&second, &companion]), "{:?}", ids(&r.commemorations));
 
     // ...and is not orphaned when the outgoing feast itself is suppressed.
     let circumcision = f("circumcision", Rank::Double2ndClass, Category::Lord);
     let r = resolve_concurrence(&day(Some(&outgoing), &[&companion]), &day(Some(&circumcision), &[]));
-    assert_eq!(r.owner, IOfFollowing);
+    assert_eq!(r.owner(), IOfFollowing);
     assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
 }
 
@@ -482,7 +482,7 @@ fn impeded_lesser_double_at_first_vespers() {
         ("Ember Saturday before a Sunday (Januarius 2026)", &ember, &sunday, false),
     ] {
         let r = resolve_concurrence(&day(Some(impeder), &[&double]), &day(Some(following), &[]));
-        assert_eq!(r.owner, IOfFollowing, "{name}");
+        assert_eq!(r.owner(), IOfFollowing, "{name}");
         assert_eq!(r.commemorations.iter().any(|c| c.id == double.id), want, "{name}: {:?}", ids(&r.commemorations));
     }
 }
@@ -503,7 +503,7 @@ fn memorial_not_at_first_vespers_of_second_class_double() {
     ] {
         let fol = f("following", rank, category);
         let r = resolve_concurrence(&day(Some(&prec), &[]), &day(Some(&fol), &[&memorial, &simple]));
-        assert_eq!(r.owner, IOfFollowing);
+        assert_eq!(r.owner(), IOfFollowing);
         assert_eq!(r.commemorations.iter().any(|c| c.id == "memorial"), want, "{rank:?} {category:?}: {:?}", ids(&r.commemorations));
         assert_eq!(r.commemorations.iter().any(|c| c.id == "simple"), want, "{rank:?} {category:?}: {:?}", ids(&r.commemorations));
     }

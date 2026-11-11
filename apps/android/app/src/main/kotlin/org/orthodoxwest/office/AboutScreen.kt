@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
@@ -199,6 +200,19 @@ private fun periodOf(label: String): Period = when (label.lowercase()) {
 }
 
 /**
+ * The hours table's ink, as home's frontispiece first ruled it (`.about` in style.css): the rules
+ * within, the period cells' wash (the frieze's green earth, thinned) and the frame, the lining
+ * thinned.
+ */
+private class HoursInk(val rule: Color, val band: Color, val panelRule: Color)
+
+private fun hoursInk(p: Palette): HoursInk = if (p.dark) {
+    HoursInk(Color(208, 176, 106).copy(alpha = 0.24f), Color(208, 176, 106).copy(alpha = 0.045f), p.lining.copy(alpha = 0.45f))
+} else {
+    HoursInk(Color(107, 58, 31).copy(alpha = 0.22f), p.inscriptionGround.copy(alpha = 0.09f), p.lining.copy(alpha = 0.45f))
+}
+
+/**
  * The seven hours in home's three periods: each period's ornament and label in the frontispiece's
  * wash, then its hours, each name opening that hour today, with what it is in italic and when it
  * is said beneath. Framed at the sides and ends in the lining thinned, ruled within in the
@@ -208,7 +222,7 @@ private fun periodOf(label: String): Period = when (label.lowercase()) {
 private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
-    val ink = frontispieceInk(p)
+    val ink = hoursInk(p)
     val labelStyle = Type.label(11.52f, 0.08f).copy(lineHeight = 13.82.sp, color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
     val nameStyle = Type.body.copy(fontSize = 19.2.sp, lineHeight = 24.96.sp, color = p.text)
     val glossStyle = Type.body.copy(fontSize = 17.6.sp, lineHeight = 22.88.sp, color = p.text, fontStyle = FontStyle.Italic)

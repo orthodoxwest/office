@@ -4,8 +4,8 @@
 use calendar::{Color, Decision, MoveableDates};
 use liturgy::OfficeHour;
 
-use crate::concurrence::VespersOwner;
-use crate::day::Day;
+use crate::concurrence::VespersOffice;
+use crate::day::{Day, Evening};
 use crate::hourdef::HourSection;
 use crate::major::{MajorHourOptions, compose_major_hour};
 use crate::psalmody::{VESPERS_OF_THE_DEAD_LABEL, dead_office_day, resolve_vespers_psalmody};
@@ -31,7 +31,7 @@ pub fn compose_vespers(
     if day.celebration_is("holy-thursday") {
         hour.color = Some(Color::Violet); // 2026 ordo p. 53
     }
-    if day.vespers.appended_office_of_the_dead {
+    if day.vespers.appended_office_of_the_dead() {
         append_vespers_of_the_dead(&mut hour, day, sections, t, moveable)?;
     }
     Ok(hour)
@@ -63,7 +63,7 @@ fn append_vespers_of_the_dead(
 /// The office supplying the psalms: the outgoing office when the incoming
 /// Simple begins only at the Chapter (General Rubrics III).
 pub fn vespers_psalmody_day(day: &Day) -> Day {
-    if !day.vespers.psalmody_from_preceding {
+    if !day.vespers.psalmody_from_preceding() {
         return vespers_office_day(day);
     }
     let mut d = day.clone();
@@ -75,39 +75,35 @@ pub fn vespers_psalmody_day(day: &Day) -> Day {
 pub fn vespers_office_day(day: &Day) -> Day {
     let mut office_day = day.clone();
     let v = &day.vespers;
-    let Some(feast) = v.feast.clone().filter(|_| v.owner != VespersOwner::NotApplicable) else {
-        // No adjacent celebration owns Vespers: today's office with
-        // tomorrow's occurrence commemorations (XIV.9). Rogation and
-        // September Ember propers end at None (XIII.18).
-        office_day.commemorations = v.commemorations.clone();
-        if matches!(
-            day.celebration_id(),
-            Some("rogation-monday" | "september-ember-wednesday" | "september-ember-friday" | "september-ember-saturday")
-        ) {
-            office_day.celebration = None;
-            office_day.color = day.season.color();
+    office_day.commemorations = v.commemorations.clone();
+    match &v.office {
+        VespersOffice::Unowned => {
+            // No adjacent celebration owns Vespers: today's office with
+            // tomorrow's occurrence commemorations (XIV.9). Rogation and
+            // September Ember propers end at None (XIII.18).
+            if matches!(
+                day.celebration_id(),
+                Some("rogation-monday" | "september-ember-wednesday" | "september-ember-friday" | "september-ember-saturday")
+            ) {
+                office_day.celebration = None;
+                office_day.color = day.season.color();
+            }
         }
-        return office_day;
-    };
-    office_day.celebration = Some(feast);
-    // An owned evening always carries a colour.
-    office_day.color = v.color.unwrap_or(day.color);
-    if let Some(s) = v.season {
-        office_day.season = s;
-    }
-    match v.owner {
-        VespersOwner::IOfFollowing => {
+        VespersOffice::First { feast, color, season, within_octave_of, psalms: _ } => {
+            office_day.celebration = Some(feast.clone());
+            office_day.color = *color;
+            office_day.season = *season;
             office_day.date = day.date.add_days(1);
-            office_day.commemorations = v.commemorations.clone();
             office_day.tempora = None;
-            office_day.within_octave_of = v.within_octave_of.clone();
-            office_day.first_vespers = true;
+            office_day.within_octave_of = within_octave_of.clone();
+            office_day.evening = Some(Evening::First);
         }
-        VespersOwner::IIOfPreceding => {
-            office_day.commemorations = v.commemorations.clone();
-            office_day.following_office_commemoration_id = v.following_office_commemoration_id.clone().unwrap_or_default();
+        VespersOffice::Second { feast, color, season, following_commemorated, following_octave_of: _ } => {
+            office_day.celebration = Some(feast.clone());
+            office_day.color = *color;
+            office_day.season = *season;
+            office_day.evening = Some(Evening::Second { following_commemorated: following_commemorated.clone() });
         }
-        VespersOwner::NotApplicable => {}
     }
     office_day
 }

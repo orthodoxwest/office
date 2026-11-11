@@ -67,6 +67,8 @@ data/
                            is sung by chant-tunes.txt; `make validate` checks them.
   chant-tunes.txt          The tune table: which of an entry's tunes is sung when (summer, a
                            Doctor's office, otherwise), from the books' hymn indexes
+  chant-doxologies.txt     The seasonal and proper hymn endings cut into syllables, so a whole
+                           hymn's score sings the day's ending to the notes of its own last stanza
 scripts/
   DIURNAL-PIPELINE.md      Supported scanned-diurnal ingestion workflow and attestation semantics
   diurnal-pages.py         Render/index page images; OCR only locates pages

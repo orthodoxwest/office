@@ -147,6 +147,23 @@ struct AboutScreen: View {
 }
 
 /**
+ * The hours table's ink, as home's frontispiece first ruled it (`.about` in style.css): the rules
+ * within, the period cells' wash (the frieze's green earth, thinned) and the frame, the lining
+ * thinned.
+ */
+private struct HoursInk {
+    let rule: Color
+    let band: Color
+    let panelRule: Color
+
+    static func of(_ p: Palette) -> HoursInk {
+        p.dark
+            ? HoursInk(rule: Color(rgb: 208, 176, 106, 0.24), band: Color(rgb: 208, 176, 106, 0.045), panelRule: p.lining.opacity(0.45))
+            : HoursInk(rule: Color(rgb: 107, 58, 31, 0.22), band: p.inscriptionGround.opacity(0.09), panelRule: p.lining.opacity(0.45))
+    }
+}
+
+/**
  * The seven hours in home's three periods: the period cells in the frontispiece's wash with their
  * painted sun and moon, ruled in its ink and framed in the lining thinned. Each hour's name opens
  * it today; its gloss is in italic, and when it is said muted beneath.
@@ -159,7 +176,7 @@ private struct AboutHours: View {
     @Environment(\.metrics) private var m
 
     var body: some View {
-        let ink = FrontispieceInk.of(p)
+        let ink = HoursInk.of(p)
         let label = TextStyle(size: 11.52, line: 13.8, tracking: 11.52 * 0.08, smallCaps: true)
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, period in

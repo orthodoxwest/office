@@ -265,6 +265,25 @@ pub fn lookup_feast_proper_text(day: &Day, hour_name: &str, reference: &str, t: 
     if ferial_vespers_antiphon(day, hour_name, reference, t) || celebration.id.is_empty() || is_synthesized_feria(celebration) {
         return (String::new(), String::new());
     }
+    // From Septuagesima to Holy Week a Sunday's or feria's own psalm
+    // antiphons are said at Lauds and the Hours; its Vespers keeps the
+    // psalter's unless the proper names Vespers ("Ants. and Psalms of
+    // Sunday", Diurnal pp. 237, 280; "of Monday", pp. 282-284; 2026 ordo, "Sun.
+    // Off. (110-115)", "Mon. Ps. (114-21)") (#776). A Sunday within an
+    // octave is said as on the Feast (Ascension, 2026 ordo, 24 May).
+    if hour_name == "vespers"
+        && base_proper_ref(reference).starts_with("psalm-antiphon")
+        && is_sunday_or_feria(Some(celebration))
+        && matches!(day.season, Season::Septuagesima | Season::Lent | Season::Passiontide)
+    {
+        for feast_id in feast_proper_ids(celebration) {
+            let (text, resolved) = first_text(t, &format!("proper/{feast_id}/"), &hour_candidates);
+            if !text.is_empty() {
+                return (substitute_proper_name(&text, &proper_name), resolved);
+            }
+        }
+        return (String::new(), String::new());
+    }
     let season = day.saints_season(hour_name);
     for feast_id in feast_proper_ids(celebration) {
         if season == Season::Easter {
@@ -295,7 +314,7 @@ fn is_sunday_or_feria(f: Option<&Feast>) -> bool {
 /// it came from, or a "[Proper text not found: …]" marker.
 pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &OfficeTexts) -> (String, String) {
     // At I Vespers prefer a "-first" variant within the proper office.
-    if day.first_vespers && hour_name == "vespers" && !reference.ends_with("-first") {
+    if day.first_vespers() && hour_name == "vespers" && !reference.ends_with("-first") {
         let (text, resolved) = resolve_proper_text(day, hour_name, &format!("{reference}-first"), t);
         if !text.starts_with("[Proper text not found") {
             // A Common's I Vespers text cannot displace the feast's own
@@ -354,7 +373,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
     // 0.7. Saturday evening before a per-annum Sunday: the historia, the
     // Sunday's own -first proper, then the ferial Saturday antiphon.
     if hour_name == "vespers"
-        && day.first_vespers
+        && day.first_vespers()
         && reference.starts_with("magnificat-antiphon")
         && reference.ends_with("-first")
         && is_per_annum_sunday(celebration)
@@ -526,7 +545,7 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
 /// the week's Sunday Lauds antiphons ("First Week, Ant.", pp. 163–164).
 pub fn advent_ferial_psalm_antiphon_ref(day: &Day, hour_name: &str, n: u32) -> Option<String> {
     let weekday = day.civil_weekday();
-    if day.season != Season::Advent || day.first_vespers || weekday == Weekday::Sunday {
+    if day.season != Season::Advent || day.first_vespers() || weekday == Weekday::Sunday {
         return None;
     }
     if !matches!(hour_name, "lauds" | "prime" | "terce" | "sext" | "none") {
@@ -561,7 +580,7 @@ pub fn greater_antiphon_day(day: &Day) -> Option<u32> {
         return None;
     }
     let mut o_day = day.date.day();
-    if day.first_vespers {
+    if day.first_vespers() {
         o_day -= 1;
     }
     (17..=23).contains(&o_day).then_some(o_day)

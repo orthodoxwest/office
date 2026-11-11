@@ -1408,7 +1408,7 @@ Day = 2
 Source = awrv
 
 [comm-extra-08-06-ss-sixtus-ii-pope-and-martyr-felicissimus-and-agapitus]
-Name = Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus
+Name = Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (Deacons), Martyrs
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1591,7 +1591,7 @@ Day = 17
 Source = awrv
 
 [comm-extra-04-14-st-tiburtius-valerian-and-maximus-martyrs]
-Name = St Tiburtius, Valerian & Maximus, Martyrs
+Name = Ss Tiburtius, Valerian & Maximus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1610,7 +1610,7 @@ Day = 22
 Source = awrv
 
 [comm-extra-04-26-st-cletus-and-marcellinus-martyrs]
-Name = St Cletus & Marcellinus, Martyrs
+Name = Ss Cletus & Marcellinus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs

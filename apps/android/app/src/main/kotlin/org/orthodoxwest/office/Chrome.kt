@@ -65,24 +65,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -97,7 +100,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -259,6 +264,21 @@ val LocalMartyrology = staticCompositionLocalOf { MartyrologyChoice(false) {} }
 class ChantChoice(val offered: Boolean, val on: Boolean, val onChange: (Boolean) -> Unit)
 
 val LocalChant = staticCompositionLocalOf { ChantChoice(false, false) {} }
+
+/**
+ * The header's overlay, at most one open at a time: the menu on a narrow screen, the wide
+ * header's Settings on a wide one. A tap outside, Back, any move to another page and crossing the
+ * breakpoint all close it. The web holds the same three states (app.js) and so does iOS
+ * (Model.swift).
+ */
+enum class Overlay {
+    NONE,
+    MENU,
+    SETTINGS;
+
+    /** After a tap on `shown`'s control: it opens, in place of any other, or closes if it was open. */
+    fun toggled(shown: Overlay): Overlay = if (this == shown) NONE else shown
+}
 
 /**
  * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
@@ -438,6 +458,7 @@ fun MenuPanel(
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
+    val plaster = ImageBitmap.imageResource(p.panel)
     // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
     // window until it has gone.
     val shown = remember { MutableTransitionState(false) }
@@ -464,6 +485,7 @@ fun MenuPanel(
                     .dropShadow(RectangleShape, Shadow(radius = 16.dp, color = Color(36, 28, 23).copy(alpha = 0.09f), offset = DpOffset(0.dp, 7.2.dp)))
                     .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
+                    .then(if (p.dark) Modifier.drawBehind { nightPlaster(plaster) } else Modifier)
                     .border(1.dp, p.border)
                     // The panel's top edge is the painted line (`--ornament-line`), with the surface's
                     // edge catching the light just inside it (`inset 0 1px 0 var(--surface-edge)`).
@@ -568,6 +590,18 @@ private fun AnnotatedString.Builder.prefName(name: String) {
     withStyle(SpanStyle(fontStyle = FontStyle.Normal, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.05.em)) { append(name) }
 }
 
+/**
+ * By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster, its ground,
+ * limewash and veil), not a flat slab of the surface: the web's `.site-menu-panel` by night. The
+ * plaster is fitted to the panel's width from the top, and covers it.
+ */
+private fun DrawScope.nightPlaster(plaster: ImageBitmap) {
+    val scale = maxOf(size.width / plaster.width, size.height / plaster.height)
+    val w = kotlin.math.ceil(plaster.width * scale).toInt()
+    val h = kotlin.math.ceil(plaster.height * scale).toInt()
+    drawImage(plaster, dstOffset = IntOffset((size.width.toInt() - w) / 2, 0), dstSize = IntSize(w, h))
+}
+
 /** The room the menu panel's popup keeps about it for the panel's shadow: at its sides and foot, and above it. */
 private val ShadowRoom: Dp = 16.dp
 private val ShadowRise: Dp = 9.dp
@@ -588,16 +622,26 @@ private fun PrefHint(text: AnnotatedString) {
 
 /** A small uppercase disclosure label with its caret ("Change date ▾"), muted, in the accent while open. */
 @Composable
-fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String? = null, modifier: Modifier = Modifier) {
+fun Disclosure(
+    label: String,
+    open: Boolean,
+    onToggle: () -> Unit,
+    value: String? = null,
+    modifier: Modifier = Modifier,
+    style: TextStyle? = null,
+    upper: Boolean = true,
+) {
     val p = LocalPalette.current
-    val ink = if (open) p.accent else p.muted
+    val ink = if (open) p.accent else (style?.color?.takeIf { it.isSpecified } ?: p.muted)
+    val cased = { s: String -> if (upper) s.uppercase() else s }
     Row(modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             buildAnnotatedString {
-                append(label.uppercase())
-                if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + value.uppercase()) }
+                append(cased(label))
+                if (value != null) withStyle(SpanStyle(color = p.text)) { append(" " + cased(value)) }
             },
-            style = Type.control.copy(color = ink),
+            style = (style ?: Type.control).copy(color = ink),
+            softWrap = style == null,
         )
         Caret(open, ink)
     }
@@ -651,19 +695,23 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
+        // "Previous day" and "Next day", worded (`presentation::PREVIOUS_DAY`), so they read as the
+        // day's turn and the month's arrows below as the month's; gathered, they stand at the
+        // grid's edges.
         Row(
-            Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
-            horizontalArrangement = if (centred) Arrangement.Center else Arrangement.Start,
+            (if (centred) Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7) else Modifier).fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("← Previous", Modifier.tap(label = "Previous day") { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
-            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
+            Text("← ${DAY_NAV.previous}", Modifier.tap(label = DAY_NAV.previous) { onPick(shown.minusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
+            Spacer(Modifier.weight(1f))
             if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
-            Spacer(if (centred) Modifier.width(4.dp) else Modifier.weight(1f))
-            Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
+            Spacer(Modifier.weight(1f))
+            Text("${DAY_NAV.next} →", Modifier.tap(label = DAY_NAV.next) { onPick(shown.plusDays(1)) }.padding(horizontal = if (centred) 4.dp else 16.dp), style = link)
         }
         Column(Modifier.align(Alignment.CenterHorizontally).widthIn(max = 44.dp * 7).fillMaxWidth()) {
-            Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+            // A hairline parts the day's turn above from the month's below.
+            Hairline(p.border.copy(alpha = p.border.alpha * 0.58f), Modifier.padding(top = 4.dp))
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 // A month's step in the days, a year's in the months; none past the picker's span.
                 val step = if (months) 12L else 1L
                 val back = month.minusMonths(step).takeIf { it.year in PICKER_YEARS }
@@ -728,8 +776,18 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
     }
 }
 
-/** Today's wash in the picker: the gold at a tenth on Nave; on the Apse the vault's blue lifted (`--apse-lift`), as gold reads grey on the night. */
-private fun todayWash(p: Palette): Color = if (p.dark) Color(132, 160, 204).copy(alpha = 0.13f) else p.gold.copy(alpha = 0.1f)
+/** Change date's day links, worded as the web's. */
+private val DAY_NAV by lazy { org.orthodoxwest.office.core.dayNavWords() }
+
+/**
+ * Today in the picker lies under a pool of light with no edge, as the hour that is now does on
+ * home (`--now-pool`): ochre by day, moonlit blue by night.
+ */
+private fun Modifier.todayPool(p: Palette): Modifier = drawBehind {
+    val pool = homeInk(p).nowPool
+    val r = minOf(size.width, size.height) / 2f
+    drawCircle(androidx.compose.ui.graphics.Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = r), r, center)
+}
 
 private fun YearMonth.coerceIn(years: IntRange): YearMonth = when {
     year < years.first -> YearMonth.of(years.first, 1)
@@ -762,7 +820,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                     Modifier
                         .weight(1f)
                         .heightIn(min = 44.dp)
-                        .then(if (day == today) Modifier.background(todayWash(p)) else Modifier)
+                        .then(if (day == today) Modifier.todayPool(p) else Modifier)
                         .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
                             haptics.chose()
                             onPick(day)
@@ -802,7 +860,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                         Text(
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
-                                .then(if (today.year == year && today.monthValue == m) Modifier.background(todayWash(p)) else Modifier)
+                                .then(if (today.year == year && today.monthValue == m) Modifier.todayPool(p) else Modifier)
                                 .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
@@ -859,8 +917,10 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
 }
 
 /**
- * The continuation after a page's content: the previous item, the way back to all of them, and
- * the next item, with no ornament of its own.
+ * The way on at a page's end: the previous and next with their labels, and the middle link between.
+ * `ruled` sets it as home sets its hours (an hour's end, the web's `.page-hour .hour-continuation`):
+ * labels in true small capitals, the names a size up, home's gilt points between the three, and
+ * one rule struck under them with home's pen where the wall's field begins.
  */
 @Composable
 fun Continuation(
@@ -873,22 +933,37 @@ fun Continuation(
     next: String?,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
+    ruled: Boolean = false,
 ) {
     val p = LocalPalette.current
-    val small = Type.label(11.2f, 0.08f).copy(color = p.muted)
-    val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.accent)
+    val small = if (ruled) Type.label(13.76f, 0.08f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS) else Type.label(11.2f, 0.08f).copy(color = p.muted)
+    val name = Type.body.copy(fontSize = if (ruled) 16.96.sp else 16.sp, lineHeight = 22.sp, color = p.accent)
+    val middleStyle = if (ruled) small else Type.label(12.16f, 0.06f).copy(color = p.muted)
+    val rule = p.lining.copy(alpha = 0.55f)
+    fun label(text: String) = if (ruled) text else text.uppercase()
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth()
+                .then(
+                    if (!ruled) Modifier else Modifier.drawBehind {
+                        val u = density
+                        drawPath(ruledLine(0f, size.height - 0.5f * u, size.width, size.height - 0.5f * u, 1.2f * u, 51, u), rule)
+                    }.padding(top = 8.8.dp, bottom = 9.6.dp),
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(Modifier.weight(1f).then(if (previous != null) Modifier.tap(label = "$previousLabel: $previous", onClick = onPrevious) else Modifier), horizontalAlignment = Alignment.Start) {
                 if (previous != null) {
-                    Text(previousLabel.uppercase(), style = small)
+                    Text(label(previousLabel), style = small)
                     Text("← $previous", style = name)
                 }
             }
-            Text(middle.uppercase(), Modifier.tap(label = middle, onClick = onMiddle).padding(horizontal = 6.4.dp, vertical = 12.dp), style = Type.label(12.16f, 0.06f).copy(color = p.muted))
+            if (ruled && previous != null) GiltPoint()
+            Text(label(middle), Modifier.tap(label = middle, onClick = onMiddle).padding(horizontal = if (ruled) 12.dp else 6.4.dp, vertical = 12.dp), style = middleStyle)
+            if (ruled && next != null) GiltPoint()
             Column(Modifier.weight(1f).then(if (next != null) Modifier.tap(label = "$nextLabel: $next", onClick = onNext) else Modifier), horizontalAlignment = Alignment.End) {
                 if (next != null) {
-                    Text(nextLabel.uppercase(), style = small)
+                    Text(label(nextLabel), style = small)
                     Text("$next →", style = name)
                 }
             }
