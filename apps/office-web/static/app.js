@@ -2977,7 +2977,15 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
   }
 
-  ruleAll();
+  // WebKit can run this deferred script before style.css has applied, and
+  // rules measured then are drawn across an unstyled page until the next
+  // resize. The wall's tokens stand only once the stylesheet does: rule now
+  // if they do, else when the page has loaded (its stylesheet with it).
+  if (getComputedStyle(document.documentElement).getPropertyValue("--bg")) {
+    ruleAll();
+  } else {
+    window.addEventListener("load", ruleAll);
+  }
   // Redrawn whenever the page's box changes: a new width, and the reader's
   // text size, which moves every line without touching the window.
   var size = page.offsetWidth + "x" + page.offsetHeight;
