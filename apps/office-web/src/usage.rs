@@ -289,8 +289,46 @@ fn advertise(resp: &mut Response<Body>, canonical: Option<&str>) {
     }
 }
 
+/// The cookie holding the reporting day a browser was first counted. The page's own mark
+/// (`office-first-counted`) lives in script storage, which Safari erases after seven days without
+/// a visit and an installed web app does not share with the browser; this one is set by the
+/// server, which Safari keeps. A browser that brings a day before today is returning whatever its
+/// page says. The day is read and dropped, never stored, so nothing links one day to another.
+const SINCE_COOKIE: &str = "office-since";
+
+/// Whether `value` is a reporting day as the since cookie writes it ("2026-11-11").
+fn valid_day(value: &str) -> bool {
+    let b = value.as_bytes();
+    b.len() == 10 && b[4] == b'-' && b[7] == b'-' && b.iter().enumerate().all(|(i, c)| i == 4 || i == 7 || c.is_ascii_digit())
+}
+
+/// A beacon's dimensions with its first visit made returning when the browser was counted on an
+/// earlier reporting day than `today`, by its since cookie.
+fn settle_visit(mut dimensions: Vec<String>, since: Option<&str>, today: &str) -> Vec<String> {
+    if since.is_some_and(|s| s < today) {
+        for d in &mut dimensions {
+            if d == "visit:first" {
+                *d = "visit:returning".to_string();
+            }
+        }
+    }
+    dimensions
+}
+
 /// `POST /api/usage`: one page view's beacon. `canonical` is the site's canonical host, if set.
 pub fn handle_event(
+    store: Option<&Store>,
+    method: &Method,
+    headers: &HeaderMap,
+    host: &str,
+    canonical: Option<&str>,
+    body: BeaconBody,
+) -> Response<Body> {
+    event_at(jiff::Timestamp::now(), store, method, headers, host, canonical, body)
+}
+
+fn event_at(
+    now: jiff::Timestamp,
     store: Option<&Store>,
     method: &Method,
     headers: &HeaderMap,
@@ -331,22 +369,34 @@ pub fn handle_event(
     };
     const COOKIE: &str = "office-usage";
     let mut resp = response(StatusCode::NO_CONTENT, Body::empty());
+    let secure = if header_value(headers, "x-forwarded-proto") == "https" { "; Secure" } else { "" };
+    let today = presentation::date_slug(eastern_day(now));
+    let since = cookie(headers, SINCE_COOKIE).filter(|d| valid_day(d));
+    let dimensions = settle_visit(event.dimensions, since.as_deref(), &today);
+    // Only a browser sends an Origin; the apps keep their own first day and take no cookies.
+    if since.is_none() && !origin.is_empty() {
+        let value = format!("{SINCE_COOKIE}={today}; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict");
+        if let Ok(v) = header::HeaderValue::from_str(&value) {
+            resp.headers_mut().append(header::SET_COOKIE, v);
+        }
+    }
     let id = match cookie(headers, COOKIE).filter(|id| valid_browser_id(id)) {
         Some(id) => id,
         None => {
             let Some(id) = random_id() else {
                 return with_usage_headers(response(StatusCode::SERVICE_UNAVAILABLE, Body::empty()));
             };
-            let secure = if header_value(headers, "x-forwarded-proto") == "https" { "; Secure" } else { "" };
             let value = format!("{COOKIE}={id}; Path=/api/usage; Max-Age=2592000; HttpOnly{secure}; SameSite=Strict");
-            set(&mut resp, header::SET_COOKIE, &value);
+            if let Ok(v) = header::HeaderValue::from_str(&value) {
+                resp.headers_mut().append(header::SET_COOKIE, v);
+            }
             id
         }
     };
-    if store.record(jiff::Timestamp::now(), &id, &event.scope, &event.dimensions).is_err() {
+    if store.record(now, &id, &event.scope, &dimensions).is_err() {
         let mut failed = response(StatusCode::SERVICE_UNAVAILABLE, Body::empty());
-        if let Some(c) = resp.headers().get(header::SET_COOKIE) {
-            failed.headers_mut().insert(header::SET_COOKIE, c.clone());
+        for c in resp.headers().get_all(header::SET_COOKIE) {
+            failed.headers_mut().append(header::SET_COOKIE, c.clone());
         }
         return with_usage_headers(failed);
     }
@@ -636,6 +686,64 @@ mod tests {
         ] {
             assert_eq!(sum(scope), n, "{scope}");
         }
+    }
+
+    // Safari erases a page's storage after seven days without a visit, so a weekly reader's page
+    // says it is new again; the server's own cookie remembers the day it was first counted.
+    #[test]
+    fn a_browser_counted_on_an_earlier_day_is_returning_whatever_its_page_says() {
+        let db = TempDb::new("since");
+        let store = db.open();
+        let now = eastern_at(2026, 11, 11, 9, 0);
+        let post = |cookies: &str, body: &str| {
+            let mut headers = HeaderMap::new();
+            headers.insert("x-office-usage", "1".parse().unwrap());
+            headers.insert(header::ORIGIN, "https://office.example".parse().unwrap());
+            headers.insert("x-forwarded-proto", "https".parse().unwrap());
+            headers.insert(header::USER_AGENT, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) Safari/604.1".parse().unwrap());
+            if !cookies.is_empty() {
+                headers.insert(header::COOKIE, cookies.parse().unwrap());
+            }
+            event_at(now, Some(&store), &Method::POST, &headers, "office.example", None, Some(body.as_bytes().to_vec()))
+        };
+        let set_cookies = |r: &Response<Body>| {
+            r.headers().get_all(header::SET_COOKIE).iter().map(|v| v.to_str().unwrap().to_string()).collect::<Vec<_>>()
+        };
+        // A new browser is given both cookies, the since cookie naming today.
+        let fresh = post("", "lauds visit:first client:browser");
+        let cookies = set_cookies(&fresh);
+        assert!(cookies.iter().any(|c| c.starts_with("office-usage=")), "{cookies:?}");
+        assert!(
+            cookies.contains(&"office-since=2026-11-11; Path=/api/usage; Max-Age=34560000; HttpOnly; Secure; SameSite=Strict".to_string()),
+            "{cookies:?}"
+        );
+        // Counted earlier, its storage since erased: returning, and the cookie is not renewed.
+        let id = "0123456789abcdef0123456789abcdef";
+        let erased = post(&format!("office-usage={id}; office-since=2026-11-02"), "vespers visit:first client:browser");
+        assert!(set_cookies(&erased).is_empty(), "{:?}", set_cookies(&erased));
+        // Counted first today, it stays new all day.
+        let today = post("office-usage=fedcba9876543210fedcba9876543210; office-since=2026-11-11", "site visit:first client:pwa");
+        assert!(set_cookies(&today).is_empty());
+        // A browser from before the cookie, or with a garbled one, keeps its page's word and is
+        // given the cookie.
+        let garbled = post("office-usage=00112233445566778899aabbccddeeff; office-since=yesterday", "site visit:first client:browser");
+        assert!(set_cookies(&garbled).iter().any(|c| c.starts_with("office-since=2026-11-11;")));
+        let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
+        for (scope, n) in [("site", 4), ("visit:first", 3), ("visit:returning", 1), ("new-client:browser", 2), ("new-client:pwa", 1)] {
+            assert_eq!(sum(scope), n, "{scope}");
+        }
+    }
+
+    #[test]
+    fn since_days_are_read_strictly() {
+        for (value, ok) in [("2026-11-02", true), ("2026-1-02", false), ("2026/11/02", false), ("2026-11-0x", false), ("", false)] {
+            assert_eq!(valid_day(value), ok, "{value:?}");
+        }
+        let dims = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        let first = dims(&["visit:first", "client:browser"]);
+        assert_eq!(settle_visit(first.clone(), Some("2026-11-10"), "2026-11-11"), dims(&["visit:returning", "client:browser"]));
+        assert_eq!(settle_visit(first.clone(), Some("2026-11-11"), "2026-11-11"), first);
+        assert_eq!(settle_visit(first.clone(), None, "2026-11-11"), first);
     }
 
     #[test]
