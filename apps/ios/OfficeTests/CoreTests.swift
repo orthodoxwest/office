@@ -570,10 +570,11 @@ final class UsageTests: XCTestCase {
         XCTAssertFalse(aboutNewcomer(daysSinceFirst: -1))
         // An installation that reported before first days were kept is no newcomer, whether its
         // first day is still to be kept or the beacon's first day was kept as "before".
-        UserDefaults().removePersistentDomain(forName: suite)
+        let clean = { for key in ["about-first", "usage-first", "usage-day"] { defaults.removeObject(forKey: key) } }
+        clean()
         defaults.set("2026-03-10", forKey: "usage-day")
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
-        UserDefaults().removePersistentDomain(forName: suite)
+        clean()
         defaults.set("before", forKey: "usage-first")
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), -1)
     }
