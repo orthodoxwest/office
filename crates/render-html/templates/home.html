@@ -69,6 +69,12 @@
 
     <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
       <h2 id="home-pray-heading"><span class="home-frieze-text">Pray the hours</span></h2>
+      {# The stage under the band: the invitation and the hours, which
+           "Change date" turns into the calendar in their place (app.js moves
+           the day's turn and the picker in beside them). Without script the
+           picker unfolds under its own control instead. #}
+      <div class="home-stage">
+      <div class="home-hours-face">
       <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
@@ -123,6 +129,8 @@
           </div>
         </section>
       </nav>
+      </div>
+      </div>
     </section>
 
     {# Season rides the secondary control row: context without interrupting

@@ -199,6 +199,15 @@ class ScreenshotTest {
         shoot("date-picker-nave")
     }
 
+    /** Home's "Change date": the calendar in the hours' place under the band. */
+    @Test
+    fun homeCalendar() {
+        show(Page.Home(lent), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
+        compose.onNodeWithText("Change date", substring = true).performClick()
+        compose.waitForIdle()
+        shoot("home-calendar-nave")
+    }
+
     @Test
     fun datePickerMonths() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))

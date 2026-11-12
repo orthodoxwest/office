@@ -381,37 +381,40 @@ private struct FrontispieceLayout: Layout {
     }
 
     /// The head's height, the day's parts (its facts, the versicle when it fits, and "Go to
-    /// today"), the hours, the picker as far as it has unfolded, and the whole. The versicle takes
-    /// only the height the head has to spare: where it would make the card taller, the head goes
-    /// without it. It is fitted to the card with the picker shut, as the web's is, so opening the
-    /// picker never takes it away.
-    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, after: CGFloat, picker: CGFloat, height: CGFloat) {
+    /// today"), the band, the stage as far as it has turned from the hours to the calendar, the
+    /// hours' height, and the whole. The versicle takes only the height the head has to spare:
+    /// where it would make the card taller, the head goes without it. It is fitted to the card
+    /// with the hours shown, as the web's is, so turning to the calendar never takes it away.
+    private func measure(_ width: CGFloat, _ proposal: ProposedViewSize, _ subviews: Subviews) -> (summary: CGFloat, facts: CGFloat, versicle: CGFloat?, back: CGFloat, band: CGFloat, stage: CGFloat, hours: CGFloat, height: CGFloat) {
         let free = ProposedViewSize(width: width, height: nil)
         let facts = subviews[2].sizeThatFits(free).height
         let versicle = subviews[3].sizeThatFits(free).height
         let back = subviews[4].sizeThatFits(free).height
-        let after = subviews[5].sizeThatFits(free).height
-        // The picker's full height; none once it has folded away.
-        let full = subviews[6].sizeThatFits(free).height
-        let unfolded = min(max(open, 0), 1)
+        let band = subviews[5].sizeThatFits(free).height
+        let hours = subviews[6].sizeThatFits(free).height
+        // The calendar's full height; none once it has turned back and been let go.
+        let full = subviews[7].sizeThatFits(free).height
+        let meta = subviews[8].sizeThatFits(free).height
+        let turned = full > 0 ? min(max(open, 0), 1) : 0
         let foot = m.px(tier.bottom)
         let pad = m.px(tier.headPad)
         let day = facts + back + m.px(tier.dayGap)
         let rise = tier.arch.rise * width
         let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
-        let shut = max(pad + day, rise, least - after - foot)
+        let shut = max(pad + day, rise, least - band - hours - meta - foot)
         let fits = versicle > 0 && pad + day + versicle <= shut
-        // Where the head's spare height holds the whole picker, the head gives it up in step
-        // with the unfolding, so the day rises as the picker opens and settles with it, and
-        // nothing scrolls. Where it does not, the head keeps its height: the page rises whole
-        // as the picker unfolds (`Reveal.alongside`), the arch never pressed down for a scroll
-        // that comes anyway (the web's and Android's alike).
+        // "Change date" turns the stage from the hours to the calendar, which is taller. Where the
+        // head's spare height holds the difference, it gives it up in step with the turn, so the
+        // day rises as the calendar opens and nothing scrolls; where it does not, the head keeps
+        // its height, the card lengthens, and the page rises with its foot in the same
+        // transaction (`Reveal.alongside`), the arch never pressed down for a scroll that comes
+        // anyway (the web's and Android's alike).
         let floor = max(pad + day + (fits ? versicle : 0), rise)
-        let room = least - after - full - foot
+        let room = least - band - full - meta - foot
         let opened = room >= floor ? room : shut
-        let summary = full > 0 ? shut - (shut - opened) * unfolded : shut
-        let picker = full * unfolded
-        return (summary, facts, fits ? versicle : nil, back, after, picker, summary + after + picker + foot)
+        let summary = shut - (shut - opened) * turned
+        let stage = hours + (full - hours) * turned
+        return (summary, facts, fits ? versicle : nil, back, band, stage, hours, summary + band + stage + meta + foot)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -420,7 +423,7 @@ private struct FrontispieceLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let (summary, facts, versicle, back, after, picker, _) = measure(bounds.width, proposal, subviews)
+        let (summary, facts, versicle, back, band, stage, hours, _) = measure(bounds.width, proposal, subviews)
         let free = ProposedViewSize(width: bounds.width, height: nil)
         let pad = m.px(tier.headPad)
         let spare = summary - pad - facts - (versicle ?? 0) - back - m.px(tier.dayGap)
@@ -434,9 +437,13 @@ private struct FrontispieceLayout: Layout {
         subviews[3].place(at: CGPoint(x: bounds.minX, y: y), proposal: ProposedViewSize(width: bounds.width, height: versicle.map { $0 + 1 } ?? 0))
         y += versicle ?? 0
         subviews[4].place(at: CGPoint(x: bounds.minX, y: y), proposal: free)
-        subviews[5].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary), proposal: free)
-        // Revealed from its top as far as it has unfolded.
-        subviews[6].place(at: CGPoint(x: bounds.minX, y: bounds.minY + summary + after), proposal: ProposedViewSize(width: bounds.width, height: picker))
+        let top = bounds.minY + summary
+        subviews[5].place(at: CGPoint(x: bounds.minX, y: top), proposal: free)
+        // Both faces of the stage stand at its head: the hours at their own height, the calendar
+        // revealed from its top as far as the turn has opened the stage.
+        subviews[6].place(at: CGPoint(x: bounds.minX, y: top + band), proposal: ProposedViewSize(width: bounds.width, height: hours))
+        subviews[7].place(at: CGPoint(x: bounds.minX, y: top + band), proposal: ProposedViewSize(width: bounds.width, height: stage))
+        subviews[8].place(at: CGPoint(x: bounds.minX, y: top + band + stage), proposal: free)
     }
 }
 
@@ -637,60 +644,28 @@ private struct Frontispiece: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            // The invitation and the hours, from the inscription band.
+            // The inscription band, at the head of the stage.
+            inscription(side: side)
+                .padding(.horizontal, side)
+                .frame(maxWidth: .infinity)
+            // The stage's first face: the invitation and the hours, which "Change date" turns into
+            // the calendar in their place (the web's `.home-hours-face`), fading out as it turns.
             VStack(spacing: 0) {
-                inscription(side: side)
                 PrayNow(label: view.prayNowLabel, tier: tier, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
                 HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
-                // The season and "Change date" share one line after the hours, centred (the web's
-                // `.home-day-meta`), in small caps, a gilt point between them. Open, the date
-                // control takes a line of its own beneath the season, and the picker the card's width.
-                let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
-                let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
-                // In a reader's first week the introduction to About stands in the season's place
-                // (each hour's header still names it), in the same small caps and gilt point, as
-                // on the web.
-                let newcomer = aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst())
-                if view.season.isEmpty && !newcomer {
-                    change.padding(.top, m.px(tier.metaGap + 1))
-                } else {
-                    let lead = HStack(spacing: 0) {
-                        Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
-                            .multilineTextAlignment(.center)
-                        if !picking {
-                            Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
-                                .frame(width: 5, height: 5)
-                                .padding(.leading, m.px(14.4))
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    let season = Group {
-                        if newcomer {
-                            Button { model.open(.about) } label: { lead.frame(minHeight: 44).contentShape(Rectangle()) }
-                                .buttonStyle(Quiet())
-                                .accessibilityLabel(aboutPage.introduction)
-                                .accessibilityHint("Opens About the Office")
-                        } else {
-                            lead
-                        }
-                    }
-                    // One layout either way, so "Change date" stays the control VoiceOver is on
-                    // as it opens.
-                    SeasonLine(spacing: m.px(8.8), above: m.px(3.2), stacked: picking) {
-                        season
-                        change
-                    }
-                    .padding(.top, m.px(tier.metaGap + 1))
-                }
             }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
-            // "Change date"'s picker, revealed from its top as the layout gives it its height
-            // (the disclosure's own unfolding, Android's `Unfold`), and laid out only while shown.
+            .opacity(picking ? 0 : 1)
+            .animation(.easeIn(duration: 0.12), value: picking)
+            .allowsHitTesting(!picking)
+            .accessibilityHidden(picking)
+            // The stage's second face: the day's turn and the calendar, laid out only while shown,
+            // and revealed from its top as far as the turn has opened the stage.
             VStack(spacing: 0) {
                 if unfolded {
                     DayPicker(shown: date, today: model.today, centred: true) { d in
@@ -705,10 +680,51 @@ private struct Frontispiece: View {
             .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .clipped()
             .opacity(picking ? 1 : 0)
+            .animation(.easeOut(duration: 0.2).delay(0.06), value: picking)
             .accessibilityHidden(!picking)
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
-            .id("disclosed")
+            // The season and "Change date" under the stage, sharing one line, centred (the web's
+            // `.home-day-meta`), in small caps, a gilt point between them, open or shut.
+            VStack(spacing: 0) {
+                let foot = TextStyle(size: tier.meta, line: tier.meta * 1.5, tracking: tier.meta * 0.09, smallCaps: true)
+                let change = Disclosure(label: "Change date", open: picking, style: foot, upper: false) { togglePicker() }
+                // In a reader's first week the introduction to About stands in the season's place
+                // (each hour's header still names it), in the same small caps and gilt point, as
+                // on the web.
+                let newcomer = aboutNewcomer(daysSinceFirst: Usage.daysSinceFirst())
+                if view.season.isEmpty && !newcomer {
+                    change.padding(.top, m.px(tier.metaGap + 1))
+                } else {
+                    let lead = HStack(spacing: 0) {
+                        Text(newcomer ? aboutPage.introduction : view.season).type(foot).foregroundStyle(p.muted)
+                            .multilineTextAlignment(.center)
+                        Canvas { ctx, s in ctx.fill(lozenge(CGPoint(x: s.width / 2, y: s.height / 2), 2.5), with: .color(o.flat.opacity(0.7))) }
+                            .frame(width: 5, height: 5)
+                            .padding(.leading, m.px(14.4))
+                            .accessibilityHidden(true)
+                    }
+                    let season = Group {
+                        if newcomer {
+                            Button { model.open(.about) } label: { lead.frame(minHeight: 44).contentShape(Rectangle()) }
+                                .buttonStyle(Quiet())
+                                .accessibilityLabel(aboutPage.introduction)
+                                .accessibilityHint("Opens About the Office")
+                        } else {
+                            lead
+                        }
+                    }
+                    // One layout either way, so "Change date" stays the control VoiceOver is on
+                    // as it opens.
+                    SeasonLine(spacing: m.px(8.8), above: m.px(3.2), stacked: false) {
+                        season
+                        change
+                    }
+                    .padding(.top, m.px(tier.metaGap + 1))
+                }
+            }
+            .padding(.horizontal, side)
+            .frame(maxWidth: .infinity)
         }
         .coordinateSpace(name: "frontispiece")
         .onPreferenceChange(ReserveKey.self) { reserve = $0 }
@@ -736,8 +752,8 @@ private struct Frontispiece: View {
             }
         } else {
             unfolded = true
-            // The page scrolls to the card's foot in the same transaction, so the picker
-            // unfolding and the page rising to show it are one motion on one curve.
+            // The page scrolls to the card's foot in the same transaction, so the stage turning to
+            // the calendar and the page rising to show it are one motion on one curve.
             withAnimation(unfolding) {
                 picking = true
                 reveal.alongside(homeCard)

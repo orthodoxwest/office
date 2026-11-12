@@ -186,12 +186,15 @@ or impose a redesign on an unrelated change.
   feast and invitation grow, the hours' rows get a fixed taller minimum
   (never stretched), and the card stands down to the screen's foot,
   the spare height going to the head, two parts above the day block to
-  three below so the title reads with the cross. Opening home's "Change
-  date" is one motion: the head gives up its spare height in step only
-  where that holds the whole picker; otherwise the arch keeps its shape
-  and the page rises with the unfolding, frame by frame, to the card's
-  foot and its gutter (app.js; Android's `Follow`, iOS's
-  `Reveal.alongside`). Never press the arch and then scroll. The larger type waits
+  three below so the title reads with the cross. Home's "Change date"
+  turns the stage under the band (the invitation and the hours) into the
+  calendar in their place, cross-fading the two while the stage eases
+  between their heights; the season and Change date stay under it. The
+  head gives up the difference only where its spare height holds it;
+  otherwise the arch keeps its shape and the page rises with the turn,
+  frame by frame, to the card's foot and its gutter (app.js; Android's
+  `Follow`, iOS's `Reveal.alongside`). Never press the arch and then
+  scroll. The larger type waits
   for 375px wide and 830px high; narrower or shorter phones need the
   height for wrapped lines. On a past date "Go to today" follows the
   day's facts (feast, fasts, commemorations) rather than parting them.
