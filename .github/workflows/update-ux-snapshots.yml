@@ -3,7 +3,7 @@ name: Update UX snapshots
 on:
   # This event loads the workflow definition from the default branch. The job
   # that executes pull-request code must remain read-only.
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [labeled]
 
 concurrency:
@@ -182,7 +182,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7 # zizmor: ignore[artipacked] the commit step pushes with it
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 

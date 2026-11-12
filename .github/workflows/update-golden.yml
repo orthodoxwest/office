@@ -2,7 +2,8 @@ name: Update golden files
 
 on:
   # Unlike pull_request, this fires even when the PR has merge conflicts.
-  pull_request_target:
+  # Guarded below: same-repository PRs only, and the PR's code runs read-only.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [labeled]
 
 concurrency:
@@ -115,7 +116,7 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7 # zizmor: ignore[artipacked] the publish step pushes with it
         if: needs.generate.result == 'success'
         with:
           ref: ${{ github.event.pull_request.head.sha }}

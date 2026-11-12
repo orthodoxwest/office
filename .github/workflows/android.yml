@@ -53,6 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           # The version code counts commits, so the preview needs full history.
           fetch-depth: 0
 

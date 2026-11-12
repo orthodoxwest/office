@@ -20,6 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v7
@@ -37,6 +39,31 @@ jobs:
       - name: Test golden updater
         run: python3 scripts/test_update_golden_workflow.py
 
+  workflows:
+    name: Workflows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Fails when .github/workflows/actions.lock is out of step with the
+      # workflows, or a locked commit no longer verifies upstream. After
+      # changing a workflow's uses: lines, run `gh actions-lock` and commit
+      # the lockfile with it.
+      - name: Verify the actions lockfile
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.4.1
+          gh actions-lock --verify
+
+      - name: Audit the workflows
+        run: pipx run zizmor==1.32.0 --min-severity low .github/workflows
+
   rust:
     name: Rust
     runs-on: ubuntu-latest
@@ -45,6 +72,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.99.1
@@ -86,6 +115,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
@@ -293,6 +324,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: dtolnay/rust-toolchain@1.99.1
 
@@ -344,6 +377,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Download the Rust server
         uses: actions/download-artifact@v8
@@ -525,6 +560,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       # The Dockerfile's cache mounts live only inside this runner's Docker,
       # so without this every run compiled every crate from scratch. They are

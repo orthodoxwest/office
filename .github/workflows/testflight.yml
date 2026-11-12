@@ -57,6 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           # The build number counts commits, so it needs full history.
           fetch-depth: 0
 

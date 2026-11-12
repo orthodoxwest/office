@@ -94,6 +94,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Choose and boot the simulators
         id: sim
