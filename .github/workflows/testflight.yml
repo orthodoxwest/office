@@ -55,7 +55,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           # The build number counts commits, so it needs full history.
@@ -90,7 +90,7 @@ jobs:
           targets: aarch64-apple-ios, aarch64-apple-ios-sim
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@v2.9.3
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -237,7 +237,7 @@ jobs:
           security delete-keychain "$KEYCHAIN" || true
           rm -f "$RUNNER_TEMP/asc.json" "$RUNNER_TEMP/appstore.mobileprovision"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: ios-release-log

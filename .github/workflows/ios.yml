@@ -93,7 +93,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
@@ -137,7 +137,7 @@ jobs:
           targets: aarch64-apple-ios, aarch64-apple-ios-sim
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@v2.9.3
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -219,7 +219,7 @@ jobs:
           shoot "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
           shoot "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: ios-screenshots${{ inputs.store && '-store' || '' }}
