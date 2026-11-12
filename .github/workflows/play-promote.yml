@@ -1,0 +1,83 @@
+name: Promote to production
+
+# Moves the Android app from Closed testing to production on Google Play, without rebuilding:
+# production gets the bundle testers already have (scripts/play-promote.py,
+# apps/android/README.md "Promoting to production").
+#
+# Daily: a staged rollout this workflow started two days before is finished (all users);
+# otherwise the build on Closed testing, once it has been there 24 hours and if it is newer than
+# production's, goes to 20% of users. So a merge reaches a fifth of the public 1 to 2 days after
+# testers get it and everyone two days later; Google's review of each new release comes out of
+# the 20% stage. A rollout halted, or started, in Play Console stops the promotions until it is
+# finished, resumed or replaced. Scheduled runs use the `play-auto` environment, with no reviewer.
+#
+# A manual run releases a build now (Closed testing's newest unless a version code is given) to
+# the share of users asked for; it uses the `play` environment, which has a required reviewer.
+on:
+  schedule:
+    # 15:00 UTC, mid-morning in America/New_York.
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      rollout:
+        description: "Share of users to release to, from 0 to 1 (below 1 is a staged rollout)"
+        type: string
+        default: "1"
+      version_code:
+        description: "Version code to release; empty means Closed testing's newest"
+        type: string
+        default: ""
+      dry_run:
+        description: "Only say what would be released"
+        type: boolean
+        default: false
+
+concurrency:
+  group: play-promote
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  promote:
+    name: ${{ github.event_name == 'schedule' && 'Promote a tested build' || 'Promote to production now' }}
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'schedule' && 'play-auto' || 'play' }}
+    permissions:
+      contents: read
+      # The Publish to Play runs say when each build reached Closed testing.
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Version codes are commit counts.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install the Google client
+        run: python3 -m pip install --quiet --disable-pip-version-check google-auth==2.40.3 requests==2.32.4
+
+      - name: Promote
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          GITHUB_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          ROLLOUT: ${{ inputs.rollout }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            # A repository secret, or one on both the play and play-auto environments.
+            echo "::warning::PLAY_SERVICE_ACCOUNT_JSON is not set for this environment; nothing promoted"
+            exit 0
+          fi
+          if [ "$EVENT" = schedule ]; then
+            set -- auto --min-age 24 --rollout 0.2 --stage-hours 47
+          else
+            set -- manual --rollout "${ROLLOUT:-1}"
+            if [ -n "$VERSION_CODE" ]; then set -- "$@" --version-code "$VERSION_CODE"; fi
+            if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
+          fi
+          python3 scripts/play-promote.py "$@"

@@ -95,6 +95,7 @@ jobs:
           python3 scripts/test_static_contracts.py
           python3 scripts/test_verify_psalms.py
           python3 scripts/test_sweep_targets.py
+          python3 scripts/test_play_promote.py
           make diurnal-test
 
       - name: Validate and lint the corpus with Rust

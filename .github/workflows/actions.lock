@@ -27,6 +27,8 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'dtolnay/rust-toolchain@1.99.1'
         - 'swatinem/rust-cache@v2.9.3'
+    '.github/workflows/play-promote.yml':
+        - 'actions/checkout@v7.0.1'
     '.github/workflows/play.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
