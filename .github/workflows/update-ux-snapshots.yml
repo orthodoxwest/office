@@ -183,7 +183,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7.0.1
-        with:
+        with: # zizmor: ignore[artipacked] the commit step pushes with these credentials
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Download untrusted snapshot candidates from CI

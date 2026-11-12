@@ -118,7 +118,7 @@ jobs:
 
       - uses: actions/checkout@v7.0.1
         if: needs.generate.result == 'success'
-        with:
+        with: # zizmor: ignore[artipacked] the publish step pushes with these credentials
           ref: ${{ github.event.pull_request.head.sha }}
           path: pr
           fetch-depth: 0
