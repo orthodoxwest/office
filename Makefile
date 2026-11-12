@@ -16,6 +16,7 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_static_contracts.py
 	python3 scripts/test_verify_psalms.py
 	python3 scripts/test_sweep_targets.py
+	python3 scripts/test_play_promote.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_update_golden_workflow.py

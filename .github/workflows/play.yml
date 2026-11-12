@@ -8,9 +8,10 @@ name: Publish to Play
 # shows there first; Closed testing reaches testers once Google's review passes, and a newer merge
 # replaces a release still in review.
 # Those runs use the `play-internal` environment, with no reviewer, and skip quietly until
-# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build only when it is promoted in Play
-# Console, or uploaded by a manual run from the Actions tab; manual runs use the `play`
-# environment, so give it a required reviewer.
+# PLAY_SERVICE_ACCOUNT_JSON is set. The public gets a build when play-promote.yml promotes it
+# (daily, once it has been on Closed testing for a day), when it is promoted in Play Console, or
+# when a manual run from the Actions tab uploads it; manual runs use the `play` environment, so
+# give it a required reviewer.
 #
 # Google's API can't create the app or take its very first bundle: upload one by hand in Play
 # Console first (a manual run of the Android workflow builds it).

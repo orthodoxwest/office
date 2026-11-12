@@ -220,8 +220,9 @@ and uploads it to Google Play.
   every build until it is edited, and an empty file uploads builds with no notes. Edit it in the
   pull request whose merge should carry it; a change to that file alone uploads nothing. A text
   over Play's 500 characters stops the run before it builds.
-- **The public** gets a build when you promote it in Play Console (*Closed testing → Promote
-  release → Production*), which ships the exact build testers have been running. A manual run from the Actions tab can also upload to any
+- **The public** gets a build when the **Promote to production** workflow moves it there (below),
+  or when you promote it in Play Console (*Closed testing → Promote release → Production*); either
+  way it is the exact build testers have been running. A manual run of Publish to Play can also upload to any
   track (`internal`, `alpha` for Closed testing, or `production`) with a staged rollout and
   notes, but only for a commit that isn't already in Play: each build's version code is its
   commit count, and Play takes each version code once.
@@ -238,6 +239,31 @@ It needs:
 
 Google's API can't create the app or take its first bundle, so the very first upload is
 done by hand in Play Console.
+
+### Promoting to production
+
+The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
+`scripts/play-promote.py`) moves a build from Closed testing to production through the Play API,
+by its version code, without rebuilding. It carries the release notes the build had on Closed
+testing.
+
+- **Every day** at 15:00 UTC: if production has a staged rollout in progress, it is finished
+  (all users). Otherwise the newest build that has been on Closed testing for 24 hours, and is
+  newer than production's, goes to 20% of users. So a merge reaches a fifth of the public 24 to
+  48 hours after testers get it, and everyone a day later. A build's time on Closed testing is
+  when its Publish to Play run finished.
+- **Halting** a rollout in Play Console (*Production → Halt rollout*) stops the daily promotions
+  until you resume it or release something else.
+- **A manual run** from the Actions tab releases Closed testing's newest build (or the version code
+  given) now, to the share of users asked for; *Only say what would be released* reads Play and
+  changes nothing.
+- **Google reviews** every new production release, usually within hours. With managed
+  publishing on in Play Console, approved releases also wait for you to press Publish there, so
+  leave it off for the daily promotion to run unattended.
+
+It needs `PLAY_SERVICE_ACCOUNT_JSON`, and skips quietly until it is set. Scheduled runs use the
+`play-auto` environment, which GitHub creates on first use and which needs no reviewer; manual
+runs use `play`, with its required reviewer.
 
 ### Closed testers
 
