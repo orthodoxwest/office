@@ -2806,7 +2806,16 @@ test("home's Change date opens in one motion, the picker in view", async ({ page
         screen: window.innerHeight,
       };
     });
-    const shut = await sizes();
+    // The head as the page settles it: app.js's load-time fitting (the arch
+    // in pixels, the versicle) done, and the same over two looks.
+    await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+    let shut = await sizes();
+    await expect.poll(async () => {
+      const again = await sizes();
+      const same = Math.abs(again.head - shut.head) < 0.5;
+      shut = again;
+      return same;
+    }, { message: `${width}x${height}: the head at rest` }).toBe(true);
     await details.locator("summary").click();
     await expect(page.getByRole("group", { name: "Choose a date" })).toBeVisible();
     // The page follows the unfolding (WebKit's, at once, in one smooth

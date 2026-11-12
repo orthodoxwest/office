@@ -373,8 +373,14 @@ document.documentElement.classList.add("js");
   var card = versicle && versicle.closest(".home-hero");
   if (!card) return;
   var frame = 0;
+  // Fitted with "Change date" shut, as Android's and iOS's are: open, the
+  // head is held at its folded height (below) or giving it up, and a
+  // measure then would show or hide the versicle by the picker's room, to
+  // jump when it folds. Measured again once it has folded and let go.
+  var picker = card.querySelector("details.home-date-nav");
   function fit() {
     frame = 0;
+    if (picker && picker.open) return;
     versicle.hidden = true;
     var without = card.getBoundingClientRect().height;
     versicle.hidden = false;
@@ -387,6 +393,12 @@ document.documentElement.classList.add("js");
   if (document.fonts) document.fonts.ready.then(schedule);
   window.addEventListener("resize", schedule);
   if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(versicle.parentNode);
+  if (picker) {
+    picker.addEventListener("toggle", function () {
+      // The fold's 200ms, and the head let go after it.
+      if (!picker.open) window.setTimeout(schedule, 300);
+    });
+  }
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
