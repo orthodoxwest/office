@@ -103,8 +103,9 @@ jobs:
             echo "status=completed" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           # The version code counts commits, so the bundle needs full history.
           fetch-depth: 0
 
@@ -139,15 +140,15 @@ jobs:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@v2.9.3
 
       - name: Install cargo-ndk
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.90.3
         with:
           tool: cargo-ndk
 
       - name: Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v6.1.0
         with:
           distribution: temurin
           java-version: 21
@@ -156,7 +157,7 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" "platforms;android-36" > /dev/null
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.4.1
 
       - name: Build the store bundle
         working-directory: apps/android
@@ -173,7 +174,7 @@ jobs:
       - name: Upload to Google Play
         if: steps.rollout.outputs.status == 'completed'
         # v1.1.5, pinned by commit.
-        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: org.orthodoxwest.office
@@ -185,7 +186,7 @@ jobs:
 
       - name: Upload to Google Play (staged rollout)
         if: steps.rollout.outputs.status == 'inProgress'
-        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5
+        uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: org.orthodoxwest.office
@@ -196,7 +197,7 @@ jobs:
           userFraction: ${{ steps.rollout.outputs.fraction }}
           whatsNewDirectory: ${{ steps.notes.outputs.dir }}
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: office-release-aab
           path: apps/android/app/build/outputs/bundle/release/app-release.aab

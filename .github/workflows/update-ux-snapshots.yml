@@ -3,7 +3,7 @@ name: Update UX snapshots
 on:
   # This event loads the workflow definition from the default branch. The job
   # that executes pull-request code must remain read-only.
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [labeled]
 
 concurrency:
@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Require a trusted label actor
-        uses: actions/github-script@v9
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             if (context.actor === 'github-actions[bot]') {
@@ -51,7 +51,7 @@ jobs:
       # them skips a rebuild and rerun; they get the same validation below.
       - name: Find CI snapshot candidates for this head
         id: candidates
-        uses: actions/github-script@v9
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             const head = context.payload.pull_request.head.sha;
@@ -98,20 +98,20 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - uses: dtolnay/rust-toolchain@1.99.1
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.9.3
 
       - name: Build Rust server
         run: make build
 
       - name: Upload the server
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ux-server
           path: target/release/office
@@ -133,13 +133,13 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Download the Rust server
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: ux-server
           path: target/release
@@ -148,7 +148,7 @@ jobs:
         run: chmod +x target/release/office
 
       - name: Set up Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
           cache: npm
@@ -161,7 +161,7 @@ jobs:
         run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=all
 
       - name: Upload untrusted snapshot candidates
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ux-snapshot-candidates
           path: .web-tools/tests/visual.spec.js-snapshots/
@@ -182,13 +182,13 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v7
-        with:
+      - uses: actions/checkout@v7.0.1
+        with: # zizmor: ignore[artipacked] the commit step pushes with these credentials
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Download untrusted snapshot candidates from CI
         if: needs.authorize.outputs.candidates_run != ''
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: ux-snapshot-candidates
           path: ${{ runner.temp }}/ux-snapshot-candidates
@@ -197,7 +197,7 @@ jobs:
 
       - name: Download untrusted regenerated snapshot candidates
         if: needs.authorize.outputs.candidates_run == ''
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: ux-snapshot-candidates
           path: ${{ runner.temp }}/ux-snapshot-candidates
@@ -288,7 +288,7 @@ jobs:
 
     steps:
       - name: Remove label
-        uses: actions/github-script@v9
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             try {
@@ -303,7 +303,7 @@ jobs:
             }
 
       - name: Comment result
-        uses: actions/github-script@v9
+        uses: actions/github-script@v9.0.0
         env:
           UPDATE_SUCCEEDED: ${{ needs.commit.result == 'success' }}
         with:
