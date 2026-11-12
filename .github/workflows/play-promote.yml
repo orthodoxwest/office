@@ -4,12 +4,12 @@ name: Promote to production
 # production gets the bundle testers already have (scripts/play-promote.py,
 # apps/android/README.md "Promoting to production").
 #
-# Daily: a staged rollout in progress is finished (all users); otherwise the newest build that has
-# been on Closed testing for at least 24 hours, and is newer than production's, goes to 20% of
-# users. So a merge reaches 20% of the public 24 to 48 hours after it reaches testers, and
-# everyone a day after that, each step after Google's review. A rollout halted in Play Console
-# stops the promotions until it is resumed or replaced. Scheduled runs use the `play-auto`
-# environment, with no reviewer.
+# Daily: a staged rollout this workflow started two days before is finished (all users);
+# otherwise the build on Closed testing, once it has been there 24 hours and if it is newer than
+# production's, goes to 20% of users. So a merge reaches a fifth of the public 1 to 2 days after
+# testers get it and everyone two days later; Google's review of each new release comes out of
+# the 20% stage. A rollout halted, or started, in Play Console stops the promotions until it is
+# finished, resumed or replaced. Scheduled runs use the `play-auto` environment, with no reviewer.
 #
 # A manual run releases a build now (Closed testing's newest unless a version code is given) to
 # the share of users asked for; it uses the `play` environment, which has a required reviewer.
@@ -50,7 +50,7 @@ jobs:
       actions: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           # Version codes are commit counts.
           fetch-depth: 0
@@ -69,11 +69,12 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
-            echo "PLAY_SERVICE_ACCOUNT_JSON is not set; nothing to do"
+            # A repository secret, or one on both the play and play-auto environments.
+            echo "::warning::PLAY_SERVICE_ACCOUNT_JSON is not set for this environment; nothing promoted"
             exit 0
           fi
           if [ "$EVENT" = schedule ]; then
-            set -- auto --min-age 24 --rollout 0.2
+            set -- auto --min-age 24 --rollout 0.2 --stage-hours 47
           else
             set -- manual --rollout "${ROLLOUT:-1}"
             if [ -n "$VERSION_CODE" ]; then set -- "$@" --version-code "$VERSION_CODE"; fi

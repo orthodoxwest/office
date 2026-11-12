@@ -247,23 +247,31 @@ The **Promote to production** workflow (`.github/workflows/play-promote.yml`,
 by its version code, without rebuilding. It carries the release notes the build had on Closed
 testing.
 
-- **Every day** at 15:00 UTC: if production has a staged rollout in progress, it is finished
-  (all users). Otherwise the newest build that has been on Closed testing for 24 hours, and is
-  newer than production's, goes to 20% of users. So a merge reaches a fifth of the public 24 to
-  48 hours after testers get it, and everyone a day later. A build's time on Closed testing is
-  when its Publish to Play run finished.
-- **Halting** a rollout in Play Console (*Production → Halt rollout*) stops the daily promotions
-  until you resume it or release something else.
+- **Every day** at 15:00 UTC: a staged rollout the workflow started two days before is
+  finished (all users). Otherwise the build on Closed testing, once it has been there 24 hours and
+  if it is newer than production's, goes to 20% of users. So a merge reaches a fifth of the public
+  1 to 2 days after testers get it, and everyone two days later. Google's review of each new
+  release (usually hours) comes out of the 20% stage. A build's time on Closed testing is when
+  its Publish to Play run finished, and only the build on Closed testing now is promoted: while
+  merges land less than a day apart, promotion waits for a quiet day.
+- **The staged release's name** in Play Console ("0.1.120 staged 2026-11-12T15:00Z") records when
+  it started; that is how the next runs know its age.
+- **Halting** a rollout in Play Console (*Production → Halt rollout*), or starting one there,
+  stops the daily promotions until you resume, finish or replace it (a manual run can do any of
+  these by releasing a build).
 - **A manual run** from the Actions tab releases Closed testing's newest build (or the version code
   given) now, to the share of users asked for; *Only say what would be released* reads Play and
   changes nothing.
-- **Google reviews** every new production release, usually within hours. With managed
-  publishing on in Play Console, approved releases also wait for you to press Publish there, so
-  leave it off for the daily promotion to run unattended.
+- **Google reviews** every new production release. With managed publishing on in Play Console,
+  approved releases also wait for you to press Publish there, so leave it off for the daily
+  promotion to run unattended. If Play refuses the commit asking for `changesNotSentForReview`
+  (it can after a rejection), send the release for review by hand in Play Console once.
 
-It needs `PLAY_SERVICE_ACCOUNT_JSON`, and skips quietly until it is set. Scheduled runs use the
-`play-auto` environment, which GitHub creates on first use and which needs no reviewer; manual
-runs use `play`, with its required reviewer.
+It needs `PLAY_SERVICE_ACCOUNT_JSON` as a repository secret (or on both environments); without it
+runs warn and promote nothing. Scheduled runs use the `play-auto` environment, which GitHub creates
+on first use with no reviewer; manual runs use `play`, with its required reviewer. Give both
+environments the deployment branch rule *master* (Settings → Environments), so only master's
+copy of the workflow can promote.
 
 ### Closed testers
 
