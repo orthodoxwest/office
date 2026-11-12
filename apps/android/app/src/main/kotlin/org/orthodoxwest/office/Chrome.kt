@@ -21,12 +21,14 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.IndicationNodeFactory
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -81,6 +84,7 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
@@ -648,13 +652,36 @@ fun Disclosure(
 }
 
 /**
+ * A page's scroll that a disclosure follows while it unfolds (`Unfold`), so the page rises to
+ * show `target`'s foot and `margin` under it: `viewport` is the scroll's own box and `foot` the
+ * height at its foot the system bars cover.
+ */
+class Follow(val scroll: ScrollState, val viewport: () -> LayoutCoordinates?, val foot: Float, val margin: Float) {
+    /** What the page brings into view, set where it is placed. */
+    var target: LayoutCoordinates? = null
+
+    /** How far the target's foot, and the margin under it, stand below what the screen shows. */
+    fun overflow(): Float {
+        val view = viewport()?.takeIf { it.isAttached } ?: return 0f
+        val placed = target?.takeIf { it.isAttached } ?: return 0f
+        return view.localBoundingBoxOf(placed, clipBounds = false).bottom + margin - (view.size.height - foot)
+    }
+}
+
+/** Set by a page whose disclosures follow their unfolding down the screen, as home's does. */
+val LocalFollow = staticCompositionLocalOf<Follow?> { null }
+
+/**
  * A disclosure's contents, unfolding down from its control and folding back up into it. With
  * `reveal`, once unfolded it is scrolled into view if it opened past the screen's edge; never
- * when it was open already, as a row scrolled into view would be.
+ * when it was open already, as a row scrolled into view would be. Under a `LocalFollow` the page
+ * follows it frame by frame as it unfolds instead, to the follow's target, so the unfolding and the scroll are one
+ * motion on one curve (home's "Change date", as the web's and iOS's).
  */
 @Composable
 fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
     val bring = remember { BringIntoViewRequester() }
+    val follow = LocalFollow.current
     AnimatedVisibility(
         visible,
         modifier.bringIntoViewRequester(bring),
@@ -665,6 +692,17 @@ fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = tr
     ) {
         LaunchedEffect(Unit) {
             if (!reveal || transition.currentState == EnterExitState.Visible) return@LaunchedEffect
+            if (follow != null) {
+                // Each frame, the page rises by as much as the target's foot has passed the
+                // screen's, to the frame after the unfolding settles.
+                do {
+                    val settled = transition.currentState == EnterExitState.Visible
+                    withFrameNanos {}
+                    val by = follow.overflow()
+                    if (by > 0.5f) follow.scroll.scrollBy(by)
+                } while (!settled)
+                return@LaunchedEffect
+            }
             snapshotFlow { transition.currentState }.first { it == EnterExitState.Visible }
             bring.bringIntoView()
         }

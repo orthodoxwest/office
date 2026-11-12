@@ -2789,6 +2789,41 @@ test("the prayers before and after the Office keep the reader's choice for their
   await expect(after()).not.toHaveAttribute("open");
 });
 
+// On a phone the picker unfolds at the card's foot, under the screen's. The
+// arch keeps its height and the page rises with the unfolding, one motion,
+// to the card's foot and its gutter; folding puts the head back as it was.
+test("home's Change date opens in one motion, the picker in view", async ({ page }) => {
+  for (const [width, height] of [[412, 839], [320, 568]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const details = page.locator(".home-hero details.home-date-nav");
+    const sizes = () => page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      return {
+        head: hero.querySelector(".home-summary").getBoundingClientRect().height,
+        foot: hero.getBoundingClientRect().bottom,
+        scroll: window.scrollY,
+        screen: window.innerHeight,
+      };
+    });
+    const shut = await sizes();
+    await details.locator("summary").click();
+    await expect(page.getByRole("group", { name: "Choose a date" })).toBeVisible();
+    // The page follows the unfolding; let it settle.
+    await page.waitForTimeout(400);
+    const open = await sizes();
+    expect(Math.abs(open.head - shut.head), `${width}x${height}: the arch keeps its height`).toBeLessThan(1);
+    expect(open.scroll, `${width}x${height}: the page rose`).toBeGreaterThan(0);
+    expect(open.foot, `${width}x${height}: the card's foot in view`).toBeLessThanOrEqual(open.screen - 15);
+    expect(open.foot, `${width}x${height}: no further than its gutter`).toBeGreaterThan(open.screen - 33);
+    await details.locator("summary").click();
+    await page.waitForTimeout(400);
+    const folded = await sizes();
+    expect(Math.abs(folded.head - shut.head), `${width}x${height}: the head as it was`).toBeLessThan(1);
+    await expect(page.locator(".home-hero .home-summary")).not.toHaveAttribute("style", /min-height/);
+  }
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 

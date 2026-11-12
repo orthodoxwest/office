@@ -87,6 +87,7 @@ struct HomeScreen: View {
                                     .environment(\.metrics, zoomed)
                                     .padding(.horizontal, 24)
                                     .padding(.top, zoomed.px(layout.air))
+                                    .id(homeCard)
                                 Spacer(minLength: 0)
                             }
                             .frame(minHeight: layout.fits ? nil : tall)
@@ -105,6 +106,8 @@ struct HomeScreen: View {
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
                         }
+                        // The card and the gutter under it, which "Change date" brings into view.
+                        .id(homeCard)
                     }
                 }
                 .revealing(scroll)
@@ -116,6 +119,9 @@ struct HomeScreen: View {
         .environment(\.palette, p)
     }
 }
+
+/// The scroll id of home's card, whose foot "Change date" brings into view as the picker unfolds.
+private let homeCard = "home-card"
 
 /// The niche's frame on the screen.
 private struct NicheFrameKey: PreferenceKey {
@@ -395,11 +401,14 @@ private struct FrontispieceLayout: Layout {
         let least = proposal.height.map { $0.isFinite ? $0 : 0 } ?? 0
         let shut = max(pad + day, rise, least - after - foot)
         let fits = versicle > 0 && pad + day + versicle <= shut
-        // The picker takes the head's spare height before it lengthens the card. Taken as it
-        // unfolded, that height went in the first frames: the day leapt up, then stood while the
-        // card grew under the picker. Instead the head gives it up in step with the unfolding, so
-        // the day rises as the picker opens and settles with it.
-        let opened = max(pad + day + (fits ? versicle : 0), rise, least - after - full - foot)
+        // Where the head's spare height holds the whole picker, the head gives it up in step
+        // with the unfolding, so the day rises as the picker opens and settles with it, and
+        // nothing scrolls. Where it does not, the head keeps its height: the page rises whole
+        // as the picker unfolds (`Reveal.alongside`), the arch never pressed down for a scroll
+        // that comes anyway (the web's and Android's alike).
+        let floor = max(pad + day + (fits ? versicle : 0), rise)
+        let room = least - after - full - foot
+        let opened = room >= floor ? room : shut
         let summary = full > 0 ? shut - (shut - opened) * unfolded : shut
         let picker = full * unfolded
         return (summary, facts, fits ? versicle : nil, back, after, picker, summary + after + picker + foot)
@@ -727,8 +736,12 @@ private struct Frontispiece: View {
             }
         } else {
             unfolded = true
-            withAnimation(unfolding) { picking = true }
-            reveal("disclosed")
+            // The page scrolls to the card's foot in the same transaction, so the picker
+            // unfolding and the page rising to show it are one motion on one curve.
+            withAnimation(unfolding) {
+                picking = true
+                reveal.alongside(homeCard)
+            }
         }
     }
 

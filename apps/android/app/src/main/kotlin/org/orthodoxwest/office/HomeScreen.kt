@@ -129,66 +129,74 @@ fun HomeScreen(
         val tall = maxHeight - top - bottom
         val niche = if (LocalWide.current) nicheTokens(LocalPalette.current) else null
         if (niche != null) ChapelLight(niche, nicheBounds)
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = top, bottom = bottom),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (niche != null) {
-                // Home is at least a screen tall, its colophon at the foot, and the niche centred
-                // between the header and the foot, as the web's wide home: a lancet for the
-                // screen's orientation at one scale, which the niche's density carries, so every
-                // measure inside it, its type included, is zoomed as the web's `zoom` does.
-                val layout = NicheLayout(screen, tall)
-                val outer = LocalDensity.current
-                val heavy = (view.penitential.isNotEmpty() && view.commemorations.isNotEmpty()) ||
-                    (!view.isToday && (view.commemorations.isNotEmpty() || view.octaveNote.isNotEmpty() || view.penitential.isNotEmpty()))
-                // Where the heaviest day does not fit with the colophon (`--niche-fits`), the header
-                // and niche take the screen and the colophon waits under the fold, rather than
-                // being cut through by it.
-                Column(
-                    Modifier.fillMaxWidth().heightIn(min = tall),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween,
-                ) {
+        // "Change date"'s picker unfolds at the card's foot, under the screen's on a phone: the
+        // page rises as it opens (`Unfold`), to show the card's foot and the gutter under it
+        // clear of the navigation bar.
+        val scroll = rememberScrollState()
+        val density = LocalDensity.current
+        val follow = remember(scroll, density, bottom) { Follow(scroll, { room }, with(density) { bottom.toPx() }, with(density) { Gutter.toPx() }) }
+        CompositionLocalProvider(LocalFollow provides follow) {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(scroll).padding(top = top, bottom = bottom),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (niche != null) {
+                    // Home is at least a screen tall, its colophon at the foot, and the niche centred
+                    // between the header and the foot, as the web's wide home: a lancet for the
+                    // screen's orientation at one scale, which the niche's density carries, so every
+                    // measure inside it, its type included, is zoomed as the web's `zoom` does.
+                    val layout = NicheLayout(screen, tall)
+                    val outer = LocalDensity.current
+                    val heavy = (view.penitential.isNotEmpty() && view.commemorations.isNotEmpty()) ||
+                        (!view.isToday && (view.commemorations.isNotEmpty() || view.octaveNote.isNotEmpty() || view.penitential.isNotEmpty()))
+                    // Where the heaviest day does not fit with the colophon (`--niche-fits`), the header
+                    // and niche take the screen and the colophon waits under the fold, rather than
+                    // being cut through by it.
                     Column(
-                        Modifier.fillMaxWidth().then(if (layout.fits) Modifier else Modifier.heightIn(min = tall)),
+                        Modifier.fillMaxWidth().heightIn(min = tall),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        chrome()
-                        CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
+                        Column(
+                            Modifier.fillMaxWidth().then(if (layout.fits) Modifier else Modifier.heightIn(min = tall)),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            chrome()
+                            CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
+                                Frontispiece(
+                                    view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
+                                    Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
+                                        .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
+                                    HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
+                                    niche = niche,
+                                    onFeast = onFeast,
+                                )
+                            }
+                            // Centred under the header: the niche's own room is the space below it.
+                            if (!layout.fits) Spacer(Modifier.height(0.dp))
+                        }
+                        Footer(reserve = true)
+                    }
+                } else {
+                    // A phone's card stands from the header to the screen's foot, short of it by the
+                    // gutter: whatever height home has beyond its own goes to the panel, above the
+                    // band. The phone's home has no colophon; the wide home keeps it.
+                    val card = minOf(576.dp, screen) - Gutter * 2
+                    PhoneHome(
+                        tall,
+                        header = chrome,
+                        card = {
                             Frontispiece(
                                 view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
-                                Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
-                                    .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
-                                HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
-                                niche = niche,
+                                Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
+                                HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                                 onFeast = onFeast,
                             )
-                        }
-                        // Centred under the header: the niche's own room is the space below it.
-                        if (!layout.fits) Spacer(Modifier.height(0.dp))
-                    }
-                    Footer(reserve = true)
+                        },
+                        foot = Gutter,
+                    )
                 }
-            } else {
-                // A phone's card stands from the header to the screen's foot, short of it by the
-                // gutter: whatever height home has beyond its own goes to the panel, above the
-                // band. The phone's home has no colophon; the wide home keeps it.
-                val card = minOf(576.dp, screen) - Gutter * 2
-                PhoneHome(
-                    tall,
-                    header = chrome,
-                    card = {
-                        Frontispiece(
-                            view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
-                            Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
-                            HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
-                            onFeast = onFeast,
-                        )
-                    },
-                    foot = Gutter,
-                )
             }
         }
     }
@@ -396,6 +404,7 @@ private fun Frontispiece(
     val frame = frontispieceFrame(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
+    val follow = LocalFollow.current
     // The picker's full height as it was last laid out, so the head can ease in step with its
     // unfolding (below); written while the picker is measured, read in the same measure pass.
     val unfolded = remember { IntArray(1) }
@@ -653,7 +662,7 @@ private fun Frontispiece(
                 }
             },
         ),
-        modifier = modifier.onGloballyPositioned { reserve.root = it }.drawBehind {
+        modifier = modifier.onGloballyPositioned { reserve.root = it; follow?.target = it }.drawBehind {
             if (niche != null && !p.dark) {
                 // The niche by day: a lancet cut into the wall, its depth told by light on the
                 // reveal, the day's colour one fillet at the back wall's edge. By night it is the
@@ -686,11 +695,13 @@ private fun Frontispiece(
         // taller, the head goes without it. It is fitted to the card with the picker shut, as the
         // web's is, so opening the picker never takes it away.
         val verse = versicle?.takeIf { headPad + day + it.height <= shut }
-        // The picker takes the head's spare height before it lengthens the card. Taken as it
-        // unfolded, that spare height went in the first frames: the day leapt up, then stood
-        // while the card grew down under the picker. Instead the head gives it up in step with
-        // the unfolding, so the day rises as the picker opens and settles with it.
-        val open = maxOf(headPad + day + (verse?.height ?: 0), rise, constraints.minHeight - after.height - unfolded[0] - foot)
+        // Where the head's spare height holds the whole picker, it gives it up in step with the
+        // unfolding, so the day rises as the picker opens and settles with it; where it does not,
+        // the head keeps its height and the page rises whole as the picker unfolds (`Follow`), the
+        // arch never pressed down for a scroll that comes anyway (the web's and iOS's alike).
+        val floor = maxOf(headPad + day + (verse?.height ?: 0), rise)
+        val room = constraints.minHeight - after.height - unfolded[0] - foot
+        val open = if (room >= floor) room else shut
         val summary = if (picker.height == 0 || unfolded[0] == 0) shut else shut - (shut - open) * minOf(picker.height, unfolded[0]) / unfolded[0]
         val spare = summary - headPad - day - (verse?.height ?: 0)
         val wall = walls.first().measure(Constraints.fixed(width, summary))
