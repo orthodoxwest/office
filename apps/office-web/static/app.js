@@ -1871,7 +1871,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   //
   // Folding, the reverse. Where the disclosure does not animate (Safari,
   // which has no interpolate-size; reduced motion) the head still keeps its
-  // height, and the page is brought there in one scroll. Android's Follow
+  // height, and the page rises there on the same curve. Android's Follow
   // and iOS's Reveal.alongside do the same.
   document.querySelectorAll(".home-hero details.home-date-nav").forEach(function (details) {
     var hero = details.closest(".home-hero");
@@ -1933,12 +1933,36 @@ function rule(x1, y1, x2, y2, w, seed) {
         return hero.getBoundingClientRect().bottom + gap - window.innerHeight;
       }
       if (!animated) {
-        window.requestAnimationFrame(function () {
-          var by = overflow();
-          if (run === following && details.open && by > 0.5) {
-            window.scrollBy({ top: by, behavior: stillness.matches ? "smooth" : "auto" });
+        // Opened at once: the page rises on the unfolding's curve itself,
+        // aiming afresh each frame, rather than by a native smooth scroll,
+        // which WebKit gives up part-way when the page settles under it.
+        var from = window.scrollY;
+        var start = null;
+        var rise = function (now) {
+          if (run !== following || !details.open) {
+            return;
           }
-        });
+          var target = window.scrollY + overflow();
+          if (!stillness.matches) {
+            if (target > window.scrollY + 0.5) {
+              window.scrollTo(0, target);
+            }
+            return;
+          }
+          if (start === null) {
+            start = now;
+          }
+          var t = Math.min((now - start) / 260, 1);
+          // ease-out, as the disclosures unfold.
+          var eased = 1 - Math.pow(1 - t, 3);
+          if (target > from + 0.5) {
+            window.scrollTo(0, from + (target - from) * eased);
+          }
+          if (t < 1) {
+            window.requestAnimationFrame(rise);
+          }
+        };
+        window.requestAnimationFrame(rise);
         return;
       }
       // The unfolding's 200ms, and a frame or two to see it settle.

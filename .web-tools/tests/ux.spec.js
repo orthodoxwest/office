@@ -2809,18 +2809,19 @@ test("home's Change date opens in one motion, the picker in view", async ({ page
     const shut = await sizes();
     await details.locator("summary").click();
     await expect(page.getByRole("group", { name: "Choose a date" })).toBeVisible();
-    // The page follows the unfolding; let it settle.
-    await page.waitForTimeout(400);
+    // The page follows the unfolding (WebKit's, at once, in one smooth
+    // scroll); wait for it to rise and bring the card's foot to rest in view.
+    await expect.poll(async () => {
+      const now = await sizes();
+      return now.scroll > 0 && now.foot <= now.screen - 15;
+    }, { message: `${width}x${height}: the page rose to the card's foot` }).toBe(true);
     const open = await sizes();
     expect(Math.abs(open.head - shut.head), `${width}x${height}: the arch keeps its height`).toBeLessThan(1);
-    expect(open.scroll, `${width}x${height}: the page rose`).toBeGreaterThan(0);
-    expect(open.foot, `${width}x${height}: the card's foot in view`).toBeLessThanOrEqual(open.screen - 15);
     expect(open.foot, `${width}x${height}: no further than its gutter`).toBeGreaterThan(open.screen - 33);
     await details.locator("summary").click();
-    await page.waitForTimeout(400);
+    await expect(page.locator(".home-hero .home-summary")).not.toHaveAttribute("style", /min-height/);
     const folded = await sizes();
     expect(Math.abs(folded.head - shut.head), `${width}x${height}: the head as it was`).toBeLessThan(1);
-    await expect(page.locator(".home-hero .home-summary")).not.toHaveAttribute("style", /min-height/);
   }
 });
 
