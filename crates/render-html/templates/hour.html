@@ -57,9 +57,11 @@
     <h1>{{ hour.title }}</h1>
     {# The date and the season share the muted line; the day's name stands
          under them in the text's ink, as home titles the day. The no-break
-         space holds the dot to the date. #}
+         space holds the dot to the date. With script the date is the quiet
+         way into the date picker below (app.js), so the header carries no
+         "Change date" label; without it the disclosure keeps its summary. #}
     {%- set season = hour.season|season_label %}
-    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{{ hour.feast|typeset }}</span>{% endif %}</p>
+    <p class="hour-meta"><span class="hour-meta-line"><span class="hour-meta-part hour-meta-date">{{ date_str }}</span>{% if season %}<span class="hour-meta-sep">&nbsp;&middot; </span><span class="hour-meta-part">{{ season }}</span>{% endif %}</span>{% if hour.feast %}<span class="sr-only">. </span><span class="hour-meta-part hour-meta-feast">{{ hour.feast|typeset }}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
@@ -69,7 +71,7 @@
     </p>
     {% endif %}
     <div class="hour-context-controls">
-    <details class="hour-date-nav">
+    <details class="hour-date-nav" id="hour-date-nav">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
         <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>

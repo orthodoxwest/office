@@ -23,7 +23,8 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 
 - **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
   invitation, the hour directory by period, "Change date"), each hour (colour band, the gold
-  hairline of progress through the prayer, framed title, "Change date" and "Prayer form", the
+  hairline of progress through the prayer, framed title, its date opening the date picker,
+  "Prayer form", the
   office, its continuation and report link), and
   the ordo's month (year and month navigation, the month's heading pinned while its days scroll,
   day rows with colour rails, ranks, and one "Office details" disclosure holding the day's

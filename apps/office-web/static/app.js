@@ -1836,10 +1836,11 @@ function rule(x1, y1, x2, y2, w, seed) {
         title.focus();
         return;
       }
-      // Through the summary, so the fold is the one a tap makes.
-      var summary = details.querySelector("summary");
-      summary.click();
-      summary.focus();
+      // Through the control, so the fold is the one a tap makes: the
+      // summary, or on an hour the date that stands for it.
+      var control = details.dateControl || details.querySelector("summary");
+      control.click();
+      control.focus();
     });
 
     // Each opening starts from the page's own day, and from the current
@@ -1865,6 +1866,33 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
     nav.insertAdjacentElement("afterend", buildDatePicker(details));
     details.classList.add("has-date-picker");
+  });
+
+  // On an hour the date in the header opens the picker, and the disclosure's
+  // "Change date" summary stays hidden (style.css): the header is quieter
+  // while praying, and home keeps the labelled control. The date is set as
+  // text, not drawn as a button, but it is one to a screen reader, which
+  // hears that it changes the date and whether the picker is open.
+  document.querySelectorAll(".hour-header .hour-meta-date").forEach(function (date) {
+    var details = document.getElementById("hour-date-nav");
+    if (!details || !details.classList.contains("has-date-picker")) {
+      return;
+    }
+    var button = el("button", date.className);
+    button.type = "button";
+    button.setAttribute("aria-controls", details.id);
+    button.textContent = date.textContent;
+    button.setAttribute("aria-label", date.textContent + ", change date");
+    var sync = function () {
+      button.setAttribute("aria-expanded", details.open ? "true" : "false");
+    };
+    button.addEventListener("click", function () {
+      details.open = !details.open;
+    });
+    details.addEventListener("toggle", sync);
+    sync();
+    details.dateControl = button;
+    date.replaceWith(button);
   });
 
   // Home's "Change date" turns the stage under the band, the invitation and
