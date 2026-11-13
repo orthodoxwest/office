@@ -1583,7 +1583,7 @@ test("the hour's disclosures never break inside themselves", async ({ page }) =>
     await openDatedPage(page, "/vespers/2026-12-25");
     // The fallback face is wider than EB Garamond: measure the face the reader gets.
     await page.evaluate(() => document.fonts.ready);
-    const boxes = await page.locator(".hour-context-controls > details > summary").evaluateAll((els) =>
+    const boxes = await page.locator(".hour-context-controls > details > summary:visible").evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
         const range = document.createRange();
@@ -2869,7 +2869,7 @@ test("home's Change date turns the hours into the calendar in their place", asyn
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
-  await page.getByText("Change date", { exact: true }).click();
+  await page.getByRole("button", { name: "Sunday, March 15, 2026, change date" }).click();
   await page.getByRole("link", { name: "Previous day" }).click();
 
   await expect(page).toHaveURL(/\/lauds\/2026-03-14$/);
@@ -2880,7 +2880,14 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   // Today is Wednesday the 18th; the page is Sunday the 15th.
   await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
   await openDatedPage(page, `/lauds/${testDate}`);
-  await page.getByText("Change date", { exact: true }).click();
+  // The header's date is the way in: set as its text, with no "Change date"
+  // label, but a button to assistive tech that says what it does.
+  await expect(page.getByText("Change date", { exact: true })).toBeHidden();
+  const date = page.getByRole("button", { name: "Sunday, March 15, 2026, change date" });
+  await expect(date).toHaveClass(/hour-meta-date/);
+  await expect(date).toHaveAttribute("aria-expanded", "false");
+  await date.click();
+  await expect(date).toHaveAttribute("aria-expanded", "true");
   const picker = page.getByRole("group", { name: "Choose a date" });
   await expect(picker).toBeVisible();
   // The native field stays in the page for no-script visitors only.
@@ -2922,13 +2929,14 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   const december = picker.getByRole("grid", { name: "December 2026" });
   await expect(december.getByRole("link", { name: "Saturday, December 19, 2026" })).toBeFocused();
 
-  // Escape closes the disclosure back to its label.
+  // Escape closes the disclosure back to the date that opened it.
   await page.keyboard.press("Escape");
   await expect(picker).toBeHidden();
-  await expect(page.locator(".hour-date-nav > summary")).toBeFocused();
+  await expect(date).toBeFocused();
+  await expect(date).toHaveAttribute("aria-expanded", "false");
 
   // Reopening starts from the page's own day, and a day is a link to it.
-  await page.getByText("Change date", { exact: true }).click();
+  await date.click();
   await expect(picker.getByRole("grid", { name: "March 2026" })).toBeVisible();
   await picker.getByRole("link", { name: "Tuesday, March 17, 2026" }).click();
   await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
@@ -2943,14 +2951,14 @@ test("the date picker keeps to 1950-2150", async ({ page }) => {
     ["/lauds/2200-06-01", "December 2150", "Next month", "Previous month"],
   ]) {
     await openDatedPage(page, path);
-    await page.getByText("Change date", { exact: true }).click();
+    await page.locator("button.hour-meta-date").click();
     await expect(picker.getByRole("grid", { name: month })).toBeVisible();
     await expect(picker.getByRole("button", { name: closed })).toBeDisabled();
     await expect(picker.getByRole("button", { name: open })).toBeEnabled();
   }
   // Keys stop at the end rather than leaving the span.
   await page.goto("/lauds/2150-12-15");
-  await page.getByText("Change date", { exact: true }).click();
+  await page.locator("button.hour-meta-date").click();
   // Let the opening's toggle run first: it resets the roving focus to the
   // page's day, as a reader's own keypress always follows it.
   await expect(picker.getByRole("grid", { name: "December 2150" })).toBeVisible();
@@ -3452,7 +3460,7 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       `/lauds/${testDate}`,
       [
         ".site-brand",
-        ".hour-date-nav > summary",
+        ".hour-meta-date",
         ".session-prayers > summary",
         ".report-issue a:visible",
       ],
@@ -4839,9 +4847,10 @@ test("a page turn goes through the wall, and the beam stands where both pages sh
   expect(fromHome).toContain("::view-transition-old(root) vt-leave 90/0");
   expect(fromHome).toContain("::view-transition-new(root) vt-arrive 210/90");
   // The beam was in view on both pages: held, so it neither fades nor moves.
-  expect(fromHome.filter((a) => a.includes("(site-header)"))).toEqual([]);
+  expect(fromHome.filter((a) => a.includes("(site-header)")), JSON.stringify(fromHome)).toEqual([]);
   // At the foot of a long hour the beam is out of sight: it comes up with the next page.
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.locator("a.next-hour").scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0);
   await page.locator("a.next-hour").click();
   await page.waitForURL(/\/compline\//);
   expect(await turn()).toContain("::view-transition-new(site-header) vt-arrive 210/90");
@@ -4899,6 +4908,6 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
   await row.scrollIntoViewIfNeeded();
   await row.evaluate((el) => el.classList.add("is-pressed"));
   expect(await row.evaluate((el) => getComputedStyle(el, "::after").opacity)).toBe("1");
-  const rail = await row.evaluate((el) => [getComputedStyle(el, "::before").height, el.getBoundingClientRect().height]);
-  expect(parseFloat(rail[0])).toBeCloseTo(rail[1], 0);
+  // The rail runs the row's height inside its rule (it grows there over 120ms).
+  await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
 });
