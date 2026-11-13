@@ -1721,7 +1721,11 @@ for (const dir of ["dusk", "dawn"]) {
     const kept = testInfo.outputPath("crown-light.json");
     fs.writeFileSync(kept, JSON.stringify({ series, ink }));
     await testInfo.attach("crown-light.json", { path: kept, contentType: "application/json" });
+    // Every figure is measured before any is judged, and all of them are
+    // named in a failure, so one run says how far each place stands from
+    // its bound in this browser.
     const sign = dir === "dusk" ? -1 : 1;
+    const figures = {}, over = [];
     for (const [name, values] of Object.entries(series)) {
       let far = values[0], back = 0, step = 0, kick = 0;
       values.forEach((v, i) => {
@@ -1730,16 +1734,21 @@ for (const dir of ["dusk", "dawn"]) {
         if (i) step = Math.max(step, Math.abs(v - values[i - 1]));
         if (i > 1) kick = Math.max(kick, Math.abs(v - 2 * values[i - 1] + values[i - 2]));
       });
-      const bound = CROWN_LIGHT[dir][name];
-      expect(back, `${name} steps back`).toBeLessThanOrEqual(bound.back);
-      expect(step, `${name} leaps`).toBeLessThanOrEqual(bound.step);
-      expect(kick, `${name} kicks`).toBeLessThanOrEqual(bound.kick);
       // And it has made most of its journey by the last moment asked for.
-      expect(sign * (values[values.length - 1] - values[0]), `${name} travels`).toBeGreaterThan(100);
+      const travel = sign * (values[values.length - 1] - values[0]);
+      const bound = CROWN_LIGHT[dir][name];
+      figures[name] = { back: +back.toFixed(2), step: +step.toFixed(2), kick: +kick.toFixed(2), travel: +travel.toFixed(1) };
+      if (back > bound.back) over.push(`${name} steps back`);
+      if (step > bound.step) over.push(`${name} leaps`);
+      if (kick > bound.kick) over.push(`${name} kicks`);
+      if (!(travel > 100)) over.push(`${name} falls short`);
     }
-    expect(ink[0], "the ink before").toBeGreaterThan(3.5);
-    expect(ink[ink.length - 1], "the ink after").toBeGreaterThan(3.5);
-    expect(ink.filter((c) => c < 2).length, "moments with the ink faint").toBeLessThanOrEqual(CROWN_LIGHT[dir].faint);
+    const faint = ink.filter((c) => c < 2).length;
+    figures.ink = { before: +ink[0].toFixed(2), after: +ink[ink.length - 1].toFixed(2), faint };
+    if (!(ink[0] > 3.5)) over.push("the ink before is faint");
+    if (!(ink[ink.length - 1] > 3.5)) over.push("the ink after is faint");
+    if (faint > CROWN_LIGHT[dir].faint) over.push("the ink is faint too long");
+    expect(over, JSON.stringify(figures)).toEqual([]);
   });
 }
 
