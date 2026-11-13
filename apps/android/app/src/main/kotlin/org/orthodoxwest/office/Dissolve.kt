@@ -1,8 +1,6 @@
 package org.orthodoxwest.office
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +35,7 @@ class Dissolve internal constructor(internal val layer: GraphicsLayer, private v
                 still = runCatching { layer.toImageBitmap() }.getOrNull()
                 alpha.snapTo(1f)
                 change()
-                alpha.animateTo(0f, tween(320, easing = FastOutSlowInEasing))
+                alpha.animateTo(0f, Tempo.dimOut.spec())
             } finally {
                 still = null
             }

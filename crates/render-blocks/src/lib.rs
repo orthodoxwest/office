@@ -7,9 +7,11 @@
 
 pub mod hour_light;
 pub mod initials;
+pub mod tempo;
 
 pub use hour_light::{HourLight, LightFrame, light_at};
 pub use initials::{InitialFit, initial_fit, initial_size};
+pub use tempo::{Beat, Curve, Tempo};
 
 use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanza_rubrics, hymn_sung_stanzas,
@@ -208,7 +210,7 @@ impl Block {
     }
 }
 
-/// The steps of the hour's vertical rhythm, each a fraction of the prayer's body line, so the
+/// The steps of the hour's vertical rhythm (its motion is [`Tempo`]'s), each a fraction of the prayer's body line, so the
 /// space grows with the text on every front. The web's `--space-*` properties (style.css) and the
 /// apps' gaps are these fractions of the line; a step's name says what it separates. The
 /// printed Monastic Diurnal steps the same way: lines of one unit set solid, a head close to

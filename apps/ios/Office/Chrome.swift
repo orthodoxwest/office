@@ -33,7 +33,104 @@ struct Quiet: ButtonStyle {
         configuration.label
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? 0.55 : 1)
-            .animation(configuration.isPressed ? nil : .easeOut(duration: 0.2), value: configuration.isPressed)
+            .animation(configuration.isPressed ? nil : Tempo.touchOut.animation, value: configuration.isPressed)
+    }
+}
+
+/**
+ * Light under the finger: a pressed row (home's hours, the ordo's days, the picker's days, About's
+ * hours, the menu's cells) lies under home's pool of light, the edgeless pool that marks the hour
+ * that is now, at once, and lets it go over Tempo's touch. Bare words keep `Quiet`. Nothing
+ * scales. `pool` is the row's pool at full strength, drawn behind the label; `strength` how much of
+ * it a press shows (home's hours take 70% by day, the moonlit pool being faint by night). The hour
+ * that is now is lit already (`current`): a press deepens its pool by half again and its words
+ * withdraw to 70% (the web's `.home-hour-link.is-current:active`).
+ */
+struct Lit<Pool: View>: ButtonStyle {
+    var strength: Double = 1
+    var current = false
+    /// The pool's light at rest, when it is neither the hour that is now's nor out: home's light
+    /// moving with the hours sets it frame by frame (`HourLightNow`).
+    var resting: Double? = nil
+    @ViewBuilder var pool: () -> Pool
+
+    func makeBody(configuration: Configuration) -> some View {
+        let held = configuration.isPressed
+        let rest = resting ?? (current ? 1 : 0)
+        return configuration.label
+            .opacity(current && held ? 0.7 : 1)
+            .background {
+                ZStack {
+                    pool().opacity(held ? max(rest, current ? 1 : strength) : rest)
+                    if current { pool().opacity(held ? 0.5 : 0) }
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+            .animation(held ? nil : Tempo.touchOut.animation, value: held)
+    }
+}
+
+extension Lit where Pool == PoolOfLight {
+    /// A row whose pool fills it, centred, with no edge.
+    init(strength: Double = 1, current: Bool = false) {
+        self.init(strength: strength, current: current) { PoolOfLight() }
+    }
+}
+
+/**
+ * A part of a row of several targets (the ordo's date and feast) that lights the whole row: it
+ * tells the row it is held, and the row draws its pool (`RowPool`) as `Lit` would. It does not dim.
+ */
+struct Holding: ButtonStyle {
+    @Binding var held: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Rectangle())
+            .onChange(of: configuration.isPressed, initial: false) { _, now in held = now }
+    }
+}
+
+extension View {
+    /// A row lit while `held`, at once, let go over Tempo's touch: a long lozenge of home's pool
+    /// under its words (the web's `ellipse 44% 58%`), centred at `x` across it.
+    func rowPool(_ held: Bool, x: CGFloat) -> some View {
+        background {
+            PoolOfLight(at: UnitPoint(x: x, y: 0.5), size: CGSize(width: 0.88, height: 1.16))
+                .opacity(held ? 1 : 0)
+                .animation(held ? nil : Tempo.touchOut.animation, value: held)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+/**
+ * Home's pool of light, the web's `radial-gradient(closest-side, pool, pool 55% at 52%,
+ * transparent)`: an ellipse with no edge filling its frame, ochre by day, moonlit blue by night.
+ * `at` and `size` place a long lozenge in a row (the web's `ellipse 44% 58% at 30% 50%`).
+ */
+struct PoolOfLight: View {
+    var at: UnitPoint = .center
+    /// The ellipse's width and height as fractions of the frame's.
+    var size: CGSize = CGSize(width: 1, height: 1)
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        let pool = HomeInk.of(p).nowPool
+        GeometryReader { g in
+            let w = g.size.width * size.width
+            let h = g.size.height * size.height
+            Ellipse()
+                .fill(EllipticalGradient(
+                    stops: [.init(color: pool, location: 0), .init(color: pool.opacity(0.55), location: 0.52), .init(color: pool.opacity(0), location: 1)],
+                    center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5
+                ))
+                .frame(width: w, height: h)
+                .position(x: g.size.width * at.x, y: g.size.height * at.y)
+        }
     }
 }
 
@@ -423,7 +520,7 @@ struct MenuPanel: View {
                     if current { Rectangle().fill(p.lining).frame(height: 1.5) }
                 }
         }
-        .buttonStyle(Quiet())
+        .buttonStyle(Lit())
         .accessibilityLabel(label.capitalized)
         .accessibilityAddTraits(current ? .isSelected : [])
     }
@@ -436,7 +533,7 @@ struct MenuPanel: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .goldUnderline(current, o.flat)
         }
-        .buttonStyle(Quiet())
+        .buttonStyle(Lit())
         .accessibilityLabel(spoken ?? label.capitalized)
         .accessibilityAddTraits(current ? .isSelected : [])
     }
@@ -488,7 +585,7 @@ private enum Haptics {
 
 /// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does
 /// (and, under Reduce Motion, at once, as the web's and Android's then do).
-let restyling = Animation.easeInOut(duration: 0.32)
+let restyling = Tempo.dimIn.animation
 
 /**
  * Brings what a disclosure unfolded into view when it opened past the screen's edge: a page's
@@ -532,11 +629,11 @@ extension View {
     }
 }
 
-/// How a disclosure opens, as on Android: over a quarter second, on Material's standard curve.
-let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.26)
+/// How a disclosure opens, as on Android: over a quarter second, on the standard curve.
+let unfolding = Tempo.unfoldIn.animation
 
 /// How a disclosure folds away, as Android's and the web's: a little quicker than it opened.
-let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.2)
+let folding = Tempo.unfoldOut.animation
 
 /// A disclosure's turn: `unfolding` as it opens and `folding` as it closes, the web's and
 /// Android's one curve; under Reduce Motion none, so it is simply open or shut, as the web's and
@@ -552,8 +649,8 @@ extension AnyTransition {
     static var unfold: AnyTransition {
         if UIAccessibility.isReduceMotionEnabled { return .identity }
         return .asymmetric(
-            insertion: .opacity.animation(.timingCurve(0, 0, 0.2, 1, duration: 0.2).delay(0.06)).combined(with: .offset(y: -6)),
-            removal: .opacity.animation(.timingCurve(0.4, 0, 1, 1, duration: 0.1)).combined(with: .offset(y: -6))
+            insertion: .opacity.animation(Beat(ms: Tempo.unfoldIn.ms - 60, delay: 60, curve: .arrive).animation).combined(with: .offset(y: -6)),
+            removal: .opacity.animation(Beat(ms: Tempo.unfoldOut.ms / 2, delay: 0, curve: .leave).animation).combined(with: .offset(y: -6))
         )
     }
 }
@@ -778,7 +875,7 @@ struct DayPicker: View {
                                     .frame(maxWidth: .infinity, minHeight: 44)
                                     .background { if day == today { todayPool } }
                             }
-                            .buttonStyle(Quiet())
+                            .buttonStyle(Lit())
                             .accessibilityLabel(spokenDay(day, today: today))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
@@ -812,7 +909,7 @@ struct DayPicker: View {
                                 .goldUnderline(chosen, p.goldLine)
                                 .background { if Int(today.year) == year && Int(today.month) == mo { todayPool } }
                         }
-                        .buttonStyle(Quiet())
+                        .buttonStyle(Lit())
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .accessibilityLabel(monthName(mo) + " " + String(year))
                         .accessibilityAddTraits(chosen ? .isSelected : [])

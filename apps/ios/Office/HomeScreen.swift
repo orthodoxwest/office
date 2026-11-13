@@ -945,19 +945,50 @@ struct PrayNow: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .padding(.vertical, m.px(pad))
                 .padding(.horizontal, m.px(13.8))
-                .background {
-                    if let tablet = UIImage(named: "tablet.png") {
-                        Image(uiImage: tablet).renderingMode(.template).resizable()
-                            .foregroundStyle(wash)
-                            .padding(1)
-                    }
-                }
-                .overlay {
-                    Canvas { ctx, size in invitationRules(ctx, size, lining: p.lining, frontal: frontal) }
-                        .allowsHitTesting(false)
-                }
         }
-        .buttonStyle(Quiet())
+        .buttonStyle(Tablet(
+            frontal: frontal, wash: wash, lining: p.lining, accent: p.accent,
+            // The wash half as deep again (`--tablet-wash-pressed`): ochre by day, moonlit blue by night.
+            deeper: p.dark ? Color(rgb: 132, 160, 204, 0.2) : ochre.opacity(0.29)
+        ))
+    }
+}
+
+/**
+ * The invitation's tablet, and its answer to the finger as a thing rather than a dimmed word (the
+ * web's `.pray-now:active`): its inner rule takes the accent and its wash deepens, at once, and both
+ * go back over Tempo's touch; the outer lining stands, and nothing scales.
+ */
+private struct Tablet: ButtonStyle {
+    let frontal: Color
+    let wash: Color
+    let lining: Color
+    let accent: Color
+    let deeper: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        let held = configuration.isPressed
+        return configuration.label
+            .background {
+                if let tablet = UIImage(named: "tablet.png") {
+                    ZStack {
+                        Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(wash).opacity(held ? 0 : 1)
+                        Image(uiImage: tablet).renderingMode(.template).resizable().foregroundStyle(deeper).opacity(held ? 1 : 0)
+                    }
+                    .padding(1)
+                }
+            }
+            .overlay {
+                ZStack {
+                    Canvas { ctx, size in invitationRules(ctx, size, lining: lining, frontal: frontal) }
+                    // The inner rule in the accent, over the day's.
+                    Canvas { ctx, size in invitationRules(ctx, size, lining: .clear, frontal: accent, share: 1) }
+                        .opacity(held ? 1 : 0)
+                }
+                .allowsHitTesting(false)
+            }
+            .contentShape(Rectangle())
+            .animation(held ? nil : Tempo.touchOut.animation, value: held)
     }
 }
 
@@ -1101,27 +1132,6 @@ private struct HourDirectory: View {
             }
             .padding(.horizontal, m.px(2))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
-            // (11rem in the niche).
-            .background {
-                if pool > 0 {
-                    Canvas { ctx, size in
-                        let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
-                        let ry = (size.height + (desk ? 8 : 4)) / 2
-                        var pool = ctx
-                        pool.translateBy(x: size.width / 2, y: size.height / 2)
-                        pool.scaleBy(x: 1, y: ry / r)
-                        pool.fill(
-                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                            with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
-                        )
-                    }
-                    .padding(.horizontal, desk ? -12 : -8)
-                    .padding(.vertical, desk ? -8 : -4)
-                    .opacity(pool)
-                    .allowsHitTesting(false)
-                }
-            }
             // A gilt point before every hour but the first of its band.
             .overlay(alignment: .leading) {
                 if j > 0 {
@@ -1132,7 +1142,23 @@ private struct HourDirectory: View {
                 }
             }
         }
-        .buttonStyle(Quiet())
+        // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
+        // (11rem in the niche). A finger lights any hour's pool (`Lit`).
+        .buttonStyle(Lit(strength: p.dark ? 1 : 0.7, current: isNow, resting: pool) {
+            Canvas { ctx, size in
+                let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
+                let ry = (size.height + (desk ? 8 : 4)) / 2
+                var pool = ctx
+                pool.translateBy(x: size.width / 2, y: size.height / 2)
+                pool.scaleBy(x: 1, y: ry / r)
+                pool.fill(
+                    Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
+                )
+            }
+            .padding(.horizontal, desk ? -12 : -8)
+            .padding(.vertical, desk ? -8 : -4)
+        })
         .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
     }
 
@@ -1214,29 +1240,26 @@ private struct HourList: View {
                 Spacer(minLength: 0)
             }
             .frame(minHeight: m.px(tier.row))
-            // The pool of light under the hour that is now, from a little before its name.
-            .background(alignment: .leading) {
-                if pool > 0 {
-                    Canvas { ctx, size in
-                        let r = m.px(136)
-                        let ry = size.height / 2
-                        var pool = ctx
-                        pool.translateBy(x: r - m.px(19.2), y: size.height / 2)
-                        pool.scaleBy(x: 1, y: ry / r)
-                        pool.fill(
-                            Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                            with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
-                        )
-                    }
-                    .frame(width: m.px(272))
-                    .padding(.vertical, -3)
-                    .opacity(pool)
-                    .allowsHitTesting(false)
-                }
-            }
             .contentShape(Rectangle())
         }
-        .buttonStyle(Quiet())
+        // The pool of light under the hour that is now, from a little before its name; a finger
+        // lights any hour's (`Lit`).
+        .buttonStyle(Lit(strength: p.dark ? 1 : 0.7, current: isNow, resting: pool) {
+            Canvas { ctx, size in
+                let r = m.px(136)
+                let ry = size.height / 2
+                var pool = ctx
+                pool.translateBy(x: r - m.px(19.2), y: size.height / 2)
+                pool.scaleBy(x: 1, y: ry / r)
+                pool.fill(
+                    Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
+                )
+            }
+            .frame(width: m.px(272))
+            .padding(.vertical, -3)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        })
         .accessibilityLabel([hourLabel(h), gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
     }
 }

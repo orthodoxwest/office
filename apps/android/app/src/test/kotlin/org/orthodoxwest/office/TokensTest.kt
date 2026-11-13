@@ -272,21 +272,25 @@ class TokensTest {
      */
     @Test
     fun oneUnfoldEverywhere() {
+        // The figures themselves are Tempo's, which render-blocks holds style.css, Tempo.kt and
+        // Tempo.swift to; here, that each front's disclosures take them.
         val standard = "cubic-bezier(0.4, 0, 0.2, 1)"
+        assertEquals(260, UNFOLD_MS)
+        assertEquals(200, FOLD_MS)
         val at = css.indexOf("@supports (interpolate-size: allow-keywords)").also { assertTrue("no disclosure rules", it >= 0) }
         val folds = css.substring(at, css.indexOf("is-settling", at))
-        assertTrue(folds.contains("block-size ${UNFOLD_MS}ms $standard"))
-        assertTrue(folds.contains("block-size ${FOLD_MS}ms $standard"))
-        assertTrue(folds.contains("opacity ${UNFOLD_MS - 60}ms cubic-bezier(0, 0, 0.2, 1) 60ms"))
-        assertTrue(folds.contains("opacity ${FOLD_MS / 2}ms cubic-bezier(0.4, 0, 1, 1)"))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-in) var(--tempo-unfold-in-curve)"))
+        assertTrue(folds.contains("block-size var(--tempo-unfold-out) var(--tempo-unfold-out-curve)"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-in) - 60ms) var(--curve-arrive) 60ms"))
+        assertTrue(folds.contains("opacity calc(var(--tempo-unfold-out) / 2) var(--curve-leave)"))
         val js = File("../../office-web/static/app.js").readText()
         assertTrue(js.contains("var duration = opening ? $UNFOLD_MS : $FOLD_MS;"))
         assertTrue(js.contains("var STANDARD = \"$standard\";"))
         assertTrue(js.contains("{ duration: $MONTH_OUT_MS, easing: \"cubic-bezier(0.4, 0, 1, 1)\", fill: \"forwards\" }"))
         assertTrue(js.contains("{ duration: $MONTH_IN_MS, easing: \"cubic-bezier(0, 0, 0.2, 1)\" }"))
         val chrome = File("../../ios/Office/Chrome.swift").readText()
-        assertTrue(chrome.contains("let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: ${UNFOLD_MS / 1000.0})"))
-        assertTrue(chrome.contains("let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: ${FOLD_MS / 1000.0})"))
+        assertTrue(chrome.contains("let unfolding = Tempo.unfoldIn.animation"))
+        assertTrue(chrome.contains("let folding = Tempo.unfoldOut.animation"))
         val ordo = File("../../ios/Office/OrdoScreen.swift").readText()
         assertTrue(ordo.contains("withAnimation(.timingCurve(0.4, 0, 1, 1, duration: ${MONTH_OUT_MS / 1000.0}))"))
         assertTrue(ordo.contains("withAnimation(.timingCurve(0, 0, 0.2, 1, duration: ${MONTH_IN_MS / 1000.0}))"))

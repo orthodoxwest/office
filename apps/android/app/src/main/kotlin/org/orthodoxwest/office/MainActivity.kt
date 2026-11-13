@@ -19,7 +19,6 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
@@ -653,12 +652,11 @@ private val TRAVEL = 30.dp
  */
 private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
     val transform = when (motion) {
-        Motion.FADE -> fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing)) togetherWith
-            fadeOut(tween(90, easing = FastOutLinearInEasing))
+        Motion.FADE -> fadeIn(Tempo.turnIn.spec()) togetherWith fadeOut(Tempo.turnOut.spec())
         else -> {
             val on = if (motion == Motion.BACK || motion == Motion.PREVIOUS) -1 else 1
-            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing))) togetherWith
-                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(tween(90, easing = FastOutLinearInEasing)))
+            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(Tempo.turnIn.spec())) togetherWith
+                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(Tempo.turnOut.spec()))
         }
     }
     return transform using null

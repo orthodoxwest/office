@@ -289,12 +289,13 @@ private fun HoursTable(periods: List<AboutPeriodView>, current: String, onHour: 
                 Column(Modifier.weight(1f)) {
                     period.hours.forEachIndexed { j, h ->
                         if (j > 0) Hairline(ink.rule)
-                        // The whole row opens the hour: a thumb's target, read as one.
+                        // The whole row opens the hour: a thumb's target, read as one. Pressed, it
+                        // lies under home's pool of light, a long lozenge under its words.
                         val isNow = h.hour == current
                         Row(
                             Modifier.fillMaxWidth()
                                 .then(if (isNow) Modifier.poolAlongRow(pool).semantics { stateDescription = "now" } else Modifier)
-                                .tap(action = "open ${h.name}") { onHour(h.hour) }
+                                .tap(action = "open ${h.name}", lit = Lit(pool, PoolShape.Row)) { onHour(h.hour) }
                                 .padding(horizontal = 13.6.dp, vertical = 8.dp),
                         ) {
                             Text(h.name, Modifier.width(nameWidth).alignByBaseline(), softWrap = false, style = if (isNow) nameStyle.copy(color = nameNow) else nameStyle)

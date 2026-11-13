@@ -105,6 +105,31 @@
         }
         if (newcomer) document.documentElement.setAttribute("data-newcomer", "");
       } catch (e) {}
+      {# Through the wall (style.css): the header and colour band stand through a page turn where both
+           pages show them. They are named only as a page is captured, the old page at pageswap, the
+           new at pagereveal (here, since it comes before the deferred scripts); a header scrolled out
+           of sight stays unnamed, so it goes or comes with its page instead of standing over the
+           other's prayers. Named all the time, the header would trap Settings' panel under the page. #}
+      var held = function () {
+        return [document.querySelector(".site-header"), document.querySelector(".color-band")];
+      };
+      var letGo = function () {
+        held().forEach(function (el) { if (el) el.style.viewTransitionName = ""; });
+      };
+      var holdHeader = function (e) {
+        if (!e.viewTransition) return;
+        var els = held(), header = els[0], band = els[1];
+        if (band) band.style.viewTransitionName = "color-band";
+        if (header) {
+          var box = header.getBoundingClientRect();
+          if (box.height > 0 && box.bottom > 0) header.style.viewTransitionName = "site-header";
+        }
+        e.viewTransition.finished.then(letGo, letGo);
+      };
+      addEventListener("pageswap", holdHeader);
+      addEventListener("pagereveal", holdHeader);
+      {# A page kept for Back comes back with its names let go. #}
+      addEventListener("pageshow", function (e) { if (e.persisted) letGo(); });
     })();
   </script>
   {# What a page must decide before it is first painted (an hour's place, hour.html). #}
@@ -115,6 +140,9 @@
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
   {% if page in ["calendar", "home"] %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
+  {# An hour's first frame waits for its colour band (it opens the page), so a page turn holds the band
+       rather than revealing the hour before the band is parsed. #}
+  {% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}<link rel="expect" href="#hour-band" blocking="render">{% endif %}
   {# Report filters should refresh immediately. A cross-document snapshot
        can hold a dense report's controls while its new view is rendering. #}
   {% if page == "usage" %}<style>@view-transition { navigation: none; }</style>{% endif %}

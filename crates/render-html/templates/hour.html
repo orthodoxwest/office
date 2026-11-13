@@ -47,7 +47,7 @@
 </script>
 {% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <div class="office-hour">
-  <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
+  <div class="color-band color-band-{{ hour.color }}" id="hour-band"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
     <div class="hour-scroll-progress-bar"></div>
   </div>

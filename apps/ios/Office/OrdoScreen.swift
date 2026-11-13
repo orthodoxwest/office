@@ -432,6 +432,8 @@ private struct DayRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var details: Bool?
+    /// A finger on the day's date or name: the row lies under home's pool of light (`Holding`).
+    @State private var held = false
     /// How far the row stands from the window's left edge: from 1000pt wide the margin holds Today.
     @State private var left: CGFloat = 0
 
@@ -570,7 +572,7 @@ private struct DayRow: View {
                     }
                     .frame(width: m.px(59))
                 }
-                .buttonStyle(Quiet())
+                .buttonStyle(Holding(held: $held))
                 .accessibilityLabel(spoken)
                 .accessibilityHint("Opens the day")
                 VStack(alignment: .leading, spacing: 0) {
@@ -579,7 +581,7 @@ private struct DayRow: View {
                         Button(action: openDay) {
                             feastName(Scale.body.sized(16, line: 21.6))
                         }
-                        .buttonStyle(Quiet())
+                        .buttonStyle(Holding(held: $held))
                         .accessibilityHidden(true)
                         // The card's marks stay quiet, as the web's: red in a row means rank.
                         HStack(spacing: m.px(6)) {
@@ -602,6 +604,7 @@ private struct DayRow: View {
             .padding(.bottom, m.px(9.6))
             Hairline(color: p.border)
         }
+        .rowPool(held, x: 0.44)
         // Today is painted, not selected: inset 8pt from the gutters.
         .background { if isToday { TodayBand(inset: 8) } }
     }
@@ -619,7 +622,7 @@ private struct DayRow: View {
                     .frame(maxHeight: .infinity, alignment: .top)
                     .overlay(alignment: .leading) { Rectangle().fill(titleColor(d.color, p)).frame(width: 3).padding(.top, 1.6) }
                 }
-                .buttonStyle(Quiet())
+                .buttonStyle(Holding(held: $held))
                 .accessibilityLabel(spoken)
                 .accessibilityHint("Opens the day")
                 Text(d.weekday).type(Scale.small.sized(12.8)).foregroundStyle(p.muted)
@@ -634,14 +637,14 @@ private struct DayRow: View {
                     // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                     if anyOpen || !d.monastic.isEmpty {
                         Button(action: openDay) { feastName(name) }
-                            .buttonStyle(Quiet())
+                            .buttonStyle(Holding(held: $held))
                             .accessibilityHidden(true)
                         monastic
                         disclosureButtons
                     } else {
                         HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
                             Button(action: openDay) { feastName(name, fill: false) }
-                                .buttonStyle(Quiet())
+                                .buttonStyle(Holding(held: $held))
                                 .accessibilityHidden(true)
                                 .layoutPriority(1)
                             disclosureButtons.fixedSize()
@@ -684,6 +687,7 @@ private struct DayRow: View {
             .padding(.vertical, 8)
             Hairline(color: p.border)
         }
+        .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
         .background { if isToday { TodayBand(inset: 0) } }
         .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: { left = $0 }

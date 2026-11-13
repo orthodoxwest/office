@@ -5439,3 +5439,99 @@ test("the ordo shows the day before a day asked for, and lets the asked day go",
     await expect.poll(ground).toBe("rgba(0, 0, 0, 0)");
   }
 });
+
+// Through the wall: a page turn is Tempo's turn, the old page gone in 90ms
+// before the next comes up in 210ms, so two pages are never seen at once;
+// the beam stands where both pages show it, and goes with its page where the
+// reader had scrolled it away. Reduced motion is a cut.
+test("a page turn goes through the wall, and the beam stands where both pages show it", async ({ page }) => {
+  await page.addInitScript(() => addEventListener("pagereveal", (e) => {
+    if (!e.viewTransition) { sessionStorage.setItem("turn", "none"); return; }
+    e.viewTransition.ready.then(() => {
+      const turn = document.getAnimations().map((a) => {
+        const t = a.effect.getTiming();
+        return `${a.effect.pseudoElement} ${a.animationName} ${t.duration}/${t.delay}`;
+      }).sort();
+      sessionStorage.setItem("turn", JSON.stringify(turn));
+    });
+  }));
+  const turn = async () => {
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem("turn"))).not.toBeNull();
+    const seen = await page.evaluate(() => sessionStorage.getItem("turn"));
+    await page.evaluate(() => sessionStorage.removeItem("turn"));
+    return seen === "none" ? null : JSON.parse(seen);
+  };
+  await page.goto(`/?date=${testDate}`);
+  await page.evaluate(() => sessionStorage.removeItem("turn"));
+  await page.locator(".home-hour-link[data-hour='vespers']").click();
+  await page.waitForURL(/\/vespers\//);
+  const fromHome = await turn();
+  // An engine without cross-document view transitions cuts, as before.
+  test.skip(fromHome === null, "no cross-document view transitions in this engine");
+  expect(fromHome).toContain("::view-transition-old(root) vt-leave 90/0");
+  expect(fromHome).toContain("::view-transition-new(root) vt-arrive 210/90");
+  // The beam was in view on both pages: held, so it neither fades nor moves.
+  expect(fromHome.filter((a) => a.includes("(site-header)")), JSON.stringify(fromHome)).toEqual([]);
+  // At the foot of a long hour the beam is out of sight: it comes up with the next page.
+  await page.locator("a.next-hour").scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0);
+  await page.locator("a.next-hour").click();
+  await page.waitForURL(/\/compline\//);
+  expect(await turn()).toContain("::view-transition-new(site-header) vt-arrive 210/90");
+});
+
+test("under reduced motion a page turn is a cut", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.addInitScript(() => addEventListener("pagereveal", (e) => sessionStorage.setItem("turn", e.viewTransition ? "turn" : "cut")));
+  await page.goto(`/?date=${testDate}`);
+  await page.locator(".home-hour-link[data-hour='vespers']").click();
+  await page.waitForURL(/\/vespers\//);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("turn"))).toBe("cut");
+  await context.close();
+});
+
+// Light under the finger: a pressed hour lies under home's pool of light, the
+// hour that is now deepens its pool and its words withdraw; bare words dim; a
+// pressed ordo row is lit, and its rail runs the row's height. No hover pool.
+test("a pressed row takes the pool of light and bare words dim", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T12:30:00-04:00"));
+  await page.goto(`/?date=${testDate}`);
+  const pool = (hour) => page.locator(`.home-hour-link[data-hour='${hour}']`).evaluate((el) => getComputedStyle(el, "::after").opacity);
+  const press = (selector, on) => page.locator(selector).first().evaluate((el, on) => el.classList.toggle("is-pressed", on), on);
+  expect(await pool("vespers")).toBe("0");
+  expect(await pool("sext")).toBe("1");
+  await press(".home-hour-link[data-hour='vespers']", true);
+  expect(await pool("vespers")).toBe("0.7");
+  await press(".home-hour-link[data-hour='vespers']", false);
+  await press(".home-hour-link[data-hour='sext']", true);
+  expect(await page.locator(".home-hour-link[data-hour='sext'] .home-hour-link-name").evaluate((el) => getComputedStyle(el).opacity)).toBe("0.7");
+  await press(".home-hour-link[data-hour='sext']", false);
+  // The tablet's inner rule (the hand-ruled day course, or the CSS rule before it is ruled) takes
+  // the accent, and its wash deepens.
+  const tablet = () => page.locator(".pray-now").evaluate((el) => {
+    const day = el.querySelector(".home-rules .r-day");
+    return {
+      rule: day ? getComputedStyle(day).fill : getComputedStyle(el, "::after").borderTopColor,
+      wash: getComputedStyle(el, "::before").backgroundColor,
+    };
+  });
+  const atRest = await tablet();
+  await press(".pray-now", true);
+  const pressed = await tablet();
+  expect(pressed.rule).not.toBe(atRest.rule);
+  expect(pressed.wash).not.toBe(atRest.wash);
+  await press(".pray-now", false);
+  await press(".home-introduction, .home-date-nav > summary", true);
+  expect(await page.locator(".home-introduction, .home-date-nav > summary").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("0.7");
+  // Released, the light goes over Tempo's touch: 200ms.
+  expect(await page.locator(".home-hour-link[data-hour='vespers']").evaluate((el) => getComputedStyle(el, "::after").transitionDuration.split(",")[0].trim())).toBe("0.2s");
+
+  await page.goto("/calendar/2026/09");
+  const row = page.locator("#d-2026-09-20");
+  await row.scrollIntoViewIfNeeded();
+  await row.evaluate((el) => el.classList.add("is-pressed"));
+  expect(await row.evaluate((el) => getComputedStyle(el, "::after").opacity)).toBe("1");
+  // The rail runs the row's height inside its rule (it grows there over 120ms).
+  await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
+});
