@@ -799,6 +799,24 @@ async function hidePage(page) {
   });
 }
 
+// The page closed by the browser or the system in the background: hidden as the phone locks, then
+// gone with no word to the page (no pagehide, no visibilitychange of an unload), as a discarded tab
+// or an installed app closed by the system is. `lose` takes the page away. Its silence is set up
+// before the page's own script listens (Chromium calls a target's listeners in the order they
+// were added, capturing or not), so the page must be opened after `losable`.
+async function losable(page) {
+  await page.addInitScript(() => {
+    const silence = (e) => { if (window.__lost) e.stopImmediatePropagation(); };
+    window.addEventListener("pagehide", silence, true);
+    document.addEventListener("visibilitychange", silence, true);
+  });
+}
+async function losePage(page, lose) {
+  await hidePage(page);
+  await page.evaluate(() => { window.__lost = true; });
+  await lose();
+}
+
 // The first line of the office below the hairline, and how far below it it begins.
 async function readingLine(page) {
   return page.evaluate(() => {
@@ -810,14 +828,14 @@ async function readingLine(page) {
 }
 
 test("an hour the browser closed opens again at the reader's place, already there", async ({ page }) => {
+  await losable(page);
   const hour = "/vespers/2026-11-13";
   await page.goto(hour);
   await page.evaluate(() => document.querySelectorAll(".psalm")[2].querySelectorAll("p")[3].scrollIntoView());
   const place = await readingLine(page);
-  await hidePage(page);
   // The tab discarded, or the installed app closed: opened again from home's link.
   const context = page.context();
-  await page.close();
+  await losePage(page, () => page.close());
   const again = await context.newPage();
   await again.addInitScript(() => {
     window.__shown = [];
@@ -845,12 +863,12 @@ test("an hour the browser closed opens again at the reader's place, already ther
 });
 
 test("an hour's place is kept only within the limit, and not once prayed", async ({ page }) => {
+  await losable(page);
   const hour = "/vespers/2026-11-13";
   const reopened = async (change) => {
     await page.goto(hour);
     await page.evaluate(() => document.querySelectorAll(".psalm")[2].scrollIntoView());
-    await hidePage(page);
-    await page.goto("/about");
+    await losePage(page, () => page.goto("/about"));
     await page.evaluate(change);
     await page.goto(hour);
     return page.evaluate(() => scrollY);
@@ -865,14 +883,156 @@ test("an hour's place is kept only within the limit, and not once prayed", async
   await page.evaluate(() => localStorage.removeItem("office-prayed"));
   // Another day's Vespers, and another hour, open at their tops.
   await reopened(() => {});
-  await hidePage(page);
-  await page.goto("/vespers/2026-11-14");
+  await losePage(page, () => page.goto("/vespers/2026-11-14"));
   expect(await page.evaluate(() => scrollY)).toBe(0);
   await page.goto("/compline/2026-11-13");
   expect(await page.evaluate(() => scrollY)).toBe(0);
 });
 
+test("an hour left by Back, a typed address or a closed tab keeps no place; a reload keeps it", async ({ page, browserName }) => {
+  const hour = "/vespers/2026-11-13";
+  const context = page.context();
+  // Safari before 26 first: it tells the page nothing of Back (no Navigation API).
+  for (const navigationApi of [false, true]) {
+    const tab = navigationApi ? page : await context.newPage();
+    if (!navigationApi) await tab.addInitScript(() => { delete Window.prototype.navigation; delete window.navigation; });
+    const scrolled = () => tab.evaluate(() => document.querySelectorAll(".psalm")[2].querySelectorAll("p")[3].scrollIntoView());
+    await tab.goto("/about");
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => "navigation" in window)).toBe(navigationApi);
+    await scrolled();
+    // The phone locked a moment and taken up again; then Back.
+    await hidePage(tab);
+    await tab.goBack();
+    await tab.waitForURL(/\/about/);
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => scrollY), `Back, Navigation API ${navigationApi}`).toBe(0);
+    // A typed address.
+    await scrolled();
+    await hidePage(tab);
+    await tab.goto("/about");
+    await tab.goto(hour);
+    expect(await tab.evaluate(() => scrollY), `typed address, Navigation API ${navigationApi}`).toBe(0);
+    // The browser's own reload opens again at the place.
+    await scrolled();
+    const place = await readingLine(tab);
+    await tab.reload();
+    await tab.waitForLoadState("load");
+    expect(await readingLine(tab), `reload, Navigation API ${navigationApi}`).toBe(place);
+    // The tab closed by the reader. Playwright's WebKit closes a page without the storage its
+    // pagehide writes reaching the other tabs (in a probe, not even a bare pagehide's mark), so
+    // only Chromium shows it here.
+    await scrolled();
+    await hidePage(tab);
+    await tab.close({ runBeforeUnload: true });
+    if (browserName === "chromium") {
+      const again = await context.newPage();
+      await again.goto(hour);
+      expect(await again.evaluate(() => scrollY), `closed tab, Navigation API ${navigationApi}`).toBe(0);
+      await again.close();
+    }
+  }
+});
+
+test("a place in a chant score is found by the words it sets, at another width", async ({ page }) => {
+  await losable(page);
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await page.setViewportSize({ width: 390, height: 800 });
+  const hour = "/vespers/2026-09-08";
+  await page.goto(hour);
+  await page.waitForLoadState("load");
+  const score = page.locator(".hymn .chant-score").nth(2);
+  await score.evaluate((s) => s.scrollIntoView());
+  const label = await score.getAttribute("aria-label");
+  await losePage(page, () => page.goto("/about"));
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+  expect(kept.words).toBe(label.replace(/\s+/g, " ").trim().slice(0, 60));
+  // Opened again on a wider screen, where the score is laid out anew.
+  await page.setViewportSize({ width: 700, height: 800 });
+  await page.goto(hour);
+  await page.waitForLoadState("load");
+  const top = await page.evaluate(() => {
+    const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+    return [...document.querySelectorAll(".office-hour .elements .chant-score")]
+      .find((s) => s.getClientRects().length && s.getBoundingClientRect().bottom > edge)?.getAttribute("aria-label");
+  });
+  expect(top).toBe(label);
+});
+
+test("a place hidden by another prayer form or the Martyrology opens where the way now shown says it", async ({ page }) => {
+  await losable(page);
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("office-prayer-form")) localStorage.setItem("office-prayer-form", "priest");
+    if (!localStorage.getItem("office-martyrology")) localStorage.setItem("office-martyrology", "on");
+  });
+  const hour = "/prime/2026-10-29";
+  const LINES = ".office-hour .elements :is(p, h2, h3, summary, .chant-score)";
+  const said = (l) => l.textContent.replace(/\s+/g, " ").trim().slice(0, 60);
+  // Kept at `pick`'s line, the page lost, and `change` made elsewhere meanwhile: the first line
+  // below the hairline when the hour opens again.
+  const reopened = async (pick, change) => {
+    await page.goto(hour);
+    const index = await page.evaluate(([LINES, pick]) => {
+      const all = [...document.querySelectorAll(LINES)];
+      const line = new Function("all", `return (${pick})(all)`)(all);
+      line.scrollIntoView();
+      return all.indexOf(line);
+    }, [LINES, pick.toString()]);
+    expect(index).toBeGreaterThan(0);
+    await losePage(page, () => page.goto("/about"));
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+    expect(kept.line).toBe(index);
+    await page.evaluate(change);
+    await page.goto(hour);
+    await page.waitForLoadState("load");
+    return page.evaluate(([LINES, saidSource]) => {
+      const said = new Function(`return ${saidSource}`)();
+      const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+      const all = [...document.querySelectorAll(LINES)];
+      const line = all.find((l) => l.getClientRects().length && l.getBoundingClientRect().bottom > edge);
+      return { index: all.indexOf(line), words: said(line), at: Math.abs(Math.round(line.getBoundingClientRect().top - edge)) };
+    }, [LINES, said.toString()]).then((top) => ({ ...top, kept: kept.words }));
+  };
+  // The priest's greeting's answer; in the private form, that passage's own first line, which
+  // stands before it on the page.
+  const greeting = await reopened(
+    (all) => all.find((l) => l.closest('.leader-slot > [data-leaders~="priest"]')?.parentElement.querySelector(':scope > [data-leaders~="private"]') && /with thy spirit/.test(l.textContent)),
+    () => localStorage.setItem("office-prayer-form", "private"),
+  );
+  const privateFirst = await page.evaluate(([LINES]) => {
+    const all = [...document.querySelectorAll(LINES)];
+    const way = all.map((l) => l.closest('.leader-slot > [data-leaders~="priest"]')?.parentElement.querySelector(':scope > [data-leaders~="private"]'))
+      .find((w, i) => w && /with thy spirit/.test(all[i].textContent));
+    return all.indexOf(way.querySelector("p"));
+  }, [LINES]);
+  expect(greeting.index).toBe(privateFirst);
+  expect(greeting.at).toBeLessThanOrEqual(1);
+  // The deacon's second Amen after the Confession; in the private form, the same words where it
+  // says them, its own second Amen.
+  await page.evaluate(() => localStorage.setItem("office-prayer-form", "deacon"));
+  const amen = (form) => `(all) => {
+    const way = document.querySelector('.leader-slot[data-leader-slot="confession"] > [data-leaders~="${form}"]');
+    return all.filter((l) => way.contains(l) && /^℟\\.\\s*Amen\\.$/.test(l.textContent.replace(/\\s+/g, " ").trim()))[1];
+  }`;
+  const confession = await reopened(amen("deacon"), () => localStorage.setItem("office-prayer-form", "private"));
+  const privateAmen = await page.evaluate(([LINES, pick]) => {
+    const all = [...document.querySelectorAll(LINES)];
+    return all.indexOf(new Function("all", `return (${pick})(all)`)(all));
+  }, [LINES, amen("private")]);
+  expect(confession.index).toBe(privateAmen);
+  expect(confession.at).toBeLessThanOrEqual(1);
+  // A day in the Martyrology; with the Martyrology off, the line said in its place.
+  await page.evaluate(() => localStorage.setItem("office-prayer-form", "priest"));
+  const martyrology = await reopened(
+    (all) => all.filter((l) => l.closest('[data-martyrology-variant="on"]'))[5],
+    () => localStorage.setItem("office-martyrology", "off"),
+  );
+  expect(await page.evaluate(([LINES, i]) => !!document.querySelectorAll(LINES)[i].closest('[data-martyrology-variant="off"]'), [LINES, martyrology.index])).toBe(true);
+  expect(martyrology.at).toBeLessThanOrEqual(1);
+});
+
 test("an hour reopened at its place can still be marked prayed", async ({ page }) => {
+  await losable(page);
   await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
   const hour = "/compline/2026-10-07";
   const readOn = async (until) => {
@@ -888,10 +1048,11 @@ test("an hour reopened at its place can still be marked prayed", async ({ page }
     return r.top + scrollY + r.height / 2;
   });
   await readOn(() => page.evaluate((y) => scrollY > y, half));
-  await hidePage(page);
-  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
-  expect(kept.read).toBeGreaterThan(0);
-  await page.goto("/about");
+  await losePage(page, async () => {
+    const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+    expect(kept.read).toBeGreaterThan(0);
+    await page.goto("/about");
+  });
   await page.goto(hour);
   expect(await page.evaluate(() => scrollY)).toBeGreaterThan(1000);
   // The rest read at the place: the whole hour has been prayed.
