@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -80,6 +81,9 @@ class CrownTest {
             }
         }
         compose.waitForIdle()
+        // Robolectric draws only when asked for a picture, and the play needs the screen as last
+        // drawn (on a phone, every frame draws it).
+        compose.onRoot().captureToImage()
         compose.mainClock.autoAdvance = false
     }
 
@@ -145,7 +149,8 @@ class CrownTest {
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
         advance(played(1000))
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
-        assertEquals(ThemeChoice.NAVE, stage.theme)
+        // Nave on a light phone is the device's look: shown as Default from the turn.
+        assertEquals(ThemeChoice.DEFAULT, stage.theme)
         shoot("crown-dawn-1000")
         advance(played(1300))
         shoot("crown-dawn-2300")
