@@ -270,7 +270,7 @@ struct HourScreen: View {
                             switch row {
                             case let .toggle(key, label, expanded, atTop):
                                 Button {
-                                    withAnimation(unfolding) { open[key] = !expanded }
+                                    withAnimation(disclosing(!expanded)) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
                                 } label: {
                                     HStack(spacing: 0) {
@@ -733,7 +733,7 @@ private struct HourTitle: View {
                     let changed = f != model.form
                     // The prayers change once the chooser has folded away, so the reader's place is
                     // held where the rows then stand, not where they stood below the open chooser.
-                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
+                    withAnimation(disclosing(false)) { choosing = false } completion: { model.chooseForm(f) }
                     // VoiceOver hears that the prayers changed, as the web's status line says it;
                     // a moment later, so the chooser folding away does not cut it short.
                     if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
@@ -758,7 +758,7 @@ private struct HourTitle: View {
         // caret to a line of its own. Where the two do not fit side by side they stand one above
         // the other, never broken inside one.
         Disclosure(label: "Change date", open: picking, style: Scale.smallCapsControl, upper: false) {
-            withAnimation(unfolding) {
+            withAnimation(disclosing(!picking)) {
                 picking.toggle()
                 choosing = false
             } completion: {
@@ -767,7 +767,7 @@ private struct HourTitle: View {
             }
         }
         Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
-            withAnimation(unfolding) {
+            withAnimation(disclosing(!choosing)) {
                 choosing.toggle()
                 picking = false
             } completion: {

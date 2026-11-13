@@ -1372,8 +1372,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 :root[data-theme="dark"] .color-band-black  { background: #8a94a0; }
 
 /* Thin vestment-trim band across the top of home and hour pages in the day's
-   color. On notched phones in standalone mode the band extends up behind the
-   status bar so it isn't clipped by the safe-area inset. */
+   color. Where the page is drawn under a display cutout (viewport-fit=cover:
+   the installed app in fullscreen on an Android phone with a notch) the band
+   grows by the top inset, so its 3px still show below the cutout. An
+   installed iPhone app starts below the status bar, since the layout sets no
+   translucent apple-mobile-web-app-status-bar-style: there the inset is 0
+   and the band is 3px. */
 .color-band {
   position: fixed;
   top: 0;
@@ -1476,7 +1480,12 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   .page-home {
     display: flex;
     flex-direction: column;
+    /* The small viewport, as the phone tier's --home-card-least: 100vh is
+       the large one, and an iPad with Safari's tab bar showing scrolled a
+       few pixels for nothing. Small rather than dynamic, so a toolbar
+       folding away never re-lays the home out under the finger. */
     min-height: 100vh;
+    min-height: 100svh;
     /* Home never shows the fixed banner, so it does not need the deep bottom
        padding that reserves room for it. Reclaiming that space lets the
        footer settle near the foot of the viewport instead of floating well
@@ -5313,42 +5322,58 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     animation-timing-function: ease;
   }
 
-  /* interpolate-size lets a 0 → auto height animate, which is what makes the
-     disclosure unfold possible at all. Chrome/Edge 129+; other engines keep
-     the instant native toggle. */
-  :root {
-    interpolate-size: allow-keywords;
-  }
-
-  /* Disclosures unfold instead of popping open.
+  /* Disclosures unfold instead of popping open, as the apps' do: the height
+     over 260ms on the standard curve, the contents fading in over 200ms after
+     60; folding, the height over 200ms and the contents out over 100ms
+     (Android's UNFOLD_MS and FOLD_MS, iOS's unfolding, folding and .unfold).
+     interpolate-size lets a 0 → auto height animate, Chromium 129+; where it
+     is missing (Safari, Firefox) app.js turns the same fold in script, so this
+     whole path stands behind @supports and the two never run together.
 
      Gated on .motion-ready after initial navigation setup. Native disclosures
      start closed; only deliberate toggles animate. No-JS documents keep the
-     instant toggle. */
-  :root.motion-ready details.hour-date-nav::details-content,
-  :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.day-office-details::details-content,
-  :root.motion-ready details.reminder-address::details-content,
-  :root.motion-ready details.reminder-help::details-content {
-    block-size: 0;
-    overflow: clip;
-    transition:
-      block-size 200ms ease-out,
-      content-visibility 200ms allow-discrete;
-  }
+     instant toggle. A transition is taken from the state being entered, so
+     the closed rule carries the fold and the open rule the unfold. */
+  @supports (interpolate-size: allow-keywords) {
+    :root {
+      interpolate-size: allow-keywords;
+    }
 
-  /* app.js lays home's head out with the picker settled, to ease the head
-     in step with the unfolding; that look must not start a transition. */
-  :root.motion-ready details.hour-date-nav.is-settling::details-content {
-    transition: none;
-  }
+    :root.motion-ready details.hour-date-nav::details-content,
+    :root.motion-ready details.session-prayers::details-content,
+    :root.motion-ready details.day-office-details::details-content,
+    :root.motion-ready details.reminder-address::details-content,
+    :root.motion-ready details.reminder-help::details-content {
+      block-size: 0;
+      opacity: 0;
+      overflow: clip;
+      transition:
+        block-size 200ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 100ms cubic-bezier(0.4, 0, 1, 1),
+        content-visibility 200ms allow-discrete;
+    }
 
-  :root.motion-ready details.hour-date-nav[open]::details-content,
-  :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.day-office-details[open]::details-content,
-  :root.motion-ready details.reminder-address[open]::details-content,
-  :root.motion-ready details.reminder-help[open]::details-content {
-    block-size: auto;
+    :root.motion-ready details.hour-date-nav[open]::details-content,
+    :root.motion-ready details.session-prayers[open]::details-content,
+    :root.motion-ready details.day-office-details[open]::details-content,
+    :root.motion-ready details.reminder-address[open]::details-content,
+    :root.motion-ready details.reminder-help[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+      transition:
+        block-size 260ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 200ms cubic-bezier(0, 0, 0.2, 1) 60ms,
+        content-visibility 260ms allow-discrete;
+    }
+
+    /* app.js lays home's head out with the picker settled, to ease the head
+       in step with the unfolding; that look must not start a transition. Nor
+       does "Show office details": the month fades once instead of thirty days
+       unfolding together (app.js, calendarExpand). */
+    :root.motion-ready details.hour-date-nav.is-settling::details-content,
+    :root.motion-ready.is-turning-all details.day-office-details::details-content {
+      transition: none;
+    }
   }
 
   /* Theme crossfade. app.js adds .theme-anim to <html> around an explicit
@@ -9729,10 +9754,10 @@ html:where(:has(> body.page-hour))::before {
     --niche-air: 1.6rem;
     --niche-least: 0.96;
     --niche-share: 0.62;
-    --niche-raw: tan(atan2(100vh - var(--niche-above) - var(--niche-below), var(--niche-fit) + var(--niche-air)));
+    --niche-raw: tan(atan2(100svh - var(--niche-above) - var(--niche-below), var(--niche-fit) + var(--niche-air)));
     --niche-zoom: clamp(var(--niche-least), min(var(--niche-raw), tan(atan2(var(--niche-share) * 100vw, var(--card-w)))), 1.5);
     --niche-fits: clamp(0, (var(--niche-raw) - var(--niche-least)) * 1000 + 1, 1);
-    min-height: calc((1 - var(--niche-fits)) * (100vh - var(--niche-above)));
+    min-height: calc((1 - var(--niche-fits)) * (100svh - var(--niche-above)));
     max-width: none;
     padding-top: 0;
   }

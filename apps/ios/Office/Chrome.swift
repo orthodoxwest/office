@@ -533,17 +533,25 @@ extension View {
 /// How a disclosure opens, as on Android: over a quarter second, on Material's standard curve.
 let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.26)
 
-/// How home's date picker folds away, as Android's: a little quicker than it opened.
+/// How a disclosure folds away, as Android's and the web's: a little quicker than it opened.
 let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.2)
 
+/// A disclosure's turn: `unfolding` as it opens and `folding` as it closes, the web's and
+/// Android's one curve; under Reduce Motion none, so it is simply open or shut, as the web's and
+/// Android's then are.
+func disclosing(_ opening: Bool) -> Animation? {
+    UIAccessibility.isReduceMotionEnabled ? nil : (opening ? unfolding : folding)
+}
+
 extension AnyTransition {
-    /// A disclosure's contents, fading in as they drop a little from their control, and back;
-    /// under Reduce Motion they only fade, as the web's and Android's lose their travel.
+    /// A disclosure's contents, fading in over 200ms after 60 as they drop a little from their
+    /// control, and out over 100ms as they fold back (the web's and Android's fades); under Reduce
+    /// Motion they are simply there or gone, as the web's and Android's folds then cut.
     static var unfold: AnyTransition {
-        let drop: AnyTransition = UIAccessibility.isReduceMotionEnabled ? .identity : .offset(y: -6)
+        if UIAccessibility.isReduceMotionEnabled { return .identity }
         return .asymmetric(
-            insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.06)).combined(with: drop),
-            removal: .opacity.animation(.easeIn(duration: 0.1)).combined(with: drop)
+            insertion: .opacity.animation(.timingCurve(0, 0, 0.2, 1, duration: 0.2).delay(0.06)).combined(with: .offset(y: -6)),
+            removal: .opacity.animation(.timingCurve(0.4, 0, 1, 1, duration: 0.1)).combined(with: .offset(y: -6))
         )
     }
 }
