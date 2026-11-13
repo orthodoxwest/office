@@ -28,7 +28,10 @@
       root.setAttribute("data-place-settling", "");
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
       var hold = document.createElement("style");
-      hold.textContent = "html[data-place] body { visibility: hidden; } html[data-place-settling] .hour-scroll-progress-bar { transition: none; }";
+      // While the place settles it alone holds the page: WebKit's scroll anchoring would move
+      // it by a line as the page settles (app.js setting the header's date as a button, most
+      // likely), before the place's own settle answers.
+      hold.textContent = "html[data-place] body { visibility: hidden; } html[data-place-settling] .hour-scroll-progress-bar { transition: none; } html[data-place-settling] * { overflow-anchor: none; }";
       document.head.appendChild(hold);
       var expect = document.createElement("link");
       expect.rel = "expect";
