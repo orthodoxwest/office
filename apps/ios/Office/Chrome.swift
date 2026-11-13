@@ -272,6 +272,7 @@ struct MenuPanel: View {
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let nav = SiteNav(model)
@@ -309,7 +310,7 @@ struct MenuPanel: View {
                     cell(t.label.uppercased(), t == model.theme, .label(12, 0.06), spoken: "\(t.label) theme") {
                         guard t != model.theme else { return }
                         chose()
-                        withAnimation(restyling) { model.chooseTheme(t) }
+                        withAnimation(reduceMotion ? nil : restyling) { model.chooseTheme(t) }
                     }
                 }
             }
@@ -450,23 +451,53 @@ func textSizeName(_ s: TextSize) -> String {
 }
 
 /**
- * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
- * Android app gives; never for a page opened. The phone's own haptics setting governs it.
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day, a month
+ * swiped), as the Android app gives; never for a page opened. The phone's own haptics setting
+ * governs it.
  */
-func chose() { UISelectionFeedbackGenerator().selectionChanged() }
+func chose() {
+    Haptics.selection.selectionChanged()
+    Haptics.selection.prepare()
+}
 
-/// The tap of a checkbox turned on or off.
-func toggled() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+/// The tap of a checkbox turned on, firm, or off, softer: Android's ToggleOn and ToggleOff.
+func toggled(_ on: Bool) {
+    if on {
+        Haptics.on.impactOccurred()
+        Haptics.on.prepare()
+    } else {
+        Haptics.off.impactOccurred(intensity: 0.7)
+        Haptics.off.prepare()
+    }
+}
 
-/// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does.
+/**
+ * The generators, made once and kept: the Taptic Engine sleeps until a generator is prepared, so
+ * one made for each tap could land its tick after the touch it answers. Each is prepared again
+ * after it plays, for the next choice in the same breath.
+ */
+private enum Haptics {
+    static let selection: UISelectionFeedbackGenerator = {
+        let g = UISelectionFeedbackGenerator()
+        g.prepare()
+        return g
+    }()
+    static let on = UIImpactFeedbackGenerator(style: .light)
+    static let off = UIImpactFeedbackGenerator(style: .soft)
+}
+
+/// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does
+/// (and, under Reduce Motion, at once, as the web's and Android's then do).
 let restyling = Animation.easeInOut(duration: 0.32)
 
 /**
- * Brings what a disclosure unfolded into view, once it has unfolded, when it opened past the
- * screen's edge: a page's scroll view sets it (`revealing`), and the disclosure names its
- * contents' id. `alongside` scrolls there in the caller's own transaction instead, so a
- * disclosure that unfolds under `withAnimation` and scrolls to its foot moves the page once, on
- * the unfolding's curve, as home's "Change date" does on the web and Android.
+ * Brings what a disclosure unfolded into view when it opened past the screen's edge: a page's
+ * scroll view sets it (`revealing`), and the disclosure names its contents' id, calling it once
+ * the unfolding has finished (`withAnimation`'s completion), as Android waits on the
+ * transition's own state rather than a clock. `alongside` scrolls there in the caller's own
+ * transaction instead, so a disclosure that unfolds under `withAnimation` and scrolls to its foot
+ * moves the page once, on the unfolding's curve, as home's "Change date" does on the web and
+ * Android.
  */
 struct Reveal {
     fileprivate let scroll: (String) -> Void
@@ -491,8 +522,9 @@ extension View {
     func revealing(_ proxy: ScrollViewProxy) -> some View {
         environment(\.reveal, Reveal(
             scroll: { id in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-                    withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(id, anchor: .bottom) }
+                // Under Reduce Motion the page is simply there, as the web's and Android's are.
+                withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) {
+                    proxy.scrollTo(id, anchor: .bottom)
                 }
             },
             now: { id in proxy.scrollTo(id, anchor: .bottom) }
@@ -507,11 +539,13 @@ let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.26)
 let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.2)
 
 extension AnyTransition {
-    /// A disclosure's contents, fading in as they drop a little from their control, and back.
+    /// A disclosure's contents, fading in as they drop a little from their control, and back;
+    /// under Reduce Motion they only fade, as the web's and Android's lose their travel.
     static var unfold: AnyTransition {
-        .asymmetric(
-            insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.06)).combined(with: .offset(y: -6)),
-            removal: .opacity.animation(.easeIn(duration: 0.1)).combined(with: .offset(y: -6))
+        let drop: AnyTransition = UIAccessibility.isReduceMotionEnabled ? .identity : .offset(y: -6)
+        return .asymmetric(
+            insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.06)).combined(with: drop),
+            removal: .opacity.animation(.easeIn(duration: 0.1)).combined(with: drop)
         )
     }
 }
@@ -573,6 +607,8 @@ struct DayPicker: View {
     @State private var months = false
     /// Which way the days last turned: 1 to a later month, -1 to an earlier.
     @State private var turn: CGFloat = 1
+    /// The days' width, of which a turning month travels a fifth, as Android's does.
+    @State private var daysWidth: CGFloat = 0
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -632,23 +668,29 @@ struct DayPicker: View {
                 .padding(.top, m.px(12))
                 ZStack {
                     // The days always lay out, for the height both views share; the months cover them.
-                    // A new month's days slide in the way it turned.
+                    // A new month's days slide in the way it turned, a fifth of their width, as
+                    // Android's do (`it / 5`).
+                    let travel = daysWidth > 0 ? daysWidth / 5 : 60
                     days
                         .id(year * 12 + month)
                         .transition(reduceMotion ? .opacity : .asymmetric(
-                            insertion: .offset(x: 60 * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
-                            removal: .offset(x: -60 * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
+                            insertion: .offset(x: travel * turn).combined(with: .opacity.animation(.easeOut(duration: 0.18).delay(0.06))),
+                            removal: .offset(x: -travel * turn).combined(with: .opacity.animation(.easeIn(duration: 0.09)))
                         ))
                         .opacity(months ? 0 : 1)
                         .accessibilityHidden(months)
                     if months { monthGrid.transition(.opacity) }
                 }
                 .clipped()
-                // A swipe across the days turns the month, as the arrows do.
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { daysWidth = $0 }
+                // A swipe across the days turns the month, as the arrows do, with a tick as it
+                // commits: the one turn with no control under the finger (Android's too).
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 24).onEnded { drag in
-                        guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2) else { return }
-                        turnTo(drag.translation.width < 0 ? forward : back)
+                        guard !months, abs(drag.translation.width) > max(48, abs(drag.translation.height) * 2),
+                              let to = drag.translation.width < 0 ? forward : back else { return }
+                        chose()
+                        turnTo(to)
                     }
                 )
             }
@@ -972,5 +1014,22 @@ struct Message: View {
     var body: some View {
         Text(text).type(Scale.body).foregroundStyle(p.muted).multilineTextAlignment(.center).padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// "Preparing the office…", only when composing takes long enough to be noticed: it waits 400ms
+/// and then fades in over 200, so a quick open or cold start never flashes it (Android's `Preparing`).
+struct Preparing: View {
+    @State private var shown = false
+
+    var body: some View {
+        Message(text: "Preparing the office…")
+            .opacity(shown ? 1 : 0)
+            .accessibilityHidden(!shown)
+            .task {
+                try? await Task.sleep(for: .milliseconds(400))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.2)) { shown = true }
+            }
     }
 }

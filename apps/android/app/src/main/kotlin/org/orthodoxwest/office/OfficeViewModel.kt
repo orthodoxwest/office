@@ -210,6 +210,13 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /**
+     * The clock hour (0–23) at the last minute's check: About's table lights it and its foot invites
+     * to it, as home does, and both move on when it turns.
+     */
+    var clockHour: Int by mutableStateOf(LocalDateTime.now().hour)
+        private set
+
     /** The day the search or a feast page was last made on: their years and next keeping follow it. */
     private var feastDay: LocalDate? = null
 
@@ -228,10 +235,11 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
      * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
-     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
-     * every minute and on every return to the app.
+     * and a feast page are made again on a new day, whose years and next keeping follow it. About
+     * follows [clockHour]. Called every minute and on every return to the app.
      */
     fun refreshClock() {
+        LocalDateTime.now().hour.let { if (it != clockHour) clockHour = it }
         feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return

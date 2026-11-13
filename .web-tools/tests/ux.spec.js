@@ -3761,6 +3761,41 @@ test("home introduces the Office to a reader in their first week", async ({ page
   await expect(page.locator(".about-hour dt a")).toHaveText(["Lauds", "Prime", "Terce", "Sext", "None", "Vespers", "Compline"]);
 });
 
+// About's table marks the hour it is now as home's directory does, and the page ends with
+// home's invitation, words and link alike; both follow the clock across an office boundary.
+test("About lights the hour it is now and ends with home's invitation", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-03-15T16:59:00-04:00") });
+  await openDatedPage(page, "/about");
+  const current = page.locator(".about-hour.is-current");
+  const door = page.locator(".about-door .pray-now");
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute("data-hour", "none");
+  await expect(current.locator("dt a")).toHaveAttribute("aria-current", "time");
+  await expect(door).toHaveText("Pray None");
+  await expect(door).toHaveAttribute("href", "/none/2026-03-15");
+  // The door comes after the last paragraph, and is home's ruled tablet.
+  await expect(page.locator(".about > :last-child")).toHaveClass(/about-door/);
+  await expect(door).toHaveClass(/is-ruled/);
+  // A Prime gloss on one line: the seven rows stand alike.
+  const heights = await page.locator(".about-hour").evaluateAll(rows => rows.map(r => Math.round(r.getBoundingClientRect().height)));
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+
+  await page.clock.fastForward("02:00");
+  await expect(current).toHaveAttribute("data-hour", "vespers");
+  await expect(door).toHaveText("Pray Vespers");
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(1);
+});
+
+test("About lights no hour from midnight to 2am, as home does", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await openDatedPage(page, "/about");
+  await expect(page.locator(".about-hour.is-current")).toHaveCount(0);
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(0);
+  const door = page.locator(".about-door .pray-now");
+  await expect(door).toHaveText("Pray Compline");
+  await expect(door).toHaveAttribute("href", "/compline/2026-03-14");
+});
+
 test.describe("on a screen with a mouse", () => {
   test.use({ isMobile: false, hasTouch: false, viewport: { width: 1280, height: 900 } });
 
