@@ -257,10 +257,9 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
             lo = hi + 1;
         }
         if !drop.is_empty() {
-            for si in start..=end {
-                let elems = std::mem::take(&mut hour.sections[si].elements);
-                hour.sections[si].elements =
-                    elems.into_iter().enumerate().filter(|(i, _)| !drop.contains(&(si, *i))).map(|(_, e)| e).collect();
+            for (si, section) in (start..).zip(&mut hour.sections[start..=end]) {
+                let elems = std::mem::take(&mut section.elements);
+                section.elements = elems.into_iter().enumerate().filter(|(i, _)| !drop.contains(&(si, *i))).map(|(_, e)| e).collect();
             }
         }
         start = end + 1;
