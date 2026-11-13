@@ -688,12 +688,27 @@ private struct HourTitle: View {
             // The date and the season share one muted line, each kept whole (`.hour-meta-part`),
             // its dot bound to the date by the no-break space; the day's name stands under them
             // in the text's ink, a size up, as home titles the day (`.hour-meta-feast`).
+            // The date opens the date picker (the web's `button.hour-meta-date`), so the header
+            // carries no "Change date" label: it stays set as the line's text, dims under the finger
+            // and takes the accent while the picker is open, and VoiceOver hears a button that
+            // changes the date. The season and the day's name are read after it, as the web reads them.
             let space = ProseLayout.advance(" ", Scale.meta.uiFont(m))
             VStack(spacing: 0) {
                 MetaLine(space: space) {
                     ForEach(Array(meta.enumerated()), id: \.offset) { i, part in
-                        Text(i < meta.count - 1 ? part + "\u{00a0}·" : part)
-                            .type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                        let text = i < meta.count - 1 ? part + "\u{00a0}·" : part
+                        if i == 0 && part == view.dateLabel {
+                            Button(action: togglePicker) {
+                                Text(text).type(Scale.meta).foregroundStyle(picking ? p.accent : p.muted).multilineTextAlignment(.center)
+                            }
+                            .buttonStyle(Quiet())
+                            .accessibilityLabel(part)
+                            .accessibilityHint("Changes the date")
+                            .accessibilityValue(picking ? "Expanded" : "Collapsed")
+                        } else {
+                            Text(text).type(Scale.meta).foregroundStyle(p.muted).multilineTextAlignment(.center)
+                                .accessibilityLabel(part)
+                        }
                     }
                 }
                 if !view.feast.isEmpty {
@@ -703,8 +718,6 @@ private struct HourTitle: View {
                 }
             }
             .padding(.top, m.px(2))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel((meta + [view.feast]).filter { !$0.isEmpty }.joined(separator: ". "))
             if date != model.today {
                 Button { model.open(.hour(model.today, view.hour)) } label: {
                     Text("Go to today").type(TextStyle(size: 16, line: 25.6, tracking: 1.28, smallCaps: true)).foregroundStyle(p.accent)
@@ -714,10 +727,15 @@ private struct HourTitle: View {
                 .buttonStyle(Quiet())
                 .padding(.top, m.px(5.6))
             }
-            // Side by side, or one above the other when the reader's font size leaves no room.
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 0) { disclosures }
-                VStack(spacing: 0) { disclosures }
+            // In home's foot letter, kept to one line (`.page-hour .leader-selector > summary`): on
+            // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
+            // caret to a line of its own.
+            Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
+                withAnimation(unfolding) {
+                    choosing.toggle()
+                    picking = false
+                }
+                if choosing { reveal("disclosed") }
             }
             .padding(.top, m.px(4))
             if picking {
@@ -752,25 +770,13 @@ private struct HourTitle: View {
         .accessibilityElement(children: .contain)
     }
 
-    @ViewBuilder private var disclosures: some View {
-        // In home's foot letter, each kept to one line (`.page-hour .hour-date-nav > summary`): on
-        // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
-        // caret to a line of its own. Where the two do not fit side by side they stand one above
-        // the other, never broken inside one.
-        Disclosure(label: "Change date", open: picking, style: Scale.smallCapsControl, upper: false) {
-            withAnimation(unfolding) {
-                picking.toggle()
-                choosing = false
-            }
-            if picking { reveal("disclosed") }
+    /// The header's date opens and closes the date picker, closing the prayer form's chooser.
+    private func togglePicker() {
+        withAnimation(unfolding) {
+            picking.toggle()
+            choosing = false
         }
-        Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
-            withAnimation(unfolding) {
-                choosing.toggle()
-                picking = false
-            }
-            if choosing { reveal("disclosed") }
-        }
+        if picking { reveal("disclosed") }
     }
 }
 

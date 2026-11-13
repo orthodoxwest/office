@@ -321,9 +321,12 @@ or impose a redesign on an unrelated change.
   1.06rem, gilt points between the three, and one rule struck under them
   with home's pen (`rule()` in app.js, seed 51; a border without script).
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
-  and issue reporting after the prayer. "Change date" unfolds the
-  hand-set month grid from `app.js` (days are links, the grid pattern's
-  keys); the native date field is only the no-script fallback, since its
+  and issue reporting after the prayer. The header's date, set as plain
+  text with no "Change date" label (home keeps the labelled control),
+  unfolds the hand-set month grid from `app.js` (days are links, the grid
+  pattern's keys): a button to assistive tech, found by the thumb through a
+  pressed wash and the accent while open. Without script the disclosure
+  keeps its summary; the native date field is only the no-script fallback, since its
   popup is the platform's and belongs to no theme here. Print expands session prayers and
   hides navigation/progress controls. Don't add persistent mobile chrome
   without checking how much prayer remains visible.

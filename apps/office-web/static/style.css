@@ -1648,6 +1648,54 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-wrap: balance;
 }
 
+/* With script the date opens the date picker (app.js), and the disclosure's
+   "Change date" goes, so the header carries no control between the day and
+   the prayer. The date stays set as the line's text: no underline, rule or
+   caret. Only the thumb finds it: a pressed wash, the accent while the
+   picker is open, and a thumb's height drawn round it so the tap lands
+   without the line moving. */
+.js .hour-header .hour-date-nav > summary {
+  display: none;
+}
+
+button.hour-meta-date {
+  position: relative;
+  margin: 0;
+  padding: 0 0.1em;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 160ms ease-out;
+}
+
+button.hour-meta-date::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc((var(--touch-target) - 1.4em) / -2);
+  bottom: calc((var(--touch-target) - 1.4em) / -2);
+}
+
+button.hour-meta-date:active {
+  background-color: var(--pressed-wash);
+}
+
+button.hour-meta-date[aria-expanded="true"] {
+  color: var(--accent);
+}
+
+@media (hover: hover) {
+  button.hour-meta-date:not([aria-expanded="true"]):hover {
+    color: var(--text);
+  }
+}
+
 /* Recovery when the open document is not local today (historical browse, or a
    long-lived PWA/tab left past midnight). Always visible — not under Change date. */
 .not-today-notice {
@@ -11351,6 +11399,9 @@ body.page-home::before {
   .hour-context-controls:has(> .leader-selector) > details { display: contents; }
   .hour-context-controls:has(> .leader-selector) > .hour-date-nav > summary { grid-area: 1 / 2; }
   .hour-context-controls:has(> .leader-selector) > .leader-selector > summary { grid-area: 1 / 3; }
+  /* With script the date opens the picker and Change date's summary is gone, so Prayer form
+     stands alone in the middle of the row. */
+  .js .hour-context-controls:has(> .leader-selector) > .leader-selector > summary { grid-column: 2 / 4; }
   .hour-context-controls:has(> .leader-selector) > details::details-content {
     grid-column: 1 / -1;
     grid-row: 2;
