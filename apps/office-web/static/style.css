@@ -12011,6 +12011,12 @@ body.page-home::before {
 
 /* ==== The view transition ============================================== */
 
+/* Under every still, the leaving page's own ground (app.js): where a
+   browser fails to draw one, that shows and not its white. */
+:root.crown-vt::view-transition {
+  background: var(--crown-floor, transparent);
+}
+
 /* The page stays usable under it: a tap on "Pray" goes to the page. */
 :root.crown-vt::view-transition,
 :root.crown-vt::view-transition-group(*),

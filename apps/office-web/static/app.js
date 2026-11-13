@@ -3664,6 +3664,9 @@ function rule(x1, y1, x2, y2, w, seed) {
       later(p, plan.turn, function () {
         g.vars.forEach(function (kv) { root.style.setProperty(kv[0], kv[1]); });
         root.style.setProperty("--crown-m-arch", maskFor(g, true));
+        // Under the stills, the ground of the page that is leaving: a browser
+        // that loses a still shows that, never its own white.
+        root.style.setProperty("--crown-floor", getComputedStyle(document.body).backgroundColor);
         root.classList.add("crown-vt", "crown-" + dir);
         // The first act holds its breath while the browser makes its stills,
         // and goes on from where it was: nothing jumps when they are up.
@@ -3752,6 +3755,12 @@ function rule(x1, y1, x2, y2, w, seed) {
                 return a !== trial && a.effect && String(a.effect.pseudoElement || "").indexOf("::view-transition") === 0;
               });
             trial.cancel();
+            // And the page that is leaving must be standing there as a still
+            // for the whole of the first act: no box for it, no play.
+            able = able && ["::view-transition-group(root)", "::view-transition-old(root)"].every(function (pseudo) {
+              var box = getComputedStyle(root, pseudo);
+              return parseFloat(box.width) > 0 && parseFloat(box.height) > 0 && box.display !== "none" && box.opacity === "1";
+            });
           } catch {
             able = false;
           }
