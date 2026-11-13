@@ -291,9 +291,14 @@ pub struct AboutData {
     pub blocks: Vec<AboutBlockView>,
     /// The seven hours in home's three bands.
     pub about_hours: Vec<AboutPeriod>,
+    /// Home's invitation at the page's foot, by the server's clock in the reader's zone (app.js
+    /// restates it by the device's): "Pray None", and the hour it opens.
+    pub pray_now_label: String,
+    pub pray_now_link: String,
 }
 
-/// One block of the About page. `kind` is intro, verse, heading, paragraph, hours, note or key;
+/// One block of the About page. `kind` is intro, verse, heading, paragraph, hours, note, key or
+/// invitation;
 /// `html` is a paragraph's words, escaped, with its links made anchors.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutBlockView {
@@ -312,9 +317,12 @@ pub struct AboutPeriod {
     pub hours: Vec<AboutHour>,
 }
 
-/// An hour on the about page: its name, what it is, and when it is said.
+/// An hour on the about page: its name, what it is, and when it is said; `is_current` when it is
+/// the hour home marks as now.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutHour {
+    pub slug: String,
+    pub is_current: bool,
     pub name: String,
     pub url: String,
     pub gloss: String,
@@ -322,10 +330,13 @@ pub struct AboutHour {
 }
 
 impl AboutData {
-    /// The page as presentation words it, for the page chrome given.
-    pub fn new(chrome: Chrome) -> AboutData {
+    /// The page as presentation words it, for the page chrome given, with the hour it is now
+    /// marked and invited to as home does at `now`'s `clock_hour` (0–23).
+    pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
-        use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_TITLE, AboutBlock, AboutRun, about_runs};
+        use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour, about_runs};
+        let current = about_current_hour(clock_hour);
+        let invite = presentation::invitation(now, now, clock_hour);
         let block = |kind| AboutBlockView { kind, ..AboutBlockView::default() };
         let blocks = ABOUT
             .iter()
@@ -348,6 +359,7 @@ impl AboutData {
                 AboutBlock::Key { mark, ink, text } => {
                     AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name(), ..block("key") }
                 }
+                AboutBlock::Invitation => block("invitation"),
             })
             .collect();
         let about_hours = ABOUT_HOURS
@@ -357,6 +369,8 @@ impl AboutData {
                 hours: hours
                     .iter()
                     .map(|(slug, time)| AboutHour {
+                        slug: (*slug).into(),
+                        is_current: *slug == current,
                         name: presentation::title_case(slug),
                         url: format!("/{slug}"),
                         gloss: presentation::hour_gloss(slug).into(),
@@ -365,7 +379,14 @@ impl AboutData {
                     .collect(),
             })
             .collect();
-        AboutData { chrome, title: ABOUT_TITLE.into(), blocks, about_hours }
+        AboutData {
+            chrome,
+            title: ABOUT_TITLE.into(),
+            blocks,
+            about_hours,
+            pray_now_label: invite.label,
+            pray_now_link: crate::links::hour_link(invite.hour, &presentation::date_slug(invite.date)),
+        }
     }
 }
 
