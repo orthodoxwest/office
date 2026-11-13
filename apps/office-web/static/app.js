@@ -4232,9 +4232,21 @@ function plainClickOpensHere(e, link) {
         var held = document.getAnimations().filter(function (a) {
           return (a.animationName || "").indexOf("crown-") === 0 && a.playState === "running";
         });
+        // Held where the glass has them, not where this thread last saw
+        // them: these run on the compositor, which has gone on drawing
+        // while the sums above kept this thread (a tenth of a second on a
+        // phone). Paused at the stale time, the first light stepped back.
+        var nowAt = performance.now();
         held = held.map(function (a) {
-          a.pause();
-          return { a: a, at: a.currentTime };
+          var at = a.currentTime;
+          try {
+            if (typeof a.startTime === "number" && typeof at === "number") {
+              at = Math.max(at, (nowAt - a.startTime) * (a.playbackRate || 1));
+            }
+            a.pause();
+            a.currentTime = at;
+          } catch { /* already gone */ }
+          return { a: a, at: at };
         });
         var resume = function () {
           // (Only what is still paused: one the play's end has cancelled
