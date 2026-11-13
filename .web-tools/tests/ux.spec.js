@@ -4615,10 +4615,11 @@ test("the ordo's current month and frontispiece are saved for offline use", asyn
     const month = `/calendar/${today.slice(0, 4)}/${today.slice(5, 7)}`;
     const year = `/calendar/${today.slice(0, 4)}`;
     await page.goto(`/lauds/${today}`);
-    await page.evaluate(async () => {
-      await navigator.serviceWorker.ready;
-      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
-    });
+    // The navigations below are the worker's once it is active; this page need not be. Home
+    // registered it, so its install can still be running when this page is requested, and
+    // a page requested then is never claimed if the worker activates before the page
+    // exists: its controllerchange never comes.
+    await page.evaluate(() => navigator.serviceWorker.ready);
     // The month is in the install shell; the frontispiece follows in the top-up.
     await expect.poll(() => page.evaluate(async (paths) => {
       for (const path of paths) if (!(await caches.match(path))) return false;
