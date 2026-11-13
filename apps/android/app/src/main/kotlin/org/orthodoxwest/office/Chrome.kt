@@ -169,7 +169,7 @@ private const val PRESSED_ALPHA = 0.55f
  * let go, so even the briefest tap is seen to land. A control that takes input focus from a
  * keyboard or D-pad (never by touch, where a tap does not take focus) wears the focus ring.
  */
-private object Dim : IndicationNodeFactory {
+internal object Dim : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
     override fun equals(other: Any?) = other === this
     override fun hashCode() = 0
