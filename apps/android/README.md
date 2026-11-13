@@ -66,7 +66,9 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   down from the top brings it back for a moment.
 - **Keeping the place.** Each visit on the way back keeps its own scroll position and open
   sections, and the way back itself is saved state: Back returns to where the reader was, and
-  so does a return after Android has closed the app in the background (`PlaceTest`).
+  so does a return after Android has closed the app in the background (`PlaceTest`). An hour
+  the app was closed on opens at the reader's place only by the core's rule, the same on every
+  front (`reopensAtPlace`: within 45 minutes, and not once prayed); otherwise at its top.
 - **The chosen theme throughout.** Nave or Apse colours the window from the first frame, the
   status and navigation bar icons, and (Android 13+) the next launch screen, whatever the
   phone's own light or dark (`WindowThemeTest`).

@@ -791,6 +791,24 @@ mod tests {
         }
     }
 
+    /// An hour keeps the reader's place by presentation's rule: the page names its own hour and
+    /// day for the place, the limit is presentation's, and the place is found before the hour is
+    /// first painted (the head) and kept from the foot, after every line it may name.
+    #[test]
+    fn hour_page_keeps_the_place_by_the_shared_rule() {
+        let (_, _, body) = get("/vespers/2026-06-07");
+        let head = &body[..body.find("<body").unwrap()];
+        assert!(head.contains(r#"var hour = "vespers", day = "2026-06-07";"#), "the head finds the place for this hour");
+        let limit = format!("away <= {} * 60", presentation::PLACE_KEPT_MINUTES);
+        assert!(head.contains(&limit), "the head keeps presentation's limit, {limit}");
+        assert!(head.contains("office-prayed"), "a prayed hour opens at its top");
+        let foot = body.find(r#"<span id="hour-place" hidden></span>"#).expect("the foot marks where Chromium may paint");
+        assert!(foot > body.find(r#"class="hour-epilogue""#).unwrap(), "the place is set once every line is in");
+        assert_eq!(body.matches(r#"localStorage.setItem(KEY"#).count(), 1, "one keeper");
+        // Other pages neither keep nor find one.
+        assert!(!get("/").2.contains("office-place"));
+    }
+
     #[test]
     fn adjacent_hours_keep_date() {
         let s = |v: (String, String, String, String)| v;

@@ -644,6 +644,106 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
   await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
 });
 
+// The page hidden as a phone locks or another app comes forward.
+async function hidePage(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+    delete document.visibilityState;
+  });
+}
+
+// The first line of the office below the hairline, and how far below it it begins.
+async function readingLine(page) {
+  return page.evaluate(() => {
+    const edge = document.querySelector(".hour-scroll-progress").getBoundingClientRect().bottom;
+    const line = [...document.querySelectorAll(".office-hour .elements p, .office-hour .elements h3")]
+      .find((l) => l.getClientRects().length && l.getBoundingClientRect().bottom > edge);
+    return `${line.textContent.trim().slice(0, 40)} @${Math.round(line.getBoundingClientRect().top - edge)}`;
+  });
+}
+
+test("an hour the browser closed opens again at the reader's place, already there", async ({ page }) => {
+  const hour = "/vespers/2026-11-13";
+  await page.goto(hour);
+  await page.evaluate(() => document.querySelectorAll(".psalm")[2].querySelectorAll("p")[3].scrollIntoView());
+  const place = await readingLine(page);
+  await hidePage(page);
+  // The tab discarded, or the installed app closed: opened again from home's link.
+  const context = page.context();
+  await page.close();
+  const again = await context.newPage();
+  await again.addInitScript(() => {
+    window.__shown = [];
+    const look = () => {
+      if (document.body && getComputedStyle(document.body).visibility === "visible") window.__shown.push(scrollY);
+      if (window.__shown.length < 5) requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  });
+  await again.goto("/?date=2026-11-13");
+  await again.evaluate((href) => { const a = document.createElement("a"); a.href = href; document.body.append(a); a.click(); }, hour);
+  await again.waitForURL(hour);
+  await again.waitForLoadState("load");
+  expect(await readingLine(again)).toBe(place);
+  // Shown first at the place: nothing moved to reach it.
+  const shown = await again.evaluate(() => window.__shown);
+  expect(shown[0]).toBeGreaterThan(1000);
+  expect(new Set(shown).size).toBe(1);
+  // Left by the page's own link, the hour opens at its top on a deliberate return.
+  await again.locator(".day-hours-link").evaluate((a) => a.click());
+  await again.waitForURL(/\?date=|\/$/);
+  expect(await again.evaluate(() => localStorage.getItem("office-place"))).toBeNull();
+  await again.goto(hour);
+  expect(await again.evaluate(() => scrollY)).toBe(0);
+});
+
+test("an hour's place is kept only within the limit, and not once prayed", async ({ page }) => {
+  const hour = "/vespers/2026-11-13";
+  const reopened = async (change) => {
+    await page.goto(hour);
+    await page.evaluate(() => document.querySelectorAll(".psalm")[2].scrollIntoView());
+    await hidePage(page);
+    await page.goto("/about");
+    await page.evaluate(change);
+    await page.goto(hour);
+    return page.evaluate(() => scrollY);
+  };
+  expect(await reopened(() => {})).toBeGreaterThan(1000);
+  expect(await reopened(() => {
+    const kept = JSON.parse(localStorage.getItem("office-place"));
+    kept.at -= 46 * 60 * 1000;
+    localStorage.setItem("office-place", JSON.stringify(kept));
+  })).toBe(0);
+  expect(await reopened(() => localStorage.setItem("office-prayed", JSON.stringify({ "2026-11-13": ["vespers"] })))).toBe(0);
+  await page.evaluate(() => localStorage.removeItem("office-prayed"));
+  // Another day's Vespers, and another hour, open at their tops.
+  await reopened(() => {});
+  await hidePage(page);
+  await page.goto("/vespers/2026-11-14");
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await page.goto("/compline/2026-11-13");
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+});
+
+test("returning to the ordo, the month is first shown at the day chosen", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__shown = [];
+    const look = () => {
+      if (document.body && getComputedStyle(document.body).visibility === "visible") window.__shown.push(scrollY);
+      if (window.__shown.length < 5) requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  });
+  await page.goto("/?date=2026-11-20");
+  await page.locator('[data-nav="calendar"]').first().evaluate((a) => a.click());
+  await page.waitForURL(/\/calendar\/2026\/11#d-2026-11-20$/);
+  await page.waitForLoadState("load");
+  await expect(page.locator("#d-2026-11-20")).toBeInViewport();
+  const shown = await page.evaluate(() => window.__shown);
+  expect(shown[0]).toBeGreaterThan(500);
+});
+
 test("the home invitation catches up when the clock jumps past a sleeping timer", async ({
   page,
 }) => {

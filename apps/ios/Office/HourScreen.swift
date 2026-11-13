@@ -186,6 +186,29 @@ private struct Held {
     let ids: [String]
 }
 
+/**
+ * The ribbon: where the reader was in an hour when the app went into the background, kept with
+ * the scene, so that an hour iOS closes in the background and brings back (the way back
+ * restores it) opens again at that place (the core's `reopensAtPlace`, as the web's
+ * `office-place` and the Android app's saved visit): the row then top-most on screen and the
+ * anchor that stands it where it stood, and when. An hour the reader leaves by the app's own
+ * ways (home, another hour, Back) keeps none, so a deliberate return opens at its top.
+ */
+private struct Place: Codable {
+    /// The hour's day and name: "2026-11-13 vespers".
+    let page: String
+    let row: String
+    let anchor: Double
+    /// When it was kept, in seconds since 1970.
+    let at: Double
+
+    var encoded: String { (try? JSONEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? "" }
+
+    static func decode(_ s: String) -> Place? {
+        s.isEmpty ? nil : try? JSONDecoder().decode(Place.self, from: Data(s.utf8))
+    }
+}
+
 /// How far the hour has been prayed. Another prayer form is the same hour, so it carries over, as
 /// the Android app's does; another hour or day begins again (`page`, the one it was prayed on).
 private final class PrayedSoFar {
@@ -216,6 +239,11 @@ struct HourScreen: View {
     /// composed again.
     @State private var held: Held?
     @State private var prayed = PrayedSoFar()
+    /// The ribbon's place, kept with the scene; and whether the page is held unseen while it is
+    /// set, so it appears at the place with nothing moving.
+    @SceneStorage("hour-place") private var kept = ""
+    @State private var placing = false
+    @Environment(\.scenePhase) private var phase
 
     init(view: HourView, date: CivilDate, composition: String) {
         self.view = view
@@ -325,6 +353,8 @@ struct HourScreen: View {
                     }
                 }
             }
+            // Held unseen for the moment the kept place is set.
+            .opacity(placing ? 0 : 1)
             .coordinateSpace(name: Reading.space)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
@@ -338,7 +368,24 @@ struct HourScreen: View {
             .onChange(of: model.martyrology) { hold() }
             .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
+            .onChange(of: phase) { _, now in
+                if now == .background { keep() }
+            }
+            // Left by the app's own ways (home, another hour, Back, a page over it): no place.
+            .onDisappear { forget() }
             .onAppear {
+                if let place = keptHere {
+                    placing = true
+                    // Once the rows are laid out, and again once those the first move brought in are.
+                    DispatchQueue.main.async {
+                        scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
+                        DispatchQueue.main.async {
+                            scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
+                            placing = false
+                        }
+                    }
+                    return
+                }
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { scroll.scrollTo(id, anchor: .top) }
@@ -404,20 +451,45 @@ struct HourScreen: View {
         return at.map { rows[max(0, $0 - 2)].id }
     }
 
-    /**
-     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
-     * is still the one composed before.
-     */
-    private func hold() {
+    /// The office's rows on screen, top-most first, each with the anchor that would stand it where it stands.
+    private func marks() -> [(id: String, anchor: UnitPoint)] {
         let height = reading.viewport.height
-        let marks = reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
+        return reading.shownRows().compactMap { shown -> (id: String, anchor: UnitPoint)? in
             // `scrollTo` stands the row's point at the anchor's height on the screen's: for its top
             // to stay where it is, that height is its top over the room the screen has beside it.
             let room = height - shown.frame.height
             guard room > 0, shown.frame.minY >= 0, shown.frame.minY <= room else { return nil }
             return (id: shown.id, anchor: UnitPoint(x: 0.5, y: shown.frame.minY / room))
         }
-        held = Held(marks: marks, ids: rows.map(\.id))
+    }
+
+    /**
+     * Notes the rows on screen as the prayer form or the Martyrology changes, while the hour shown
+     * is still the one composed before.
+     */
+    private func hold() {
+        held = Held(marks: marks(), ids: rows.map(\.id))
+    }
+
+    /// This hour's day and name, as its kept place names it.
+    private var page: String { "\(date.iso) \(view.hour)" }
+
+    /// The place kept for this hour, if it opens there: left within the core's limit, and not yet prayed.
+    private var keptHere: Place? {
+        guard let place = Place.decode(kept), place.page == page else { return nil }
+        let away = Date().timeIntervalSince1970 - place.at
+        return reopensAtPlace(prayed: model.hoursPrayed(on: date).contains(view.hour), secondsAway: away) ? place : nil
+    }
+
+    /// Keeps the reader's place as the app goes into the background; none while still at the hour's head.
+    private func keep() {
+        guard reading.ratio > 0, let mark = marks().first else { return forget() }
+        kept = Place(page: page, row: mark.id, anchor: Double(mark.anchor.y), at: Date().timeIntervalSince1970).encoded
+    }
+
+    /// Lets this hour's place go.
+    private func forget() {
+        if Place.decode(kept)?.page == page { kept = "" }
     }
 
     /// Once the hour is composed again, stands the top-most row held that is still in it where it stood.

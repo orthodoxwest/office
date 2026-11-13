@@ -261,6 +261,34 @@ final class PlaceTests: XCTestCase {
         XCTAssertTrue(model.path.isEmpty)
     }
 
+    /// A day chosen in the ordo's month brings the month's visit to that day, so a return to it,
+    /// Back or the way back restored, opens at the day chosen; the same visit, nothing composed.
+    func testTheOrdoOpensAgainAtTheDayChosen() {
+        let model = AppModel()
+        model.path = []
+        model.open(.ordo(year: 2026, month: 11, day: 0))
+        let visit = model.path[0].id
+        let chosen = CivilDate(year: 2026, month: 11, day: 20)
+        model.choseInOrdo(chosen)
+        model.open(.home(chosen))
+        XCTAssertEqual(model.path[0].id, visit)
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 11, day: 20), .home(chosen)])
+        let again = AppModel()
+        again.restore(model.saved)
+        XCTAssertEqual(again.pages.first, .ordo(year: 2026, month: 11, day: 20))
+        // Only the month shown takes it.
+        model.choseInOrdo(CivilDate(year: 2026, month: 12, day: 1))
+        XCTAssertEqual(model.pages.first, .ordo(year: 2026, month: 11, day: 20))
+    }
+
+    /// The ribbon's rule is the core's: within its limit, and not once prayed.
+    func testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit() {
+        XCTAssertTrue(reopensAtPlace(prayed: false, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: true, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: 3 * 3600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: -60))
+    }
+
     /// The search takes its words in place: the same visit, with no move between pages.
     func testTheSearchTakesItsWordsInPlace() {
         let model = AppModel()

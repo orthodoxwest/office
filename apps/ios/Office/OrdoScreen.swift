@@ -61,6 +61,9 @@ struct OrdoScreen: View {
     @Environment(\.wide) private var wide
     @State private var allDetails = false
     @State private var focused = false
+    /// Whether the day asked for has been set in place: until then the month is held unseen, so it
+    /// appears at the day with nothing moving (the web's month page holds itself the same way).
+    @State private var placed = false
 
     /// The scroll view's height, and the pinned month heading's as last laid out.
     @State private var viewport: CGFloat = 0
@@ -127,6 +130,7 @@ struct OrdoScreen: View {
                     Footer()
                 }
             }
+            .opacity(focusDay > 0 && !placed ? 0 : 1)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
             // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
             .background {
@@ -141,7 +145,12 @@ struct OrdoScreen: View {
                 guard viewport > 0, !focused else { return }
                 focused = true
                 if focusDay > 0 {
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: focus) }
+                    DispatchQueue.main.async {
+                        scroll.scrollTo("d-\(focusDay)", anchor: focus)
+                        placed = true
+                    }
+                } else {
+                    placed = true
                 }
             }
         }
@@ -428,7 +437,11 @@ private struct DayRow: View {
         if wide { table } else { card }
     }
 
-    private func openDay() { model.open(.home(d.date)) }
+    /// The day's page; the month's visit notes the day, so a return to it opens there.
+    private func openDay() {
+        model.choseInOrdo(d.date)
+        model.open(.home(d.date))
+    }
 
     /// A day's rank is its ink, as in a Book of Hours: the great feasts red-letter, doubles slate blue, lesser days black.
     private var rankInk: Color? {

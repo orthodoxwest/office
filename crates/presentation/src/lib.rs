@@ -305,6 +305,29 @@ impl Reading {
     }
 }
 
+/// How long an hour keeps the reader's place, like the ribbon a breviary keeps in it: an hour
+/// left in the middle when the reader was taken away (the phone locked, the door answered) and
+/// the page then lost (a tab discarded, an installed web app or a native app closed by the
+/// system in the background) opens again where it was, if it is opened again within this time.
+/// Long enough for an interruption, short enough that a later return to the same hour is a new
+/// beginning. The web renders it into the hour page; the apps ask [`reopens_at_place`].
+pub const PLACE_KEPT_MINUTES: u32 = 45;
+
+/// Whether an hour opens at the place the reader was taken away from, rather than at its top:
+/// only that same hour of that same day (`same_hour`: the page's hour and date, Compline after
+/// midnight still yesterday's), opened again within [`PLACE_KEPT_MINUTES`] of being left
+/// (`seconds_away`; a clock set back counts as too long), and not yet prayed (home's mark).
+///
+/// A place is kept only while the system, not the reader, closed the page: an hour the reader
+/// left by a link or a control of the app (home, another hour, the ordo, another day) keeps
+/// none, so a deliberate return opens at the top. Each front keeps the place in its own way
+/// (the web's `office-place`, iOS's scene storage, Android's saved state of the visit) and asks
+/// this when the hour opens. Nothing moves: the page appears at the place, and scrolling up is
+/// the way back to the start.
+pub fn reopens_at_place(same_hour: bool, prayed: bool, seconds_away: f64) -> bool {
+    same_hour && !prayed && (0.0..=f64::from(PLACE_KEPT_MINUTES) * 60.0).contains(&seconds_away)
+}
+
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
@@ -670,6 +693,27 @@ mod tests {
         let tall = Reading::default().advance(0.0, total, 3600.0);
         assert_eq!(tall.read, PRAYED_LONGEST_STEP * PRAYED_WORDS_PER_SECOND);
         assert!(!Reading::default().prayed(0.0, true));
+    }
+
+    #[test]
+    fn an_interrupted_hour_reopens_at_its_place_only_within_the_limit() {
+        let limit = f64::from(PLACE_KEPT_MINUTES) * 60.0;
+        // The door answered at the third psalm, back ten minutes later: the place.
+        assert!(reopens_at_place(true, false, 600.0));
+        assert!(reopens_at_place(true, false, 0.0));
+        assert!(reopens_at_place(true, false, limit));
+        // Past the limit, the hour begins again.
+        assert!(!reopens_at_place(true, false, limit + 1.0));
+        assert!(!reopens_at_place(true, false, 6.0 * 3600.0));
+        // Another hour, or the same hour of another day: its own top.
+        assert!(!reopens_at_place(false, false, 600.0));
+        // Prayed to its end: the next opening is a new office.
+        assert!(!reopens_at_place(true, true, 600.0));
+        // A clock set back, or no time at all, is no evidence of a short absence.
+        assert!(!reopens_at_place(true, false, -60.0));
+        assert!(!reopens_at_place(true, false, f64::NAN));
+        // Long enough to answer the door; shorter than the two hours between Terce and Sext.
+        const { assert!(PLACE_KEPT_MINUTES >= 15 && PLACE_KEPT_MINUTES < 120) };
     }
 
     #[test]

@@ -303,6 +303,16 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /**
+     * A day chosen in the ordo's month: its visit is brought to that day, so a return to it (Back,
+     * or the way back after iOS has closed the app) opens at the day chosen, as the web's Back and
+     * its menu's Ordo do. The month stays the same page: nothing is composed or moved.
+     */
+    func choseInOrdo(_ date: CivilDate) {
+        guard case let .ordo(y, m, _)? = path.last?.page, y == Int(date.year), m == Int(date.month) else { return }
+        path[path.count - 1].page = .ordo(year: y, month: m, day: Int(date.day))
+    }
+
     /// The search's words changed: the search page takes them in place, with no move between pages.
     func search(_ query: String) {
         guard case let .find(q)? = path.last?.page, q != query else { return }
