@@ -3388,9 +3388,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(subscribe).toHaveAttribute("aria-disabled", "true");
   await expect(subscribe).not.toHaveAttribute("href");
   await expect(subscribe).toHaveAttribute("tabindex", "-1");
-  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toBeVisible();
+  await expect(page.locator("#reminder-url")).toHaveText("No hour is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No hour is chosen yet.");
 
   await page.locator('input[name="hour"][value="lauds"]').check();
   await expect(copy).toBeEnabled();
@@ -3409,10 +3408,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await page.getByLabel("Time for Lauds").press("Tab");
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
-  await expect(page.locator("#reminder-copied")).toHaveText(
-    "Choose a time for each selected hour.",
-  );
+  await expect(feedURL).toHaveText("Choose a time for each chosen hour.");
+  await expect(page.locator("#reminder-rule")).toHaveText("Choose a time for each chosen hour.");
 
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
@@ -3423,8 +3420,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   }
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Select at least one day above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+  await expect(feedURL).toHaveText("No day is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No day is chosen yet.");
 
   await page.locator('input[name="day"][value="sun"]').check();
   await expect(copy).toBeEnabled();
@@ -3443,11 +3440,77 @@ test("reminder copy failure reveals the calendar address", async ({ page }) => {
 
   await page.getByRole("button", { name: "Copy link" }).click();
 
-  await expect(page.locator("#reminder-copied")).toHaveText(
+  await expect(page.locator("#reminder-copy-note")).toHaveText(
     "Copy unavailable. The calendar address is shown below.",
   );
   await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
   await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+// The rule, written out: the sentences of presentation::reminders' table tests, from app.js's
+// copy of the grammar and the words the page is sent.
+test("the reminder rule says back the choices", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/reminders");
+  const rule = page.locator("#reminder-rule");
+  const said = async () => (await rule.textContent()).replace(/\u00a0/g, " ");
+  const day = (name) => page.locator(".reminder-day", { hasText: name }).locator("input");
+  await expect.poll(said).toBe(
+    "Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.",
+  );
+  await page.locator('input[name="hour"][value="compline"]').uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM and Vespers at 6:00 PM, every day, ten minutes before.");
+  await page.locator('input[name="hour"][value="vespers"]').uncheck();
+  await day("Sat").uncheck();
+  await day("Sun").uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on weekdays, ten minutes before.");
+  await day("Sat").check();
+  await day("Sun").check();
+  await day("Fri").uncheck();
+  await page.selectOption('select[name="alarm"]', "none");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Fridays, with no alert.");
+  for (const name of ["Mon", "Tue", "Thu", "Sat"]) {
+    await day(name).uncheck();
+  }
+  await day("Fri").check();
+  await page.selectOption('select[name="alarm"]', "0");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on Wednesdays, Fridays, and Sundays, at the hour.");
+  await day("Wed").check();
+  await day("Thu").check();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Mondays, Tuesdays, and Saturdays, at the hour.");
+  for (const box of await page.locator('input[name="day"]').all()) {
+    await box.uncheck();
+  }
+  await expect.poll(said).toBe("No day is chosen yet.");
+  await page.locator('input[name="hour"][value="lauds"]').uncheck();
+  await expect.poll(said).toBe("No hour or day is chosen yet.");
+});
+
+test("a tap on an unchosen hour's time chooses the hour", async ({ page }) => {
+  await page.goto("/reminders");
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await page.locator('[data-reminder-hour="prime"] .reminder-time').click();
+  await expect(page.locator('input[name="hour"][value="prime"]')).toBeChecked();
+  await expect(page.getByLabel("Time for Prime")).toBeEnabled();
+});
+
+test("copying the link changes its words in place for a moment", async ({ page, context, browserName }) => {
+  test.skip(browserName !== "chromium", "clipboard permissions are Chromium's");
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/reminders");
+  const copy = page.getByRole("button", { name: "Copy link" });
+  // Where the link stands on the page, whatever the scroll.
+  const place = () => copy.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y + window.scrollY, width: r.width, height: r.height };
+  });
+  await copy.scrollIntoViewIfNeeded();
+  const before = await place();
+  await copy.click();
+  await expect(copy).toHaveClass(/is-copied/);
+  await expect(page.locator("#reminder-copied")).toHaveText("Copied.");
+  expect(await place()).toEqual(before);
+  await expect(copy).not.toHaveClass(/is-copied/, { timeout: 4000 });
 });
 
 test("quiet mobile controls retain full thumb targets", async ({ page }) => {

@@ -1381,7 +1381,19 @@ function plainClickOpensHere(e, link) {
     var webcalEl = document.getElementById("reminder-webcal");
     var copyBtn = document.getElementById("reminder-copy");
     var copiedEl = document.getElementById("reminder-copied");
+    var copyNoteEl = document.getElementById("reminder-copy-note");
     var addressEl = document.querySelector(".reminder-address");
+    var ruleEl = document.getElementById("reminder-rule");
+    var ruleWords = {};
+    try {
+      ruleWords = JSON.parse(document.getElementById("reminder-rule-words").textContent);
+    } catch {
+      ruleWords = null;
+    }
+    var stillRule = function () {
+      return !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    };
+    var feedAddress = "";
 
     var buildFeedURL = function () {
       var params = [];
@@ -1410,6 +1422,174 @@ function plainClickOpensHere(e, link) {
       return location.host + "/office.ics?" + params.join("&");
     };
 
+    // The rule, written out (presentation::reminders, whose tests give the sentences): the
+    // hours in the day's order with an Oxford comma from three, the days, how long before.
+    var ruleJoint = function (i, n) {
+      if (i === n - 1) {
+        return "";
+      }
+      if (n === 2) {
+        return " " + ruleWords.and + " ";
+      }
+      return i === n - 2 ? ", " + ruleWords.and + " " : ", ";
+    };
+    var ruleList = function (items) {
+      return items.map(function (item, i) {
+        return item + ruleJoint(i, items.length);
+      }).join("");
+    };
+    var ruleDays = function (days) {
+      var chosen = [];
+      var left = [];
+      days.forEach(function (on, i) {
+        (on ? chosen : left).push(ruleWords.days[i]);
+      });
+      if (chosen.length === 0) {
+        return null;
+      }
+      if (chosen.length === 7) {
+        return ruleWords.everyDay;
+      }
+      if (days.join() === "true,true,true,true,true,false,false") {
+        return ruleWords.weekdays;
+      }
+      return chosen.length <= 3 ? ruleWords.on + " " + ruleList(chosen) : ruleWords.except + " " + ruleList(left);
+    };
+    // A time in the reader's own clock ("6:45 AM"), held to its figures by a no-break space.
+    var ruleClock = (function () {
+      var format = null;
+      try {
+        format = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+      } catch {
+        format = null;
+      }
+      return function (value) {
+        var parts = value.split(":");
+        if (!format || parts.length < 2) {
+          return value;
+        }
+        return format.format(new Date(2026, 0, 1, Number(parts[0]), Number(parts[1]))).replace(/[\s\u202f]+(?=\D+$)/, "\u00a0");
+      };
+    })();
+    var rulePhrases = function (invalidTime) {
+      var hours = [];
+      remindersForm.querySelectorAll("input[name=hour]:checked").forEach(function (cb) {
+        var t = remindersForm.querySelector("input[name=time-" + cb.value + "]");
+        hours.push({ slug: cb.value, time: t && t.value ? ruleClock(t.value) : "" });
+      });
+      var days = Array.from(remindersForm.querySelectorAll("input[name=day]")).map(function (cb) {
+        return cb.checked;
+      });
+      var daysPhrase = ruleDays(days);
+      if (hours.length === 0 || daysPhrase === null) {
+        var empty = hours.length > 0 ? ruleWords.noDay : days.indexOf(true) >= 0 ? ruleWords.noHour : ruleWords.noHourOrDay;
+        return [{ key: "empty", text: empty }];
+      }
+      if (invalidTime) {
+        return [{ key: "empty", text: ruleWords.noTime }];
+      }
+      var out = [];
+      hours.forEach(function (h, i) {
+        out.push({ key: h.slug, text: ruleWords.hours[h.slug] });
+        out.push({ key: h.slug + "-time", text: " " + ruleWords.at + " " + h.time });
+        var joint = ruleJoint(i, hours.length);
+        if (joint) {
+          out.push({ key: h.slug + "-joint", text: joint });
+        }
+      });
+      var alarm = remindersForm.querySelector("select[name=alarm]").value;
+      out.push({ key: "days", text: ", " + daysPhrase });
+      out.push({ key: "lead", text: ", " + (ruleWords.leads[alarm] || alarm + " minutes before") + "." });
+      return out;
+    };
+    // Only the phrases whose words changed cross-fade: out in 90ms, in over 180ms after a beat.
+    // The rule is a polite, atomic live region, so every change to its words lands in one
+    // moment (after the beat) and is read once, whole, rather than phrase by phrase.
+    var ruleTimer = 0;
+    var paintRule = function (phrases, quiet) {
+      if (!ruleEl) {
+        return;
+      }
+      var spans = function () {
+        var kept = {};
+        ruleEl.querySelectorAll("span[data-key]").forEach(function (span) {
+          kept[span.dataset.key] = span;
+        });
+        return kept;
+      };
+      var still = quiet || stillRule();
+      var apply = function () {
+        var kept = spans();
+        var prev = null;
+        ruleEl.classList.toggle("is-empty", phrases[0].key === "empty");
+        phrases.forEach(function (p) {
+          var span = kept[p.key];
+          delete kept[p.key];
+          if (!span) {
+            span = document.createElement("span");
+            span.dataset.key = p.key;
+            span.textContent = p.text;
+            if (!still) {
+              span.classList.add("is-out");
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                  span.classList.remove("is-out");
+                });
+              });
+            }
+          } else {
+            if (span.textContent !== p.text) {
+              span.textContent = p.text;
+            }
+            span.classList.remove("is-out");
+          }
+          // Moved only where it is out of place, so an unchanged phrase is left alone.
+          var at = prev ? prev.nextSibling : ruleEl.firstChild;
+          if (at !== span) {
+            ruleEl.insertBefore(span, at);
+          }
+          prev = span;
+        });
+        Object.keys(kept).forEach(function (key) {
+          kept[key].remove();
+        });
+      };
+      window.clearTimeout(ruleTimer);
+      if (still) {
+        apply();
+        return;
+      }
+      // What will change or go fades out now; the new words come in together after the beat.
+      var wanted = {};
+      phrases.forEach(function (p) {
+        wanted[p.key] = p.text;
+      });
+      var kept = spans();
+      var same = Object.keys(kept).length === phrases.length;
+      Object.keys(kept).forEach(function (key) {
+        if (wanted[key] !== kept[key].textContent) {
+          kept[key].classList.add("is-out");
+          same = false;
+        }
+      });
+      if (same) {
+        apply();
+        return;
+      }
+      ruleTimer = window.setTimeout(apply, 150);
+    };
+
+    // The calendar address, breakable after its slashes and joints rather than anywhere.
+    var setAddress = function (text) {
+      urlEl.textContent = "";
+      text.replace(/([/?&])/g, "$1\n").split("\n").forEach(function (piece, i) {
+        if (i > 0) {
+          urlEl.appendChild(document.createElement("wbr"));
+        }
+        urlEl.appendChild(document.createTextNode(piece));
+      });
+    };
+
     var syncReminderHourRows = function () {
       remindersForm.querySelectorAll(".reminder-hour-row").forEach(function (row) {
         var checkbox = row.querySelector('input[name="hour"]');
@@ -1421,9 +1601,20 @@ function plainClickOpensHere(e, link) {
           time.required = selected;
         }
       });
+      remindersForm.querySelectorAll(".reminder-day").forEach(function (day) {
+        var checkbox = day.querySelector("input");
+        day.classList.toggle("is-selected", Boolean(checkbox && checkbox.checked));
+      });
     };
 
-    var update = function () {
+    var copiedTimer = 0;
+    var settleCopied = function () {
+      window.clearTimeout(copiedTimer);
+      copyBtn.classList.remove("is-copied");
+      copiedEl.textContent = "";
+    };
+
+    var update = function (quiet) {
       syncReminderHourRows();
       var selectedHours = remindersForm.querySelectorAll("input[name=hour]:checked");
       var selectedDays = remindersForm.querySelectorAll("input[name=day]:checked");
@@ -1431,33 +1622,37 @@ function plainClickOpensHere(e, link) {
         var time = remindersForm.querySelector("input[name=time-" + checkbox.value + "]");
         return !time || !time.validity.valid;
       });
-      var message = "";
-      if (selectedHours.length === 0) {
-        message = "Select at least one hour above.";
-      } else if (invalidTime) {
-        message = "Choose a time for each selected hour.";
-      } else if (selectedDays.length === 0) {
-        message = "Select at least one day above.";
-      }
-      var valid = message === "";
-      var feed = valid ? buildFeedURL() : "";
-      urlEl.textContent = valid ? "https://" + feed : message;
+      var valid = selectedHours.length > 0 && selectedDays.length > 0 && !invalidTime;
+      var phrases = ruleWords ? rulePhrases(invalidTime) : [{ key: "empty", text: "" }];
+      paintRule(phrases, quiet === true);
+      feedAddress = valid ? "https://" + buildFeedURL() : "";
+      setAddress(valid ? feedAddress : phrases[0].text);
       webcalEl.classList.toggle("is-disabled", !valid);
       webcalEl.setAttribute("aria-disabled", valid ? "false" : "true");
       if (!valid) {
         webcalEl.removeAttribute("href");
         webcalEl.setAttribute("tabindex", "-1");
       } else {
-        webcalEl.href = "webcal://" + feed;
+        webcalEl.href = "webcal://" + feedAddress.slice("https://".length);
         webcalEl.removeAttribute("tabindex");
       }
       copyBtn.disabled = !valid;
-      copiedEl.textContent = valid ? "Copied." : message;
-      copiedEl.hidden = valid;
+      settleCopied();
+      copyNoteEl.hidden = true;
     };
 
     remindersForm.addEventListener("change", update);
-    update();
+    // A tap on an unchosen hour's greyed time chooses the hour (the field lets the tap through).
+    remindersForm.addEventListener("click", function (event) {
+      var cell = event.target.closest && event.target.closest(".reminder-time");
+      var checkbox = cell && cell.closest(".reminder-hour-row").querySelector('input[name="hour"]');
+      if (!checkbox || checkbox.checked) {
+        return;
+      }
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    update(true);
 
     webcalEl.addEventListener("click", function (event) {
       if (webcalEl.getAttribute("aria-disabled") === "true") {
@@ -1472,8 +1667,8 @@ function plainClickOpensHere(e, link) {
         return;
       }
       var showCopyFallback = function () {
-        copiedEl.textContent = "Copy unavailable. The calendar address is shown below.";
-        copiedEl.hidden = false;
+        copyNoteEl.textContent = "Copy unavailable. The calendar address is shown below.";
+        copyNoteEl.hidden = false;
         if (addressEl) {
           addressEl.open = true;
         }
@@ -1482,9 +1677,12 @@ function plainClickOpensHere(e, link) {
         showCopyFallback();
         return;
       }
-      navigator.clipboard.writeText(urlEl.textContent).then(function () {
+      navigator.clipboard.writeText(feedAddress).then(function () {
+        // The link's own words say so for a moment, and nothing beside it moves.
+        settleCopied();
+        copyBtn.classList.add("is-copied");
         copiedEl.textContent = "Copied.";
-        copiedEl.hidden = false;
+        copiedTimer = window.setTimeout(settleCopied, 2400);
         reportUsageAction("reminders");
       }).catch(showCopyFallback);
     });

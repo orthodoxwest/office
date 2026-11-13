@@ -96,6 +96,8 @@ class AccessibilityTest {
         compose.onNodeWithText("Prime").assertIsOff()
         compose.onNodeWithContentDescription("Sunday").assert(role(Role.Checkbox)).assertIsOn()
         compose.onNodeWithText("Set prayer reminders").assert(isHeading())
+        // The rule, written out under the choices (presentation::reminders).
+        compose.onNodeWithText("Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.").assertExists()
     }
 
     @Test
