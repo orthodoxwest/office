@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { holdCrown, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -211,3 +212,23 @@ test("full-size raised alphabet — light", async ({ page }) => {
   await expect(page.locator(".initial-elevated")).toHaveCount(26);
   await expect(page.locator(".elements")).toHaveScreenshot(`raised-alphabet-light.png`);
 });
+
+// The crown's play, mid-flight (a tap on home's cross turns the look over as
+// dusk or dawn: app.js, "Home: the crown's play"). Each frame is the play
+// stopped and set to a moment of presentation::crown's timetable, in ms
+// from the tap (crown-play.js): the front in the head, the window moment,
+// the wall shaded, crossed and nearly at rest. The ending beat is not
+// here: it is played from script after the stills go.
+for (const [dir, moments] of [
+  ["dusk", [1000, 1700, 2300, 2900, 3400, 3900]],
+  ["dawn", [1000, 1400, 1900, 2300, 2800, 3400]],
+]) {
+  test(`the crown's ${dir}, held at six moments`, async ({ page }) => {
+    await holdCrown(page, dir);
+    for (const at of moments) {
+      await seekCrown(page, at);
+      // (The play's animations are held, not to be run to their ends.)
+      await expect(page).toHaveScreenshot(`crown-${dir}-${at}.png`, { animations: "allow" });
+    }
+  });
+}

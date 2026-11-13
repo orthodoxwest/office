@@ -1,5 +1,7 @@
+import fs from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { LAST as CROWN_LAST, centile, contrast, holdCrown, lumas, mean, pixels, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -1661,6 +1663,123 @@ test("the crown makes the Menu's change in an Android app's own browser, whose s
     expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c)))).toEqual([]);
     expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
   } finally { await context.close(); }
+});
+
+// The play's light, sampled. The play is stopped and set to every twentieth
+// of a second of its timetable (crown-play.js), and at each the picture is
+// read in three places: the head of the arch, the foot of the wall, and the
+// card under the frieze (its ground, and the ink on it). What these hold:
+// the light travels one way (dawn's first light once stepped back at the
+// turn), no place leaps between two neighbouring moments (the arch once
+// jumped), nothing starts with a kick, and the hours' names are readable
+// but for the moment their ink changes hands. The bounds are today's
+// figures and half as much again, or more (in 0-255 levels: `back` the
+// furthest any place steps against its travel, `step` the most between two
+// moments, `kick` the most a step differs from the one before; `faint` the
+// moments, of some sixty, at which the ink stands under 2:1).
+const CROWN_LIGHT = {
+  dusk: { arch: { back: 5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5 },
+  dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 13.5, kick: 4.5 }, faint: 6 },
+};
+for (const dir of ["dusk", "dawn"]) {
+  test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {
+    test.slow();
+    await holdCrown(page, dir);
+    // Nothing of the arch's outline is a part of the transition: a still of
+    // it sits off the live one and the outline steps as the stills go.
+    expect(
+      await page.evaluate(() => [...document.querySelectorAll(".home-arch, .home-arch *, .home-arch-fill, .home-arch-fill *, .home-lining")].map((el) => getComputedStyle(el).viewTransitionName).filter((name) => name && name !== "none")),
+    ).toEqual([]);
+    const geo = await page.evaluate(() => {
+      const box = (sel) => {
+        const q = document.querySelector(sel).getBoundingClientRect();
+        return { x: q.left, y: q.top, width: q.width, height: q.height };
+      };
+      return { hero: box(".home-hero"), frieze: box(".home-prayer-card > h2"), tap: box(".home-crown-tap"), W: innerWidth, H: innerHeight };
+    });
+    const { hero, frieze, tap, W, H } = geo;
+    const under = frieze.y + frieze.height + 20;
+    const boxes = {
+      arch: { x: hero.x + hero.width * 0.25, y: tap.y + tap.height + 10, width: hero.width * 0.5, height: frieze.y - 40 - (tap.y + tap.height + 10) },
+      wall: { x: 0, y: H - 26, width: W, height: 22 },
+      card: { x: hero.x + hero.width * 0.1, y: under, width: hero.width * 0.8, height: H - 30 - under },
+    };
+    const series = { arch: [], wall: [], card: [] }, ink = [];
+    for (let at = 700; at <= CROWN_LAST[dir]; at += 50) {
+      await seekCrown(page, at);
+      const img = pixels(await page.screenshot());
+      const scale = img.width / W;
+      series.arch.push(mean(lumas(img, boxes.arch, scale)));
+      series.wall.push(mean(lumas(img, boxes.wall, scale)));
+      const card = lumas(img, boxes.card, scale), ground = centile(card, 0.5);
+      series.card.push(ground);
+      // The ink is the darkest or the lightest of the card, whichever
+      // stands further from its ground.
+      ink.push(Math.max(contrast(ground, centile(card, 0.015)), contrast(ground, centile(card, 0.985))));
+    }
+    // (Kept with the run: the same figures every time.)
+    const kept = testInfo.outputPath("crown-light.json");
+    fs.writeFileSync(kept, JSON.stringify({ series, ink }));
+    await testInfo.attach("crown-light.json", { path: kept, contentType: "application/json" });
+    const sign = dir === "dusk" ? -1 : 1;
+    for (const [name, values] of Object.entries(series)) {
+      let far = values[0], back = 0, step = 0, kick = 0;
+      values.forEach((v, i) => {
+        far = sign * v > sign * far ? v : far;
+        back = Math.max(back, sign * (far - v));
+        if (i) step = Math.max(step, Math.abs(v - values[i - 1]));
+        if (i > 1) kick = Math.max(kick, Math.abs(v - 2 * values[i - 1] + values[i - 2]));
+      });
+      const bound = CROWN_LIGHT[dir][name];
+      expect(back, `${name} steps back`).toBeLessThanOrEqual(bound.back);
+      expect(step, `${name} leaps`).toBeLessThanOrEqual(bound.step);
+      expect(kick, `${name} kicks`).toBeLessThanOrEqual(bound.kick);
+      // And it has made most of its journey by the last moment asked for.
+      expect(sign * (values[values.length - 1] - values[0]), `${name} travels`).toBeGreaterThan(100);
+    }
+    expect(ink[0], "the ink before").toBeGreaterThan(3.5);
+    expect(ink[ink.length - 1], "the ink after").toBeGreaterThan(3.5);
+    expect(ink.filter((c) => c < 2).length, "moments with the ink faint").toBeLessThanOrEqual(CROWN_LIGHT[dir].faint);
+  });
+}
+
+// The first act (the cross, the light on the horizon) is held while the
+// browser makes the transition's stills and goes on from where it was. It
+// must be held where the glass has it, not where the page's thread last saw
+// it: those animations run on the compositor, which draws on while the
+// thread is busy, and held at the thread's stale time the first light
+// stepped back at the turn. Here the thread is kept busy for an eighth of
+// a second just before the hold, and every part must be held no earlier
+// than the clock then stood.
+test("the crown's first act is held at the turn where the glass has it", async ({ page }) => {
+  await page.addInitScript(() => {
+    const real = Document.prototype.getAnimations;
+    Document.prototype.getAnimations = function (...args) {
+      if (!document.documentElement.classList.contains("crown-vt") || window.__crownHold) return real.apply(this, args);
+      const until = performance.now() + 125;
+      while (performance.now() < until) { /* busy */ }
+      const list = real.apply(this, args);
+      const now = performance.now();
+      const seen = list
+        .filter((a) => /^crown-/.test(a.animationName || "") && a.playState === "running" && typeof a.startTime === "number")
+        .map((a) => ({ a, name: a.animationName, due: (now - a.startTime) * (a.playbackRate || 1) }));
+      window.__crownHold = [];
+      // After the hold, which is the rest of this same task.
+      queueMicrotask(() => {
+        window.__crownHold = seen.map((p) => ({ name: p.name, state: p.a.playState, short: p.due - p.a.currentTime }));
+      });
+      return list;
+    };
+  });
+  const tap = await openCrown(page, { stored: "dark", hurry: false });
+  await tap.click();
+  await expect.poll(() => page.evaluate(() => (window.__crownHold || []).length)).toBeGreaterThan(0);
+  const held = await page.evaluate(() => window.__crownHold);
+  for (const part of held) {
+    expect(part.state, part.name).toBe("paused");
+    expect(part.short, `${part.name} held behind the glass`).toBeLessThanOrEqual(1);
+  }
+  await crownAtRest(page);
 });
 
 test("the crown's button is the card's last control, a 44px target clear of the date, named for what it does", async ({ page }) => {

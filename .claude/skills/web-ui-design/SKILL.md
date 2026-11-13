@@ -98,7 +98,26 @@ or impose a redesign on an unrelated change.
   is never crossed cream to navy straight: a veil multiplied over both
   pictures shades it first. When
   capturing it, take no screenshot while the browser makes its stills
-  (the turn): one in flight there loses the old page's still.
+  (the turn): one in flight there loses the old page's still. Do not undo
+  (each has a `KEEP` comment beside it and a test):
+  - the `; wv)` gate: Android's WebView loses the leaving page's still even
+    in a bare transition, so there the tap makes the Menu's change;
+  - the lining, and every other part of the arch's outline, is never given
+    a `view-transition-name`;
+  - the first act is held at the turn at `(now - startTime) * rate`, never
+    at the stale `currentTime` (first light stepped back);
+  - nothing newer than Safari 18.0: no `view-transition-class`, nested
+    groups, `@starting-style`, animated mask images or scroll timelines;
+  - nothing reads the frame back between `startViewTransition` and its
+    `ready`;
+  - stillness, contrast, a black day, an open panel and forced colours take
+    the plain path and set no `crown-` class.
+  Its tests never watch it play: `.web-tools/tests/crown-play.js` pauses
+  every animation after the first frame, clears the play's timers and
+  writes each `currentTime` for the moment asked, so a frame is a function
+  of that moment alone (the visual baselines `crown-dusk-*`/`crown-dawn-*`
+  and the light's smoothness checks in ux.spec.js). The ending beat runs
+  from script after the stills go and is not held this way.
 - On a phone home's frontispiece is a painted panel with a pointed head:
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by

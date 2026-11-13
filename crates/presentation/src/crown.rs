@@ -122,7 +122,7 @@ pub const DUSK: CrownPlay = CrownPlay {
     veil_gone: 1.0,
     veil_in: [0.4, 0.0, 0.7, 1.0],
     veil_out: [0.2, 0.0, 0.3, 1.0],
-    ink_at: 0.22,
+    ink_at: 0.34,
     glow_ease: [0.8, 0.0, 0.4, 1.0],
 };
 

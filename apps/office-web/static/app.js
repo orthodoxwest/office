@@ -3582,7 +3582,7 @@ function plainClickOpensHere(e, link) {
     // begins to turn while the front is still crossing the head) and every
     // ramp ends on a long tail. Light arrives faster than it leaves.
     var CROWN_PLAY = {
-      dusk: { turn: 650, front: [800, 1900], spread: [1500, 2700], veil: [1500, 4200], frieze: [700, 1500], end: 5200, inkAt: 0.22, glowEase: [0.8, 0, 0.4, 1] },
+      dusk: { turn: 650, front: [800, 1900], spread: [1500, 2700], veil: [1500, 4200], frieze: [700, 1500], end: 5200, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1] },
       dawn: { turn: 650, front: [800, 1700], spread: [1300, 2400], veil: [1300, 3700], frieze: [2600, 1100], end: 4700, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
     };
     var FRONT_EASE = [0.4, 0, 0.3, 1];
@@ -3759,6 +3759,10 @@ function plainClickOpensHere(e, link) {
     // seen to lose the leaving page's still, under these rules and under the
     // browser's own crossfade alike: white for the whole first act. There the
     // tap makes the Menu's change, which takes no stills.
+    // KEEP: this gate was measured on a phone (the still was lost in the
+    // plainest transition a page can ask for), not guessed; no rule of ours
+    // can mend it. ux.spec.js: "the crown makes the Menu's change in an
+    // Android app's own browser".
     var plain = /; wv\)/.test(navigator.userAgent || "");
     if (plain) {
       document.documentElement.setAttribute("data-crown-plain", "an Android WebView");
@@ -4524,6 +4528,8 @@ function plainClickOpensHere(e, link) {
         var held = document.getAnimations().filter(function (a) {
           return (a.animationName || "").indexOf("crown-") === 0 && a.playState === "running";
         });
+        // KEEP (ux.spec.js: "the crown's first act is held at the turn
+        // where the glass has it").
         // Held where the glass has them, not where this thread last saw
         // them: these run on the compositor, which has gone on drawing
         // while the sums above kept this thread (a tenth of a second on a
@@ -4570,6 +4576,12 @@ function plainClickOpensHere(e, link) {
         veil.className = "crown-veil";
         veil.setAttribute("aria-hidden", "true");
         p.edge = veil;
+        // KEEP: nothing between here and vt.ready may read the frame back
+        // (a canvas drawn from the page, a capture, a screenshot in a
+        // test): a read in flight while the browser makes its stills loses
+        // the leaving page's still for the whole play, and the wall turns at
+        // once. Tests hold the play only after the first frame
+        // (.web-tools/tests/crown-play.js).
         var vt = p.vt = document.startViewTransition(function () {
           p.called = true;
           if (playing !== p) {
@@ -4994,6 +5006,10 @@ function plainClickOpensHere(e, link) {
       // transitions, a reader who asked for stillness or contrast, a black
       // day (no sky is played over Good Friday or All Souls), and a page
       // with a panel open over it.
+      // KEEP: every one of these takes the plain path and sets no crown-
+      // class at all. ux.spec.js: "the crown plays nothing for a reader who
+      // asked for stillness or contrast, on a black day, or under forced
+      // colours".
       if (!document.startViewTransition || (still && still.matches) || (contrast && contrast.matches) ||
           hero.classList.contains("day-color-black") || panelOpen() || plain) {
         applyOwn(choice);

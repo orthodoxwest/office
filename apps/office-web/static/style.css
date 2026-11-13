@@ -12290,7 +12290,10 @@ body.page-home::before {
    - Masks are static gradients moved by mask-size and mask-position only.
      Two colours are registered with @property (the frieze's ground and
      edge, so the live band can change them by animation); nothing here is
-     newer than Safari 18.0.
+     newer than Safari 18.0. KEEP it so: no view-transition-class, no
+     nested groups, no @starting-style, no animation of a mask's image
+     (sizes and positions only), no scroll-driven timeline. Safari 18.0 is
+     the oldest browser that plays this at all, and it plays all of it.
    - The page is never crossed with its other look straight: a veil,
      multiplied over both pictures, shades the wall to near the new look's
      value first (see "The veil").
@@ -12955,7 +12958,9 @@ body.page-home::before {
 :root.crown-vt .page-home .crown-cross { view-transition-name: crown-cross; }
 :root.crown-vt.crown-new .page-home .home-back { view-transition-name: crown-back; }
 :root.crown-vt .page-home .home-prayer-card > h2 { view-transition-name: crown-frieze; }
-/* (The lining is not named: a still of it sits a fraction of a pixel off
+/* KEEP (ux.spec.js: "the crown's dusk moves its light one way" checks no
+   part of the arch has a name).
+   (The lining is not named: a still of it sits a fraction of a pixel off
    the live one wherever the screen's pixels are not a whole number to the
    CSS pixel, and the arch's whole outline would step as the stills go up
    and again as they come down. It stays in the page's own picture, which
