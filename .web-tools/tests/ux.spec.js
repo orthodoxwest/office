@@ -5023,7 +5023,9 @@ test("a chant score fills its column at every width and keeps its own when the e
   expect(fetched).toEqual([]);
 });
 
-// Every frame's heights of the scores shown, from the page's first frame.
+// Every frame's heights of the scores shown, from the page's first frame. A long page may be
+// painted before it is all parsed, so a frame can show fewer scores than the next: each score is
+// compared with itself.
 async function logScoreHeights(page) {
   await page.addInitScript(() => {
     window.__scores = [];
@@ -5058,7 +5060,11 @@ test("a chant score is drawn at its final height from the first frame once the c
     await openDatedPage(page, path);
     await page.waitForTimeout(800);
     const frames = await page.evaluate(() => window.__scores);
-    expect(new Set(frames).size, `${path}: ${frames[0]} then ${frames[frames.length - 1]}`).toBe(1);
+    const changed = frames.reduce((seen, frame) => {
+      frame.split("/").forEach((h, i) => (seen[i] ||= new Set()).add(h));
+      return seen;
+    }, []).some((heights) => heights.size > 1);
+    expect(changed, `${path}: ${frames[0]} then ${frames[frames.length - 1]}`).toBe(false);
     const fit = await page.evaluate(() => [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent)
       .map((e) => e.clientWidth - e.querySelector(".chant-width").getBoundingClientRect().width));
     for (const gap of fit) expect(Math.abs(gap), path).toBeLessThan(1);
