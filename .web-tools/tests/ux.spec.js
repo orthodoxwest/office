@@ -2873,9 +2873,11 @@ test("themes never change layout", async ({ browser }) => {
         // page's, the lining moves out to the sky's edge, and in the wide
         // niche the panel sits inside the night's slate course where by day
         // it meets the reveal's fillet: painted layers, absolutely placed and
-        // aria-hidden, that move no other box.
+        // aria-hidden, that move no other box. So is the crown's vault
+        // (its ground, stars and light), which the play turns over: WebKit
+        // leaves the hidden stars' drawing unsized by day.
         boxes: [...document.querySelectorAll("body *")]
-          .filter((el) => !el.closest(".home-sky, .home-lining") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
+          .filter((el) => !el.closest(".home-sky, .home-lining, .home-vault") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
           .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);
