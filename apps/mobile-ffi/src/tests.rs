@@ -461,3 +461,12 @@ fn days_name_their_feasts_pages() {
     assert_eq!(day.commemoration_ids.len(), day.commemorations.len());
     assert!(day.lauds_comms.iter().chain(&day.vespers_comms).any(|c| c.feast_id == "st-raphael-of-brooklyn"));
 }
+
+#[test]
+fn crown_tap_turns_the_look_and_back() {
+    let there = crate::after_crown_tap("apse".into(), true, None);
+    assert_eq!(there, crate::CrownTap { choice: "nave".into(), restore: Some("apse".into()) });
+    let back = crate::after_crown_tap(there.choice, true, there.restore);
+    assert_eq!(back, crate::CrownTap { choice: "apse".into(), restore: None });
+    assert_eq!(crate::after_crown_tap("bogus".into(), false, None).choice, "apse");
+}

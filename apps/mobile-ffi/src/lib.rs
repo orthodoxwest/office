@@ -302,6 +302,35 @@ pub fn prayers_open_by_default(hour: String) -> bool {
     presentation::prayers_open_by_default(&hour)
 }
 
+/// What a tap on home's crown leaves behind (`presentation::crown::after_crown_tap`): the theme
+/// choice to save ("default", "nave" or "apse", the menu's values), and the one it turned away
+/// from, kept in memory for the tap back and never saved.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CrownTap {
+    pub choice: String,
+    pub restore: Option<String>,
+}
+
+/// The theme choice after a tap on home's crown: the look always turns over, a look matching the
+/// device's is saved as Default, and the tap back restores the choice the last tap turned from.
+/// An unknown value reads as Default.
+#[uniffi::export]
+pub fn after_crown_tap(choice: String, device_dark: bool, restore: Option<String>) -> CrownTap {
+    use presentation::crown::ThemeChoice;
+    let parse = |s: &str| match s {
+        "nave" => ThemeChoice::Nave,
+        "apse" => ThemeChoice::Apse,
+        _ => ThemeChoice::Default,
+    };
+    let name = |c: ThemeChoice| match c {
+        ThemeChoice::Default => "default",
+        ThemeChoice::Nave => "nave",
+        ThemeChoice::Apse => "apse",
+    };
+    let tap = presentation::crown::after_crown_tap(parse(&choice), device_dark, restore.as_deref().map(parse));
+    CrownTap { choice: name(tap.choice).into(), restore: tap.restore.map(|c| name(c).into()) }
+}
+
 /// The lines under the menu's settings that need saying, as the web prints them
 /// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
