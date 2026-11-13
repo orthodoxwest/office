@@ -437,6 +437,8 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
+        // The calendar stands inert in the hours' place until Change date turns to it.
+        .filter((element) => !element.closest("[inert]"))
         // date + the feast's page + go-to-today (historical days) + pray + 7 hours + the first
         // week's introduction + change-date.
         .slice(0, 13)
@@ -2787,6 +2789,70 @@ test("the prayers before and after the Office keep the reader's choice for their
   await expect(after()).toHaveCount(0);
   await expect(await before("lauds", "2026-04-20")).toHaveAttribute("open");
   await expect(after()).not.toHaveAttribute("open");
+});
+
+// "Change date" turns the invitation and the hours into the calendar in
+// their place, under the band. The head gives up only the difference, or,
+// where it has not the height, keeps its own while the page rises with the
+// card's foot; either way the calendar ends wholly in view and the card's
+// foot rests on its gutter. Folding brings the hours back as they were.
+test("home's Change date turns the hours into the calendar in their place", async ({ page }) => {
+  for (const [width, height] of [[412, 915], [375, 667], [320, 568]]) {
+    await page.setViewportSize({ width, height });
+    await openDatedPage(page, `/?date=${testDate}`);
+    const summary = page.locator(".home-hero details.home-date-nav > summary");
+    const hours = page.locator(".home-hours-face");
+    const sizes = () => page.evaluate(() => {
+      const hero = document.querySelector(".home-hero");
+      const chooser = hero.querySelector(".home-chooser").getBoundingClientRect();
+      return {
+        head: hero.querySelector(".home-summary").getBoundingClientRect().height,
+        foot: hero.getBoundingClientRect().bottom,
+        top: chooser.top,
+        bottom: chooser.bottom,
+        scroll: window.scrollY,
+        screen: window.innerHeight,
+        band: hero.querySelector(".home-prayer-card h2").getBoundingClientRect().bottom,
+      };
+    });
+    // The head as the page settles it: app.js's load-time fitting (the arch
+    // in pixels, the versicle) done, and the same over two looks.
+    await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+    let shut = await sizes();
+    await expect.poll(async () => {
+      const again = await sizes();
+      const same = Math.abs(again.head - shut.head) < 0.5;
+      shut = again;
+      return same;
+    }, { message: `${width}x${height}: the head at rest` }).toBe(true);
+
+    await summary.click();
+    const picker = page.getByRole("group", { name: "Choose a date" });
+    await expect(picker).toBeVisible();
+    await expect(hours).toBeHidden();
+    await expect(hours).toHaveAttribute("inert", "");
+    await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+    await expect.poll(async () => {
+      const now = await sizes();
+      return now.foot <= now.screen - 15 && now.foot > now.screen - 33;
+    }, { message: `${width}x${height}: the card's foot at rest on its gutter` }).toBe(true);
+    const open = await sizes();
+    expect(Math.abs(open.top - open.band), `${width}x${height}: the calendar under the band`).toBeLessThan(24);
+    expect(open.top, `${width}x${height}: the calendar's head in view`).toBeGreaterThanOrEqual(0);
+    if (open.scroll > 0) {
+      expect(Math.abs(open.head - shut.head), `${width}x${height}: scrolled, the arch keeps its height`).toBeLessThan(1);
+    } else {
+      expect(Math.abs(open.foot - shut.foot), `${width}x${height}: unscrolled, the card keeps its length`).toBeLessThan(1);
+    }
+
+    await summary.click();
+    await expect(hours).toBeVisible();
+    await expect(picker).toBeHidden();
+    await expect(page.locator(".home-hero .home-summary")).not.toHaveAttribute("style", /min-height/);
+    await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+    const folded = await sizes();
+    expect(Math.abs(folded.head - shut.head), `${width}x${height}: the head as it was`).toBeLessThan(1);
+  }
 });
 
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {

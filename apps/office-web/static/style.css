@@ -1768,7 +1768,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   gap: 0 1rem;
 }
 
-.home-day-meta .home-date-nav:is([open], :only-child),
+.home-day-meta .home-date-nav:is([open]:not(.has-chooser), :only-child),
 html:not([data-newcomer]) .home-day-meta .home-introduction:first-child + .home-date-nav {
   flex: 1 0 100%;
 }
@@ -7189,6 +7189,58 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 .page-home .home-day-meta .home-date-nav .day-nav {
   justify-content: space-between;
+}
+
+/* "Change date" turns the stage under the band, the invitation and the
+   hours, into the calendar in their place (app.js), so the card keeps its
+   shape: the face not shown stands out of the flow where it was, hidden,
+   and the stage is as tall as the face shown. Turning, app.js eases the
+   stage's height between the two and crosses their fades; the head gives
+   up only the difference, or, where it has not the height, keeps its own
+   and the page rises with the card's foot. */
+.page-home .home-stage {
+  position: relative;
+  /* Its faces' margins kept inside it, so the stage is as tall eased as
+     at rest. */
+  display: flow-root;
+}
+
+.page-home .home-stage > .home-chooser,
+.page-home .home-hero.is-choosing .home-stage > .home-hours-face {
+  position: absolute;
+  inset: 0 0 auto;
+  visibility: hidden;
+}
+
+.page-home .home-hero.is-choosing .home-stage > .home-chooser {
+  position: relative;
+  visibility: visible;
+}
+
+/* The calendar, taller than the hours, would reach past the card's foot
+   and lengthen the page at rest: it is laid out only while shown or
+   turning. The hours stay laid out hidden, so their drawn rules keep their
+   measure. */
+.page-home .home-hero:not(.is-choosing) .home-stage:not(.is-turning) > .home-chooser {
+  display: none;
+}
+
+.page-home .home-stage.is-turning {
+  overflow: clip;
+}
+
+.page-home .home-stage.is-turning > * {
+  visibility: visible;
+}
+
+/* The day's turn heads the calendar under the band, whose rules part it
+   from the head: no hairline of its own above it. */
+.page-home .home-chooser .day-nav {
+  justify-content: space-between;
+  max-width: calc(7 * var(--touch-target));
+  margin-inline: auto;
+  padding-top: 0.15rem;
+  border-top: 0;
 }
 
 @media (max-width: 350px) {

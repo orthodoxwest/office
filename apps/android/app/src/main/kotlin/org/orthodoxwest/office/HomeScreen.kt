@@ -1,8 +1,12 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,13 +34,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -56,6 +63,7 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -76,6 +84,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import kotlin.math.roundToInt
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.hourNote
 
@@ -129,66 +139,74 @@ fun HomeScreen(
         val tall = maxHeight - top - bottom
         val niche = if (LocalWide.current) nicheTokens(LocalPalette.current) else null
         if (niche != null) ChapelLight(niche, nicheBounds)
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = top, bottom = bottom),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (niche != null) {
-                // Home is at least a screen tall, its colophon at the foot, and the niche centred
-                // between the header and the foot, as the web's wide home: a lancet for the
-                // screen's orientation at one scale, which the niche's density carries, so every
-                // measure inside it, its type included, is zoomed as the web's `zoom` does.
-                val layout = NicheLayout(screen, tall)
-                val outer = LocalDensity.current
-                val heavy = (view.penitential.isNotEmpty() && view.commemorations.isNotEmpty()) ||
-                    (!view.isToday && (view.commemorations.isNotEmpty() || view.octaveNote.isNotEmpty() || view.penitential.isNotEmpty()))
-                // Where the heaviest day does not fit with the colophon (`--niche-fits`), the header
-                // and niche take the screen and the colophon waits under the fold, rather than
-                // being cut through by it.
-                Column(
-                    Modifier.fillMaxWidth().heightIn(min = tall),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween,
-                ) {
+        // "Change date"'s picker unfolds at the card's foot, under the screen's on a phone: the
+        // page rises as it opens (`Unfold`), to show the card's foot and the gutter under it
+        // clear of the navigation bar.
+        val scroll = rememberScrollState()
+        val density = LocalDensity.current
+        val follow = remember(scroll, density, bottom) { Follow(scroll, { room }, with(density) { bottom.toPx() }, with(density) { Gutter.toPx() }) }
+        CompositionLocalProvider(LocalFollow provides follow) {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(scroll).padding(top = top, bottom = bottom),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (niche != null) {
+                    // Home is at least a screen tall, its colophon at the foot, and the niche centred
+                    // between the header and the foot, as the web's wide home: a lancet for the
+                    // screen's orientation at one scale, which the niche's density carries, so every
+                    // measure inside it, its type included, is zoomed as the web's `zoom` does.
+                    val layout = NicheLayout(screen, tall)
+                    val outer = LocalDensity.current
+                    val heavy = (view.penitential.isNotEmpty() && view.commemorations.isNotEmpty()) ||
+                        (!view.isToday && (view.commemorations.isNotEmpty() || view.octaveNote.isNotEmpty() || view.penitential.isNotEmpty()))
+                    // Where the heaviest day does not fit with the colophon (`--niche-fits`), the header
+                    // and niche take the screen and the colophon waits under the fold, rather than
+                    // being cut through by it.
                     Column(
-                        Modifier.fillMaxWidth().then(if (layout.fits) Modifier else Modifier.heightIn(min = tall)),
+                        Modifier.fillMaxWidth().heightIn(min = tall),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        chrome()
-                        CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
+                        Column(
+                            Modifier.fillMaxWidth().then(if (layout.fits) Modifier else Modifier.heightIn(min = tall)),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            chrome()
+                            CompositionLocalProvider(LocalDensity provides Density(outer.density * layout.zoom, outer.fontScale)) {
+                                Frontispiece(
+                                    view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
+                                    Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
+                                        .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
+                                    HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
+                                    niche = niche,
+                                    onFeast = onFeast,
+                                )
+                            }
+                            // Centred under the header: the niche's own room is the space below it.
+                            if (!layout.fits) Spacer(Modifier.height(0.dp))
+                        }
+                        Footer(reserve = true)
+                    }
+                } else {
+                    // A phone's card stands from the header to the screen's foot, short of it by the
+                    // gutter: whatever height home has beyond its own goes to the panel, above the
+                    // band. The phone's home has no colophon; the wide home keeps it.
+                    val card = minOf(576.dp, screen) - Gutter * 2
+                    PhoneHome(
+                        tall,
+                        header = chrome,
+                        card = {
                             Frontispiece(
                                 view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
-                                Modifier.padding(horizontal = 24.dp).padding(top = layout.air).widthIn(max = layout.card).fillMaxWidth()
-                                    .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
-                                HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
-                                niche = niche,
+                                Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
+                                HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                                 onFeast = onFeast,
                             )
-                        }
-                        // Centred under the header: the niche's own room is the space below it.
-                        if (!layout.fits) Spacer(Modifier.height(0.dp))
-                    }
-                    Footer(reserve = true)
+                        },
+                        foot = Gutter,
+                    )
                 }
-            } else {
-                // A phone's card stands from the header to the screen's foot, short of it by the
-                // gutter: whatever height home has beyond its own goes to the panel, above the
-                // band. The phone's home has no colophon; the wide home keeps it.
-                val card = minOf(576.dp, screen) - Gutter * 2
-                PhoneHome(
-                    tall,
-                    header = chrome,
-                    card = {
-                        Frontispiece(
-                            view, date, today, onDate, onHour, onOrdoDay, introduction, onIntroduction,
-                            Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
-                            HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
-                            onFeast = onFeast,
-                        )
-                    },
-                    foot = Gutter,
-                )
             }
         }
     }
@@ -396,6 +414,25 @@ private fun Frontispiece(
     val frame = frontispieceFrame(p)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
+    val follow = LocalFollow.current
+    // How far "Change date" has turned the stage from the hours to the calendar, 0 to 1, on the
+    // disclosures' curves; while it opens, the page follows the card's foot where it lengthens.
+    val turn = remember { Animatable(if (picking) 1f else 0f) }
+    LaunchedEffect(picking) {
+        coroutineScope {
+            launch { turn.animateTo(if (picking) 1f else 0f, tween(if (picking) UNFOLD_MS else FOLD_MS, easing = FastOutSlowInEasing)) }
+            if (picking && follow != null) launch {
+                // Each frame, the page rises by as much as the card's foot has passed the screen's,
+                // to the frame after the turn settles.
+                do {
+                    val settled = !turn.isRunning && turn.value >= 1f
+                    withFrameNanos {}
+                    val by = follow.overflow()
+                    if (by > 0.5f) follow.scroll.scrollBy(by)
+                } while (!settled)
+            }
+        }
+    }
     // The picker's full height as it was last laid out, so the head can ease in step with its
     // unfolding (below); written while the picker is measured, read in the same measure pass.
     val unfolded = remember { IntArray(1) }
@@ -580,7 +617,7 @@ private fun Frontispiece(
                     }
                 }
             },
-            // The invitation and the hours, from the inscription band.
+            // The inscription band, at the head of the stage.
             {
                 Column(Modifier.fillMaxWidth().padding(horizontal = side), horizontalAlignment = Alignment.CenterHorizontally) {
                     // The inscription band: gilt letters on the frieze's green earth, between
@@ -610,17 +647,46 @@ private fun Frontispiece(
                         val letters = Brush.verticalGradient(0.2f to mix(o.ink, Color.White, 0.7f), 0.58f to o.ink)
                         Lozenged("Pray the hours", Type.label(tier.band, tier.bandTracking).copy(brush = letters, fontFeatureSettings = ALL_SMALL_CAPS), o.ink)
                     }
+                }
+            },
+            // The stage's first face: the invitation and the hours, which "Change date" turns into
+            // the calendar in their place (the web's `.home-hours-face`).
+            {
+                Column(
+                    Modifier.fillMaxWidth().padding(horizontal = side).then(if (picking) Modifier.clearAndSetSemantics {} else Modifier),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Spacer(Modifier.height(tier.bandGap))
                     PrayNow(view.prayNowLabel, tier, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(view.currentHour, view.currentHourNote, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
+                }
+            },
+            // The stage's second face: the day's turn and the calendar, always laid out so its
+            // height is known before it is turned to; shown only as far as the turn has opened the
+            // stage, clipped to it.
+            {
+                Box(
+                    Modifier.fillMaxWidth().padding(horizontal = side).clipToBounds()
+                        .then(if (picking) Modifier else Modifier.clearAndSetSemantics {})
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+                            unfolded[0] = placeable.height
+                            layout(placeable.width, minOf(placeable.height, constraints.maxHeight)) { placeable.place(0, 0) }
+                        },
+                    contentAlignment = Alignment.TopCenter,
+                ) { DatePicker(date, today, centred = true) { picking = false; onDate(it) } }
+            },
+            // The season and "Change date", under the stage.
+            {
+                Column(Modifier.fillMaxWidth().padding(horizontal = side), horizontalAlignment = Alignment.CenterHorizontally) {
                     // Season and date control share one line after the hours (`.home-day-meta`), in
-                    // small caps, a gilt point between them; once open, the control takes a row of
-                    // its own under the season.
+                    // small caps, a gilt point between them, open or shut: the calendar opens in the
+                    // hours' place above, not under the control.
                     Spacer(Modifier.height(tier.metaGap + 1.dp))
                     val seasonStyle = Type.label(tier.meta, 0.09f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
                     // One row throughout, so the control TalkBack just activated is the one that stays
-                    // (the web's one <summary>); open, the season fills its line and the control wraps.
+                    // (the web's one <summary>).
                     FlowRow(horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.Center) {
                         // A reader's first week: the introduction stands in the season's place
                         // (each hour's header still names it), in the same small capitals and with
@@ -628,32 +694,17 @@ private fun Frontispiece(
                         val lead = introduction ?: view.season
                         if (lead.isNotEmpty()) {
                             val leadModifier = if (introduction == null) Modifier else Modifier.heightIn(min = 44.dp).tap(action = "open About the Office", onClick = onIntroduction)
-                            Row((if (picking) Modifier.fillMaxWidth() else Modifier).align(Alignment.CenterVertically).then(leadModifier), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            Row(Modifier.align(Alignment.CenterVertically).then(leadModifier), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                                 Text(lead, style = seasonStyle.copy(textAlign = TextAlign.Center))
-                                if (!picking) Canvas(Modifier.padding(start = 14.4.dp, end = 8.8.dp).size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
+                                Canvas(Modifier.padding(start = 14.4.dp, end = 8.8.dp).size(5.dp)) { lozenge(center, 2.5.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
                             }
                         }
                         Disclosure("Change date", picking, { picking = !picking }, modifier = Modifier.align(Alignment.CenterVertically), style = seasonStyle, upper = false)
                     }
                 }
             },
-            // "Change date"'s picker, apart from the hours above it so the head can be measured
-            // without it.
-            {
-                Box(Modifier.fillMaxWidth().padding(horizontal = side), contentAlignment = Alignment.TopCenter) {
-                    Unfold(picking) {
-                        Column(
-                            Modifier.layout { measurable, constraints ->
-                                val placeable = measurable.measure(constraints)
-                                unfolded[0] = placeable.height
-                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-                            },
-                        ) { DatePicker(date, today, centred = true) { picking = false; onDate(it) } }
-                    }
-                }
-            },
         ),
-        modifier = modifier.onGloballyPositioned { reserve.root = it }.drawBehind {
+        modifier = modifier.onGloballyPositioned { reserve.root = it; follow?.target = it }.drawBehind {
             if (niche != null && !p.dark) {
                 // The niche by day: a lancet cut into the wall, its depth told by light on the
                 // reveal, the day's colour one fillet at the back wall's edge. By night it is the
@@ -673,28 +724,41 @@ private fun Frontispiece(
         val facts = dayBlock.first().measure(full)
         val versicle = verses.firstOrNull()?.measure(full)
         val back = backs.firstOrNull()?.measure(full)
-        val after = slots[5].first().measure(full)
-        val picker = slots[6].first().measure(full)
+        val band = slots[5].first().measure(full)
+        val hours = slots[6].first().measure(full)
+        // The calendar as far as the turn has opened the stage: its full height comes from its own
+        // measure (`unfolded`), which it takes whatever it is offered.
+        val turned = turn.value
+        val stage = hours.height + ((unfolded[0] - hours.height) * turned).roundToInt()
+        val chooser = slots[7].first().measure(Constraints(minWidth = width, maxWidth = width, minHeight = 0, maxHeight = if (turned > 0f) stage else 0))
+        val meta = slots[8].first().measure(full)
+        val after = band.height + meta.height
         val headPad = tier.headPad.roundToPx()
         val foot = tier.bottom.roundToPx()
         val day = facts.height + (back?.height ?: 0) + tier.dayGap.roundToPx()
         val rise = (tier.arch.rise * width).roundToInt()
         // The day under the head's room for the cross, and the band no higher than the springing,
         // so it never crosses the arch; on a phone, the height the card is given beyond its own.
-        val shut = maxOf(headPad + day, rise, constraints.minHeight - after.height - foot)
+        val shut = maxOf(headPad + day, rise, constraints.minHeight - after - hours.height - foot)
         // The versicle takes only the height the head has to spare: where it would make the card
-        // taller, the head goes without it. It is fitted to the card with the picker shut, as the
-        // web's is, so opening the picker never takes it away.
+        // taller, the head goes without it. It is fitted to the card with the hours shown, as the
+        // web's is, so turning to the calendar never takes it away.
         val verse = versicle?.takeIf { headPad + day + it.height <= shut }
-        // The picker takes the head's spare height before it lengthens the card. Taken as it
-        // unfolded, that spare height went in the first frames: the day leapt up, then stood
-        // while the card grew down under the picker. Instead the head gives it up in step with
-        // the unfolding, so the day rises as the picker opens and settles with it.
-        val open = maxOf(headPad + day + (verse?.height ?: 0), rise, constraints.minHeight - after.height - unfolded[0] - foot)
-        val summary = if (picker.height == 0 || unfolded[0] == 0) shut else shut - (shut - open) * minOf(picker.height, unfolded[0]) / unfolded[0]
+        // "Change date" turns the stage from the hours to the calendar, which is taller. Where the
+        // head's spare height holds the difference, it gives it up in step with the turn, so the
+        // day rises as the calendar opens and nothing scrolls; where it does not, the head keeps its
+        // height, the card lengthens, and the page rises with its foot (`Follow`), the arch never
+        // pressed down for a scroll that comes anyway (the web's and iOS's alike).
+        val floor = maxOf(headPad + day + (verse?.height ?: 0), rise)
+        val room = constraints.minHeight - after - unfolded[0] - foot
+        val open = if (room >= floor) room else shut
+        val summary = shut - ((shut - open) * turned).roundToInt()
         val spare = summary - headPad - day - (verse?.height ?: 0)
         val wall = walls.first().measure(Constraints.fixed(width, summary))
-        val height = summary + after.height + picker.height + foot
+        val height = summary + after + stage + foot
+        // The hours fade out over the turn's first half, the calendar in over all but its start.
+        val hoursAlpha = (1f - turned / 0.46f).coerceIn(0f, 1f)
+        val chooserAlpha = ((turned - 0.23f) / 0.77f).coerceIn(0f, 1f)
         layout(width, height) {
             wall.place(0, 0)
             mark.place((width - mark.width) / 2, tier.crownTop.roundToPx())
@@ -703,8 +767,10 @@ private fun Frontispiece(
             y += facts.height
             verse?.let { it.place(0, y); y += it.height }
             back?.place(0, y)
-            after.place(0, summary)
-            picker.place(0, summary + after.height)
+            band.place(0, summary)
+            if (turned < 1f) hours.placeWithLayer(0, summary + band.height) { alpha = hoursAlpha }
+            if (turned > 0f) chooser.placeWithLayer(0, summary + band.height) { alpha = chooserAlpha }
+            meta.place(0, summary + band.height + stage)
         }
     }
 }

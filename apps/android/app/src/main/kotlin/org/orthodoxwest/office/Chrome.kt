@@ -21,6 +21,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.IndicationNodeFactory
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,6 +82,7 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
@@ -648,6 +650,26 @@ fun Disclosure(
 }
 
 /**
+ * A page's scroll that follows what opens on it, so the page rises to show `target`'s foot and
+ * `margin` under it (home's turn to the calendar): `viewport` is the scroll's own box and `foot`
+ * the height at its foot the system bars cover.
+ */
+class Follow(val scroll: ScrollState, val viewport: () -> LayoutCoordinates?, val foot: Float, val margin: Float) {
+    /** What the page brings into view, set where it is placed. */
+    var target: LayoutCoordinates? = null
+
+    /** How far the target's foot, and the margin under it, stand below what the screen shows. */
+    fun overflow(): Float {
+        val view = viewport()?.takeIf { it.isAttached } ?: return 0f
+        val placed = target?.takeIf { it.isAttached } ?: return 0f
+        return view.localBoundingBoxOf(placed, clipBounds = false).bottom + margin - (view.size.height - foot)
+    }
+}
+
+/** Set by a page whose scroll follows what opens on it, as home's does. */
+val LocalFollow = staticCompositionLocalOf<Follow?> { null }
+
+/**
  * A disclosure's contents, unfolding down from its control and folding back up into it. With
  * `reveal`, once unfolded it is scrolled into view if it opened past the screen's edge; never
  * when it was open already, as a row scrolled into view would be.
@@ -672,8 +694,9 @@ fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = tr
     }
 }
 
-private const val UNFOLD_MS = 260
-private const val FOLD_MS = 200
+/** How long a disclosure takes to unfold and to fold, here and for home's turn to the calendar. */
+internal const val UNFOLD_MS = 260
+internal const val FOLD_MS = 200
 
 /** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
 private val PICKER_YEARS = 1950..2150

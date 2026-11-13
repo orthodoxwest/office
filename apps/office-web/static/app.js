@@ -373,8 +373,14 @@ document.documentElement.classList.add("js");
   var card = versicle && versicle.closest(".home-hero");
   if (!card) return;
   var frame = 0;
+  // Fitted with "Change date" shut, as Android's and iOS's are: open, the
+  // head is held at its folded height (below) or giving it up, and a
+  // measure then would show or hide the versicle by the picker's room, to
+  // jump when it folds. Measured again once it has folded and let go.
+  var picker = card.querySelector("details.home-date-nav");
   function fit() {
     frame = 0;
+    if (picker && picker.open) return;
     versicle.hidden = true;
     var without = card.getBoundingClientRect().height;
     versicle.hidden = false;
@@ -387,6 +393,12 @@ document.documentElement.classList.add("js");
   if (document.fonts) document.fonts.ready.then(schedule);
   window.addEventListener("resize", schedule);
   if ("ResizeObserver" in window) new ResizeObserver(schedule).observe(versicle.parentNode);
+  if (picker) {
+    picker.addEventListener("toggle", function () {
+      // The fold's 200ms, and the head let go after it.
+      if (!picker.open) window.setTimeout(schedule, 300);
+    });
+  }
 })();
 
 // Appearance and screen dimensions accompany every usage beacon; office pages
@@ -1855,88 +1867,207 @@ function rule(x1, y1, x2, y2, w, seed) {
     details.classList.add("has-date-picker");
   });
 
-  // On a phone, home's card is at least a screen tall, and the head above
-  // the day takes whatever height the card's contents leave. "Change date"
-  // unfolding under it used up that spare height first: the day leapt up in
-  // the opening frames, then stood while the card grew down under the
-  // picker, two motions one after the other. Instead the head gives up its
-  // spare height over the whole unfolding, at the disclosure's pace, so the
-  // day rises as the picker opens and settles with it; folding, the reverse.
-  // Where the head has nothing to give (a short phone, the desktop niche),
-  // the fold is left as it is.
-  document.querySelectorAll(".home-hero details.home-date-nav").forEach(function (details) {
-    var head = details.closest(".home-hero").querySelector(".home-summary");
-    var summary = details.querySelector("summary");
-    if (!head || !summary || !window.matchMedia || !window.CSS || !CSS.supports("interpolate-size", "allow-keywords")) {
+  // Home's "Change date" turns the stage under the band, the invitation and
+  // the hours, into the calendar in their place, and back: the day's turn
+  // and the picker move out of the disclosure, which keeps its summary as
+  // the control, into the stage beside the hours (style.css, "Change date
+  // turns the stage"). The turn is one motion on the disclosures' curve:
+  //
+  // - the stage eases from the hours' height to the calendar's, the hours
+  //   fading out and the calendar in;
+  // - the head above the day gives up the difference where its spare
+  //   height holds it, so nothing scrolls;
+  // - where it does not, the head keeps its height, the card lengthens by
+  //   the difference, and the page rises with the card's foot frame by
+  //   frame, to rest with it and its gutter in view. Pressing the arch down
+  //   first and then scrolling for the rest read as two jerks.
+  //
+  // Folding is the reverse. Without motion (reduced motion, or before the
+  // page has settled) the faces change at once and the page is brought to
+  // the card's foot at once. Android's and iOS's frontispieces turn the same
+  // way (HomeScreen).
+  document.querySelectorAll(".page-home .home-hero").forEach(function (hero) {
+    var details = hero.querySelector("details.home-date-nav");
+    var stage = hero.querySelector(".home-stage");
+    var hours = stage && stage.querySelector(".home-hours-face");
+    var head = hero.querySelector(".home-summary");
+    var summary = details && details.querySelector(":scope > summary");
+    var nav = details && details.querySelector(".day-nav");
+    var picker = details && details.querySelector(".date-picker");
+    if (!stage || !hours || !head || !summary || !nav || !picker || !window.matchMedia) {
       return;
     }
+    var chooser = document.createElement("div");
+    // has-date-picker: the native field stays behind for no-script visitors only.
+    chooser.className = "home-chooser has-date-picker";
+    chooser.id = "home-chooser";
+    chooser.appendChild(nav);
+    chooser.appendChild(picker);
+    stage.appendChild(chooser);
+    details.classList.add("has-chooser");
+    summary.setAttribute("aria-controls", chooser.id);
+
     var stillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
-    // The head's heights folded and unfolded while it eases between them.
-    var easing = null;
+    // The open the page is following, so a later turn stops it.
+    var following = 0;
+    // The head held at its folded height while the calendar is shown.
+    var held = false;
+    // The turn under way: its end, run early when turned again.
+    var turning = null;
 
-    // The head's height with the picker settled open or shut, laid out
-    // without the unfolding's transition and put back within the same task,
-    // so nothing of it is painted.
-    function settledHeight(open) {
-      var was = details.open;
-      details.classList.add("is-settling");
-      details.open = open;
-      var height = head.getBoundingClientRect().height;
-      details.open = was;
-      void head.offsetHeight;
-      details.classList.remove("is-settling");
-      return height;
+    function show(open) {
+      hero.classList.toggle("is-choosing", open);
+      chooser.inert = !open;
+      hours.inert = open;
     }
 
-    function settle() {
-      easing = null;
-      head.style.removeProperty("transition");
-      head.style.removeProperty("min-height");
-      head.style.removeProperty("flex-grow");
+    function sizes() {
+      return {
+        stage: stage.getBoundingClientRect().height,
+        head: head.getBoundingClientRect().height,
+        hero: hero.getBoundingClientRect().height,
+      };
     }
 
-    // The summary's own toggle follows this listener in the same task, so
-    // the head's transition and the disclosure's start on the same frame.
-    summary.addEventListener("click", function () {
-      if (!document.documentElement.classList.contains("motion-ready") || !stillness.matches) {
-        return;
-      }
-      var opening = !details.open;
-      if (easing) {
-        // Turned back part-way: the disclosure retraces its transition, and
-        // the head heads back to where it came from.
-        head.style.minHeight = (opening ? easing.open : easing.shut) + "px";
-        return;
-      }
-      var from = head.getBoundingClientRect().height;
-      var to = settledHeight(opening);
-      if (Math.abs(to - from) < 1) {
-        return;
-      }
-      easing = opening ? { shut: from, open: to } : { shut: to, open: from };
+    function hold(height) {
+      held = true;
       head.style.flexGrow = "0";
-      head.style.minHeight = from + "px";
-      void head.offsetHeight;
-      // The unfolding's duration and easing (style.css, "Disclosures unfold").
-      head.style.transition = "min-height 200ms ease-out";
-      head.style.minHeight = to + "px";
+      head.style.minHeight = height + "px";
+    }
+
+    function release() {
+      held = false;
+      head.style.removeProperty("flex-grow");
+      head.style.removeProperty("min-height");
+    }
+
+    // Brings the card's foot, and the gutter it rests on, into view: each
+    // frame of the turn by as much as it has passed the screen's foot, or
+    // at once without motion.
+    function follow(gap, animated) {
+      var run = ++following;
+      function overflow() {
+        return hero.getBoundingClientRect().bottom + gap - window.innerHeight;
+      }
+      if (!animated) {
+        var by = overflow();
+        if (by > 0.5) {
+          window.scrollBy(0, by);
+        }
+        return;
+      }
+      // The turn's 260ms, and a frame or two to see it settle.
+      var until = performance.now() + 300;
+      function step(now) {
+        if (run !== following || !details.open) {
+          return;
+        }
+        var over = overflow();
+        if (over > 0.5) {
+          window.scrollBy(0, over);
+        }
+        if (now < until) {
+          window.requestAnimationFrame(step);
+        }
+      }
+      window.requestAnimationFrame(step);
+    }
+
+    function turn(open) {
+      if (turning) {
+        turning();
+      }
+      following++;
+      var animated = document.documentElement.classList.contains("motion-ready") &&
+        stillness.matches && typeof stage.animate === "function";
+      // The gutter under the card at rest, which the open keeps; a phone's
+      // where the card stood past the screen's foot already (Android's Gutter).
+      var rest = window.innerHeight - hero.getBoundingClientRect().bottom;
+      var gap = rest > 0 && rest <= 32 ? rest : 16;
+      var from = sizes();
+      var wasHeld = held;
+      release();
+      details.open = open;
+      show(open);
+      var to = sizes();
+      if (open && to.hero > from.hero + 0.5) {
+        // The calendar lengthens the card even with the head given up:
+        // the head keeps its height, and the page rises instead.
+        hold(from.head);
+      } else if (!open && wasHeld) {
+        // Held, the head is already its folded height; let it go once the
+        // stage has turned back.
+        hold(from.head);
+      }
+      if (!animated) {
+        if (!open) {
+          release();
+        } else {
+          follow(gap, false);
+        }
+        return;
+      }
+      var outgoing = open ? hours : chooser;
+      var incoming = open ? chooser : hours;
+      stage.classList.add("is-turning");
+      stage.style.height = from.stage + "px";
+      void stage.offsetHeight;
+      // The disclosures' duration and Material's standard curve, as the
+      // apps' unfolding.
+      stage.style.transition = "height 260ms cubic-bezier(0.4, 0, 0.2, 1)";
+      stage.style.height = to.stage + "px";
+      var fades = [
+        outgoing.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: "ease-in", fill: "both" }),
+        incoming.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "ease-out", fill: "both" }),
+      ];
+      var timer = 0;
+      function end() {
+        turning = null;
+        window.clearTimeout(timer);
+        stage.removeEventListener("transitionend", ended);
+        fades.forEach(function (fade) {
+          fade.cancel();
+        });
+        stage.classList.remove("is-turning");
+        stage.style.removeProperty("transition");
+        stage.style.removeProperty("height");
+        if (!details.open && held) {
+          release();
+        }
+      }
+      function ended(event) {
+        if (event.target === stage && event.propertyName === "height") {
+          end();
+        }
+      }
+      turning = end;
+      stage.addEventListener("transitionend", ended);
+      // transitionend never comes where nothing moved, or in a hidden tab.
+      timer = window.setTimeout(end, 400);
+      if (open) {
+        follow(gap, true);
+      }
+    }
+
+    // The summary toggles the disclosure itself, so the stage turns in the
+    // same frame and nothing of the other state is ever painted.
+    summary.addEventListener("click", function (event) {
+      event.preventDefault();
+      turn(!details.open);
     });
 
-    head.addEventListener("transitionend", function (event) {
-      if (event.target === head && event.propertyName === "min-height") {
-        settle();
-      }
-    });
-    head.addEventListener("transitioncancel", function (event) {
-      if (event.target === head && event.propertyName === "min-height") {
-        settle();
-      }
-    });
+    // Turned while settling (a resize) the stage and head start again from
+    // the page's own layout.
     window.addEventListener("resize", function () {
-      if (easing) {
-        settle();
+      if (turning) {
+        turning();
+      }
+      if (held && !details.open) {
+        release();
       }
     });
+
+    show(details.open);
   });
 
   // The home panel's courses are clipped to its pointed head by --arch-w,
@@ -2196,6 +2327,11 @@ function rule(x1, y1, x2, y2, w, seed) {
       watch.observe(hero);
       if (head) {
         watch.observe(head);
+      }
+      // The sky shortens with the head when "Change date" turns the stage
+      // to the calendar, inside a card that keeps its height.
+      if (sky) {
+        watch.observe(sky);
       }
     }
     // The sky comes and goes with the theme.
