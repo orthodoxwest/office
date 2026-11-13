@@ -214,7 +214,7 @@ mod tests {
             assert!(play.veil_peak < 0.5 && (0.0..1.0).contains(&play.ink_at));
         }
         // Light arrives faster than it leaves.
-        assert!(DAWN.end < DUSK.end);
+        const { assert!(DAWN.end < DUSK.end) };
         assert_eq!(crown_play(true), DUSK);
         assert_eq!(crown_play(false), DAWN);
     }
