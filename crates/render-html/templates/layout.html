@@ -64,6 +64,21 @@
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
         if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
+      {%- if page == "home" %}
+      {# Apse's home shows its gold-leaf stars from the first frames: their field (app.js) is
+           fetched with the page, not after it, when the night theme is the one to be painted. #}
+      try {
+        var night = document.documentElement.getAttribute("data-theme");
+        if (night === "dark" || (night === null && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          var stars = document.createElement("link");
+          stars.rel = "preload";
+          stars.as = "fetch";
+          stars.crossOrigin = "anonymous";
+          stars.href = "{{ static("ornaments/stars.json")|url|safe }}";
+          document.head.appendChild(stars);
+        }
+      } catch (e) {}
+      {%- endif %}
       {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
            that used the Office before that was recorded holds "before"): home offers the
            introduction beside Change date. Before the first record, any stored setting or an
@@ -88,9 +103,10 @@
   {# What a page must decide before it is first painted (an hour's place, hour.html). #}
   {% block head %}{% endblock %}
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
-  {# Start the ordo font fetch early to reduce reflow in the long year table. #}
+  {# Start the text face's fetch early: it reflows the ordo's long year table, and re-sets home's
+       date and day when it swaps in. #}
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
-  {% if page == "calendar" %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {% if page in ["calendar", "home"] %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
   {# Report filters should refresh immediately. A cross-document snapshot
        can hold a dense report's controls while its new view is rendering. #}

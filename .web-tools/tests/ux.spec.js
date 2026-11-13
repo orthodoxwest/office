@@ -4884,3 +4884,98 @@ test("a chant score fills its column at every width and keeps its own when the e
   expect((await fit()).laidOut).toBe(false);
   expect(fetched).toEqual([]);
 });
+
+// Home marks the reader's own hour before its first paint, as the theme is
+// set: not the server's hour, corrected once the deferred script runs.
+test("home marks the device's hour before its script runs", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now")).toHaveAttribute("href", `/terce/${testDate}`);
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "terce");
+  await expect(page.locator(".home-hour-link.is-current")).toHaveCount(1);
+  release();
+  await page.waitForLoadState("load");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await page.unroute("**/static/app.js*");
+});
+
+// A press is seen: a tap marks the control at once, and one that opens a page
+// keeps the mark until the page goes; an ordo row is pressed as one control.
+// Reported from the page, which is leaving when the mark matters.
+test("a tapped ordo row and a tapped hour show their press at once", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await context.newPage();
+  const seen = [];
+  await page.exposeFunction("reportPress", (note) => seen.push(note));
+  await page.goto("/calendar/2026/09");
+  await page.evaluate(() => {
+    new MutationObserver((records) => records.forEach((r) => {
+      if (r.target.classList.contains("is-pressed")) window.reportPress(r.target.id || r.target.className);
+    })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  });
+  const row = page.locator("#d-2026-09-20");
+  await row.scrollIntoViewIfNeeded();
+  const box = await row.boundingBox();
+  await page.touchscreen.tap(box.x + box.width * 0.7, box.y + box.height - 6);
+  await page.waitForURL(/\?date=2026-09-20/);
+  expect(seen).toContain("d-2026-09-20");
+  // After app.js's own listener: keep the page, and say how the hour stood.
+  await page.evaluate(() => document.addEventListener("click", (e) => {
+    const link = e.target.closest(".home-hour-link");
+    if (!link) return;
+    e.preventDefault();
+    window.reportPress((link.classList.contains("is-pressed") ? "pressed " : "plain ") + getComputedStyle(link).transitionDuration);
+  }));
+  seen.length = 0;
+  await page.locator(".home-hour-link[data-hour='vespers']").tap();
+  await expect.poll(() => seen.find((note) => note.startsWith("pressed") || note.startsWith("plain"))).toMatch(/^pressed 0s/);
+  await context.close();
+});
+
+test("a link chosen in the open phone menu puts the menu away before the page goes", async ({ page }) => {
+  await page.goto(`/vespers/${testDate}`);
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(page.locator(".site-menu-panel")).toBeVisible();
+  const seen = [];
+  await page.exposeFunction("reportMenu", (note) => seen.push(note));
+  await page.evaluate(() => document.addEventListener("click", () => {
+    window.reportMenu(getComputedStyle(document.querySelector(".site-menu-panel")).display);
+  }));
+  await page.locator('.site-menu nav a[data-hour="lauds"]').click();
+  await page.waitForURL(/\/lauds\//);
+  expect(seen).toEqual(["none"]);
+});
+
+test("the brand on today's home stays put", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator(".site-brand")).toHaveAttribute("aria-current", "page");
+  let navigations = 0;
+  page.on("framenavigated", () => { navigations += 1; });
+  await page.locator(".site-brand").click();
+  await page.waitForTimeout(300);
+  expect(navigations).toBe(0);
+});
+
+// A day asked for comes to rest with the day before it in view under the
+// pinned month heading, and its gold lets go once the reader scrolls.
+test("the ordo shows the day before a day asked for, and lets the asked day go", async ({ page }) => {
+  for (const [width, day, before] of [[390, "14", "13"], [1280, "22", "21"]]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`/calendar/2026/09#d-2026-09-${day}`);
+    await page.evaluate(() => document.fonts.ready);
+    const place = await page.evaluate(([day, before]) => ({
+      heading: document.getElementById(`d-2026-09-${day}`).closest(".month").querySelector("h2").getBoundingClientRect().bottom,
+      before: document.getElementById(`d-2026-09-${before}`).getBoundingClientRect().top,
+    }), [day, before]);
+    expect(place.before, `${width}px`).toBeGreaterThanOrEqual(place.heading - 2);
+    const ground = () => page.locator(`#d-2026-09-${day} > td`).last().evaluate((td) => getComputedStyle(td).backgroundColor);
+    expect(await ground()).not.toBe("rgba(0, 0, 0, 0)");
+    // The reader's own scroll (mobile WebKit has no wheel to send).
+    await page.evaluate(() => { window.dispatchEvent(new WheelEvent("wheel", { deltaY: 240 })); window.scrollBy(0, 240); });
+    await expect.poll(ground).toBe("rgba(0, 0, 0, 0)");
+  }
+});

@@ -71,10 +71,11 @@ struct OrdoScreen: View {
     /// The wall's frame on the screen, for the pinned heading's copy of it.
     @State private var wall: CGRect = .zero
 
-    /// Where a day asked for is brought: clear of the pinned month heading, a little below it (the
-    /// web's `scroll-margin-top`, 3.5rem at the default size). The heading grows with the reader's
-    /// type; one not yet laid out is taken at its text's line and padding. The day's mark has no
-    /// height, so its top stands at this share of the screen.
+    /// Where the day before a day asked for is brought: clear of the pinned month heading, a
+    /// little below it (the web's `scroll-margin-top`, 3.5rem at the default size, less the row
+    /// it keeps for that day). The heading grows with the reader's type; one not yet laid out is
+    /// taken at its text's line and padding. The day's mark has no height, so its top stands at
+    /// this share of the screen.
     private var focus: UnitPoint {
         let pinned = heading > 0 ? heading : 28 * m.type + m.px(12.8)
         return viewport > 0 ? UnitPoint(x: 0.5, y: min(1, (pinned + m.px(15.2)) / viewport)) : .top
@@ -145,8 +146,12 @@ struct OrdoScreen: View {
                 guard viewport > 0, !focused else { return }
                 focused = true
                 if focusDay > 0 {
+                    // The day before comes to rest under the heading, so the day asked for is
+                    // found among its neighbours, as the web's `scroll-margin-top` keeps a row
+                    // above it; the month's first day has none before it here.
+                    let anchorDay = max(1, focusDay - 1)
                     DispatchQueue.main.async {
-                        scroll.scrollTo("d-\(focusDay)", anchor: focus)
+                        scroll.scrollTo("d-\(anchorDay)", anchor: focus)
                         placed = true
                     }
                 } else {
