@@ -7760,53 +7760,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   color: var(--muted);
 }
 
-/* The Android test's sign-up: the privacy page's prose, with numbered steps
-   whose links are the reminders page's buttons. */
-.beta-device {
-  font-style: italic;
-}
-
-.beta-steps {
-  margin: 1.2rem 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: beta-step;
-}
-
-.beta-steps > li {
-  position: relative;
-  padding-left: 2rem;
-  counter-increment: beta-step;
-}
-
-.beta-steps > li::before {
-  content: counter(beta-step);
-  position: absolute;
-  top: 0.02rem;
-  left: 0;
-  color: var(--titulus);
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.beta-steps h2 {
-  margin-top: 1.4rem;
-}
-
-.privacy a.beta-action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--touch-target);
-  line-height: 1.2;
-  text-decoration: none;
-}
-
 /* An action is home's invitation, not a filled slab: a thin wash
    (`tablet.png`, `--tablet-wash`) inside the lining's rule with a finer one
    inside it, its words in the lining (lifted by night). Reminders' "Subscribe
-   in calendar app" and /beta's steps; the apps' "Turn on reminders". */
-.privacy a.beta-action,
+   in calendar app"; the apps' "Turn on reminders". */
 .reminder-subscribe {
   position: relative;
   isolation: isolate;
@@ -7821,7 +7778,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   letter-spacing: 0.012em;
 }
 
-.privacy a.beta-action::before,
 .reminder-subscribe::before {
   content: "";
   position: absolute;
@@ -7833,13 +7789,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   pointer-events: none;
 }
 
-.privacy a.beta-action:hover,
 .reminder-subscribe:hover:not(.is-disabled) {
   border-color: var(--lining);
 }
 
 @media (forced-colors: active) {
-  .privacy a.beta-action,
   .reminder-subscribe {
     border-color: LinkText;
   }

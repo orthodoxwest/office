@@ -31,7 +31,7 @@ use tools::fs::FsData;
 
 use crate::cache::YearCache;
 use crate::handlers::Req;
-use crate::http::{Query, bad_request, unescape_path};
+use crate::http::{Query, bad_request, redirect, unescape_path};
 use crate::usage::{BeaconBody, MAX_BEACON, Store};
 
 /// Everything a request reads, loaded once and shared.
@@ -154,7 +154,8 @@ impl Server {
             Route::Reminders => self.reminders(&req),
             Route::Privacy => self.privacy(&req),
             Route::About => self.about(&req),
-            Route::Beta => self.beta(&req),
+            // The Android app's closed-test sign-up, retired now the app is on Google Play.
+            Route::Beta => redirect("/", StatusCode::MOVED_PERMANENTLY),
             Route::Calendar => self.calendar(&req),
             Route::Feast => self.feast(&req),
             Route::Robots => crawl::robots(&site),
@@ -298,7 +299,7 @@ mod routing_tests {
 
     #[tokio::test]
     async fn routes_serve_pages_assets_and_head() {
-        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/about", "/beta", "/sw.js"] {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/privacy", "/about", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
             assert_eq!(get.status(), StatusCode::OK, "{path}");
@@ -306,6 +307,9 @@ mod routing_tests {
             assert_eq!(head.headers().get(header::CONTENT_TYPE), get.headers().get(header::CONTENT_TYPE));
             assert!(axum::body::to_bytes(head.into_body(), usize::MAX).await.unwrap().is_empty());
         }
+        let beta = request(Method::GET, "/beta", Body::empty()).await;
+        assert_eq!(beta.status(), StatusCode::MOVED_PERMANENTLY);
+        assert_eq!(beta.headers()[header::LOCATION], "/");
         let redirect = request(Method::GET, "/calendar?form=priest", Body::empty()).await;
         assert_eq!(redirect.status(), StatusCode::FOUND);
         let location = redirect.headers()[header::LOCATION].to_str().unwrap();

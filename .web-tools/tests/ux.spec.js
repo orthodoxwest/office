@@ -3474,7 +3474,6 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
         ".reminder-help > summary",
       ],
     ],
-    ["/beta", [".beta-action"]],
   ]) {
     await openDatedPage(page, path);
     for (const selector of selectors) {
@@ -3524,12 +3523,6 @@ for (const { name, path, theme, knownViolations } of [
   {
     name: "About in the Nave theme",
     path: "/about",
-    theme: "light",
-    knownViolations: [],
-  },
-  {
-    name: "the Android test's sign-up in the Nave theme",
-    path: "/beta",
     theme: "light",
     knownViolations: [],
   },

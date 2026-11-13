@@ -311,7 +311,7 @@ or impose a redesign on an unrelated change.
   and the years are a rail beside the texts. Its back link names the day or
   the ordo's month it was opened from (`?from=`).
 - Filled actions are home's tablet, not slabs (`.reminder-subscribe`,
-  `/beta`'s steps, the apps' "Turn on reminders"); a second action is a
+  the apps' "Turn on reminders"); a second action is a
   worded link with the gold underline. Reminders is ruled as home's hours
   (titulus over a lining rule, hairlines, a closing rule); a chosen time
   is the accent's figures on the gold rule with the caret, the platform's
