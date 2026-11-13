@@ -1464,50 +1464,80 @@ function rule(x1, y1, x2, y2, w, seed) {
       return out;
     };
     // Only the phrases whose words changed cross-fade: out in 90ms, in over 180ms after a beat.
+    // The rule is a polite, atomic live region, so every change to its words lands in one
+    // moment (after the beat) and is read once, whole, rather than phrase by phrase.
+    var ruleTimer = 0;
     var paintRule = function (phrases, quiet) {
       if (!ruleEl) {
         return;
       }
+      var spans = function () {
+        var kept = {};
+        ruleEl.querySelectorAll("span[data-key]").forEach(function (span) {
+          kept[span.dataset.key] = span;
+        });
+        return kept;
+      };
       var still = quiet || stillRule();
-      var kept = {};
-      ruleEl.querySelectorAll("span[data-key]").forEach(function (span) {
-        kept[span.dataset.key] = span;
-      });
-      ruleEl.classList.toggle("is-empty", phrases[0].key === "empty");
-      phrases.forEach(function (p) {
-        var span = kept[p.key];
-        delete kept[p.key];
-        if (!span) {
-          span = document.createElement("span");
-          span.dataset.key = p.key;
-          span.textContent = p.text;
-          if (!still) {
-            span.classList.add("is-out");
-            window.requestAnimationFrame(function () {
-              window.requestAnimationFrame(function () {
-                span.classList.remove("is-out");
-              });
-            });
-          }
-        } else if (span.dataset.next !== undefined ? span.dataset.next !== p.text : span.textContent !== p.text) {
-          if (still) {
+      var apply = function () {
+        var kept = spans();
+        var prev = null;
+        ruleEl.classList.toggle("is-empty", phrases[0].key === "empty");
+        phrases.forEach(function (p) {
+          var span = kept[p.key];
+          delete kept[p.key];
+          if (!span) {
+            span = document.createElement("span");
+            span.dataset.key = p.key;
             span.textContent = p.text;
+            if (!still) {
+              span.classList.add("is-out");
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                  span.classList.remove("is-out");
+                });
+              });
+            }
           } else {
-            span.dataset.next = p.text;
-            span.classList.add("is-out");
-            window.clearTimeout(span.fadeTimer);
-            span.fadeTimer = window.setTimeout(function () {
-              span.textContent = span.dataset.next;
-              delete span.dataset.next;
-              span.classList.remove("is-out");
-            }, 150);
+            if (span.textContent !== p.text) {
+              span.textContent = p.text;
+            }
+            span.classList.remove("is-out");
           }
-        }
-        ruleEl.appendChild(span);
+          // Moved only where it is out of place, so an unchanged phrase is left alone.
+          var at = prev ? prev.nextSibling : ruleEl.firstChild;
+          if (at !== span) {
+            ruleEl.insertBefore(span, at);
+          }
+          prev = span;
+        });
+        Object.keys(kept).forEach(function (key) {
+          kept[key].remove();
+        });
+      };
+      window.clearTimeout(ruleTimer);
+      if (still) {
+        apply();
+        return;
+      }
+      // What will change or go fades out now; the new words come in together after the beat.
+      var wanted = {};
+      phrases.forEach(function (p) {
+        wanted[p.key] = p.text;
       });
+      var kept = spans();
+      var same = Object.keys(kept).length === phrases.length;
       Object.keys(kept).forEach(function (key) {
-        kept[key].remove();
+        if (wanted[key] !== kept[key].textContent) {
+          kept[key].classList.add("is-out");
+          same = false;
+        }
       });
+      if (same) {
+        apply();
+        return;
+      }
+      ruleTimer = window.setTimeout(apply, 150);
     };
 
     // The calendar address, breakable after its slashes and joints rather than anywhere.

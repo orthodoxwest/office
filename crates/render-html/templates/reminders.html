@@ -57,7 +57,7 @@
 
   {# The rule, written out: what the choices above ask for, in one sentence (presentation::reminders).
      The server sets the defaults; app.js rewrites it from the words below on every change. #}
-  <p class="reminder-rule{% if rule[0].key == "empty" %} is-empty{% endif %}" id="reminder-rule" aria-live="polite">{% for p in rule %}<span data-key="{{ p.key }}">{{ p.text }}</span>{% endfor %}</p>
+  <p class="reminder-rule{% if rule[0].key == "empty" %} is-empty{% endif %}" id="reminder-rule" aria-live="polite" aria-atomic="true">{% for p in rule %}<span data-key="{{ p.key }}">{{ p.text }}</span>{% endfor %}</p>
   <script type="application/json" id="reminder-rule-words">{{ rule_words|safe }}</script>
 
   <div class="reminder-result">
