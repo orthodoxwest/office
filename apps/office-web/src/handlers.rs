@@ -799,6 +799,8 @@ mod tests {
         let (_, _, body) = get("/vespers/2026-06-07");
         let head = &body[..body.find("<body").unwrap()];
         assert!(head.contains(r#"var hour = "vespers", day = "2026-06-07";"#), "the head finds the place for this hour");
+        // The head block renders once, in the head: not again inside the page's content.
+        assert_eq!(body.matches(r##"expect.href = "#hour-place""##).count(), 1, "the finder runs once");
         let limit = format!("away <= {} * 60", presentation::PLACE_KEPT_MINUTES);
         assert!(head.contains(&limit), "the head keeps presentation's limit, {limit}");
         assert!(head.contains("office-prayed"), "a prayed hour opens at its top");
@@ -807,6 +809,10 @@ mod tests {
         assert_eq!(body.matches(r#"localStorage.setItem(KEY"#).count(), 1, "one keeper");
         // Other pages neither keep nor find one.
         assert!(!get("/").2.contains("office-place"));
+        // The ordo month's hold, likewise, renders once and in the head.
+        let month = get("/calendar/2026/11").2;
+        assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
+        assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
     }
 
     #[test]

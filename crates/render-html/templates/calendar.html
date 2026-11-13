@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}
 {% block head %}{% if view == "month" %}
 {#- Returning to the ordo opens at the day chosen (the menu's Ordo from a day or an hour carries
      #d-date; Back keeps the browser's own place). Browsers set a #fragment's row in place only
@@ -28,7 +28,7 @@
     } catch (e) {}
   })();
 </script>
-{% endif %}{% endblock %}
+{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
 {% if view == "year" %}
 {# A link into the year from before the ordo was set a month to a page
      (/calendar/2026#d-2026-09-12, or #september) forwards to that month

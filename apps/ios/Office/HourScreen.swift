@@ -243,6 +243,9 @@ struct HourScreen: View {
     /// set, so it appears at the place with nothing moving.
     @SceneStorage("hour-place") private var kept = ""
     @State private var placing = false
+    /// Whether this hour is the page on screen: an hour under another page in the way back is
+    /// kept alive and hears the scene go into the background too, but keeps no place.
+    @State private var onScreen = false
     @Environment(\.scenePhase) private var phase
 
     init(view: HourView, date: CivilDate, composition: String) {
@@ -369,11 +372,15 @@ struct HourScreen: View {
             .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
             .onChange(of: phase) { _, now in
-                if now == .background { keep() }
+                if now == .background, onScreen { keep() }
             }
             // Left by the app's own ways (home, another hour, Back, a page over it): no place.
-            .onDisappear { forget() }
+            .onDisappear {
+                onScreen = false
+                forget()
+            }
             .onAppear {
+                onScreen = true
                 if let place = keptHere {
                     placing = true
                     // Once the rows are laid out, and again once those the first move brought in are.

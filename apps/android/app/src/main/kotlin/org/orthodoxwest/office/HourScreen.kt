@@ -576,7 +576,6 @@ private val EndingAir = 52.dp
 private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOutSlowInEasing)
 private val FOLD_FADE = tween<Float>(120, easing = FastOutLinearInEasing)
 
-/** Which collapsible sections are open, as saved state can hold it. */
 /**
  * An hour's list state as its visit saves it: the place, and when the app went into the
  * background with it (`leftAt`, 0 while in front). Restored from the background, it opens at the
@@ -589,6 +588,7 @@ internal fun placeSaver(leftAt: () -> Long, reopens: (Long) -> Boolean) = listSa
     },
 )
 
+/** Which collapsible sections are open, as saved state can hold it. */
 private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
     save = { m -> m.flatMap { (i, open) -> listOf(i, if (open) 1 else 0) } },
     restore = { l -> mutableStateMapOf<Int, Boolean>().apply { l.chunked(2).forEach { (i, open) -> put(i, open == 1) } } },
