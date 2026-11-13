@@ -3230,7 +3230,12 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   await expect(grid.locator("[aria-current=date]")).toHaveCount(1);
   // Six weeks always, so paging months never moves what lies below.
   await expect(grid.locator("tbody tr")).toHaveCount(6);
-  const height = await picker.evaluate((node) => node.getBoundingClientRect().height);
+  // Measured once the disclosure has unfolded: WebKit, which cannot ease to auto, folds the
+  // picker's own box open (app.js, turnFold), so until it lands its height is partway.
+  const height = await picker.evaluate(async (node) => {
+    await Promise.allSettled(node.closest("details").getAnimations({ subtree: true }).map((turn) => turn.finished));
+    return node.getBoundingClientRect().height;
+  });
   await picker.getByRole("button", { name: "Next month" }).click();
   await expect(picker.getByRole("grid", { name: "April 2026" })).toBeVisible();
   expect(await picker.evaluate((node) => node.getBoundingClientRect().height)).toBe(height);
