@@ -289,8 +289,8 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
         if (!stars) return@clipPath
         val scale = if (first) 1.14f else 1f
         val light = Brush.radialGradient(0f to leaf.hi, 0.6f to leaf.mid, 1f to leaf.lo, center = Offset(w / 2f, band * 0.62f), radius = w * 0.72f)
-        // While home's crown plays, it says how lit and how large each star is (Crown.kt), and
-        // keeps the stars as drawn for the play to draw on.
+        // While home's crown plays, it keeps the stars as drawn and, from the change of look, draws
+        // them itself, above the head's front, each at its own turn (Crown.kt).
         val playing = crown?.active == true
         val drawn = if (playing) ArrayList<SkyStarPaint>() else null
         skyStars(arch).forEachIndexed { index, s ->
@@ -299,19 +299,18 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
             val r = s.r * scale * u
             if (cy + r > band - 9f * u) return@forEachIndexed
             if (reserve.any { cx + r > it.left && cx - r < it.right && cy + r > it.top && cy - r < it.bottom }) return@forEachIndexed
-            val grown = if (playing) scale * crown.scale(index) else scale
             val path = Path().apply {
                 fillType = PathFillType.NonZero
                 for (i in s.outline.indices step 2) {
-                    val px = cx + s.outline[i] * grown * u
-                    val py = cy + s.outline[i + 1] * grown * u
+                    val px = cx + s.outline[i] * scale * u
+                    val py = cy + s.outline[i + 1] * scale * u
                     if (i == 0) moveTo(px, py) else lineTo(px, py)
                 }
                 close()
             }
             val alpha = catch * if (first) min(1f, s.leaf + 0.25f) else s.leaf
-            drawn?.add(SkyStarPaint(index, path, light, alpha))
-            val lit = if (playing) crown.alpha(index) else 1f
+            drawn?.add(SkyStarPaint(index, path, light, alpha, Offset(cx, cy), s.r))
+            val lit = if (playing) crown.lit else 1f
             if (lit > 0f) drawPath(path, light, alpha = alpha * lit)
         }
         if (drawn != null) crown!!.record(drawn)

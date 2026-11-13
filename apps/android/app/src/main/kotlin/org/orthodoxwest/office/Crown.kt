@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Paint
@@ -83,8 +85,9 @@ import org.orthodoxwest.office.core.crownPlan
  * it stands is kept as a still, and the theme changes under it. From then on the new screen is
  * drawn live over the still: through a front crossing the head of the arch (down from above the
  * point at dusk, up from under the frieze at dawn), and through the arch's own shape grown over
- * the page with a wide feather and a coloured veil; each lifted unit hands its old ink to its new
- * at its own moment. When it ends nothing is left: the screen is the live, themed screen.
+ * the page with a wide feather, under a veil of the hour's colour multiplied over it; each lifted
+ * unit hands its old ink to its new at its own moment. When it ends nothing is left: the screen
+ * is the live, themed screen.
  */
 
 /** The crown's play at the app's root, for home to reach; none in tests that do not ask for it. */
@@ -134,7 +137,7 @@ private fun smooth(a: Float, b: Float, x: Float): Float {
 }
 
 /** Keyframes on one value: (offset, value), each stretch eased by its own curve (CSS's per-keyframe timing). */
-private class Keys(private val offsets: FloatArray, private val values: FloatArray, private val eases: Array<Bezier?>) {
+internal class Keys(private val offsets: FloatArray, private val values: FloatArray, private val eases: Array<Bezier?>) {
     fun at(x: Float): Float {
         if (x <= offsets.first()) return values.first()
         if (x >= offsets.last()) return values.last()
@@ -154,6 +157,8 @@ private object Ease {
     val kindle = Bezier(0.3f, 0.2f, 0.3f, 1f)
     val inkOut = Bezier(0.4f, 0f, 0.7f, 1f)
     val inkIn = Bezier(0.3f, 0f, 0.4f, 1f)
+    /** presentation's front ease: quickest in its middle, a long tail (the frieze, the snuff, the sinks). */
+    val tail = Bezier(0.4f, 0f, 0.3f, 1f)
 }
 
 private fun rgb(c: CrownRgb, alpha: Float = 1f) = Color(c.r.toInt(), c.g.toInt(), c.b.toInt()).copy(alpha = alpha)
@@ -191,12 +196,15 @@ internal class CrownHead {
     var gilt = false
 }
 
-/** The stars of the head's sky, as home's sky drew them: for the play to draw on at dawn. */
-internal class SkyStarPaint(val index: Int, val path: Path, val brush: Brush, val alpha: Float)
+/**
+ * The stars of the head's sky, as home's sky drew them (in the card's own coordinates, `centre`
+ * and `r` the star's middle and magnitude): the play draws them from the change of look.
+ */
+internal class SkyStarPaint(val index: Int, val path: Path, val brush: Brush, val alpha: Float, val centre: Offset, val r: Float)
 
 /**
- * The sky's say in the play: how lit each of its stars is (dusk kindles them, dawn puts them out)
- * and how large, and which it drew.
+ * The sky's say in the play: from the change of look the play draws the stars itself, above the
+ * head's front (dusk kindles them, dawn puts them out), so the sky leaves them out; and which it drew.
  */
 class CrownSky internal constructor(private val crown: Crown) {
     internal var drawn: List<SkyStarPaint> = emptyList()
@@ -204,9 +212,8 @@ class CrownSky internal constructor(private val crown: Crown) {
     /** Whether the play has a say in this frame (else every star is simply itself). */
     val active: Boolean get() = crown.play != null
 
-    fun alpha(index: Int): Float = crown.starAlpha(index)
-
-    fun scale(index: Int): Float = crown.starScale(index)
+    /** How lit the sky's own stars are: 1, or none while the play draws them. */
+    val lit: Float get() = crown.starAlpha()
 
     internal fun record(stars: List<SkyStarPaint>) {
         drawn = stars
@@ -230,6 +237,8 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
     val frontEase = Bezier(plan.frontEase)
     val spreadEase = Bezier(plan.spreadEase)
     val glowEase = Bezier(plan.glowEase)
+    val veilIn = Bezier(plan.veilIn)
+    val veilOut = Bezier(plan.veilOut)
 
     // ---- The vault: the head inside the slate course, where the sky lies by night. ----
     val W = head.width
@@ -324,10 +333,8 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
         val e = spreadEase.at(tau / dur)
         return 0.5f * s0 * (s1 / s0).pow(e) + 0.5f * (s0 + e * (s1 - s0))
     }
-    val vnodes = FloatArray(NODES + 1) {
-        val tn = vDur * it / NODES
-        sizeAt(if (tn <= 400f) tn else 400f + (tn - 400f) * (dur - 400f) / (vDur - 400f)) * plan.veilLead
-    }
+    /** The veil's shape: the spread's whole run of sizes, led, played over `vDur`. */
+    val vnodes = FloatArray(NODES + 1) { sizeAt(dur * it / NODES) * plan.veilLead }
 
     /** The page's scale and opacity at a time. */
     fun spreadScale(t: Float): Float = interpolate(nodes, (t - spreadAt) / shapeDur)
@@ -402,8 +409,9 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
 
     /**
      * The rows change ink quickly, one after another, where the page under each can carry the ink
-     * it is given, dealt out about the middle one 32ms apart and none further than 130ms from its
-     * own moment: no frame with every label mid-change.
+     * it is given, dealt out about the middle one 14ms apart, none further than 60ms from its own
+     * moment and never two within 10ms: the wall is shaded to the new look's value before it is
+     * crossed, so the rows come back together, in one breath.
      */
     val rows: Map<String, Float>
     val lastDip: Float
@@ -418,8 +426,8 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
         val dealt = LinkedHashMap<String, Float>()
         var previous = Float.NEGATIVE_INFINITY
         order.forEachIndexed { n, (key, own) ->
-            var t = max(own - 130f, min(own + 130f, base + (n - mid) * 32f))
-            if (n > 0 && t < previous + 25f) t = previous + 25f
+            var t = max(own - 60f, min(own + 60f, base + (n - mid) * 14f))
+            if (n > 0 && t < previous + 10f) t = previous + 10f
             previous = t
             dealt[key] = t
         }
@@ -429,31 +437,79 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
 
     /** The play is settled when the page has visibly turned and the last row has its new ink. */
     val settle = maxOf(covered, lastDip + 220f, spreadAt + 1100f, veil1 - 80f, spreadAt + dur * part - 50f) + 80f
-    val end = maxOf(plan.end.toFloat(), covered + 20f, settle + 90f)
+    /** The ending beat: the page still for `beat_hold`, then one thing, in `beat_len`. */
+    val beat = settle + plan.beatHold.toFloat()
+    val end = max(plan.end.toFloat(), beat + plan.beatLen.toFloat() + 30f)
 
-    // ---- The stars: their turns. ----
-    val stars = skyStars(arch)
-    val starTurns: FloatArray = run {
-        if (stars.isEmpty()) return@run FloatArray(0)
-        val big = stars.maxOf { it.r }
-        val small = stars.minOf { it.r }
-        val cross = units["cross"]?.rect?.center ?: Offset(ax, apex)
-        val at = stars.map { Offset(origin.x + it.x * W, origin.y + it.y * W) }
-        val nearest = at.indices.minByOrNull { (at[it] - cross).getDistance() } ?: -1
-        FloatArray(stars.size) { i ->
-            val rank = if (big > small) (big - stars[i].r) / (big - small) else 0f
-            val seed = ((i * 7919) % 97) / 97f
-            if (dusk) {
-                // In the wake of the dark, the largest first.
-                min(frontAt(at[i].y) + 160f + 620f * rank + 260f * seed, end - 1050f)
-            } else if (i == nearest) {
-                // A morning star lingers by the cross.
-                1750f
-            } else {
-                // Out a little ahead of the light, the smallest and lowest first.
-                (frontAt(at[i].y) - 850f - 450f * rank - 160f * seed).coerceIn(150f, 1650f)
+    /** The veil's span: it begins with the spread, and runs longer on a wide screen. */
+    val veilEnd = veil1 + if (wideDp) plan.spreadWide.toFloat() else 0f
+
+    /**
+     * The vault's stand-in (the head's front over the new screen) leaves early and slowly, from
+     * where the page under it is nearly its new self until just before the settle; the old ground
+     * kept under it goes first.
+     */
+    val vaultOut = spreadAt + 0.62f * dur
+    val vaultGone = max(vaultOut + 1f, settle - 60f)
+
+    /** A star kindling swells a little past its size and settles. */
+    internal val kindleScale = Keys(floatArrayOf(0f, 0.55f, 1f), floatArrayOf(0.86f, plan.starOver, 1f), arrayOf(Ease.kindle, Ease.kindle))
+
+    // ---- The stars: their turns, by magnitude, in ms from the turn (app.js's `g.starTurns`). ----
+    private val crossAt = units["cross"]?.rect?.center ?: Offset(ax, apex)
+    private val marginIn = (vault.left - origin.x + 9f * u) / W
+
+    /** The turns of the stars the sky drew (in its order), the star by the cross, and the morning star's deepening. */
+    class StarTurns(val key: List<Int>, val turns: FloatArray, val nearest: Int, val morningAt: Float)
+
+    fun starTurns(list: List<SkyStarPaint>): StarTurns {
+        val at = list.map { Offset(origin.x + it.centre.x, origin.y + it.centre.y) }
+        val nearest = at.indices.minByOrNull { (at[it] - crossAt).getDistance() } ?: -1
+        val settleR = settle - turn
+        val beatR = beat - turn
+        val out = FloatArray(list.size) { beatR }
+        // Brightest first; equal stars keep the field's order.
+        val rest = list.indices.filter { it != nearest }.sortedWith(compareByDescending<Int> { list[it].r }.thenBy { it })
+        val bright = rest.take(plan.starsBright.toInt())
+        val field = rest.drop(plan.starsBright.toInt()).toMutableList()
+        val apart = plan.starsBrightApart.toFloat()
+        fun dark(i: Int) = frontAt(at[i].y) - turn
+        fun seed(i: Int) = ((i * 7919) % 97) / 97f
+        var morningAt = 0f
+        if (dusk) {
+            val first = if (nearest < 0) 150f else max(150f, dark(nearest) + 60f)
+            if (nearest >= 0) out[nearest] = first
+            val lastOne = if (field.size > 1) field.removeAt(field.size - 1) else -1
+            val alone = plan.eveningStarAlone.toFloat()
+            bright.forEachIndexed { n, i -> out[i] = max(first + alone + n * apart, dark(i) + 100f) }
+            val from = first + alone + bright.size * apart
+            val cap = settleR - 0.3f * plan.starKindle.toFloat()
+            val to = max(from, cap)
+            field.forEachIndexed { n, i ->
+                var t = from + (to - from) * (n + 0.6f * (seed(i) - 0.5f)) / max(1, field.size - 1)
+                t = maxOf(from, min(to, t), dark(i) + 100f)
+                // A star out in the moulding's margin waits for the wall's night.
+                if (shape((at[i].x - origin.x) / W, (ys - at[i].y) / W) < marginIn) {
+                    t = max(t, turnedAt(at[i].x, at[i].y, 0.5f) - turn + 200f)
+                }
+                out[i] = min(t, cap)
+            }
+            if (lastOne >= 0) out[lastOne] = beatR
+        } else {
+            val linger = plan.dawnStarLinger.toFloat()
+            val until = plan.dawnFieldOut * settleR - bright.size * apart
+            field.reversed().forEachIndexed { n, i ->
+                val t = 40f + (until - 40f) * (n + 0.6f * (seed(i) - 0.5f)) / max(1, field.size - 1)
+                out[i] = max(0f, minOf(t, until, dark(i) + linger))
+            }
+            bright.reversed().forEachIndexed { n, i -> out[i] = max(0f, min(until + (n + 1) * apart, dark(i) + linger)) }
+            if (nearest >= 0) {
+                out[nearest] = beatR
+                // When the plaster's front reaches the morning star: its gold deepens to stand on it.
+                morningAt = dark(nearest) - 300f
             }
         }
+        return StarTurns(list.map { it.index }, out, nearest, morningAt)
     }
 }
 
@@ -462,12 +518,16 @@ internal class Sums(val plan: CrownPlan, head: CrownHead, units: Map<String, Cro
  */
 internal class Play(val plan: CrownPlan, val choice: ThemeChoice, val sums: Sums, val k: Float) {
     val dusk = plan.toDark
-    var turned = false
-    var capturing = false
+    // (State: the sky reads them, to leave its stars to the play from the change of look.)
+    var turned by mutableStateOf(false)
+    var capturing by mutableStateOf(false)
     var old: ImageBitmap? = null
     var crossOld: ImageBitmap? = null
     var crossNew: ImageBitmap? = null
     var crossCatch: ImageBitmap? = null
+    var crossEmber: ImageBitmap? = null
+    /** The stars' turns, for the stars the sky last drew. */
+    var stars: Sums.StarTurns? = null
     var gilt = false
     /** A second tap on the cross, kept for the settle. */
     var again = false
@@ -487,6 +547,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     var choice: () -> ThemeChoice = { ThemeChoice.DEFAULT }
     var deviceDark = false
     var animationScale: () -> Float = { 1f }
+    /** One soft tick under the finger at the turn, as the look itself changes. */
+    var tick: () -> Unit = {}
     /** Saves the choice (at the tap), applies it (at the turn), or makes it the Menu's way. */
     var save: (ThemeChoice) -> Unit = {}
     var apply: (ThemeChoice) -> Unit = {}
@@ -573,6 +635,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val cross = units["cross"]!!
         p.crossNew = look(cross.size) { h.cross(this, toDark) }
         p.crossCatch = look(cross.size) { consecrationCross(h.catchInk) }
+        p.crossEmber = look(cross.size) { consecrationCross(rgb(plan.crossEmber)) }
+        firmament.drawn = emptyList()
         t = 0f
         play = p
         p.job = scope.launch {
@@ -630,6 +694,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         }
         apply(p.choice)
         p.turned = true
+        tick()
     }
 
     /**
@@ -668,38 +733,17 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
 
     // ---- The stars' say (the sky asks while it draws). ----
 
-    private val kindleAlpha = Keys(floatArrayOf(0f, 0.55f, 1f), floatArrayOf(0f, 1f, 1f), arrayOf(Ease.kindle, Ease.kindle))
-    private val kindleScale = Keys(floatArrayOf(0f, 0.55f, 1f), floatArrayOf(0.86f, 1.06f, 1f), arrayOf(Ease.kindle, Ease.kindle))
-
-    internal fun starAlpha(index: Int): Float {
+    /** At rest, and until the turn, each star is the sky's; from the turn the play draws it. */
+    internal fun starAlpha(): Float {
         val p = play ?: return 1f
-        val d = p.sums.starTurns.getOrNull(index) ?: return 1f
-        return if (p.dusk) {
-            kindleAlpha.at((t - d) / 800f)
-        } else if (p.capturing || p.turned) {
-            // At dawn the still is made without them, and the play draws them on.
-            0f
-        } else {
-            1f - Ease.catch.at((t - d) / 650f)
-        }
-    }
-
-    internal fun starScale(index: Int): Float {
-        val p = play ?: return 1f
-        if (!p.dusk) return 1f
-        val d = p.sums.starTurns.getOrNull(index) ?: return 1f
-        return kindleScale.at((t - d) / 800f)
+        return if (p.capturing || p.turned) 0f else 1f
     }
 
     // ---- Drawing. ----
 
     private val catchKeys = Keys(floatArrayOf(0f, 0.4f, 1f), floatArrayOf(0f, 0.6f, 0f), arrayOf(Ease.catch, Ease.catch))
     private val catchHold = Keys(floatArrayOf(0f, 0.34f, 1f), floatArrayOf(0f, 0.55f, 0f), arrayOf(Ease.inOut, Ease.catch))
-    private val veilDusk = Keys(
-        floatArrayOf(0f, 0.329f, 0.467f, 0.733f, 1f),
-        floatArrayOf(0f, 0.75f, 1f, 0.8f, 0f),
-        arrayOf(Bezier(0.4f, 0f, 0.7f, 1f), Bezier(0.3f, 0.3f, 0.6f, 1f), Bezier(0.4f, 0f, 0.6f, 1f), Bezier(0.4f, 0f, 0.5f, 1f)),
-    )
+    private val kindleAlpha = Keys(floatArrayOf(0f, 0.55f, 1f), floatArrayOf(0f, 1f, 1f), arrayOf(Ease.kindle, Ease.kindle))
 
     internal fun draw(scope: DrawScope, p: Play) = with(scope) {
         val s = p.sums
@@ -716,45 +760,47 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                 drawLayer(layer)
                 drawRect(s.maskBrush(s.spreadScale(t)), blendMode = BlendMode.DstIn)
             }
-            veil(p, t)
             // The head keeps its old ground until its own front has passed, whatever the page
-            // behind has done (the web's `.home-back`).
-            clipPath(s.vaultPath) {
-                drawImage(old)
-                if (p.dusk) {
-                    // The plaster still lit takes a trace of the afterglow as the night comes down.
-                    val warm = Ease.warm.at((t - turn - 100f) / 900f)
-                    if (warm > 0f) {
-                        drawRect(
-                            Brush.verticalGradient(
-                                0f to rgb(p.plan.skyOchre, 0.1f), 0.55f to rgb(p.plan.skyOchre, 0.15f), 1f to rgb(p.plan.skyRedOchre, 0.2f),
-                                startY = s.vault.top, endY = s.vault.bottom,
-                            ),
-                            s.vault.topLeft, s.vault.size, alpha = warm,
-                        )
+            // behind has done (the web's `.home-back`), and lets it go just before the vault's
+            // stand-in leaves.
+            val back = 1f - clamp01((t - (s.vaultOut - 80f)) / 80f)
+            if (back > 0f) layered(full, back) {
+                clipPath(s.vaultPath) {
+                    drawImage(old)
+                    if (p.dusk) {
+                        // The plaster still lit takes a trace of the afterglow as the night comes down.
+                        val warm = Ease.warm.at((t - turn - 100f) / 900f)
+                        if (warm > 0f) {
+                            drawRect(
+                                Brush.verticalGradient(
+                                    0f to rgb(p.plan.skyOchre, 0.1f), 0.55f to rgb(p.plan.skyOchre, 0.15f), 1f to rgb(p.plan.skyRedOchre, 0.2f),
+                                    startY = s.vault.top, endY = s.vault.bottom,
+                                ),
+                                s.vault.topLeft, s.vault.size, alpha = warm,
+                            )
+                        }
+                    } else {
+                        // Dawn: ahead of the rose, a wider band of the night's teal, lifted.
+                        belt(s, t, 1.5f, rgb(p.plan.skyTeal, 0.6f), arrayOf(0f to Color.Transparent, 0.52f to Color.Transparent, 0.66f to Color.Black.copy(alpha = 0.6f), 0.76f to Color.Black, 0.9f to Color.Black.copy(alpha = 0.4f), 1f to Color.Transparent))
                     }
+                    // The belt: rose-lilac riding ahead of the front on the sky it has not reached.
+                    belt(s, t, 1.22f, rgb(p.plan.skyRoseLilac, if (p.dusk) 0.62f else 0.5f), arrayOf(0f to Color.Transparent, 0.6f to Color.Transparent, 0.69f to Color.Black.copy(alpha = 0.5f), 0.79f to Color.Black, 0.9f to Color.Black.copy(alpha = 0.45f), 1f to Color.Transparent))
                 }
             }
-            if (!p.dusk) {
-                // Dawn: the stars go out ahead of the light, under it.
-                translate(s.origin.x, s.origin.y) {
-                    for (star in firmament.drawn) {
-                        val d = s.starTurns.getOrNull(star.index) ?: continue
-                        val a = 1f - Ease.catch.at((t - d) / 650f)
-                        if (a > 0f) drawPath(star.path, star.brush, alpha = star.alpha * a)
-                    }
-                }
-            }
+            veil(p, t)
         }
 
         horizon(p, t)
 
         if (old != null) {
             // The head's front: the new ground inside the slate course, with what the light leaves.
+            // It leaves early and slowly, from where the page under it is nearly its new self.
             val r = s.frontRadius(t)
-            layered(full, 1f) {
+            val stand = 1f - Ease.warm.at((t - s.vaultOut) / (s.vaultGone - s.vaultOut))
+            if (stand > 0f) layered(full, stand) {
                 clipPath(s.vaultPath) {
                     drawLayer(layer)
+                    if (!p.dusk) plasterShade(p, t)
                     vaultLight(p, t)
                 }
                 val c = Offset(s.vault.center.x, s.cy)
@@ -771,15 +817,18 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             }
         }
 
+        // The stars, above the vault both ways, from the change of look.
+        if (old != null) stars(p, t)
+
         // The units, each handing its ink over at its moment.
         for ((key, unit) in units) {
             if (key == "cross" || lifted[key] != true) continue
             val (out, into) = when {
                 !p.turned -> 1f to 0f
-                key == "frieze" -> Ease.inOut.at((t - s.spreadAt - 250f) / 900f).let { 1f - it to it }
+                key == "frieze" -> Ease.tail.at((t - p.plan.frieze.at.toFloat()) / p.plan.frieze.len.toFloat()).let { 1f - it to it }
                 key.startsWith("w-") -> {
                     val w = s.words[key] ?: turn
-                    (1f - Ease.inkOut.at((t - w + 230f) / 240f)) to Ease.inkIn.at((t - w - 40f) / 420f)
+                    (1f - Ease.inkOut.at((t - w + 230f) / 240f)) to Ease.inkIn.at((t - w + 80f) / 360f)
                 }
                 else -> {
                     val r = s.rows[key] ?: s.settle
@@ -794,20 +843,29 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             }
         }
 
-        // The cross, in its two looks and the light it catches.
+        // The cross, in its two looks, the ember gold it keeps (dusk) or takes first (dawn), and
+        // the light it catches.
         val cross = units["cross"]
         if (cross != null && lifted["cross"] == true) {
-            val (oldAlpha, newAlpha, catchAlpha) = if (p.dusk) {
-                Triple(
-                    1f - Ease.inOut.at((t - 780f) / 300f),
-                    Ease.inOut.at((t - 80f) / 760f),
-                    max(if (p.gilt) catchKeys.at((t - 80f) / 760f) else 0f, catchKeys.at((t - turn - 2700f) / 600f)),
-                )
+            val oldAlpha: Float
+            val newAlpha: Float
+            val emberAlpha: Float
+            val catchAlpha: Float
+            if (p.dusk) {
+                oldAlpha = 1f - Ease.inOut.at((t - 780f) / 300f)
+                newAlpha = Ease.inOut.at((t - 80f) / 760f)
+                catchAlpha = if (p.gilt) catchKeys.at((t - 80f) / 760f) else 0f
+                emberAlpha = 0.85f * Ease.rise.at((t - turn - 500f) / 900f) * (1f - Ease.rise.at((t - s.beat + 970f) / 600f))
             } else {
-                Triple(1f - Ease.inOut.at((t - turn - 2230f) / 300f), Ease.inOut.at((t - turn - 1550f) / 700f), catchHold.at((t - 60f) / 1300f))
+                val beat = Ease.inOut.at((t - s.beat) / p.plan.beatLen.toFloat())
+                oldAlpha = 1f - beat
+                newAlpha = beat
+                catchAlpha = catchHold.at((t - 60f) / 1300f)
+                emberAlpha = 0.85f * Ease.rise.at((t - turn - 900f) / 800f) * (1f - beat)
             }
             p.crossOld?.let { if (oldAlpha > 0f) drawImage(it, cross.at, alpha = oldAlpha) }
             p.crossNew?.let { if (newAlpha > 0f) drawImage(it, cross.at, alpha = newAlpha) }
+            p.crossEmber?.let { if (emberAlpha > 0f) drawImage(it, cross.at, alpha = emberAlpha) }
             p.crossCatch?.let { if (catchAlpha > 0f) drawImage(it, cross.at, alpha = catchAlpha) }
         }
     }
@@ -820,49 +878,65 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     }
 
     /**
-     * The veil: the hour's colour laid over the page in the page's own growing shape, a little
-     * ahead of it, thinning out from the arch: never a sheet. Dawn's ink turns rose-umber through
-     * the wall's dark and grey half.
+     * Draws `block` multiplied over what is under it, on a white ground of its own: where it is
+     * clear it changes nothing, and a phone whose multiply is Porter-Duff's draws it the same.
+     */
+    private inline fun DrawScope.multiplied(bounds: Rect, block: DrawScope.() -> Unit) {
+        drawIntoCanvas { it.saveLayer(bounds, Paint().apply { blendMode = BlendMode.Multiply }) }
+        drawRect(Color.White, bounds.topLeft, bounds.size)
+        block()
+        drawIntoCanvas { it.restore() }
+    }
+
+    /**
+     * A belt riding ahead of the head's front on the old ground: a wash seen through a ring on the
+     * front's own ellipse, `k` times its size.
+     */
+    private fun DrawScope.belt(s: Sums, t: Float, k: Float, colour: Color, ring: Array<Pair<Float, Color>>) {
+        layered(Rect(Offset.Zero, size), 1f) {
+            drawRect(colour, s.vault.topLeft, s.vault.size)
+            val c = Offset(s.vault.center.x, s.cy)
+            scale(s.a, 1f, pivot = c) {
+                drawRect(
+                    Brush.radialGradient(*ring, center = c, radius = max(1f, k * s.frontRadius(t))),
+                    Offset(c.x - size.width, -size.height), Size(size.width * 2, size.height * 3), blendMode = BlendMode.DstIn,
+                )
+            }
+        }
+    }
+
+    /**
+     * The veil: the hour's colour multiplied over the turning wall (so it only ever shades: the
+     * plaster keeps its texture and every line its ink), in the page's own growing shape, a little
+     * ahead of it, thinning a little outward from the arch.
      */
     private fun DrawScope.veil(p: Play, t: Float) {
         val s = p.sums
-        if (t < s.spreadAt || t < s.veil0 || t > s.veil1) return
-        val x = (t - s.veil0) / (s.veil1 - s.veil0)
-        val peak = p.plan.veilPeak
-        val low = p.plan.dawnVeilLow
-        val opacity: Float
-        val ink: Color
-        val stops: FloatArray
-        if (p.dusk) {
-            opacity = peak * veilDusk.at(x)
-            ink = rgb(p.plan.veilInk)
-            stops = floatArrayOf(1f, 0.86f, 0.5f, 0.2f)
-        } else {
-            opacity = Keys(
-                floatArrayOf(0f, 0.305f, 0.436f, 0.667f, 0.795f, 1f),
-                floatArrayOf(0f, peak * 1.13f, low, low, peak, 0f),
-                arrayOf(Ease.catch, Ease.catch, null, Ease.catch, Ease.rise),
-            ).at(x)
-            val blush = rgb(p.plan.veilInk)
-            val umber = rgb(p.plan.dawnVeilUmber)
-            val share = Keys(floatArrayOf(0f, 0.28f, 0.4f, 0.64f, 0.795f, 1f), floatArrayOf(0f, 0f, 1f, 1f, 0f, 0f), arrayOfNulls<Bezier>(5)).at(x)
-            ink = mix(umber, blush, share)
-            stops = floatArrayOf(1f, 0.88f, 0.66f, 0.46f)
+        if (t < s.spreadAt || t < s.veil0 || t > s.veilEnd) return
+        val plan = p.plan
+        val x = (t - s.veil0) / (s.veilEnd - s.veil0)
+        val opacity = when {
+            x < plan.veilTop -> plan.veilPeak * s.veilIn.at(x / plan.veilTop)
+            x < plan.veilGone -> plan.veilPeak * (1f - s.veilOut.at((x - plan.veilTop) / (plan.veilGone - plan.veilTop)))
+            else -> 0f
         }
         if (opacity <= 0f) return
+        val ink = rgb(plan.veilInk)
         val full = Rect(Offset.Zero, size)
         val c = Offset(s.ax, s.ys)
-        layered(full, opacity) {
-            scale(1f, 1.9f / 1.5f, pivot = c) {
-                drawRect(
-                    Brush.radialGradient(
-                        0f to ink.copy(alpha = stops[0]), 0.28f to ink.copy(alpha = stops[1]), 0.58f to ink.copy(alpha = stops[2]), 1f to ink.copy(alpha = stops[3]),
-                        center = c, radius = 1.5f * s.W,
-                    ),
-                    Offset(-size.width, -size.height), Size(size.width * 3, size.height * 3),
-                )
+        multiplied(full) {
+            layered(full, opacity) {
+                scale(1f, 1.9f / 1.5f, pivot = c) {
+                    drawRect(
+                        Brush.radialGradient(
+                            0f to ink, 0.28f to ink.copy(alpha = 0.94f), 0.58f to ink.copy(alpha = 0.82f), 1f to ink.copy(alpha = plan.veilFar),
+                            center = c, radius = 1.5f * s.W,
+                        ),
+                        Offset(-size.width, -size.height), Size(size.width * 3, size.height * 3),
+                    )
+                }
+                drawRect(s.maskBrush(s.veilScale(t)), blendMode = BlendMode.DstIn)
             }
-            drawRect(s.maskBrush(s.veilScale(t)), blendMode = BlendMode.DstIn)
         }
     }
 
@@ -891,8 +965,9 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
 
     /**
      * The first act's light on the horizon, inside the head under the day's words: at dusk the
-     * afterglow, yellow ochre with red ochre only at the horizon; at dawn first light, lime white
-     * over a rose ochre that comes before it, parted from the sky by a rose-lilac.
+     * whole niche takes a raking ochre, and the afterglow rises off the horizon, yellow ochre with
+     * red ochre only at the horizon; at dawn the night lifts from the horizon to its teal, then a
+     * rose-lilac, then a peach, and last and thin a lime white.
      */
     private fun DrawScope.horizon(p: Play, t: Float) {
         val s = p.sums
@@ -901,8 +976,19 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val plan = p.plan
         clipPath(s.vaultPath) {
             if (p.dusk) {
+                val gone = clamp01((t - turn - 1750f) / 500f)
+                // The golden hour on the whole niche, deeper toward the horizon.
+                val wash = Ease.rise.at((t - 120f) / 1300f) * (1f - gone)
+                if (wash > 0f) {
+                    drawRect(
+                        Brush.verticalGradient(
+                            0f to rgb(plan.skyOchre, 0.16f), 0.6f to rgb(plan.skyOchre, 0.28f), 1f to rgb(plan.skyOchre, 0.4f),
+                            startY = s.vault.top, endY = s.vault.bottom,
+                        ),
+                        s.vault.topLeft, s.vault.size, alpha = wash,
+                    )
+                }
                 val x = Ease.rise.at((t - 250f) / 1250f)
-                val gone = clamp01((t - turn - 1550f) / 300f)
                 val dense = screenDp <= 700f
                 val ochre = Brush.verticalGradient(
                     0f to rgb(plan.skyOchre, 0f), 0.32f to rgb(plan.skyOchre, if (dense) 0.2f else 0.1f),
@@ -920,26 +1006,25 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
                 mound(rect, red, 1.6f * rect.width, stops, 0.3f + 0.7f * x, a)
             } else {
                 val stops = arrayOf(0f to Color.Black, 0.3f to Color.Black.copy(alpha = 0.9f), 0.64f to Color.Black.copy(alpha = 0.45f), 1f to Color.Transparent)
-                val gone = clamp01((t - turn - 800f) / 600f)
-                // Under it, and before it, the colour of the hour.
-                val before = Ease.rise.at((t - 220f) / 650f)
+                val gone = clamp01((t - turn - 1100f) / 700f)
+                // One wash, three pigments deep, rising: the teal leads, then rose, then peach.
+                val first = Ease.rise.at((t - 150f) / 1100f)
+                val high = Rect(rect.left, rect.bottom - 1.5f * s.room, rect.right, rect.bottom)
                 mound(
-                    rect,
+                    high,
                     Brush.verticalGradient(
-                        0f to rgb(plan.skyRoseLilac, 0f), 0.18f to rgb(plan.skyRoseLilac, 0.14f), 0.45f to Color(196, 146, 140).copy(alpha = 0.42f),
-                        0.78f to Color(206, 150, 124).copy(alpha = 0.8f), 1f to Color(214, 160, 128).copy(alpha = 0.95f),
-                        startY = rect.top, endY = rect.bottom,
+                        0f to rgb(plan.skyTeal, 0f), 0.18f to rgb(plan.skyTeal, 0.22f), 0.38f to rgb(plan.skyTeal, 0.5f),
+                        0.62f to rgb(plan.skyRoseLilac, 0.5f), 0.84f to Color(206, 150, 124).copy(alpha = 0.8f), 1f to rgb(plan.skyPeach, 0.92f),
+                        startY = high.top, endY = high.bottom,
                     ),
-                    s.washRx, stops, 0.3f + 0.7f * before, before * (1f - gone),
+                    1.3f * s.washRx, stops, 0.3f + 0.7f * first, first * (1f - gone),
                 )
-                val light = Ease.rise.at((t - 450f) / 800f)
+                // The lime comes last, thin, and only low.
+                val light = Ease.rise.at((t - 700f) / 900f)
+                val low = Rect(rect.left, rect.bottom - 0.5f * s.room, rect.right, rect.bottom)
                 mound(
-                    rect,
-                    Brush.verticalGradient(
-                        0f to rgb(plan.skyRoseLilac, 0f), 0.16f to rgb(plan.skyRoseLilac, 0.12f), 0.34f to rgb(plan.skyRoseLilac, 0.28f),
-                        0.54f to rgb(plan.skyLime, 0.5f), 0.84f to rgb(plan.skyLime, 0.9f), 1f to rgb(plan.skyLime, 0.92f),
-                        startY = rect.top, endY = rect.bottom,
-                    ),
+                    low,
+                    Brush.verticalGradient(0f to rgb(plan.skyLime, 0f), 0.6f to rgb(plan.skyLime, 0.3f), 1f to rgb(plan.skyLime, 0.45f), startY = low.top, endY = low.bottom),
                     s.washRx, stops, 0.3f + 0.7f * light, light * (1f - gone),
                 )
             }
@@ -951,7 +1036,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val s = p.sums
         val h = 0.22f * (s.vault.bottom - s.vault.top)
         val rect = Rect(s.vault.left, s.vault.bottom - h, s.vault.right, s.vault.bottom)
-        val x = if (p.dusk) Ease.catch.at((t - s.turn - 2250f) / 1000f) else Ease.catch.at((t - s.turn - 850f) / 1400f)
+        val x = if (p.dusk) Ease.tail.at((t - s.turn - 1900f) / 1500f) else Ease.tail.at((t - s.turn - 900f) / 1600f)
         val colour = if (p.dusk) {
             Brush.verticalGradient(0f to rgb(p.plan.skyEmber, 0f), 0.55f to rgb(p.plan.skyEmber, 0.32f), 1f to rgb(p.plan.skyEmber, 0.64f), startY = rect.top, endY = rect.bottom)
         } else {
@@ -962,6 +1047,77 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             0.84f to Color.Transparent, 1f to Color.Transparent,
         )
         mound(rect, colour, 0.58f * rect.width, stops, 1f - 0.6f * x, 1f - x)
+    }
+
+    /**
+     * Dawn's plaster does not arrive white: it comes up under a warm shade, peach low and rose
+     * above, multiplied over it, which lifts on a long tail.
+     */
+    private fun DrawScope.plasterShade(p: Play, t: Float) {
+        val s = p.sums
+        val f = 1f - Ease.rise.at((t - s.turn - 250f) / 2300f)
+        if (f <= 0f) return
+        // Multiplying by the shade mixed with white at its strength is the shade at that strength.
+        drawRect(
+            Brush.verticalGradient(
+                0f to mix(rgb(p.plan.skyRoseLilac), Color.White, f), 0.45f to mix(Color(206, 158, 140), Color.White, f), 1f to mix(rgb(p.plan.skyPeach), Color.White, f),
+                startY = s.vault.top, endY = s.vault.bottom,
+            ),
+            s.vault.topLeft, s.vault.size, blendMode = BlendMode.Multiply,
+        )
+    }
+
+    /**
+     * The stars, by magnitude, each at its turn from the change of look: at dusk each kindles,
+     * swelling a little past its size and settling; at dawn each goes out, and the morning star by
+     * the cross deepens its gold as the plaster reaches it and goes out at the ending beat.
+     */
+    private fun DrawScope.stars(p: Play, t: Float) {
+        if (!p.turned) return
+        val drawn = firmament.drawn
+        if (drawn.isEmpty()) return
+        val s = p.sums
+        val key = drawn.map { it.index }
+        val turns = p.stars?.takeIf { it.key == key } ?: s.starTurns(drawn).also { p.stars = it }
+        val since = t - s.turn
+        translate(s.origin.x, s.origin.y) {
+            drawn.forEachIndexed { i, star ->
+                val local = since - turns.turns[i]
+                if (p.dusk) {
+                    val a = kindleAlpha.at(local / p.plan.starKindle.toFloat())
+                    if (a <= 0f) return@forEachIndexed
+                    val grown = s.kindleScale.at(local / p.plan.starKindle.toFloat())
+                    scale(grown, pivot = star.centre) { drawPath(star.path, star.brush, alpha = star.alpha * a) }
+                } else if (i == turns.nearest) {
+                    val a = 1f - Ease.inOut.at(local / p.plan.beatLen.toFloat())
+                    if (a <= 0f) return@forEachIndexed
+                    val deep = Ease.inOut.at((since - turns.morningAt) / 700f)
+                    drawPath(star.path, star.brush, alpha = star.alpha * a, colorFilter = if (deep > 0f) morning(deep) else null)
+                } else {
+                    val a = 1f - Ease.tail.at(local / p.plan.starSnuff.toFloat())
+                    if (a > 0f) drawPath(star.path, star.brush, alpha = star.alpha * a)
+                }
+            }
+        }
+    }
+
+    /** The morning star's gold deepened, `e` of the way to brightness 0.7 and saturation 1.8 (CSS's filters). */
+    private fun morning(e: Float): ColorFilter {
+        val b = 1f - 0.3f * e
+        val k = 1f + 0.8f * e
+        val r = 0.213f
+        val g = 0.715f
+        val bl = 0.072f
+        return ColorFilter.colorMatrix(
+            ColorMatrix(
+                floatArrayOf(
+                    b * (r + (1 - r) * k), b * (g - g * k), b * (bl - bl * k), 0f, 0f,
+                    b * (r - r * k), b * (g + (1 - g) * k), b * (bl - bl * k), 0f, 0f,
+                    b * (r - r * k), b * (g - g * k), b * (bl + (1 - bl) * k), 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f,
+                ),
+            ),
+        )
     }
 }
 

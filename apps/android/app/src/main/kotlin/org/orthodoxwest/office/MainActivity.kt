@@ -60,8 +60,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
@@ -128,6 +130,9 @@ class MainActivity : ComponentActivity() {
             crown.save = vm::keepTheme
             crown.apply = vm::chooseTheme
             crown.plain = { t -> dissolve.change { vm.chooseTheme(t) } }
+            // One soft tick as the look itself changes under the play (the tap has its own).
+            val haptics = LocalHapticFeedback.current
+            crown.tick = { haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick) }
             LaunchedEffect(vm.shown?.entry) { crown.cut() }
             DisposableEffect(crown) { onDispose { crown.finish() } }
             Box(Modifier.fillMaxSize().dissolving(dissolve).crowning(crown)) {

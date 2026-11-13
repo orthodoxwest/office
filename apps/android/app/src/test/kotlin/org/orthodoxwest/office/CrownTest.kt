@@ -50,6 +50,7 @@ class CrownTest {
         var theme by mutableStateOf(start)
         var saved: ThemeChoice? = null
         var plain = 0
+        var ticks = 0
         lateinit var crown: Crown
         lateinit var view: HomeView
     }
@@ -66,6 +67,7 @@ class CrownTest {
             crown.save = { stage.saved = it }
             crown.apply = { stage.theme = it }
             crown.plain = { stage.plain++; stage.theme = it }
+            crown.tick = { stage.ticks++ }
             Box(Modifier.fillMaxSize().crowning(crown)) {
                 OfficeTheme(choice = stage.theme, season = view.ornament) {
                     CompositionLocalProvider(LocalCrown provides crown) {
@@ -124,15 +126,23 @@ class CrownTest {
         assertTrue(stage.crown.playing)
         assertEquals(ThemeChoice.APSE, stage.saved)
         assertEquals(ThemeChoice.NAVE, stage.theme)
+        assertEquals(0, stage.ticks)
         advance(played(1000))
         assertEquals(ThemeChoice.APSE, stage.theme)
+        // One soft tick as the look changes.
+        assertEquals(1, stage.ticks)
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
+        // The play's frames at the web strip's moments (ms of the timetable from the tap), the
+        // last after the ending beat's last star.
+        var at = 1200L
         shoot("crown-dusk-1200")
-        advance(played(1400))
-        shoot("crown-dusk-2600")
-        advance(played(700))
-        shoot("crown-dusk-3300")
-        advance(played(crownPlan(true).end.toLong()) + 1500)
+        for (next in listOf(1700L, 2200L, 2700L, 3200L, 3700L, 4300L, 5000L)) {
+            advance(played(next - at))
+            at = next
+            shoot("crown-dusk-$next")
+        }
+        val end = stage.crown.play!!.sums.end
+        advance(played(end.toLong() - at) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         assertTrue(stage.crown.lifted.isEmpty())
@@ -151,12 +161,15 @@ class CrownTest {
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         // Nave on a light phone is the device's look: shown as Default from the turn.
         assertEquals(ThemeChoice.DEFAULT, stage.theme)
+        var at = 1000L
         shoot("crown-dawn-1000")
-        advance(played(1300))
-        shoot("crown-dawn-2300")
-        advance(played(700))
-        shoot("crown-dawn-3000")
-        advance(played(crownPlan(false).end.toLong()) + 1500)
+        for (next in listOf(1500L, 2000L, 2500L, 3000L, 3500L, 4000L, 4600L)) {
+            advance(played(next - at))
+            at = next
+            shoot("crown-dawn-$next")
+        }
+        val end = stage.crown.play!!.sums.end
+        advance(played(end.toLong() - at) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         // Nave on a light phone is the device's look: saved as Default.
