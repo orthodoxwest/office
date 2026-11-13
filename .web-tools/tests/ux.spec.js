@@ -5326,6 +5326,33 @@ test("closing the prayers after the Office at the page's end leaves its summary 
   await expect.poll(() => page.evaluate(() => document.documentElement.style.minHeight)).toBe("");
 });
 
+// The page settles from a change in real time (faces arriving, ResizeObservers) and on the
+// fake clock's frames (the initials' typesetting), and each step may move the words again. The
+// watch's ticks are held meanwhile, so a step that lands after a tick cannot be counted as a
+// second measure of one change: held, then let go for one tick.
+async function settleUnwatched(page) {
+  await page.evaluate(() => { window.__holdWatch = true; });
+  let moves = -1;
+  for (let i = 0; i < 30; i++) {
+    const now = await page.evaluate(async () => {
+      await document.fonts.ready;
+      // A rendering update: every ResizeObserver has been told.
+      await new Promise((resolve) => {
+        const frame = new ResizeObserver(() => { frame.disconnect(); resolve(); });
+        frame.observe(document.body);
+      });
+      return window.__moves;
+    });
+    if (now === moves) {
+      await page.evaluate(() => { window.__holdWatch = false; });
+      return;
+    }
+    moves = now;
+    await page.clock.runFor(100);
+  }
+  throw new Error("the page kept moving");
+}
+
 test("the prayed watch measures the hour's words again only when they move", async ({ page }) => {
   await page.addInitScript(() => {
     window.__measured = 0;
@@ -5333,7 +5360,21 @@ test("the prayed watch measures the hour's words again only when they move", asy
     Range.prototype.getClientRects = function () { window.__measured++; return rects.call(this); };
   });
   await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  // After the clock, so the watch's one-second tick (app.js) is the fake clock's.
+  await page.addInitScript(() => {
+    window.__holdWatch = true;
+    window.__moves = 0;
+    const every = window.setInterval;
+    window.setInterval = function (callback, ms, ...rest) {
+      if (ms !== 1000) return every.call(this, callback, ms, ...rest);
+      return every.call(this, function () { if (!window.__holdWatch) return callback.apply(this, arguments); }, ms, ...rest);
+    };
+    new MutationObserver((records) => { window.__moves += records.length; })
+      .observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+    document.fonts.addEventListener("loadingdone", () => { window.__moves++; });
+  });
   await page.goto("/compline/2026-10-07");
+  await settleUnwatched(page);
   await page.clock.runFor(1000);
   const once = await page.evaluate(() => window.__measured);
   expect(once).toBeGreaterThan(100);
@@ -5344,7 +5385,9 @@ test("the prayed watch measures the hour's words again only when they move", asy
   expect(await page.evaluate(() => window.__measured)).toBe(once);
   // A new text size moves every word: they are measured again, once (the page's other
   // measures made at its load aside).
+  await page.evaluate(() => { window.__holdWatch = true; });
   await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await settleUnwatched(page);
   await page.clock.runFor(2000);
   const again = (await page.evaluate(() => window.__measured)) - once;
   expect(again).toBeGreaterThan(0.9 * once);
