@@ -655,6 +655,32 @@ pub struct AboutView {
     pub periods: Vec<AboutPeriodView>,
 }
 
+/// The hour it is now on the About page, as home has it: the hour its table lights (empty from
+/// midnight to 2 am, as home's directory lights none then), and home's invitation at its foot,
+/// with the hour and day it opens.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct AboutNow {
+    pub current: String,
+    pub pray_now_label: String,
+    pub pray_now_hour: String,
+    pub pray_now_date: CivilDate,
+}
+
+/// About's hour now, for the device's `today` and `clock_hour` (0–23), as the web's /about and
+/// home mark it (`presentation::about::about_current_hour`, `presentation::invitation`).
+#[uniffi::export]
+pub fn about_now(today: CivilDate, clock_hour: i32) -> Result<AboutNow, OfficeError> {
+    let now = today.parse()?;
+    let hour = clock_hour_i8(clock_hour);
+    let invite = invitation(now, now, hour);
+    Ok(AboutNow {
+        current: presentation::about::about_current_hour(hour).into(),
+        pray_now_label: invite.label,
+        pray_now_hour: invite.hour.into(),
+        pray_now_date: CivilDate::from(invite.date),
+    })
+}
+
 /// The page for newcomers, as the web's /about.
 #[uniffi::export]
 pub fn about() -> AboutView {
@@ -688,6 +714,7 @@ pub fn about() -> AboutView {
             AboutBlock::Key { mark, ink, text } => {
                 AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name().into(), ..block("key") }
             }
+            AboutBlock::Invitation => block("invitation"),
         })
         .collect();
     let periods = ABOUT_HOURS

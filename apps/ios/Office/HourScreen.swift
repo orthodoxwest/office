@@ -54,7 +54,7 @@ struct Loaded<Value, Content: View>: View {
             } else if let failure {
                 Message(text: failure)
             } else {
-                Message(text: "Preparing the office…")
+                Preparing()
             }
         }
         .task(id: key) {
@@ -825,8 +825,9 @@ private struct HourTitle: View {
                 withAnimation(unfolding) {
                     choosing.toggle()
                     picking = false
+                } completion: {
+                    if choosing { reveal("disclosed") }
                 }
-                if choosing { reveal("disclosed") }
             }
             .padding(.top, m.px(4))
             if picking {
@@ -866,8 +867,10 @@ private struct HourTitle: View {
         withAnimation(unfolding) {
             picking.toggle()
             choosing = false
+        } completion: {
+            // Once unfolded, as Android waits on the transition rather than a clock.
+            if picking { reveal("disclosed") }
         }
-        if picking { reveal("disclosed") }
     }
 }
 

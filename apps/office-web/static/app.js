@@ -1122,6 +1122,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   function syncChromeIfNeeded() {
     syncDatedNavigation();
     updatePrayNow();
+    updateAboutNow();
     markCalendarToday();
     window.dispatchEvent(new Event("officenavigation"));
   }
@@ -1139,6 +1140,7 @@ function rule(x1, y1, x2, y2, w, seed) {
       // within the day; cheap and keeps long-lived tabs honest).
       syncDatedNavigation();
       updatePrayNow();
+      updateAboutNow();
     }
   });
 
@@ -2502,9 +2504,39 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
   }
 
-  // Home, Ordo, and an open office may remain visible across a time boundary
-  // without producing a visibility event. Home refreshes at the next office
-  // boundary; Ordo and an office only need midnight. Midnight is also a home
+  // About's table marks the hour it is now as home's directory does (none
+  // from midnight to 2am, which is yesterday's Compline), and the page's foot
+  // carries home's invitation, words and link alike, by the device's clock:
+  // the server's copy was marked by its own, and may be cached.
+  function updateAboutNow() {
+    var table = document.querySelector(".about-hours");
+    if (!table) {
+      return;
+    }
+    var now = new Date();
+    var info = currentHourInfo(now);
+    table.querySelectorAll(".about-hour[data-hour]").forEach(function (row) {
+      var isCurrent = info.offset === 0 && row.getAttribute("data-hour") === info.slug;
+      row.classList.toggle("is-current", isCurrent);
+      var link = row.querySelector("dt a");
+      if (isCurrent) {
+        link.setAttribute("aria-current", "time");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+    var door = document.querySelector(".about-door .pray-now");
+    if (door) {
+      var officeDate = new Date(now.getTime());
+      officeDate.setDate(officeDate.getDate() + info.offset);
+      door.setAttribute("href", "/" + info.slug + "/" + localDateSlug(officeDate));
+      setPrayNowLabel(door, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
+    }
+  }
+
+  // Home, About, Ordo, and an open office may remain visible across a time boundary
+  // without producing a visibility event. Home and About refresh at the next
+  // office boundary; Ordo and an office only need midnight. Midnight is also a home
   // boundary because Compline before 2am belongs to the previous liturgical
   // day.
   //
@@ -2517,7 +2549,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   var timedChromeRefreshTimer = null;
   var timedChromeRefreshAt = null;
   function timedChromeRefreshBoundary(now) {
-    if (document.querySelector(".home-prayer-card[data-date-slug]")) {
+    if (document.querySelector(".home-prayer-card[data-date-slug], .about-hours")) {
       return nextOfficeBoundary(now);
     }
     if (!document.querySelector(".calendar") && !document.querySelector(".office-hour")) {
@@ -3050,6 +3082,53 @@ function rule(x1, y1, x2, y2, w, seed) {
   }
   draw();
   if ("ResizeObserver" in window) new ResizeObserver(draw).observe(nav);
+  else window.addEventListener("resize", draw);
+  if (document.fonts) document.fonts.ready.then(draw);
+})();
+
+// About's foot: home's invitation, ruled as home rules it (the lining, and
+// inside it the frontal stopping short of the corners), with home's seeds.
+// Without script its frame is the CSS border.
+(function () {
+  var tablet = document.querySelector(".about-door .pray-now");
+  if (!tablet) return;
+  var NS = "http://www.w3.org/2000/svg";
+  function draw() {
+    var w = tablet.offsetWidth, h = tablet.offsetHeight, g = 3.5;
+    if (!w || !h) return;
+    var svg = tablet.querySelector(":scope > svg.home-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "home-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      tablet.appendChild(svg);
+      tablet.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    [
+      ["r-lining", 0, 0.5, w, 0.5, 1.25, 21],
+      ["r-lining", 0, h - 0.5, w, h - 0.5, 1.25, 22],
+      ["r-lining", 0.5, 0, 0.5, h, 1.25, 23],
+      ["r-lining", w - 0.5, 0, w - 0.5, h, 1.25, 24],
+      ["r-day", g + 1.5, g, w - g - 1.5, g, 0.7, 25],
+      ["r-day", g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 26],
+      ["r-day", g, g + 1.5, g, h - g - 1.5, 0.7, 27],
+      ["r-day", w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 28],
+    ].forEach(function (s) {
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("class", s[0]);
+      path.setAttribute("d", rule(s[1], s[2], s[3], s[4], s[5], s[6]));
+      svg.appendChild(path);
+    });
+  }
+  // As the feast page's: WebKit can run this before style.css applies.
+  if (getComputedStyle(document.documentElement).getPropertyValue("--bg")) {
+    draw();
+  } else {
+    window.addEventListener("load", draw);
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(draw).observe(tablet);
   else window.addEventListener("resize", draw);
   if (document.fonts) document.fonts.ready.then(draw);
 })();

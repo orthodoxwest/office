@@ -252,13 +252,18 @@ impl Server {
     }
 
     pub fn about(&self, req: &Req) -> Response<Body> {
-        let data = AboutData::new(Chrome {
-            page: "about".into(),
-            nav_date: self.nav_date_now(req),
-            site: req.site.into(),
-            canonical: "/about".into(),
-            ..Chrome::default()
-        });
+        let (now, now_hour) = now_in(&self.user_location(req));
+        let data = AboutData::new(
+            Chrome {
+                page: "about".into(),
+                nav_date: date_slug(now),
+                site: req.site.into(),
+                canonical: "/about".into(),
+                ..Chrome::default()
+            },
+            now,
+            now_hour,
+        );
         match self.pages.about(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),
