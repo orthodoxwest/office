@@ -1200,6 +1200,26 @@ test("the crown plays nothing for a reader who asked for stillness or contrast, 
   await expect(page.locator(".home-crown-tap")).toBeHidden();
 });
 
+test("the crown makes the Menu's change in an Android app's own browser, whose stills go missing", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({
+    baseURL,
+    userAgent: "Mozilla/5.0 (Linux; Android 10; K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/157.0.0.0 Mobile Safari/537.36",
+  });
+  try {
+    const page = await context.newPage();
+    const tap = await openCrown(page);
+    await page.evaluate(() => {
+      window.crownClasses = [];
+      new MutationObserver(() => window.crownClasses.push(document.documentElement.className)).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    });
+    await tap.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await crownAtRest(page);
+    expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c)))).toEqual([]);
+    expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  } finally { await context.close(); }
+});
+
 test("the crown's button is the card's last control, a 44px target clear of the date, named for what it does", async ({ page }) => {
   for (const [width, height] of [[390, 844], [320, 568], [1280, 800]]) {
     await page.setViewportSize({ width, height });

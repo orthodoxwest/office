@@ -12641,3 +12641,10 @@ body.page-home::before {
 :root.crown-plain::view-transition-new(*) {
   animation: crown-plain-in 250ms linear both !important;
 }
+/* The page itself does not fade out under the new one: it stands whole
+   until the new has covered it, so nothing behind the two can show
+   between them. */
+:root.crown-plain::view-transition-old(root) {
+  animation: none !important;
+  opacity: 1 !important;
+}

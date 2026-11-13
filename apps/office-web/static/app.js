@@ -2981,7 +2981,12 @@ function rule(x1, y1, x2, y2, w, seed) {
     var PAINT = GROUND.concat(["maskImage", "maskSize", "maskPosition", "maskRepeat", "maskComposite", "webkitMaskImage", "webkitMaskSize", "webkitMaskPosition", "webkitMaskRepeat", "webkitMaskComposite"]);
 
     // ---- One playing at a time, and one way out of it. ----
-    var playing = null, plain = false, lastTap = 0, applying = false;
+    // Android's WebView (an app's own browser: "; wv)" in its name) has been
+    // seen to lose the leaving page's still, under these rules and under the
+    // browser's own crossfade alike: white for the whole first act. There the
+    // tap makes the Menu's change, which takes no stills.
+    var plain = /; wv\)/.test(navigator.userAgent || "");
+    var playing = null, lastTap = 0, applying = false;
     function applyOwn(choice) {
       applying = true;
       try { applyThemeChoice(choice); } finally { applying = false; }
