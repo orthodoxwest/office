@@ -163,6 +163,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        vm.inFront = true
         vm.refreshReminderStatus()
         // Every visit keeps the alarm window running ahead, and the widget current; following the
         // sun, the place is read again and the schedule follows it once it comes.
@@ -173,6 +174,11 @@ class MainActivity : ComponentActivity() {
         vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vm.inFront = false
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -524,6 +530,7 @@ fun OfficeApp(
                             content is Content.Failed -> Message(content.message, insets)
                             page is Page.Home && content is Content.Home -> HomeScreen(
                                 view = content.view,
+                                lightMoves = content.seen,
                                 date = page.date,
                                 today = today,
                                 chrome = chrome,

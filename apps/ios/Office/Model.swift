@@ -406,12 +406,21 @@ final class AppModel: ObservableObject {
     /// Whether `page` showed its scores: nil unless it is an hour composed, with a score.
     func chantShown(on page: Page) -> Bool? { hourShows[page]?.chant }
 
-    /// Called when the app comes forward, and every minute while it is in front: the hour or the
-    /// date may have turned since home was composed.
-    func refreshToday() {
-        let hour = civil.component(.hour, from: Date())
+    /// Whether the clock's last turn of the hour was seen happening, on a minute's tick while the
+    /// app was in front, rather than found on coming forward: home's light moves only for a turn
+    /// seen (`HourLightPass`), and a return is simply drawn as it now is.
+    private(set) var hourSeenTurning = false
+
+    /// Called when the app comes forward, and every minute while it is in front (`seen`): the hour
+    /// or the date may have turned since home was composed.
+    func refreshToday(seen: Bool = false) {
+        let date = Date()
+        let hour = civil.component(.hour, from: date)
         if hour != clockHour {
             step = nil
+            // A tick a minute apart finds the turn within its first minute; one later (a timer
+            // catching up as the app comes forward) found it, rather than saw it.
+            hourSeenTurning = seen && civil.component(.minute, from: date) == 0
             clockHour = hour
         }
         let now = pinnedToday ?? .of(Date())
