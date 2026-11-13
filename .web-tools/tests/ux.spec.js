@@ -5084,6 +5084,9 @@ test("the note fades on Tempo's settle for a word and a mark alike, and cuts und
     await trigger.click();
     await expect(note).not.toHaveClass(/closed|faded/);
     expect(parseFloat((await card(note)).duration), `${path}: a cut`).toBeLessThan(0.001);
+    // Measured at its full size, so it opens clear of what it explains, as with motion.
+    const [n, t] = await Promise.all([note.boundingBox(), trigger.boundingBox()]);
+    expect(n.y + n.height <= t.y || n.y >= t.y + t.height, `${path}: clear of its word`).toBe(true);
     await page.keyboard.press("Escape");
     await expect(note).toHaveClass(/closed/);
   }

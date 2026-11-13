@@ -2697,6 +2697,11 @@ html[data-newcomer] .home-season {
   font-size: 0.95rem;
   line-height: 1.45;
   text-align: left;
+  /* Only its ink ever changes over time. Without this, reduced motion's
+     global 0.01ms (below) would ease every property, so the note opened
+     with the closed box's padding and border, was measured that small, and
+     was set over its own mark. */
+  transition-property: opacity;
 }
 
 /* A mark's name is a word or two: the card is as wide as its words. */
@@ -2710,6 +2715,8 @@ html[data-newcomer] .home-season {
    the way out has run. Under reduced motion, a cut. */
 .gloss-note.faded {
   opacity: 0;
+  /* A card on its way out, or out of sight, never takes the pointer. */
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2724,6 +2731,7 @@ html[data-newcomer] .home-season {
 
 /* Closed, the note stays in the page as an empty live region, out of sight. */
 .gloss-note.closed {
+  pointer-events: none;
   width: 1px;
   height: 1px;
   padding: 0;
