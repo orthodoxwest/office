@@ -59,6 +59,22 @@ class ReminderTest {
         store.save(store.load().copy(on = on))
     }
 
+    /** The page's "Next:" line is read again as its reminder comes, or at midnight when none comes first (#808). */
+    @Test
+    fun theNextLineIsReadAgainAsItsReminderComesOrTheDayTurns() {
+        val now = ZonedDateTime.of(2026, 3, 15, 17, 0, 0, 0, zone)
+        val compline = ZonedDateTime.of(2026, 3, 15, 20, 50, 0, 0, zone)
+        assertEquals(compline, ReminderScheduler.nextLineStale(now, compline))
+        val midnight = ZonedDateTime.of(2026, 3, 16, 0, 0, 0, 0, zone)
+        assertEquals(midnight, ReminderScheduler.nextLineStale(now, ZonedDateTime.of(2026, 3, 16, 5, 50, 0, 0, zone)))
+        assertEquals(midnight, ReminderScheduler.nextLineStale(now, null))
+        // The first plan after a reminder comes names the one after it: the line moves on.
+        turn(on = true)
+        val settings = ReminderStore(app).load()
+        val first = ReminderScheduler.plan(settings, now).minOf { it.at }
+        assertTrue(ReminderScheduler.plan(settings, first).minOf { it.at }.isAfter(first))
+    }
+
     @Test
     fun nothingIsScheduledUntilRemindersAreOn() {
         ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))

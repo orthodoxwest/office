@@ -1,5 +1,35 @@
 // The engine prepares every ordinary form in the cached document. This file
 // selects a branch; it does not contain liturgical wording or rubric rules.
+
+// The reader's place, held while something changes the page around it: the
+// prayer form here, the text size (app.js) and a chant score drawn anew
+// (chant.js). The first block whose foot is below the top of the screen stays
+// where it stands; one read from its middle, across the top of the screen,
+// keeps the same share of itself above it, so a paragraph that grows with the
+// text size keeps the line at the top in view. A reader at the very top of the
+// page stays there.
+window.officeHoldPlace = function (change, blocks) {
+  // Without :is(), which a browser before Safari 14 and Chrome 88 would throw on.
+  var list = document.querySelectorAll(blocks || ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score");
+  var anchor = null;
+  var before = null;
+  if (window.scrollY > 0) {
+    for (var i = 0; i < list.length && !anchor; i++) {
+      var rect = list[i].getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < window.innerHeight && rect.height) {
+        anchor = list[i];
+        before = rect;
+      }
+    }
+  }
+  change();
+  if (!anchor) return;
+  var after = anchor.getBoundingClientRect();
+  if (!after.height) return;
+  var top = before.top < 0 ? (before.top / before.height) * after.height : before.top;
+  if (Math.abs(after.top - top) >= 0.5) window.scrollBy(0, after.top - top);
+};
+
 (function () {
   var root = document.documentElement;
   var leaders = ["private", "deacon", "priest"];
@@ -43,11 +73,6 @@
     selector.querySelector("fieldset").disabled = false;
     selector.addEventListener("change", function (event) {
       if (event.target.name !== "office-prayer-form" || leaders.indexOf(event.target.value) < 0) return;
-      var anchor = Array.from(document.querySelectorAll(".elements .leader-slot, .elements .psalm, .elements .canticle, .elements > .section-heading")).find(function (element) {
-        var rect = element.getBoundingClientRect();
-        return rect.bottom > 0 && rect.top < window.innerHeight;
-      });
-      var top = anchor ? anchor.getBoundingClientRect().top : 0;
       choice = event.target.value;
       try { localStorage.setItem("office-prayer-form", choice); } catch { propagate = true; }
       if (propagate) {
@@ -55,10 +80,12 @@
         url.searchParams.set("form", choice);
         history.replaceState(null, "", url.pathname + url.search + url.hash);
       }
-      syncControls();
-      selector.open = false;
-      selector.querySelector("summary").focus({ preventScroll: true });
-      if (anchor) window.scrollBy(0, anchor.getBoundingClientRect().top - top);
+      // A form changes whole slots of the office, so a slot is the place held.
+      window.officeHoldPlace(function () {
+        syncControls();
+        selector.open = false;
+        selector.querySelector("summary").focus({ preventScroll: true });
+      }, ".elements .leader-slot, .elements .psalm, .elements .canticle, .elements > .section-heading");
       syncLinks();
       document.getElementById("leader-status").textContent = "Prayers updated. " + event.target.nextElementSibling.textContent + ".";
       window.dispatchEvent(new Event("officeleaderchange"));

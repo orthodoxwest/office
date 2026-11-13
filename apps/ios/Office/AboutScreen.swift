@@ -257,7 +257,8 @@ private struct AboutHours: View {
                 if isNow { PoolAlongRow() }
             }
         }
-        .buttonStyle(Quiet())
+        // Pressed, the row lies under home's pool of light, a long lozenge under its words.
+        .buttonStyle(Lit { PoolOfLight(at: UnitPoint(x: 0.3, y: 0.5), size: CGSize(width: 0.88, height: 1.16)) })
         .accessibilityElement(children: .ignore)
         .accessibilityLabel([h.name, h.gloss, h.time, isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(.isButton)

@@ -315,6 +315,16 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /**
+     * A day chosen in the ordo's month: its visit is brought to that day, so a return to it (Back,
+     * or the way back after iOS has closed the app) opens at the day chosen, as the web's Back and
+     * its menu's Ordo do. The month stays the same page: nothing is composed or moved.
+     */
+    func choseInOrdo(_ date: CivilDate) {
+        guard case let .ordo(y, m, _)? = path.last?.page, y == Int(date.year), m == Int(date.month) else { return }
+        path[path.count - 1].page = .ordo(year: y, month: m, day: Int(date.day))
+    }
+
     /// The search's words changed: the search page takes them in place, with no move between pages.
     func search(_ query: String) {
         guard case let .find(q)? = path.last?.page, q != query else { return }
@@ -425,12 +435,23 @@ final class AppModel: ObservableObject {
     /// Whether `page` showed its scores: nil unless it is an hour composed, with a score.
     func chantShown(on page: Page) -> Bool? { hourShows[page]?.chant }
 
-    /// Called when the app comes forward, and every minute while it is in front: the hour or the
-    /// date may have turned since home was composed.
-    func refreshToday() {
-        let hour = civil.component(.hour, from: Date())
+    /// Whether the clock's last turn of the hour was seen happening, on a minute's tick while the
+    /// app was in front with home (the stack's root) showing, rather than found on coming forward
+    /// or on going back to home: home's light moves only for a turn seen (`HourLightPass`), and a
+    /// return is simply drawn as it now is. Home under another page composes again only when it
+    /// shows again, so a turn seen on that page must not count.
+    private(set) var hourSeenTurning = false
+
+    /// Called when the app comes forward, and every minute while it is in front (`seen`): the hour
+    /// or the date may have turned since home was composed.
+    func refreshToday(seen: Bool = false) {
+        let date = Date()
+        let hour = civil.component(.hour, from: date)
         if hour != clockHour {
             step = nil
+            // A tick a minute apart finds the turn within its first minute; one later (a timer
+            // catching up as the app comes forward) found it, rather than saw it.
+            hourSeenTurning = seen && path.isEmpty && civil.component(.minute, from: date) == 0
             clockHour = hour
         }
         let now = pinnedToday ?? .of(Date())

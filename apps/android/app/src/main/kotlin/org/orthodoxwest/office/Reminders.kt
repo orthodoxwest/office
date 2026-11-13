@@ -155,6 +155,15 @@ object ReminderScheduler {
         return last - now.toInstant().toEpochMilli() < REFILL.toMillis()
     }
 
+    /**
+     * When the page's "Next:" line goes stale: as the reminder it names comes (`next`, the plan's
+     * first `at`), or at the next midnight, when its "today" and "tomorrow" move; whichever is first.
+     */
+    fun nextLineStale(now: ZonedDateTime, next: ZonedDateTime?): ZonedDateTime {
+        val midnight = now.toLocalDate().plusDays(1).atStartOfDay(now.zone)
+        return if (next != null && next.isBefore(midnight)) next else midnight
+    }
+
     /** The reminders due from `now` over the window, as the alarms are set: the page's "Next:" line reads the first. */
     fun plan(settings: ReminderSettings, now: ZonedDateTime): List<Alarm> {
         if (!settings.on) return emptyList()

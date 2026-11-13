@@ -2,7 +2,12 @@ package org.orthodoxwest.office
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +50,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
@@ -54,9 +60,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
@@ -94,6 +100,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
+import org.orthodoxwest.office.core.LightFrame
+import org.orthodoxwest.office.core.hourLightAt
+import org.orthodoxwest.office.core.hourLightTotalMs
 import org.orthodoxwest.office.core.hourNote
 
 private val PERIODS = listOf(
@@ -109,6 +118,8 @@ private val PERIODS = listOf(
 @Composable
 fun HomeScreen(
     view: HomeView,
+    /** Composed for a turn of the hour seen while home was in front: the light moves with it. */
+    lightMoves: Boolean = false,
     date: LocalDate,
     today: LocalDate,
     chrome: @Composable () -> Unit,
@@ -191,6 +202,7 @@ fun HomeScreen(
                                     HomeTier(screen = screen, tall = tall, card = layout.card, dyn = outer.fontScale, wide = layout, heavy = heavy),
                                     niche = niche,
                                     onFeast = onFeast,
+                                    lightMoves = lightMoves,
                                 )
                             }
                             // Centred under the header: the niche's own room is the space below it.
@@ -212,6 +224,7 @@ fun HomeScreen(
                                 Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 13.6.dp),
                                 HomeTier(screen = screen, tall = tall, card = card, dyn = LocalDensity.current.fontScale),
                                 onFeast = onFeast,
+                                lightMoves = lightMoves,
                             )
                         },
                         foot = Gutter,
@@ -427,10 +440,12 @@ private fun Frontispiece(
     tier: HomeTier,
     niche: NicheTokens? = null,
     onFeast: (String) -> Unit = {},
+    lightMoves: Boolean = false,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val frame = frontispieceFrame(p)
+    val light = rememberHourLight(HourLit(view.currentHour, view.currentHourNote, view.prayNowLabel), lightMoves)
     val panelPlaster = ImageBitmap.imageResource(p.panel)
     var picking by remember { mutableStateOf(false) }
     val follow = LocalFollow.current
@@ -715,9 +730,12 @@ private fun Frontispiece(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(tier.bandGap))
-                    PrayNow(view.prayNowLabel, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    // The light moves with the hours: drawn each frame of a pass from the shared
+                    // figures, and at rest from the view.
+                    val lit = light?.lit ?: HourLit(view.currentHour, view.currentHourNote, view.prayNowLabel)
+                    PrayNow(lit.label, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null, light?.words ?: 1f) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
-                    HourDirectory(view.currentHour, view.currentHourNote, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
+                    HourDirectory(lit.hour, lit.note, light, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
             },
             // The stage's second face: the day's turn and the calendar, always laid out so its
@@ -923,23 +941,32 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
  * the same tablet; on home `size`, `top` and `bottom` are the tier's.
  */
 @Composable
-fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, wash: Color, lifted: Color?, onClick: () -> Unit) {
+fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, wash: Color, lifted: Color?, words: Float = 1f, onClick: () -> Unit) {
     val p = LocalPalette.current
     val tablet = ImageBitmap.imageResource(R.drawable.tablet)
+    // The tablet answers the finger as a thing, not a dimmed word (the web's `.pray-now:active`):
+    // its inner rule takes the accent and its wash deepens by half again, at once, and both go back
+    // over Tempo's touch; the outer lining stands, and nothing scales.
+    val source = remember { MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val held by animateFloatAsState(if (pressed) 1f else 0f, if (pressed) snap() else Tempo.touchOut.spec(), label = "tablet")
+    val deeper = if (p.dark) Color(132, 160, 204).copy(alpha = 0.2f) else Ochre.copy(alpha = 0.29f)
     Box(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 44.dp)
             .crownUnit("r-pray")
-            .tap(onClick = onClick)
+            .tap(source = source, onClick = onClick)
             .drawBehind {
-                tabletWash(tablet, wash)
+                tabletWash(tablet, lerp(wash, deeper, held))
                 invitationRules(p.lining, frontal)
+                if (held > 0f) invitationRules(Color.Transparent, p.accent.copy(alpha = held), day = 1f)
             }
             .padding(top = top, bottom = bottom, start = 13.8.dp, end = 13.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.3f).sp, letterSpacing = (size * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+        // The words alone go out and come back as the light moves to another hour.
+        Text(label, if (words < 1f) Modifier.alpha(words) else Modifier, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.3f).sp, letterSpacing = (size * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
     }
 }
 
@@ -953,7 +980,7 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
  * colour alone; from 1000 high the hours stand one to a line there ([HourList]).
  */
 @Composable
-private fun HourDirectory(current: String, note: String, prayed: Set<String>, tier: HomeTier, now: Color, home: HomeInk, onHour: (String) -> Unit) {
+private fun HourDirectory(current: String, note: String, light: HourLightNow?, prayed: Set<String>, tier: HomeTier, now: Color, home: HomeInk, onHour: (String) -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val desk = tier.desk
@@ -980,7 +1007,7 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
     ) {
         PERIODS.forEachIndexed { i, (period, label, hours) ->
             if (tier.list) {
-                HourList(i, period, label, hours, current, prayed, tier, now, home, labelStyle, joints, onHour)
+                HourList(i, period, label, hours, current, light, prayed, tier, now, home, labelStyle, joints, onHour)
                 return@forEachIndexed
             }
             Row(
@@ -1005,14 +1032,10 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                         val gloss = if (desk) hourNote(h) else if (isNow) note else ""
                         val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { isNow }, "prayed".takeIf { done })
                         // The light rests on the hour that is now: a pool with no edge, at most
-                        // 9.5rem across (11rem in the niche).
-                        val pool = if (isNow) Modifier.drawBehind {
-                            val r = minOf(size.width + (if (desk) 12.dp else 8.dp).toPx(), (if (desk) 176.dp else 152.dp).toPx()) / 2f
-                            val ry = (size.height + (if (desk) 8.dp else 4.dp).toPx()) / 2f
-                            scale(1f, ry / r, pivot = center) {
-                                drawCircle(poolBrush(home.nowPool, center, r), r, center)
-                            }
-                        } else Modifier
+                        // 9.5rem across (11rem in the niche). A finger lights any hour's ([Lit]).
+                        val shape = if (desk) PoolShape(outsetX = 6.dp, outsetY = 4.dp, max = 176.dp) else PoolShape(outsetX = 4.dp, outsetY = 2.dp, max = 152.dp)
+                        val lightness = light?.pool(h) ?: if (isNow) 1f else 0f
+                        val pool = if (lightness > 0f) Modifier.drawBehind { poolOfLight(home.nowPool, shape, lightness) } else Modifier
                         Box(
                             Modifier.weight(1f).fillMaxHeight().then(pool).drawBehind {
                                 // A gilt point before every hour but the first of its band.
@@ -1020,16 +1043,17 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                                     val d = 3.5.dp.toPx()
                                     drawRect(o.flat.copy(alpha = 0.7f), Offset(-d / 2f, size.height / 2f - d / 2f), Size(d, d))
                                 }
-                            }.tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) },
+                            }.tap(label = if (said.size > 1) said.joinToString(", ") else null, lit = Lit(home.nowPool, shape, if (p.dark) 1f else 0.7f, isNow)) { onHour(h) },
                             contentAlignment = Alignment.Center,
                         ) {
                             // An hour prayed today withdraws to the muted ink, a small gilt cross at its
                             // shoulder, as the web's `.is-prayed`; the cross takes no width.
-                            val ink = if (done) p.muted else if (isNow) now else p.text
+                            val ink = light?.ink(h, if (done) p.muted else now, if (done) p.muted else p.text) ?: if (done) p.muted else if (isNow) now else p.text
                             val size = if (isNow) tier.hourNow else tier.hour
                             val name = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.2f).sp, letterSpacing = 0.31.sp, color = ink)
+                            val seat = light?.name(h) ?: 1f
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box {
+                                Box(if (seat < 1f) Modifier.alpha(seat) else Modifier) {
                                     // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
                                     BasicText(
                                         hourLabel(h),
@@ -1045,7 +1069,8 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                                 if (gloss.isNotEmpty()) {
                                     // A short screen's gloss, held at 12 in so small a niche, takes a
                                     // second line rather than running into its neighbour.
-                                    Text(gloss, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = if (tier.shortScreen) 2 else 1, softWrap = tier.shortScreen)
+                                    val shown = if (desk) 1f else light?.gloss(h) ?: 1f
+                                    Text(gloss, if (shown < 1f) Modifier.alpha(shown) else Modifier, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = if (tier.shortScreen) 2 else 1, softWrap = tier.shortScreen)
                                 }
                             }
                         }
@@ -1070,6 +1095,7 @@ private fun HourList(
     label: String,
     hours: List<String>,
     current: String,
+    light: HourLightNow?,
     prayed: Set<String>,
     tier: HomeTier,
     now: Color,
@@ -1095,27 +1121,25 @@ private fun HourList(
                         val isNow = h == current
                         val gloss = hourNote(h)
                         val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { isNow }, "prayed".takeIf { done })
-                        // The pool of light under the hour that is now, from a little before its name.
-                        val pool = if (isNow) Modifier.drawBehind {
-                            val r = 136.dp.toPx()
-                            val c = Offset(r - 19.2.dp.toPx(), size.height / 2f)
-                            val ry = (size.height + 6.dp.toPx()) / 2f
-                            scale(1f, ry / r, pivot = c) {
-                                drawCircle(poolBrush(home.nowPool, c, r), r, c)
-                            }
-                        } else Modifier
+                        // The pool of light under the hour that is now, from a little before its
+                        // name; a finger lights any hour's ([Lit]).
+                        val shape = PoolShape(span = 272.dp, lead = 19.2.dp, outsetY = 3.dp)
+                        val lightness = light?.pool(h) ?: if (isNow) 1f else 0f
+                        val pool = if (lightness > 0f) Modifier.drawBehind { poolOfLight(home.nowPool, shape, lightness) } else Modifier
                         Row(
-                            Modifier.fillMaxWidth().heightIn(min = tier.row).then(pool).tap(label = said.joinToString(", ")) { onHour(h) },
+                            Modifier.fillMaxWidth().heightIn(min = tier.row).then(pool)
+                                .tap(label = said.joinToString(", "), lit = Lit(home.nowPool, shape, if (p.dark) 1f else 0.7f, isNow)) { onHour(h) },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            val ink = if (done) p.muted else if (isNow) now else p.text
+                            val ink = light?.ink(h, if (done) p.muted else now, if (done) p.muted else p.text) ?: if (done) p.muted else if (isNow) now else p.text
                             val size = if (isNow) tier.hourNow else tier.hour
+                            val seat = light?.name(h) ?: 1f
                             Box(Modifier.width(100.8.dp)) {
-                                Text(hourLabel(h), style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.2f).sp, letterSpacing = 0.31.sp, color = ink), maxLines = 1, softWrap = false)
+                                Text(hourLabel(h), if (seat < 1f) Modifier.alpha(seat) else Modifier, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.2f).sp, letterSpacing = 0.31.sp, color = ink), maxLines = 1, softWrap = false)
                                 if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = (-6).dp, y = 2.dp).size(7.dp), ink = p.gold)
                             }
                             Canvas(Modifier.padding(end = 13.6.dp).size(5.dp)) { lozenge(center, 1.75.dp.toPx(), o.flat.copy(alpha = 0.7f), null) }
-                            Text(gloss, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic), maxLines = 1, softWrap = false)
+                            Text(gloss, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic), maxLines = 1, softWrap = false)
                         }
                     }
                 }
@@ -1138,4 +1162,73 @@ private fun HourList(
             list.place(side, 0)
         }
     }
+}
+
+/** What home's light rests on: the hour that is now (none in the small hours), its gloss, the invitation's words. */
+internal data class HourLit(val hour: String, val note: String, val label: String)
+
+/** The light moving with the hours (the web's `HOUR_LIGHT`, `render_blocks::hour_light`), from one hour to the next. */
+internal class HourLightPass(val from: HourLit, val to: HourLit)
+
+/**
+ * The light on home, moving when the hour that is now turns while home is in front (`moves`) and
+ * the system animates (Remove animations shows the new hour at once, as a return does). A second
+ * turn during a pass starts from where the first was going. Null at rest.
+ */
+@Composable
+private fun rememberHourLight(lit: HourLit, moves: Boolean): HourLightNow? {
+    val context = LocalContext.current
+    var shown by remember { mutableStateOf(lit) }
+    var pass by remember { mutableStateOf<HourLightPass?>(null) }
+    val elapsed = remember { Animatable(0f) }
+    val animates = remember(context) {
+        android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    }
+    val passes = moves && animates
+    LaunchedEffect(lit) {
+        val from = shown
+        shown = lit
+        if (from == lit || !passes) return@LaunchedEffect
+        val mine = HourLightPass(from, lit)
+        try {
+            elapsed.snapTo(0f)
+            pass = mine
+            val total = hourLightTotalMs().toInt()
+            elapsed.animateTo(total.toFloat(), tween(total, easing = LinearEasing))
+        } finally {
+            if (pass === mine) pass = null
+        }
+    }
+    // The frame that brings the new hour, before the pass has begun, is the pass's first.
+    val now = pass ?: if (passes && lit != shown) HourLightPass(shown, lit) else null
+    return now?.let { HourLightNow(it, hourLightAt(if (pass != null) elapsed.value else 0f)) }
+}
+
+/**
+ * One frame of a pass. The pool under the old hour dies as the new one's gathers, the names' ink
+ * turns, the old gloss goes and the new comes; a name whose seat changes, and the invitation's
+ * words, go out where they stood and come back where they belong ([lit] changes while they are
+ * out), never sliding.
+ */
+internal class HourLightNow(private val pass: HourLightPass, private val frame: LightFrame) {
+    /** What the page is laid out for: the old hour's until the words are out, then the new's. */
+    val lit: HourLit get() = if (frame.seated) pass.to else pass.from
+    private val moves = pass.from.hour != pass.to.hour
+    private fun touched(h: String) = moves && (h == pass.from.hour || h == pass.to.hour)
+
+    /** The invitation's words. */
+    val words: Float get() = if (pass.from.label == pass.to.label) 1f else frame.words
+
+    /** The pool under `h`, or null where the pass leaves it as it is. */
+    fun pool(h: String): Float? = if (!touched(h)) null else if (h == pass.from.hour) frame.leavingPool else frame.comingPool
+
+    /** A name's opacity: out and back as its seat changes. */
+    fun name(h: String): Float = if (touched(h)) frame.words else 1f
+
+    /** The ink of `h`'s name or gloss, between its ink as the hour that is now and its plain ink. */
+    fun ink(h: String, now: Color, plain: Color): Color? =
+        if (!touched(h)) null else mix(now, plain, if (h == pass.from.hour) 1f - frame.ink else frame.ink)
+
+    /** A phone's gloss, shown only under the hour that is now. */
+    fun gloss(h: String): Float = if (!touched(h)) 1f else if (h == pass.from.hour) frame.leavingGloss else frame.comingGloss
 }

@@ -158,6 +158,14 @@ enum ReminderScheduler {
     /// iOS's pending limit, less room for a snoozed reminder or two.
     static let capacity = 60
 
+    /// When the page's "Next:" line goes stale: as the reminder it names comes (`next`, the plan's
+    /// first fire date), or at the next midnight, when its "today" and "tomorrow" move; whichever is first.
+    static func nextLineStale(now: Date, next: Date?, calendar: Calendar = .current) -> Date {
+        let midnight = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now.addingTimeInterval(24 * 60 * 60)
+        guard let next, next < midnight else { return midnight }
+        return next
+    }
+
     /// The reminders due from `now`, earliest first, no more than fit.
     static func plan(_ settings: ReminderSettings, now: Date, core: OfficeCore, calendar: Calendar = .current) throws -> [PlannedReminder] {
         guard settings.on else { return [] }

@@ -859,7 +859,7 @@ summary:focus-visible {
   appearance: none;
   border: none;
   border-right: 1px solid var(--surface-edge);
-  background: transparent;
+  background-color: transparent;
   color: var(--muted);
   font: inherit;
   font-size: 0.72rem;
@@ -917,7 +917,7 @@ summary:focus-visible {
    underline, not a filled cell. One vocabulary for "this is the one". */
 .theme-option[aria-pressed="true"],
 .text-size-option[aria-pressed="true"] {
-  background: transparent;
+  background-color: transparent;
   color: var(--accent);
   box-shadow: inset 0 -1px 0 var(--ornament);
 }
@@ -1135,7 +1135,7 @@ summary:focus-visible {
   /* The current page wears the header's terracotta underline — a filled
      cell reads as a settings panel. */
   .site-menu nav a.active {
-    background: transparent;
+    background-color: transparent;
     border-bottom: none;
     box-shadow: inset 0 -1.5px 0 var(--lining);
   }
@@ -1299,7 +1299,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: inherit;
   text-decoration: none;
   border-bottom: 1px dotted transparent;
-  transition: border-color 0.15s, color 0.15s, background-color 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition: border-color 0.15s, color 0.15s, opacity var(--tempo-touch-out) var(--tempo-touch-out-curve);
 }
 
 .home-date-link:hover {
@@ -1440,7 +1440,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-decoration: none;
   letter-spacing: 0.02em;
   border-radius: 2px;
-  transition: background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out;
+  transition-property: background, color, border-color;
+  transition-duration: var(--tempo-touch-out);
+  transition-timing-function: var(--tempo-touch-out-curve);
 }
 
 /* Framing and spacing live in .page-home .home-hour-link below; the base
@@ -1450,7 +1452,9 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   align-items: center;
   color: var(--text);
   text-decoration: none;
-  transition: border-color 0.2s ease-out, background 0.2s ease-out, color 0.2s ease-out;
+  transition-property: border-color, background, color;
+  transition-duration: var(--tempo-touch-out);
+  transition-timing-function: var(--tempo-touch-out-curve);
 }
 
 .home-hour-link-name {
@@ -2153,10 +2157,8 @@ html[data-newcomer] .home-season {
   }
 }
 
-:is(.date-picker-day, .date-picker-month, .date-picker-step:not(:disabled), .date-picker-title):is(:active, .is-pressed) {
-  background-color: var(--pressed-wash);
-  box-shadow: inset 0 1px 2px var(--surface-edge);
-}
+/* Pressed, a day or month lies under the pool of light; the arrows and
+   the title dim ("Light under the finger"). */
 
 /* Inside a tight grid the usual 3px offset would ring the neighbours. */
 .date-picker a:focus-visible,
@@ -3897,9 +3899,24 @@ html[data-newcomer] .home-season {
 }
 /* A finger on a row: app.js marks it (.is-pressed) after a rest or on the
    tap, not :active, which iOS Safari sets under a thumb starting a scroll.
-   The row keeps it until the page leaves. */
-.js .month-table tr.day.is-pressed > td {
-  background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash));
+   The row keeps it until the page leaves. It lies under home's pool of
+   light, a long lozenge under the day's name with no edge at the rules, at
+   full strength, and the day's rail runs the row's full height. */
+.month-table tr.day > td:first-child::before {
+  transition:
+    top var(--tempo-touch-out) var(--tempo-touch-out-curve),
+    bottom var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+.js .month-table tr.day.is-pressed > td:first-child::before {
+  top: 0;
+  bottom: 0;
+  transition-duration: var(--tempo-touch-reach);
+  transition-timing-function: var(--tempo-touch-reach-curve);
+}
+@media (min-width: 701px) {
+  .js .month-table tr.day.is-pressed > td.day-feast {
+    background-image: radial-gradient(ellipse 44% 58% at 30% 50%, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 50%, transparent 100%);
+  }
 }
 /* The day arrived at keeps its gold ground until the reader moves on (app.js
    lets it go at the first scroll of their own, .target-released), so it never
@@ -4195,6 +4212,34 @@ html[data-newcomer] .home-season {
     width: 3px;
     background: var(--day-color, var(--border));
     z-index: 1;
+  }
+  .month-table tr.day {
+    isolation: isolate;
+  }
+  .month-table tr.day::before {
+    transition:
+      top var(--tempo-touch-out) var(--tempo-touch-out-curve),
+      height var(--tempo-touch-out) var(--tempo-touch-out-curve);
+  }
+  .month-table tr.day::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(ellipse 44% 58% at 44% 50%, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 50%, transparent 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--tempo-touch-out) var(--tempo-touch-out-curve);
+  }
+  .js .month-table tr.day.is-pressed::after {
+    opacity: 1;
+    transition: none;
+  }
+  .js .month-table tr.day.is-pressed::before {
+    top: 0;
+    height: 100%;
+    transition-duration: var(--tempo-touch-reach);
+    transition-timing-function: var(--tempo-touch-reach-curve);
   }
   .month-table .day-feast {
     display: grid;
@@ -5381,27 +5426,123 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    (the reduce block below is a second belt), and every piece degrades to the
    current instant behaviour in browsers that lack the feature. */
 
+/* Tempo: the app's five motions and three curves, render_blocks::Tempo, as
+   the apps' Tempo.swift and Tempo.kt have them (a test there reads this
+   block). Each motion's way in and way out, its wait, and its curve:
+     touch   a press at once; let go over 200ms. Bare words dim to 0.7
+             (quiet); what a press moves, the ordo's rail, reaches in 120ms
+     settle  a panel in 160ms; out in 120
+     unfold  a disclosure opens in 260ms; folds in 200
+     turn    page to page: the old out in 90ms, then the new in 210
+     dim     the room changing: 320ms
+   No motion takes the browser's own `ease`. */
+:root {
+  --curve-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --curve-arrive: cubic-bezier(0, 0, 0.2, 1);
+  --curve-leave: cubic-bezier(0.4, 0, 1, 1);
+  --tempo-touch-in: 0ms;
+  --tempo-touch-in-delay: 0ms;
+  --tempo-touch-in-curve: var(--curve-arrive);
+  --tempo-touch-out: 200ms;
+  --tempo-touch-out-delay: 0ms;
+  --tempo-touch-out-curve: var(--curve-arrive);
+  --tempo-touch-quiet: 0.7;
+  --tempo-touch-reach: 120ms;
+  --tempo-touch-reach-delay: 0ms;
+  --tempo-touch-reach-curve: var(--curve-arrive);
+  --tempo-settle-in: 160ms;
+  --tempo-settle-in-delay: 0ms;
+  --tempo-settle-in-curve: var(--curve-arrive);
+  --tempo-settle-out: 120ms;
+  --tempo-settle-out-delay: 0ms;
+  --tempo-settle-out-curve: var(--curve-leave);
+  --tempo-unfold-in: 260ms;
+  --tempo-unfold-in-delay: 0ms;
+  --tempo-unfold-in-curve: var(--curve-standard);
+  --tempo-unfold-out: 200ms;
+  --tempo-unfold-out-delay: 0ms;
+  --tempo-unfold-out-curve: var(--curve-standard);
+  --tempo-turn-in: 210ms;
+  --tempo-turn-in-delay: 90ms;
+  --tempo-turn-in-curve: var(--curve-arrive);
+  --tempo-turn-out: 90ms;
+  --tempo-turn-out-delay: 0ms;
+  --tempo-turn-out-curve: var(--curve-leave);
+  --tempo-dim-in: 320ms;
+  --tempo-dim-in-delay: 0ms;
+  --tempo-dim-in-curve: var(--curve-standard);
+  --tempo-dim-out: 320ms;
+  --tempo-dim-out-delay: 0ms;
+  --tempo-dim-out-curve: var(--curve-standard);
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  /* Cross-document view transitions. Same-origin navigations (hour → hour,
-     home → hour, ordo → hour) crossfade rather than flashing between paints.
-     This is the browser's default root crossfade — the pseudo-element rule
-     only pins the duration a hair under the UA default so it stays a blink
-     and not a fade the reader waits on. Unsupporting browsers ignore both
-     rules and navigate exactly as before. */
+  /* Through the wall. A same-origin navigation (hour to hour, home to an
+     hour, the ordo to a day) is Tempo's turn, as in the apps: the page goes
+     in 90ms, and only then does the next come up, in 210ms, so two pages of
+     prayer are never seen over each other. The wall is under both: at the
+     turn's middle there is only the plaster, the beam and the day's colour.
+     No slide (see above). Chromium 126+ and Safari 18.2+; elsewhere, and
+     under reduced motion, a cut, as before. */
   @view-transition {
     navigation: auto;
   }
 
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 220ms;
-    animation-timing-function: ease;
+  /* The header and the hour's colour band stand still where both pages have
+     them: each is its own group (site-header, color-band), held and not
+     faded. The layout's first script names them only as a page is captured
+     (pageswap on the old page, pagereveal on the new), and leaves a header
+     scrolled out of sight unnamed, so it comes up with its page rather than
+     appearing at once over the last page's prayers. A name held all the time
+     would make the header a stacking context and sink Settings' panel under
+     the page. */
+
+  ::view-transition-old(root) {
+    animation: vt-leave var(--tempo-turn-out) var(--tempo-turn-out-curve) var(--tempo-turn-out-delay) both;
   }
+
+  ::view-transition-new(root) {
+    animation: vt-arrive var(--tempo-turn-in) var(--tempo-turn-in-curve) var(--tempo-turn-in-delay) both;
+  }
+
+  /* One page is put away before the next is taken up: never blended. */
+  ::view-transition-image-pair(root) { isolation: auto; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { mix-blend-mode: normal; }
+
+  /* Held: the beam does not move or fade when both pages have it; the new
+     one is shown throughout (it is the same paint). The band stands too,
+     and where the day's colour changes, the one colour gives way to the
+     other over the whole turn rather than at its start. */
+  ::view-transition-group(site-header),
+  ::view-transition-group(color-band) { animation: none; }
+  ::view-transition-old(site-header):not(:only-child) { display: none; }
+  ::view-transition-new(site-header):not(:only-child) { animation: none; mix-blend-mode: normal; }
+  ::view-transition-old(color-band):not(:only-child),
+  ::view-transition-new(color-band):not(:only-child) {
+    animation-duration: calc(var(--tempo-turn-in-delay) + var(--tempo-turn-in));
+    animation-timing-function: linear;
+  }
+
+  /* One page has it and the other not (a header out of sight, the band of an
+     hour left for home): it goes and comes with its page. */
+  ::view-transition-old(site-header):only-child,
+  ::view-transition-old(color-band):only-child {
+    animation: vt-leave var(--tempo-turn-out) var(--tempo-turn-out-curve) both;
+  }
+  ::view-transition-new(site-header):only-child,
+  ::view-transition-new(color-band):only-child {
+    animation: vt-arrive var(--tempo-turn-in) var(--tempo-turn-in-curve) var(--tempo-turn-in-delay) both;
+  }
+
+  @keyframes vt-leave { to { opacity: 0; } }
+  @keyframes vt-arrive { from { opacity: 0; } }
 
   /* Disclosures unfold instead of popping open, as the apps' do: the height
      over 260ms on the standard curve, the contents fading in over 200ms after
      60; folding, the height over 200ms and the contents out over 100ms
-     (Android's UNFOLD_MS and FOLD_MS, iOS's unfolding, folding and .unfold).
+     (Tempo's unfold, render_blocks::tempo; Android's UNFOLD_MS and FOLD_MS, iOS's
+     unfolding, folding and .unfold).
      interpolate-size lets a 0 → auto height animate, Chromium 129+; where it
      is missing (Safari, Firefox) app.js turns the same fold in script, so this
      whole path stands behind @supports and the two never run together.
@@ -5424,9 +5565,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
       opacity: 0;
       overflow: clip;
       transition:
-        block-size 200ms cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 100ms cubic-bezier(0.4, 0, 1, 1),
-        content-visibility 200ms allow-discrete;
+        block-size var(--tempo-unfold-out) var(--tempo-unfold-out-curve),
+        opacity calc(var(--tempo-unfold-out) / 2) var(--curve-leave),
+        content-visibility var(--tempo-unfold-out) allow-discrete;
     }
 
     :root.motion-ready details.hour-date-nav[open]::details-content,
@@ -5437,9 +5578,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
       block-size: auto;
       opacity: 1;
       transition:
-        block-size 260ms cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 200ms cubic-bezier(0, 0, 0.2, 1) 60ms,
-        content-visibility 260ms allow-discrete;
+        block-size var(--tempo-unfold-in) var(--tempo-unfold-in-curve),
+        opacity calc(var(--tempo-unfold-in) - 60ms) var(--curve-arrive) 60ms,
+        content-visibility var(--tempo-unfold-in) allow-discrete;
     }
 
     /* app.js lays home's head out with the picker settled, to ease the head
@@ -5500,25 +5641,27 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 /* The mobile site menu is an absolutely positioned dropdown, so it has no
-   in-flow height to unfold; it fades and settles the last few pixels instead.
+   in-flow height to unfold; it fades and settles the last few pixels instead,
+   on Tempo's settle: in over 160ms, away faster, over 120.
    Desktop shows the nav regardless of [open] (and app.js force-opens it), and
    this block never applies there. */
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
-  :root.motion-ready .site-menu-panel {
-    transition:
-      opacity 160ms ease-out,
-      transform 160ms ease-out,
-      display 160ms allow-discrete;
-  }
-
   :root.motion-ready .site-menu:not([open]) > .site-menu-panel {
     opacity: 0;
     transform: translateY(-0.3rem);
+    transition:
+      opacity var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      transform var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      display var(--tempo-settle-out) allow-discrete;
   }
 
   :root.motion-ready .site-menu[open] > .site-menu-panel {
     opacity: 1;
     transform: none;
+    transition:
+      opacity var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      transform var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      display var(--tempo-settle-in) allow-discrete;
   }
 
   /* A link chosen in the menu puts it away at once (app.js), so it does not
@@ -5538,21 +5681,22 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 /* Wide screens' Settings panel settles the same way. */
 @media (min-width: 701px) and (prefers-reduced-motion: no-preference) {
-  :root.motion-ready .settings-prefs {
-    transition:
-      opacity 160ms ease-out,
-      transform 160ms ease-out,
-      display 160ms allow-discrete;
-  }
-
   :root.motion-ready .site-settings:not([open]) > .settings-prefs {
     opacity: 0;
     transform: translateY(-0.3rem);
+    transition:
+      opacity var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      transform var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      display var(--tempo-settle-out) allow-discrete;
   }
 
   :root.motion-ready .site-settings[open] > .settings-prefs {
     opacity: 1;
     transform: none;
+    transition:
+      opacity var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      transform var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      display var(--tempo-settle-in) allow-discrete;
   }
 
   @starting-style {
@@ -7074,11 +7218,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   pointer-events: none;
 }
 
-:is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
-  border-color: var(--accent);
-  background: rgba(107, 58, 31, 0.1);
-}
-
 @media (hover: hover) {
   :is(.page-home, .about-door) .pray-now:hover {
     border-color: var(--accent);
@@ -7220,21 +7359,13 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    brushed patch read as a highlight box), and its name is rubricated. Its
    gloss keeps one line: with no cell walls it may overhang a little. On the
    wide niche the cell is wide, and the pool keeps its own size. */
-.page-home .home-hour-link.is-current {
+/* While the light moves from one hour to the next (app.js's HOUR_LIGHT), the
+   hour it leaves and the hour it comes to (.is-passing) both hold a pool, which
+   the pass fades out and in. */
+.page-home .home-hour-link:is(.is-current, .is-passing) {
   isolation: isolate;
   background: none;
   box-shadow: none;
-}
-
-.page-home .home-hour-link.is-current::after {
-  content: "";
-  position: absolute;
-  inset: -2px -4px;
-  z-index: -1;
-  max-width: 9.5rem;
-  margin-inline: auto;
-  background: radial-gradient(closest-side, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent 100%);
-  pointer-events: none;
 }
 
 .page-home .home-hour-link.is-current .home-hour-link-name {
@@ -7412,10 +7543,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     color: var(--lining);
   }
 
-  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
-    border-color: var(--accent);
-    background: rgba(208, 176, 106, 0.14);
-  }
 }
 
 :root[data-theme="dark"] .page-home .home-hero {
@@ -7439,11 +7566,6 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   border-color: var(--lining);
   background: transparent;
   color: var(--lining);
-}
-
-:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
-  border-color: var(--accent);
-  background: rgba(208, 176, 106, 0.14);
 }
 
 /* The Apse's phone panel. By day the plaster frame is paler than the panel
@@ -9623,7 +9745,7 @@ body.rank-first-class .home-crown {
 
   :is(.page-home, .about-door) .home-rules,
   :is(.page-home, .about-door) .pray-now::before,
-  .page-home .home-hour-link.is-current::after,
+  .page-home .home-hour-link::after,
   .about-hour.is-current::before {
     display: none;
   }
@@ -9786,23 +9908,52 @@ html {
   user-select: none;
 }
 
-/* Pressed controls darken inward like a thumb settling on a page edge.
-   Background only: no bounce, scale, glow, or delayed animation, and no
-   effect on selectable prayer text. Individual controls keep their own
-   borders and typography while sharing one material response.
+/* Light under the finger. A pressed row lies under home's pool of light,
+   the edgeless pool that marks the hour that is now: the hours, the ordo's
+   days, the picker's days, About's hours, the phone menu's cells and the
+   settings' choices. Bare words on the wall dim instead. A few controls
+   with a ground of their own (the search's button, the reminders' choices)
+   darken inward like a thumb on a page edge. Nothing scales, slides or
+   glows, nothing touches selectable prayer text, and a resting pointer
+   lights nothing: the pool means "here, now", and a hover would put two
+   lit hours on the table.
 
-   A press shows at once and lets go over 200ms, the apps' figure: a tap is
-   over in a few frames, and a wash that eased in was never seen before the
+   A press shows at once and lets go over Tempo's touch (200ms): a tap is
+   over in a few frames, and a press that eased in was never seen before the
    page left. :active is the platform's press; .is-pressed is app.js's, for
    a touch browser that sets :active late or not at all (see "A finger on a
-   control" there). Zero specificity: a control's own transition stands. */
+   control" there). The release lives on the resting state at zero
+   specificity, so a control's own transition stands. */
+@property --press {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+:is(a, button, summary, label, [role="button"], tr.day):is(:active, .is-pressed),
+:is(a, button, summary, label, [role="button"], tr.day):is(:active, .is-pressed)::after,
+.about-hour:has(dt a:is(:active, .is-pressed)) {
+  transition-duration: 0s !important;
+}
+
+/* Darkened inward: controls with a ground of their own. */
+:where(.find-submit, .date-submit, .find-year, .reminder-hour-name, .reminder-day, .reminder-subscribe, .reminder-copy) {
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--tempo-touch-out);
+  transition-timing-function: var(--tempo-touch-out-curve);
+}
+
+:is(.find-submit, .date-submit, .find-year, .reminder-hour-name, .reminder-day, .reminder-subscribe, .reminder-copy):is(:active, .is-pressed) {
+  background-color: var(--pressed-wash);
+  box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+/* Dimmed: bare words on the wall. The ink withdraws to 70%, as the apps'
+   pressed words do. */
 :where(
   .site-brand,
   .site-menu > summary,
   .site-settings > summary,
-  .site-menu nav a,
-  .theme-option,
-  .text-size-option,
   .hour-date-nav > summary,
   .session-prayers > summary,
   .day-nav a,
@@ -9820,24 +9971,16 @@ html {
   .calendar-expand,
   .day-disclosures summary,
   .tabula-tables dd a,
-  .find-submit,
   .find-back,
   .from-feast,
   .find-name,
-  .find-year,
   .feast-next,
-  .about-hour,
   .about a,
-  .reminder-hour-name,
-  .reminder-day,
-  .reminder-subscribe,
-  .reminder-copy,
   .reminder-address > summary,
   .reminder-help > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
-  .date-submit,
   .report-issue a,
   .find-meta a,
   .feast-everyone a,
@@ -9847,24 +9990,20 @@ html {
   .usage-notes summary,
   .usage-trend-details summary,
   .not-found-home a,
-  .usage-explore-link
+  .usage-explore-link,
+  .site-menu nav a,
+  .date-picker-step,
+  .date-picker-title
 ) {
-  transition-property: background-color, box-shadow;
-  transition-duration: 0.2s;
-  transition-timing-function: ease-out;
-}
-
-:is(a, button, summary, label, [role="button"], tr.day):is(:active, .is-pressed) {
-  transition-duration: 0s !important;
+  transition-property: opacity;
+  transition-duration: var(--tempo-touch-out);
+  transition-timing-function: var(--tempo-touch-out-curve);
 }
 
 :is(
   .site-brand,
   .site-menu > summary,
   .site-settings > summary,
-  .site-menu nav a,
-  .theme-option,
-  .text-size-option,
   .hour-date-nav > summary,
   .session-prayers > summary,
   .day-nav a,
@@ -9873,7 +10012,6 @@ html {
   .home-introduction,
   .not-today-link,
   .feast-link,
-  .home-hour-link,
   .hour-continuation a,
   .month-jump a,
   .month-top,
@@ -9883,23 +10021,16 @@ html {
   .calendar-expand,
   .day-disclosures summary,
   .tabula-tables dd a,
-  .find-submit,
   .find-back,
   .from-feast,
   .find-name,
-  .find-year,
   .feast-next,
   .about a,
-  .reminder-hour-name,
-  .reminder-day,
-  .reminder-subscribe,
-  .reminder-copy,
   .reminder-address > summary,
   .reminder-help > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
-  .date-submit,
   .report-issue a,
   .find-meta a,
   .feast-everyone a,
@@ -9909,30 +10040,167 @@ html {
   .usage-notes summary,
   .usage-trend-details summary,
   .not-found-home a,
-  .usage-explore-link
+  .usage-explore-link,
+  .site-menu nav a,
+  .date-picker-step:not(:disabled),
+  .date-picker-title
 ):is(:active, .is-pressed) {
-  background-color: var(--pressed-wash);
-  box-shadow: inset 0 1px 2px var(--surface-edge);
+  opacity: var(--tempo-touch-quiet);
 }
 
-/* Home's hours: the hour that is now has no wash of its own to give way
-   (its light is a pool), so it takes the press over its pool; and the Apse
-   sets every hour's ground transparent at (0,4,0), which the shared rule
-   above does not outrank. Later in the sheet, this does. */
-:root .page-home .home-hour-link:is(:active, .is-pressed) {
-  background-color: var(--pressed-wash);
-  box-shadow: inset 0 1px 2px var(--surface-edge);
+/* Lit: the pool of light, drawn by --press (0 at rest, the pool's strength
+   pressed), which the release eases back to nothing. On a row the pool is
+   a long lozenge under the words with no edge at the rules, at full
+   strength: spread over a row, less reads as nothing. */
+:where(.theme-option, .text-size-option, .date-picker-day, .date-picker-month, .about-hour) {
+  --press-light: radial-gradient(closest-side, color-mix(in srgb, var(--now-pool) calc(var(--press) * 100%), transparent) 0%, color-mix(in srgb, var(--now-pool) calc(var(--press) * 55%), transparent) 52%, transparent 100%);
+  background-image: var(--press-light);
+  transition: --press var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+:is(.theme-option, .text-size-option, .date-picker-day, .date-picker-month):is(:active, .is-pressed),
+.about-hour:has(dt a:is(:active, .is-pressed)) {
+  --press: 1;
+}
+
+.about-hour {
+  --press-light: radial-gradient(ellipse 44% 58% at 30% 50%, color-mix(in srgb, var(--now-pool) calc(var(--press) * 100%), transparent) 0%, color-mix(in srgb, var(--now-pool) calc(var(--press) * 55%), transparent) 50%, transparent 100%);
+}
+
+/* The phone menu's cells; on a wide screen its links are words in a line,
+   and dim (above). */
+@media (max-width: 700px) {
+  .site-menu nav a {
+    --press-light: radial-gradient(closest-side, color-mix(in srgb, var(--now-pool) calc(var(--press) * 100%), transparent) 0%, color-mix(in srgb, var(--now-pool) calc(var(--press) * 55%), transparent) 52%, transparent 100%);
+    background-image: var(--press-light);
+    transition: --press var(--tempo-touch-out) var(--tempo-touch-out-curve);
+  }
+  :root .site-menu nav a:is(:active, .is-pressed) {
+    --press: 1;
+    opacity: 1;
+  }
+}
+
+/* Today in the picker already lies under the pool: a press deepens it. */
+:is(.date-picker-day, .date-picker-month)[aria-current="date"] {
+  background-image: var(--press-light), radial-gradient(closest-side, var(--now-pool), color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent);
+}
+
+/* Home's hours. The pool lies under every hour, unlit; the hour that is now
+   lights it, and so does a finger, at 70% (by night the moonlit pool is
+   faint by design, so a press takes all of it). The hour that is now,
+   pressed, deepens its pool by half again and its words withdraw to 70%. */
+@property --pool-gain {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.page-home .home-hour-link {
+  isolation: isolate;
+}
+
+.page-home .home-hour-link::after {
+  content: "";
+  position: absolute;
+  inset: -2px -4px;
+  z-index: -1;
+  max-width: 9.5rem;
+  margin-inline: auto;
+  background:
+    radial-gradient(closest-side, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent 100%),
+    radial-gradient(closest-side, color-mix(in srgb, var(--now-pool) calc(var(--pool-gain) * 100%), transparent) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity var(--tempo-touch-out) var(--tempo-touch-out-curve),
+    --pool-gain var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+/* The hour that is now, and while the light moves (app.js's HOUR_LIGHT) the
+   hour it leaves and the hour it comes to, whose pools the pass fades. */
+.page-home .home-hour-link:is(.is-current, .is-passing)::after {
+  opacity: 1;
+}
+
+.page-home .home-hour-link:is(:active, .is-pressed)::after {
+  opacity: 0.7;
+}
+
+:root[data-theme="dark"] .page-home .home-hour-link:is(:active, .is-pressed)::after {
+  opacity: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-hour-link:is(:active, .is-pressed)::after {
+    opacity: 1;
+  }
+}
+
+.page-home .home-hour-link.is-current:is(:active, .is-pressed)::after {
+  opacity: 1;
+  --pool-gain: 0.5;
+}
+
+.page-home .home-hour-link :is(.home-hour-link-name, .home-hour-link-note) {
+  transition: opacity var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+.page-home .home-hour-link.is-current:is(:active, .is-pressed) :is(.home-hour-link-name, .home-hour-link-note) {
+  opacity: var(--tempo-touch-quiet);
+  transition: none;
+}
+
+/* The invitation's tablet answers as a thing: its inner rule takes the
+   accent and its ochre wash deepens by half again (moonlit blue by night),
+   at once; the outer lining stands. On the hand-ruled tablet the inner
+   rule is the SVG's day course (.r-day); the CSS rule does the same where
+   script has not ruled it. */
+:root {
+  --tablet-wash-pressed: color-mix(in srgb, var(--ochre) 29%, transparent);
+}
+
+:root[data-theme="dark"] {
+  --tablet-wash-pressed: rgba(132, 160, 204, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tablet-wash-pressed: rgba(132, 160, 204, 0.2);
+  }
+}
+
+:is(.page-home, .about-door) .pray-now::before {
+  transition: background-color var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+:is(.page-home, .about-door) .pray-now::after {
+  transition: border-color var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+:is(.page-home, .about-door) .pray-now .home-rules .r-day {
+  transition: fill var(--tempo-touch-out) var(--tempo-touch-out-curve);
+}
+
+:is(.page-home, .about-door) .pray-now:is(:active, .is-pressed)::before {
+  background-color: var(--tablet-wash-pressed);
+  transition: none;
+}
+
+:is(.page-home, .about-door) .pray-now:is(:active, .is-pressed)::after {
+  border-color: var(--accent);
+  transition: none;
+}
+
+:is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) .home-rules .r-day {
+  fill: var(--accent);
+  transition: none;
 }
 
 /* About's hours: the whole row is the link (its name's ::after spans it), so
-   the row takes the press, not the name. */
-.about-hour:has(dt a:is(:active, .is-pressed)) {
-  background-color: var(--pressed-wash);
-  transition-duration: 0s;
-}
+   the row takes the light, not the name, which neither dims nor washes. */
 .about .about-hour dt a:is(:active, .is-pressed) {
-  background-color: transparent;
-  box-shadow: none;
+  opacity: 1;
 }
 
 @media (max-width: 540px) {
@@ -10578,7 +10846,7 @@ html:where(:has(> body.page-hour))::before {
     font-size: 1.32rem;
   }
 
-  .page-home .home-hour-link.is-current::after {
+  .page-home .home-hour-link::after {
     inset: -4px -6px;
     max-width: 11rem;
   }
@@ -10752,7 +11020,7 @@ html:where(:has(> body.page-hour))::before {
     transform: translateY(-0.22em) rotate(45deg);
   }
 
-  .page-home .home-hour-link.is-current::after {
+  .page-home .home-hour-link::after {
     inset: -3px auto -3px -1.2rem;
     width: 17rem;
     max-width: none;

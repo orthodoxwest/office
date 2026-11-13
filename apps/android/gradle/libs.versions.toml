@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
 compose-bom = "2026.09.00"
 activity-compose = "1.13.0"
@@ -8,7 +8,7 @@ lifecycle = "2.11.0"
 jna = "5.19.1"
 junit = "4.13.2"
 robolectric = "4.17"
-roborazzi = "1.77.0"
+roborazzi = "1.78.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }

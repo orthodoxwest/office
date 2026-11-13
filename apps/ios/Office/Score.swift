@@ -20,10 +20,15 @@ struct ScoreRow: View {
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
+    @Environment(\.scoreColumn) private var column
     @State private var width: CGFloat = 0
 
     var body: some View {
         let lyric = Float(Scale.verse.size * m.type)
+        // The row's width as laid out; before that, the column its list gives it, so the row has its
+        // height on its first pass and nothing under it moves when it is engraved (a lazy list lays a
+        // row out as it is scrolled to).
+        let width = self.width > 0 ? self.width : column > 0 ? min(column, m.px(hymnMax)) : 0
         let page = width > 0
             ? Engraving.page(block.score, initial: block.dropCap, phrases: block.phrases, width: Float(width.rounded(.down)), lyric: lyric)
             : nil
@@ -36,7 +41,7 @@ struct ScoreRow: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: page.map { CGFloat($0.height) * fit } ?? 0)
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { self.width = $0 }
         }
         .overlay(alignment: .topLeading) {
             // A stanza's number stands in the space above its staff and takes none of its own (the
@@ -138,6 +143,17 @@ private enum Engraving {
         let path = svg(d)
         outlines[id] = path
         return path
+    }
+}
+
+private struct ScoreColumnKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
+
+extension EnvironmentValues {
+    /// The width of the column a score row stands in, as the list that holds it knows it before the
+    /// row is laid out; 0 where it is not known, and the row learns its width on its first pass.
+    var scoreColumn: CGFloat {
+        get { self[ScoreColumnKey.self] }
+        set { self[ScoreColumnKey.self] = newValue }
     }
 }
 

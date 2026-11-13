@@ -528,6 +528,15 @@ pub fn prayed_reading_done(reading: PrayedReading, total: f64, at_end: bool) -> 
     presentation::Reading { cursor: reading.cursor, read: reading.read }.prayed(total, at_end)
 }
 
+/// Whether an hour the system closed opens again at the reader's place rather than its top
+/// (`presentation::reopens_at_place`): the apps keep the place with the hour's own visit, so it
+/// is always the same hour of the same day; it was left `seconds_away` ago, and `prayed` is
+/// home's mark for it.
+#[uniffi::export]
+pub fn reopens_at_place(prayed: bool, seconds_away: f64) -> bool {
+    presentation::reopens_at_place(true, prayed, seconds_away)
+}
+
 /// The words of a block, as home's mark of the hours prayed counts them: those with a letter
 /// or a figure.
 #[uniffi::export]
@@ -1415,6 +1424,43 @@ impl From<Space> for render_blocks::Space {
 #[uniffi::export]
 pub fn space_lines(space: Space) -> f32 {
     render_blocks::Space::from(space).lines()
+}
+
+/// `render_blocks::LightFrame`: home's light moving from one hour to the next, at one instant.
+/// Each figure is an opacity or a progress from 0 to 1 (`render_blocks::hour_light`).
+#[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]
+pub struct LightFrame {
+    pub leaving_pool: f32,
+    pub coming_pool: f32,
+    pub ink: f32,
+    pub leaving_gloss: f32,
+    pub coming_gloss: f32,
+    pub words: f32,
+    pub seated: bool,
+    pub done: bool,
+}
+
+/// The light's pass `ms` milliseconds after it began, which the apps draw each frame: the web
+/// plays the same figures as Web Animations (app.js's `HOUR_LIGHT`).
+#[uniffi::export]
+pub fn hour_light_at(ms: f32) -> LightFrame {
+    let f = render_blocks::light_at(ms);
+    LightFrame {
+        leaving_pool: f.leaving_pool,
+        coming_pool: f.coming_pool,
+        ink: f.ink,
+        leaving_gloss: f.leaving_gloss,
+        coming_gloss: f.coming_gloss,
+        words: f.words,
+        seated: f.seated,
+        done: f.done,
+    }
+}
+
+/// The whole pass, in milliseconds.
+#[uniffi::export]
+pub fn hour_light_total_ms() -> u32 {
+    render_blocks::HourLight::TOTAL
 }
 
 /// `render_blocks::RunStyle`, for the bindings.

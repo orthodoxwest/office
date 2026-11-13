@@ -93,7 +93,8 @@ data class Entry(val id: Long, val page: Page)
 
 /** A page's composed content, ready to draw. */
 sealed interface Content {
-    data class Home(val view: HomeView) : Content
+    /** `seen`: composed for a turn of the hour seen while home was in front, so its light moves. */
+    data class Home(val view: HomeView, val seen: Boolean = false) : Content
     data class Hour(val view: HourView) : Content
     data class Ordo(val view: OrdoMonthView) : Content
     data class Find(val view: FindView) : Content
@@ -210,6 +211,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** The day and clock hour home was last composed at: its highlighted hour and invitation are theirs. */
     private var homeClock: Pair<LocalDate, Int>? = null
 
+    /** Whether the app is in front (MainActivity's resume to its pause). */
+    var inFront = false
+
+    /** Whether the home being composed is for a turn of the hour seen happening (`Content.Home.seen`). */
+    private var hourSeenTurning = false
+
     /**
      * The clock hour (0–23) at the last minute's check: About's table lights it and its foot invites
      * to it, as home does, and both move on when it turns.
@@ -227,7 +234,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         viewModelScope.launch {
             while (true) {
                 delay(60_000)
-                refreshClock()
+                refreshClock(seen = inFront)
             }
         }
     }
@@ -236,9 +243,10 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
      * Home composed again once the clock has passed into another hour or day, so a home opened at
      * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
      * and a feast page are made again on a new day, whose years and next keeping follow it. About
-     * follows [clockHour]. Called every minute and on every return to the app.
+     * follows [clockHour]. Called every minute (`seen` while the app is in front, when home's light
+     * may move with the hour) and on every return to the app, which shows the new hour at once.
      */
-    fun refreshClock() {
+    fun refreshClock(seen: Boolean = false) {
         LocalDateTime.now().hour.let { if (it != clockHour) clockHour = it }
         feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
@@ -249,6 +257,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
             stack[stack.lastIndex] = Entry(entry.id, Page.Home(now.toLocalDate()))
             saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
         }
+        // A home moved on to a new day is a new page, not the same one's light moving.
+        // A tick a minute apart finds the turn within its first minute; a later one found it.
+        hourSeenTurning = seen && now.toLocalDate() == shownAt.first && now.minute == 0
         load()
     }
 
@@ -451,6 +462,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         val visit = entry
         val now = LocalDateTime.now()
         homeClock = if (visit.page is Page.Home) now.toLocalDate() to now.hour else null
+        val seen = hourSeenTurning
+        hourSeenTurning = false
         if (visit.page is Page.Home) newcomer = aboutNewcomer(usage.daysSinceFirst())
         feastDay = if (visit.page is Page.Find || visit.page is Page.Feast) now.toLocalDate() else null
         loading?.cancel()
@@ -463,6 +476,7 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         withContext(Dispatchers.Default) {
                             office.home(page.date.toCivil(), now.toLocalDate().toCivil(), now.hour)
                         },
+                        seen,
                     )
                     is Page.Hour -> Content.Hour(
                         withContext(Dispatchers.Default) {

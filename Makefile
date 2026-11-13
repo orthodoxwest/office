@@ -4,12 +4,15 @@
 
 YEAR ?= 2026
 
+# Cargo's build directory: a worktree with a private CARGO_TARGET_DIR builds there, not in target/.
+TARGET_DIR := $(or $(CARGO_TARGET_DIR),target)
+
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-28s %s\n", $$1, $$2}'
 
 build: ## Build the Rust binary
 	cargo build --locked --release -p office-cli
-	cp target/release/office office
+	cp $(TARGET_DIR)/release/office office
 
 test: ## Run Rust and Python tests
 	cargo test --workspace --locked

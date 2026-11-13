@@ -63,6 +63,9 @@ struct OrdoScreen: View {
     /// The month faded out while "Show office details" changes every day at once.
     @State private var dimmed = false
     @State private var focused = false
+    /// Whether the day asked for has been set in place: until then the month is held unseen, so it
+    /// appears at the day with nothing moving (the web's month page holds itself the same way).
+    @State private var placed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The scroll view's height, and the pinned month heading's as last laid out.
@@ -132,6 +135,7 @@ struct OrdoScreen: View {
                     Footer()
                 }
             }
+            .opacity(focusDay > 0 && !placed ? 0 : 1)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
             // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
             .background {
@@ -150,7 +154,12 @@ struct OrdoScreen: View {
                     // found among its neighbours, as the web's `scroll-margin-top` keeps a row
                     // above it; the month's first day has none before it here.
                     let anchorDay = max(1, focusDay - 1)
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(anchorDay)", anchor: focus) }
+                    DispatchQueue.main.async {
+                        scroll.scrollTo("d-\(anchorDay)", anchor: focus)
+                        placed = true
+                    }
+                } else {
+                    placed = true
                 }
             }
         }
@@ -423,6 +432,8 @@ private struct DayRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var details: Bool?
+    /// A finger on the day's date or name: the row lies under home's pool of light (`Holding`).
+    @State private var held = false
     /// How far the row stands from the window's left edge: from 1000pt wide the margin holds Today.
     @State private var left: CGFloat = 0
 
@@ -455,7 +466,11 @@ private struct DayRow: View {
         if wide { table } else { card }
     }
 
-    private func openDay() { model.open(.home(d.date)) }
+    /// The day's page; the month's visit notes the day, so a return to it opens there.
+    private func openDay() {
+        model.choseInOrdo(d.date)
+        model.open(.home(d.date))
+    }
 
     /// A day's rank is its ink, as in a Book of Hours: the great feasts red-letter, doubles slate blue, lesser days black.
     private var rankInk: Color? {
@@ -548,8 +563,9 @@ private struct DayRow: View {
     private var card: some View {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 0) {
-                // The day's liturgical colour as a rail beside its date.
-                Rectangle().fill(titleColor(d.color, p)).frame(width: 3, height: m.px(37.6)).padding(.top, m.px(1.6))
+                // The day's liturgical colour as a rail beside its date ([DayRail], drawn over the
+                // row): its room here, as tall as the rail stands at rest.
+                Color.clear.frame(width: 3, height: m.px(1.6 + 37.6))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
                         Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
@@ -557,7 +573,7 @@ private struct DayRow: View {
                     }
                     .frame(width: m.px(59))
                 }
-                .buttonStyle(Quiet())
+                .buttonStyle(Holding(held: $held))
                 .accessibilityLabel(spoken)
                 .accessibilityHint("Opens the day")
                 VStack(alignment: .leading, spacing: 0) {
@@ -566,7 +582,7 @@ private struct DayRow: View {
                         Button(action: openDay) {
                             feastName(Scale.body.sized(16, line: 21.6))
                         }
-                        .buttonStyle(Quiet())
+                        .buttonStyle(Holding(held: $held))
                         .accessibilityHidden(true)
                         // The card's marks stay quiet, as the web's: red in a row means rank.
                         HStack(spacing: m.px(6)) {
@@ -587,8 +603,10 @@ private struct DayRow: View {
             // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
             .padding(.top, m.px(11.2))
             .padding(.bottom, m.px(9.6))
+            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: m.px(12.8), height: m.px(37.6)) }
             Hairline(color: p.border)
         }
+        .rowPool(held, x: 0.44)
         // Today is painted, not selected: inset 8pt from the gutters.
         .background { if isToday { TodayBand(inset: 8) } }
     }
@@ -604,9 +622,8 @@ private struct DayRow: View {
                     .padding(.leading, dayColumnPad)
                     .frame(width: dayColumn, alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .overlay(alignment: .leading) { Rectangle().fill(titleColor(d.color, p)).frame(width: 3).padding(.top, 1.6) }
                 }
-                .buttonStyle(Quiet())
+                .buttonStyle(Holding(held: $held))
                 .accessibilityLabel(spoken)
                 .accessibilityHint("Opens the day")
                 Text(d.weekday).type(Scale.small.sized(12.8)).foregroundStyle(p.muted)
@@ -621,14 +638,14 @@ private struct DayRow: View {
                     // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                     if anyOpen || !d.monastic.isEmpty {
                         Button(action: openDay) { feastName(name) }
-                            .buttonStyle(Quiet())
+                            .buttonStyle(Holding(held: $held))
                             .accessibilityHidden(true)
                         monastic
                         disclosureButtons
                     } else {
                         HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
                             Button(action: openDay) { feastName(name, fill: false) }
-                                .buttonStyle(Quiet())
+                                .buttonStyle(Holding(held: $held))
                                 .accessibilityHidden(true)
                                 .layoutPriority(1)
                             disclosureButtons.fixedSize()
@@ -669,11 +686,40 @@ private struct DayRow: View {
             }
             // The web's `.month-table td`: 0.5rem above and below, from 701px.
             .padding(.vertical, 8)
+            // The day's liturgical colour as a rail beside its date, under the date's column.
+            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: 8 + 1.6, foot: 8) }
             Hairline(color: p.border)
         }
+        .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
         .background { if isToday { TodayBand(inset: 0) } }
         .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: { left = $0 }
+    }
+}
+
+/**
+ * A day's liturgical colour as a rail at the row's leading edge. At rest it stands `top` below the
+ * row's top, `height` tall or down to `foot` above its foot; while the row is held it runs the
+ * row's full height, to the hairline, over Tempo's reach, and goes back over its touch (the web's
+ * `.month-table tr.day.is-pressed` rail).
+ */
+private struct DayRail: View {
+    let color: Color
+    let held: Bool
+    let top: CGFloat
+    var height: CGFloat? = nil
+    var foot: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { g in
+            let from = held ? 0 : top
+            let to = held ? g.size.height : height.map { top + $0 } ?? g.size.height - foot
+            Rectangle().fill(color).frame(width: 3, height: max(0, to - from)).offset(y: from)
+        }
+        .frame(width: 3)
+        .animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

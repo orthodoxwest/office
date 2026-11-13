@@ -87,6 +87,8 @@ impl Pages {
         env.add_global("chant_hint", presentation::CHANT_HINT);
         env.add_global("previous_day", presentation::PREVIOUS_DAY);
         env.add_global("next_day", presentation::NEXT_DAY);
+        // How long an hour keeps the reader's place (hour.html's head).
+        env.add_global("place_kept_minutes", presentation::PLACE_KEPT_MINUTES);
         // The About page's names in the menu and on home, as the apps set them.
         env.add_global("about_menu", presentation::about::ABOUT_MENU);
         env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);

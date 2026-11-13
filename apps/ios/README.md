@@ -20,6 +20,10 @@ native text, screen for screen:
   after its office begins.
 - **Icon shortcuts**: long-pressing the app's icon offers Lauds, Vespers, Compline and this
   month's ordo, with the web's glyphs, as Android's launcher shortcuts do (`Shortcuts.swift`).
+- **Keeping the place**: the way back is kept with the scene for a return after iOS has closed
+  the app in the background, and so is the reader's place in an hour, which opens there by the
+  core's rule, the same on every front (`reopensAtPlace`: within 45 minutes, and not once
+  prayed). A month of the ordo notes the day chosen in it, so Back or a return opens at that day.
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
 - **The crown**: the consecration cross at the head of home's arch turns the look over, unannounced,

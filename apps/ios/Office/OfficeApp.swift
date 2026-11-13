@@ -133,7 +133,8 @@ struct RootView: View {
                     .transition(panel)
                 }
             }
-            .animation(.easeOut(duration: 0.15), value: model.overlay)
+            // Tempo's settle: a panel comes in 160ms and leaves faster, in 120.
+            .animation(model.overlay == .none ? Tempo.settleOut.animation : Tempo.settleIn.animation, value: model.overlay)
             // The menu belongs to the narrow screen and Settings to the wide one: neither survives
             // a rotation or resize across the breakpoint, to come back later unasked.
             // (A width of zero is the geometry before its first layout, not a side.)
@@ -164,7 +165,7 @@ struct RootView: View {
             Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant)
         }
         .onReceive(minute) { _ in
-            if phase == .active { model.refreshToday() }
+            if phase == .active { model.refreshToday(seen: true) }
         }
         .onChange(of: phase) { _, now in
             guard now == .active else { return }

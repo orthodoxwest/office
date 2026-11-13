@@ -1,4 +1,34 @@
-{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}
+{% block head %}{% if view == "month" %}
+{#- Returning to the ordo opens at the day chosen (the menu's Ordo from a day or an hour carries
+     #d-date; Back keeps the browser's own place). Browsers set a #fragment's row in place only
+     after a first paint at the top: Safari shows the month's head first, and Chromium's
+     cross-fade takes its picture of it. So the month is held unseen, and Chromium holds its
+     first paint, until the month's last row is in and the foot below has set the day in place:
+     it appears at the day, and nothing moves. #}
+<script>
+  (function () {
+    try {
+      if (!/^#d-\d{4}-\d{2}-\d{2}$/.test(location.hash)) return;
+      var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+      if (arrival && arrival.type === "back_forward") return;
+      var root = document.documentElement;
+      root.setAttribute("data-place", "");
+      var hold = document.createElement("style");
+      hold.textContent = "html[data-place] body { visibility: hidden; }";
+      document.head.appendChild(hold);
+      var expect = document.createElement("link");
+      expect.rel = "expect";
+      expect.href = "#ordo-place";
+      expect.setAttribute("blocking", "render");
+      document.head.appendChild(expect);
+      document.addEventListener("DOMContentLoaded", function () {
+        root.removeAttribute("data-place");
+      });
+    } catch (e) {}
+  })();
+</script>
+{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
 {% if view == "year" %}
 {# A link into the year from before the ordo was set a month to a page
      (/calendar/2026#d-2026-09-12, or #september) forwards to that month
@@ -172,6 +202,19 @@
   </section>
   {% endfor %}
   {% if view == "month" %}
+  {#- The day asked for, set in place before the month is first seen (the head block). #}
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (!root.hasAttribute("data-place")) return;
+      try {
+        var row = document.getElementById(location.hash.slice(1));
+        if (row) row.scrollIntoView({ block: "start" });
+      } catch (e) {}
+      root.removeAttribute("data-place");
+    })();
+  </script>
+  <span id="ordo-place" hidden></span>
   {# The hours' continuation: the same diamond, labels and targets. #}
   <nav class="hour-continuation ordo-continuation" aria-label="Other months">
     {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}

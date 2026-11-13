@@ -11,6 +11,7 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
+use render_html::chant;
 use render_html::links::{
     calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
 };
@@ -500,7 +501,18 @@ impl Server {
         let martyrology: Vec<(PrayerForm, &OfficeHour)> =
             if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
         match self.pages.hour(&mut data, &forms, &martyrology) {
-            Ok(body) => html(StatusCode::OK, body),
+            // Scores engraved at the reader's own column, as chant.js last measured it, so that
+            // none is laid out again under them (render_html::chant::at_width). The page differs
+            // with that cookie, so a cache keeps one reader's copy from another.
+            Ok(body) => {
+                let body = match cookie(req.headers, chant::WIDTH_COOKIE).as_deref().and_then(chant::column_em) {
+                    Some(steps) => chant::at_width(&body, steps),
+                    None => body,
+                };
+                let mut resp = html(StatusCode::OK, body);
+                set(&mut resp, header::VARY, "Cookie");
+                resp
+            }
             Err(e) => render_failed(&e),
         }
     }
@@ -844,9 +856,17 @@ mod tests {
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
+        get_with_cookie(path, "")
+    }
+
+    fn get_with_cookie(path: &str, cookie: &str) -> (StatusCode, HeaderMap, String) {
         use tower::ServiceExt;
         let runtime = tokio::runtime::Builder::new_current_thread().build().unwrap();
-        let request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap()).body(Body::empty()).unwrap();
+        let mut request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap());
+        if !cookie.is_empty() {
+            request = request.header(header::COOKIE, cookie);
+        }
+        let request = request.body(Body::empty()).unwrap();
         let resp = runtime.block_on(test_server().router().oneshot(request)).unwrap();
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
@@ -907,7 +927,7 @@ mod tests {
         assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
         // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
         for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {
-            assert!(!get(path).2.contains("data-martyrology-variant"), "{path}");
+            assert!(!get(path).2.contains("data-martyrology-variant=\""), "{path}");
         }
     }
 
@@ -923,6 +943,58 @@ mod tests {
         assert_eq!(body.matches(r#"class="report-issue""#).count(), 3, "one report link per prayer form");
         for unwanted in ["assurance", "Text dependencies", "Composition decisions", "SOURCE:", ".txt", "/home/", "../resources"] {
             assert!(!body.contains(unwanted) && !body.contains(&unwanted.replace('/', "&#x2f;")), "hour page contains {unwanted:?}");
+        }
+    }
+
+    /// An hour keeps the reader's place by presentation's rule: the page names its own hour and
+    /// day for the place, the limit is presentation's, and the place is found before the hour is
+    /// first painted (the head) and kept from the foot, after every line it may name.
+    #[test]
+    fn hour_page_keeps_the_place_by_the_shared_rule() {
+        let (_, _, body) = get("/vespers/2026-06-07");
+        let head = &body[..body.find("<body").unwrap()];
+        assert!(head.contains(r#"var hour = "vespers", day = "2026-06-07";"#), "the head finds the place for this hour");
+        // The head block renders once, in the head: not again inside the page's content.
+        assert_eq!(body.matches(r##"expect.href = "#hour-place""##).count(), 1, "the finder runs once");
+        let limit = format!("away <= {} * 60", presentation::PLACE_KEPT_MINUTES);
+        assert!(head.contains(&limit), "the head keeps presentation's limit, {limit}");
+        assert!(head.contains("office-prayed"), "a prayed hour opens at its top");
+        let foot = body.find(r#"<span id="hour-place" hidden></span>"#).expect("the foot marks where Chromium may paint");
+        assert!(foot > body.find(r#"class="hour-epilogue""#).unwrap(), "the place is set once every line is in");
+        assert_eq!(body.matches(r#"localStorage.setItem(KEY"#).count(), 1, "one keeper");
+        // Other pages neither keep nor find one.
+        assert!(!get("/").2.contains("office-place"));
+        // The ordo month's hold, likewise, renders once and in the head.
+        let month = get("/calendar/2026/11").2;
+        assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
+        assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
+    /// A browser that has laid a score out names its column's width, and the hour's scores come
+    /// engraved at it, so chant.js has nothing to lay out again and no score changes height under
+    /// the reader; a width that is not one leaves the page's own.
+    #[test]
+    fn an_hours_scores_are_engraved_at_the_column_the_browser_named() {
+        let units = |body: &str| body.matches(" data-chant-units=\"").count();
+        let at = |body: &str, em: f32| body.matches(&format!(" data-chant-units=\"{:.3}\"", em * 2.45 * 6.0)).count();
+        let (_, headers, plain) = get("/compline/2026-10-27");
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert!(units(&plain) > 0 && at(&plain, 17.0) == units(&plain), "the scores at the fallback's width");
+        let (status, headers, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.875");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert_eq!(at(&narrow, 17.875), units(&plain), "every score at the reader's column");
+        // A width between sixteenths of an em is engraved at the nearest.
+        assert_eq!(get_with_cookie("/compline/2026-10-27", "chant-width=17.900").2, narrow);
+        // Only the scores differ.
+        let words = |body: &str| {
+            body.split("<div class=\"chant-width\"")
+                .map(|s| s.split_once("</div>").map_or(s, |(_, rest)| rest).to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(words(&narrow), words(&plain));
+        for odd in ["chant-width=wide", "chant-width=900", "chant-width="] {
+            assert_eq!(get_with_cookie("/compline/2026-10-27", odd).2, plain, "{odd}");
         }
     }
 

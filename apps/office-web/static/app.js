@@ -752,10 +752,13 @@ function plainClickOpensHere(e, link) {
     });
   };
 
-  // User action: paint + persist.
+  // User action: paint + persist. The line the reader is at stays where it
+  // stands while the words grow or shrink around it (leader.js).
   var applyTextSizeChoice = function (choice) {
     choice = normalizeTextSizeChoice(choice) || "default";
-    paintTextSizeChoice(choice);
+    var paint = function () { paintTextSizeChoice(choice); };
+    if (window.officeHoldPlace) window.officeHoldPlace(paint);
+    else paint();
     writeStoredTextSize(choice);
   };
 
@@ -1135,9 +1138,9 @@ function plainClickOpensHere(e, link) {
   }
 
   var lastSyncedDay = localDateSlug(new Date());
-  function syncChromeIfNeeded() {
+  function syncChromeIfNeeded(passing) {
     syncDatedNavigation();
-    updatePrayNow();
+    updatePrayNow(passing);
     updateAboutNow();
     markCalendarToday();
     window.dispatchEvent(new Event("officenavigation"));
@@ -1395,9 +1398,10 @@ function plainClickOpensHere(e, link) {
 
   // Where the browser cannot ease a height to auto (no interpolate-size:
   // Safari, Firefox), the disclosures' unfold of style.css is turned here
-  // instead, so they unfold on every browser as in the apps: the height over
-  // 260ms on the standard curve and the contents fading in over 200ms after
-  // 60; folding, 200ms and the contents out over 100ms, the disclosure held
+  // instead, so they unfold on every browser as in the apps, on Tempo's
+  // unfold as style.css's --tempo-unfold-* give it: the height over 260ms on
+  // the standard curve and the contents fading in over the rest after 60ms;
+  // folding, 200ms and the contents out over half that, the disclosure held
   // open, marked .is-folding, until it has folded. Heard on the disclosure,
   // after the summary's own listeners (the prayers' kept choice reads the
   // state before the toggle), and never for a click another listener has
@@ -1408,7 +1412,12 @@ function plainClickOpensHere(e, link) {
   var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
   if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
     var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
-    var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
+    // A Tempo figure from style.css's :root, its var() resolved: a beat's
+    // length ("260ms"), or its curve. Unset (no style sheet), undefined, so
+    // the animation takes the platform's defaults rather than failing.
+    var tempo = function (name) {
+      return window.getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim() || undefined;
+    };
     var folds = new WeakMap();
     // A box's height and edges as they stand, and folded away.
     var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
@@ -1497,14 +1506,16 @@ function plainClickOpensHere(e, link) {
           box.style.overflow = "clip";
         });
         details.classList.toggle("is-folding", !opening);
-        var duration = opening ? 260 : 200;
+        var beat = opening ? "tempo-unfold-in" : "tempo-unfold-out";
+        var duration = parseFloat(tempo(beat)) || 0;
+        var curve = tempo(beat + "-curve");
         var turns = boxes.map(function (box, i) {
-          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+          return box.animate([from[i], to[i]], { duration: duration, easing: curve });
         });
         contents.forEach(function (child) {
           turns.push(opening ?
-            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
-            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }));
+            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Math.max(0, duration - 60), delay: 60, easing: tempo("curve-arrive"), fill: "backwards" }) :
+            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: duration / 2, easing: tempo("curve-leave"), fill: "forwards" }));
         });
         var timer = 0;
         var fold = {
@@ -2512,7 +2523,7 @@ function plainClickOpensHere(e, link) {
       void stage.offsetHeight;
       // The disclosures' duration and Material's standard curve, as the
       // apps' unfolding.
-      stage.style.transition = "height 260ms cubic-bezier(0.4, 0, 0.2, 1)";
+      stage.style.transition = "height var(--tempo-unfold-in) var(--tempo-unfold-in-curve)";
       stage.style.height = to.stage + "px";
       var fades = [
         outgoing.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: "ease-in", fill: "both" }),
@@ -2951,29 +2962,214 @@ function plainClickOpensHere(e, link) {
   }
 
   // The invitation's words, leaving its hand-ruled frame (an aria-hidden SVG
-  // child, see "Home: the painted page") in place.
+  // child, see "Home: the painted page") in place. While the light passes
+  // (below) they stand in a span of their own, so that they alone can go out
+  // and come back; at rest they are the bare text the page arrives with.
+  // The words sit in a span of their own (home.html), which the crown's play
+  // names; a cached page from before it has them bare in the link.
+  function prayNowHost(prayNow) {
+    return prayNow.querySelector(".pray-now-label") || prayNow;
+  }
+  function prayNowWords(prayNow) {
+    return Array.prototype.find.call(prayNowHost(prayNow).childNodes, function (n) {
+      return (n.nodeType === 3 && n.nodeValue.trim()) || (n.nodeType === 1 && n.classList.contains("pray-now-words"));
+    });
+  }
   function setPrayNowLabel(prayNow, label) {
-    // The words have a span of their own (home.html), which the crown's play
-    // names; a cached page from before it has none.
-    var span = prayNow.querySelector(".pray-now-label");
-    if (span) {
-      span.textContent = label;
+    var words = prayNowWords(prayNow);
+    if (words) {
+      words.textContent = label;
+    } else {
+      prayNowHost(prayNow).insertBefore(document.createTextNode(label), prayNowHost(prayNow).firstChild);
+    }
+  }
+
+  // The light moves with the hours. When the hour that is now changes while
+  // home is in front (never on arrival, never on a return that finds the
+  // clock moved on), the pool under the old hour dies as one gathers under
+  // the new, the rubric ink follows, the gloss changes and the invitation's
+  // words change in place, all on one clock. A word is never slid: a name
+  // whose seat changes (the hour that is now stands higher on a phone, to make
+  // room for its gloss, and is larger in the wide niche) goes out where it
+  // stood and comes back where it belongs, as the invitation's words do, and
+  // the new hour's look takes over at `seat`, while they are out. The figures
+  // are render_blocks::hour_light's, which the apps play too; a test holds
+  // this line to them. Reduced motion, a hidden page or a browser without
+  // pseudo-element animations takes the change at once, as before.
+  var HOUR_LIGHT = { total: 1400, glossOut: 500, inkFrom: 300, inkFor: 600, wordsOut: 500, seat: 620, wordsBack: 800, glossIn: 800, ease: "cubic-bezier(0.45, 0, 0.55, 1)", out: "cubic-bezier(0.42, 0, 1, 1)", back: "cubic-bezier(0, 0, 0.58, 1)" };
+  // A boundary found later than this after it passed was not seen passing
+  // (a timer held back by a sleeping phone): the page is corrected, not moved.
+  var HOUR_LIGHT_FRESH_MS = 5000;
+  var lightPass = null;
+
+  function lightMayPass() {
+    return typeof KeyframeEffect === "function" && "pseudoElement" in KeyframeEffect.prototype &&
+      !document.hidden &&
+      document.documentElement.classList.contains("motion-ready") &&
+      !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  // Ends a pass at once, leaving the page exactly as a fresh load draws it.
+  function settleLight() {
+    var pass = lightPass;
+    if (!pass) {
       return;
     }
-    var words = Array.prototype.find.call(prayNow.childNodes, function (n) { return n.nodeType === 3 && n.nodeValue.trim(); });
-    if (words) {
-      words.nodeValue = label;
-    } else {
-      prayNow.insertBefore(document.createTextNode(label), prayNow.firstChild);
+    lightPass = null;
+    pass.seat();
+    pass.anims.forEach(function (a) { a.cancel(); });
+    pass.links.forEach(function (link) { link.classList.remove("is-passing"); });
+    if (pass.words && pass.words.parentNode) {
+      pass.words.parentNode.replaceChild(document.createTextNode(pass.words.textContent), pass.words);
     }
+  }
+
+  // Plays the change from the hour lit (`was`) and the invitation's words
+  // (`wasLabel`) to `lit` and `label`. The links' aria-current has already
+  // moved; their look is held at the old hour's until the seat.
+  function passLight(card, was, lit, prayNow, wasLabel, label) {
+    var L = HOUR_LIGHT;
+    var T = L.total;
+    var moves = was !== lit;
+    var links = Array.prototype.slice.call(card.querySelectorAll(".home-hour-link"));
+    var hold = function (old) {
+      if (!moves) {
+        return;
+      }
+      if (was) {
+        was.classList.toggle("is-current", old);
+      }
+      if (lit) {
+        lit.classList.toggle("is-current", !old);
+      }
+    };
+    var look = function (link) {
+      var name = link.querySelector(".home-hour-link-name");
+      var note = link.querySelector(".home-hour-link-note");
+      var box = name.getBoundingClientRect();
+      var nameStyle = getComputedStyle(name);
+      var noteStyle = note ? getComputedStyle(note) : null;
+      return {
+        top: box.top,
+        left: box.left,
+        size: nameStyle.fontSize,
+        ink: nameStyle.color,
+        gloss: noteStyle !== null && noteStyle.display !== "none",
+        glossInk: noteStyle ? noteStyle.color : "",
+      };
+    };
+    // Each hour as it will be (the classes are already the new hour's), then
+    // as it stands.
+    var after = links.map(look);
+    hold(true);
+    var before = links.map(look);
+
+    var pass = {
+      anims: [],
+      links: [was, lit].filter(Boolean),
+      words: null,
+      seated: false,
+      seat: function () {
+        if (pass.seated) {
+          return;
+        }
+        pass.seated = true;
+        hold(false);
+        if (prayNow) {
+          setPrayNowLabel(prayNow, label);
+        }
+      },
+    };
+    var run = function (el, frames, timing, pseudo) {
+      timing.fill = "both";
+      if (pseudo) {
+        timing.pseudoElement = pseudo;
+      }
+      pass.anims.push(el.animate(frames, timing));
+    };
+    // Out where it stood and back where it belongs.
+    var dip = [
+      { opacity: 1, offset: 0 },
+      { opacity: 1, offset: L.wordsOut / T, easing: L.out },
+      { opacity: 0, offset: L.seat / T, easing: L.back },
+      { opacity: 1, offset: L.wordsBack / T },
+      { opacity: 1, offset: 1 },
+    ];
+    var ink = { delay: L.inkFrom, duration: L.inkFor, easing: L.ease };
+
+    pass.links.forEach(function (link) { link.classList.add("is-passing"); });
+    if (moves && was) {
+      run(was, [{ opacity: 1 }, { opacity: 0 }], { duration: T, easing: L.ease }, "::after");
+    }
+    if (moves && lit) {
+      run(lit, [{ opacity: 0 }, { opacity: 1 }], { duration: T, easing: L.ease }, "::after");
+    }
+    links.forEach(function (link, i) {
+      var b = before[i];
+      var a = after[i];
+      var name = link.querySelector(".home-hour-link-name");
+      var note = link.querySelector(".home-hour-link-note");
+      if (b.ink !== a.ink) {
+        run(name, [{ color: b.ink }, { color: a.ink }], Object.assign({}, ink));
+      }
+      // Any name the change of hour re-seats, a neighbour's included.
+      if (Math.abs(b.top - a.top) > 0.25 || Math.abs(b.left - a.left) > 0.25 || b.size !== a.size) {
+        run(name, dip, { duration: T });
+      }
+      if (!note) {
+        return;
+      }
+      if (b.gloss && a.gloss) {
+        if (b.glossInk !== a.glossInk) {
+          run(note, [{ color: b.glossInk }, { color: a.glossInk }], Object.assign({}, ink));
+        }
+      } else if (b.gloss) {
+        run(note, [{ opacity: 1 }, { opacity: 0 }], { duration: L.glossOut, easing: L.ease });
+      } else if (a.gloss) {
+        run(note, [{ opacity: 0 }, { opacity: 1 }], { delay: L.glossIn, duration: T - L.glossIn, easing: L.ease });
+      }
+    });
+    if (prayNow && wasLabel !== label) {
+      var words = document.createElement("span");
+      var bare = prayNowWords(prayNow);
+      words.className = "pray-now-words";
+      words.textContent = wasLabel;
+      if (bare) {
+        bare.parentNode.replaceChild(words, bare);
+      } else {
+        prayNowHost(prayNow).insertBefore(words, prayNowHost(prayNow).firstChild);
+      }
+      pass.words = words;
+      run(words, dip, { duration: T });
+    }
+
+    // The seat and the end, on the same clock as the rest: a promise settled
+    // in the frame an animation finishes is drawn in that frame.
+    var ignore = function () {};
+    var seat = card.animate([], { duration: L.seat });
+    var end = card.animate([], { duration: T });
+    pass.anims.push(seat, end);
+    seat.finished.then(function () {
+      if (lightPass === pass) {
+        pass.seat();
+      }
+    }, ignore);
+    end.finished.then(function () {
+      if (lightPass === pass) {
+        settleLight();
+      }
+    }, ignore);
+    lightPass = pass;
   }
 
   // updatePrayNow recomputes the "pray now" shortcut on the home page from the
   // device clock. The same value is rendered server-side, but the home page is
   // a cacheable document, so a cached copy would otherwise freeze whichever
   // hour was current when it was fetched. Computing it here keeps the shortcut
-  // correct no matter how old the cached page is.
-  function updatePrayNow() {
+  // correct no matter how old the cached page is. `passing` is the timed
+  // refresh's word that the hour has just turned before the reader's eyes, so
+  // the light may move with it (see HOUR_LIGHT).
+  function updatePrayNow(passing) {
     var card = document.querySelector(".home-prayer-card[data-date-slug]");
     if (!card) {
       return;
@@ -2988,32 +3184,45 @@ function plainClickOpensHere(e, link) {
         ? currentInfo
         : null;
     var prayNow = card.querySelector(".pray-now");
-    var matched = false;
+    var lit = null;
+    var href = null;
+    var label = "Open Lauds";
 
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
-      var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
-      setHourCurrent(link, isCurrent);
-      if (isCurrent && prayNow) {
-        prayNow.setAttribute("href", link.getAttribute("href"));
-        setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
-        matched = true;
+      if (info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug) {
+        lit = link;
       }
     });
-
-    if (!matched && info !== null && info.offset !== 0 && prayNow) {
+    if (lit) {
+      href = lit.getAttribute("href");
+      label = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+    } else if (info !== null && info.offset !== 0) {
       var offsetDate = new Date(now.getTime());
       offsetDate.setDate(offsetDate.getDate() + info.offset);
-      prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
-      setPrayNowLabel(prayNow, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
-      matched = true;
-    }
-
-    if (!matched && prayNow) {
+      href = "/" + info.slug + "/" + localDateSlug(offsetDate);
+      label = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+    } else {
       var lauds = card.querySelector('.home-hour-link[data-hour="lauds"]');
       if (lauds) {
-        prayNow.setAttribute("href", lauds.getAttribute("href"));
+        href = lauds.getAttribute("href");
       }
-      setPrayNowLabel(prayNow, "Open Lauds");
+    }
+
+    // A pass under way ends where it was going before another begins.
+    settleLight();
+    var was = card.querySelector(".home-hour-link.is-current");
+    var wasWords = prayNow ? prayNowWords(prayNow) : null;
+    var wasLabel = wasWords ? wasWords.textContent.trim() : "";
+    card.querySelectorAll(".home-hour-link").forEach(function (link) {
+      setHourCurrent(link, link === lit);
+    });
+    if (prayNow && href) {
+      prayNow.setAttribute("href", href);
+    }
+    if (passing === true && (was !== lit || (prayNow && wasLabel !== label)) && lightMayPass()) {
+      passLight(card, was, lit, prayNow, wasLabel, label);
+    } else if (prayNow) {
+      setPrayNowLabel(prayNow, label);
     }
   }
 
@@ -3096,9 +3305,11 @@ function plainClickOpensHere(e, link) {
   function catchUpWithClock() {
     timedChromeRefreshTimer = null;
     if (timedChromeRefreshAt !== null && Date.now() >= timedChromeRefreshAt) {
+      // Seen as it turned, the hour's light may move (HOUR_LIGHT).
+      var seen = Date.now() - timedChromeRefreshAt < HOUR_LIGHT_FRESH_MS;
       timedChromeRefreshAt = null;
       lastSyncedDay = localDateSlug(new Date());
-      syncChromeIfNeeded();
+      syncChromeIfNeeded(seen);
     }
     scheduleTimedChromeRefresh();
   }
@@ -5169,32 +5380,76 @@ function plainClickOpensHere(e, link) {
   var read = 0;
   var done = false;
   var last = Date.now();
+  // The ribbon (hour.html): the reading so far goes with the kept place, and an hour opened
+  // again at the place takes it up, so it can still earn its mark.
+  var carried = window.officePlaceReading;
+  if (carried && Number.isFinite(carried.cursor) && Number.isFinite(carried.read)) {
+    cursor = Math.max(0, carried.cursor);
+    read = Math.max(0, carried.read);
+  }
+  window.officeReading = function () {
+    return { cursor: cursor, read: read };
+  };
 
   // The words of the shown text, in order: each text node's count and box.
   // A form or reading hidden by the reader's settings has no box and no words.
-  function wordsOnScreen() {
-    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+  // The words are counted once and the boxes measured once, relative to the
+  // hour's top, then again only when the text may have moved within the hour:
+  // a node or attribute changed under it or on the root (a setting, a fold, a
+  // gloss, a score drawn anew) or the hour's box changed size (the window, the
+  // text size, a face arriving). Between, each second compares numbers.
+  var nodes = null;
+  var boxes = null;
+  var measured = null;
+  new MutationObserver(function (records) {
+    if (records.some(function (r) { return r.type !== "attributes"; })) nodes = null;
+    boxes = null;
+  }).observe(content, { subtree: true, childList: true, characterData: true, attributes: true });
+  new MutationObserver(function () { boxes = null; })
+    .observe(document.documentElement, { attributes: true });
+  new MutationObserver(function () { boxes = null; })
+    .observe(document.body, { attributes: true });
+  if (document.fonts) document.fonts.addEventListener("loadingdone", function () { boxes = null; });
+
+  function measure(origin) {
+    if (!nodes) {
+      nodes = [];
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        var count = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
+        if (count) nodes.push({ node: node, words: count });
+      }
+    }
     var range = document.createRange();
+    boxes = [];
+    nodes.forEach(function (entry) {
+      range.selectNodeContents(entry.node);
+      var rects = range.getClientRects();
+      if (!rects.length) return;
+      boxes.push({ top: rects[0].top - origin.top, bottom: rects[rects.length - 1].bottom - origin.top, words: entry.words });
+    });
+    measured = { width: origin.width, height: origin.height };
+  }
+
+  function wordsOnScreen() {
+    var origin = content.getBoundingClientRect();
+    if (!boxes || origin.width !== measured.width || origin.height !== measured.height) measure(origin);
     var total = 0;
     var first = -1;
     var through = 0;
-    var bottom = window.innerHeight;
-    for (var node = walker.nextNode(); node; node = walker.nextNode()) {
-      var words = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
-      if (!words) continue;
-      range.selectNodeContents(node);
-      var rects = range.getClientRects();
-      if (!rects.length) continue;
-      var top = rects[0].top;
-      var low = rects[rects.length - 1].bottom;
-      if (low > 0 && top < bottom) {
+    // The screen's top and foot, measured from the hour's top.
+    var top = -origin.top;
+    var bottom = window.innerHeight - origin.top;
+    for (var i = 0; i < boxes.length; i++) {
+      var box = boxes[i];
+      if (box.bottom > top && box.top < bottom) {
         if (first < 0) first = total;
-        through = total + words;
+        through = total + box.words;
       }
-      total += words;
+      total += box.words;
     }
     // Nothing on screen: above the text, none of it is passed; below, all of it.
-    if (first < 0) first = through = content.getBoundingClientRect().bottom <= 0 ? total : 0;
+    if (first < 0) first = through = origin.bottom <= 0 ? total : 0;
     return { total: total, first: first, through: through };
   }
 
@@ -5221,6 +5476,36 @@ function plainClickOpensHere(e, link) {
     last = Date.now();
   });
   window.setInterval(tick, 1000);
+})();
+
+// Closing the prayers after the Office near the end of an hour would shorten
+// the page under the screen, and the browser would pull the page down to its
+// new end: the summary under the reader's finger would jump. The page keeps its
+// height through the fold instead, and gives the room back as the reader
+// scrolls up into it, never moving what is on the screen.
+(function () {
+  var root = document.documentElement;
+  var held = 0;
+  var release = function () {
+    var end = document.body.getBoundingClientRect().bottom + window.scrollY;
+    var needed = Math.ceil(window.scrollY + window.innerHeight);
+    if (end >= needed) {
+      held = 0;
+      root.style.minHeight = "";
+      window.removeEventListener("scroll", release);
+    } else if (needed < held) {
+      held = needed;
+      root.style.minHeight = held + "px";
+    }
+  };
+  document.querySelectorAll(".page-hour .elements > details.session-prayers > summary").forEach(function (summary) {
+    summary.addEventListener("click", function () {
+      if (!summary.parentNode.open) return;
+      held = Math.ceil(window.scrollY + window.innerHeight);
+      root.style.minHeight = held + "px";
+      window.addEventListener("scroll", release, { passive: true });
+    });
+  });
 })();
 
 // The end of an hour: its way on is ruled under with home's pen where the

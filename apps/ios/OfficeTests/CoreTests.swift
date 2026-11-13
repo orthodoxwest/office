@@ -275,6 +275,47 @@ final class PlaceTests: XCTestCase {
         XCTAssertTrue(model.path.isEmpty)
     }
 
+    /// A day chosen in the ordo's month brings the month's visit to that day, so a return to it,
+    /// Back or the way back restored, opens at the day chosen; the same visit, nothing composed.
+    func testTheOrdoOpensAgainAtTheDayChosen() {
+        let model = AppModel()
+        model.path = []
+        model.open(.ordo(year: 2026, month: 11, day: 0))
+        let visit = model.path[0].id
+        let chosen = CivilDate(year: 2026, month: 11, day: 20)
+        model.choseInOrdo(chosen)
+        model.open(.home(chosen))
+        XCTAssertEqual(model.path[0].id, visit)
+        XCTAssertEqual(model.pages, [.ordo(year: 2026, month: 11, day: 20), .home(chosen)])
+        let again = AppModel()
+        again.restore(model.saved)
+        XCTAssertEqual(again.pages.first, .ordo(year: 2026, month: 11, day: 20))
+        // Only the month shown takes it.
+        model.choseInOrdo(CivilDate(year: 2026, month: 12, day: 1))
+        XCTAssertEqual(model.pages.first, .ordo(year: 2026, month: 11, day: 20))
+    }
+
+    /// The ribbon's rule is the core's: within its limit, and not once prayed.
+    func testAnInterruptedHourOpensAtItsPlaceOnlyWithinTheLimit() {
+        XCTAssertTrue(reopensAtPlace(prayed: false, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: true, secondsAway: 600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: 3 * 3600))
+        XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: -60))
+    }
+
+    /// The kept place carries the prayed watch's reading, so an hour reopened mid-psalm can still
+    /// earn its mark; a place kept before the reading was carried begins the reading again.
+    func testTheKeptPlaceCarriesTheReading() {
+        let place = HourPlace(page: "2026-11-13 vespers", row: "b-3-1", anchor: 0.2, at: 1_000, cursor: 640, read: 512)
+        let again = HourPlace.decode(place.encoded)
+        XCTAssertEqual(again?.page, "2026-11-13 vespers")
+        XCTAssertEqual(again?.reading.cursor, 640)
+        XCTAssertEqual(again?.reading.read, 512)
+        let older = HourPlace.decode(#"{"page":"2026-11-13 vespers","row":"b-3-1","anchor":0.2,"at":1000}"#)
+        XCTAssertEqual(older?.row, "b-3-1")
+        XCTAssertEqual(older?.reading.read, 0)
+    }
+
     /// The search takes its words in place: the same visit, with no move between pages.
     func testTheSearchTakesItsWordsInPlace() {
         let model = AppModel()
@@ -371,6 +412,22 @@ final class ReminderTests: XCTestCase {
         XCTAssertEqual(calendar.component(.hour, from: first.office), 7)
         XCTAssertNotNil(content.userInfo["office"] as? Double)
         XCTAssertNotNil(Bundle.main.url(forResource: "bell", withExtension: "caf"))
+    }
+
+    /// The page's "Next:" line is read again as its reminder comes, or at midnight when none comes first (#808).
+    func testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 17, minute: 0)))
+        let compline = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 20, minute: 50)))
+        let midnight = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 0, minute: 0)))
+        let lauds = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 5, minute: 50)))
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: compline, calendar: calendar), compline)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: lauds, calendar: calendar), midnight)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: nil, calendar: calendar), midnight)
+        // The first plan once a reminder comes names the one after it: the line moves on.
+        let s = settings(["vespers": (17, 30), "compline": (21, 0)])
+        let first = try XCTUnwrap(ReminderScheduler.plan(s, now: now, core: Office.core.get(), calendar: calendar).first)
+        let after = try XCTUnwrap(ReminderScheduler.plan(s, now: first.fireDate, core: Office.core.get(), calendar: calendar).first)
+        XCTAssertGreaterThan(after.fireDate, first.fireDate)
     }
 
     func testTheScheduleStopsAtIOSsLimit() throws {

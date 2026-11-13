@@ -19,7 +19,6 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
@@ -191,6 +190,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        vm.inFront = true
         vm.refreshReminderStatus()
         // Every visit keeps the alarm window running ahead, and the widget current; following the
         // sun, the place is read again and the schedule follows it once it comes.
@@ -201,6 +201,11 @@ class MainActivity : ComponentActivity() {
         vm.refreshClock()
         // A return on a new day is that day's visit.
         vm.countVisit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vm.inFront = false
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -557,6 +562,7 @@ fun OfficeApp(
                             content is Content.Failed -> Message(content.message, insets)
                             page is Page.Home && content is Content.Home -> HomeScreen(
                                 view = content.view,
+                                lightMoves = content.seen,
                                 date = page.date,
                                 today = today,
                                 chrome = chrome,
@@ -670,12 +676,11 @@ private val TRAVEL = 30.dp
  */
 private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
     val transform = when (motion) {
-        Motion.FADE -> fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing)) togetherWith
-            fadeOut(tween(90, easing = FastOutLinearInEasing))
+        Motion.FADE -> fadeIn(Tempo.turnIn.spec()) togetherWith fadeOut(Tempo.turnOut.spec())
         else -> {
             val on = if (motion == Motion.BACK || motion == Motion.PREVIOUS) -1 else 1
-            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(tween(210, delayMillis = 90, easing = LinearOutSlowInEasing))) togetherWith
-                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(tween(90, easing = FastOutLinearInEasing)))
+            (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { on * travel } + fadeIn(Tempo.turnIn.spec())) togetherWith
+                (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -on * travel } + fadeOut(Tempo.turnOut.spec()))
         }
     }
     return transform using null

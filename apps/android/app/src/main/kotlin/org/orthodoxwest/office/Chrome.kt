@@ -32,6 +32,7 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -114,6 +115,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -137,13 +139,29 @@ val Measure: Dp = 608.dp
 
 fun Modifier.measure(): Modifier = this.widthIn(max = Measure).fillMaxWidth().padding(horizontal = Gutter)
 
-/** A tap target with no ripple: the web's controls mark state, not touches; a pressed one only dims a little. */
-fun Modifier.tap(role: Role = Role.Button, label: String? = null, selected: Boolean? = null, action: String? = null, onClick: () -> Unit): Modifier =
+/** A tap target with no ripple: the web's controls mark state, not touches; a pressed one only dims a little, or, a row, takes the light ([Lit]). */
+fun Modifier.tap(
+    role: Role = Role.Button,
+    label: String? = null,
+    selected: Boolean? = null,
+    action: String? = null,
+    lit: Lit? = null,
+    source: MutableInteractionSource? = null,
+    onClick: () -> Unit,
+): Modifier =
     this.semantics {
         // What a screen reader says for a control drawn as a glyph ("‹", "↑"), in place of the glyph.
         if (label != null) contentDescription = label
         if (selected != null) this.selected = selected
-    }.clickable(interactionSource = null, indication = Dim, role = role, onClickLabel = action, onClick = onClick)
+    }.clickable(
+        // A part of a row of several targets lights the row, which draws the light from the same
+        // `source` ([Modifier.indication] with a [Lit]); the part itself neither dims nor lights.
+        interactionSource = source,
+        indication = if (source != null) null else lit ?: Dim,
+        role = role,
+        onClickLabel = action,
+        onClick = onClick,
+    )
 
 /** A checkbox row: the box and its words are one control, announced checked or not. */
 fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
@@ -163,12 +181,9 @@ fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTic
  */
 fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
 
-/** How far a pressed control dims, as the iOS app's (Quiet). */
-private const val PRESSED_ALPHA = 0.55f
-
 /**
- * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
- * let go, so even the briefest tap is seen to land. A control that takes input focus from a
+ * A pressed control's answer to the finger: it dims at once to Tempo's quiet (the web's bare
+ * words, the iOS app's `Quiet`), and comes back over Tempo's touch when let go, so even the briefest tap is seen to land. A control that takes input focus from a
  * keyboard or D-pad (never by touch, where a tap does not take focus) wears the focus ring.
  */
 internal object Dim : IndicationNodeFactory {
@@ -205,9 +220,9 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
                     }
                 }
                 if (presses.isEmpty()) {
-                    launch { alpha.animateTo(1f, tween(200, easing = LinearOutSlowInEasing)) }
+                    launch { alpha.animateTo(1f, Tempo.touchOut.spec()) }
                 } else {
-                    launch { alpha.snapTo(PRESSED_ALPHA) }
+                    launch { alpha.snapTo(Tempo.TOUCH_QUIET) }
                 }
             }
         }
@@ -223,19 +238,122 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
             drawContent()
             drawContext.canvas.restore()
         }
-        if (focused) {
-            // The web's ring (`:focus-visible`): a 2px line 3px off the control, square, here in
-            // the gold of the app's functional marks (the web's home and date link wear gold).
-            // Drawn in place, as the web's appears.
-            val width = FOCUS_RING.toPx()
-            val gap = FOCUS_GAP.toPx() + width / 2f
-            drawRect(
-                currentValueOf(LocalPalette).gold,
-                topLeft = Offset(-gap, -gap),
-                size = Size(size.width + 2 * gap, size.height + 2 * gap),
-                style = Stroke(width),
-            )
+        if (focused) focusRing(currentValueOf(LocalPalette).gold)
+    }
+}
+
+/**
+ * The web's ring (`:focus-visible`): a 2px line 3px off the control, square, here in the gold of
+ * the app's functional marks (the web's home and date link wear gold). Drawn in place, as the
+ * web's appears. [Dim] and [Lit] both wear it.
+ */
+private fun DrawScope.focusRing(gold: Color) {
+    val width = FOCUS_RING.toPx()
+    val gap = FOCUS_GAP.toPx() + width / 2f
+    drawRect(
+        gold,
+        topLeft = Offset(-gap, -gap),
+        size = Size(size.width + 2 * gap, size.height + 2 * gap),
+        style = Stroke(width),
+    )
+}
+
+/**
+ * Where a row's pool of light lies: an ellipse with no edge (the web's
+ * `radial-gradient(closest-side, pool, pool 55% at 52%, transparent)`), centred [at] the fraction
+ * of the row's width, [width] and [height] its fractions of the row's, or, where [span] is given,
+ * that wide from [lead] before the row's start; [outsetX] and [outsetY] reach past its edges, and it
+ * is at most [max] across.
+ */
+data class PoolShape(
+    val at: Float = 0.5f,
+    val width: Float = 1f,
+    val height: Float = 1f,
+    val outsetX: Dp = 0.dp,
+    val outsetY: Dp = 0.dp,
+    val max: Dp = Dp.Infinity,
+    val lead: Dp = 0.dp,
+    val span: Dp = Dp.Unspecified,
+) {
+    companion object {
+        /** A row's long lozenge under its words (the web's `ellipse 44% 58% at 30% 50%`). */
+        val Row = PoolShape(at = 0.3f, width = 0.88f, height = 1.16f)
+    }
+}
+
+/** Home's pool of light in [color], laid as [shape] over a box of this scope's size, at [alpha]. */
+fun DrawScope.poolOfLight(color: Color, shape: PoolShape, alpha: Float = 1f) {
+    if (alpha <= 0f) return
+    val w = if (shape.span.isSpecified) shape.span.toPx() else minOf(size.width * shape.width + 2 * shape.outsetX.toPx(), if (shape.max == Dp.Infinity) Float.MAX_VALUE else shape.max.toPx())
+    val h = size.height * shape.height + 2 * shape.outsetY.toPx()
+    val cx = if (shape.span.isSpecified) w / 2f - shape.lead.toPx() else size.width * shape.at
+    val r = w / 2f
+    val c = Offset(cx, size.height / 2f)
+    val pool = color.copy(alpha = color.alpha * alpha)
+    scale(1f, h / w, pivot = c) { drawCircle(poolBrush(pool, c, r), r, c) }
+}
+
+/**
+ * Light under the finger, beside [Dim] for rows: a pressed row (home's hours, the ordo's days, the
+ * picker's days, About's hours, the menu's cells) lies under home's pool of light, the edgeless
+ * pool that marks the hour that is now, at once, and lets it go over Tempo's touch; nothing scales.
+ * [strength] is how much of the pool a press shows (home's hours take 70% by day; the moonlit pool
+ * is faint by night). The hour that is now is lit already ([current]): a press deepens its pool by
+ * half again and its words withdraw to 70% (the web's `.home-hour-link.is-current:active`). A row
+ * reached by keyboard or D-pad wears the focus ring, as [Dim]'s controls do.
+ */
+data class Lit(val pool: Color, val shape: PoolShape = PoolShape(), val strength: Float = 1f, val current: Boolean = false) : IndicationNodeFactory {
+    override fun create(interactionSource: InteractionSource): DelegatableNode = LitNode(interactionSource, this)
+}
+
+private class LitNode(private val source: InteractionSource, private val lit: Lit) : Modifier.Node(), DrawModifierNode, CompositionLocalConsumerModifierNode {
+    private val held = Animatable(0f)
+    private val layer = Paint()
+    /** Whether the row has the focus, and so wears the ring. */
+    private var focused by mutableStateOf(false)
+
+    override fun onAttach() {
+        // Undispatched, as [Dim]'s, so the first focus is heard.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val presses = mutableListOf<PressInteraction.Press>()
+            val focuses = mutableListOf<FocusInteraction.Focus>()
+            source.interactions.collect { interaction ->
+                when (interaction) {
+                    is PressInteraction.Press -> presses.add(interaction)
+                    is PressInteraction.Release -> presses.remove(interaction.press)
+                    is PressInteraction.Cancel -> presses.remove(interaction.press)
+                    is FocusInteraction.Focus -> {
+                        focuses.add(interaction)
+                        focused = true
+                        return@collect
+                    }
+                    is FocusInteraction.Unfocus -> {
+                        focuses.remove(interaction.focus)
+                        focused = focuses.isNotEmpty()
+                        return@collect
+                    }
+                }
+                if (presses.isEmpty()) {
+                    launch { held.animateTo(0f, Tempo.touchOut.spec()) }
+                } else {
+                    launch { held.snapTo(1f) }
+                }
+            }
         }
+    }
+
+    override fun ContentDrawScope.draw() {
+        val h = held.value
+        poolOfLight(lit.pool, lit.shape, h * if (lit.current) 0.5f else lit.strength)
+        if (h > 0f && lit.current) {
+            layer.alpha = 1f - (1f - Tempo.TOUCH_QUIET) * h
+            drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+            drawContent()
+            drawContext.canvas.restore()
+        } else {
+            drawContent()
+        }
+        if (focused) focusRing(currentValueOf(LocalPalette).gold)
     }
 }
 
@@ -469,7 +587,7 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
     val o = LocalOrnament.current
     val haptics = LocalHapticFeedback.current
     Box(
-        Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current) {
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(label = spoken, selected = current, lit = Lit(homeInk(p).nowPool)) {
             if (!page && !current) haptics.chose()
             onClick()
         }
@@ -510,8 +628,8 @@ fun MenuPanel(
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
     val plaster = ImageBitmap.imageResource(p.panel)
-    // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
-    // window until it has gone.
+    // The panel drops a little as it fades in, and lifts as it fades out, on Tempo's settle
+    // (leaving faster than it came); it stays in the window until it has gone.
     val shown = remember { MutableTransitionState(false) }
     shown.targetState = visible
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
@@ -526,8 +644,8 @@ fun MenuPanel(
         val drop = with(LocalDensity.current) { 8.dp.roundToPx() }
         AnimatedVisibility(
             shown,
-            enter = fadeIn(tween(150, easing = LinearOutSlowInEasing)) + slideInVertically(tween(200, easing = FastOutSlowInEasing)) { -drop },
-            exit = fadeOut(tween(120, easing = FastOutLinearInEasing)) + slideOutVertically(tween(120, easing = FastOutLinearInEasing)) { -drop / 2 },
+            enter = fadeIn(Tempo.settleIn.spec()) + slideInVertically(Tempo.settleIn.spec()) { -drop },
+            exit = fadeOut(Tempo.settleOut.spec()) + slideOutVertically(Tempo.settleOut.spec()) { -drop / 2 },
         ) {
             Column(
                 Modifier
@@ -746,11 +864,11 @@ fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = tr
 
 /**
  * How long a disclosure takes to unfold and to fold, here, for the hour's sections and for home's
- * turn to the calendar, on the standard curve: iOS's `unfolding` and `folding`, the web's
- * disclosures (style.css, "Disclosures unfold"; TokensTest holds them together).
+ * turn to the calendar: Tempo's unfold, on the standard curve, as iOS's `unfolding` and
+ * `folding` and the web's disclosures (style.css, "Disclosures unfold").
  */
-internal const val UNFOLD_MS = 260
-internal const val FOLD_MS = 200
+internal val UNFOLD_MS = Tempo.unfoldIn.ms
+internal val FOLD_MS = Tempo.unfoldOut.ms
 
 /**
  * The ordo's "Show office details": the month fades out, every day changes at once, and it fades
@@ -910,7 +1028,7 @@ private fun Days(month: YearMonth, shown: LocalDate, today: LocalDate, live: Boo
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .then(if (day == today) Modifier.todayPool(p) else Modifier)
-                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown) {
+                        .then(if (day != null && live) Modifier.tap(label = spokenDay(day, today), selected = day == shown, lit = Lit(homeInk(p).nowPool)) {
                             haptics.chose()
                             onPick(day)
                         } else Modifier),
@@ -950,7 +1068,7 @@ private fun MonthGrid(year: Int, shown: LocalDate, today: LocalDate, modifier: M
                             Month.of(m).getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier
                                 .then(if (today.year == year && today.monthValue == m) Modifier.todayPool(p) else Modifier)
-                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen) { onMonth(m) } else Modifier.clearAndSetSemantics {})
+                                .then(if (live) Modifier.tap(label = "$name $year", selected = chosen, lit = Lit(homeInk(p).nowPool)) { onMonth(m) } else Modifier.clearAndSetSemantics {})
                                 .heightIn(min = 44.dp)
                                 .goldUnderline(chosen, p.goldLine)
                                 .padding(horizontal = 14.4.dp, vertical = 13.dp),
