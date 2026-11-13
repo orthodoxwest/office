@@ -546,8 +546,8 @@ private struct Frontispiece: View {
                     // into the point, clear of the date's own tap box below.
                     let tap = max(m.px(44), 46)
                     Button {
-                        // A light tap under the finger, as a checkbox gives.
-                        toggled()
+                        // A light tick under the finger, as a choice gives (Android does the same).
+                        chose()
                         let head = CrownHead(arch: tier.arch, first: first, black: black, season: view.ornament, crownSize: crownSize,
                                              crownTop: m.px(tier.crownTop), reserve: Array(reserve.values))
                         CrownPlayer.shared.tap(model: model, head: head, frames: frames)
