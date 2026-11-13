@@ -35,7 +35,7 @@ for (const theme of ["light", "dark"]) {
     // Pinned so today's wash always falls on the same day of the month.
     await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
-    await page.getByText("Change date", { exact: true }).click();
+    await page.locator("button.hour-meta-date").click();
     await expect(page.locator(".date-picker")).toBeVisible();
     // The picker lends its parts to the controls' grid, so the row and its open panel are shot.
     await expect(page.locator(".hour-context-controls")).toHaveScreenshot(`date-picker-${theme}.png`);
