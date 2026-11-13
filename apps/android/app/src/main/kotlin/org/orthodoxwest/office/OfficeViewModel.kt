@@ -217,6 +217,13 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /** Whether the home being composed is for a turn of the hour seen happening (`Content.Home.seen`). */
     private var hourSeenTurning = false
 
+    /**
+     * The clock hour (0–23) at the last minute's check: About's table lights it and its foot invites
+     * to it, as home does, and both move on when it turns.
+     */
+    var clockHour: Int by mutableStateOf(LocalDateTime.now().hour)
+        private set
+
     /** The day the search or a feast page was last made on: their years and next keeping follow it. */
     private var feastDay: LocalDate? = null
 
@@ -235,11 +242,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     /**
      * Home composed again once the clock has passed into another hour or day, so a home opened at
      * Sext doesn't still highlight Sext at Vespers; today's home moves on to the new day. The search
-     * and a feast page are made again on a new day, whose years and next keeping follow it. Called
-     * every minute (`seen` while the app is in front, when home's light may move with the hour) and
-     * on every return to the app, which shows the new hour at once.
+     * and a feast page are made again on a new day, whose years and next keeping follow it. About
+     * follows [clockHour]. Called every minute (`seen` while the app is in front, when home's light
+     * may move with the hour) and on every return to the app, which shows the new hour at once.
      */
     fun refreshClock(seen: Boolean = false) {
+        LocalDateTime.now().hour.let { if (it != clockHour) clockHour = it }
         feastDay?.let { if (it != today) return load() }
         val shownAt = homeClock ?: return
         val home = page as? Page.Home ?: return

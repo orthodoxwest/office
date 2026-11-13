@@ -23,6 +23,7 @@ import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -57,6 +58,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -67,6 +69,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FindView
@@ -124,6 +127,7 @@ class MainActivity : ComponentActivity() {
                             motion = vm.motion,
                             onBack = { vm.back() },
                             today = vm.today,
+                            clockHour = vm.clockHour,
                             hours = vm.hours,
                             form = vm.form,
                             theme = vm.theme,
@@ -297,6 +301,8 @@ fun OfficeApp(
     find: FindView? = null,
     feast: FeastPageView? = null,
     pageUnder: (Long) -> Page? = { null },
+    // Home's screenshots are composed at 6 pm; About lights the same hour.
+    clockHour: Int = 18,
 ) {
     val content = when {
         error != null -> Content.Failed(error)
@@ -313,6 +319,7 @@ fun OfficeApp(
         motion = Motion.FADE,
         onBack = null,
         today = today,
+        clockHour = clockHour,
         hours = hours,
         form = form,
         theme = theme,
@@ -351,6 +358,8 @@ fun OfficeApp(
     motion: Motion,
     onBack: (() -> Unit)?,
     today: LocalDate,
+    /** The clock hour (0–23) at the last minute's check: About lights it and invites to it (tests: 6 pm, as home's). */
+    clockHour: Int = 18,
     hours: List<String>,
     form: String,
     theme: ThemeChoice,
@@ -435,7 +444,7 @@ fun OfficeApp(
                 contentKey = { it?.entry?.id },
             ) { visit ->
                 if (visit == null) {
-                    Message("Preparing the office…", insets)
+                    Preparing(insets)
                     return@AnimatedContent
                 }
                 val page = visit.entry.page
@@ -619,11 +628,12 @@ fun OfficeApp(
                             page is Page.About -> AboutScreen(
                                 view = aboutView,
                                 today = today,
+                                clockHour = clockHour,
                                 chrome = chrome,
                                 insets = insets,
                                 onOpen = onOpen,
                             )
-                            else -> Message("Preparing the office…", insets)
+                            else -> Preparing(insets)
                         }
                     }
                 }
@@ -652,6 +662,23 @@ private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel
         }
     }
     return transform using null
+}
+
+/**
+ * "Preparing the office…", only when composing takes long enough to be noticed: it waits 400ms and
+ * then fades in over 200, so a quick open or cold start never flashes it (the iOS app's `Preparing`).
+ */
+@Composable
+private fun Preparing(insets: PaddingValues) {
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(400)
+        shown = true
+    }
+    val fade by animateFloatAsState(if (shown) 1f else 0f, tween(200, easing = LinearOutSlowInEasing), label = "preparing")
+    Box(Modifier.fillMaxSize().alpha(fade).then(if (shown) Modifier else Modifier.clearAndSetSemantics {})) {
+        Message("Preparing the office…", insets)
+    }
 }
 
 @Composable

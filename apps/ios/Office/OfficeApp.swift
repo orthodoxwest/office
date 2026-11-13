@@ -77,12 +77,17 @@ struct RootView: View {
     @Environment(\.colorScheme) private var system
     @Environment(\.dynamicTypeSize) private var dynamicType
     @Environment(\.scenePhase) private var phase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The way back, kept for a return after iOS has closed the app in the background.
     @SceneStorage("way-back") private var wayBack = ""
     @State private var started = false
     /// The clock, read every minute while the app is in front: a timer to the next hour stops
     /// counting while the phone sleeps, so home could still highlight Sext at Vespers.
     private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+
+    /// The menu and Settings panels drop a little as they fade in; under Reduce Motion they only
+    /// fade, as the web's and Android's lose their travel.
+    private var panel: AnyTransition { reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -8)) }
 
     var body: some View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
@@ -111,7 +116,7 @@ struct RootView: View {
                             .accessibilityAddTraits(.isModal)
                             .accessibilityAction(.escape) { model.closeOverlay() }
                     }
-                    .transition(.opacity.combined(with: .offset(y: -8)))
+                    .transition(panel)
                 }
                 if model.overlay == .settings && geo.size.width >= wideFrom {
                     ZStack(alignment: .topTrailing) {
@@ -125,7 +130,7 @@ struct RootView: View {
                             .accessibilityAddTraits(.isModal)
                             .accessibilityAction(.escape) { model.closeOverlay() }
                     }
-                    .transition(.opacity.combined(with: .offset(y: -8)))
+                    .transition(panel)
                 }
             }
             .animation(.easeOut(duration: 0.15), value: model.overlay)
