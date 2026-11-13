@@ -171,6 +171,22 @@ fn home_invites_to_the_current_office_only_today() {
 }
 
 #[test]
+fn about_lights_and_invites_to_the_hour_home_does() {
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        let home = core.home(today, today, hour).unwrap();
+        let about = crate::about_now(today, hour).unwrap();
+        assert_eq!(
+            (about.current.as_str(), about.pray_now_label.as_str(), about.pray_now_hour.as_str(), about.pray_now_date),
+            (home.current_hour.as_str(), home.pray_now_label.as_str(), home.pray_now_hour.as_str(), home.pray_now_date),
+            "{hour}"
+        );
+    }
+    assert_eq!(crate::about().blocks.last().map(|b| b.kind.as_str()), Some("invitation"));
+}
+
+#[test]
 fn home_sets_the_days_versicle_on_a_plain_day() {
     let core = OfficeCore::new().unwrap();
     let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 15).unwrap();
@@ -270,6 +286,28 @@ fn reminders_can_follow_the_sun() {
     assert!(core.reminders(civil(2026, 6, 21), 2, all(), vec![true; 7], philly(-240)).is_err());
     assert!(sun_available(58.3) && !sun_available(61.2));
     assert!(sun_unavailable_note().contains("too long"));
+}
+
+#[test]
+fn the_reminder_rule_is_written_out_from_the_apps_choices() {
+    let at = |hour: &str, time: &str| RuleHourChoice { hour: hour.into(), time: time.into(), by_sun: false };
+    let text = |p: Vec<RulePhraseView>| p.into_iter().map(|p| p.text).collect::<String>();
+    // Sunday first, as the engine counts the week: Monday to Friday.
+    let weekdays = vec![false, true, true, true, true, true, false];
+    assert_eq!(
+        text(reminder_rule(vec![at("lauds", "6:45 AM"), at("vespers", "6:00 PM")], weekdays, 10)),
+        "Lauds at 6:45 AM and Vespers at 6:00 PM, on weekdays, ten minutes before."
+    );
+    let sunny =
+        vec![RuleHourChoice { by_sun: true, ..at("vespers", "6:00 PM") }, RuleHourChoice { by_sun: true, ..at("compline", "9:00 PM") }];
+    assert_eq!(text(reminder_rule(sunny, vec![true; 7], 0)), "Vespers at sunset and Compline at 9:00 PM, every day, at the hour.");
+    assert_eq!(text(reminder_rule(vec![], vec![true; 7], 10)), "No hour is chosen yet.");
+    assert_eq!(
+        reminder_next("vespers".into(), civil(2026, 11, 13), civil(2026, 11, 14), "5:50 PM".into()),
+        "Next: Vespers, tomorrow at 5:50 PM."
+    );
+    let periods: Vec<(String, usize)> = reminder_periods().into_iter().map(|p| (p.label, p.hours.len())).collect();
+    assert_eq!(periods, [("Morning".to_string(), 2), ("Day".to_string(), 3), ("Evening".to_string(), 2)]);
 }
 
 #[test]

@@ -90,6 +90,9 @@ impl Pages {
         // The About page's names in the menu and on home, as the apps set them.
         env.add_global("about_menu", presentation::about::ABOUT_MENU);
         env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);
+        // The office being prayed from each clock hour, as a script literal for home's pre-paint mark
+        // of the hour ([start, slug, name, day offset], home.html).
+        env.add_global("hour_schedule", Value::from_safe_string(hour_schedule_literal()));
         Ok(Pages { env })
     }
 
@@ -180,6 +183,15 @@ impl Pages {
 }
 
 // Template escaping and the undated brand link.
+/// `presentation::CURRENT_HOUR_SCHEDULE` as a JavaScript array literal: `[[0,"compline","Compline",-1],…]`.
+fn hour_schedule_literal() -> String {
+    let entries: Vec<String> = presentation::CURRENT_HOUR_SCHEDULE
+        .iter()
+        .map(|(start, slug, name, offset)| format!("[{start},\"{slug}\",\"{name}\",{offset}]"))
+        .collect();
+    format!("[{}]", entries.join(","))
+}
+
 #[cfg(test)]
 mod tests {
     use super::{Pages, TEMPLATES};
@@ -215,6 +227,25 @@ mod tests {
     }
 
     #[test]
+    fn about_lights_the_hour_home_lights_and_ends_with_its_invitation() {
+        use crate::view::{AboutData, Chrome};
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let today = calendar::Date::new(2026, 11, 13);
+        let chrome = || Chrome { page: "about".into(), ..Chrome::default() };
+        let afternoon = pages.about(&AboutData::new(chrome(), today, 15)).unwrap();
+        assert_eq!(afternoon.matches("about-hour is-current").count(), 1);
+        assert!(afternoon.contains(r#"<div class="about-hour is-current" data-hour="none">"#));
+        assert!(afternoon.contains(r#"<a class="pray-now" href="&#x2f;none&#x2f;2026-11-13">Pray None</a>"#));
+        // The door is the page's last word, after the last paragraph.
+        let door = afternoon.find("about-door").unwrap();
+        assert!(afternoon.find("issues/new\">issue tracker</a>").unwrap() < door);
+        // From midnight to 2am home lights no hour, and invites to yesterday's Compline.
+        let late = pages.about(&AboutData::new(chrome(), today, 1)).unwrap();
+        assert!(!late.contains("is-current"));
+        assert!(late.contains(r#"<a class="pray-now" href="&#x2f;compline&#x2f;2026-11-12">Pray Compline</a>"#));
+    }
+
+    #[test]
     fn layout_brand_is_today_home() {
         let body = source("layout.html");
         // The brand must not carry the page's date, which pins an overnight
@@ -224,5 +255,17 @@ mod tests {
         }
         assert!(!body.contains(r#"nav_link("/", d)"#));
         assert!(!body.contains(r#"{% if p == "home" %} active{% endif %}"#), "not every home page is current");
+    }
+
+    // Home marks the device's hour before its first paint from presentation's schedule, so the
+    // inline script and the server cannot disagree on a boundary.
+    #[test]
+    fn home_marks_the_hour_from_the_shared_schedule() {
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let html = pages.home(&crate::view::HomeData { date_slug: "2026-11-13".into(), ..Default::default() }).unwrap();
+        let literal = super::hour_schedule_literal();
+        assert!(literal.starts_with(r#"[[0,"compline","Compline",-1],[2,"lauds","Lauds",0],"#), "{literal}");
+        assert_eq!(literal.matches('[').count(), presentation::CURRENT_HOUR_SCHEDULE.len() + 1);
+        assert!(html.contains(&format!("{literal}.forEach(")), "home's pre-paint script reads the schedule");
     }
 }

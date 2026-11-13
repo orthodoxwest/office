@@ -16,8 +16,8 @@ use render_html::links::{
 };
 use render_html::view::{
     AboutData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
-    TabulaRow,
+    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, ReminderPeriod,
+    ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;
@@ -252,13 +252,18 @@ impl Server {
     }
 
     pub fn about(&self, req: &Req) -> Response<Body> {
-        let data = AboutData::new(Chrome {
-            page: "about".into(),
-            nav_date: self.nav_date_now(req),
-            site: req.site.into(),
-            canonical: "/about".into(),
-            ..Chrome::default()
-        });
+        let (now, now_hour) = now_in(&self.user_location(req));
+        let data = AboutData::new(
+            Chrome {
+                page: "about".into(),
+                nav_date: date_slug(now),
+                site: req.site.into(),
+                canonical: "/about".into(),
+                ..Chrome::default()
+            },
+            now,
+            now_hour,
+        );
         match self.pages.about(&data) {
             Ok(body) => html(StatusCode::OK, body),
             Err(e) => render_failed(&e),
@@ -623,19 +628,30 @@ impl Server {
                 canonical: "/reminders".into(),
                 ..Chrome::default()
             },
-            hours: REMINDER_DEFAULTS
+            // The hours in home's three periods, as home and About group them.
+            periods: presentation::about::ABOUT_HOURS
                 .iter()
-                .map(|&(slug, name, hh, mm, checked)| ReminderHour {
-                    name: name.into(),
-                    slug: slug.into(),
-                    default: format!("{hh:02}:{mm:02}"),
-                    checked,
+                .map(|(label, hours)| ReminderPeriod {
+                    key: label.to_lowercase(),
+                    label: label.to_string(),
+                    hours: hours
+                        .iter()
+                        .filter_map(|(slug, _)| REMINDER_DEFAULTS.iter().find(|d| d.0 == *slug))
+                        .map(|&(slug, name, hh, mm, checked)| ReminderHour {
+                            name: name.into(),
+                            slug: slug.into(),
+                            default: format!("{hh:02}:{mm:02}"),
+                            checked,
+                        })
+                        .collect(),
                 })
                 .collect(),
             days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                 .iter()
                 .map(|d| ReminderDay { name: d.to_string(), slug: d.to_lowercase() })
                 .collect(),
+            rule: reminder_rule_at_first(),
+            rule_words: render_html::view::reminder_rule_words(),
         };
         match self.pages.reminders(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -647,6 +663,19 @@ impl Server {
     pub fn local_year() -> i32 {
         now_in(&local()).0.year()
     }
+}
+
+/// The reminder rule for the page's default choices, with times as an American browser shows
+/// them ("6:45 AM"); app.js rewrites it in the reader's own clock, leaving alike phrases alone.
+fn reminder_rule_at_first() -> Vec<ReminderRulePhrase> {
+    use presentation::reminders::{RuleHour, RuleTime, rule};
+    let times: Vec<(&str, String)> = REMINDER_DEFAULTS
+        .iter()
+        .filter(|d| d.4)
+        .map(|&(slug, _, hh, mm, _)| (slug, format!("{}:{mm:02}\u{a0}{}", (hh + 11) % 12 + 1, if hh < 12 { "AM" } else { "PM" })))
+        .collect();
+    let hours: Vec<RuleHour> = times.iter().map(|(slug, t)| RuleHour { hour: slug, time: RuleTime::Clock(t) }).collect();
+    rule(&hours, [true; 7], Some(10)).into_iter().map(|p| ReminderRulePhrase { key: p.key, text: p.text }).collect()
 }
 
 #[cfg(test)]
@@ -792,6 +821,22 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Reminders sets its rule for the default choices at once, and sends app.js the words it
+    // rewrites the rule from; the hours stand in home's three periods.
+    #[test]
+    fn reminders_writes_out_the_rule_and_sends_its_words() {
+        let (status, _, body) = get("/reminders");
+        assert_eq!(status, StatusCode::OK);
+        let at = body.find("id=\"reminder-rule\"").expect("the rule");
+        let rule = &body[at..at + body[at..].find("</p>").unwrap()];
+        assert!(rule.contains("<span data-key=\"lauds-time\"> at 6:45\u{a0}AM</span>"), "{rule}");
+        assert!(rule.contains("<span data-key=\"lead\">, ten minutes before.</span>"), "{rule}");
+        let at = body.find("id=\"reminder-rule-words\">").expect("the words") + "id=\"reminder-rule-words\">".len();
+        let words = &body[at..at + body[at..].find("</script>").unwrap()];
+        assert!(words.contains("\"none\":\"with no alert\"") && words.contains("\"Sundays\""), "{words}");
+        assert_eq!(body.matches("class=\"reminder-period\"").count(), 3);
     }
 
     // Home's head carries the day's versicle from Lauds on a plain day, and is

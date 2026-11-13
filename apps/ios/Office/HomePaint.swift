@@ -35,6 +35,13 @@ struct HomeInk {
     }
 }
 
+/// The pool of light on the hour that is now: no edge, its stops the web's
+/// (`radial-gradient(var(--now-pool), 55% at 52%, transparent)`). Home's directory and About's
+/// table both lay it.
+func poolGradient(_ pool: Color) -> Gradient {
+    Gradient(stops: [.init(color: pool, location: 0), .init(color: pool.opacity(0.55), location: 0.52), .init(color: pool.opacity(0), location: 1)])
+}
+
 /// `--ochre`, whose thin washes are Nave's tablet and pool.
 let ochre = Color(hex: 0xC9973F)
 let leafMatteHi = Color(hex: 0xC9A182)

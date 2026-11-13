@@ -25,6 +25,12 @@
   <meta property="og:image:alt" content="Daily Office, the Benedictine Divine Office of the Western Rite: a gold cross in its ring over the name, on a night sky of gold-leaf stars, above a band reading Pray the hours">
   <meta name="twitter:card" content="summary_large_image">
   {% endif %}
+  {# The system's edge (Chromium's toolbar, an installed app's status bar) takes the wall's
+       colour, style.css's --bg in each theme. Here, before the pre-paint script, so a stored
+       Nave or Apse sets both before the first paint: an Apse reader on a light phone gets a
+       dark toolbar. app.js (syncThemeColorMeta) keeps them in step after a change. #}
+  <meta name="theme-color" content="#faf3e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   {# Apply stored appearance before CSS to avoid a flash.
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
@@ -52,6 +58,7 @@
         var t = localStorage.getItem("office-theme");
         if (t === "light" || t === "dark") {
           document.documentElement.setAttribute("data-theme", t);
+          document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute("content", t === "dark" ? "#121c28" : "#faf3e9"); });
         } else if (t === "default") {
           document.documentElement.removeAttribute("data-theme");
         }
@@ -64,6 +71,21 @@
         if (localStorage.getItem("office-martyrology") === "on") document.documentElement.setAttribute("data-martyrology", "on");
         if (localStorage.getItem("office-chant") === "on") document.documentElement.setAttribute("data-chant", "on");
       } catch (e) {}
+      {%- if page == "home" %}
+      {# Apse's home shows its gold-leaf stars from the first frames: their field (app.js) is
+           fetched with the page, not after it, when the night theme is the one to be painted. #}
+      try {
+        var night = document.documentElement.getAttribute("data-theme");
+        if (night === "dark" || (night === null && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          var stars = document.createElement("link");
+          stars.rel = "preload";
+          stars.as = "fetch";
+          stars.crossOrigin = "anonymous";
+          stars.href = "{{ static("ornaments/stars.json")|url|safe }}";
+          document.head.appendChild(stars);
+        }
+      } catch (e) {}
+      {%- endif %}
       {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
            that used the Office before that was recorded holds "before"): home offers the
            introduction beside Change date. Before the first record, any stored setting or an
@@ -86,9 +108,10 @@
     })();
   </script>
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
-  {# Start the ordo font fetch early to reduce reflow in the long year table. #}
+  {# Start the text face's fetch early: it reflows the ordo's long year table, and re-sets home's
+       date and day when it swaps in. #}
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
-  {% if page == "calendar" %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {% if page in ["calendar", "home"] %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
   {# Report filters should refresh immediately. A cross-document snapshot
        can hold a dense report's controls while its new view is rendering. #}
@@ -97,8 +120,6 @@
   <link rel="manifest" href="{{ static("manifest.webmanifest")|url }}">
   <link rel="apple-touch-icon" href="{{ static("icons/apple-touch-icon.png")|url }}">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#fdf1e6" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{ static("leader.js")|url }}" defer></script>
   <script src="{{ static("app.js")|url }}" defer></script>
   {# chant.js lays chant scores out with neuma's engine, fetched only once one is shown. #}

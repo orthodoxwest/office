@@ -1,5 +1,9 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +51,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
@@ -103,10 +108,17 @@ fun OrdoScreen(
     val p = LocalPalette.current
     val wide = LocalWide.current
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
+    // "Show office details" fades the month out, changes every day at once and fades it back in,
+    // rather than thirty days unfolding together. A press while it turns is let go. The system's
+    // animator scale times the fades, so with animations off the days simply change.
+    val monthShade = remember { Animatable(1f) }
+    var turningAll by remember { mutableStateOf(false) }
     // A day asked for (the web's #d-date) is brought into view once, when the month is ready:
     // from the first frame when it already is, so the page comes in at that day. After that
-    // the reader's own scroll position stands, restored or not.
-    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
+    // the reader's own scroll position stands, restored or not. The day before it comes to rest
+    // under the heading, so the day is found among its neighbours, as the web keeps a row above
+    // it (`scroll-margin-top`); the month's first day has none before it here.
+    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + maxOf(1, focusDay - 1) - 1
     var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
     // The day comes to rest under the month's pinned heading, not behind it: the heading's
     // measured height, or before its first layout an estimate (its padding, and the taller of
@@ -165,7 +177,20 @@ fun OrdoScreen(
                 Spacer(Modifier.weight(1f))
                 Text(
                     if (allDetails) "Hide office details" else "Show office details",
-                    Modifier.tap { allDetails = !allDetails }.padding(vertical = 12.dp),
+                    Modifier.tap {
+                        if (!turningAll) {
+                            turningAll = true
+                            scope.launch {
+                                try {
+                                    monthShade.animateTo(0f, tween(MONTH_OUT_MS, easing = FastOutLinearInEasing))
+                                    allDetails = !allDetails
+                                    monthShade.animateTo(1f, tween(MONTH_IN_MS, easing = LinearOutSlowInEasing))
+                                } finally {
+                                    turningAll = false
+                                }
+                            }
+                        }
+                    }.padding(vertical = 12.dp),
                     style = Type.small.copy(color = p.accent, textDecoration = TextDecoration.Underline),
                 )
             }
@@ -186,12 +211,12 @@ fun OrdoScreen(
                 }
             }
         }
-        if (wide) item(key = "columns") { DayColumns(ordoColumn()) }
+        if (wide) item(key = "columns") { DayColumns(ordoColumn().graphicsLayer { alpha = monthShade.value }) }
         if (month == null) {
             item(key = "wait") { Text("Preparing the month…", ordoColumn().padding(vertical = 32.dp), style = Type.small.copy(color = p.muted, textAlign = TextAlign.Center)) }
         } else {
             itemsIndexed(month.days, key = { _, d -> "d-${d.date.day}" }) { _, d ->
-                DayRow(d, LocalDate.of(d.date.year, d.date.month, d.date.day) == today, allDetails, onDay, onFeast, ordoColumn())
+                DayRow(d, LocalDate.of(d.date.year, d.date.month, d.date.day) == today, allDetails, turningAll, onDay, onFeast, ordoColumn().graphicsLayer { alpha = monthShade.value })
             }
         }
         item(key = "continuation") {
@@ -497,7 +522,7 @@ private fun MonthHeading(name: String, modifier: Modifier, onTop: () -> Unit) {
 }
 
 @Composable
-private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay: (LocalDate) -> Unit, onFeast: (String) -> Unit, modifier: Modifier) {
+private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turningAll: Boolean, onDay: (LocalDate) -> Unit, onFeast: (String) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
     val open = rememberSaveable(d.date, saver = Disclosures) { mutableStateMapOf<String, Boolean>() }
     val details = open["details"] ?: allDetails
@@ -518,8 +543,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
-        // Shown for the whole month at once, the rows stay where they are.
-        Unfold(details && hasDetails, reveal = open["details"] != null) { Digest(d, onFeast) }
+        // Shown for the whole month at once, the rows stay where they are, and change at once
+        // while the month is faded.
+        Unfold(details && hasDetails, reveal = open["details"] != null, instant = turningAll) { Digest(d, onFeast) }
     }
     val anyOpen = details && hasDetails
     if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)

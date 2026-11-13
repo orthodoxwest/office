@@ -506,6 +506,13 @@ function rule(x1, y1, x2, y2, w, seed) {
     return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
   }).join("L") + "Z";
 }
+
+// plainClickOpensHere: a primary click with no modifier key, on a link that
+// opens in this tab (not a new one, not a download).
+function plainClickOpensHere(e, link) {
+  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
+    (!link.target || link.target === "_self") && !link.hasAttribute("download");
+}
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
@@ -514,7 +521,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   // matching pre-paint script in layout.html applies the choice before CSS.
   // Only explicit button clicks write storage — passive load never invents a choice.
   var THEME_KEY = "office-theme";
-  var THEME_LIGHT_COLOR = "#fdf1e6";
+  var THEME_LIGHT_COLOR = "#faf3e9";
   var THEME_DARK_COLOR = "#121c28";
 
   var readStoredTheme = function () {
@@ -1131,6 +1138,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   function syncChromeIfNeeded() {
     syncDatedNavigation();
     updatePrayNow();
+    updateAboutNow();
     markCalendarToday();
     window.dispatchEvent(new Event("officenavigation"));
   }
@@ -1148,6 +1156,7 @@ function rule(x1, y1, x2, y2, w, seed) {
       // within the day; cheap and keeps long-lived tabs honest).
       syncDatedNavigation();
       updatePrayNow();
+      updateAboutNow();
     }
   });
 
@@ -1259,18 +1268,114 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
   });
 
+  // A link in the open phone menu puts the menu away before the page goes,
+  // at once rather than with its 160ms fade, so it does not ride the
+  // cross-fade over the next page as a ghost. A page restored by Back comes
+  // with the menu put away, as a tap outside leaves it.
+  if (siteMenu) {
+    siteMenu.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest("a[href]");
+      if (!link || e.defaultPrevented || overlayOpen() !== "menu" || plainClickOpensHere(e, link) === false) {
+        return;
+      }
+      siteMenu.classList.add("is-leaving");
+      siteMenu.removeAttribute("open");
+    });
+    window.addEventListener("pageshow", function () {
+      siteMenu.classList.remove("is-leaving");
+    });
+  }
+
+  // The brand on today's home leads where the reader already is: it puts an
+  // open overlay away and does nothing else, as in the apps (AppModel.goHome),
+  // rather than reload an identical page. syncDatedNavigation keeps its
+  // aria-current to today's home.
+  document.addEventListener("click", function (e) {
+    var brand = e.target.closest && e.target.closest(".site-brand[aria-current='page']");
+    if (brand && !e.defaultPrevented && plainClickOpensHere(e, brand)) {
+      e.preventDefault();
+      closeOverlay(false);
+    }
+  });
+
   // Native disclosures start closed at every width, including without JS.
   // A deliberate bulk action is useful for comparing offices across the year.
   var calendarExpand = document.querySelector(".calendar-expand");
   if (calendarExpand) {
     calendarExpand.hidden = false;
+    // Thirty days unfolding together is a page in turmoil: the month fades
+    // out, every day opens or closes at once, and the month fades back in,
+    // as the apps' ordo does (Chrome.kt's MONTH_OUT_MS and MONTH_IN_MS).
+    // Without motion, or before the page has settled, the days simply change.
+    var turnAll = null;
     calendarExpand.addEventListener("click", function () {
+      // Pressed again mid-turn: the first turn lands at once, and this one
+      // starts from it.
+      if (turnAll) {
+        turnAll();
+      }
       var expand = calendarExpand.getAttribute("aria-pressed") !== "true";
-      document.querySelectorAll(".day-disclosures details").forEach(function (item) {
-        item.open = expand;
-      });
-      calendarExpand.setAttribute("aria-pressed", String(expand));
-      calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      var months = Array.prototype.slice.call(document.querySelectorAll(".month-table"));
+      var animated = months.length > 0 && typeof months[0].animate === "function" &&
+        document.documentElement.classList.contains("motion-ready") &&
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+      // The days change with their transitions held off (style.css,
+      // .is-turning-all) until the month has faded back in.
+      function change() {
+        document.querySelectorAll(".day-disclosures details").forEach(function (item) {
+          // A day folding on its own lands first, or its fold would undo this.
+          if (item.stopFold) {
+            item.stopFold();
+          }
+          item.open = expand;
+        });
+        calendarExpand.setAttribute("aria-pressed", String(expand));
+        calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      }
+      if (!animated) {
+        change();
+        return;
+      }
+      var changed = false;
+      var fades = [];
+      var timer = 0;
+      function fade(from, to, options) {
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+        fades = months.map(function (month) {
+          return month.animate([{ opacity: from }, { opacity: to }], options);
+        });
+        return fades[0].finished;
+      }
+      function end() {
+        if (!changed) {
+          changed = true;
+          change();
+        }
+        document.documentElement.classList.remove("is-turning-all");
+        turnAll = null;
+        window.clearTimeout(timer);
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+      }
+      turnAll = end;
+      document.documentElement.classList.add("is-turning-all");
+      // The fades' 210ms and a little over: a hidden tab may never finish them.
+      timer = window.setTimeout(end, 400);
+      fade(1, 0, { duration: 70, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }).then(function () {
+        if (turnAll !== end) {
+          return;
+        }
+        changed = true;
+        change();
+        return fade(0, 1, { duration: 140, easing: "cubic-bezier(0, 0, 0.2, 1)" }).then(function () {
+          if (turnAll === end) {
+            end();
+          }
+        });
+      }).catch(function () {});
     });
   }
 
@@ -1286,6 +1391,161 @@ function rule(x1, y1, x2, y2, w, seed) {
     });
   } else {
     markMotionReady();
+  }
+
+  // Where the browser cannot ease a height to auto (no interpolate-size:
+  // Safari, Firefox), the disclosures' unfold of style.css is turned here
+  // instead, so they unfold on every browser as in the apps: the height over
+  // 260ms on the standard curve and the contents fading in over 200ms after
+  // 60; folding, 200ms and the contents out over 100ms, the disclosure held
+  // open, marked .is-folding, until it has folded. Heard on the disclosure,
+  // after the summary's own listeners (the prayers' kept choice reads the
+  // state before the toggle), and never for a click another listener has
+  // taken (home's "Change date" turns its stage itself). An hour's date in
+  // the header turns it through details.turnFold, and the ordo's "Show office
+  // details" lands a fold mid-turn through details.stopFold before it changes
+  // the day. Without motion it is the native toggle.
+  var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
+  if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
+    var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
+    var folds = new WeakMap();
+    // A box's height and edges as they stand, and folded away.
+    var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
+    var tall = function (box) {
+      return { height: box.getBoundingClientRect().height + "px" };
+    };
+    var edges = function (box) {
+      var style = window.getComputedStyle(box);
+      var at = tall(box);
+      EDGES.forEach(function (edge) {
+        at[edge] = style[edge];
+      });
+      return at;
+    };
+    var folded = function () {
+      var at = { height: "0px" };
+      EDGES.forEach(function (edge) {
+        at[edge] = "0px";
+      });
+      return at;
+    };
+    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help").forEach(function (details) {
+      var summary = details.querySelector(":scope > summary");
+      if (!summary) {
+        return;
+      }
+      details.stopFold = function () {
+        var running = folds.get(details);
+        if (running) {
+          running.stop();
+        }
+      };
+      // Opens or closes the disclosure on the fold; false where it is left
+      // to the native toggle.
+      details.turnFold = function () {
+        if (!document.documentElement.classList.contains("motion-ready") || !foldStillness.matches) {
+          return false;
+        }
+        var running = folds.get(details);
+        var opening = running ? !running.opening : !details.open;
+        var contents = Array.prototype.filter.call(details.children, function (child) {
+          return child !== summary;
+        });
+        // Where the disclosure gives its parts to the hour's controls grid
+        // (display: contents, style.css) it has no box to fold, and WebKit
+        // does not animate its ::details-content: its parts fold instead.
+        var unboxed = window.getComputedStyle(details).display === "contents";
+        var boxes = unboxed ? contents : [details];
+        if (boxes.length === 0) {
+          return false;
+        }
+        var measure = unboxed ? edges : tall;
+        var from = boxes.map(measure);
+        if (running) {
+          running.stop();
+        }
+        var to;
+        if (opening) {
+          details.open = true;
+          to = boxes.map(measure);
+          if (unboxed && !running) {
+            from = boxes.map(folded);
+          }
+        } else if (unboxed) {
+          to = boxes.map(folded);
+        } else {
+          // Folded, the disclosure is its summary and its own edges: measured
+          // with the contents set aside.
+          var kept = contents.map(function (child) {
+            var display = [child.style.getPropertyValue("display"), child.style.getPropertyPriority("display")];
+            child.style.setProperty("display", "none", "important");
+            return display;
+          });
+          to = [tall(details)];
+          contents.forEach(function (child, i) {
+            if (kept[i][0]) {
+              child.style.setProperty("display", kept[i][0], kept[i][1]);
+            } else {
+              child.style.removeProperty("display");
+            }
+          });
+        }
+        boxes.forEach(function (box) {
+          box.style.boxSizing = "border-box";
+          box.style.overflow = "hidden";
+          box.style.overflow = "clip";
+        });
+        details.classList.toggle("is-folding", !opening);
+        var duration = opening ? 260 : 200;
+        var turns = boxes.map(function (box, i) {
+          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+        });
+        contents.forEach(function (child) {
+          turns.push(opening ?
+            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
+            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }));
+        });
+        var timer = 0;
+        var fold = {
+          opening: opening,
+          stop: function () {
+            folds.delete(details);
+            window.clearTimeout(timer);
+            turns.forEach(function (turn) {
+              turn.cancel();
+            });
+            details.classList.remove("is-folding");
+            boxes.forEach(function (box) {
+              box.style.removeProperty("box-sizing");
+              box.style.removeProperty("overflow");
+            });
+          },
+        };
+        function land() {
+          if (folds.get(details) !== fold) {
+            return;
+          }
+          fold.stop();
+          if (!opening) {
+            details.open = false;
+          }
+        }
+        folds.set(details, fold);
+        // A hidden tab may never finish the turn.
+        timer = window.setTimeout(land, duration + 150);
+        turns[0].finished.then(land, function () {});
+        return true;
+      };
+      details.addEventListener("click", function (event) {
+        if (event.defaultPrevented || !(event.target instanceof Element) || event.target.closest("summary") !== summary) {
+          return;
+        }
+        if (details.turnFold()) {
+          event.preventDefault();
+        }
+      });
+    });
   }
 
   // Registered after load: on a first visit the worker's install fetches the
@@ -1351,7 +1611,19 @@ function rule(x1, y1, x2, y2, w, seed) {
     var webcalEl = document.getElementById("reminder-webcal");
     var copyBtn = document.getElementById("reminder-copy");
     var copiedEl = document.getElementById("reminder-copied");
+    var copyNoteEl = document.getElementById("reminder-copy-note");
     var addressEl = document.querySelector(".reminder-address");
+    var ruleEl = document.getElementById("reminder-rule");
+    var ruleWords = {};
+    try {
+      ruleWords = JSON.parse(document.getElementById("reminder-rule-words").textContent);
+    } catch {
+      ruleWords = null;
+    }
+    var stillRule = function () {
+      return !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    };
+    var feedAddress = "";
 
     var buildFeedURL = function () {
       var params = [];
@@ -1380,6 +1652,174 @@ function rule(x1, y1, x2, y2, w, seed) {
       return location.host + "/office.ics?" + params.join("&");
     };
 
+    // The rule, written out (presentation::reminders, whose tests give the sentences): the
+    // hours in the day's order with an Oxford comma from three, the days, how long before.
+    var ruleJoint = function (i, n) {
+      if (i === n - 1) {
+        return "";
+      }
+      if (n === 2) {
+        return " " + ruleWords.and + " ";
+      }
+      return i === n - 2 ? ", " + ruleWords.and + " " : ", ";
+    };
+    var ruleList = function (items) {
+      return items.map(function (item, i) {
+        return item + ruleJoint(i, items.length);
+      }).join("");
+    };
+    var ruleDays = function (days) {
+      var chosen = [];
+      var left = [];
+      days.forEach(function (on, i) {
+        (on ? chosen : left).push(ruleWords.days[i]);
+      });
+      if (chosen.length === 0) {
+        return null;
+      }
+      if (chosen.length === 7) {
+        return ruleWords.everyDay;
+      }
+      if (days.join() === "true,true,true,true,true,false,false") {
+        return ruleWords.weekdays;
+      }
+      return chosen.length <= 3 ? ruleWords.on + " " + ruleList(chosen) : ruleWords.except + " " + ruleList(left);
+    };
+    // A time in the reader's own clock ("6:45 AM"), held to its figures by a no-break space.
+    var ruleClock = (function () {
+      var format = null;
+      try {
+        format = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+      } catch {
+        format = null;
+      }
+      return function (value) {
+        var parts = value.split(":");
+        if (!format || parts.length < 2) {
+          return value;
+        }
+        return format.format(new Date(2026, 0, 1, Number(parts[0]), Number(parts[1]))).replace(/[\s\u202f]+(?=\D+$)/, "\u00a0");
+      };
+    })();
+    var rulePhrases = function (invalidTime) {
+      var hours = [];
+      remindersForm.querySelectorAll("input[name=hour]:checked").forEach(function (cb) {
+        var t = remindersForm.querySelector("input[name=time-" + cb.value + "]");
+        hours.push({ slug: cb.value, time: t && t.value ? ruleClock(t.value) : "" });
+      });
+      var days = Array.from(remindersForm.querySelectorAll("input[name=day]")).map(function (cb) {
+        return cb.checked;
+      });
+      var daysPhrase = ruleDays(days);
+      if (hours.length === 0 || daysPhrase === null) {
+        var empty = hours.length > 0 ? ruleWords.noDay : days.indexOf(true) >= 0 ? ruleWords.noHour : ruleWords.noHourOrDay;
+        return [{ key: "empty", text: empty }];
+      }
+      if (invalidTime) {
+        return [{ key: "empty", text: ruleWords.noTime }];
+      }
+      var out = [];
+      hours.forEach(function (h, i) {
+        out.push({ key: h.slug, text: ruleWords.hours[h.slug] });
+        out.push({ key: h.slug + "-time", text: " " + ruleWords.at + " " + h.time });
+        var joint = ruleJoint(i, hours.length);
+        if (joint) {
+          out.push({ key: h.slug + "-joint", text: joint });
+        }
+      });
+      var alarm = remindersForm.querySelector("select[name=alarm]").value;
+      out.push({ key: "days", text: ", " + daysPhrase });
+      out.push({ key: "lead", text: ", " + (ruleWords.leads[alarm] || alarm + " minutes before") + "." });
+      return out;
+    };
+    // Only the phrases whose words changed cross-fade: out in 90ms, in over 180ms after a beat.
+    // The rule is a polite, atomic live region, so every change to its words lands in one
+    // moment (after the beat) and is read once, whole, rather than phrase by phrase.
+    var ruleTimer = 0;
+    var paintRule = function (phrases, quiet) {
+      if (!ruleEl) {
+        return;
+      }
+      var spans = function () {
+        var kept = {};
+        ruleEl.querySelectorAll("span[data-key]").forEach(function (span) {
+          kept[span.dataset.key] = span;
+        });
+        return kept;
+      };
+      var still = quiet || stillRule();
+      var apply = function () {
+        var kept = spans();
+        var prev = null;
+        ruleEl.classList.toggle("is-empty", phrases[0].key === "empty");
+        phrases.forEach(function (p) {
+          var span = kept[p.key];
+          delete kept[p.key];
+          if (!span) {
+            span = document.createElement("span");
+            span.dataset.key = p.key;
+            span.textContent = p.text;
+            if (!still) {
+              span.classList.add("is-out");
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                  span.classList.remove("is-out");
+                });
+              });
+            }
+          } else {
+            if (span.textContent !== p.text) {
+              span.textContent = p.text;
+            }
+            span.classList.remove("is-out");
+          }
+          // Moved only where it is out of place, so an unchanged phrase is left alone.
+          var at = prev ? prev.nextSibling : ruleEl.firstChild;
+          if (at !== span) {
+            ruleEl.insertBefore(span, at);
+          }
+          prev = span;
+        });
+        Object.keys(kept).forEach(function (key) {
+          kept[key].remove();
+        });
+      };
+      window.clearTimeout(ruleTimer);
+      if (still) {
+        apply();
+        return;
+      }
+      // What will change or go fades out now; the new words come in together after the beat.
+      var wanted = {};
+      phrases.forEach(function (p) {
+        wanted[p.key] = p.text;
+      });
+      var kept = spans();
+      var same = Object.keys(kept).length === phrases.length;
+      Object.keys(kept).forEach(function (key) {
+        if (wanted[key] !== kept[key].textContent) {
+          kept[key].classList.add("is-out");
+          same = false;
+        }
+      });
+      if (same) {
+        apply();
+        return;
+      }
+      ruleTimer = window.setTimeout(apply, 150);
+    };
+
+    // The calendar address, breakable after its slashes and joints rather than anywhere.
+    var setAddress = function (text) {
+      urlEl.textContent = "";
+      text.replace(/([/?&])/g, "$1\n").split("\n").forEach(function (piece, i) {
+        if (i > 0) {
+          urlEl.appendChild(document.createElement("wbr"));
+        }
+        urlEl.appendChild(document.createTextNode(piece));
+      });
+    };
+
     var syncReminderHourRows = function () {
       remindersForm.querySelectorAll(".reminder-hour-row").forEach(function (row) {
         var checkbox = row.querySelector('input[name="hour"]');
@@ -1391,9 +1831,20 @@ function rule(x1, y1, x2, y2, w, seed) {
           time.required = selected;
         }
       });
+      remindersForm.querySelectorAll(".reminder-day").forEach(function (day) {
+        var checkbox = day.querySelector("input");
+        day.classList.toggle("is-selected", Boolean(checkbox && checkbox.checked));
+      });
     };
 
-    var update = function () {
+    var copiedTimer = 0;
+    var settleCopied = function () {
+      window.clearTimeout(copiedTimer);
+      copyBtn.classList.remove("is-copied");
+      copiedEl.textContent = "";
+    };
+
+    var update = function (quiet) {
       syncReminderHourRows();
       var selectedHours = remindersForm.querySelectorAll("input[name=hour]:checked");
       var selectedDays = remindersForm.querySelectorAll("input[name=day]:checked");
@@ -1401,33 +1852,37 @@ function rule(x1, y1, x2, y2, w, seed) {
         var time = remindersForm.querySelector("input[name=time-" + checkbox.value + "]");
         return !time || !time.validity.valid;
       });
-      var message = "";
-      if (selectedHours.length === 0) {
-        message = "Select at least one hour above.";
-      } else if (invalidTime) {
-        message = "Choose a time for each selected hour.";
-      } else if (selectedDays.length === 0) {
-        message = "Select at least one day above.";
-      }
-      var valid = message === "";
-      var feed = valid ? buildFeedURL() : "";
-      urlEl.textContent = valid ? "https://" + feed : message;
+      var valid = selectedHours.length > 0 && selectedDays.length > 0 && !invalidTime;
+      var phrases = ruleWords ? rulePhrases(invalidTime) : [{ key: "empty", text: "" }];
+      paintRule(phrases, quiet === true);
+      feedAddress = valid ? "https://" + buildFeedURL() : "";
+      setAddress(valid ? feedAddress : phrases[0].text);
       webcalEl.classList.toggle("is-disabled", !valid);
       webcalEl.setAttribute("aria-disabled", valid ? "false" : "true");
       if (!valid) {
         webcalEl.removeAttribute("href");
         webcalEl.setAttribute("tabindex", "-1");
       } else {
-        webcalEl.href = "webcal://" + feed;
+        webcalEl.href = "webcal://" + feedAddress.slice("https://".length);
         webcalEl.removeAttribute("tabindex");
       }
       copyBtn.disabled = !valid;
-      copiedEl.textContent = valid ? "Copied." : message;
-      copiedEl.hidden = valid;
+      settleCopied();
+      copyNoteEl.hidden = true;
     };
 
     remindersForm.addEventListener("change", update);
-    update();
+    // A tap on an unchosen hour's greyed time chooses the hour (the field lets the tap through).
+    remindersForm.addEventListener("click", function (event) {
+      var cell = event.target.closest && event.target.closest(".reminder-time");
+      var checkbox = cell && cell.closest(".reminder-hour-row").querySelector('input[name="hour"]');
+      if (!checkbox || checkbox.checked) {
+        return;
+      }
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    update(true);
 
     webcalEl.addEventListener("click", function (event) {
       if (webcalEl.getAttribute("aria-disabled") === "true") {
@@ -1442,8 +1897,8 @@ function rule(x1, y1, x2, y2, w, seed) {
         return;
       }
       var showCopyFallback = function () {
-        copiedEl.textContent = "Copy unavailable. The calendar address is shown below.";
-        copiedEl.hidden = false;
+        copyNoteEl.textContent = "Copy unavailable. The calendar address is shown below.";
+        copyNoteEl.hidden = false;
         if (addressEl) {
           addressEl.open = true;
         }
@@ -1452,9 +1907,12 @@ function rule(x1, y1, x2, y2, w, seed) {
         showCopyFallback();
         return;
       }
-      navigator.clipboard.writeText(urlEl.textContent).then(function () {
+      navigator.clipboard.writeText(feedAddress).then(function () {
+        // The link's own words say so for a moment, and nothing beside it moves.
+        settleCopied();
+        copyBtn.classList.add("is-copied");
         copiedEl.textContent = "Copied.";
-        copiedEl.hidden = false;
+        copiedTimer = window.setTimeout(settleCopied, 2400);
         reportUsageAction("reminders");
       }).catch(showCopyFallback);
     });
@@ -1895,8 +2353,11 @@ function rule(x1, y1, x2, y2, w, seed) {
     var sync = function () {
       button.setAttribute("aria-expanded", details.open ? "true" : "false");
     };
+    // On the disclosures' fold where script turns it (app.js, turnFold).
     button.addEventListener("click", function () {
-      details.open = !details.open;
+      if (!(details.turnFold && details.turnFold())) {
+        details.open = !details.open;
+      }
     });
     details.addEventListener("toggle", sync);
     sync();
@@ -2556,9 +3017,39 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
   }
 
-  // Home, Ordo, and an open office may remain visible across a time boundary
-  // without producing a visibility event. Home refreshes at the next office
-  // boundary; Ordo and an office only need midnight. Midnight is also a home
+  // About's table marks the hour it is now as home's directory does (none
+  // from midnight to 2am, which is yesterday's Compline), and the page's foot
+  // carries home's invitation, words and link alike, by the device's clock:
+  // the server's copy was marked by its own, and may be cached.
+  function updateAboutNow() {
+    var table = document.querySelector(".about-hours");
+    if (!table) {
+      return;
+    }
+    var now = new Date();
+    var info = currentHourInfo(now);
+    table.querySelectorAll(".about-hour[data-hour]").forEach(function (row) {
+      var isCurrent = info.offset === 0 && row.getAttribute("data-hour") === info.slug;
+      row.classList.toggle("is-current", isCurrent);
+      var link = row.querySelector("dt a");
+      if (isCurrent) {
+        link.setAttribute("aria-current", "time");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+    var door = document.querySelector(".about-door .pray-now");
+    if (door) {
+      var officeDate = new Date(now.getTime());
+      officeDate.setDate(officeDate.getDate() + info.offset);
+      door.setAttribute("href", "/" + info.slug + "/" + localDateSlug(officeDate));
+      setPrayNowLabel(door, "Pray " + (HOUR_NAMES[info.slug] || info.slug));
+    }
+  }
+
+  // Home, About, Ordo, and an open office may remain visible across a time boundary
+  // without producing a visibility event. Home and About refresh at the next
+  // office boundary; Ordo and an office only need midnight. Midnight is also a home
   // boundary because Compline before 2am belongs to the previous liturgical
   // day.
   //
@@ -2571,7 +3062,7 @@ function rule(x1, y1, x2, y2, w, seed) {
   var timedChromeRefreshTimer = null;
   var timedChromeRefreshAt = null;
   function timedChromeRefreshBoundary(now) {
-    if (document.querySelector(".home-prayer-card[data-date-slug]")) {
+    if (document.querySelector(".home-prayer-card[data-date-slug], .about-hours")) {
       return nextOfficeBoundary(now);
     }
     if (!document.querySelector(".calendar") && !document.querySelector(".office-hour")) {
@@ -2682,6 +3173,60 @@ function rule(x1, y1, x2, y2, w, seed) {
       }, { passive: true });
       markVisibleMonth();
     }
+
+    // A day asked for (#d-…, Today) comes to rest with the whole day before
+    // it in view above, under the pinned month heading: style.css allows one
+    // plain row (--day-row); here the row before gives its own height, before
+    // an in-page link scrolls, and on arrival, where the browser has already
+    // brought the day to that plain row's place. The month's first day has
+    // its heading above it instead.
+    var restUnderDayBefore = function (row) {
+      var before = row && row.matches("tr.day") && row.previousElementSibling;
+      if (before && before.matches("tr.day")) {
+        row.style.setProperty("--day-row", before.offsetHeight + "px");
+      }
+    };
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest('a[href^="#d-"]');
+      if (link) {
+        restUnderDayBefore(document.getElementById(link.getAttribute("href").slice(1)));
+      }
+    }, true);
+    var readerMoved = false;
+    var askedDay = location.hash.indexOf("#d-") === 0 ? document.getElementById(location.hash.slice(1)) : null;
+    var arrival = window.performance && performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+    if (askedDay && askedDay.matches("tr.day")) {
+      restUnderDayBefore(askedDay);
+      // Not over a place the browser restored (a reload, Back).
+      if (!arrival || arrival.type === "navigate") {
+        askedDay.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+    }
+
+    // The day arrived at (#d-…) keeps its gold ground until the reader moves
+    // on: the first scroll of their own lets it go (.target-released), so it
+    // never stands as a second "you are here" beside Today. The browser's own
+    // scroll to the day is not the reader's; a new day asked for marks again.
+    var noteReaderMoved = function () { readerMoved = true; };
+    ["wheel", "touchmove", "keydown"].forEach(function (type) {
+      window.addEventListener(type, noteReaderMoved, { passive: true });
+    });
+    window.addEventListener("scroll", function () {
+      if (readerMoved && location.hash) {
+        calendarEl.classList.add("target-released");
+      }
+    }, { passive: true });
+    window.addEventListener("hashchange", function () {
+      readerMoved = false;
+      calendarEl.classList.remove("target-released");
+      // A day asked for in place (a typed address, Back across days), which
+      // no link's click prepared.
+      var day = location.hash.indexOf("#d-") === 0 ? document.getElementById(location.hash.slice(1)) : null;
+      if (day && day.matches("tr.day") && !day.style.getPropertyValue("--day-row")) {
+        restUnderDayBefore(day);
+        day.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+    });
 
     calendarEl.addEventListener("click", function (e) {
       if (e.target.closest("a, abbr, details")) {
@@ -4175,6 +4720,115 @@ function rule(x1, y1, x2, y2, w, seed) {
   })();
 })();
 
+// A finger on a control. A touch browser may set :active late (Chromium once
+// the finger has lifted) or, in iOS Safari, only where a touch listener is
+// heard; and a tap is over in a few frames, before a press that waited could
+// be seen. So the control under a finger that rests on it for 90ms without
+// moving takes .is-pressed (a thumb starting a scroll lights nothing, as in a
+// native list), as does the control a tap lands on, at once. A link to
+// another of the site's pages keeps it until the page goes, so the last thing
+// seen is the press; anything else lets go at once, and style.css eases the
+// release over 200ms (and draws .is-pressed as :active). An ordo row is one
+// control with the day's own links (calendarRowClicks). A mouse has :active,
+// and its click is marked the same way.
+(function () {
+  if (!window.PointerEvent) return;
+  var PRESSABLE = "a[href], button:not(:disabled), summary, label, [role='button']";
+  var ROW_LINKS = ".day-feast-name, .day-mobile-date, .day-num a";
+  var REST_MS = 90;
+  var SLOP_PX = 10;
+  var KEEP_MS = 8000;
+  var held = null;
+  var timer = 0;
+  var startX = 0;
+  var startY = 0;
+
+  function pressable(target) {
+    if (!target || !target.closest) return null;
+    var row = target.closest(".js .month-table tr.day");
+    if (row && !target.closest("abbr, details")) {
+      var link = target.closest("a");
+      if (!link || link.matches(ROW_LINKS)) return row;
+    }
+    return target.closest(PRESSABLE);
+  }
+  function lift() {
+    window.clearTimeout(timer);
+    timer = 0;
+    if (held) held.classList.remove("is-pressed");
+    held = null;
+  }
+  function clearAll() {
+    lift();
+    document.querySelectorAll(".is-pressed").forEach(function (el) {
+      el.classList.remove("is-pressed");
+    });
+  }
+  // Whether a click on el leaves for another of the site's pages.
+  function leaves(e, el) {
+    if (el.matches("tr.day")) {
+      // The day's own link, opened in a new tab or window, leaves the row here.
+      var own = e.target.closest("a[href]");
+      if (own && !plainClickOpensHere(e, own)) return false;
+      var selection = window.getSelection && window.getSelection();
+      return !(selection && !selection.isCollapsed);
+    }
+    if (!el.matches("a[href]") || e.defaultPrevented || !plainClickOpensHere(e, el)) return false;
+    if (el.origin !== location.origin) return false;
+    return !(el.hash && el.pathname === location.pathname && el.search === location.search);
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    lift();
+    if (e.pointerType === "mouse" || !e.isPrimary) return;
+    var el = pressable(e.target);
+    if (!el) return;
+    held = el;
+    startX = e.clientX;
+    startY = e.clientY;
+    timer = window.setTimeout(function () {
+      timer = 0;
+      el.classList.add("is-pressed");
+    }, REST_MS);
+  }, { passive: true });
+  document.addEventListener("pointermove", function (e) {
+    if (held && e.isPrimary && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > SLOP_PX) lift();
+  }, { passive: true });
+  document.addEventListener("pointercancel", lift, { passive: true });
+  document.addEventListener("pointerup", function () {
+    // The click follows, and decides; a finger lifted off the control has none.
+    var was = held;
+    window.setTimeout(function () {
+      if (held === was) lift();
+    }, 100);
+  }, { passive: true });
+  // Last, after the page's own handlers have had their say (defaultPrevented).
+  document.addEventListener("click", function (e) {
+    var el = e.detail ? pressable(e.target) : null;
+    if (held && held !== el) lift();
+    window.clearTimeout(timer);
+    timer = 0;
+    held = null;
+    if (!el) return;
+    el.classList.add("is-pressed");
+    if (leaves(e, el)) {
+      window.setTimeout(function () { el.classList.remove("is-pressed"); }, KEEP_MS);
+      return;
+    }
+    // Seen for a frame, then eased off.
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () { el.classList.remove("is-pressed"); });
+    });
+  });
+  // iOS Safari applies :active only where a touch listener is heard; this
+  // one, never removed, lets it apply everywhere.
+  document.addEventListener("touchstart", function () {}, { passive: true });
+  // A page restored by Back is shown at rest.
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) clearAll();
+  });
+})();
+
 // Record engaged use of a current page, never the service worker's background
 // preloads, crawlers, or a scrape of the dated archive.
 (function () {
@@ -4304,8 +4958,9 @@ function rule(x1, y1, x2, y2, w, seed) {
     if (!summary) return;
     summary.addEventListener("click", function () {
       // The summary's own toggle follows this listener, so the choice is the
-      // state it will leave.
-      var open = !details.open;
+      // state it will leave; one still folding shut (app.js's fold, where
+      // the browser cannot ease to auto) is open, and this opens it again.
+      var open = details.classList.contains("is-folding") || !details.open;
       try {
         var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
         if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};
@@ -4486,6 +5141,53 @@ function rule(x1, y1, x2, y2, w, seed) {
   }
   draw();
   if ("ResizeObserver" in window) new ResizeObserver(draw).observe(nav);
+  else window.addEventListener("resize", draw);
+  if (document.fonts) document.fonts.ready.then(draw);
+})();
+
+// About's foot: home's invitation, ruled as home rules it (the lining, and
+// inside it the frontal stopping short of the corners), with home's seeds.
+// Without script its frame is the CSS border.
+(function () {
+  var tablet = document.querySelector(".about-door .pray-now");
+  if (!tablet) return;
+  var NS = "http://www.w3.org/2000/svg";
+  function draw() {
+    var w = tablet.offsetWidth, h = tablet.offsetHeight, g = 3.5;
+    if (!w || !h) return;
+    var svg = tablet.querySelector(":scope > svg.home-rules");
+    if (!svg) {
+      svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "home-rules");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      tablet.appendChild(svg);
+      tablet.classList.add("is-ruled");
+    }
+    svg.textContent = "";
+    [
+      ["r-lining", 0, 0.5, w, 0.5, 1.25, 21],
+      ["r-lining", 0, h - 0.5, w, h - 0.5, 1.25, 22],
+      ["r-lining", 0.5, 0, 0.5, h, 1.25, 23],
+      ["r-lining", w - 0.5, 0, w - 0.5, h, 1.25, 24],
+      ["r-day", g + 1.5, g, w - g - 1.5, g, 0.7, 25],
+      ["r-day", g + 1.5, h - g, w - g - 1.5, h - g, 0.7, 26],
+      ["r-day", g, g + 1.5, g, h - g - 1.5, 0.7, 27],
+      ["r-day", w - g, g + 1.5, w - g, h - g - 1.5, 0.7, 28],
+    ].forEach(function (s) {
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("class", s[0]);
+      path.setAttribute("d", rule(s[1], s[2], s[3], s[4], s[5], s[6]));
+      svg.appendChild(path);
+    });
+  }
+  // As the feast page's: WebKit can run this before style.css applies.
+  if (getComputedStyle(document.documentElement).getPropertyValue("--bg")) {
+    draw();
+  } else {
+    window.addEventListener("load", draw);
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(draw).observe(tablet);
   else window.addEventListener("resize", draw);
   if (document.fonts) document.fonts.ready.then(draw);
 })();

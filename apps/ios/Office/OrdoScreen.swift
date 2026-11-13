@@ -60,7 +60,10 @@ struct OrdoScreen: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var allDetails = false
+    /// The month faded out while "Show office details" changes every day at once.
+    @State private var dimmed = false
     @State private var focused = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The scroll view's height, and the pinned month heading's as last laid out.
     @State private var viewport: CGFloat = 0
@@ -68,10 +71,11 @@ struct OrdoScreen: View {
     /// The wall's frame on the screen, for the pinned heading's copy of it.
     @State private var wall: CGRect = .zero
 
-    /// Where a day asked for is brought: clear of the pinned month heading, a little below it (the
-    /// web's `scroll-margin-top`, 3.5rem at the default size). The heading grows with the reader's
-    /// type; one not yet laid out is taken at its text's line and padding. The day's mark has no
-    /// height, so its top stands at this share of the screen.
+    /// Where the day before a day asked for is brought: clear of the pinned month heading, a
+    /// little below it (the web's `scroll-margin-top`, 3.5rem at the default size, less the row
+    /// it keeps for that day). The heading grows with the reader's type; one not yet laid out is
+    /// taken at its text's line and padding. The day's mark has no height, so its top stands at
+    /// this share of the screen.
     private var focus: UnitPoint {
         let pinned = heading > 0 ? heading : 28 * m.type + m.px(12.8)
         return viewport > 0 ? UnitPoint(x: 0.5, y: min(1, (pinned + m.px(15.2)) / viewport)) : .top
@@ -91,13 +95,14 @@ struct OrdoScreen: View {
                     // The month's heading stays pinned while its days scroll under it (the web's
                     // sticky `.month h2`), so the way back to the top stays in reach.
                     Section {
-                        if wide { DayColumns().ordoColumn(m, wide: wide) }
+                        if wide { DayColumns().ordoColumn(m, wide: wide).opacity(dimmed ? 0 : 1) }
                         ForEach(month.days, id: \.date.day) { d in
                             // Where a day asked for is brought: a mark of no height at its top, which
                             // `focus` sets clear of the pinned heading.
                             Color.clear.frame(height: 0).id("d-\(d.date.day)")
-                            DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails)
+                            DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails, turning: dimmed)
                                 .ordoColumn(m, wide: wide)
+                                .opacity(dimmed ? 0 : 1)
                         }
                     } header: {
                         MonthHeading(name: monthName(number)) {
@@ -141,7 +146,11 @@ struct OrdoScreen: View {
                 guard viewport > 0, !focused else { return }
                 focused = true
                 if focusDay > 0 {
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(focusDay)", anchor: focus) }
+                    // The day before comes to rest under the heading, so the day asked for is
+                    // found among its neighbours, as the web's `scroll-margin-top` keeps a row
+                    // above it; the month's first day has none before it here.
+                    let anchorDay = max(1, focusDay - 1)
+                    DispatchQueue.main.async { scroll.scrollTo("d-\(anchorDay)", anchor: focus) }
                 }
             }
         }
@@ -167,6 +176,22 @@ struct OrdoScreen: View {
             .accessibilityLabel("Ranks: " + Self.rankNames.map(\.1).joined(separator: ", "))
     }
 
+    /// "Show office details": the month fades out, every day opens or closes at once, and the
+    /// month fades back in, as the web's and Android's ordo (70ms out, 140ms in), rather than
+    /// thirty days unfolding together. Under Reduce Motion the days simply change.
+    private func turnAll() {
+        guard !reduceMotion else {
+            allDetails.toggle()
+            return
+        }
+        withAnimation(.timingCurve(0.4, 0, 1, 1, duration: 0.07)) { dimmed = true } completion: {
+            var still = Transaction()
+            still.disablesAnimations = true
+            withTransaction(still) { allDetails.toggle() }
+            withAnimation(.timingCurve(0, 0, 0.2, 1, duration: 0.14)) { dimmed = false }
+        }
+    }
+
     private var tools: some View {
         let small = Scale.small.sized(12, line: 17.4)
         return HStack(spacing: 0) {
@@ -178,7 +203,7 @@ struct OrdoScreen: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Section mark: fasting. Fish: abstinence.")
             Spacer()
-            Button { withAnimation(unfolding) { allDetails.toggle() } } label: {
+            Button { turnAll() } label: {
                 Text(allDetails ? "Hide office details" : "Show office details").type(Scale.small).foregroundStyle(p.accent).underline()
                     .padding(.vertical, m.px(12))
             }
@@ -391,6 +416,8 @@ private struct DayRow: View {
     let d: OrdoDayView
     let isToday: Bool
     let allDetails: Bool
+    /// The month is faded while "Show office details" changes every day at once.
+    var turning = false
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -471,7 +498,7 @@ private struct DayRow: View {
     /// The day's one disclosure, "Office details", which holds its commemorations and its office.
     @ViewBuilder private var disclosureButtons: some View {
         let open = details ?? allDetails
-        if hasDetails { small("Office details", open) { withAnimation(unfolding) { details = !open } } }
+        if hasDetails { small("Office details", open) { withAnimation(disclosing(!open)) { details = !open } } }
     }
 
     @ViewBuilder private var disclosures: some View {
@@ -499,7 +526,9 @@ private struct DayRow: View {
     /// What the open disclosure unfolds: the day's commemorations, and the office digest.
     @ViewBuilder private var disclosed: some View {
         let open = details ?? allDetails
-        if open && hasDetails { Digest(d: d, dayComms: dayComms, hasLauds: hasLauds, hasVespers: hasVespers).transition(.unfold) }
+        // Changed by the month's "Show office details", it is simply there or gone while the month
+        // is faded; opened on its own, it unfolds.
+        if open && hasDetails { Digest(d: d, dayComms: dayComms, hasLauds: hasLauds, hasVespers: hasVespers).transition(turning ? .identity : .unfold) }
     }
 
     private func small(_ label: String, _ open: Bool, toggle: @escaping () -> Void) -> some View {

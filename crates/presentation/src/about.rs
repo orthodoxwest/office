@@ -23,6 +23,9 @@ pub enum AboutBlock {
     Note(&'static str),
     /// A key to the page's marks: the mark, set in its `ink`, then what it means.
     Key { mark: &'static str, ink: KeyInk, text: &'static str },
+    /// Home's invitation to pray the hour it is now ([`crate::invitation`]): the same tablet,
+    /// words and link as home's, still, as the page's last word before its tailpiece.
+    Invitation,
 }
 
 /// The ink a key's mark is set in, so it shows what it names.
@@ -57,7 +60,10 @@ pub const ABOUT_MENU: &str = "About";
 /// How long after the first day home keeps offering the introduction, in days.
 pub const ABOUT_NEWCOMER_DAYS: i64 = 7;
 
-/// The seven hours in home's three periods, with when each is said.
+/// The seven hours in home's three periods, with when each is said. The table marks the hour it
+/// is now as home's directory does ([`about_current_hour`]). Every front sets the names in a
+/// column as wide as the widest of the seven, measured, so the glosses line up and Prime's
+/// ("Prayer as work begins") keeps one line beside it on a 390-point phone.
 pub const ABOUT_HOURS: [(&str, &[(&str, &str)]); 3] = [
     ("Morning", &[("lauds", "at daybreak"), ("prime", "about 7 am")]),
     ("Day", &[("terce", "about 9 am"), ("sext", "at noon"), ("none", "about 3 pm")]),
@@ -137,7 +143,15 @@ pub const ABOUT: &[AboutBlock] = &[
          [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
+    AboutBlock::Invitation,
 ];
+
+/// The hour the table marks as now at a clock hour (0–23), as home's directory marks it: none
+/// from midnight to 2 am, when the office being prayed is yesterday's Compline.
+pub fn about_current_hour(clock_hour: i8) -> &'static str {
+    let (hour, _, offset) = crate::current_hour_entry(clock_hour);
+    if offset == 0 { hour } else { "" }
+}
 
 /// A piece of a paragraph: plain words, or a link's words and its target.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -208,6 +222,24 @@ mod tests {
     fn the_hours_are_the_seven_in_order() {
         let slugs: Vec<_> = ABOUT_HOURS.iter().flat_map(|(_, hours)| hours.iter().map(|(slug, _)| *slug)).collect();
         assert_eq!(slugs, ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"]);
+    }
+
+    #[test]
+    fn the_table_lights_the_hour_home_lights() {
+        let today = crate::Date::new(2026, 11, 13);
+        for h in 0..24 {
+            assert_eq!(about_current_hour(h), crate::invitation(today, today, h).current, "{h}");
+        }
+        assert_eq!(about_current_hour(1), "");
+        assert_eq!(about_current_hour(2), "lauds");
+        assert_eq!(about_current_hour(15), "none");
+        assert_eq!(about_current_hour(23), "compline");
+    }
+
+    #[test]
+    fn the_page_ends_with_home_s_invitation() {
+        assert_eq!(ABOUT.last(), Some(&AboutBlock::Invitation));
+        assert_eq!(ABOUT.iter().filter(|b| **b == AboutBlock::Invitation).count(), 1);
     }
 
     #[test]

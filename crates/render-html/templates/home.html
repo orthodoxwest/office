@@ -139,6 +139,54 @@
       </div>
       </div>
     </section>
+    {# The device's hour, marked before the first paint as layout.html's script sets the theme:
+         the server's clock and zone are not the reader's, and a copy from the cache keeps the hour
+         it was fetched at. The same rule as app.js's updatePrayNow, which keeps it right from
+         then on; the schedule is presentation::CURRENT_HOUR_SCHEDULE. #}
+    <script>
+      (function () {
+        var card = document.querySelector(".home-prayer-card[data-date-slug]");
+        var prayNow = card && card.querySelector(".pray-now");
+        if (!prayNow) return;
+        var now = new Date(), entry = null;
+        {{ hour_schedule }}.forEach(function (e) { if (now.getHours() >= e[0]) entry = e; });
+        var slug = function (d) {
+          return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        };
+        var day = new Date(now.getTime());
+        day.setDate(day.getDate() + entry[3]);
+        var shown = card.getAttribute("data-date-slug");
+        var ours = shown === slug(now) || shown === slug(day);
+        var href = null, label = "Open Lauds";
+        card.querySelectorAll(".home-hour-link").forEach(function (link) {
+          var hour = link.getAttribute("data-hour");
+          var current = ours && entry[3] === 0 && hour === entry[1];
+          var state = link.querySelector(".home-hour-link-state");
+          link.classList.toggle("is-current", current);
+          if (current) {
+            link.setAttribute("aria-current", "time");
+            if (!state) {
+              state = document.createElement("span");
+              state.className = "home-hour-link-state sr-only";
+              state.textContent = "Now";
+              link.appendChild(state);
+            }
+            href = link.getAttribute("href");
+            label = "Pray " + entry[2];
+          } else {
+            link.removeAttribute("aria-current");
+            if (state) state.parentNode.removeChild(state);
+            if (hour === "lauds" && !href) href = link.getAttribute("href");
+          }
+        });
+        if (ours && entry[3] !== 0) {
+          href = "/" + entry[1] + "/" + slug(day);
+          label = "Pray " + entry[2];
+        }
+        if (href) prayNow.setAttribute("href", href);
+        prayNow.textContent = label;
+      })();
+    </script>
 
     {# Season rides the secondary control row: context without interrupting
          the date → prayer invitation reading order. #}

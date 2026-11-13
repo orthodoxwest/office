@@ -3002,6 +3002,60 @@ test("the prayers before and after the Office keep the reader's choice for their
   await expect(after()).not.toHaveAttribute("open");
 });
 
+// Where the browser cannot ease a height to auto (WebKit), app.js turns the
+// disclosures' fold in script. A disclosure folding shut is still [open]:
+// pressed again it opens, and that is the choice kept; the ordo's "Show
+// office details" is not undone by a day that was folding; the hour's date
+// in the header turns the picker on the fold too. Reduced motion cuts.
+test("disclosures folded in script turn back when pressed mid-fold", async ({ page, browserName }) => {
+  test.skip(browserName !== "webkit", "Chromium eases the fold in CSS (interpolate-size); the script's fold is for the other engines");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const ready = () => page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await ready();
+  await page.evaluate(() => localStorage.removeItem("office-prayers-open"));
+  const prayers = page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]');
+  await expect(prayers).toHaveAttribute("open");
+  await prayers.locator("summary").evaluate((summary) => {
+    summary.click();
+    summary.click();
+  });
+  await expect(prayers).not.toHaveClass(/is-folding/);
+  await expect(prayers).toHaveAttribute("open");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("office-prayers-open")))).toEqual({ "lauds/Prayers Before the Office": true });
+
+  await openDatedPage(page, "/calendar/2026/03");
+  await ready();
+  const day = page.locator(".day-disclosures details.day-office-details").first();
+  await day.locator("summary").click();
+  await expect(day).toHaveAttribute("open");
+  await page.evaluate(() => {
+    document.querySelector(".day-disclosures details.day-office-details > summary").click();
+    document.querySelector(".calendar-expand").click();
+  });
+  await expect(page.locator(".calendar-expand")).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(500);
+  await expect(day).toHaveAttribute("open");
+  await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
+
+  await openDatedPage(page, `/sext/${testDate}`);
+  await ready();
+  const turning = () => page.evaluate(() => [...document.querySelectorAll("#hour-date-nav > :not(summary)")].some((part) => part.getAnimations().length > 0));
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(true);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "true");
+  await page.locator("button.hour-meta-date").click();
+  await expect(page.locator("#hour-date-nav")).not.toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "false");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(false);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+});
+
 // "Change date" turns the invitation and the hours into the calendar in
 // their place, under the band. The head gives up only the difference, or,
 // where it has not the height, keeps its own while the page rises with the
@@ -3588,9 +3642,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(subscribe).toHaveAttribute("aria-disabled", "true");
   await expect(subscribe).not.toHaveAttribute("href");
   await expect(subscribe).toHaveAttribute("tabindex", "-1");
-  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toBeVisible();
+  await expect(page.locator("#reminder-url")).toHaveText("No hour is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No hour is chosen yet.");
 
   await page.locator('input[name="hour"][value="lauds"]').check();
   await expect(copy).toBeEnabled();
@@ -3609,10 +3662,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await page.getByLabel("Time for Lauds").press("Tab");
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
-  await expect(page.locator("#reminder-copied")).toHaveText(
-    "Choose a time for each selected hour.",
-  );
+  await expect(feedURL).toHaveText("Choose a time for each chosen hour.");
+  await expect(page.locator("#reminder-rule")).toHaveText("Choose a time for each chosen hour.");
 
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
@@ -3623,8 +3674,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   }
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Select at least one day above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+  await expect(feedURL).toHaveText("No day is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No day is chosen yet.");
 
   await page.locator('input[name="day"][value="sun"]').check();
   await expect(copy).toBeEnabled();
@@ -3643,11 +3694,77 @@ test("reminder copy failure reveals the calendar address", async ({ page }) => {
 
   await page.getByRole("button", { name: "Copy link" }).click();
 
-  await expect(page.locator("#reminder-copied")).toHaveText(
+  await expect(page.locator("#reminder-copy-note")).toHaveText(
     "Copy unavailable. The calendar address is shown below.",
   );
   await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
   await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+// The rule, written out: the sentences of presentation::reminders' table tests, from app.js's
+// copy of the grammar and the words the page is sent.
+test("the reminder rule says back the choices", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/reminders");
+  const rule = page.locator("#reminder-rule");
+  const said = async () => (await rule.textContent()).replace(/\u00a0/g, " ");
+  const day = (name) => page.locator(".reminder-day", { hasText: name }).locator("input");
+  await expect.poll(said).toBe(
+    "Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.",
+  );
+  await page.locator('input[name="hour"][value="compline"]').uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM and Vespers at 6:00 PM, every day, ten minutes before.");
+  await page.locator('input[name="hour"][value="vespers"]').uncheck();
+  await day("Sat").uncheck();
+  await day("Sun").uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on weekdays, ten minutes before.");
+  await day("Sat").check();
+  await day("Sun").check();
+  await day("Fri").uncheck();
+  await page.selectOption('select[name="alarm"]', "none");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Fridays, with no alert.");
+  for (const name of ["Mon", "Tue", "Thu", "Sat"]) {
+    await day(name).uncheck();
+  }
+  await day("Fri").check();
+  await page.selectOption('select[name="alarm"]', "0");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on Wednesdays, Fridays, and Sundays, at the hour.");
+  await day("Wed").check();
+  await day("Thu").check();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Mondays, Tuesdays, and Saturdays, at the hour.");
+  for (const box of await page.locator('input[name="day"]').all()) {
+    await box.uncheck();
+  }
+  await expect.poll(said).toBe("No day is chosen yet.");
+  await page.locator('input[name="hour"][value="lauds"]').uncheck();
+  await expect.poll(said).toBe("No hour or day is chosen yet.");
+});
+
+test("a tap on an unchosen hour's time chooses the hour", async ({ page }) => {
+  await page.goto("/reminders");
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await page.locator('[data-reminder-hour="prime"] .reminder-time').click();
+  await expect(page.locator('input[name="hour"][value="prime"]')).toBeChecked();
+  await expect(page.getByLabel("Time for Prime")).toBeEnabled();
+});
+
+test("copying the link changes its words in place for a moment", async ({ page, context, browserName }) => {
+  test.skip(browserName !== "chromium", "clipboard permissions are Chromium's");
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/reminders");
+  const copy = page.getByRole("button", { name: "Copy link" });
+  // Where the link stands on the page, whatever the scroll.
+  const place = () => copy.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y + window.scrollY, width: r.width, height: r.height };
+  });
+  await copy.scrollIntoViewIfNeeded();
+  const before = await place();
+  await copy.click();
+  await expect(copy).toHaveClass(/is-copied/);
+  await expect(page.locator("#reminder-copied")).toHaveText("Copied.");
+  expect(await place()).toEqual(before);
+  await expect(copy).not.toHaveClass(/is-copied/, { timeout: 4000 });
 });
 
 test("quiet mobile controls retain full thumb targets", async ({ page }) => {
@@ -3959,6 +4076,41 @@ test("home introduces the Office to a reader in their first week", async ({ page
   await expect(page).toHaveURL(/\/about$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("About the Office");
   await expect(page.locator(".about-hour dt a")).toHaveText(["Lauds", "Prime", "Terce", "Sext", "None", "Vespers", "Compline"]);
+});
+
+// About's table marks the hour it is now as home's directory does, and the page ends with
+// home's invitation, words and link alike; both follow the clock across an office boundary.
+test("About lights the hour it is now and ends with home's invitation", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-03-15T16:59:00-04:00") });
+  await openDatedPage(page, "/about");
+  const current = page.locator(".about-hour.is-current");
+  const door = page.locator(".about-door .pray-now");
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute("data-hour", "none");
+  await expect(current.locator("dt a")).toHaveAttribute("aria-current", "time");
+  await expect(door).toHaveText("Pray None");
+  await expect(door).toHaveAttribute("href", "/none/2026-03-15");
+  // The door comes after the last paragraph, and is home's ruled tablet.
+  await expect(page.locator(".about > :last-child")).toHaveClass(/about-door/);
+  await expect(door).toHaveClass(/is-ruled/);
+  // A Prime gloss on one line: the seven rows stand alike.
+  const heights = await page.locator(".about-hour").evaluateAll(rows => rows.map(r => Math.round(r.getBoundingClientRect().height)));
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+
+  await page.clock.fastForward("02:00");
+  await expect(current).toHaveAttribute("data-hour", "vespers");
+  await expect(door).toHaveText("Pray Vespers");
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(1);
+});
+
+test("About lights no hour from midnight to 2am, as home does", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await openDatedPage(page, "/about");
+  await expect(page.locator(".about-hour.is-current")).toHaveCount(0);
+  await expect(page.locator('.about-hour dt a[aria-current="time"]')).toHaveCount(0);
+  const door = page.locator(".about-door .pray-now");
+  await expect(door).toHaveText("Pray Compline");
+  await expect(door).toHaveAttribute("href", "/compline/2026-03-14");
 });
 
 test.describe("on a screen with a mouse", () => {
@@ -4919,4 +5071,99 @@ test("a chant score fills its column at every width and keeps its own when the e
   await page.waitForTimeout(300);
   expect((await fit()).laidOut).toBe(false);
   expect(fetched).toEqual([]);
+});
+
+// Home marks the reader's own hour before its first paint, as the theme is
+// set: not the server's hour, corrected once the deferred script runs.
+test("home marks the device's hour before its script runs", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator(".pray-now")).toHaveAttribute("href", `/terce/${testDate}`);
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "terce");
+  await expect(page.locator(".home-hour-link.is-current")).toHaveCount(1);
+  release();
+  await page.waitForLoadState("load");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await page.unroute("**/static/app.js*");
+});
+
+// A press is seen: a tap marks the control at once, and one that opens a page
+// keeps the mark until the page goes; an ordo row is pressed as one control.
+// Reported from the page, which is leaving when the mark matters.
+test("a tapped ordo row and a tapped hour show their press at once", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await context.newPage();
+  const seen = [];
+  await page.exposeFunction("reportPress", (note) => seen.push(note));
+  await page.goto("/calendar/2026/09");
+  await page.evaluate(() => {
+    new MutationObserver((records) => records.forEach((r) => {
+      if (r.target.classList.contains("is-pressed")) window.reportPress(r.target.id || r.target.className);
+    })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  });
+  const row = page.locator("#d-2026-09-20");
+  await row.scrollIntoViewIfNeeded();
+  const box = await row.boundingBox();
+  await page.touchscreen.tap(box.x + box.width * 0.7, box.y + box.height - 6);
+  await page.waitForURL(/\?date=2026-09-20/);
+  expect(seen).toContain("d-2026-09-20");
+  // After app.js's own listener: keep the page, and say how the hour stood.
+  await page.evaluate(() => document.addEventListener("click", (e) => {
+    const link = e.target.closest(".home-hour-link");
+    if (!link) return;
+    e.preventDefault();
+    window.reportPress((link.classList.contains("is-pressed") ? "pressed " : "plain ") + getComputedStyle(link).transitionDuration);
+  }));
+  seen.length = 0;
+  await page.locator(".home-hour-link[data-hour='vespers']").tap();
+  await expect.poll(() => seen.find((note) => note.startsWith("pressed") || note.startsWith("plain"))).toMatch(/^pressed 0s/);
+  await context.close();
+});
+
+test("a link chosen in the open phone menu puts the menu away before the page goes", async ({ page }) => {
+  await page.goto(`/vespers/${testDate}`);
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(page.locator(".site-menu-panel")).toBeVisible();
+  const seen = [];
+  await page.exposeFunction("reportMenu", (note) => seen.push(note));
+  await page.evaluate(() => document.addEventListener("click", () => {
+    window.reportMenu(getComputedStyle(document.querySelector(".site-menu-panel")).display);
+  }));
+  await page.locator('.site-menu nav a[data-hour="lauds"]').click();
+  await page.waitForURL(/\/lauds\//);
+  expect(seen).toEqual(["none"]);
+});
+
+test("the brand on today's home stays put", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator(".site-brand")).toHaveAttribute("aria-current", "page");
+  let navigations = 0;
+  page.on("framenavigated", () => { navigations += 1; });
+  await page.locator(".site-brand").click();
+  await page.waitForTimeout(300);
+  expect(navigations).toBe(0);
+});
+
+// A day asked for comes to rest with the day before it in view under the
+// pinned month heading, and its gold lets go once the reader scrolls.
+test("the ordo shows the day before a day asked for, and lets the asked day go", async ({ page }) => {
+  for (const [width, day, before] of [[390, "14", "13"], [1280, "22", "21"]]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`/calendar/2026/09#d-2026-09-${day}`);
+    await page.evaluate(() => document.fonts.ready);
+    const place = await page.evaluate(([day, before]) => ({
+      heading: document.getElementById(`d-2026-09-${day}`).closest(".month").querySelector("h2").getBoundingClientRect().bottom,
+      before: document.getElementById(`d-2026-09-${before}`).getBoundingClientRect().top,
+    }), [day, before]);
+    expect(place.before, `${width}px`).toBeGreaterThanOrEqual(place.heading - 2);
+    const ground = () => page.locator(`#d-2026-09-${day} > td`).last().evaluate((td) => getComputedStyle(td).backgroundColor);
+    expect(await ground()).not.toBe("rgba(0, 0, 0, 0)");
+    // The reader's own scroll (mobile WebKit has no wheel to send).
+    await page.evaluate(() => { window.dispatchEvent(new WheelEvent("wheel", { deltaY: 240 })); window.scrollBy(0, 240); });
+    await expect.poll(ground).toBe("rgba(0, 0, 0, 0)");
+  }
 });

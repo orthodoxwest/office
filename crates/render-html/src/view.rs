@@ -266,13 +266,59 @@ pub struct ReminderDay {
     pub slug: String,
 }
 
+/// The reminder page's hours in one of home's three periods ("morning", "Morning").
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ReminderPeriod {
+    pub key: String,
+    pub label: String,
+    pub hours: Vec<ReminderHour>,
+}
+
 /// The reminder-subscription settings page.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct RemindersData {
     #[serde(flatten)]
     pub chrome: Chrome,
-    pub hours: Vec<ReminderHour>,
+    pub periods: Vec<ReminderPeriod>,
     pub days: Vec<ReminderDay>,
+    /// The rule written out for the default choices, phrase by phrase, for the first paint.
+    pub rule: Vec<ReminderRulePhrase>,
+    /// The rule's words for app.js (`presentation::reminders::RULE_WORDS`), as JSON.
+    pub rule_words: String,
+}
+
+/// One phrase of the reminder rule, keyed by what it says (`presentation::reminders::RulePhrase`).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ReminderRulePhrase {
+    pub key: String,
+    pub text: String,
+}
+
+/// The reminder rule's words as the page's JSON: app.js writes the rule from them by
+/// `presentation::reminders`' grammar, so the server need not be asked on every change.
+pub fn reminder_rule_words() -> String {
+    use data_format::json::{Json, Obj};
+    use presentation::reminders::{DAY_PLURALS, RULE_WORDS as w};
+    let names = presentation::REMINDER_DEFAULTS.iter().fold(Obj::new(), |o, d| o.str(d.0, d.1)).build();
+    let sun = w.sun.iter().fold(Obj::new(), |o, (h, t)| o.str(h, t)).build();
+    let leads = w.leads.iter().fold(Obj::new(), |o, (m, t)| o.str(&m.map_or("none".to_string(), |m| m.to_string()), t)).build();
+    let value = Obj::new()
+        .field("hours", names)
+        .field("days", Json::strings(&DAY_PLURALS.map(String::from)))
+        .str("everyDay", w.every_day)
+        .str("weekdays", w.weekdays)
+        .str("on", w.on)
+        .str("except", w.except)
+        .str("at", w.at)
+        .str("and", w.and)
+        .field("leads", leads)
+        .field("sun", sun)
+        .str("noHour", w.no_hour)
+        .str("noDay", w.no_day)
+        .str("noHourOrDay", w.no_hour_or_day)
+        .str("noTime", w.no_time)
+        .build();
+    data_format::json::encode_compact(&value)
 }
 
 /// The styled 404 page.
@@ -291,9 +337,14 @@ pub struct AboutData {
     pub blocks: Vec<AboutBlockView>,
     /// The seven hours in home's three bands.
     pub about_hours: Vec<AboutPeriod>,
+    /// Home's invitation at the page's foot, by the server's clock in the reader's zone (app.js
+    /// restates it by the device's): "Pray None", and the hour it opens.
+    pub pray_now_label: String,
+    pub pray_now_link: String,
 }
 
-/// One block of the About page. `kind` is intro, verse, heading, paragraph, hours, note or key;
+/// One block of the About page. `kind` is intro, verse, heading, paragraph, hours, note, key or
+/// invitation;
 /// `html` is a paragraph's words, escaped, with its links made anchors.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutBlockView {
@@ -312,9 +363,12 @@ pub struct AboutPeriod {
     pub hours: Vec<AboutHour>,
 }
 
-/// An hour on the about page: its name, what it is, and when it is said.
+/// An hour on the about page: its name, what it is, and when it is said; `is_current` when it is
+/// the hour home marks as now.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AboutHour {
+    pub slug: String,
+    pub is_current: bool,
     pub name: String,
     pub url: String,
     pub gloss: String,
@@ -322,10 +376,13 @@ pub struct AboutHour {
 }
 
 impl AboutData {
-    /// The page as presentation words it, for the page chrome given.
-    pub fn new(chrome: Chrome) -> AboutData {
+    /// The page as presentation words it, for the page chrome given, with the hour it is now
+    /// marked and invited to as home does at `now`'s `clock_hour` (0–23).
+    pub fn new(chrome: Chrome, now: calendar::Date, clock_hour: i8) -> AboutData {
         use crate::escape::html_escape_string as esc;
-        use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_TITLE, AboutBlock, AboutRun, about_runs};
+        use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_TITLE, AboutBlock, AboutRun, about_current_hour, about_runs};
+        let current = about_current_hour(clock_hour);
+        let invite = presentation::invitation(now, now, clock_hour);
         let block = |kind| AboutBlockView { kind, ..AboutBlockView::default() };
         let blocks = ABOUT
             .iter()
@@ -348,6 +405,7 @@ impl AboutData {
                 AboutBlock::Key { mark, ink, text } => {
                     AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name(), ..block("key") }
                 }
+                AboutBlock::Invitation => block("invitation"),
             })
             .collect();
         let about_hours = ABOUT_HOURS
@@ -357,6 +415,8 @@ impl AboutData {
                 hours: hours
                     .iter()
                     .map(|(slug, time)| AboutHour {
+                        slug: (*slug).into(),
+                        is_current: *slug == current,
                         name: presentation::title_case(slug),
                         url: format!("/{slug}"),
                         gloss: presentation::hour_gloss(slug).into(),
@@ -365,7 +425,14 @@ impl AboutData {
                     .collect(),
             })
             .collect();
-        AboutData { chrome, title: ABOUT_TITLE.into(), blocks, about_hours }
+        AboutData {
+            chrome,
+            title: ABOUT_TITLE.into(),
+            blocks,
+            about_hours,
+            pray_now_label: invite.label,
+            pray_now_link: crate::links::hour_link(invite.hour, &presentation::date_slug(invite.date)),
+        }
     }
 }
 

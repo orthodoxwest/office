@@ -54,7 +54,7 @@ struct Loaded<Value, Content: View>: View {
             } else if let failure {
                 Message(text: failure)
             } else {
-                Message(text: "Preparing the office…")
+                Preparing()
             }
         }
         .task(id: key) {
@@ -270,7 +270,7 @@ struct HourScreen: View {
                             switch row {
                             case let .toggle(key, label, expanded, atTop):
                                 Button {
-                                    withAnimation(unfolding) { open[key] = !expanded }
+                                    withAnimation(disclosing(!expanded)) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
                                 } label: {
                                     HStack(spacing: 0) {
@@ -731,11 +731,12 @@ private struct HourTitle: View {
             // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
             // caret to a line of its own.
             Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
-                withAnimation(unfolding) {
+                withAnimation(disclosing(!choosing)) {
                     choosing.toggle()
                     picking = false
+                } completion: {
+                    if choosing { reveal("disclosed") }
                 }
-                if choosing { reveal("disclosed") }
             }
             .padding(.top, m.px(4))
             if picking {
@@ -751,7 +752,7 @@ private struct HourTitle: View {
                     let changed = f != model.form
                     // The prayers change once the chooser has folded away, so the reader's place is
                     // held where the rows then stand, not where they stood below the open chooser.
-                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
+                    withAnimation(disclosing(false)) { choosing = false } completion: { model.chooseForm(f) }
                     // VoiceOver hears that the prayers changed, as the web's status line says it;
                     // a moment later, so the chooser folding away does not cut it short.
                     if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
@@ -772,11 +773,13 @@ private struct HourTitle: View {
 
     /// The header's date opens and closes the date picker, closing the prayer form's chooser.
     private func togglePicker() {
-        withAnimation(unfolding) {
+        withAnimation(disclosing(!picking)) {
             picking.toggle()
             choosing = false
+        } completion: {
+            // Once unfolded, as Android waits on the transition rather than a clock.
+            if picking { reveal("disclosed") }
         }
-        if picking { reveal("disclosed") }
     }
 }
 

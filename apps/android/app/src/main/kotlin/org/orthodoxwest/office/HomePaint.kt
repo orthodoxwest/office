@@ -82,6 +82,14 @@ fun homeInk(p: Palette): HomeInk = if (p.dark) {
 }
 
 /**
+ * The pool of light on the hour that is now: no edge, its stops the web's
+ * (`radial-gradient(var(--now-pool), 55% at 52%, transparent)`), about `center` out to `radius`.
+ * Home's directory and About's table both lay it.
+ */
+fun poolBrush(pool: Color, center: Offset, radius: Float): Brush =
+    Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = radius)
+
+/**
  * The current hour's name on its pool: the tituli's ink, lifted by night in the quiet seasons and
  * Passiontide (`--titulus-now`).
  */
@@ -326,15 +334,16 @@ fun DrawScope.skyLining(arch: Arch, leaf: Leaf, catch: Float, hairline: Color, f
 /**
  * An action set as home's invitation, not a filled slab (the web's `.reminder-subscribe`): the
  * tablet's thin wash inside the lining's rule with a finer one 4dp inside it, its words in the
- * lining, lifted by night. Reminders' "Turn on reminders".
+ * lining, lifted by night. Reminders' "Turn on reminders". Not `enabled`, it is a plain statement
+ * in the same tablet ("Reminders are on"), its words changing in place by a cross-fade.
  */
 @androidx.compose.runtime.Composable
-fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, onClick: () -> Unit) {
+fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, enabled: Boolean = true, onClick: () -> Unit) {
     val p = LocalPalette.current
     val home = homeInk(p)
     val tablet = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.tablet)
     androidx.compose.foundation.layout.Box(
-        modifier.fillMaxWidth().heightIn(min = 46.dp).tap(onClick = onClick).drawBehind {
+        modifier.fillMaxWidth().heightIn(min = 46.dp).then(if (enabled) androidx.compose.ui.Modifier.tap(onClick = onClick) else androidx.compose.ui.Modifier).drawBehind {
             tabletWash(tablet, home.tabletWash)
             val u = 1.dp.toPx()
             drawRect(p.lining.copy(alpha = 0.78f), Offset(u / 2f, u / 2f), Size(size.width - u, size.height - u), style = Stroke(u))
@@ -343,6 +352,8 @@ fun TabletButton(label: String, modifier: androidx.compose.ui.Modifier, onClick:
         }.padding(horizontal = 17.6.dp, vertical = 10.dp),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
-        androidx.compose.material3.Text(label, style = Type.body.copy(fontSize = 17.92.sp, lineHeight = 24.sp, letterSpacing = 0.21.sp, color = if (p.dark) home.liningLifted else p.lining))
+        androidx.compose.animation.Crossfade(label, animationSpec = androidx.compose.animation.core.tween(180), label = "tablet") { words ->
+            androidx.compose.material3.Text(words, style = Type.body.copy(fontSize = 17.92.sp, lineHeight = 24.sp, letterSpacing = 0.21.sp, color = if (p.dark) home.liningLifted else p.lining))
+        }
     }
 }
