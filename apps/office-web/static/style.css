@@ -7334,7 +7334,11 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    brushed patch read as a highlight box), and its name is rubricated. Its
    gloss keeps one line: with no cell walls it may overhang a little. On the
    wide niche the cell is wide, and the pool keeps its own size. */
-.page-home .home-hour-link.is-current {
+/* While the light moves from one hour to the next (app.js's HOUR_LIGHT), the
+   hour it leaves and the hour it comes to (.is-passing) both hold a pool, which
+   the pass fades out and in. */
+.page-home .home-hour-link:is(.is-current, .is-passing) {
+  isolation: isolate;
   background: none;
   box-shadow: none;
 }
@@ -10088,7 +10092,9 @@ html {
     --pool-gain var(--tempo-touch-out) var(--tempo-touch-out-curve);
 }
 
-.page-home .home-hour-link.is-current::after {
+/* The hour that is now, and while the light moves (app.js's HOUR_LIGHT) the
+   hour it leaves and the hour it comes to, whose pools the pass fades. */
+.page-home .home-hour-link:is(.is-current, .is-passing)::after {
   opacity: 1;
 }
 

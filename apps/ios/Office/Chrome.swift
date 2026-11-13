@@ -49,15 +49,19 @@ struct Quiet: ButtonStyle {
 struct Lit<Pool: View>: ButtonStyle {
     var strength: Double = 1
     var current = false
+    /// The pool's light at rest, when it is neither the hour that is now's nor out: home's light
+    /// moving with the hours sets it frame by frame (`HourLightNow`).
+    var resting: Double? = nil
     @ViewBuilder var pool: () -> Pool
 
     func makeBody(configuration: Configuration) -> some View {
         let held = configuration.isPressed
+        let rest = resting ?? (current ? 1 : 0)
         return configuration.label
             .opacity(current && held ? 0.7 : 1)
             .background {
                 ZStack {
-                    pool().opacity(current ? 1 : held ? strength : 0)
+                    pool().opacity(held ? max(rest, current ? 1 : strength) : rest)
                     if current { pool().opacity(held ? 0.5 : 0) }
                 }
                 .allowsHitTesting(false)
@@ -416,7 +420,9 @@ struct MenuPanel: View {
                     cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), spoken: textSizeName(s)) {
                         guard s != model.textSize else { return }
                         chose()
-                        withAnimation(reduceMotion ? nil : restyling) { model.chooseTextSize(s) }
+                        // At once, as on the web: the prayer is set again at its new size in one
+                        // frame, never seen re-wrapping, and the hour holds the reader's row.
+                        model.chooseTextSize(s)
                     }
                 }
             }

@@ -19,8 +19,10 @@ crates/
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
                            word-for-word against render-html. Holds the hour's vertical rhythm
                            (Space: steps of the body line), which the apps and style.css's
-                           --space-* follow, and its motion (Tempo: five motions, three curves),
-                           which style.css's --tempo-*/--curve-*, Tempo.swift and Tempo.kt follow
+                           --space-* follow, its motion (Tempo: five motions, three curves),
+                           which style.css's --tempo-*/--curve-*, Tempo.swift and Tempo.kt follow,
+                           and home's light moving with the hours (hour_light: the pass's timings,
+                           which app.js's HOUR_LIGHT and the apps play)
   presentation/            Words every front shares: day, season and date names, the current-hour
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
                            the usage beacon's vocabulary (server, app.js and native apps)

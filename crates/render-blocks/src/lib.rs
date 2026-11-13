@@ -5,9 +5,11 @@
 //!
 //! Every run of display text passes through the same typography as the web and the booklet.
 
+pub mod hour_light;
 pub mod initials;
 pub mod tempo;
 
+pub use hour_light::{HourLight, LightFrame, light_at};
 pub use initials::{InitialFit, initial_fit, initial_size};
 pub use tempo::{Beat, Curve, Tempo};
 
