@@ -157,8 +157,9 @@ jobs:
       - name: Install UX test dependencies
         run: npm ci --prefix .web-tools
 
+      # Only failing snapshots are rewritten (see ci.yml's candidates step).
       - name: Regenerate UX snapshots
-        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=all
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=changed
 
       - name: Upload untrusted snapshot candidates
         uses: actions/upload-artifact@v7.0.2
