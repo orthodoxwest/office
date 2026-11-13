@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import android.app.Application
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -61,6 +62,7 @@ class AccessibilityTest {
 
     private fun role(r: Role) = SemanticsMatcher.expectValue(SemanticsProperties.Role, r)
     private fun state(s: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, s)
+    private val changesDate = SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }
 
     @Test
     @Config(qualifiers = "w390dp-h2400dp-xxhdpi")
@@ -76,8 +78,10 @@ class AccessibilityTest {
     @Test
     fun theDatePickerNamesEachDay() {
         show(Page.Hour(lent, "vespers"))
-        compose.onNodeWithText("Change date", substring = true).assert(state("Collapsed")).performClick()
-        compose.onNodeWithText("Change date", substring = true).assert(state("Expanded"))
+        // The header's date is the way in: no "Change date" label, but a button that says so.
+        assertTrue(compose.onAllNodesWithText("Change date", substring = true).fetchSemanticsNodes().isEmpty())
+        compose.onNode(changesDate).assert(role(Role.Button)).assert(state("Collapsed")).performClick()
+        compose.onNode(changesDate).assert(state("Expanded"))
         compose.onNodeWithContentDescription("Sunday, March 15, today").assertIsSelected()
         compose.onNodeWithContentDescription("Previous month").assert(role(Role.Button))
         // The prayer form's legend is set in capitals, as the web's `.leader-selector legend`.
