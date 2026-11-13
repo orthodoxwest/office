@@ -65,95 +65,51 @@ struct CrownFigures {
     let rush: Double
 }
 
-#if CROWN_PLAN_FFI
 extension CrownFigures {
-    /// The Rust core's plan (`crownPlan(dusk:)`, presentation::crown), for a dusk or a dawn.
+    /// The Rust core's plan (`crownPlan(toDark:)`, presentation::crown), for a dusk or a dawn.
     static func of(dusk: Bool) -> CrownFigures {
-        let p = crownPlan(dusk: dusk)
+        let p = crownPlan(toDark: dusk)
         return CrownFigures(
-            turn: number(p.turn),
-            front: Span(at: number(p.front.at), len: number(p.front.len)),
-            spread: Span(at: number(p.spread.at), len: number(p.spread.len)),
-            veilFrom: number(p.veilFrom),
-            veilTo: number(p.veilTo),
-            end: number(p.end),
+            turn: Double(p.turn),
+            front: Span(at: Double(p.front.at), len: Double(p.front.len)),
+            spread: Span(at: Double(p.spread.at), len: Double(p.spread.len)),
+            veilFrom: Double(p.veilFrom),
+            veilTo: Double(p.veilTo),
+            end: Double(p.end),
             veilInk: Pigment(p.veilInk),
-            veilPeak: number(p.veilPeak),
-            inkAt: number(p.inkAt),
+            veilPeak: Double(p.veilPeak),
+            inkAt: Double(p.inkAt),
             glowEase: CubicEase(p.glowEase),
             frontEase: CubicEase(p.frontEase),
             spreadEase: CubicEase(p.spreadEase),
-            spreadWide: number(p.spreadWide),
-            spreadFeather: number(p.spreadFeather),
-            spreadShapePart: number(p.spreadShapePart),
-            spreadBend: number(p.spreadBend),
-            spreadGlowPart: number(p.spreadGlowPart),
-            veilLead: number(p.veilLead),
-            veilPart: number(p.veilPart),
+            spreadWide: Double(p.spreadWide),
+            spreadFeather: Double(p.spreadFeather),
+            spreadShapePart: Double(p.spreadShapePart),
+            spreadBend: Double(p.spreadBend),
+            spreadGlowPart: Double(p.spreadGlowPart),
+            veilLead: Double(p.veilLead),
+            veilPart: Double(p.veilPart),
             dawnVeilUmber: Pigment(p.dawnVeilUmber),
-            dawnVeilLow: number(p.dawnVeilLow),
-            inkHandover: number(p.inkHandover),
+            dawnVeilLow: Double(p.dawnVeilLow),
+            inkHandover: Double(p.inkHandover),
             skyOchre: Pigment(p.skyOchre),
             skyRedOchre: Pigment(p.skyRedOchre),
             skyEmber: Pigment(p.skyEmber),
             skyLime: Pigment(p.skyLime),
             skyRoseLilac: Pigment(p.skyRoseLilac),
-            tapApart: number(p.tapApart),
-            rush: number(p.rush)
+            tapApart: Double(p.tapApart),
+            rush: Double(p.rush)
         )
     }
 }
 
-private func number<T: BinaryInteger>(_ v: T) -> Double { Double(v) }
-private func number<T: BinaryFloatingPoint>(_ v: T) -> Double { Double(v) }
-
 extension Pigment {
-    init<T: BinaryInteger>(_ v: [T]) { self.init(Double(v[0]), Double(v[1]), Double(v[2])) }
+    init(_ v: CrownRgb) { self.init(Double(v.r), Double(v.g), Double(v.b)) }
 }
 
 extension CubicEase {
-    init<T: BinaryFloatingPoint>(_ v: [T]) { self.init(Double(v[0]), Double(v[1]), Double(v[2]), Double(v[3])) }
+    init(_ v: CrownEase) { self.init(Double(v.x1), Double(v.y1), Double(v.x2), Double(v.y2)) }
 }
-#else
-// TEMPORARY: presentation::crown's figures, copied until the core exports them as
-// `crownPlan(dusk:)` (build with CROWN_PLAN_FFI then, and delete this block). Every figure here
-// is crown.rs's, by the same name.
-extension CrownFigures {
-    static func of(dusk: Bool) -> CrownFigures {
-        CrownFigures(
-            turn: 650,
-            front: Span(at: 800, len: dusk ? 1700 : 1600),
-            spread: Span(at: dusk ? 2200 : 1850, len: dusk ? 1750 : 1800),
-            veilFrom: dusk ? 2000 : 1650,
-            veilTo: dusk ? 3500 : 3600,
-            end: dusk ? 4000 : 3700,
-            veilInk: dusk ? Pigment(92, 94, 160) : Pigment(226, 174, 140),
-            veilPeak: dusk ? 0.36 : 0.3,
-            inkAt: dusk ? 0.6 : 0.33,
-            glowEase: dusk ? CubicEase(0.55, 0.1, 0.7, 1) : CubicEase(0.5, 0.2, 0.7, 1),
-            frontEase: CubicEase(0.3, 0, 0.7, 1),
-            spreadEase: CubicEase(0.4, 0, 0.5, 1),
-            spreadWide: 100,
-            spreadFeather: 0.42,
-            spreadShapePart: 0.45,
-            spreadBend: 0.8,
-            spreadGlowPart: 0.96,
-            veilLead: 1.4,
-            veilPart: 0.8,
-            dawnVeilUmber: Pigment(200, 100, 74),
-            dawnVeilLow: 0.15,
-            inkHandover: 140,
-            skyOchre: Pigment(201, 151, 63),
-            skyRedOchre: Pigment(181, 101, 63),
-            skyEmber: Pigment(160, 86, 62),
-            skyLime: Pigment(244, 232, 223),
-            skyRoseLilac: Pigment(196, 163, 166),
-            tapApart: 450,
-            rush: 300
-        )
-    }
-}
-#endif
 
 /// A pigment, as red, green and blue from 0 to 255.
 struct Pigment: Equatable {
