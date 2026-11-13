@@ -3910,7 +3910,8 @@ html[data-newcomer] .home-season {
 .js .month-table tr.day.is-pressed > td:first-child::before {
   top: 0;
   bottom: 0;
-  transition-duration: 120ms;
+  transition-duration: var(--tempo-touch-reach);
+  transition-timing-function: var(--tempo-touch-reach-curve);
 }
 @media (min-width: 701px) {
   .js .month-table tr.day.is-pressed > td.day-feast {
@@ -4237,7 +4238,8 @@ html[data-newcomer] .home-season {
   .js .month-table tr.day.is-pressed::before {
     top: 0;
     height: 100%;
-    transition-duration: 120ms;
+    transition-duration: var(--tempo-touch-reach);
+    transition-timing-function: var(--tempo-touch-reach-curve);
   }
   .month-table .day-feast {
     display: grid;
@@ -5427,7 +5429,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 /* Tempo: the app's five motions and three curves, render_blocks::Tempo, as
    the apps' Tempo.swift and Tempo.kt have them (a test there reads this
    block). Each motion's way in and way out, its wait, and its curve:
-     touch   a press at once; let go over 200ms
+     touch   a press at once; let go over 200ms. Bare words dim to 0.7
+             (quiet); what a press moves, the ordo's rail, reaches in 120ms
      settle  a panel in 160ms; out in 120
      unfold  a disclosure opens in 260ms; folds in 200
      turn    page to page: the old out in 90ms, then the new in 210
@@ -5443,6 +5446,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --tempo-touch-out: 200ms;
   --tempo-touch-out-delay: 0ms;
   --tempo-touch-out-curve: var(--curve-arrive);
+  --tempo-touch-quiet: 0.7;
+  --tempo-touch-reach: 120ms;
+  --tempo-touch-reach-delay: 0ms;
+  --tempo-touch-reach-curve: var(--curve-arrive);
   --tempo-settle-in: 160ms;
   --tempo-settle-in-delay: 0ms;
   --tempo-settle-in-curve: var(--curve-arrive);
@@ -5634,25 +5641,27 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 /* The mobile site menu is an absolutely positioned dropdown, so it has no
-   in-flow height to unfold; it fades and settles the last few pixels instead.
+   in-flow height to unfold; it fades and settles the last few pixels instead,
+   on Tempo's settle: in over 160ms, away faster, over 120.
    Desktop shows the nav regardless of [open] (and app.js force-opens it), and
    this block never applies there. */
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
-  :root.motion-ready .site-menu-panel {
-    transition:
-      opacity 160ms ease-out,
-      transform 160ms ease-out,
-      display 160ms allow-discrete;
-  }
-
   :root.motion-ready .site-menu:not([open]) > .site-menu-panel {
     opacity: 0;
     transform: translateY(-0.3rem);
+    transition:
+      opacity var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      transform var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      display var(--tempo-settle-out) allow-discrete;
   }
 
   :root.motion-ready .site-menu[open] > .site-menu-panel {
     opacity: 1;
     transform: none;
+    transition:
+      opacity var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      transform var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      display var(--tempo-settle-in) allow-discrete;
   }
 
   /* A link chosen in the menu puts it away at once (app.js), so it does not
@@ -5672,21 +5681,22 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 /* Wide screens' Settings panel settles the same way. */
 @media (min-width: 701px) and (prefers-reduced-motion: no-preference) {
-  :root.motion-ready .settings-prefs {
-    transition:
-      opacity 160ms ease-out,
-      transform 160ms ease-out,
-      display 160ms allow-discrete;
-  }
-
   :root.motion-ready .site-settings:not([open]) > .settings-prefs {
     opacity: 0;
     transform: translateY(-0.3rem);
+    transition:
+      opacity var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      transform var(--tempo-settle-out) var(--tempo-settle-out-curve),
+      display var(--tempo-settle-out) allow-discrete;
   }
 
   :root.motion-ready .site-settings[open] > .settings-prefs {
     opacity: 1;
     transform: none;
+    transition:
+      opacity var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      transform var(--tempo-settle-in) var(--tempo-settle-in-curve),
+      display var(--tempo-settle-in) allow-discrete;
   }
 
   @starting-style {
@@ -10020,7 +10030,7 @@ html {
   .date-picker-step:not(:disabled),
   .date-picker-title
 ):is(:active, .is-pressed) {
-  opacity: 0.7;
+  opacity: var(--tempo-touch-quiet);
 }
 
 /* Lit: the pool of light, drawn by --press (0 at rest, the pool's strength
@@ -10122,7 +10132,7 @@ html {
 }
 
 .page-home .home-hour-link.is-current:is(:active, .is-pressed) :is(.home-hour-link-name, .home-hour-link-note) {
-  opacity: 0.7;
+  opacity: var(--tempo-touch-quiet);
   transition: none;
 }
 

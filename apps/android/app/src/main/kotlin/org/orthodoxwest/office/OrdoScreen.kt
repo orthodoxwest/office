@@ -3,11 +3,14 @@ package org.orthodoxwest.office
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +39,7 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,6 +57,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
@@ -593,10 +598,17 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         // A finger on the date or the name lights the whole row: home's pool of light, a long
         // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
         val held = remember { MutableInteractionSource() }
+        val reach = railReach(held)
+        val rail = railColor(d.color, p)
         // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
-        Row(Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row.copy(at = 0.44f))).height(IntrinsicSize.Min).padding(top = 11.2.dp, bottom = 9.6.dp)) {
-            // The day's liturgical colour as a rail beside its date.
-            Box(Modifier.padding(top = 1.6.dp).width(3.dp).height(37.6.dp).background(railColor(d.color, p)))
+        Row(
+            Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row.copy(at = 0.44f))).height(IntrinsicSize.Min)
+                // The day's liturgical colour as a rail beside its date.
+                .drawBehind { dayRail(rail, reach.value, top = 12.8.dp.toPx(), bottom = (12.8 + 37.6).dp.toPx()) }
+                .padding(top = 11.2.dp, bottom = 9.6.dp),
+        ) {
+            // The rail's room, as tall as it stands at rest.
+            Spacer(Modifier.width(3.dp).height((1.6 + 37.6).dp))
             Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day", source = held) { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
@@ -618,6 +630,24 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         }
         Hairline(p.border)
     }
+}
+
+/**
+ * How far a day's rail has run toward the row's full height: 1 while the row is held, reached over
+ * Tempo's reach, and 0 at rest, gone back to over its touch (the web's `.month-table
+ * tr.day.is-pressed` rail).
+ */
+@Composable
+private fun railReach(held: InteractionSource): State<Float> {
+    val pressed by held.collectIsPressedAsState()
+    return animateFloatAsState(if (pressed) 1f else 0f, if (pressed) Tempo.touchReach.spec() else Tempo.touchOut.spec(), label = "rail")
+}
+
+/** A day's rail at the row's leading edge: from `top` to `bottom` at rest, the row's full height at `reach` 1. */
+private fun DrawScope.dayRail(color: Color, reach: Float, top: Float, bottom: Float) {
+    val from = top * (1f - reach)
+    val to = bottom + (size.height - bottom) * reach
+    drawRect(color, Offset(0f, from), Size(3.dp.toPx(), to - from))
 }
 
 /**
@@ -693,8 +723,14 @@ private fun DayTableRow(
     ) {
         // A finger on the date or the name lights the whole row ([Lit]), as on a phone.
         val held = remember { MutableInteractionSource() }
+        val reach = railReach(held)
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
-        Row(Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row)).height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row)).height(IntrinsicSize.Min)
+                // The day's liturgical colour as a rail under the date's column.
+                .drawBehind { dayRail(rail, reach.value, top = (8 + 1.6).dp.toPx(), bottom = size.height - 8.dp.toPx()) }
+                .padding(vertical = 8.dp),
+        ) {
             // From 1000dp Today is a note in the margin beside today's band (the web's), taking no
             // room in the row; narrower, the table has no margin and it stands under the number.
             if (isToday && margin) {
@@ -709,7 +745,6 @@ private fun DayTableRow(
             }
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
-                    .drawBehind { drawRect(rail, Offset(0f, 1.6.dp.toPx()), Size(3.dp.toPx(), size.height - 1.6.dp.toPx())) }
                     .tap(label = spoken, action = "open the day", source = held) { onDay(date) }
                     .padding(start = 10.4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

@@ -5,6 +5,7 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.hypot
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -284,8 +285,11 @@ class TokensTest {
         assertTrue(folds.contains("opacity calc(var(--tempo-unfold-in) - 60ms) var(--curve-arrive) 60ms"))
         assertTrue(folds.contains("opacity calc(var(--tempo-unfold-out) / 2) var(--curve-leave)"))
         val js = File("../../office-web/static/app.js").readText()
-        assertTrue(js.contains("var duration = opening ? $UNFOLD_MS : $FOLD_MS;"))
-        assertTrue(js.contains("var STANDARD = \"$standard\";"))
+        // app.js's fallback reads style.css's figures rather than keeping its own.
+        assertTrue(js.contains("var beat = opening ? \"tempo-unfold-in\" : \"tempo-unfold-out\";"))
+        assertTrue(js.contains("{ duration: duration, easing: curve }"))
+        assertTrue(js.contains("stage.style.transition = \"height var(--tempo-unfold-in) var(--tempo-unfold-in-curve)\";"))
+        assertFalse("app.js keeps the standard curve's own figures", js.contains(standard))
         assertTrue(js.contains("{ duration: $MONTH_OUT_MS, easing: \"cubic-bezier(0.4, 0, 1, 1)\", fill: \"forwards\" }"))
         assertTrue(js.contains("{ duration: $MONTH_IN_MS, easing: \"cubic-bezier(0, 0, 0.2, 1)\" }"))
         val chrome = File("../../ios/Office/Chrome.swift").readText()
@@ -294,5 +298,36 @@ class TokensTest {
         val ordo = File("../../ios/Office/OrdoScreen.swift").readText()
         assertTrue(ordo.contains("withAnimation(.timingCurve(0.4, 0, 1, 1, duration: ${MONTH_OUT_MS / 1000.0}))"))
         assertTrue(ordo.contains("withAnimation(.timingCurve(0, 0, 0.2, 1, duration: ${MONTH_IN_MS / 1000.0}))"))
+    }
+
+    /**
+     * A press and a panel move by Tempo on every front: bare words dim to Tempo's quiet (the web's
+     * `--tempo-touch-quiet`, iOS's `Quiet`, Android's [Dim]), the ordo day's rail runs the row's
+     * height over Tempo's reach and back over its touch, and the menu and Settings panels settle
+     * in and leave on Tempo's settle. render-blocks holds the figures themselves.
+     */
+    @Test
+    fun pressAndPanelKeepTempo() {
+        assertEquals(0.7f, Tempo.TOUCH_QUIET)
+        assertTrue(css.contains("):is(:active, .is-pressed) {\n  opacity: var(--tempo-touch-quiet);\n}"))
+        assertEquals(2, Regex("transition-duration: var\\(--tempo-touch-reach\\);").findAll(css).count())
+        for (way in listOf("in", "out")) {
+            assertEquals(2, Regex("opacity var\\(--tempo-settle-$way\\) var\\(--tempo-settle-$way-curve\\)").findAll(css).count())
+        }
+        val chrome = File("src/main/kotlin/org/orthodoxwest/office/Chrome.kt").readText()
+        assertTrue(chrome.contains("alpha.snapTo(Tempo.TOUCH_QUIET)"))
+        assertTrue(chrome.contains("enter = fadeIn(Tempo.settleIn.spec())"))
+        assertTrue(chrome.contains("exit = fadeOut(Tempo.settleOut.spec())"))
+        val ordo = File("src/main/kotlin/org/orthodoxwest/office/OrdoScreen.kt").readText()
+        assertTrue(ordo.contains("if (pressed) Tempo.touchReach.spec() else Tempo.touchOut.spec()"))
+        assertEquals(2, Regex("\\.drawBehind \\{ dayRail\\(").findAll(ordo).count())
+        val swift = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(swift.contains(".opacity(configuration.isPressed ? Tempo.touchQuiet : 1)"))
+        assertTrue(swift.contains(".opacity(current && held ? Tempo.touchQuiet : 1)"))
+        val app = File("../../ios/Office/OfficeApp.swift").readText()
+        assertTrue(app.contains(".animation(model.overlay == .none ? Tempo.settleOut.animation : Tempo.settleIn.animation, value: model.overlay)"))
+        val swiftOrdo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(swiftOrdo.contains(".animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)"))
+        assertEquals(2, Regex("\\.overlay\\(alignment: \\.topLeading\\) \\{ DayRail\\(").findAll(swiftOrdo).count())
     }
 }

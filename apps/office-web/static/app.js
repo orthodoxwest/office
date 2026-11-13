@@ -1389,9 +1389,10 @@ function plainClickOpensHere(e, link) {
 
   // Where the browser cannot ease a height to auto (no interpolate-size:
   // Safari, Firefox), the disclosures' unfold of style.css is turned here
-  // instead, so they unfold on every browser as in the apps: the height over
-  // 260ms on the standard curve and the contents fading in over 200ms after
-  // 60; folding, 200ms and the contents out over 100ms, the disclosure held
+  // instead, so they unfold on every browser as in the apps, on Tempo's
+  // unfold as style.css's --tempo-unfold-* give it: the height over 260ms on
+  // the standard curve and the contents fading in over the rest after 60ms;
+  // folding, 200ms and the contents out over half that, the disclosure held
   // open, marked .is-folding, until it has folded. Heard on the disclosure,
   // after the summary's own listeners (the prayers' kept choice reads the
   // state before the toggle), and never for a click another listener has
@@ -1402,7 +1403,12 @@ function plainClickOpensHere(e, link) {
   var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
   if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
     var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
-    var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
+    // A Tempo figure from style.css's :root, its var() resolved: a beat's
+    // length ("260ms"), or its curve. Unset (no style sheet), undefined, so
+    // the animation takes the platform's defaults rather than failing.
+    var tempo = function (name) {
+      return window.getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim() || undefined;
+    };
     var folds = new WeakMap();
     // A box's height and edges as they stand, and folded away.
     var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
@@ -1491,14 +1497,16 @@ function plainClickOpensHere(e, link) {
           box.style.overflow = "clip";
         });
         details.classList.toggle("is-folding", !opening);
-        var duration = opening ? 260 : 200;
+        var beat = opening ? "tempo-unfold-in" : "tempo-unfold-out";
+        var duration = parseFloat(tempo(beat)) || 0;
+        var curve = tempo(beat + "-curve");
         var turns = boxes.map(function (box, i) {
-          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+          return box.animate([from[i], to[i]], { duration: duration, easing: curve });
         });
         contents.forEach(function (child) {
           turns.push(opening ?
-            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
-            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }));
+            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Math.max(0, duration - 60), delay: 60, easing: tempo("curve-arrive"), fill: "backwards" }) :
+            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: duration / 2, easing: tempo("curve-leave"), fill: "forwards" }));
         });
         var timer = 0;
         var fold = {
@@ -2506,7 +2514,7 @@ function plainClickOpensHere(e, link) {
       void stage.offsetHeight;
       // The disclosures' duration and Material's standard curve, as the
       // apps' unfolding.
-      stage.style.transition = "height 260ms cubic-bezier(0.4, 0, 0.2, 1)";
+      stage.style.transition = "height var(--tempo-unfold-in) var(--tempo-unfold-in-curve)";
       stage.style.height = to.stage + "px";
       var fades = [
         outgoing.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: "ease-in", fill: "both" }),

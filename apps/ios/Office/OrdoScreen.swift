@@ -563,8 +563,9 @@ private struct DayRow: View {
     private var card: some View {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 0) {
-                // The day's liturgical colour as a rail beside its date.
-                Rectangle().fill(titleColor(d.color, p)).frame(width: 3, height: m.px(37.6)).padding(.top, m.px(1.6))
+                // The day's liturgical colour as a rail beside its date ([DayRail], drawn over the
+                // row): its room here, as tall as the rail stands at rest.
+                Color.clear.frame(width: 3, height: m.px(1.6 + 37.6))
                 Button(action: openDay) {
                     VStack(spacing: 0) {
                         Text("\(d.date.day)").type(TextStyle(size: 21.6, line: 23.76, lining: true)).foregroundStyle(isToday ? p.gold : p.accent)
@@ -602,6 +603,7 @@ private struct DayRow: View {
             // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
             .padding(.top, m.px(11.2))
             .padding(.bottom, m.px(9.6))
+            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: m.px(12.8), height: m.px(37.6)) }
             Hairline(color: p.border)
         }
         .rowPool(held, x: 0.44)
@@ -620,7 +622,6 @@ private struct DayRow: View {
                     .padding(.leading, dayColumnPad)
                     .frame(width: dayColumn, alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .overlay(alignment: .leading) { Rectangle().fill(titleColor(d.color, p)).frame(width: 3).padding(.top, 1.6) }
                 }
                 .buttonStyle(Holding(held: $held))
                 .accessibilityLabel(spoken)
@@ -685,12 +686,40 @@ private struct DayRow: View {
             }
             // The web's `.month-table td`: 0.5rem above and below, from 701px.
             .padding(.vertical, 8)
+            // The day's liturgical colour as a rail beside its date, under the date's column.
+            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: 8 + 1.6, foot: 8) }
             Hairline(color: p.border)
         }
         .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
         .background { if isToday { TodayBand(inset: 0) } }
         .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: { left = $0 }
+    }
+}
+
+/**
+ * A day's liturgical colour as a rail at the row's leading edge. At rest it stands `top` below the
+ * row's top, `height` tall or down to `foot` above its foot; while the row is held it runs the
+ * row's full height, to the hairline, over Tempo's reach, and goes back over its touch (the web's
+ * `.month-table tr.day.is-pressed` rail).
+ */
+private struct DayRail: View {
+    let color: Color
+    let held: Bool
+    let top: CGFloat
+    var height: CGFloat? = nil
+    var foot: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { g in
+            let from = held ? 0 : top
+            let to = held ? g.size.height : height.map { top + $0 } ?? g.size.height - foot
+            Rectangle().fill(color).frame(width: 3, height: max(0, to - from)).offset(y: from)
+        }
+        .frame(width: 3)
+        .animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
