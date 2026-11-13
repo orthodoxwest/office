@@ -169,8 +169,9 @@
      hairline cut (less than nothing when the line begins below it), with how far the hour has
      been prayed (app.js). A line another prayer form hides gives way to the next one shown. It
      is kept whenever the page is hidden (the phone locked, another app, a tab put by), and let
-     go when the reader leaves by the page's own links or forms or the browser's navigation, or
-     is still at the head of the hour. Opened at the place, the page holds it while late fonts and scores
+     go when the reader leaves by the page's own links or forms or by Back and Forward, or is
+     still at the head of the hour. The browser's own reload keeps it (it tells the page nothing
+     of it), and the page opens again at the place, as the browser would set it. Opened at the place, the page holds it while late fonts and scores
      settle, until the reader's own hand moves it. #}
 <script>
   (function () {
@@ -302,8 +303,9 @@
     document.addEventListener("submit", function (e) {
       if (!e.defaultPrevented) leave();
     });
-    // Where the browser tells of its own navigation (Back, Forward, a reload), that is the
-    // reader's too.
+    // Where the browser tells of Back and Forward (the Navigation API), that is the reader's
+    // leaving too. Its reload button fires no navigate event in Chromium or WebKit, so a reload
+    // keeps the place, as the head says; older engines without the API tell of neither.
     if (window.navigation && navigation.addEventListener) {
       navigation.addEventListener("navigate", function (e) {
         if (e.destination && !e.destination.sameDocument) leave();
