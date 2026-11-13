@@ -266,13 +266,59 @@ pub struct ReminderDay {
     pub slug: String,
 }
 
+/// The reminder page's hours in one of home's three periods ("morning", "Morning").
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ReminderPeriod {
+    pub key: String,
+    pub label: String,
+    pub hours: Vec<ReminderHour>,
+}
+
 /// The reminder-subscription settings page.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct RemindersData {
     #[serde(flatten)]
     pub chrome: Chrome,
-    pub hours: Vec<ReminderHour>,
+    pub periods: Vec<ReminderPeriod>,
     pub days: Vec<ReminderDay>,
+    /// The rule written out for the default choices, phrase by phrase, for the first paint.
+    pub rule: Vec<ReminderRulePhrase>,
+    /// The rule's words for app.js (`presentation::reminders::RULE_WORDS`), as JSON.
+    pub rule_words: String,
+}
+
+/// One phrase of the reminder rule, keyed by what it says (`presentation::reminders::RulePhrase`).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ReminderRulePhrase {
+    pub key: String,
+    pub text: String,
+}
+
+/// The reminder rule's words as the page's JSON: app.js writes the rule from them by
+/// `presentation::reminders`' grammar, so the server need not be asked on every change.
+pub fn reminder_rule_words() -> String {
+    use data_format::json::{Json, Obj};
+    use presentation::reminders::{DAY_PLURALS, RULE_WORDS as w};
+    let names = presentation::REMINDER_DEFAULTS.iter().fold(Obj::new(), |o, d| o.str(d.0, d.1)).build();
+    let sun = w.sun.iter().fold(Obj::new(), |o, (h, t)| o.str(h, t)).build();
+    let leads = w.leads.iter().fold(Obj::new(), |o, (m, t)| o.str(&m.map_or("none".to_string(), |m| m.to_string()), t)).build();
+    let value = Obj::new()
+        .field("hours", names)
+        .field("days", Json::strings(&DAY_PLURALS.map(String::from)))
+        .str("everyDay", w.every_day)
+        .str("weekdays", w.weekdays)
+        .str("on", w.on)
+        .str("except", w.except)
+        .str("at", w.at)
+        .str("and", w.and)
+        .field("leads", leads)
+        .field("sun", sun)
+        .str("noHour", w.no_hour)
+        .str("noDay", w.no_day)
+        .str("noHourOrDay", w.no_hour_or_day)
+        .str("noTime", w.no_time)
+        .build();
+    data_format::json::encode_compact(&value)
 }
 
 /// The styled 404 page.
