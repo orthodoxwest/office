@@ -65,6 +65,14 @@ class TokensTest {
 
     private val root get() = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
 
+    /** The system's font scale reaches the type no further than iOS lets Dynamic Type (Theme.swift). */
+    @Test
+    fun fontScaleStopsWhereIosDoes() {
+        val swift = File("../../ios/Office/Theme.swift").readText()
+        val cap = Regex("""return min\(body / 17, ([0-9.]+)\)""").find(swift)?.groupValues?.get(1)?.toFloat() ?: error("no cap in Theme.swift")
+        assertEquals(cap, MaxFontScale, 0f)
+    }
+
     @Test
     fun naveIsTheRoot() {
         checkPalette(root, Nave)

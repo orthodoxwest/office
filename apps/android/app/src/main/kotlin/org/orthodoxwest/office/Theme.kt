@@ -278,6 +278,9 @@ object Type {
     val small = face(12.48f, 19.97f)
 }
 
+/** The largest system font scale the type follows, as iOS caps Dynamic Type (Theme.swift). */
+const val MaxFontScale = 2f
+
 @Composable
 fun OfficeTheme(
     choice: ThemeChoice = ThemeChoice.DEFAULT,
@@ -297,9 +300,11 @@ fun OfficeTheme(
         onSurfaceVariant = palette.muted,
         outline = palette.border,
     )
-    // Text size scales every measure together, as the web scales its root.
+    // Text size scales every measure together, as the web scales its root. The system's font scale
+    // reaches the type up to twice its default, as on iOS (Theme.swift `Metrics.factor`): past that
+    // the measure breaks every line.
     val density = LocalDensity.current
-    val scaled = Density(density.density * textSize.scale, density.fontScale)
+    val scaled = Density(density.density * textSize.scale, density.fontScale.coerceAtMost(MaxFontScale))
     CompositionLocalProvider(
         LocalPalette provides palette,
         LocalOrnament provides ornament(base, season),

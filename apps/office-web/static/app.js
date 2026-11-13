@@ -736,10 +736,13 @@ function rule(x1, y1, x2, y2, w, seed) {
     });
   };
 
-  // User action: paint + persist.
+  // User action: paint + persist. The line the reader is at stays where it
+  // stands while the words grow or shrink around it (leader.js).
   var applyTextSizeChoice = function (choice) {
     choice = normalizeTextSizeChoice(choice) || "default";
-    paintTextSizeChoice(choice);
+    var paint = function () { paintTextSizeChoice(choice); };
+    if (window.officeHoldPlace) window.officeHoldPlace(paint);
+    else paint();
     writeStoredTextSize(choice);
   };
 
@@ -2931,29 +2934,63 @@ function rule(x1, y1, x2, y2, w, seed) {
 
   // The words of the shown text, in order: each text node's count and box.
   // A form or reading hidden by the reader's settings has no box and no words.
-  function wordsOnScreen() {
-    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+  // The words are counted once and the boxes measured once, relative to the
+  // hour's top, then again only when the text may have moved within the hour:
+  // a node or attribute changed under it or on the root (a setting, a fold, a
+  // gloss, a score drawn anew) or the hour's box changed size (the window, the
+  // text size, a face arriving). Between, each second compares numbers.
+  var nodes = null;
+  var boxes = null;
+  var measured = null;
+  new MutationObserver(function (records) {
+    if (records.some(function (r) { return r.type !== "attributes"; })) nodes = null;
+    boxes = null;
+  }).observe(content, { subtree: true, childList: true, characterData: true, attributes: true });
+  new MutationObserver(function () { boxes = null; })
+    .observe(document.documentElement, { attributes: true });
+  new MutationObserver(function () { boxes = null; })
+    .observe(document.body, { attributes: true });
+  if (document.fonts) document.fonts.addEventListener("loadingdone", function () { boxes = null; });
+
+  function measure(origin) {
+    if (!nodes) {
+      nodes = [];
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        var count = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
+        if (count) nodes.push({ node: node, words: count });
+      }
+    }
     var range = document.createRange();
+    boxes = [];
+    nodes.forEach(function (entry) {
+      range.selectNodeContents(entry.node);
+      var rects = range.getClientRects();
+      if (!rects.length) return;
+      boxes.push({ top: rects[0].top - origin.top, bottom: rects[rects.length - 1].bottom - origin.top, words: entry.words });
+    });
+    measured = { width: origin.width, height: origin.height };
+  }
+
+  function wordsOnScreen() {
+    var origin = content.getBoundingClientRect();
+    if (!boxes || origin.width !== measured.width || origin.height !== measured.height) measure(origin);
     var total = 0;
     var first = -1;
     var through = 0;
-    var bottom = window.innerHeight;
-    for (var node = walker.nextNode(); node; node = walker.nextNode()) {
-      var words = (node.nodeValue.match(/\S*[A-Za-z0-9]\S*/g) || []).length;
-      if (!words) continue;
-      range.selectNodeContents(node);
-      var rects = range.getClientRects();
-      if (!rects.length) continue;
-      var top = rects[0].top;
-      var low = rects[rects.length - 1].bottom;
-      if (low > 0 && top < bottom) {
+    // The screen's top and foot, measured from the hour's top.
+    var top = -origin.top;
+    var bottom = window.innerHeight - origin.top;
+    for (var i = 0; i < boxes.length; i++) {
+      var box = boxes[i];
+      if (box.bottom > top && box.top < bottom) {
         if (first < 0) first = total;
-        through = total + words;
+        through = total + box.words;
       }
-      total += words;
+      total += box.words;
     }
     // Nothing on screen: above the text, none of it is passed; below, all of it.
-    if (first < 0) first = through = content.getBoundingClientRect().bottom <= 0 ? total : 0;
+    if (first < 0) first = through = origin.bottom <= 0 ? total : 0;
     return { total: total, first: first, through: through };
   }
 
@@ -2980,6 +3017,36 @@ function rule(x1, y1, x2, y2, w, seed) {
     last = Date.now();
   });
   window.setInterval(tick, 1000);
+})();
+
+// Closing the prayers after the Office near the end of an hour would shorten
+// the page under the screen, and the browser would pull the page down to its
+// new end: the summary under the reader's finger would jump. The page keeps its
+// height through the fold instead, and gives the room back as the reader
+// scrolls up into it, never moving what is on the screen.
+(function () {
+  var root = document.documentElement;
+  var held = 0;
+  var release = function () {
+    var end = document.body.getBoundingClientRect().bottom + window.scrollY;
+    var needed = Math.ceil(window.scrollY + window.innerHeight);
+    if (end >= needed) {
+      held = 0;
+      root.style.minHeight = "";
+      window.removeEventListener("scroll", release);
+    } else if (needed < held) {
+      held = needed;
+      root.style.minHeight = held + "px";
+    }
+  };
+  document.querySelectorAll(".page-hour .elements > details.session-prayers > summary").forEach(function (summary) {
+    summary.addEventListener("click", function () {
+      if (!summary.parentNode.open) return;
+      held = Math.ceil(window.scrollY + window.innerHeight);
+      root.style.minHeight = held + "px";
+      window.addEventListener("scroll", release, { passive: true });
+    });
+  });
 })();
 
 // The end of an hour: its way on is ruled under with home's pen where the

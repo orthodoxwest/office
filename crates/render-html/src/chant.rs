@@ -6,6 +6,11 @@
 //!
 //! A score sits beside the words it sets: the page carries both, marked `data-chant-variant`, and
 //! the reader's Chant setting (`data-chant` on the root) shows one (style.css).
+//!
+//! A score must not change its height under a reader once it is drawn, so a browser that has laid
+//! a score out says its column's width in lyric ems in a cookie ([`WIDTH_COOKIE`]), and the server
+//! engraves the next page's scores at that width ([`at_width`]): chant.js finds them already laid
+//! out at its column's width, keeps them, and never fetches the engine.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -27,6 +32,13 @@ const SCALE: f32 = 6.0;
 /// the column's width, or without script: a phone's column is 15 to 20 em at the default text
 /// size, and the score scales down to fit a narrower one.
 pub const FALLBACK_EM: u16 = 17;
+
+/// The cookie in which chant.js keeps its scores' column width, in lyric ems to the thousandth.
+pub const WIDTH_COOKIE: &str = "chant-width";
+
+/// The widths [`column_em`] accepts, in lyric ems: a phone in its narrowest at the largest text
+/// to a page wider than the prayer's measure.
+const COLUMN_EMS: std::ops::RangeInclusive<f32> = 4.0..=80.0;
 
 /// A score in place of the words it sets. The group is announced by `words`, the text it sets,
 /// typeset as the page's text is, rather than by its SVG.
@@ -71,20 +83,73 @@ fn phrased(score: &ChantScore) -> bool {
     score.sets != ScoreSpan::Antiphon
 }
 
-/// The score's SVGs, engraved once per score, initial and phrasing.
+/// The score's SVGs at [`FALLBACK_EM`], engraved once per score, initial and phrasing.
 fn engraved(gabc: &Arc<str>, initial: bool, phrases: bool) -> String {
-    type Cache = Mutex<HashMap<(Arc<str>, bool, bool), String>>;
+    engraved_at(gabc, initial, phrases, u32::from(FALLBACK_EM) * 1000)
+}
+
+/// The score's SVGs at `milli_em` thousandths of a lyric em, engraved once per score, initial,
+/// phrasing and width. Readers' columns come in a few widths each; the cache is emptied when
+/// many readers' widths have filled it, as the apps' is.
+fn engraved_at(gabc: &Arc<str>, initial: bool, phrases: bool, milli_em: u32) -> String {
+    type Cache = Mutex<HashMap<(Arc<str>, bool, bool, u32), String>>;
     static CACHE: OnceLock<Cache> = OnceLock::new();
+    const KEEP: usize = 1024;
     let cache = CACHE.get_or_init(Default::default);
-    let key = (gabc.clone(), initial, phrases);
+    let key = (gabc.clone(), initial, phrases, milli_em);
     if let Some(svgs) = cache.lock().ok().and_then(|c| c.get(&key).cloned()) {
         return svgs;
     }
-    let svgs = engrave(gabc, initial, phrases);
+    let svgs = engrave(gabc, initial, phrases, milli_em as f32 / 1000.0);
     if let Ok(mut c) = cache.lock() {
+        if c.len() >= KEEP {
+            c.clear();
+        }
         c.insert(key, svgs.clone());
     }
     svgs
+}
+
+/// The column's width in lyric ems that a [`WIDTH_COOKIE`] carries, in thousandths, or `None` for a
+/// value that is not a plausible column.
+pub fn column_em(cookie: &str) -> Option<u32> {
+    let em: f32 = cookie.trim().parse().ok()?;
+    COLUMN_EMS.contains(&em).then(|| (em * 1000.0).round() as u32)
+}
+
+/// A page's scores engraved again at `milli_em` thousandths of a lyric em (see [`column_em`]):
+/// each `.chant-width` box this module wrote is set anew from the GABC it carries, and everything
+/// else on the page is left as it was.
+pub fn at_width(html: &str, milli_em: u32) -> String {
+    const OPEN: &str = "<div class=\"chant-width\" ";
+    if milli_em == u32::from(FALLBACK_EM) * 1000 || !html.contains(OPEN) {
+        return html.to_string();
+    }
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(start) = rest.find(OPEN) {
+        let box_html = &rest[start..];
+        // The SVG holds no division, so the box ends at the first one closed.
+        let (Some(tag_end), Some(close)) = (box_html.find('>'), box_html.find("</div>")) else { break };
+        let tag = &box_html[..tag_end];
+        let attr = |name: &str| {
+            let pat = format!(" {name}=\"");
+            tag.find(&pat).map(|i| &tag[i + pat.len()..]).and_then(|v| v.split('"').next())
+        };
+        let (Some(gabc), Some(initial), Some(phrases)) = (attr("data-gabc"), attr("data-chant-initial"), attr("data-chant-phrases")) else {
+            break;
+        };
+        out.push_str(&rest[..start]);
+        out.push_str(&engraved_at(&Arc::from(html_unescape(gabc)), initial == "1", phrases == "1", milli_em));
+        rest = &box_html[close + "</div>".len()..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// The text [`html_escape_string`] escaped.
+fn html_unescape(s: &str) -> String {
+    s.replace("&#34;", "\"").replace("&#39;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 }
 
 /// The app's own Garamond's metrics ([`presentation::CHANT_LYRIC_METRICS`]), read once.
@@ -124,21 +189,23 @@ const INITIAL_SCALE: f32 = 0.5;
 /// space falls between one line's words and the next staff.
 const LYRIC_DROP: f32 = 2.6;
 
-/// The score at [`FALLBACK_EM`], sized in ems so that its lyrics are set at the text's size, with
+/// The score at `em` lyric ems, sized in ems so that its lyrics are set at the text's size, with
 /// what chant.js lays it out again from: its GABC, whether it takes the initial and is phrased,
-/// and its prefix.
-fn engrave(gabc: &str, initial: bool, phrases: bool) -> String {
+/// its prefix, and the width it was laid out at, in SVG units (chant.js keeps a score laid out
+/// within half a unit of its column).
+fn engrave(gabc: &str, initial: bool, phrases: bool, em: f32) -> String {
     let options = if initial { page_options(phrases) } else { page_options(phrases).with_initial(Initial::None) };
     let chant = Chant::with_options(gabc, options);
     // Ids and classes unique to this score, so scores on one page never share a definition.
     let prefix = format!("chant{:x}{}", fnv(gabc), if initial { "" } else { "n" });
     let units_per_em = LYRIC_SPACES * SCALE;
-    let layout = chant.layout_with(f32::from(FALLBACK_EM) * units_per_em, &LayoutOptions::default().with_scale(SCALE));
+    let units = em * units_per_em;
+    let layout = chant.layout_with(units, &LayoutOptions::default().with_scale(SCALE));
     let svg = layout.svg_with(&SvgOptions::default().with_style(false).with_ids(false).with_prefix(prefix.clone()));
     let (w, h) = (layout_width(&svg), layout_height(&svg));
     format!(
         "<div class=\"chant-width\" data-gabc=\"{}\" data-chant-initial=\"{}\" data-chant-phrases=\"{}\" data-chant-prefix=\"{prefix}\" \
-         style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
+         data-chant-units=\"{units:.3}\" style=\"width:{:.3}em;aspect-ratio:{w:.2}/{h:.2}\">{}</div>",
         html_escape_string(gabc),
         u8::from(initial),
         u8::from(phrases),
@@ -281,5 +348,70 @@ mod tests {
     fn widths_are_set_in_lyric_ems() {
         let html = html_of(HYMN, ScoreSpan::FirstStanza, "x");
         assert!(html.contains("style=\"width:17.000em;"), "{html}");
+        // chant.js keeps a score laid out within half a unit of its column's width.
+        assert!(html.contains(&format!(" data-chant-units=\"{:.3}\" ", 17.0 * LYRIC_SPACES * SCALE)), "{html}");
+    }
+
+    /// A score's height: its box's width in ems over its aspect ratio.
+    fn heights(html: &str) -> Vec<f32> {
+        html.split("style=\"width:")
+            .skip(1)
+            .map(|s| {
+                let (w, rest) = s.split_once("em;aspect-ratio:").unwrap();
+                let (ratio, _) = rest.split_once('"').unwrap();
+                let (rw, rh) = ratio.split_once('/').unwrap();
+                w.parse::<f32>().unwrap() * rh.parse::<f32>().unwrap() / rw.parse::<f32>().unwrap()
+            })
+            .collect()
+    }
+
+    const LONG: &str = "name: t;\n%%\n(c4) O(g) bless(h)ed(j) Cre(h)a(g)tor(h) of(g) the(h) light,(g.) (;) who(g) mak(h)est(j) day(h) with(g) ra(h)di(g)ance(h) bright,(g.) (::)";
+
+    /// The server engraves a page's scores at the column a reader's browser reported, in place of
+    /// the fallback's width, so the score the page arrives with is the one chant.js would lay out
+    /// and keeps its height (the reader's place does not move under them).
+    #[test]
+    fn a_page_is_engraved_again_at_the_readers_column() {
+        let page = format!(
+            "<p>before</p>{}<p>between</p>{}<p>after</p>",
+            html_of(LONG, ScoreSpan::Antiphon, "x"),
+            whole_hymn_html(&score(LONG, ScoreSpan::WholeHymn), "O blessed Creator of the light, who makest day with radiance bright,")
+        );
+        let narrow = at_width(&page, column_em("10.250").unwrap());
+        assert!(narrow.starts_with("<p>before</p><div class=\"chant-score\""), "{narrow}");
+        assert!(narrow.contains("</div></div><p>between</p>") && narrow.ends_with("</div></div></div><p>after</p>"), "{narrow}");
+        assert_eq!(narrow.matches("<svg").count(), 2);
+        assert_eq!(narrow.matches(&format!(" data-chant-units=\"{:.3}\" ", 10.25 * LYRIC_SPACES * SCALE)).count(), 2, "{narrow}");
+        // The same scores, their GABC, initial and prefix as they were, set on more staves.
+        for name in ["data-gabc", "data-chant-initial", "data-chant-phrases", "data-chant-prefix", "aria-label"] {
+            let values = |html: &str| {
+                html.match_indices(&format!(" {name}=\""))
+                    .map(|(i, _)| html[i..].split('"').nth(1).unwrap().to_string())
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(values(&narrow), values(&page), "{name}");
+        }
+        let (was, now) = (heights(&page), heights(&narrow));
+        assert!(now[0] > was[0] && now[1] > was[1], "{was:?} {now:?}");
+        // Engraved as chant.js would set it at that width: the same score as the fallback's way.
+        assert_eq!(narrow, at_width(&narrow, column_em("10.25").unwrap()));
+        // The fallback's own width, and a page without a score, are left alone.
+        assert_eq!(at_width(&page, column_em("17").unwrap()), page);
+        assert_eq!(at_width("<p>words</p>", 10_250), "<p>words</p>");
+    }
+
+    #[test]
+    fn a_column_is_read_from_the_cookie_only_when_it_is_one() {
+        assert_eq!(column_em("17.900"), Some(17_900));
+        assert_eq!(column_em(" 21.3333 "), Some(21_333));
+        for bad in ["", "wide", "NaN", "inf", "-3", "0", "3.9", "80.5", "1e9"] {
+            assert_eq!(column_em(bad), None, "{bad:?}");
+        }
+    }
+
+    #[test]
+    fn a_gabc_survives_its_attribute() {
+        let gabc = "name: \"x\" & <y> 'z';";
+        assert_eq!(html_unescape(&html_escape_string(gabc)), gabc);
     }
 }

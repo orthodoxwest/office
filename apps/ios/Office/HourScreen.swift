@@ -257,6 +257,8 @@ struct HourScreen: View {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
         let inset: CGFloat = view.firstClass && width < m.px(frameClear) ? m.px(12) : 0
+        // A block's column: the measure inside the page's gutters and the frame's inset.
+        let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
@@ -297,6 +299,7 @@ struct HourScreen: View {
                                     }
                                     BlockRow(block: block, column: columns[at])
                                         .environment(\.ornament, view.sections[at.section].bare ? bareO : o)
+                                        .environment(\.scoreColumn, scoreColumn)
                                 }
                                 .padding(.top, prayer.space(space))
                                 .measured(m)
@@ -338,6 +341,16 @@ struct HourScreen: View {
             .onChange(of: model.martyrology) { hold() }
             .onChange(of: model.chant) { hold() }
             .onChange(of: composition) { restore(scroll) }
+            // A new text size sets every row again; the row the reader is at stands where it stood,
+            // as the web holds the line at the top of the screen.
+            .onChange(of: model.textSize) {
+                // At the hour's head the page stays at its top.
+                if let top = reading.shownRows().first, top.id == rows.first?.id, top.frame.minY >= 0 { return }
+                hold()
+                guard let mark = held?.marks.first else { held = nil; return }
+                held = nil
+                DispatchQueue.main.async { scroll.scrollTo(mark.id, anchor: mark.anchor) }
+            }
             .onAppear {
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
                 guard let id = anchor(rows) else { return }
