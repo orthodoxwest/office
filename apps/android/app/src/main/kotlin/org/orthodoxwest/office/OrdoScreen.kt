@@ -105,8 +105,10 @@ fun OrdoScreen(
     var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
     // A day asked for (the web's #d-date) is brought into view once, when the month is ready:
     // from the first frame when it already is, so the page comes in at that day. After that
-    // the reader's own scroll position stands, restored or not.
-    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + focusDay - 1
+    // the reader's own scroll position stands, restored or not. The day before it comes to rest
+    // under the heading, so the day is found among its neighbours, as the web keeps a row above
+    // it (`scroll-margin-top`); the month's first day has none before it here.
+    val focusItem = FIRST_DAY_ITEM + (if (wide) 1 else 0) + maxOf(1, focusDay - 1) - 1
     var focused by rememberSaveable(year, monthNumber, focusDay) { mutableStateOf(focusDay == 0 || month != null) }
     // The day comes to rest under the month's pinned heading, not behind it: the heading's
     // measured height, or before its first layout an estimate (its padding, and the taller of
