@@ -119,7 +119,7 @@ class CrownTest {
         assertEquals(ThemeChoice.NAVE, stage.theme)
         advance(1000)
         assertEquals(ThemeChoice.APSE, stage.theme)
-        assertEquals(0, stage.plain)
+        assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         shoot("crown-dusk-1200")
         advance(1400)
         shoot("crown-dusk-2600")
@@ -141,6 +141,7 @@ class CrownTest {
         show(stage)
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
         advance(1000)
+        assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         assertEquals(ThemeChoice.NAVE, stage.theme)
         shoot("crown-dawn-1000")
         advance(1300)
@@ -152,7 +153,7 @@ class CrownTest {
         assertFalse(stage.crown.playing)
         // Nave on a light phone is the device's look: saved as Default.
         assertEquals(ThemeChoice.DEFAULT, stage.theme)
-        assertEquals(0, stage.plain)
+        assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
     }
 
     @Test
@@ -177,7 +178,7 @@ class CrownTest {
         show(stage)
         compose.onNodeWithContentDescription("Switch to Apse").performClick()
         advance(1500)
-        assertTrue(stage.crown.playing)
+        assertTrue("not playing: ${stage.crown.plainBecause}", stage.crown.playing)
         compose.onNodeWithText(stage.view.prayNowLabel).performClick()
         advance(crownPlan(true).rush.toLong() + 200)
         compose.waitForIdle()

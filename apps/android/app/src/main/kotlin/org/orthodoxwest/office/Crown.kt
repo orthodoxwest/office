@@ -491,6 +491,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     var save: (ThemeChoice) -> Unit = {}
     var apply: (ThemeChoice) -> Unit = {}
     var plain: (ThemeChoice) -> Unit = {}
+    /** Why the last tap took the Menu's change rather than the play, for tests and debugging. */
+    internal var plainBecause: String? = null
 
     internal var play: Play? by mutableStateOf(null)
     /** The play's clock: ms from the tap on the plan's timetable. */
@@ -538,7 +540,17 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val choice = next()
         val h = head
         val k = animationScale()
-        if (h == null || k <= 0f || h.black || h.picking || rootSize == IntSize.Zero || h.width <= 0f || units["cross"] == null) {
+        plainBecause = when {
+            h == null -> "no head"
+            k <= 0f -> "animations off"
+            h.black -> "black day"
+            h.picking -> "picking a date"
+            rootSize == IntSize.Zero -> "no root size"
+            h.width <= 0f -> "no head width"
+            units["cross"] == null -> "no cross"
+            else -> null
+        }
+        if (plainBecause != null || h == null) {
             plain(choice)
             return
         }
@@ -548,7 +560,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     private fun start(choice: ThemeChoice, h: CrownHead, k: Float) {
         val toDark = choice.dark(deviceDark)
         val plan = crownPlan(toDark)
-        val sums = runCatching { Sums(plan, h, units, rootSize, density, screenDp > 700f) }.getOrNull()
+        val sums = runCatching { Sums(plan, h, units, rootSize, density, screenDp > 700f) }
+            .onFailure { plainBecause = "sums: $it" }.getOrNull()
         if (sums == null) {
             plain(choice)
             return
@@ -610,6 +623,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         p.old = runCatching { layer.toImageBitmap() }.getOrNull()
         if (p.old == null) {
             // No still to play over: the Menu's change.
+            plainBecause = "no still"
             finish(pending = plain)
             return
         }
@@ -625,6 +639,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         val p = play ?: return
         if (head?.tapBox?.contains(at) == true) return
         if (!p.turned) {
+            plainBecause = "touched before the turn"
             finish(pending = plain)
             return
         }
