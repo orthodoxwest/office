@@ -390,6 +390,9 @@ pub struct CrownPlan {
     pub sky_rose_lilac: CrownRgb,
     pub tap_apart: u32,
     pub rush: u32,
+    /// How many times slower than these figures the play is performed: the apps multiply their
+    /// clock by it (`tap_apart` and `rush` stay real ms).
+    pub pace: f32,
 }
 
 /// The play for a tap that turns the page dark (dusk) or light (dawn).
@@ -431,6 +434,7 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         sky_rose_lilac: rgb(c::SKY_ROSE_LILAC),
         tap_apart: c::TAP_APART,
         rush: c::RUSH,
+        pace: c::PACE,
     }
 }
 

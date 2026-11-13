@@ -567,7 +567,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             return
         }
         save(choice)
-        val p = Play(plan, choice, sums, k)
+        // The timetable is performed plan.pace times slower than it is written.
+        val p = Play(plan, choice, sums, k * plan.pace)
         p.gilt = toDark && h.gilt
         val cross = units["cross"]!!
         p.crossNew = look(cross.size) { h.cross(this, toDark) }
@@ -645,7 +646,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         }
         if (t >= p.sums.settle) return
         val left = p.sums.end - t
-        p.rate = max(p.rate, max(1f, left / p.plan.rush.toFloat()))
+        p.rate = max(p.rate, max(1f, left * p.plan.pace / p.plan.rush.toFloat()))
     }
 
     /** Scrolling, a new page or a new size: the play ends at once. */

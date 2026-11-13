@@ -89,7 +89,12 @@ or impose a redesign on an unrelated change.
   play sets is `crown-` prefixed and removed at its end. A reader who
   asked for stillness or contrast, a black day, and a browser that cannot
   drive the transition's parts get the Menu's plain crossfade; forced
-  colours hide the button. Slow it for a test with `--crown-k` on `:root`.
+  colours hide the button. Its timings are written at the pace it was
+  composed at and performed `PACE` (`--crown-pace`) times slower; slow or
+  hurry it for a test with `--crown-k` on `:root`. The arch's lining is
+  never a named part of the transition (a still of it sits off the live
+  one at a fractional pixel ratio and the outline steps), and a fallback
+  says why on the root (`data-crown-plain`, `data-crown-early`).
 - On a phone home's frontispiece is a painted panel with a pointed head:
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by

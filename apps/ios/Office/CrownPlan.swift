@@ -63,6 +63,8 @@ struct CrownFigures {
     let tapApart: Double
     /// A touch elsewhere runs what is left out in this long, ms.
     let rush: Double
+    /// How many times slower than its timetable the play is performed (the clock is divided by it).
+    let pace: Double
 }
 
 extension CrownFigures {
@@ -98,7 +100,8 @@ extension CrownFigures {
             skyLime: Pigment(p.skyLime),
             skyRoseLilac: Pigment(p.skyRoseLilac),
             tapApart: Double(p.tapApart),
-            rush: Double(p.rush)
+            rush: Double(p.rush),
+            pace: Double(p.pace)
         )
     }
 }

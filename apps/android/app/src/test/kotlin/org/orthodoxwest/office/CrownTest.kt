@@ -85,6 +85,9 @@ class CrownTest {
 
     private fun advance(ms: Long) = compose.mainClock.advanceTimeBy(ms)
 
+    /** A stretch of the play's own timetable, as the clock runs it: the plan's pace times longer. */
+    private fun played(ms: Long) = (ms * crownPlan(true).pace).toLong()
+
     private fun shoot(name: String) = compose.onRoot().captureRoboImage("build/screenshots/$name.png")
 
     @Test
@@ -112,20 +115,20 @@ class CrownTest {
         val stage = Stage(ThemeChoice.NAVE)
         show(stage)
         compose.onNodeWithContentDescription("Switch to Apse").performClick()
-        advance(200)
+        advance(played(200))
         // Saved at the tap, shown at the turn.
         assertTrue(stage.crown.playing)
         assertEquals(ThemeChoice.APSE, stage.saved)
         assertEquals(ThemeChoice.NAVE, stage.theme)
-        advance(1000)
+        advance(played(1000))
         assertEquals(ThemeChoice.APSE, stage.theme)
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         shoot("crown-dusk-1200")
-        advance(1400)
+        advance(played(1400))
         shoot("crown-dusk-2600")
-        advance(700)
+        advance(played(700))
         shoot("crown-dusk-3300")
-        advance(crownPlan(true).end.toLong() + 1500)
+        advance(played(crownPlan(true).end.toLong()) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         assertTrue(stage.crown.lifted.isEmpty())
@@ -140,15 +143,15 @@ class CrownTest {
         val stage = Stage(ThemeChoice.APSE)
         show(stage)
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
-        advance(1000)
+        advance(played(1000))
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         assertEquals(ThemeChoice.NAVE, stage.theme)
         shoot("crown-dawn-1000")
-        advance(1300)
+        advance(played(1300))
         shoot("crown-dawn-2300")
-        advance(700)
+        advance(played(700))
         shoot("crown-dawn-3000")
-        advance(crownPlan(false).end.toLong() + 1500)
+        advance(played(crownPlan(false).end.toLong()) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         // Nave on a light phone is the device's look: saved as Default.
@@ -163,9 +166,9 @@ class CrownTest {
         compose.onNodeWithContentDescription("Switch to Apse").performClick()
         advance(1500)
         compose.onNodeWithContentDescription("Switch to Nave").performClick()
-        advance(crownPlan(true).end.toLong() + 500)
+        advance(played(crownPlan(true).end.toLong()) + 500)
         // The way back is under way, or done.
-        advance(crownPlan(false).end.toLong() + 1500)
+        advance(played(crownPlan(false).end.toLong()) + 1500)
         compose.waitForIdle()
         assertFalse(stage.crown.playing)
         assertEquals(ThemeChoice.NAVE, stage.theme)

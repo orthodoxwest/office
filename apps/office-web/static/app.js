@@ -3391,6 +3391,10 @@ function plainClickOpensHere(e, link) {
     var VEIL_PART = 0.8;
     // A second tap is kept only if it comes this long after the last, and a
     // touch elsewhere runs the rest out in RUSH.
+    // The timetable is written at the pace it was composed at; the play is
+    // performed this many times slower (style.css's --crown-pace). A reader's
+    // own taps are counted in real time.
+    var PACE = 1.625;
     var TAP_APART = 450;
     var RUSH = 300;
     // Where in a mask's radius its feather is half through (style.css's stops).
@@ -3510,7 +3514,7 @@ function plainClickOpensHere(e, link) {
     }
 
     function K() {
-      return parseFloat(getComputedStyle(root).getPropertyValue("--crown-k")) || 1;
+      return (parseFloat(getComputedStyle(root).getPropertyValue("--crown-k")) || 1) * PACE;
     }
     function px(n) {
       return n.toFixed(1) + "px";
@@ -3531,6 +3535,9 @@ function plainClickOpensHere(e, link) {
     // browser's own crossfade alike: white for the whole first act. There the
     // tap makes the Menu's change, which takes no stills.
     var plain = /; wv\)/.test(navigator.userAgent || "");
+    if (plain) {
+      document.documentElement.setAttribute("data-crown-plain", "an Android WebView");
+    }
     var playing = null, lastTap = 0, applying = false;
     function applyOwn(choice) {
       applying = true;
@@ -3999,7 +4006,9 @@ function plainClickOpensHere(e, link) {
       // Where the veil is densest (the springing line's middle) and how far
       // it thins, on the glass.
       set("--crown-ax", px(ax)); set("--crown-ys", px(ys)); set("--crown-aw", px(W));
-      set("--crown-lining-at", String(Math.round(when(vr.left, vr.top + vr.height * 0.6, 0.5) - plan.turn)));
+      // The vault's stand-in leaves over the last half second before the
+      // stills do (style.css).
+      set("--crown-vault-out", String(Math.round(g.settle - plan.turn - 540)));
 
       // Each star's turn. Dusk: ms from the change of theme, in the wake of
       // the dark, the largest first. Dawn: ms from the tap, ahead of the light.
@@ -4297,22 +4306,25 @@ function plainClickOpensHere(e, link) {
           // rush and the last top-up need both of these; a browser that takes
           // the calls and does nothing (no throw) gets its own plain
           // crossfade, now and for the rest of the page's life.
-          var able;
+          // (Why not, when not, is left on the root for whoever is asking:
+          // data-crown-plain.)
+          var able, why = "";
           try {
             var trial = root.animate({ opacity: [1, 1] }, { duration: 1, pseudoElement: "::view-transition-new(root)" });
-            able = !!(trial && trial.effect && trial.effect.pseudoElement === "::view-transition-new(root)") &&
-              document.getAnimations().some(function (a) {
-                return a !== trial && a.effect && String(a.effect.pseudoElement || "").indexOf("::view-transition") === 0;
-              });
+            if (!(trial && trial.effect && trial.effect.pseudoElement === "::view-transition-new(root)")) {
+              why = "animate() does not take the transition's parts";
+            } else if (!document.getAnimations().some(function (a) {
+              return a !== trial && a.effect && String(a.effect.pseudoElement || "").indexOf("::view-transition") === 0;
+            })) {
+              why = "getAnimations() does not list the transition's parts";
+            }
             trial.cancel();
-            // And the page that is leaving must be standing there as a still
-            // for the whole of the first act: no box for it, no play.
-            able = able && ["::view-transition-group(root)", "::view-transition-old(root)"].every(function (pseudo) {
-              var box = getComputedStyle(root, pseudo);
-              return parseFloat(box.width) > 0 && parseFloat(box.height) > 0 && box.display !== "none" && box.opacity === "1";
-            });
-          } catch {
-            able = false;
+          } catch (err) {
+            why = "the trial threw: " + (err && err.name);
+          }
+          able = !why;
+          if (!able) {
+            root.setAttribute("data-crown-plain", why);
           }
           if (!able) {
             // The stills are taken under our names, and to drop the names now
@@ -4368,9 +4380,10 @@ function plainClickOpensHere(e, link) {
           later(p, settle, function () {
             try { vt.skipTransition(); } catch { /* already gone */ }
           });
-        }, function () {
+        }, function (err) {
           // The browser would not play it (a resize while it made its
           // stills, a hidden tab): the change is simply made.
+          root.setAttribute("data-crown-early", "never ready: " + (err && err.name));
           resume();
           if (playing === p) {
             teardown();
@@ -4386,6 +4399,12 @@ function plainClickOpensHere(e, link) {
           if (p.rushing || !p.ready) {
             teardown();
             return;
+          }
+          // A browser that drops the stills before the page has turned has
+          // cut the play short; that is left on the root too.
+          var ran = (performance.now() - p.ready) / p.k;
+          if (ran < g.settle - plan.turn - 200) {
+            root.setAttribute("data-crown-early", Math.round(ran) + " of " + Math.round(g.settle - plan.turn) + "ms");
           }
           // A tap on the cross while the page was turning was kept: the way
           // back plays now.

@@ -12027,6 +12027,12 @@ body.page-home::before {
 
 :root {
   --crown-k: 1;
+  /* The play is written at the pace it was composed at and performed this
+     many times slower (presentation::crown::PACE): every time below is
+     multiplied by --crown-kp. Only the cross's own answer to the tap keeps
+     the composed pace (--crown-k): it answers at once. */
+  --crown-pace: 1.625;
+  --crown-kp: calc(var(--crown-k) * var(--crown-pace));
   /* A line's ink changes hands in this long: old ink out and new ink in,
      never both. */
   --crown-ink-handover: 140ms;
@@ -12139,7 +12145,7 @@ body.page-home::before {
   position: absolute;
   inset: 0;
   background: linear-gradient(0deg, rgba(var(--crown-red-ochre), 0.2) 0, rgba(var(--crown-ochre), 0.15) 45%, rgba(var(--crown-ochre), 0.1) 100%);
-  animation: crown-warm calc(900ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.5, 1) calc(100ms * var(--crown-k)) both;
+  animation: crown-warm calc(900ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.5, 1) calc(100ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-warm {
@@ -12273,7 +12279,7 @@ body.page-home::before {
 /* (From the change of theme on, times are counted from the transition's
    first frame, .crown-new: one clock, however long the stills took.) */
 .page-home .home-hero.crown-dusk.crown-new .crown-cross-catch {
-  animation: crown-catch calc(600ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(2700ms * var(--crown-k)) both;
+  animation: crown-catch calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(2700ms * var(--crown-kp)) both;
 }
 
 .page-home .home-hero.crown-dusk.crown-gilt .crown-cross-catch {
@@ -12284,7 +12290,7 @@ body.page-home::before {
 .page-home .home-hero.crown-dusk.crown-gilt.crown-new .crown-cross-catch {
   animation:
     crown-catch calc(760ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(80ms * var(--crown-k)) both,
-    crown-catch-again calc(600ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(2700ms * var(--crown-k)) both;
+    crown-catch-again calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(2700ms * var(--crown-kp)) both;
 }
 
 /* Dawn: the leaf lifts at once (0-180) and settles; the cross is the last
@@ -12297,12 +12303,12 @@ body.page-home::before {
    as the paint paling. The cross simply stands.) */
 
 .page-home .home-hero.crown-dawn.crown-new .crown-cross-old {
-  animation: crown-fade-out calc(300ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.4, 1) calc(2230ms * var(--crown-k)) both;
+  animation: crown-fade-out calc(300ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(2230ms * var(--crown-kp)) both;
 }
 
 .page-home .home-hero.crown-dawn.crown-new .crown-cross-new {
   /* Paint over leaf, as the arch opens past the crown (900-1150). */
-  animation: crown-cross-in calc(700ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.4, 1) calc(1550ms * var(--crown-k)) both;
+  animation: crown-cross-in calc(700ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(1550ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-fade-out {
@@ -12361,13 +12367,13 @@ body.page-home::before {
   -webkit-mask-composite: source-in;
   mask: url("pigment.png") 0 0 / 128px 128px, radial-gradient(ellipse 160% 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.85) 34%, rgba(0, 0, 0, 0.4) 66%, transparent 100%);
   mask-composite: intersect;
-  animation: crown-rise calc(1250ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-k)) both;
+  animation: crown-rise calc(1250ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-kp)) both;
 }
 
 .page-home .home-hero.crown-dusk.crown-new .home-glow::before {
   animation:
-    crown-rise calc(1250ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-k)) both,
-    crown-gone calc(300ms * var(--crown-k)) linear calc(1550ms * var(--crown-k)) forwards;
+    crown-rise calc(1250ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-kp)) both,
+    crown-gone calc(300ms * var(--crown-kp)) linear calc(1550ms * var(--crown-kp)) forwards;
 }
 
 /* On a phone the afterglow is the cue that something has begun: denser. */
@@ -12391,7 +12397,7 @@ body.page-home::before {
     rgba(var(--crown-rose-lilac), 0) 100%);
   -webkit-mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
   mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
-  animation: crown-rise calc(800ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(450ms * var(--crown-k)) both;
+  animation: crown-rise calc(800ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(450ms * var(--crown-kp)) both;
 }
 
 /* Under it, and before it, the colour of the hour: lime thin over night
@@ -12421,19 +12427,19 @@ body.page-home::before {
     rgba(var(--crown-rose-lilac), 0) 100%);
   -webkit-mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
   mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
-  animation: crown-rise calc(650ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(220ms * var(--crown-k)) both;
+  animation: crown-rise calc(650ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(220ms * var(--crown-kp)) both;
 }
 
 .page-home .home-hero.crown-dawn.crown-new .home-glow::after {
   animation:
-    crown-rise calc(650ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(220ms * var(--crown-k)) both,
-    crown-gone calc(600ms * var(--crown-k)) linear calc(800ms * var(--crown-k)) forwards;
+    crown-rise calc(650ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(220ms * var(--crown-kp)) both,
+    crown-gone calc(600ms * var(--crown-kp)) linear calc(800ms * var(--crown-kp)) forwards;
 }
 
 .page-home .home-hero.crown-dawn.crown-new .home-glow::before {
   animation:
-    crown-rise calc(800ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.3, 1) calc(450ms * var(--crown-k)) both,
-    crown-gone calc(600ms * var(--crown-k)) linear calc(800ms * var(--crown-k)) forwards;
+    crown-rise calc(800ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(450ms * var(--crown-kp)) both,
+    crown-gone calc(600ms * var(--crown-kp)) linear calc(800ms * var(--crown-kp)) forwards;
 }
 
 @keyframes crown-rise {
@@ -12471,12 +12477,12 @@ body.page-home::before {
 
 .page-home .home-hero.crown-dusk.crown-new .home-vault-light {
   background: linear-gradient(0deg, rgba(var(--crown-ember), 0.64) 0, rgba(var(--crown-ember), 0.32) 45%, rgba(var(--crown-ember), 0) 100%);
-  animation: crown-sink calc(1000ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(2250ms * var(--crown-k)) both;
+  animation: crown-sink calc(1000ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(2250ms * var(--crown-kp)) both;
 }
 
 .page-home .home-hero.crown-dawn.crown-new .home-vault-light {
   background: linear-gradient(0deg, rgba(var(--crown-ochre), 0.2) 0, rgba(var(--crown-ochre), 0.08) 50%, rgba(var(--crown-ochre), 0) 100%);
-  animation: crown-sink calc(1400ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(850ms * var(--crown-k)) both;
+  animation: crown-sink calc(1400ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(850ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-sink {
@@ -12498,7 +12504,7 @@ body.page-home::before {
 }
 
 .page-home .home-hero.crown-dusk.crown-new .home-stars path {
-  animation: crown-kindle calc(800ms * var(--crown-k)) cubic-bezier(0.3, 0.2, 0.3, 1) calc(var(--crown-d, 2600) * 1ms * var(--crown-k)) both;
+  animation: crown-kindle calc(800ms * var(--crown-kp)) cubic-bezier(0.3, 0.2, 0.3, 1) calc(var(--crown-d, 2600) * 1ms * var(--crown-kp)) both;
 }
 
 /* Dawn: out a little ahead of the light, the smallest and lowest first. They
@@ -12508,7 +12514,7 @@ body.page-home::before {
 }
 
 .page-home .home-hero.crown-dawn .home-stars path {
-  animation: crown-snuff calc(650ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(var(--crown-d, 0) * 1ms * var(--crown-k)) both;
+  animation: crown-snuff calc(650ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(var(--crown-d, 0) * 1ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-kindle {
@@ -12545,7 +12551,11 @@ body.page-home::before {
 :root.crown-vt .page-home .crown-cross { view-transition-name: crown-cross; }
 :root.crown-vt.crown-new .page-home .home-back { view-transition-name: crown-back; }
 :root.crown-vt .page-home .home-prayer-card > h2 { view-transition-name: crown-frieze; }
-:root.crown-vt .page-home .home-lining { view-transition-name: crown-lining; }
+/* (The lining is not named: a still of it sits a fraction of a pixel off
+   the live one wherever the screen's pixels are not a whole number to the
+   CSS pixel, and the arch's whole outline would step as the stills go up
+   and again as they come down. It stays in the page's own picture, which
+   is exact, and turns with the page as the spread passes it.) */
 :root.crown-vt .page-home .home-crown-tap:focus-visible { view-transition-name: crown-tap; }
 :root.crown-vt .page-home .crown-r1 { view-transition-name: crown-r1; }
 :root.crown-vt .page-home .crown-r2 { view-transition-name: crown-r2; }
@@ -12621,35 +12631,6 @@ body.page-home::before {
    leaves it, then takes the new one (two registered colours, animated on
    the element). The lettering's leaf is the same in both themes. */
 :root.crown-vt::view-transition-group(crown-frieze) { z-index: 6; }
-:root.crown-vt::view-transition-group(crown-lining) { z-index: 5; }
-:root.crown-vt.crown-dawn::view-transition-group(crown-lining) {
-  animation-duration: calc(800ms * var(--crown-k));
-  animation-delay: calc((var(--crown-spread-at) + 150) * 1ms * var(--crown-k));
-  animation-fill-mode: both;
-}
-:root.crown-vt.crown-dawn::view-transition-old(crown-lining),
-:root.crown-vt.crown-dawn::view-transition-new(crown-lining) {
-  animation-duration: calc(800ms * var(--crown-k));
-  animation-delay: calc((var(--crown-spread-at) + 150) * 1ms * var(--crown-k));
-  animation-fill-mode: both;
-}
-/* Dusk: the two linings' lines stand 8px apart, so they never share the
-   wall: the old set goes as the page's front reaches the jamb, then the
-   new set comes. */
-/* (Its box differs between the themes too, so the group takes the new
-   box in one step between them, not before.) */
-:root.crown-vt.crown-dusk::view-transition-group(crown-lining) {
-  animation-duration: calc(10ms * var(--crown-k));
-  animation-delay: calc(var(--crown-lining-at, 2300) * 1ms * var(--crown-k));
-  animation-timing-function: step-end;
-  animation-fill-mode: both;
-}
-:root.crown-vt.crown-dusk::view-transition-old(crown-lining) {
-  animation: crown-ink-out calc(160ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-lining-at, 2300) - 160) * 1ms * var(--crown-k)) both;
-}
-:root.crown-vt.crown-dusk::view-transition-new(crown-lining) {
-  animation: crown-ink-in calc(240ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-lining-at, 2300) + 10) * 1ms * var(--crown-k)) both;
-}
 :root.crown-vt::view-transition-group(crown-tap) { z-index: 8; }
 :root.crown-vt::view-transition-group(crown-cross) { z-index: 7; }
 
@@ -12664,7 +12645,18 @@ body.page-home::before {
   mask-image: radial-gradient(closest-side, #000 0, #000 78%, rgba(0, 0, 0, 0.844) 83.5%, rgba(0, 0, 0, 0.5) 89%, rgba(0, 0, 0, 0.156) 94.5%, transparent 100%);
   -webkit-mask-size: 0 0;
   mask-size: 0 0;
-  animation: crown-front calc(var(--crown-front-dur) * 1ms * var(--crown-k)) linear calc((var(--crown-front-at)) * 1ms * var(--crown-k)) both;
+  animation: crown-front calc(var(--crown-front-dur) * 1ms * var(--crown-kp)) linear calc((var(--crown-front-at)) * 1ms * var(--crown-kp)) both;
+}
+
+/* Before the stills come down the vault's stand-in goes, slowly, and
+   leaves the page's own vault showing: what its clip hid of the lining
+   comes up with it and not in the frame the stills go. (The old ground
+   kept behind it goes first, unseen under it.) */
+:root.crown-vt::view-transition-new(crown-vault) {
+  animation: crown-ink-out calc(480ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(var(--crown-vault-out, 99999) * 1ms * var(--crown-kp)) both;
+}
+:root.crown-vt::view-transition-new(crown-back) {
+  animation: crown-ink-out calc(10ms * var(--crown-kp)) step-end calc((var(--crown-vault-out, 99999) - 20) * 1ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-front {
@@ -12696,76 +12688,76 @@ body.page-home::before {
    sinks into the changing ground before the new ink rises from it. Never
    both. ---- */
 :root.crown-vt::view-transition-group(crown-w1) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w1) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w1, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w1) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w1, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w1) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w1, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w1) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w1, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w2) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w2) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w2, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w2) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w2, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w2) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w2, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w2) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w2, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w3) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w3) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w3, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w3) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w3, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w3) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w3, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w3) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w3, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w4) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w4) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w4, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w4) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w4, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w4) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w4, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w4) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w4, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w5) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w5) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w5, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w5) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w5, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w5) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w5, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w5) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w5, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w6) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w6) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w6, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w6) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w6, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w6) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w6, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w6) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w6, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w7) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w7) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w7, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w7) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w7, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w7) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w7, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w7) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w7, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w8) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w8) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w8, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w8) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w8, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w8) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w8, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w8) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w8, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w9) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w9) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w9, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w9) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w9, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w9) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w9, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w9) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w9, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w10) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w10) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w10, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w10) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w10, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w10) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w10, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w10) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w10, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w11) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w11) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w11, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w11) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w11, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w11) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w11, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w11) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w11, 0) + 40) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-w12) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-w12) { animation: crown-ink-out calc(240ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w12, 0) - 230) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-w12) { animation: crown-ink-in calc(420ms * var(--crown-k)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w12, 0) + 40) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-w12) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w12, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w12) { animation: crown-ink-in calc(420ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w12, 0) + 40) * 1ms * var(--crown-kp)) both; }
 
 /* The page's rows: each changes ink in 140ms at its own
    moment (--crown-rN, in turn down the card, 60ms apart at the least), one
    ink handing to the other at the same glyphs. So the card is never a
    blank slab while its ground passes through the middle. */
 :root.crown-vt::view-transition-group(crown-r1) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r2) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r3) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r4) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r5) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r6) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r7) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r8) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r9) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both; }
 :root.crown-vt::view-transition-group(crown-r10) { z-index: 5; animation: none; }
-:root.crown-vt::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-k)) both; }
-:root.crown-vt::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-k)) both; }
+:root.crown-vt::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both; }
 
 /* The page takes its time to turn, and an ink of
    middling weight (the Pray button's red, the gold labels, "Change date")
@@ -12782,26 +12774,26 @@ body.page-home::before {
    only a little: its glow would go to a brown smudge. */
 @keyframes crown-ink-dim-soft { to { filter: brightness(0.78); } }
 @keyframes crown-ink-undim-soft { from { filter: brightness(0.78); } }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn1, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r1, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un1, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r1, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn2, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r2, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un2, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r2, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn3, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r3, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un3, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r3, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn4, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r4, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un4, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r4, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn5, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r5, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un5, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r5, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn6, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r6, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un6, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r6, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn7, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r7, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un7, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r7, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn8, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r8, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un8, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r8, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn9, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r9, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un9, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r9, 0) + 220) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dusk::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-dn10, crown-ink-dim) calc(280ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r10, 0) - 430) * 1ms * var(--crown-k)) both; }
-:root.crown-vt.crown-dawn::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-k)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-k)) both, var(--crown-un10, crown-ink-undim) calc(520ms * var(--crown-k)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r10, 0) + 220) * 1ms * var(--crown-k)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn1, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r1, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un1, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r1, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn2, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r2, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un2, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r2, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn3, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r3, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un3, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r3, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn4, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r4, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un4, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r4, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn5, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r5, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un5, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r5, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn6, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r6, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un6, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r6, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn7, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r7, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un7, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r7, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn8, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r8, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un8, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r8, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn9, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r9, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un9, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r9, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn10, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r10, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un10, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r10, 0) + 220) * 1ms * var(--crown-kp)) both; }
 
 @keyframes crown-ink-out {
   to { opacity: 0; }
@@ -12826,7 +12818,7 @@ body.page-home::before {
 .page-home .home-hero.crown-new .home-prayer-card > h2 {
   --inscription-ground: var(--crown-fz-ground);
   --inscription-edge: var(--crown-fz-edge);
-  animation: crown-frieze calc(900ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.4, 1) calc((var(--crown-spread-at, 1550) + 250) * 1ms * var(--crown-k)) both;
+  animation: crown-frieze calc(900ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc((var(--crown-spread-at, 1550) + 250) * 1ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-frieze {
@@ -12870,8 +12862,8 @@ body.page-home::before {
      pair of its nine sizes (about 53 a second), so no stair is more than a
      few levels. */
   animation:
-    crown-spread calc(var(--crown-shape-dur) * 1ms * var(--crown-k)) steps(12, end) calc(var(--crown-spread-at) * 1ms * var(--crown-k)) forwards,
-    crown-glow-in calc(var(--crown-glow-dur) * 1ms * var(--crown-k)) var(--crown-glow-ease) calc(var(--crown-spread-at) * 1ms * var(--crown-k)) both;
+    crown-spread calc(var(--crown-shape-dur) * 1ms * var(--crown-kp)) steps(12, end) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) forwards,
+    crown-glow-in calc(var(--crown-glow-dur) * 1ms * var(--crown-kp)) var(--crown-glow-ease) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-glow-in {
@@ -13033,7 +13025,7 @@ body.page-home::before {
       color-mix(in srgb, var(--crown-veil-c) 88%, transparent) 28%,
       color-mix(in srgb, var(--crown-veil-c) 66%, transparent) 58%,
       color-mix(in srgb, var(--crown-veil-c) 46%, transparent) 100%);
-    animation: crown-veil-ink calc(var(--crown-veil-dur) * 1ms * var(--crown-k)) linear calc(var(--crown-veil-at) * 1ms * var(--crown-k)) both;
+    animation: crown-veil-ink calc(var(--crown-veil-dur) * 1ms * var(--crown-kp)) linear calc(var(--crown-veil-at) * 1ms * var(--crown-kp)) both;
   }
 }
 
@@ -13055,8 +13047,8 @@ body.page-home::before {
   -webkit-mask-size: 0 0;
   mask-size: 0 0;
   animation:
-    crown-veil-spread calc(var(--crown-vshape-dur) * 1ms * var(--crown-k)) steps(6, end) calc(var(--crown-spread-at) * 1ms * var(--crown-k)) forwards,
-    crown-veil-dusk calc(var(--crown-veil-dur) * 1ms * var(--crown-k)) linear calc(var(--crown-veil-at) * 1ms * var(--crown-k)) both;
+    crown-veil-spread calc(var(--crown-vshape-dur) * 1ms * var(--crown-kp)) steps(6, end) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) forwards,
+    crown-veil-dusk calc(var(--crown-veil-dur) * 1ms * var(--crown-kp)) linear calc(var(--crown-veil-at) * 1ms * var(--crown-kp)) both;
 }
 
 :root.crown-vt.crown-dawn::view-transition-new(crown-veil) {

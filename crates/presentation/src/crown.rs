@@ -124,6 +124,13 @@ pub fn crown_play(to_dark: bool) -> CrownPlay {
     if to_dark { DUSK } else { DAWN }
 }
 
+/// How many times slower than its timetable the play is performed. The timetable above, and every
+/// front's own smaller timings, are written at the pace the play was composed at; each front
+/// multiplies its clock by this, so a figure of 1000 is 1625 ms on the glass: dusk takes six and a
+/// half seconds, dawn six. Only what answers the reader's own hand keeps real time: the cross's
+/// first catch of the light, [`TAP_APART`] and [`RUSH`].
+pub const PACE: f32 = 1.625;
+
 /// The front in the head of the arch.
 pub const FRONT_EASE: Ease = [0.3, 0.0, 0.7, 1.0];
 /// The spread's shape: near enough even, since it starts from nothing under the frieze and ends

@@ -546,6 +546,7 @@ fn crown_plan_carries_presentations_figures() {
         );
         let rgb = |p: crate::CrownRgb| [p.r, p.g, p.b];
         assert_eq!(rgb(plan.dawn_veil_umber), c::DAWN_VEIL_UMBER);
+        assert_eq!(plan.pace, c::PACE);
         assert_eq!(
             [rgb(plan.sky_ochre), rgb(plan.sky_red_ochre), rgb(plan.sky_ember), rgb(plan.sky_lime), rgb(plan.sky_rose_lilac)],
             [c::SKY_OCHRE, c::SKY_RED_OCHRE, c::SKY_EMBER, c::SKY_LIME, c::SKY_ROSE_LILAC]

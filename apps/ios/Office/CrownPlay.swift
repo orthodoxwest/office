@@ -324,7 +324,7 @@ final class CrownPlayer: NSObject, ObservableObject {
             return
         }
         run.rushing = true
-        run.speed(max(1, (run.scene.end - run.clock()) / ms))
+        run.speed(max(1, (run.scene.end - run.clock()) * run.fig.pace / ms))
     }
 
     private func touched(_ point: CGPoint) {
@@ -474,7 +474,7 @@ final class CrownRun {
 
     func clock() -> Double {
         guard let since else { return base }
-        return base + rate * (CrownPlayer.now() - since)
+        return base + rate * (CrownPlayer.now() - since) / fig.pace
     }
 
     func hold() {

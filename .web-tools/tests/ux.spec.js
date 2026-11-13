@@ -1069,6 +1069,12 @@ async function crownPoint(page) {
   return [box.x + box.width / 2, box.y + box.height / 2];
 }
 
+// The play itself, not one of its fallbacks: a browser that took the plain
+// crossfade, or dropped the stills early, says why on the root.
+async function crownPlayed(page) {
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("data-crown-plain"), document.documentElement.getAttribute("data-crown-early")])).toEqual([null, null]);
+}
+
 async function crownAtRest(page) {
   await expect(page.locator(".home-hero")).not.toHaveClass(/crown-/, { timeout: 15_000 });
   await expect(page.locator("html")).not.toHaveClass(/crown-|theme-anim|vault-hidden/, { timeout: 15_000 });
@@ -1091,6 +1097,7 @@ test("a tap on home's crown turns the look over, and the tap back restores the r
   await tap.click();
   await expect(page.locator(".home-hero")).toHaveClass(/crown-on/);
   await crownAtRest(page);
+  await crownPlayed(page);
   expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
   await tap.click();
   await crownAtRest(page);
@@ -1143,6 +1150,7 @@ test("a second tap while the crown plays is kept and plays the way back", async 
   await page.mouse.click(x, y);
   await expect(page.locator("html")).toHaveClass(/crown-new/);
   await page.waitForTimeout(900);
+  await crownPlayed(page);
   await page.mouse.click(x, y);
   // The play carries on: the look has turned and is not cut short.
   expect((await crownState(page)).stored).toBe("dark");

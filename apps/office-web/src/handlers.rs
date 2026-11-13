@@ -740,6 +740,7 @@ mod tests {
         lines.push(format!("var VEIL_LEAD = {};", crown::VEIL_LEAD));
         lines.push(format!("var VEIL_PART = {};", crown::VEIL_PART));
         lines.push(format!("var TAP_APART = {};", crown::TAP_APART));
+        lines.push(format!("var PACE = {};", crown::PACE));
         lines.push(format!("var RUSH = {};", crown::RUSH));
         for line in &lines {
             assert!(js.contains(line), "app.js lacks {line:?}");
@@ -761,6 +762,7 @@ mod tests {
         rules.push(format!("--crown-veil-c: rgb({});", rgb(crown::DAWN_VEIL_UMBER)));
         rules.push(format!("var(--crown-veil-low, {})", crown::DAWN_VEIL_LOW));
         rules.push(format!("--crown-ink-handover: {}ms;", crown::INK_HANDOVER));
+        rules.push(format!("--crown-pace: {};", crown::PACE));
         for rule in &rules {
             assert!(css.contains(rule), "style.css lacks {rule:?}");
         }
