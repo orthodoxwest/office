@@ -4846,7 +4846,10 @@ test("changing the text size keeps the line the reader is at", async ({ page }) 
   await openDatedPage(page, "/vespers/2026-11-13");
   await page.evaluate(() => scrollTo(0, 3000));
   const at = () => page.evaluate(() => {
-    const p = [...document.querySelectorAll(".elements p")].find((e) => { const r = e.getBoundingClientRect(); return r.height && r.bottom > 0; });
+    // The first block on the screen, from the same blocks officeHoldPlace holds: a heading above
+    // the first paragraph is the one held, and the paragraph under it may move with the heading.
+    const blocks = ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score";
+    const p = [...document.querySelectorAll(blocks)].find((e) => { const r = e.getBoundingClientRect(); return r.height && r.bottom > 0; });
     p.dataset.held = "1";
     const r = p.getBoundingClientRect();
     return { top: r.top, height: r.height };
