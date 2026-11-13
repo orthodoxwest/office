@@ -193,6 +193,11 @@ pub const MARTYROLOGY_HINT: &str = "Includes a reading of the following day’s 
 pub const PREVIOUS_DAY: &str = "Previous day";
 pub const NEXT_DAY: &str = "Next day";
 
+/// What the ordo's fasting and abstinence marks (§ and the fish) say when tapped, on every front:
+/// the note a rank's letters open with the rank's name.
+pub const FAST_DAY: &str = "Day of Fasting";
+pub const ABSTINENCE_DAY: &str = "Day of Abstinence";
+
 /// The line under the menu's Chant setting, on every front.
 pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 

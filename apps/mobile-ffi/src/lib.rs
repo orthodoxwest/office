@@ -327,6 +327,19 @@ pub fn day_nav_words() -> DayNavWords {
     DayNavWords { previous: presentation::PREVIOUS_DAY.into(), next: presentation::NEXT_DAY.into() }
 }
 
+/// What the ordo's § and fish say in the note a tap opens, as the web's titles word them
+/// (`presentation::FAST_DAY`, `ABSTINENCE_DAY`); a rank's letters say the day's `rank_full`.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct OrdoMarkWords {
+    pub fasting: String,
+    pub abstinence: String,
+}
+
+#[uniffi::export]
+pub fn ordo_mark_words() -> OrdoMarkWords {
+    OrdoMarkWords { fasting: presentation::FAST_DAY.into(), abstinence: presentation::ABSTINENCE_DAY.into() }
+}
+
 /// A reader's way through an hour's words, for home's mark of the hours prayed
 /// (`presentation::Reading`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, uniffi::Record)]

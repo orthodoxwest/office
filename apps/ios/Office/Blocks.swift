@@ -432,7 +432,7 @@ struct BlockRow: View {
                         attachmentAnchor: .rect(.rect(glossRect)),
                         arrowEdge: .bottom
                     ) {
-                        if shownGloss < glosses.count { GlossCard(gloss: glosses[shownGloss]) }
+                        if shownGloss < glosses.count { NoteCard(title: glosses[shownGloss].title, note: glosses[shownGloss].note) }
                     }
                     .padding(.leading, -spec.hang)
             } else {
@@ -444,30 +444,34 @@ struct BlockRow: View {
 }
 
 /**
- * A rubric term's note, as the web's `.gloss-note`: a card of the surface, its heading in the
- * rubric's red small caps over the note in the text's ink, 19rem wide.
+ * The app's one answer to "what does this mean?", as the web's `.gloss-note`, shown in the system's
+ * popover: a card of the surface, a rubric term's heading in the rubric's red small caps over its
+ * note in the text's ink, 19rem wide; an ordo mark's name alone (no heading), as wide as its words.
  */
-private struct GlossCard: View {
-    let gloss: GlossView
+struct NoteCard: View {
+    let title: String
+    let note: String
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
     var body: some View {
         VStack(alignment: .leading, spacing: m.px(3.2)) {
-            Text(gloss.title)
-                .font(Font(garamond(14.44 * m.type, smallCaps: true)))
-                .kerning(0.72 * m.type)
-                .foregroundStyle(p.rubric)
-            Text(gloss.note)
+            if !title.isEmpty {
+                Text(title)
+                    .font(Font(garamond(14.44 * m.type, smallCaps: true)))
+                    .kerning(0.72 * m.type)
+                    .foregroundStyle(p.rubric)
+            }
+            Text(note)
                 .font(Font(garamond(15.2 * m.type)))
                 .lineSpacing(3 * m.type)
                 .foregroundStyle(p.text)
-                .fixedSize(horizontal: false, vertical: true)
+                .fixedSize(horizontal: title.isEmpty, vertical: true)
         }
         .padding(.horizontal, m.px(14.4))
         .padding(.top, m.px(11.2))
         .padding(.bottom, m.px(12.8))
-        .frame(width: m.px(304), alignment: .leading)
+        .frame(width: title.isEmpty ? nil : m.px(304), alignment: .leading)
         .presentationCompactAdaptation(.popover)
         .presentationBackground(p.surface)
         .accessibilityElement(children: .combine)

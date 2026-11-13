@@ -87,6 +87,9 @@ impl Pages {
         env.add_global("chant_hint", presentation::CHANT_HINT);
         env.add_global("previous_day", presentation::PREVIOUS_DAY);
         env.add_global("next_day", presentation::NEXT_DAY);
+        // The ordo's § and fish, named in the note they open, as the apps name them.
+        env.add_global("fast_day", presentation::FAST_DAY);
+        env.add_global("abstinence_day", presentation::ABSTINENCE_DAY);
         // How long an hour keeps the reader's place (hour.html's head).
         env.add_global("place_kept_minutes", presentation::PLACE_KEPT_MINUTES);
         // The About page's names in the menu and on home, as the apps set them.

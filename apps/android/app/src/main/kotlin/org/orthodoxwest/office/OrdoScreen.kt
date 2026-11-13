@@ -618,10 +618,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
                     // The date's stop already says the feast; the feast is a second target for the eye only.
                     FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
                     // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
-                    Row(Modifier.padding(start = 8.dp, top = 2.dp).clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (d.fast) Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted))
-                        if (d.abstinence) FishIcon(p.muted)
-                        if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
+                    // Each names itself in a note when tapped ([OrdoMarks]).
+                    Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        OrdoMarks(d, fast = { Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted)) }, rank = { Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted)) })
                     }
                 }
                 Monastic(d)
@@ -769,19 +768,40 @@ private fun DayTableRow(
                 }
                 unfolded()
             }
-            // Fasting and abstinence stay quiet, so red in a row means rank.
-            Box(Modifier.width(FlagCol).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.fast) Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.muted, fontWeight = FontWeight.Bold))
+            // Fasting and abstinence stay quiet, so red in a row means rank. Each mark names itself
+            // in a note when tapped ([OrdoMarks]).
+            Box(Modifier.width(FlagCol), contentAlignment = Alignment.TopCenter) {
+                OrdoMarks(d, fast = { Text("§", style = Type.body.copy(fontSize = 16.sp, color = p.muted, fontWeight = FontWeight.Bold)) }, abstinence = false, rank = null)
             }
-            Box(Modifier.width(FlagCol).padding(top = 6.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopCenter) {
-                if (d.abstinence) FishIcon(p.muted)
+            Box(Modifier.width(FlagCol).padding(top = 6.dp), contentAlignment = Alignment.TopCenter) {
+                OrdoMarks(d, fast = null, rank = null)
             }
             // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
-            Box(Modifier.width(RankCol).padding(end = 7.2.dp, top = 3.dp).clearAndSetSemantics {}, contentAlignment = Alignment.TopEnd) {
-                if (d.rank.isNotEmpty()) Text(d.rank, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = rankInk(d.rank, p)))
+            Box(Modifier.width(RankCol).padding(end = 7.2.dp, top = 3.dp), contentAlignment = Alignment.TopEnd) {
+                OrdoMarks(d, fast = null, abstinence = false, rank = { Text(d.rank, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = rankInk(d.rank, p))) })
             }
         }
         Hairline(p.border)
+    }
+}
+
+/** What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`). */
+private val MARK_WORDS by lazy { org.orthodoxwest.office.core.ordoMarkWords() }
+
+/**
+ * A day's marks, each naming itself in the note a glossed word opens when tapped (the web's
+ * `.month-table abbr`): the fast's § as `fast` draws it, the fish (unless `abstinence` is false),
+ * and the rank's letters as `rank` draws them, its name the day's `rankFull`. A null draws none.
+ * The date's stop already says them all to a screen reader; each is a stop of its own as well,
+ * which opens its note.
+ */
+@Composable
+private fun OrdoMarks(d: OrdoDayView, fast: (@Composable () -> Unit)?, abstinence: Boolean = true, rank: (@Composable () -> Unit)?) {
+    val p = LocalPalette.current
+    if (d.fast && fast != null) NoteMark(MARK_WORDS.fasting, "Fasting") { fast() }
+    if (d.abstinence && abstinence) NoteMark(MARK_WORDS.abstinence, "Abstinence") { FishIcon(p.muted) }
+    if (d.rank.isNotEmpty() && rank != null) {
+        if (d.rankFull.isNotEmpty()) NoteMark(d.rankFull, "Rank ${d.rank}") { rank() } else rank()
     }
 }
 

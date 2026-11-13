@@ -69,7 +69,8 @@ pub enum Tempo {
     /// second, so even the briefest tap is seen to land.
     Touch,
     /// A small panel (the menu, Settings) settling under the beam it hangs from; it leaves
-    /// faster than it came.
+    /// faster than it came. The note a glossed word or an ordo mark opens comes and goes on it
+    /// too, by fading alone.
     Settle,
     /// A disclosure unfolding (its way in) and folding (its way out), and home's turn to the
     /// calendar.

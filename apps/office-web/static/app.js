@@ -62,20 +62,28 @@ document.documentElement.classList.add("js");
   });
 })();
 
-// A rubric term a newcomer stumbles on ("secretly") opens a short note. The
-// server marks the term and carries the note in its attributes
-// (presentation::gloss); here the term becomes a control, and one note,
-// shared by every term, opens above the word so it never covers the prayer
-// it explains. The term stays an inline span with a button's role: a real
-// <button> lays out as inline-block, which let the rubric's closing stop
-// wrap alone onto the next line. A tap elsewhere or Escape closes it.
+// "What does this mean?" has one answer across the app: a small plaster card,
+// the note. A rubric term a newcomer stumbles on ("secretly") opens it with a
+// heading and a short note (the server marks the term and carries the note in
+// its attributes, presentation::gloss); a mark in the ordo (a rank's letters,
+// the fast's §, the fish) opens it with the mark's name, which its title
+// carries for a page without the script. One note, shared by every term and
+// mark, opens above the word so it never covers what it explains, below only
+// where the window's top (or the ordo's sticky month) leaves no room. Each
+// term or mark stays inline with a button's role: a real <button> lays out as
+// inline-block, which let the rubric's closing stop wrap alone onto the next
+// line. A second tap, a tap elsewhere or Escape closes it; under a mouse, an
+// ordo mark also names itself while the pointer rests on it, as its title
+// did. The note fades in and out on Tempo's settle (style.css), a cut under
+// reduced motion; it never rises or slides.
 (function () {
-  var terms = document.querySelectorAll(".gloss-term[data-gloss]");
-  if (!terms.length) return;
+  var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss]"));
+  var marks = Array.prototype.slice.call(document.querySelectorAll(".month-table abbr[title]"));
+  if (!terms.length && !marks.length) return;
   // Kept in the page and emptied rather than hidden, so a screen reader
   // hears each note as it is written into the live region.
   var note = document.createElement("div");
-  note.className = "gloss-note closed";
+  note.className = "gloss-note closed faded";
   note.id = "gloss-note";
   note.setAttribute("role", "status");
   var title = document.createElement("span");
@@ -84,6 +92,18 @@ document.documentElement.classList.add("js");
   note.append(title, body);
   document.body.append(note);
   var open = null;
+  // How it was opened: "hover" closes when the pointer leaves; a tap or a
+  // key keeps it until it is put away.
+  var by = null;
+  var leaving = 0;
+
+  // The ordo's month heading sticks to the top of the window: the note keeps
+  // below it, as it keeps below the window's top.
+  function ceiling(el) {
+    var month = el.closest(".month");
+    var head = month && month.querySelector("h2");
+    return head ? Math.max(0, head.getBoundingClientRect().bottom) : 0;
+  }
 
   function place() {
     if (!open) return;
@@ -94,7 +114,7 @@ document.documentElement.classList.add("js");
     var margin = 12;
     var w = note.offsetWidth;
     var h = note.offsetHeight;
-    var below = rects[0].top - h - 10 < margin;
+    var below = rects[0].top - h - 10 < ceiling(open) + margin;
     var r = below ? rects[rects.length - 1] : rects[0];
     var mid = r.left + r.width / 2;
     var left = Math.max(margin, Math.min(mid - w / 2, document.documentElement.clientWidth - margin - w));
@@ -104,20 +124,35 @@ document.documentElement.classList.add("js");
     note.style.setProperty("--gloss-arrow", Math.max(14, Math.min(mid - left, w - 14)) + "px");
   }
 
+  // The settle's way out, as style.css times it (nothing under reduced motion).
+  function fadeMs() {
+    var s = getComputedStyle(note);
+    return (parseFloat(s.transitionDuration) + parseFloat(s.transitionDelay)) * 1000 || 0;
+  }
+
   function close(refocus) {
     if (!open) return;
     var was = open;
     open.setAttribute("aria-expanded", "false");
     open = null;
-    note.classList.add("closed");
-    title.textContent = "";
-    body.textContent = "";
+    by = null;
+    note.classList.add("faded");
+    clearTimeout(leaving);
+    // Emptied and put out of sight once it has faded, so it fades with its words.
+    leaving = setTimeout(function () {
+      if (open) return;
+      note.classList.add("closed");
+      title.textContent = "";
+      body.textContent = "";
+    }, fadeMs());
     if (refocus) was.focus();
   }
 
-  function show(term) {
+  function show(term, how) {
+    clearTimeout(leaving);
     if (open) open.setAttribute("aria-expanded", "false");
     open = term;
+    by = how;
     title.textContent = "";
     body.textContent = "";
     term.setAttribute("aria-expanded", "true");
@@ -125,19 +160,26 @@ document.documentElement.classList.add("js");
     // still a change the live region announces.
     requestAnimationFrame(function () {
       if (open !== term) return;
-      title.textContent = term.dataset.glossTitle || "";
+      var heading = term.dataset.glossTitle || "";
+      title.textContent = heading;
       body.textContent = term.dataset.gloss;
+      // A mark's name is a word or two: the card is as wide as its words.
+      note.classList.toggle("brief", !heading);
       note.classList.remove("closed");
       place();
+      // Laid out (place read its size) before the fade, so it fades in.
+      note.classList.remove("faded");
     });
   }
 
   function toggle(term) {
-    if (open === term) close(false);
-    else show(term);
+    // A mark the pointer rests on is already named: a click keeps it.
+    if (open === term && by === "hover") by = "tap";
+    else if (open === term) close(false);
+    else show(term, "tap");
   }
 
-  terms.forEach(function (term) {
+  function control(term) {
     term.setAttribute("role", "button");
     term.setAttribute("tabindex", "0");
     term.setAttribute("aria-expanded", "false");
@@ -148,6 +190,21 @@ document.documentElement.classList.add("js");
         e.preventDefault();
         toggle(term);
       }
+    });
+  }
+
+  terms.forEach(control);
+  marks.forEach(function (mark) {
+    // The title becomes the note: kept, the browser's own tooltip would
+    // answer too.
+    mark.dataset.gloss = mark.getAttribute("title");
+    mark.removeAttribute("title");
+    control(mark);
+    mark.addEventListener("pointerenter", function (e) {
+      if (e.pointerType === "mouse" && open !== mark) show(mark, "hover");
+    });
+    mark.addEventListener("pointerleave", function (e) {
+      if (e.pointerType === "mouse" && open === mark && by === "hover") close(false);
     });
   });
 

@@ -494,6 +494,26 @@ private struct DayRow: View {
         .frame(maxWidth: fill ? .infinity : nil, alignment: .leading)
     }
 
+    /// The fast's §, as `glyph` draws it, naming itself in its note.
+    private func fastMark<Glyph: View>(@ViewBuilder _ glyph: @escaping () -> Glyph) -> some View {
+        NoteMark(name: markWords.fasting, label: "Fasting", mark: glyph)
+    }
+
+    /// The fish, naming itself in its note.
+    private var abstinenceMark: some View {
+        NoteMark(name: markWords.abstinence, label: "Abstinence") { FishIcon(color: p.muted) }
+    }
+
+    /// The rank's letters, as `letters` draws them, naming the rank in its note; bare where the day
+    /// has no rank's name (as the web's plain span).
+    @ViewBuilder private func rankMark<Letters: View>(@ViewBuilder _ letters: @escaping () -> Letters) -> some View {
+        if d.rankFull.isEmpty {
+            letters().accessibilityHidden(true)
+        } else {
+            NoteMark(name: d.rankFull, label: "Rank \(d.rank)", mark: letters)
+        }
+    }
+
     /// The ordo's bracketed line for an observance kept by monastics and oblates only (the web's
     /// `.day-monastic`): quiet like a commemoration, never read as the day.
     @ViewBuilder private var monastic: some View {
@@ -584,17 +604,17 @@ private struct DayRow: View {
                         }
                         .buttonStyle(Holding(held: $held))
                         .accessibilityHidden(true)
-                        // The card's marks stay quiet, as the web's: red in a row means rank.
+                        // The card's marks stay quiet, as the web's: red in a row means rank. Each
+                        // names itself in a note when tapped (`NoteMark`).
                         HStack(spacing: m.px(6)) {
-                            if d.fast { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) }
-                            if d.abstinence { FishIcon(color: p.muted) }
+                            if d.fast { fastMark { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) } }
+                            if d.abstinence { abstinenceMark }
                             if !d.rank.isEmpty {
-                                Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted)
+                                rankMark { Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted) }
                             }
                         }
                         .padding(.leading, m.px(8))
                         .padding(.top, m.px(2))
-                        .accessibilityHidden(true)
                     }
                     monastic
                     disclosures
@@ -655,24 +675,22 @@ private struct DayRow: View {
                     disclosed
                 }
                 .padding(.horizontal, 7.2)
-                // Fasting and abstinence stay quiet, so red in a row means rank.
+                // Fasting and abstinence stay quiet, so red in a row means rank. Each mark names
+                // itself in a note when tapped (`NoteMark`).
                 Group {
-                    if d.fast { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.muted) }
+                    if d.fast { fastMark { Text("§").type(Scale.body.sized(16)).foregroundStyle(p.muted) } }
                 }
                 .frame(width: flagColumn)
-                .accessibilityHidden(true)
                 Group {
-                    if d.abstinence { FishIcon(color: p.muted).padding(.top, 6) }
+                    if d.abstinence { abstinenceMark.padding(.top, 6) }
                 }
                 .frame(width: flagColumn)
-                .accessibilityHidden(true)
                 // A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
                 Group {
-                    if !d.rank.isEmpty { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(rankInk ?? p.text) }
+                    if !d.rank.isEmpty { rankMark { Text(d.rank).type(Scale.small.sized(12.48, line: 17.5)).foregroundStyle(rankInk ?? p.text) } }
                 }
                 .padding(.trailing, 7.2).padding(.top, 3)
                 .frame(width: rankColumn, alignment: .trailing)
-                .accessibilityHidden(true)
             }
             .fixedSize(horizontal: false, vertical: true)
             // From 1000pt Today is a note in the margin beside today's band (the web's), taking no
@@ -1007,5 +1025,37 @@ private struct TabulaTable: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+/// What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`).
+private let markWords = ordoMarkWords()
+
+/**
+ * A mark whose meaning is not on its face (the ordo's rank letters, its § and fish), as the web's
+ * `.month-table abbr`: a tap opens its `name` in the note a glossed word opens (`NoteCard`, in the
+ * system's popover, pointing down at the mark so it never covers it). A tap elsewhere puts it
+ * away. The touch reaches round so small a mark; `label` is what VoiceOver calls it, and the note
+ * is read as it opens.
+ */
+struct NoteMark<Mark: View>: View {
+    let name: String
+    let label: String
+    let mark: () -> Mark
+    @State private var open = false
+
+    init(name: String, label: String, @ViewBuilder mark: @escaping () -> Mark) {
+        self.name = name
+        self.label = label
+        self.mark = mark
+    }
+
+    var body: some View {
+        Button { open.toggle() } label: { mark() }
+            .buttonStyle(Quiet())
+            .contentShape(Rectangle().inset(by: -10))
+            .accessibilityLabel(label)
+            .accessibilityValue(open ? "Expanded" : "Collapsed")
+            .popover(isPresented: $open, arrowEdge: .bottom) { NoteCard(title: "", note: name) }
     }
 }
