@@ -66,6 +66,20 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(aboutLink("/privacy", defaults: defaults), .web(URL(string: "https://example.org/privacy")!))
     }
 
+    /// About lights the hour home lights, none from midnight to 2 am, and ends with home's invitation.
+    func testAboutLightsAndInvitesToTheHourHomeDoes() throws {
+        let today = CivilDate(year: 2026, month: 11, day: 13)
+        let afternoon = try aboutNow(today: today, clockHour: 15)
+        XCTAssertEqual(afternoon.current, "none")
+        XCTAssertEqual(afternoon.prayNowLabel, "Pray None")
+        XCTAssertEqual(afternoon.prayNowDate, today)
+        let late = try aboutNow(today: today, clockHour: 1)
+        XCTAssertEqual(late.current, "")
+        XCTAssertEqual(late.prayNowHour, "compline")
+        XCTAssertEqual(late.prayNowDate, CivilDate(year: 2026, month: 11, day: 12))
+        XCTAssertEqual(about().blocks.last?.kind, "invitation")
+    }
+
     /// A rubric's "secretly" carries its note, as the web's `.gloss-term`, and the typesetter finds
     /// its box to draw the hairline and anchor the note.
     func testARubricsSecretlyCarriesItsNote() throws {

@@ -444,14 +444,25 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
         // The date and the season share one muted line; the day's name stands under them in the
         // text's ink, a size up, as home titles the day (the web's `.hour-meta-line` and
         // `.hour-meta-feast`). The dot is tied to the date by a no-break space.
-        val line = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }.joinToString("\u00A0· ")
-        val said = listOf(line, view.feast).filter { it.isNotEmpty() }.joinToString(". ")
-        Column(Modifier.padding(top = 2.dp).semantics(mergeDescendants = true) { contentDescription = said }, horizontalAlignment = Alignment.CenterHorizontally) {
+        // The date opens the date picker (the web's `button.hour-meta-date`), so the header carries
+        // no "Change date" label: it stays set as the line's text, dims under the finger and takes
+        // the accent while the picker is open, and a screen reader hears a button that changes
+        // the date. The season and the day's name are read after it, as the web reads them.
+        Column(Modifier.padding(top = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             // Each part whole; at the reader's largest sizes the season goes under the date.
             val parts = listOf(view.dateLabel, view.seasonLabel).filter { it.isNotEmpty() }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(3.6.dp, Alignment.CenterHorizontally)) {
                 parts.forEachIndexed { j, part ->
-                    Text(if (j < parts.lastIndex) "$part\u00A0·" else part, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                    val text = if (j < parts.lastIndex) "$part\u00A0·" else part
+                    if (part == view.dateLabel && j == 0) {
+                        Text(
+                            text,
+                            Modifier.tap(label = part, action = "change date") { picking = !picking; choosing = false }.disclosed(picking),
+                            style = Type.meta.copy(color = if (picking) p.accent else p.muted, textAlign = TextAlign.Center),
+                        )
+                    } else {
+                        Text(text, Modifier.semantics { contentDescription = part }, style = Type.meta.copy(color = p.muted, textAlign = TextAlign.Center))
+                    }
                 }
             }
             if (view.feast.isNotEmpty()) {
@@ -465,14 +476,9 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 style = Type.label(16f, 0.08f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS),
             )
         }
-        // Side by side, or one above the other when the reader's font size leaves no room.
-        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterHorizontally)) {
-            // In home's foot letter, each kept to one line: on a first-class day the frame narrows the
-            // measure and "Prayer form: Private" lost its caret to a line of its own. Where the two
-            // do not fit side by side, they stand one above the other, never broken inside one.
-            Disclosure("Change date", picking, { picking = !picking; choosing = false }, style = Type.smallCapsControl, upper = false)
-            Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second, style = Type.smallCapsControl, upper = false)
-        }
+        // In home's foot letter, kept to one line: on a first-class day the frame narrows the
+        // measure and "Prayer form: Private" lost its caret to a line of its own.
+        Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second, modifier = Modifier.padding(top = 4.dp), style = Type.smallCapsControl, upper = false)
         // Previous · Today · Next keep to the edges up to 540dp, and gather in the middle above it.
         Unfold(picking) { DatePicker(date, today, centred = LocalConfiguration.current.screenWidthDp > 540) { picking = false; onDate(it) } }
         Unfold(choosing) {

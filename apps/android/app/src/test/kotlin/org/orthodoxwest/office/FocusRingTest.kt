@@ -1,6 +1,9 @@
 package org.orthodoxwest.office
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
@@ -9,16 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -28,7 +25,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** A control reached by keyboard or D-pad wears the web's focus ring, in gold; a touch draws none. */
+/**
+ * A control that takes focus wears the web's focus ring, in gold. The focus is sent to the Dim
+ * indication directly: Robolectric does not move input focus on a Tab, and the ring is drawn by
+ * the indication whichever way the focus arrives.
+ */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w390dp-h844dp-xxhdpi")
@@ -38,10 +39,11 @@ class FocusRingTest {
 
     @Test
     fun aControlReachedByKeyboardWearsTheGoldRing() {
+        val source = MutableInteractionSource()
         compose.setContent {
             CompositionLocalProvider(LocalPalette provides Nave) {
                 Box(Modifier.size(120.dp).background(Nave.bg).testTag("wall"), contentAlignment = Alignment.Center) {
-                    Box(Modifier.size(40.dp).testTag("control").tap {})
+                    Box(Modifier.size(40.dp).indication(source, Dim))
                 }
             }
         }
@@ -51,12 +53,16 @@ class FocusRingTest {
         val y = with(compose.density) { 60.dp.roundToPx() }
         fun at() = compose.onNodeWithTag("wall").captureToImage().toPixelMap()[x, y]
 
-        compose.onNodeWithTag("control").assertIsNotFocused()
         assertEquals(Nave.bg, at())
 
-        compose.onRoot().performKeyInput { pressKey(Key.Tab) }
-        compose.onNodeWithTag("control").assertIsFocused()
+        val focus = FocusInteraction.Focus()
+        compose.runOnIdle { check(source.tryEmit(focus)) }
+        compose.waitForIdle()
         assertEquals(Nave.gold, at())
+
+        compose.runOnIdle { check(source.tryEmit(FocusInteraction.Unfocus(focus))) }
+        compose.waitForIdle()
+        assertEquals(Nave.bg, at())
     }
 
     private fun assertEquals(expected: Color, actual: Color) =

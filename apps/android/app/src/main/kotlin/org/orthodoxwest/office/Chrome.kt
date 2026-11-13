@@ -1,6 +1,5 @@
 package org.orthodoxwest.office
 
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
@@ -155,33 +154,24 @@ fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
  * swiped), as the iOS app gives; never for a page opened. The phone's own touch-feedback setting
  * governs it.
  */
-fun HapticFeedback.chose() = performHapticFeedback(if (Build.VERSION.SDK_INT >= 34) HapticFeedbackType.SegmentTick else OLDER_TICK)
-
-/** The tick of a checkbox turned on or off. */
-fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(
-    when {
-        Build.VERSION.SDK_INT < 34 -> OLDER_TICK
-        on -> HapticFeedbackType.ToggleOn
-        else -> HapticFeedbackType.ToggleOff
-    },
-)
+fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTick)
 
 /**
- * The tick before Android 14, whose segment and toggle constants (API 34) an older phone does not
- * know and so would not play: the context click (API 23), which Android 8 to 13 play as the
- * clock's tick, the lightest the phone has. On and off feel alike there.
+ * The tick of a checkbox turned on or off. Before Android 14, whose segment and toggle constants
+ * (API 34) an older phone does not know, Compose plays them through `ViewCompat`, which falls back
+ * to the context click (a tick, and on) and the clock's tick (off), so no guard is needed here.
  */
-private val OLDER_TICK = HapticFeedbackType.ContextClick
+fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
 
 /** How far a pressed control dims, as the iOS app's (Quiet). */
 private const val PRESSED_ALPHA = 0.55f
 
 /**
  * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
- * let go, so even the briefest tap is seen to land. A control reached by keyboard, D-pad or
- * Switch Access (never by touch, where a tap does not take focus) wears the focus ring.
+ * let go, so even the briefest tap is seen to land. A control that takes input focus from a
+ * keyboard or D-pad (never by touch, where a tap does not take focus) wears the focus ring.
  */
-private object Dim : IndicationNodeFactory {
+internal object Dim : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
     override fun equals(other: Any?) = other === this
     override fun hashCode() = 0
