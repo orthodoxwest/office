@@ -171,6 +171,22 @@ fn home_invites_to_the_current_office_only_today() {
 }
 
 #[test]
+fn about_lights_and_invites_to_the_hour_home_does() {
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    for hour in 0..24 {
+        let home = core.home(today, today, hour).unwrap();
+        let about = crate::about_now(today, hour).unwrap();
+        assert_eq!(
+            (about.current.as_str(), about.pray_now_label.as_str(), about.pray_now_hour.as_str(), about.pray_now_date),
+            (home.current_hour.as_str(), home.pray_now_label.as_str(), home.pray_now_hour.as_str(), home.pray_now_date),
+            "{hour}"
+        );
+    }
+    assert_eq!(crate::about().blocks.last().map(|b| b.kind.as_str()), Some("invitation"));
+}
+
+#[test]
 fn home_sets_the_days_versicle_on_a_plain_day() {
     let core = OfficeCore::new().unwrap();
     let placidus = core.home(civil(2026, 10, 5), civil(2026, 10, 5), 15).unwrap();

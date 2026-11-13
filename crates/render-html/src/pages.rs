@@ -215,6 +215,25 @@ mod tests {
     }
 
     #[test]
+    fn about_lights_the_hour_home_lights_and_ends_with_its_invitation() {
+        use crate::view::{AboutData, Chrome};
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let today = calendar::Date::new(2026, 11, 13);
+        let chrome = || Chrome { page: "about".into(), ..Chrome::default() };
+        let afternoon = pages.about(&AboutData::new(chrome(), today, 15)).unwrap();
+        assert_eq!(afternoon.matches("about-hour is-current").count(), 1);
+        assert!(afternoon.contains(r#"<div class="about-hour is-current" data-hour="none">"#));
+        assert!(afternoon.contains(r#"<a class="pray-now" href="&#x2f;none&#x2f;2026-11-13">Pray None</a>"#));
+        // The door is the page's last word, after the last paragraph.
+        let door = afternoon.find("about-door").unwrap();
+        assert!(afternoon.find("issues/new\">issue tracker</a>").unwrap() < door);
+        // From midnight to 2am home lights no hour, and invites to yesterday's Compline.
+        let late = pages.about(&AboutData::new(chrome(), today, 1)).unwrap();
+        assert!(!late.contains("is-current"));
+        assert!(late.contains(r#"<a class="pray-now" href="&#x2f;compline&#x2f;2026-11-12">Pray Compline</a>"#));
+    }
+
+    #[test]
     fn layout_brand_is_today_home() {
         let body = source("layout.html");
         // The brand must not carry the page's date, which pins an overnight

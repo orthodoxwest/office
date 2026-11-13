@@ -82,6 +82,14 @@ fun homeInk(p: Palette): HomeInk = if (p.dark) {
 }
 
 /**
+ * The pool of light on the hour that is now: no edge, its stops the web's
+ * (`radial-gradient(var(--now-pool), 55% at 52%, transparent)`), about `center` out to `radius`.
+ * Home's directory and About's table both lay it.
+ */
+fun poolBrush(pool: Color, center: Offset, radius: Float): Brush =
+    Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = radius)
+
+/**
  * The current hour's name on its pool: the tituli's ink, lifted by night in the quiet seasons and
  * Passiontide (`--titulus-now`).
  */

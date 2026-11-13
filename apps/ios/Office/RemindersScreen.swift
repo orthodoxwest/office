@@ -41,7 +41,7 @@ struct RemindersScreen: View {
                     Text("Choose the hours you pray and their times. Each reminder names the office and the feast of the day. Your schedule stays on this phone, and reminders come without a connection.")
                         .type(text).foregroundStyle(p.muted).padding(.top, m.px(10))
                     TimesGroup(settings: settings, locationDenied: location.denied) { follow in
-                        toggled()
+                        toggled(follow)
                         var s = settings
                         s.followSun = follow
                         // Back to the reader's own times, the place is forgotten.
@@ -99,7 +99,7 @@ struct RemindersScreen: View {
                                 let on = settings.days.contains(d)
                                 let sunday = d == 1
                                 Button {
-                                    toggled()
+                                    toggled(!on)
                                     var s = settings
                                     if on { s.days.remove(d) } else { s.days.insert(d) }
                                     change(s)
@@ -270,7 +270,7 @@ struct RemindersScreen: View {
             HStack(spacing: 0) {
                 // The box and the hour's name are one checkbox; its time is a control of its own.
                 Button {
-                    toggled()
+                    toggled(!h.chosen)
                     var changed = h
                     changed.chosen.toggle()
                     change(settings.with(changed))

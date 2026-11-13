@@ -6972,8 +6972,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   margin-bottom: 0.7rem;
 }
 
-.page-home .pray-now,
-.page-home .pray-now:hover {
+:is(.page-home, .about-door) .pray-now,
+:is(.page-home, .about-door) .pray-now:hover {
   position: relative;
   padding: 0.68rem 0.8rem 0.72rem;
   /* A painted line with a thinner one 3px inside it (below), as a panel's
@@ -6987,12 +6987,12 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   line-height: 1.3;
 }
 
-.page-home .pray-now {
+:is(.page-home, .about-door) .pray-now {
   /* Square, as its inner rule and the hours' table are. */
   border-radius: 0;
 }
 
-.page-home .pray-now::after {
+:is(.page-home, .about-door) .pray-now::after {
   content: "";
   position: absolute;
   inset: 3px;
@@ -7000,13 +7000,13 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   pointer-events: none;
 }
 
-.page-home .pray-now:active {
+:is(.page-home, .about-door) .pray-now:active {
   border-color: var(--accent);
   background: rgba(107, 58, 31, 0.1);
 }
 
 @media (hover: hover) {
-  .page-home .pray-now:hover {
+  :is(.page-home, .about-door) .pray-now:hover {
     border-color: var(--accent);
     background: rgba(107, 58, 31, 0.07);
   }
@@ -7328,14 +7328,14 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   :root:not([data-theme="light"]) .page-home :is(.home-hero, .home-summary).day-color-green { --day-color: #4f8a52; }
   :root:not([data-theme="light"]) .page-home :is(.home-hero, .home-summary).day-color-violet { --day-color: #8d62ad; }
 
-  :root:not([data-theme="light"]) .page-home .pray-now,
-  :root:not([data-theme="light"]) .page-home .pray-now:hover {
+  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now,
+  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:hover {
     border-color: var(--lining);
     background: transparent;
     color: var(--lining);
   }
 
-  :root:not([data-theme="light"]) .page-home .pray-now:active {
+  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:active {
     border-color: var(--accent);
     background: rgba(208, 176, 106, 0.14);
   }
@@ -7357,14 +7357,14 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 :root[data-theme="dark"] .page-home :is(.home-hero, .home-summary).day-color-green { --day-color: #4f8a52; }
 :root[data-theme="dark"] .page-home :is(.home-hero, .home-summary).day-color-violet { --day-color: #8d62ad; }
 
-:root[data-theme="dark"] .page-home .pray-now,
-:root[data-theme="dark"] .page-home .pray-now:hover {
+:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now,
+:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:hover {
   border-color: var(--lining);
   background: transparent;
   color: var(--lining);
 }
 
-:root[data-theme="dark"] .page-home .pray-now:active {
+:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:active {
   border-color: var(--accent);
   background: rgba(208, 176, 106, 0.14);
 }
@@ -7453,14 +7453,14 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 }
 
 @media (hover: hover) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .page-home .pray-now:hover {
+  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:hover {
     border-color: var(--accent);
     background: rgba(208, 176, 106, 0.1);
   }
 }
 
 @media (hover: hover) {
-  :root[data-theme="dark"] .page-home .pray-now:hover {
+  :root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:hover {
     border-color: var(--accent);
     background: rgba(208, 176, 106, 0.1);
   }
@@ -7751,6 +7751,77 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   display: block;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* One name column for the seven, as wide as the widest name (the apps
+   measure theirs the same way): the table, its periods, their lists and
+   each row share the table's three tracks, so the glosses line up and
+   Prime's keeps one line beside the names on a 390px phone. */
+@supports (grid-template-columns: subgrid) {
+  .about-hours {
+    display: grid;
+    grid-template-columns: 5.2rem max-content minmax(0, 1fr);
+  }
+
+  .about-hour-group {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  .about-hour-group dl {
+    display: grid;
+    grid-column: 2 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  .about-hour {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    gap: 0;
+  }
+
+  .about-hour dt {
+    margin-inline-end: 0.75rem;
+  }
+}
+
+/* The hour it is now, marked as home marks it: the light rests on it, a
+   pool with no edge (home's --now-pool and its stops) laid along the row,
+   brightest behind the name and gone before the row's rules, and its name
+   in the tituli's ink. Still: it arrives with the page, and moves only when
+   the hour does (app.js). */
+.about-hour.is-current {
+  isolation: isolate;
+}
+
+.about-hour.is-current::before {
+  content: "";
+  position: absolute;
+  inset: 1px 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 50% 46% at 29% 46%, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 52%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14%);
+  pointer-events: none;
+}
+
+.about-hour.is-current dt a {
+  color: var(--titulus-now, var(--titulus));
+}
+
+/* Home's invitation as the page's last word, before the tailpiece: the
+   same tablet (see "The invitation" below, which it shares with home), a
+   size down by width only, still. With no day of its own, its frontal is
+   home's for a day without a colour, the lining. */
+.about .about-door {
+  --frontal: var(--lining);
+  max-width: 17.5rem;
+  margin: 2.1rem auto 0.4rem;
+}
+
+.about-door .pray-now:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 
 .about-note {
@@ -9141,7 +9212,7 @@ body.rank-first-class .home-crown {
 }
 
 /* The hand-ruled lines (app.js), each host's own layer. */
-.page-home .home-rules {
+:is(.page-home, .about-door) .home-rules {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -9154,21 +9225,21 @@ body.rank-first-class .home-crown {
 .page-home .home-rules .r-fillet { fill: color-mix(in srgb, var(--inscription-ink) 30%, transparent); }
 .page-home .home-rules .r-frame { fill: color-mix(in srgb, var(--lining) 78%, transparent); }
 .page-home .home-rules .r-inner { fill: color-mix(in srgb, var(--lining) 36%, transparent); }
-.page-home .home-rules .r-lining { fill: var(--lining); }
-.page-home .home-rules .r-day { fill: color-mix(in srgb, var(--frontal) 50%, transparent); }
+:is(.page-home, .about-door) .home-rules .r-lining { fill: var(--lining); }
+:is(.page-home, .about-door) .home-rules .r-day { fill: color-mix(in srgb, var(--frontal) 50%, transparent); }
 
 /* The invitation: a thin wash (tablet.png, feathered so no edge of it lies
    on a rule) in a ruled frame, the frontal inside the lining. The quiet
    seasons keep the ochre (a greyed wash read as a disabled button); only
    the leaf goes quiet. It stays a full touch target on every day. */
-.page-home .pray-now,
-.page-home .pray-now:hover {
+:is(.page-home, .about-door) .pray-now,
+:is(.page-home, .about-door) .pray-now:hover {
   isolation: isolate;
   min-height: var(--touch-target);
   letter-spacing: 0.012em;
 }
 
-.page-home .pray-now::before {
+:is(.page-home, .about-door) .pray-now::before {
   content: "";
   position: absolute;
   inset: 1px;
@@ -9179,16 +9250,16 @@ body.rank-first-class .home-crown {
   pointer-events: none;
 }
 
-.page-home .pray-now::after {
+:is(.page-home, .about-door) .pray-now::after {
   border-color: color-mix(in srgb, var(--frontal) 50%, transparent);
 }
 
-:root .page-home .pray-now.is-ruled,
-:root .page-home .pray-now.is-ruled:hover {
+:root :is(.page-home, .about-door) .pray-now.is-ruled,
+:root :is(.page-home, .about-door) .pray-now.is-ruled:hover {
   border-color: transparent;
 }
 
-.page-home .pray-now.is-ruled::after {
+:is(.page-home, .about-door) .pray-now.is-ruled::after {
   content: none;
 }
 
@@ -9460,10 +9531,18 @@ body.rank-first-class .home-crown {
     display: none !important;
   }
 
-  .page-home .home-rules,
-  .page-home .pray-now::before,
-  .page-home .home-hour-link.is-current::after {
+  :is(.page-home, .about-door) .home-rules,
+  :is(.page-home, .about-door) .pray-now::before,
+  .page-home .home-hour-link.is-current::after,
+  .about-hour.is-current::before {
     display: none;
+  }
+
+  /* With the pool hidden, the hour that is now keeps a mark of its own. */
+  .about-hour.is-current dt a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
   }
 
   /* The niche's reveal, arris and gilt fillet are light and leaf, which
@@ -9516,12 +9595,12 @@ body.rank-first-class .home-crown {
       inset 0 -1px 0 var(--inscription-edge);
   }
 
-  :root .page-home .pray-now.is-ruled,
-  :root .page-home .pray-now.is-ruled:hover {
+  :root :is(.page-home, .about-door) .pray-now.is-ruled,
+  :root :is(.page-home, .about-door) .pray-now.is-ruled:hover {
     border-color: var(--panel-rule);
   }
 
-  .page-home .pray-now.is-ruled::after {
+  :is(.page-home, .about-door) .pray-now.is-ruled::after {
     content: "";
   }
 

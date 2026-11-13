@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -29,11 +30,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -48,12 +55,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.LocalDate
-import kotlin.math.max
-import kotlin.math.min
 import org.orthodoxwest.office.core.AboutPeriodView
 import org.orthodoxwest.office.core.AboutRunView
 import org.orthodoxwest.office.core.AboutView
+import org.orthodoxwest.office.core.aboutNow
+import java.time.LocalDate
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Each block's margins above and below, as style.css sets `.about`'s (the prose 0.8rem apart, the
@@ -67,6 +75,7 @@ private val MARGINS: Map<String, Pair<Dp, Dp>> = mapOf(
     "hours" to (0.dp to 0.dp),
     "note" to (8.8.dp to 12.8.dp),
     "key" to (0.dp to 8.8.dp),
+    "invitation" to (33.6.dp to 6.4.dp),
 )
 
 /**
@@ -74,12 +83,14 @@ private val MARGINS: Map<String, Pair<Dp, Dp>> = mapOf(
  * tituli in small capitals, the verse as red work, and the seven hours as home's table of
  * periods. The words are the core's (presentation::about), so every front says the same. A link
  * opens the app's own page where it has one (the ordo at today, the reminders), and the site in
- * the browser otherwise.
+ * the browser otherwise. The table lights the hour it is now as home's directory does, and the page
+ * ends with home's invitation to it; both follow `clockHour`, which home's minute check keeps.
  */
 @Composable
 fun AboutScreen(
     view: AboutView,
     today: LocalDate,
+    clockHour: Int,
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
     onOpen: (Page) -> Unit,
@@ -98,6 +109,8 @@ fun AboutScreen(
         }
     }
     val body = Type.body.copy(lineHeight = 31.sp, color = p.text)
+    // The hour it is now, as home has it (presentation::about): null only if the core refuses the date.
+    val now = remember(today, clockHour) { runCatching { aboutNow(today.toCivil(), clockHour) }.getOrNull() }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,7 +147,19 @@ fun AboutScreen(
                         style = body.copy(fontSize = 15.2.sp, lineHeight = 23.56.sp, letterSpacing = 1.22.sp, color = p.titulus, fontFeatureSettings = ALL_SMALL_CAPS),
                     )
                     "paragraph" -> LinkedText(b.runs, body, follow)
-                    "hours" -> HoursTable(view.periods) { onOpen(Page.Hour(today, it)) }
+                    "hours" -> HoursTable(view.periods, now?.current.orEmpty()) { onOpen(Page.Hour(today, it)) }
+                    // Home's invitation, still, a size down by width only (the web's `.about-door`):
+                    // with no day of its own, its frontal is home's for a day without a colour, the lining.
+                    "invitation" -> if (now != null) {
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                            Box(Modifier.widthIn(max = 280.dp)) {
+                                PrayNow(now.prayNowLabel, 19.2f, 11.9.dp, 12.5.dp, p.lining, homeInk(p).tabletWash, null) {
+                                    val d = now.prayNowDate
+                                    onOpen(Page.Hour(LocalDate.of(d.year, d.month, d.day), now.prayNowHour))
+                                }
+                            }
+                        }
+                    }
                     "note" -> Text(b.text, style = body.copy(fontSize = 16.8.sp, lineHeight = 26.04.sp, color = p.muted))
                     // The mark first, in the rubrics' red where the page prints it so.
                     "key" -> Text(
@@ -216,10 +241,11 @@ private fun hoursInk(p: Palette): HoursInk = if (p.dark) {
  * The seven hours in home's three periods: each period's ornament and label in the frontispiece's
  * wash, then its hours, each name opening that hour today, with what it is in italic and when it
  * is said beneath. Framed at the sides and ends in the lining thinned, ruled within in the
- * frontispiece's ink, as home's directory.
+ * frontispiece's ink, as home's directory. The hour it is now (`current`, empty from midnight to
+ * 2 am as on home) lies under home's pool of light laid along its row, its name in the tituli's ink.
  */
 @Composable
-private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit) {
+private fun HoursTable(periods: List<AboutPeriodView>, current: String, onHour: (String) -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     val ink = hoursInk(p)
@@ -227,16 +253,20 @@ private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit)
     val nameStyle = Type.body.copy(fontSize = 19.2.sp, lineHeight = 24.96.sp, color = p.text)
     val glossStyle = Type.body.copy(fontSize = 17.6.sp, lineHeight = 22.88.sp, color = p.text, fontStyle = FontStyle.Italic)
     val timeStyle = Type.body.copy(fontSize = 14.4.sp, lineHeight = 18.72.sp, color = p.muted)
-    // The label and name columns are the web's 5.2rem and 5.5rem, widened only when the reader's
-    // font size needs it, so the rows still line up.
+    // The label column is the web's 5.2rem, widened only when the reader's font size needs it; the
+    // names stand in one column as wide as the widest of the seven, measured, as on every front, so
+    // the rows line up and Prime's gloss keeps one line.
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val labelWidth = remember(periods, labelStyle, density) {
         with(density) { periods.maxOf { measurer.measure(it.label, labelStyle).size.width }.toDp() + 12.8.dp }.coerceAtLeast(83.2.dp)
     }
     val nameWidth = remember(periods, nameStyle, density) {
-        with(density) { periods.flatMap { it.hours }.maxOf { measurer.measure(it.name, nameStyle).size.width }.toDp() + 2.dp }.coerceAtLeast(88.dp)
+        with(density) { periods.flatMap { it.hours }.maxOf { measurer.measure(it.name, nameStyle).size.width }.toDp() + 1.dp }
     }
+    val pool = homeInk(p).nowPool
+    // About keeps no season of its own.
+    val nameNow = titulusNow(p, "")
     Column(
         Modifier.fillMaxWidth().drawBehind {
             val w = 1.dp.toPx()
@@ -260,8 +290,14 @@ private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit)
                     period.hours.forEachIndexed { j, h ->
                         if (j > 0) Hairline(ink.rule)
                         // The whole row opens the hour: a thumb's target, read as one.
-                        Row(Modifier.fillMaxWidth().tap(action = "open ${h.name}") { onHour(h.hour) }.padding(horizontal = 13.6.dp, vertical = 8.dp)) {
-                            Text(h.name, Modifier.width(nameWidth).alignByBaseline(), style = nameStyle)
+                        val isNow = h.hour == current
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .then(if (isNow) Modifier.poolAlongRow(pool).semantics { stateDescription = "now" } else Modifier)
+                                .tap(action = "open ${h.name}") { onHour(h.hour) }
+                                .padding(horizontal = 13.6.dp, vertical = 8.dp),
+                        ) {
+                            Text(h.name, Modifier.width(nameWidth).alignByBaseline(), softWrap = false, style = if (isNow) nameStyle.copy(color = nameNow) else nameStyle)
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f).alignByBaseline()) {
                                 Text(h.gloss, style = glossStyle)
@@ -274,4 +310,21 @@ private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit)
         }
         Hairline(ink.panelRule)
     }
+}
+
+/**
+ * Home's pool of light ([poolBrush]) laid along an About row, as the web's
+ * `.about-hour.is-current::before`: an ellipse half the row wide and nearly its height, brightest
+ * behind the name (29% across, a little under the middle), feathered in from the row's start so
+ * no edge of it lies on a rule.
+ */
+private fun Modifier.poolAlongRow(pool: Color): Modifier = drawBehind {
+    val rx = size.width * 0.5f
+    val ry = size.height * 0.46f
+    if (rx <= 0f || ry <= 0f) return@drawBehind
+    val c = Offset(size.width * 0.29f, size.height * 0.46f)
+    drawContext.canvas.saveLayer(Rect(Offset.Zero, size), Paint())
+    scale(1f, ry / rx, pivot = c) { drawCircle(poolBrush(pool, c, rx), rx, c) }
+    drawRect(Brush.horizontalGradient(0f to Color.Transparent, 0.14f to Color.Black, 1f to Color.Black), blendMode = BlendMode.DstIn)
+    drawContext.canvas.restore()
 }
