@@ -2085,6 +2085,17 @@ test("themes never change layout", async ({ browser }) => {
     await sheet.setViewportSize({ width, height: 900 });
     await sheet.goto(path);
     await sheet.evaluate(() => document.fonts.ready);
+    // The ordo's faces are font-display: optional, so a face that misses the
+    // first paint is replaced by a fallback for the whole visit. Which visits
+    // miss is a race, separate for each theme's page. The bold face is not
+    // preloaded, and the fasting and abstinence columns are its only use, so
+    // at 1280px one theme sometimes set the column's strut in Georgia and
+    // the other in Garamond (#798). Measure the cached-font visit, as the
+    // visual baselines do.
+    if (path.startsWith("/calendar/")) {
+      await sheet.reload();
+      await sheet.evaluate(() => document.fonts.ready);
+    }
     return sheet.evaluate(() => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
