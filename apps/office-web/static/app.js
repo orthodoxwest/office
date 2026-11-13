@@ -506,6 +506,13 @@ function rule(x1, y1, x2, y2, w, seed) {
     return horizontal ? (x1 + p[0]).toFixed(2) + "," + (y1 + p[1]).toFixed(2) : (x1 + p[1]).toFixed(2) + "," + (y1 + p[0]).toFixed(2);
   }).join("L") + "Z";
 }
+
+// plainClickOpensHere: a primary click with no modifier key, on a link that
+// opens in this tab (not a new one, not a download).
+function plainClickOpensHere(e, link) {
+  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
+    (!link.target || link.target === "_self") && !link.hasAttribute("download");
+}
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
@@ -1249,6 +1256,36 @@ function rule(x1, y1, x2, y2, w, seed) {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       closeOverlay(true);
+    }
+  });
+
+  // A link in the open phone menu puts the menu away before the page goes,
+  // at once rather than with its 160ms fade, so it does not ride the
+  // cross-fade over the next page as a ghost. A page restored by Back comes
+  // with the menu put away, as a tap outside leaves it.
+  if (siteMenu) {
+    siteMenu.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest("a[href]");
+      if (!link || e.defaultPrevented || overlayOpen() !== "menu" || plainClickOpensHere(e, link) === false) {
+        return;
+      }
+      siteMenu.classList.add("is-leaving");
+      siteMenu.removeAttribute("open");
+    });
+    window.addEventListener("pageshow", function () {
+      siteMenu.classList.remove("is-leaving");
+    });
+  }
+
+  // The brand on today's home leads where the reader already is: it puts an
+  // open overlay away and does nothing else, as in the apps (AppModel.goHome),
+  // rather than reload an identical page. syncDatedNavigation keeps its
+  // aria-current to today's home.
+  document.addEventListener("click", function (e) {
+    var brand = e.target.closest && e.target.closest(".site-brand[aria-current='page']");
+    if (brand && !e.defaultPrevented && plainClickOpensHere(e, brand)) {
+      e.preventDefault();
+      closeOverlay(false);
     }
   });
 
@@ -2885,6 +2922,60 @@ function rule(x1, y1, x2, y2, w, seed) {
       markVisibleMonth();
     }
 
+    // A day asked for (#d-…, Today) comes to rest with the whole day before
+    // it in view above, under the pinned month heading: style.css allows one
+    // plain row (--day-row); here the row before gives its own height, before
+    // an in-page link scrolls, and on arrival, where the browser has already
+    // brought the day to that plain row's place. The month's first day has
+    // its heading above it instead.
+    var restUnderDayBefore = function (row) {
+      var before = row && row.matches("tr.day") && row.previousElementSibling;
+      if (before && before.matches("tr.day")) {
+        row.style.setProperty("--day-row", before.offsetHeight + "px");
+      }
+    };
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest('a[href^="#d-"]');
+      if (link) {
+        restUnderDayBefore(document.getElementById(link.getAttribute("href").slice(1)));
+      }
+    }, true);
+    var readerMoved = false;
+    var askedDay = location.hash.indexOf("#d-") === 0 ? document.getElementById(location.hash.slice(1)) : null;
+    var arrival = window.performance && performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+    if (askedDay && askedDay.matches("tr.day")) {
+      restUnderDayBefore(askedDay);
+      // Not over a place the browser restored (a reload, Back).
+      if (!arrival || arrival.type === "navigate") {
+        askedDay.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+    }
+
+    // The day arrived at (#d-…) keeps its gold ground until the reader moves
+    // on: the first scroll of their own lets it go (.target-released), so it
+    // never stands as a second "you are here" beside Today. The browser's own
+    // scroll to the day is not the reader's; a new day asked for marks again.
+    var noteReaderMoved = function () { readerMoved = true; };
+    ["wheel", "touchmove", "keydown"].forEach(function (type) {
+      window.addEventListener(type, noteReaderMoved, { passive: true });
+    });
+    window.addEventListener("scroll", function () {
+      if (readerMoved && location.hash) {
+        calendarEl.classList.add("target-released");
+      }
+    }, { passive: true });
+    window.addEventListener("hashchange", function () {
+      readerMoved = false;
+      calendarEl.classList.remove("target-released");
+      // A day asked for in place (a typed address, Back across days), which
+      // no link's click prepared.
+      var day = location.hash.indexOf("#d-") === 0 ? document.getElementById(location.hash.slice(1)) : null;
+      if (day && day.matches("tr.day") && !day.style.getPropertyValue("--day-row")) {
+        restUnderDayBefore(day);
+        day.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+    });
+
     calendarEl.addEventListener("click", function (e) {
       if (e.target.closest("a, abbr, details")) {
         return;
@@ -2983,6 +3074,115 @@ function rule(x1, y1, x2, y2, w, seed) {
       updateHourScrollProgress();
     }
   }
+})();
+
+// A finger on a control. A touch browser may set :active late (Chromium once
+// the finger has lifted) or, in iOS Safari, only where a touch listener is
+// heard; and a tap is over in a few frames, before a press that waited could
+// be seen. So the control under a finger that rests on it for 90ms without
+// moving takes .is-pressed (a thumb starting a scroll lights nothing, as in a
+// native list), as does the control a tap lands on, at once. A link to
+// another of the site's pages keeps it until the page goes, so the last thing
+// seen is the press; anything else lets go at once, and style.css eases the
+// release over 200ms (and draws .is-pressed as :active). An ordo row is one
+// control with the day's own links (calendarRowClicks). A mouse has :active,
+// and its click is marked the same way.
+(function () {
+  if (!window.PointerEvent) return;
+  var PRESSABLE = "a[href], button:not(:disabled), summary, label, [role='button']";
+  var ROW_LINKS = ".day-feast-name, .day-mobile-date, .day-num a";
+  var REST_MS = 90;
+  var SLOP_PX = 10;
+  var KEEP_MS = 8000;
+  var held = null;
+  var timer = 0;
+  var startX = 0;
+  var startY = 0;
+
+  function pressable(target) {
+    if (!target || !target.closest) return null;
+    var row = target.closest(".js .month-table tr.day");
+    if (row && !target.closest("abbr, details")) {
+      var link = target.closest("a");
+      if (!link || link.matches(ROW_LINKS)) return row;
+    }
+    return target.closest(PRESSABLE);
+  }
+  function lift() {
+    window.clearTimeout(timer);
+    timer = 0;
+    if (held) held.classList.remove("is-pressed");
+    held = null;
+  }
+  function clearAll() {
+    lift();
+    document.querySelectorAll(".is-pressed").forEach(function (el) {
+      el.classList.remove("is-pressed");
+    });
+  }
+  // Whether a click on el leaves for another of the site's pages.
+  function leaves(e, el) {
+    if (el.matches("tr.day")) {
+      // The day's own link, opened in a new tab or window, leaves the row here.
+      var own = e.target.closest("a[href]");
+      if (own && !plainClickOpensHere(e, own)) return false;
+      var selection = window.getSelection && window.getSelection();
+      return !(selection && !selection.isCollapsed);
+    }
+    if (!el.matches("a[href]") || e.defaultPrevented || !plainClickOpensHere(e, el)) return false;
+    if (el.origin !== location.origin) return false;
+    return !(el.hash && el.pathname === location.pathname && el.search === location.search);
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    lift();
+    if (e.pointerType === "mouse" || !e.isPrimary) return;
+    var el = pressable(e.target);
+    if (!el) return;
+    held = el;
+    startX = e.clientX;
+    startY = e.clientY;
+    timer = window.setTimeout(function () {
+      timer = 0;
+      el.classList.add("is-pressed");
+    }, REST_MS);
+  }, { passive: true });
+  document.addEventListener("pointermove", function (e) {
+    if (held && e.isPrimary && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > SLOP_PX) lift();
+  }, { passive: true });
+  document.addEventListener("pointercancel", lift, { passive: true });
+  document.addEventListener("pointerup", function () {
+    // The click follows, and decides; a finger lifted off the control has none.
+    var was = held;
+    window.setTimeout(function () {
+      if (held === was) lift();
+    }, 100);
+  }, { passive: true });
+  // Last, after the page's own handlers have had their say (defaultPrevented).
+  document.addEventListener("click", function (e) {
+    var el = e.detail ? pressable(e.target) : null;
+    if (held && held !== el) lift();
+    window.clearTimeout(timer);
+    timer = 0;
+    held = null;
+    if (!el) return;
+    el.classList.add("is-pressed");
+    if (leaves(e, el)) {
+      window.setTimeout(function () { el.classList.remove("is-pressed"); }, KEEP_MS);
+      return;
+    }
+    // Seen for a frame, then eased off.
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () { el.classList.remove("is-pressed"); });
+    });
+  });
+  // iOS Safari applies :active only where a touch listener is heard; this
+  // one, never removed, lets it apply everywhere.
+  document.addEventListener("touchstart", function () {}, { passive: true });
+  // A page restored by Back is shown at rest.
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) clearAll();
+  });
 })();
 
 // Record engaged use of a current page, never the service worker's background
