@@ -1299,7 +1299,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   color: inherit;
   text-decoration: none;
   border-bottom: 1px dotted transparent;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background-color 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .home-date-link:hover {
@@ -1436,7 +1436,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   text-decoration: none;
   letter-spacing: 0.02em;
   border-radius: 2px;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 /* Framing and spacing live in .page-home .home-hour-link below; the base
@@ -1446,7 +1446,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   align-items: center;
   color: var(--text);
   text-decoration: none;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  transition: border-color 0.2s ease-out, background 0.2s ease-out, color 0.2s ease-out;
 }
 
 .home-hour-link-name {
@@ -1989,7 +1989,6 @@ html[data-newcomer] .home-season {
   color: inherit;
   font: inherit;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -2078,7 +2077,6 @@ html[data-newcomer] .home-season {
   color: var(--text);
   text-decoration: none;
   font-variant-numeric: lining-nums tabular-nums;
-  -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -2146,10 +2144,7 @@ html[data-newcomer] .home-season {
   }
 }
 
-.date-picker-day:active,
-.date-picker-month:active,
-.date-picker-step:not(:disabled):active,
-.date-picker-title:active {
+:is(.date-picker-day, .date-picker-month, .date-picker-step:not(:disabled), .date-picker-title):is(:active, .is-pressed) {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
 }
@@ -2648,7 +2643,6 @@ html[data-newcomer] .home-season {
   text-decoration-thickness: 1px;
   text-underline-offset: 0.24em;
   text-decoration-skip-ink: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .gloss-term[aria-expanded="true"] {
@@ -2665,7 +2659,9 @@ html[data-newcomer] .home-season {
   .gloss-term[role="button"]::before {
     content: "";
     position: absolute;
-    inset: -0.6rem -0.25rem;
+    inset: 50% -0.25rem auto;
+    height: var(--touch-target);
+    transform: translateY(-50%);
   }
 }
 
@@ -3866,7 +3862,12 @@ html[data-newcomer] .home-season {
   vertical-align: top;
   line-height: 1.4;
 }
-.month-table tr.day { scroll-margin-top: 3.5rem; }
+/* A day asked for (#d-…, Today) comes to rest clear of the pinned month
+   heading with the day before it in view above, so it is found among its
+   neighbours (--day-row: one plain row; the phone's cards are taller). The
+   apps bring the day before under the heading (OrdoScreen.swift, .kt). */
+.month-table { --day-row: 2.5rem; }
+.month-table tr.day { scroll-margin-top: calc(3.5rem + var(--day-row)); }
 .month-table tr.day > td:first-child { position: relative; }
 .month-table tr.day > td:first-child::before {
   content: "";
@@ -3885,7 +3886,16 @@ html[data-newcomer] .home-season {
     background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash));
   }
 }
-.month-table tr:target > td {
+/* A finger on a row: app.js marks it (.is-pressed) after a rest or on the
+   tap, not :active, which iOS Safari sets under a thumb starting a scroll.
+   The row keeps it until the page leaves. */
+.js .month-table tr.day.is-pressed > td {
+  background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash));
+}
+/* The day arrived at keeps its gold ground until the reader moves on (app.js
+   lets it go at the first scroll of their own, .target-released), so it never
+   stands as a second "you are here" beside Today. */
+:where(.calendar:not(.target-released)) .month-table tr:target > td {
   background: color-mix(in srgb, var(--gold) 6%, transparent);
 }
 
@@ -3921,7 +3931,7 @@ html[data-newcomer] .home-season {
 }
 .month-table .is-today .day-num::after,
 .is-today .day-mobile-date::after { visibility: visible; }
-.month-table tr:target > td { border-bottom-color: var(--gold-line); }
+:where(.calendar:not(.target-released)) .month-table tr:target > td { border-bottom-color: var(--gold-line); }
 .day-mobile-head { display: none; }
 .day-feast-name {
   position: relative;
@@ -4139,6 +4149,7 @@ html[data-newcomer] .home-season {
 @media (max-width: 700px) {
   .page-home .site-header { margin-bottom: 0.85rem; }
   .calendar { gap: 0.65rem; }
+  .month-table { --day-row: 3.9rem; }
   .calendar-header {
     grid-template-columns: 1fr;
     gap: 0.5rem;
@@ -4503,10 +4514,26 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   align-items: center;
   margin: 1.3rem 0 0;
   padding: 1.6rem 0.5rem 1.15rem;
-  border-top: 1px solid var(--lining);
+  /* The course, broken by the cross, as app.js rules it (.feast-rules: its
+     seeds 51-54, at the same places): so the first frame, and a page
+     without script, already has it where the pen will draw it. */
+  --course-gap: 24px;
+  border-top: 1px solid transparent;
+  background:
+    linear-gradient(var(--lining), var(--lining)) left 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat,
+    linear-gradient(var(--lining), var(--lining)) right 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat;
   text-align: center;
 }
-.feast-head.is-ruled { border-top-color: transparent; }
+.feast-head.is-first {
+  --course-gap: 27px;
+  --course-day: color-mix(in srgb, var(--frontal) 62%, transparent);
+  background:
+    linear-gradient(var(--lining), var(--lining)) left 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat,
+    linear-gradient(var(--lining), var(--lining)) right 0 top 0 / calc(50% - var(--course-gap)) 1px no-repeat,
+    linear-gradient(var(--course-day), var(--course-day)) left 1.5px top 3.5px / calc(50% - var(--course-gap) - 4.5px) 1px no-repeat,
+    linear-gradient(var(--course-day), var(--course-day)) right 1.5px top 3.5px / calc(50% - var(--course-gap) - 4.5px) 1px no-repeat;
+}
+.feast-head.is-ruled { background: none; }
 .feast-head.day-color-white { --frontal: var(--ornament); }
 .feast-head.day-color-black { --frontal: color-mix(in srgb, var(--lining) 80%, transparent); }
 /* A lit place on the wall under the cross, with no edge: limewash by day,
@@ -4547,6 +4574,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
   margin-top: 0.4rem;
   padding: 0.2rem 0.5rem 1rem;
   border-top: 0;
+  background: none;
 }
 .feast-head.is-plain .feast-crown { display: none; }
 .feast-titulus {
@@ -4762,7 +4790,7 @@ a.find-year:hover .find-year-date { text-decoration: underline; text-decoration-
 .feast-years .find-year-status { grid-column: 3; grid-row: 2; font-size: 0.92rem; }
 .feast-years .find-year-go { display: none; }
 .feast-years a.find-year:hover .find-year-date { text-decoration: none; }
-.feast-years a.find-year:is(:hover, :active) {
+.feast-years a.find-year:is(:hover, :active, .is-pressed) {
   background: radial-gradient(ellipse 60% 90% at 30% 50%, var(--now-pool), transparent 75%);
 }
 
@@ -5466,6 +5494,12 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   :root.motion-ready .site-menu[open] > .site-menu-panel {
     opacity: 1;
     transform: none;
+  }
+
+  /* A link chosen in the menu puts it away at once (app.js), so it does not
+     fade over the page cross-fading in. */
+  :root.motion-ready .site-menu.is-leaving > .site-menu-panel {
+    transition: none;
   }
 
   /* Without @starting-style the menu simply appears at full opacity. */
@@ -7000,7 +7034,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   pointer-events: none;
 }
 
-:is(.page-home, .about-door) .pray-now:active {
+:is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
   border-color: var(--accent);
   background: rgba(107, 58, 31, 0.1);
 }
@@ -7135,7 +7169,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 /* One focus ring for the card's controls: the date's gold, not the
    browser's or the oak. */
 .page-home :is(.pray-now, .home-hour-link, .home-date-nav > summary, .home-introduction, .not-today-link):focus-visible {
-  outline: 2px solid var(--gold);
+  /* 2px on the glass inside the wide niche's zoom (--niche-zoom, 1 on a
+     phone): Chromium floors an outline to whole device pixels, and 2px
+     zoomed to 0.96 fell to a 1px hairline. */
+  outline: calc(2px / var(--niche-zoom, 1) + 0.01px) solid var(--gold);
   outline-offset: 3px;
 }
 
@@ -7335,7 +7372,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     color: var(--lining);
   }
 
-  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:active {
+  :root:not([data-theme="light"]) :is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
     border-color: var(--accent);
     background: rgba(208, 176, 106, 0.14);
   }
@@ -7364,7 +7401,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   color: var(--lining);
 }
 
-:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:active {
+:root[data-theme="dark"] :is(.page-home, .about-door) .pray-now:is(:active, .is-pressed) {
   border-color: var(--accent);
   background: rgba(208, 176, 106, 0.14);
 }
@@ -7730,11 +7767,24 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   text-decoration: none;
 }
 
-/* The whole row opens its hour, as on home and in the apps. */
+/* The whole row opens its hour, as on home and in the apps; so the focus
+   ring goes round the row, inside the table's rules, not round the name. */
 .about-hour dt a::after {
   content: "";
   position: absolute;
   inset: 0;
+}
+
+/* Only where :has() is read: elsewhere the name keeps its own ring. */
+@supports selector(:has(*)) {
+  .about-hour dt a:focus-visible {
+    outline: none;
+  }
+
+  .about-hour:has(dt a:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
 }
 
 .about-hour dd {
@@ -9669,28 +9719,17 @@ body.rank-first-class .home-crown {
 }
 
 /* ── Touch chrome ──
-   Tapping navigation should not flash a grey box over the page, and a
-   long-press on a menu item should not begin a selection. Strictly limited to
-   navigation chrome: every word of the office itself stays selectable and
-   copyable, as do dates and feast names. */
-.site-brand,
-.site-menu > summary,
-.site-settings > summary,
-.site-menu nav a,
-.theme-option,
-.hour-date-nav > summary,
-.session-prayers > summary,
-.day-nav a,
-.not-today-notice a,
-.home-hour-link,
-.hour-continuation a,
-.month-jump a,
-.month-top,
-.year-nav a,
-.skip-link {
+   No control flashes the browser's tap highlight (a tint of the platform's
+   blue, which belongs to no theme here): each answers the finger with the
+   pressed wash below. The property is inherited, so one rule at the root
+   covers every control, and a new one is never missed. */
+html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* A long-press on a menu item should not begin a selection. Strictly
+   limited to navigation chrome: every word of the office itself stays
+   selectable and copyable, as do dates and feast names. */
 .site-brand,
 .site-menu > summary,
 .site-settings > summary,
@@ -9710,21 +9749,150 @@ body.rank-first-class .home-crown {
 /* Pressed controls darken inward like a thumb settling on a page edge.
    Background only: no bounce, scale, glow, or delayed animation, and no
    effect on selectable prayer text. Individual controls keep their own
-   borders and typography while sharing one material response. */
-.site-menu > summary:active,
-.site-settings > summary:active,
-.site-menu nav a:active,
-.theme-option:active,
-.text-size-option:active,
-.hour-date-nav > summary:active,
-.day-nav a:active,
-.home-hour-link:active,
-.hour-continuation a:active,
-.month-jump a:active,
-.month-top:active,
-.year-nav a:active {
+   borders and typography while sharing one material response.
+
+   A press shows at once and lets go over 200ms, the apps' figure: a tap is
+   over in a few frames, and a wash that eased in was never seen before the
+   page left. :active is the platform's press; .is-pressed is app.js's, for
+   a touch browser that sets :active late or not at all (see "A finger on a
+   control" there). Zero specificity: a control's own transition stands. */
+:where(
+  .site-brand,
+  .site-menu > summary,
+  .site-settings > summary,
+  .site-menu nav a,
+  .theme-option,
+  .text-size-option,
+  .hour-date-nav > summary,
+  .session-prayers > summary,
+  .day-nav a,
+  .home-date-link,
+  .home-date-nav > summary,
+  .home-introduction,
+  .not-today-link,
+  .feast-link,
+  .hour-continuation a,
+  .month-jump a,
+  .month-top,
+  .year-nav a,
+  .calendar-today-link,
+  .calendar-whole-year,
+  .calendar-expand,
+  .day-disclosures summary,
+  .tabula-tables dd a,
+  .find-submit,
+  .find-back,
+  .from-feast,
+  .find-name,
+  .find-year,
+  .feast-next,
+  .about-hour,
+  .about a,
+  .reminder-hour-name,
+  .reminder-day,
+  .reminder-subscribe,
+  .reminder-copy,
+  .reminder-address > summary,
+  .reminder-help > summary,
+  .reminders-privacy a,
+  .reminder-help a,
+  .leader-selector > summary,
+  .date-submit,
+  .report-issue a,
+  .find-meta a,
+  .feast-everyone a,
+  .feast-see a,
+  .privacy a,
+  .usage-jump a,
+  .usage-notes summary,
+  .usage-trend-details summary,
+  .not-found-home a,
+  .usage-explore-link
+) {
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+:is(a, button, summary, label, [role="button"], tr.day):is(:active, .is-pressed) {
+  transition-duration: 0s !important;
+}
+
+:is(
+  .site-brand,
+  .site-menu > summary,
+  .site-settings > summary,
+  .site-menu nav a,
+  .theme-option,
+  .text-size-option,
+  .hour-date-nav > summary,
+  .session-prayers > summary,
+  .day-nav a,
+  .home-date-link,
+  .home-date-nav > summary,
+  .home-introduction,
+  .not-today-link,
+  .feast-link,
+  .home-hour-link,
+  .hour-continuation a,
+  .month-jump a,
+  .month-top,
+  .year-nav a,
+  .calendar-today-link,
+  .calendar-whole-year,
+  .calendar-expand,
+  .day-disclosures summary,
+  .tabula-tables dd a,
+  .find-submit,
+  .find-back,
+  .from-feast,
+  .find-name,
+  .find-year,
+  .feast-next,
+  .about a,
+  .reminder-hour-name,
+  .reminder-day,
+  .reminder-subscribe,
+  .reminder-copy,
+  .reminder-address > summary,
+  .reminder-help > summary,
+  .reminders-privacy a,
+  .reminder-help a,
+  .leader-selector > summary,
+  .date-submit,
+  .report-issue a,
+  .find-meta a,
+  .feast-everyone a,
+  .feast-see a,
+  .privacy a,
+  .usage-jump a,
+  .usage-notes summary,
+  .usage-trend-details summary,
+  .not-found-home a,
+  .usage-explore-link
+):is(:active, .is-pressed) {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+/* Home's hours: the hour that is now has no wash of its own to give way
+   (its light is a pool), so it takes the press over its pool; and the Apse
+   sets every hour's ground transparent at (0,4,0), which the shared rule
+   above does not outrank. Later in the sheet, this does. */
+:root .page-home .home-hour-link:is(:active, .is-pressed) {
+  background-color: var(--pressed-wash);
+  box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+/* About's hours: the whole row is the link (its name's ::after spans it), so
+   the row takes the press, not the name. */
+.about-hour:has(dt a:is(:active, .is-pressed)) {
+  background-color: var(--pressed-wash);
+  transition-duration: 0s;
+}
+.about .about-hour dt a:is(:active, .is-pressed) {
+  background-color: transparent;
+  box-shadow: none;
 }
 
 @media (max-width: 540px) {
@@ -11405,10 +11573,10 @@ body.page-home::before {
 .usage-subtitle { margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
 /* The period strip is the ordo's month strip, at four stops. */
 .usage-window { display: flex; border-bottom: 1px solid var(--border); }
-.usage-window a { display: flex; align-items: center; justify-content: center; min-height: var(--touch-target); padding-inline: 1.1rem; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); text-decoration: none; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; -webkit-tap-highlight-color: transparent; }
+.usage-window a { display: flex; align-items: center; justify-content: center; min-height: var(--touch-target); padding-inline: 1.1rem; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); text-decoration: none; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
 .usage-window a:first-child { padding-left: 0; }
 .usage-window a:hover, .usage-window a[aria-current] { color: var(--accent); border-bottom-color: var(--gold-line); }
-.usage-window a:active { background-color: var(--pressed-wash); }
+.usage-window a:is(:active, .is-pressed) { background-color: var(--pressed-wash); }
 .usage-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.5rem 1.6rem; border-bottom: 1px solid var(--border); }
 .usage-summary > div { padding-inline: 1.2rem; border-left: 1px solid var(--border); }
 .usage-summary > div:first-child { padding-left: 0; border-left: 0; }
@@ -11741,11 +11909,10 @@ body.page-home::before {
   min-height: var(--touch-target);
   line-height: 1.4;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 .leader-option + .leader-option { border-top: 1px solid var(--surface-edge); }
 .leader-option:hover { background: var(--surface); }
-.leader-option:active { background: var(--pressed-wash); }
+.leader-option:is(:active, .is-pressed) { background: var(--pressed-wash); }
 .leader-option input {
   appearance: none;
   flex: 0 0 auto;
