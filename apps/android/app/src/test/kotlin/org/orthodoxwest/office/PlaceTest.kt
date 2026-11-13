@@ -94,7 +94,7 @@ class PlaceTest {
     fun anHourTakenAwayOpensAtItsPlaceOnlyWithinTheLimit() {
         val now = System.currentTimeMillis()
         fun reopened(leftAt: Long, prayed: Boolean = false): Int {
-            val saver = placeSaver({ leftAt }) { at -> reopensAtPlace(prayed, (System.currentTimeMillis() - at) / 1000.0) }
+            val saver = placeSaver(leftAt = { leftAt }, reopens = { at -> reopensAtPlace(prayed, (System.currentTimeMillis() - at) / 1000.0) })
             val saved = with(saver) { SaverScope { true }.save(LazyListState(12, 40)) }!!
             return saver.restore(saved)!!.firstVisibleItemIndex
         }
