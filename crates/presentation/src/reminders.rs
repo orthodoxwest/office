@@ -285,7 +285,8 @@ mod tests {
 
     #[test]
     fn each_phrase_is_keyed_by_what_it_says() {
-        let keys: Vec<String> = rule(&[at("lauds", "6:45 AM"), at("vespers", "6:00 PM")], EVERY, Some(10)).into_iter().map(|p| p.key).collect();
+        let keys: Vec<String> =
+            rule(&[at("lauds", "6:45 AM"), at("vespers", "6:00 PM")], EVERY, Some(10)).into_iter().map(|p| p.key).collect();
         assert_eq!(keys, ["lauds", "lauds-time", "lauds-joint", "vespers", "vespers-time", "days", "lead"]);
         assert_eq!(rule(&[], EVERY, Some(10))[0].key, "empty");
     }

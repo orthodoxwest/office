@@ -23,6 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.orthodoxwest.office.core.reminderNext
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -76,6 +77,18 @@ class ReminderTest {
         assertEquals("2026-03-15T06:35", times.first())
         assertTrue(times.contains("2026-03-15T17:50"))
         assertEquals("2026-03-22T20:50", times.last())
+    }
+
+    @Test
+    fun thePlanGivesThePagesNextLine() {
+        turn(on = true)
+        val now = ZonedDateTime.of(2026, 3, 15, 7, 0, 0, 0, zone)
+        val first = ReminderScheduler.plan(ReminderStore(app).load(), now).minBy { it.at }
+        assertEquals("vespers", first.hour)
+        assertEquals("2026-03-15T17:50", first.at.toLocalDateTime().toString())
+        assertEquals("Next: Vespers, today at 5:50 PM.", reminderNext(first.hour, now.toLocalDate().toCivil(), first.at.toLocalDate().toCivil(), "5:50 PM"))
+        turn(on = false)
+        assertTrue(ReminderScheduler.plan(ReminderStore(app).load(), now).isEmpty())
     }
 
     @Test

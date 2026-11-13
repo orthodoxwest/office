@@ -570,6 +570,22 @@ pub fn reminder_next(hour: String, today: CivilDate, on: CivilDate, time: String
     }
 }
 
+/// One of home's three periods on the reminder page: its name ("Morning") and its hours' slugs.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReminderPeriodView {
+    pub label: String,
+    pub hours: Vec<String>,
+}
+
+/// The reminder page's hours in home's three periods, as home and About group them.
+#[uniffi::export]
+pub fn reminder_periods() -> Vec<ReminderPeriodView> {
+    presentation::about::ABOUT_HOURS
+        .iter()
+        .map(|(label, hours)| ReminderPeriodView { label: label.to_string(), hours: hours.iter().map(|(h, _)| h.to_string()).collect() })
+        .collect()
+}
+
 /// One reminder: an office on a civil date at a local time, with its words.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ReminderView {

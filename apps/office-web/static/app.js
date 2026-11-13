@@ -1429,7 +1429,7 @@ function rule(x1, y1, x2, y2, w, seed) {
         if (!format || parts.length < 2) {
           return value;
         }
-        return format.format(new Date(2026, 0, 1, Number(parts[0]), Number(parts[1]))).replace(/[\s ]+(?=\D+$)/, " ");
+        return format.format(new Date(2026, 0, 1, Number(parts[0]), Number(parts[1]))).replace(/[\s\u202f]+(?=\D+$)/, "\u00a0");
       };
     })();
     var rulePhrases = function (invalidTime) {

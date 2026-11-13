@@ -16,8 +16,8 @@ use render_html::links::{
 };
 use render_html::view::{
     AboutData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, ReminderPeriod, ReminderRulePhrase, RemindersData, TabulaData,
-    TabulaRow,
+    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, ReminderPeriod,
+    ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;

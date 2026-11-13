@@ -7878,6 +7878,29 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   padding-left: 0.6rem;
 }
 
+/* Where the name and its time would crowd (the narrowest phones, or large text
+   on a phone), the period keeps its sun or moon and gives up its word; the
+   group still carries the name for a screen reader. */
+@media (max-width: 359px) {
+  .reminder-period {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .reminder-period-label span {
+    display: none;
+  }
+}
+
+@media (max-width: 439px) {
+  :root[data-text-size="large"] .reminder-period {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  :root[data-text-size="large"] .reminder-period-label span {
+    display: none;
+  }
+}
+
 .reminder-hour-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
