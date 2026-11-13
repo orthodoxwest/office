@@ -124,6 +124,7 @@ class MainActivity : ComponentActivity() {
                             motion = vm.motion,
                             onBack = { vm.back() },
                             today = vm.today,
+                            clockHour = vm.clockHour,
                             hours = vm.hours,
                             form = vm.form,
                             theme = vm.theme,
@@ -291,6 +292,8 @@ fun OfficeApp(
     find: FindView? = null,
     feast: FeastPageView? = null,
     pageUnder: (Long) -> Page? = { null },
+    // Home's screenshots are composed at 6 pm; About lights the same hour.
+    clockHour: Int = 18,
 ) {
     val content = when {
         error != null -> Content.Failed(error)
@@ -307,6 +310,7 @@ fun OfficeApp(
         motion = Motion.FADE,
         onBack = null,
         today = today,
+        clockHour = clockHour,
         hours = hours,
         form = form,
         theme = theme,
@@ -345,6 +349,8 @@ fun OfficeApp(
     motion: Motion,
     onBack: (() -> Unit)?,
     today: LocalDate,
+    /** The clock hour (0–23) at the last minute's check: About lights it and invites to it (tests: 6 pm, as home's). */
+    clockHour: Int = 18,
     hours: List<String>,
     form: String,
     theme: ThemeChoice,
@@ -612,6 +618,7 @@ fun OfficeApp(
                             page is Page.About -> AboutScreen(
                                 view = aboutView,
                                 today = today,
+                                clockHour = clockHour,
                                 chrome = chrome,
                                 insets = insets,
                                 onOpen = onOpen,
