@@ -25,7 +25,10 @@ crates/
                            which app.js's HOUR_LIGHT and the apps play)
   presentation/            Words every front shares: day, season and date names, the current-hour
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
-                           the usage beacon's vocabulary (server, app.js and native apps)
+                           the usage beacon's vocabulary (server, app.js and native apps),
+                           the crown's tap (crown.rs: which look it turns to, and the play's
+                           timetable and pigments; app.js and style.css mirror them, the
+                           apps read them through mobile-ffi's crown_plan)
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
   cli/                     office command dispatch, dump stream, diff and digest
@@ -46,7 +49,8 @@ tools/
                            Apse vault tile and the Nave powdering cell) for the web
   genplaster.py            Texture generator; source photograph stays in ../resources/
   genarch.py               Home frontispiece's pointed head: clip-path polygons in style.css, and
-                           the arcs' figures for the native apps (Arch.kt, Arch.swift)
+                           the arcs' figures for the native apps (Arch.kt, Arch.swift) and
+                           for the crown's play (app.js's ARCHES)
   gencross.py              Subsets the ✠ glyph from Noto Sans Symbols for the web and apps
   gengaramond.py           Builds the apps' heavier EB Garamond text faces from the variable fonts
 data/

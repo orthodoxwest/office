@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,12 +67,16 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -91,6 +97,7 @@ import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import kotlin.math.roundToInt
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.LightFrame
@@ -156,7 +163,10 @@ fun HomeScreen(
         val scroll = rememberScrollState()
         val density = LocalDensity.current
         val follow = remember(scroll, density, bottom) { Follow(scroll, { room }, with(density) { bottom.toPx() }, with(density) { Gutter.toPx() }) }
-        CompositionLocalProvider(LocalFollow provides follow) {
+        // The crown's play is made over a still of the screen: a scroll ends it at once.
+        val crown = LocalCrown.current
+        if (crown != null) LaunchedEffect(scroll, crown) { snapshotFlow { scroll.value }.drop(1).collect { crown.cut() } }
+        CompositionLocalProvider(LocalFollow provides follow, LocalCrownStage provides crown) {
             Column(
                 Modifier.fillMaxSize().verticalScroll(scroll).padding(top = top, bottom = bottom),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -305,6 +315,12 @@ private class HomeTier(screen: Dp, tall: Dp, card: Dp, private val dyn: Float, v
     val headPad = if (desk) (if (upright) (if (heavy) 118.4.dp else 144.dp) else if (heavy) 92.8.dp else 118.4.dp) else rise(0.dp, 86.4.dp, 105.6.dp, 118.4.dp) - (44.dp - dateLine) / 2
     val crownTop = if (desk) (if (upright) (if (heavy) 62.4.dp else 73.6.dp) else if (heavy) 44.8.dp else 57.6.dp) else rise(0.dp, 33.6.dp, 49.6.dp, 54.4.dp)
     val crownSize = if (desk) (if (heavy) 32.dp else if (list) 40.dp else 36.8.dp) else rise(0.dp, 30.4.dp, 35.2.dp, 40.dp)
+    /**
+     * The crown's tap box: at least 44 by 44 on the glass, sized against the niche's zoom, standing
+     * on the roundel's foot and growing up into the point, clear of the date's own (the web's
+     * `.home-crown-tap`).
+     */
+    val crownTap = maxOf(44.dp, (46f / zoom).dp)
     /** Spare height under the head is parted 2:3 above and below the day, else the day is centred in it. */
     val split = !desk && step > 0
     val side = if (desk) 36.dp else 16.dp
@@ -404,6 +420,9 @@ private fun unbroken(date: String): String {
  */
 private fun frontispieceFrame(p: Palette): Color = if (p.dark) Color(208, 176, 106).copy(alpha = 0.34f) else Color(87, 52, 33).copy(alpha = 0.3f)
 
+/** The crown's tap box reaches this far below the roundel's foot (0.15rem). */
+private val CrownFoot = 2.4.dp
+
 /** The phone panel's lining stands this far inside its edge (`--panel-inset`); the niche's 26dp. */
 private val PanelInset = 12.dp
 
@@ -483,16 +502,54 @@ private fun Frontispiece(
     // The painter's reserve round the day's words, which the sky's stars keep clear of.
     val reserve = remember { Reserve() }
     val side = tier.side
+    // Home's crown: the cross is a button that turns the look over, and nothing says so but its
+    // name (Crown.kt). The play needs the frontispiece's measures and the cross in either look.
+    val crown = LocalCrown.current
+    val head = remember(crown) { crown?.let { CrownHead() } }
+    if (head != null) {
+        head.arch = tier.arch
+        head.black = black
+        head.picking = picking
+        head.gilt = !night && first
+        head.catchInk = mix(Leaf(ornament(Apse, season)).hi, Color.White, 0.62f)
+        head.cross = { dark ->
+            val base = if (dark) Apse else Nave
+            val other = ornament(base, season)
+            when {
+                dark -> {
+                    val l = Leaf(other)
+                    consecrationCross(base.lining, brush = Brush.linearGradient(0f to l.hi, 0.55f to l.mid, 1f to l.lo), alpha = 0.35f + 0.65f * catch)
+                }
+                first -> consecrationCross(base.lining, brush = giltBrush(other))
+                else -> consecrationCross(seasoned(base, season).lining, pigment = pigment)
+            }
+        }
+    }
+    CrownHeadEffect(crown, head)
+    val firmament = crown?.firmament
+    val haptics = LocalHapticFeedback.current
     Layout(
         contents = listOf<@Composable () -> Unit>(
             // The consecration cross in the point of the head, with clear air round it: painted
             // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
             {
-                when {
-                    night && black -> ConsecrationCross(Modifier.size(tier.crownSize), ink = muted.copy(alpha = 0.7f))
-                    night -> ConsecrationCross(Modifier.size(tier.crownSize), brush = Brush.linearGradient(0f to leaf.hi, 0.55f to leaf.mid, 1f to leaf.lo), alpha = 0.35f + 0.65f * catch)
-                    first -> ConsecrationCross(Modifier.size(tier.crownSize), brush = giltBrush(o))
-                    else -> ConsecrationCross(Modifier.size(tier.crownSize), pigment = pigment)
+                // The cross stands at the foot of its tap box, which grows up into the point. With a
+                // crown it is a button: no ripple, no hint, only its name and a tick under the finger.
+                val button = if (crown == null) Modifier else Modifier
+                    .onGloballyPositioned { head?.tapBox = it.boundsInRoot() }
+                    .semantics { contentDescription = if (night) "Switch to Nave" else "Switch to Apse" }
+                    .clickable(interactionSource = null, indication = null, role = Role.Button) {
+                        haptics.chose()
+                        crown.tap()
+                    }
+                Box(Modifier.size(tier.crownTap).then(button).padding(bottom = CrownFoot), contentAlignment = Alignment.BottomCenter) {
+                    val mark = Modifier.crownUnit("cross").size(tier.crownSize)
+                    when {
+                        night && black -> ConsecrationCross(mark, ink = muted.copy(alpha = 0.7f))
+                        night -> ConsecrationCross(mark, brush = Brush.linearGradient(0f to leaf.hi, 0.55f to leaf.mid, 1f to leaf.lo), alpha = 0.35f + 0.65f * catch)
+                        first -> ConsecrationCross(mark, brush = giltBrush(o))
+                        else -> ConsecrationCross(mark, pigment = pigment)
+                    }
                 }
             },
             // A lining painted round the head on the back wall, down to the inscription band; by
@@ -506,7 +563,7 @@ private fun Frontispiece(
                             val pad = 11.dp.toPx()
                             val clear = reserve.rects.values.flatten().map { Rect(it.left - 14.dp.toPx(), it.top - 6.dp.toPx(), it.right + 14.dp.toPx(), it.bottom + 6.dp.toPx()) } +
                                 Rect((size.width - crown) / 2f - pad, tier.crownTop.toPx() - pad, (size.width + crown) / 2f + pad, tier.crownTop.toPx() + crown + pad)
-                            sky(tier.arch, size.height, wash, home, leaf, catch, stars = !black, first = first, reserve = clear)
+                            sky(tier.arch, size.height, wash, home, leaf, catch, stars = !black, first = first, reserve = clear, crown = firmament)
                             if (!black) skyLining(tier.arch, leaf, catch, if (view.color == "white") home.limeWhite else day, first)
                         } else {
                             // A first-class niche by day gilds one fillet round its head, to the frieze.
@@ -519,7 +576,7 @@ private fun Frontispiece(
             // The day.
             {
                 Column(Modifier.fillMaxWidth().padding(horizontal = tier.dayClear), horizontalAlignment = Alignment.CenterHorizontally) {
-                    val dateModifier = Modifier.semantics(mergeDescendants = true) { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
+                    val dateModifier = Modifier.crownUnit("w-date").semantics(mergeDescendants = true) { heading() }.tap(action = "open the ordo", onClick = onOrdoDay)
                     val at = view.dateLabel.indexOf(", ")
                     if (at < 0) {
                         Text(
@@ -573,20 +630,20 @@ private fun Frontispiece(
                         view.feastName,
                         view.feastAlias,
                         tier.feast,
-                        Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure)
+                        Modifier.padding(top = 2.dp).widthIn(max = tier.feastMeasure).crownUnit("w-feast")
                             .then(if (view.feastId.isEmpty()) Modifier else Modifier.tap(action = "open the feast's page") { onFeast(view.feastId) }),
                         linked = view.feastId.isNotEmpty(),
                         reserve = reserve,
                     )
-                    if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, reserve.at("octave"), style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
+                    if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, Modifier.crownUnit("w-octave").then(reserve.at("octave")), style = Type.small.copy(color = muted), onTextLayout = reserve.layout("octave"))
                     if (view.penitential.isNotEmpty()) {
-                        Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
+                        Row(Modifier.padding(top = if (desk && tier.heavy) 0.dp else 12.dp).crownUnit("w-fast"), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) {
                             val fast = if (desk) Type.small.copy(fontSize = tier.fast.sp) else Type.small
                             view.penitential.forEachIndexed { i, it -> Text(it, reserve.at("fast$i"), style = fast.copy(color = rubric, fontFeatureSettings = ALL_SMALL_CAPS, letterSpacing = 0.75.sp), onTextLayout = reserve.layout("fast$i")) }
                         }
                     }
                     if (view.commemorations.isNotEmpty()) {
-                        Column(Modifier.padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(Modifier.padding(top = 8.dp).crownUnit("w-also"), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("ALSO", reserve.at("also"), style = Type.label(10.56f, 0.1f).copy(color = muted), onTextLayout = reserve.layout("also"))
                             // A second commemoration is joined to the first with "and", as the web's
                             // `.commemorations li + li::before`, so the list reads as a sentence.
@@ -612,7 +669,7 @@ private fun Frontispiece(
                 val style = tier.versicle
                 if (style != null && view.versicle.isNotEmpty()) {
                     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.TopCenter) {
-                        Column(Modifier.widthIn(max = tier.versicleMeasure), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(Modifier.widthIn(max = tier.versicleMeasure).crownUnit("w-versicle"), horizontalAlignment = Alignment.CenterHorizontally) {
                             VersicleLine("℣.", view.versicle, style, rubric, reserve, "versicle")
                             VersicleLine("℟.", view.response, style, rubric, reserve, "response")
                         }
@@ -625,7 +682,7 @@ private fun Frontispiece(
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                         Text(
                             "GO TO TODAY",
-                            Modifier.heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).then(reserve.at("today")).goldUnderline(true, p.goldLine),
+                            Modifier.crownUnit("w-today").heightIn(min = 44.dp).tap { onDate(today) }.padding(vertical = 12.dp).then(reserve.at("today")).goldUnderline(true, p.goldLine),
                             style = Type.menu.copy(color = p.accent),
                             onTextLayout = reserve.layout("today"),
                         )
@@ -644,6 +701,7 @@ private fun Frontispiece(
                     Row(
                         Modifier
                             .throughPadding(side)
+                            .crownUnit("frieze")
                             .background(p.inscriptionGround)
                             .drawBehind {
                                 val u = density
@@ -697,7 +755,7 @@ private fun Frontispiece(
             },
             // The season and "Change date", under the stage.
             {
-                Column(Modifier.fillMaxWidth().padding(horizontal = side), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = side).crownUnit("r-meta"), horizontalAlignment = Alignment.CenterHorizontally) {
                     // Season and date control share one line after the hours (`.home-day-meta`), in
                     // small caps, a gilt point between them, open or shut: the calendar opens in the
                     // hours' place above, not under the control.
@@ -722,7 +780,12 @@ private fun Frontispiece(
                 }
             },
         ),
-        modifier = modifier.onGloballyPositioned { reserve.root = it; follow?.target = it }.drawBehind {
+        modifier = modifier.onGloballyPositioned {
+            reserve.root = it
+            follow?.target = it
+            head?.origin = it.positionInRoot()
+            head?.width = it.size.width.toFloat()
+        }.drawBehind {
             if (niche != null && !p.dark) {
                 // The niche by day: a lancet cut into the wall, its depth told by light on the
                 // reveal, the day's colour one fillet at the back wall's edge. By night it is the
@@ -778,8 +841,10 @@ private fun Frontispiece(
         val hoursAlpha = (1f - turned / 0.46f).coerceIn(0f, 1f)
         val chooserAlpha = ((turned - 0.23f) / 0.77f).coerceIn(0f, 1f)
         layout(width, height) {
+            head?.band = summary.toFloat()
             wall.place(0, 0)
-            mark.place((width - mark.width) / 2, tier.crownTop.roundToPx())
+            // The tap box stands on the roundel's foot, so the cross is where it always stood.
+            mark.place((width - mark.width) / 2, (tier.crownTop + tier.crownSize + CrownFoot).roundToPx() - mark.height)
             var y = headPad + if (tier.split) spare * 2 / 5 else spare / 2
             facts.place(0, y)
             y += facts.height
@@ -890,6 +955,7 @@ fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, was
         Modifier
             .fillMaxWidth()
             .heightIn(min = 44.dp)
+            .crownUnit("r-pray")
             .tap(source = source, onClick = onClick)
             .drawBehind {
                 tabletWash(tablet, lerp(wash, deeper, held))
@@ -946,7 +1012,8 @@ private fun HourDirectory(current: String, note: String, light: HourLightNow?, p
             }
             Row(
                 Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 1.dp)
-                    .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier),
+                    .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier)
+                    .crownUnit("r-period$i"),
             ) {
                 Column(
                     Modifier.width(labelWidth).fillMaxHeight().padding(vertical = 6.dp).padding(start = 1.4.dp),
@@ -1079,7 +1146,8 @@ private fun HourList(
             },
         ),
         modifier = Modifier.fillMaxWidth().padding(top = 1.dp)
-            .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier),
+            .then(if (i > 0) Modifier.onGloballyPositioned { joints[i - 1] = it.positionInParent().y - 1f } else Modifier)
+            .crownUnit("r-period$i"),
     ) { (labels, lists), constraints ->
         // grid-template-columns: 1fr middle 1fr, the label in the first column, the hours across
         // the other two.

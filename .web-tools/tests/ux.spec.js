@@ -1,5 +1,7 @@
+import fs from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { LAST as CROWN_LAST, centile, contrast, holdCrown, lumas, mean, pixels, seekCrown } from "./crown-play.js";
 
 const testDate = "2026-03-15";
 
@@ -622,8 +624,7 @@ const homeAtRest = (page) =>
     passing: document.querySelectorAll(".is-passing").length,
     // The pass's own, not a control's CSS transitions.
     animations: window.lightAnimations.filter((a) => a.playState !== "idle").length,
-    words: Array.from(document.querySelector(".pray-now").childNodes)
-      .filter((n) => n.nodeType === 1 && n.matches(".pray-now-words")).length,
+    words: document.querySelectorAll(".pray-now .pray-now-words").length,
     current: Array.from(document.querySelectorAll(".home-hour-link.is-current")).map((l) => l.dataset.hour),
   }));
 
@@ -1320,12 +1321,16 @@ test("the wide home by night is one sky inside the niche and a plain wall round 
   for (const [width, height] of [[1280, 800], [820, 1180]]) {
     await page.setViewportSize({ width, height });
     await openDatedPage(page, `/?date=${testDate}`, "dark");
-    await expect(page.locator(".home-sky svg.home-stars")).toHaveCount(1);
+    // The stars stand in the vault (the sky's own box inside the lining), in
+    // both looks, so the crown's play has them; they show by night.
+    await expect(page.locator(".home-vault-stars svg.home-stars")).toHaveCount(1);
     const night = await page.evaluate(() => ({
       wall: getComputedStyle(document.body, "::before").display,
       sky: getComputedStyle(document.querySelector(".home-sky")).display,
-      stars: document.querySelectorAll(".home-sky svg.home-stars path, .home-sky svg.home-stars use").length,
+      shown: getComputedStyle(document.querySelector(".home-vault-stars")).visibility,
+      stars: document.querySelectorAll(".home-vault-stars svg.home-stars path, .home-vault-stars svg.home-stars use").length,
     }));
+    expect(night.shown, `${width}x${height}: the stars show by night`).toBe("visible");
     expect(night.wall, `${width}x${height}: the margins' starfield is off`).toBe("none");
     expect(night.sky, `${width}x${height}`).not.toBe("none");
     expect(night.stars, `${width}x${height}: the head has its stars`).toBeGreaterThan(5);
@@ -1472,6 +1477,336 @@ test("the wall fades out before a theme swap and respects reduced motion", async
   await choosePreference(page, "Nave");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await opacity()).toBe(1);
+});
+
+// Home's crown: a tap on the consecration cross turns the look over and plays
+// the change in the arch (presentation::crown; app.js mirrors its rule, and
+// these are the rule's cases). The stored choice is set once, before the
+// first load only, so a later load reads what the taps left.
+async function openCrown(page, { stored, date = testDate, hurry = true } = {}) {
+  await page.addInitScript((value) => {
+    if (sessionStorage.getItem("crown-test")) return;
+    sessionStorage.setItem("crown-test", "1");
+    if (value) localStorage.setItem("office-theme", value);
+  }, stored);
+  await page.goto(`/?date=${date}`);
+  await page.evaluate(() => document.fonts.ready);
+  // The play runs to its own clock; a test need not sit through all of it.
+  if (hurry) await page.addStyleTag({ content: ":root { --crown-k: 0.25; }" });
+  const tap = page.locator(".home-crown-tap");
+  // Shown once its play is set up, in idle time after load.
+  await expect(tap).toBeVisible();
+  return tap;
+}
+
+// The cross's middle: while the play's stills are up the browser gives every
+// pointer to the root, so a tap then is made at a point, as a finger's is.
+async function crownPoint(page) {
+  const box = await page.locator(".home-crown-tap").boundingBox();
+  return [box.x + box.width / 2, box.y + box.height / 2];
+}
+
+// The play itself, not one of its fallbacks: a browser that took the plain
+// crossfade, or dropped the stills early, says why on the root.
+async function crownPlayed(page) {
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("data-crown-plain"), document.documentElement.getAttribute("data-crown-early")])).toEqual([null, null]);
+}
+
+async function crownAtRest(page) {
+  await expect(page.locator(".home-hero")).not.toHaveClass(/crown-/, { timeout: 15_000 });
+  await expect(page.locator("html")).not.toHaveClass(/crown-|theme-anim|vault-hidden/, { timeout: 15_000 });
+}
+
+const crownState = (page) => page.evaluate(() => ({
+  look: document.documentElement.getAttribute("data-theme"),
+  stored: localStorage.getItem("office-theme"),
+  label: document.querySelector(".home-crown-tap").getAttribute("aria-label"),
+  pressed: Array.from(document.querySelectorAll(".theme-option[data-theme-choice][aria-pressed='true']"), (b) => b.getAttribute("data-theme-choice")).filter((v, i, all) => all.indexOf(v) === i).join(","),
+}));
+
+test("a tap on home's crown turns the look over, and the tap back restores the reader's choice", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  // Default on a light device: the tap turns to Apse and saves it; the tap
+  // back is Default again, not Nave.
+  let tap = await openCrown(page);
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Apse");
+  const atRest = await page.evaluate(() => document.body.outerHTML);
+  await tap.click();
+  await expect(page.locator(".home-hero")).toHaveClass(/crown-on/);
+  await crownAtRest(page);
+  await crownPlayed(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+  // The settled page is the page as it loaded: nothing of the play is left.
+  expect(await page.evaluate(() => document.body.outerHTML)).toBe(atRest);
+  expect(await page.evaluate(() => [document.documentElement.getAttribute("style"), document.getAnimations().length])).toEqual([null, 0]);
+  // And it is a fresh load's page: the same words and boxes in the same look.
+  const boxes = () => page.evaluate(() => Array.from(document.querySelectorAll(".home-hero *"), (el) => {
+    const q = el.getBoundingClientRect();
+    return [el.className, Math.round(q.left), Math.round(q.top), Math.round(q.width), Math.round(q.height), getComputedStyle(el).color].join(" ");
+  }).join("\n"));
+  const settled = await boxes();
+  await page.reload();
+  await expect(page.locator(".home-crown-tap")).toBeVisible();
+  expect(await boxes()).toBe(settled);
+});
+
+test("the crown keeps Default with the device and gives a chosen Apse back", async ({ page }) => {
+  // Apse chosen on a dark device: the tap turns to Nave; the tap back is the
+  // reader's Apse, not Default.
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "dark" });
+  const tap = await openCrown(page, { stored: "dark" });
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "light", stored: "light", label: "Switch to Apse", pressed: "light" });
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  // A look that matches the device's is saved as Default: Apse on a light
+  // device turns to Default, never to Nave.
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await expect(tap).toHaveAttribute("aria-label", "Switch to Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+  // The Menu's choice in between is the later word: the tap after it turns
+  // from that choice and restores nothing older.
+  await choosePreference(page, "Nave");
+  await tap.click();
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+});
+
+test("a second tap while the crown plays is kept and plays the way back", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await openCrown(page, { hurry: false });
+  const [x, y] = await crownPoint(page);
+  await page.mouse.click(x, y);
+  await expect(page.locator("html")).toHaveClass(/crown-new/);
+  await page.waitForTimeout(900);
+  await crownPlayed(page);
+  await page.mouse.click(x, y);
+  // The play carries on: the look has turned and is not cut short.
+  expect((await crownState(page)).stored).toBe("dark");
+  await expect(page.locator(".home-hero")).toHaveClass(/crown-dawn/, { timeout: 15_000 });
+  await crownAtRest(page);
+  expect(await crownState(page)).toEqual({ look: null, stored: "default", label: "Switch to Apse", pressed: "default" });
+});
+
+test("Pray tapped while the crown plays opens the hour at once", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
+  await openCrown(page, { hurry: false });
+  const href = await page.locator(".pray-now").getAttribute("href");
+  const pray = await page.locator(".pray-now").boundingBox();
+  const [x, y] = await crownPoint(page);
+  await page.mouse.click(x, y);
+  await expect(page.locator("html")).toHaveClass(/crown-new/);
+  await page.waitForTimeout(600);
+  await page.mouse.click(pray.x + pray.width / 2, pray.y + pray.height / 2);
+  await page.waitForURL((url) => url.pathname === href);
+  // The choice was saved at the tap: the hour opens in the look it turned to.
+  expect(await page.evaluate(() => [localStorage.getItem("office-theme"), document.documentElement.getAttribute("data-theme")])).toEqual(["dark", "dark"]);
+});
+
+test("the crown plays nothing for a reader who asked for stillness or contrast, on a black day, or under forced colours", async ({ page }) => {
+  for (const [name, media, date] of [
+    ["reduced motion", { reducedMotion: "reduce" }, testDate],
+    ["more contrast", { contrast: "more" }, testDate],
+    ["All Souls", {}, "2026-11-02"],
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference", contrast: "no-preference", forcedColors: "none", colorScheme: "light", ...media });
+    await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear(); } catch { /* no page yet */ } });
+    const tap = await openCrown(page, { date });
+    await page.evaluate(() => {
+      window.crownClasses = [];
+      const note = () => window.crownClasses.push(document.documentElement.className + " / " + document.querySelector(".home-hero").className);
+      new MutationObserver(note).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      new MutationObserver(note).observe(document.querySelector(".home-hero"), { attributes: true, attributeFilter: ["class"] });
+    });
+    await tap.click();
+    await expect(page.locator("html"), name).toHaveAttribute("data-theme", "dark");
+    await crownAtRest(page);
+    // The Menu's own change, and none of the play's classes on the way.
+    expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c))), name).toEqual([]);
+    expect(await crownState(page), name).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  }
+  // The themes do nothing under forced colours, so neither does the cross:
+  // its button is never shown, at load or when they come on later.
+  await page.emulateMedia({ reducedMotion: "no-preference", contrast: "no-preference", forcedColors: "none", colorScheme: "light" });
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  const tap = await openCrown(page);
+  await page.emulateMedia({ forcedColors: "active" });
+  await expect(tap).toBeHidden();
+  await page.reload();
+  await page.waitForTimeout(1200);
+  await expect(page.locator(".home-crown-tap")).toBeHidden();
+});
+
+test("the crown makes the Menu's change in an Android app's own browser, whose stills go missing", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({
+    baseURL,
+    userAgent: "Mozilla/5.0 (Linux; Android 10; K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/157.0.0.0 Mobile Safari/537.36",
+  });
+  try {
+    const page = await context.newPage();
+    const tap = await openCrown(page);
+    await page.evaluate(() => {
+      window.crownClasses = [];
+      new MutationObserver(() => window.crownClasses.push(document.documentElement.className)).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    });
+    await tap.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await crownAtRest(page);
+    expect(await page.evaluate(() => window.crownClasses.filter((c) => /crown-/.test(c)))).toEqual([]);
+    expect(await crownState(page)).toEqual({ look: "dark", stored: "dark", label: "Switch to Nave", pressed: "dark" });
+  } finally { await context.close(); }
+});
+
+// The play's light, sampled. The play is stopped and set to every twentieth
+// of a second of its timetable (crown-play.js), and at each the picture is
+// read in three places: the head of the arch, the foot of the wall, and the
+// card under the frieze (its ground, and the ink on it). What these hold:
+// the light travels one way (dawn's first light once stepped back at the
+// turn), no place leaps between two neighbouring moments (the arch once
+// jumped), nothing starts with a kick, and the hours' names are readable
+// but for the moment their ink changes hands. The bounds are today's
+// figures and half as much again, or more (in 0-255 levels: `back` the
+// furthest any place steps against its travel, `step` the most between two
+// moments, `kick` the most a step differs from the one before; `faint` the
+// moments, of some sixty, at which the ink stands under 2:1).
+const CROWN_LIGHT = {
+  dusk: { arch: { back: 5, step: 24, kick: 8 }, wall: { back: 2, step: 12, kick: 4 }, card: { back: 2, step: 12, kick: 4 }, faint: 5 },
+  dawn: { arch: { back: 5, step: 24, kick: 7 }, wall: { back: 5, step: 22, kick: 7 }, card: { back: 2, step: 13.5, kick: 4.5 }, faint: 6 },
+};
+for (const dir of ["dusk", "dawn"]) {
+  test(`the crown's ${dir} moves its light one way, without a leap, and keeps the hours readable`, async ({ page }, testInfo) => {
+    test.slow();
+    await holdCrown(page, dir);
+    // Nothing of the arch's outline is a part of the transition: a still of
+    // it sits off the live one and the outline steps as the stills go.
+    expect(
+      await page.evaluate(() => [...document.querySelectorAll(".home-arch, .home-arch *, .home-arch-fill, .home-arch-fill *, .home-lining")].map((el) => getComputedStyle(el).viewTransitionName).filter((name) => name && name !== "none")),
+    ).toEqual([]);
+    const geo = await page.evaluate(() => {
+      const box = (sel) => {
+        const q = document.querySelector(sel).getBoundingClientRect();
+        return { x: q.left, y: q.top, width: q.width, height: q.height };
+      };
+      return { hero: box(".home-hero"), frieze: box(".home-prayer-card > h2"), tap: box(".home-crown-tap"), W: innerWidth, H: innerHeight };
+    });
+    const { hero, frieze, tap, W, H } = geo;
+    const under = frieze.y + frieze.height + 20;
+    const boxes = {
+      arch: { x: hero.x + hero.width * 0.25, y: tap.y + tap.height + 10, width: hero.width * 0.5, height: frieze.y - 40 - (tap.y + tap.height + 10) },
+      wall: { x: 0, y: H - 26, width: W, height: 22 },
+      card: { x: hero.x + hero.width * 0.1, y: under, width: hero.width * 0.8, height: H - 30 - under },
+    };
+    const series = { arch: [], wall: [], card: [] }, ink = [];
+    for (let at = 700; at <= CROWN_LAST[dir]; at += 50) {
+      await seekCrown(page, at);
+      const img = pixels(await page.screenshot());
+      const scale = img.width / W;
+      series.arch.push(mean(lumas(img, boxes.arch, scale)));
+      series.wall.push(mean(lumas(img, boxes.wall, scale)));
+      const card = lumas(img, boxes.card, scale), ground = centile(card, 0.5);
+      series.card.push(ground);
+      // The ink is the darkest or the lightest of the card, whichever
+      // stands further from its ground.
+      ink.push(Math.max(contrast(ground, centile(card, 0.015)), contrast(ground, centile(card, 0.985))));
+    }
+    // (Kept with the run: the same figures every time.)
+    const kept = testInfo.outputPath("crown-light.json");
+    fs.writeFileSync(kept, JSON.stringify({ series, ink }));
+    await testInfo.attach("crown-light.json", { path: kept, contentType: "application/json" });
+    // Every figure is measured before any is judged, and all of them are
+    // named in a failure, so one run says how far each place stands from
+    // its bound in this browser.
+    const sign = dir === "dusk" ? -1 : 1;
+    const figures = {}, over = [];
+    for (const [name, values] of Object.entries(series)) {
+      let far = values[0], back = 0, step = 0, kick = 0;
+      values.forEach((v, i) => {
+        far = sign * v > sign * far ? v : far;
+        back = Math.max(back, sign * (far - v));
+        if (i) step = Math.max(step, Math.abs(v - values[i - 1]));
+        if (i > 1) kick = Math.max(kick, Math.abs(v - 2 * values[i - 1] + values[i - 2]));
+      });
+      // And it has made most of its journey by the last moment asked for.
+      const travel = sign * (values[values.length - 1] - values[0]);
+      const bound = CROWN_LIGHT[dir][name];
+      figures[name] = { back: +back.toFixed(2), step: +step.toFixed(2), kick: +kick.toFixed(2), travel: +travel.toFixed(1) };
+      if (back > bound.back) over.push(`${name} steps back`);
+      if (step > bound.step) over.push(`${name} leaps`);
+      if (kick > bound.kick) over.push(`${name} kicks`);
+      if (!(travel > 100)) over.push(`${name} falls short`);
+    }
+    const faint = ink.filter((c) => c < 2).length;
+    figures.ink = { before: +ink[0].toFixed(2), after: +ink[ink.length - 1].toFixed(2), faint };
+    if (!(ink[0] > 3.5)) over.push("the ink before is faint");
+    if (!(ink[ink.length - 1] > 3.5)) over.push("the ink after is faint");
+    if (faint > CROWN_LIGHT[dir].faint) over.push("the ink is faint too long");
+    expect(over, JSON.stringify(figures)).toEqual([]);
+  });
+}
+
+// The first act (the cross, the light on the horizon) is held while the
+// browser makes the transition's stills and goes on from where it was. It
+// must be held where the glass has it, not where the page's thread last saw
+// it: those animations run on the compositor, which draws on while the
+// thread is busy, and held at the thread's stale time the first light
+// stepped back at the turn. Here the thread is kept busy for an eighth of
+// a second just before the hold, and every part must be held no earlier
+// than the clock then stood.
+test("the crown's first act is held at the turn where the glass has it", async ({ page }) => {
+  await page.addInitScript(() => {
+    const real = Document.prototype.getAnimations;
+    Document.prototype.getAnimations = function (...args) {
+      if (!document.documentElement.classList.contains("crown-vt") || window.__crownHold) return real.apply(this, args);
+      const until = performance.now() + 125;
+      while (performance.now() < until) { /* busy */ }
+      const list = real.apply(this, args);
+      const now = performance.now();
+      const seen = list
+        .filter((a) => /^crown-/.test(a.animationName || "") && a.playState === "running" && typeof a.startTime === "number")
+        .map((a) => ({ a, name: a.animationName, due: (now - a.startTime) * (a.playbackRate || 1) }));
+      window.__crownHold = [];
+      // After the hold, which is the rest of this same task.
+      queueMicrotask(() => {
+        window.__crownHold = seen.map((p) => ({ name: p.name, state: p.a.playState, short: p.due - p.a.currentTime }));
+      });
+      return list;
+    };
+  });
+  const tap = await openCrown(page, { stored: "dark", hurry: false });
+  await tap.click();
+  await expect.poll(() => page.evaluate(() => (window.__crownHold || []).length)).toBeGreaterThan(0);
+  const held = await page.evaluate(() => window.__crownHold);
+  for (const part of held) {
+    expect(part.state, part.name).toBe("paused");
+    expect(part.short, `${part.name} held behind the glass`).toBeLessThanOrEqual(1);
+  }
+  await crownAtRest(page);
+});
+
+test("the crown's button is the card's last control, a 44px target clear of the date, named for what it does", async ({ page }) => {
+  for (const [width, height] of [[390, 844], [320, 568], [1280, 800]]) {
+    await page.setViewportSize({ width, height });
+    const tap = await openCrown(page);
+    const box = await tap.boundingBox();
+    expect(Math.min(box.width, box.height), `${width}x${height}`).toBeGreaterThanOrEqual(44);
+    const date = await page.locator(".home-date-link").boundingBox();
+    expect(box.y + box.height, `${width}x${height}: clear of the date's tap box`).toBeLessThanOrEqual(date.y + 0.5);
+    // Over the roundel it stands for.
+    const crown = await page.locator(".home-crown").boundingBox();
+    expect(Math.abs(box.x + box.width / 2 - (crown.x + crown.width / 2)), `${width}x${height}`).toBeLessThan(1);
+    expect(await page.evaluate(() => {
+      const controls = Array.from(document.querySelectorAll(".home-hero a[href], .home-hero button, .home-hero summary")).filter((el) => el.getClientRects().length);
+      return controls[controls.length - 1].className;
+    }), `${width}x${height}`).toBe("home-crown-tap");
+  }
 });
 
 for (const theme of ["light", "dark"]) {
@@ -2532,6 +2867,13 @@ test("themes never change layout", async ({ browser }) => {
       await sheet.reload();
       await sheet.evaluate(() => document.fonts.ready);
     }
+    // Home's crown button ships hidden and is shown once its set-up is done,
+    // in idle time a little after load: a fingerprint taken on either side
+    // of that moment has or lacks its box, and the two themes' pages do not
+    // reach it together. Measure with it shown.
+    if (await sheet.locator(".home-crown-tap").count()) {
+      await sheet.locator(".home-crown-tap").waitFor({ state: "visible" });
+    }
     return sheet.evaluate(() => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();
@@ -2540,9 +2882,11 @@ test("themes never change layout", async ({ browser }) => {
         // page's, the lining moves out to the sky's edge, and in the wide
         // niche the panel sits inside the night's slate course where by day
         // it meets the reveal's fillet: painted layers, absolutely placed and
-        // aria-hidden, that move no other box.
+        // aria-hidden, that move no other box. So is the crown's vault
+        // (its ground, stars and light), which the play turns over: WebKit
+        // leaves the hidden stars' drawing unsized by day.
         boxes: [...document.querySelectorAll("body *")]
-          .filter((el) => !el.closest(".home-sky, .home-lining") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
+          .filter((el) => !el.closest(".home-sky, .home-lining, .home-vault") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
           .map((el) => round(el.getBoundingClientRect())),
         lines: [...document.querySelectorAll(".verse, .plain-line, .hymn-line, .antiphon")].map((el) => {
           range.selectNodeContents(el);

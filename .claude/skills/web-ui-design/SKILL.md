@@ -79,12 +79,52 @@ or impose a redesign on an unrelated change.
   across the unequal 2/3/2 groups. Nothing is appended after the groups
   that a `:first-child`/`:last-child` rule would miss: the ruled layer is an
   SVG, so the group rules use `:first-of-type`/`:last-of-type`.
+- A tap on the consecration cross at the head of home's card turns the
+  look over (Nave to Apse and back) as a dusk or a dawn: a same-document
+  view transition, in app.js's "Home: the crown's play" and style.css's
+  block of the same name. `presentation::crown` holds the rule
+  (`after_crown_tap`) and the timetable; a test in office-web's
+  handlers.rs holds app.js and style.css to it. At rest the page is
+  exactly the page without it: every class, name and custom property the
+  play sets is `crown-` prefixed and removed at its end. A reader who
+  asked for stillness or contrast, a black day, and a browser that cannot
+  drive the transition's parts get the Menu's plain crossfade; forced
+  colours hide the button. Its timings are written at the pace it was
+  composed at and performed `PACE` (`--crown-pace`) times slower; slow or
+  hurry it for a test with `--crown-k` on `:root`. The arch's lining is
+  never a named part of the transition (a still of it sits off the live
+  one at a fractional pixel ratio and the outline steps), and a fallback
+  says why on the root (`data-crown-plain`, `data-crown-early`). The wall
+  is never crossed cream to navy straight: a veil multiplied over both
+  pictures shades it first. When
+  capturing it, take no screenshot while the browser makes its stills
+  (the turn): one in flight there loses the old page's still. Do not undo
+  (each has a `KEEP` comment beside it and a test):
+  - the `; wv)` gate: Android's WebView loses the leaving page's still even
+    in a bare transition, so there the tap makes the Menu's change;
+  - the lining, and every other part of the arch's outline, is never given
+    a `view-transition-name`;
+  - the first act is held at the turn at `(now - startTime) * rate`, never
+    at the stale `currentTime` (first light stepped back);
+  - nothing newer than Safari 18.0: no `view-transition-class`, nested
+    groups, `@starting-style`, animated mask images or scroll timelines;
+  - nothing reads the frame back between `startViewTransition` and its
+    `ready`;
+  - stillness, contrast, a black day, an open panel and forced colours take
+    the plain path and set no `crown-` class.
+  Its tests never watch it play: `.web-tools/tests/crown-play.js` pauses
+  every animation after the first frame, clears the play's timers and
+  writes each `currentTime` for the moment asked, so a frame is a function
+  of that moment alone (the visual baselines `crown-dusk-*`/`crown-dawn-*`
+  and the light's smoothness checks in ux.spec.js). The ending beat runs
+  from script after the stills go and is not held this way.
 - On a phone home's frontispiece is a painted panel with a pointed head:
   a steep four-centred arch rising 0.44 of the card's width, its haunches
   leaving the jambs without a kink. The head is drawn by
   `tools/genarch.py`, which writes clip-path polygons into style.css's
   `genarch` block, and the same shapes' arcs into the native apps'
-  `Arch.kt` and `Arch.swift`; never edit them by hand. A box-shadow or border-radius
+  `Arch.kt` and `Arch.swift`, and their figures into app.js's `ARCHES`
+  for the crown's play; never edit them by hand. A box-shadow or border-radius
   cannot follow a pointed head, so each course is its own layer clipped
   to the same arch offset by its own distance (`--arch-d`): the day's
   ring (`.home-arch::before`, the halo's source), the frame

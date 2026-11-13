@@ -20,6 +20,13 @@
            the frieze; app.js sets its gold-leaf stars in it, clear of the
            day's words. Without script the sky has no stars. #}
       <span class="home-sky" aria-hidden="true" data-stars="{{ static("ornaments/stars.json")|url }}"></span>
+      {# The crown's play (a tap on the cross turns the look over, as dusk or
+           dawn in the head: "Home: the crown's play" in style.css and app.js).
+           The vault is the head inside the lining and holds the stars in both
+           looks, hidden by day; the rest is empty and undrawn until it plays. #}
+      <span class="home-back" aria-hidden="true"><span></span></span>
+      <span class="home-vault" aria-hidden="true"><span class="home-vault-ground"></span><span class="home-vault-stars"></span><span class="home-vault-light"></span></span>
+      <span class="home-glow" aria-hidden="true"></span>
       {# A painted border on the niche's back wall, round its head. #}
       <div class="home-lining" aria-hidden="true"></div>
       <header class="home-day-head">
@@ -75,7 +82,7 @@
            picker unfolds under its own control instead. #}
       <div class="home-stage">
       <div class="home-hours-face">
-      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}"><span class="pray-now-label">{{ pray_now_label }}</span></a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
           <h3 class="home-hour-group-label" id="home-hours-morning">
@@ -201,6 +208,11 @@
         </nav>
       </details>
     </div>
+    {# The cross answers a tap: it turns the look over, Nave to Apse or back
+         (presentation::crown). Never announced; last in the card, so the
+         reading and focus order above is unchanged. Script reveals it once
+         its play is set up, and without script it stays hidden. #}
+    <button type="button" class="home-crown-tap" aria-label="Switch to Apse" hidden></button>
   </div>
 </div>
 {% endblock %}

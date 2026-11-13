@@ -484,7 +484,8 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
                 .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = if (rank) 0.dp else 5.6.dp).heightIn(min = 44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            // (On home each of the header's words is a row of the crown's play: Crown.kt.)
+            Row(Modifier.crownUnit("r-brand").tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 // The brand's mark, 18dp: the roundel that ends every hour. Centred on the
                 // row it sits on the text box's middle, 0.21em above the baseline (0.71em
                 // ascent, 0.29em descent); the capitals' middle is 0.325em above it. Raised by
@@ -496,11 +497,11 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
             }
             Spacer(Modifier.weight(1f))
             if (rank) {
-                InlineNav(nav!!, links = false)
+                InlineNav(nav!!, links = false, modifier = Modifier.crownUnit("r-nav"))
             } else if (wide) {
-                InlineNav(nav!!)
+                InlineNav(nav!!, modifier = Modifier.crownUnit("r-nav"))
             } else {
-                Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.crownUnit("r-menu").tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("MENU", style = Type.menu.copy(color = p.accent))
                     Caret(menuOpen, p.accent)
                 }
@@ -508,7 +509,7 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
         }
         if (rank) {
             Box(Modifier.fillMaxWidth().padding(top = 2.4.dp, bottom = 5.6.dp), contentAlignment = Alignment.Center) {
-                InlineNav(nav!!, settings = false)
+                InlineNav(nav!!, settings = false, modifier = Modifier.crownUnit("r-links"))
             }
         }
         // The beam: a 4dp course of oak, its upper edge catching the light as a timber's arris does.
@@ -527,9 +528,9 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: S
  * which a ranked header sets apart.
  */
 @Composable
-private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = true) {
+private fun InlineNav(nav: SiteNav, links: Boolean = true, settings: Boolean = true, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         @Composable
         fun link(label: String, current: Boolean, secondary: Boolean = false, onClick: () -> Unit) {
             val style = if (secondary) Type.label(11.52f, 0.04f) else Type.label(12.48f, 0.06f)

@@ -5978,7 +5978,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 .page-home .home-hero::before,
 .page-home .home-hero::after,
 .page-home .home-arch-fill,
-.page-home .home-sky {
+.page-home .home-sky,
+.page-home .home-back,
+.page-home .home-vault,
+.page-home .home-glow {
   clip-path: polygon(
     0 100%,
     calc(0%) calc(var(--arch-lift) + 0.44 * var(--arch-w)),
@@ -6156,7 +6159,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-hero::before,
   .page-home .home-hero::after,
   .page-home .home-arch-fill,
-  .page-home .home-sky {
+  .page-home .home-sky,
+  .page-home .home-back,
+  .page-home .home-vault,
+  .page-home .home-glow {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.56 * var(--arch-w)),
@@ -6343,7 +6349,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-hero::before,
   .page-home .home-hero::after,
   .page-home .home-arch-fill,
-  .page-home .home-sky {
+  .page-home .home-sky,
+  .page-home .home-back,
+  .page-home .home-vault,
+  .page-home .home-glow {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.64 * var(--arch-w)),
@@ -6538,7 +6547,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-hero::before,
   .page-home .home-hero::after,
   .page-home .home-arch-fill,
-  .page-home .home-sky {
+  .page-home .home-sky,
+  .page-home .home-back,
+  .page-home .home-vault,
+  .page-home .home-glow {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.5 * var(--arch-w)),
@@ -6758,7 +6770,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   .page-home .home-hero::before,
   .page-home .home-hero::after,
   .page-home .home-arch-fill,
-  .page-home .home-sky {
+  .page-home .home-sky,
+  .page-home .home-back,
+  .page-home .home-vault,
+  .page-home .home-glow {
     clip-path: polygon(
       0 100%,
       calc(0%) calc(var(--arch-lift) + 0.62 * var(--arch-w)),
@@ -12240,3 +12255,1282 @@ body.page-home::before {
 @media print { .leader-selector { display: none; } .leader-print-label { display: block; } }
 .usage-trend-details { margin-top: 1rem; }
 .usage-trend-details summary { cursor: pointer; min-height: var(--touch-target); }
+
+/* ==== Home: the crown's play ==========================================
+
+   The sky in the arch keeps the hours, and the page takes its light from
+   it (app.js's block of this name; presentation::crown has the rule, the
+   timetable and the pigments, which office-web tests against this sheet).
+
+   A tap on the consecration cross at the crown of home's arch turns the
+   theme. The cross answers first; the head of the arch acts the change out
+   as a sky over the frieze's horizon (dusk to the Apse, dawn to the Nave);
+   and as the head's act ends the rest of the page opens out from under the
+   horizon. Never announced: the menu's Theme row stays the way to choose.
+   The block stands last in the sheet, so its rules win over the page's own
+   at equal weight while it plays, and none of them holds at rest.
+
+   How it is put together:
+
+   - Everything that moves on its own clock is a live element with fixed
+     pigments: the cross's looks and the light on the horizon from the tap,
+     and from the change of theme each star (by magnitude: the evening
+     star alone, the brightest one at a time, the field; dawn told
+     backwards), the belt riding ahead of the head's front, and the ending
+     beat (the page still, a held breath, then one thing: the last star,
+     or the morning star going out as the cross turns red).
+   - The change of theme itself is a same-document view transition, begun
+     650ms after the tap. The old page is a still. Over it lie, each in a
+     group of its own: the vault (the head's new ground inside the inner
+     lining, let in through a mask whose front crosses the head), the day's
+     words and the page's rows (each dipped once, old ink out and then new
+     ink in, as a front reaches it, so two inks never share a line), the
+     frieze, and the new page itself, let in through a round mask about the
+     frieze's midpoint.
+   - Masks are static gradients moved by mask-size and mask-position only.
+     Two colours are registered with @property (the frieze's ground and
+     edge, so the live band can change them by animation); nothing here is
+     newer than Safari 18.0. KEEP it so: no view-transition-class, no
+     nested groups, no @starting-style, no animation of a mask's image
+     (sizes and positions only), no scroll-driven timeline. Safari 18.0 is
+     the oldest browser that plays this at all, and it plays all of it.
+   - The page is never crossed with its other look straight: a veil,
+     multiplied over both pictures, shades the wall to near the new look's
+     value first (see "The veil").
+
+   Every time below is in ms from the tap. --crown-k scales them all (1 in use;
+   a test may slow or hurry it). What plays before the change
+   of theme is timed from the tap; everything after it from the transition's
+   first frame (.crown-new and the transition's own pseudo-elements). */
+
+:root {
+  --crown-k: 1;
+  /* The play is written at the pace it was composed at and performed this
+     many times slower (presentation::crown::PACE): every time below is
+     multiplied by --crown-kp. Only the cross's own answer to the tap keeps
+     the composed pace (--crown-k): it answers at once. */
+  --crown-pace: 1.625;
+  --crown-kp: calc(var(--crown-k) * var(--crown-pace));
+  /* A line's ink changes hands in this long: old ink out and new ink in,
+     never both. */
+  --crown-ink-handover: 140ms;
+  /* Fresco earths. The afterglow is yellow ochre with red ochre only at the
+     horizon; its ember on the night sky is burnt sienna. First light is
+     lime white laid as light (nearly opaque at the horizon), parted from
+     the sky's teal by a rose-lilac so the two never mix to olive. */
+  --crown-ochre: 201, 151, 63;
+  --crown-red-ochre: 181, 101, 63;
+  --crown-ember: 160, 86, 62;
+  --crown-lime: 244, 232, 223;
+  --crown-rose-lilac: 196, 163, 166;
+  /* Dawn's first warmth, before any lime; the night's teal, lifted; and the
+     cross's ember gold. */
+  --crown-peach: 214, 160, 128;
+  --crown-teal: 72, 112, 118;
+  --crown-cross-ember: 186, 118, 52;
+  /* The edge of the page's change: blue hour, rose gold. Thin. */
+  --crown-edge-dusk: #7f86b8;
+  --crown-edge-dawn: #f6c9a4;
+}
+
+/* ---- At rest. ---- */
+
+/* 1. The vault: one wrapper in the head whose box is the arch inside the
+   inner lining (genarch clips it, as it clips the sky). At rest it holds
+   only the stars' host and clips nothing. While the crown plays it is the
+   head's group: its border box is the mask's box, and what it shows stops
+   at the lining, so the moulding outside changes with the wall. The glow
+   is the same box, for the light on the horizon. */
+.page-home .home-back,
+.page-home .home-vault,
+.page-home .home-glow {
+  --arch-d: calc(-1 * var(--panel-inset) - 9px);
+  --vault-in: calc(var(--panel-inset) + 9px - 5px);
+  display: block;
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--arch-lift));
+  right: calc(-1 * var(--pad-x) - var(--arch-d));
+  bottom: calc(-0.15rem - 2px);
+  left: calc(-1 * var(--pad-x) - var(--arch-d));
+  pointer-events: none;
+}
+
+.page-home .home-hero:not(.crown-on) .home-vault {
+  clip-path: none;
+}
+
+.page-home .home-vault > span {
+  display: block;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* 2. The stars stand in the DOM in both themes, in the sky's own box, and
+   are shown by night. (app.js sets them here; they were once built and
+   thrown away with the theme.) */
+/* Dawn: the plaster rises in the whole panel, to the lining's
+   band, not to the hairline 8px inside it (which left a strip of night
+   beside a square-sided slab). The lining then rides over it as a group of
+   its own and changes as the arch opens. */
+.page-home .home-hero.crown-dawn .home-back,
+.page-home .home-hero.crown-dawn .home-vault,
+.page-home .home-hero.crown-dawn .home-glow {
+  --arch-d: calc(-1 * var(--panel-inset) - 1px);
+  --vault-in: calc(var(--panel-inset) + 1px - 5px);
+}
+
+.page-home .home-vault-stars {
+  top: 0;
+  right: calc(-1 * var(--vault-in));
+  bottom: 0;
+  left: calc(-1 * var(--vault-in));
+  visibility: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-vault-stars {
+    visibility: visible;
+  }
+}
+
+:root[data-theme="dark"] .page-home .home-vault-stars {
+  visibility: visible;
+}
+
+.page-home .home-vault-ground,
+.page-home .home-vault-light {
+  display: none;
+}
+
+/* The old ground's stand-in: empty and not drawn at rest.
+   While the crown plays it holds a copy of the head's old ground under the
+   vault, so the page behind may change at any time without showing in the
+   head before the head's own front has passed. */
+.page-home .home-back {
+  display: none;
+}
+
+.page-home .home-back > span {
+  display: block;
+  position: absolute;
+}
+
+.page-home .home-hero.crown-new .home-back {
+  display: block;
+}
+
+/* Dusk: the plaster still lit takes a trace of the afterglow as the night
+   comes down over it, so the front's feather mixes navy with warmth, not
+   with cream to a chalk white. */
+.page-home .home-hero.crown-dusk.crown-new .home-back > span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(var(--crown-red-ochre), 0.2) 0, rgba(var(--crown-ochre), 0.15) 45%, rgba(var(--crown-ochre), 0.1) 100%);
+  animation: crown-warm calc(900ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.5, 1) calc(100ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-warm {
+  from { opacity: 0; }
+}
+
+/* The belt. Ahead of the front, on the sky it has not reached, rides a
+   band of rose-lilac (the Belt of Venus over the earth's shadow at dusk;
+   the first rose over the night at dawn), and at dawn a wider one of the
+   night's teal lifted ahead of that: the front is three pigments deep, not
+   a fog between cream and navy. Each is a wash on the old ground's
+   stand-in, shown through a ring that moves as the front does (the same
+   ellipse, 1.22 and 1.5 times its size; the figures are the glass's, so the
+   niche's zoom is taken off). */
+.page-home .home-hero.crown-new .home-back::before,
+.page-home .home-hero.crown-new .home-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  --crown-belt: 1.22;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, rgba(0, 0, 0, 0.5) 69%, #000 79%, rgba(0, 0, 0, 0.45) 90%, transparent 100%);
+  mask-image: radial-gradient(closest-side, transparent 60%, rgba(0, 0, 0, 0.5) 69%, #000 79%, rgba(0, 0, 0, 0.45) 90%, transparent 100%);
+  -webkit-mask-size: 0 0;
+  mask-size: 0 0;
+  animation: crown-belt calc(var(--crown-front-dur) * 1ms * var(--crown-kp)) linear calc((var(--crown-front-at)) * 1ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-new .home-back::after {
+  background: rgba(var(--crown-rose-lilac), 0.62);
+}
+
+.page-home .home-hero.crown-dusk.crown-new .home-back::before {
+  content: none;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-back::before {
+  --crown-belt: 1.5;
+  background: rgba(var(--crown-teal), 0.6);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 52%, rgba(0, 0, 0, 0.6) 66%, #000 76%, rgba(0, 0, 0, 0.4) 90%, transparent 100%);
+  mask-image: radial-gradient(closest-side, transparent 52%, rgba(0, 0, 0, 0.6) 66%, #000 76%, rgba(0, 0, 0, 0.4) 90%, transparent 100%);
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-back::after {
+  background: rgba(var(--crown-rose-lilac), 0.5);
+}
+
+@keyframes crown-belt {
+  0% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-r0) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-r0) * var(--crown-belt) / var(--niche-zoom, 1));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-r0) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-r0) * var(--crown-belt) / var(--niche-zoom, 1));
+    -webkit-mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-r0) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-r0) * var(--crown-belt)) / var(--niche-zoom, 1));
+    mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-r0) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-r0) * var(--crown-belt)) / var(--niche-zoom, 1));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+  }
+  95% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-ra) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-ra) * var(--crown-belt) / var(--niche-zoom, 1));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-ra) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-ra) * var(--crown-belt) / var(--niche-zoom, 1));
+    -webkit-mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-ra) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-ra) * var(--crown-belt)) / var(--niche-zoom, 1));
+    mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-ra) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-ra) * var(--crown-belt)) / var(--niche-zoom, 1));
+    animation-timing-function: linear;
+  }
+  100% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-r) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-r) * var(--crown-belt) / var(--niche-zoom, 1));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-r) * var(--crown-belt) / var(--niche-zoom, 1)) calc(2 * var(--crown-r) * var(--crown-belt) / var(--niche-zoom, 1));
+    -webkit-mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-r) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-r) * var(--crown-belt)) / var(--niche-zoom, 1));
+    mask-position: calc((var(--crown-cx) - var(--crown-a) * var(--crown-r) * var(--crown-belt)) / var(--niche-zoom, 1)) calc((var(--crown-cy) - var(--crown-r) * var(--crown-belt)) / var(--niche-zoom, 1));
+  }
+}
+
+.page-home .home-glow {
+  visibility: hidden;
+}
+
+@media (forced-colors: active) {
+  .page-home .home-vault,
+  .page-home .home-glow,
+  .page-home .home-crown-tap {
+    display: none !important;
+  }
+}
+
+@media print {
+  .page-home .home-vault,
+  .page-home .home-glow,
+  .page-home .home-crown-tap {
+    display: none !important;
+  }
+}
+
+/* 3. The cross is a button, after the day's heading in the source, and
+   looks like nothing of the kind: no cursor, no hover, no tap flash. Its
+   box is 2.75rem wide and 2.5rem high, standing on the roundel's foot and
+   growing up into the point, so it keeps clear of the date's own tap box.
+   The template ships it [hidden]; script reveals it. */
+.page-home .home-crown-tap {
+  position: absolute;
+  z-index: 2;
+  /* At least 44 by 44 on the glass in every layout: the niche is zoomed,
+     so the box is sized against the zoom. It may stand wider than the
+     roundel; it still stands on the roundel's foot. */
+  --tap: max(2.75rem, calc(46px / var(--niche-zoom, 1)));
+  top: calc(var(--crown-top) + var(--crown-size) + 0.15rem - var(--tap));
+  left: 50%;
+  width: var(--tap);
+  height: var(--tap);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  transform: translateX(-50%);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: inherit;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.page-home .home-crown-tap[hidden] {
+  display: none;
+}
+
+/* The card's one focus ring (style.css: "One focus ring for the card's
+   controls"), restated here for the button. Keyboard only. */
+.page-home .home-crown-tap:focus {
+  outline: none;
+}
+
+.page-home .home-crown-tap:focus-visible {
+  outline: max(2px, calc(3px / var(--niche-zoom, 1))) solid var(--gold);
+  outline-offset: -4px;
+  border-radius: 6px;
+}
+
+/* ---- The play. ---- */
+
+/* ---- The cross. Its two looks are laid over the real one (which hides
+   while this plays): the look it has, the look it will have, and the
+   leaf's catch of light. app.js copies both looks from the page, so a gilt
+   first-class cross or a quiet season's dimmer leaf are whatever they are. */
+.page-home .home-hero.crown-on .home-crown {
+  visibility: hidden;
+}
+
+.page-home .crown-cross {
+  display: block;
+  position: absolute;
+  top: var(--crown-top);
+  left: 50%;
+  width: var(--crown-size);
+  height: var(--crown-size);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.crown-cross > span {
+  position: absolute;
+  inset: 0;
+}
+
+.crown-cross-new {
+  opacity: 0;
+}
+
+.crown-cross-catch {
+  opacity: 0;
+  background: color-mix(in srgb, var(--crown-catch-ink, #f3e2ad) 62%, white);
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+}
+
+/* Dusk: the cross takes the leaf while it is still on plaster, the first
+   thing that moves (80-460). A cross already gilt answers with the catch.
+   Then it keeps the last of the light: an ember gold that comes with the
+   afterglow and stays on it after the wall is dark, going only as the
+   page comes to rest. */
+.page-home .home-hero.crown-dusk .crown-cross-old {
+  /* The paint stays under the leaf until the leaf has covered it: gilding
+     lays gold over, it does not thin the paint to tan first. */
+  animation: crown-fade-out calc(300ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.4, 1) calc(780ms * var(--crown-k)) both;
+}
+
+.page-home .home-hero.crown-dusk .crown-cross-new {
+  animation: crown-cross-in calc(760ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.4, 1) calc(80ms * var(--crown-k)) both;
+}
+
+.page-home .home-hero.crown-dusk .crown-cross-catch {
+  animation: none;
+}
+
+.page-home .home-hero.crown-dusk.crown-gilt .crown-cross-catch {
+  animation:
+    crown-catch calc(760ms * var(--crown-k)) cubic-bezier(0.4, 0, 0.6, 1) calc(80ms * var(--crown-k)) both;
+}
+
+.crown-cross-ember {
+  opacity: 0;
+  background: rgb(var(--crown-cross-ember));
+  -webkit-mask: url("ornaments/consecration.svg") center / contain no-repeat;
+  mask: url("ornaments/consecration.svg") center / contain no-repeat;
+}
+
+/* (From the change of theme on, times are counted from the transition's
+   first frame, .crown-new: one clock, however long the stills took.) */
+.page-home .home-hero.crown-dusk.crown-new .crown-cross-ember {
+  animation:
+    crown-ember-in calc(900ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(500ms * var(--crown-kp)) both,
+    crown-gone calc(600ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc((var(--crown-beat, 3900) - 970) * 1ms * var(--crown-kp)) forwards;
+}
+
+/* Dawn: the roundel takes the first light, before the horizon does: the
+   leaf lifts at once (0-180) and settles. As the plaster nears it the
+   cross deepens to the ember gold, which stands on cream where leaf alone
+   is lost; and it is the last thing to change: at the ending beat, with the
+   morning star, it turns from gold to its red. */
+.page-home .home-hero.crown-dawn .crown-cross-catch {
+  animation: crown-catch-hold calc(1300ms * var(--crown-k)) linear calc(60ms * var(--crown-k)) both;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .crown-cross-ember {
+  animation:
+    crown-ember-in calc(800ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(900ms * var(--crown-kp)) both,
+    crown-gone calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(var(--crown-beat, 3400) * 1ms * var(--crown-kp)) forwards;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .crown-cross-old {
+  animation: crown-fade-out calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(var(--crown-beat, 3400) * 1ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .crown-cross-new {
+  /* Paint over leaf. */
+  animation: crown-cross-in calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(var(--crown-beat, 3400) * 1ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-ember-in {
+  from { opacity: 0; }
+  to { opacity: 0.85; }
+}
+
+@keyframes crown-fade-out {
+  from { opacity: var(--crown-op, 1); }
+  to { opacity: 0; }
+}
+
+@keyframes crown-cross-in {
+  from { opacity: 0; }
+  to { opacity: var(--crown-op, 1); }
+}
+
+@keyframes crown-catch {
+  0% { opacity: 0; }
+  40% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+@keyframes crown-catch-hold {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1); }
+  34% { opacity: 0.55; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  100% { opacity: 0; }
+}
+
+/* ---- The light on the horizon: a low, wide wash inside the inner lining,
+   under the day's words. app.js caps its height under the last line of the
+   day block (--crown-wash-h). ---- */
+.page-home .home-hero.crown-on .home-glow {
+  visibility: visible;
+}
+
+.page-home .home-glow::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--crown-wash-h, 34%);
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+
+/* Dusk: the afterglow rises off the horizon (0-450), through the pigment,
+   and is gone once the dark has covered it. */
+.page-home .home-hero.crown-dusk .home-glow::before {
+  background:
+    linear-gradient(0deg, rgba(var(--crown-red-ochre), 0.24) 0, rgba(var(--crown-red-ochre), 0.1) 14%, rgba(var(--crown-red-ochre), 0) 30%),
+    linear-gradient(0deg, rgba(var(--crown-ochre), 0.3) 0, rgba(var(--crown-ochre), 0.26) 30%, rgba(var(--crown-ochre), 0.1) 68%, rgba(var(--crown-ochre), 0) 100%);
+  -webkit-mask: url("pigment.png") 0 0 / 128px 128px, radial-gradient(ellipse 160% 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.85) 34%, rgba(0, 0, 0, 0.4) 66%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask: url("pigment.png") 0 0 / 128px 128px, radial-gradient(ellipse 160% 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.85) 34%, rgba(0, 0, 0, 0.4) 66%, transparent 100%);
+  mask-composite: intersect;
+  animation: crown-rise calc(1250ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dusk.crown-new .home-glow::before {
+  animation:
+    crown-rise calc(1250ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-kp)) both,
+    crown-gone calc(500ms * var(--crown-kp)) linear calc(1750ms * var(--crown-kp)) forwards;
+}
+
+/* And before the dark comes down, the whole niche takes the raking light:
+   golden hour on plaster, an ochre laid thin over all of it and deeper
+   toward the horizon. The night covers it from above. */
+.page-home .home-hero.crown-dusk .home-glow::after {
+  height: 100%;
+  background: linear-gradient(0deg, rgba(var(--crown-ochre), 0.4) 0, rgba(var(--crown-ochre), 0.28) 40%, rgba(var(--crown-ochre), 0.16) 100%);
+  animation: crown-wash calc(1300ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(120ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dusk.crown-new .home-glow::after {
+  animation:
+    crown-wash calc(1300ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(120ms * var(--crown-kp)) both,
+    crown-gone calc(500ms * var(--crown-kp)) linear calc(1750ms * var(--crown-kp)) forwards;
+}
+
+@keyframes crown-wash {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* On a phone the afterglow is the cue that something has begun: denser. */
+@media (max-width: 700px) {
+  .page-home .home-hero.crown-dusk .home-glow::before {
+    background:
+      linear-gradient(0deg, rgba(var(--crown-red-ochre), 0.5) 0, rgba(var(--crown-red-ochre), 0.22) 14%, rgba(var(--crown-red-ochre), 0) 32%),
+      linear-gradient(0deg, rgba(var(--crown-ochre), 0.62) 0, rgba(var(--crown-ochre), 0.52) 30%, rgba(var(--crown-ochre), 0.2) 68%, rgba(var(--crown-ochre), 0) 100%);
+  }
+}
+
+/* Dawn. The night first lifts to its teal from the horizon, then a
+   rose-lilac, then a peach of red ochre and lime (one wash, three pigments
+   deep, rising: the teal leads). No white: the lime comes last, thin, and
+   only low, and the plaster that follows it is itself under a warm shade
+   (below). */
+.page-home .home-glow::before {
+  z-index: 1;
+}
+
+.page-home .home-glow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--crown-wash-h, 34%);
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+
+.page-home .home-hero.crown-dawn .home-glow::after {
+  height: calc(var(--crown-wash-h, 34%) * 1.5);
+  background: linear-gradient(0deg,
+    rgba(var(--crown-peach), 0.92) 0,
+    rgba(206, 150, 124, 0.8) 16%,
+    rgba(var(--crown-rose-lilac), 0.5) 38%,
+    rgba(var(--crown-teal), 0.5) 62%,
+    rgba(var(--crown-teal), 0.22) 82%,
+    rgba(var(--crown-teal), 0) 100%);
+  -webkit-mask: radial-gradient(ellipse calc(var(--crown-wash-rx, 48%) * 1.3) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
+  mask: radial-gradient(ellipse calc(var(--crown-wash-rx, 48%) * 1.3) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
+  animation: crown-rise calc(1100ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(150ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dawn .home-glow::before {
+  height: calc(var(--crown-wash-h, 34%) * 0.5);
+  background: linear-gradient(0deg,
+    rgba(var(--crown-lime), 0.45) 0,
+    rgba(var(--crown-lime), 0.3) 40%,
+    rgba(var(--crown-lime), 0) 100%);
+  -webkit-mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
+  mask: radial-gradient(ellipse var(--crown-wash-rx, 48%) 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.45) 64%, transparent 100%);
+  animation: crown-rise calc(900ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(700ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-glow::after {
+  animation:
+    crown-rise calc(1100ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(150ms * var(--crown-kp)) both,
+    crown-gone calc(700ms * var(--crown-kp)) linear calc(1100ms * var(--crown-kp)) forwards;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-glow::before {
+  animation:
+    crown-rise calc(900ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(700ms * var(--crown-kp)) both,
+    crown-gone calc(700ms * var(--crown-kp)) linear calc(1100ms * var(--crown-kp)) forwards;
+}
+
+@keyframes crown-rise {
+  from { opacity: 0; transform: scaleY(0.3); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes crown-gone {
+  to { opacity: 0; }
+}
+
+/* ---- The vault's own furniture while it is the head's group. ---- */
+
+/* The new ground, inside the lining: the Apse's sky at dusk, the Nave's
+   plaster at dawn, each a copy of the real layer in the real layer's box
+   (app.js), so it registers with what it hands over to. */
+.page-home .home-hero.crown-new .home-vault-ground {
+  display: block;
+}
+
+/* What the light leaves on the new ground: an ember low on the night sky,
+   a warmth low on the plaster. Both go out. */
+.page-home .home-hero.crown-new .home-vault-light {
+  display: block;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 22%;
+  transform-origin: 50% 100%;
+  /* A low mound on the horizon that has gone before it reaches the jambs:
+     no side, no corner. */
+  -webkit-mask: radial-gradient(ellipse 58% 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.85) 26%, rgba(0, 0, 0, 0.4) 52%, rgba(0, 0, 0, 0.12) 70%, transparent 84%);
+  mask: radial-gradient(ellipse 58% 100% at 50% 100%, #000 0, rgba(0, 0, 0, 0.85) 26%, rgba(0, 0, 0, 0.4) 52%, rgba(0, 0, 0, 0.12) 70%, transparent 84%);
+}
+
+.page-home .home-hero.crown-dusk.crown-new .home-vault-light {
+  background: linear-gradient(0deg, rgba(var(--crown-ember), 0.64) 0, rgba(var(--crown-ember), 0.32) 45%, rgba(var(--crown-ember), 0) 100%);
+  animation: crown-sink calc(1500ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.3, 1) calc(1900ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-vault-light {
+  background: linear-gradient(0deg, rgba(var(--crown-ochre), 0.2) 0, rgba(var(--crown-ochre), 0.08) 50%, rgba(var(--crown-ochre), 0) 100%);
+  animation: crown-sink calc(1600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.3, 1) calc(900ms * var(--crown-kp)) both;
+}
+
+/* Dawn's plaster does not arrive white. It comes up under a warm shade,
+   peach low and rose above, multiplied over it, and the shade lifts on a
+   long tail: the horizon has no white lip, and the niche comes to its
+   cream last. */
+.page-home .home-hero.crown-dawn.crown-new .home-vault-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(var(--crown-peach)) 0, rgb(206, 158, 140) 55%, rgb(var(--crown-rose-lilac)) 100%);
+  mix-blend-mode: multiply;
+  animation: crown-gone calc(2300ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.3, 1) calc(250ms * var(--crown-kp)) forwards;
+}
+
+@keyframes crown-sink {
+  from { opacity: 1; transform: scaleY(1); }
+  to { opacity: 0; transform: scaleY(0.4); }
+}
+
+/* ---- The stars. app.js gives each its turn (--crown-d, ms from the tap). ---- */
+
+.page-home .home-stars path {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* Dusk: unlit until its turn (app.js: the evening star alone, the
+   brightest one at a time, then the field by magnitude, and one last after
+   the page is still). Leaf does not grow: it swells a little past its
+   size as it kindles and settles, and opacity carries it. Nothing
+   twinkles. */
+.page-home .home-hero.crown-dusk .home-stars path {
+  opacity: 0;
+}
+
+.page-home .home-hero.crown-dusk.crown-new .home-stars path {
+  animation: crown-kindle calc(600ms * var(--crown-kp)) cubic-bezier(0.3, 0.2, 0.3, 1) calc(var(--crown-d, 2600) * 1ms * var(--crown-kp)) both;
+}
+
+/* Dawn: out by magnitude, the faintest first, each before the plaster's
+   front reaches it. They stay shown through the change of theme, on a
+   layer of their own, over the vault: the morning star stands on the
+   light wall, its gold deepened to be seen there, until the ending beat. */
+.page-home .home-hero.crown-dawn .home-vault-stars {
+  visibility: visible;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-stars path {
+  animation: crown-snuff calc(650ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.3, 1) calc(var(--crown-d, 0) * 1ms * var(--crown-kp)) both;
+}
+
+.page-home .home-hero.crown-dawn.crown-new .home-stars path.crown-evening {
+  animation:
+    crown-morning calc(700ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(var(--crown-morning-at, 1400) * 1ms * var(--crown-kp)) both,
+    crown-snuff calc(600ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.4, 1) calc(var(--crown-d, 0) * 1ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-kindle {
+  0% { opacity: 0; transform: scale(0.86); }
+  55% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes crown-snuff {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes crown-morning {
+  from { filter: brightness(1) saturate(1); }
+  to { filter: brightness(0.7) saturate(1.8); }
+}
+
+/* ==== The view transition ============================================== */
+
+/* Under every still, the leaving page's own ground (app.js): where a
+   browser fails to draw one, that shows and not its white. */
+:root.crown-vt::view-transition {
+  background: var(--crown-floor, transparent);
+}
+
+/* The page stays usable under it: a tap on "Pray" goes to the page. */
+:root.crown-vt::view-transition,
+:root.crown-vt::view-transition-group(*),
+:root.crown-vt::view-transition-image-pair(*),
+:root.crown-vt::view-transition-old(*),
+:root.crown-vt::view-transition-new(*) {
+  pointer-events: none;
+}
+
+:root.crown-vt.crown-new .page-home .home-vault { view-transition-name: crown-vault; }
+:root.crown-vt .page-home .home-glow { view-transition-name: crown-glow; }
+:root.crown-vt .page-home .home-vault-stars { view-transition-name: crown-stars; }
+:root.crown-vt .page-home .crown-cross { view-transition-name: crown-cross; }
+:root.crown-vt.crown-new .page-home .home-back { view-transition-name: crown-back; }
+:root.crown-vt .page-home .home-prayer-card > h2 { view-transition-name: crown-frieze; }
+/* KEEP (ux.spec.js: "the crown's dusk moves its light one way" checks no
+   part of the arch has a name).
+   (The lining is not named: a still of it sits a fraction of a pixel off
+   the live one wherever the screen's pixels are not a whole number to the
+   CSS pixel, and the arch's whole outline would step as the stills go up
+   and again as they come down. It stays in the page's own picture, which
+   is exact, and turns with the page as the spread passes it.) */
+:root.crown-vt .page-home .home-crown-tap:focus-visible { view-transition-name: crown-tap; }
+:root.crown-vt .page-home .crown-r1 { view-transition-name: crown-r1; }
+:root.crown-vt .page-home .crown-r2 { view-transition-name: crown-r2; }
+:root.crown-vt .page-home .crown-r3 { view-transition-name: crown-r3; }
+:root.crown-vt .page-home .crown-r4 { view-transition-name: crown-r4; }
+:root.crown-vt .page-home .crown-r5 { view-transition-name: crown-r5; }
+:root.crown-vt .page-home .crown-r6 { view-transition-name: crown-r6; }
+:root.crown-vt .page-home .crown-r7 { view-transition-name: crown-r7; }
+:root.crown-vt .page-home .crown-r8 { view-transition-name: crown-r8; }
+:root.crown-vt .page-home .crown-r9 { view-transition-name: crown-r9; }
+:root.crown-vt .page-home .crown-r10 { view-transition-name: crown-r10; }
+:root.crown-vt .crown-veil { view-transition-name: crown-veil; }
+:root.crown-vt .page-home .crown-u1 { view-transition-name: crown-w1; }
+:root.crown-vt .page-home .crown-u2 { view-transition-name: crown-w2; }
+:root.crown-vt .page-home .crown-u3 { view-transition-name: crown-w3; }
+:root.crown-vt .page-home .crown-u4 { view-transition-name: crown-w4; }
+:root.crown-vt .page-home .crown-u5 { view-transition-name: crown-w5; }
+:root.crown-vt .page-home .crown-u6 { view-transition-name: crown-w6; }
+:root.crown-vt .page-home .crown-u7 { view-transition-name: crown-w7; }
+:root.crown-vt .page-home .crown-u8 { view-transition-name: crown-w8; }
+:root.crown-vt .page-home .crown-u9 { view-transition-name: crown-w9; }
+:root.crown-vt .page-home .crown-u10 { view-transition-name: crown-w10; }
+:root.crown-vt .page-home .crown-u11 { view-transition-name: crown-w11; }
+:root.crown-vt .page-home .crown-u12 { view-transition-name: crown-w12; }
+
+/* (The words' and rows' names, crown-w1..24, are set by app.js.) */
+
+/* The live layers: no still, no crossfade; they are simply themselves. */
+:root.crown-vt::view-transition-group(crown-glow),
+:root.crown-vt::view-transition-group(crown-stars),
+:root.crown-vt::view-transition-group(crown-cross),
+:root.crown-vt::view-transition-group(crown-vault),
+:root.crown-vt::view-transition-group(crown-back),
+:root.crown-vt::view-transition-group(crown-veil),
+:root.crown-vt::view-transition-group(crown-tap),
+:root.crown-vt::view-transition-group(crown-frieze),
+:root.crown-vt::view-transition-group(root) {
+  animation: none;
+}
+
+:root.crown-vt::view-transition-old(crown-glow),
+:root.crown-vt::view-transition-old(crown-stars),
+:root.crown-vt::view-transition-old(crown-tap),
+:root.crown-vt::view-transition-old(crown-frieze),
+:root.crown-vt::view-transition-old(crown-cross) {
+  display: none;
+}
+
+:root.crown-vt::view-transition-new(crown-glow),
+:root.crown-vt::view-transition-new(crown-stars),
+:root.crown-vt::view-transition-new(crown-cross),
+:root.crown-vt::view-transition-new(crown-tap),
+:root.crown-vt::view-transition-new(crown-frieze),
+:root.crown-vt::view-transition-new(crown-back),
+:root.crown-vt::view-transition-new(crown-vault) {
+  animation: none;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+/* Order, from the wall up: the page, its veil, first or last light, the
+   vault, the stars, the words and rows, the frieze, the cross. */
+:root.crown-vt::view-transition-group(crown-back) { z-index: 1; }
+:root.crown-vt::view-transition-group(crown-veil) { z-index: 1; }
+:root.crown-vt::view-transition-group(crown-glow) { z-index: 3; }
+:root.crown-vt::view-transition-group(crown-vault) { z-index: 4; }
+:root.crown-vt::view-transition-group(crown-stars) { z-index: 5; }
+/* The frieze is the horizon, and the one thing that holds. A still of it
+   goes soft (the browser's stills are not as sharp as the page), so it is
+   never a still: its group shows the live band from the first frame, and
+   the band itself keeps the old theme's ground until the page's front
+   leaves it, then takes the new one (two registered colours, animated on
+   the element). The lettering's leaf is the same in both themes. */
+:root.crown-vt::view-transition-group(crown-frieze) { z-index: 6; }
+:root.crown-vt::view-transition-group(crown-tap) { z-index: 8; }
+:root.crown-vt::view-transition-group(crown-cross) { z-index: 7; }
+
+/* ---- The head's front. The vault's group is drawn through an ellipse
+   --crown-a times as wide as tall about (--crown-cx, --crown-cy), in the vault's
+   own box, its vertical radius growing from --crown-r0 to --crown-r: from above
+   the point at dusk, from under the frieze at dawn. ---- */
+:root.crown-vt::view-transition-group(crown-vault) {
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: radial-gradient(closest-side, #000 0, #000 78%, rgba(0, 0, 0, 0.844) 83.5%, rgba(0, 0, 0, 0.5) 89%, rgba(0, 0, 0, 0.156) 94.5%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 0, #000 78%, rgba(0, 0, 0, 0.844) 83.5%, rgba(0, 0, 0, 0.5) 89%, rgba(0, 0, 0, 0.156) 94.5%, transparent 100%);
+  -webkit-mask-size: 0 0;
+  mask-size: 0 0;
+  animation: crown-front calc(var(--crown-front-dur) * 1ms * var(--crown-kp)) linear calc((var(--crown-front-at)) * 1ms * var(--crown-kp)) both;
+}
+
+/* Before the stills come down the vault's stand-in goes, slowly, and
+   leaves the page's own vault showing: what its clip hid of the lining
+   comes up with it and not in the frame the stills go. (The old ground
+   kept behind it goes first, unseen under it.) */
+:root.crown-vt::view-transition-new(crown-vault) {
+  animation: crown-ink-out calc(var(--crown-vault-dur, 480) * 1ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.5, 1) calc(var(--crown-vault-out, 99999) * 1ms * var(--crown-kp)) both;
+}
+:root.crown-vt::view-transition-new(crown-back) {
+  animation: crown-ink-out calc(80ms * var(--crown-kp)) linear calc((var(--crown-vault-out, 99999) - 80) * 1ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-front {
+  0% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-r0)) calc(2 * var(--crown-r0));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-r0)) calc(2 * var(--crown-r0));
+    -webkit-mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-r0)) calc(var(--crown-cy) - var(--crown-r0));
+    mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-r0)) calc(var(--crown-cy) - var(--crown-r0));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+  }
+  95% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-ra)) calc(2 * var(--crown-ra));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-ra)) calc(2 * var(--crown-ra));
+    -webkit-mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-ra)) calc(var(--crown-cy) - var(--crown-ra));
+    mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-ra)) calc(var(--crown-cy) - var(--crown-ra));
+    animation-timing-function: linear;
+  }
+  100% {
+    -webkit-mask-size: calc(2 * var(--crown-a) * var(--crown-r)) calc(2 * var(--crown-r));
+    mask-size: calc(2 * var(--crown-a) * var(--crown-r)) calc(2 * var(--crown-r));
+    -webkit-mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-r)) calc(var(--crown-cy) - var(--crown-r));
+    mask-position: calc(var(--crown-cx) - var(--crown-a) * var(--crown-r)) calc(var(--crown-cy) - var(--crown-r));
+  }
+}
+
+/* ---- The words and the rows: one dip each, about the moment a front's
+   middle reaches the line (--crown-wN, from app.js). The old ink sinks
+   into the changing ground and the new rises from it, the new beginning
+   before the old is quite gone: on the front's mid-ground the two are
+   one faint line for an instant, and a line is never without ink. ---- */
+:root.crown-vt::view-transition-group(crown-w1) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w1) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w1, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w1) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w1, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w2) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w2) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w2, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w2) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w2, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w3) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w3) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w3, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w3) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w3, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w4) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w4) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w4, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w4) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w4, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w5) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w5) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w5, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w5) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w5, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w6) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w6) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w6, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w6) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w6, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w7) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w7) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w7, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w7) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w7, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w8) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w8) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w8, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w8) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w8, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w9) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w9) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w9, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w9) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w9, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w10) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w10) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w10, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w10) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w10, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w11) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w11) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w11, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w11) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w11, 0) - 80) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-w12) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-w12) { animation: crown-ink-out calc(240ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.7, 1) calc((var(--crown-w12, 0) - 230) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-w12) { animation: crown-ink-in calc(360ms * var(--crown-kp)) cubic-bezier(0.3, 0, 0.4, 1) calc((var(--crown-w12, 0) - 80) * 1ms * var(--crown-kp)) both; }
+
+/* The page's rows: each changes ink in 140ms at its own
+   moment (--crown-rN, in turn down the card, 60ms apart at the least), one
+   ink handing to the other at the same glyphs. So the card is never a
+   blank slab while its ground passes through the middle. */
+:root.crown-vt::view-transition-group(crown-r1) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r2) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r3) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r4) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r5) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r6) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r7) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r8) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r9) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-group(crown-r10) { z-index: 5; animation: none; }
+:root.crown-vt::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both; }
+
+/* The page takes its time to turn, and an ink of
+   middling weight (the Pray button's red, the gold labels, "Change date")
+   has no contrast on a ground passing through its middle greys, whichever
+   of its two colours it wears. So each row's ink goes dark for that
+   passage: at dusk the old ink deepens toward black before it hands over
+   (a dark ink holds on any ground lighter than deep slate, and the light
+   one takes over below that); at dawn the new ink arrives dark and eases
+   to its own colour as the ground grows light. The hand-over itself is
+   still 140 ms. */
+@keyframes crown-ink-dim { to { filter: brightness(var(--crown-ink-dim, 0.3)); } }
+@keyframes crown-ink-undim { from { filter: brightness(var(--crown-ink-dim, 0.3)); } }
+/* A row with a ground of its own (the current hour's glow) is dimmed
+   only a little: its glow would go to a brown smudge. */
+@keyframes crown-ink-dim-soft { to { filter: brightness(0.78); } }
+@keyframes crown-ink-undim-soft { from { filter: brightness(0.78); } }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r1) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn1, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r1, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r1) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r1, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un1, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r1, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r2) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn2, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r2, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r2) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r2, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un2, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r2, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r3) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn3, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r3, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r3) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r3, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un3, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r3, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r4) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn4, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r4, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r4) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r4, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un4, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r4, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r5) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn5, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r5, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r5) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r5, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un5, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r5, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r6) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn6, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r6, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r6) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r6, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un6, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r6, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r7) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn7, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r7, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r7) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r7, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un7, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r7, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r8) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn8, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r8, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r8) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r8, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un8, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r8, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r9) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn9, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r9, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r9) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r9, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un9, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r9, 0) + 220) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dusk::view-transition-old(crown-r10) { animation: crown-ink-out calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-dn10, crown-ink-dim) calc(280ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc((var(--crown-r10, 0) - 430) * 1ms * var(--crown-kp)) both; }
+:root.crown-vt.crown-dawn::view-transition-new(crown-r10) { animation: crown-ink-in calc(var(--crown-ink-handover) * var(--crown-kp)) linear calc((var(--crown-r10, 0) - 70) * 1ms * var(--crown-kp)) both, var(--crown-un10, crown-ink-undim) calc(520ms * var(--crown-kp)) cubic-bezier(0.5, 0, 0.7, 1) calc((var(--crown-r10, 0) + 220) * 1ms * var(--crown-kp)) both; }
+
+@keyframes crown-ink-out {
+  to { opacity: 0; }
+}
+
+@keyframes crown-ink-in {
+  from { opacity: 0; }
+}
+
+@property --crown-fz-ground {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
+@property --crown-fz-edge {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
+.page-home .home-hero.crown-new .home-prayer-card > h2 {
+  --inscription-ground: var(--crown-fz-ground);
+  --inscription-edge: var(--crown-fz-edge);
+  /* The land: dark first at dusk, a silhouette against the afterglow;
+     light last at dawn (presentation::crown's frieze spans). */
+  animation: crown-frieze calc(var(--crown-frieze-dur, 900) * 1ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.3, 1) calc(var(--crown-frieze-at, 1550) * 1ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-frieze {
+  from { --crown-fz-ground: var(--crown-fz-g0); --crown-fz-edge: var(--crown-fz-e0); }
+  to { --crown-fz-ground: var(--crown-fz-g1); --crown-fz-edge: var(--crown-fz-e1); }
+}
+
+/* ---- The page. The old one is a still; the new one lies
+   over it through the arch's own shape, grown: a head (app.js draws the
+   four-centred arch from genarch's figures into a small image, feathered)
+   scaled about the middle of the springing line, and under it a body with
+   the same jambs whose foot runs down the page. So the night, or the
+   light, leaves the window in the window's form: up and out through the
+   moulding and over the wall as a pointed arch, and down the hour list
+   between straight jambs. It starts just inside the vault, hidden under
+   it. Three static images, moved by mask-size and mask-position only:
+     arch (head and jambs in one image)  ∩  foot
+   (These outrank the cross-document crossfade's rules on the root.) ---- */
+:root.crown-vt::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+:root.crown-vt::view-transition-old(root) {
+  mix-blend-mode: normal;
+  animation: none;
+  opacity: 1;
+}
+
+:root.crown-vt::view-transition-new(root) {
+  mix-blend-mode: normal;
+  opacity: 1;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: var(--crown-m-arch);
+  mask-image: var(--crown-m-arch);
+  /* Nothing of the new page shows before its turn. */
+  -webkit-mask-size: 0 0;
+  mask-size: 0 0;
+  /* The opacity is the light and runs on the compositor; the shape only
+     says where it is furthest along, and is moved six times between each
+     pair of its nine sizes (about 53 a second), so no stair is more than a
+     few levels. */
+  animation:
+    crown-spread calc(var(--crown-shape-dur) * 1ms * var(--crown-kp)) steps(12, end) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) forwards,
+    crown-glow-in calc(var(--crown-glow-dur) * 1ms * var(--crown-kp)) var(--crown-glow-ease) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) both;
+}
+
+@keyframes crown-glow-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes crown-spread {
+  0.0% {
+    -webkit-mask-size: var(--crown-hw0) var(--crown-hh0);
+    mask-size: var(--crown-hw0) var(--crown-hh0);
+    -webkit-mask-position: var(--crown-hx0) var(--crown-hy0);
+    mask-position: var(--crown-hx0) var(--crown-hy0);
+  }
+  12.5% {
+    -webkit-mask-size: var(--crown-hw1) var(--crown-hh1);
+    mask-size: var(--crown-hw1) var(--crown-hh1);
+    -webkit-mask-position: var(--crown-hx1) var(--crown-hy1);
+    mask-position: var(--crown-hx1) var(--crown-hy1);
+  }
+  25.0% {
+    -webkit-mask-size: var(--crown-hw2) var(--crown-hh2);
+    mask-size: var(--crown-hw2) var(--crown-hh2);
+    -webkit-mask-position: var(--crown-hx2) var(--crown-hy2);
+    mask-position: var(--crown-hx2) var(--crown-hy2);
+  }
+  37.5% {
+    -webkit-mask-size: var(--crown-hw3) var(--crown-hh3);
+    mask-size: var(--crown-hw3) var(--crown-hh3);
+    -webkit-mask-position: var(--crown-hx3) var(--crown-hy3);
+    mask-position: var(--crown-hx3) var(--crown-hy3);
+  }
+  50.0% {
+    -webkit-mask-size: var(--crown-hw4) var(--crown-hh4);
+    mask-size: var(--crown-hw4) var(--crown-hh4);
+    -webkit-mask-position: var(--crown-hx4) var(--crown-hy4);
+    mask-position: var(--crown-hx4) var(--crown-hy4);
+  }
+  62.5% {
+    -webkit-mask-size: var(--crown-hw5) var(--crown-hh5);
+    mask-size: var(--crown-hw5) var(--crown-hh5);
+    -webkit-mask-position: var(--crown-hx5) var(--crown-hy5);
+    mask-position: var(--crown-hx5) var(--crown-hy5);
+  }
+  75.0% {
+    -webkit-mask-size: var(--crown-hw6) var(--crown-hh6);
+    mask-size: var(--crown-hw6) var(--crown-hh6);
+    -webkit-mask-position: var(--crown-hx6) var(--crown-hy6);
+    mask-position: var(--crown-hx6) var(--crown-hy6);
+  }
+  87.5% {
+    -webkit-mask-size: var(--crown-hw7) var(--crown-hh7);
+    mask-size: var(--crown-hw7) var(--crown-hh7);
+    -webkit-mask-position: var(--crown-hx7) var(--crown-hy7);
+    mask-position: var(--crown-hx7) var(--crown-hy7);
+  }
+  100.0% {
+    -webkit-mask-size: var(--crown-hw8) var(--crown-hh8);
+    mask-size: var(--crown-hw8) var(--crown-hh8);
+    -webkit-mask-position: var(--crown-hx8) var(--crown-hy8);
+    mask-position: var(--crown-hx8) var(--crown-hy8);
+  }
+}
+
+@keyframes crown-veil-spread {
+  0.0% {
+    -webkit-mask-size: var(--crown-vw0) var(--crown-vh0);
+    mask-size: var(--crown-vw0) var(--crown-vh0);
+    -webkit-mask-position: var(--crown-vx0) var(--crown-vy0);
+    mask-position: var(--crown-vx0) var(--crown-vy0);
+  }
+  12.5% {
+    -webkit-mask-size: var(--crown-vw1) var(--crown-vh1);
+    mask-size: var(--crown-vw1) var(--crown-vh1);
+    -webkit-mask-position: var(--crown-vx1) var(--crown-vy1);
+    mask-position: var(--crown-vx1) var(--crown-vy1);
+  }
+  25.0% {
+    -webkit-mask-size: var(--crown-vw2) var(--crown-vh2);
+    mask-size: var(--crown-vw2) var(--crown-vh2);
+    -webkit-mask-position: var(--crown-vx2) var(--crown-vy2);
+    mask-position: var(--crown-vx2) var(--crown-vy2);
+  }
+  37.5% {
+    -webkit-mask-size: var(--crown-vw3) var(--crown-vh3);
+    mask-size: var(--crown-vw3) var(--crown-vh3);
+    -webkit-mask-position: var(--crown-vx3) var(--crown-vy3);
+    mask-position: var(--crown-vx3) var(--crown-vy3);
+  }
+  50.0% {
+    -webkit-mask-size: var(--crown-vw4) var(--crown-vh4);
+    mask-size: var(--crown-vw4) var(--crown-vh4);
+    -webkit-mask-position: var(--crown-vx4) var(--crown-vy4);
+    mask-position: var(--crown-vx4) var(--crown-vy4);
+  }
+  62.5% {
+    -webkit-mask-size: var(--crown-vw5) var(--crown-vh5);
+    mask-size: var(--crown-vw5) var(--crown-vh5);
+    -webkit-mask-position: var(--crown-vx5) var(--crown-vy5);
+    mask-position: var(--crown-vx5) var(--crown-vy5);
+  }
+  75.0% {
+    -webkit-mask-size: var(--crown-vw6) var(--crown-vh6);
+    mask-size: var(--crown-vw6) var(--crown-vh6);
+    -webkit-mask-position: var(--crown-vx6) var(--crown-vy6);
+    mask-position: var(--crown-vx6) var(--crown-vy6);
+  }
+  87.5% {
+    -webkit-mask-size: var(--crown-vw7) var(--crown-vh7);
+    mask-size: var(--crown-vw7) var(--crown-vh7);
+    -webkit-mask-position: var(--crown-vx7) var(--crown-vy7);
+    mask-position: var(--crown-vx7) var(--crown-vy7);
+  }
+  100.0% {
+    -webkit-mask-size: var(--crown-vw8) var(--crown-vh8);
+    mask-size: var(--crown-vw8) var(--crown-vh8);
+    -webkit-mask-position: var(--crown-vx8) var(--crown-vy8);
+    mask-position: var(--crown-vx8) var(--crown-vy8);
+  }
+}
+
+/* The veil. Plaster and night mix to a dead grey half way, so the page is
+   never crossed with its other look straight. The hour's colour is
+   multiplied over the turning wall: at dusk a blue that shades the
+   plaster, texture and all, down to near the night's own value while the
+   new page under it has barely begun, so the crossing is between two
+   pictures of like value and the middle is blue-violet plaster; at dawn a
+   warm shade the plaster comes in under, lifted as it arrives, so the
+   middle is rose-umber. It lies in the page's own growing shape, ahead of
+   it, and thins only a little outward from the arch. The frieze and the
+   words ride above it. */
+.crown-veil {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse calc(var(--crown-aw, 360px) * 1.5) calc(var(--crown-aw, 360px) * 1.9) at var(--crown-ax, 50%) var(--crown-ys, 30%),
+    rgb(var(--crown-veil-ink)) 0,
+    rgba(var(--crown-veil-ink), 0.94) 28%,
+    rgba(var(--crown-veil-ink), 0.82) 58%,
+    rgba(var(--crown-veil-ink), var(--crown-veil-far)) 100%);
+}
+
+:root { --crown-veil-far: 0.7; }
+:root.crown-dusk { --crown-veil-ink: 96, 104, 200; --crown-veil-peak: 0.8; }
+:root.crown-dawn { --crown-veil-ink: 200, 128, 100; --crown-veil-peak: 0.8; }
+
+/* Multiplied, as a whole layer, over everything under it (the two pages'
+   pictures): it can only shade, so the plaster keeps its texture and
+   every line its ink. */
+:root.crown-vt::view-transition-group(crown-veil) {
+  mix-blend-mode: multiply;
+}
+
+:root.crown-vt::view-transition-new(crown-veil) {
+  mix-blend-mode: normal;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: var(--crown-m-arch);
+  mask-image: var(--crown-m-arch);
+  -webkit-mask-size: 0 0;
+  mask-size: 0 0;
+  animation:
+    crown-veil-spread calc(var(--crown-vshape-dur) * 1ms * var(--crown-kp)) steps(12, end) calc(var(--crown-spread-at) * 1ms * var(--crown-kp)) forwards,
+    crown-veil-dusk calc(var(--crown-veil-dur) * 1ms * var(--crown-kp)) linear calc(var(--crown-veil-at) * 1ms * var(--crown-kp)) both;
+}
+
+:root.crown-vt.crown-dawn::view-transition-new(crown-veil) {
+  animation-name: crown-veil-spread, crown-veil-dawn;
+}
+
+/* The veil begins with the spread and from rest, as the page's own
+   opacity does: nothing starts with a kick. Dusk: it deepens while the new
+   page has barely begun, is at its height half way (the wall is then
+   seven tenths dark and a third turned), and leaves on a long tail. Dawn:
+   at its height while the wall is still dark (0.4), lifted as the plaster
+   comes, and gone by 0.8. */
+@keyframes crown-veil-dusk {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.4, 0, 0.7, 1); }
+  50% { opacity: var(--crown-veil-peak); animation-timing-function: cubic-bezier(0.2, 0, 0.3, 1); }
+  100% { opacity: 0; }
+}
+
+@keyframes crown-veil-dawn {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.6, 0, 0.7, 1); }
+  40% { opacity: var(--crown-veil-peak); animation-timing-function: cubic-bezier(0.4, 0, 0.5, 1); }
+  80%, 100% { opacity: 0; }
+}
+
+/* From the settle to the end the page is its live self: no clip on the
+   vault (it cut the star beside the cross), no copied ground. */
+.page-home .home-hero.crown-set .home-vault {
+  clip-path: none;
+}
+
+.page-home .home-hero.crown-set .home-vault-ground,
+.page-home .home-hero.crown-set .home-back {
+  display: none;
+}
+
+/* At rest too: the label is a box of its own, so a
+   browser that will not capture a non-atomic inline (Safari 18.0) still
+   makes a group of it. */
+.page-home .pray-now-label {
+  display: inline-block;
+}
+
+/* Belt and braces: none of this for a reader who asked for stillness or
+   contrast (app.js takes the Menu's crossfade for them and never sets a
+   class). */
+@media (prefers-reduced-motion: reduce), (prefers-contrast: more) {
+  .page-home .home-glow,
+  .page-home .crown-cross,
+  .crown-veil {
+    display: none !important;
+  }
+}
+
+/* A browser that cannot drive the transition's parts from script (app.js
+   finds out at the first frame): the browser's plain crossfade, by rules
+   alone, under the names the stills were taken with. */
+@keyframes crown-plain-out { to { opacity: 0; } }
+@keyframes crown-plain-in { from { opacity: 0; } }
+:root.crown-plain::view-transition-group(*) {
+  animation: none !important;
+}
+:root.crown-plain::view-transition-group(*) {
+  mask: none !important;
+  -webkit-mask: none !important;
+  clip-path: none !important;
+  opacity: 1 !important;
+}
+/* The play's own stand-ins (the old ground kept behind the vault, the
+   glow, the veil) have no part in a crossfade. */
+:root.crown-plain::view-transition-group(crown-veil),
+:root.crown-plain::view-transition-group(crown-back),
+:root.crown-plain::view-transition-group(crown-glow) {
+  display: none !important;
+}
+:root.crown-plain::view-transition-old(*),
+:root.crown-plain::view-transition-new(*) {
+  mask: none !important;
+  -webkit-mask: none !important;
+  clip-path: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+:root.crown-plain::view-transition-old(*) {
+  animation: crown-plain-out 250ms linear both !important;
+}
+:root.crown-plain::view-transition-new(*) {
+  animation: crown-plain-in 250ms linear both !important;
+}
+/* The page itself does not fade out under the new one: it stands whole
+   until the new has covered it, so nothing behind the two can show
+   between them. */
+:root.crown-plain::view-transition-old(root) {
+  animation: none !important;
+  opacity: 1 !important;
+}

@@ -80,6 +80,12 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   unfold from their controls and, once open, scroll into view; the menu drops in; the date
   picker's months slide, and a swipe turns them; a new theme or text size dissolves in
   (`Dissolve.kt`). A pressed control dims, as on iOS. Remove animations shows each at once.
+  Home's consecration cross, unannounced, turns the look over by `presentation::crown`'s
+  rule and plays the change as dusk or dawn to the web's timetable (`Crown.kt`, `CrownTest`):
+  the old screen is held as a still, the new theme is drawn live through a front in the head
+  of the arch and then through the arch's own shape grown over the page, and each row hands
+  its ink over at its moment. A black day, a picker open or Remove animations takes the
+  dissolve; a touch elsewhere runs the play out and goes through.
 - **Touch.** A light tick under a choice (a setting, a prayer form, a day) and a toggle's tick
   on a checkbox; none for a page opened.
 - **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in

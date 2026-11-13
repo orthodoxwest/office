@@ -264,7 +264,7 @@ fun skyStars(arch: Arch): List<SkyStar> = Fields[arch] ?: emptyList()
  * `first` sets them a size larger and fully lit. The fillet and hairline round it are the
  * lining's (`skyLining`).
  */
-fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf: Leaf, catch: Float, stars: Boolean, first: Boolean, reserve: List<Rect>) {
+fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf: Leaf, catch: Float, stars: Boolean, first: Boolean, reserve: List<Rect>, crown: CrownSky? = null) {
     val u = density
     val w = size.width
     val head = archPath(arch, w, -5f * u, band + 2f * u)
@@ -289,12 +289,16 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
         if (!stars) return@clipPath
         val scale = if (first) 1.14f else 1f
         val light = Brush.radialGradient(0f to leaf.hi, 0.6f to leaf.mid, 1f to leaf.lo, center = Offset(w / 2f, band * 0.62f), radius = w * 0.72f)
-        for (s in skyStars(arch)) {
+        // While home's crown plays, it keeps the stars as drawn and, from the change of look, draws
+        // them itself, above the head's front, each at its own turn (Crown.kt).
+        val playing = crown?.active == true
+        val drawn = if (playing) ArrayList<SkyStarPaint>() else null
+        skyStars(arch).forEachIndexed { index, s ->
             val cx = s.x * w
             val cy = s.y * w
             val r = s.r * scale * u
-            if (cy + r > band - 9f * u) continue
-            if (reserve.any { cx + r > it.left && cx - r < it.right && cy + r > it.top && cy - r < it.bottom }) continue
+            if (cy + r > band - 9f * u) return@forEachIndexed
+            if (reserve.any { cx + r > it.left && cx - r < it.right && cy + r > it.top && cy - r < it.bottom }) return@forEachIndexed
             val path = Path().apply {
                 fillType = PathFillType.NonZero
                 for (i in s.outline.indices step 2) {
@@ -304,8 +308,12 @@ fun DrawScope.sky(arch: Arch, band: Float, wash: ImageBitmap, ink: HomeInk, leaf
                 }
                 close()
             }
-            drawPath(path, light, alpha = catch * if (first) min(1f, s.leaf + 0.25f) else s.leaf)
+            val alpha = catch * if (first) min(1f, s.leaf + 0.25f) else s.leaf
+            drawn?.add(SkyStarPaint(index, path, light, alpha, Offset(cx, cy), s.r))
+            val lit = if (playing) crown.lit else 1f
+            if (lit > 0f) drawPath(path, light, alpha = alpha * lit)
         }
+        if (drawn != null) crown!!.record(drawn)
     }
 }
 

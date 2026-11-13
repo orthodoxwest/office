@@ -644,9 +644,18 @@ function plainClickOpensHere(e, link) {
     ]);
   };
 
+  // Home's crown (below: "Home: the crown's play") turns the look over with
+  // a play of its own; any other change of theme ends it first.
+  var crownPlay = null;
+
   // User action: paint + persist.
   var applyThemeChoice = function (choice) {
     choice = normalizeThemeChoice(choice) || "default";
+    // The crown's play, if one is running, ends here: this choice is the
+    // later word.
+    if (crownPlay) {
+      crownPlay.end();
+    }
     flashThemeTransition();
     var root = document.documentElement;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -2613,6 +2622,9 @@ function plainClickOpensHere(e, link) {
     var prayNow = hero.querySelector(".pray-now");
     var table = hero.querySelector(".home-hour-links");
     var sky = hero.querySelector(".home-sky");
+    // The stars stand in the vault's host in both looks (hidden by day), so
+    // a change of look never waits on a fetch or a repaint to have them.
+    var starHost = hero.querySelector(".home-vault-stars") || sky;
     var head = hero.querySelector(".home-day-head");
     var crown = hero.querySelector(".home-crown");
 
@@ -2705,11 +2717,11 @@ function plainClickOpensHere(e, link) {
     }
 
     function placeStars() {
-      var old = sky.querySelector(":scope > svg.home-stars");
-      if (old) {
-        old.remove();
-      }
-      if (getComputedStyle(sky).display === "none") {
+      var old = starHost.querySelector(":scope > svg.home-stars");
+      if (starHost === sky && getComputedStyle(sky).display === "none") {
+        if (old) {
+          old.remove();
+        }
         delete hero.dataset.stars;
         return;
       }
@@ -2730,7 +2742,7 @@ function plainClickOpensHere(e, link) {
         return { left: q.left / zoom, top: q.top / zoom, right: q.right / zoom, bottom: q.bottom / zoom, width: q.width / zoom, height: q.height / zoom };
       }
       var hr = own(hero.getBoundingClientRect());
-      var sr = own(sky.getBoundingClientRect());
+      var sr = own(starHost.getBoundingClientRect());
       var band = own(frieze.getBoundingClientRect()).top - hr.top;
       // The reserve: every laid-out line of the day block, and the cross.
       var reserve = [];
@@ -2764,6 +2776,17 @@ function plainClickOpensHere(e, link) {
       svg.setAttribute("class", "home-stars");
       svg.setAttribute("aria-hidden", "true");
       svg.setAttribute("focusable", "false");
+      // The same head, the same field: leave the stars that stand. (The
+      // theme's observer asks for a repaint a frame after every change.)
+      var key = [list.length, k, w.toFixed(1), band.toFixed(1), sr.width.toFixed(1), sr.height.toFixed(1), (hr.left - sr.left).toFixed(1), (hr.top - sr.top).toFixed(1)]
+        .concat(reserve.map(function (q) { return q.map(function (n) { return n.toFixed(1); }).join(" "); })).join("|");
+      if (old && old.getAttribute("data-key") === key) {
+        return;
+      }
+      if (old) {
+        old.remove();
+      }
+      svg.setAttribute("data-key", key);
       svg.setAttribute("width", sr.width.toFixed(1));
       svg.setAttribute("height", sr.height.toFixed(1));
       // Leaf under a lamp: the stars nearest the day's words take the light.
@@ -2786,19 +2809,43 @@ function plainClickOpensHere(e, link) {
         var path = document.createElementNS(NS, "path");
         path.setAttribute("d", "M" + points.join("L") + "Z");
         path.setAttribute("fill", "url(#home-leaf)");
+        // Where it stands and how large, for the crown's play.
+        path.setAttribute("data-y", (y / band).toFixed(4));
+        path.setAttribute("data-r", r.toFixed(2));
         path.setAttribute("fill-opacity", first ? Math.min(1, star[3] + 0.25).toFixed(2) : String(star[3]));
         cardSpace.appendChild(path);
         count += 1;
       });
       svg.appendChild(cardSpace);
-      sky.appendChild(svg);
+      starHost.appendChild(svg);
       hero.dataset.stars = String(count);
     }
 
     var frame = 0;
+    // The rules do not depend on the look, only on the sizes of what they
+    // rule, so they are keyed on those sizes, as the stars are keyed: a
+    // change of look reads a few boxes and rebuilds nothing.
+    var ruled = "";
+    function rulesKey() {
+      var parts = [heroZoom()];
+      [frieze, prayNow, table].forEach(function (el) {
+        parts.push(el ? el.offsetWidth + "x" + el.offsetHeight : "-");
+      });
+      if (table) {
+        var top = table.getBoundingClientRect().top;
+        Array.prototype.forEach.call(table.querySelectorAll(".home-hour-group"), function (group) {
+          parts.push(group.offsetTop + "/" + (group.getBoundingClientRect().top - top).toFixed(2));
+        });
+      }
+      return parts.join(",");
+    }
     function paint() {
       frame = 0;
-      ruleAll();
+      var key = rulesKey();
+      if (key !== ruled) {
+        ruled = key;
+        ruleAll();
+      }
       if (sky && head) {
         placeStars();
       }
@@ -2918,8 +2965,13 @@ function plainClickOpensHere(e, link) {
   // child, see "Home: the painted page") in place. While the light passes
   // (below) they stand in a span of their own, so that they alone can go out
   // and come back; at rest they are the bare text the page arrives with.
+  // The words sit in a span of their own (home.html), which the crown's play
+  // names; a cached page from before it has them bare in the link.
+  function prayNowHost(prayNow) {
+    return prayNow.querySelector(".pray-now-label") || prayNow;
+  }
   function prayNowWords(prayNow) {
-    return Array.prototype.find.call(prayNow.childNodes, function (n) {
+    return Array.prototype.find.call(prayNowHost(prayNow).childNodes, function (n) {
       return (n.nodeType === 3 && n.nodeValue.trim()) || (n.nodeType === 1 && n.classList.contains("pray-now-words"));
     });
   }
@@ -2928,7 +2980,7 @@ function plainClickOpensHere(e, link) {
     if (words) {
       words.textContent = label;
     } else {
-      prayNow.insertBefore(document.createTextNode(label), prayNow.firstChild);
+      prayNowHost(prayNow).insertBefore(document.createTextNode(label), prayNowHost(prayNow).firstChild);
     }
   }
 
@@ -3083,9 +3135,9 @@ function plainClickOpensHere(e, link) {
       words.className = "pray-now-words";
       words.textContent = wasLabel;
       if (bare) {
-        prayNow.replaceChild(words, bare);
+        bare.parentNode.replaceChild(words, bare);
       } else {
-        prayNow.insertBefore(words, prayNow.firstChild);
+        prayNowHost(prayNow).insertBefore(words, prayNowHost(prayNow).firstChild);
       }
       pass.words = words;
       run(words, dip, { duration: T });
@@ -3485,6 +3537,1526 @@ function plainClickOpensHere(e, link) {
       updateHourScrollProgress();
     }
   }
+
+  // Home: the crown's play. A tap on the consecration cross at the head of
+  // the arch turns the look over: Nave to Apse plays as dusk, Apse to Nave as
+  // dawn (presentation::crown has the rule and the timetable; style.css's
+  // block of this name says how the picture is put together). Home only: the
+  // same mark ends every hour, and there it stays paint.
+  (function () {
+    "use strict";
+
+    var root = document.documentElement;
+    var hero = document.querySelector(".page-home .home-hero");
+    var tap = hero && hero.querySelector(".home-crown-tap");
+    if (!hero || !tap) {
+      return;
+    }
+    var crown = hero.querySelector(".home-crown");
+    var summary = hero.querySelector(".home-summary");
+    var head = hero.querySelector(".home-day-head");
+    var sky = hero.querySelector(".home-sky");
+    var fill = hero.querySelector(".home-arch-fill");
+    var vault = hero.querySelector(".home-vault");
+    var ground = hero.querySelector(".home-vault-ground");
+    var starHost = hero.querySelector(".home-vault-stars");
+    var glow = hero.querySelector(".home-glow");
+    var back = hero.querySelector(".home-back > span");
+    var frieze = hero.querySelector(".home-prayer-card > h2");
+    if (!crown || !summary || !head || !sky || !fill || !vault || !ground || !starHost || !glow || !back || !frieze) {
+      return;
+    }
+    var mq = function (q) {
+      return window.matchMedia ? window.matchMedia(q) : null;
+    };
+    var device = mq("(prefers-color-scheme: dark)");
+    var still = mq("(prefers-reduced-motion: reduce)");
+    var contrast = mq("(prefers-contrast: more)");
+    var forced = mq("(forced-colors: active)");
+
+    // The timetable (presentation::crown mirrors every figure here to the
+    // native apps; office-web tests the two agree). Times are ms from the
+    // tap: when the look itself turns, the front crossing the head and the
+    // spread over the page (each a start and a length), the veil's first and
+    // last, the frieze's own change, and the end. The acts overlap (the page
+    // begins to turn while the front is still crossing the head) and every
+    // ramp ends on a long tail. Light arrives faster than it leaves.
+    var CROWN_PLAY = {
+      dusk: { turn: 650, front: [800, 1900], spread: [1500, 2700], veil: [1500, 4200], frieze: [700, 1500], end: 5200, inkAt: 0.34, glowEase: [0.8, 0, 0.4, 1] },
+      dawn: { turn: 650, front: [800, 1700], spread: [1300, 2400], veil: [1300, 3700], frieze: [2600, 1100], end: 4700, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
+    };
+    var FRONT_EASE = [0.4, 0, 0.3, 1];
+    // Near enough even: it starts from nothing under the frieze, so it must
+    // not dawdle there, and it ends at the corner, so it need not brake.
+    var SPREAD_EASE = [0.4, 0, 0.5, 1];
+    // On a wide screen the spread has further to go.
+    var SPREAD_WIDE = 100;
+    // The arch's feather, in card widths at the shape's first size.
+    var SPREAD_FEATHER = 0.42;
+    // The spread's shape is done by this share of its span, growing by an
+    // even ratio bent a little toward its start; the page's own opacity
+    // rises over nearly all of it (a glow filling a room, not a front
+    // crossing it).
+    var SPREAD_SHAPE_PART = 0.45;
+    var SPREAD_BEND = 0.8;
+    var SPREAD_GLOW_PART = 0.96;
+    var VEIL_LEAD = 1.4;
+    var VEIL_PART = 0.18;
+    // The stars come by magnitude, each from the change of look: the evening
+    // star alone, then the brightest one at a time, then the field; dawn is
+    // the same told backwards, and the morning star stays for the ending
+    // beat (the page still for BEAT_HOLD, then one thing, in BEAT_LEN).
+    var STAR_KINDLE = 600;
+    var EVENING_STAR_ALONE = 760;
+    var STARS_BRIGHT = 5;
+    var STARS_BRIGHT_APART = 150;
+    var DAWN_FIELD_OUT = 0.62;
+    var DAWN_STAR_LINGER = 250;
+    var BEAT_HOLD = 370;
+    var BEAT_LEN = 600;
+    // A second tap is kept only if it comes this long after the last, and a
+    // touch elsewhere runs the rest out in RUSH.
+    // The timetable is written at the pace it was composed at; the play is
+    // performed this many times slower (style.css's --crown-pace). A reader's
+    // own taps are counted in real time.
+    var PACE = 1.625;
+    var TAP_APART = 450;
+    var RUSH = 300;
+    // Where in a mask's radius its feather is half through (style.css's stops).
+    var MID = 0.89, CORE = 0.78;
+    var WORDS = 12, ROWS = 10;
+
+    // ---- The arch, from tools/genarch.py's figures, in card widths: the
+    // head style.css clips is the head the spread opens out of. ----
+    // genarch:begin: tools/genarch.py writes this block; edit the script, not the figures.
+    var ARCHES = {
+      "0.44": { haunch: 0.3, centre: 0.9, depth: 0.781098, radius: 1.284944 }, // phone
+      "0.56": { haunch: 0.4, centre: 1, depth: 0.535519, radius: 1.204227 }, // tall
+      "0.64": { haunch: 0.4, centre: 1.05, depth: 0.364522, radius: 1.145236 }, // taller
+      "0.5": { haunch: 0.34, centre: 0.95, depth: 0.632955, radius: 1.219052 }, // niche
+      "0.62": { haunch: 0.38, centre: 1.02, depth: 0.372603, radius: 1.120563 }, // upright
+    };
+    // genarch:end
+    function archNow() {
+      var key = getComputedStyle(hero).getPropertyValue("--arch-rise").trim();
+      var f = ARCHES[key] || ARCHES["0.44"];
+      var rise = parseFloat(ARCHES[key] ? key : "0.44"), h = f.haunch, c = f.centre, cy = -f.depth, R = f.radius;
+      var len = Math.hypot(h - c, -cy);
+      var turn = Math.atan2(cy + (-cy) * R / len, c + (h - c) * R / len - h);
+      var left = function (x, y) {
+        if (y <= 0) {
+          return x;
+        }
+        if (Math.atan2(y, x - h) >= turn) {
+          return h - Math.hypot(x - h, y);
+        }
+        return R - Math.hypot(x - c, y - cy);
+      };
+      // How far inside the head a point is, in card widths (negative: outside).
+      // x across from the left springing, y up from the springing line.
+      return {
+        rise: rise,
+        inside: function (x, y) {
+          return Math.min(left(x, y), left(1 - x, y));
+        },
+      };
+    }
+    function smooth(a, b, x) {
+      var t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    }
+    function deviceLook() {
+      return device && device.matches ? "dark" : "light";
+    }
+    function lookOf(choice) {
+      return choice === "light" || choice === "dark" ? choice : deviceLook();
+    }
+    function look() {
+      return lookOf(root.getAttribute("data-theme"));
+    }
+
+    // The button says what it will do, in the Menu row's own words, and
+    // nothing else gives it away.
+    function label() {
+      tap.setAttribute("aria-label", look() === "dark" ? "Switch to Nave" : "Switch to Apse");
+    }
+    label();
+    new MutationObserver(label).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    // The themes do nothing under forced colours, so neither does the button.
+    // It is shown once the set-up is done (idle time, well inside a second
+    // of load), so no tap ever pays for the set-up.
+    var setUp = false;
+    function reveal() {
+      setUp = true;
+      tap.hidden = !!(forced && forced.matches);
+    }
+
+    // The rule (presentation::crown::after_crown_tap, mirrored here as the
+    // hour schedule is). The look always turns over. A look that matches the
+    // device's is saved as Default, so the crown never strands a reader off
+    // Default; and the tap back undoes the tap exactly: the choice the last
+    // tap turned away from comes back when the new tap lands on its look (so
+    // Apse chosen on a dark phone comes back as Apse, not as Default).
+    function afterCrownTap(choice, deviceDark, restore) {
+      var dark = !(choice === "default" ? deviceDark : choice === "dark");
+      if (restore && (restore === "default" ? deviceDark : restore === "dark") === dark) {
+        return { choice: restore, restore: null };
+      }
+      return { choice: dark === deviceDark ? "default" : dark ? "dark" : "light", restore: choice };
+    }
+    // What the last tap turned away from, and what it wrote: kept in memory
+    // only, and only while the saved choice is still the one the tap wrote.
+    var turned = null;
+
+    // Cubic bezier: the time (0..1) at which the eased progress is p.
+    function timeAt(ease, p) {
+      if (p <= 0) { return 0; }
+      if (p >= 1) { return 1; }
+      function axis(a, b, t) {
+        return 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+      }
+      var lo = 0, hi = 1;
+      for (var i = 0; i < 24; i++) {
+        var mid = (lo + hi) / 2;
+        if (axis(ease[1], ease[3], mid) < p) { lo = mid; } else { hi = mid; }
+      }
+      return axis(ease[0], ease[2], (lo + hi) / 2);
+    }
+
+    // Cubic bezier: the eased progress at time x (0..1).
+    function easeAt(ease, x) {
+      if (x <= 0) { return 0; }
+      if (x >= 1) { return 1; }
+      function axis(a, b, t) {
+        return 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+      }
+      var lo = 0, hi = 1;
+      for (var i = 0; i < 24; i++) {
+        var mid = (lo + hi) / 2;
+        if (axis(ease[0], ease[2], mid) < x) { lo = mid; } else { hi = mid; }
+      }
+      return axis(ease[1], ease[3], (lo + hi) / 2);
+    }
+
+    function K() {
+      return (parseFloat(getComputedStyle(root).getPropertyValue("--crown-k")) || 1) * PACE;
+    }
+    function px(n) {
+      return n.toFixed(1) + "px";
+    }
+    function copy(to, from, props) {
+      props.forEach(function (k) {
+        if (from[k] !== undefined) {
+          to.style[k] = from[k];
+        }
+      });
+    }
+    var GROUND = ["backgroundImage", "backgroundSize", "backgroundPosition", "backgroundRepeat", "backgroundBlendMode", "backgroundColor"];
+    var PAINT = GROUND.concat(["maskImage", "maskSize", "maskPosition", "maskRepeat", "maskComposite", "webkitMaskImage", "webkitMaskSize", "webkitMaskPosition", "webkitMaskRepeat", "webkitMaskComposite"]);
+
+    // ---- One playing at a time, and one way out of it. ----
+    // Android's WebView (an app's own browser: "; wv)" in its name) has been
+    // seen to lose the leaving page's still, under these rules and under the
+    // browser's own crossfade alike: white for the whole first act. There the
+    // tap makes the Menu's change, which takes no stills.
+    // KEEP: this gate was measured on a phone (the still was lost in the
+    // plainest transition a page can ask for), not guessed; no rule of ours
+    // can mend it. ux.spec.js: "the crown makes the Menu's change in an
+    // Android app's own browser".
+    var plain = /; wv\)/.test(navigator.userAgent || "");
+    if (plain) {
+      document.documentElement.setAttribute("data-crown-plain", "an Android WebView");
+    }
+    var playing = null, lastTap = 0, applying = false;
+    function applyOwn(choice) {
+      applying = true;
+      try { applyThemeChoice(choice); } finally { applying = false; }
+    }
+
+    function teardown(how) {
+      var p = playing;
+      if (!p) {
+        return;
+      }
+      playing = null;
+      if (how === "crossfade") {
+        // Not begun yet: the Menu's own change paints it, crossfade and all.
+        p.painted = true;
+      }
+      p.timers.forEach(clearTimeout);
+      // "fade": the transition is under way but is not to be played (it was
+      // interrupted while the stills were being made, or this browser cannot
+      // drive its parts). It is left to run as the browser's own plain
+      // crossfade: with our classes gone below, none of our rules hold.
+      var fade = how === "fade" && p.vt && !p.settled;
+      if (fade && !p.called) {
+        // The stills are not taken yet: the change waits for the callback.
+        p.fadePaint = true;
+      }
+      if (p.vt && !fade) {
+        try { p.vt.skipTransition(); } catch { /* already gone */ }
+      }
+      // Stored at the tap; if the paint had not come yet, it comes now.
+      if (!p.painted && !p.fadePaint) {
+        paintThemeChoice(p.choice);
+      } else if (p.bars) {
+        p.bars();
+      }
+      var unclass = function (el, name) {
+        el.classList.remove(name);
+        if (el.getAttribute("class") === "") {
+          el.removeAttribute("class");
+        }
+      };
+      p.g.units.forEach(function (el, i) { unclass(el, "crown-u" + (i + 1)); });
+      p.g.rows.forEach(function (el, i) { unclass(el, "crown-r" + (i + 1)); });
+      [root, hero].forEach(function (host) {
+        Array.prototype.slice.call(host.classList).forEach(function (c) {
+          if (c.indexOf("crown-") === 0) {
+            host.classList.remove(c);
+          }
+        });
+      });
+      (p.extra || []).forEach(function (a) { try { a.cancel(); } catch { /* already gone */ } });
+      Array.prototype.slice.call(root.style).forEach(function (k) {
+        if (k.indexOf("--crown-") === 0 && k !== "--crown-k") {
+          root.style.removeProperty(k);
+        }
+      });
+      if (p.cross) { p.cross.remove(); }
+      if (p.edge) { p.edge.remove(); }
+      ground.removeAttribute("style");
+      back.removeAttribute("style");
+      mark(null);
+      Array.prototype.forEach.call(starHost.querySelectorAll("path"), function (path) {
+        path.style.removeProperty("--crown-d");
+        unstyle(path);
+      });
+      Array.prototype.forEach.call(starHost.querySelectorAll("stop"), function (stop) {
+        stop.style.removeProperty("stop-color");
+        unstyle(stop);
+      });
+      if (p.watch) { p.watch.disconnect(); }
+      p.undo.forEach(function (fn) { fn(); });
+      p.g.wash.forEach(function (kv) { glow.style.removeProperty(kv[0]); });
+      p.g.frieze.forEach(function (kv) { frieze.style.removeProperty(kv[0]); });
+      [root, ground, back, glow, frieze].forEach(unstyle);
+      if (!root.getAttribute("style")) {
+        root.removeAttribute("style");
+      }
+      if (how === "crossfade") {
+        applyOwn(p.choice);
+      }
+      // The way back was summed at settle; otherwise in idle time.
+      prep = p.back && p.back.m === measured ? p.back : null;
+      soon();
+    }
+
+    // An interruption does not cut: what is left plays out in `ms`, then it
+    // is over. Before the change of theme has begun there is nothing to
+    // play out, and the Menu's crossfade takes it.
+    function rush(ms) {
+      var p = playing;
+      if (!p || p.rushing) {
+        return;
+      }
+      if (!p.vt) {
+        teardown("crossfade");
+        return;
+      }
+      if (!p.ready) {
+        teardown("fade");
+        return;
+      }
+      p.rushing = true;
+      p.timers.forEach(clearTimeout);
+      p.timers = [];
+      var left = (p.end - p.plan.turn - (performance.now() - p.ready) / p.k) * p.k;
+      var rate = Math.max(1, left / ms);
+      document.getAnimations().forEach(function (a) {
+        var name = a.animationName || "";
+        var pseudo = a.effect && a.effect.pseudoElement || "";
+        if (name.indexOf("crown-") === 0 || pseudo.indexOf("::view-transition") === 0) {
+          try { a.playbackRate = rate; } catch { /* already gone */ }
+        }
+      });
+      setTimeout(function () {
+        if (playing === p) {
+          teardown();
+        }
+      }, ms + 30);
+    }
+
+    function later(p, ms, fn) {
+      p.timers.push(setTimeout(function () {
+        if (playing === p) {
+          fn();
+        }
+      }, ms * p.k));
+    }
+
+    // ---- Set-up: everything that reads the page is done in
+    // idle time after load and kept, reads before writes. The tap only
+    // writes. ----
+
+    function headUnits() {
+      var out = [];
+      Array.prototype.forEach.call(head.children, function (el) {
+        if (!el.getClientRects().length || !el.textContent.trim()) {
+          return;
+        }
+        var kids = Array.prototype.filter.call(el.children, function (kid) {
+          return kid.textContent.trim();
+        });
+        var blocks = kids.length > 1 && kids.every(function (kid) {
+          return getComputedStyle(kid).display === "block";
+        });
+        (blocks && el.tagName !== "H1" ? kids : [el]).forEach(function (unit) {
+          out.push(unit);
+        });
+      });
+      return out.length > WORDS ? [head] : out;
+    }
+    function readLook(cs) {
+      var out = { opacity: cs.opacity };
+      PAINT.forEach(function (k) { out[k] = cs[k]; });
+      return out;
+    }
+    function readStars() {
+      var svg = starHost.querySelector("svg.home-stars");
+      if (!svg) {
+        return [];
+      }
+      return Array.prototype.map.call(svg.querySelectorAll("path"), function (path) {
+        var q = path.getBoundingClientRect();
+        return { path: path, x: q.left + q.width / 2, y: q.top + q.height / 2, size: parseFloat(path.getAttribute("data-r")) || 1 };
+      });
+    }
+
+    // The two looks (the cross's paint, the head's two grounds, the leaf's
+    // highlight, the stars' leaf). They do not depend on scroll or size, so
+    // they are read once: the look showing as it stands, the other by
+    // turning the theme for an instant in idle time, once per page.
+    var looks = {}, boxes = {};
+    function readLooks(name, v, zoom) {
+      var ccs = getComputedStyle(crown);
+      var L = looks[name] = { crown: readLook(ccs), gilt: /gild\.png|gradient/.test(ccs.backgroundImage) };
+      [["sky", sky], ["fill", fill]].forEach(function (pair) {
+        var cs = getComputedStyle(pair[1]), q = pair[1].getBoundingClientRect(), out = {};
+        GROUND.forEach(function (k) { out[k] = cs[k]; });
+        L[pair[0]] = out;
+        // (Each layer's box is taken in the theme whose ground it is.)
+        if (q.width && pair[0] === (name === "dark" ? "sky" : "fill")) {
+          // Where the layer lies about the vault, in its own px.
+          boxes[pair[0]] = [(q.left - v.left) / zoom, (q.top - v.top) / zoom, (q.width - v.width) / zoom, (q.height - v.height) / zoom];
+        }
+      });
+      L.hi = getComputedStyle(hero).getPropertyValue("--sky-leaf-hi").trim();
+      // The frieze's ground and edge (custom properties: not mid-transition).
+      var fcs = getComputedStyle(frieze);
+      L.fz = [fcs.getPropertyValue("--inscription-ground").trim(), fcs.getPropertyValue("--inscription-edge").trim()];
+      if (name === "dark") {
+        L.inks = Array.prototype.map.call(starHost.querySelectorAll("stop"), function (stop) { return getComputedStyle(stop).stopColor; });
+      }
+    }
+
+    // The page's measures, read together (idle time, and again only when a
+    // ResizeObserver or the stars' arrival says they have changed).
+    var measured = null, prep = null, prepTimer = null;
+    function measure() {
+      var hcs = getComputedStyle(hero);
+      var zoom = parseFloat(hcs.zoom) || 1;
+      var m = {
+        sx: window.scrollX, sy: window.scrollY, zoom: zoom,
+        lift: (parseFloat(hcs.getPropertyValue("--arch-lift")) || 2) * parseFloat(getComputedStyle(root).fontSize) * zoom,
+        vr: vault.getBoundingClientRect(), hr: hero.getBoundingClientRect(), cr: crown.getBoundingClientRect(),
+        fz: frieze.getBoundingClientRect(), W2: window.innerWidth, H2: window.innerHeight,
+      };
+      m.units = headUnits();
+      m.unitRects = m.units.map(function (el) { return el.getBoundingClientRect(); });
+      m.rows = rowUnits();
+      m.rowRects = m.rows.map(function (el) { return el.getBoundingClientRect(); });
+      m.last = head.getBoundingClientRect().bottom;
+      Array.prototype.forEach.call(head.querySelectorAll("*"), function (el) {
+        var q = el.getBoundingClientRect();
+        if (q.height && el.textContent.trim() && q.bottom > m.last) {
+          m.last = q.bottom;
+        }
+      });
+      m.stars = readStars();
+      m.stops = Array.prototype.slice.call(starHost.querySelectorAll("stop"));
+      var cur = look(), other = cur === "dark" ? "light" : "dark";
+      if (!looks[cur] || (cur === "dark" && looks.dark.inks.length !== m.stops.length)) {
+        readLooks(cur, m.vr, zoom);
+      }
+      if (!looks[other]) {
+        var attr = root.getAttribute("data-theme");
+        root.setAttribute("data-theme", other);
+        readLooks(other, m.vr, zoom);
+        if (attr === null) {
+          root.removeAttribute("data-theme");
+        } else {
+          root.setAttribute("data-theme", attr);
+        }
+      }
+      return m;
+    }
+    function rowUnits() {
+      var out = [];
+      // (With the header's words: they too change ink in one move, not through
+      // a half-mix in which neither ink reads.)
+      [".site-header .site-brand", ".site-header details > summary", ".site-header nav", ".page-home .pray-now-label", ".page-home .home-hour-group", ".page-home .home-day-meta"].forEach(function (sel) {
+        Array.prototype.forEach.call(document.querySelectorAll(sel), function (el) {
+          if (el.getClientRects().length) {
+            out.push(el);
+          }
+        });
+      });
+      return out.slice(0, ROWS);
+    }
+
+    // The sums for one direction: no reads. Scroll is taken off here, so a
+    // scrolled page needs no new measures.
+    function compute(m, dir) {
+      var plan = CROWN_PLAY[dir];
+      var g = { dir: dir, m: m, sx: window.scrollX, sy: window.scrollY, vars: [] };
+      var ox = m.sx - g.sx, oy = m.sy - g.sy;
+      var at = function (q) {
+        return { left: q.left + ox, top: q.top + oy, width: q.width, height: q.height, right: q.right + ox, bottom: q.bottom + oy };
+      };
+      var zoom = m.zoom, lift = m.lift, vr = at(m.vr), hr = at(m.hr), cr = at(m.cr);
+      var W2 = m.W2, H2 = m.H2, units = m.units, unitRects = m.unitRects.map(at), last = m.last + oy;
+      var stars = m.stars.map(function (s) { return { path: s.path, x: s.x + ox, y: s.y + oy, size: s.size }; });
+      var cur = dir === "dusk" ? "light" : "dark", other = dir === "dusk" ? "dark" : "light";
+      g.oldLook = looks[cur].crown;
+      g.newLook = looks[other].crown;
+      g.gilt = looks[cur].gilt;
+      g.hi = looks.dark.hi;
+      // The frieze is live throughout (a still of it goes soft): it keeps its
+      // old ground under the new theme until the page's front leaves it.
+      g.frieze = [["--crown-fz-g0", looks[cur].fz[0]], ["--crown-fz-e0", looks[cur].fz[1]], ["--crown-fz-g1", looks[other].fz[0]], ["--crown-fz-e1", looks[other].fz[1]]];
+      g.kept = looks[cur][dir === "dusk" ? "fill" : "sky"];
+      g.newGround = looks[other][dir === "dusk" ? "sky" : "fill"];
+
+      // ---- Sums. ----
+      var set = function (k, val) { g.vars.push([k, val]); };
+      // The vault's box. At dawn it runs to the lining's band (style.css), 8px
+      // wider each side than it stands at rest.
+      var grow = dir === "dawn" ? 8 * zoom : 0;
+      var v = { left: vr.left - grow, top: vr.top, width: vr.width + 2 * grow, height: vr.height, bottom: vr.bottom };
+      var inset = (v.left - hr.left) / zoom;
+      var apex = lift + 1.0523 * inset * zoom;
+      var hc = v.height - apex;
+      var w = v.width;
+      var a, cy, r0, ra, r;
+      if (dir === "dusk") {
+        // About a point 0.6 of the head above its own, twice as wide as tall.
+        a = 2;
+        cy = apex - 0.6 * hc;
+        r0 = 0.6 * hc;
+        ra = (v.height - cy) / MID;
+        r = Math.sqrt(w * w / (4 * a * a) + 1.6 * hc * 1.6 * hc) / CORE + 4;
+      } else {
+        // A low dome about a point 0.3 of the head under the horizon.
+        a = 2.5;
+        cy = v.height + 0.3 * hc;
+        r0 = 0.3 * hc;
+        ra = (cy - apex) / MID;
+        r = 1.3 * hc / CORE + 4;
+      }
+      r = Math.max(r, ra + 1);
+      set("--crown-a", String(a));
+      set("--crown-cx", px(w / 2));
+      set("--crown-cy", px(cy));
+      set("--crown-r0", px(r0));
+      set("--crown-ra", px(ra));
+      set("--crown-r", px(r));
+      set("--crown-front-at", String(plan.front[0] - plan.turn));
+      set("--crown-front-dur", String(plan.front[1]));
+      // When the front's middle is at a height y of the viewport (ms from the
+      // tap, by the plan). It reaches the far edge 0.95 of the way through.
+      var frontAt = function (y) {
+        var need = Math.abs(y - (v.top + cy)) / MID;
+        return plan.front[0] + 0.95 * plan.front[1] * timeAt(FRONT_EASE, (need - r0) / (ra - r0));
+      };
+
+      // The page's glow: the arch closed with a round foot, one image, grown
+      // by ratio about the middle of the springing line.
+      var arch = archNow();
+      var W = v.width + 2 * (v.left - hr.left);
+      var ax = hr.left + W / 2;
+      var ys = v.top + lift + arch.rise * W;
+      var yc = v.bottom;
+      var fw = SPREAD_FEATHER, F = 0.5;
+      var s0 = 1 / (1 + fw);
+      var D = Math.max(0.05, (yc - ys) / (W * s0) - F * (1 + fw));
+      var shape = function (x, y) {
+        if (y >= -D) {
+          return arch.inside(x, y);
+        }
+        return 0.5 * (1 - Math.hypot((x - 0.5) / 0.5, (y + D) / F));
+      };
+      var corner = function (sc) {
+        return Math.min.apply(null, [[0, 0], [W2, 0], [0, H2], [W2, H2]].map(function (c) {
+          return shape((c[0] - ax) / (W * sc) + 0.5, (ys - c[1]) / (W * sc));
+        }));
+      };
+      var s1 = 1;
+      while (corner(s1) < fw / 2 && s1 < 60) {
+        s1 += 0.05;
+      }
+      s1 *= 1.02;
+      var wide = W2 > 700 ? SPREAD_WIDE : 0;
+      var dur = plan.spread[1] + wide;
+      var m0 = fw / 2 + 0.012, top = arch.rise + 2.4 * m0, deep = D + F * (1 + fw) + 0.02;
+      g.mask = { arch: arch, shape: shape, fw: fw, m: m0, top: top, deep: deep, key: [W.toFixed(0), arch.rise, D.toFixed(3)].join("/") };
+      // The shape's sizes. Half by ratio, half evenly, along SPREAD_EASE: that
+      // is its pace for the first 400ms, which is not to change. After that
+      // it runs on ahead and has covered the page by SPREAD_SHAPE_PART of the span,
+      // so the end of the change everywhere is the glow's opacity coming to
+      // rest (the slowest part of its curve), not a late edge arriving.
+      var NODES = 8, nodes = [], vnodes = [];
+      var sizeAt = function (tau) {
+        var e = easeAt(SPREAD_EASE, tau / dur);
+        return 0.5 * s0 * Math.pow(s1 / s0, e) + 0.5 * (s0 + e * (s1 - s0));
+      };
+      // The veil's shape grows half by ratio and half evenly along
+      // SPREAD_EASE, and is over the whole page by VEIL_PART of the span,
+      // while the veil itself is still next to nothing: the shade deepens
+      // everywhere from rest, a little ahead about the arch, and no edge
+      // of it crosses the page.
+      var vDur = Math.round(dur * VEIL_PART);
+      for (var vi = 0; vi <= NODES; vi += 1) {
+        vnodes.push(sizeAt(dur * vi / NODES));
+      }
+      // The page's own shape grows by an even ratio, a little faster at
+      // first (SPREAD_BEND), and is done by SPREAD_SHAPE_PART of the span:
+      // it starts at once under the halo, its feather takes as long to pass
+      // the foot as to pass the wall beside the arch, and it has reached
+      // every place while the glow's opacity is still low. The opacity, over
+      // nearly the whole span and near enough even, does the rest: every
+      // place has begun early and none is finished before the end. (Before,
+      // the shape kept its slow pace for 400 ms and then took the far field,
+      // most of the glass, in a few frames at half opacity.)
+      var shapeDur = Math.round(dur * SPREAD_SHAPE_PART), bend = SPREAD_BEND;
+      for (var ni = 0; ni <= NODES; ni += 1) {
+        nodes.push(s0 * Math.pow(s1 / s0, Math.pow(ni / NODES, bend)));
+      }
+      nodes.forEach(function (sc, i) {
+        set("--crown-hw" + i, px((1 + 2 * m0) * W * sc));
+        set("--crown-hh" + i, px((top + deep) * W * sc));
+        set("--crown-hx" + i, px(ax - (1 + 2 * m0) * W * sc / 2));
+        set("--crown-hy" + i, px(ys - top * W * sc));
+        // The veil's shape leads the page's old one, so it is whole where
+        // the page is half way.
+        var vs = vnodes[i] * VEIL_LEAD;
+        set("--crown-vw" + i, px((1 + 2 * m0) * W * vs));
+        set("--crown-vh" + i, px((top + deep) * W * vs));
+        set("--crown-vx" + i, px(ax - (1 + 2 * m0) * W * vs / 2));
+        set("--crown-vy" + i, px(ys - top * W * vs));
+      });
+      g.last = [px((1 + 2 * m0) * W * s1 * 1.3) + " " + px((top + deep) * W * s1 * 1.3), px(ax - (1 + 2 * m0) * W * s1 * 1.3 / 2) + " " + px(ys - top * W * s1 * 1.3)];
+      var part = SPREAD_GLOW_PART, glowEase = plan.glowEase;
+      var alphaAt = function (X, Y, time) {
+        var u = Math.max(0, Math.min(1, (time - plan.spread[0]) / dur));
+        var f = Math.min(1, (time - plan.spread[0]) / shapeDur) * NODES, i = Math.max(0, Math.min(NODES - 1, Math.floor(f)));
+        var sc = nodes[i] + (Math.max(0, f) - i) * (nodes[i + 1] - nodes[i]);
+        return smooth(-fw / 2, fw / 2, shape((X - ax) / (W * sc) + 0.5, (ys - Y) / (W * sc))) * easeAt(glowEase, u / part);
+      };
+      var when = function (X, Y, level) {
+        for (var i = 0; i <= 120; i += 1) {
+          var time = plan.spread[0] + dur * i / 120;
+          if (alphaAt(X, Y, time) >= level) {
+            return time;
+          }
+        }
+        return plan.spread[0] + dur;
+      };
+      set("--crown-spread-at", String(plan.spread[0] - plan.turn));
+      set("--crown-spread-dur", String(dur));
+      set("--crown-shape-dur", String(shapeDur));
+      set("--crown-vshape-dur", String(vDur));
+      set("--crown-glow-dur", String(Math.round(dur * part)));
+      set("--crown-glow-ease", "cubic-bezier(" + glowEase.join(",") + ")");
+      g.covered = Math.max.apply(null, [[0, 0], [W2, 0], [0, H2], [W2, H2], [W2 / 2, H2], [W2 / 2, 0]].map(function (c) {
+        return when(c[0], c[1], 0.96);
+      })) + 40;
+
+      g.geom = { s0: s0, s1: s1, W: W };
+
+      // The light on the horizon stops under the last line of the day block.
+      var room = Math.max(0.13 * hc, Math.min(0.5 * hc, v.bottom - last - 4 * zoom));
+      // (These two are all the first act needs; they go on the glow itself, so
+      // the tap does not restyle the document. The rest go on the root with
+      // the change of theme.)
+      g.wash = [["--crown-wash-h", px(room / zoom)], ["--crown-wash-rx", px(Math.min(0.48 * w, 2.6 * room) / zoom)]];
+
+      // The day's lines dip as the head's front reaches them.
+      g.units = units;
+      units.forEach(function (el, i) {
+        var q = unitRects[i];
+        set("--crown-w" + (i + 1), String(Math.round(frontAt(q.top + q.height * 0.6) - plan.turn)));
+      });
+
+      // The rows change ink quickly, one after another, each as the page under
+      // it is half turned and never closer than 60ms to the row before: no
+      // moment with every label faint at once.
+      g.rows = m.rows;
+      var inkAt = plan.inkAt;
+      var order = m.rowRects.map(at).map(function (q, i) { return [when(q.left + q.width / 2, q.top + q.height / 2, inkAt), i]; });
+      order.sort(function (p1, p2) { return p1[0] - p2[0] || p1[1] - p2[1]; });
+      var mid = (order.length - 1) / 2, base = order.length ? order[Math.floor(mid)][0] : 0;
+      order.forEach(function (pair, n) {
+        // About the middle row's own moment, 60ms apart, but no earlier than a
+        // row's own half-mix less 150ms nor later than it plus 150.
+        // (Each at its own moment, where the ground under it can carry the
+        // ink it is given; never two within 25ms.)
+        // The rows have much the same moment now (the shape has long passed
+        // them all and they share the glow's opacity), so they are dealt out
+        // about the middle one, 32ms apart, none further than 130ms from its
+        // own: no frame with every label mid-change.
+        // (Closer now, 14ms apart and none further than 60 from its own:
+        // the wall is shaded to the new look's value before it is crossed,
+        // so the rows come back together, in one breath.)
+        var t = Math.max(pair[0] - 60, Math.min(pair[0] + 60, base + (n - Math.floor(mid)) * 14));
+        if (n && t < order[n - 1][2] + 10) { t = order[n - 1][2] + 10; }
+        pair[2] = t;
+        set("--crown-r" + (pair[1] + 1), String(Math.round(t - plan.turn)));
+        var rowEl = m.rows[pair[1]];
+        if (rowEl && (rowEl.matches(".is-current") || rowEl.querySelector(".is-current"))) {
+          set("--crown-dn" + (pair[1] + 1), "crown-ink-dim-soft");
+          set("--crown-un" + (pair[1] + 1), "crown-ink-undim-soft");
+        }
+      });
+      g.lastDip = order.length ? order[order.length - 1][2] : 0;
+      // The stills go when the page has visibly turned and the last row has
+      // its new ink; the veil is timed to be gone by then.
+      g.settle = Math.max(g.covered, g.lastDip + 220, plan.spread[0] + 1100, plan.veil[1] - 80, plan.spread[0] + dur * part - 50) + 80;
+      // (The settle now comes near the plan's end: the play is over a little
+      // after it, never before.)
+      // The ending beat: the page is still for BEAT_HOLD, then one thing
+      // (the last star, or the morning star and the cross), then the end.
+      g.beat = g.settle + BEAT_HOLD;
+      g.end = Math.max(plan.end, g.beat + BEAT_LEN + 30);
+      set("--crown-beat", String(Math.round(g.beat - plan.turn)));
+      set("--crown-veil-at", String(plan.veil[0] - plan.turn));
+      set("--crown-veil-dur", String(plan.veil[1] - plan.veil[0] + wide));
+      set("--crown-frieze-at", String(plan.frieze[0] - plan.turn));
+      set("--crown-frieze-dur", String(plan.frieze[1]));
+      // Where the veil is densest (the springing line's middle) and how far
+      // it thins, on the glass.
+      set("--crown-ax", px(ax)); set("--crown-ys", px(ys)); set("--crown-aw", px(W));
+      // The vault's stand-in leaves early and slowly, from where the page
+      // under it is nearly its new self until just before the stills go
+      // (style.css): the mouldings its clip hid come up with the page and
+      // nothing arrives in the last second.
+      var vaultOut = Math.round(plan.spread[0] + 0.62 * dur - plan.turn);
+      set("--crown-vault-out", String(vaultOut));
+      set("--crown-vault-dur", String(Math.round(g.settle - plan.turn - 60 - vaultOut)));
+
+      // Each star's turn, in ms from the change of theme, by magnitude.
+      // Dusk: the evening star (the one nearest the cross) as the dark first
+      // reaches it, alone; then the brightest, one at a time; then the field,
+      // brightest to faintest, until the page is still; and after the held
+      // breath the last and faintest. None before the dark has reached it.
+      // Dawn: the field goes out faintest first, then the brightest one at a
+      // time, none later than the plaster's front; the morning star stays
+      // for the ending beat.
+      g.starTurns = function (list) {
+        var nearest = -1, nearestD = Infinity;
+        list.forEach(function (s, i) {
+          var d = Math.hypot(s.x - (cr.left + cr.width / 2), s.y - (cr.top + cr.height / 2));
+          if (d < nearestD) { nearestD = d; nearest = i; }
+        });
+        var settle = g.settle - plan.turn, beat = g.beat - plan.turn;
+        var out = list.map(function () { return beat; });
+        // Brightest first; equal stars keep the file's order.
+        var rest = list.map(function (s, i) { return i; }).filter(function (i) { return i !== nearest; });
+        rest.sort(function (i, j) { return list[j].size - list[i].size || i - j; });
+        var dark = function (s) { return frontAt(s.y) - plan.turn; };
+        var bright = rest.slice(0, STARS_BRIGHT), field = rest.slice(STARS_BRIGHT);
+        g.evening = nearest < 0 ? null : list[nearest].path;
+        if (dir === "dusk") {
+          var first = nearest < 0 ? 150 : Math.max(150, dark(list[nearest]) + 60);
+          if (nearest >= 0) { out[nearest] = first; }
+          var lastOne = field.length > 1 ? field.pop() : -1;
+          bright.forEach(function (i, n) {
+            out[i] = Math.max(first + EVENING_STAR_ALONE + n * STARS_BRIGHT_APART, dark(list[i]) + 100);
+          });
+          var from = first + EVENING_STAR_ALONE + bright.length * STARS_BRIGHT_APART;
+          var to = Math.max(from, settle - 0.3 * STAR_KINDLE);
+          field.forEach(function (i, n) {
+            var s = list[i], seed = ((i * 7919) % 97) / 97;
+            var t = from + (to - from) * (n + 0.6 * (seed - 0.5)) / Math.max(1, field.length - 1);
+            t = Math.max(from, Math.min(to, t), dark(s) + 100);
+            // A star out in the moulding's margin (outside the inner lining,
+            // by the arch's own sums) waits for the wall's night.
+            if (arch.inside((s.x - hr.left) / W, (ys - s.y) / W) < (v.left - hr.left + 9 * zoom) / W) {
+              t = Math.max(t, when(s.x, s.y, 0.5) - plan.turn + 200);
+            }
+            out[i] = Math.min(t, settle - 0.3 * STAR_KINDLE);
+          });
+          if (lastOne >= 0) { out[lastOne] = beat; }
+          return out.map(Math.round);
+        }
+        var until = DAWN_FIELD_OUT * settle - bright.length * STARS_BRIGHT_APART;
+        field.reverse().forEach(function (i, n) {
+          var seed = ((i * 7919) % 97) / 97;
+          var t = 40 + (until - 40) * (n + 0.6 * (seed - 0.5)) / Math.max(1, field.length - 1);
+          out[i] = Math.max(0, Math.min(t, until, dark(list[i]) + DAWN_STAR_LINGER));
+        });
+        bright.reverse().forEach(function (i, n) {
+          out[i] = Math.max(0, Math.min(until + (n + 1) * STARS_BRIGHT_APART, dark(list[i]) + DAWN_STAR_LINGER));
+        });
+        if (nearest >= 0) {
+          out[nearest] = beat;
+          // When the plaster's front reaches the morning star (style.css
+          // deepens its gold there, to stand on the light wall).
+          g.morningAt = Math.round(dark(list[nearest]) - 300);
+        }
+        return out.map(Math.round);
+      };
+      g.stars = stars;
+      g.turns = g.starTurns(stars);
+      g.stops = dir === "dawn" ? m.stops : [];
+      g.inks = looks.dark.inks || [];
+
+      // Where the stand-ins lie (each layer's box about the vault's).
+      var box = function (d) {
+        return {
+          left: (d[0] + (vr.left - v.left) / zoom).toFixed(2) + "px", top: d[1].toFixed(2) + "px",
+          width: (vr.width / zoom + d[2]).toFixed(2) + "px", height: (vr.height / zoom + d[3]).toFixed(2) + "px",
+        };
+      };
+      g.backBox = box(boxes[dir === "dusk" ? "fill" : "sky"] || [0, 0, 0, 0]);
+      g.groundBox = box(boxes[dir === "dusk" ? "sky" : "fill"] || [0, 0, 0, 0]);
+      return g;
+    }
+
+    // The glow's mask: one small image (the feather is wide; 120px across is
+    // plenty), made once per geometry and kept as a blob. The head is
+    // genarch's (ARCHES); the foot is as deep as this page stands below the
+    // springing, so the whole is drawn here.
+    var maskCache = {};
+    function maskFor(g, sync) {
+      var k = g.mask.key, hit = maskCache[k];
+      if (hit && (hit.url || !sync)) {
+        return hit.url;
+      }
+      // One mask at a time: the last one's blob is given back.
+      Object.keys(maskCache).forEach(function (old) {
+        if (maskCache[old].blob) {
+          URL.revokeObjectURL(maskCache[old].blob);
+        }
+        delete maskCache[old];
+      });
+      var mk = g.mask, NX = 120, q = NX / (1 + 2 * mk.m), NY = Math.ceil((mk.top + mk.deep) * q);
+      var cv = document.createElement("canvas");
+      cv.width = NX;
+      cv.height = NY;
+      var ctx = cv.getContext("2d");
+      var img = ctx.createImageData(NX, NY);
+      for (var row = 0; row < NY; row += 1) {
+        var y = mk.top - (row + 0.5) / q;
+        for (var i = 0; i < NX; i += 1) {
+          img.data[(row * NX + i) * 4 + 3] = Math.round(255 * smooth(-mk.fw / 2, mk.fw / 2, mk.shape((i + 0.5) / q - mk.m, y)));
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      hit = maskCache[k] = { url: null };
+      if (sync || !cv.toBlob) {
+        hit.url = 'url("' + cv.toDataURL("image/png") + '")';
+      } else {
+        cv.toBlob(function (blob) {
+          if (blob && !hit.url && maskCache[k] === hit) {
+            hit.blob = URL.createObjectURL(blob);
+            hit.url = 'url("' + hit.blob + '")';
+          }
+        });
+      }
+      return hit.url;
+    }
+
+    function dirNow() {
+      return look() === "dark" ? "dawn" : "dusk";
+    }
+    function ready() {
+      if (playing) {
+        return prep;
+      }
+      if (!measured) {
+        measured = measure();
+        prep = null;
+      }
+      reveal();
+      var dir = dirNow();
+      if (!prep || prep.dir !== dir || prep.m !== measured || prep.sx !== window.scrollX || prep.sy !== window.scrollY) {
+        prep = compute(measured, dir);
+        maskFor(prep, false);
+      }
+      return prep;
+    }
+    function soon() {
+      clearTimeout(prepTimer);
+      prepTimer = setTimeout(function () {
+        if (window.requestIdleCallback) {
+          window.requestIdleCallback(ready, { timeout: 2000 });
+        } else {
+          ready();
+        }
+      }, 300);
+    }
+    // New measures are wanted (a resize, late fonts, the stars arriving).
+    function stale() {
+      measured = null;
+      soon();
+    }
+    function unstyle(el) {
+      if (el.getAttribute("style") === "") {
+        el.removeAttribute("style");
+      }
+    }
+
+    function crossLooks(p, g) {
+      var cross = document.createElement("span");
+      cross.className = "crown-cross";
+      cross.setAttribute("aria-hidden", "true");
+      var mk = function (cls, lookNow) {
+        var s = document.createElement("span");
+        s.className = cls;
+        if (lookNow) {
+          copy(s, lookNow, PAINT);
+          s.style.setProperty("--crown-op", lookNow.opacity);
+        }
+        cross.appendChild(s);
+        return s;
+      };
+      mk("crown-cross-old", g.oldLook).style.opacity = g.oldLook.opacity;
+      mk("crown-cross-new", g.newLook);
+      // The ember gold it keeps after the wall is dark, and takes before the
+      // wall is light.
+      mk("crown-cross-ember", null);
+      var catchLight = mk("crown-cross-catch", null);
+      if (g.hi) {
+        catchLight.style.setProperty("--crown-catch-ink", g.hi);
+      }
+      if (p.dir === "dusk" && g.gilt) {
+        hero.classList.add("crown-gilt");
+      }
+      crown.insertAdjacentElement("afterend", cross);
+      p.cross = cross;
+    }
+    function setTurns(list, turnsNow, since) {
+      list.forEach(function (s, i) {
+        s.path.style.setProperty("--crown-d", String(Math.round(turnsNow[i] - (since || 0))));
+      });
+    }
+    // The star nearest the cross: the evening star, and the morning star.
+    function mark(path, morningAt) {
+      Array.prototype.forEach.call(starHost.querySelectorAll(".crown-evening"), function (el) {
+        el.classList.remove("crown-evening");
+        el.style.removeProperty("--crown-morning-at");
+        if (el.getAttribute("class") === "") { el.removeAttribute("class"); }
+      });
+      if (path) {
+        path.classList.add("crown-evening");
+        if (morningAt !== undefined) { path.style.setProperty("--crown-morning-at", String(Math.round(morningAt))); }
+      }
+    }
+    // The stars' leaf is the night's: at dawn it must not take the day's
+    // tokens when the theme turns under them.
+    function pinStars() {
+      var stops = Array.prototype.slice.call(starHost.querySelectorAll("stop"));
+      var inks = stops.map(function (stop) { return getComputedStyle(stop).stopColor; });
+      stops.forEach(function (stop, i) { stop.style.stopColor = inks[i]; });
+    }
+
+    function play(to, choice) {
+      var dir = to === "dark" ? "dusk" : "dawn";
+      var g = ready();
+      if (!g || g.dir !== dir) {
+        applyOwn(choice);
+        return;
+      }
+      writeStoredTheme(choice);
+      var plan = CROWN_PLAY[dir];
+      var p = playing = {
+        dir: dir, choice: choice, plan: plan, k: K(), t0: performance.now(), g: g,
+        timers: [], undo: [], painted: false, vt: null, ready: 0,
+        covered: g.covered, end: g.end, geom: g.geom,
+      };
+      // Writes only from here.
+      g.wash.forEach(function (kv) { glow.style.setProperty(kv[0], kv[1]); });
+      g.frieze.forEach(function (kv) { if (kv[1]) { frieze.style.setProperty(kv[0], kv[1]); } });
+      g.units.forEach(function (el, i) { el.classList.add("crown-u" + (i + 1)); });
+      g.rows.forEach(function (el, i) { el.classList.add("crown-r" + (i + 1)); });
+      setTurns(g.stars, g.turns, 0);
+      mark(g.evening, g.morningAt);
+      crossLooks(p, g);
+      // The stars' leaf is the night's: at dawn it must not take the day's
+      // tokens when the theme turns under them.
+      g.stops.forEach(function (stop, i) { stop.style.stopColor = g.inks[i]; });
+      // (On the hero, not the root: the tap restyles the arch, not the page.)
+      hero.classList.add("crown-on", "crown-" + dir);
+      // A star field that lands late (a tap before stars.json has come) takes
+      // its turns from where the clock stands.
+      p.watch = new MutationObserver(function () {
+        if (playing !== p) {
+          return;
+        }
+        g.stars = readStars();
+        var clock = p.ready ? (performance.now() - p.ready) / p.k : 0;
+        mark(null);
+        setTurns(g.stars, g.starTurns(g.stars), clock);
+        mark(g.evening, g.morningAt === undefined ? undefined : g.morningAt - clock);
+        if (dir === "dawn") {
+          pinStars();
+        }
+        measured = null;
+      });
+      p.watch.observe(starHost, { childList: true });
+
+      later(p, plan.turn, function () {
+        g.vars.forEach(function (kv) { root.style.setProperty(kv[0], kv[1]); });
+        root.style.setProperty("--crown-m-arch", maskFor(g, true));
+        // Under the stills, the ground of the page that is leaving: a browser
+        // that loses a still shows that, never its own white.
+        root.style.setProperty("--crown-floor", getComputedStyle(document.body).backgroundColor);
+        root.classList.add("crown-vt", "crown-" + dir);
+        // The first act holds its breath while the browser makes its stills,
+        // and goes on from where it was: nothing jumps when they are up.
+        var held = document.getAnimations().filter(function (a) {
+          return (a.animationName || "").indexOf("crown-") === 0 && a.playState === "running";
+        });
+        // KEEP (ux.spec.js: "the crown's first act is held at the turn
+        // where the glass has it").
+        // Held where the glass has them, not where this thread last saw
+        // them: these run on the compositor, which has gone on drawing
+        // while the sums above kept this thread (a tenth of a second on a
+        // phone). Paused at the stale time, the first light stepped back.
+        var nowAt = performance.now();
+        held = held.map(function (a) {
+          var at = a.currentTime;
+          try {
+            if (typeof a.startTime === "number" && typeof at === "number") {
+              at = Math.max(at, (nowAt - a.startTime) * (a.playbackRate || 1));
+            }
+            a.pause();
+            a.currentTime = at;
+          } catch { /* already gone */ }
+          return { a: a, at: at };
+        });
+        var resume = function () {
+          // (Only what is still paused: one the play's end has cancelled
+          // would start again from nothing.) By start time, anchored to
+          // where each was held, on the clock of the frame that shows it:
+          // play() would leave them pending through the transition's first,
+          // heaviest frames; the timeline's own clock is still the frame's
+          // before the stills (the act would leap the hold), and
+          // performance.now() is past the frame being drawn (it would step
+          // back). The frame's own time is neither.
+          var mine = held;
+          held = [];
+          if (!mine.length) return;
+          requestAnimationFrame(function (ts) {
+            mine.forEach(function (h) {
+              try {
+                if (playing === p && h.a.playState === "paused") {
+                  if (typeof ts === "number" && typeof h.at === "number") {
+                    h.a.startTime = ts - h.at / (h.a.playbackRate || 1);
+                  } else {
+                    h.a.play();
+                  }
+                }
+              } catch { /* already gone */ }
+            });
+          });
+        };
+        var veil = document.createElement("div");
+        veil.className = "crown-veil";
+        veil.setAttribute("aria-hidden", "true");
+        p.edge = veil;
+        // KEEP: nothing between here and vt.ready may read the frame back
+        // (a canvas drawn from the page, a capture, a screenshot in a
+        // test): a read in flight while the browser makes its stills loses
+        // the leaving page's still for the whole play, and the wall turns at
+        // once. Tests hold the play only after the first frame
+        // (.web-tools/tests/crown-play.js).
+        var vt = p.vt = document.startViewTransition(function () {
+          p.called = true;
+          if (playing !== p) {
+            if (p.fadePaint) {
+              paintThemeChoice(choice);
+            }
+            return;
+          }
+          // The browser's own bars turn with the page, not at this frame.
+          var metas = Array.prototype.slice.call(document.querySelectorAll('meta[name="theme-color"]'));
+          var was = metas.map(function (mt) { return mt.getAttribute("content"); });
+          paintThemeChoice(choice);
+          p.painted = true;
+          var will = metas.map(function (mt) { return mt.getAttribute("content"); });
+          metas.forEach(function (mt, i) { mt.setAttribute("content", was[i]); });
+          // (Their turn comes mid-spread, or at the end if it never does; the
+          // theme itself is painted once.)
+          p.bars = function () {
+            metas.forEach(function (mt, i) { mt.setAttribute("content", will[i]); });
+            p.bars = null;
+          };
+          root.classList.add("crown-new");
+          hero.classList.add("crown-new");
+          copy(ground, g.groundBox, ["left", "top", "width", "height"]);
+          copy(ground, g.newGround, GROUND);
+          copy(back, g.backBox, ["left", "top", "width", "height"]);
+          copy(back, g.kept, GROUND);
+          document.body.appendChild(veil);
+        });
+        // One clock: everything from here is timed from the transition's
+        // first frame, however long the browser took to make its stills.
+        vt.ready.then(function () {
+          if (playing !== p) {
+            return;
+          }
+          p.ready = performance.now();
+          // Can this browser drive the transition's parts from script? The
+          // rush and the last top-up need both of these; a browser that takes
+          // the calls and does nothing (no throw) gets its own plain
+          // crossfade, now and for the rest of the page's life.
+          // (Why not, when not, is left on the root for whoever is asking:
+          // data-crown-plain.)
+          var able, why = "";
+          try {
+            var trial = root.animate({ opacity: [1, 1] }, { duration: 1, pseudoElement: "::view-transition-new(root)" });
+            if (!(trial && trial.effect && trial.effect.pseudoElement === "::view-transition-new(root)")) {
+              why = "animate() does not take the transition's parts";
+            } else if (!document.getAnimations().some(function (a) {
+              return a !== trial && a.effect && String(a.effect.pseudoElement || "").indexOf("::view-transition") === 0;
+            })) {
+              why = "getAnimations() does not list the transition's parts";
+            }
+            trial.cancel();
+          } catch (err) {
+            why = "the trial threw: " + (err && err.name);
+          }
+          able = !why;
+          if (!able) {
+            root.setAttribute("data-crown-plain", why);
+          }
+          if (!able) {
+            // The stills are taken under our names, and to drop the names now
+            // would end the transition in a cut. So the names stay for the
+            // quarter second of a plain crossfade (style.css, .crown-plain: rules
+            // only, nothing driven from script), the live page beneath is
+            // run to its settled look, and then everything goes.
+            plain = true;
+            p.timers.forEach(clearTimeout);
+            p.timers = [];
+            root.classList.add("crown-plain");
+            held.forEach(function (h) { try { h.a.finish(); } catch { /* already gone */ } });
+            held = [];
+            try {
+              document.getAnimations().forEach(function (a) {
+                var pseudo = a.effect && a.effect.pseudoElement || "";
+                if ((a.animationName || "").indexOf("crown-") === 0 && String(pseudo).indexOf("::view-transition") !== 0) {
+                  try { a.finish(); } catch { /* already gone */ }
+                }
+              });
+            } catch { /* already gone */ }
+            p.settled = true;
+            var done = function () {
+              if (playing === p) {
+                teardown();
+              }
+            };
+            vt.finished.then(done, done);
+            p.timers.push(setTimeout(done, 1200));
+            return;
+          }
+          resume();
+          later(p, plan.spread[0] + 0.45 * plan.spread[1] - plan.turn, function () {
+            if (p.bars) {
+              p.bars();
+            }
+          });
+          // The stills go when the page has visibly turned, not when the
+          // shape has finished growing off-screen: from then the page is live.
+          // The last few hundredths are brought up over 250ms first, so
+          // dropping the stills changes nothing on the glass.
+          var settle = g.settle - plan.turn;
+          later(p, settle - 250, function () {
+            var opts = { duration: 250 * p.k, fill: "forwards", easing: "ease-out" };
+            p.extra = [];
+            try {
+              opts.pseudoElement = "::view-transition-new(root)";
+              p.extra.push(root.animate({ maskSize: [g.last[0]], webkitMaskSize: [g.last[0]], maskPosition: [g.last[1]], webkitMaskPosition: [g.last[1]] }, opts));
+              opts = { duration: 250 * p.k, fill: "forwards", easing: "ease-out", pseudoElement: "::view-transition-new(crown-veil)" };
+              p.extra.push(root.animate({ opacity: [0] }, opts));
+            } catch { /* already gone */ }
+          });
+          later(p, settle, function () {
+            try { vt.skipTransition(); } catch { /* already gone */ }
+          });
+        }, function (err) {
+          // The browser would not play it (a resize while it made its
+          // stills, a hidden tab): the change is simply made.
+          root.setAttribute("data-crown-early", "never ready: " + (err && err.name));
+          resume();
+          if (playing === p) {
+            teardown();
+          }
+        });
+        var over = function () {
+          if (playing !== p) {
+            return;
+          }
+          root.classList.remove("crown-vt");
+          veil.remove();
+          p.settled = true;
+          if (p.rushing || !p.ready) {
+            teardown();
+            return;
+          }
+          // A browser that drops the stills before the page has turned has
+          // cut the play short; that is left on the root too.
+          var ran = (performance.now() - p.ready) / p.k;
+          if (ran < g.settle - plan.turn - 200) {
+            root.setAttribute("data-crown-early", Math.round(ran) + " of " + Math.round(g.settle - plan.turn) + "ms");
+          }
+          // A tap on the cross while the page was turning was kept: the way
+          // back plays now.
+          if (p.again) {
+            // (Not a tap of its own: one that follows closely still counts.)
+            var tapped = lastTap;
+            teardown();
+            toggle();
+            lastTap = tapped;
+            return;
+          }
+          // From here the page is its live self: the vault's clip and its
+          // copied ground are done with (the clip cut the star by the cross
+          // and showed as a hairline inside the lining until the end).
+          hero.classList.add("crown-set");
+          // The way back is summed now, so a second tap is as cheap as the first.
+          setTimeout(function () {
+            if (playing === p && measured === g.m) {
+              if (dir === "dusk" && (!looks.dark.inks || looks.dark.inks.length !== g.m.stops.length)) {
+                looks.dark.inks = g.m.stops.map(function (stop) { return getComputedStyle(stop).stopColor; });
+              }
+              p.back = compute(g.m, dir === "dusk" ? "dawn" : "dusk");
+            }
+          }, 0);
+          var remains = p.end - plan.turn - (performance.now() - p.ready) / p.k;
+          if (remains > 0) {
+            later(p, remains, teardown);
+          } else {
+            teardown();
+          }
+        };
+        vt.finished.then(over, over);
+      });
+    }
+
+    // ---- Everything that ends it early. ----
+    var cut = function () { teardown(); };
+    var soft = function () { rush(RUSH); };
+    // A scroll: the old page's still cannot move with the page, and every
+    // named part does, so to run the rest out under it tears the picture.
+    // The stills go at once. (Before the change of theme, as any other.)
+    var scrolled = function () {
+      var p = playing;
+      if (p && p.vt && p.ready && !p.settled) {
+        teardown();
+      } else {
+        soft();
+      }
+    };
+    // A new viewport may be a new layout: the looks are read again too (one
+    // probe), as they are not for anything less.
+    window.addEventListener("resize", function () {
+      looks.light = looks.dark = null;
+      stale();
+    });
+    if (window.ResizeObserver) {
+      var sizes = new ResizeObserver(function () {
+        measured = null;
+        if (!playing) {
+          soon();
+        }
+      });
+      sizes.observe(hero);
+      sizes.observe(head);
+    }
+    ["pagehide", "pageswap", "resize", "orientationchange"].forEach(function (type) {
+      window.addEventListener(type, cut);
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) {
+        cut();
+      }
+    });
+    document.addEventListener("visibilitychange", cut);
+    // Any scroller, not only the window: scroll does not bubble.
+    document.addEventListener("scroll", scrolled, { passive: true, capture: true });
+    window.addEventListener("touchmove", soft, { passive: true });
+    if (device && device.addEventListener) {
+      device.addEventListener("change", function () {
+        soft();
+        label();
+      });
+    }
+    // A reader who asks for stillness or contrast while it plays gets it.
+    [still, contrast, forced].forEach(function (q) {
+      if (q && q.addEventListener) {
+        q.addEventListener("change", function () {
+          if (q.matches) {
+            cut();
+          }
+          // Forced colours coming or going take the button with them, as a
+          // load under them would.
+          if (q === forced && setUp) {
+            tap.hidden = q.matches;
+          }
+        });
+      }
+    });
+    new MutationObserver(function () {
+      if (!playing) {
+        soon();
+      }
+    }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    new MutationObserver(function () {
+      if (!playing) {
+        stale();
+      }
+    }).observe(starHost, { childList: true });
+    var panels = Array.prototype.slice.call(document.querySelectorAll("details.site-menu, details.site-settings, details.home-date-nav"));
+    panels.forEach(function (d) {
+      d.addEventListener("toggle", function () {
+        if (d.open) {
+          soft();
+        }
+      });
+    });
+    // An open panel a reader can see (the wide header keeps the nav open
+    // without showing a panel: its summary is not displayed).
+    function panelOpen() {
+      return panels.some(function (d) {
+        var summaryEl = d.querySelector(":scope > summary");
+        return d.open && summaryEl && summaryEl.getClientRects().length > 0;
+      });
+    }
+
+    // While the stills are up the browser sends every pointer to the root,
+    // whatever pointer-events says. So a press anywhere but the cross runs
+    // the rest of the play out, and a click that lands on the root is given
+    // at once to the control under the point, found by its box, with its
+    // modifiers: no waiting for the transition to end.
+    function overTap(x, y) {
+      var q = tap.getBoundingClientRect();
+      return x >= q.left && x <= q.right && y >= q.top && y <= q.bottom;
+    }
+    function controlAt(x, y) {
+      var found = null;
+      Array.prototype.forEach.call(document.querySelectorAll("a[href], button, summary, input, select, textarea, label"), function (el) {
+        var q = el.getBoundingClientRect();
+        if (q.width && q.height && x >= q.left && x <= q.right && y >= q.top && y <= q.bottom && !el.hidden && !el.disabled) {
+          found = el;
+        }
+      });
+      return found;
+    }
+    // The hand-over is made from pointerup, not from the click: a browser
+    // need not send a click to a root that is not interactive (iOS Safari
+    // has not always), and pointerup comes whatever the target. The click
+    // that may follow is swallowed, so nothing is given twice.
+    // Modified and middle clicks on a link open a tab, in the foreground
+    // (shift too: a tab, not a window; alt is not treated as a download), and
+    // a right-click while the stills are up gets the page's menu, not the
+    // link's. Both are accepted for the few seconds this lasts.
+    var press = null, handed = null, given = null;
+    function give(x, y, e, aux) {
+      var el = controlAt(x, y);
+      if (!el) {
+        return false;
+      }
+      if (el === tap) {
+        // Pressed while the page was turning: kept, or (let go after the
+        // settle) the way back at once.
+        if (!aux) {
+          toggle();
+        }
+        return true;
+      }
+      var link = el.closest("a[href]");
+      if (link && (aux || e.ctrlKey || e.metaKey || e.shiftKey)) {
+        window.open(link.href, "_blank", "noopener");
+        return true;
+      }
+      if (!aux) {
+        // What opens a panel ends the play first: the panel's links are
+        // rows of the transition and its ground is not, so for a few frames
+        // they would hang on the vault without it.
+        if (el.tagName === "SUMMARY" && playing) {
+          teardown();
+        }
+        // Focus goes where a real click would have put it.
+        try { el.focus({ preventScroll: true }); } catch { /* already gone */ }
+        given = el;
+        el.click();
+      }
+      return true;
+    }
+    document.addEventListener("pointerdown", function (e) {
+      press = null;
+      if (playing && playing.vt && !playing.settled) {
+        press = { id: e.pointerId, x: e.clientX, y: e.clientY, button: e.button };
+        if (!overTap(e.clientX, e.clientY)) {
+          rush(250);
+        }
+      }
+    }, true);
+    document.addEventListener("pointercancel", function () {
+      press = null;
+    }, true);
+    document.addEventListener("pointerup", function (e) {
+      var pr = press;
+      press = null;
+      if (!pr || pr.id !== e.pointerId || pr.button !== e.button || (e.button !== 0 && e.button !== 1) ||
+          Math.hypot(e.clientX - pr.x, e.clientY - pr.y) > 10) {
+        return;
+      }
+      given = null;
+      if (give(e.clientX, e.clientY, e, e.button === 1)) {
+        handed = { t: performance.now(), x: e.clientX, y: e.clientY, el: given };
+        // This pointerup names the root, not what was pressed: the page's
+        // own listeners would read it as a tap outside (and shut the Menu
+        // this press has just opened). The click handed over speaks for it.
+        e.stopPropagation();
+      }
+    }, true);
+    var near = function (e) {
+      return handed && e.isTrusted && performance.now() - handed.t < 700 && Math.hypot(e.clientX - handed.x, e.clientY - handed.y) < 12;
+    };
+    // After a touch the browser sends its mouse events too, to the root: the
+    // mousedown would take the focus the hand-over has just placed.
+    document.addEventListener("mousedown", function (e) {
+      if (near(e) && e.target === root) {
+        e.preventDefault();
+      }
+    }, true);
+    var handOn = function (e) {
+      // Only the middle button is an auxiliary click to hand over: a
+      // right-click is the browser's.
+      if (e.type === "auxclick" && e.button !== 1) {
+        return;
+      }
+      if (handed && e.isTrusted && performance.now() - handed.t < 700 && Math.hypot(e.clientX - handed.x, e.clientY - handed.y) < 12) {
+        // The browser's own click for a press already handed over.
+        var was = handed.el;
+        handed = null;
+        if (was && was.isConnected && document.activeElement !== was && (document.activeElement === document.body || !document.activeElement)) {
+          try { was.focus({ preventScroll: true }); } catch { /* already gone */ }
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      // (A click on the root with no press of ours behind it: handed over
+      // all the same.)
+      if (e.target !== root || !e.isTrusted) {
+        return;
+      }
+      if (give(e.clientX, e.clientY, e, e.type === "auxclick")) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("click", handOn, true);
+    document.addEventListener("auxclick", handOn, true);
+
+    function toggle() {
+      if (playing) {
+        // Locked only while the page is turning; once it has visibly
+        // settled the same tap is the way back, whatever is still twinkling.
+        if (!playing.settled) {
+          // Kept, once: the way back plays at the settle. A further tap
+          // changes the reader's mind again. (Not the taps of a double tap
+          // or a flurry: only one that comes a moment after the last.)
+          // And only once the stills are up: before that the page has not
+          // begun to turn, and a slow second tap of a double tap is not a
+          // change of mind. (A way back's own opening is another matter: it
+          // began by itself, its tap is long past, and a tap there is a new
+          // one.)
+          var now = performance.now();
+          if ((playing.ready || now - lastTap > 2 * TAP_APART) && now - lastTap > TAP_APART) {
+            playing.again = !playing.again;
+          }
+          lastTap = now;
+          return;
+        }
+        teardown();
+      }
+      lastTap = performance.now();
+      var stored = effectiveThemeChoice();
+      var after = afterCrownTap(stored, deviceLook() === "dark", turned && turned.wrote === stored ? turned.from : null);
+      var choice = after.choice;
+      var to = lookOf(choice);
+      turned = after.restore ? { from: after.restore, wrote: choice } : null;
+      // The Menu's own change, crossfade and all: for a browser without view
+      // transitions, a reader who asked for stillness or contrast, a black
+      // day (no sky is played over Good Friday or All Souls), and a page
+      // with a panel open over it.
+      // KEEP: every one of these takes the plain path and sets no crown-
+      // class at all. ux.spec.js: "the crown plays nothing for a reader who
+      // asked for stillness or contrast, on a black day, or under forced
+      // colours".
+      if (!document.startViewTransition || (still && still.matches) || (contrast && contrast.matches) ||
+          hero.classList.contains("day-color-black") || panelOpen() || plain) {
+        applyOwn(choice);
+        return;
+      }
+      // (The choice is kept from the tap: a reader who goes straight on to
+      // "Pray" has still chosen.)
+      play(to, choice);
+    }
+
+    // A click, never a press; and not the end of a drag (the cross sits where
+    // a thumb begins a pull).
+    var down = null;
+    tap.addEventListener("pointerdown", function (e) {
+      down = { x: e.clientX, y: e.clientY, moved: false };
+    });
+    tap.addEventListener("pointermove", function (e) {
+      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) {
+        down.moved = true;
+      }
+    });
+    tap.addEventListener("pointercancel", function () {
+      down = null;
+    });
+    tap.addEventListener("click", function (e) {
+      var dragged = down && (down.moved || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8);
+      down = null;
+      if (!dragged) {
+        toggle();
+      }
+    });
+
+    // Any other route to a change of theme ends the play first
+    // (applyThemeChoice); the play's own calls to it are fenced.
+    crownPlay = {
+      end: function () {
+        if (playing && !applying) {
+          teardown();
+        }
+      },
+    };
+    if (document.readyState === "complete") {
+      stale();
+    } else {
+      window.addEventListener("load", stale);
+    }
+  })();
 })();
 
 // A finger on a control. A touch browser may set :active late (Chromium once

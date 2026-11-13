@@ -569,6 +569,17 @@ func toggled(_ on: Bool) {
     }
 }
 
+/// Readies the soft tick the crown's play gives at its turn, a second or so ahead.
+func crownTurning() {
+    Haptics.turn.prepare()
+}
+
+/// One soft tick as the crown's play turns the look over under the reader's eyes (the play's
+/// turn, not the tap, which has its own tick).
+func crownTurned() {
+    Haptics.turn.impactOccurred(intensity: 0.6)
+}
+
 /**
  * The generators, made once and kept: the Taptic Engine sleeps until a generator is prepared, so
  * one made for each tap could land its tick after the touch it answers. Each is prepared again
@@ -582,6 +593,7 @@ private enum Haptics {
     }()
     static let on = UIImpactFeedbackGenerator(style: .light)
     static let off = UIImpactFeedbackGenerator(style: .soft)
+    static let turn = UIImpactFeedbackGenerator(style: .soft)
 }
 
 /// How the room changes when the reader changes how it looks: dimming rather than snapping, as the web's theme does
