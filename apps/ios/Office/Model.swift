@@ -191,18 +191,30 @@ struct Entry: Hashable {
 final class AppModel: ObservableObject {
     static let shared = AppModel()
 
-    @Published var root: CivilDate
+    /// Home's day; another one ends the crown's play, if one is under way.
+    @Published var root: CivilDate {
+        didSet {
+            if root != oldValue { CrownPlayer.shared.cut() }
+        }
+    }
     /// Every move to another visit, the edge swipe's included, puts the header's overlay away; a
-    /// page changed in place (the search's words) does not, as on Android.
+    /// page changed in place (the search's words) does not, as on Android. Any move ends the
+    /// crown's play.
     @Published var path: [Entry] = [] {
         didSet {
             if path.last?.id != oldValue.last?.id { overlay = .none }
+            if path.map(\.id) != oldValue.map(\.id) || path.map(\.page) != oldValue.map(\.page) { CrownPlayer.shared.cut() }
         }
     }
     /// How the page replaced in place last moves, and the page it moved to.
     @Published private(set) var step: (to: Page, motion: Motion)?
-    /// The header's open overlay, if any.
-    @Published private(set) var overlay = Overlay.none
+    /// The header's open overlay, if any. Opening one ends the crown's play: the menu is drawn
+    /// over the page, and the play's photographs would lie over it.
+    @Published private(set) var overlay = Overlay.none {
+        didSet {
+            if overlay != .none { CrownPlayer.shared.cut() }
+        }
+    }
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
@@ -358,7 +370,14 @@ final class AppModel: ObservableObject {
         defaults.set(value, forKey: "form")
     }
 
+    /// The menu's Theme row: the later word, so the crown's play, if one is under way, ends first.
     func chooseTheme(_ value: ThemeChoice) {
+        CrownPlayer.shared.cut()
+        turnTheme(value)
+    }
+
+    /// Saves and shows a theme: the menu's, or the one home's crown turns to under its play.
+    func turnTheme(_ value: ThemeChoice) {
         theme = value
         defaults.set(value.rawValue, forKey: "theme")
     }

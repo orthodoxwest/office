@@ -609,3 +609,104 @@ final class UsageTests: XCTestCase {
         XCTAssertNotEqual(Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String, "YES")
     }
 }
+
+/// Home's crown: the tap rule's wiring, the plain change, and the play's sums.
+final class CrownTests: XCTestCase {
+    private var savedTheme: String?
+
+    override func setUp() {
+        savedTheme = UserDefaults.standard.string(forKey: "theme")
+    }
+
+    override func tearDown() {
+        CrownPlayer.shared.teardown(.cut)
+        UserDefaults.standard.set(savedTheme, forKey: "theme")
+    }
+
+    // The look always turns over, a look matching the device's is saved as Default, and the tap
+    // back restores the choice the last tap turned from (presentation::crown).
+    func testTheTapTurnsTheLookAndTheTapBackRestoresTheChoice() {
+        var light = CrownMemory()
+        XCTAssertEqual(light.next(stored: .system, deviceDark: false), .apse)
+        XCTAssertEqual(light.next(stored: .apse, deviceDark: false), .system)
+        var dark = CrownMemory()
+        XCTAssertEqual(dark.next(stored: .apse, deviceDark: true), .nave)
+        XCTAssertEqual(dark.next(stored: .nave, deviceDark: true), .apse, "Apse chosen on a dark phone comes back as Apse")
+        // The menu chose meanwhile: the memory is of another choice and is let go.
+        var changed = CrownMemory()
+        XCTAssertEqual(changed.next(stored: .apse, deviceDark: true), .nave)
+        XCTAssertEqual(changed.next(stored: .system, deviceDark: true), .nave)
+    }
+
+    // A tap that takes the menu's own change (a black day here) saves the turned theme as the
+    // Theme row does, starts no play, and the next tap turns it back.
+    func testAPlainTapSettlesOnTheTurnedThemeAndSavesIt() {
+        let model = AppModel()
+        model.turnTheme(.nave)
+        let deviceDark = CrownPlayer.deviceDark(CrownPlayer.keyWindow())
+        let head = CrownHead(arch: .phone, first: false, black: true, season: "", crownSize: 40, crownTop: 20, reserve: [])
+        CrownPlayer.shared.tap(model: model, head: head, frames: CrownFrames())
+        XCTAssertNil(CrownPlayer.shared.run)
+        XCTAssertEqual(model.theme, deviceDark ? .system : .apse)
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "theme"), model.theme.rawValue)
+        CrownPlayer.shared.tap(model: model, head: head, frames: CrownFrames(), plain: true)
+        XCTAssertEqual(model.theme, .nave)
+        // The menu's choice is the later word, and there is no play to end.
+        model.chooseTheme(.apse)
+        XCTAssertEqual(model.theme, .apse)
+    }
+
+    // The play's sums on a phone's home: in their order, and every line's ink handed over.
+    func testThePlayKeepsItsOrder() {
+        let card = CGRect(x: 16, y: 60, width: 358, height: 760)
+        let band: CGFloat = 330
+        let placed = SkyStar.placed(.phone, width: card.width, band: band, first: false, reserve: [])
+        let stars = placed.enumerated().map {
+            CrownStar(index: $0.offset, center: CGPoint(x: card.minX + $0.element.center.x, y: card.minY + $0.element.center.y), size: Double($0.element.size))
+        }
+        let words = ["w-date": CGRect(x: 60, y: 240, width: 270, height: 60), "w-feast": CGRect(x: 80, y: 300, width: 230, height: 28)]
+        let rows = [
+            "r-header": CGRect(x: 0, y: 0, width: 390, height: 48), "r-pray": CGRect(x: 30, y: 420, width: 330, height: 50),
+            "r-band0": CGRect(x: 30, y: 480, width: 330, height: 60), "r-band1": CGRect(x: 30, y: 540, width: 330, height: 60),
+            "r-band2": CGRect(x: 30, y: 600, width: 330, height: 60), "r-meta": CGRect(x: 30, y: 680, width: 330, height: 40),
+        ]
+        for dusk in [true, false] {
+            let fig = CrownFigures.of(dusk: dusk)
+            let s = CrownScene(dusk: dusk, fig: fig, arch: .phone, card: card, headHeight: band, screen: CGSize(width: 390, height: 844),
+                               words: words, rows: rows, crown: CGRect(x: 175, y: 80, width: 40, height: 40), stars: stars)
+            XCTAssertNotNil(s.maskImage())
+            XCTAssertGreaterThan(s.s1, s.s0)
+            XCTAssertLessThan(fig.turn, fig.front.at)
+            XCTAssertGreaterThan(s.covered, fig.spread.at)
+            XCTAssertGreaterThanOrEqual(s.end, fig.end)
+            XCTAssertLessThan(s.settle, s.end)
+            // Light arrives faster than it leaves.
+            if !dusk { XCTAssertLessThan(fig.end, CrownFigures.of(dusk: true).end) }
+            // The page's own light rises from nothing to the whole, and the veil is gone by its end.
+            XCTAssertEqual(s.glow(fig.spread.at), 0)
+            XCTAssertEqual(s.glow(fig.spread.at + s.dur), 1, accuracy: 1e-6)
+            XCTAssertEqual(s.veilOpacity(fig.veilTo), 0, accuracy: 1e-6)
+            // The front has turned the whole head by its end.
+            XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + 40), fig.front.end), 1)
+            XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + band - 4), fig.front.end), 1)
+            // Each of the day's lines hands over while the front crosses the head, and the rows
+            // one after another, no two within 25ms; by the settle every line has its new ink.
+            XCTAssertEqual(Set(s.words.keys), Set(words.keys))
+            for t in s.words.values { XCTAssertTrue((fig.front.at...fig.front.end).contains(t)) }
+            let dealt = s.rows.values.sorted()
+            XCTAssertEqual(dealt.count, rows.count)
+            for (a, b) in zip(dealt, dealt.dropFirst()) { XCTAssertGreaterThanOrEqual(b - a, 25 - 1e-9) }
+            for key in Array(rows.keys) + Array(words.keys) {
+                XCTAssertEqual(s.inkIn(key, s.settle), 1)
+                XCTAssertEqual(s.inkOut(key, s.settle), 1)
+            }
+            // Dusk's stars have kindled before the play is over; dawn's go out ahead of the
+            // light, the morning star by the cross last.
+            XCTAssertEqual(s.starTurns.count, stars.count)
+            for t in s.starTurns {
+                if dusk { XCTAssertLessThanOrEqual(t + 800, s.end) } else { XCTAssertTrue((150...1750).contains(t)) }
+            }
+            if !dusk && !stars.isEmpty { XCTAssertEqual(s.starTurns.max(), 1750) }
+        }
+    }
+}

@@ -22,6 +22,11 @@ native text, screen for screen:
   month's ordo, with the web's glyphs, as Android's launcher shortcuts do (`Shortcuts.swift`).
 - **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
   the hand-set date picker.
+- **The crown**: the consecration cross at the head of home's arch turns the look over, unannounced,
+  as the web's does (presentation::crown has the rule and the timetable). The change plays as dusk
+  or dawn (`CrownPlay.swift`): act one is drawn in a layer of the window over the app's views, and
+  at the turn the page is photographed and let go of, over the live new theme, through the front
+  in the head and then the arch's own shape. Every figure it reads is in `CrownPlan.swift`.
 - **Motion**, as the Android app's: pushes and pops are the stack's own slide and edge swipe; a
   page of the same kind (the next hour, another day or month) changes in place, keeping the
   page shown until the next is composed and then moving along Material's shared axis.

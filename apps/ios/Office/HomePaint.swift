@@ -168,6 +168,14 @@ struct Crown: View {
     }
 }
 
+/// A star as a head shows it: its path and centre in the head's own space, its size, its leaf's strength.
+struct PlacedStar {
+    let path: Path
+    let center: CGPoint
+    let size: CGFloat
+    let leaf: Double
+}
+
 /// One of the sky's gold-leaf stars: its centre in card widths, its size and outline in points.
 struct SkyStar {
     let x: CGFloat
@@ -204,6 +212,33 @@ struct SkyStar {
                 path.closeSubpath()
                 out.append((path: path, leaf: Double(s.leaf)))
             }
+        }
+        return out
+    }
+
+    /**
+     * The stars a head `width` wide and `band` deep shows: every one clear of `reserve` and 9pt
+     * clear of the frieze, a size larger on a first-class feast, each as its path in the head's own
+     * space with its leaf's strength (fully lit on a first-class feast) before the season's catch.
+     * `Sky` paints them, and the crown's play (CrownPlay.swift) kindles or puts them out.
+     */
+    static func placed(_ arch: Arch, width w: CGFloat, band: CGFloat, first: Bool, reserve: [CGRect]) -> [PlacedStar] {
+        let scale: CGFloat = first ? 1.14 : 1
+        var out: [PlacedStar] = []
+        for s in of(arch) {
+            let cx = s.x * w
+            let cy = s.y * w
+            let r = s.r * scale
+            if cy + r > band - 9 { continue }
+            let box = CGRect(x: cx - r, y: cy - r, width: 2 * r, height: 2 * r)
+            if reserve.contains(where: { $0.intersects(box) }) { continue }
+            var path = Path()
+            for i in stride(from: 0, to: s.outline.count - 1, by: 2) {
+                let p = CGPoint(x: cx + s.outline[i] * scale, y: cy + s.outline[i + 1] * scale)
+                if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
+            }
+            path.closeSubpath()
+            out.append(PlacedStar(path: path, center: CGPoint(x: cx, y: cy), size: s.r, leaf: Double(first ? min(1, s.leaf + 0.25) : s.leaf)))
         }
         return out
     }
@@ -279,33 +314,31 @@ struct Sky: View {
                     }
                 }
                 guard stars else { return }
-                let scale: CGFloat = first ? 1.14 : 1
-                let light = GraphicsContext.Shading.radialGradient(
-                    Gradient(stops: [.init(color: leaf.hi, location: 0), .init(color: leaf.mid, location: 0.6), .init(color: leaf.lo, location: 1)]),
-                    center: CGPoint(x: w / 2, y: band * 0.62), startRadius: 0, endRadius: w * 0.72
-                )
-                for s in SkyStar.of(arch) {
-                    let cx = s.x * w
-                    let cy = s.y * w
-                    let r = s.r * scale
-                    if cy + r > band - 9 { continue }
-                    let box = CGRect(x: cx - r, y: cy - r, width: 2 * r, height: 2 * r)
-                    if reserve.contains(where: { $0.intersects(box) }) { continue }
-                    var path = Path()
-                    for i in stride(from: 0, to: s.outline.count - 1, by: 2) {
-                        let p = CGPoint(x: cx + s.outline[i] * scale, y: cy + s.outline[i + 1] * scale)
-                        if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
-                    }
-                    path.closeSubpath()
+                let light = Sky.starLight(leaf, width: w, band: band)
+                for s in SkyStar.placed(arch, width: w, band: band, first: first, reserve: reserve) {
                     var star = sky
-                    star.opacity = lit * (first ? min(1, s.leaf + 0.25) : s.leaf)
-                    star.fill(path, with: light)
+                    star.opacity = Double(lit) * s.leaf
+                    star.fill(s.path, with: light)
                 }
             }
             if let hairline { skyLining(ctx, size, hairline: hairline) }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// The leaf's light on the stars: brightest a little above the horizon's middle.
+    static func starLight(_ leaf: Leaf, width w: CGFloat, band: CGFloat) -> GraphicsContext.Shading {
+        .radialGradient(
+            Gradient(stops: [.init(color: leaf.hi, location: 0), .init(color: leaf.mid, location: 0.6), .init(color: leaf.lo, location: 1)]),
+            center: CGPoint(x: w / 2, y: band * 0.62), startRadius: 0, endRadius: w * 0.72
+        )
+    }
+
+    /// The painter's reserve the stars keep clear of: the day's words padded 14 by 6, and the
+    /// cross (`size` across, `top` below the card's top) padded 11.
+    static func starReserve(_ words: [CGRect], width w: CGFloat, crown size: CGFloat, top: CGFloat) -> [CGRect] {
+        words.map { $0.insetBy(dx: -14, dy: -6) } + [CGRect(x: (w - size) / 2 - 11, y: top - 11, width: size + 22, height: size + 22)]
     }
 
     /// The sky's two lines, where the lining stands by day: one matte leaf fillet against the slate

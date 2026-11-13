@@ -33,6 +33,9 @@ struct HomeScreen: View {
     @Environment(\.wide) private var wide
     /// Where the niche stands on the screen, which the chapel light follows.
     @State private var nicheFrame: CGRect?
+    /// Where the crown's play finds home's parts; kept apart from the view's state, so a scroll
+    /// that moves them does not lay home out again.
+    @State private var crownFrames = CrownFrames()
 
     var body: some View {
         let p = self.p.seasoned(view.ornament)
@@ -77,9 +80,9 @@ struct HomeScreen: View {
                         // fold, rather than being cut through by it.
                         VStack(spacing: 0) {
                             VStack(spacing: 0) {
-                                SiteHeader()
+                                SiteHeader().crownInk("r-header")
                                 Spacer(minLength: 0)
-                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche)
+                                Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: layout.card, dyn: m.type / m.layout, wide: layout, heavy: heavy), niche: niche, frames: crownFrames)
                                     .background(GeometryReader { card in
                                         Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
                                     })
@@ -100,8 +103,8 @@ struct HomeScreen: View {
                         // above the band. The phone's home has no colophon; the wide home keeps it.
                         let card = min(m.px(576), screen - 2 * m.px(gutter))
                         PhoneHome(height: tall, foot: m.px(gutter)) {
-                            SiteHeader()
-                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil)
+                            SiteHeader().crownInk("r-header")
+                            Frontispiece(view: view, date: date, tier: HomeTier(screen: screen / m.layout, tall: tall / m.layout, card: card / m.layout, dyn: m.type / m.layout), niche: nil, frames: crownFrames)
                                 .frame(maxWidth: m.px(576))
                                 .padding(.horizontal, m.px(gutter))
                                 .padding(.top, m.px(13.6))
@@ -115,6 +118,12 @@ struct HomeScreen: View {
             }
         }
         .onPreferenceChange(NicheFrameKey.self) { nicheFrame = $0 }
+        .onPreferenceChange(CrownFrameKey.self) { frames in
+            crownFrames.value = frames
+            // A scroll or a new layout ends the crown's play: its photographs cannot move.
+            CrownPlayer.shared.moved(crownFrames)
+        }
+        .onDisappear { CrownPlayer.shared.cut(owner: crownFrames) }
         .environment(\.ornament, o)
         .environment(\.palette, p)
     }
@@ -460,7 +469,10 @@ private struct Frontispiece: View {
     let date: CivilDate
     let tier: HomeTier
     let niche: NicheTokens?
+    /// Where home's parts stand, for the crown's play.
+    let frames: CrownFrames
     @EnvironmentObject private var model: AppModel
+    @ObservedObject private var crownPlayer = CrownPlayer.shared
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
@@ -502,36 +514,51 @@ private struct Frontispiece: View {
             // on a phone 0.75rem inside the panel's edge, in a niche 26pt inside the moulding. By
             // night on a phone, the apse's sky with its stars, ringed by a leaf fillet and the
             // day's hairline.
-            if night {
-                let crown = m.px(tier.crownSize)
-                let top = m.px(tier.crownTop)
-                GeometryReader { g in
-                    let w = g.size.width
-                    let clear = reserve.values.map { $0.insetBy(dx: -14, dy: -6) }
-                        + [CGRect(x: (w - crown) / 2 - 11, y: top - 11, width: crown + 22, height: crown + 22)]
-                    Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
-                }
-            } else {
-                ZStack {
-                    // A first-class niche by day gilds one fillet round its head, to the frieze.
-                    if desk && first { GiltHead(arch: tier.arch) }
-                    Lining(arch: tier.arch, inset: m.px(tier.lining), hairline: liningDay, pigmented: true)
+            Group {
+                if night {
+                    let crown = m.px(tier.crownSize)
+                    let top = m.px(tier.crownTop)
+                    GeometryReader { g in
+                        let clear = Sky.starReserve(Array(reserve.values), width: g.size.width, crown: crown, top: top)
+                        // While the crown plays, its stars are the play's to kindle or put out.
+                        Sky(arch: tier.arch, ink: home, leaf: leaf, lit: catchLight, stars: !black && crownPlayer.run == nil, first: first, hairline: black ? nil : view.color == "white" ? home.limeWhite : day, reserve: clear)
+                    }
+                } else {
+                    ZStack {
+                        // A first-class niche by day gilds one fillet round its head, to the frieze.
+                        if desk && first { GiltHead(arch: tier.arch) }
+                        Lining(arch: tier.arch, inset: m.px(tier.lining), hairline: liningDay, pigmented: true)
+                    }
                 }
             }
+            .crownFrame("head")
             // The consecration cross in the point of the head, with clear air round it: painted
             // through the pigment, gilt on a first-class feast by day, leaf by night on the sky.
-            Group {
-                let size = m.px(tier.crownSize)
-                if night && black {
-                    Crown(size: size, ink: muted.opacity(0.7), shading: .color(muted.opacity(0.7)))
-                } else if night {
-                    Crown(size: size, ink: leaf.mid, shading: .linearGradient(Gradient(stops: [.init(color: leaf.hi, location: 0), .init(color: leaf.mid, location: 0.55), .init(color: leaf.lo, location: 1)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)), alpha: 0.35 + 0.65 * catchLight)
-                } else if first {
-                    Crown(size: size, ink: o.flat, shading: .linearGradient(Gradient(stops: [.init(color: o.hi, location: 0.08), .init(color: mix(o.hi, .white, 0.55), location: 0.3), .init(color: o.flat, location: 0.52), .init(color: o.lo, location: 0.92)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size)))
-                } else {
-                    Crown(size: size, ink: p.lining)
+            // It is also, unannounced, a button: a tap turns the look over (CrownPlay.swift).
+            let crownSize = m.px(tier.crownSize)
+            crownMark(dark: night, season: view.ornament, first: first, black: black, size: crownSize)
+                // While the crown plays, its looks are the play's.
+                .opacity(crownPlayer.run == nil ? 1 : 0)
+                .crownFrame("crown")
+                .overlay(alignment: .bottom) {
+                    // At least a thumb's width, standing on the roundel's foot and growing up
+                    // into the point, clear of the date's own tap box below.
+                    let tap = max(m.px(44), 46)
+                    Button {
+                        // A light tap under the finger, as a checkbox gives.
+                        toggled()
+                        let head = CrownHead(arch: tier.arch, first: first, black: black, season: view.ornament, crownSize: crownSize,
+                                             crownTop: m.px(tier.crownTop), reserve: Array(reserve.values))
+                        CrownPlayer.shared.tap(model: model, head: head, frames: frames)
+                    } label: {
+                        Color.clear.frame(width: tap, height: tap)
+                    }
+                    .buttonStyle(Unmarked())
+                    .crownFrame("tap")
+                    .offset(y: m.px(2.4))
+                    // In the menu's own words, following the look.
+                    .accessibilityLabel(night ? "Switch to Nave" : "Switch to Apse")
                 }
-            }
             // The day.
             VStack(spacing: 0) {
                 Button { model.open(.ordo(year: Int(date.year), month: Int(date.month), day: Int(date.day))) } label: {
@@ -565,6 +592,7 @@ private struct Frontispiece: View {
                 .buttonStyle(Quiet())
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityHint("Opens the ordo")
+                .crownInk("w-date")
                 // The day's feast leads to its page, underlined as the web's `.feast-link`.
                 Group {
                     if view.feastId.isEmpty {
@@ -579,10 +607,12 @@ private struct Frontispiece: View {
                 }
                 .foregroundStyle(p.accent)
                 .reserved("feast")
+                .crownInk("w-feast")
                 .frame(maxWidth: tier.feastMeasure.map { m.px($0) })
                 .padding(.top, m.px(2))
                 if !view.octaveNote.isEmpty {
                     Text(view.octaveNote).type(Scale.small).foregroundStyle(muted).multilineTextAlignment(.center).reserved("octave")
+                        .crownInk("w-octave")
                 }
                 if !view.penitential.isEmpty {
                     HStack(spacing: m.px(9.6)) {
@@ -590,6 +620,7 @@ private struct Frontispiece: View {
                             Text(t).type(tier.fast).foregroundStyle(rubric).reserved("fast " + t)
                         }
                     }
+                    .crownInk("w-fast")
                     .padding(.top, m.px(desk && tier.heavy ? 0 : 12))
                 }
                 if !view.commemorations.isEmpty {
@@ -612,6 +643,7 @@ private struct Frontispiece: View {
                             }
                         }
                     }
+                    .crownInk("w-also")
                     .padding(.top, m.px(8))
                 }
             }
@@ -626,6 +658,7 @@ private struct Frontispiece: View {
                         versicleLine("℟.", view.response, style).reserved("response")
                     }
                     .frame(maxWidth: m.px(tier.versicleMeasure))
+                    .crownInk("w-versicle")
                     .padding(.top, m.px(12))
                 }
                 Color.clear.frame(height: 0)
@@ -641,6 +674,7 @@ private struct Frontispiece: View {
                             .padding(.vertical, m.px(12))
                     }
                     .buttonStyle(Quiet())
+                    .crownInk("w-today")
                 }
             }
             .frame(maxWidth: .infinity)
@@ -654,6 +688,7 @@ private struct Frontispiece: View {
                 PrayNow(label: view.prayNowLabel, tier: tier, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
+                .crownInk("r-pray")
                 .padding(.top, m.px(tier.bandGap))
                 HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
                     .padding(.top, m.px(tier.prayGap))
@@ -723,10 +758,12 @@ private struct Frontispiece: View {
                     .padding(.top, m.px(tier.metaGap + 1))
                 }
             }
+            .crownInk("r-meta")
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
         }
         .coordinateSpace(name: "frontispiece")
+        .crownFrame("card")
         .onPreferenceChange(ReserveKey.self) { reserve = $0 }
         .background {
             if let niche, !p.dark {
@@ -1003,6 +1040,8 @@ private struct HourDirectory: View {
                     .frame(height: 2)
                     .allowsHitTesting(false)
                 }
+                // Each band hands its ink over in one move under the crown's play.
+                .crownInk("r-band\(i)")
             }
         }
         .padding(.bottom, 1)
