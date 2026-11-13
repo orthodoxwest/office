@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -112,9 +114,23 @@ class MainActivity : ComponentActivity() {
             val dark = vm.theme.dark(isSystemInDarkTheme())
             LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
             val dissolve = rememberDissolve()
-            Box(Modifier.fillMaxSize().dissolving(dissolve)) {
+            // Home's crown turns the look over with a play of its own (Crown.kt): the choice is
+            // saved at the tap and shown at the play's turn; where there is no play, the Menu's
+            // dissolve. Any other change of theme, a new page, or the window going, ends it.
+            val crown = rememberCrown()
+            val context = LocalContext.current
+            crown.choice = { vm.theme }
+            crown.deviceDark = isSystemInDarkTheme()
+            crown.animationScale = { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }
+            crown.save = vm::keepTheme
+            crown.apply = vm::chooseTheme
+            crown.plain = { t -> dissolve.change { vm.chooseTheme(t) } }
+            LaunchedEffect(vm.shown?.entry) { crown.cut() }
+            DisposableEffect(crown) { onDispose { crown.finish() } }
+            Box(Modifier.fillMaxSize().dissolving(dissolve).crowning(crown)) {
                 OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
                     CompositionLocalProvider(
+                        LocalCrown provides crown,
                         LocalMartyrology provides MartyrologyChoice(vm.martyrology) { on -> if (on != vm.martyrology) vm.chooseMartyrology(on) },
                         LocalChant provides ChantChoice(vm.offersChant, vm.chant) { on -> if (on != vm.chant) vm.chooseChant(on) },
                     ) {
@@ -133,7 +149,10 @@ class MainActivity : ComponentActivity() {
                             onOpen = vm::open,
                             onHome = vm::goHome,
                             onForm = vm::chooseForm,
-                            onTheme = { t -> if (t != vm.theme) dissolve.change { vm.chooseTheme(t) } },
+                            onTheme = { t ->
+                                crown.finish()
+                                if (t != vm.theme) dissolve.change { vm.chooseTheme(t) }
+                            },
                             onTextSize = { t -> if (t != vm.textSize) dissolve.change { vm.chooseTextSize(t) } },
                             reminders = vm.reminders,
                             reminderStatus = vm.reminderStatus,

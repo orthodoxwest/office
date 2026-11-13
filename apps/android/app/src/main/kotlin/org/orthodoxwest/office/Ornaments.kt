@@ -326,14 +326,20 @@ fun DrawScope.quatrefoil(topLeft: Offset, side: Float, color: Color) {
  */
 @Composable
 fun ConsecrationCross(modifier: Modifier, ink: Color = LocalPalette.current.lining, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
-    Canvas(modifier) {
-        // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
-        val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
-        val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
-        fitted(40f, 40f) {
-            for (part in listOf(ConsecrationRing, ConsecrationArms)) {
-                if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
-            }
+    Canvas(modifier) { consecrationCross(ink, brush, alpha, pigment) }
+}
+
+/**
+ * The consecration cross drawn to this scope's size: home's crown draws it so, in the look the
+ * crown's play turns to (Crown.kt), before that look is the screen's.
+ */
+fun DrawScope.consecrationCross(ink: Color, brush: Brush? = null, alpha: Float = 1f, pigment: androidx.compose.ui.graphics.ImageBitmap? = null) {
+    // Home's painted cross lies unevenly, through the pigment; a gilt or leaf one is a brush.
+    val paint = brush ?: pigment?.let { pigmentBrush(it, 96f * 40f / size.width) }
+    val tint = if (brush == null && paint != null) androidx.compose.ui.graphics.ColorFilter.tint(ink, BlendMode.SrcIn) else null
+    fitted(40f, 40f) {
+        for (part in listOf(ConsecrationRing, ConsecrationArms)) {
+            if (paint != null) drawPath(part, paint, alpha = alpha, colorFilter = tint) else drawPath(part, ink, alpha = alpha)
         }
     }
 }

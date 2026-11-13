@@ -331,6 +331,14 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         load()
     }
 
+    /**
+     * Saves a choice without showing it yet: home's crown writes the choice at the tap and turns
+     * the look later, under its play ([chooseTheme] then).
+     */
+    fun keepTheme(value: ThemeChoice) {
+        prefs.edit().putString("theme", value.name).apply()
+    }
+
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
