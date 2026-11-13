@@ -538,6 +538,63 @@ pub fn sun_unavailable_note() -> String {
     sun::UNAVAILABLE_NOTE.to_string()
 }
 
+/// A chosen hour as the reminder page's rule says it: its slug, its time in the phone's clock
+/// style ("6:45 AM"), or `by_sun` while the hours follow the sun (never Compline).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct RuleHourChoice {
+    pub hour: String,
+    pub time: String,
+    pub by_sun: bool,
+}
+
+/// One phrase of the rule, keyed by what it says (`presentation::reminders::RulePhrase`).
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct RulePhraseView {
+    pub key: String,
+    pub text: String,
+}
+
+/// The reminder page's rule, written out under the choices: "Lauds at 6:45 AM and Vespers at
+/// 6:00 PM, every day, ten minutes before." The chosen hours in the day's order; `weekdays`
+/// Sunday first, as the engine counts them; `lead` in minutes.
+#[uniffi::export]
+pub fn reminder_rule(hours: Vec<RuleHourChoice>, weekdays: Vec<bool>, lead: i32) -> Vec<RulePhraseView> {
+    use presentation::reminders::{RuleHour, RuleTime, rule};
+    let chosen: Vec<RuleHour> = hours
+        .iter()
+        .map(|h| RuleHour { hour: &h.hour, time: if h.by_sun && h.hour != "compline" { RuleTime::Sun } else { RuleTime::Clock(&h.time) } })
+        .collect();
+    // Monday first, as the page's Days row.
+    let days: [bool; 7] = std::array::from_fn(|i| weekdays.get((i + 1) % 7).copied().unwrap_or(false));
+    rule(&chosen, days, Some(lead.max(0) as u32)).into_iter().map(|p| RulePhraseView { key: p.key, text: p.text }).collect()
+}
+
+/// The reminder that will come next, under the rule: "Next: Vespers, today at 5:50 PM." `on`
+/// is the day it rings and `time` when, in the phone's clock style.
+#[uniffi::export]
+pub fn reminder_next(hour: String, today: CivilDate, on: CivilDate, time: String) -> String {
+    match (today.parse(), on.parse()) {
+        (Ok(today), Ok(on)) => presentation::reminders::next_reminder(&hour, today, on, &time),
+        _ => String::new(),
+    }
+}
+
+/// One of home's three periods on the reminder page: its name ("Morning") and its hours' slugs.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReminderPeriodView {
+    pub label: String,
+    pub hours: Vec<String>,
+}
+
+/// The reminder page's hours in home's three periods, as home and About group them.
+#[uniffi::export]
+pub fn reminder_periods() -> Vec<ReminderPeriodView> {
+    presentation::about::ABOUT_HOURS
+        .iter()
+        .map(|(label, hours)| ReminderPeriodView { label: label.to_string(), hours: hours.iter().map(|(h, _)| h.to_string()).collect() })
+        .collect()
+}
+
 /// One reminder: an office on a civil date at a local time, with its words.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ReminderView {

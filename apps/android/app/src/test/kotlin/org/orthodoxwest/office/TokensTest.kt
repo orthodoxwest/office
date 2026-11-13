@@ -65,6 +65,14 @@ class TokensTest {
 
     private val root get() = rule(":root").takeIf { it.contains("--text:") } ?: error(":root tokens")
 
+    /** The system's font scale reaches the type no further than iOS lets Dynamic Type (Theme.swift). */
+    @Test
+    fun fontScaleStopsWhereIosDoes() {
+        val swift = File("../../ios/Office/Theme.swift").readText()
+        val cap = Regex("""return min\(body / 17, ([0-9.]+)\)""").find(swift)?.groupValues?.get(1)?.toFloat() ?: error("no cap in Theme.swift")
+        assertEquals(cap, MaxFontScale, 0f)
+    }
+
     @Test
     fun naveIsTheRoot() {
         checkPalette(root, Nave)
@@ -254,5 +262,33 @@ class TokensTest {
             val want = parse(value(block, token)!!)
             for (i in 0..3) assertEquals("Niche.swift $swiftName vs --$token", want[i], got[i], 0.01f)
         }
+    }
+
+    /**
+     * A disclosure unfolds and folds alike on every front: UNFOLD_MS and FOLD_MS on the standard
+     * curve are style.css's disclosures, app.js's fallback for browsers without interpolate-size,
+     * and iOS's `unfolding` and `folding`; the ordo's "Show office details" fades the month by
+     * MONTH_OUT_MS and MONTH_IN_MS in app.js and OrdoScreen.swift.
+     */
+    @Test
+    fun oneUnfoldEverywhere() {
+        val standard = "cubic-bezier(0.4, 0, 0.2, 1)"
+        val at = css.indexOf("@supports (interpolate-size: allow-keywords)").also { assertTrue("no disclosure rules", it >= 0) }
+        val folds = css.substring(at, css.indexOf("is-settling", at))
+        assertTrue(folds.contains("block-size ${UNFOLD_MS}ms $standard"))
+        assertTrue(folds.contains("block-size ${FOLD_MS}ms $standard"))
+        assertTrue(folds.contains("opacity ${UNFOLD_MS - 60}ms cubic-bezier(0, 0, 0.2, 1) 60ms"))
+        assertTrue(folds.contains("opacity ${FOLD_MS / 2}ms cubic-bezier(0.4, 0, 1, 1)"))
+        val js = File("../../office-web/static/app.js").readText()
+        assertTrue(js.contains("var duration = opening ? $UNFOLD_MS : $FOLD_MS;"))
+        assertTrue(js.contains("var STANDARD = \"$standard\";"))
+        assertTrue(js.contains("{ duration: $MONTH_OUT_MS, easing: \"cubic-bezier(0.4, 0, 1, 1)\", fill: \"forwards\" }"))
+        assertTrue(js.contains("{ duration: $MONTH_IN_MS, easing: \"cubic-bezier(0, 0, 0.2, 1)\" }"))
+        val chrome = File("../../ios/Office/Chrome.swift").readText()
+        assertTrue(chrome.contains("let unfolding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: ${UNFOLD_MS / 1000.0})"))
+        assertTrue(chrome.contains("let folding = Animation.timingCurve(0.4, 0, 0.2, 1, duration: ${FOLD_MS / 1000.0})"))
+        val ordo = File("../../ios/Office/OrdoScreen.swift").readText()
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0.4, 0, 1, 1, duration: ${MONTH_OUT_MS / 1000.0}))"))
+        assertTrue(ordo.contains("withAnimation(.timingCurve(0, 0, 0.2, 1, duration: ${MONTH_IN_MS / 1000.0}))"))
     }
 }

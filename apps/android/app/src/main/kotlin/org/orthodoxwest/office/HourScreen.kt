@@ -8,9 +8,7 @@ import android.view.View
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -158,13 +156,16 @@ fun HourScreen(
     // The office below a section moves to make room only while the section opens or closes,
     // not when a new text size or prayer form sets it again.
     var unfolding by remember { mutableStateOf(false) }
+    // Which way the section last turned: it opens over UNFOLD_MS and closes over FOLD_MS, on the
+    // standard curve, as Unfold, iOS's unfolding and folding and the web's session prayers.
+    var opening by remember { mutableStateOf(true) }
     LaunchedEffect(unfolding) {
         if (unfolding) {
             delay(600)
             unfolding = false
         }
     }
-    val placement = if (unfolding) spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = IntOffset.VisibilityThreshold) else null
+    val placement = if (unfolding) tween<IntOffset>(if (opening) UNFOLD_MS else FOLD_MS, easing = FastOutSlowInEasing) else null
     val index = hours.indexOf(view.hour)
     // Each shown block's words, from and to, for home's mark of the hours prayed.
     val wordsOf = remember(view) { view.sections.map { s -> s.blocks.map { blockWords(it).toDouble() } } }
@@ -223,6 +224,7 @@ fun HourScreen(
                             Modifier.animateItem(placementSpec = placement).measure().padding(horizontal = inset).padding(top = if (atTop) 0.dp else Space.SECTION.of(line), bottom = if (expanded) Space.BIND.of(line) else 0.dp).heightIn(min = 44.dp)
                                 .semantics { heading() }.tap {
                                     unfolding = true
+                                    opening = !expanded
                                     open[i] = !expanded
                                     SessionPrayers.choose(context, view.hour, section.label, !expanded)
                                 }.disclosed(expanded),
@@ -583,9 +585,12 @@ private fun Epilogue(
 /** Air below the hour navigation (`.hour-epilogue`'s bottom padding), where the wall's field begins. */
 private val EndingAir = 52.dp
 
-/** A section's blocks fade in as it opens, the office below moving down to make room, and out as it closes. */
-private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOutSlowInEasing)
-private val FOLD_FADE = tween<Float>(120, easing = FastOutLinearInEasing)
+/**
+ * A section's blocks fade in as it opens, the office below moving down to make room, and out as it
+ * closes: Unfold's fades, so a section turns as every other disclosure does.
+ */
+private val UNFOLD_FADE = tween<Float>(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)
+private val FOLD_FADE = tween<Float>(FOLD_MS / 2, easing = FastOutLinearInEasing)
 
 /**
  * An hour's list state as its visit saves it: the place, when the app went into the background

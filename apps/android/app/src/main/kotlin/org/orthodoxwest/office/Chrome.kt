@@ -3,6 +3,8 @@ package org.orthodoxwest.office
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -718,17 +720,18 @@ val LocalFollow = staticCompositionLocalOf<Follow?> { null }
 /**
  * A disclosure's contents, unfolding down from its control and folding back up into it. With
  * `reveal`, once unfolded it is scrolled into view if it opened past the screen's edge; never
- * when it was open already, as a row scrolled into view would be.
+ * when it was open already, as a row scrolled into view would be. `instant` shows or hides it at
+ * once, for a change made under a fade of its own (the ordo's "Show office details").
  */
 @Composable
-fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
+fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = true, instant: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     val bring = remember { BringIntoViewRequester() }
     AnimatedVisibility(
         visible,
         modifier.bringIntoViewRequester(bring),
-        enter = expandVertically(tween(UNFOLD_MS, easing = FastOutSlowInEasing), expandFrom = Alignment.Top) +
+        enter = if (instant) EnterTransition.None else expandVertically(tween(UNFOLD_MS, easing = FastOutSlowInEasing), expandFrom = Alignment.Top) +
             fadeIn(tween(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)),
-        exit = shrinkVertically(tween(FOLD_MS, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Top) +
+        exit = if (instant) ExitTransition.None else shrinkVertically(tween(FOLD_MS, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Top) +
             fadeOut(tween(FOLD_MS / 2, easing = FastOutLinearInEasing)),
     ) {
         LaunchedEffect(Unit) {
@@ -740,9 +743,20 @@ fun Unfold(visible: Boolean, modifier: Modifier = Modifier, reveal: Boolean = tr
     }
 }
 
-/** How long a disclosure takes to unfold and to fold, here and for home's turn to the calendar. */
+/**
+ * How long a disclosure takes to unfold and to fold, here, for the hour's sections and for home's
+ * turn to the calendar, on the standard curve: iOS's `unfolding` and `folding`, the web's
+ * disclosures (style.css, "Disclosures unfold"; TokensTest holds them together).
+ */
 internal const val UNFOLD_MS = 260
 internal const val FOLD_MS = 200
+
+/**
+ * The ordo's "Show office details": the month fades out, every day changes at once, and it fades
+ * back in, as on the web (app.js, calendarExpand) and iOS (OrdoScreen's turnAll).
+ */
+internal const val MONTH_OUT_MS = 70
+internal const val MONTH_IN_MS = 140
 
 /** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
 private val PICKER_YEARS = 1950..2150

@@ -11,13 +11,14 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
+use render_html::chant;
 use render_html::links::{
     calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
 };
 use render_html::view::{
     AboutData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, RemindersData, TabulaData,
-    TabulaRow,
+    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, ReminderPeriod,
+    ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;
@@ -500,7 +501,18 @@ impl Server {
         let martyrology: Vec<(PrayerForm, &OfficeHour)> =
             if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
         match self.pages.hour(&mut data, &forms, &martyrology) {
-            Ok(body) => html(StatusCode::OK, body),
+            // Scores engraved at the reader's own column, as chant.js last measured it, so that
+            // none is laid out again under them (render_html::chant::at_width). The page differs
+            // with that cookie, so a cache keeps one reader's copy from another.
+            Ok(body) => {
+                let body = match cookie(req.headers, chant::WIDTH_COOKIE).as_deref().and_then(chant::column_em) {
+                    Some(steps) => chant::at_width(&body, steps),
+                    None => body,
+                };
+                let mut resp = html(StatusCode::OK, body);
+                set(&mut resp, header::VARY, "Cookie");
+                resp
+            }
             Err(e) => render_failed(&e),
         }
     }
@@ -628,19 +640,30 @@ impl Server {
                 canonical: "/reminders".into(),
                 ..Chrome::default()
             },
-            hours: REMINDER_DEFAULTS
+            // The hours in home's three periods, as home and About group them.
+            periods: presentation::about::ABOUT_HOURS
                 .iter()
-                .map(|&(slug, name, hh, mm, checked)| ReminderHour {
-                    name: name.into(),
-                    slug: slug.into(),
-                    default: format!("{hh:02}:{mm:02}"),
-                    checked,
+                .map(|(label, hours)| ReminderPeriod {
+                    key: label.to_lowercase(),
+                    label: label.to_string(),
+                    hours: hours
+                        .iter()
+                        .filter_map(|(slug, _)| REMINDER_DEFAULTS.iter().find(|d| d.0 == *slug))
+                        .map(|&(slug, name, hh, mm, checked)| ReminderHour {
+                            name: name.into(),
+                            slug: slug.into(),
+                            default: format!("{hh:02}:{mm:02}"),
+                            checked,
+                        })
+                        .collect(),
                 })
                 .collect(),
             days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                 .iter()
                 .map(|d| ReminderDay { name: d.to_string(), slug: d.to_lowercase() })
                 .collect(),
+            rule: reminder_rule_at_first(),
+            rule_words: render_html::view::reminder_rule_words(),
         };
         match self.pages.reminders(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -652,6 +675,19 @@ impl Server {
     pub fn local_year() -> i32 {
         now_in(&local()).0.year()
     }
+}
+
+/// The reminder rule for the page's default choices, with times as an American browser shows
+/// them ("6:45 AM"); app.js rewrites it in the reader's own clock, leaving alike phrases alone.
+fn reminder_rule_at_first() -> Vec<ReminderRulePhrase> {
+    use presentation::reminders::{RuleHour, RuleTime, rule};
+    let times: Vec<(&str, String)> = REMINDER_DEFAULTS
+        .iter()
+        .filter(|d| d.4)
+        .map(|&(slug, _, hh, mm, _)| (slug, format!("{}:{mm:02}\u{a0}{}", (hh + 11) % 12 + 1, if hh < 12 { "AM" } else { "PM" })))
+        .collect();
+    let hours: Vec<RuleHour> = times.iter().map(|(slug, t)| RuleHour { hour: slug, time: RuleTime::Clock(t) }).collect();
+    rule(&hours, [true; 7], Some(10)).into_iter().map(|p| ReminderRulePhrase { key: p.key, text: p.text }).collect()
 }
 
 #[cfg(test)]
@@ -730,13 +766,37 @@ mod tests {
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
+        get_with_cookie(path, "")
+    }
+
+    fn get_with_cookie(path: &str, cookie: &str) -> (StatusCode, HeaderMap, String) {
         use tower::ServiceExt;
         let runtime = tokio::runtime::Builder::new_current_thread().build().unwrap();
-        let request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap()).body(Body::empty()).unwrap();
+        let mut request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap());
+        if !cookie.is_empty() {
+            request = request.header(header::COOKIE, cookie);
+        }
+        let request = request.body(Body::empty()).unwrap();
         let resp = runtime.block_on(test_server().router().oneshot(request)).unwrap();
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Reminders sets its rule for the default choices at once, and sends app.js the words it
+    // rewrites the rule from; the hours stand in home's three periods.
+    #[test]
+    fn reminders_writes_out_the_rule_and_sends_its_words() {
+        let (status, _, body) = get("/reminders");
+        assert_eq!(status, StatusCode::OK);
+        let at = body.find("id=\"reminder-rule\"").expect("the rule");
+        let rule = &body[at..at + body[at..].find("</p>").unwrap()];
+        assert!(rule.contains("<span data-key=\"lauds-time\"> at 6:45\u{a0}AM</span>"), "{rule}");
+        assert!(rule.contains("<span data-key=\"lead\">, ten minutes before.</span>"), "{rule}");
+        let at = body.find("id=\"reminder-rule-words\">").expect("the words") + "id=\"reminder-rule-words\">".len();
+        let words = &body[at..at + body[at..].find("</script>").unwrap()];
+        assert!(words.contains("\"none\":\"with no alert\"") && words.contains("\"Sundays\""), "{words}");
+        assert_eq!(body.matches("class=\"reminder-period\"").count(), 3);
     }
 
     // Home's head carries the day's versicle from Lauds on a plain day, and is
@@ -818,6 +878,34 @@ mod tests {
         let month = get("/calendar/2026/11").2;
         assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
+    /// A browser that has laid a score out names its column's width, and the hour's scores come
+    /// engraved at it, so chant.js has nothing to lay out again and no score changes height under
+    /// the reader; a width that is not one leaves the page's own.
+    #[test]
+    fn an_hours_scores_are_engraved_at_the_column_the_browser_named() {
+        let units = |body: &str| body.matches(" data-chant-units=\"").count();
+        let at = |body: &str, em: f32| body.matches(&format!(" data-chant-units=\"{:.3}\"", em * 2.45 * 6.0)).count();
+        let (_, headers, plain) = get("/compline/2026-10-27");
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert!(units(&plain) > 0 && at(&plain, 17.0) == units(&plain), "the scores at the fallback's width");
+        let (status, headers, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.875");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert_eq!(at(&narrow, 17.875), units(&plain), "every score at the reader's column");
+        // A width between sixteenths of an em is engraved at the nearest.
+        assert_eq!(get_with_cookie("/compline/2026-10-27", "chant-width=17.900").2, narrow);
+        // Only the scores differ.
+        let words = |body: &str| {
+            body.split("<div class=\"chant-width\"")
+                .map(|s| s.split_once("</div>").map_or(s, |(_, rest)| rest).to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(words(&narrow), words(&plain));
+        for odd in ["chant-width=wide", "chant-width=900", "chant-width="] {
+            assert_eq!(get_with_cookie("/compline/2026-10-27", odd).2, plain, "{odd}");
+        }
     }
 
     #[test]

@@ -295,6 +295,8 @@ struct HourScreen: View {
         // A first-class day's frame takes a little of a phone's measure (the web's 12px side
         // columns under 920px); where the lines stand outside the measure, the text keeps it.
         let inset: CGFloat = view.firstClass && width < m.px(frameClear) ? m.px(12) : 0
+        // A block's column: the measure inside the page's gutters and the frame's inset.
+        let scoreColumn = min(m.px(measure), width - 2 * (inset + m.px(gutter)))
         ScrollViewReader { scroll in
             ScrollView {
                 LazyVStack(spacing: 0) {
@@ -308,7 +310,7 @@ struct HourScreen: View {
                             switch row {
                             case let .toggle(key, label, expanded, atTop):
                                 Button {
-                                    withAnimation(unfolding) { open[key] = !expanded }
+                                    withAnimation(disclosing(!expanded)) { open[key] = !expanded }
                                     SessionPrayers.choose(view.hour, label, open: !expanded)
                                 } label: {
                                     HStack(spacing: 0) {
@@ -335,6 +337,7 @@ struct HourScreen: View {
                                     }
                                     BlockRow(block: block, column: columns[at])
                                         .environment(\.ornament, view.sections[at.section].bare ? bareO : o)
+                                        .environment(\.scoreColumn, scoreColumn)
                                 }
                                 .padding(.top, prayer.space(space))
                                 .measured(m)
@@ -385,6 +388,16 @@ struct HourScreen: View {
             .onDisappear {
                 onScreen = false
                 forget()
+            }
+            // A new text size sets every row again; the row the reader is at stands where it stood,
+            // as the web holds the line at the top of the screen.
+            .onChange(of: model.textSize) {
+                // At the hour's head the page stays at its top.
+                if let top = reading.shownRows().first, top.id == rows.first?.id, top.frame.minY >= 0 { return }
+                hold()
+                guard let mark = held?.marks.first else { held = nil; return }
+                held = nil
+                DispatchQueue.main.async { scroll.scrollTo(mark.id, anchor: mark.anchor) }
             }
             .onAppear {
                 onScreen = true
@@ -822,7 +835,7 @@ private struct HourTitle: View {
             // a first-class day the frame narrows the measure, and "Prayer form: Private" lost its
             // caret to a line of its own.
             Disclosure(label: "Prayer form:", open: choosing, value: prayerForms.first { $0.value == model.form }?.label, style: Scale.smallCapsControl, upper: false) {
-                withAnimation(unfolding) {
+                withAnimation(disclosing(!choosing)) {
                     choosing.toggle()
                     picking = false
                 } completion: {
@@ -843,7 +856,7 @@ private struct HourTitle: View {
                     let changed = f != model.form
                     // The prayers change once the chooser has folded away, so the reader's place is
                     // held where the rows then stand, not where they stood below the open chooser.
-                    withAnimation(unfolding) { choosing = false } completion: { model.chooseForm(f) }
+                    withAnimation(disclosing(false)) { choosing = false } completion: { model.chooseForm(f) }
                     // VoiceOver hears that the prayers changed, as the web's status line says it;
                     // a moment later, so the chooser folding away does not cut it short.
                     if changed, let phrase = prayerForms.first(where: { $0.value == f })?.phrase {
@@ -864,7 +877,7 @@ private struct HourTitle: View {
 
     /// The header's date opens and closes the date picker, closing the prayer form's chooser.
     private func togglePicker() {
-        withAnimation(unfolding) {
+        withAnimation(disclosing(!picking)) {
             picking.toggle()
             choosing = false
         } completion: {

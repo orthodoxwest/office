@@ -2931,6 +2931,60 @@ test("the prayers before and after the Office keep the reader's choice for their
   await expect(after()).not.toHaveAttribute("open");
 });
 
+// Where the browser cannot ease a height to auto (WebKit), app.js turns the
+// disclosures' fold in script. A disclosure folding shut is still [open]:
+// pressed again it opens, and that is the choice kept; the ordo's "Show
+// office details" is not undone by a day that was folding; the hour's date
+// in the header turns the picker on the fold too. Reduced motion cuts.
+test("disclosures folded in script turn back when pressed mid-fold", async ({ page, browserName }) => {
+  test.skip(browserName !== "webkit", "Chromium eases the fold in CSS (interpolate-size); the script's fold is for the other engines");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const ready = () => page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await ready();
+  await page.evaluate(() => localStorage.removeItem("office-prayers-open"));
+  const prayers = page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]');
+  await expect(prayers).toHaveAttribute("open");
+  await prayers.locator("summary").evaluate((summary) => {
+    summary.click();
+    summary.click();
+  });
+  await expect(prayers).not.toHaveClass(/is-folding/);
+  await expect(prayers).toHaveAttribute("open");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("office-prayers-open")))).toEqual({ "lauds/Prayers Before the Office": true });
+
+  await openDatedPage(page, "/calendar/2026/03");
+  await ready();
+  const day = page.locator(".day-disclosures details.day-office-details").first();
+  await day.locator("summary").click();
+  await expect(day).toHaveAttribute("open");
+  await page.evaluate(() => {
+    document.querySelector(".day-disclosures details.day-office-details > summary").click();
+    document.querySelector(".calendar-expand").click();
+  });
+  await expect(page.locator(".calendar-expand")).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(500);
+  await expect(day).toHaveAttribute("open");
+  await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
+
+  await openDatedPage(page, `/sext/${testDate}`);
+  await ready();
+  const turning = () => page.evaluate(() => [...document.querySelectorAll("#hour-date-nav > :not(summary)")].some((part) => part.getAnimations().length > 0));
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(true);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "true");
+  await page.locator("button.hour-meta-date").click();
+  await expect(page.locator("#hour-date-nav")).not.toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "false");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(false);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+});
+
 // "Change date" turns the invitation and the hours into the calendar in
 // their place, under the band. The head gives up only the difference, or,
 // where it has not the height, keeps its own while the page rises with the
@@ -3517,9 +3571,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(subscribe).toHaveAttribute("aria-disabled", "true");
   await expect(subscribe).not.toHaveAttribute("href");
   await expect(subscribe).toHaveAttribute("tabindex", "-1");
-  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
-  await expect(page.locator("#reminder-copied")).toBeVisible();
+  await expect(page.locator("#reminder-url")).toHaveText("No hour is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No hour is chosen yet.");
 
   await page.locator('input[name="hour"][value="lauds"]').check();
   await expect(copy).toBeEnabled();
@@ -3538,10 +3591,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await page.getByLabel("Time for Lauds").press("Tab");
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
-  await expect(page.locator("#reminder-copied")).toHaveText(
-    "Choose a time for each selected hour.",
-  );
+  await expect(feedURL).toHaveText("Choose a time for each chosen hour.");
+  await expect(page.locator("#reminder-rule")).toHaveText("Choose a time for each chosen hour.");
 
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
@@ -3552,8 +3603,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   }
   await expect(copy).toBeDisabled();
   await expect(subscribe).not.toHaveAttribute("href");
-  await expect(feedURL).toHaveText("Select at least one day above.");
-  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+  await expect(feedURL).toHaveText("No day is chosen yet.");
+  await expect(page.locator("#reminder-rule")).toHaveText("No day is chosen yet.");
 
   await page.locator('input[name="day"][value="sun"]').check();
   await expect(copy).toBeEnabled();
@@ -3572,11 +3623,77 @@ test("reminder copy failure reveals the calendar address", async ({ page }) => {
 
   await page.getByRole("button", { name: "Copy link" }).click();
 
-  await expect(page.locator("#reminder-copied")).toHaveText(
+  await expect(page.locator("#reminder-copy-note")).toHaveText(
     "Copy unavailable. The calendar address is shown below.",
   );
   await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
   await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+// The rule, written out: the sentences of presentation::reminders' table tests, from app.js's
+// copy of the grammar and the words the page is sent.
+test("the reminder rule says back the choices", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/reminders");
+  const rule = page.locator("#reminder-rule");
+  const said = async () => (await rule.textContent()).replace(/\u00a0/g, " ");
+  const day = (name) => page.locator(".reminder-day", { hasText: name }).locator("input");
+  await expect.poll(said).toBe(
+    "Lauds at 6:45 AM, Vespers at 6:00 PM, and Compline at 9:00 PM, every day, ten minutes before.",
+  );
+  await page.locator('input[name="hour"][value="compline"]').uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM and Vespers at 6:00 PM, every day, ten minutes before.");
+  await page.locator('input[name="hour"][value="vespers"]').uncheck();
+  await day("Sat").uncheck();
+  await day("Sun").uncheck();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on weekdays, ten minutes before.");
+  await day("Sat").check();
+  await day("Sun").check();
+  await day("Fri").uncheck();
+  await page.selectOption('select[name="alarm"]', "none");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Fridays, with no alert.");
+  for (const name of ["Mon", "Tue", "Thu", "Sat"]) {
+    await day(name).uncheck();
+  }
+  await day("Fri").check();
+  await page.selectOption('select[name="alarm"]', "0");
+  await expect.poll(said).toBe("Lauds at 6:45 AM, on Wednesdays, Fridays, and Sundays, at the hour.");
+  await day("Wed").check();
+  await day("Thu").check();
+  await expect.poll(said).toBe("Lauds at 6:45 AM, except Mondays, Tuesdays, and Saturdays, at the hour.");
+  for (const box of await page.locator('input[name="day"]').all()) {
+    await box.uncheck();
+  }
+  await expect.poll(said).toBe("No day is chosen yet.");
+  await page.locator('input[name="hour"][value="lauds"]').uncheck();
+  await expect.poll(said).toBe("No hour or day is chosen yet.");
+});
+
+test("a tap on an unchosen hour's time chooses the hour", async ({ page }) => {
+  await page.goto("/reminders");
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await page.locator('[data-reminder-hour="prime"] .reminder-time').click();
+  await expect(page.locator('input[name="hour"][value="prime"]')).toBeChecked();
+  await expect(page.getByLabel("Time for Prime")).toBeEnabled();
+});
+
+test("copying the link changes its words in place for a moment", async ({ page, context, browserName }) => {
+  test.skip(browserName !== "chromium", "clipboard permissions are Chromium's");
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/reminders");
+  const copy = page.getByRole("button", { name: "Copy link" });
+  // Where the link stands on the page, whatever the scroll.
+  const place = () => copy.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y + window.scrollY, width: r.width, height: r.height };
+  });
+  await copy.scrollIntoViewIfNeeded();
+  const before = await place();
+  await copy.click();
+  await expect(copy).toHaveClass(/is-copied/);
+  await expect(page.locator("#reminder-copied")).toHaveText("Copied.");
+  expect(await place()).toEqual(before);
+  await expect(copy).not.toHaveClass(/is-copied/, { timeout: 4000 });
 });
 
 test("quiet mobile controls retain full thumb targets", async ({ page }) => {
@@ -4840,20 +4957,24 @@ test("Chant On notes every verse of a whole hymn, its mode's figure once over th
 
 test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The hour's last score, off the screen: one on it keeps its first drawing until it leaves.
   const fit = () => page.evaluate(() => {
-    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    const score = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
     const box = score.querySelector(".chant-width");
     return {
       column: score.clientWidth,
       score: box.getBoundingClientRect().width,
       laidOut: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")),
+      // Laid out here, or engraved by the server at the column the page last reported.
+      atColumn: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")) ||
+        Math.abs(parseFloat(box.dataset.chantUnits) - (score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 2.45 * 6) < 0.5,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
   for (const width of [320, 390, 430, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/compline/2026-10-27");
-    await expect.poll(async () => (await fit()).laidOut, { message: `${width}px` }).toBe(true);
+    await expect.poll(async () => (await fit()).atColumn, { message: `${width}px` }).toBe(true);
     const f = await fit();
     expect(Math.abs(f.score - f.column), `${width}px: ${JSON.stringify(f)}`).toBeLessThan(1);
     expect(f.overflow, `${width}px`).toBe(0);
@@ -4883,6 +5004,193 @@ test("a chant score fills its column at every width and keeps its own when the e
   await page.waitForTimeout(300);
   expect((await fit()).laidOut).toBe(false);
   expect(fetched).toEqual([]);
+});
+
+// Every frame's heights of the scores shown, from the page's first frame.
+async function logScoreHeights(page) {
+  await page.addInitScript(() => {
+    window.__scores = [];
+    const loop = () => {
+      if (document.body) {
+        const heights = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
+        if (heights.length) window.__scores.push(heights.join("/"));
+      }
+      if (performance.now() < 10000) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+}
+
+test("a chant score is drawn at its final height from the first frame once the column is known", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await logScoreHeights(page);
+  // A first visit lays the score out at the column and keeps the column's width for the server.
+  await openDatedPage(page, "/terce/2026-11-13");
+  await expect.poll(async () => (await context.cookies()).find((c) => c.name === "chant-width")?.value).toMatch(/^\d+\.\d{4}$/);
+  const column = await page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    return (Math.round((score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 16) / 16).toFixed(4);
+  });
+  expect((await context.cookies()).find((c) => c.name === "chant-width").value).toBe(column);
+
+  // The next page arrives engraved at it: no score changes its height, and the engine is not fetched.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  for (const path of ["/compline/2026-11-13", "/terce/2026-11-13"]) {
+    await openDatedPage(page, path);
+    await page.waitForTimeout(800);
+    const frames = await page.evaluate(() => window.__scores);
+    expect(new Set(frames).size, `${path}: ${frames[0]} then ${frames[frames.length - 1]}`).toBe(1);
+    const fit = await page.evaluate(() => [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent)
+      .map((e) => e.clientWidth - e.querySelector(".chant-width").getBoundingClientRect().width));
+    for (const gap of fit) expect(Math.abs(gap), path).toBeLessThan(1);
+  }
+  expect(fetched).toEqual([]);
+});
+
+test("a score laid out anew on arriving never moves the words being read", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The page's faces fetched beforehand (the engine not), and no column reported: without scroll
+  // anchoring a face arriving moves the text too, and this test is about the scores.
+  await page.route("**/static/neuma.mjs*", (route) => route.abort());
+  await page.goto("/compline/2026-11-13");
+  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(async () => (await context.cookies()).some((c) => c.name === "chant-width")).toBe(true);
+  await page.goto("about:blank");
+  await page.unroute("**/static/neuma.mjs*");
+  await context.clearCookies();
+  await logScoreHeights(page);
+  // A reader brought back below the scores, in a browser that does not anchor scrolling, at a
+  // width the page was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.documentElement.style.overflowAnchor = "none";
+      const last = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
+      window.scrollTo(0, last.getBoundingClientRect().bottom + scrollY + 300);
+      const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+      window.__probe = [];
+      // Watched once the faces are in, with the scores' heights beside it.
+      const loop = () => {
+        if (document.fonts.status === "loaded") {
+          const scores = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height)).join("/");
+          window.__probe.push({ top: probe.getBoundingClientRect().top, scores });
+        }
+        if (performance.now() < 10000) requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    });
+  });
+  await page.goto("/compline/2026-11-13");
+  // The scores above were laid out again at the column while the line was watched...
+  await expect.poll(() => page.evaluate(() => { const f = window.__probe; return f.length > 0 && f[0].scores !== f[f.length - 1].scores; })).toBe(true);
+  await page.waitForTimeout(300);
+  // ...and the line being read stood still.
+  const probe = await page.evaluate(() => window.__probe.map((f) => f.top));
+  expect(Math.max(...probe) - Math.min(...probe)).toBeLessThan(1);
+
+});
+
+test("a score on the screen keeps its first drawing until it leaves the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The first score in the middle of the screen as the page arrives, at a width it was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+      scrollTo(0, score.getBoundingClientRect().top + scrollY - 200);
+    });
+  });
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await page.goto("/compline/2026-11-13");
+  await metrics;
+  const score = page.locator(".chant-score:visible").first();
+  const height = () => score.evaluate((e) => e.getBoundingClientRect().height);
+  const first = await height();
+  await page.waitForTimeout(1000);
+  expect(await height()).toBe(first);
+  // Scrolled past, it is drawn at its column, and the words on the screen stay where they stand.
+  await page.evaluate(() => scrollBy(0, 1500));
+  await page.evaluate(() => {
+    const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+    probe.dataset.probe = "1";
+    window.__probeTop = probe.getBoundingClientRect().top;
+  });
+  await expect.poll(height).not.toBe(first);
+  expect(Math.abs(await page.locator("[data-probe]").evaluate((p) => p.getBoundingClientRect().top - window.__probeTop))).toBeLessThan(1);
+});
+
+test("changing the text size keeps the line the reader is at", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-text-size"));
+  await openDatedPage(page, "/vespers/2026-11-13");
+  await page.evaluate(() => scrollTo(0, 3000));
+  const at = () => page.evaluate(() => {
+    // The first block on the screen, from the same blocks officeHoldPlace holds: a heading above
+    // the first paragraph is the one held, and the paragraph under it may move with the heading.
+    const blocks = ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score";
+    const p = [...document.querySelectorAll(blocks)].find((e) => { const r = e.getBoundingClientRect(); return r.height && r.bottom > 0; });
+    p.dataset.held = "1";
+    const r = p.getBoundingClientRect();
+    return { top: r.top, height: r.height };
+  });
+  const before = await at();
+  // The menu's Text row, tapped where the reader is (a click here would scroll to the header).
+  await page.evaluate(() => document.querySelector('.text-size-option[data-text-size-choice="large"]').click());
+  await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+  const after = await page.locator("[data-held]").evaluate((p) => { const r = p.getBoundingClientRect(); return { top: r.top, height: r.height }; });
+  expect(after.height).toBeGreaterThan(before.height);
+  // The share of the line's block above the top of the screen is the share it was.
+  const want = before.top < 0 ? (before.top / before.height) * after.height : before.top;
+  expect(Math.abs(after.top - want), JSON.stringify({ before, after })).toBeLessThan(2);
+});
+
+test("closing the prayers after the Office at the page's end leaves its summary where it was", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-prayers-open"));
+  await openDatedPage(page, "/lauds/2026-11-13");
+  const after = page.locator('details.session-prayers[data-prayers$="/Prayers After the Office"]');
+  await expect(after).toHaveAttribute("open", "");
+  const summary = after.locator(":scope > summary");
+  // The summary near the top of the screen, with less than a screen of page below it.
+  await page.evaluate(() => {
+    const s = [...document.querySelectorAll("details.session-prayers > summary")].pop();
+    scrollTo(0, s.getBoundingClientRect().top + scrollY - 80);
+  });
+  const top = await summary.evaluate((s) => s.getBoundingClientRect().top);
+  await summary.click();
+  await expect(after).not.toHaveAttribute("open", "");
+  await page.waitForTimeout(400);
+  expect(Math.abs((await summary.evaluate((s) => s.getBoundingClientRect().top)) - top)).toBeLessThan(1);
+  // Scrolling back up gives the room back, without moving what is on the screen.
+  await scrollHourBy(page, -2000);
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.minHeight)).toBe("");
+});
+
+test("the prayed watch measures the hour's words again only when they move", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__measured = 0;
+    const rects = Range.prototype.getClientRects;
+    Range.prototype.getClientRects = function () { window.__measured++; return rects.call(this); };
+  });
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  await page.clock.runFor(1000);
+  const once = await page.evaluate(() => window.__measured);
+  expect(once).toBeGreaterThan(100);
+  for (let i = 0; i < 3; i++) {
+    await scrollHourBy(page, 400);
+    await page.clock.runFor(1000);
+  }
+  expect(await page.evaluate(() => window.__measured)).toBe(once);
+  // A new text size moves every word: they are measured again, once (the page's other
+  // measures made at its load aside).
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await page.clock.runFor(2000);
+  const again = (await page.evaluate(() => window.__measured)) - once;
+  expect(again).toBeGreaterThan(0.9 * once);
+  expect(again).toBeLessThanOrEqual(once);
 });
 
 // Home marks the reader's own hour before its first paint, as the theme is

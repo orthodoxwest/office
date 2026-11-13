@@ -25,6 +25,12 @@
   <meta property="og:image:alt" content="Daily Office, the Benedictine Divine Office of the Western Rite: a gold cross in its ring over the name, on a night sky of gold-leaf stars, above a band reading Pray the hours">
   <meta name="twitter:card" content="summary_large_image">
   {% endif %}
+  {# The system's edge (Chromium's toolbar, an installed app's status bar) takes the wall's
+       colour, style.css's --bg in each theme. Here, before the pre-paint script, so a stored
+       Nave or Apse sets both before the first paint: an Apse reader on a light phone gets a
+       dark toolbar. app.js (syncThemeColorMeta) keeps them in step after a change. #}
+  <meta name="theme-color" content="#faf3e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   {# Apply stored appearance before CSS to avoid a flash.
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
@@ -52,6 +58,7 @@
         var t = localStorage.getItem("office-theme");
         if (t === "light" || t === "dark") {
           document.documentElement.setAttribute("data-theme", t);
+          document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute("content", t === "dark" ? "#121c28" : "#faf3e9"); });
         } else if (t === "default") {
           document.documentElement.removeAttribute("data-theme");
         }
@@ -115,8 +122,6 @@
   <link rel="manifest" href="{{ static("manifest.webmanifest")|url }}">
   <link rel="apple-touch-icon" href="{{ static("icons/apple-touch-icon.png")|url }}">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#fdf1e6" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{ static("leader.js")|url }}" defer></script>
   <script src="{{ static("app.js")|url }}" defer></script>
   {# chant.js lays chant scores out with neuma's engine, fetched only once one is shown. #}
