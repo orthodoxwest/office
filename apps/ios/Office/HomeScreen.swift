@@ -14,7 +14,9 @@ struct HomePage: View {
     var body: some View {
         let today = model.today
         let clock = model.clockHour
-        Loaded(key: "\(date.iso) \(today.iso) \(clock)", motion: model.motion(to: .home(date))) {
+        // A new clock hour composes home again in place, its light moving if the turn was seen
+        // (`HourLightPass`), rather than replacing the page.
+        Loaded(key: "\(date.iso) \(today.iso) \(clock)", place: "\(date.iso) \(today.iso)", motion: model.motion(to: .home(date))) {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)
@@ -465,12 +467,14 @@ private struct Frontispiece: View {
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
     @State private var picking = false
+    /// The light moving from one hour to the next, while it moves.
+    @State private var light: HourLightPass?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Whether the picker is laid out: from its opening until it has folded away.
     @State private var unfolded = false
     /// The painter's reserve round the day's words, which the sky's stars keep clear of.
     @State private var reserve: [String: CGRect] = [:]
     @Environment(\.reveal) private var reveal
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// By night the head is the apse's sky (the web's `.home-sky`), a phone's and the niche's alike.
     private var night: Bool { p.dark }
@@ -651,13 +655,30 @@ private struct Frontispiece: View {
                 .frame(maxWidth: .infinity)
             // The stage's first face: the invitation and the hours, which "Change date" turns into
             // the calendar in their place (the web's `.home-hours-face`), fading out as it turns.
-            VStack(spacing: 0) {
-                PrayNow(label: view.prayNowLabel, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
-                    model.open(.hour(view.prayNowDate, view.prayNowHour))
+            // The light moves with the hours: drawn each frame of a pass from the shared figures
+            // (`hourLightAt`), and at rest from the view.
+            TimelineView(.animation(paused: light == nil)) { tick in
+                let now = light.map { HourLightNow(pass: $0, frame: hourLightAt(ms: Float(tick.date.timeIntervalSince($0.start) * 1000))) }
+                let lit = now?.lit ?? HourLit(view)
+                VStack(spacing: 0) {
+                    PrayNow(label: lit.label, words: now?.words ?? 1, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
+                        model.open(.hour(view.prayNowDate, view.prayNowHour))
+                    }
+                    .padding(.top, m.px(tier.bandGap))
+                    HourDirectory(current: lit.hour, note: lit.note, light: now, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
+                        .padding(.top, m.px(tier.prayGap))
                 }
-                .padding(.top, m.px(tier.bandGap))
-                HourDirectory(current: view.currentHour, note: view.currentHourNote, prayed: model.hoursPrayed(on: date), tier: tier, now: titulusNow(p, season: view.ornament), home: home) { h in model.open(.hour(date, h)) }
-                    .padding(.top, m.px(tier.prayGap))
+            }
+            // Only a turn of the hour seen while home is in front moves the light; a return, or
+            // less motion asked for, shows the new hour at once. A second turn during a pass
+            // starts from where the first was going.
+            .onChange(of: HourLit(view)) { old, new in
+                light = model.hourSeenTurning && !reduceMotion ? HourLightPass(from: old, to: new, start: .now) : nil
+            }
+            .task(id: light) {
+                guard let pass = light else { return }
+                try? await Task.sleep(for: .milliseconds(Int(hourLightTotalMs())))
+                if light == pass { light = nil }
             }
             .padding(.horizontal, side)
             .frame(maxWidth: .infinity)
@@ -904,6 +925,8 @@ private struct FeastName: View {
  */
 struct PrayNow: View {
     let label: String
+    /// The words' opacity: they go out and come back as the light moves to another hour.
+    var words: Double = 1
     let style: TextStyle
     let pad: CGFloat
     let frontal: Color
@@ -917,6 +940,7 @@ struct PrayNow: View {
         Button(action: action) {
             Text(label).type(style.tracked(style.size * 0.012))
                 .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
+                .opacity(words)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .padding(.vertical, m.px(pad))
@@ -950,6 +974,8 @@ private struct HourDirectory: View {
     let current: String
     /// What the current hour is, set under its name for a newcomer.
     let note: String
+    /// The light moving from one hour to the next, at this frame; nil at rest.
+    let light: HourLightNow?
     /// The hours prayed on this day.
     let prayed: Set<String>
     let tier: HomeTier
@@ -973,7 +999,7 @@ private struct HourDirectory: View {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, row in
                 Group {
                     if tier.list {
-                        HourList(period: row.period, label: row.label, hours: row.hours, current: current, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
+                        HourList(period: row.period, label: row.label, hours: row.hours, current: current, light: light, prayed: prayed, tier: tier, now: now, home: home, labelStyle: label, labelInk: labelInk, open: open)
                     } else {
                         HStack(spacing: 0) {
                             VStack(spacing: m.px(2)) {
@@ -1031,14 +1057,16 @@ private struct HourDirectory: View {
         let isNow = h == current
         let gloss = desk ? hourNote(slug: h) : isNow ? note : ""
         let size = isNow ? tier.hourNow : tier.hour
+        let pool = light?.pool(h) ?? (isNow ? 1 : 0)
         return Button { open(h) } label: {
             VStack(spacing: 0) {
                 // Never broken mid-word: at the largest sizes a name steps down to fit its cell.
                 Text(hourLabel(h))
                     .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
-                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .foregroundStyle(light?.ink(h, now: done ? p.muted : now, plain: done ? p.muted : p.text) ?? (done ? p.muted : isNow ? now : p.text))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                    .opacity(light?.name(h) ?? 1)
                     // An hour prayed today withdraws to the muted ink, a small gilt cross
                     // at its shoulder, as the web's `.is-prayed`; the cross takes no width.
                     .overlay(alignment: .topTrailing) {
@@ -1055,17 +1083,19 @@ private struct HourDirectory: View {
                         // running into its neighbour.
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .foregroundStyle(glossInk(h, isNow))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
+                            .opacity(desk ? 1 : light?.gloss(h) ?? 1)
                     } else {
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                            .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                            .foregroundStyle(glossInk(h, isNow))
                             .lineLimit(1)
                             .fixedSize()
                             .frame(width: 0)
+                            .opacity(desk ? 1 : light?.gloss(h) ?? 1)
                     }
                 }
             }
@@ -1074,7 +1104,7 @@ private struct HourDirectory: View {
             // The light rests on the hour that is now: a pool with no edge, at most 9.5rem across
             // (11rem in the niche).
             .background {
-                if isNow {
+                if pool > 0 {
                     Canvas { ctx, size in
                         let r = min(size.width + (desk ? 12 : 8), desk ? 176 : 152) / 2
                         let ry = (size.height + (desk ? 8 : 4)) / 2
@@ -1088,6 +1118,7 @@ private struct HourDirectory: View {
                     }
                     .padding(.horizontal, desk ? -12 : -8)
                     .padding(.vertical, desk ? -8 : -4)
+                    .opacity(pool)
                     .allowsHitTesting(false)
                 }
             }
@@ -1104,6 +1135,11 @@ private struct HourDirectory: View {
         .buttonStyle(Quiet())
         .accessibilityLabel([hourLabel(h), gloss.isEmpty ? nil : gloss, isNow ? "now" : nil, done ? "prayed" : nil].compactMap { $0 }.joined(separator: ", "))
     }
+
+    /// A gloss's ink: the hour that is now's, or in the niche another's, turning with the light.
+    private func glossInk(_ h: String, _ isNow: Bool) -> Color {
+        light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted)
+    }
 }
 
 /**
@@ -1117,6 +1153,7 @@ private struct HourList: View {
     let label: String
     let hours: [String]
     let current: String
+    let light: HourLightNow?
     let prayed: Set<String>
     let tier: HomeTier
     let now: Color
@@ -1150,13 +1187,15 @@ private struct HourList: View {
         let isNow = h == current
         let gloss = hourNote(slug: h)
         let size = isNow ? tier.hourNow : tier.hour
+        let pool = light?.pool(h) ?? (isNow ? 1 : 0)
         return Button { open(h) } label: {
             HStack(spacing: 0) {
                 Text(hourLabel(h))
                     .type(TextStyle(size: size, line: size * 1.2, tracking: 0.31))
-                    .foregroundStyle(done ? p.muted : isNow ? now : p.text)
+                    .foregroundStyle(light?.ink(h, now: done ? p.muted : now, plain: done ? p.muted : p.text) ?? (done ? p.muted : isNow ? now : p.text))
                     .lineLimit(1)
                     .fixedSize()
+                    .opacity(light?.name(h) ?? 1)
                     .overlay(alignment: .topTrailing) {
                         if done {
                             PaintedMark(.cross, size: m.px(7), color: p.gold).offset(x: m.px(9), y: m.px(2))
@@ -1169,7 +1208,7 @@ private struct HourList: View {
                     .accessibilityHidden(true)
                 Text(gloss)
                     .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
-                    .foregroundStyle(isNow ? home.nowGloss : p.muted)
+                    .foregroundStyle(light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted))
                     .lineLimit(1)
                     .fixedSize()
                 Spacer(minLength: 0)
@@ -1177,7 +1216,7 @@ private struct HourList: View {
             .frame(minHeight: m.px(tier.row))
             // The pool of light under the hour that is now, from a little before its name.
             .background(alignment: .leading) {
-                if isNow {
+                if pool > 0 {
                     Canvas { ctx, size in
                         let r = m.px(136)
                         let ry = size.height / 2
@@ -1191,6 +1230,7 @@ private struct HourList: View {
                     }
                     .frame(width: m.px(272))
                     .padding(.vertical, -3)
+                    .opacity(pool)
                     .allowsHitTesting(false)
                 }
             }
@@ -1222,5 +1262,64 @@ private struct HourListLayout: Layout {
         let label = subviews[0].sizeThatFits(ProposedViewSize(width: side, height: nil))
         subviews[0].place(at: CGPoint(x: bounds.minX + side, y: bounds.midY), anchor: .trailing, proposal: ProposedViewSize(width: side, height: label.height))
         subviews[1].place(at: CGPoint(x: bounds.minX + side, y: bounds.minY), proposal: ProposedViewSize(width: bounds.width - side, height: nil))
+    }
+}
+
+/// What home's light rests on: the hour that is now (none in the small hours, when Compline is the
+/// day before's), its gloss, and the invitation's words.
+struct HourLit: Equatable {
+    let hour: String
+    let note: String
+    let label: String
+
+    init(_ view: HomeView) {
+        hour = view.currentHour
+        note = view.currentHourNote
+        label = view.prayNowLabel
+    }
+}
+
+/// The light moving with the hours (the web's `HOUR_LIGHT`, `render_blocks::hour_light`): begun at
+/// `start` when the hour that is now turned from `from` to `to` while home was in front.
+struct HourLightPass: Equatable {
+    let from: HourLit
+    let to: HourLit
+    let start: Date
+}
+
+/**
+ * One frame of a pass. The pool under the old hour dies as the new one's gathers, the names' ink
+ * turns, the old gloss goes and the new comes; a name whose seat changes, and the invitation's
+ * words, go out where they stood and come back where they belong (`lit` changes while they are
+ * out), never sliding.
+ */
+struct HourLightNow {
+    let pass: HourLightPass
+    let frame: LightFrame
+
+    /// What the page is laid out for: the old hour's until the words are out, then the new's.
+    var lit: HourLit { frame.seated ? pass.to : pass.from }
+    private var moves: Bool { pass.from.hour != pass.to.hour }
+    private func touched(_ h: String) -> Bool { moves && (h == pass.from.hour || h == pass.to.hour) }
+
+    /// The invitation's words.
+    var words: Double { pass.from.label == pass.to.label ? 1 : Double(frame.words) }
+    /// The pool under `h`, or nil where the pass leaves it as it is.
+    func pool(_ h: String) -> Double? {
+        guard touched(h) else { return nil }
+        return Double(h == pass.from.hour ? frame.leavingPool : frame.comingPool)
+    }
+    /// A name's opacity: out and back as its seat changes.
+    func name(_ h: String) -> Double { touched(h) ? Double(frame.words) : 1 }
+    /// The ink of `h`'s name or gloss, between its ink as the hour that is now and its plain ink.
+    func ink(_ h: String, now: Color, plain: Color) -> Color? {
+        guard touched(h) else { return nil }
+        let share = CGFloat(h == pass.from.hour ? 1 - frame.ink : frame.ink)
+        return mix(now, plain, share)
+    }
+    /// A phone's gloss, shown only under the hour that is now.
+    func gloss(_ h: String) -> Double {
+        guard touched(h) else { return 1 }
+        return Double(h == pass.from.hour ? frame.leavingGloss : frame.comingGloss)
     }
 }

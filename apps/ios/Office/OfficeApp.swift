@@ -164,7 +164,7 @@ struct RootView: View {
             Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant)
         }
         .onReceive(minute) { _ in
-            if phase == .active { model.refreshToday() }
+            if phase == .active { model.refreshToday(seen: true) }
         }
         .onChange(of: phase) { _, now in
             guard now == .active else { return }
