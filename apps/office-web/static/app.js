@@ -1277,6 +1277,10 @@ function rule(x1, y1, x2, y2, w, seed) {
       // .is-turning-all) until the month has faded back in.
       function change() {
         document.querySelectorAll(".day-disclosures details").forEach(function (item) {
+          // A day folding on its own lands first, or its fold would undo this.
+          if (item.stopFold) {
+            item.stopFold();
+          }
           item.open = expand;
         });
         calendarExpand.setAttribute("aria-pressed", String(expand));
@@ -1348,51 +1352,109 @@ function rule(x1, y1, x2, y2, w, seed) {
   // instead, so they unfold on every browser as in the apps: the height over
   // 260ms on the standard curve and the contents fading in over 200ms after
   // 60; folding, 200ms and the contents out over 100ms, the disclosure held
-  // open until it has folded. Heard on the disclosure, after the summary's
-  // own listeners (the prayers' kept choice reads the state before the
-  // toggle), and never for a click another listener has taken (home's
-  // "Change date" turns its stage itself). Without motion it is the native
-  // toggle.
+  // open, marked .is-folding, until it has folded. Heard on the disclosure,
+  // after the summary's own listeners (the prayers' kept choice reads the
+  // state before the toggle), and never for a click another listener has
+  // taken (home's "Change date" turns its stage itself). An hour's date in
+  // the header turns it through details.turnFold, and the ordo's "Show office
+  // details" lands a fold mid-turn through details.stopFold before it changes
+  // the day. Without motion it is the native toggle.
   var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
   if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
     var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
     var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
     var folds = new WeakMap();
+    // A box's height and edges as they stand, and folded away.
+    var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
+    var tall = function (box) {
+      return { height: box.getBoundingClientRect().height + "px" };
+    };
+    var edges = function (box) {
+      var style = window.getComputedStyle(box);
+      var at = tall(box);
+      EDGES.forEach(function (edge) {
+        at[edge] = style[edge];
+      });
+      return at;
+    };
+    var folded = function () {
+      var at = { height: "0px" };
+      EDGES.forEach(function (edge) {
+        at[edge] = "0px";
+      });
+      return at;
+    };
     document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help").forEach(function (details) {
       var summary = details.querySelector(":scope > summary");
       if (!summary) {
         return;
       }
-      details.addEventListener("click", function (event) {
-        if (event.defaultPrevented || !(event.target instanceof Element) || event.target.closest("summary") !== summary ||
-          !document.documentElement.classList.contains("motion-ready") || !foldStillness.matches) {
-          return;
+      details.stopFold = function () {
+        var running = folds.get(details);
+        if (running) {
+          running.stop();
         }
-        event.preventDefault();
+      };
+      // Opens or closes the disclosure on the fold; false where it is left
+      // to the native toggle.
+      details.turnFold = function () {
+        if (!document.documentElement.classList.contains("motion-ready") || !foldStillness.matches) {
+          return false;
+        }
         var running = folds.get(details);
         var opening = running ? !running.opening : !details.open;
-        var from = details.getBoundingClientRect().height;
+        var contents = Array.prototype.filter.call(details.children, function (child) {
+          return child !== summary;
+        });
+        // Where the disclosure gives its parts to the hour's controls grid
+        // (display: contents, style.css) it has no box to fold, and WebKit
+        // does not animate its ::details-content: its parts fold instead.
+        var unboxed = window.getComputedStyle(details).display === "contents";
+        var boxes = unboxed ? contents : [details];
+        if (boxes.length === 0) {
+          return false;
+        }
+        var measure = unboxed ? edges : tall;
+        var from = boxes.map(measure);
         if (running) {
           running.stop();
         }
         var to;
         if (opening) {
           details.open = true;
-          to = details.getBoundingClientRect().height;
+          to = boxes.map(measure);
+          if (unboxed && !running) {
+            from = boxes.map(folded);
+          }
+        } else if (unboxed) {
+          to = boxes.map(folded);
         } else {
-          // Folded, the disclosure is its summary and its own foot.
-          var style = window.getComputedStyle(details);
-          to = summary.getBoundingClientRect().bottom - details.getBoundingClientRect().top +
-            parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth);
+          // Folded, the disclosure is its summary and its own edges: measured
+          // with the contents set aside.
+          var kept = contents.map(function (child) {
+            var display = [child.style.getPropertyValue("display"), child.style.getPropertyPriority("display")];
+            child.style.setProperty("display", "none", "important");
+            return display;
+          });
+          to = [tall(details)];
+          contents.forEach(function (child, i) {
+            if (kept[i][0]) {
+              child.style.setProperty("display", kept[i][0], kept[i][1]);
+            } else {
+              child.style.removeProperty("display");
+            }
+          });
         }
-        var contents = Array.prototype.filter.call(details.children, function (child) {
-          return child !== summary;
+        boxes.forEach(function (box) {
+          box.style.boxSizing = "border-box";
+          box.style.overflow = "hidden";
+          box.style.overflow = "clip";
         });
-        details.style.boxSizing = "border-box";
-        details.style.overflow = "hidden";
-        details.style.overflow = "clip";
+        details.classList.toggle("is-folding", !opening);
         var duration = opening ? 260 : 200;
-        var turns = [details.animate([{ height: from + "px" }, { height: to + "px" }], { duration: duration, easing: STANDARD })];
+        var turns = boxes.map(function (box, i) {
+          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+        });
         contents.forEach(function (child) {
           turns.push(opening ?
             child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
@@ -1407,23 +1469,35 @@ function rule(x1, y1, x2, y2, w, seed) {
             turns.forEach(function (turn) {
               turn.cancel();
             });
-            details.style.removeProperty("box-sizing");
-            details.style.removeProperty("overflow");
+            details.classList.remove("is-folding");
+            boxes.forEach(function (box) {
+              box.style.removeProperty("box-sizing");
+              box.style.removeProperty("overflow");
+            });
           },
         };
         function land() {
           if (folds.get(details) !== fold) {
             return;
           }
+          fold.stop();
           if (!opening) {
             details.open = false;
           }
-          fold.stop();
         }
         folds.set(details, fold);
         // A hidden tab may never finish the turn.
         timer = window.setTimeout(land, duration + 150);
         turns[0].finished.then(land, function () {});
+        return true;
+      };
+      details.addEventListener("click", function (event) {
+        if (event.defaultPrevented || !(event.target instanceof Element) || event.target.closest("summary") !== summary) {
+          return;
+        }
+        if (details.turnFold()) {
+          event.preventDefault();
+        }
       });
     });
   }
@@ -2035,8 +2109,11 @@ function rule(x1, y1, x2, y2, w, seed) {
     var sync = function () {
       button.setAttribute("aria-expanded", details.open ? "true" : "false");
     };
+    // On the disclosures' fold where script turns it (app.js, turnFold).
     button.addEventListener("click", function () {
-      details.open = !details.open;
+      if (!(details.turnFold && details.turnFold())) {
+        details.open = !details.open;
+      }
     });
     details.addEventListener("toggle", sync);
     sync();
@@ -3037,8 +3114,9 @@ function rule(x1, y1, x2, y2, w, seed) {
     if (!summary) return;
     summary.addEventListener("click", function () {
       // The summary's own toggle follows this listener, so the choice is the
-      // state it will leave.
-      var open = !details.open;
+      // state it will leave; one still folding shut (app.js's fold, where
+      // the browser cannot ease to auto) is open, and this opens it again.
+      var open = details.classList.contains("is-folding") || !details.open;
       try {
         var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
         if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};
