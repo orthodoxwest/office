@@ -856,6 +856,30 @@ mod tests {
         }
     }
 
+    /// An hour keeps the reader's place by presentation's rule: the page names its own hour and
+    /// day for the place, the limit is presentation's, and the place is found before the hour is
+    /// first painted (the head) and kept from the foot, after every line it may name.
+    #[test]
+    fn hour_page_keeps_the_place_by_the_shared_rule() {
+        let (_, _, body) = get("/vespers/2026-06-07");
+        let head = &body[..body.find("<body").unwrap()];
+        assert!(head.contains(r#"var hour = "vespers", day = "2026-06-07";"#), "the head finds the place for this hour");
+        // The head block renders once, in the head: not again inside the page's content.
+        assert_eq!(body.matches(r##"expect.href = "#hour-place""##).count(), 1, "the finder runs once");
+        let limit = format!("away <= {} * 60", presentation::PLACE_KEPT_MINUTES);
+        assert!(head.contains(&limit), "the head keeps presentation's limit, {limit}");
+        assert!(head.contains("office-prayed"), "a prayed hour opens at its top");
+        let foot = body.find(r#"<span id="hour-place" hidden></span>"#).expect("the foot marks where Chromium may paint");
+        assert!(foot > body.find(r#"class="hour-epilogue""#).unwrap(), "the place is set once every line is in");
+        assert_eq!(body.matches(r#"localStorage.setItem(KEY"#).count(), 1, "one keeper");
+        // Other pages neither keep nor find one.
+        assert!(!get("/").2.contains("office-place"));
+        // The ordo month's hold, likewise, renders once and in the head.
+        let month = get("/calendar/2026/11").2;
+        assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
+        assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
     /// A browser that has laid a score out names its column's width, and the hour's scores come
     /// engraved at it, so chant.js has nothing to lay out again and no score changes height under
     /// the reader; a width that is not one leaves the page's own.

@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -51,18 +50,28 @@ object Prayed {
 }
 
 /**
+ * How far an hour's visit has been prayed. It lives with the visit's place (`placeSaver`), so an
+ * hour reopened at the reader's place takes up the reading where it was and can still earn its
+ * mark, as the web's office-place carries it.
+ */
+class PrayedProgress {
+    var reading = PrayedReading(0.0, 0.0)
+    var done = false
+}
+
+/**
  * Marks `hour` of `date` prayed once its end is reached after its words were read on screen at a
  * praying pace (the core's `PrayedReading`, as the web's): a quick scroll to the end, or a wait
  * there, does not. `spans` gives each office item's key its words' place, from and to, among
- * the `total` shown; `end` is the key of the item that closes the hour.
+ * the `total` shown; `end` is the key of the item that closes the hour. `state` is the visit's
+ * reading so far.
  */
 @Composable
-fun PrayedWatch(date: LocalDate, hour: String, list: LazyListState, spans: Map<Any, Pair<Double, Double>>, total: Double, end: Any) {
+fun PrayedWatch(date: LocalDate, hour: String, list: LazyListState, spans: Map<Any, Pair<Double, Double>>, total: Double, end: Any, state: PrayedProgress) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val currentSpans by rememberUpdatedState(spans)
     val currentTotal by rememberUpdatedState(total)
-    val state = remember(date, hour) { object { var reading = PrayedReading(0.0, 0.0); var done = false } }
     LaunchedEffect(date, hour) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             var last = System.nanoTime()

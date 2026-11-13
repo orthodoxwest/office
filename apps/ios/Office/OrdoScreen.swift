@@ -63,6 +63,9 @@ struct OrdoScreen: View {
     /// The month faded out while "Show office details" changes every day at once.
     @State private var dimmed = false
     @State private var focused = false
+    /// Whether the day asked for has been set in place: until then the month is held unseen, so it
+    /// appears at the day with nothing moving (the web's month page holds itself the same way).
+    @State private var placed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The scroll view's height, and the pinned month heading's as last laid out.
@@ -132,6 +135,7 @@ struct OrdoScreen: View {
                     Footer()
                 }
             }
+            .opacity(focusDay > 0 && !placed ? 0 : 1)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
             // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
             .background {
@@ -150,7 +154,12 @@ struct OrdoScreen: View {
                     // found among its neighbours, as the web's `scroll-margin-top` keeps a row
                     // above it; the month's first day has none before it here.
                     let anchorDay = max(1, focusDay - 1)
-                    DispatchQueue.main.async { scroll.scrollTo("d-\(anchorDay)", anchor: focus) }
+                    DispatchQueue.main.async {
+                        scroll.scrollTo("d-\(anchorDay)", anchor: focus)
+                        placed = true
+                    }
+                } else {
+                    placed = true
                 }
             }
         }
@@ -455,7 +464,11 @@ private struct DayRow: View {
         if wide { table } else { card }
     }
 
-    private func openDay() { model.open(.home(d.date)) }
+    /// The day's page; the month's visit notes the day, so a return to it opens there.
+    private func openDay() {
+        model.choseInOrdo(d.date)
+        model.open(.home(d.date))
+    }
 
     /// A day's rank is its ink, as in a Book of Hours: the great feasts red-letter, doubles slate blue, lesser days black.
     private var rankInk: Color? {

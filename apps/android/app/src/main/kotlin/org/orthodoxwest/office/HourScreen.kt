@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.view.RoundedCorner
 import android.view.View
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -75,6 +76,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.WeakHashMap
@@ -84,7 +87,9 @@ import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
+import org.orthodoxwest.office.core.PrayedReading
 import org.orthodoxwest.office.core.blockWords
+import org.orthodoxwest.office.core.reopensAtPlace
 
 /** How many hours hold each window awake. */
 private val hoursAwake = WeakHashMap<View, Int>()
@@ -124,7 +129,30 @@ fun HourScreen(
             view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, SessionPrayers.opens(context, view.hour, s.label)) }
         }
     }
-    val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
+    // The ribbon (the core's reopensAtPlace, as the web's office-place and the iOS app's scene
+    // storage): the visit's place is saved with it, for Back and for a return after Android has
+    // closed the app. Saved while the app went into the background (not in front, and not being
+    // recreated for a rotation or a theme), it is the place the reader was taken away from, and
+    // the hour opens there only within the core's limit and before it is prayed; after that, at
+    // its top. A visit the reader left by the app's own ways keeps its place for Back, as before.
+    val activity = LocalActivity.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // How far it has been prayed goes with the place, so a reopened hour can still earn its mark.
+    val progress = remember(date, view.hour) { PrayedProgress() }
+    val ribbon = remember(date, view.hour) {
+        placeSaver(
+            leftAt = {
+                val away = activity?.isChangingConfigurations != true && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                if (away) System.currentTimeMillis() else 0L
+            },
+            reopens = { at ->
+                reopensAtPlace(Prayed.hours(context, date).contains(view.hour), (System.currentTimeMillis() - at) / 1000.0)
+            },
+            reading = { progress.reading },
+            carry = { progress.reading = it },
+        )
+    }
+    val listState = rememberSaveable(view.hour, view.dateLabel, saver = ribbon) { LazyListState() }
     // The office below a section moves to make room only while the section opens or closes,
     // not when a new text size or prayer form sets it again.
     var unfolding by remember { mutableStateOf(false) }
@@ -148,7 +176,7 @@ fun HourScreen(
             shown.forEach { i -> wordsOf[i].forEachIndexed { j, w -> put("$i-$j", at to at + w); at += w } }
         }
     }
-    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
+    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue", state = progress)
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
     // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
     val gilding = LocalOrnament.current
@@ -563,6 +591,36 @@ private val EndingAir = 52.dp
  */
 private val UNFOLD_FADE = tween<Float>(UNFOLD_MS - 60, delayMillis = 60, easing = LinearOutSlowInEasing)
 private val FOLD_FADE = tween<Float>(FOLD_MS / 2, easing = FastOutLinearInEasing)
+
+/**
+ * An hour's list state as its visit saves it: the place, when the app went into the background
+ * with it (`leftAt`, 0 while in front), and the prayed watch's `reading` then. Restored from the
+ * background, it opens at the place only if `reopens` says so, and hands the reading on to
+ * `carry`; otherwise at the top, with nothing moving, and the reading begins again. A state saved
+ * before the reading was carried restores as before.
+ */
+internal fun placeSaver(
+    leftAt: () -> Long,
+    reopens: (Long) -> Boolean,
+    reading: () -> PrayedReading = { PrayedReading(0.0, 0.0) },
+    carry: (PrayedReading) -> Unit = {},
+) = listSaver<LazyListState, Long>(
+    save = {
+        val r = reading()
+        listOf(it.firstVisibleItemIndex.toLong(), it.firstVisibleItemScrollOffset.toLong(), leftAt(), r.cursor.toRawBits(), r.read.toRawBits())
+    },
+    restore = { saved ->
+        val at = saved.getOrElse(2) { 0L }
+        if (at == 0L || reopens(at)) {
+            val cursor = Double.fromBits(saved.getOrElse(3) { 0L })
+            val read = Double.fromBits(saved.getOrElse(4) { 0L })
+            if (cursor.isFinite() && read.isFinite()) carry(PrayedReading(maxOf(0.0, cursor), maxOf(0.0, read)))
+            LazyListState(saved[0].toInt(), saved[1].toInt())
+        } else {
+            LazyListState()
+        }
+    },
+)
 
 /** Which collapsible sections are open, as saved state can hold it. */
 private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(

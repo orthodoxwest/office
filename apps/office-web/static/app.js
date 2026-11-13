@@ -3816,6 +3816,16 @@ function plainClickOpensHere(e, link) {
   var read = 0;
   var done = false;
   var last = Date.now();
+  // The ribbon (hour.html): the reading so far goes with the kept place, and an hour opened
+  // again at the place takes it up, so it can still earn its mark.
+  var carried = window.officePlaceReading;
+  if (carried && Number.isFinite(carried.cursor) && Number.isFinite(carried.read)) {
+    cursor = Math.max(0, carried.cursor);
+    read = Math.max(0, carried.read);
+  }
+  window.officeReading = function () {
+    return { cursor: cursor, read: read };
+  };
 
   // The words of the shown text, in order: each text node's count and box.
   // A form or reading hidden by the reader's settings has no box and no words.

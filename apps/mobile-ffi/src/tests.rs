@@ -379,6 +379,16 @@ fn a_quick_scroll_does_not_pray_an_hour() {
 }
 
 #[test]
+fn the_apps_keep_an_interrupted_hours_place_by_the_shared_rule() {
+    let limit = f64::from(presentation::PLACE_KEPT_MINUTES) * 60.0;
+    assert!(reopens_at_place(false, 600.0));
+    assert!(reopens_at_place(false, limit));
+    assert!(!reopens_at_place(false, limit + 1.0));
+    assert!(!reopens_at_place(true, 600.0));
+    assert!(!reopens_at_place(false, -1.0));
+}
+
+#[test]
 fn chant_sets_the_hymn_and_marian_antiphon_where_scores_are_in_hand() {
     let core = OfficeCore::new().unwrap();
     assert!(core.offers_chant());

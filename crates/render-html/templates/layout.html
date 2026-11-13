@@ -107,6 +107,8 @@
       } catch (e) {}
     })();
   </script>
+  {# What a page must decide before it is first painted (an hour's place, hour.html). #}
+  {% block head %}{% endblock %}
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
   {# Start the text face's fetch early: it reflows the ordo's long year table, and re-sets home's
        date and day when it swaps in. #}

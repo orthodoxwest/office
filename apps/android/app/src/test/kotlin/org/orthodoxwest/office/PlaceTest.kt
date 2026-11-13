@@ -2,8 +2,10 @@ package org.orthodoxwest.office
 
 import android.app.Application
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasScrollToIndexAction
@@ -18,7 +20,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.orthodoxwest.office.core.PrayedReading
 import org.orthodoxwest.office.core.hourNames
+import org.orthodoxwest.office.core.reopensAtPlace
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -79,5 +83,51 @@ class PlaceTest {
         entry = 1
         compose.waitForIdle()
         assertEquals(read, position())
+    }
+
+    /**
+     * The ribbon: an hour Android closed in the background opens at the reader's place only
+     * within the core's limit and before it is prayed; one left by the app's own ways (saved in
+     * front) keeps its place for Back.
+     */
+    @Test
+    fun anHourTakenAwayOpensAtItsPlaceOnlyWithinTheLimit() {
+        val now = System.currentTimeMillis()
+        fun reopened(leftAt: Long, prayed: Boolean = false): Int {
+            val saver = placeSaver(leftAt = { leftAt }, reopens = { at -> reopensAtPlace(prayed, (System.currentTimeMillis() - at) / 1000.0) })
+            val saved = with(saver) { SaverScope { true }.save(LazyListState(12, 40)) }!!
+            return saver.restore(saved)!!.firstVisibleItemIndex
+        }
+        assertEquals(12, reopened(0L))
+        assertEquals(12, reopened(now - 10 * 60_000L))
+        assertEquals(0, reopened(now - 46 * 60_000L))
+        assertEquals(0, reopened(now - 60_000L, prayed = true))
+    }
+
+    /**
+     * The visit's place carries the prayed watch's reading, so an hour reopened at the place can
+     * still earn its mark; an hour reopened at its top begins the reading again, and a place
+     * saved before the reading was carried still restores.
+     */
+    @Test
+    fun theKeptPlaceCarriesTheReading() {
+        val now = System.currentTimeMillis()
+        fun carried(leftAt: Long): PrayedReading? {
+            var got: PrayedReading? = null
+            val saver = placeSaver(
+                leftAt = { leftAt },
+                reopens = { at -> reopensAtPlace(false, (System.currentTimeMillis() - at) / 1000.0) },
+                reading = { PrayedReading(640.0, 512.0) },
+                carry = { got = it },
+            )
+            val saved = with(saver) { SaverScope { true }.save(LazyListState(12, 40)) }!!
+            saver.restore(saved)
+            return got
+        }
+        assertEquals(PrayedReading(640.0, 512.0), carried(now - 10 * 60_000L))
+        assertEquals(PrayedReading(640.0, 512.0), carried(0L))
+        assertEquals(null, carried(now - 46 * 60_000L))
+        val older = placeSaver({ 0L }, { true }).restore(listOf(12L, 40L, now - 60_000L))!!
+        assertEquals(12, older.firstVisibleItemIndex)
     }
 }

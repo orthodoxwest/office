@@ -349,6 +349,15 @@ pub fn prayed_reading_done(reading: PrayedReading, total: f64, at_end: bool) -> 
     presentation::Reading { cursor: reading.cursor, read: reading.read }.prayed(total, at_end)
 }
 
+/// Whether an hour the system closed opens again at the reader's place rather than its top
+/// (`presentation::reopens_at_place`): the apps keep the place with the hour's own visit, so it
+/// is always the same hour of the same day; it was left `seconds_away` ago, and `prayed` is
+/// home's mark for it.
+#[uniffi::export]
+pub fn reopens_at_place(prayed: bool, seconds_away: f64) -> bool {
+    presentation::reopens_at_place(true, prayed, seconds_away)
+}
+
 /// The words of a block, as home's mark of the hours prayed counts them: those with a letter
 /// or a figure.
 #[uniffi::export]
