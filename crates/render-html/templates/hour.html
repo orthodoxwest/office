@@ -166,10 +166,11 @@
 {#- The ribbon's keeping and finding (see the head block). The place is the first line of the
      office not wholly above the hairline: its index among the office's lines, its first words
      (a page changed since, by a new day's corpus, keeps no place), and how far into it the
-     hairline cut (less than nothing when the line begins below it). A line another prayer form hides gives way to the next one shown. It is kept
-     whenever the page is hidden (the phone locked, another app, a tab put by), and let go when
-     the reader leaves by the page's own links or forms or the browser's navigation, or is still
-     at the head of the hour. Opened at the place, the page holds it while late fonts and scores
+     hairline cut (less than nothing when the line begins below it), with how far the hour has
+     been prayed (app.js). A line another prayer form hides gives way to the next one shown. It
+     is kept whenever the page is hidden (the phone locked, another app, a tab put by), and let
+     go when the reader leaves by the page's own links or forms or the browser's navigation, or
+     is still at the head of the hour. Opened at the place, the page holds it while late fonts and scores
      settle, until the reader's own hand moves it. #}
 <script>
   (function () {
@@ -245,6 +246,8 @@
       } else {
         var watch = "ResizeObserver" in window ? new ResizeObserver(function () { settle(); }) : null;
         var hands = ["touchstart", "wheel", "keydown", "pointerdown"];
+        // The prayed watch (app.js, deferred) takes up the reading kept with the place.
+        if (Number.isFinite(kept.cursor) && Number.isFinite(kept.read)) window.officePlaceReading = { cursor: Number(kept.cursor), read: Number(kept.read) };
         var settle = function () {
           if (root.hasAttribute("data-place-settling")) open(kept);
         };
@@ -275,6 +278,12 @@
       at.hour = hour;
       at.day = day;
       at.at = Date.now();
+      // How far the hour has been prayed (app.js), so it can still earn its mark at the place.
+      var reading = typeof window.officeReading === "function" ? window.officeReading() : null;
+      if (reading) {
+        at.cursor = reading.cursor;
+        at.read = reading.read;
+      }
       try {
         localStorage.setItem(KEY, JSON.stringify(at));
       } catch (e) {}

@@ -192,20 +192,27 @@ private struct Held {
  * restores it) opens again at that place (the core's `reopensAtPlace`, as the web's
  * `office-place` and the Android app's saved visit): the row then top-most on screen and the
  * anchor that stands it where it stood, and when. An hour the reader leaves by the app's own
- * ways (home, another hour, Back) keeps none, so a deliberate return opens at its top.
+ * ways (home, another hour, Back) keeps none, so a deliberate return opens at its top. It
+ * carries how far the hour had been prayed, so an hour reopened mid-psalm can still earn its mark.
  */
-private struct Place: Codable {
+struct HourPlace: Codable {
     /// The hour's day and name: "2026-11-13 vespers".
     let page: String
     let row: String
     let anchor: Double
     /// When it was kept, in seconds since 1970.
     let at: Double
+    /// The prayed watch's reading then (`PrayedReading`); absent from a place kept before it was carried.
+    var cursor: Double?
+    var read: Double?
+
+    /// The reading the hour's prayed watch takes up again at the place.
+    var reading: PrayedReading { PrayedReading(cursor: max(0, cursor ?? 0), read: max(0, read ?? 0)) }
 
     var encoded: String { (try? JSONEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? "" }
 
-    static func decode(_ s: String) -> Place? {
-        s.isEmpty ? nil : try? JSONDecoder().decode(Place.self, from: Data(s.utf8))
+    static func decode(_ s: String) -> HourPlace? {
+        s.isEmpty ? nil : try? JSONDecoder().decode(HourPlace.self, from: Data(s.utf8))
     }
 }
 
@@ -383,6 +390,10 @@ struct HourScreen: View {
                 onScreen = true
                 if let place = keptHere {
                     placing = true
+                    // The prayed watch takes up the reading where it was (watchPrayed keeps it for this page).
+                    prayed.page = page
+                    prayed.reading = place.reading
+                    prayed.done = false
                     // Once the rows are laid out, and again once those the first move brought in are.
                     DispatchQueue.main.async {
                         scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
@@ -482,8 +493,8 @@ struct HourScreen: View {
     private var page: String { "\(date.iso) \(view.hour)" }
 
     /// The place kept for this hour, if it opens there: left within the core's limit, and not yet prayed.
-    private var keptHere: Place? {
-        guard let place = Place.decode(kept), place.page == page else { return nil }
+    private var keptHere: HourPlace? {
+        guard let place = HourPlace.decode(kept), place.page == page else { return nil }
         let away = Date().timeIntervalSince1970 - place.at
         return reopensAtPlace(prayed: model.hoursPrayed(on: date).contains(view.hour), secondsAway: away) ? place : nil
     }
@@ -491,12 +502,13 @@ struct HourScreen: View {
     /// Keeps the reader's place as the app goes into the background; none while still at the hour's head.
     private func keep() {
         guard reading.ratio > 0, let mark = marks().first else { return forget() }
-        kept = Place(page: page, row: mark.id, anchor: Double(mark.anchor.y), at: Date().timeIntervalSince1970).encoded
+        let sofar = prayed.page == page ? prayed.reading : PrayedReading(cursor: 0, read: 0)
+        kept = HourPlace(page: page, row: mark.id, anchor: Double(mark.anchor.y), at: Date().timeIntervalSince1970, cursor: sofar.cursor, read: sofar.read).encoded
     }
 
     /// Lets this hour's place go.
     private func forget() {
-        if Place.decode(kept)?.page == page { kept = "" }
+        if HourPlace.decode(kept)?.page == page { kept = "" }
     }
 
     /// Once the hour is composed again, stands the top-most row held that is still in it where it stood.

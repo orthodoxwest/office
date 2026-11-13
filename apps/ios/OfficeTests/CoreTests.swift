@@ -289,6 +289,19 @@ final class PlaceTests: XCTestCase {
         XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: -60))
     }
 
+    /// The kept place carries the prayed watch's reading, so an hour reopened mid-psalm can still
+    /// earn its mark; a place kept before the reading was carried begins the reading again.
+    func testTheKeptPlaceCarriesTheReading() {
+        let place = HourPlace(page: "2026-11-13 vespers", row: "b-3-1", anchor: 0.2, at: 1_000, cursor: 640, read: 512)
+        let again = HourPlace.decode(place.encoded)
+        XCTAssertEqual(again?.page, "2026-11-13 vespers")
+        XCTAssertEqual(again?.reading.cursor, 640)
+        XCTAssertEqual(again?.reading.read, 512)
+        let older = HourPlace.decode(#"{"page":"2026-11-13 vespers","row":"b-3-1","anchor":0.2,"at":1000}"#)
+        XCTAssertEqual(older?.row, "b-3-1")
+        XCTAssertEqual(older?.reading.read, 0)
+    }
+
     /// The search takes its words in place: the same visit, with no move between pages.
     func testTheSearchTakesItsWordsInPlace() {
         let model = AppModel()

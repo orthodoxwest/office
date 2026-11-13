@@ -89,6 +89,7 @@ import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
+import org.orthodoxwest.office.core.PrayedReading
 import org.orthodoxwest.office.core.blockWords
 import org.orthodoxwest.office.core.reopensAtPlace
 
@@ -138,6 +139,8 @@ fun HourScreen(
     // its top. A visit the reader left by the app's own ways keeps its place for Back, as before.
     val activity = LocalActivity.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // How far it has been prayed goes with the place, so a reopened hour can still earn its mark.
+    val progress = remember(date, view.hour) { PrayedProgress() }
     val ribbon = remember(date, view.hour) {
         placeSaver(
             leftAt = {
@@ -147,6 +150,8 @@ fun HourScreen(
             reopens = { at ->
                 reopensAtPlace(Prayed.hours(context, date).contains(view.hour), (System.currentTimeMillis() - at) / 1000.0)
             },
+            reading = { progress.reading },
+            carry = { progress.reading = it },
         )
     }
     val listState = rememberSaveable(view.hour, view.dateLabel, saver = ribbon) { LazyListState() }
@@ -170,7 +175,7 @@ fun HourScreen(
             shown.forEach { i -> wordsOf[i].forEachIndexed { j, w -> put("$i-$j", at to at + w); at += w } }
         }
     }
-    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue")
+    PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue", state = progress)
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
     // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
     val gilding = LocalOrnament.current
@@ -577,14 +582,32 @@ private val UNFOLD_FADE = tween<Float>(220, delayMillis = 60, easing = LinearOut
 private val FOLD_FADE = tween<Float>(120, easing = FastOutLinearInEasing)
 
 /**
- * An hour's list state as its visit saves it: the place, and when the app went into the
- * background with it (`leftAt`, 0 while in front). Restored from the background, it opens at the
- * place only if `reopens` says so; otherwise at the top, with nothing moving.
+ * An hour's list state as its visit saves it: the place, when the app went into the background
+ * with it (`leftAt`, 0 while in front), and the prayed watch's `reading` then. Restored from the
+ * background, it opens at the place only if `reopens` says so, and hands the reading on to
+ * `carry`; otherwise at the top, with nothing moving, and the reading begins again. A state saved
+ * before the reading was carried restores as before.
  */
-internal fun placeSaver(leftAt: () -> Long, reopens: (Long) -> Boolean) = listSaver<LazyListState, Long>(
-    save = { listOf(it.firstVisibleItemIndex.toLong(), it.firstVisibleItemScrollOffset.toLong(), leftAt()) },
-    restore = { (index, offset, at) ->
-        if (at == 0L || reopens(at)) LazyListState(index.toInt(), offset.toInt()) else LazyListState()
+internal fun placeSaver(
+    leftAt: () -> Long,
+    reopens: (Long) -> Boolean,
+    reading: () -> PrayedReading = { PrayedReading(0.0, 0.0) },
+    carry: (PrayedReading) -> Unit = {},
+) = listSaver<LazyListState, Long>(
+    save = {
+        val r = reading()
+        listOf(it.firstVisibleItemIndex.toLong(), it.firstVisibleItemScrollOffset.toLong(), leftAt(), r.cursor.toRawBits(), r.read.toRawBits())
+    },
+    restore = { saved ->
+        val at = saved.getOrElse(2) { 0L }
+        if (at == 0L || reopens(at)) {
+            val cursor = Double.fromBits(saved.getOrElse(3) { 0L })
+            val read = Double.fromBits(saved.getOrElse(4) { 0L })
+            if (cursor.isFinite() && read.isFinite()) carry(PrayedReading(maxOf(0.0, cursor), maxOf(0.0, read)))
+            LazyListState(saved[0].toInt(), saved[1].toInt())
+        } else {
+            LazyListState()
+        }
     },
 )
 

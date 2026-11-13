@@ -726,6 +726,35 @@ test("an hour's place is kept only within the limit, and not once prayed", async
   expect(await page.evaluate(() => scrollY)).toBe(0);
 });
 
+test("an hour reopened at its place can still be marked prayed", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  const hour = "/compline/2026-10-07";
+  const readOn = async (until) => {
+    for (let i = 0; i < 60 && !(await until()); i++) {
+      await page.clock.runFor(20_000);
+      await scrollHourBy(page, 400);
+    }
+  };
+  await page.goto(hour);
+  // Half the hour read at a praying pace; then the phone locks and the page is lost.
+  const half = await page.evaluate(() => {
+    const r = document.querySelector(".office-hour .elements").getBoundingClientRect();
+    return r.top + scrollY + r.height / 2;
+  });
+  await readOn(() => page.evaluate((y) => scrollY > y, half));
+  await hidePage(page);
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("office-place")));
+  expect(kept.read).toBeGreaterThan(0);
+  await page.goto("/about");
+  await page.goto(hour);
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(1000);
+  // The rest read at the place: the whole hour has been prayed.
+  await readOn(() => atHourEnd(page));
+  await page.clock.runFor(2000);
+  await page.goto("/?date=2026-10-07");
+  await expect(page.locator('.home-hour-link[data-hour="compline"]')).toHaveClass(/is-prayed/);
+});
+
 test("returning to the ordo, the month is first shown at the day chosen", async ({ page }) => {
   await page.addInitScript(() => {
     window.__shown = [];
