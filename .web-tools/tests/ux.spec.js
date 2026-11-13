@@ -2802,6 +2802,60 @@ test("the prayers before and after the Office keep the reader's choice for their
   await expect(after()).not.toHaveAttribute("open");
 });
 
+// Where the browser cannot ease a height to auto (WebKit), app.js turns the
+// disclosures' fold in script. A disclosure folding shut is still [open]:
+// pressed again it opens, and that is the choice kept; the ordo's "Show
+// office details" is not undone by a day that was folding; the hour's date
+// in the header turns the picker on the fold too. Reduced motion cuts.
+test("disclosures folded in script turn back when pressed mid-fold", async ({ page, browserName }) => {
+  test.skip(browserName !== "webkit", "Chromium eases the fold in CSS (interpolate-size); the script's fold is for the other engines");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const ready = () => page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await ready();
+  await page.evaluate(() => localStorage.removeItem("office-prayers-open"));
+  const prayers = page.locator('details.session-prayers[data-prayers$="/Prayers Before the Office"]');
+  await expect(prayers).toHaveAttribute("open");
+  await prayers.locator("summary").evaluate((summary) => {
+    summary.click();
+    summary.click();
+  });
+  await expect(prayers).not.toHaveClass(/is-folding/);
+  await expect(prayers).toHaveAttribute("open");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("office-prayers-open")))).toEqual({ "lauds/Prayers Before the Office": true });
+
+  await openDatedPage(page, "/calendar/2026/03");
+  await ready();
+  const day = page.locator(".day-disclosures details.day-office-details").first();
+  await day.locator("summary").click();
+  await expect(day).toHaveAttribute("open");
+  await page.evaluate(() => {
+    document.querySelector(".day-disclosures details.day-office-details > summary").click();
+    document.querySelector(".calendar-expand").click();
+  });
+  await expect(page.locator(".calendar-expand")).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(500);
+  await expect(day).toHaveAttribute("open");
+  await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
+
+  await openDatedPage(page, `/sext/${testDate}`);
+  await ready();
+  const turning = () => page.evaluate(() => [...document.querySelectorAll("#hour-date-nav > :not(summary)")].some((part) => part.getAnimations().length > 0));
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(true);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "true");
+  await page.locator("button.hour-meta-date").click();
+  await expect(page.locator("#hour-date-nav")).not.toHaveAttribute("open");
+  await expect(page.locator("button.hour-meta-date")).toHaveAttribute("aria-expanded", "false");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator("button.hour-meta-date").click();
+  expect(await turning()).toBe(false);
+  await expect(page.locator("#hour-date-nav")).toHaveAttribute("open");
+});
+
 // "Change date" turns the invitation and the hours into the calendar in
 // their place, under the band. The head gives up only the difference, or,
 // where it has not the height, keeps its own while the page rises with the

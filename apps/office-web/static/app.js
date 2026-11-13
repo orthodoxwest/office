@@ -521,7 +521,7 @@ function plainClickOpensHere(e, link) {
   // matching pre-paint script in layout.html applies the choice before CSS.
   // Only explicit button clicks write storage — passive load never invents a choice.
   var THEME_KEY = "office-theme";
-  var THEME_LIGHT_COLOR = "#fdf1e6";
+  var THEME_LIGHT_COLOR = "#faf3e9";
   var THEME_DARK_COLOR = "#121c28";
 
   var readStoredTheme = function () {
@@ -1294,13 +1294,79 @@ function plainClickOpensHere(e, link) {
   var calendarExpand = document.querySelector(".calendar-expand");
   if (calendarExpand) {
     calendarExpand.hidden = false;
+    // Thirty days unfolding together is a page in turmoil: the month fades
+    // out, every day opens or closes at once, and the month fades back in,
+    // as the apps' ordo does (Chrome.kt's MONTH_OUT_MS and MONTH_IN_MS).
+    // Without motion, or before the page has settled, the days simply change.
+    var turnAll = null;
     calendarExpand.addEventListener("click", function () {
+      // Pressed again mid-turn: the first turn lands at once, and this one
+      // starts from it.
+      if (turnAll) {
+        turnAll();
+      }
       var expand = calendarExpand.getAttribute("aria-pressed") !== "true";
-      document.querySelectorAll(".day-disclosures details").forEach(function (item) {
-        item.open = expand;
-      });
-      calendarExpand.setAttribute("aria-pressed", String(expand));
-      calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      var months = Array.prototype.slice.call(document.querySelectorAll(".month-table"));
+      var animated = months.length > 0 && typeof months[0].animate === "function" &&
+        document.documentElement.classList.contains("motion-ready") &&
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+      // The days change with their transitions held off (style.css,
+      // .is-turning-all) until the month has faded back in.
+      function change() {
+        document.querySelectorAll(".day-disclosures details").forEach(function (item) {
+          // A day folding on its own lands first, or its fold would undo this.
+          if (item.stopFold) {
+            item.stopFold();
+          }
+          item.open = expand;
+        });
+        calendarExpand.setAttribute("aria-pressed", String(expand));
+        calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      }
+      if (!animated) {
+        change();
+        return;
+      }
+      var changed = false;
+      var fades = [];
+      var timer = 0;
+      function fade(from, to, options) {
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+        fades = months.map(function (month) {
+          return month.animate([{ opacity: from }, { opacity: to }], options);
+        });
+        return fades[0].finished;
+      }
+      function end() {
+        if (!changed) {
+          changed = true;
+          change();
+        }
+        document.documentElement.classList.remove("is-turning-all");
+        turnAll = null;
+        window.clearTimeout(timer);
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+      }
+      turnAll = end;
+      document.documentElement.classList.add("is-turning-all");
+      // The fades' 210ms and a little over: a hidden tab may never finish them.
+      timer = window.setTimeout(end, 400);
+      fade(1, 0, { duration: 70, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }).then(function () {
+        if (turnAll !== end) {
+          return;
+        }
+        changed = true;
+        change();
+        return fade(0, 1, { duration: 140, easing: "cubic-bezier(0, 0, 0.2, 1)" }).then(function () {
+          if (turnAll === end) {
+            end();
+          }
+        });
+      }).catch(function () {});
     });
   }
 
@@ -1316,6 +1382,161 @@ function plainClickOpensHere(e, link) {
     });
   } else {
     markMotionReady();
+  }
+
+  // Where the browser cannot ease a height to auto (no interpolate-size:
+  // Safari, Firefox), the disclosures' unfold of style.css is turned here
+  // instead, so they unfold on every browser as in the apps: the height over
+  // 260ms on the standard curve and the contents fading in over 200ms after
+  // 60; folding, 200ms and the contents out over 100ms, the disclosure held
+  // open, marked .is-folding, until it has folded. Heard on the disclosure,
+  // after the summary's own listeners (the prayers' kept choice reads the
+  // state before the toggle), and never for a click another listener has
+  // taken (home's "Change date" turns its stage itself). An hour's date in
+  // the header turns it through details.turnFold, and the ordo's "Show office
+  // details" lands a fold mid-turn through details.stopFold before it changes
+  // the day. Without motion it is the native toggle.
+  var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
+  if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
+    var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
+    var folds = new WeakMap();
+    // A box's height and edges as they stand, and folded away.
+    var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
+    var tall = function (box) {
+      return { height: box.getBoundingClientRect().height + "px" };
+    };
+    var edges = function (box) {
+      var style = window.getComputedStyle(box);
+      var at = tall(box);
+      EDGES.forEach(function (edge) {
+        at[edge] = style[edge];
+      });
+      return at;
+    };
+    var folded = function () {
+      var at = { height: "0px" };
+      EDGES.forEach(function (edge) {
+        at[edge] = "0px";
+      });
+      return at;
+    };
+    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help").forEach(function (details) {
+      var summary = details.querySelector(":scope > summary");
+      if (!summary) {
+        return;
+      }
+      details.stopFold = function () {
+        var running = folds.get(details);
+        if (running) {
+          running.stop();
+        }
+      };
+      // Opens or closes the disclosure on the fold; false where it is left
+      // to the native toggle.
+      details.turnFold = function () {
+        if (!document.documentElement.classList.contains("motion-ready") || !foldStillness.matches) {
+          return false;
+        }
+        var running = folds.get(details);
+        var opening = running ? !running.opening : !details.open;
+        var contents = Array.prototype.filter.call(details.children, function (child) {
+          return child !== summary;
+        });
+        // Where the disclosure gives its parts to the hour's controls grid
+        // (display: contents, style.css) it has no box to fold, and WebKit
+        // does not animate its ::details-content: its parts fold instead.
+        var unboxed = window.getComputedStyle(details).display === "contents";
+        var boxes = unboxed ? contents : [details];
+        if (boxes.length === 0) {
+          return false;
+        }
+        var measure = unboxed ? edges : tall;
+        var from = boxes.map(measure);
+        if (running) {
+          running.stop();
+        }
+        var to;
+        if (opening) {
+          details.open = true;
+          to = boxes.map(measure);
+          if (unboxed && !running) {
+            from = boxes.map(folded);
+          }
+        } else if (unboxed) {
+          to = boxes.map(folded);
+        } else {
+          // Folded, the disclosure is its summary and its own edges: measured
+          // with the contents set aside.
+          var kept = contents.map(function (child) {
+            var display = [child.style.getPropertyValue("display"), child.style.getPropertyPriority("display")];
+            child.style.setProperty("display", "none", "important");
+            return display;
+          });
+          to = [tall(details)];
+          contents.forEach(function (child, i) {
+            if (kept[i][0]) {
+              child.style.setProperty("display", kept[i][0], kept[i][1]);
+            } else {
+              child.style.removeProperty("display");
+            }
+          });
+        }
+        boxes.forEach(function (box) {
+          box.style.boxSizing = "border-box";
+          box.style.overflow = "hidden";
+          box.style.overflow = "clip";
+        });
+        details.classList.toggle("is-folding", !opening);
+        var duration = opening ? 260 : 200;
+        var turns = boxes.map(function (box, i) {
+          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+        });
+        contents.forEach(function (child) {
+          turns.push(opening ?
+            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
+            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }));
+        });
+        var timer = 0;
+        var fold = {
+          opening: opening,
+          stop: function () {
+            folds.delete(details);
+            window.clearTimeout(timer);
+            turns.forEach(function (turn) {
+              turn.cancel();
+            });
+            details.classList.remove("is-folding");
+            boxes.forEach(function (box) {
+              box.style.removeProperty("box-sizing");
+              box.style.removeProperty("overflow");
+            });
+          },
+        };
+        function land() {
+          if (folds.get(details) !== fold) {
+            return;
+          }
+          fold.stop();
+          if (!opening) {
+            details.open = false;
+          }
+        }
+        folds.set(details, fold);
+        // A hidden tab may never finish the turn.
+        timer = window.setTimeout(land, duration + 150);
+        turns[0].finished.then(land, function () {});
+        return true;
+      };
+      details.addEventListener("click", function (event) {
+        if (event.defaultPrevented || !(event.target instanceof Element) || event.target.closest("summary") !== summary) {
+          return;
+        }
+        if (details.turnFold()) {
+          event.preventDefault();
+        }
+      });
+    });
   }
 
   // Registered after load: on a first visit the worker's install fetches the
@@ -2123,8 +2344,11 @@ function plainClickOpensHere(e, link) {
     var sync = function () {
       button.setAttribute("aria-expanded", details.open ? "true" : "false");
     };
+    // On the disclosures' fold where script turns it (app.js, turnFold).
     button.addEventListener("click", function () {
-      details.open = !details.open;
+      if (!(details.turnFold && details.turnFold())) {
+        details.open = !details.open;
+      }
     });
     details.addEventListener("toggle", sync);
     sync();
@@ -3288,8 +3512,9 @@ function plainClickOpensHere(e, link) {
     if (!summary) return;
     summary.addEventListener("click", function () {
       // The summary's own toggle follows this listener, so the choice is the
-      // state it will leave.
-      var open = !details.open;
+      // state it will leave; one still folding shut (app.js's fold, where
+      // the browser cannot ease to auto) is open, and this opens it again.
+      var open = details.classList.contains("is-folding") || !details.open;
       try {
         var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
         if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};
