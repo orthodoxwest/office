@@ -520,6 +520,17 @@ fn crown_plan_carries_presentations_figures() {
         assert_eq!((plan.front.at, plan.front.len), (play.front.at, play.front.len));
         assert_eq!((plan.spread.at, plan.spread.len), (play.spread.at, play.spread.len));
         assert_eq!((plan.veil_from, plan.veil_to), play.veil);
+        assert_eq!((plan.frieze.at, plan.frieze.len), (play.frieze.at, play.frieze.len));
+        assert_eq!((plan.veil_top, plan.veil_gone, plan.veil_far), (play.veil_top, play.veil_gone, c::VEIL_FAR));
+        assert_eq!([plan.veil_in.x1, plan.veil_in.y1, plan.veil_in.x2, plan.veil_in.y2], play.veil_in);
+        assert_eq!([plan.veil_out.x1, plan.veil_out.y1, plan.veil_out.x2, plan.veil_out.y2], play.veil_out);
+        assert_eq!(
+            (plan.star_kindle, plan.star_snuff, plan.evening_star_alone, plan.stars_bright, plan.stars_bright_apart),
+            (c::STAR_KINDLE, c::STAR_SNUFF, c::EVENING_STAR_ALONE, c::STARS_BRIGHT, c::STARS_BRIGHT_APART)
+        );
+        assert_eq!((plan.dawn_field_out, plan.dawn_star_linger, plan.star_over), (c::DAWN_FIELD_OUT, c::DAWN_STAR_LINGER, c::STAR_OVER));
+        assert_eq!((plan.beat_hold, plan.beat_len), (c::BEAT_HOLD, c::BEAT_LEN));
+        assert_eq!([plan.cross_ember.r, plan.cross_ember.g, plan.cross_ember.b], c::CROSS_EMBER);
         assert_eq!([plan.veil_ink.r, plan.veil_ink.g, plan.veil_ink.b], play.veil_ink);
         assert_eq!((plan.veil_peak, plan.ink_at), (play.veil_peak, play.ink_at));
         let g = plan.glow_ease;

@@ -2304,6 +2304,13 @@ test("themes never change layout", async ({ browser }) => {
       await sheet.reload();
       await sheet.evaluate(() => document.fonts.ready);
     }
+    // Home's crown button ships hidden and is shown once its set-up is done,
+    // in idle time a little after load: a fingerprint taken on either side
+    // of that moment has or lacks its box, and the two themes' pages do not
+    // reach it together. Measure with it shown.
+    if (await sheet.locator(".home-crown-tap").count()) {
+      await sheet.locator(".home-crown-tap").waitFor({ state: "visible" });
+    }
     return sheet.evaluate(() => {
       const round = (r) => [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10)).join(",");
       const range = document.createRange();

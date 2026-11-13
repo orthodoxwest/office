@@ -716,7 +716,7 @@ mod tests {
         let rgb = |c: Rgb| format!("{}, {}, {}", c[0], c[1], c[2]);
         let play = |name: &str, p: CrownPlay| {
             format!(
-                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], end: {}, inkAt: {}, glowEase: {} }},",
+                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], frieze: [{}, {}], end: {}, inkAt: {}, glowEase: {} }},",
                 p.turn,
                 p.front.at,
                 p.front.len,
@@ -724,6 +724,8 @@ mod tests {
                 p.spread.len,
                 p.veil.0,
                 p.veil.1,
+                p.frieze.at,
+                p.frieze.len,
                 p.end,
                 p.ink_at,
                 ease(p.glow_ease)
@@ -739,6 +741,14 @@ mod tests {
         lines.push(format!("var SPREAD_GLOW_PART = {};", crown::SPREAD_GLOW_PART));
         lines.push(format!("var VEIL_LEAD = {};", crown::VEIL_LEAD));
         lines.push(format!("var VEIL_PART = {};", crown::VEIL_PART));
+        lines.push(format!("var STAR_KINDLE = {};", crown::STAR_KINDLE));
+        lines.push(format!("var EVENING_STAR_ALONE = {};", crown::EVENING_STAR_ALONE));
+        lines.push(format!("var STARS_BRIGHT = {};", crown::STARS_BRIGHT));
+        lines.push(format!("var STARS_BRIGHT_APART = {};", crown::STARS_BRIGHT_APART));
+        lines.push(format!("var DAWN_FIELD_OUT = {};", crown::DAWN_FIELD_OUT));
+        lines.push(format!("var DAWN_STAR_LINGER = {};", crown::DAWN_STAR_LINGER));
+        lines.push(format!("var BEAT_HOLD = {};", crown::BEAT_HOLD));
+        lines.push(format!("var BEAT_LEN = {};", crown::BEAT_LEN));
         lines.push(format!("var TAP_APART = {};", crown::TAP_APART));
         lines.push(format!("var PACE = {};", crown::PACE));
         lines.push(format!("var RUSH = {};", crown::RUSH));
@@ -755,12 +765,30 @@ mod tests {
             ("ember", crown::SKY_EMBER),
             ("lime", crown::SKY_LIME),
             ("rose-lilac", crown::SKY_ROSE_LILAC),
+            ("peach", crown::SKY_PEACH),
+            ("teal", crown::SKY_TEAL),
+            ("cross-ember", crown::CROSS_EMBER),
         ] {
             rules.push(format!("--crown-{name}: {};", rgb(c)));
         }
-        rules.push(format!("--crown-veil-c: rgb({});", rgb(crown::DAWN.veil_ink)));
-        rules.push(format!("--crown-veil-c: rgb({});", rgb(crown::DAWN_VEIL_UMBER)));
-        rules.push(format!("var(--crown-veil-low, {})", crown::DAWN_VEIL_LOW));
+        // The veil's two ramps, the stars' and the beat's lengths, and the front's ease, as
+        // style.css writes them.
+        let bez = |e: Ease| format!("cubic-bezier({}, {}, {}, {})", e[0], e[1], e[2], e[3]);
+        for (name, p) in [("dusk", crown::DUSK), ("dawn", crown::DAWN)] {
+            let gone = if p.veil_gone < 1.0 { format!("{}%, 100%", p.veil_gone * 100.0) } else { "100%".to_string() };
+            rules.push(format!(
+                "@keyframes crown-veil-{name} {{\n  0% {{ opacity: 0; animation-timing-function: {}; }}\n  {}% {{ opacity: var(--crown-veil-peak); animation-timing-function: {}; }}\n  {gone} {{ opacity: 0; }}\n}}",
+                bez(p.veil_in),
+                p.veil_top * 100.0,
+                bez(p.veil_out)
+            ));
+        }
+        rules.push(format!("--crown-veil-far: {};", crown::VEIL_FAR));
+        rules.push(format!("animation-timing-function: {};\n  }}\n  95% {{", bez(crown::FRONT_EASE)));
+        rules.push(format!("animation: crown-kindle calc({}ms * var(--crown-kp))", crown::STAR_KINDLE));
+        rules.push(format!("animation: crown-snuff calc({}ms * var(--crown-kp))", crown::STAR_SNUFF));
+        rules.push(format!("55% {{ opacity: 1; transform: scale({}); }}", crown::STAR_OVER));
+        rules.push(format!("crown-snuff calc({}ms * var(--crown-kp))", crown::BEAT_LEN));
         rules.push(format!("--crown-ink-handover: {}ms;", crown::INK_HANDOVER));
         rules.push(format!("--crown-pace: {};", crown::PACE));
         for rule in &rules {

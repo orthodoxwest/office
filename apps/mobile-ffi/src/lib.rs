@@ -393,6 +393,30 @@ pub struct CrownPlan {
     /// How many times slower than these figures the play is performed: the apps multiply their
     /// clock by it (`tap_apart` and `rush` stay real ms).
     pub pace: f32,
+    /// The frieze's own change: dark first at dusk, light last at dawn.
+    pub frieze: CrownSpan,
+    /// The veil is multiplied over the page: its strength rises to `veil_peak` by `veil_top` of
+    /// its span (`veil_in`) and is gone by `veil_gone` (`veil_out`); it thins to `veil_far` of
+    /// itself at the screen's edge.
+    pub veil_top: f32,
+    pub veil_gone: f32,
+    pub veil_in: CrownEase,
+    pub veil_out: CrownEase,
+    pub veil_far: f32,
+    pub sky_peach: CrownRgb,
+    pub sky_teal: CrownRgb,
+    pub cross_ember: CrownRgb,
+    /// The stars by magnitude and the ending beat (`presentation::crown` says how).
+    pub star_kindle: u32,
+    pub star_over: f32,
+    pub star_snuff: u32,
+    pub evening_star_alone: u32,
+    pub stars_bright: u32,
+    pub stars_bright_apart: u32,
+    pub dawn_field_out: f32,
+    pub dawn_star_linger: u32,
+    pub beat_hold: u32,
+    pub beat_len: u32,
 }
 
 /// The play for a tap that turns the page dark (dusk) or light (dawn).
@@ -435,6 +459,25 @@ pub fn crown_plan(to_dark: bool) -> CrownPlan {
         tap_apart: c::TAP_APART,
         rush: c::RUSH,
         pace: c::PACE,
+        frieze: span(play.frieze),
+        veil_top: play.veil_top,
+        veil_gone: play.veil_gone,
+        veil_in: ease(play.veil_in),
+        veil_out: ease(play.veil_out),
+        veil_far: c::VEIL_FAR,
+        sky_peach: rgb(c::SKY_PEACH),
+        sky_teal: rgb(c::SKY_TEAL),
+        cross_ember: rgb(c::CROSS_EMBER),
+        star_kindle: c::STAR_KINDLE,
+        star_over: c::STAR_OVER,
+        star_snuff: c::STAR_SNUFF,
+        evening_star_alone: c::EVENING_STAR_ALONE,
+        stars_bright: c::STARS_BRIGHT,
+        stars_bright_apart: c::STARS_BRIGHT_APART,
+        dawn_field_out: c::DAWN_FIELD_OUT,
+        dawn_star_linger: c::DAWN_STAR_LINGER,
+        beat_hold: c::BEAT_HOLD,
+        beat_len: c::BEAT_LEN,
     }
 }
 

@@ -3367,12 +3367,14 @@ function plainClickOpensHere(e, link) {
     // native apps; office-web tests the two agree). Times are ms from the
     // tap: when the look itself turns, the front crossing the head and the
     // spread over the page (each a start and a length), the veil's first and
-    // last, and the end. Light arrives faster than it leaves.
+    // last, the frieze's own change, and the end. The acts overlap (the page
+    // begins to turn while the front is still crossing the head) and every
+    // ramp ends on a long tail. Light arrives faster than it leaves.
     var CROWN_PLAY = {
-      dusk: { turn: 650, front: [800, 1700], spread: [2200, 1750], veil: [2000, 3500], end: 4000, inkAt: 0.6, glowEase: [0.55, 0.1, 0.7, 1] },
-      dawn: { turn: 650, front: [800, 1600], spread: [1850, 1800], veil: [1650, 3600], end: 3700, inkAt: 0.33, glowEase: [0.5, 0.2, 0.7, 1] },
+      dusk: { turn: 650, front: [800, 1900], spread: [1500, 2700], veil: [1500, 4200], frieze: [700, 1500], end: 5200, inkAt: 0.22, glowEase: [0.8, 0, 0.4, 1] },
+      dawn: { turn: 650, front: [800, 1700], spread: [1300, 2400], veil: [1300, 3700], frieze: [2600, 1100], end: 4700, inkAt: 0.6, glowEase: [0.5, 0, 0.15, 1] },
     };
-    var FRONT_EASE = [0.3, 0, 0.7, 1];
+    var FRONT_EASE = [0.4, 0, 0.3, 1];
     // Near enough even: it starts from nothing under the frieze, so it must
     // not dawdle there, and it ends at the corner, so it need not brake.
     var SPREAD_EASE = [0.4, 0, 0.5, 1];
@@ -3388,7 +3390,19 @@ function plainClickOpensHere(e, link) {
     var SPREAD_BEND = 0.8;
     var SPREAD_GLOW_PART = 0.96;
     var VEIL_LEAD = 1.4;
-    var VEIL_PART = 0.8;
+    var VEIL_PART = 0.18;
+    // The stars come by magnitude, each from the change of look: the evening
+    // star alone, then the brightest one at a time, then the field; dawn is
+    // the same told backwards, and the morning star stays for the ending
+    // beat (the page still for BEAT_HOLD, then one thing, in BEAT_LEN).
+    var STAR_KINDLE = 600;
+    var EVENING_STAR_ALONE = 760;
+    var STARS_BRIGHT = 5;
+    var STARS_BRIGHT_APART = 150;
+    var DAWN_FIELD_OUT = 0.62;
+    var DAWN_STAR_LINGER = 250;
+    var BEAT_HOLD = 370;
+    var BEAT_LEN = 600;
     // A second tap is kept only if it comes this long after the last, and a
     // touch elsewhere runs the rest out in RUSH.
     // The timetable is written at the pace it was composed at; the play is
@@ -3598,6 +3612,7 @@ function plainClickOpensHere(e, link) {
       if (p.edge) { p.edge.remove(); }
       ground.removeAttribute("style");
       back.removeAttribute("style");
+      mark(null);
       Array.prototype.forEach.call(starHost.querySelectorAll("path"), function (path) {
         path.style.removeProperty("--crown-d");
         unstyle(path);
@@ -3891,12 +3906,13 @@ function plainClickOpensHere(e, link) {
         return 0.5 * s0 * Math.pow(s1 / s0, e) + 0.5 * (s0 + e * (s1 - s0));
       };
       // The veil's shape grows half by ratio and half evenly along
-      // SPREAD_EASE for its first 400 ms (the halo round the window), then
-      // runs on ahead, done by VEIL_PART.
+      // SPREAD_EASE, and is over the whole page by VEIL_PART of the span,
+      // while the veil itself is still next to nothing: the shade deepens
+      // everywhere from rest, a little ahead about the arch, and no edge
+      // of it crosses the page.
       var vDur = Math.round(dur * VEIL_PART);
       for (var vi = 0; vi <= NODES; vi += 1) {
-        var tn = vDur * vi / NODES;
-        vnodes.push(sizeAt(tn <= 400 ? tn : 400 + (tn - 400) * (dur - 400) / (vDur - 400)));
+        vnodes.push(sizeAt(dur * vi / NODES));
       }
       // The page's own shape grows by an even ratio, a little faster at
       // first (SPREAD_BEND), and is done by SPREAD_SHAPE_PART of the span:
@@ -3984,8 +4000,11 @@ function plainClickOpensHere(e, link) {
         // them all and they share the glow's opacity), so they are dealt out
         // about the middle one, 32ms apart, none further than 130ms from its
         // own: no frame with every label mid-change.
-        var t = Math.max(pair[0] - 130, Math.min(pair[0] + 130, base + (n - Math.floor(mid)) * 32));
-        if (n && t < order[n - 1][2] + 25) { t = order[n - 1][2] + 25; }
+        // (Closer now, 14ms apart and none further than 60 from its own:
+        // the wall is shaded to the new look's value before it is crossed,
+        // so the rows come back together, in one breath.)
+        var t = Math.max(pair[0] - 60, Math.min(pair[0] + 60, base + (n - Math.floor(mid)) * 14));
+        if (n && t < order[n - 1][2] + 10) { t = order[n - 1][2] + 10; }
         pair[2] = t;
         set("--crown-r" + (pair[1] + 1), String(Math.round(t - plan.turn)));
         var rowEl = m.rows[pair[1]];
@@ -4000,43 +4019,87 @@ function plainClickOpensHere(e, link) {
       g.settle = Math.max(g.covered, g.lastDip + 220, plan.spread[0] + 1100, plan.veil[1] - 80, plan.spread[0] + dur * part - 50) + 80;
       // (The settle now comes near the plan's end: the play is over a little
       // after it, never before.)
-      g.end = Math.max(plan.end, g.covered + 20, g.settle + 90);
+      // The ending beat: the page is still for BEAT_HOLD, then one thing
+      // (the last star, or the morning star and the cross), then the end.
+      g.beat = g.settle + BEAT_HOLD;
+      g.end = Math.max(plan.end, g.beat + BEAT_LEN + 30);
+      set("--crown-beat", String(Math.round(g.beat - plan.turn)));
       set("--crown-veil-at", String(plan.veil[0] - plan.turn));
-      set("--crown-veil-dur", String(plan.veil[1] - plan.veil[0]));
+      set("--crown-veil-dur", String(plan.veil[1] - plan.veil[0] + wide));
+      set("--crown-frieze-at", String(plan.frieze[0] - plan.turn));
+      set("--crown-frieze-dur", String(plan.frieze[1]));
       // Where the veil is densest (the springing line's middle) and how far
       // it thins, on the glass.
       set("--crown-ax", px(ax)); set("--crown-ys", px(ys)); set("--crown-aw", px(W));
-      // The vault's stand-in leaves over the last half second before the
-      // stills do (style.css).
-      set("--crown-vault-out", String(Math.round(g.settle - plan.turn - 540)));
+      // The vault's stand-in leaves early and slowly, from where the page
+      // under it is nearly its new self until just before the stills go
+      // (style.css): the mouldings its clip hid come up with the page and
+      // nothing arrives in the last second.
+      var vaultOut = Math.round(plan.spread[0] + 0.62 * dur - plan.turn);
+      set("--crown-vault-out", String(vaultOut));
+      set("--crown-vault-dur", String(Math.round(g.settle - plan.turn - 60 - vaultOut)));
 
-      // Each star's turn. Dusk: ms from the change of theme, in the wake of
-      // the dark, the largest first. Dawn: ms from the tap, ahead of the light.
+      // Each star's turn, in ms from the change of theme, by magnitude.
+      // Dusk: the evening star (the one nearest the cross) as the dark first
+      // reaches it, alone; then the brightest, one at a time; then the field,
+      // brightest to faintest, until the page is still; and after the held
+      // breath the last and faintest. None before the dark has reached it.
+      // Dawn: the field goes out faintest first, then the brightest one at a
+      // time, none later than the plaster's front; the morning star stays
+      // for the ending beat.
       g.starTurns = function (list) {
-        var sizes = list.map(function (s) { return s.size; });
-        var big = Math.max.apply(null, sizes), small = Math.min.apply(null, sizes);
         var nearest = -1, nearestD = Infinity;
         list.forEach(function (s, i) {
           var d = Math.hypot(s.x - (cr.left + cr.width / 2), s.y - (cr.top + cr.height / 2));
           if (d < nearestD) { nearestD = d; nearest = i; }
         });
-        return list.map(function (s, i) {
-          var rank = big > small ? (big - s.size) / (big - small) : 0;
-          var seed = ((i * 7919) % 97) / 97;
-          var t;
-          if (dir === "dusk") {
-            t = frontAt(s.y) + 160 + 620 * rank + 260 * seed;
+        var settle = g.settle - plan.turn, beat = g.beat - plan.turn;
+        var out = list.map(function () { return beat; });
+        // Brightest first; equal stars keep the file's order.
+        var rest = list.map(function (s, i) { return i; }).filter(function (i) { return i !== nearest; });
+        rest.sort(function (i, j) { return list[j].size - list[i].size || i - j; });
+        var dark = function (s) { return frontAt(s.y) - plan.turn; };
+        var bright = rest.slice(0, STARS_BRIGHT), field = rest.slice(STARS_BRIGHT);
+        g.evening = nearest < 0 ? null : list[nearest].path;
+        if (dir === "dusk") {
+          var first = nearest < 0 ? 150 : Math.max(150, dark(list[nearest]) + 60);
+          if (nearest >= 0) { out[nearest] = first; }
+          var lastOne = field.length > 1 ? field.pop() : -1;
+          bright.forEach(function (i, n) {
+            out[i] = Math.max(first + EVENING_STAR_ALONE + n * STARS_BRIGHT_APART, dark(list[i]) + 100);
+          });
+          var from = first + EVENING_STAR_ALONE + bright.length * STARS_BRIGHT_APART;
+          var to = Math.max(from, settle - 0.3 * STAR_KINDLE);
+          field.forEach(function (i, n) {
+            var s = list[i], seed = ((i * 7919) % 97) / 97;
+            var t = from + (to - from) * (n + 0.6 * (seed - 0.5)) / Math.max(1, field.length - 1);
+            t = Math.max(from, Math.min(to, t), dark(s) + 100);
             // A star out in the moulding's margin (outside the inner lining,
             // by the arch's own sums) waits for the wall's night.
             if (arch.inside((s.x - hr.left) / W, (ys - s.y) / W) < (v.left - hr.left + 9 * zoom) / W) {
-              t = Math.max(t, when(s.x, s.y, 0.5) + 200);
+              t = Math.max(t, when(s.x, s.y, 0.5) - plan.turn + 200);
             }
-            return Math.round(Math.min(t, g.end - 1050) - plan.turn);
-          }
-          t = frontAt(s.y) - 850 - 450 * rank - 160 * seed;
-          t = Math.max(150, Math.min(t, 1650));
-          return Math.round(i === nearest ? 1750 : t);
+            out[i] = Math.min(t, settle - 0.3 * STAR_KINDLE);
+          });
+          if (lastOne >= 0) { out[lastOne] = beat; }
+          return out.map(Math.round);
+        }
+        var until = DAWN_FIELD_OUT * settle - bright.length * STARS_BRIGHT_APART;
+        field.reverse().forEach(function (i, n) {
+          var seed = ((i * 7919) % 97) / 97;
+          var t = 40 + (until - 40) * (n + 0.6 * (seed - 0.5)) / Math.max(1, field.length - 1);
+          out[i] = Math.max(0, Math.min(t, until, dark(list[i]) + DAWN_STAR_LINGER));
         });
+        bright.reverse().forEach(function (i, n) {
+          out[i] = Math.max(0, Math.min(until + (n + 1) * STARS_BRIGHT_APART, dark(list[i]) + DAWN_STAR_LINGER));
+        });
+        if (nearest >= 0) {
+          out[nearest] = beat;
+          // When the plaster's front reaches the morning star (style.css
+          // deepens its gold there, to stand on the light wall).
+          g.morningAt = Math.round(dark(list[nearest]) - 300);
+        }
+        return out.map(Math.round);
       };
       g.stars = stars;
       g.turns = g.starTurns(stars);
@@ -4155,6 +4218,9 @@ function plainClickOpensHere(e, link) {
       };
       mk("crown-cross-old", g.oldLook).style.opacity = g.oldLook.opacity;
       mk("crown-cross-new", g.newLook);
+      // The ember gold it keeps after the wall is dark, and takes before the
+      // wall is light.
+      mk("crown-cross-ember", null);
       var catchLight = mk("crown-cross-catch", null);
       if (g.hi) {
         catchLight.style.setProperty("--crown-catch-ink", g.hi);
@@ -4169,6 +4235,18 @@ function plainClickOpensHere(e, link) {
       list.forEach(function (s, i) {
         s.path.style.setProperty("--crown-d", String(Math.round(turnsNow[i] - (since || 0))));
       });
+    }
+    // The star nearest the cross: the evening star, and the morning star.
+    function mark(path, morningAt) {
+      Array.prototype.forEach.call(starHost.querySelectorAll(".crown-evening"), function (el) {
+        el.classList.remove("crown-evening");
+        el.style.removeProperty("--crown-morning-at");
+        if (el.getAttribute("class") === "") { el.removeAttribute("class"); }
+      });
+      if (path) {
+        path.classList.add("crown-evening");
+        if (morningAt !== undefined) { path.style.setProperty("--crown-morning-at", String(Math.round(morningAt))); }
+      }
     }
     // The stars' leaf is the night's: at dawn it must not take the day's
     // tokens when the theme turns under them.
@@ -4198,6 +4276,7 @@ function plainClickOpensHere(e, link) {
       g.units.forEach(function (el, i) { el.classList.add("crown-u" + (i + 1)); });
       g.rows.forEach(function (el, i) { el.classList.add("crown-r" + (i + 1)); });
       setTurns(g.stars, g.turns, 0);
+      mark(g.evening, g.morningAt);
       crossLooks(p, g);
       // The stars' leaf is the night's: at dawn it must not take the day's
       // tokens when the theme turns under them.
@@ -4211,8 +4290,10 @@ function plainClickOpensHere(e, link) {
           return;
         }
         g.stars = readStars();
-        var clock = dir === "dusk" ? (p.ready ? (performance.now() - p.ready) / p.k : 0) : (performance.now() - p.t0) / p.k;
+        var clock = p.ready ? (performance.now() - p.ready) / p.k : 0;
+        mark(null);
         setTurns(g.stars, g.starTurns(g.stars), clock);
+        mark(g.evening, g.morningAt === undefined ? undefined : g.morningAt - clock);
         if (dir === "dawn") {
           pinStars();
         }
