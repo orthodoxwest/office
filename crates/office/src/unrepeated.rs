@@ -7,12 +7,14 @@
 //! (General Rubrics XXIV.8).
 
 use corpus::lines::{PsalmItem, parse_psalm};
-use liturgy::{ElementType, OfficeHour, Unrepeated, antiphon_announcement, split_words};
+use liturgy::{ElementType, Unrepeated, antiphon_announcement, split_words};
+
+use crate::finish::Announced;
 
 /// Marks the psalms and canticles whose opening words their antiphon has just
-/// said. Runs after antiphons are marked announced.
-pub fn mark_unrepeated_openings(hour: &mut OfficeHour) {
-    for section in &mut hour.sections {
+/// said, once the antiphons said only begun are known.
+pub fn mark_unrepeated_openings(announced: &mut Announced) {
+    for section in &mut announced.hour_mut().sections {
         for i in 1..section.elements.len() {
             let (before, after) = section.elements.split_at_mut(i);
             let (antiphon, psalm) = (&before[i - 1], &mut after[0]);
