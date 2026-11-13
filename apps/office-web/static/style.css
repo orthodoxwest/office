@@ -9239,6 +9239,13 @@ body.rank-first-class .home-crown {
     display: none;
   }
 
+  /* With the pool hidden, the hour that is now keeps a mark of its own. */
+  .about-hour.is-current dt a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
   /* The niche's reveal, arris and gilt fillet are light and leaf, which
      forced colours would leave as stray bands round the system's frame. */
   .page-home .home-arch::after,
