@@ -218,7 +218,7 @@ private fun LinkedText(runs: List<AboutRunView>, style: TextStyle, onLink: (Stri
 }
 
 /** A period's ornament, by the label the core gives it. */
-private fun periodOf(label: String): Period = when (label.lowercase()) {
+internal fun periodOf(label: String): Period = when (label.lowercase()) {
     "morning" -> Period.MORNING
     "day" -> Period.DAY
     else -> Period.EVENING

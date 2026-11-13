@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}Daily Office — Reminders{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+{% extends "layout.html" %}{% block title %}Daily Office — Reminders{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
 <div class="reminders">
   {{ headpiece() }}
   <h1>Set prayer reminders</h1>
@@ -11,23 +11,33 @@
   <form id="reminders-form">
     <fieldset class="reminder-hours">
       <legend>Hours</legend>
-      {% for h in hours %}
-      <div class="reminder-hour-row{% if h.checked %} is-selected{% endif %}" data-reminder-hour="{{ h.slug }}">
-        <label class="reminder-hour-name">
-          <input type="checkbox" name="hour" value="{{ h.slug }}"{% if h.checked %} checked{% endif %}>
-          {{ h.name }}
-        </label>
-        <input type="time" name="time-{{ h.slug }}" value="{{ h.default }}" aria-label="Time for {{ h.name }}"{% if not h.checked %} disabled{% endif %}>
+      {# The hours in home's three periods, each under its painted sun or moon. #}
+      {% for period in periods %}
+      <div class="reminder-period" role="group" aria-label="{{ period.label }}">
+        <p class="reminder-period-label" aria-hidden="true">{{ period_ornament(period.key) }}<span>{{ period.label }}</span></p>
+        <div class="reminder-period-hours">
+          {% for h in period.hours %}
+          <div class="reminder-hour-row{% if h.checked %} is-selected{% endif %}" data-reminder-hour="{{ h.slug }}">
+            <label class="reminder-hour-name">
+              <input type="checkbox" name="hour" value="{{ h.slug }}"{% if h.checked %} checked{% endif %}>
+              {{ h.name }}
+            </label>
+            {# An unchosen hour's greyed time lets a tap through to the row, which chooses the hour (app.js). #}
+            <span class="reminder-time"><input type="time" name="time-{{ h.slug }}" value="{{ h.default }}" aria-label="Time for {{ h.name }}"{% if not h.checked %} disabled{% endif %}></span>
+          </div>
+          {% endfor %}
+        </div>
       </div>
       {% endfor %}
     </fieldset>
 
+    {# One ruled week, Sunday in red as every calendar in the app sets it. #}
     <fieldset class="reminder-days">
       <legend>Days</legend>
       {% for day in days %}
-      <label class="reminder-day">
+      <label class="reminder-day{% if day.slug == "sun" %} is-sunday{% endif %}">
         <input type="checkbox" name="day" value="{{ day.slug }}" checked>
-        {{ day.name }}
+        <span class="reminder-day-name">{{ day.name }}</span>
       </label>
       {% endfor %}
     </fieldset>
@@ -45,16 +55,23 @@
     </fieldset>
   </form>
 
+  {# The rule, written out: what the choices above ask for, in one sentence (presentation::reminders).
+     The server sets the defaults; app.js rewrites it from the words below on every change. #}
+  <p class="reminder-rule{% if rule[0].key == "empty" %} is-empty{% endif %}" id="reminder-rule" aria-live="polite" aria-atomic="true">{% for p in rule %}<span data-key="{{ p.key }}">{{ p.text }}</span>{% endfor %}</p>
+  <script type="application/json" id="reminder-rule-words">{{ rule_words|safe }}</script>
+
   <div class="reminder-result">
     <h2>Your calendar link</h2>
     <p class="reminder-links">
       <a id="reminder-webcal" class="reminder-subscribe" href="#">Subscribe in calendar app</a>
-      <button type="button" id="reminder-copy" class="reminder-copy">Copy link</button>
-      <span id="reminder-copied" role="status" aria-live="polite" hidden>Copied.</span>
+      {# "Copied" takes the link's place for a moment; the wider of the two words holds its width. #}
+      <button type="button" id="reminder-copy" class="reminder-copy"><span class="reminder-copy-words">Copy link</span><span class="reminder-copy-done" aria-hidden="true">Copied</span></button>
     </p>
+    <p id="reminder-copied" class="sr-only" role="status" aria-live="polite"></p>
+    <p id="reminder-copy-note" class="reminder-copy-note" hidden></p>
     <details class="reminder-address">
       <summary>View calendar address</summary>
-      <p><code id="reminder-url" class="reminder-url"></code></p>
+      <p id="reminder-url" class="reminder-url"></p>
     </details>
   </div>
 

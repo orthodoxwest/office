@@ -289,6 +289,28 @@ fn reminders_can_follow_the_sun() {
 }
 
 #[test]
+fn the_reminder_rule_is_written_out_from_the_apps_choices() {
+    let at = |hour: &str, time: &str| RuleHourChoice { hour: hour.into(), time: time.into(), by_sun: false };
+    let text = |p: Vec<RulePhraseView>| p.into_iter().map(|p| p.text).collect::<String>();
+    // Sunday first, as the engine counts the week: Monday to Friday.
+    let weekdays = vec![false, true, true, true, true, true, false];
+    assert_eq!(
+        text(reminder_rule(vec![at("lauds", "6:45 AM"), at("vespers", "6:00 PM")], weekdays, 10)),
+        "Lauds at 6:45 AM and Vespers at 6:00 PM, on weekdays, ten minutes before."
+    );
+    let sunny =
+        vec![RuleHourChoice { by_sun: true, ..at("vespers", "6:00 PM") }, RuleHourChoice { by_sun: true, ..at("compline", "9:00 PM") }];
+    assert_eq!(text(reminder_rule(sunny, vec![true; 7], 0)), "Vespers at sunset and Compline at 9:00 PM, every day, at the hour.");
+    assert_eq!(text(reminder_rule(vec![], vec![true; 7], 10)), "No hour is chosen yet.");
+    assert_eq!(
+        reminder_next("vespers".into(), civil(2026, 11, 13), civil(2026, 11, 14), "5:50 PM".into()),
+        "Next: Vespers, tomorrow at 5:50 PM."
+    );
+    let periods: Vec<(String, usize)> = reminder_periods().into_iter().map(|p| (p.label, p.hours.len())).collect();
+    assert_eq!(periods, [("Morning".to_string(), 2), ("Day".to_string(), 3), ("Evening".to_string(), 2)]);
+}
+
+#[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
     let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None);

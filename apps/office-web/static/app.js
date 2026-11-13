@@ -521,7 +521,7 @@ function plainClickOpensHere(e, link) {
   // matching pre-paint script in layout.html applies the choice before CSS.
   // Only explicit button clicks write storage — passive load never invents a choice.
   var THEME_KEY = "office-theme";
-  var THEME_LIGHT_COLOR = "#fdf1e6";
+  var THEME_LIGHT_COLOR = "#faf3e9";
   var THEME_DARK_COLOR = "#121c28";
 
   var readStoredTheme = function () {
@@ -1294,13 +1294,79 @@ function plainClickOpensHere(e, link) {
   var calendarExpand = document.querySelector(".calendar-expand");
   if (calendarExpand) {
     calendarExpand.hidden = false;
+    // Thirty days unfolding together is a page in turmoil: the month fades
+    // out, every day opens or closes at once, and the month fades back in,
+    // as the apps' ordo does (Chrome.kt's MONTH_OUT_MS and MONTH_IN_MS).
+    // Without motion, or before the page has settled, the days simply change.
+    var turnAll = null;
     calendarExpand.addEventListener("click", function () {
+      // Pressed again mid-turn: the first turn lands at once, and this one
+      // starts from it.
+      if (turnAll) {
+        turnAll();
+      }
       var expand = calendarExpand.getAttribute("aria-pressed") !== "true";
-      document.querySelectorAll(".day-disclosures details").forEach(function (item) {
-        item.open = expand;
-      });
-      calendarExpand.setAttribute("aria-pressed", String(expand));
-      calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      var months = Array.prototype.slice.call(document.querySelectorAll(".month-table"));
+      var animated = months.length > 0 && typeof months[0].animate === "function" &&
+        document.documentElement.classList.contains("motion-ready") &&
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+      // The days change with their transitions held off (style.css,
+      // .is-turning-all) until the month has faded back in.
+      function change() {
+        document.querySelectorAll(".day-disclosures details").forEach(function (item) {
+          // A day folding on its own lands first, or its fold would undo this.
+          if (item.stopFold) {
+            item.stopFold();
+          }
+          item.open = expand;
+        });
+        calendarExpand.setAttribute("aria-pressed", String(expand));
+        calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
+      }
+      if (!animated) {
+        change();
+        return;
+      }
+      var changed = false;
+      var fades = [];
+      var timer = 0;
+      function fade(from, to, options) {
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+        fades = months.map(function (month) {
+          return month.animate([{ opacity: from }, { opacity: to }], options);
+        });
+        return fades[0].finished;
+      }
+      function end() {
+        if (!changed) {
+          changed = true;
+          change();
+        }
+        document.documentElement.classList.remove("is-turning-all");
+        turnAll = null;
+        window.clearTimeout(timer);
+        fades.forEach(function (f) {
+          f.cancel();
+        });
+      }
+      turnAll = end;
+      document.documentElement.classList.add("is-turning-all");
+      // The fades' 210ms and a little over: a hidden tab may never finish them.
+      timer = window.setTimeout(end, 400);
+      fade(1, 0, { duration: 70, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }).then(function () {
+        if (turnAll !== end) {
+          return;
+        }
+        changed = true;
+        change();
+        return fade(0, 1, { duration: 140, easing: "cubic-bezier(0, 0, 0.2, 1)" }).then(function () {
+          if (turnAll === end) {
+            end();
+          }
+        });
+      }).catch(function () {});
     });
   }
 
@@ -1316,6 +1382,161 @@ function plainClickOpensHere(e, link) {
     });
   } else {
     markMotionReady();
+  }
+
+  // Where the browser cannot ease a height to auto (no interpolate-size:
+  // Safari, Firefox), the disclosures' unfold of style.css is turned here
+  // instead, so they unfold on every browser as in the apps: the height over
+  // 260ms on the standard curve and the contents fading in over 200ms after
+  // 60; folding, 200ms and the contents out over 100ms, the disclosure held
+  // open, marked .is-folding, until it has folded. Heard on the disclosure,
+  // after the summary's own listeners (the prayers' kept choice reads the
+  // state before the toggle), and never for a click another listener has
+  // taken (home's "Change date" turns its stage itself). An hour's date in
+  // the header turns it through details.turnFold, and the ordo's "Show office
+  // details" lands a fold mid-turn through details.stopFold before it changes
+  // the day. Without motion it is the native toggle.
+  var easesToAuto = window.CSS && typeof CSS.supports === "function" && CSS.supports("interpolate-size", "allow-keywords");
+  if (!easesToAuto && window.matchMedia && typeof document.documentElement.animate === "function") {
+    var foldStillness = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    var STANDARD = "cubic-bezier(0.4, 0, 0.2, 1)";
+    var folds = new WeakMap();
+    // A box's height and edges as they stand, and folded away.
+    var EDGES = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth", "marginTop", "marginBottom"];
+    var tall = function (box) {
+      return { height: box.getBoundingClientRect().height + "px" };
+    };
+    var edges = function (box) {
+      var style = window.getComputedStyle(box);
+      var at = tall(box);
+      EDGES.forEach(function (edge) {
+        at[edge] = style[edge];
+      });
+      return at;
+    };
+    var folded = function () {
+      var at = { height: "0px" };
+      EDGES.forEach(function (edge) {
+        at[edge] = "0px";
+      });
+      return at;
+    };
+    document.querySelectorAll("details.hour-date-nav, details.session-prayers, details.day-office-details, details.reminder-address, details.reminder-help").forEach(function (details) {
+      var summary = details.querySelector(":scope > summary");
+      if (!summary) {
+        return;
+      }
+      details.stopFold = function () {
+        var running = folds.get(details);
+        if (running) {
+          running.stop();
+        }
+      };
+      // Opens or closes the disclosure on the fold; false where it is left
+      // to the native toggle.
+      details.turnFold = function () {
+        if (!document.documentElement.classList.contains("motion-ready") || !foldStillness.matches) {
+          return false;
+        }
+        var running = folds.get(details);
+        var opening = running ? !running.opening : !details.open;
+        var contents = Array.prototype.filter.call(details.children, function (child) {
+          return child !== summary;
+        });
+        // Where the disclosure gives its parts to the hour's controls grid
+        // (display: contents, style.css) it has no box to fold, and WebKit
+        // does not animate its ::details-content: its parts fold instead.
+        var unboxed = window.getComputedStyle(details).display === "contents";
+        var boxes = unboxed ? contents : [details];
+        if (boxes.length === 0) {
+          return false;
+        }
+        var measure = unboxed ? edges : tall;
+        var from = boxes.map(measure);
+        if (running) {
+          running.stop();
+        }
+        var to;
+        if (opening) {
+          details.open = true;
+          to = boxes.map(measure);
+          if (unboxed && !running) {
+            from = boxes.map(folded);
+          }
+        } else if (unboxed) {
+          to = boxes.map(folded);
+        } else {
+          // Folded, the disclosure is its summary and its own edges: measured
+          // with the contents set aside.
+          var kept = contents.map(function (child) {
+            var display = [child.style.getPropertyValue("display"), child.style.getPropertyPriority("display")];
+            child.style.setProperty("display", "none", "important");
+            return display;
+          });
+          to = [tall(details)];
+          contents.forEach(function (child, i) {
+            if (kept[i][0]) {
+              child.style.setProperty("display", kept[i][0], kept[i][1]);
+            } else {
+              child.style.removeProperty("display");
+            }
+          });
+        }
+        boxes.forEach(function (box) {
+          box.style.boxSizing = "border-box";
+          box.style.overflow = "hidden";
+          box.style.overflow = "clip";
+        });
+        details.classList.toggle("is-folding", !opening);
+        var duration = opening ? 260 : 200;
+        var turns = boxes.map(function (box, i) {
+          return box.animate([from[i], to[i]], { duration: duration, easing: STANDARD });
+        });
+        contents.forEach(function (child) {
+          turns.push(opening ?
+            child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: "cubic-bezier(0, 0, 0.2, 1)", fill: "backwards" }) :
+            child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }));
+        });
+        var timer = 0;
+        var fold = {
+          opening: opening,
+          stop: function () {
+            folds.delete(details);
+            window.clearTimeout(timer);
+            turns.forEach(function (turn) {
+              turn.cancel();
+            });
+            details.classList.remove("is-folding");
+            boxes.forEach(function (box) {
+              box.style.removeProperty("box-sizing");
+              box.style.removeProperty("overflow");
+            });
+          },
+        };
+        function land() {
+          if (folds.get(details) !== fold) {
+            return;
+          }
+          fold.stop();
+          if (!opening) {
+            details.open = false;
+          }
+        }
+        folds.set(details, fold);
+        // A hidden tab may never finish the turn.
+        timer = window.setTimeout(land, duration + 150);
+        turns[0].finished.then(land, function () {});
+        return true;
+      };
+      details.addEventListener("click", function (event) {
+        if (event.defaultPrevented || !(event.target instanceof Element) || event.target.closest("summary") !== summary) {
+          return;
+        }
+        if (details.turnFold()) {
+          event.preventDefault();
+        }
+      });
+    });
   }
 
   // Registered after load: on a first visit the worker's install fetches the
@@ -1381,7 +1602,19 @@ function plainClickOpensHere(e, link) {
     var webcalEl = document.getElementById("reminder-webcal");
     var copyBtn = document.getElementById("reminder-copy");
     var copiedEl = document.getElementById("reminder-copied");
+    var copyNoteEl = document.getElementById("reminder-copy-note");
     var addressEl = document.querySelector(".reminder-address");
+    var ruleEl = document.getElementById("reminder-rule");
+    var ruleWords = {};
+    try {
+      ruleWords = JSON.parse(document.getElementById("reminder-rule-words").textContent);
+    } catch {
+      ruleWords = null;
+    }
+    var stillRule = function () {
+      return !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    };
+    var feedAddress = "";
 
     var buildFeedURL = function () {
       var params = [];
@@ -1410,6 +1643,174 @@ function plainClickOpensHere(e, link) {
       return location.host + "/office.ics?" + params.join("&");
     };
 
+    // The rule, written out (presentation::reminders, whose tests give the sentences): the
+    // hours in the day's order with an Oxford comma from three, the days, how long before.
+    var ruleJoint = function (i, n) {
+      if (i === n - 1) {
+        return "";
+      }
+      if (n === 2) {
+        return " " + ruleWords.and + " ";
+      }
+      return i === n - 2 ? ", " + ruleWords.and + " " : ", ";
+    };
+    var ruleList = function (items) {
+      return items.map(function (item, i) {
+        return item + ruleJoint(i, items.length);
+      }).join("");
+    };
+    var ruleDays = function (days) {
+      var chosen = [];
+      var left = [];
+      days.forEach(function (on, i) {
+        (on ? chosen : left).push(ruleWords.days[i]);
+      });
+      if (chosen.length === 0) {
+        return null;
+      }
+      if (chosen.length === 7) {
+        return ruleWords.everyDay;
+      }
+      if (days.join() === "true,true,true,true,true,false,false") {
+        return ruleWords.weekdays;
+      }
+      return chosen.length <= 3 ? ruleWords.on + " " + ruleList(chosen) : ruleWords.except + " " + ruleList(left);
+    };
+    // A time in the reader's own clock ("6:45 AM"), held to its figures by a no-break space.
+    var ruleClock = (function () {
+      var format = null;
+      try {
+        format = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+      } catch {
+        format = null;
+      }
+      return function (value) {
+        var parts = value.split(":");
+        if (!format || parts.length < 2) {
+          return value;
+        }
+        return format.format(new Date(2026, 0, 1, Number(parts[0]), Number(parts[1]))).replace(/[\s\u202f]+(?=\D+$)/, "\u00a0");
+      };
+    })();
+    var rulePhrases = function (invalidTime) {
+      var hours = [];
+      remindersForm.querySelectorAll("input[name=hour]:checked").forEach(function (cb) {
+        var t = remindersForm.querySelector("input[name=time-" + cb.value + "]");
+        hours.push({ slug: cb.value, time: t && t.value ? ruleClock(t.value) : "" });
+      });
+      var days = Array.from(remindersForm.querySelectorAll("input[name=day]")).map(function (cb) {
+        return cb.checked;
+      });
+      var daysPhrase = ruleDays(days);
+      if (hours.length === 0 || daysPhrase === null) {
+        var empty = hours.length > 0 ? ruleWords.noDay : days.indexOf(true) >= 0 ? ruleWords.noHour : ruleWords.noHourOrDay;
+        return [{ key: "empty", text: empty }];
+      }
+      if (invalidTime) {
+        return [{ key: "empty", text: ruleWords.noTime }];
+      }
+      var out = [];
+      hours.forEach(function (h, i) {
+        out.push({ key: h.slug, text: ruleWords.hours[h.slug] });
+        out.push({ key: h.slug + "-time", text: " " + ruleWords.at + " " + h.time });
+        var joint = ruleJoint(i, hours.length);
+        if (joint) {
+          out.push({ key: h.slug + "-joint", text: joint });
+        }
+      });
+      var alarm = remindersForm.querySelector("select[name=alarm]").value;
+      out.push({ key: "days", text: ", " + daysPhrase });
+      out.push({ key: "lead", text: ", " + (ruleWords.leads[alarm] || alarm + " minutes before") + "." });
+      return out;
+    };
+    // Only the phrases whose words changed cross-fade: out in 90ms, in over 180ms after a beat.
+    // The rule is a polite, atomic live region, so every change to its words lands in one
+    // moment (after the beat) and is read once, whole, rather than phrase by phrase.
+    var ruleTimer = 0;
+    var paintRule = function (phrases, quiet) {
+      if (!ruleEl) {
+        return;
+      }
+      var spans = function () {
+        var kept = {};
+        ruleEl.querySelectorAll("span[data-key]").forEach(function (span) {
+          kept[span.dataset.key] = span;
+        });
+        return kept;
+      };
+      var still = quiet || stillRule();
+      var apply = function () {
+        var kept = spans();
+        var prev = null;
+        ruleEl.classList.toggle("is-empty", phrases[0].key === "empty");
+        phrases.forEach(function (p) {
+          var span = kept[p.key];
+          delete kept[p.key];
+          if (!span) {
+            span = document.createElement("span");
+            span.dataset.key = p.key;
+            span.textContent = p.text;
+            if (!still) {
+              span.classList.add("is-out");
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                  span.classList.remove("is-out");
+                });
+              });
+            }
+          } else {
+            if (span.textContent !== p.text) {
+              span.textContent = p.text;
+            }
+            span.classList.remove("is-out");
+          }
+          // Moved only where it is out of place, so an unchanged phrase is left alone.
+          var at = prev ? prev.nextSibling : ruleEl.firstChild;
+          if (at !== span) {
+            ruleEl.insertBefore(span, at);
+          }
+          prev = span;
+        });
+        Object.keys(kept).forEach(function (key) {
+          kept[key].remove();
+        });
+      };
+      window.clearTimeout(ruleTimer);
+      if (still) {
+        apply();
+        return;
+      }
+      // What will change or go fades out now; the new words come in together after the beat.
+      var wanted = {};
+      phrases.forEach(function (p) {
+        wanted[p.key] = p.text;
+      });
+      var kept = spans();
+      var same = Object.keys(kept).length === phrases.length;
+      Object.keys(kept).forEach(function (key) {
+        if (wanted[key] !== kept[key].textContent) {
+          kept[key].classList.add("is-out");
+          same = false;
+        }
+      });
+      if (same) {
+        apply();
+        return;
+      }
+      ruleTimer = window.setTimeout(apply, 150);
+    };
+
+    // The calendar address, breakable after its slashes and joints rather than anywhere.
+    var setAddress = function (text) {
+      urlEl.textContent = "";
+      text.replace(/([/?&])/g, "$1\n").split("\n").forEach(function (piece, i) {
+        if (i > 0) {
+          urlEl.appendChild(document.createElement("wbr"));
+        }
+        urlEl.appendChild(document.createTextNode(piece));
+      });
+    };
+
     var syncReminderHourRows = function () {
       remindersForm.querySelectorAll(".reminder-hour-row").forEach(function (row) {
         var checkbox = row.querySelector('input[name="hour"]');
@@ -1421,9 +1822,20 @@ function plainClickOpensHere(e, link) {
           time.required = selected;
         }
       });
+      remindersForm.querySelectorAll(".reminder-day").forEach(function (day) {
+        var checkbox = day.querySelector("input");
+        day.classList.toggle("is-selected", Boolean(checkbox && checkbox.checked));
+      });
     };
 
-    var update = function () {
+    var copiedTimer = 0;
+    var settleCopied = function () {
+      window.clearTimeout(copiedTimer);
+      copyBtn.classList.remove("is-copied");
+      copiedEl.textContent = "";
+    };
+
+    var update = function (quiet) {
       syncReminderHourRows();
       var selectedHours = remindersForm.querySelectorAll("input[name=hour]:checked");
       var selectedDays = remindersForm.querySelectorAll("input[name=day]:checked");
@@ -1431,33 +1843,37 @@ function plainClickOpensHere(e, link) {
         var time = remindersForm.querySelector("input[name=time-" + checkbox.value + "]");
         return !time || !time.validity.valid;
       });
-      var message = "";
-      if (selectedHours.length === 0) {
-        message = "Select at least one hour above.";
-      } else if (invalidTime) {
-        message = "Choose a time for each selected hour.";
-      } else if (selectedDays.length === 0) {
-        message = "Select at least one day above.";
-      }
-      var valid = message === "";
-      var feed = valid ? buildFeedURL() : "";
-      urlEl.textContent = valid ? "https://" + feed : message;
+      var valid = selectedHours.length > 0 && selectedDays.length > 0 && !invalidTime;
+      var phrases = ruleWords ? rulePhrases(invalidTime) : [{ key: "empty", text: "" }];
+      paintRule(phrases, quiet === true);
+      feedAddress = valid ? "https://" + buildFeedURL() : "";
+      setAddress(valid ? feedAddress : phrases[0].text);
       webcalEl.classList.toggle("is-disabled", !valid);
       webcalEl.setAttribute("aria-disabled", valid ? "false" : "true");
       if (!valid) {
         webcalEl.removeAttribute("href");
         webcalEl.setAttribute("tabindex", "-1");
       } else {
-        webcalEl.href = "webcal://" + feed;
+        webcalEl.href = "webcal://" + feedAddress.slice("https://".length);
         webcalEl.removeAttribute("tabindex");
       }
       copyBtn.disabled = !valid;
-      copiedEl.textContent = valid ? "Copied." : message;
-      copiedEl.hidden = valid;
+      settleCopied();
+      copyNoteEl.hidden = true;
     };
 
     remindersForm.addEventListener("change", update);
-    update();
+    // A tap on an unchosen hour's greyed time chooses the hour (the field lets the tap through).
+    remindersForm.addEventListener("click", function (event) {
+      var cell = event.target.closest && event.target.closest(".reminder-time");
+      var checkbox = cell && cell.closest(".reminder-hour-row").querySelector('input[name="hour"]');
+      if (!checkbox || checkbox.checked) {
+        return;
+      }
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    update(true);
 
     webcalEl.addEventListener("click", function (event) {
       if (webcalEl.getAttribute("aria-disabled") === "true") {
@@ -1472,8 +1888,8 @@ function plainClickOpensHere(e, link) {
         return;
       }
       var showCopyFallback = function () {
-        copiedEl.textContent = "Copy unavailable. The calendar address is shown below.";
-        copiedEl.hidden = false;
+        copyNoteEl.textContent = "Copy unavailable. The calendar address is shown below.";
+        copyNoteEl.hidden = false;
         if (addressEl) {
           addressEl.open = true;
         }
@@ -1482,9 +1898,12 @@ function plainClickOpensHere(e, link) {
         showCopyFallback();
         return;
       }
-      navigator.clipboard.writeText(urlEl.textContent).then(function () {
+      navigator.clipboard.writeText(feedAddress).then(function () {
+        // The link's own words say so for a moment, and nothing beside it moves.
+        settleCopied();
+        copyBtn.classList.add("is-copied");
         copiedEl.textContent = "Copied.";
-        copiedEl.hidden = false;
+        copiedTimer = window.setTimeout(settleCopied, 2400);
         reportUsageAction("reminders");
       }).catch(showCopyFallback);
     });
@@ -1925,8 +2344,11 @@ function plainClickOpensHere(e, link) {
     var sync = function () {
       button.setAttribute("aria-expanded", details.open ? "true" : "false");
     };
+    // On the disclosures' fold where script turns it (app.js, turnFold).
     button.addEventListener("click", function () {
-      details.open = !details.open;
+      if (!(details.turnFold && details.turnFold())) {
+        details.open = !details.open;
+      }
     });
     details.addEventListener("toggle", sync);
     sync();
@@ -3090,8 +3512,9 @@ function plainClickOpensHere(e, link) {
     if (!summary) return;
     summary.addEventListener("click", function () {
       // The summary's own toggle follows this listener, so the choice is the
-      // state it will leave.
-      var open = !details.open;
+      // state it will leave; one still folding shut (app.js's fold, where
+      // the browser cannot ease to auto) is open, and this opens it again.
+      var open = details.classList.contains("is-folding") || !details.open;
       try {
         var chosen = JSON.parse(localStorage.getItem(PRAYERS_KEY) || "{}");
         if (!chosen || typeof chosen !== "object" || Array.isArray(chosen)) chosen = {};

@@ -155,20 +155,25 @@ object ReminderScheduler {
         return last - now.toInstant().toEpochMilli() < REFILL.toMillis()
     }
 
+    /** The reminders due from `now` over the window, as the alarms are set: the page's "Next:" line reads the first. */
+    fun plan(settings: ReminderSettings, now: ZonedDateTime): List<Alarm> {
+        if (!settings.on) return emptyList()
+        val zone: ZoneId = now.zone
+        val chosen = settings.hours.filter { it.chosen }.map { ReminderChoice(it.hour, it.time.hour, it.time.minute) }
+        if (chosen.isEmpty() || settings.days.isEmpty()) return emptyList()
+        val from = now.toLocalDate()
+        return Office.core.reminders(from.toCivil(), HORIZON_DAYS, chosen, settings.weekdays, settings.sunPlace(from, HORIZON_DAYS, zone)).mapNotNull { r ->
+            val office = LocalDate.of(r.date.year, r.date.month, r.date.day).atTime(r.hourOfDay, r.minute).atZone(zone)
+            val at = office.minusMinutes(settings.lead.toLong())
+            if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary)
+        }
+    }
+
     fun sync(context: Context, now: ZonedDateTime = ZonedDateTime.now()) {
         val settings = ReminderStore(context).load()
         val alarms = context.getSystemService(AlarmManager::class.java)
         val state = context.getSharedPreferences("reminders", Context.MODE_PRIVATE)
-        val zone: ZoneId = now.zone
-        val wanted = if (!settings.on) emptyList() else {
-            val chosen = settings.hours.filter { it.chosen }.map { ReminderChoice(it.hour, it.time.hour, it.time.minute) }
-            val from = now.toLocalDate()
-            Office.core.reminders(from.toCivil(), HORIZON_DAYS, chosen, settings.weekdays, settings.sunPlace(from, HORIZON_DAYS, zone)).mapNotNull { r ->
-                val office = LocalDate.of(r.date.year, r.date.month, r.date.day).atTime(r.hourOfDay, r.minute).atZone(zone)
-                val at = office.minusMinutes(settings.lead.toLong())
-                if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary)
-            }
-        }
+        val wanted = plan(settings, now)
         for (a in wanted) set(alarms, a.at.toInstant().toEpochMilli(), a.pendingIntent(context))
         val codes = wanted.map { it.code }.toSet()
         state.getStringSet(SCHEDULED, emptySet())!!.mapNotNull { it.toIntOrNull() }.filter { it !in codes }.forEach { code ->

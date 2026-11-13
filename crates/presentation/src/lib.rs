@@ -7,6 +7,7 @@
 pub mod about;
 pub mod feast;
 pub mod gloss;
+pub mod reminders;
 pub mod sun;
 pub mod usage;
 
