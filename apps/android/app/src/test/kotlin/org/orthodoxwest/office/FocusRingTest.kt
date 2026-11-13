@@ -1,5 +1,6 @@
 package org.orthodoxwest.office
 
+import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.FocusInteraction
@@ -38,12 +39,18 @@ class FocusRingTest {
     val compose = createComposeRule()
 
     @Test
-    fun aControlReachedByKeyboardWearsTheGoldRing() {
+    fun aControlReachedByKeyboardWearsTheGoldRing() = wearsTheRing(Dim)
+
+    /** A row that takes the light under the finger wears the same ring. */
+    @Test
+    fun aLitRowReachedByKeyboardWearsTheGoldRing() = wearsTheRing(Lit(homeInk(Nave).nowPool))
+
+    private fun wearsTheRing(indication: IndicationNodeFactory) {
         val source = MutableInteractionSource()
         compose.setContent {
             CompositionLocalProvider(LocalPalette provides Nave) {
                 Box(Modifier.size(120.dp).background(Nave.bg).testTag("wall"), contentAlignment = Alignment.Center) {
-                    Box(Modifier.size(40.dp).indication(source, Dim))
+                    Box(Modifier.size(40.dp).indication(source, indication))
                 }
             }
         }

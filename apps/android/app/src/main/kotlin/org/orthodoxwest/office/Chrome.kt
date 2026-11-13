@@ -239,20 +239,24 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
             drawContent()
             drawContext.canvas.restore()
         }
-        if (focused) {
-            // The web's ring (`:focus-visible`): a 2px line 3px off the control, square, here in
-            // the gold of the app's functional marks (the web's home and date link wear gold).
-            // Drawn in place, as the web's appears.
-            val width = FOCUS_RING.toPx()
-            val gap = FOCUS_GAP.toPx() + width / 2f
-            drawRect(
-                currentValueOf(LocalPalette).gold,
-                topLeft = Offset(-gap, -gap),
-                size = Size(size.width + 2 * gap, size.height + 2 * gap),
-                style = Stroke(width),
-            )
-        }
+        if (focused) focusRing(currentValueOf(LocalPalette).gold)
     }
+}
+
+/**
+ * The web's ring (`:focus-visible`): a 2px line 3px off the control, square, here in the gold of
+ * the app's functional marks (the web's home and date link wear gold). Drawn in place, as the
+ * web's appears. [Dim] and [Lit] both wear it.
+ */
+private fun DrawScope.focusRing(gold: Color) {
+    val width = FOCUS_RING.toPx()
+    val gap = FOCUS_GAP.toPx() + width / 2f
+    drawRect(
+        gold,
+        topLeft = Offset(-gap, -gap),
+        size = Size(size.width + 2 * gap, size.height + 2 * gap),
+        style = Stroke(width),
+    )
 }
 
 /**
@@ -287,9 +291,7 @@ fun DrawScope.poolOfLight(color: Color, shape: PoolShape, alpha: Float = 1f) {
     val r = w / 2f
     val c = Offset(cx, size.height / 2f)
     val pool = color.copy(alpha = color.alpha * alpha)
-    scale(1f, h / w, pivot = c) {
-        drawCircle(Brush.radialGradient(0f to pool, 0.52f to pool.copy(alpha = pool.alpha * 0.55f), 1f to Color.Transparent, center = c, radius = r), r, c)
-    }
+    scale(1f, h / w, pivot = c) { drawCircle(poolBrush(pool, c, r), r, c) }
 }
 
 /**
@@ -298,24 +300,39 @@ fun DrawScope.poolOfLight(color: Color, shape: PoolShape, alpha: Float = 1f) {
  * pool that marks the hour that is now, at once, and lets it go over Tempo's touch; nothing scales.
  * [strength] is how much of the pool a press shows (home's hours take 70% by day; the moonlit pool
  * is faint by night). The hour that is now is lit already ([current]): a press deepens its pool by
- * half again and its words withdraw to 70% (the web's `.home-hour-link.is-current:active`).
+ * half again and its words withdraw to 70% (the web's `.home-hour-link.is-current:active`). A row
+ * reached by keyboard or D-pad wears the focus ring, as [Dim]'s controls do.
  */
 data class Lit(val pool: Color, val shape: PoolShape = PoolShape(), val strength: Float = 1f, val current: Boolean = false) : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = LitNode(interactionSource, this)
 }
 
-private class LitNode(private val source: InteractionSource, private val lit: Lit) : Modifier.Node(), DrawModifierNode {
+private class LitNode(private val source: InteractionSource, private val lit: Lit) : Modifier.Node(), DrawModifierNode, CompositionLocalConsumerModifierNode {
     private val held = Animatable(0f)
     private val layer = Paint()
+    /** Whether the row has the focus, and so wears the ring. */
+    private var focused by mutableStateOf(false)
 
     override fun onAttach() {
-        coroutineScope.launch {
+        // Undispatched, as [Dim]'s, so the first focus is heard.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             val presses = mutableListOf<PressInteraction.Press>()
+            val focuses = mutableListOf<FocusInteraction.Focus>()
             source.interactions.collect { interaction ->
                 when (interaction) {
                     is PressInteraction.Press -> presses.add(interaction)
                     is PressInteraction.Release -> presses.remove(interaction.press)
                     is PressInteraction.Cancel -> presses.remove(interaction.press)
+                    is FocusInteraction.Focus -> {
+                        focuses.add(interaction)
+                        focused = true
+                        return@collect
+                    }
+                    is FocusInteraction.Unfocus -> {
+                        focuses.remove(interaction.focus)
+                        focused = focuses.isNotEmpty()
+                        return@collect
+                    }
                 }
                 if (presses.isEmpty()) {
                     launch { held.animateTo(0f, Tempo.touchOut.spec()) }
@@ -328,13 +345,16 @@ private class LitNode(private val source: InteractionSource, private val lit: Li
 
     override fun ContentDrawScope.draw() {
         val h = held.value
-        if (h <= 0f) return drawContent()
         poolOfLight(lit.pool, lit.shape, h * if (lit.current) 0.5f else lit.strength)
-        if (!lit.current) return drawContent()
-        layer.alpha = 1f - 0.3f * h
-        drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
-        drawContent()
-        drawContext.canvas.restore()
+        if (h > 0f && lit.current) {
+            layer.alpha = 1f - 0.3f * h
+            drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+            drawContent()
+            drawContext.canvas.restore()
+        } else {
+            drawContent()
+        }
+        if (focused) focusRing(currentValueOf(LocalPalette).gold)
     }
 }
 
