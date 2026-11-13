@@ -2839,6 +2839,9 @@ function plainClickOpensHere(e, link) {
   // Whether a click on el leaves for another of the site's pages.
   function leaves(e, el) {
     if (el.matches("tr.day")) {
+      // The day's own link, opened in a new tab or window, leaves the row here.
+      var own = e.target.closest("a[href]");
+      if (own && !plainClickOpensHere(e, own)) return false;
       var selection = window.getSelection && window.getSelection();
       return !(selection && !selection.isCollapsed);
     }

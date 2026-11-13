@@ -7712,13 +7712,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   inset: 0;
 }
 
-.about-hour dt a:focus-visible {
-  outline: none;
-}
+/* Only where :has() is read: elsewhere the name keeps its own ring. */
+@supports selector(:has(*)) {
+  .about-hour dt a:focus-visible {
+    outline: none;
+  }
 
-.about-hour:has(dt a:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  .about-hour:has(dt a:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
 }
 
 .about-hour dd {
@@ -9414,6 +9417,18 @@ html {
   .reminder-address > summary,
   .reminder-help > summary,
   .reminders-privacy a,
+  .reminder-help a,
+  .leader-selector > summary,
+  .date-submit,
+  .report-issue a,
+  .find-meta a,
+  .feast-everyone a,
+  .feast-see a,
+  .privacy a,
+  .usage-jump a,
+  .usage-notes summary,
+  .usage-trend-details summary,
+  .not-found-home a,
   .usage-explore-link
 ) {
   transition-property: background-color, box-shadow;
@@ -9464,15 +9479,29 @@ html {
   .reminder-address > summary,
   .reminder-help > summary,
   .reminders-privacy a,
+  .reminder-help a,
+  .leader-selector > summary,
+  .date-submit,
+  .report-issue a,
+  .find-meta a,
+  .feast-everyone a,
+  .feast-see a,
+  .privacy a,
+  .usage-jump a,
+  .usage-notes summary,
+  .usage-trend-details summary,
+  .not-found-home a,
   .usage-explore-link
 ):is(:active, .is-pressed) {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
 }
 
-/* The hour that is now has no wash of its own to give way (its light is a
-   pool), so it takes the press over its pool. */
-.page-home .home-hour-link.is-current:is(:active, .is-pressed) {
+/* Home's hours: the hour that is now has no wash of its own to give way
+   (its light is a pool), so it takes the press over its pool; and the Apse
+   sets every hour's ground transparent at (0,4,0), which the shared rule
+   above does not outrank. Later in the sheet, this does. */
+:root .page-home .home-hour-link:is(:active, .is-pressed) {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
 }

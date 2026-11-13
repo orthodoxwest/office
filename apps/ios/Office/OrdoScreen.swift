@@ -69,9 +69,10 @@ struct OrdoScreen: View {
     @State private var wall: CGRect = .zero
 
     /// Where the day before a day asked for is brought: clear of the pinned month heading, a
-    /// little below it (the web's `scroll-margin-top`, 3.5rem and a row at the default size). The heading grows with the reader's
-    /// type; one not yet laid out is taken at its text's line and padding. The day's mark has no
-    /// height, so its top stands at this share of the screen.
+    /// little below it (the web's `scroll-margin-top`, 3.5rem at the default size, less the row
+    /// it keeps for that day). The heading grows with the reader's type; one not yet laid out is
+    /// taken at its text's line and padding. The day's mark has no height, so its top stands at
+    /// this share of the screen.
     private var focus: UnitPoint {
         let pinned = heading > 0 ? heading : 28 * m.type + m.px(12.8)
         return viewport > 0 ? UnitPoint(x: 0.5, y: min(1, (pinned + m.px(15.2)) / viewport)) : .top
