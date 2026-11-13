@@ -9,7 +9,8 @@
 // text size keeps the line at the top in view. A reader at the very top of the
 // page stays there.
 window.officeHoldPlace = function (change, blocks) {
-  var list = document.querySelectorAll(blocks || ".elements p, .elements :is(h2, h3, summary, .chant-score)");
+  // Without :is(), which a browser before Safari 14 and Chrome 88 would throw on.
+  var list = document.querySelectorAll(blocks || ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score");
   var anchor = null;
   var before = null;
   if (window.scrollY > 0) {

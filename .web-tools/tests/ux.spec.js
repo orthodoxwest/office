@@ -4726,7 +4726,7 @@ async function logScoreHeights(page) {
         const heights = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
         if (heights.length) window.__scores.push(heights.join("/"));
       }
-      if (performance.now() < 4000) requestAnimationFrame(loop);
+      if (performance.now() < 10000) requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
   });
@@ -4760,9 +4760,18 @@ test("a chant score is drawn at its final height from the first frame once the c
   expect(fetched).toEqual([]);
 });
 
-test("a score laid out anew on arriving never moves the words being read", async ({ page }) => {
+test("a score laid out anew on arriving never moves the words being read", async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The page's faces fetched beforehand (the engine not), and no column reported: without scroll
+  // anchoring a face arriving moves the text too, and this test is about the scores.
+  await page.route("**/static/neuma.mjs*", (route) => route.abort());
+  await page.goto("/compline/2026-11-13");
+  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(async () => (await context.cookies()).some((c) => c.name === "chant-width")).toBe(true);
+  await page.goto("about:blank");
+  await page.unroute("**/static/neuma.mjs*");
+  await context.clearCookies();
   await logScoreHeights(page);
   // A reader brought back below the scores, in a browser that does not anchor scrolling, at a
   // width the page was not engraved at.
@@ -4773,19 +4782,23 @@ test("a score laid out anew on arriving never moves the words being read", async
       window.scrollTo(0, last.getBoundingClientRect().bottom + scrollY + 300);
       const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
       window.__probe = [];
+      // Watched once the faces are in, with the scores' heights beside it.
       const loop = () => {
-        window.__probe.push(probe.getBoundingClientRect().top);
-        if (performance.now() < 4000) requestAnimationFrame(loop);
+        if (document.fonts.status === "loaded") {
+          const scores = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height)).join("/");
+          window.__probe.push({ top: probe.getBoundingClientRect().top, scores });
+        }
+        if (performance.now() < 10000) requestAnimationFrame(loop);
       };
       requestAnimationFrame(loop);
     });
   });
   await page.goto("/compline/2026-11-13");
-  // The scores above were laid out again at the column...
-  await expect.poll(() => page.evaluate(() => { const f = window.__scores; return f[0] !== f[f.length - 1]; })).toBe(true);
+  // The scores above were laid out again at the column while the line was watched...
+  await expect.poll(() => page.evaluate(() => { const f = window.__probe; return f.length > 0 && f[0].scores !== f[f.length - 1].scores; })).toBe(true);
   await page.waitForTimeout(300);
   // ...and the line being read stood still.
-  const probe = await page.evaluate(() => window.__probe);
+  const probe = await page.evaluate(() => window.__probe.map((f) => f.top));
   expect(Math.max(...probe) - Math.min(...probe)).toBeLessThan(1);
 
 });
