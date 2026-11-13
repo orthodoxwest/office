@@ -64,6 +64,17 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
+// About: the seven hours with the hour it is now lit, and home's invitation at the
+// foot. Pinned to an afternoon, so None is lit and invited to.
+for (const theme of ["light", "dark"]) {
+  test(`mobile About — ${theme}`, async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-03-18T15:30:00-04:00") });
+    await openForSnapshot(page, "/about", theme);
+    await expect(page.locator(".about-hour.is-current")).toHaveAttribute("data-hour", "none");
+    await expect(page).toHaveScreenshot(`about-${theme}.png`, { fullPage: true });
+  });
+}
+
 for (const theme of ["light", "dark"]) {
   for (const width of [390, 1280]) {
     test(`Ordo at ${width}px — ${theme}`, async ({ page }) => {
