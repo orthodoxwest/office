@@ -2,7 +2,11 @@ package org.orthodoxwest.office
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,9 +56,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
@@ -860,14 +864,22 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
 private fun PrayNow(label: String, tier: HomeTier, frontal: Color, wash: Color, lifted: Color?, onClick: () -> Unit) {
     val p = LocalPalette.current
     val tablet = ImageBitmap.imageResource(R.drawable.tablet)
+    // The tablet answers the finger as a thing, not a dimmed word (the web's `.pray-now:active`):
+    // its inner rule takes the accent and its wash deepens by half again, at once, and both go back
+    // over Tempo's touch; the outer lining stands, and nothing scales.
+    val source = remember { MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val held by animateFloatAsState(if (pressed) 1f else 0f, if (pressed) snap() else Tempo.touchOut.spec(), label = "tablet")
+    val deeper = if (p.dark) Color(132, 160, 204).copy(alpha = 0.2f) else Ochre.copy(alpha = 0.29f)
     Box(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 44.dp)
-            .tap(onClick = onClick)
+            .tap(source = source, onClick = onClick)
             .drawBehind {
-                tabletWash(tablet, wash)
+                tabletWash(tablet, lerp(wash, deeper, held))
                 invitationRules(p.lining, frontal)
+                if (held > 0f) invitationRules(Color.Transparent, p.accent.copy(alpha = held), day = 1f)
             }
             .padding(top = tier.prayTop, bottom = tier.prayBottom, start = 13.8.dp, end = 13.8.dp),
         contentAlignment = Alignment.Center,
@@ -937,14 +949,9 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                         val gloss = if (desk) hourNote(h) else if (isNow) note else ""
                         val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { isNow }, "prayed".takeIf { done })
                         // The light rests on the hour that is now: a pool with no edge, at most
-                        // 9.5rem across (11rem in the niche).
-                        val pool = if (isNow) Modifier.drawBehind {
-                            val r = minOf(size.width + (if (desk) 12.dp else 8.dp).toPx(), (if (desk) 176.dp else 152.dp).toPx()) / 2f
-                            val ry = (size.height + (if (desk) 8.dp else 4.dp).toPx()) / 2f
-                            scale(1f, ry / r, pivot = center) {
-                                drawCircle(Brush.radialGradient(0f to home.nowPool, 0.52f to home.nowPool.copy(alpha = home.nowPool.alpha * 0.55f), 1f to Color.Transparent, center = center, radius = r), r, center)
-                            }
-                        } else Modifier
+                        // 9.5rem across (11rem in the niche). A finger lights any hour's ([Lit]).
+                        val shape = if (desk) PoolShape(outsetX = 6.dp, outsetY = 4.dp, max = 176.dp) else PoolShape(outsetX = 4.dp, outsetY = 2.dp, max = 152.dp)
+                        val pool = if (isNow) Modifier.drawBehind { poolOfLight(home.nowPool, shape) } else Modifier
                         Box(
                             Modifier.weight(1f).fillMaxHeight().then(pool).drawBehind {
                                 // A gilt point before every hour but the first of its band.
@@ -952,7 +959,7 @@ private fun HourDirectory(current: String, note: String, prayed: Set<String>, ti
                                     val d = 3.5.dp.toPx()
                                     drawRect(o.flat.copy(alpha = 0.7f), Offset(-d / 2f, size.height / 2f - d / 2f), Size(d, d))
                                 }
-                            }.tap(label = if (said.size > 1) said.joinToString(", ") else null) { onHour(h) },
+                            }.tap(label = if (said.size > 1) said.joinToString(", ") else null, lit = Lit(home.nowPool, shape, if (p.dark) 1f else 0.7f, isNow)) { onHour(h) },
                             contentAlignment = Alignment.Center,
                         ) {
                             // An hour prayed today withdraws to the muted ink, a small gilt cross at its
@@ -1027,17 +1034,13 @@ private fun HourList(
                         val isNow = h == current
                         val gloss = hourNote(h)
                         val said = listOfNotNull(hourLabel(h), gloss.ifEmpty { null }, "now".takeIf { isNow }, "prayed".takeIf { done })
-                        // The pool of light under the hour that is now, from a little before its name.
-                        val pool = if (isNow) Modifier.drawBehind {
-                            val r = 136.dp.toPx()
-                            val c = Offset(r - 19.2.dp.toPx(), size.height / 2f)
-                            val ry = (size.height + 6.dp.toPx()) / 2f
-                            scale(1f, ry / r, pivot = c) {
-                                drawCircle(Brush.radialGradient(0f to home.nowPool, 0.52f to home.nowPool.copy(alpha = home.nowPool.alpha * 0.55f), 1f to Color.Transparent, center = c, radius = r), r, c)
-                            }
-                        } else Modifier
+                        // The pool of light under the hour that is now, from a little before its
+                        // name; a finger lights any hour's ([Lit]).
+                        val shape = PoolShape(span = 272.dp, lead = 19.2.dp, outsetY = 3.dp)
+                        val pool = if (isNow) Modifier.drawBehind { poolOfLight(home.nowPool, shape) } else Modifier
                         Row(
-                            Modifier.fillMaxWidth().heightIn(min = tier.row).then(pool).tap(label = said.joinToString(", ")) { onHour(h) },
+                            Modifier.fillMaxWidth().heightIn(min = tier.row).then(pool)
+                                .tap(label = said.joinToString(", "), lit = Lit(home.nowPool, shape, if (p.dark) 1f else 0.7f, isNow)) { onHour(h) },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val ink = if (done) p.muted else if (isNow) now else p.text

@@ -95,6 +95,16 @@
         }
         if (newcomer) document.documentElement.setAttribute("data-newcomer", "");
       } catch (e) {}
+      {# Through the wall (style.css): the header stands through a page turn only where both pages
+           show it. One scrolled out of sight gives up its name as its page is captured, the old page
+           at pageswap, the new at pagereveal (here, since it comes before the deferred scripts), so
+           it goes or comes with its page instead of standing over the other's prayers. #}
+      var holdHeader = function (e) {
+        var header = e.viewTransition && document.querySelector(".site-header");
+        if (header) header.style.viewTransitionName = header.getBoundingClientRect().bottom <= 0 ? "none" : "";
+      };
+      addEventListener("pageswap", holdHeader);
+      addEventListener("pagereveal", holdHeader);
     })();
   </script>
   {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}

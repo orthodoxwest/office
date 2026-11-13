@@ -2,6 +2,8 @@ package org.orthodoxwest.office
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -564,18 +566,21 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
             },
         ),
     ) {
+        // A finger on the date or the name lights the whole row: home's pool of light, a long
+        // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
+        val held = remember { MutableInteractionSource() }
         // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 11.2.dp, bottom = 9.6.dp)) {
+        Row(Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row.copy(at = 0.44f))).height(IntrinsicSize.Min).padding(top = 11.2.dp, bottom = 9.6.dp)) {
             // The day's liturgical colour as a rail beside its date.
             Box(Modifier.padding(top = 1.6.dp).width(3.dp).height(37.6.dp).background(railColor(d.color, p)))
-            Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day", source = held) { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
             }
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.Top) {
                     // The date's stop already says the feast; the feast is a second target for the eye only.
-                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
                     // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
                     Row(Modifier.padding(start = 8.dp, top = 2.dp).clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (d.fast) Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted))
@@ -662,8 +667,10 @@ private fun DayTableRow(
             },
         ),
     ) {
+        // A finger on the date or the name lights the whole row ([Lit]), as on a phone.
+        val held = remember { MutableInteractionSource() }
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
+        Row(Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row)).height(IntrinsicSize.Min).padding(vertical = 8.dp)) {
             // From 1000dp Today is a note in the margin beside today's band (the web's), taking no
             // room in the row; narrower, the table has no margin and it stands under the number.
             if (isToday && margin) {
@@ -679,7 +686,7 @@ private fun DayTableRow(
             Column(
                 Modifier.width(DayCol).fillMaxHeight()
                     .drawBehind { drawRect(rail, Offset(0f, 1.6.dp.toPx()), Size(3.dp.toPx(), size.height - 1.6.dp.toPx())) }
-                    .tap(label = spoken, action = "open the day") { onDay(date) }
+                    .tap(label = spoken, action = "open the day", source = held) { onDay(date) }
                     .padding(start = 10.4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -692,12 +699,12 @@ private fun DayTableRow(
                 val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
                 // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                 if (anyOpen || d.monastic.isNotEmpty()) {
-                    FeastName(d, name, Modifier.tap { onDay(date) }.semantics { hideFromAccessibility() })
+                    FeastName(d, name, Modifier.tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
                     Monastic(d)
                     Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                 } else {
                     Row {
-                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap { onDay(date) }.semantics { hideFromAccessibility() })
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
                         Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                     }
                 }

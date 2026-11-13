@@ -88,8 +88,8 @@ struct Loaded<Value, Content: View>: View {
  * coming one settles; a fade where there is no order, or the reader has asked for less motion.
  */
 func inPlace(_ motion: Motion, reduceMotion: Bool) -> AnyTransition {
-    let fadeIn = AnyTransition.opacity.animation(.easeOut(duration: 0.21).delay(0.09))
-    let fadeOut = AnyTransition.opacity.animation(.easeIn(duration: 0.09))
+    let fadeIn = AnyTransition.opacity.animation(Tempo.turnIn.animation)
+    let fadeOut = AnyTransition.opacity.animation(Tempo.turnOut.animation)
     guard motion != .fade, !reduceMotion else { return .asymmetric(insertion: fadeIn, removal: fadeOut) }
     let on: CGFloat = motion == .next ? 1 : -1
     return .asymmetric(

@@ -259,8 +259,9 @@ private fun HoursTable(periods: List<AboutPeriodView>, onHour: (String) -> Unit)
                 Column(Modifier.weight(1f)) {
                     period.hours.forEachIndexed { j, h ->
                         if (j > 0) Hairline(ink.rule)
-                        // The whole row opens the hour: a thumb's target, read as one.
-                        Row(Modifier.fillMaxWidth().tap(action = "open ${h.name}") { onHour(h.hour) }.padding(horizontal = 13.6.dp, vertical = 8.dp)) {
+                        // The whole row opens the hour: a thumb's target, read as one. Pressed, it
+                        // lies under home's pool of light, a long lozenge under its words.
+                        Row(Modifier.fillMaxWidth().tap(action = "open ${h.name}", lit = Lit(homeInk(p).nowPool, PoolShape.Row)) { onHour(h.hour) }.padding(horizontal = 13.6.dp, vertical = 8.dp)) {
                             Text(h.name, Modifier.width(nameWidth).alignByBaseline(), style = nameStyle)
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f).alignByBaseline()) {
