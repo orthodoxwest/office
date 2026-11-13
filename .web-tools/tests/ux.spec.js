@@ -4828,20 +4828,24 @@ test("Chant On notes every verse of a whole hymn, its mode's figure once over th
 
 test("a chant score fills its column at every width and keeps its own when the engine can't load", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The hour's last score, off the screen: one on it keeps its first drawing until it leaves.
   const fit = () => page.evaluate(() => {
-    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    const score = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
     const box = score.querySelector(".chant-width");
     return {
       column: score.clientWidth,
       score: box.getBoundingClientRect().width,
       laidOut: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")),
+      // Laid out here, or engraved by the server at the column the page last reported.
+      atColumn: !box.querySelector("svg").getAttribute("class").endsWith(box.getAttribute("data-chant-prefix")) ||
+        Math.abs(parseFloat(box.dataset.chantUnits) - (score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 2.45 * 6) < 0.5,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
   for (const width of [320, 390, 430, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/compline/2026-10-27");
-    await expect.poll(async () => (await fit()).laidOut, { message: `${width}px` }).toBe(true);
+    await expect.poll(async () => (await fit()).atColumn, { message: `${width}px` }).toBe(true);
     const f = await fit();
     expect(Math.abs(f.score - f.column), `${width}px: ${JSON.stringify(f)}`).toBeLessThan(1);
     expect(f.overflow, `${width}px`).toBe(0);
@@ -4871,6 +4875,193 @@ test("a chant score fills its column at every width and keeps its own when the e
   await page.waitForTimeout(300);
   expect((await fit()).laidOut).toBe(false);
   expect(fetched).toEqual([]);
+});
+
+// Every frame's heights of the scores shown, from the page's first frame.
+async function logScoreHeights(page) {
+  await page.addInitScript(() => {
+    window.__scores = [];
+    const loop = () => {
+      if (document.body) {
+        const heights = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
+        if (heights.length) window.__scores.push(heights.join("/"));
+      }
+      if (performance.now() < 10000) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+}
+
+test("a chant score is drawn at its final height from the first frame once the column is known", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  await logScoreHeights(page);
+  // A first visit lays the score out at the column and keeps the column's width for the server.
+  await openDatedPage(page, "/terce/2026-11-13");
+  await expect.poll(async () => (await context.cookies()).find((c) => c.name === "chant-width")?.value).toMatch(/^\d+\.\d{4}$/);
+  const column = await page.evaluate(() => {
+    const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+    return (Math.round((score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 16) / 16).toFixed(4);
+  });
+  expect((await context.cookies()).find((c) => c.name === "chant-width").value).toBe(column);
+
+  // The next page arrives engraved at it: no score changes its height, and the engine is not fetched.
+  const fetched = [];
+  page.on("request", (r) => { if (r.url().includes("/static/neuma.mjs")) fetched.push(r.url()); });
+  for (const path of ["/compline/2026-11-13", "/terce/2026-11-13"]) {
+    await openDatedPage(page, path);
+    await page.waitForTimeout(800);
+    const frames = await page.evaluate(() => window.__scores);
+    expect(new Set(frames).size, `${path}: ${frames[0]} then ${frames[frames.length - 1]}`).toBe(1);
+    const fit = await page.evaluate(() => [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent)
+      .map((e) => e.clientWidth - e.querySelector(".chant-width").getBoundingClientRect().width));
+    for (const gap of fit) expect(Math.abs(gap), path).toBeLessThan(1);
+  }
+  expect(fetched).toEqual([]);
+});
+
+test("a score laid out anew on arriving never moves the words being read", async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The page's faces fetched beforehand (the engine not), and no column reported: without scroll
+  // anchoring a face arriving moves the text too, and this test is about the scores.
+  await page.route("**/static/neuma.mjs*", (route) => route.abort());
+  await page.goto("/compline/2026-11-13");
+  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(async () => (await context.cookies()).some((c) => c.name === "chant-width")).toBe(true);
+  await page.goto("about:blank");
+  await page.unroute("**/static/neuma.mjs*");
+  await context.clearCookies();
+  await logScoreHeights(page);
+  // A reader brought back below the scores, in a browser that does not anchor scrolling, at a
+  // width the page was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.documentElement.style.overflowAnchor = "none";
+      const last = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).pop();
+      window.scrollTo(0, last.getBoundingClientRect().bottom + scrollY + 300);
+      const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+      window.__probe = [];
+      // Watched once the faces are in, with the scores' heights beside it.
+      const loop = () => {
+        if (document.fonts.status === "loaded") {
+          const scores = [...document.querySelectorAll(".chant-score")].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height)).join("/");
+          window.__probe.push({ top: probe.getBoundingClientRect().top, scores });
+        }
+        if (performance.now() < 10000) requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    });
+  });
+  await page.goto("/compline/2026-11-13");
+  // The scores above were laid out again at the column while the line was watched...
+  await expect.poll(() => page.evaluate(() => { const f = window.__probe; return f.length > 0 && f[0].scores !== f[f.length - 1].scores; })).toBe(true);
+  await page.waitForTimeout(300);
+  // ...and the line being read stood still.
+  const probe = await page.evaluate(() => window.__probe.map((f) => f.top));
+  expect(Math.max(...probe) - Math.min(...probe)).toBeLessThan(1);
+
+});
+
+test("a score on the screen keeps its first drawing until it leaves the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-chant", "on"));
+  // The first score in the middle of the screen as the page arrives, at a width it was not engraved at.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
+      scrollTo(0, score.getBoundingClientRect().top + scrollY - 200);
+    });
+  });
+  const metrics = page.waitForResponse((r) => r.url().includes("eb-garamond-lyrics.nmet") && r.ok());
+  await page.goto("/compline/2026-11-13");
+  await metrics;
+  const score = page.locator(".chant-score:visible").first();
+  const height = () => score.evaluate((e) => e.getBoundingClientRect().height);
+  const first = await height();
+  await page.waitForTimeout(1000);
+  expect(await height()).toBe(first);
+  // Scrolled past, it is drawn at its column, and the words on the screen stay where they stand.
+  await page.evaluate(() => scrollBy(0, 1500));
+  await page.evaluate(() => {
+    const probe = [...document.querySelectorAll(".elements p")].find((p) => p.offsetParent && p.getBoundingClientRect().top >= 100);
+    probe.dataset.probe = "1";
+    window.__probeTop = probe.getBoundingClientRect().top;
+  });
+  await expect.poll(height).not.toBe(first);
+  expect(Math.abs(await page.locator("[data-probe]").evaluate((p) => p.getBoundingClientRect().top - window.__probeTop))).toBeLessThan(1);
+});
+
+test("changing the text size keeps the line the reader is at", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-text-size"));
+  await openDatedPage(page, "/vespers/2026-11-13");
+  await page.evaluate(() => scrollTo(0, 3000));
+  const at = () => page.evaluate(() => {
+    // The first block on the screen, from the same blocks officeHoldPlace holds: a heading above
+    // the first paragraph is the one held, and the paragraph under it may move with the heading.
+    const blocks = ".elements p, .elements h2, .elements h3, .elements summary, .elements .chant-score";
+    const p = [...document.querySelectorAll(blocks)].find((e) => { const r = e.getBoundingClientRect(); return r.height && r.bottom > 0; });
+    p.dataset.held = "1";
+    const r = p.getBoundingClientRect();
+    return { top: r.top, height: r.height };
+  });
+  const before = await at();
+  // The menu's Text row, tapped where the reader is (a click here would scroll to the header).
+  await page.evaluate(() => document.querySelector('.text-size-option[data-text-size-choice="large"]').click());
+  await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+  const after = await page.locator("[data-held]").evaluate((p) => { const r = p.getBoundingClientRect(); return { top: r.top, height: r.height }; });
+  expect(after.height).toBeGreaterThan(before.height);
+  // The share of the line's block above the top of the screen is the share it was.
+  const want = before.top < 0 ? (before.top / before.height) * after.height : before.top;
+  expect(Math.abs(after.top - want), JSON.stringify({ before, after })).toBeLessThan(2);
+});
+
+test("closing the prayers after the Office at the page's end leaves its summary where it was", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.removeItem("office-prayers-open"));
+  await openDatedPage(page, "/lauds/2026-11-13");
+  const after = page.locator('details.session-prayers[data-prayers$="/Prayers After the Office"]');
+  await expect(after).toHaveAttribute("open", "");
+  const summary = after.locator(":scope > summary");
+  // The summary near the top of the screen, with less than a screen of page below it.
+  await page.evaluate(() => {
+    const s = [...document.querySelectorAll("details.session-prayers > summary")].pop();
+    scrollTo(0, s.getBoundingClientRect().top + scrollY - 80);
+  });
+  const top = await summary.evaluate((s) => s.getBoundingClientRect().top);
+  await summary.click();
+  await expect(after).not.toHaveAttribute("open", "");
+  await page.waitForTimeout(400);
+  expect(Math.abs((await summary.evaluate((s) => s.getBoundingClientRect().top)) - top)).toBeLessThan(1);
+  // Scrolling back up gives the room back, without moving what is on the screen.
+  await scrollHourBy(page, -2000);
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.minHeight)).toBe("");
+});
+
+test("the prayed watch measures the hour's words again only when they move", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__measured = 0;
+    const rects = Range.prototype.getClientRects;
+    Range.prototype.getClientRects = function () { window.__measured++; return rects.call(this); };
+  });
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  await page.clock.runFor(1000);
+  const once = await page.evaluate(() => window.__measured);
+  expect(once).toBeGreaterThan(100);
+  for (let i = 0; i < 3; i++) {
+    await scrollHourBy(page, 400);
+    await page.clock.runFor(1000);
+  }
+  expect(await page.evaluate(() => window.__measured)).toBe(once);
+  // A new text size moves every word: they are measured again, once (the page's other
+  // measures made at its load aside).
+  await page.evaluate(() => document.documentElement.setAttribute("data-text-size", "large"));
+  await page.clock.runFor(2000);
+  const again = (await page.evaluate(() => window.__measured)) - once;
+  expect(again).toBeGreaterThan(0.9 * once);
+  expect(again).toBeLessThanOrEqual(once);
 });
 
 // Home marks the reader's own hour before its first paint, as the theme is

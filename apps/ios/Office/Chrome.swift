@@ -323,7 +323,9 @@ struct MenuPanel: View {
                     cell("A", s == model.textSize, .label(s == .small ? 13 : s == .standard ? 16 : 20, 0), spoken: textSizeName(s)) {
                         guard s != model.textSize else { return }
                         chose()
-                        withAnimation(reduceMotion ? nil : restyling) { model.chooseTextSize(s) }
+                        // At once, as on the web: the prayer is set again at its new size in one
+                        // frame, never seen re-wrapping, and the hour holds the reader's row.
+                        model.chooseTextSize(s)
                     }
                 }
             }
