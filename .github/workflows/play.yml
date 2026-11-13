@@ -135,7 +135,7 @@ jobs:
           fi
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.99.1
+        uses: dtolnay/rust-toolchain@1.100.0
         with:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
