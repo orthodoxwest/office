@@ -166,8 +166,8 @@ private const val PRESSED_ALPHA = 0.55f
 
 /**
  * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
- * let go, so even the briefest tap is seen to land. A control reached by keyboard, D-pad or
- * Switch Access (never by touch, where a tap does not take focus) wears the focus ring.
+ * let go, so even the briefest tap is seen to land. A control that takes input focus from a
+ * keyboard or D-pad (never by touch, where a tap does not take focus) wears the focus ring.
  */
 private object Dim : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
