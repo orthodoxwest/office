@@ -33,8 +33,13 @@ const SCALE: f32 = 6.0;
 /// size, and the score scales down to fit a narrower one.
 pub const FALLBACK_EM: u16 = 17;
 
-/// The cookie in which chant.js keeps its scores' column width, in lyric ems to the thousandth.
+/// The cookie in which chant.js keeps its scores' column width, in lyric ems to the sixteenth.
 pub const WIDTH_COOKIE: &str = "chant-width";
+
+/// Steps of a lyric em the column's width is kept in. A width rounded to the nearest sixteenth is
+/// within 1/32 em, 0.46 SVG units, of the column, inside the half unit chant.js lets a score stand
+/// at; and the server's engravings come in some 1,200 widths rather than one per window.
+pub const WIDTH_STEPS: u32 = 16;
 
 /// The widths [`column_em`] accepts, in lyric ems: a phone in its narrowest at the largest text
 /// to a page wider than the prayer's measure.
@@ -83,46 +88,90 @@ fn phrased(score: &ChantScore) -> bool {
     score.sets != ScoreSpan::Antiphon
 }
 
+/// [`FALLBACK_EM`] in [`WIDTH_STEPS`].
+const FALLBACK_STEPS: u32 = FALLBACK_EM as u32 * WIDTH_STEPS;
+
 /// The score's SVGs at [`FALLBACK_EM`], engraved once per score, initial and phrasing.
 fn engraved(gabc: &Arc<str>, initial: bool, phrases: bool) -> String {
-    engraved_at(gabc, initial, phrases, u32::from(FALLBACK_EM) * 1000)
+    engraved_at(gabc, initial, phrases, FALLBACK_STEPS)
 }
 
-/// The score's SVGs at `milli_em` thousandths of a lyric em, engraved once per score, initial,
-/// phrasing and width. Readers' columns come in a few widths each; the cache is emptied when
-/// many readers' widths have filled it, as the apps' is.
-fn engraved_at(gabc: &Arc<str>, initial: bool, phrases: bool, milli_em: u32) -> String {
-    type Cache = Mutex<HashMap<(Arc<str>, bool, bool, u32), String>>;
-    static CACHE: OnceLock<Cache> = OnceLock::new();
-    const KEEP: usize = 1024;
+type EngravingKey = (Arc<str>, bool, bool, u32);
+
+/// Engraved scores. Those at [`FALLBACK_EM`], one set per score in the corpus, are always kept;
+/// those at readers' columns are kept up to [`Engravings::BUDGET`] bytes, the least
+/// recently used given up first.
+#[derive(Default)]
+struct Engravings {
+    map: HashMap<EngravingKey, (String, u64)>,
+    clock: u64,
+    readers: usize,
+}
+
+impl Engravings {
+    const BUDGET: usize = 32 << 20;
+
+    fn get(&mut self, key: &EngravingKey) -> Option<String> {
+        self.clock += 1;
+        let clock = self.clock;
+        self.map.get_mut(key).map(|(svgs, used)| {
+            *used = clock;
+            svgs.clone()
+        })
+    }
+
+    fn insert(&mut self, key: EngravingKey, svgs: String) {
+        self.clock += 1;
+        let reader = key.3 != FALLBACK_STEPS;
+        if reader {
+            self.readers += svgs.len();
+        }
+        let replaced = self.map.insert(key, (svgs, self.clock));
+        if reader && let Some((old, _)) = replaced {
+            self.readers -= old.len();
+        }
+        while self.readers > Self::BUDGET {
+            let Some(oldest) =
+                self.map.iter().filter(|(k, _)| k.3 != FALLBACK_STEPS).min_by_key(|(_, (_, used))| *used).map(|(k, _)| k.clone())
+            else {
+                break;
+            };
+            if let Some((svgs, _)) = self.map.remove(&oldest) {
+                self.readers -= svgs.len();
+            }
+        }
+    }
+}
+
+/// The score's SVGs at `steps` [`WIDTH_STEPS`] of a lyric em, engraved once per score, initial,
+/// phrasing and width (see [`Engravings`]).
+fn engraved_at(gabc: &Arc<str>, initial: bool, phrases: bool, steps: u32) -> String {
+    static CACHE: OnceLock<Mutex<Engravings>> = OnceLock::new();
     let cache = CACHE.get_or_init(Default::default);
-    let key = (gabc.clone(), initial, phrases, milli_em);
-    if let Some(svgs) = cache.lock().ok().and_then(|c| c.get(&key).cloned()) {
+    let key = (gabc.clone(), initial, phrases, steps);
+    if let Some(svgs) = cache.lock().ok().and_then(|mut c| c.get(&key)) {
         return svgs;
     }
-    let svgs = engrave(gabc, initial, phrases, milli_em as f32 / 1000.0);
+    let svgs = engrave(gabc, initial, phrases, steps as f32 / WIDTH_STEPS as f32);
     if let Ok(mut c) = cache.lock() {
-        if c.len() >= KEEP {
-            c.clear();
-        }
         c.insert(key, svgs.clone());
     }
     svgs
 }
 
-/// The column's width in lyric ems that a [`WIDTH_COOKIE`] carries, in thousandths, or `None` for a
-/// value that is not a plausible column.
+/// The column's width that a [`WIDTH_COOKIE`] carries, rounded to [`WIDTH_STEPS`] of a lyric em,
+/// or `None` for a value that is not a plausible column.
 pub fn column_em(cookie: &str) -> Option<u32> {
     let em: f32 = cookie.trim().parse().ok()?;
-    COLUMN_EMS.contains(&em).then(|| (em * 1000.0).round() as u32)
+    COLUMN_EMS.contains(&em).then(|| (em * WIDTH_STEPS as f32).round() as u32)
 }
 
-/// A page's scores engraved again at `milli_em` thousandths of a lyric em (see [`column_em`]):
+/// A page's scores engraved again at `steps` [`WIDTH_STEPS`] of a lyric em (see [`column_em`]):
 /// each `.chant-width` box this module wrote is set anew from the GABC it carries, and everything
 /// else on the page is left as it was.
-pub fn at_width(html: &str, milli_em: u32) -> String {
+pub fn at_width(html: &str, steps: u32) -> String {
     const OPEN: &str = "<div class=\"chant-width\" ";
-    if milli_em == u32::from(FALLBACK_EM) * 1000 || !html.contains(OPEN) {
+    if steps == FALLBACK_STEPS || !html.contains(OPEN) {
         return html.to_string();
     }
     let mut out = String::with_capacity(html.len());
@@ -140,7 +189,7 @@ pub fn at_width(html: &str, milli_em: u32) -> String {
             break;
         };
         out.push_str(&rest[..start]);
-        out.push_str(&engraved_at(&Arc::from(html_unescape(gabc)), initial == "1", phrases == "1", milli_em));
+        out.push_str(&engraved_at(&Arc::from(html_unescape(gabc)), initial == "1", phrases == "1", steps));
         rest = &box_html[close + "</div>".len()..];
     }
     out.push_str(rest);
@@ -397,16 +446,42 @@ mod tests {
         assert_eq!(narrow, at_width(&narrow, column_em("10.25").unwrap()));
         // The fallback's own width, and a page without a score, are left alone.
         assert_eq!(at_width(&page, column_em("17").unwrap()), page);
-        assert_eq!(at_width("<p>words</p>", 10_250), "<p>words</p>");
+        assert_eq!(at_width("<p>words</p>", 164), "<p>words</p>");
     }
 
     #[test]
     fn a_column_is_read_from_the_cookie_only_when_it_is_one() {
-        assert_eq!(column_em("17.900"), Some(17_900));
-        assert_eq!(column_em(" 21.3333 "), Some(21_333));
+        assert_eq!(column_em("17.875"), Some(286));
+        assert_eq!(column_em(" 21.3333 "), Some(341), "to the nearest sixteenth");
+        assert_eq!(column_em("17.9"), Some(286));
         for bad in ["", "wide", "NaN", "inf", "-3", "0", "3.9", "80.5", "1e9"] {
             assert_eq!(column_em(bad), None, "{bad:?}");
         }
+    }
+
+    /// Readers' widths are given up least recently used first, within the budget; the fallback's
+    /// engravings, which every page is composed with, are never given up.
+    #[test]
+    fn engravings_keep_the_fallback_and_the_recent() {
+        let key = |n: u32, steps: u32| (Arc::<str>::from(format!("g{n}")), true, true, steps);
+        let big = "x".repeat(Engravings::BUDGET / 4);
+        let mut cache = Engravings::default();
+        cache.insert(key(0, FALLBACK_STEPS), big.clone());
+        for n in 1..=4 {
+            cache.insert(key(n, 200), big.clone());
+        }
+        assert!(cache.get(&key(1, 200)).is_some());
+        cache.insert(key(5, 200), big.clone());
+        assert!(cache.get(&key(2, 200)).is_none(), "the least recently used goes");
+        for n in [1, 3, 4, 5] {
+            assert!(cache.get(&key(n, 200)).is_some(), "{n}");
+        }
+        for n in 6..20 {
+            cache.insert(key(n, 201), big.clone());
+        }
+        assert!(cache.get(&key(0, FALLBACK_STEPS)).is_some(), "the fallback's stay");
+        assert!(cache.readers <= Engravings::BUDGET);
+        assert_eq!(cache.readers, cache.map.iter().filter(|(k, _)| k.3 != FALLBACK_STEPS).map(|(_, (s, _))| s.len()).sum::<usize>());
     }
 
     #[test]

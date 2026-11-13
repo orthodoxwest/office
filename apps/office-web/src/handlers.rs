@@ -497,11 +497,17 @@ impl Server {
             if martyrology.len() == forms.len() { martyrology.iter().map(|(f, h)| (*f, h)).collect() } else { Vec::new() };
         match self.pages.hour(&mut data, &forms, &martyrology) {
             // Scores engraved at the reader's own column, as chant.js last measured it, so that
-            // none is laid out again under them (render_html::chant::at_width).
-            Ok(body) => match cookie(req.headers, chant::WIDTH_COOKIE).as_deref().and_then(chant::column_em) {
-                Some(em) => html(StatusCode::OK, chant::at_width(&body, em)),
-                None => html(StatusCode::OK, body),
-            },
+            // none is laid out again under them (render_html::chant::at_width). The page differs
+            // with that cookie, so a cache keeps one reader's copy from another.
+            Ok(body) => {
+                let body = match cookie(req.headers, chant::WIDTH_COOKIE).as_deref().and_then(chant::column_em) {
+                    Some(steps) => chant::at_width(&body, steps),
+                    None => body,
+                };
+                let mut resp = html(StatusCode::OK, body);
+                set(&mut resp, header::VARY, "Cookie");
+                resp
+            }
             Err(e) => render_failed(&e),
         }
     }
@@ -812,11 +818,15 @@ mod tests {
     fn an_hours_scores_are_engraved_at_the_column_the_browser_named() {
         let units = |body: &str| body.matches(" data-chant-units=\"").count();
         let at = |body: &str, em: f32| body.matches(&format!(" data-chant-units=\"{:.3}\"", em * 2.45 * 6.0)).count();
-        let (_, _, plain) = get("/compline/2026-10-27");
+        let (_, headers, plain) = get("/compline/2026-10-27");
+        assert_eq!(headers[header::VARY], "Cookie");
         assert!(units(&plain) > 0 && at(&plain, 17.0) == units(&plain), "the scores at the fallback's width");
-        let (status, _, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.900");
+        let (status, headers, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.875");
         assert_eq!(status, StatusCode::OK);
-        assert_eq!(at(&narrow, 17.9), units(&plain), "every score at the reader's column");
+        assert_eq!(headers[header::VARY], "Cookie");
+        assert_eq!(at(&narrow, 17.875), units(&plain), "every score at the reader's column");
+        // A width between sixteenths of an em is engraved at the nearest.
+        assert_eq!(get_with_cookie("/compline/2026-10-27", "chant-width=17.900").2, narrow);
         // Only the scores differ.
         let words = |body: &str| {
             body.split("<div class=\"chant-width\"")

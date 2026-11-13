@@ -51,9 +51,11 @@
     return { em: width / em, units: (width / em) * LYRIC_SPACES * SCALE, px: em, column: width };
   };
 
-  // The server engraves the next page's scores at this column (chant.rs at_width).
+  // The server engraves the next page's scores at this column (chant.rs at_width),
+  // to the nearest sixteenth of an em (chant.rs WIDTH_STEPS): within 1/32 em,
+  // 0.46 units, of the column, so the score it sends fits as one laid out here.
   var tell = function (em) {
-    var value = em.toFixed(3);
+    var value = (Math.round(em * 16) / 16).toFixed(4);
     if (value === told) return;
     told = value;
     document.cookie = COOKIE + "=" + value + ";path=/;max-age=31536000;SameSite=Lax";

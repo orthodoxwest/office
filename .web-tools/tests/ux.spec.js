@@ -4738,10 +4738,10 @@ test("a chant score is drawn at its final height from the first frame once the c
   await logScoreHeights(page);
   // A first visit lays the score out at the column and keeps the column's width for the server.
   await openDatedPage(page, "/terce/2026-11-13");
-  await expect.poll(async () => (await context.cookies()).find((c) => c.name === "chant-width")?.value).toMatch(/^\d+\.\d{3}$/);
+  await expect.poll(async () => (await context.cookies()).find((c) => c.name === "chant-width")?.value).toMatch(/^\d+\.\d{4}$/);
   const column = await page.evaluate(() => {
     const score = [...document.querySelectorAll(".chant-score")].find((e) => e.offsetParent);
-    return (score.clientWidth / parseFloat(getComputedStyle(score).fontSize)).toFixed(3);
+    return (Math.round((score.clientWidth / parseFloat(getComputedStyle(score).fontSize)) * 16) / 16).toFixed(4);
   });
   expect((await context.cookies()).find((c) => c.name === "chant-width").value).toBe(column);
 
