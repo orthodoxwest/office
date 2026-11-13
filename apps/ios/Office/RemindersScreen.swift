@@ -333,7 +333,7 @@ struct RemindersScreen: View {
 
     /// Chooses an hour, from its faint time as from its box.
     private func choose(_ h: HourReminder) {
-        toggled()
+        toggled(true)
         var changed = h
         changed.chosen = true
         change(settings.with(changed))
