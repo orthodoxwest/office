@@ -3108,7 +3108,7 @@ function rule(x1, y1, x2, y2, w, seed) {
       }, ms * p.k));
     }
 
-    // ---- Set-up (sixth pass): everything that reads the page is done in
+    // ---- Set-up: everything that reads the page is done in
     // idle time after load and kept, reads before writes. The tap only
     // writes. ----
 
@@ -3253,7 +3253,7 @@ function rule(x1, y1, x2, y2, w, seed) {
 
       // ---- Sums. ----
       var set = function (k, val) { g.vars.push([k, val]); };
-      // The vault's box. At dawn it runs to the lining's band (egg.css), 8px
+      // The vault's box. At dawn it runs to the lining's band (style.css), 8px
       // wider each side than it stands at rest.
       var grow = dir === "dawn" ? 8 * zoom : 0;
       var v = { left: vr.left - grow, top: vr.top, width: vr.width + 2 * grow, height: vr.height, bottom: vr.bottom };
@@ -3333,15 +3333,16 @@ function rule(x1, y1, x2, y2, w, seed) {
         var e = easeAt(SPREAD_EASE, tau / dur);
         return 0.5 * s0 * Math.pow(s1 / s0, e) + 0.5 * (s0 + e * (s1 - s0));
       };
-      // The veil's shape keeps the eighth pass's pace (the halo round the
-      // window is its first 400 ms): the old sizes, done by VEIL_PART.
+      // The veil's shape grows half by ratio and half evenly along
+      // SPREAD_EASE for its first 400 ms (the halo round the window), then
+      // runs on ahead, done by VEIL_PART.
       var vDur = Math.round(dur * VEIL_PART);
       for (var vi = 0; vi <= NODES; vi += 1) {
         var tn = vDur * vi / NODES;
         vnodes.push(sizeAt(tn <= 400 ? tn : 400 + (tn - 400) * (dur - 400) / (vDur - 400)));
       }
-      // The page's own shape (ninth pass) grows by an even ratio, a little
-      // faster at first (SPREAD_BEND), and is done by SPREAD_SHAPE_PART of the span:
+      // The page's own shape grows by an even ratio, a little faster at
+      // first (SPREAD_BEND), and is done by SPREAD_SHAPE_PART of the span:
       // it starts at once under the halo, its feather takes as long to pass
       // the foot as to pass the wall beside the arch, and it has reached
       // every place while the glow's opacity is still low. The opacity, over
@@ -3420,8 +3421,8 @@ function rule(x1, y1, x2, y2, w, seed) {
       order.forEach(function (pair, n) {
         // About the middle row's own moment, 60ms apart, but no earlier than a
         // row's own half-mix less 150ms nor later than it plus 150.
-        // (Ninth pass: each at its own moment, where the ground under it can
-        // carry the ink it is given; never two within 25ms.)
+        // (Each at its own moment, where the ground under it can carry the
+        // ink it is given; never two within 25ms.)
         // The rows have much the same moment now (the shape has long passed
         // them all and they share the glow's opacity), so they are dealt out
         // about the middle one, 32ms apart, none further than 130ms from its
@@ -3496,8 +3497,9 @@ function rule(x1, y1, x2, y2, w, seed) {
     }
 
     // The glow's mask: one small image (the feather is wide; 120px across is
-    // plenty), made once per geometry and kept as a blob. Shipped, genarch
-    // writes it as an asset beside the arch's clip paths.
+    // plenty), made once per geometry and kept as a blob. The head is
+    // genarch's (ARCHES); the foot is as deep as this page stands below the
+    // springing, so the whole is drawn here.
     var maskCache = {};
     function maskFor(g, sync) {
       var k = g.mask.key, hit = maskCache[k];
@@ -3756,7 +3758,7 @@ function rule(x1, y1, x2, y2, w, seed) {
           if (!able) {
             // The stills are taken under our names, and to drop the names now
             // would end the transition in a cut. So the names stay for the
-            // quarter second of a plain crossfade (egg.css, .crown-plain: rules
+            // quarter second of a plain crossfade (style.css, .crown-plain: rules
             // only, nothing driven from script), the live page beneath is
             // run to its settled look, and then everything goes.
             plain = true;

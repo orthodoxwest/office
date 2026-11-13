@@ -677,6 +677,66 @@ mod tests {
         }
     }
 
+    // app.js and style.css play the crown's tap to presentation::crown's timetable and pigments.
+    #[test]
+    fn client_crown_play_matches_presentation() {
+        use presentation::crown::{self, CrownPlay, Ease, Rgb};
+        let js = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let css = std::str::from_utf8(crate::pwa::file("static/style.css").unwrap()).unwrap();
+        let ease = |e: Ease| format!("[{}, {}, {}, {}]", e[0], e[1], e[2], e[3]);
+        let rgb = |c: Rgb| format!("{}, {}, {}", c[0], c[1], c[2]);
+        let play = |name: &str, p: CrownPlay| {
+            format!(
+                "{name}: {{ turn: {}, front: [{}, {}], spread: [{}, {}], veil: [{}, {}], end: {}, inkAt: {}, glowEase: {} }},",
+                p.turn,
+                p.front.at,
+                p.front.len,
+                p.spread.at,
+                p.spread.len,
+                p.veil.0,
+                p.veil.1,
+                p.end,
+                p.ink_at,
+                ease(p.glow_ease)
+            )
+        };
+        let mut lines = vec![play("dusk", crown::DUSK), play("dawn", crown::DAWN)];
+        lines.push(format!("var FRONT_EASE = {};", ease(crown::FRONT_EASE)));
+        lines.push(format!("var SPREAD_EASE = {};", ease(crown::SPREAD_EASE)));
+        lines.push(format!("var SPREAD_WIDE = {};", crown::SPREAD_WIDE));
+        lines.push(format!("var SPREAD_FEATHER = {};", crown::SPREAD_FEATHER));
+        lines.push(format!("var SPREAD_SHAPE_PART = {};", crown::SPREAD_SHAPE_PART));
+        lines.push(format!("var SPREAD_BEND = {};", crown::SPREAD_BEND));
+        lines.push(format!("var SPREAD_GLOW_PART = {};", crown::SPREAD_GLOW_PART));
+        lines.push(format!("var VEIL_LEAD = {};", crown::VEIL_LEAD));
+        lines.push(format!("var VEIL_PART = {};", crown::VEIL_PART));
+        lines.push(format!("var TAP_APART = {};", crown::TAP_APART));
+        lines.push(format!("var RUSH = {};", crown::RUSH));
+        for line in &lines {
+            assert!(js.contains(line), "app.js lacks {line:?}");
+        }
+        let mut rules = Vec::new();
+        for (name, p) in [("dusk", crown::DUSK), ("dawn", crown::DAWN)] {
+            rules.push(format!(":root.crown-{name} {{ --crown-veil-ink: {}; --crown-veil-peak: {}; }}", rgb(p.veil_ink), p.veil_peak));
+        }
+        for (name, c) in [
+            ("ochre", crown::SKY_OCHRE),
+            ("red-ochre", crown::SKY_RED_OCHRE),
+            ("ember", crown::SKY_EMBER),
+            ("lime", crown::SKY_LIME),
+            ("rose-lilac", crown::SKY_ROSE_LILAC),
+        ] {
+            rules.push(format!("--crown-{name}: {};", rgb(c)));
+        }
+        rules.push(format!("--crown-veil-c: rgb({});", rgb(crown::DAWN.veil_ink)));
+        rules.push(format!("--crown-veil-c: rgb({});", rgb(crown::DAWN_VEIL_UMBER)));
+        rules.push(format!("var(--crown-veil-low, {})", crown::DAWN_VEIL_LOW));
+        rules.push(format!("--crown-ink-handover: {}ms;", crown::INK_HANDOVER));
+        for rule in &rules {
+            assert!(css.contains(rule), "style.css lacks {rule:?}");
+        }
+    }
+
     // app.js reads an hour at presentation::Reading's pace before home marks it prayed.
     #[test]
     fn client_prayed_pace_matches_server() {
