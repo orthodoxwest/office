@@ -12656,7 +12656,7 @@ body.page-home::before {
   animation: crown-ink-out calc(480ms * var(--crown-kp)) cubic-bezier(0.4, 0, 0.6, 1) calc(var(--crown-vault-out, 99999) * 1ms * var(--crown-kp)) both;
 }
 :root.crown-vt::view-transition-new(crown-back) {
-  animation: crown-ink-out calc(10ms * var(--crown-kp)) step-end calc((var(--crown-vault-out, 99999) - 20) * 1ms * var(--crown-kp)) both;
+  animation: crown-ink-out calc(80ms * var(--crown-kp)) linear calc((var(--crown-vault-out, 99999) - 80) * 1ms * var(--crown-kp)) both;
 }
 
 @keyframes crown-front {
