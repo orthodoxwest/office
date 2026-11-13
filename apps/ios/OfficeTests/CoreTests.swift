@@ -671,7 +671,7 @@ final class CrownTests: XCTestCase {
     }
 
     // The play's sums on a phone's home: in their order, and every line's ink handed over.
-    func testThePlayKeepsItsOrder() {
+    func testThePlayKeepsItsOrder() throws {
         let card = CGRect(x: 16, y: 60, width: 358, height: 760)
         let band: CGFloat = 330
         let placed = SkyStar.placed(.phone, width: card.width, band: band, first: false, reserve: [])
@@ -694,33 +694,65 @@ final class CrownTests: XCTestCase {
             XCTAssertGreaterThan(s.covered, fig.spread.at)
             XCTAssertGreaterThanOrEqual(s.end, fig.end)
             XCTAssertLessThan(s.settle, s.end)
+            // The ending beat: the page still for a held breath, then one thing, then the end.
+            XCTAssertEqual(s.beat, s.settle + fig.beatHold)
+            XCTAssertEqual(s.end, max(fig.end, s.beat + fig.beatLen + 30))
             // Light arrives faster than it leaves.
             if !dusk { XCTAssertLessThan(fig.end, CrownFigures.of(dusk: true).end) }
-            // The page's own light rises from nothing to the whole, and the veil is gone by its end.
+            // The page's own light rises from nothing to the whole; the veil begins with the
+            // spread from rest, is at its height at `veilTop` of its span, and is gone by its end.
             XCTAssertEqual(s.glow(fig.spread.at), 0)
             XCTAssertEqual(s.glow(fig.spread.at + s.dur), 1, accuracy: 1e-6)
+            XCTAssertEqual(fig.veilFrom, fig.spread.at)
+            XCTAssertEqual(s.veilOpacity(fig.veilFrom), 0, accuracy: 1e-6)
+            XCTAssertEqual(s.veilOpacity(fig.veilFrom + fig.veilTop * s.veilSpan), fig.veilPeak, accuracy: 1e-6)
             XCTAssertEqual(s.veilOpacity(fig.veilTo), 0, accuracy: 1e-6)
+            // The veil's shape is over the page's ahead of it, done by `veilPart` of the spread.
+            XCTAssertGreaterThan(s.veilScale(fig.spread.at + s.veilDur), s.spreadScale(fig.spread.at + s.veilDur))
+            // The frieze turns on its own span: dark first at dusk, light last at dawn.
+            XCTAssertEqual(s.friezeTurn(fig.frieze.at), 0)
+            XCTAssertEqual(s.friezeTurn(fig.frieze.end), 1)
+            XCTAssertLessThanOrEqual(fig.frieze.end, s.settle)
             // The front has turned the whole head by its end.
             XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + 40), fig.front.end), 1)
             XCTAssertEqual(s.frontAlpha(CGPoint(x: card.midX, y: card.minY + band - 4), fig.front.end), 1)
             // Each of the day's lines hands over while the front crosses the head, and the rows
-            // one after another, no two within 25ms; by the settle every line has its new ink.
+            // one after another, no two within 10ms; by the settle every line has its new ink.
             XCTAssertEqual(Set(s.words.keys), Set(words.keys))
             for t in s.words.values { XCTAssertTrue((fig.front.at...fig.front.end).contains(t)) }
             let dealt = s.rows.values.sorted()
             XCTAssertEqual(dealt.count, rows.count)
-            for (a, b) in zip(dealt, dealt.dropFirst()) { XCTAssertGreaterThanOrEqual(b - a, 25 - 1e-9) }
+            for (a, b) in zip(dealt, dealt.dropFirst()) { XCTAssertGreaterThanOrEqual(b - a, 10 - 1e-9) }
             for key in Array(rows.keys) + Array(words.keys) {
                 XCTAssertEqual(s.inkIn(key, s.settle), 1)
                 XCTAssertEqual(s.inkOut(key, s.settle), 1)
             }
-            // Dusk's stars have kindled before the play is over; dawn's go out ahead of the
-            // light, the morning star by the cross last.
+            // The stars come by magnitude from the change of look, and every one has its turn by
+            // the ending beat. Dusk: the evening star (the one nearest the cross) first and
+            // alone, and the faintest at the beat, kindled before the play is over. Dawn: the
+            // field and the brightest go out before the page is still, and the morning star at
+            // the beat.
             XCTAssertEqual(s.starTurns.count, stars.count)
             for t in s.starTurns {
-                if dusk { XCTAssertLessThanOrEqual(t + 800, s.end) } else { XCTAssertTrue((150...1750).contains(t)) }
+                // (Each turn is a whole ms, as the web's are.)
+                XCTAssertTrue((fig.turn...s.beat + 0.5).contains(t))
+                if dusk { XCTAssertLessThanOrEqual(t + fig.starKindle, s.end) }
             }
-            if !dusk && !stars.isEmpty { XCTAssertEqual(s.starTurns.max(), 1750) }
+            XCTAssertGreaterThan(stars.count, fig.starsBright + 2)
+            let evening = try XCTUnwrap(s.evening)
+            let latest = try XCTUnwrap(s.starTurns.max())
+            XCTAssertEqual(latest, s.beat, accuracy: 0.5)
+            if dusk {
+                XCTAssertGreaterThanOrEqual(s.starTurns[evening], fig.turn + 150)
+                XCTAssertNil(s.morningAt)
+                for (i, t) in s.starTurns.enumerated() where i != evening {
+                    XCTAssertGreaterThanOrEqual(t, s.starTurns[evening] + fig.eveningStarAlone)
+                }
+            } else {
+                XCTAssertEqual(s.starTurns[evening], s.beat, accuracy: 0.5)
+                XCTAssertNotNil(s.morningAt)
+                for (i, t) in s.starTurns.enumerated() where i != evening { XCTAssertLessThan(t, s.settle) }
+            }
         }
     }
 }

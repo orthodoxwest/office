@@ -48,9 +48,6 @@ struct CrownFigures {
     /// How far the veil's shape runs ahead of the page's, and by what share it is done.
     let veilLead: Double
     let veilPart: Double
-    /// Dawn's veil through the wall's grey passage.
-    let dawnVeilUmber: Pigment
-    let dawnVeilLow: Double
     /// A line's ink changes hands in this long, ms.
     let inkHandover: Double
     /// The sky's pigments.
@@ -65,6 +62,36 @@ struct CrownFigures {
     let rush: Double
     /// How many times slower than its timetable the play is performed (the clock is divided by it).
     let pace: Double
+    /// The frieze's own change: dark first at dusk, light last at dawn.
+    let frieze: Span
+    /// The veil is multiplied over the page: its strength rises to `veilPeak` by `veilTop` of its
+    /// span (`veilIn`) and is gone by `veilGone` (`veilOut`); it thins to `veilFar` of itself at
+    /// the screen's edge.
+    let veilTop: Double
+    let veilGone: Double
+    let veilIn: CubicEase
+    let veilOut: CubicEase
+    let veilFar: Double
+    /// Dawn's first warmth, the night's teal lifted, and the cross's ember gold.
+    let skyPeach: Pigment
+    let skyTeal: Pigment
+    let crossEmber: Pigment
+    /// Each star kindles in `starKindle`, to `starOver` of its size and back, and goes out in
+    /// `starSnuff`.
+    let starKindle: Double
+    let starOver: Double
+    let starSnuff: Double
+    /// Dusk's evening star stands alone this long; then the brightest, one at a time, apart.
+    let eveningStarAlone: Double
+    let starsBright: Int
+    let starsBrightApart: Double
+    /// Dawn's field is out by this share of the way to the settle; none lingers longer than this
+    /// after the plaster's front has reached it.
+    let dawnFieldOut: Double
+    let dawnStarLinger: Double
+    /// The ending beat: the page still for `beatHold`, then one thing, in `beatLen`.
+    let beatHold: Double
+    let beatLen: Double
 }
 
 extension CrownFigures {
@@ -91,8 +118,6 @@ extension CrownFigures {
             spreadGlowPart: Double(p.spreadGlowPart),
             veilLead: Double(p.veilLead),
             veilPart: Double(p.veilPart),
-            dawnVeilUmber: Pigment(p.dawnVeilUmber),
-            dawnVeilLow: Double(p.dawnVeilLow),
             inkHandover: Double(p.inkHandover),
             skyOchre: Pigment(p.skyOchre),
             skyRedOchre: Pigment(p.skyRedOchre),
@@ -101,7 +126,26 @@ extension CrownFigures {
             skyRoseLilac: Pigment(p.skyRoseLilac),
             tapApart: Double(p.tapApart),
             rush: Double(p.rush),
-            pace: Double(p.pace)
+            pace: Double(p.pace),
+            frieze: Span(at: Double(p.frieze.at), len: Double(p.frieze.len)),
+            veilTop: Double(p.veilTop),
+            veilGone: Double(p.veilGone),
+            veilIn: CubicEase(p.veilIn),
+            veilOut: CubicEase(p.veilOut),
+            veilFar: Double(p.veilFar),
+            skyPeach: Pigment(p.skyPeach),
+            skyTeal: Pigment(p.skyTeal),
+            crossEmber: Pigment(p.crossEmber),
+            starKindle: Double(p.starKindle),
+            starOver: Double(p.starOver),
+            starSnuff: Double(p.starSnuff),
+            eveningStarAlone: Double(p.eveningStarAlone),
+            starsBright: Int(p.starsBright),
+            starsBrightApart: Double(p.starsBrightApart),
+            dawnFieldOut: Double(p.dawnFieldOut),
+            dawnStarLinger: Double(p.dawnStarLinger),
+            beatHold: Double(p.beatHold),
+            beatLen: Double(p.beatLen)
         )
     }
 }
@@ -281,6 +325,8 @@ struct CrownScene {
     let dur: Double
     let shapeDur: Double
     let veilDur: Double
+    /// The veil's whole span, from `fig.veilFrom` (longer on a wide screen, as the spread is).
+    let veilSpan: Double
 
     /// The light on the horizon: its height and (at dawn) its half-width.
     let washHeight: Double
@@ -293,12 +339,18 @@ struct CrownScene {
     let rowRects: [String: CGRect]
 
     let stars: [CrownStar]
-    /// Each star's turn: at dusk when it kindles, at dawn when it goes out.
+    /// Each star's turn, ms from the tap: at dusk when it kindles, at dawn when it goes out.
     let starTurns: [Double]
+    /// The star nearest the cross: the evening star, and the morning star; and (dawn) when the
+    /// plaster's front nears it and its gold deepens.
+    let evening: Int?
+    let morningAt: Double?
 
-    /// When the page has turned everywhere, when the stills go, and the play's end.
+    /// When the page has turned everywhere, when the stills go, the ending beat (the page still
+    /// for `beatHold`, then one thing), and the play's end.
     let covered: Double
     let settle: Double
+    let beat: Double
     let end: Double
 
     /// Where a front's feather is half through, and where it begins (style.css's stops).
@@ -375,7 +427,8 @@ struct CrownScene {
         var s1 = 1.0
         while cornerAt(s1) < fw / 2 && s1 < 60 { s1 += 0.05 }
         s1 *= 1.02
-        let dur = fig.spread.len + (Double(screen.width) > 700 ? fig.spreadWide : 0)
+        let wide = Double(screen.width) > 700 ? fig.spreadWide : 0
+        let dur = fig.spread.len + wide
         let m0 = fw / 2 + 0.012
         width = W
         self.ax = ax
@@ -395,12 +448,14 @@ struct CrownScene {
         let vDur = (dur * fig.veilPart).rounded()
         let shapeDur = (dur * fig.spreadShapePart).rounded()
         veilDur = vDur
+        veilSpan = fig.veilTo - fig.veilFrom + wide
         self.shapeDur = shapeDur
         var nodes: [Double] = []
         var veilNodes: [Double] = []
         for i in 0...8 {
-            let tn = vDur * Double(i) / 8
-            veilNodes.append(sizeAt(tn <= 400 ? tn : 400 + (tn - 400) * (dur - 400) / (vDur - 400)))
+            // The veil's shape is the spread's whole course run through in `veilPart` of it: over
+            // the whole page while the veil is still next to nothing, so no edge of it crosses.
+            veilNodes.append(sizeAt(dur * Double(i) / 8))
             nodes.append(s0 * pow(s1 / s0, pow(Double(i) / 8, fig.spreadBend)))
         }
         self.nodes = nodes
@@ -436,8 +491,9 @@ struct CrownScene {
         self.words = shownWords.mapValues { frontAt(Double($0.minY) + Double($0.height) * 0.6) }
 
         // The rows change ink one after another, each as the page under it is turned far enough
-        // to carry the new ink, dealt out 32ms apart about the middle one, none further than
-        // 130ms from its own moment and never two within 25ms.
+        // to carry the new ink, dealt out 14ms apart about the middle one, none further than
+        // 60ms from its own moment and never two within 10ms: the wall is shaded to the new
+        // look's value before it is crossed, so the rows come back together, in one breath.
         let shownRows = rows.filter { $0.value.height > 0 && $0.value.width > 0 }
         rowRects = shownRows
         var order = shownRows.map { (key: $0.key, at: when(Double($0.value.midX), Double($0.value.midY), fig.inkAt), y: Double($0.value.minY)) }
@@ -448,42 +504,84 @@ struct CrownScene {
             let base = order[middle].at
             var previous = -Double.infinity
             for (n, row) in order.enumerated() {
-                var t = max(row.at - 130, min(row.at + 130, base + Double(n - middle) * 32))
-                if n > 0 && t < previous + 25 { t = previous + 25 }
+                var t = max(row.at - 60, min(row.at + 60, base + Double(n - middle) * 14))
+                if n > 0 && t < previous + 10 { t = previous + 10 }
                 previous = t
                 dealt[row.key] = t
             }
         }
         self.rows = dealt
         let lastDip = dealt.values.max() ?? 0
-        settle = max(covered, lastDip + 220, fig.spread.at + 1100, fig.veilTo - 80, fig.spread.at + dur * fig.spreadGlowPart - 50) + 80
-        end = max(fig.end, covered + 20, settle + 90)
+        let settle = max(covered, lastDip + 220, fig.spread.at + 1100, fig.veilTo - 80, fig.spread.at + dur * fig.spreadGlowPart - 50) + 80
+        self.settle = settle
+        // The ending beat: the page is still for `beatHold`, then one thing (the last star, or
+        // the morning star and the cross), then the end.
+        let beat = settle + fig.beatHold
+        self.beat = beat
+        end = max(fig.end, beat + fig.beatLen + 30)
 
-        // Each star's turn. Dusk: in the wake of the dark, the largest first; a star out in the
-        // moulding's margin waits for the wall's night. Dawn: ahead of the light, the smallest
-        // and lowest first, the one nearest the cross (the morning star) last.
+        // Each star's turn, by magnitude, from the change of look (app.js's `starTurns`; the sums
+        // are made in ms from the turn, as the web's are, and given from the tap). Dusk: the
+        // evening star (the one nearest the cross) as the dark first reaches it, alone; then the
+        // brightest, one at a time; then the field, brightest to faintest, until the page is
+        // still; and after the held breath the last and faintest. None before the dark has
+        // reached it. Dawn: the field goes out faintest first, then the brightest one at a time,
+        // none long after the plaster's front; the morning star stays for the ending beat.
         self.stars = stars
-        let sizes = stars.map(\.size)
-        let big = sizes.max() ?? 0
-        let small = sizes.min() ?? 0
         let crossAt = CGPoint(x: crown.midX, y: crown.midY)
         let nearest = stars.indices.min { hypot(stars[$0].center.x - crossAt.x, stars[$0].center.y - crossAt.y) < hypot(stars[$1].center.x - crossAt.x, stars[$1].center.y - crossAt.y) }
-        let playEnd = end
-        starTurns = stars.indices.map { i in
-            let s = stars[i]
-            let rank = big > small ? (big - s.size) / (big - small) : 0
-            let seed = Double((s.index * 7919) % 97) / 97
-            let sy = Double(s.center.y)
-            if dusk {
-                var t = frontAt(sy) + 160 + 620 * rank + 260 * seed
-                if arch.inside((Double(s.center.x) - Double(card.minX)) / W, (ys - sy) / W) < (5 + 9) / W {
-                    t = max(t, when(Double(s.center.x), sy, 0.5) + 200)
-                }
-                return min(t, playEnd - 1050)
+        evening = nearest
+        let turn = fig.turn
+        let settleIn = settle - turn
+        let beatIn = beat - turn
+        let dark = { (i: Int) -> Double in frontAt(Double(stars[i].center.y)) - turn }
+        let seedOf = { (i: Int) -> Double in Double((i * 7919) % 97) / 97 }
+        var out = [Double](repeating: beatIn, count: stars.count)
+        // Brightest first; equal stars keep their order.
+        let rest = stars.indices.filter { $0 != nearest }.sorted { stars[$0].size != stars[$1].size ? stars[$0].size > stars[$1].size : $0 < $1 }
+        let bright = Array(rest.prefix(fig.starsBright))
+        var field = Array(rest.dropFirst(fig.starsBright))
+        let apart = fig.starsBrightApart
+        var morning: Double?
+        if dusk {
+            let first = nearest.map { max(150, dark($0) + 60) } ?? 150
+            if let nearest { out[nearest] = first }
+            let lastOne: Int? = field.count > 1 ? field.removeLast() : nil
+            for (n, i) in bright.enumerated() {
+                out[i] = max(first + fig.eveningStarAlone + Double(n) * apart, dark(i) + 100)
             }
-            if i == nearest { return 1750 }
-            return max(150, min(frontAt(sy) - 850 - 450 * rank - 160 * seed, 1650))
+            let from = first + fig.eveningStarAlone + Double(bright.count) * apart
+            let to = max(from, settleIn - 0.3 * fig.starKindle)
+            for (n, i) in field.enumerated() {
+                let star = stars[i]
+                let sy = Double(star.center.y)
+                var t = from + (to - from) * (Double(n) + 0.6 * (seedOf(i) - 0.5)) / Double(max(1, field.count - 1))
+                t = max(from, min(to, t), dark(i) + 100)
+                // A star out in the moulding's margin waits for the wall's night.
+                if arch.inside((Double(star.center.x) - Double(card.minX)) / W, (ys - sy) / W) < (5 + 9) / W {
+                    t = max(t, when(Double(star.center.x), sy, 0.5) - turn + 200)
+                }
+                out[i] = min(t, settleIn - 0.3 * fig.starKindle)
+            }
+            if let lastOne { out[lastOne] = beatIn }
+        } else {
+            let until = fig.dawnFieldOut * settleIn - Double(bright.count) * apart
+            for (n, i) in field.reversed().enumerated() {
+                let t = 40 + (until - 40) * (Double(n) + 0.6 * (seedOf(i) - 0.5)) / Double(max(1, field.count - 1))
+                out[i] = max(0, min(t, until, dark(i) + fig.dawnStarLinger))
+            }
+            for (n, i) in bright.reversed().enumerated() {
+                out[i] = max(0, min(until + Double(n + 1) * apart, dark(i) + fig.dawnStarLinger))
+            }
+            if let nearest {
+                out[nearest] = beatIn
+                // When the plaster's front nears the morning star: its gold deepens there, to
+                // stand on the light wall.
+                morning = (dark(nearest) - 300).rounded() + turn
+            }
         }
+        morningAt = morning
+        starTurns = out.map { $0.rounded() + turn }
     }
 
     // MARK: The front
@@ -493,6 +591,12 @@ struct CrownScene {
         let u = crownRun(t, fig.front.at, fig.front.len)
         if u <= 0.95 { return r0 + (ra - r0) * fig.frontEase.at(u / 0.95) }
         return ra + (r - ra) * (u - 0.95) / 0.05
+    }
+
+    /// The front's ellipse at `t`, `scale` times its size: beyond it the front has not reached.
+    func frontEllipse(_ t: Double, scale: Double = 1) -> Path {
+        let R = frontRadius(t) * scale
+        return Path(ellipseIn: CGRect(x: cx - a * R, y: cy - R, width: 2 * a * R, height: 2 * R))
     }
 
     /// How far the front has turned the head at a point (0...1).
@@ -576,40 +680,24 @@ struct CrownScene {
 
     // MARK: The veil
 
-    /// The veil's strength at `t`: dusk's lilac haze gathering round the window and held while
-    /// the wall passes its middle greys; dawn's warm halo, a thin rose-umber through the grey,
-    /// then the blush on the wall grown light.
+    /// The veil's strength at `t` (style.css's `crown-veil-dusk` and `crown-veil-dawn`): from
+    /// rest to `veilPeak` at `veilTop` of its span, by `veilIn`, and gone by `veilGone`, by
+    /// `veilOut`. Dusk deepens while the new page has barely begun and leaves on a long tail;
+    /// dawn is at its height while the wall is still dark and lifted as the plaster comes.
     func veilOpacity(_ t: Double) -> Double {
-        let u = crownRun(t, fig.veilFrom, fig.veilTo - fig.veilFrom)
-        guard t >= fig.veilFrom, t <= fig.veilTo else { return 0 }
-        let peak = fig.veilPeak
-        let track = dusk
-            ? CrownTrack(stops: [
-                (0, 0, CubicEase(0.4, 0, 0.7, 1)),
-                (0.329, peak * 0.75, CubicEase(0.3, 0.3, 0.6, 1)),
-                (0.467, peak, CubicEase(0.4, 0, 0.6, 1)),
-                (0.733, peak * 0.8, CubicEase(0.4, 0, 0.5, 1)),
-                (1, 0, CubicEase.linear),
-            ])
-            : CrownTrack(stops: [
-                (0, 0, CubicEase(0.4, 0, 0.6, 1)),
-                (0.305, peak * 1.13, CubicEase(0.4, 0, 0.6, 1)),
-                (0.436, fig.dawnVeilLow, CubicEase.linear),
-                (0.667, fig.dawnVeilLow, CubicEase(0.4, 0, 0.6, 1)),
-                (0.795, peak, CubicEase(0.3, 0, 0.3, 1)),
-                (1, 0, CubicEase.linear),
-            ])
-        return track.value(u)
+        guard t >= fig.veilFrom else { return 0 }
+        let u = crownRun(t, fig.veilFrom, veilSpan)
+        if u <= fig.veilTop { return fig.veilPeak * fig.veilIn.at(u / fig.veilTop) }
+        if u < fig.veilGone { return fig.veilPeak * (1 - fig.veilOut.at((u - fig.veilTop) / (fig.veilGone - fig.veilTop))) }
+        return 0
     }
 
-    /// The veil's ink at `t`: dusk's one; at dawn the blush, rose-umber through the grey passage.
-    func veilInk(_ t: Double) -> Pigment {
-        guard !dusk else { return fig.veilInk }
-        let u = crownRun(t, fig.veilFrom, fig.veilTo - fig.veilFrom)
-        if u <= 0.28 || u >= 0.795 { return fig.veilInk }
-        if u < 0.4 { return fig.veilInk.toward(fig.dawnVeilUmber, (u - 0.28) / 0.12) }
-        if u <= 0.64 { return fig.dawnVeilUmber }
-        return fig.dawnVeilUmber.toward(fig.veilInk, (u - 0.64) / 0.155)
+    // MARK: The frieze
+
+    /// How far the frieze has taken the new look at `t` (0...1): the land, dark first at dusk, a
+    /// silhouette against the afterglow, and light last at dawn.
+    func friezeTurn(_ t: Double) -> Double {
+        CubicEase(0.4, 0, 0.3, 1).at(crownRun(t, fig.frieze.at, fig.frieze.len))
     }
 
     // MARK: Ink
@@ -623,7 +711,7 @@ struct CrownScene {
 
     /// How far a line's new ink has come at `t` (0...1).
     func inkIn(_ key: String, _ t: Double) -> Double {
-        if let w = words[key] { return CubicEase(0.3, 0, 0.4, 1).at(crownRun(t, w + 40, 420)) }
+        if let w = words[key] { return CubicEase(0.3, 0, 0.4, 1).at(crownRun(t, w - 80, 360)) }
         if let r = rows[key] { return crownRun(t, r - fig.inkHandover / 2, fig.inkHandover) }
         return 1
     }

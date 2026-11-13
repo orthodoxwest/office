@@ -13,10 +13,13 @@ import UIKit.UIGestureRecognizerSubclass
  * - At the turn the page is photographed (the old look), then again with its rows' and the day's
  *   words' ink taken off (its ground), and the theme is changed under the photographs. The new
  *   look is live from then on: the old one is let go of through the front crossing the head and
- *   then through the arch's own shape spreading over the page, feathered wide, under a thin veil
- *   of the hour's colour. Each row and line of the day hands its ink over at its own moment: the
- *   old ink goes from the photograph and the live line's new ink comes in.
- * - At the settle the photographs go, and the page is its live self.
+ *   then through the arch's own shape spreading over the page, feathered wide, under a veil of
+ *   the hour's colour multiplied over both (a layer of its own, blended, so it only shades). Each
+ *   row and line of the day hands its ink over at its own moment: the old ink goes from the
+ *   photograph and the live line's new ink comes in. The frieze holds its old look over all of
+ *   it until its own span. A soft tick marks the turn.
+ * - At the settle the photographs go, and the page is its live self; after a held breath, one
+ *   last thing (the last star, or the morning star and the cross) ends the play.
  *
  * A touch anywhere else runs what is left out quickly and goes on to the control touched; a
  * scroll, a turn of the phone, opening the menu or another page, or the app leaving the screen
@@ -203,6 +206,7 @@ final class CrownPlayer: NSObject, ObservableObject {
         window.addSubview(host.view)
         host.view.layoutIfNeeded()
         run.host = host
+        crownTurning()
         let touches = CrownTouches { [weak self] point in self?.touched(point) }
         window.addGestureRecognizer(touches)
         watcher = touches
@@ -248,6 +252,8 @@ final class CrownPlayer: NSObject, ObservableObject {
             withTransaction(quiet) { run.model.turnTheme(run.choice) }
             run.switched = true
             run.phase = .turned
+            // One soft tick as the look turns under the reader's eyes.
+            crownTurned()
         case .turned:
             // One clock: everything from here is timed from the first frame of the new look,
             // however long the photographs took.
@@ -414,10 +420,14 @@ final class CrownRun {
     private let lit: Double
     private let oldCross: Crown
     private let newCross: Crown
+    /// The cross's ember gold: the last light it keeps at dusk, the first it takes at dawn.
+    private let emberCross: Crown
     private let catchInk: Color
     /// A gilt cross by day answers dusk with a catch of light at once.
     private let gilt: Bool
     private let crown: CGRect
+    /// The frieze, the land under the sky: it changes on its own span, over everything else.
+    private let frieze: CGRect?
     private let pigment: UIImage?
 
     // The clock: ms from the tap, held while the photographs are taken, sped by a rush.
@@ -437,6 +447,8 @@ final class CrownRun {
         self.window = window
         self.root = root
         self.crown = crown
+        // On whole points, so the band's cut and its redrawing meet on the screen's pixels.
+        frieze = f["frieze"].flatMap { $0.width > 0 && $0.height > 0 ? $0.integral : nil }
         let fig = CrownFigures.of(dusk: dusk)
         self.fig = fig
         let band = headFrame.height
@@ -464,6 +476,8 @@ final class CrownRun {
         lit = Double(leafCatch(head.season))
         oldCross = crownMark(dark: !dusk, season: head.season, first: head.first, black: head.black, size: crown.width)
         newCross = crownMark(dark: dusk, season: head.season, first: head.first, black: head.black, size: crown.width)
+        let ember = fig.crossEmber.color()
+        emberCross = Crown(size: crown.width, ink: ember, shading: .color(ember))
         catchInk = mix(leaf.hi, .white, 0.62)
         gilt = dusk && head.first
         pigment = UIImage(named: "pigment.png")
@@ -502,32 +516,44 @@ final class CrownRun {
 
     // MARK: The cross
 
-    /// The cross's two looks and the leaf's catch of light, at `t`.
+    /// The cross's two looks, its ember gold and the leaf's catch of light, at `t`.
     func crosses(_ t: Double) -> some View {
         let old: Double
         let new: Double
         let gleam: Double
+        var ember = 0.0
+        let rise = CubicEase(0.3, 0, 0.3, 1)
         if dusk {
-            // The leaf is laid over the paint first, then the paint goes; a catch of light as
-            // the last star lands (and at once, on a cross already gilt).
+            // The leaf is laid over the paint first, then the paint goes; a cross already gilt
+            // answers with a catch of light at once. Then it keeps the last of the light: an
+            // ember gold that comes with the afterglow and stays on it after the wall is dark,
+            // going only as the page comes to rest.
             let ease = CubicEase(0.4, 0, 0.4, 1)
             new = ease.at(crownRun(t, 80, 760))
             old = 1 - ease.at(crownRun(t, 780, 300))
             let flash = CrownTrack(stops: [(0, 0, CubicEase(0.4, 0, 0.6, 1)), (0.4, 0.6, CubicEase(0.4, 0, 0.6, 1)), (1, 0, CubicEase.linear)])
-            let first = gilt && t < fig.turn + 2700 ? flash.value(crownRun(t, 80, 760)) : 0
-            let last = t >= fig.turn + 2700 ? flash.value(crownRun(t, fig.turn + 2700, 600)) : 0
-            gleam = max(first, last)
+            gleam = gilt ? flash.value(crownRun(t, 80, 760)) : 0
+            if switched {
+                ember = 0.85 * rise.at(crownRun(t, fig.turn + 500, 900)) * (1 - rise.at(crownRun(t, scene.beat - 970, 600)))
+            }
         } else {
-            // The leaf lifts at once and settles; the paint comes over it as the arch opens past
-            // the crown, and the leaf is the last gold to go.
+            // The leaf lifts at once and settles. As the plaster nears it the cross deepens to
+            // the ember gold, which stands on cream where leaf alone is lost; and it is the last
+            // thing to change: at the ending beat, with the morning star, it turns from gold to
+            // its red.
             let ease = CubicEase(0.4, 0, 0.4, 1)
             gleam = CrownTrack(stops: [(0, 0, CubicEase(0.4, 0, 0.4, 1)), (0.34, 0.55, CubicEase(0.4, 0, 0.6, 1)), (1, 0, CubicEase.linear)]).value(crownRun(t, 60, 1300))
-            new = ease.at(crownRun(t, fig.turn + 1550, 700))
-            old = 1 - ease.at(crownRun(t, fig.turn + 2230, 300))
+            let beat = ease.at(crownRun(t, scene.beat, fig.beatLen))
+            new = switched ? beat : 0
+            old = switched ? 1 - beat : 1
+            if switched {
+                ember = 0.85 * rise.at(crownRun(t, fig.turn + 900, 800)) * (1 - beat)
+            }
         }
         return ZStack {
             oldCross.opacity(old)
             newCross.opacity(new)
+            emberCross.opacity(ember)
             Crown(size: crown.width, ink: catchInk, shading: .color(catchInk)).opacity(gleam)
         }
         .frame(width: crown.width, height: crown.height)
@@ -558,6 +584,7 @@ final class CrownRun {
                     }
                 }
             }
+            paintBelts(&old, t)
             paintFirstLight(&old, t)
             if switched && t > fig.front.at {
                 var front = old
@@ -572,30 +599,83 @@ final class CrownRun {
                 let sc = s.spreadScale(t)
                 page.draw(mask, in: s.maskRect(sc + (1.3 * s.s1 - sc) * topUp))
             }
+            // The frieze is drawn on its own over all of it (below).
+            if switched, oldShot != nil, let frieze {
+                var band = old
+                band.blendMode = .destinationOut
+                band.fill(Path(frieze), with: .color(.black))
+            }
         }
 
         // What the light leaves on the new ground in the head, shown as the front passes.
         if switched { paintEmber(&ctx, t) }
 
-        // The veil, over the turning wall (not the head), in the page's shape a little ahead.
-        if switched, t >= fig.spread.at, let mask {
-            let strength = s.veilOpacity(t) * (1 - topUp)
+        // The frieze is the horizon, and the one thing that holds: the old band stays whole
+        // over the turning page until its own span, and gives way to the live one.
+        if switched, let oldShot, let frieze {
+            let left = 1 - s.friezeTurn(t)
+            if left > 0 {
+                var band = ctx
+                band.clip(to: Path(frieze))
+                band.opacity = left
+                band.draw(oldShot, in: whole)
+            }
+        }
+
+        paintStars(&ctx, t)
+    }
+
+    /**
+     * What is multiplied over the page beneath (the stage's own layer, blended): it can only
+     * shade, so the plaster keeps its texture and every line its ink. The veil over the turning
+     * wall, in the page's growing shape and ahead of it; and at dawn the warm shade the head's
+     * new plaster comes up under, where the front has let it in.
+     */
+    func paintShade(_ ctx: inout GraphicsContext, size: CGSize, t: Double) {
+        guard switched else { return }
+        let s = scene
+        let whole = CGRect(origin: .zero, size: size)
+
+        // The veil, over the turning wall (not the head, the frieze or the cross, which ride
+        // above it).
+        if t >= fig.spread.at, let mask {
+            let strength = s.veilOpacity(t) * (1 - s.topUp(t))
             if strength > 0 {
                 ctx.drawLayer { veil in
                     veil.opacity = strength
                     let rect = s.maskRect(s.veilScale(t))
                     veil.clip(to: Path(rect))
-                    var outside = Path(whole)
-                    outside.addPath(s.vaultPath)
-                    veil.clip(to: outside, style: FillStyle(eoFill: true))
-                    paintVeil(&veil, t, whole)
+                    veil.clip(to: s.vaultPath, options: .inverse)
+                    if let frieze { veil.clip(to: Path(frieze), options: .inverse) }
+                    veil.clip(to: Path(crown), options: .inverse)
+                    paintVeil(&veil, whole)
                     veil.blendMode = .destinationIn
                     veil.draw(mask, in: rect)
                 }
             }
         }
 
-        paintStars(&ctx, t)
+        // Dawn's plaster does not arrive white: it comes up under a warm shade, peach low and
+        // rose above, which lifts on a long tail.
+        if !dusk {
+            let shade = 1 - CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, fig.turn + 250, 2300))
+            if shade > 0, t > fig.front.at {
+                let v = s.vault
+                ctx.drawLayer { warm in
+                    warm.clip(to: s.vaultPath)
+                    warm.clip(to: s.frontEllipse(t))
+                    warm.opacity = shade
+                    warm.fill(Path(v), with: .linearGradient(
+                        Gradient(stops: [.init(color: fig.skyPeach.color(), location: 0), .init(color: Color(rgb: 206, 158, 140, 1), location: 0.55), .init(color: fig.skyRoseLilac.color(), location: 1)]),
+                        startPoint: CGPoint(x: v.midX, y: v.maxY), endPoint: CGPoint(x: v.midX, y: v.minY)
+                    ))
+                    // Only as far as the front has let the new ground in.
+                    var reach = warm
+                    reach.blendMode = .destinationIn
+                    fillFront(&reach, t)
+                }
+            }
+        }
     }
 
     /// The front's ellipse at `t`, its feather as style.css's stops, filled in `ctx`'s blend.
@@ -608,9 +688,38 @@ final class CrownRun {
         c.fill(Path(ellipseIn: CGRect(x: -R, y: -R, width: 2 * R, height: 2 * R)), with: .radialGradient(Gradient(stops: stops), center: .zero, startRadius: 0, endRadius: R))
     }
 
-    /// Act one in the head, over the old ground: at dusk the afterglow rising off the horizon
-    /// and a warmth on the plaster as the night comes down over it; at dawn the colour of the
-    /// hour and then first light, a low dome on the horizon.
+    /**
+     * The belt. Ahead of the front, on the old sky it has not reached, rides a band of rose-lilac
+     * (the Belt of Venus over the earth's shadow at dusk; the first rose over the night at dawn),
+     * and at dawn a wider one of the night's teal lifted ahead of that: the front is three
+     * pigments deep. Each is a wash through a ring on the front's own ellipse, grown with it.
+     */
+    private func paintBelts(_ ctx: inout GraphicsContext, _ t: Double) {
+        guard switched else { return }
+        var c = ctx
+        c.clip(to: scene.vaultPath)
+        if !dusk {
+            belt(&c, t, scale: 1.5, pigment: fig.skyTeal, alpha: 0.6, ring: [(0, 0.52), (0.6, 0.66), (1, 0.76), (0.4, 0.9), (0, 1)])
+        }
+        belt(&c, t, scale: 1.22, pigment: fig.skyRoseLilac, alpha: dusk ? 0.62 : 0.5, ring: [(0, 0.6), (0.5, 0.69), (1, 0.79), (0.45, 0.9), (0, 1)])
+    }
+
+    /// One belt: `pigment` at `alpha` through a ring whose strength runs by `ring` (strength,
+    /// place) out to the front's ellipse `scale` times its size.
+    private func belt(_ ctx: inout GraphicsContext, _ t: Double, scale: Double, pigment: Pigment, alpha: Double, ring: [(Double, Double)]) {
+        let R = scene.frontRadius(t) * scale
+        guard R > 0 else { return }
+        var c = ctx
+        c.translateBy(x: scene.cx, y: scene.cy)
+        c.scaleBy(x: scene.a, y: 1)
+        let stops = ring.map { Gradient.Stop(color: pigment.color(alpha * $0.0), location: $0.1) }
+        c.fill(Path(ellipseIn: CGRect(x: -R, y: -R, width: 2 * R, height: 2 * R)), with: .radialGradient(Gradient(stops: stops), center: .zero, startRadius: 0, endRadius: R))
+    }
+
+    /// Act one in the head, over the old ground: at dusk the raking light on the whole niche and
+    /// the afterglow rising off the horizon, and a warmth on the plaster as the night comes down
+    /// over it; at dawn the night lifting to teal, rose and peach from the horizon, and then a
+    /// thin lime, low.
     private func paintFirstLight(_ ctx: inout GraphicsContext, _ t: Double) {
         let v = scene.vault
         let f = fig
@@ -628,8 +737,20 @@ final class CrownRun {
                     ))
                 }
             }
+            // Golden hour on the plaster: an ochre laid thin over the whole niche, deeper toward
+            // the horizon, before the dark comes down; the night covers it from above.
+            let gone = 1 - crownRun(t, f.turn + 1750, 500)
+            let raking = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 120, 1300)) * gone
+            if raking > 0 {
+                var w = c
+                w.opacity = raking
+                w.fill(Path(v), with: .linearGradient(
+                    Gradient(stops: [.init(color: f.skyOchre.color(0.4), location: 0), .init(color: f.skyOchre.color(0.28), location: 0.4), .init(color: f.skyOchre.color(0.16), location: 1)]),
+                    startPoint: CGPoint(x: v.midX, y: v.maxY), endPoint: CGPoint(x: v.midX, y: v.minY)
+                ))
+            }
             let rise = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 250, 1250))
-            let shown = rise * (1 - crownRun(t, f.turn + 1550, 300))
+            let shown = rise * gone
             guard shown > 0 else { return }
             // On a phone the afterglow is the cue that something has begun: denser.
             let phone = scene.screen.width <= 700
@@ -639,40 +760,42 @@ final class CrownRun {
             let ochre: [Gradient.Stop] = phone
                 ? [.init(color: f.skyOchre.color(0.62), location: 0), .init(color: f.skyOchre.color(0.52), location: 0.3), .init(color: f.skyOchre.color(0.2), location: 0.68), .init(color: f.skyOchre.color(0), location: 1)]
                 : [.init(color: f.skyOchre.color(0.3), location: 0), .init(color: f.skyOchre.color(0.26), location: 0.3), .init(color: f.skyOchre.color(0.1), location: 0.68), .init(color: f.skyOchre.color(0), location: 1)]
-            let box = washBox(scale: 0.3 + 0.7 * rise)
+            let box = washBox(scene.washHeight, scale: 0.3 + 0.7 * rise)
             wash(&c, box: box, opacity: shown, layers: [red, ochre], radius: CGSize(width: 1.6 * box.width, height: box.height), mask: [(0, 1), (0.34, 0.85), (0.66, 0.4), (1, 0)], pigmented: true)
         } else {
-            // Under it, and before it, the colour of the hour: lime thin over night is a grey
-            // mist, so the first of the light is rose ochre and the lime rises through that.
-            let gone = 1 - crownRun(t, f.turn + 800, 600)
+            // The night first lifts to its teal from the horizon, then a rose-lilac, then a peach
+            // of red ochre and lime: one wash, three pigments deep, rising, the teal leading. The
+            // lime comes last, thin and only low. Both are gone once the plaster has come.
+            let gone = 1 - crownRun(t, f.turn + 1100, 700)
             let rx = scene.washRadius
-            let under = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 220, 650))
-            if under * gone > 0 {
-                let box = washBox(scale: 0.3 + 0.7 * under)
-                let rose: [Gradient.Stop] = [
-                    .init(color: Color(rgb: 214, 160, 128, 0.95), location: 0), .init(color: Color(rgb: 206, 150, 124, 0.8), location: 0.22),
-                    .init(color: Color(rgb: 196, 146, 140, 0.42), location: 0.55), .init(color: f.skyRoseLilac.color(0.14), location: 0.82),
-                    .init(color: f.skyRoseLilac.color(0), location: 1),
+            let mask: [(Double, Double)] = [(0, 1), (0.3, 0.9), (0.64, 0.45), (1, 0)]
+            let first = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 150, 1100))
+            if first * gone > 0 {
+                let box = washBox(1.5 * scene.washHeight, scale: 0.3 + 0.7 * first)
+                let dawn: [Gradient.Stop] = [
+                    .init(color: f.skyPeach.color(0.92), location: 0), .init(color: Color(rgb: 206, 150, 124, 0.8), location: 0.16),
+                    .init(color: f.skyRoseLilac.color(0.5), location: 0.38), .init(color: f.skyTeal.color(0.5), location: 0.62),
+                    .init(color: f.skyTeal.color(0.22), location: 0.82), .init(color: f.skyTeal.color(0), location: 1),
                 ]
-                wash(&c, box: box, opacity: under * gone, layers: [rose], radius: CGSize(width: rx, height: box.height), mask: [(0, 1), (0.3, 0.9), (0.64, 0.45), (1, 0)], pigmented: false)
+                wash(&c, box: box, opacity: first * gone, layers: [dawn], radius: CGSize(width: 1.3 * rx, height: box.height), mask: mask, pigmented: false)
             }
-            let light = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 450, 800))
-            if light * gone > 0 {
-                let box = washBox(scale: 0.3 + 0.7 * light)
-                let lime: [Gradient.Stop] = [
-                    .init(color: f.skyLime.color(0.92), location: 0), .init(color: f.skyLime.color(0.9), location: 0.16),
-                    .init(color: f.skyLime.color(0.5), location: 0.46), .init(color: f.skyRoseLilac.color(0.28), location: 0.66),
-                    .init(color: f.skyRoseLilac.color(0.12), location: 0.84), .init(color: f.skyRoseLilac.color(0), location: 1),
+            let lime = CubicEase(0.3, 0, 0.3, 1).at(crownRun(t, 700, 900))
+            if lime * gone > 0 {
+                let box = washBox(0.5 * scene.washHeight, scale: 0.3 + 0.7 * lime)
+                let stops: [Gradient.Stop] = [
+                    .init(color: f.skyLime.color(0.45), location: 0), .init(color: f.skyLime.color(0.3), location: 0.4),
+                    .init(color: f.skyLime.color(0), location: 1),
                 ]
-                wash(&c, box: box, opacity: light * gone, layers: [lime], radius: CGSize(width: rx, height: box.height), mask: [(0, 1), (0.3, 0.9), (0.64, 0.45), (1, 0)], pigmented: false)
+                wash(&c, box: box, opacity: lime * gone, layers: [stops], radius: CGSize(width: rx, height: box.height), mask: mask, pigmented: false)
             }
         }
     }
 
-    /// The light on the horizon's box, grown from the horizon to `scale` of its height.
-    private func washBox(scale: Double) -> CGRect {
+    /// A light on the horizon's box, `height` tall when risen, grown from the horizon to `scale`
+    /// of it.
+    private func washBox(_ height: Double, scale: Double) -> CGRect {
         let v = scene.vault
-        let h = scene.washHeight * scale
+        let h = height * scale
         return CGRect(x: v.minX, y: v.maxY - h, width: v.width, height: h)
     }
 
@@ -710,7 +833,7 @@ final class CrownRun {
     private func paintEmber(_ ctx: inout GraphicsContext, _ t: Double) {
         let f = fig
         let v = scene.vault
-        let sink = dusk ? CubicEase(0.4, 0, 0.6, 1).at(crownRun(t, f.turn + 2250, 1000)) : CubicEase(0.4, 0, 0.6, 1).at(crownRun(t, f.turn + 850, 1400))
+        let sink = dusk ? CubicEase(0.4, 0, 0.3, 1).at(crownRun(t, f.turn + 1900, 1500)) : CubicEase(0.4, 0, 0.3, 1).at(crownRun(t, f.turn + 900, 1600))
         guard sink < 1, t > f.front.at else { return }
         let h = 0.22 * v.height * (1 - 0.6 * sink)
         let box = CGRect(x: v.minX, y: v.maxY - h, width: v.width, height: h)
@@ -725,10 +848,11 @@ final class CrownRun {
         wash(&e, box: box, opacity: shown, layers: [stops], radius: CGSize(width: 0.58 * box.width, height: box.height), mask: [(0, 1), (0.26, 0.85), (0.52, 0.4), (0.7, 0.12), (0.84, 0)], pigmented: false)
     }
 
-    /// The veil's ink, thinning outward from the springing's middle (style.css's `.crown-veil`).
-    private func paintVeil(_ ctx: inout GraphicsContext, _ t: Double, _ whole: CGRect) {
-        let ink = scene.veilInk(t)
-        let shares: [Double] = dusk ? [1, 0.86, 0.5, 0.2] : [1, 0.88, 0.66, 0.46]
+    /// The veil's ink, thinning only a little outward from the springing's middle (style.css's
+    /// `.crown-veil`).
+    private func paintVeil(_ ctx: inout GraphicsContext, _ whole: CGRect) {
+        let ink = fig.veilInk
+        let shares: [Double] = [1, 0.94, 0.82, fig.veilFar]
         let stops = zip(shares, [0, 0.28, 0.58, 1.0]).map { Gradient.Stop(color: ink.color($0.0), location: $0.1) }
         let rx = 1.5 * scene.width
         let ry = 1.9 * scene.width
@@ -743,32 +867,44 @@ final class CrownRun {
         c.fill(Path(ellipseIn: CGRect(x: -rx, y: -rx, width: 2 * rx, height: 2 * rx)), with: .radialGradient(Gradient(stops: stops), center: .zero, startRadius: 0, endRadius: rx))
     }
 
-    /// The stars. Dusk: unlit until each one's turn, in the wake of the dark, the largest first;
-    /// they barely swell, and the leaf's light carries them. Dawn: out a little ahead of the
-    /// light, the one by the cross last, and covered by the light where it reaches them first.
+    /// The stars, by magnitude, over the head's new ground both ways. Dusk: unlit until each
+    /// one's turn; they swell a little past their size as they kindle and settle, and the
+    /// leaf's light carries them. Dawn: out faintest first, and the morning star, its gold
+    /// deepened to stand on the light wall, at the ending beat.
     private func paintStars(_ ctx: inout GraphicsContext, _ t: Double) {
         guard !starPaths.isEmpty else { return }
         var sky = ctx
         sky.clip(to: scene.vaultPath)
-        let kindle = CrownTrack(stops: [(0, 0, CubicEase(0.3, 0.2, 0.3, 1)), (0.55, 1, CubicEase(0.3, 0.2, 0.3, 1)), (1, 1, CubicEase.linear)])
-        let swell = CrownTrack(stops: [(0, 0.86, CubicEase(0.3, 0.2, 0.3, 1)), (0.55, 1.06, CubicEase(0.3, 0.2, 0.3, 1)), (1, 1, CubicEase.linear)])
+        let rise = CubicEase(0.3, 0.2, 0.3, 1)
+        let kindle = CrownTrack(stops: [(0, 0, rise), (0.55, 1, rise), (1, 1, CubicEase.linear)])
+        let swell = CrownTrack(stops: [(0, 0.86, rise), (0.55, fig.starOver, rise), (1, 1, CubicEase.linear)])
         for (i, path) in starPaths.enumerated() {
             let turn = scene.starTurns[i]
             let centre = scene.stars[i].center
+            let morning = !dusk && i == scene.evening
             var shown: Double
             var scale = 1.0
             if dusk {
                 guard switched else { continue }
-                let u = crownRun(t, turn, 800)
+                let u = crownRun(t, turn, fig.starKindle)
                 shown = kindle.value(u)
                 scale = swell.value(u)
+            } else if morning {
+                shown = 1 - CubicEase(0.4, 0, 0.4, 1).at(crownRun(t, turn, fig.beatLen))
             } else {
-                shown = 1 - CubicEase(0.4, 0, 0.6, 1).at(crownRun(t, turn, 650))
-                if switched { shown *= 1 - scene.frontAlpha(centre, t) }
+                shown = 1 - CubicEase(0.4, 0, 0.3, 1).at(crownRun(t, turn, fig.starSnuff))
             }
             guard shown > 0.001 else { continue }
             var star = sky
             star.opacity = lit * starLeaf[i] * shown
+            if morning, switched, let at = scene.morningAt {
+                let deep = CubicEase(0.4, 0, 0.4, 1).at(crownRun(t, at, 700))
+                if deep > 0 {
+                    // style.css's brightness(0.7) saturate(1.8), reached by degrees.
+                    star.addFilter(.colorMultiply(Color(white: 1 - 0.3 * deep)))
+                    star.addFilter(.saturation(1 + 0.8 * deep))
+                }
+            }
             if scale != 1 {
                 star.translateBy(x: centre.x, y: centre.y)
                 star.scaleBy(x: scale, y: scale)
@@ -790,6 +926,10 @@ struct CrownStageView: View {
                     let t = run.clock()
                     ZStack(alignment: .topLeading) {
                         Canvas { ctx, size in run.paint(&ctx, size: size, t: t) }
+                        // Multiplied over everything under it, the live page and the leaving
+                        // one's picture alike: it can only shade.
+                        Canvas { ctx, size in run.paintShade(&ctx, size: size, t: t) }
+                            .blendMode(.multiply)
                         run.crosses(t)
                     }
                 }

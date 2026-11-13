@@ -841,6 +841,8 @@ private struct Frontispiece: View {
             .allowsHitTesting(false)
         }
         .padding(.horizontal, -side)
+        // The land under the sky: the crown's play turns it on its own span.
+        .crownFrame("frieze")
         .accessibilityAddTraits(.isHeader)
     }
 }
