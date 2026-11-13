@@ -7205,13 +7205,16 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
    brushed patch read as a highlight box), and its name is rubricated. Its
    gloss keeps one line: with no cell walls it may overhang a little. On the
    wide niche the cell is wide, and the pool keeps its own size. */
-.page-home .home-hour-link.is-current {
+/* While the light moves from one hour to the next (app.js's HOUR_LIGHT), the
+   hour it leaves and the hour it comes to (.is-passing) both hold a pool, which
+   the pass fades out and in. */
+.page-home .home-hour-link:is(.is-current, .is-passing) {
   isolation: isolate;
   background: none;
   box-shadow: none;
 }
 
-.page-home .home-hour-link.is-current::after {
+.page-home .home-hour-link:is(.is-current, .is-passing)::after {
   content: "";
   position: absolute;
   inset: -2px -4px;
@@ -9608,7 +9611,7 @@ body.rank-first-class .home-crown {
 
   :is(.page-home, .about-door) .home-rules,
   :is(.page-home, .about-door) .pray-now::before,
-  .page-home .home-hour-link.is-current::after,
+  .page-home .home-hour-link:is(.is-current, .is-passing)::after,
   .about-hour.is-current::before {
     display: none;
   }
@@ -10563,7 +10566,7 @@ html:where(:has(> body.page-hour))::before {
     font-size: 1.32rem;
   }
 
-  .page-home .home-hour-link.is-current::after {
+  .page-home .home-hour-link:is(.is-current, .is-passing)::after {
     inset: -4px -6px;
     max-width: 11rem;
   }
@@ -10737,7 +10740,7 @@ html:where(:has(> body.page-hour))::before {
     transform: translateY(-0.22em) rotate(45deg);
   }
 
-  .page-home .home-hour-link.is-current::after {
+  .page-home .home-hour-link:is(.is-current, .is-passing)::after {
     inset: -3px auto -3px -1.2rem;
     width: 17rem;
     max-width: none;

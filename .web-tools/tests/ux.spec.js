@@ -593,6 +593,152 @@ test("the foreground home invitation advances at the next office boundary", asyn
   );
 });
 
+// The light moves with the hours (app.js HOUR_LIGHT, render_blocks::hour_light).
+// Its animations are held almost still as they are made, so a test sets the
+// pass's clock itself rather than racing it.
+async function holdTheLight(page) {
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    window.lightAnimations = [];
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args);
+      animation.playbackRate = 1e-6;
+      window.lightAnimations.push(animation);
+      return animation;
+    };
+  });
+}
+async function lightAt(page, ms) {
+  await page.evaluate((t) => {
+    window.lightAnimations.forEach((a) => {
+      if (a.playState !== "idle") a.currentTime = t;
+    });
+  }, ms);
+  // The seat and the end are promises the animations settle.
+  await page.evaluate(() => new Promise((done) => setTimeout(done, 0)));
+}
+const homeAtRest = (page) =>
+  page.evaluate(() => ({
+    passing: document.querySelectorAll(".is-passing").length,
+    // The pass's own, not a control's CSS transitions.
+    animations: window.lightAnimations.filter((a) => a.playState !== "idle").length,
+    words: Array.from(document.querySelector(".pray-now").childNodes)
+      .filter((n) => n.nodeType === 1 && n.matches(".pray-now-words")).length,
+    current: Array.from(document.querySelectorAll(".home-hour-link.is-current")).map((l) => l.dataset.hour),
+  }));
+
+test("the light moves from Sext to None on an open home, and settles as a fresh page", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const invitation = page.locator(".pray-now");
+  await expect(invitation).toHaveText("Pray Sext");
+  // Arrival never moves the light.
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+
+  await page.clock.runFor(3000);
+  // The hour has turned for a screen reader at once …
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "none");
+  await expect(invitation).toHaveAttribute("href", /\/none\//);
+  // … while the eye sees the light leave Sext: both hours hold a pool.
+  await lightAt(page, 300);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(2);
+  await expect(invitation).toHaveText("Pray Sext");
+  expect((await homeAtRest(page)).current).toEqual(["sext"]);
+  // Past the seat, the new hour's look and words.
+  await lightAt(page, 700);
+  await expect(invitation).toHaveText("Pray None");
+  expect((await homeAtRest(page)).current).toEqual(["none"]);
+  // At the end nothing of the pass is left.
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+  await expect(page.locator(".home-hour-link-note:visible")).toHaveText("Afternoon prayer");
+});
+
+test("a second turn of the hour during a pass settles the first", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.clock.runFor(3000);
+  await lightAt(page, 300);
+  // Another turn arrives (a clock set forward) while the first is under way.
+  await page.clock.setSystemTime(new Date("2026-03-15T17:00:01-04:00"));
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  // The first pass ends where it was going (None), and the next leaves from there.
+  const passing = await page.evaluate(() => Array.from(document.querySelectorAll(".is-passing")).map((l) => l.dataset.hour));
+  expect(passing).toEqual(["none", "vespers"]);
+  await expect(page.locator(".pray-now")).toHaveText("Pray None");
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["vespers"] });
+  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+});
+
+test.describe("under reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+  test("the light does not move: the new hour comes at once", async ({ page }) => {
+    await holdTheLight(page);
+    await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+    await openDatedPage(page, `/?date=${testDate}`);
+    await page.clock.runFor(3000);
+    await expect(page.locator(".pray-now")).toHaveText("Pray None");
+    expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+    expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+  });
+});
+
+test("a page hidden at the turn of the hour is corrected on its return, without moving the light", async ({ page }) => {
+  await holdTheLight(page);
+  await page.addInitScript(() => {
+    window.pageHidden = false;
+    Object.defineProperty(document, "hidden", { get: () => window.pageHidden });
+    Object.defineProperty(document, "visibilityState", { get: () => (window.pageHidden ? "hidden" : "visible") });
+  });
+  await page.clock.install({ time: new Date("2026-03-15T12:59:58-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => { window.pageHidden = true; });
+  await page.clock.runFor(3000);
+  await page.evaluate(() => {
+    window.pageHidden = false;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.locator(".pray-now")).toHaveText("Pray None");
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["none"] });
+});
+
+test("a turn found late, after a sleeping timer, corrects home without moving the light", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.install({ time: new Date("2026-03-15T12:00:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.clock.setSystemTime(new Date("2026-03-15T18:00:00-04:00"));
+  await page.clock.runFor("01:01");
+  await expect(page.locator(".pray-now")).toHaveText("Pray Vespers");
+  expect(await page.evaluate(() => window.lightAnimations.length)).toBe(0);
+});
+
+test("the light leaves Compline at midnight and gathers on Lauds at two", async ({ page }) => {
+  await holdTheLight(page);
+  await page.clock.install({ time: new Date("2026-07-29T23:59:58-04:00") });
+  await openDatedPage(page, "/?date=2026-07-29");
+  await page.clock.runFor(3000);
+  // Only the one pool dies; the invitation's words stay.
+  await lightAt(page, 700);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
+  expect(await page.evaluate(() => document.querySelectorAll(".pray-now-words").length)).toBe(0);
+  await lightAt(page, 1400);
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: [] });
+
+  await page.clock.setSystemTime(new Date("2026-07-30T01:59:58-04:00"));
+  await openDatedPage(page, "/?date=2026-07-30");
+  await page.clock.runFor(3000);
+  await lightAt(page, 300);
+  await expect(page.locator(".home-hour-link.is-passing")).toHaveCount(1);
+  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await lightAt(page, 1400);
+  await expect(page.locator(".pray-now")).toHaveText("Pray Lauds");
+  expect(await homeAtRest(page)).toEqual({ passing: 0, animations: 0, words: 0, current: ["lauds"] });
+});
+
 test("Compline hands on to tomorrow's Lauds", async ({ page }) => {
   await page.goto("/compline/2026-10-07");
   const next = page.locator(".next-hour");
