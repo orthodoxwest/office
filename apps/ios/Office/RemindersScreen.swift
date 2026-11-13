@@ -26,6 +26,8 @@ struct RemindersScreen: View {
     @State private var editing: HourReminder?
     /// The reminder that will really come next, from the scheduler's own plan; nil while none will.
     @State private var next: String?
+    /// When `next` goes stale, and a count of its readings, so each reading sets the timer afresh.
+    @State private var stale: (at: Date, read: Int)?
     @ObservedObject private var location = PhoneLocation.shared
 
     var body: some View {
@@ -168,6 +170,13 @@ struct RemindersScreen: View {
             readNext()
         }
         .onChange(of: phase) { _, now in if now == .active { readPermission() } }
+        // Read again while the page stays open as that reminder comes or the day turns (#808);
+        // the wait ends with the page.
+        .task(id: stale?.read) {
+            guard let at = stale?.at else { return }
+            try? await Task.sleep(for: .seconds(max(1, at.timeIntervalSinceNow)))
+            if !Task.isCancelled { readNext() }
+        }
         .sheet(item: Binding(get: { editing.map(Editing.init) }, set: { editing = $0?.hour })) { e in
             TimeSheet(hour: e.hour) { h in
                 editing = nil
@@ -220,6 +229,7 @@ struct RemindersScreen: View {
         let s = settings
         guard s.on, permission != .denied else {
             next = nil
+            stale = nil
             return
         }
         DispatchQueue.global(qos: .userInitiated).async {
@@ -232,7 +242,11 @@ struct RemindersScreen: View {
                 }
                 return reminderNext(hour: r.hour, today: day(now), on: day(r.fireDate), time: r.fireDate.formatted(date: .omitted, time: .shortened))
             }
-            DispatchQueue.main.async { next = line }
+            let until = ReminderScheduler.nextLineStale(now: now, next: first?.fireDate)
+            DispatchQueue.main.async {
+                next = line
+                stale = (until, (stale?.read ?? 0) + 1)
+            }
         }
     }
 

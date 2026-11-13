@@ -72,6 +72,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import java.time.Duration
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -81,6 +85,7 @@ import java.time.format.TextStyle as JavaTextStyle
 import java.time.ZonedDateTime
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.RuleHourChoice
 import org.orthodoxwest.office.core.reminderNext
@@ -379,17 +384,26 @@ private fun RuleLines(
     val said = remember(chosen, settings.days, settings.lead) { reminderRule(chosen, settings.weekdays, settings.lead) }.joinToString("") { it.text }
     val empty = settings.hours.none { it.chosen } || settings.days.isEmpty()
     var next by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(settings, status.notificationsAllowed, today) {
-        next = if (!settings.on || !status.notificationsAllowed) {
-            null
-        } else {
-            withContext(Dispatchers.Default) {
-                runCatching {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(settings, status.notificationsAllowed, today, lifecycle) {
+        if (!settings.on || !status.notificationsAllowed) {
+            next = null
+            return@LaunchedEffect
+        }
+        // Read again on each return to the app, and while the page stays open as that reminder
+        // comes or the day turns (#808), so the line never names a time already gone. Reading and
+        // waiting both run on the default dispatcher, off the composition's clock, so a test's
+        // waitForIdle never waits on the timer.
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                val (line, stale) = withContext(Dispatchers.Default) {
                     val now = ZonedDateTime.now()
-                    ReminderScheduler.plan(settings, now).minByOrNull { it.at }?.let { a ->
-                        reminderNext(a.hour, now.toLocalDate().toCivil(), a.at.toLocalDate().toCivil(), a.at.format(clock))
-                    }
-                }.getOrNull()
+                    val first = runCatching { ReminderScheduler.plan(settings, now).minByOrNull { it.at } }.getOrNull()
+                    val line = first?.let { a -> reminderNext(a.hour, now.toLocalDate().toCivil(), a.at.toLocalDate().toCivil(), a.at.format(clock)) }
+                    line to ReminderScheduler.nextLineStale(now, first?.at)
+                }
+                next = line
+                withContext(Dispatchers.Default) { delay(Duration.between(ZonedDateTime.now(), stale).toMillis().coerceAtLeast(1000)) }
             }
         }
     }

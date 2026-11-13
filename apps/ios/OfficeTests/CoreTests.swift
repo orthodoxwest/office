@@ -414,6 +414,22 @@ final class ReminderTests: XCTestCase {
         XCTAssertNotNil(Bundle.main.url(forResource: "bell", withExtension: "caf"))
     }
 
+    /// The page's "Next:" line is read again as its reminder comes, or at midnight when none comes first (#808).
+    func testTheNextLineIsReadAgainAsItsReminderComesOrTheDayTurns() throws {
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 17, minute: 0)))
+        let compline = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 20, minute: 50)))
+        let midnight = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 0, minute: 0)))
+        let lauds = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 16, hour: 5, minute: 50)))
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: compline, calendar: calendar), compline)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: lauds, calendar: calendar), midnight)
+        XCTAssertEqual(ReminderScheduler.nextLineStale(now: now, next: nil, calendar: calendar), midnight)
+        // The first plan once a reminder comes names the one after it: the line moves on.
+        let s = settings(["vespers": (17, 30), "compline": (21, 0)])
+        let first = try XCTUnwrap(ReminderScheduler.plan(s, now: now, core: Office.core.get(), calendar: calendar).first)
+        let after = try XCTUnwrap(ReminderScheduler.plan(s, now: first.fireDate, core: Office.core.get(), calendar: calendar).first)
+        XCTAssertGreaterThan(after.fireDate, first.fireDate)
+    }
+
     func testTheScheduleStopsAtIOSsLimit() throws {
         let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 3, day: 15, hour: 0, minute: 0)))
         let all = Dictionary(uniqueKeysWithValues: hourNames().enumerated().map { ($0.element, (6 + 2 * $0.offset, 0)) })
