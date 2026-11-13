@@ -33,7 +33,9 @@ struct AboutPage: View {
 
 /**
  * About the Office, set as the web's: the reminders page's headpiece and measure, the verse as
- * red work, tituli over the sections, and the seven hours in home's table of periods.
+ * red work, tituli over the sections, the seven hours in home's table of periods with the hour it
+ * is now lit as home lights it, and at the foot home's invitation to that hour. Both follow the
+ * model's clock, which home's minute timer keeps.
  */
 struct AboutScreen: View {
     let view: AboutView
@@ -42,7 +44,11 @@ struct AboutScreen: View {
     @Environment(\.metrics) private var m
     @Environment(\.openURL) private var openURL
 
+    /// The hour it is now, as home has it (`presentation::about`): nil only if the core refuses the date.
+    private var now: AboutNow? { try? aboutNow(today: model.today, clockHour: Int32(model.clockHour)) }
+
     var body: some View {
+        let now = self.now
         ScrollView {
             VStack(spacing: 0) {
                 SiteHeader()
@@ -53,7 +59,7 @@ struct AboutScreen: View {
                         .accessibilityAddTraits(.isHeader)
                     ForEach(Array(view.blocks.enumerated()), id: \.offset) { i, b in
                         let next = i + 1 < view.blocks.count ? view.blocks[i + 1] : nil
-                        block(b)
+                        block(b, now: now)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             // The web's margins, collapsing between neighbours as CSS's do.
                             .padding(.top, m.px(max(i == 0 ? 8.8 : below(view.blocks[i - 1], next: b), above(b))))
@@ -90,6 +96,7 @@ struct AboutScreen: View {
         case "verse": return 19.2
         case "heading": return 28.8
         case "note": return 8.8
+        case "invitation": return 33.6
         default: return 0
         }
     }
@@ -99,12 +106,13 @@ struct AboutScreen: View {
         switch b.kind {
         case "heading": return 7.2
         case "verse", "hours": return 0
+        case "invitation": return 6.4
         case "key": return next?.kind == "key" ? 8.8 : 12.8
         default: return 12.8
         }
     }
 
-    @ViewBuilder private func block(_ b: AboutBlockView) -> some View {
+    @ViewBuilder private func block(_ b: AboutBlockView, now: AboutNow?) -> some View {
         switch b.kind {
         case "verse":
             VStack(spacing: 0) {
@@ -121,7 +129,20 @@ struct AboutScreen: View {
         case "paragraph":
             Text(linked(b.runs)).type(Scale.body.sized(20, line: 31)).foregroundStyle(p.text)
         case "hours":
-            AboutHours(periods: view.periods)
+            AboutHours(periods: view.periods, current: now?.current ?? "")
+        case "invitation":
+            // Home's invitation, still, a size down by width only (the web's `.about-door`): with
+            // no day of its own, its frontal is home's for a day without a colour, the lining.
+            if let now {
+                PrayNow(
+                    label: now.prayNowLabel, style: Scale.body.sized(19.2, line: 24.96), pad: 11.5,
+                    frontal: p.lining, wash: HomeInk.of(p).tabletWash, lifted: nil
+                ) {
+                    model.open(.hour(now.prayNowDate, now.prayNowHour))
+                }
+                .frame(maxWidth: m.px(280))
+                .frame(maxWidth: .infinity)
+            }
         case "note":
             Text(b.text).type(Scale.body.sized(16.8, line: 26)).foregroundStyle(p.muted)
         case "key":
@@ -166,18 +187,26 @@ private struct HoursInk {
 /**
  * The seven hours in home's three periods: the period cells in the frontispiece's wash with their
  * painted sun and moon, ruled in its ink and framed in the lining thinned. Each hour's name opens
- * it today; its gloss is in italic, and when it is said muted beneath.
+ * it today; its gloss is in italic, and when it is said muted beneath. The names stand in one
+ * column as wide as the widest of the seven, measured, as on every front. The hour it is now
+ * (`current`, empty from midnight to 2 am as on home) lies under home's pool of light, laid along
+ * the row, its name in the tituli's ink.
  */
 private struct AboutHours: View {
     let periods: [AboutPeriodView]
+    let current: String
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
     @Environment(\.metrics) private var m
 
+    private var nameStyle: TextStyle { TextStyle(size: 19.2, line: 24) }
+
     var body: some View {
         let ink = HoursInk.of(p)
         let label = TextStyle(size: 11.52, line: 13.8, tracking: 11.52 * 0.08, smallCaps: true)
+        let font = nameStyle.uiFont(m)
+        let nameWidth = ceil(periods.flatMap(\.hours).map { ProseLayout.advance($0.name, font) }.max() ?? 0) + 1
         VStack(spacing: 0) {
             ForEach(Array(periods.enumerated()), id: \.offset) { i, period in
                 if i > 0 { Hairline(color: ink.rule) }
@@ -197,7 +226,7 @@ private struct AboutHours: View {
                     VStack(spacing: 0) {
                         ForEach(Array(period.hours.enumerated()), id: \.offset) { j, h in
                             if j > 0 { Hairline(color: ink.rule) }
-                            row(h)
+                            row(h, nameWidth: nameWidth)
                         }
                     }
                 }
@@ -208,13 +237,14 @@ private struct AboutHours: View {
     }
 
     /// The whole row opens its hour: the web links the name alone, but a finger wants the row.
-    private func row(_ h: AboutHourView) -> some View {
-        Button { model.open(.hour(model.today, h.hour)) } label: {
+    private func row(_ h: AboutHourView, nameWidth: CGFloat) -> some View {
+        let isNow = h.hour == current
+        return Button { model.open(.hour(model.today, h.hour)) } label: {
             HStack(alignment: .firstTextBaseline, spacing: m.px(12)) {
-                Text(h.name).type(TextStyle(size: 19.2, line: 24)).foregroundStyle(p.text)
+                Text(h.name).type(nameStyle).foregroundStyle(isNow ? titulusNow(p, season: model.season) : p.text)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .frame(width: m.px(88), alignment: .leading)
+                    .fixedSize()
+                    .frame(width: nameWidth, alignment: .leading)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(h.gloss).type(TextStyle(size: 17.6, line: 22.9, italic: true)).foregroundStyle(p.text)
                     Text(h.time).type(TextStyle(size: 14.4, line: 18.7)).foregroundStyle(p.muted)
@@ -223,12 +253,45 @@ private struct AboutHours: View {
             }
             .padding(.vertical, m.px(8))
             .padding(.horizontal, m.px(13.6))
+            .background {
+                if isNow { PoolAlongRow() }
+            }
         }
         // Pressed, the row lies under home's pool of light, a long lozenge under its words.
         .buttonStyle(Lit { PoolOfLight(at: UnitPoint(x: 0.3, y: 0.5), size: CGSize(width: 0.88, height: 1.16)) })
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(h.name), \(h.gloss), \(h.time)")
+        .accessibilityLabel([h.name, h.gloss, h.time, isNow ? "now" : nil].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/**
+ * Home's pool of light (`poolGradient`), laid along an About row as the web's
+ * `.about-hour.is-current::before`: an ellipse half the row wide and nearly its height, brightest
+ * behind the name (29% across, a little under the middle), feathered in from the row's start so
+ * no edge of it lies on a rule.
+ */
+private struct PoolAlongRow: View {
+    @Environment(\.palette) private var p
+
+    var body: some View {
+        let color = HomeInk.of(p).nowPool
+        Canvas { ctx, size in
+            let rx = size.width * 0.5
+            let ry = size.height * 0.46
+            guard rx > 0, ry > 0 else { return }
+            var pool = ctx
+            pool.translateBy(x: size.width * 0.29, y: size.height * 0.46)
+            pool.scaleBy(x: 1, y: ry / rx)
+            pool.fill(
+                Path(ellipseIn: CGRect(x: -rx, y: -rx, width: 2 * rx, height: 2 * rx)),
+                with: .radialGradient(poolGradient(color), center: .zero, startRadius: 0, endRadius: rx)
+            )
+        }
+        .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.14)], startPoint: .leading, endPoint: .trailing))
+        .padding(.vertical, 1)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

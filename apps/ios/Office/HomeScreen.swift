@@ -470,6 +470,7 @@ private struct Frontispiece: View {
     /// The painter's reserve round the day's words, which the sky's stars keep clear of.
     @State private var reserve: [String: CGRect] = [:]
     @Environment(\.reveal) private var reveal
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// By night the head is the apse's sky (the web's `.home-sky`), a phone's and the niche's alike.
     private var night: Bool { p.dark }
@@ -651,7 +652,7 @@ private struct Frontispiece: View {
             // The stage's first face: the invitation and the hours, which "Change date" turns into
             // the calendar in their place (the web's `.home-hours-face`), fading out as it turns.
             VStack(spacing: 0) {
-                PrayNow(label: view.prayNowLabel, tier: tier, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
+                PrayNow(label: view.prayNowLabel, style: tier.pray, pad: tier.prayPad, frontal: frontal, wash: black ? .clear : home.tabletWash, lifted: night ? home.liningLifted : nil) {
                     model.open(.hour(view.prayNowDate, view.prayNowHour))
                 }
                 .padding(.top, m.px(tier.bandGap))
@@ -743,9 +744,14 @@ private struct Frontispiece: View {
         }
     }
 
-    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves.
+    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves;
+    /// under Reduce Motion the stage turns at once, as the web's and Android's then do.
     private func togglePicker() {
-        if picking {
+        if reduceMotion {
+            unfolded = !picking
+            picking.toggle()
+            if picking { reveal.alongside(homeCard) }
+        } else if picking {
             withAnimation(folding) { picking = false } completion: {
                 // Opened again while it folded, it stays.
                 if !picking { unfolded = false }
@@ -893,11 +899,13 @@ private struct FeastName: View {
  * The invitation: a thin wash (`tablet.png`, feathered so no edge of it lies on a rule) in a frame
  * ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short of
  * the corners; neither veils with the season, and a bare black day has no wash. Its words are the
- * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`).
+ * tituli's red ochre, or by night the lining, lifted on a phone (`lifted`). About's foot sets
+ * the same tablet (`style` and `pad` are the tier's on home).
  */
-private struct PrayNow: View {
+struct PrayNow: View {
     let label: String
-    let tier: HomeTier
+    let style: TextStyle
+    let pad: CGFloat
     let frontal: Color
     let wash: Color
     let lifted: Color?
@@ -907,11 +915,11 @@ private struct PrayNow: View {
 
     var body: some View {
         Button(action: action) {
-            Text(label).type(tier.pray.tracked(tier.pray.size * 0.012))
+            Text(label).type(style.tracked(style.size * 0.012))
                 .foregroundStyle(lifted ?? (p.dark ? p.lining : p.titulus))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, minHeight: 44)
-                .padding(.vertical, m.px(tier.prayPad))
+                .padding(.vertical, m.px(pad))
                 .padding(.horizontal, m.px(13.8))
         }
         .buttonStyle(Tablet(
@@ -1115,7 +1123,7 @@ private struct HourDirectory: View {
                 pool.scaleBy(x: 1, y: ry / r)
                 pool.fill(
                     Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                    with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
                 )
             }
             .padding(.horizontal, desk ? -12 : -8)
@@ -1207,7 +1215,7 @@ private struct HourList: View {
                 pool.scaleBy(x: 1, y: ry / r)
                 pool.fill(
                     Path(ellipseIn: CGRect(x: -r, y: -r, width: 2 * r, height: 2 * r)),
-                    with: .radialGradient(Gradient(stops: [.init(color: home.nowPool, location: 0), .init(color: home.nowPool.opacity(0.55), location: 0.52), .init(color: home.nowPool.opacity(0), location: 1)]), center: .zero, startRadius: 0, endRadius: r)
+                    with: .radialGradient(poolGradient(home.nowPool), center: .zero, startRadius: 0, endRadius: r)
                 )
             }
             .frame(width: m.px(272))

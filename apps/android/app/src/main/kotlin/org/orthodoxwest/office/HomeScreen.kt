@@ -661,7 +661,7 @@ private fun Frontispiece(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(tier.bandGap))
-                    PrayNow(view.prayNowLabel, tier, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+                    PrayNow(view.prayNowLabel, tier.pray, tier.prayTop, tier.prayBottom, frontal, if (black) Color.Transparent else home.tabletWash, if (night) home.liningLifted else null) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
                     Spacer(Modifier.height(tier.prayGap))
                     HourDirectory(view.currentHour, view.currentHourNote, prayed, tier, titulusNow(p, season), home) { onHour(date, it) }
                 }
@@ -858,10 +858,11 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
  * The invitation: a thin wash (`tablet.png`, feathered so no edge of it lies on a rule) in a
  * frame ruled by hand twice, the lining and inside it the day's colour (`frontal`) stopping short
  * of the corners; neither veils with the season, and a bare black day has no wash. Its words are
- * the tituli's red ochre, or by night the lining, lifted on a phone (`lifted`).
+ * the tituli's red ochre, or by night the lining, lifted on a phone (`lifted`). About's foot sets
+ * the same tablet; on home `size`, `top` and `bottom` are the tier's.
  */
 @Composable
-private fun PrayNow(label: String, tier: HomeTier, frontal: Color, wash: Color, lifted: Color?, onClick: () -> Unit) {
+fun PrayNow(label: String, size: Float, top: Dp, bottom: Dp, frontal: Color, wash: Color, lifted: Color?, onClick: () -> Unit) {
     val p = LocalPalette.current
     val tablet = ImageBitmap.imageResource(R.drawable.tablet)
     // The tablet answers the finger as a thing, not a dimmed word (the web's `.pray-now:active`):
@@ -881,10 +882,10 @@ private fun PrayNow(label: String, tier: HomeTier, frontal: Color, wash: Color, 
                 invitationRules(p.lining, frontal)
                 if (held > 0f) invitationRules(Color.Transparent, p.accent.copy(alpha = held), day = 1f)
             }
-            .padding(top = tier.prayTop, bottom = tier.prayBottom, start = 13.8.dp, end = 13.8.dp),
+            .padding(top = top, bottom = bottom, start = 13.8.dp, end = 13.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = tier.pray.sp, lineHeight = (tier.pray * 1.3f).sp, letterSpacing = (tier.pray * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
+        Text(label, style = Type.body.copy(fontSize = size.sp, lineHeight = (size * 1.3f).sp, letterSpacing = (size * 0.012f).sp, color = lifted ?: if (p.dark) p.lining else p.titulus, textAlign = TextAlign.Center))
     }
 }
 

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
-{# The words are presentation::about's, which the native apps set too. #}
+{# The words are presentation::about's, which the native apps set too. The hour it is now is
+   marked as on home (presentation::about::about_current_hour; app.js keeps it by the device's
+   clock). #}
 <div class="about">
   {{ headpiece() }}
   <h1>{{ title }}</h1>
@@ -32,8 +34,8 @@
       <h3 class="about-hour-group-label">{{ period_ornament(period.label|lower) }}<span>{{ period.label }}</span></h3>
       <dl>
         {%- for h in period.hours %}
-        <div class="about-hour">
-          <dt><a href="{{ h.url|url }}">{{ h.name }}</a></dt>
+        <div class="about-hour{% if h.is_current %} is-current{% endif %}" data-hour="{{ h.slug }}">
+          <dt><a href="{{ h.url|url }}"{% if h.is_current %} aria-current="time"{% endif %}>{{ h.name }}</a></dt>
           <dd><span class="about-hour-gloss">{{ h.gloss }}</span> <span class="about-hour-time">{{ h.time }}</span></dd>
         </div>
         {%- endfor %}
@@ -41,6 +43,10 @@
     </section>
     {%- endfor %}
   </div>
+  {%- elif b.kind == "invitation" %}
+  {# Home's invitation, still: its tablet, words and link (app.js restates them by the device's
+     clock, as on home, and rules the frame with home's pen). #}
+  <p class="pray-now-wrap about-door"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
   {%- endif %}
   {%- endfor %}
 </div>
