@@ -1,5 +1,6 @@
 package org.orthodoxwest.office
 
+import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
@@ -28,6 +29,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +71,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -77,14 +80,17 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.imageResource
@@ -117,6 +123,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.preferenceHints
@@ -142,20 +149,35 @@ fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
     this.toggleable(checked, interactionSource = null, indication = Dim, role = Role.Checkbox, onValueChange = onChange)
 
 /**
- * A light tick under the finger as a choice is made (a setting, a prayer form, a day), as the
- * iOS app gives; never for a page opened. The phone's own touch-feedback setting governs it.
+ * A light tick under the finger as a choice is made (a setting, a prayer form, a day, a month
+ * swiped), as the iOS app gives; never for a page opened. The phone's own touch-feedback setting
+ * governs it.
  */
-fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTick)
+fun HapticFeedback.chose() = performHapticFeedback(if (Build.VERSION.SDK_INT >= 34) HapticFeedbackType.SegmentTick else OLDER_TICK)
 
 /** The tick of a checkbox turned on or off. */
-fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(
+    when {
+        Build.VERSION.SDK_INT < 34 -> OLDER_TICK
+        on -> HapticFeedbackType.ToggleOn
+        else -> HapticFeedbackType.ToggleOff
+    },
+)
+
+/**
+ * The tick before Android 14, whose segment and toggle constants (API 34) an older phone does not
+ * know and so would not play: the context click (API 23), which Android 8 to 13 play as the
+ * clock's tick, the lightest the phone has. On and off feel alike there.
+ */
+private val OLDER_TICK = HapticFeedbackType.ContextClick
 
 /** How far a pressed control dims, as the iOS app's (Quiet). */
 private const val PRESSED_ALPHA = 0.55f
 
 /**
  * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
- * let go, so even the briefest tap is seen to land.
+ * let go, so even the briefest tap is seen to land. A control reached by keyboard, D-pad or
+ * Switch Access (never by touch, where a tap does not take focus) wears the focus ring.
  */
 private object Dim : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = DimNode(interactionSource)
@@ -163,18 +185,32 @@ private object Dim : IndicationNodeFactory {
     override fun hashCode() = 0
 }
 
-private class DimNode(private val source: InteractionSource) : Modifier.Node(), DrawModifierNode {
+private class DimNode(private val source: InteractionSource) : Modifier.Node(), DrawModifierNode, CompositionLocalConsumerModifierNode {
     private val alpha = Animatable(1f)
     private val layer = Paint()
+    /** Whether the control has the focus, and so wears the ring. */
+    private var focused by mutableStateOf(false)
 
     override fun onAttach() {
-        coroutineScope.launch {
+        // Undispatched, so the first focus after the clickable makes this node lazily is heard.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             val presses = mutableListOf<PressInteraction.Press>()
+            val focuses = mutableListOf<FocusInteraction.Focus>()
             source.interactions.collect { interaction ->
                 when (interaction) {
                     is PressInteraction.Press -> presses.add(interaction)
                     is PressInteraction.Release -> presses.remove(interaction.press)
                     is PressInteraction.Cancel -> presses.remove(interaction.press)
+                    is FocusInteraction.Focus -> {
+                        focuses.add(interaction)
+                        focused = true
+                        return@collect
+                    }
+                    is FocusInteraction.Unfocus -> {
+                        focuses.remove(interaction.focus)
+                        focused = focuses.isNotEmpty()
+                        return@collect
+                    }
                 }
                 if (presses.isEmpty()) {
                     launch { alpha.animateTo(1f, tween(200, easing = LinearOutSlowInEasing)) }
@@ -187,13 +223,33 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
 
     override fun ContentDrawScope.draw() {
         val a = alpha.value
-        if (a >= 1f) return drawContent()
-        layer.alpha = a
-        drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
-        drawContent()
-        drawContext.canvas.restore()
+        if (a >= 1f) {
+            drawContent()
+        } else {
+            layer.alpha = a
+            drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
+            drawContent()
+            drawContext.canvas.restore()
+        }
+        if (focused) {
+            // The web's ring (`:focus-visible`): a 2px line 3px off the control, square, here in
+            // the gold of the app's functional marks (the web's home and date link wear gold).
+            // Drawn in place, as the web's appears.
+            val width = FOCUS_RING.toPx()
+            val gap = FOCUS_GAP.toPx() + width / 2f
+            drawRect(
+                currentValueOf(LocalPalette).gold,
+                topLeft = Offset(-gap, -gap),
+                size = Size(size.width + 2 * gap, size.height + 2 * gap),
+                style = Stroke(width),
+            )
+        }
     }
 }
+
+/** The focus ring's line, and its distance from the control (style.css `:focus-visible`). */
+private val FOCUS_RING = 2.dp
+private val FOCUS_GAP = 3.dp
 
 /** "Expanded" or "Collapsed", after a disclosure's name. */
 fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }
@@ -713,6 +769,7 @@ private val PICKER_YEARS = 1950..2150
 @Composable
 fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onPick: (LocalDate) -> Unit) {
     val p = LocalPalette.current
+    val haptics = LocalHapticFeedback.current
     var month by remember(shown) { mutableStateOf(YearMonth.from(shown).coerceIn(PICKER_YEARS)) }
     var months by remember(shown) { mutableStateOf(false) }
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
@@ -761,7 +818,8 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                     contentAlignment = Alignment.Center,
                 ) { Text("›", style = if (forward != null) stepStyle else stepStyle.copy(color = p.border)) }
             }
-            // A swipe across the days turns the month, as the arrows do.
+            // A swipe across the days turns the month, as the arrows do, with a tick as it commits:
+            // the one turn with no control under the finger (the iOS app's too).
             val swipe = with(LocalDensity.current) { 48.dp.toPx() }
             var dragged by remember { mutableFloatStateOf(0f) }
             val daysAlpha by animateFloatAsState(if (months) 0f else 1f, tween(180), label = "days")
@@ -773,7 +831,10 @@ fun DatePicker(shown: LocalDate, today: LocalDate, centred: Boolean = false, onP
                     onDragStarted = { dragged = 0f },
                     onDragStopped = {
                         val to = if (dragged < -swipe) month.plusMonths(1) else if (dragged > swipe) month.minusMonths(1) else null
-                        if (to != null && to.year in PICKER_YEARS) month = to
+                        if (to != null && to.year in PICKER_YEARS) {
+                            haptics.chose()
+                            month = to
+                        }
                     },
                 ),
             ) {

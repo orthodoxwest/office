@@ -470,6 +470,7 @@ private struct Frontispiece: View {
     /// The painter's reserve round the day's words, which the sky's stars keep clear of.
     @State private var reserve: [String: CGRect] = [:]
     @Environment(\.reveal) private var reveal
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// By night the head is the apse's sky (the web's `.home-sky`), a phone's and the niche's alike.
     private var night: Bool { p.dark }
@@ -743,9 +744,14 @@ private struct Frontispiece: View {
         }
     }
 
-    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves.
+    /// Opens "Change date"'s picker, or folds it away and then lets it go, on the disclosures' curves;
+    /// under Reduce Motion the stage turns at once, as the web's and Android's then do.
     private func togglePicker() {
-        if picking {
+        if reduceMotion {
+            unfolded = !picking
+            picking.toggle()
+            if picking { reveal.alongside(homeCard) }
+        } else if picking {
             withAnimation(folding) { picking = false } completion: {
                 // Opened again while it folded, it stays.
                 if !picking { unfolded = false }
