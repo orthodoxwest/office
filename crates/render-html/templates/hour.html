@@ -5,10 +5,10 @@
      installed web app opened again, a reload), opens again at the place, as the script at the
      page's foot kept it in office-place: if it is this hour of this day, left no more than
      place_kept_minutes ago, and not yet prayed (app.js's office-prayed). An hour the reader left
-     by one of the page's own links or forms keeps no place, and Back and Forward keep the
-     browser's own. Until the foot sets the place the page is held unseen, and Chromium holds its
-     first paint (and so the cross-fade's picture of it) for #hour-place: it appears at the
-     place, and nothing moves. #}
+     by one of the page's own links or forms, by Back and Forward, by a typed address or by
+     closing it keeps no place, and Back and Forward keep the browser's own. Until the foot sets
+     the place the page is held unseen, and Chromium holds its first paint (and so the
+     cross-fade's picture of it) for #hour-place: it appears at the place, and nothing moves. #}
 <script>
   (function () {
     try {
@@ -17,6 +17,12 @@
       if (!kept || kept.hour !== hour || kept.day !== day) return;
       var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
       if (arrival && arrival.type === "back_forward") return;
+      // A place the page kept as it was unloaded (pagehide: Back, a link, a typed address, the
+      // tab closed) is the reader's leaving, unless the page has come straight back by a reload.
+      if (kept.gone && !(arrival && arrival.type === "reload")) {
+        localStorage.removeItem("office-place");
+        return;
+      }
       var prayed = JSON.parse(localStorage.getItem("office-prayed") || "{}") || {};
       var away = (Date.now() - kept.at) / 1000;
       if (!(away >= 0 && away <= {{ place_kept_minutes }} * 60) || (Array.isArray(prayed[day]) && prayed[day].indexOf(hour) >= 0)) {
@@ -170,14 +176,17 @@
     {% else %}{{ report_issue(report_url) }}{% endif %}
 {#- The ribbon's keeping and finding (see the head block). The place is the first line of the
      office not wholly above the hairline: its index among the office's lines, its first words
-     (a page changed since, by a new day's corpus, keeps no place), and how far into it the
-     hairline cut (less than nothing when the line begins below it), with how far the hour has
-     been prayed (app.js). A line another prayer form hides gives way to the next one shown. It
-     is kept whenever the page is hidden (the phone locked, another app, a tab put by), and let
-     go when the reader leaves by the page's own links or forms or by Back and Forward, or is
-     still at the head of the hour. The browser's own reload keeps it (it tells the page nothing
-     of it), and the page opens again at the place, as the browser would set it. Opened at the place, the page holds it while late fonts and scores
-     settle, until the reader's own hand moves it. #}
+     (a score's, the words it sets; a page changed since, by a new day's corpus, keeps no place),
+     and how far into it the hairline cut (less than nothing when the line begins below it), with
+     how far the hour has been prayed (app.js). A line another prayer form hides gives way to the
+     same words as the form now shown says the passage (standIn). It is kept whenever the page is
+     hidden (the phone locked, another app, a tab put by), and let go when the reader leaves by
+     the page's own links or forms or by Back and Forward (the Navigation API), or is still at the
+     head of the hour. A page unloaded otherwise (Back without the Navigation API, a typed
+     address, the tab closed, a reload: the browser tells the page only pagehide) keeps it marked
+     gone, and the head opens such a place only on a reload, as the browser would set it. Opened
+     at the place, the page holds it while late fonts and scores settle, until the reader's own
+     hand moves it. #}
 <script>
   (function () {
     var KEY = "office-place";
@@ -191,6 +200,8 @@
       return;
     }
 
+    // The ways a passage is said: a leader slot's branches by prayer form, the Martyrology read or not.
+    var WAYS = ".leader-slot > [data-leaders], [data-martyrology-variant]";
     function lines() {
       return content.querySelectorAll("p, h2, h3, summary, .chant-score");
     }
@@ -198,8 +209,11 @@
       if (line.tagName !== "SUMMARY" && line.closest("details:not([open])")) return false;
       return line.getClientRects().length > 0;
     }
+    // A chant score by the words it sets (its aria-label), not its SVG, which chant.js lays out
+    // again at the column's width.
     function words(line) {
-      return (line.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
+      var said = line.classList.contains("chant-score") ? line.getAttribute("aria-label") : null;
+      return (said || line.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
     }
     // The reading's top edge: under the colour band and the hairline.
     function edge() {
@@ -216,14 +230,43 @@
       }
       return null;
     }
+    // The line shown in place of a hidden one. Where another prayer form or the Martyrology setting
+    // says the passage another way (WAYS), the same words in the way now shown (the same one of
+    // them, where they come more than once), or else that way's first line, so the reader goes on
+    // from where the passage begins rather than past it; a line in a closed section, the
+    // section's own heading; and a passage the page now leaves out, the line after it.
+    function standIn(all, i) {
+      var line = all[i];
+      var said = words(line);
+      for (var way = line.closest(WAYS); way && content.contains(way); way = way.parentElement.closest(WAYS)) {
+        var nth = 0;
+        for (var k = 0; k < i; k++) if (way.contains(all[k]) && words(all[k]) === said) nth++;
+        var first = -1, same = [];
+        for (var j = 0; j < all.length; j++) {
+          var other = all[j];
+          if (way.contains(other) || !way.parentElement.contains(other) || !shown(other)) continue;
+          var along = other;
+          while (along.parentElement !== way.parentElement) along = along.parentElement;
+          if (!along.matches(WAYS)) continue;
+          if (first < 0) first = j;
+          if (words(other) === said) same.push(j);
+        }
+        if (first >= 0) return same.length ? same[Math.min(nth, same.length - 1)] : first;
+      }
+      var closed = line.closest("details:not([open])");
+      var head = closed && closed.querySelector("summary");
+      if (head && shown(head)) return Array.prototype.indexOf.call(all, head);
+      while (all[i] && !shown(all[i])) i++;
+      return i;
+    }
     function open(kept) {
       var all = lines();
       var i = kept.line;
       var line = all[i];
       if (!line || words(line) !== kept.words) return false;
       var into = Math.min(Math.max(Number(kept.into) || 0, -2), 1);
-      while (line && !shown(line)) {
-        line = all[++i];
+      if (!shown(line)) {
+        line = all[standIn(all, i)];
         into = 0;
       }
       if (!line) return false;
@@ -273,6 +316,8 @@
     }
 
     var leaving = false;
+    // The page has been unloaded or put by for Back and Forward (pagehide), and not shown since.
+    var gone = false;
     function leave() {
       leaving = true;
       forget();
@@ -284,6 +329,7 @@
       at.hour = hour;
       at.day = day;
       at.at = Date.now();
+      if (gone) at.gone = true;
       // How far the hour has been prayed (app.js), so it can still earn its mark at the place.
       var reading = typeof window.officeReading === "function" ? window.officeReading() : null;
       if (reading) {
@@ -296,6 +342,7 @@
     }
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden") keep();
+      else gone = false;
     });
     document.addEventListener("click", function (e) {
       var link = e.target.closest ? e.target.closest("a[href]") : null;
@@ -316,12 +363,22 @@
         if (e.destination && !e.destination.sameDocument) leave();
       });
     }
+    // The page unloaded or put by for Back and Forward (pagehide), in every engine, whether it
+    // fires before the visibilitychange of the same unload (WebKit, and the HTML standard) or after
+    // it (a tab hidden before it closes): the place is kept marked gone, which the head takes up
+    // only on a reload. The system closing a page in the background fires no pagehide (an app
+    // switch on iOS only hides the page), so the place it was hidden at stays whole.
     window.addEventListener("pagehide", function () {
-      if (leaving) forget();
+      if (leaving) {
+        forget();
+      } else {
+        gone = true;
+        keep();
+      }
       if ("scrollRestoration" in history) history.scrollRestoration = "auto";
     });
     window.addEventListener("pageshow", function (e) {
-      if (e.persisted) leaving = false;
+      if (e.persisted) leaving = gone = false;
     });
   })();
 </script>
