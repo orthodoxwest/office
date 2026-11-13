@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -193,11 +194,14 @@ class ScreenshotTest {
     @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
     fun ordoYearNave() { show(Page.Year(2026), ThemeChoice.NAVE); shoot("ordo-year-nave") }
 
+    /** The hour header's date, which opens the date picker. */
+    private val changesDate = SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }
+
     @Test
     fun datePicker() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
         // The header's date opens the picker.
-        compose.onNode(SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }).performClick()
+        compose.onNode(changesDate).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
     }
@@ -215,7 +219,7 @@ class ScreenshotTest {
     fun datePickerMonths() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
         // The header's date opens the picker.
-        compose.onNode(SemanticsMatcher("clicks to change date") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "change date" }).performClick()
+        compose.onNode(changesDate).performClick()
         compose.onNodeWithText("MARCH 2026").performClick()
         compose.waitForIdle()
         shoot("date-picker-months-nave")
