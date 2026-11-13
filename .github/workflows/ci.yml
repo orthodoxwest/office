@@ -419,6 +419,9 @@ jobs:
       # The update-ux-snapshots label commits these candidates directly
       # instead of rebuilding and rerunning the suite. Like any snapshot run
       # they come from PR code, so that workflow validates them first.
+      # Only the snapshots that fail their comparison are rewritten: Chromium's
+      # antialiasing differs by a level between runs, so rewriting every one
+      # (=all) committed fresh bytes for pages the PR never touched.
       - name: Regenerate visual snapshot candidates
         id: candidates
         if: >-
@@ -428,7 +431,7 @@ jobs:
           github.event.pull_request.head.repo.full_name == github.repository
         env:
           PLAYWRIGHT_SUITE: visual-update
-        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=all
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=changed
 
       - name: Upload visual snapshot candidates
         if: steps.candidates.outcome == 'success'

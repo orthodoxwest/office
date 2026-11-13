@@ -270,7 +270,7 @@ object Type {
     val control = label(11.52f, 0.1f)
     /**
      * Home's foot letter, true small capitals: the season and "Change date" at home's foot, and an
-     * hour's two disclosures under its title (`.page-hour .hour-date-nav > summary`).
+     * hour's Prayer form under its title (`.page-hour .leader-selector > summary`).
      */
     val smallCapsControl = label(14.4f, 0.08f).copy(fontFeatureSettings = ALL_SMALL_CAPS)
     /** The day's name under an hour's title, in the text's ink (`.hour-meta-feast`). */

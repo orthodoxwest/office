@@ -29,6 +29,9 @@
        Keys: office-theme, office-text-size, office-prayer-form, office-martyrology, office-chant. #}
   <script>
     (function () {
+      {# app.js marks scripted pages too, but only once it runs: marked here, an hour's header
+           never shows "Change date" for a moment before its date takes the picker over. #}
+      document.documentElement.classList.add("js");
       {# Settings carried from the site's previous address (office-web moved.rs); a choice already made here wins. #}
       try {
         var carry = /^#office-carry=(.*)$/.exec(location.hash);
