@@ -181,12 +181,9 @@ fun HapticFeedback.chose() = performHapticFeedback(HapticFeedbackType.SegmentTic
  */
 fun HapticFeedback.toggled(on: Boolean) = performHapticFeedback(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
 
-/** How far a pressed control dims, as the iOS app's (Quiet). */
-private const val PRESSED_ALPHA = 0.55f
-
 /**
- * A pressed control's answer to the finger: it dims at once, and comes back over a moment when
- * let go, so even the briefest tap is seen to land. A control that takes input focus from a
+ * A pressed control's answer to the finger: it dims at once to Tempo's quiet (the web's bare
+ * words, the iOS app's `Quiet`), and comes back over Tempo's touch when let go, so even the briefest tap is seen to land. A control that takes input focus from a
  * keyboard or D-pad (never by touch, where a tap does not take focus) wears the focus ring.
  */
 internal object Dim : IndicationNodeFactory {
@@ -225,7 +222,7 @@ private class DimNode(private val source: InteractionSource) : Modifier.Node(), 
                 if (presses.isEmpty()) {
                     launch { alpha.animateTo(1f, Tempo.touchOut.spec()) }
                 } else {
-                    launch { alpha.snapTo(PRESSED_ALPHA) }
+                    launch { alpha.snapTo(Tempo.TOUCH_QUIET) }
                 }
             }
         }
@@ -349,7 +346,7 @@ private class LitNode(private val source: InteractionSource, private val lit: Li
         val h = held.value
         poolOfLight(lit.pool, lit.shape, h * if (lit.current) 0.5f else lit.strength)
         if (h > 0f && lit.current) {
-            layer.alpha = 1f - 0.3f * h
+            layer.alpha = 1f - (1f - Tempo.TOUCH_QUIET) * h
             drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
             drawContent()
             drawContext.canvas.restore()
@@ -630,8 +627,8 @@ fun MenuPanel(
     val o = LocalOrnament.current
     val nav = Type.label(13.12f, 0.06f)
     val plaster = ImageBitmap.imageResource(p.panel)
-    // The panel drops a little as it fades in, and lifts as it fades out; it stays in the
-    // window until it has gone.
+    // The panel drops a little as it fades in, and lifts as it fades out, on Tempo's settle
+    // (leaving faster than it came); it stays in the window until it has gone.
     val shown = remember { MutableTransitionState(false) }
     shown.targetState = visible
     if (!shown.currentState && !shown.targetState && shown.isIdle) return
@@ -646,8 +643,8 @@ fun MenuPanel(
         val drop = with(LocalDensity.current) { 8.dp.roundToPx() }
         AnimatedVisibility(
             shown,
-            enter = fadeIn(tween(150, easing = LinearOutSlowInEasing)) + slideInVertically(tween(200, easing = FastOutSlowInEasing)) { -drop },
-            exit = fadeOut(tween(120, easing = FastOutLinearInEasing)) + slideOutVertically(tween(120, easing = FastOutLinearInEasing)) { -drop / 2 },
+            enter = fadeIn(Tempo.settleIn.spec()) + slideInVertically(Tempo.settleIn.spec()) { -drop },
+            exit = fadeOut(Tempo.settleOut.spec()) + slideOutVertically(Tempo.settleOut.spec()) { -drop / 2 },
         ) {
             Column(
                 Modifier

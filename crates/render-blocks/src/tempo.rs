@@ -84,6 +84,15 @@ pub enum Tempo {
 impl Tempo {
     pub const ALL: [Tempo; 5] = [Tempo::Touch, Tempo::Settle, Tempo::Unfold, Tempo::Turn, Tempo::Dim];
 
+    /// How far bare words (a link, a disclosure's summary, a step of the picker) dim under the
+    /// finger, as an opacity: the touch's answer where there is no pool of light to lie under.
+    /// The hour that is now withdraws its words as far when pressed.
+    pub const TOUCH_QUIET: f32 = 0.7;
+
+    /// What a press moves rather than lights (the ordo day's rail running the row's full height)
+    /// reaches its place over this, so the stretch is seen; it goes back over the touch's way out.
+    pub const TOUCH_REACH: Beat = beat(120, 0, Curve::Arrive);
+
     /// The motion's name, as the web's `--tempo-*` properties name it.
     pub fn name(self) -> &'static str {
         match self {
@@ -165,6 +174,11 @@ mod tests {
             assert_eq!(value(&format!("{base}-delay")), format!("{}ms", b.delay), "{base}-delay");
             assert_eq!(value(&format!("{base}-curve")), format!("var(--curve-{})", b.curve.name()), "{base}-curve");
         }
+        assert_eq!(value("--tempo-touch-quiet"), Tempo::TOUCH_QUIET.to_string());
+        let reach = Tempo::TOUCH_REACH;
+        assert_eq!(value("--tempo-touch-reach"), format!("{}ms", reach.ms));
+        assert_eq!(value("--tempo-touch-reach-delay"), format!("{}ms", reach.delay));
+        assert_eq!(value("--tempo-touch-reach-curve"), format!("var(--curve-{})", reach.curve.name()));
     }
 
     /// The iOS app's table (`Tempo.swift`): `static let turnIn = Beat(ms: 210, delay: 90, curve: .arrive)`
@@ -179,6 +193,13 @@ mod tests {
         }
         for (t, way, b) in beats() {
             let line = format!("static let {} = Beat(ms: {}, delay: {}, curve: .{})", camel(t, way), b.ms, b.delay, b.curve.name());
+            assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
+        }
+        let r = Tempo::TOUCH_REACH;
+        for line in [
+            format!("static let touchQuiet = {}", Tempo::TOUCH_QUIET),
+            format!("static let touchReach = Beat(ms: {}, delay: {}, curve: .{})", r.ms, r.delay, r.curve.name()),
+        ] {
             assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
         }
     }
@@ -196,6 +217,13 @@ mod tests {
         }
         for (t, way, b) in beats() {
             let line = format!("val {} = Beat(ms = {}, delay = {}, curve = Curve.{})", camel(t, way), b.ms, b.delay, title(b.curve.name()));
+            assert!(kt.contains(&line), "Tempo.kt lacks `{line}`");
+        }
+        let r = Tempo::TOUCH_REACH;
+        for line in [
+            format!("const val TOUCH_QUIET = {}f", Tempo::TOUCH_QUIET),
+            format!("val touchReach = Beat(ms = {}, delay = {}, curve = Curve.{})", r.ms, r.delay, title(r.curve.name())),
+        ] {
             assert!(kt.contains(&line), "Tempo.kt lacks `{line}`");
         }
     }

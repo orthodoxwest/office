@@ -15,6 +15,12 @@ object Tempo {
     val touchIn = Beat(ms = 0, delay = 0, curve = Curve.Arrive)
     val touchOut = Beat(ms = 200, delay = 0, curve = Curve.Arrive)
 
+    /** How far bare words dim under the finger ([Dim]), and the hour that is now's words when pressed: the web's `--tempo-touch-quiet`. */
+    const val TOUCH_QUIET = 0.7f
+
+    /** What a press moves rather than lights (the ordo day's rail running the row's height) reaches its place over this; it goes back over [touchOut]. */
+    val touchReach = Beat(ms = 120, delay = 0, curve = Curve.Arrive)
+
     /** A small panel settling under the beam; it leaves faster than it came. */
     val settleIn = Beat(ms = 160, delay = 0, curve = Curve.Arrive)
     val settleOut = Beat(ms = 120, delay = 0, curve = Curve.Leave)

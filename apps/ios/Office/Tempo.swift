@@ -10,6 +10,12 @@ enum Tempo {
     /// A press: answered at once, let go over a fifth of a second.
     static let touchIn = Beat(ms: 0, delay: 0, curve: .arrive)
     static let touchOut = Beat(ms: 200, delay: 0, curve: .arrive)
+    /// How far bare words dim under the finger (`Quiet`), and the hour that is now's words when
+    /// pressed: the web's `--tempo-touch-quiet`.
+    static let touchQuiet = 0.7
+    /// What a press moves rather than lights (the ordo day's rail running the row's height)
+    /// reaches its place over this; it goes back over `touchOut`.
+    static let touchReach = Beat(ms: 120, delay: 0, curve: .arrive)
     /// A small panel settling under the beam; it leaves faster than it came.
     static let settleIn = Beat(ms: 160, delay: 0, curve: .arrive)
     static let settleOut = Beat(ms: 120, delay: 0, curve: .leave)

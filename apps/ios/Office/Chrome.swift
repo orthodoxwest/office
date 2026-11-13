@@ -25,14 +25,15 @@ extension View {
 }
 
 /**
- * The web's controls mark state, not touches; a pressed control only dims a little, at once,
- * and comes back over a moment when let go, so even the briefest tap is seen to land.
+ * The web's controls mark state, not touches; a pressed control only dims a little (Tempo's
+ * `touchQuiet`, the web's bare words), at once, and comes back over Tempo's touch when let go, so
+ * even the briefest tap is seen to land.
  */
 struct Quiet: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .contentShape(Rectangle())
-            .opacity(configuration.isPressed ? 0.55 : 1)
+            .opacity(configuration.isPressed ? Tempo.touchQuiet : 1)
             .animation(configuration.isPressed ? nil : Tempo.touchOut.animation, value: configuration.isPressed)
     }
 }
@@ -58,7 +59,7 @@ struct Lit<Pool: View>: ButtonStyle {
         let held = configuration.isPressed
         let rest = resting ?? (current ? 1 : 0)
         return configuration.label
-            .opacity(current && held ? 0.7 : 1)
+            .opacity(current && held ? Tempo.touchQuiet : 1)
             .background {
                 ZStack {
                     pool().opacity(held ? max(rest, current ? 1 : strength) : rest)

@@ -11,8 +11,14 @@
 //! the invitation's words change: the layout of the new hour takes over at [`HourLight::SEAT`],
 //! when they are out.
 //!
-//! These are motion figures, like the tempo of the other passes the fronts share; they can join a
-//! common set of timings when one exists.
+//! These are motion figures, but they stay beside [`crate::Tempo`] rather than in it. Tempo is the
+//! table of transitions each front writes by hand in its own idiom (a CSS transition, a SwiftUI
+//! animation, a Compose tween), copied as literals and held together by drift tests; this pass is
+//! one choreography of eight marks on one clock, which the apps never write: they sample
+//! [`light_at`] through the bindings each frame, so its figures already have one home, and only
+//! app.js copies them (held by the test below). Its curves are its own too (a slow ease in and out
+//! for the light, CSS's `ease-in` and `ease-out` for the words), and taking Tempo's three instead
+//! would change how the light moves.
 
 /// The pass's figures, in milliseconds from its start.
 pub struct HourLight;
