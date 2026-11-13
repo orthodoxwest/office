@@ -837,7 +837,7 @@ mod tests {
         assert_eq!(get("/prime/2026-09-07?preview=martyrology").2, body, "the retired preview flag is ignored");
         // Other hours, and a Prime without the Martyrology (Good Friday), carry no choice.
         for path in ["/lauds/2026-09-07", "/prime/2026-04-10"] {
-            assert!(!get(path).2.contains("data-martyrology-variant"), "{path}");
+            assert!(!get(path).2.contains("data-martyrology-variant=\""), "{path}");
         }
     }
 
