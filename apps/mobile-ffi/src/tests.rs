@@ -470,3 +470,49 @@ fn crown_tap_turns_the_look_and_back() {
     assert_eq!(back, crate::CrownTap { choice: "apse".into(), restore: None });
     assert_eq!(crate::after_crown_tap("bogus".into(), false, None).choice, "apse");
 }
+
+#[test]
+fn crown_plan_carries_presentations_figures() {
+    use presentation::crown as c;
+    for to_dark in [true, false] {
+        let plan = crate::crown_plan(to_dark);
+        let play = c::crown_play(to_dark);
+        assert_eq!(plan.to_dark, to_dark);
+        assert_eq!((plan.turn, plan.end), (play.turn, play.end));
+        assert_eq!((plan.front.at, plan.front.len), (play.front.at, play.front.len));
+        assert_eq!((plan.spread.at, plan.spread.len), (play.spread.at, play.spread.len));
+        assert_eq!((plan.veil_from, plan.veil_to), play.veil);
+        assert_eq!([plan.veil_ink.r, plan.veil_ink.g, plan.veil_ink.b], play.veil_ink);
+        assert_eq!((plan.veil_peak, plan.ink_at), (play.veil_peak, play.ink_at));
+        let g = plan.glow_ease;
+        assert_eq!([g.x1, g.y1, g.x2, g.y2], play.glow_ease);
+        let f = plan.front_ease;
+        assert_eq!([f.x1, f.y1, f.x2, f.y2], c::FRONT_EASE);
+        let s = plan.spread_ease;
+        assert_eq!([s.x1, s.y1, s.x2, s.y2], c::SPREAD_EASE);
+        assert_eq!(
+            (plan.spread_wide, plan.ink_handover, plan.tap_apart, plan.rush),
+            (c::SPREAD_WIDE, c::INK_HANDOVER, c::TAP_APART, c::RUSH)
+        );
+        assert_eq!(
+            [
+                plan.spread_feather,
+                plan.spread_shape_part,
+                plan.spread_bend,
+                plan.spread_glow_part,
+                plan.veil_lead,
+                plan.veil_part,
+                plan.dawn_veil_low
+            ],
+            [c::SPREAD_FEATHER, c::SPREAD_SHAPE_PART, c::SPREAD_BEND, c::SPREAD_GLOW_PART, c::VEIL_LEAD, c::VEIL_PART, c::DAWN_VEIL_LOW]
+        );
+        let rgb = |p: crate::CrownRgb| [p.r, p.g, p.b];
+        assert_eq!(rgb(plan.dawn_veil_umber), c::DAWN_VEIL_UMBER);
+        assert_eq!(
+            [rgb(plan.sky_ochre), rgb(plan.sky_red_ochre), rgb(plan.sky_ember), rgb(plan.sky_lime), rgb(plan.sky_rose_lilac)],
+            [c::SKY_OCHRE, c::SKY_RED_OCHRE, c::SKY_EMBER, c::SKY_LIME, c::SKY_ROSE_LILAC]
+        );
+    }
+    // Light arrives faster than it leaves.
+    assert!(crate::crown_plan(false).end < crate::crown_plan(true).end);
+}

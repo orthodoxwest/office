@@ -331,6 +331,109 @@ pub fn after_crown_tap(choice: String, device_dark: bool, restore: Option<String
     CrownTap { choice: name(tap.choice).into(), restore: tap.restore.map(|c| name(c).into()) }
 }
 
+/// A stretch of the crown's play: when it begins, in ms from the tap, and how long it runs.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CrownSpan {
+    pub at: u32,
+    pub len: u32,
+}
+
+/// A cubic-bezier ease, as CSS writes it.
+#[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]
+pub struct CrownEase {
+    pub x1: f32,
+    pub y1: f32,
+    pub x2: f32,
+    pub y2: f32,
+}
+
+/// A pigment of the crown's play.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CrownRgb {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
+/// One direction of the crown's play (`presentation::crown::CrownPlay`, dusk or dawn), with the
+/// figures both directions share, so the apps draw the web's play to its own numbers. Times are
+/// ms from the tap.
+#[derive(Clone, Copy, Debug, PartialEq, uniffi::Record)]
+pub struct CrownPlan {
+    pub to_dark: bool,
+    pub turn: u32,
+    pub front: CrownSpan,
+    pub spread: CrownSpan,
+    pub veil_from: u32,
+    pub veil_to: u32,
+    pub end: u32,
+    pub veil_ink: CrownRgb,
+    pub veil_peak: f32,
+    pub ink_at: f32,
+    pub glow_ease: CrownEase,
+    pub front_ease: CrownEase,
+    pub spread_ease: CrownEase,
+    pub spread_wide: u32,
+    pub spread_feather: f32,
+    pub spread_shape_part: f32,
+    pub spread_bend: f32,
+    pub spread_glow_part: f32,
+    pub veil_lead: f32,
+    pub veil_part: f32,
+    pub dawn_veil_umber: CrownRgb,
+    pub dawn_veil_low: f32,
+    pub ink_handover: u32,
+    pub sky_ochre: CrownRgb,
+    pub sky_red_ochre: CrownRgb,
+    pub sky_ember: CrownRgb,
+    pub sky_lime: CrownRgb,
+    pub sky_rose_lilac: CrownRgb,
+    pub tap_apart: u32,
+    pub rush: u32,
+}
+
+/// The play for a tap that turns the page dark (dusk) or light (dawn).
+#[uniffi::export]
+pub fn crown_plan(to_dark: bool) -> CrownPlan {
+    use presentation::crown as c;
+    let span = |s: c::Span| CrownSpan { at: s.at, len: s.len };
+    let ease = |e: c::Ease| CrownEase { x1: e[0], y1: e[1], x2: e[2], y2: e[3] };
+    let rgb = |p: c::Rgb| CrownRgb { r: p[0], g: p[1], b: p[2] };
+    let play = c::crown_play(to_dark);
+    CrownPlan {
+        to_dark,
+        turn: play.turn,
+        front: span(play.front),
+        spread: span(play.spread),
+        veil_from: play.veil.0,
+        veil_to: play.veil.1,
+        end: play.end,
+        veil_ink: rgb(play.veil_ink),
+        veil_peak: play.veil_peak,
+        ink_at: play.ink_at,
+        glow_ease: ease(play.glow_ease),
+        front_ease: ease(c::FRONT_EASE),
+        spread_ease: ease(c::SPREAD_EASE),
+        spread_wide: c::SPREAD_WIDE,
+        spread_feather: c::SPREAD_FEATHER,
+        spread_shape_part: c::SPREAD_SHAPE_PART,
+        spread_bend: c::SPREAD_BEND,
+        spread_glow_part: c::SPREAD_GLOW_PART,
+        veil_lead: c::VEIL_LEAD,
+        veil_part: c::VEIL_PART,
+        dawn_veil_umber: rgb(c::DAWN_VEIL_UMBER),
+        dawn_veil_low: c::DAWN_VEIL_LOW,
+        ink_handover: c::INK_HANDOVER,
+        sky_ochre: rgb(c::SKY_OCHRE),
+        sky_red_ochre: rgb(c::SKY_RED_OCHRE),
+        sky_ember: rgb(c::SKY_EMBER),
+        sky_lime: rgb(c::SKY_LIME),
+        sky_rose_lilac: rgb(c::SKY_ROSE_LILAC),
+        tap_apart: c::TAP_APART,
+        rush: c::RUSH,
+    }
+}
+
 /// The lines under the menu's settings that need saying, as the web prints them
 /// (`presentation::MARTYROLOGY_HINT`, `presentation::CHANT_HINT`).
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
