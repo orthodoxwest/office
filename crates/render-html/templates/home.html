@@ -139,10 +139,34 @@
       </div>
       </div>
     </section>
+
+    {# Season rides the secondary control row: context without interrupting
+         the date → prayer invitation reading order. #}
+    <div class="home-day-meta">
+      {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
+      {# Shown only in a reader's first week (layout.html's data-newcomer); the menu keeps About after. #}
+      <a class="home-introduction" href="/about">{{ about_introduction }}</a>
+      <details class="hour-date-nav home-date-nav">
+        <summary>Change date</summary>
+        <nav class="day-nav" aria-label="Date navigation">
+          <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
+          <form class="date-jump-form" action="/" method="get">
+            <label class="sr-only" for="home-date-jump">Jump to date</label>
+            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
+            <button class="date-submit" type="submit">Go</button>
+            {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
+          </form>
+          <a href="{{ next_link|url }}">{{ next_day }}<span aria-hidden="true">&nbsp;&rarr;</span></a>
+        </nav>
+      </details>
+    </div>
     {# The device's hour, marked before the first paint as layout.html's script sets the theme:
          the server's clock and zone are not the reader's, and a copy from the cache keeps the hour
          it was fetched at. The same rule as app.js's updatePrayNow, which keeps it right from
-         then on; the schedule is presentation::CURRENT_HOUR_SCHEDULE. #}
+         then on; the schedule is presentation::CURRENT_HOUR_SCHEDULE. Here, after the whole
+         frontispiece: an inline script waits on the stylesheet, and a browser may paint what it
+         has parsed while it waits; set above "Change date", that frame showed the arch taller and
+         its words 25 to 65px lower until the rest came. #}
     <script>
       (function () {
         var card = document.querySelector(".home-prayer-card[data-date-slug]");
@@ -187,27 +211,6 @@
         prayNow.textContent = label;
       })();
     </script>
-
-    {# Season rides the secondary control row: context without interrupting
-         the date → prayer invitation reading order. #}
-    <div class="home-day-meta">
-      {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
-      {# Shown only in a reader's first week (layout.html's data-newcomer); the menu keeps About after. #}
-      <a class="home-introduction" href="/about">{{ about_introduction }}</a>
-      <details class="hour-date-nav home-date-nav">
-        <summary>Change date</summary>
-        <nav class="day-nav" aria-label="Date navigation">
-          <a href="{{ prev_link|url }}"><span aria-hidden="true">&larr;&nbsp;</span>{{ previous_day }}</a>
-          <form class="date-jump-form" action="/" method="get">
-            <label class="sr-only" for="home-date-jump">Jump to date</label>
-            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
-            <button class="date-submit" type="submit">Go</button>
-            {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
-          </form>
-          <a href="{{ next_link|url }}">{{ next_day }}<span aria-hidden="true">&nbsp;&rarr;</span></a>
-        </nav>
-      </details>
-    </div>
     {# The cross answers a tap: it turns the look over, Nave to Apse or back
          (presentation::crown). Never announced; last in the card, so the
          reading and focus order above is unchanged. Script reveals it once

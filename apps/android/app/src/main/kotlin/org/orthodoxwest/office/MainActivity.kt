@@ -19,6 +19,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
@@ -679,6 +680,12 @@ private val TRAVEL = 30.dp
  * governs it, so Remove animations shows each page at once.
  */
 private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
+    // The wall first: on a launch, home comes into the light on the wall the splash showed, over
+    // Tempo's dim, opacity only (iOS's `Loaded` does the same once a launch). Only from nothing
+    // composed yet, so never on a return to home within the session.
+    if (initialState == null && targetState?.entry?.page is Page.Home) {
+        return fadeIn(Tempo.dimIn.spec()) togetherWith ExitTransition.None using null
+    }
     val transform = when (motion) {
         Motion.FADE -> fadeIn(Tempo.turnIn.spec()) togetherWith fadeOut(Tempo.turnOut.spec())
         else -> {

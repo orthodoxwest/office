@@ -85,6 +85,26 @@
           document.head.appendChild(stars);
         }
       } catch (e) {}
+      {# The wall first (style.css): on a fresh arrival at home (from outside the Office, a
+           bookmark, the installed app or a reload; never a page turn from another of its pages,
+           which the turn already brings in), the painted layer is held until all of it is to
+           hand, and app.js (wallFirst) lays it as one coat. #}
+      try {
+        var entry = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+        var kind = entry ? entry.type : "navigate";
+        var turned = kind === "back_forward" || (kind !== "reload" && document.referrer && new URL(document.referrer).origin === location.origin);
+        if (!turned) {
+          var root = document.documentElement;
+          root.classList.add("wall-first");
+          {# Whether a frame has been shown: paint ready before it is simply there. #}
+          requestAnimationFrame(function () { root.setAttribute("data-wall-seen", ""); });
+          {# Without app.js the paint is let go: a second after load, or after six seconds
+               whatever has come, so a script that hangs (and holds load) never keeps it back. #}
+          var unhold = function () { if (!window.officeWallFirst) root.classList.remove("wall-first"); };
+          addEventListener("load", function () { setTimeout(unhold, 1000); });
+          setTimeout(unhold, 6000);
+        }
+      } catch (e) {}
       {%- endif %}
       {# A reader's first week (presentation::about::ABOUT_NEWCOMER_DAYS; app.js records the first day in office-first-counted; a browser
            that used the Office before that was recorded holds "before"): home offers the
@@ -139,6 +159,9 @@
        date and day when it swaps in. #}
   {# The preload must name the stylesheet's stamped URL exactly, or the face downloads twice. #}
   {% if page in ["calendar", "home"] %}<link rel="preload" href="{{ static("fonts/eb-garamond-regular.woff2")|url }}" as="font" type="font/woff2" crossorigin>{% endif %}
+  {# The header's ✠ is set in a face that blocks (style.css's "Office Cross"), and the brand's words
+       wait with it: fetched with the stylesheet, they stand from the first frame. #}
+  <link rel="preload" href="{{ static("fonts/noto-sans-symbols-cross.woff2")|url }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ static("style.css")|url }}">
   {# An hour's first frame waits for its colour band (it opens the page), so a page turn holds the band
        rather than revealing the hour before the band is parsed. #}

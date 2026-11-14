@@ -6341,6 +6341,100 @@ test("home marks the device's hour before its script runs", async ({ page }) => 
   await page.unroute("**/static/app.js*");
 });
 
+// The wall first's held layers, in style.css's order: the wall's field, the
+// lining, the cross, the stars' host, the invitation's wash, the ruled lines.
+async function heldLayers(page) {
+  return page.evaluate(() => {
+    const opacity = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo).opacity;
+    return [opacity("body", "::before"), opacity(".home-lining"), opacity(".home-crown"), opacity(".home-vault-stars"), opacity(".pray-now", "::before"), opacity(".home-rules")];
+  });
+}
+
+// The wall first (style.css): on a fresh arrival home's paint is held until
+// all of it is to hand and then laid as one coat. The words never wait, the
+// CSS rules the pen replaces stand down meanwhile so no line is seen twice, and
+// a page turn from another of the Office's pages holds nothing.
+test("home's paint is laid as one coat on a fresh arrival, and never held on a page turn", async ({ page }) => {
+  let script, wash;
+  const scriptGoes = new Promise((resolve) => { script = resolve; });
+  const washComes = new Promise((resolve) => { wash = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await scriptGoes; await route.continue(); });
+  await page.route("**/static/tablet.png*", async (route) => { await washComes; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  const root = page.locator("html");
+  await expect(page.locator("#home-date-heading")).toBeVisible();
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  const rules = () => page.evaluate(() => {
+    const prayNow = document.querySelector(".pray-now");
+    return [getComputedStyle(prayNow).borderTopColor, getComputedStyle(prayNow, "::after").content, getComputedStyle(document.querySelector(".home-prayer-card h2")).boxShadow];
+  });
+  expect(await rules()).toEqual(["rgba(0, 0, 0, 0)", "none", "none"]);
+  const paint = () => heldLayers(page);
+  script();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+  expect(await paint()).toEqual(["0", "0", "0", "0", "0", "0"]);
+  await page.waitForTimeout(300);
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  wash();
+  await expect(root).not.toHaveClass(/\bwall-first\b/);
+  await expect.poll(paint).toEqual(["1", "1", "1", "1", "1", "1"]);
+  await expect(root).not.toHaveClass(/\bwall-coat\b/);
+  await page.unroute("**/static/app.js*");
+  await page.unroute("**/static/tablet.png*");
+
+  await page.addInitScript(() => {
+    document.addEventListener("readystatechange", () => {
+      if (document.readyState === "interactive") window.heldOnArrival = document.documentElement.classList.contains("wall-first");
+    });
+  });
+  await page.goto("/about");
+  await page.locator(".site-brand").click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await page.evaluate(() => window.heldOnArrival)).toBe(false);
+});
+
+// The hold wins over every look's own figure for its layers: a black day by
+// night sets the cross at 0,6,0. Each layer comes in on the coat's beat.
+test("home's paint is held whole on a black day by night, and every layer comes in on the coat", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  let wash;
+  const washComes = new Promise((resolve) => { wash = resolve; });
+  await page.route("**/static/tablet.png*", async (route) => { await washComes; await route.continue(); });
+  await page.goto("/?date=2026-11-02", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".home-hero.day-color-black")).toHaveCount(1);
+  await expect(page.locator("html")).toHaveClass(/\bwall-first\b/);
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+  expect(await heldLayers(page)).toEqual(["0", "0", "0", "0", "0", "0"]);
+  wash();
+  await expect(page.locator("html")).not.toHaveClass(/\bwall-(first|coat)\b/);
+  expect((await heldLayers(page))[2]).toBe("1");
+  await page.unroute("**/static/tablet.png*");
+  const beats = await page.evaluate(() => {
+    document.documentElement.classList.add("wall-coat");
+    const beat = (selector, pseudo) => {
+      const cs = getComputedStyle(document.querySelector(selector), pseudo);
+      return `${cs.transitionProperty} ${cs.transitionDuration}`;
+    };
+    const all = [beat("body", "::before"), beat(".home-lining"), beat(".home-crown"), beat(".home-vault-stars"), beat(".pray-now", "::before"), beat(".home-rules")];
+    document.documentElement.classList.remove("wall-coat");
+    return all;
+  });
+  expect(beats).toEqual(Array(6).fill("opacity 0.24s"));
+});
+
+// A script that never answers holds load, and app.js never takes the paint
+// over: the pre-paint script lets it go by itself.
+test("home's paint is let go when app.js hangs", async ({ page }) => {
+  await page.route("**/static/app.js*", () => {});
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  await expect(page.locator("#home-date-heading")).toBeVisible();
+  await expect(page.locator("html")).toHaveClass(/\bwall-first\b/);
+  await expect(page.locator("html")).not.toHaveClass(/\bwall-first\b/, { timeout: 9000 });
+  // Without app.js nothing is ruled by hand: the CSS rules stand again.
+  expect(await page.locator(".home-crown").evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+  expect(await page.locator(".pray-now").evaluate((el) => getComputedStyle(el).borderTopColor)).not.toBe("rgba(0, 0, 0, 0)");
+});
+
 // A press is seen: a tap marks the control at once, and one that opens a page
 // keeps the mark until the page goes; an ordo row is pressed as one control.
 // Reported from the page, which is leaving when the mark matters.
