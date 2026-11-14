@@ -1168,7 +1168,7 @@ mod tests {
         assert!(!ordo(&format!("/calendar/{}", now.year() + 1)).contains("this month"));
     }
 
-    /// The year's course under the strip spells, day by day, the colours of the rows' rails, on
+    /// The year's course under the strip spells, day by day, the days' own colours, on
     /// the frontispiece and every month page alike, and is drawn for the eye alone.
     #[test]
     fn ordo_strip_lays_the_years_course_in_the_rows_colours() {
@@ -1181,11 +1181,16 @@ mod tests {
         assert_eq!(bands_of_year.len(), 12);
         assert_eq!(year.matches(r#"<span class="month-course" aria-hidden="true">"#).count(), 12);
         assert!(bands_of_year.iter().all(|b| b.starts_with(r#" viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">"#)));
-        // The rows' own colours, from the whole year.
+        // The days' own colours, from the whole year: a row's rail, or, where an octave's strand
+        // runs through a day of another colour (presentation::rails), that day's own inset.
         let all = ordo("/calendar/2026/all");
         let mut rows = vec![Vec::new(); 12];
         for row in all.split(r#"<tr class="day day-color-"#).skip(1) {
-            let colour = row.split(' ').next().unwrap().trim_end_matches('"');
+            let row = row.split("</tr>").next().unwrap();
+            let colour = match row.split(r#"<span class="day-inset day-color-"#).nth(1) {
+                Some(inset) => inset.split('"').next().unwrap(),
+                None => row.split(' ').next().unwrap().trim_end_matches('"'),
+            };
             let month: usize = row.split(r#"id="d-2026-"#).nth(1).unwrap()[..2].parse().unwrap();
             rows[month - 1].push(colour.to_string());
         }
