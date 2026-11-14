@@ -977,7 +977,9 @@ mod tests {
     fn an_hours_scores_are_engraved_at_the_column_the_browser_named() {
         let units = |body: &str| body.matches(" data-chant-units=\"").count();
         let at = |body: &str, em: f32| body.matches(&format!(" data-chant-units=\"{:.3}\"", em * 2.45 * 6.0)).count();
-        let (_, headers, plain) = get("/compline/2026-10-27");
+        // Every request names the same zone, so "today" (and with it the page's
+        // links back to today) is the same day in each, whatever the hour in UTC.
+        let (_, headers, plain) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York");
         assert_eq!(headers[header::VARY], "Cookie");
         assert!(units(&plain) > 0 && at(&plain, 17.0) == units(&plain), "the scores at the fallback's width");
         let (status, headers, narrow) = get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.875");
@@ -985,7 +987,7 @@ mod tests {
         assert_eq!(headers[header::VARY], "Cookie");
         assert_eq!(at(&narrow, 17.875), units(&plain), "every score at the reader's column");
         // A width between sixteenths of an em is engraved at the nearest.
-        assert_eq!(get_with_cookie("/compline/2026-10-27", "chant-width=17.900").2, narrow);
+        assert_eq!(get_with_cookie("/compline/2026-10-27", "tz=America/New_York; chant-width=17.900").2, narrow);
         // Only the scores differ.
         let words = |body: &str| {
             body.split("<div class=\"chant-width\"")
@@ -994,7 +996,7 @@ mod tests {
         };
         assert_eq!(words(&narrow), words(&plain));
         for odd in ["chant-width=wide", "chant-width=900", "chant-width="] {
-            assert_eq!(get_with_cookie("/compline/2026-10-27", odd).2, plain, "{odd}");
+            assert_eq!(get_with_cookie("/compline/2026-10-27", &format!("tz=America/New_York; {odd}")).2, plain, "{odd}");
         }
     }
 
