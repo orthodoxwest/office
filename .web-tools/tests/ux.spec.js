@@ -4006,8 +4006,28 @@ for (const [width, size, hash, path] of [
         scrollY,
         width: document.documentElement.scrollWidth,
       });
+      // The fonts are late only if the page has been painted without them: the ordo's faces
+      // are `optional`, so a release before the first paint (a slow first frame, a render held
+      // up) lays the page out in Garamond from the start, and there is no "before" to keep.
+      // So the release waits for the first paint and two frames after it. WebKit may hold its
+      // first paint (and its frames) for as long as a font is pending, records no paint at
+      // all, and so has nothing a font could be late for: after 5s it is released unpainted.
+      const painted = () => new Promise((resolve) => {
+        const since = performance.now();
+        const check = () => {
+          if (performance.getEntriesByType("paint").length) {
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+          } else if (performance.now() - since > 5000) {
+            resolve();
+          } else {
+            setTimeout(check, 16);
+          }
+        };
+        check();
+      });
       document.addEventListener("DOMContentLoaded", () => {
         setTimeout(async () => {
+          await painted();
           window.ordoBeforeFonts = geometry();
           await window.releaseOrdoFonts();
           await document.fonts.ready;
