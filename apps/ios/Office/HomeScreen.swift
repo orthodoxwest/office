@@ -1149,17 +1149,31 @@ private struct HourDirectory: View {
                     }
                 // What the hour is, for a newcomer, as the web's `.home-hour-link-note`.
                 if !gloss.isEmpty {
-                    if !desk || tier.shortScreen {
-                        // A gloss wider than its cell ("Mid-morning prayer" among the day's three,
-                        // or a short screen's, held at 12 in so small a niche) takes a second line
-                        // rather than running into its neighbour.
+                    if !desk {
+                        // A gloss wider than its cell ("Mid-morning prayer" among the day's three)
+                        // takes a second, balanced line rather than running into its neighbour; it
+                        // keeps 6 clear of either gilt point, and steps down where even its
+                        // longest word would not, as the web's.
+                        let two = balancedLines(gloss)
+                        ViewThatFits(in: .horizontal) {
+                            glossText(gloss, h, isNow)
+                            glossText(two, h, isNow)
+                            glossText(two, h, isNow, scale: 0.94)
+                            glossText(two, h, isNow, scale: 0.88)
+                            glossText(two, h, isNow, scale: 0.82)
+                            glossText(two, h, isNow, scale: 0.76)
+                        }
+                        .padding(.horizontal, m.px(4))
+                        .opacity(light?.gloss(h) ?? 1)
+                    } else if tier.shortScreen {
+                        // Held at 12 in so small a niche, a gloss takes a second line rather than
+                        // running into its neighbour.
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
                             .foregroundStyle(glossInk(h, isNow))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
-                            .opacity(desk ? 1 : light?.gloss(h) ?? 1)
                     } else {
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
@@ -1206,6 +1220,24 @@ private struct HourDirectory: View {
     /// A gloss's ink: the hour that is now's, or in the niche another's, turning with the light.
     private func glossInk(_ h: String, _ isNow: Bool) -> Color {
         light?.ink(h, now: home.nowGloss, plain: p.muted) ?? (isNow ? home.nowGloss : p.muted)
+    }
+
+    /// A phone's gloss at its own size or a step below, set whole on the lines it is given.
+    private func glossText(_ words: String, _ h: String, _ isNow: Bool, scale: CGFloat = 1) -> some View {
+        let size = tier.gloss * scale
+        return Text(words)
+            .type(TextStyle(size: size, line: size * 1.15, italic: true))
+            .foregroundStyle(glossInk(h, isNow))
+            .multilineTextAlignment(.center)
+            .fixedSize()
+    }
+
+    /// A gloss parted on two lines at the space that makes them most even ("Mid-morning / prayer").
+    private func balancedLines(_ gloss: String) -> String {
+        let chars = Array(gloss)
+        let spaces = chars.indices.filter { chars[$0] == " " }
+        guard let split = spaces.min(by: { max($0, chars.count - $0 - 1) < max($1, chars.count - $1 - 1) }) else { return gloss }
+        return String(chars[..<split]) + "\n" + String(chars[(split + 1)...])
     }
 }
 

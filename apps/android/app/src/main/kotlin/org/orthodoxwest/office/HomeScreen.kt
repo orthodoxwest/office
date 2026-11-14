@@ -1068,10 +1068,23 @@ private fun HourDirectory(current: String, note: String, light: HourLightNow?, p
                                 if (gloss.isNotEmpty()) {
                                     // A gloss wider than its cell ("Mid-morning prayer" among the day's
                                     // three, or a short screen's, held at 12 in so small a niche) takes a
-                                    // second, balanced line rather than running into its neighbour.
+                                    // second, balanced line rather than running into its neighbour. On a
+                                    // phone it keeps 6 clear of either gilt point, and steps down where
+                                    // even its longest word ("Mid-morning") would not.
                                     val wraps = !desk || tier.shortScreen
                                     val shown = if (desk) 1f else light?.gloss(h) ?: 1f
-                                    Text(gloss, if (shown < 1f) Modifier.alpha(shown) else Modifier, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading), maxLines = if (wraps) 2 else 1, softWrap = wraps)
+                                    val glossStyle = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading)
+                                    if (desk) {
+                                        Text(gloss, if (shown < 1f) Modifier.alpha(shown) else Modifier, style = glossStyle, maxLines = if (wraps) 2 else 1, softWrap = wraps)
+                                    } else {
+                                        BasicText(
+                                            gloss,
+                                            Modifier.padding(horizontal = 6.dp).then(if (shown < 1f) Modifier.alpha(shown) else Modifier),
+                                            style = glossStyle,
+                                            maxLines = 2,
+                                            autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = glossStyle.fontSize, stepSize = 0.25.sp),
+                                        )
+                                    }
                                 }
                             }
                         }

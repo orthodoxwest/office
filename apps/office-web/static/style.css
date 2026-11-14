@@ -7593,13 +7593,23 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 /* A gloss wider than its hour's cell ("Mid-morning prayer" in the day's
    three) takes a second line rather than running over the gilt point into
-   its neighbour. It may use the cell's padding, so that "Mid-morning" keeps
-   one line on a 360px phone. */
+   its neighbour. It keeps 6px clear of either point, and its type steps
+   down where even its longest word ("Mid-morning", 5.51em) would not: the
+   day's cells are a third of their band (cqi), so on a phone narrower than
+   about 400px. */
+.page-home .home-hour-group-links {
+  container-type: inline-size;
+}
+
 .page-home .home-hour-link.is-current .home-hour-link-note {
   display: block;
-  margin-inline: -0.2rem;
+  margin-inline: calc(6px - 0.2rem);
   color: var(--now-gloss);
   text-wrap: balance;
+}
+
+.page-home .home-hour-group-day .home-hour-link.is-current .home-hour-link-note {
+  font-size: min(0.78rem, calc((33.33cqi - 12px) / 5.51));
 }
 
 /* An hour prayed today (app.js): its name withdraws to the muted ink and a
