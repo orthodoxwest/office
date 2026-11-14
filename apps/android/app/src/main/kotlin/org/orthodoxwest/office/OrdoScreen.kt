@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.indication
@@ -60,6 +61,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.layout
@@ -93,10 +95,13 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.orthodoxwest.office.core.CommemorationView
+import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.OrdoDayView
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.OrdoYearView
 import org.orthodoxwest.office.core.TabulaRowView
+import org.orthodoxwest.office.core.coursePlace
+import org.orthodoxwest.office.core.courseSpan
 
 /** One month of the ordo, as the web's month page: year and month navigation, then the days. */
 @Composable
@@ -173,7 +178,7 @@ fun OrdoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item(key = "chrome") { chrome() }
-        item(key = "header") { OrdoHeader(year, monthNumber, null, today, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        item(key = "header") { OrdoHeader(year, monthNumber, null, month?.course, today, { 1f }, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
         // The web's search field under the ordo's title, which opens the search page.
         item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tools") {
@@ -262,7 +267,9 @@ private fun OrdoHeader(
     year: Int,
     month: Int?,
     roman: String?,
+    course: List<CourseMonthView>?,
     today: LocalDate,
+    laid: () -> Float,
     onMonth: (Int, Int) -> Unit,
     onToday: () -> Unit,
     onYear: (Int) -> Unit,
@@ -297,43 +304,30 @@ private fun OrdoHeader(
             Text("${year + 1} ›", cell.tap(label = "Next year, ${year + 1}") { sameView(year + 1) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
     }
-    // The month strip: the shown month underlined in gold, and today's month marked with the gold
-    // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
+    // The month strip: the shown month underlined in gold along its cell's foot, and under each
+    // month the year's course (`CourseBand`), with today's lozenge hung beneath at today's place.
     val strip: @Composable () -> Unit = {
         Month.entries.chunked(if (wide) 12 else 6).forEach { row ->
             Row(Modifier.fillMaxWidth()) {
                 row.forEach { m ->
                     val current = m.value == month
                     val todays = today.year == year && today.monthValue == m.value
-                    Box(
-                        Modifier.weight(1f).heightIn(min = 44.dp)
-                            .then(
-                                if (!wide) Modifier else Modifier.drawBehind {
-                                    val y = size.height - 1.dp.toPx()
-                                    if (current) drawLine(p.goldLine, Offset(0f, y), Offset(size.width, y), 2.dp.toPx())
-                                    if (todays) {
-                                        val c = Offset(size.width / 2f, if (current) y else size.height - 0.5.dp.toPx())
-                                        lozenge(c, 5.83.dp.toPx(), p.bg, null)
-                                        lozenge(c, 3.dp.toPx(), p.gold, null)
-                                    }
-                                },
-                            )
-                            .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            m.getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
-                            Modifier.drawBehind {
-                                if (wide) return@drawBehind
-                                val y = size.height + 4.dp.toPx()
-                                if (current) drawLine(p.goldLine, Offset(-14.dp.toPx(), y), Offset(size.width + 14.dp.toPx(), y), 2.dp.toPx())
-                                if (todays) {
-                                    lozenge(Offset(size.width / 2f, y), 5.83.dp.toPx(), p.bg, null)
-                                    lozenge(Offset(size.width / 2f, y), 3.dp.toPx(), p.gold, null)
+                    Column(Modifier.weight(1f)) {
+                        Box(
+                            Modifier.fillMaxWidth().heightIn(min = 44.dp)
+                                .drawBehind {
+                                    val w = 2.dp.toPx()
+                                    if (current) drawLine(p.goldLine, Offset(0f, size.height - w / 2f), Offset(size.width, size.height - w / 2f), w)
                                 }
-                            },
-                            style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
-                        )
+                                .tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                m.getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
+                                style = Type.label(12.48f, 0.06f).copy(color = if (current) p.accent else p.muted),
+                            )
+                        }
+                        CourseBand(course?.getOrNull(m.value - 1), if (todays) today.dayOfMonth else null) { (laid() * 12f - (m.value - 1)).coerceIn(0f, 1f) }
                     }
                 }
             }
@@ -352,7 +346,8 @@ private fun OrdoHeader(
                 Spacer(Modifier.weight(1f).widthIn(min = 32.dp))
                 yearNav(Modifier)
             }
-            Column(Modifier.fillMaxWidth().drawBehind { drawLine(p.border, Offset(0f, size.height - 0.5.dp.toPx()), Offset(size.width, size.height - 0.5.dp.toPx()), 1.dp.toPx()) }) { strip() }
+            // The course's own hairline is the strip's foot now (the web's band in `.month-jump`).
+            Column(Modifier.fillMaxWidth()) { strip() }
         }
     } else {
         Column(modifier.then(rules).padding(top = 13.4.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -364,16 +359,58 @@ private fun OrdoHeader(
     }
 }
 
+/**
+ * One month's band of the year's course under the strip, as the web's `.month-course`: the rows'
+ * colour rails laid on their side, a day to a 31st of the month's width (`courseSpan`), so a short
+ * month ends early and the strip's hairline, the band's lowest line, shows in its tail; each run's
+ * edges snapped to whole pixels, as the web's `crispEdges`. Today's lozenge hangs beneath the band
+ * at today's place. Its 11dp are kept whether the course has come or not, so nothing moves when
+ * it does; drawn for the eye alone. `laid` is how much of it the frontispiece's stroke has
+ * uncovered (0 to 1), read as it draws.
+ */
+@Composable
+private fun CourseBand(band: CourseMonthView?, today: Int?, laid: () -> Float) {
+    val p = LocalPalette.current
+    Canvas(Modifier.fillMaxWidth().height(11.dp)) {
+        val top = 1.dp.toPx().roundToInt().toFloat()
+        val height = 3.dp.toPx().roundToInt().toFloat()
+        val hair = 1.dp.toPx().roundToInt().coerceAtLeast(1).toFloat()
+        drawRect(p.border, Offset(0f, top + height - hair), Size(size.width, hair))
+        if (band != null) {
+            val span = courseSpan().toFloat()
+            // The stroke uncovers the band from the left; nothing else moves.
+            clipRect(right = size.width * laid()) {
+                for (r in band.runs) {
+                    val x0 = (size.width * r.start / span).roundToInt().toFloat()
+                    val x1 = (size.width * (r.start + r.days) / span).roundToInt().toFloat()
+                    if (x1 > x0) drawRect(railColor(r.color, p), Offset(x0, top), Size(x1 - x0, height))
+                }
+            }
+        }
+        if (today != null) {
+            // The web's 0.22rem square turned on its point, centred 7.5dp under the cell.
+            lozenge(Offset((size.width * coursePlace(today)).toFloat(), 7.5.dp.toPx()), 2.5.dp.toPx(), p.gold, null)
+        }
+    }
+}
+
+/** Whether this launch has laid the year's course in yet: once a launch. */
+private object CourseLay {
+    var done = false
+}
+
 /** The first day's item in a month's list: after the chrome, header, search, tools, rank key and month heading (and a wide screen's column headings). */
 private const val FIRST_DAY_ITEM = 6
 
 /**
- * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip, and the
- * Tabula Temporaria. Each date leads to its day in the ordo.
+ * A year's frontispiece, as the web's /calendar/{year}: the title page, the month strip with the
+ * year's course under it (`course`, from the engine once it has it), and the Tabula Temporaria.
+ * Each date leads to its day in the ordo.
  */
 @Composable
 fun OrdoYearScreen(
     view: OrdoYearView,
+    course: List<CourseMonthView>?,
     today: LocalDate,
     chrome: @Composable () -> Unit,
     insets: PaddingValues,
@@ -385,6 +422,16 @@ fun OrdoYearScreen(
 ) {
     val p = LocalPalette.current
     val listState = rememberSaveable(view.year, saver = LazyListState.Saver) { LazyListState() }
+    // The year's course is laid in by one stroke across the twelve months, the first time a
+    // frontispiece shows it this launch (the web's once a session); with animations off the
+    // stroke is over at once.
+    val stroke = remember { Animatable(if (CourseLay.done) 1f else 0f) }
+    LaunchedEffect(course != null) {
+        if (course != null && !CourseLay.done) {
+            CourseLay.done = true
+            stroke.animateTo(1f, tween(Tempo.COURSE_LAY_MS, easing = Tempo.courseLayCurve))
+        }
+    }
     LazyColumn(
         Modifier.fillMaxSize(),
         state = listState,
@@ -392,7 +439,7 @@ fun OrdoYearScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item(key = "chrome") { chrome() }
-        item(key = "header") { OrdoHeader(view.year, null, view.roman, today, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
+        item(key = "header") { OrdoHeader(view.year, null, view.roman, course, today, { stroke.value }, onMonth, onToday, onYear, ordoColumn().padding(top = 17.6.dp)) }
         item(key = "find") { SearchEntry(onFind, ordoColumn().padding(top = 8.dp)) }
         item(key = "tabula") {
             Column(ordoColumn().padding(top = 40.dp)) {

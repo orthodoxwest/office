@@ -3610,12 +3610,17 @@ html[data-newcomer] .home-season {
 .day-rank {
   font-family: Georgia, "Times New Roman", "Ordo Cross", serif;
 }
+/* The strip's room for the year's course is reserved in its own padding and
+   row gap (the band 3px below each month's underline, the lozenge hung beneath
+   it), so the band adds no height of its own and nothing shifts. */
 .month-jump {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  border-bottom: 1px solid var(--border);
+  row-gap: 11px;
+  padding-bottom: 11px;
 }
 .month-jump a {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3632,24 +3637,50 @@ html[data-newcomer] .home-season {
   color: var(--accent);
   border-bottom-color: var(--gold-line);
 }
-/* Today's month carries the month heading's lozenge, set on the line its
-   underline takes: on the rule when it is the page, alone when it is not.
-   It moves at midnight with the day's own Today marker. */
-.month-jump a.is-today-month { position: relative; }
+/* The year's course: the rows' colour rail laid on its side under the
+   months, one rect to a run of days in the rail's own pigment
+   (presentation::course; viewBox 31 wide, so a short month ends early and
+   the strip's hairline, the band's lowest pixel, shows in its tail). Static:
+   no stroke, no year turn. A gap of the ground parts it from the current
+   month's gold underline, which would run into a white day's pigment. */
+.month-course {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 3px);
+  width: 100%;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(var(--border), var(--border)) 0 100% / 100% 1px no-repeat;
+}
+.month-course svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: crispEdges;
+}
+.month-course rect { fill: var(--day-color); }
+/* Before its stroke (calendar.html decides, app.js lays it) the band is held
+   unseen; the hairline stands in its room. */
+html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
+/* Today's month carries the month heading's lozenge, hung under the band at
+   today's own place along it (--today-x, the middle of the day's 31st), so
+   today's colour is still seen. It moves at midnight with the day's own
+   Today marker. */
 .month-jump a.is-today-month::after {
   content: "";
   position: absolute;
-  left: 50%;
-  /* Centred on the 2px underline, or on the strip's hairline beneath. */
-  bottom: 1px;
+  left: var(--today-x, 50%);
+  bottom: -9.5px;
   width: 0.22rem;
   height: 0.22rem;
   background: var(--gold);
-  box-shadow: 0 0 0 2px var(--bg);
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
 }
-.month-jump a.is-today-month:not([aria-current])::after { bottom: -0.5px; }
+/* Forced colours keep no pigment: the band stands down, as the rails do. */
+@media (forced-colors: active) {
+  .month-course { display: none; }
+}
 .calendar-tools {
   display: flex;
   flex-wrap: wrap;
@@ -5588,6 +5619,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      dim     the room changing: 320ms
      gild    the cross under the last Amen taking its gold: 2000ms, by
              opacity alone, once (presentation::EndLeaf)
+   and the coat: on a cold start of home, its paint laid over the wall as
+   one, in 240ms (Tempo::COAT, "The wall first" below).
    No motion takes the browser's own `ease`. */
 :root {
   --curve-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -5603,6 +5636,10 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --tempo-touch-reach: 120ms;
   --tempo-touch-reach-delay: 0ms;
   --tempo-touch-reach-curve: var(--curve-arrive);
+  /* The year's course laid in on the frontispiece, once a session: one
+     brush stroke across the twelve months (app.js's "The year's course"). */
+  --tempo-course-lay: 815ms;
+  --tempo-course-lay-curve: cubic-bezier(0.38, 0.2, 0.6, 0.92);
   --tempo-gild: 2000ms;
   --tempo-gild-delay: 0ms;
   --tempo-gild-curve: var(--curve-standard);
@@ -5630,6 +5667,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --tempo-dim-out: 320ms;
   --tempo-dim-out-delay: 0ms;
   --tempo-dim-out-curve: var(--curve-standard);
+  --tempo-coat: 240ms;
+  --tempo-coat-delay: 0ms;
+  --tempo-coat-curve: var(--curve-arrive);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -11805,6 +11845,64 @@ body.page-home::before {
   mask-position: top center;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
+}
+
+/* ── The wall first ──
+   A cold start is the wall, then its painting. On a fresh arrival at home
+   the wall, the arch, the frieze and every word stand from the first frame,
+   but the paint came later and piece by piece: measured on a cold load (a
+   phone, four times slower, a slow 4G link), the powdering some 480ms after
+   the first frame, the lining and the cross at 1.5s, the invitation's wash
+   at 1.8s, the stars by night at 0.5s and again 0.9s later when the italic
+   face moved the words they keep clear of, and the hand-ruled lines over
+   the CSS rules they replace as app.js ran. So the paint is held
+   (.wall-first, set by layout.html's pre-paint script on a fresh arrival
+   only, never on a page turn) until all of it is to hand, and then laid as
+   one coat over Tempo's coat, opacity only (app.js, wallFirst). Paint ready
+   before the first frame is simply there; under reduced motion the coat is
+   laid at once. The CSS rules the pen replaces stand down while held, as
+   they do once ruled, so no line is seen twice. Screen only: paper prints
+   whatever the page has. */
+@media screen {
+  /* Important: the hold must win over every look's own figure for these
+     layers (a black day's cross by night is set at 0,6,0), and it lasts
+     only until the coat is laid. */
+  :root.wall-first body.page-home::before,
+  :root.wall-first body.page-home .home-lining,
+  :root.wall-first body.page-home .home-crown,
+  :root.wall-first body.page-home .home-rules,
+  :root.wall-first body.page-home .home-vault-stars,
+  :root.wall-first body.page-home .pray-now::before {
+    opacity: 0 !important;
+  }
+
+  :root.wall-first body.page-home .home-prayer-card h2 {
+    box-shadow: none !important;
+  }
+
+  :root.wall-first body.page-home .pray-now,
+  :root.wall-first body.page-home .pray-now:hover {
+    border-color: transparent !important;
+  }
+
+  :root.wall-first body.page-home .pray-now::after {
+    content: none !important;
+  }
+
+  :root.wall-first body.page-home .home-hour-links .home-hour-group {
+    border-color: transparent !important;
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  :root.wall-coat body.page-home::before,
+  :root.wall-coat body.page-home .home-lining,
+  :root.wall-coat body.page-home .home-crown,
+  :root.wall-coat body.page-home .home-rules,
+  :root.wall-coat body.page-home .home-vault-stars,
+  :root.wall-coat body.page-home .pray-now::before {
+    transition: opacity var(--tempo-coat) var(--tempo-coat-curve) var(--tempo-coat-delay);
+  }
 }
 
 /* ── Print ──

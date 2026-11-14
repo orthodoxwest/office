@@ -214,6 +214,19 @@ pub struct MonthLink {
     pub current: bool,
     /// Today falls in this month.
     pub today: bool,
+    /// Today's place along the month's band ("40.323%"), on today's month only; the client
+    /// moves it with the local date.
+    pub today_x: String,
+    /// The month's runs of day colours, the year's course (`presentation::course`).
+    pub course: Vec<CourseRunView>,
+}
+
+/// One run of a month's band: `days` days of `color` from `start` (0-based), on a span of 31.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CourseRunView {
+    pub start: u32,
+    pub days: u32,
+    pub color: String,
 }
 
 /// A labelled figure or date in the Tabula Temporaria; `href` leads to the

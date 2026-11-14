@@ -78,7 +78,9 @@ pub enum Tempo {
     /// Page to page: the old page goes, then the new one comes, so two pages of prayer are never
     /// seen over each other. The way in waits for the way out.
     Turn,
-    /// The room changing as a whole: theme and text size, one beat.
+    /// The room changing as a whole: theme and text size, one beat. The apps' home comes into the
+    /// light on its way in once a launch (never on a return to it within the session), from the
+    /// wall the launch screen showed.
     Dim,
 }
 
@@ -94,12 +96,31 @@ impl Tempo {
     /// reaches its place over this, so the stretch is seen; it goes back over the touch's way out.
     pub const TOUCH_REACH: Beat = beat(120, 0, Curve::Arrive);
 
+    /// The year's course laid in under the ordo frontispiece's month strip, once a session (the
+    /// web's sessionStorage, the apps' launch), never under reduced motion: one front crossing
+    /// January to December, uncovering the band and moving nothing else. Its pace is a brush's,
+    /// [`Tempo::COURSE_LAY_CURVE`], over the whole year, each month taking its twelfth of the
+    /// eased stroke; on a phone's two rows of six the front finishes June and carries on at July.
+    pub const COURSE_LAY_MS: u32 = 815;
+
+    /// The stroke's curve, a CSS `cubic-bezier`'s four figures: unlike the three [`Curve`]s it
+    /// keeps moving to the end, so December is laid, not settled into.
+    pub const COURSE_LAY_CURVE: [f32; 4] = [0.38, 0.2, 0.6, 0.92];
+
     /// The consecration cross under an hour's last Amen taking its gold (`presentation::EndLeaf`):
     /// once the hour is marked prayed and the cross stands wholly on the screen, the gold comes
     /// up evenly over two seconds, by its opacity alone. Nothing travels, grows, wipes or glows;
     /// it is slow so that it is a change of the wall and not an event on it. Reduced motion
     /// cuts it: the cross is simply gilt.
     pub const GILD: Beat = beat(2000, 0, Curve::Standard);
+
+    /// The wall first: on a cold start of the web's home, where its paint (the lining, the cross,
+    /// the invitation's wash, the ruled lines, the wall's powdering or vault, the Apse's stars)
+    /// comes later than the wall and the words, the paint is held until all of it is to hand and
+    /// then laid as one coat over this, opacity only (style.css's `--tempo-coat`, app.js's
+    /// `wallFirst`). Paint ready by the first frame is simply there. The apps draw their paint
+    /// with the page, so they have no coat; home comes into the light on [`Tempo::Dim`] instead.
+    pub const COAT: Beat = beat(240, 0, Curve::Arrive);
 
     /// The motion's name, as the web's `--tempo-*` properties name it.
     pub fn name(self) -> &'static str {
@@ -187,10 +208,41 @@ mod tests {
         assert_eq!(value("--tempo-touch-reach"), format!("{}ms", reach.ms));
         assert_eq!(value("--tempo-touch-reach-delay"), format!("{}ms", reach.delay));
         assert_eq!(value("--tempo-touch-reach-curve"), format!("var(--curve-{})", reach.curve.name()));
+        let coat = Tempo::COAT;
+        assert_eq!(value("--tempo-coat"), format!("{}ms", coat.ms));
+        assert_eq!(value("--tempo-coat-delay"), format!("{}ms", coat.delay));
+        assert_eq!(value("--tempo-coat-curve"), format!("var(--curve-{})", coat.curve.name()));
+        let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+        assert_eq!(value("--tempo-course-lay"), format!("{}ms", Tempo::COURSE_LAY_MS));
+        assert_eq!(value("--tempo-course-lay-curve"), format!("cubic-bezier({x1}, {y1}, {x2}, {y2})"));
         let gild = Tempo::GILD;
         assert_eq!(value("--tempo-gild"), format!("{}ms", gild.ms));
         assert_eq!(value("--tempo-gild-delay"), format!("{}ms", gild.delay));
         assert_eq!(value("--tempo-gild-curve"), format!("var(--curve-{})", gild.curve.name()));
+    }
+
+    /// The wall first, on each front: the web's coat is laid on `--tempo-coat` (and app.js waits
+    /// for it before taking the transition off), and each app's home comes into the light on the
+    /// dim's way in, once a launch.
+    #[test]
+    fn the_wall_comes_first_on_every_front() {
+        let css = read("apps/office-web/static/style.css");
+        assert!(
+            css.contains("transition: opacity var(--tempo-coat) var(--tempo-coat-curve) var(--tempo-coat-delay);"),
+            "style.css lays the coat on --tempo-coat"
+        );
+        let js = read("apps/office-web/static/app.js");
+        assert!(js.contains("tempoMs(\"tempo-coat\")"), "app.js times the coat by --tempo-coat");
+        let swift = read("apps/ios/Office/HourScreen.swift");
+        assert!(
+            swift.contains(".transition(lighting ? AnyTransition.opacity.animation(Tempo.dimIn.animation) : transition)"),
+            "iOS home comes into the light on Tempo.dimIn"
+        );
+        let kt = read("apps/android/app/src/main/kotlin/org/orthodoxwest/office/MainActivity.kt");
+        assert!(
+            kt.contains("fadeIn(Tempo.dimIn.spec()) togetherWith ExitTransition.None"),
+            "Android home comes into the light on Tempo.dimIn"
+        );
     }
 
     /// The iOS app's table (`Tempo.swift`): `static let turnIn = Beat(ms: 210, delay: 90, curve: .arrive)`
@@ -211,6 +263,11 @@ mod tests {
         for line in [
             format!("static let touchQuiet = {}", Tempo::TOUCH_QUIET),
             format!("static let touchReach = Beat(ms: {}, delay: {}, curve: .{})", r.ms, r.delay, r.curve.name()),
+            format!("static let courseLay = {}", Tempo::COURSE_LAY_MS),
+            {
+                let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+                format!("static let courseLayCurve = ({x1}, {y1}, {x2}, {y2})")
+            },
             format!("static let gild = Beat(ms: {}, delay: {}, curve: .{})", Tempo::GILD.ms, Tempo::GILD.delay, Tempo::GILD.curve.name()),
         ] {
             assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
@@ -236,6 +293,11 @@ mod tests {
         for line in [
             format!("const val TOUCH_QUIET = {}f", Tempo::TOUCH_QUIET),
             format!("val touchReach = Beat(ms = {}, delay = {}, curve = Curve.{})", r.ms, r.delay, title(r.curve.name())),
+            format!("const val COURSE_LAY_MS = {}", Tempo::COURSE_LAY_MS),
+            {
+                let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+                format!("val courseLayCurve = CubicBezierEasing({x1}f, {y1}f, {x2}f, {y2}f)")
+            },
             format!(
                 "val gild = Beat(ms = {}, delay = {}, curve = Curve.{})",
                 Tempo::GILD.ms,

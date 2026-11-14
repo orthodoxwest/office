@@ -16,7 +16,7 @@ struct HomePage: View {
         let clock = model.clockHour
         // A new clock hour composes home again in place, its light moving if the turn was seen
         // (`HourLightPass`), rather than replacing the page.
-        Loaded(key: "\(date.iso) \(today.iso) \(clock)", place: "\(date.iso) \(today.iso)", motion: model.motion(to: .home(date))) {
+        Loaded(key: "\(date.iso) \(today.iso) \(clock)", place: "\(date.iso) \(today.iso)", motion: model.motion(to: .home(date)), arrival: model.homeArrival) {
             try Office.core.get().home(date: date, today: today, clockHour: Int32(clock))
         } content: { view in
             HomeScreen(view: view, date: date)

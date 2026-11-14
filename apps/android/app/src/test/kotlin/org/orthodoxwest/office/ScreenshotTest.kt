@@ -67,6 +67,7 @@ class ScreenshotTest {
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
+        val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }
         compose.setContent {
             OfficeTheme(choice = theme, season = home?.ornament ?: hour?.ornament ?: "") {
                 OfficeApp(
@@ -74,6 +75,7 @@ class ScreenshotTest {
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
                     reminders = reminders, reminderStatus = status,
                     onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
+                    course = course,
                     newcomer = newcomer,
                 )
             }

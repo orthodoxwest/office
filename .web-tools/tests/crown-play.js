@@ -25,6 +25,8 @@ export async function holdCrown(page, dir, { date = "2026-03-15" } = {}) {
   await page.addInitScript((stored) => localStorage.setItem("office-theme", stored), dir === "dusk" ? "light" : "dark");
   await page.goto(`/?date=${date}`);
   await page.evaluate(() => document.fonts.ready);
+  // Home's paint laid (the wall first), as a reader sees it before the tap.
+  await page.waitForFunction(() => !document.documentElement.matches(".wall-first, .wall-coat"));
   const tap = page.locator(".home-crown-tap");
   // Shown once the play is set up, in idle time after load; the stars are
   // fetched, and each has its turn in the play.

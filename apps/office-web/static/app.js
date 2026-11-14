@@ -2656,6 +2656,127 @@ function plainClickOpensHere(e, link) {
     }).observe(hero);
   });
 
+  // Home: the wall first (style.css). On a fresh arrival, layout.html's
+  // pre-paint script holds home's paint (.wall-first): the wall, the arch
+  // and the words stand from the first frame, and the paint (the wall's
+  // powdering or vault, the lining, the cross, the invitation's wash, the
+  // ruled lines, the stars by night) is laid as one coat once all of it is
+  // to hand: its images decoded, the faces in (they move the words the
+  // stars keep clear of), the lines ruled and the stars set. Ready before a
+  // frame was shown, it is simply there; otherwise it comes in over Tempo's
+  // coat (under reduced motion, at once). Whatever is late, it is laid
+  // within a few seconds.
+  var wallFirst = (function () {
+    var root = document.documentElement;
+    if (!root.classList.contains("wall-first")) {
+      return null;
+    }
+    if (!document.querySelector(".page-home .home-hero")) {
+      root.classList.remove("wall-first");
+      return null;
+    }
+    // layout.html lets the paint go at load if no script takes it over.
+    window.officeWallFirst = true;
+    var ready = null;
+    var laid = false;
+    var waitingOnStars = true;
+    function tempoMs(name) {
+      return parseFloat(window.getComputedStyle(root).getPropertyValue("--" + name)) || 0;
+    }
+    function lay(atOnce) {
+      if (laid) {
+        return;
+      }
+      laid = true;
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (atOnce === true || still || !root.hasAttribute("data-wall-seen")) {
+        root.classList.remove("wall-first");
+        return;
+      }
+      root.classList.add("wall-coat");
+      root.classList.remove("wall-first");
+      window.setTimeout(function () {
+        root.classList.remove("wall-coat");
+      }, tempoMs("tempo-coat") + tempoMs("tempo-coat-delay") + 50);
+    }
+    // The images the held paint is drawn through, as the stylesheet
+    // resolves them for this look and width. A mask's image is fetched in
+    // CORS mode and a background's is not, and each is asked for as the
+    // stylesheet asked, so it is the same copy, not a second download.
+    function images() {
+      var found = [];
+      [[document.body, "::before"], [document.querySelector(".page-home .home-lining"), "::before"], [document.querySelector(".page-home .home-crown"), null], [document.querySelector(".page-home .pray-now"), "::before"]].forEach(function (pair) {
+        if (!pair[0]) {
+          return;
+        }
+        var cs = window.getComputedStyle(pair[0], pair[1]);
+        if (cs.display === "none") {
+          return;
+        }
+        [[cs.maskImage, true], [cs.webkitMaskImage, true], [cs.backgroundImage, false]].forEach(function (layer) {
+          String(layer[0] || "").replace(/url\(\s*["']?([^"')]+)["']?\s*\)/g, function (all, url) {
+            var key = (layer[1] ? "cors " : "") + url;
+            if (found.indexOf(key) < 0) {
+              found.push(key);
+            }
+            return all;
+          });
+        });
+      });
+      return found;
+    }
+    function decoded(key) {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        var cors = key.indexOf("cors ") === 0;
+        if (cors) {
+          img.crossOrigin = "anonymous";
+        }
+        img.src = cors ? key.slice(5) : key;
+        if (img.decode) {
+          img.decode().then(resolve, resolve);
+        } else {
+          img.onload = img.onerror = resolve;
+        }
+      });
+    }
+    window.setTimeout(lay, 4000);
+    // A tap on the cross plays on the paint: whatever is still to come, it
+    // is laid at once, with no coat, rather than held under the play.
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.closest && e.target.closest(".home-crown-tap")) {
+        lay(true);
+      }
+    }, true);
+    return {
+      // Home's painter, after each pass: whether stars are wanted (by night)
+      // and set, and how to ask it for another pass.
+      painted: function (starsWanted, starsSet, repaint) {
+        if (laid) {
+          return;
+        }
+        waitingOnStars = starsWanted && !starsSet;
+        if (ready === null) {
+          ready = false;
+          var waits = images().map(decoded);
+          if (document.fonts && document.fonts.ready) {
+            waits.push(document.fonts.ready);
+          }
+          // Once all is to hand, one more pass sets the stars where the
+          // faces now put the words, and the coat is laid after it.
+          Promise.all(waits).then(function () {
+            ready = true;
+            repaint();
+          }, lay);
+          return;
+        }
+        if (ready && !waitingOnStars) {
+          lay();
+        }
+      },
+    };
+  })();
+
   // Home: the painted page (style.css). Two things CSS cannot draw.
   //
   // The rules: the frieze's oxblood edges and leaf fillets, the invitation's
@@ -2905,6 +3026,10 @@ function plainClickOpensHere(e, link) {
       }
       if (sky && head) {
         placeStars();
+      }
+      if (wallFirst) {
+        var night = Boolean(sky && head && starHost) && window.getComputedStyle(starHost).visibility === "visible" && !(starHost === sky && window.getComputedStyle(sky).display === "none");
+        wallFirst.painted(night, Boolean(night && starHost.querySelector(":scope > svg.home-stars")), schedule);
       }
     }
     function schedule() {
@@ -3392,13 +3517,20 @@ function plainClickOpensHere(e, link) {
       todayLink.setAttribute("href", ordoDayURL(localDateSlug(new Date())));
     }
     // Today's month in the strip: its lozenge and spoken name follow the
-    // local date too.
+    // local date too. The lozenge hangs at today's place along the year's
+    // course, the middle of the day's 31st (presentation::course::course_place).
     var thisMonth = localDateSlug(new Date()).slice(0, 7);
+    var todayX = ((new Date().getDate() - 0.5) / 31 * 100).toFixed(3) + "%";
     document.querySelectorAll(".month-jump a[data-month]").forEach(function (link) {
       var name = (link.getAttribute("aria-label") || "").replace(/, this month$/, "");
       var today = link.getAttribute("data-month") === thisMonth;
       link.classList.toggle("is-today-month", today);
       link.setAttribute("aria-label", today ? name + ", this month" : name);
+      if (today) {
+        link.style.setProperty("--today-x", todayX);
+      } else {
+        link.style.removeProperty("--today-x");
+      }
     });
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
@@ -3409,6 +3541,56 @@ function plainClickOpensHere(e, link) {
       }
     }
   }
+
+  // The year's course: on the frontispiece, once a session, the band under
+  // the month strip is laid in by one brush stroke, a single front crossing
+  // January to December (on a phone's two rows it finishes June and carries
+  // on at July). calendar.html decides before the first paint
+  // (html[data-course-lay], which holds the band unseen); here each month's
+  // band is uncovered for its twelfth of the eased stroke. Only the band's
+  // clip moves. Its length and pace are Tempo's (--tempo-course-lay,
+  // --tempo-course-lay-curve; render_blocks::Tempo::COURSE_LAY_*).
+  (function layYearCourse() {
+    var root = document.documentElement;
+    if (!root.hasAttribute("data-course-lay")) {
+      return;
+    }
+    var svgs = [].slice.call(document.querySelectorAll(".calendar[data-view='year'] .month-course svg"));
+    var style = getComputedStyle(root);
+    var ms = parseFloat(style.getPropertyValue("--tempo-course-lay"));
+    var curve = /cubic-bezier\(([^)]*)\)/.exec(style.getPropertyValue("--tempo-course-lay-curve"));
+    if (!svgs.length || !ms || !curve || typeof svgs[0].animate !== "function") {
+      root.removeAttribute("data-course-lay");
+      return;
+    }
+    var c = curve[1].split(",").map(parseFloat);
+    function axis(a, b, t) {
+      return 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+    }
+    // The eased progress at time x (0..1).
+    function eased(x) {
+      var lo = 0, hi = 1;
+      for (var i = 0; i < 24; i++) {
+        var mid = (lo + hi) / 2;
+        if (axis(c[0], c[2], mid) < x) { lo = mid; } else { hi = mid; }
+      }
+      return axis(c[1], c[3], (lo + hi) / 2);
+    }
+    var steps = 60;
+    var strokes = svgs.map(function (svg, i) {
+      var frames = [];
+      for (var k = 0; k <= steps; k++) {
+        var laid = Math.max(0, Math.min(1, eased(k / steps) * svgs.length - i));
+        frames.push({ clipPath: "inset(0 " + ((1 - laid) * 100).toFixed(2) + "% 0 0)", offset: k / steps });
+      }
+      return svg.animate(frames, { duration: ms, easing: "linear", fill: "both" });
+    });
+    // The strokes now hold the band unseen until they reach it.
+    root.removeAttribute("data-course-lay");
+    Promise.all(strokes.map(function (s) { return s.finished; })).then(function () {
+      strokes.forEach(function (s) { s.cancel(); });
+    }, function () {});
+  })();
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home
   // page. The day-number link stays as the keyboard/no-JS path; clicks on

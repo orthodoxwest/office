@@ -191,6 +191,9 @@ struct Entry: Hashable {
 final class AppModel: ObservableObject {
     static let shared = AppModel()
 
+    /// Home comes into the light once a launch, on the wall the launch screen showed (`Loaded`).
+    let homeArrival = Arrival()
+
     /// Home's day; another one ends the crown's play, if one is under way.
     @Published var root: CivilDate {
         didSet {
@@ -215,6 +218,9 @@ final class AppModel: ObservableObject {
             if overlay != .none { CrownPlayer.shared.cut() }
         }
     }
+    /// Whether a frontispiece has laid the year's course in yet: once a launch, as the web's once
+    /// a session. Not published: it only answers whether the next stroke runs.
+    var courseLaid = false
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize

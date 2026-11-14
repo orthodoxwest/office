@@ -28,6 +28,26 @@
     } catch (e) {}
   })();
 </script>
+{% elif view == "year" %}
+{#- The year's course is laid in on the frontispiece once a session: a first
+     visit, not a return (Back), and never under reduced motion. Decided here,
+     before the first paint, so the band is held unseen from the start and
+     app.js lays it in (its "The year's course"); without storage it is simply
+     there. A stroke app.js never starts is let go after a moment. #}
+<script>
+  (function () {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+      if (arrival && arrival.type === "back_forward") return;
+      if (sessionStorage.getItem("office-course-laid")) return;
+      sessionStorage.setItem("office-course-laid", "1");
+      var root = document.documentElement;
+      root.setAttribute("data-course-lay", "");
+      setTimeout(function () { root.removeAttribute("data-course-lay"); }, 3000);
+    } catch (e) {}
+  })();
+</script>
 {% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
 {% if view == "year" %}
 {# A link into the year from before the ordo was set a month to a page
@@ -69,9 +89,14 @@
   </div>
   {{ feast_search() }}
   {# One month to a page: the strip leads between them, its current month
-       underlined. The whole year keeps it as in-page jumps. #}
+       underlined. The whole year keeps it as in-page jumps. Under each month
+       runs the year's course: the rows' colour rail laid on its side, a day to
+       a 31st of the month's width (presentation::course), so February is
+       short. It is drawn, not read: hidden from the reading order. Today's
+       lozenge hangs under it at today's place (--today-x, which app.js moves
+       with the local date). #}
   <nav class="month-jump" aria-label="Jump to month">
-    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}</a>{% endfor %}
+    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month" style="--today-x: {{ m.today_x }}"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}<span class="month-course" aria-hidden="true"><svg viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">{% for r in m.course %}<rect x="{{ r.start }}" width="{{ r.days }}" height="1" class="day-color-{{ r.color }}"/>{% endfor %}</svg></span></a>{% endfor %}
   </nav>
   {% if view == "year" %}
   {# The frontispiece's one tool sits where a month keeps its own. #}

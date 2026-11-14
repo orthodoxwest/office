@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
+import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
@@ -100,7 +101,10 @@ sealed interface Content {
     data class Find(val view: FindView) : Content
     data class Feast(val view: FeastPageView) : Content
 
-    /** The year's frontispiece, the reminders and About, drawn from the page itself. */
+    /** The year's frontispiece: the year's course under its month strip; the rest is arithmetic. */
+    data class Year(val course: List<CourseMonthView>) : Content
+
+    /** The reminders and About, drawn from the page itself. */
     data object Drawn : Content
     data class Failed(val message: String) : Content
 }
@@ -489,8 +493,9 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
                         withContext(Dispatchers.Default) { office.feastPage(page.id, now.toLocalDate().toCivil()) }
                             ?: throw IllegalArgumentException("No feast by that name."),
                     )
-                    // The frontispiece is arithmetic, drawn at once from the page itself.
-                    is Page.Year -> Content.Drawn
+                    // The frontispiece is arithmetic but for the year's course, which the engine
+                    // keeps per year once built.
+                    is Page.Year -> Content.Year(withContext(Dispatchers.Default) { office.ordoCourse(page.year) })
                     Page.Reminders -> {
                         refreshReminderStatus()
                         Content.Drawn

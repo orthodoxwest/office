@@ -16,6 +16,11 @@ enum Tempo {
     /// What a press moves rather than lights (the ordo day's rail running the row's height)
     /// reaches its place over this; it goes back over `touchOut`.
     static let touchReach = Beat(ms: 120, delay: 0, curve: .arrive)
+    /// The year's course laid in under the frontispiece's month strip, once a launch, never under
+    /// Reduce Motion: one stroke crossing January to December, each month its twelfth of it.
+    static let courseLay = 815
+    /// The stroke's pace, a brush's: it keeps moving to the end (the web's `--tempo-course-lay-curve`).
+    static let courseLayCurve = (0.38, 0.2, 0.6, 0.92)
     /// The consecration cross under the last Amen taking its gold, once the hour is marked prayed
     /// and the cross stands wholly on screen: evenly, by opacity alone (`presentation::EndLeaf`).
     static let gild = Beat(ms: 2000, delay: 0, curve: .standard)

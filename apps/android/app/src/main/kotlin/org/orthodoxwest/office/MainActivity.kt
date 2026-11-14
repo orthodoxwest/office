@@ -19,6 +19,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
@@ -74,6 +75,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
@@ -289,7 +291,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
- * `hour` and `ordo` is its content, still. `newcomer` is a reader's first week.
+ * `hour`, `ordo` and the year's `course` is its content, still. `newcomer` is a reader's first week.
  */
 @Composable
 fun OfficeApp(
@@ -323,6 +325,7 @@ fun OfficeApp(
     newcomer: Boolean = false,
     find: FindView? = null,
     feast: FeastPageView? = null,
+    course: List<CourseMonthView>? = null,
     pageUnder: (Long) -> Page? = { null },
     // Home's screenshots are composed at 6 pm; About lights the same hour.
     clockHour: Int = 18,
@@ -334,6 +337,7 @@ fun OfficeApp(
         page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
         page is Page.Find -> find?.let(Content::Find)
         page is Page.Feast -> feast?.takeIf { it.id == page.id }?.let(Content::Feast)
+        page is Page.Year -> Content.Year(course.orEmpty())
         else -> Content.Drawn
     }
     OfficeApp(
@@ -625,6 +629,7 @@ fun OfficeApp(
                             )
                             page is Page.Year -> OrdoYearScreen(
                                 view = remember(page.year) { ordoYear(page.year) },
+                                course = (content as? Content.Year)?.course,
                                 today = today,
                                 chrome = chrome,
                                 insets = insets,
@@ -675,6 +680,12 @@ private val TRAVEL = 30.dp
  * governs it, so Remove animations shows each page at once.
  */
 private fun AnimatedContentTransitionScope<Shown?>.moving(motion: Motion, travel: Int): ContentTransform {
+    // The wall first: on a launch, home comes into the light on the wall the splash showed, over
+    // Tempo's dim, opacity only (iOS's `Loaded` does the same once a launch). Only from nothing
+    // composed yet, so never on a return to home within the session.
+    if (initialState == null && targetState?.entry?.page is Page.Home) {
+        return fadeIn(Tempo.dimIn.spec()) togetherWith ExitTransition.None using null
+    }
     val transform = when (motion) {
         Motion.FADE -> fadeIn(Tempo.turnIn.spec()) togetherWith fadeOut(Tempo.turnOut.spec())
         else -> {
