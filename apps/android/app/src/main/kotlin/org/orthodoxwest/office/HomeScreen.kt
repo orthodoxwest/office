@@ -1064,13 +1064,14 @@ private fun HourDirectory(current: String, note: String, light: HourLightNow?, p
                                     )
                                     if (done) PaintedCross(Modifier.align(Alignment.TopEnd).offset(x = 9.dp, y = 2.dp).size(7.dp), ink = p.gold)
                                 }
-                                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`;
-                                // one line, which may overhang its cell a little.
+                                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`.
                                 if (gloss.isNotEmpty()) {
-                                    // A short screen's gloss, held at 12 in so small a niche, takes a
-                                    // second line rather than running into its neighbour.
+                                    // A gloss wider than its cell ("Mid-morning prayer" among the day's
+                                    // three, or a short screen's, held at 12 in so small a niche) takes a
+                                    // second, balanced line rather than running into its neighbour.
+                                    val wraps = !desk || tier.shortScreen
                                     val shown = if (desk) 1f else light?.gloss(h) ?: 1f
-                                    Text(gloss, if (shown < 1f) Modifier.alpha(shown) else Modifier, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center), maxLines = if (tier.shortScreen) 2 else 1, softWrap = tier.shortScreen)
+                                    Text(gloss, if (shown < 1f) Modifier.alpha(shown) else Modifier, style = Type.small.copy(fontSize = tier.gloss.sp, lineHeight = (tier.gloss * 1.15f).sp, color = light?.ink(h, home.nowGloss, p.muted) ?: if (isNow) home.nowGloss else p.muted, fontStyle = FontStyle.Italic, textAlign = TextAlign.Center, lineBreak = LineBreak.Heading), maxLines = if (wraps) 2 else 1, softWrap = wraps)
                                 }
                             }
                         }

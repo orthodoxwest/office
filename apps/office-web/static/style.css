@@ -7556,7 +7556,7 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
 
 /* The hour that is now: the light rests on it, a pool with no edge (a
    brushed patch read as a highlight box), and its name is rubricated. Its
-   gloss keeps one line: with no cell walls it may overhang a little. On the
+   gloss takes a second line where its cell is too narrow for one. On the
    wide niche the cell is wide, and the pool keeps its own size. */
 /* While the light moves from one hour to the next (app.js's HOUR_LIGHT), the
    hour it leaves and the hour it comes to (.is-passing) both hold a pool, which
@@ -7591,10 +7591,15 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   line-height: 1.15;
 }
 
+/* A gloss wider than its hour's cell ("Mid-morning prayer" in the day's
+   three) takes a second line rather than running over the gilt point into
+   its neighbour. It may use the cell's padding, so that "Mid-morning" keeps
+   one line on a 360px phone. */
 .page-home .home-hour-link.is-current .home-hour-link-note {
   display: block;
+  margin-inline: -0.2rem;
   color: var(--now-gloss);
-  white-space: nowrap;
+  text-wrap: balance;
 }
 
 /* An hour prayed today (app.js): its name withdraws to the muted ink and a

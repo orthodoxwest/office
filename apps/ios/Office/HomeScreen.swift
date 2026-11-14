@@ -1147,12 +1147,12 @@ private struct HourDirectory: View {
                                 .offset(x: m.px(9), y: m.px(2))
                         }
                     }
-                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`; one
-                // line, which may overhang its cell a little.
+                // What the hour is, for a newcomer, as the web's `.home-hour-link-note`.
                 if !gloss.isEmpty {
-                    if tier.shortScreen {
-                        // Held at 12 in so small a niche, a gloss takes a second line rather than
-                        // running into its neighbour.
+                    if !desk || tier.shortScreen {
+                        // A gloss wider than its cell ("Mid-morning prayer" among the day's three,
+                        // or a short screen's, held at 12 in so small a niche) takes a second line
+                        // rather than running into its neighbour.
                         Text(gloss)
                             .type(TextStyle(size: tier.gloss, line: tier.gloss * 1.15, italic: true))
                             .foregroundStyle(glossInk(h, isNow))
