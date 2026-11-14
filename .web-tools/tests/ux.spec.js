@@ -1530,6 +1530,10 @@ test("a tap on home's crown turns the look over, and the tap back restores the r
   // back is Default again, not Nave.
   let tap = await openCrown(page);
   await expect(tap).toHaveAttribute("aria-label", "Switch to Apse");
+  // The stars come by a fetch and are set in the vault by day too (hidden),
+  // which WebKit may finish after the button shows: the page as it loaded
+  // is the page with them.
+  await expect(page.locator(".home-hero")).toHaveAttribute("data-stars", /^\d+$/);
   const atRest = await page.evaluate(() => document.body.outerHTML);
   await tap.click();
   await expect(page.locator(".home-hero")).toHaveClass(/crown-on/);
@@ -2896,8 +2900,8 @@ test("themes never change layout", async ({ browser }) => {
         // niche the panel sits inside the night's slate course where by day
         // it meets the reveal's fillet: painted layers, absolutely placed and
         // aria-hidden, that move no other box. So is the crown's vault
-        // (its ground, stars and light), which the play turns over: WebKit
-        // leaves the hidden stars' drawing unsized by day.
+        // (its ground, stars and light), which the play turns over: its
+        // stars come by a fetch, and land on either side of the measure.
         boxes: [...document.querySelectorAll("body *")]
           .filter((el) => !el.closest(".home-sky, .home-lining, .home-vault") && !(innerWidth > 700 && el.closest(".home-arch-fill")))
           .map((el) => round(el.getBoundingClientRect())),
