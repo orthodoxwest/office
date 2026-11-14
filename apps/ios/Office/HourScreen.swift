@@ -282,6 +282,9 @@ struct HourScreen: View {
     /// composed again.
     @State private var held: Held?
     @State private var prayed = PrayedSoFar()
+    /// The leaf on the cross that ends the hour (`presentation::EndLeaf`), as the page it was found
+    /// on opened, and since.
+    @State private var endLeaf: (page: String, leaf: EndLeaf)?
     /// The ribbon's place, kept with the scene; and whether the page is held unseen while it is
     /// set, so it appears at the place with nothing moving.
     @SceneStorage("hour-place") private var kept = ""
@@ -384,6 +387,7 @@ struct HourScreen: View {
                         .read(row.id, at: n, into: reading)
                     }
                     Epilogue(
+                        leaf: leaf,
                         previous: index > 0 ? model.hours[index - 1] : nil,
                         next: index >= 0 && index + 1 < model.hours.count ? model.hours[index + 1] : nil,
                         // Compline's next is the morrow's Lauds, as on the web.
@@ -406,11 +410,19 @@ struct HourScreen: View {
             .opacity(placing ? 0 : 1)
             .coordinateSpace(name: Reading.space)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
+            // The cross's place in the ending moves with the text size (the menu's Text row).
+            .onChange(of: m, initial: true) { reading.endMark = (top: m.px(endCrossTop), size: m.px(endCrossSize)) }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
             // Begun again on the hour composed in another form, so it reads the rows now shown.
             .task(id: "\(date.iso)/\(view.hour)/\(composition)") { await watchPrayed() }
+            // The cross takes its gold once the hour is marked and it stands wholly on the screen.
+            .onChange(of: page, initial: true) {
+                endLeaf = (page: page, leaf: endLeafOpens(bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour)))
+            }
+            .onChange(of: reading.endMarkShown) { lookAtLeaf() }
+            .onChange(of: model.prayed) { lookAtLeaf() }
             // The row the reader is at stays where it stood while the office changes around it, as
             // the web's prayer form keeps the first element on screen in its place.
             .onChange(of: model.form) { hold() }
@@ -501,6 +513,27 @@ struct HourScreen: View {
                 return
             }
         }
+    }
+
+    /// An hour ending bare (the core's `endBare`) takes no leaf.
+    private var endBare: Bool { view.endBare }
+
+    /// The leaf on the cross that ends the hour now; before the page has looked, as it opens.
+    private var leaf: EndLeaf {
+        if let endLeaf, endLeaf.page == page { return endLeaf.leaf }
+        return endLeafOpens(bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour))
+    }
+
+    /**
+     * The cross under the last Amen takes its gold (`presentation::EndLeaf`): not as the hour is
+     * marked, which is as the ending first comes into sight, but once it has been marked and the
+     * cross stands wholly on the screen.
+     */
+    private func lookAtLeaf() {
+        let now = leaf
+        guard now == .paint, reading.endMarkShown else { return }
+        let next = endLeafNext(leaf: now, bare: endBare, prayed: model.hoursPrayed(on: date).contains(view.hour), whollyShown: true)
+        if next != now { endLeaf = (page: page, leaf: next) }
     }
 
     private func anchor(_ rows: [Row]) -> String? {
@@ -649,6 +682,12 @@ final class Reading {
     /// row's id, so a row leaving never clears the place of one that has taken its index.
     @ObservationIgnored private var heights: [Int: CGFloat] = [:]
     @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
+    /// Where the cross that ends the hour stands in the ending, from its top, and its size; and
+    /// whether it stands wholly on the screen now, for its leaf.
+    @ObservationIgnored var endMark: (top: CGFloat, size: CGFloat) = (top: 0, size: .infinity) {
+        didSet { update() }
+    }
+    private(set) var endMarkShown = false
 
     func place(_ id: String, at row: Int, _ frame: CGRect?) {
         if let frame {
@@ -673,9 +712,17 @@ final class Reading {
         return (shown.filter { $0 < rows }, shown.contains(rows))
     }
 
+    /// Whether a mark from `from`, `size` tall, lies wholly between the screen's top (0) and `foot`.
+    static func whollyShown(from: CGFloat, size: CGFloat, foot: CGFloat) -> Bool {
+        from >= 0 && from + size <= foot
+    }
+
     private func update() {
         let now = read()
         if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
+        let mark = frames[Reading.ending].map { $0.frame.minY + endMark.top }
+        let shown = mark.map { Reading.whollyShown(from: $0, size: endMark.size, foot: viewport.height) } ?? false
+        if shown != endMarkShown { endMarkShown = shown }
     }
 
     private func read() -> CGFloat {
@@ -729,6 +776,39 @@ private struct FirstClassFrame: View {
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+}
+
+/// Where the cross that ends the hour stands in the epilogue, and its size.
+private let endCrossTop: CGFloat = 26.4
+private let endCrossSize: CGFloat = 40
+
+/**
+ * The consecration cross that ends the hour, in the lining, and its leaf over it: gilt from the
+ * first paint, or coming up evenly by its opacity alone over `Tempo.gild` in the visit that marks
+ * the hour prayed, and laid at once under Reduce Motion.
+ */
+private struct EndCross: View {
+    let leaf: EndLeaf
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+    @Environment(\.ornament) private var o
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The leaf's opacity once it has gilded in front of the reader.
+    @State private var gold: Double?
+
+    var body: some View {
+        let size = m.px(endCrossSize)
+        ZStack {
+            PaintedMark(.consecration, size: size, color: p.lining)
+            Crown(size: size, ink: o.flat, shading: endLeafShading(o, dark: p.dark, size: size))
+                .opacity(gold ?? (leaf == .gilt ? 1 : 0))
+        }
+        .onChange(of: leaf) { _, now in
+            if now == .gilding { withAnimation(reduceMotion ? nil : Tempo.gild.animation) { gold = 1 } }
+        }
+        // Laid out again (scrolled away and back) after it has gilded, it stands gilt.
+        .onAppear { if leaf == .gilding { gold = 1 } }
     }
 }
 
@@ -977,6 +1057,7 @@ struct MetaLine: Layout {
  * Apse vault by night, the Nave's powdering by day.
  */
 private struct Epilogue: View {
+    let leaf: EndLeaf
     let previous: String?
     let next: String?
     let morrow: String?
@@ -994,8 +1075,8 @@ private struct Epilogue: View {
         VStack(spacing: 0) {
             // One mark, as painted where the bishop anointed the walls; the way on below is parted by
             // home's gilt points and ruled under where the wall's field begins.
-            PaintedMark(.consecration, size: m.px(40), color: p.lining)
-                .padding(.top, m.px(26.4))
+            EndCross(leaf: leaf)
+                .padding(.top, m.px(endCrossTop))
             Continuation(
                 previousLabel: "Previous hour",
                 previous: previous.map(hourLabel),

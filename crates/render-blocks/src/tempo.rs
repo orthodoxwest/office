@@ -96,6 +96,13 @@ impl Tempo {
     /// reaches its place over this, so the stretch is seen; it goes back over the touch's way out.
     pub const TOUCH_REACH: Beat = beat(120, 0, Curve::Arrive);
 
+    /// The consecration cross under an hour's last Amen taking its gold (`presentation::EndLeaf`):
+    /// once the hour is marked prayed and the cross stands wholly on the screen, the gold comes
+    /// up evenly over two seconds, by its opacity alone. Nothing travels, grows, wipes or glows;
+    /// it is slow so that it is a change of the wall and not an event on it. Reduced motion
+    /// cuts it: the cross is simply gilt.
+    pub const GILD: Beat = beat(2000, 0, Curve::Standard);
+
     /// The wall first: on a cold start of the web's home, where its paint (the lining, the cross,
     /// the invitation's wash, the ruled lines, the wall's powdering or vault, the Apse's stars)
     /// comes later than the wall and the words, the paint is held until all of it is to hand and
@@ -194,6 +201,10 @@ mod tests {
         assert_eq!(value("--tempo-coat"), format!("{}ms", coat.ms));
         assert_eq!(value("--tempo-coat-delay"), format!("{}ms", coat.delay));
         assert_eq!(value("--tempo-coat-curve"), format!("var(--curve-{})", coat.curve.name()));
+        let gild = Tempo::GILD;
+        assert_eq!(value("--tempo-gild"), format!("{}ms", gild.ms));
+        assert_eq!(value("--tempo-gild-delay"), format!("{}ms", gild.delay));
+        assert_eq!(value("--tempo-gild-curve"), format!("var(--curve-{})", gild.curve.name()));
     }
 
     /// The wall first, on each front: the web's coat is laid on `--tempo-coat` (and app.js waits
@@ -238,6 +249,7 @@ mod tests {
         for line in [
             format!("static let touchQuiet = {}", Tempo::TOUCH_QUIET),
             format!("static let touchReach = Beat(ms: {}, delay: {}, curve: .{})", r.ms, r.delay, r.curve.name()),
+            format!("static let gild = Beat(ms: {}, delay: {}, curve: .{})", Tempo::GILD.ms, Tempo::GILD.delay, Tempo::GILD.curve.name()),
         ] {
             assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
         }
@@ -262,6 +274,12 @@ mod tests {
         for line in [
             format!("const val TOUCH_QUIET = {}f", Tempo::TOUCH_QUIET),
             format!("val touchReach = Beat(ms = {}, delay = {}, curve = Curve.{})", r.ms, r.delay, title(r.curve.name())),
+            format!(
+                "val gild = Beat(ms = {}, delay = {}, curve = Curve.{})",
+                Tempo::GILD.ms,
+                Tempo::GILD.delay,
+                title(Tempo::GILD.curve.name())
+            ),
         ] {
             assert!(kt.contains(&line), "Tempo.kt lacks `{line}`");
         }

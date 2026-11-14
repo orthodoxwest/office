@@ -159,7 +159,21 @@
        where the vault may fade in around the administrative epilogue without
        ever sitting behind liturgical text. #}
   <div class="hour-epilogue">
-    <span class="hour-end-mark" aria-hidden="true"></span>
+    {#- The cross takes its gold once the hour is prayed (presentation::EndLeaf; app.js gilds it
+         in the visit that marks it). An hour home already marks prayed (office-prayed) is gilt
+         before it is painted, with nothing moving; a bare hour takes no leaf. #}
+    <span class="hour-end-mark{% if end_bare %} is-bare{% endif %}" aria-hidden="true"></span>
+    {%- if not end_bare %}
+    <script>
+      (function () {
+        try {
+          var prayed = JSON.parse(localStorage.getItem("office-prayed") || "{}") || {};
+          var list = prayed["{{ date_slug }}"];
+          if (Array.isArray(list) && list.indexOf("{{ hour_name }}") >= 0) document.querySelector(".hour-end-mark").classList.add("is-gilt");
+        } catch (e) {}
+      })();
+    </script>
+    {%- endif %}
     <nav class="hour-continuation" aria-label="Other hours for this day">
       {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>

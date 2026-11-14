@@ -1,20 +1,28 @@
 package org.orthodoxwest.office
 
 import android.content.Context
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import java.time.LocalDate
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import org.orthodoxwest.office.core.EndLeaf
 import org.orthodoxwest.office.core.PrayedReading
+import org.orthodoxwest.office.core.endLeafNext
+import org.orthodoxwest.office.core.endLeafOpens
 import org.orthodoxwest.office.core.prayedReadingAdvance
 import org.orthodoxwest.office.core.prayedReadingDone
 
@@ -95,3 +103,37 @@ fun PrayedWatch(date: LocalDate, hour: String, list: LazyListState, spans: Map<A
         }
     }
 }
+
+/**
+ * The leaf on the consecration cross that ends `hour` of `date` (the core's `EndLeaf`, as the
+ * web's `.hour-end-mark`): gilt from the first paint if home already marks the hour prayed; else
+ * it starts gilding once [PrayedWatch] has marked it and the cross then stands wholly on the
+ * screen, not as the cross first peeps in. A `bare` hour takes none. The cross stands `top`
+ * pixels down the list item keyed `end`, `size` pixels square.
+ */
+@Composable
+fun rememberEndLeaf(date: LocalDate, hour: String, list: LazyListState, bare: Boolean, end: Any, top: Int, size: Int): EndLeaf {
+    val context = LocalContext.current
+    var leaf by remember(date, hour, bare) { mutableStateOf(endLeafOpens(bare, Prayed.hours(context, date).contains(hour))) }
+    LaunchedEffect(date, hour, bare, top, size) {
+        snapshotFlow { Prayed.version to endCrossShown(list.layoutInfo, end, top, size) }
+            .distinctUntilChanged()
+            .collect { (_, shown) ->
+                if (leaf == EndLeaf.PAINT && shown) leaf = endLeafNext(leaf, bare, Prayed.hours(context, date).contains(hour), true)
+            }
+    }
+    return leaf
+}
+
+/**
+ * Whether the cross that ends the hour stands wholly on the screen: the list item keyed `end` is
+ * laid out, and the cross, `top` pixels down it and `size` tall, lies between the list's top and
+ * its foot above the system bar (the content padding's).
+ */
+fun endCrossShown(info: LazyListLayoutInfo, end: Any, top: Int, size: Int): Boolean {
+    val item = info.visibleItemsInfo.firstOrNull { it.key == end } ?: return false
+    return whollyShown(item.offset + top, size, info.viewportEndOffset - info.afterContentPadding)
+}
+
+/** Whether a mark from `from`, `size` tall, lies wholly between the list's top (0) and `foot`. */
+fun whollyShown(from: Int, size: Int, foot: Int): Boolean = from >= 0 && from + size <= foot

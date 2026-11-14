@@ -550,6 +550,51 @@ pub fn reopens_at_place(prayed: bool, seconds_away: f64) -> bool {
     presentation::reopens_at_place(true, prayed, seconds_away)
 }
 
+/// The leaf on the consecration cross that ends an hour (`presentation::EndLeaf`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Enum)]
+pub enum EndLeaf {
+    /// In its paint, as every hour ends.
+    Paint,
+    /// The gold coming up in this visit, over `Tempo.gild`: the one time it moves.
+    Gilding,
+    /// Gilt from the first paint: prayed before this visit.
+    Gilt,
+}
+
+impl From<presentation::EndLeaf> for EndLeaf {
+    fn from(leaf: presentation::EndLeaf) -> Self {
+        match leaf {
+            presentation::EndLeaf::Paint => EndLeaf::Paint,
+            presentation::EndLeaf::Gilding => EndLeaf::Gilding,
+            presentation::EndLeaf::Gilt => EndLeaf::Gilt,
+        }
+    }
+}
+
+impl From<EndLeaf> for presentation::EndLeaf {
+    fn from(leaf: EndLeaf) -> Self {
+        match leaf {
+            EndLeaf::Paint => presentation::EndLeaf::Paint,
+            EndLeaf::Gilding => presentation::EndLeaf::Gilding,
+            EndLeaf::Gilt => presentation::EndLeaf::Gilt,
+        }
+    }
+}
+
+/// The end cross as the hour opens: gilt at once if home already marks it `prayed`, unless the
+/// hour is `bare` (`HourView::bare`, or its last section is).
+#[uniffi::export]
+pub fn end_leaf_opens(bare: bool, prayed: bool) -> EndLeaf {
+    presentation::EndLeaf::opens(bare, prayed).into()
+}
+
+/// The end cross after a look at the page: it gilds once the hour is marked `prayed` and the cross
+/// stands `wholly_shown` on the screen, and never goes back.
+#[uniffi::export]
+pub fn end_leaf_next(leaf: EndLeaf, bare: bool, prayed: bool, wholly_shown: bool) -> EndLeaf {
+    presentation::EndLeaf::from(leaf).next(bare, prayed, wholly_shown).into()
+}
+
 /// The words of a block, as home's mark of the hours prayed counts them: those with a letter
 /// or a figure.
 #[uniffi::export]
@@ -1207,6 +1252,9 @@ pub struct HourView {
     /// muted ink, the headpiece carries no sun or moon and its rule closes, and on the Apse a
     /// veiled bare hour's vault goes dark.
     pub bare: bool,
+    /// Whether the hour ends bare (`presentation::ends_bare`), so the cross under its last Amen
+    /// takes no leaf: a bare hour, or one whose last section is said bare.
+    pub end_bare: bool,
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
@@ -1242,6 +1290,7 @@ impl HourView {
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             first_class: !rank_class(hour.rank, hour.color, hour.bare).is_empty(),
             bare: hour.bare,
+            end_bare: presentation::ends_bare(hour.bare, &hour.sections),
             sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,

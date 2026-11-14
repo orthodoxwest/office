@@ -7,10 +7,12 @@ import android.view.RoundedCorner
 import android.view.View
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,6 +87,7 @@ import kotlin.math.max
 import kotlin.math.sqrt
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
+import org.orthodoxwest.office.core.EndLeaf
 import org.orthodoxwest.office.core.Space
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.PrayedReading
@@ -177,6 +180,14 @@ fun HourScreen(
         }
     }
     PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue", state = progress)
+    // The cross under the last Amen takes its gold once the hour is marked and the cross stands
+    // wholly on the screen; an hour ending bare (the core's `endBare`) takes none.
+    val crossAt = with(LocalDensity.current) { EndCrossTop.roundToPx() to EndCrossSize.roundToPx() }
+    val leaf = rememberEndLeaf(
+        date, view.hour, listState,
+        bare = view.endBare,
+        end = "epilogue", top = crossAt.first, size = crossAt.second,
+    )
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's
     // `hour-bare`: its capitals are set in the muted ink, as lettering the painter left ungilt.
     val gilding = LocalOrnament.current
@@ -275,6 +286,7 @@ fun HourScreen(
                 val next = if (morrow) hours.firstOrNull() else hours.getOrNull(index + 1)
                 val nextDate = if (morrow) date.plusDays(1) else date
                 Epilogue(
+                    leaf = leaf,
                     previous = hours.getOrNull(index - 1),
                     next = next,
                     nextLabel = if (morrow) "Tomorrow" else "Next hour",
@@ -528,6 +540,7 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
  */
 @Composable
 private fun Epilogue(
+    leaf: EndLeaf,
     previous: String?,
     next: String?,
     nextLabel: String,
@@ -542,7 +555,7 @@ private fun Epilogue(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         // The hour ends on one mark, as painted where the bishop anointed the walls; the way on
         // below is parted by home's gilt points and ruled under where the wall's field begins.
-        ConsecrationCross(Modifier.padding(top = 26.4.dp).size(40.dp))
+        EndCross(leaf, Modifier.padding(top = EndCrossTop).size(EndCrossSize))
         Continuation(
             previousLabel = "Previous hour",
             previous = previous?.let(::hourLabel),
@@ -579,6 +592,41 @@ private fun Epilogue(
                 )
             }
         }
+    }
+}
+
+/** Where the cross that ends the hour stands in the epilogue, and its size. */
+private val EndCrossTop = 26.4.dp
+private val EndCrossSize = 40.dp
+
+/**
+ * The consecration cross that ends the hour, in the lining, and its leaf over it ([rememberEndLeaf]):
+ * gilt from the first paint, or coming up evenly by its alpha alone over [Tempo.gild] in the visit
+ * that marks the hour prayed, and laid at once when the system removes animations. By day the leaf
+ * is [leafBrush] in the season's gilding, by night flat gilt.
+ */
+@Composable
+private fun EndCross(leaf: EndLeaf, modifier: Modifier) {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    val context = LocalContext.current
+    // A cross laid out again (scrolled away and back) after it has gilded stands gilt.
+    val gold = remember { Animatable(if (leaf == EndLeaf.PAINT) 0f else 1f) }
+    LaunchedEffect(leaf) {
+        when (leaf) {
+            EndLeaf.GILDING -> {
+                val animates = android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+                if (animates) gold.animateTo(1f, Tempo.gild.spec()) else gold.snapTo(1f)
+            }
+            EndLeaf.GILT -> gold.snapTo(1f)
+            EndLeaf.PAINT -> gold.snapTo(0f)
+        }
+    }
+    val brush = if (p.dark) null else leafBrush(o)
+    Canvas(modifier) {
+        consecrationCross(p.lining)
+        val a = gold.value
+        if (a > 0f) consecrationCross(o.flat, brush = brush, alpha = a)
     }
 }
 

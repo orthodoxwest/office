@@ -5667,7 +5667,26 @@ function plainClickOpensHere(e, link) {
     if (atEnd && seen.total > 0 && read >= seen.total * PRAYED_SHARE) {
       done = true;
       markPrayed(hour);
+      lookAtLeaf();
+      window.addEventListener("scroll", lookAtLeaf, { passive: true });
+      window.addEventListener("resize", lookAtLeaf);
     }
+  }
+
+  // The cross under the last Amen takes its gold (presentation::EndLeaf): not as the hour is
+  // marked, which is as the cross's top first comes into sight, but once it has been marked and
+  // the cross stands wholly on the screen. The gold then comes up evenly over Tempo's gild
+  // (style.css), once. An hour prayed before is gilt from the first paint (the script under the
+  // cross in hour.html); a bare hour takes no leaf (is-bare).
+  var leaf = end.classList.contains("is-gilt") ? "gilt" : "paint";
+  function lookAtLeaf() {
+    if (leaf !== "paint" || !done || end.classList.contains("is-bare")) return;
+    var box = end.getBoundingClientRect();
+    if (box.top < 0 || box.bottom > window.innerHeight) return;
+    leaf = "gilding";
+    end.classList.add("is-gilding");
+    window.removeEventListener("scroll", lookAtLeaf);
+    window.removeEventListener("resize", lookAtLeaf);
   }
 
   document.addEventListener("visibilitychange", function () {
