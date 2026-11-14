@@ -1732,6 +1732,24 @@ fn overlapping_octaves_follow_the_office_said() {
     }
 }
 
+/// An octave runs across the new year (#833): 1 January is the Nativity's eighth day, "THE
+/// CIRCUMCISION … (Octave Day of the Nativity)" in the 2026 ordo, though each civil year's
+/// calendar is built on its own. The octave stops there: 2 January is outside it. The calendar's
+/// following 1 January, which 31 December's Vespers read, says the same, in every weekday
+/// position of the 28-year cycle.
+#[test]
+fn the_nativity_octave_reaches_the_first_of_january() {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    for y in 2026..2054 {
+        let cal = build_calendar(y, &data).unwrap();
+        let on = |m, d| cal.days.iter().find(|day| day.date == Date::new(y, m, d)).unwrap();
+        assert_eq!(on(1, 1).within_octave_of.as_deref(), Some("christmas"), "{y}-01-01");
+        assert_eq!(on(1, 2).within_octave_of, None, "{y}-01-02");
+        assert_eq!(on(12, 31).within_octave_of.as_deref(), Some("christmas"), "{y}-12-31");
+        assert_eq!(cal.following_jan1.within_octave_of.as_deref(), Some("christmas"), "{}-01-01", y + 1);
+    }
+}
+
 /// The Sunday within the Octave of Corpus Christi commemorates the octave at II Vespers with
 /// "O how sweet" (Diurnal p. 421; 2023-2026 ordos) even when the Octave of Ss Peter & Paul or of
 /// St John Baptist overlaps it (2027 and 2022). The 2017-2022 ordos print "O sacred banquet" on

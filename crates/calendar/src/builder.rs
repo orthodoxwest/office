@@ -666,12 +666,20 @@ fn build_calendar_year(
         }
     }
 
-    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap.
+    // Days 1–8 of each octave, counted from the feast's own day; two octaves can overlap. An
+    // octave begun late in the previous year runs on into this one (the Nativity's eighth day is
+    // 1 January, which the 2026 ordo prints "Octave Day of the Nativity"; #833), and one begun
+    // late in this year stops at 31 December, the next year taking up the rest.
+    let previous = MoveableDates::compute(year - 1);
     let mut octave_ranges: HashMap<Date, Vec<(Date, FeastRef)>> = HashMap::new();
     for f in all_base.iter().filter(|f| f.has_octave) {
-        if let Some(parent) = resolve_feast_date(f, year, &m) {
+        let begun = [resolve_feast_date(f, year - 1, &previous), resolve_feast_date(f, year, &m)];
+        for parent in begun.into_iter().flatten() {
             for n in 0..8 {
                 let date = parent.add_days(n);
+                if date.year() != year {
+                    continue;
+                }
                 // Pentecost's octave ends with None of its Saturday (Rubrics VII.2): Trinity
                 // Sunday is not within it (2021 and 2024 ordos commemorate the Baptist's octave
                 // there, not Pentecost's).
