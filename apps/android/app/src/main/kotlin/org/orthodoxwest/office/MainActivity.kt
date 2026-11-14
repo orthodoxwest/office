@@ -74,6 +74,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.orthodoxwest.office.core.CourseMonthView
 import org.orthodoxwest.office.core.FeastPageView
 import org.orthodoxwest.office.core.FindView
 import org.orthodoxwest.office.core.HomeView
@@ -289,7 +290,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app on its plaster wall, for the screenshot tests: `page` shown with whichever of `home`,
- * `hour` and `ordo` is its content, still. `newcomer` is a reader's first week.
+ * `hour`, `ordo` and the year's `course` is its content, still. `newcomer` is a reader's first week.
  */
 @Composable
 fun OfficeApp(
@@ -323,6 +324,7 @@ fun OfficeApp(
     newcomer: Boolean = false,
     find: FindView? = null,
     feast: FeastPageView? = null,
+    course: List<CourseMonthView>? = null,
     pageUnder: (Long) -> Page? = { null },
     // Home's screenshots are composed at 6 pm; About lights the same hour.
     clockHour: Int = 18,
@@ -334,6 +336,7 @@ fun OfficeApp(
         page is Page.Ordo -> ordo?.takeIf { it.year == page.year && it.month == page.month }?.let(Content::Ordo)
         page is Page.Find -> find?.let(Content::Find)
         page is Page.Feast -> feast?.takeIf { it.id == page.id }?.let(Content::Feast)
+        page is Page.Year -> Content.Year(course.orEmpty())
         else -> Content.Drawn
     }
     OfficeApp(
@@ -625,6 +628,7 @@ fun OfficeApp(
                             )
                             page is Page.Year -> OrdoYearScreen(
                                 view = remember(page.year) { ordoYear(page.year) },
+                                course = (content as? Content.Year)?.course,
                                 today = today,
                                 chrome = chrome,
                                 insets = insets,

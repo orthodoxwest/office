@@ -215,6 +215,9 @@ final class AppModel: ObservableObject {
             if overlay != .none { CrownPlayer.shared.cut() }
         }
     }
+    /// Whether a frontispiece has laid the year's course in yet: once a launch, as the web's once
+    /// a session. Not published: it only answers whether the next stroke runs.
+    var courseLaid = false
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize

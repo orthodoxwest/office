@@ -376,6 +376,13 @@ or impose a redesign on an unrelated change.
   the year was ~14,000); `/calendar/YYYY` is the frontispiece (Tabula
   Temporaria and the month strip) and `/calendar/YYYY/all` the whole year
   for print and find-in-page. Links to a day go to its month's page.
+  Under the month strip, on every ordo page, runs the year's course: a 3px
+  band of each day's rail colour (`presentation::course`, a day to a 31st of
+  the month, so February is short; aria-hidden), today's lozenge hung under
+  it at today's place. On the frontispiece alone it is laid in once a
+  session by one stroke across the year (Tempo's `COURSE_LAY_*`); never on
+  Back or under reduced motion. July to November reads as flecks, not
+  bands: that is the ordo's feasts, drawn as they are.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a quiet field.
 - The limewash wall is the parish nave photograph, high-passed to grey
