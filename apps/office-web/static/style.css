@@ -4034,6 +4034,26 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     background-image: radial-gradient(ellipse 44% 58% at 30% 50%, var(--now-pool) 0%, color-mix(in srgb, var(--now-pool) 55%, transparent) 50%, transparent 100%);
   }
 }
+/* Days bound together (presentation::rails): an octave's rail runs unbroken
+   down its days, through the rules between them, starting where a lone bar
+   starts and stopping where one stops, so the strand reads as one long bar.
+   The strand keeps the octave's colour; a feast that impedes the octave, or
+   a day of it in another colour, stands beside it as a lone bar of its own
+   colour (.day-inset). A day bound to neither neighbour keeps its lone bar. The apps
+   draw the same (OrdoScreen.swift, .kt). */
+.month-table tr.day.bound-above > td:first-child::before { top: 0; }
+.month-table tr.day.bound-below > td:first-child::before,
+.js .month-table tr.day.bound-below.is-pressed > td:first-child::before { bottom: -1px; }
+.month-table .day-inset {
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0.65rem;
+  left: 6px;
+  width: 3px;
+  background: var(--day-color);
+  pointer-events: none;
+}
+.month-table .day-feast > .day-inset { display: none; }
 /* The day arrived at keeps its gold ground until the reader moves on (app.js
    lets it go at the first scroll of their own, .target-released), so it never
    stands as a second "you are here" beside Today. */
@@ -4466,6 +4486,19 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     top: 0.8rem;
     height: 2.35rem;
   }
+  /* Bound (above): the card's rail comes down from its top edge. */
+  .month-table tr.day.bound-above::before { top: 0; height: 3.15rem; }
+  .month-table tr.day.bound-below::before { height: calc(100% - 0.8rem + 1px); }
+  .month-table tr.day.bound-above.bound-below::before,
+  .js .month-table tr.day.bound-below.is-pressed::before { top: 0; height: calc(100% + 1px); }
+  /* The inset hangs on the card, as the rail does. */
+  .month-table .day-feast > .day-inset {
+    display: block;
+    top: 0.8rem;
+    bottom: auto;
+    height: 2.35rem;
+    z-index: 1;
+  }
 }
 /* Wide, Today is a note in the margin beside today's band, so no row keeps
    a line for it. Between the phone and 1000px the table has no margin to
@@ -4484,7 +4517,8 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     line-height: 1.4;
     white-space: nowrap;
   }
-  .month-table tr.day > td:first-child::before {
+  .month-table tr.day > td:first-child::before,
+  .month-table .day-inset {
     top: 0.45rem;
     bottom: 0.45rem;
   }
