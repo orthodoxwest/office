@@ -63,8 +63,9 @@ class ScreenshotTest {
         status: ReminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
         newcomer: Boolean = false,
         insets: PaddingValues = PaddingValues(),
+        clockHour: Int = 18,
     ) {
-        val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
+        val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), clockHour) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
         val course = (page as? Page.Year)?.let { core.ordoCourse(it.year) }
@@ -93,6 +94,10 @@ class ScreenshotTest {
     /** A reader's first week: the introduction before Change date, in the season's place. */
     @Test
     fun homeNewcomer() { show(Page.Home(lent), ThemeChoice.NAVE, newcomer = true); shoot("home-newcomer-nave") }
+
+    /** Terce's gloss, the widest among the day's three, takes a second line rather than being cut off. */
+    @Test
+    fun homeTerce() { show(Page.Home(lent), ThemeChoice.NAVE, clockHour = 10); shoot("home-terce") }
 
     @Test
     fun homeAnotherDay() { show(Page.Home(LocalDate.of(2026, 12, 25)), ThemeChoice.NAVE); shoot("home-christmas") }
