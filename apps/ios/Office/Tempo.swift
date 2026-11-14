@@ -21,6 +21,9 @@ enum Tempo {
     static let courseLay = 815
     /// The stroke's pace, a brush's: it keeps moving to the end (the web's `--tempo-course-lay-curve`).
     static let courseLayCurve = (0.38, 0.2, 0.6, 0.92)
+    /// The consecration cross under the last Amen taking its gold, once the hour is marked prayed
+    /// and the cross stands wholly on screen: evenly, by opacity alone (`presentation::EndLeaf`).
+    static let gild = Beat(ms: 2000, delay: 0, curve: .standard)
     /// A small panel settling under the beam; it leaves faster than it came.
     static let settleIn = Beat(ms: 160, delay: 0, curve: .arrive)
     static let settleOut = Beat(ms: 120, delay: 0, curve: .leave)

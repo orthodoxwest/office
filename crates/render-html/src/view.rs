@@ -130,6 +130,9 @@ pub struct HourData {
     pub next_hour_link: String,
     pub hour: HourHeader,
     pub report_url: String,
+    /// The consecration cross under the last Amen takes no leaf (`presentation::EndLeaf`): a bare
+    /// hour, or one whose last section is said bare (Vespers of the Dead after the day's).
+    pub end_bare: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]

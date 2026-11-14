@@ -330,4 +330,21 @@ class TokensTest {
         assertTrue(swiftOrdo.contains(".animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)"))
         assertEquals(2, Regex("\\.overlay\\(alignment: \\.topLeading\\) \\{ DayRail\\(").findAll(swiftOrdo).count())
     }
+
+    /**
+     * The cross under the last Amen gilds by Tempo's gild on every front, by opacity alone: the
+     * web's `.hour-end-mark.is-gilding::after`, Android's [Tempo.gild] and iOS's `Tempo.gild`.
+     * render-blocks holds the figures themselves.
+     */
+    @Test
+    fun theEndCrossGildsByTempo() {
+        val gilding = css.substringAfter("  .hour-end-mark.is-gilding::after {\n").substringBefore("}")
+        assertTrue(gilding.contains("transition-duration: var(--tempo-gild);"))
+        assertTrue(gilding.contains("transition-timing-function: var(--tempo-gild-curve);"))
+        assertTrue(rule(".hour-end-mark::after").contains("transition-property: opacity;"))
+        val hour = File("src/main/kotlin/org/orthodoxwest/office/HourScreen.kt").readText()
+        assertTrue(hour.contains("gold.animateTo(1f, Tempo.gild.spec())"))
+        val swift = File("../../ios/Office/HourScreen.swift").readText()
+        assertTrue(swift.contains("withAnimation(reduceMotion ? nil : Tempo.gild.animation) { gold = 1 }"))
+    }
 }

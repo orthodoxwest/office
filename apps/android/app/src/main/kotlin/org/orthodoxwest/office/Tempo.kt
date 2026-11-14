@@ -30,6 +30,9 @@ object Tempo {
     /** The stroke's pace, a brush's: it keeps moving to the end (the web's `--tempo-course-lay-curve`). */
     val courseLayCurve = CubicBezierEasing(0.38f, 0.2f, 0.6f, 0.92f)
 
+    /** The consecration cross under the last Amen taking its gold, once the hour is marked prayed and the cross stands wholly on screen: evenly, by opacity alone (`presentation::EndLeaf`). */
+    val gild = Beat(ms = 2000, delay = 0, curve = Curve.Standard)
+
     /** A small panel settling under the beam, or a word's note fading in; it leaves faster than it came. */
     val settleIn = Beat(ms = 160, delay = 0, curve = Curve.Arrive)
     val settleOut = Beat(ms = 120, delay = 0, curve = Curve.Leave)

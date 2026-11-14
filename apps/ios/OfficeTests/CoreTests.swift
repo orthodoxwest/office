@@ -303,6 +303,22 @@ final class PlaceTests: XCTestCase {
         XCTAssertFalse(reopensAtPlace(prayed: false, secondsAway: -60))
     }
 
+    /// The cross under the last Amen takes its gold by the core's rule: once the hour is marked
+    /// and the cross stands wholly on the screen, not as its top first peeps in; once; gilt from
+    /// the first paint when prayed before; never on a bare hour.
+    func testTheEndCrossGildsOnceMarkedAndWhollyShown() {
+        XCTAssertTrue(Reading.whollyShown(from: 760, size: 40, foot: 800))
+        XCTAssertFalse(Reading.whollyShown(from: 792, size: 40, foot: 800))
+        XCTAssertFalse(Reading.whollyShown(from: -1, size: 40, foot: 800))
+        let open = endLeafOpens(bare: false, prayed: false)
+        XCTAssertEqual(open, .paint)
+        XCTAssertEqual(endLeafNext(leaf: open, bare: false, prayed: true, whollyShown: false), .paint)
+        XCTAssertEqual(endLeafNext(leaf: open, bare: false, prayed: true, whollyShown: true), .gilding)
+        XCTAssertEqual(endLeafNext(leaf: .gilding, bare: false, prayed: true, whollyShown: false), .gilding)
+        XCTAssertEqual(endLeafOpens(bare: false, prayed: true), .gilt)
+        XCTAssertEqual(endLeafOpens(bare: true, prayed: true), .paint)
+    }
+
     /// The kept place carries the prayed watch's reading, so an hour reopened mid-psalm can still
     /// earn its mark; a place kept before the reading was carried begins the reading again.
     func testTheKeptPlaceCarriesTheReading() {

@@ -2278,6 +2278,59 @@ html[data-newcomer] .home-season {
   mask: url("ornaments/consecration.svg") center / contain no-repeat;
 }
 
+/* The cross takes its gold once the hour is prayed (presentation::EndLeaf):
+   a coat of leaf inside the cross's own mask. app.js gilds it (.is-gilding)
+   once the hour is marked and the cross stands wholly on the screen, evenly
+   by opacity over Tempo's gild: nothing travels, grows, wipes or glows.
+   An hour prayed before is gilt before it is painted (.is-gilt), with no
+   transition; under reduced motion the gold is simply laid. The Nave lays
+   the leaf's squares over the season's gilding (home's first-class crown,
+   without the near-white stop that loses an arm on plaster at this size);
+   the Apse is flat gilt, as its tituli. A bare hour takes no leaf, as its
+   capitals take none (is-bare). */
+.hour-end-mark {
+  position: relative;
+}
+
+.hour-end-mark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    url("gild.png") 0 0 / 64px 64px,
+    linear-gradient(128deg, var(--ornament-hi) 8%, var(--ornament) 52%, var(--ornament-lo) 92%);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 0s;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hour-end-mark::after {
+    background: var(--ornament);
+  }
+}
+
+:root[data-theme="dark"] .hour-end-mark::after {
+  background: var(--ornament);
+}
+
+.hour-end-mark.is-gilding::after,
+.hour-end-mark.is-gilt::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hour-end-mark.is-gilding::after {
+    transition-duration: var(--tempo-gild);
+    transition-delay: var(--tempo-gild-delay);
+    transition-timing-function: var(--tempo-gild-curve);
+  }
+}
+
+.hour-end-mark.is-bare::after {
+  content: none;
+}
+
 .hour-continuation a {
   color: var(--accent);
   text-decoration: none;
@@ -5486,6 +5539,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      unfold  a disclosure opens in 260ms; folds in 200
      turn    page to page: the old out in 90ms, then the new in 210
      dim     the room changing: 320ms
+     gild    the cross under the last Amen taking its gold: 2000ms, by
+             opacity alone, once (presentation::EndLeaf)
    No motion takes the browser's own `ease`. */
 :root {
   --curve-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -5505,6 +5560,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      brush stroke across the twelve months (app.js's "The year's course"). */
   --tempo-course-lay: 815ms;
   --tempo-course-lay-curve: cubic-bezier(0.38, 0.2, 0.6, 0.92);
+  --tempo-gild: 2000ms;
+  --tempo-gild-delay: 0ms;
+  --tempo-gild-curve: var(--curve-standard);
   --tempo-settle-in: 160ms;
   --tempo-settle-in-delay: 0ms;
   --tempo-settle-in-curve: var(--curve-arrive);

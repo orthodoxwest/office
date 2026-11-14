@@ -105,6 +105,13 @@ impl Tempo {
     /// keeps moving to the end, so December is laid, not settled into.
     pub const COURSE_LAY_CURVE: [f32; 4] = [0.38, 0.2, 0.6, 0.92];
 
+    /// The consecration cross under an hour's last Amen taking its gold (`presentation::EndLeaf`):
+    /// once the hour is marked prayed and the cross stands wholly on the screen, the gold comes
+    /// up evenly over two seconds, by its opacity alone. Nothing travels, grows, wipes or glows;
+    /// it is slow so that it is a change of the wall and not an event on it. Reduced motion
+    /// cuts it: the cross is simply gilt.
+    pub const GILD: Beat = beat(2000, 0, Curve::Standard);
+
     /// The motion's name, as the web's `--tempo-*` properties name it.
     pub fn name(self) -> &'static str {
         match self {
@@ -194,6 +201,10 @@ mod tests {
         let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
         assert_eq!(value("--tempo-course-lay"), format!("{}ms", Tempo::COURSE_LAY_MS));
         assert_eq!(value("--tempo-course-lay-curve"), format!("cubic-bezier({x1}, {y1}, {x2}, {y2})"));
+        let gild = Tempo::GILD;
+        assert_eq!(value("--tempo-gild"), format!("{}ms", gild.ms));
+        assert_eq!(value("--tempo-gild-delay"), format!("{}ms", gild.delay));
+        assert_eq!(value("--tempo-gild-curve"), format!("var(--curve-{})", gild.curve.name()));
     }
 
     /// The iOS app's table (`Tempo.swift`): `static let turnIn = Beat(ms: 210, delay: 90, curve: .arrive)`
@@ -219,6 +230,7 @@ mod tests {
                 let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
                 format!("static let courseLayCurve = ({x1}, {y1}, {x2}, {y2})")
             },
+            format!("static let gild = Beat(ms: {}, delay: {}, curve: .{})", Tempo::GILD.ms, Tempo::GILD.delay, Tempo::GILD.curve.name()),
         ] {
             assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
         }
@@ -248,6 +260,12 @@ mod tests {
                 let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
                 format!("val courseLayCurve = CubicBezierEasing({x1}f, {y1}f, {x2}f, {y2}f)")
             },
+            format!(
+                "val gild = Beat(ms = {}, delay = {}, curve = Curve.{})",
+                Tempo::GILD.ms,
+                Tempo::GILD.delay,
+                title(Tempo::GILD.curve.name())
+            ),
         ] {
             assert!(kt.contains(&line), "Tempo.kt lacks `{line}`");
         }
