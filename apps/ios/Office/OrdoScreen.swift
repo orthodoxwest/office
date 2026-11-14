@@ -19,22 +19,30 @@ struct OrdoPage: View {
     }
 }
 
-/// A year's frontispiece: arithmetic, drawn at once.
+/// A year's frontispiece: arithmetic, drawn at once; the year's course under its month strip
+/// follows from the engine, in the room kept for it.
 struct YearPage: View {
     let year: Int
     @EnvironmentObject private var model: AppModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var course: (year: Int, months: [CourseMonthView])?
 
     var body: some View {
         // Drawn at once, so another year moves in as soon as it is asked for.
         ZStack {
-            OrdoYearScreen(view: ordoYear(year: Int32(year)))
+            OrdoYearScreen(view: ordoYear(year: Int32(year)), course: course?.year == year ? course?.months : nil)
                 .id(year)
                 .transition(inPlace(model.motion(to: .year(year)), reduceMotion: reduceMotion))
         }
         .animation(.easeInOut(duration: 0.3), value: year)
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
+        .task(id: year) {
+            let y = year
+            if case let .success(months) = await compose({ try Office.core.get().ordoCourse(year: Int32(y)) }), !Task.isCancelled {
+                course = (y, months)
+            }
+        }
     }
 }
 
@@ -90,7 +98,7 @@ struct OrdoScreen: View {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     SiteHeader().id("top")
-                    OrdoHeader(year: year, month: number, roman: nil).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                    OrdoHeader(year: year, month: number, roman: nil, course: month.course).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                     // The web's search field under the ordo's title, which opens the search page.
                     SearchEntry { model.open(.find("")) }.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                     tools.ordoColumn(m, wide: wide).padding(.top, m.px(8))
@@ -231,6 +239,9 @@ private struct OrdoHeader: View {
     let year: Int
     let month: Int?
     let roman: String?
+    let course: [CourseMonthView]?
+    /// How much of the year's course the frontispiece's stroke has uncovered, 0 to 1.
+    var laid: Double = 1
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.ornament) private var o
@@ -317,8 +328,8 @@ private struct OrdoHeader: View {
         Text(s).type(style).foregroundStyle(p.accent).padding(m.px(12)).frame(maxWidth: wide ? nil : .infinity)
     }
 
-    // The month strip: the shown month underlined in gold, and today's month marked with the gold
-    // lozenge, on its underline or, on a wide screen, on the strip's hairline beneath.
+    // The month strip: the shown month underlined in gold along its cell's foot, and under each
+    // month the year's course (`CourseBand`), with today's lozenge hung beneath at today's place.
     private var strip: some View {
         let t = model.today
         let rows: [[Int]] = wide ? [Array(1...12)] : [Array(1...6), Array(7...12)]
@@ -328,37 +339,85 @@ private struct OrdoHeader: View {
                     ForEach(row, id: \.self) { mo in
                         let current = mo == month
                         let todays = Int(t.year) == year && Int(t.month) == mo
-                        Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
-                            Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
-                                .foregroundStyle(current ? p.accent : p.muted)
-                                .overlay(alignment: .bottom) {
-                                    if !wide {
-                                        ZStack {
-                                            if current { Rectangle().fill(p.goldLine).frame(height: 2).padding(.horizontal, -m.px(14)) }
-                                            if todays { Diamond(size: 6, color: p.gold) }
-                                        }
-                                        .offset(y: m.px(5))
+                        VStack(spacing: 0) {
+                            Button { model.open(.ordo(year: year, month: mo, day: 0)) } label: {
+                                Text(monthShort(mo).uppercased()).type(.label(12.48, 0.06))
+                                    .foregroundStyle(current ? p.accent : p.muted)
+                                    .frame(maxWidth: .infinity, minHeight: 44)
+                                    .overlay(alignment: .bottom) {
+                                        if current { Rectangle().fill(p.goldLine).frame(height: 2) }
                                     }
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                                .overlay(alignment: .bottom) {
-                                    if wide {
-                                        ZStack {
-                                            if current { Rectangle().fill(p.goldLine).frame(height: 2) }
-                                            if todays { Diamond(size: 6, color: p.gold) }
-                                        }
-                                        .frame(height: 6)
-                                        .offset(y: 3)
-                                    }
-                                }
+                            }
+                            .buttonStyle(Quiet())
+                            .accessibilityLabel(monthName(mo))
+                            .accessibilityAddTraits(current ? .isSelected : [])
+                            CourseBand(
+                                band: course.flatMap { mo - 1 < $0.count ? $0[mo - 1] : nil },
+                                today: todays ? Int(t.day) : nil,
+                                index: mo - 1,
+                                stroke: laid
+                            )
                         }
-                        .buttonStyle(Quiet())
-                        .accessibilityLabel(monthName(mo))
-                        .accessibilityAddTraits(current ? .isSelected : [])
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * One month's band of the year's course under the strip, as the web's `.month-course`: the rows'
+ * colour rails laid on their side, a day to a 31st of the month's width (`courseSpan()`), so a
+ * short month ends early and the strip's hairline, the band's lowest line, shows in its tail;
+ * each run's edges on whole pixels, as the web's `crispEdges`. Today's lozenge hangs beneath the
+ * band at today's place. Its 11pt are kept whether the course has come or not, so nothing moves
+ * when it does; drawn for the eye alone. `stroke` is how far the frontispiece's one stroke has
+ * crossed the year (0 to 1), animatable so it draws frame by frame; the month at `index` (from 0)
+ * is uncovered for its twelfth of it, so every band follows the one front.
+ */
+private struct CourseBand: View, Animatable {
+    let band: CourseMonthView?
+    let today: Int?
+    let index: Int
+    var stroke: Double
+    @Environment(\.palette) private var p
+    @Environment(\.metrics) private var m
+    @Environment(\.displayScale) private var scale
+
+    var animatableData: Double {
+        get { stroke }
+        set { stroke = newValue }
+    }
+
+    var body: some View {
+        let laid = CGFloat(min(1, max(0, stroke * 12 - Double(index))))
+        let (band, today, p, scale, r) = (band, today, p, scale, m.px(2.5))
+        Canvas { ctx, size in
+            let snap = { (v: CGFloat) in (v * scale).rounded() / scale }
+            let top = snap(1), height = snap(3), hair = 1 / scale
+            ctx.fill(Path(CGRect(x: 0, y: top + height - hair, width: size.width, height: hair)), with: .color(p.border))
+            if let band {
+                let span = CGFloat(courseSpan())
+                // The stroke uncovers the band from the left; nothing else moves.
+                ctx.clip(to: Path(CGRect(x: 0, y: 0, width: size.width * laid, height: size.height)))
+                for run in band.runs {
+                    let x0 = snap(size.width * CGFloat(run.start) / span)
+                    let x1 = snap(size.width * CGFloat(run.start + run.days) / span)
+                    if x1 > x0 { ctx.fill(Path(CGRect(x: x0, y: top, width: x1 - x0, height: height)), with: .color(titleColor(run.color, p))) }
+                }
+            }
+        }
+        .overlay {
+            if let today {
+                // The web's 0.22rem square turned on its point, centred 7.5pt under the cell.
+                Canvas { ctx, size in
+                    ctx.fill(lozenge(CGPoint(x: size.width * CGFloat(coursePlace(day: Int32(today))), y: 7.5), r), with: .color(p.gold))
+                }
+            }
+        }
+        .frame(height: 11)
+        .frame(maxWidth: .infinity)
+        .accessibilityHidden(true)
     }
 }
 
@@ -623,8 +682,8 @@ private struct DayRow: View {
             // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
             .padding(.top, m.px(11.2))
             .padding(.bottom, m.px(9.6))
-            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: m.px(12.8), height: m.px(37.6)) }
-            Hairline(color: p.border)
+            .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: m.px(12.8), height: m.px(37.6)) }
+            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
         }
         .rowPool(held, x: 0.44)
         // Today is painted, not selected: inset 8pt from the gutters.
@@ -705,8 +764,8 @@ private struct DayRow: View {
             // The web's `.month-table td`: 0.5rem above and below, from 701px.
             .padding(.vertical, 8)
             // The day's liturgical colour as a rail beside its date, under the date's column.
-            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: 8 + 1.6, foot: 8) }
-            Hairline(color: p.border)
+            .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: 8 + 1.6, foot: 8) }
+            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
         }
         .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
@@ -720,9 +779,16 @@ private struct DayRow: View {
  * row's top, `height` tall or down to `foot` above its foot; while the row is held it runs the
  * row's full height, to the hairline, over Tempo's reach, and goes back over its touch (the web's
  * `.month-table tr.day.is-pressed` rail).
+ *
+ * Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`): within an
+ * octave the rail runs up to the row's top and down through the hairline into the next day's, so
+ * the octave's days read as one long bar in the octave's colour; a feast that impedes the octave,
+ * or a day of it in another colour, stands beside it as a lone bar of its own colour (the web's
+ * `.day-inset`).
  */
 private struct DayRail: View {
-    let color: Color
+    let day: OrdoDayView
+    let palette: Palette
     let held: Bool
     let top: CGFloat
     var height: CGFloat? = nil
@@ -730,9 +796,17 @@ private struct DayRail: View {
 
     var body: some View {
         GeometryReader { g in
-            let from = held ? 0 : top
-            let to = held ? g.size.height : height.map { top + $0 } ?? g.size.height - foot
-            Rectangle().fill(color).frame(width: 3, height: max(0, to - from)).offset(y: from)
+            // The lone bar's foot, and the row's: through the hairline below when bound to the next day.
+            let lone = height.map { top + $0 } ?? g.size.height - foot
+            let end = day.boundBelow ? g.size.height + 1 : g.size.height
+            let from = held || day.boundAbove ? 0 : top
+            let to = held || day.boundBelow ? end : lone
+            ZStack(alignment: .topLeading) {
+                Rectangle().fill(titleColor(day.railColor, palette)).frame(width: 3, height: max(0, to - from)).offset(y: from)
+                if !day.railInset.isEmpty {
+                    Rectangle().fill(titleColor(day.railInset, palette)).frame(width: 3, height: max(0, lone - top)).offset(x: 6, y: top)
+                }
+            }
         }
         .frame(width: 3)
         .animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)
@@ -870,16 +944,22 @@ private struct Digest: View {
  */
 struct OrdoYearScreen: View {
     let view: OrdoYearView
+    /// The year's course, once the engine has it.
+    let course: [CourseMonthView]?
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The stroke that lays the course in, the first time a frontispiece shows it this launch
+    /// (`AppModel.courseLaid`); under Reduce Motion, or after, the band is simply there.
+    @State private var laid: Double?
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 SiteHeader()
-                OrdoHeader(year: Int(view.year), month: nil, roman: view.roman).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
+                OrdoHeader(year: Int(view.year), month: nil, roman: view.roman, course: course, laid: laid ?? (model.courseLaid ? 1 : 0)).ordoColumn(m, wide: wide).padding(.top, m.px(17.6))
                 SearchEntry { model.open(.find("")) }.ordoColumn(m, wide: wide).padding(.top, m.px(8))
                 VStack(spacing: 0) {
                     TabulaHeading()
@@ -901,6 +981,16 @@ struct OrdoYearScreen: View {
                 .padding(.top, m.px(40))
                 Footer()
             }
+        }
+        .onChange(of: course != nil, initial: true) { _, has in
+            guard has, !model.courseLaid else { return }
+            model.courseLaid = true
+            guard !reduceMotion else {
+                laid = 1
+                return
+            }
+            let (x1, y1, x2, y2) = Tempo.courseLayCurve
+            withAnimation(.timingCurve(x1, y1, x2, y2, duration: Double(Tempo.courseLay) / 1000)) { laid = 1 }
         }
     }
 }

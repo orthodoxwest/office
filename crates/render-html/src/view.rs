@@ -163,7 +163,14 @@ pub struct DayRow {
     pub rank: String,
     pub rank_full: String,
     pub color: String,
+    /// The rail's colour class: within an octave's strand the octave's, else the day's own
+    /// (`presentation::rails`).
     pub color_class: String,
+    /// Days bound together: the day's own colour beside the octave's strand, or empty.
+    pub rail_inset: String,
+    /// The rail runs up into the day before and down into the day after, of the same octave.
+    pub bound_above: bool,
+    pub bound_below: bool,
     pub feast_name: String,
     pub fast: bool,
     pub abstinence: bool,
@@ -203,6 +210,19 @@ pub struct MonthLink {
     pub current: bool,
     /// Today falls in this month.
     pub today: bool,
+    /// Today's place along the month's band ("40.323%"), on today's month only; the client
+    /// moves it with the local date.
+    pub today_x: String,
+    /// The month's runs of day colours, the year's course (`presentation::course`).
+    pub course: Vec<CourseRunView>,
+}
+
+/// One run of a month's band: `days` days of `color` from `start` (0-based), on a span of 31.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CourseRunView {
+    pub start: u32,
+    pub days: u32,
+    pub color: String,
 }
 
 /// A labelled figure or date in the Tabula Temporaria; `href` leads to the

@@ -5,9 +5,11 @@
 //! and the composed hour: no templates, no platform, and nothing that composes an hour.
 
 pub mod about;
+pub mod course;
 pub mod crown;
 pub mod feast;
 pub mod gloss;
+pub mod rails;
 pub mod reminders;
 pub mod sun;
 pub mod usage;

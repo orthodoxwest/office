@@ -96,6 +96,17 @@ impl Tempo {
     /// reaches its place over this, so the stretch is seen; it goes back over the touch's way out.
     pub const TOUCH_REACH: Beat = beat(120, 0, Curve::Arrive);
 
+    /// The year's course laid in under the ordo frontispiece's month strip, once a session (the
+    /// web's sessionStorage, the apps' launch), never under reduced motion: one front crossing
+    /// January to December, uncovering the band and moving nothing else. Its pace is a brush's,
+    /// [`Tempo::COURSE_LAY_CURVE`], over the whole year, each month taking its twelfth of the
+    /// eased stroke; on a phone's two rows of six the front finishes June and carries on at July.
+    pub const COURSE_LAY_MS: u32 = 815;
+
+    /// The stroke's curve, a CSS `cubic-bezier`'s four figures: unlike the three [`Curve`]s it
+    /// keeps moving to the end, so December is laid, not settled into.
+    pub const COURSE_LAY_CURVE: [f32; 4] = [0.38, 0.2, 0.6, 0.92];
+
     /// The consecration cross under an hour's last Amen taking its gold (`presentation::EndLeaf`):
     /// once the hour is marked prayed and the cross stands wholly on the screen, the gold comes
     /// up evenly over two seconds, by its opacity alone. Nothing travels, grows, wipes or glows;
@@ -201,6 +212,9 @@ mod tests {
         assert_eq!(value("--tempo-coat"), format!("{}ms", coat.ms));
         assert_eq!(value("--tempo-coat-delay"), format!("{}ms", coat.delay));
         assert_eq!(value("--tempo-coat-curve"), format!("var(--curve-{})", coat.curve.name()));
+        let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+        assert_eq!(value("--tempo-course-lay"), format!("{}ms", Tempo::COURSE_LAY_MS));
+        assert_eq!(value("--tempo-course-lay-curve"), format!("cubic-bezier({x1}, {y1}, {x2}, {y2})"));
         let gild = Tempo::GILD;
         assert_eq!(value("--tempo-gild"), format!("{}ms", gild.ms));
         assert_eq!(value("--tempo-gild-delay"), format!("{}ms", gild.delay));
@@ -249,6 +263,11 @@ mod tests {
         for line in [
             format!("static let touchQuiet = {}", Tempo::TOUCH_QUIET),
             format!("static let touchReach = Beat(ms: {}, delay: {}, curve: .{})", r.ms, r.delay, r.curve.name()),
+            format!("static let courseLay = {}", Tempo::COURSE_LAY_MS),
+            {
+                let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+                format!("static let courseLayCurve = ({x1}, {y1}, {x2}, {y2})")
+            },
             format!("static let gild = Beat(ms: {}, delay: {}, curve: .{})", Tempo::GILD.ms, Tempo::GILD.delay, Tempo::GILD.curve.name()),
         ] {
             assert!(swift.contains(&line), "Tempo.swift lacks `{line}`");
@@ -274,6 +293,11 @@ mod tests {
         for line in [
             format!("const val TOUCH_QUIET = {}f", Tempo::TOUCH_QUIET),
             format!("val touchReach = Beat(ms = {}, delay = {}, curve = Curve.{})", r.ms, r.delay, title(r.curve.name())),
+            format!("const val COURSE_LAY_MS = {}", Tempo::COURSE_LAY_MS),
+            {
+                let [x1, y1, x2, y2] = Tempo::COURSE_LAY_CURVE;
+                format!("val courseLayCurve = CubicBezierEasing({x1}f, {y1}f, {x2}f, {y2}f)")
+            },
             format!(
                 "val gild = Beat(ms = {}, delay = {}, curve = Curve.{})",
                 Tempo::GILD.ms,

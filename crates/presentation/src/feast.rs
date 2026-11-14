@@ -751,7 +751,7 @@ pub fn is_feast_id(id: &str) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
     #[test]
@@ -809,7 +809,7 @@ mod tests {
     }
 
     /// The data directory, read as the calendar loader reads it.
-    struct Data;
+    pub(crate) struct Data;
 
     impl calendar::DataSource for Data {
         fn display_path(&self, rel: &str) -> String {

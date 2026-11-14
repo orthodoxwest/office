@@ -3517,13 +3517,20 @@ function plainClickOpensHere(e, link) {
       todayLink.setAttribute("href", ordoDayURL(localDateSlug(new Date())));
     }
     // Today's month in the strip: its lozenge and spoken name follow the
-    // local date too.
+    // local date too. The lozenge hangs at today's place along the year's
+    // course, the middle of the day's 31st (presentation::course::course_place).
     var thisMonth = localDateSlug(new Date()).slice(0, 7);
+    var todayX = ((new Date().getDate() - 0.5) / 31 * 100).toFixed(3) + "%";
     document.querySelectorAll(".month-jump a[data-month]").forEach(function (link) {
       var name = (link.getAttribute("aria-label") || "").replace(/, this month$/, "");
       var today = link.getAttribute("data-month") === thisMonth;
       link.classList.toggle("is-today-month", today);
       link.setAttribute("aria-label", today ? name + ", this month" : name);
+      if (today) {
+        link.style.setProperty("--today-x", todayX);
+      } else {
+        link.style.removeProperty("--today-x");
+      }
     });
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
@@ -3534,6 +3541,56 @@ function plainClickOpensHere(e, link) {
       }
     }
   }
+
+  // The year's course: on the frontispiece, once a session, the band under
+  // the month strip is laid in by one brush stroke, a single front crossing
+  // January to December (on a phone's two rows it finishes June and carries
+  // on at July). calendar.html decides before the first paint
+  // (html[data-course-lay], which holds the band unseen); here each month's
+  // band is uncovered for its twelfth of the eased stroke. Only the band's
+  // clip moves. Its length and pace are Tempo's (--tempo-course-lay,
+  // --tempo-course-lay-curve; render_blocks::Tempo::COURSE_LAY_*).
+  (function layYearCourse() {
+    var root = document.documentElement;
+    if (!root.hasAttribute("data-course-lay")) {
+      return;
+    }
+    var svgs = [].slice.call(document.querySelectorAll(".calendar[data-view='year'] .month-course svg"));
+    var style = getComputedStyle(root);
+    var ms = parseFloat(style.getPropertyValue("--tempo-course-lay"));
+    var curve = /cubic-bezier\(([^)]*)\)/.exec(style.getPropertyValue("--tempo-course-lay-curve"));
+    if (!svgs.length || !ms || !curve || typeof svgs[0].animate !== "function") {
+      root.removeAttribute("data-course-lay");
+      return;
+    }
+    var c = curve[1].split(",").map(parseFloat);
+    function axis(a, b, t) {
+      return 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+    }
+    // The eased progress at time x (0..1).
+    function eased(x) {
+      var lo = 0, hi = 1;
+      for (var i = 0; i < 24; i++) {
+        var mid = (lo + hi) / 2;
+        if (axis(c[0], c[2], mid) < x) { lo = mid; } else { hi = mid; }
+      }
+      return axis(c[1], c[3], (lo + hi) / 2);
+    }
+    var steps = 60;
+    var strokes = svgs.map(function (svg, i) {
+      var frames = [];
+      for (var k = 0; k <= steps; k++) {
+        var laid = Math.max(0, Math.min(1, eased(k / steps) * svgs.length - i));
+        frames.push({ clipPath: "inset(0 " + ((1 - laid) * 100).toFixed(2) + "% 0 0)", offset: k / steps });
+      }
+      return svg.animate(frames, { duration: ms, easing: "linear", fill: "both" });
+    });
+    // The strokes now hold the band unseen until they reach it.
+    root.removeAttribute("data-course-lay");
+    Promise.all(strokes.map(function (s) { return s.finished; })).then(function () {
+      strokes.forEach(function (s) { s.cancel(); });
+    }, function () {});
+  })();
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home
   // page. The day-number link stays as the keyboard/no-JS path; clicks on

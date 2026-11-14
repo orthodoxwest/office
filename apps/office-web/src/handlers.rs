@@ -11,14 +11,15 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
+use presentation::rails::Rail;
 use render_html::chant;
 use render_html::links::{
     calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
 };
 use render_html::view::{
-    AboutData, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm,
-    LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour, ReminderPeriod,
-    ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
+    AboutData, CalendarData, Chrome, CommemorationRow, CourseRunView, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader,
+    LeaderForm, LinkRow, MonasticRow, MonthData, MonthLink, MonthStep, NotFoundData, PrivacyData, ReminderDay, ReminderHour,
+    ReminderPeriod, ReminderRulePhrase, RemindersData, TabulaData, TabulaRow,
 };
 
 use crate::Server;
@@ -109,12 +110,13 @@ fn comm_rows(comms: &[CommSummary], feasts: &FeastIndex, date: Date) -> Vec<Comm
 }
 
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
-/// and Vespers digest. `days` are the month's days in order.
-pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
+/// and Vespers digest. `days` are the month's days in order, `rails` their rails.
+pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
     let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
-    for d in days {
+    for (i, d) in days.iter().enumerate() {
         let o = ordo_day(d, engine, moveable);
+        let rail = rails.get(i).copied().unwrap_or_else(|| Rail::alone(o.color));
         let mut row = DayRow {
             day_num: d.date.day(),
             weekday: d.date.weekday().name()[..3].to_string(),
@@ -122,7 +124,10 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feas
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
-            color_class: format!("day-color-{}", o.color.as_str()),
+            color_class: format!("day-color-{}", rail.color.as_str()),
+            rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            bound_above: rail.above,
+            bound_below: rail.below,
             feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
@@ -573,6 +578,11 @@ impl Server {
             OrdoView::Month(m) => calendar_month_link(y, m),
             OrdoView::All => calendar_all_link(y),
         };
+        // The year's course under the strip: each month's runs of the rows' own colours.
+        let course = match self.cache.get(year) {
+            Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
+            Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
+        };
         let step = |y: i32, m: u32| MonthStep {
             name: if y == year { MONTHS[m as usize - 1].to_string() } else { format!("{} {y}", MONTHS[m as usize - 1]) },
             href: calendar_month_link(y, m),
@@ -610,6 +620,11 @@ impl Server {
                         month: format!("{year:04}-{m:02}"),
                         current: current == Some(m),
                         today,
+                        today_x: if today { presentation::course::course_place_percent(now.day()) } else { String::new() },
+                        course: course[m as usize - 1]
+                            .iter()
+                            .map(|r| CourseRunView { start: r.start, days: r.days, color: r.color.as_str().to_string() })
+                            .collect(),
                     }
                 })
                 .collect(),
@@ -971,6 +986,42 @@ mod tests {
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
     }
 
+    /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the
+    /// Nativity)"), so home names the octave under the Circumcision, as it does under St Stephen
+    /// and St Sylvester; 2 January is past it.
+    #[test]
+    fn home_names_the_nativity_octave_on_the_first_of_january() {
+        let note = r#"<p class="octave-note">Octave of Christmas</p>"#;
+        for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
+            assert!(get(&format!("/?date={date}")).2.contains(note), "{date}");
+        }
+        assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
+    }
+
+    /// Days bound together (presentation::rails; needs ruling #838): the Nativity's rail runs
+    /// from 25 December across the year's turn to 1 January, St Stephen's red standing beside its
+    /// white, and the days outside it keep their lone bars and their markup.
+    #[test]
+    fn the_ordo_binds_the_nativity_octave_across_the_new_year() {
+        let row = |body: &str, date: &str| {
+            let at = body.find(&format!(r#"id="d-{date}""#)).unwrap();
+            let start = body[..at].rfind("<tr").unwrap();
+            body[start..start + body[start..].find("</td>").unwrap()].to_string()
+        };
+        let december = get("/calendar/2026/12").2;
+        assert!(row(&december, "2026-12-24").starts_with(r#"<tr class="day day-color-violet" id="d-2026-12-24""#));
+        assert!(row(&december, "2026-12-25").starts_with(r#"<tr class="day day-color-white bound-below" "#));
+        let stephen = row(&december, "2026-12-26");
+        assert!(stephen.starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#), "{stephen}");
+        assert!(stephen.contains(r#"<span class="day-inset day-color-red" aria-hidden="true"></span>"#), "{stephen}");
+        assert!(row(&december, "2026-12-31").starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#));
+        let january = get("/calendar/2027/01").2;
+        let circumcision = row(&january, "2027-01-01");
+        assert!(circumcision.starts_with(r#"<tr class="day day-color-white bound-above" "#), "{circumcision}");
+        assert!(!circumcision.contains("day-inset"));
+        assert!(row(&january, "2027-01-02").starts_with(r#"<tr class="day day-color-red" id="d-2027-01-02""#));
+    }
+
     /// A browser that has laid a score out names its column's width, and the hour's scores come
     /// engraved at it, so chant.js has nothing to lay out again and no score changes height under
     /// the reader; a width that is not one leaves the page's own.
@@ -1060,7 +1111,10 @@ mod tests {
         // The strip leads to each month, naming this one as the current page.
         let strip = body.split(r#"<nav class="month-jump""#).nth(1).and_then(|s| s.split("</nav>").next()).unwrap();
         assert_eq!(strip.matches(r#"<a href="/calendar/2026/"#).count(), 12);
-        assert!(strip.contains(r#"<a href="/calendar/2026/09" aria-label="September"#) && strip.contains(r#"aria-current="page">Sep</a>"#));
+        assert!(
+            strip.contains(r#"<a href="/calendar/2026/09" aria-label="September"#)
+                && strip.contains(r#"aria-current="page">Sep<span class="month-course""#)
+        );
         assert_eq!(strip.matches(r#"aria-current="page""#).count(), 1);
         assert!(strip.contains(r#"data-month="2026-09""#));
         assert_eq!(body.matches(r#"aria-current="page""#).count(), 2, "the month and the Ordo menu item");
@@ -1108,8 +1162,53 @@ mod tests {
         assert_eq!(body.matches("is-today-month").count(), 1);
         let link = body.split("<a ").find(|a| a.contains(&this_month)).unwrap();
         assert!(link.contains(r#"class="is-today-month""#) && link.contains(", this month\""), "{link}");
+        // Its lozenge hangs at today's place along the course.
+        assert!(link.contains(&format!(r#"style="--today-x: {}""#, presentation::course::course_place_percent(now.day()))), "{link}");
         assert!(!ordo(&format!("/calendar/{}", now.year() - 1)).contains("is-today-month"));
         assert!(!ordo(&format!("/calendar/{}", now.year() + 1)).contains("this month"));
+    }
+
+    /// The year's course under the strip spells, day by day, the days' own colours, on
+    /// the frontispiece and every month page alike, and is drawn for the eye alone.
+    #[test]
+    fn ordo_strip_lays_the_years_course_in_the_rows_colours() {
+        let strip =
+            |body: &str| body.split(r#"<nav class="month-jump""#).nth(1).and_then(|s| s.split("</nav>").next()).unwrap().to_string();
+        let bands =
+            |strip: &str| -> Vec<String> { strip.split("<svg").skip(1).map(|s| s.split("</svg>").next().unwrap().to_string()).collect() };
+        let year = strip(&ordo("/calendar/2026"));
+        let bands_of_year = bands(&year);
+        assert_eq!(bands_of_year.len(), 12);
+        assert_eq!(year.matches(r#"<span class="month-course" aria-hidden="true">"#).count(), 12);
+        assert!(bands_of_year.iter().all(|b| b.starts_with(r#" viewBox="0 0 31 1" preserveAspectRatio="none" focusable="false">"#)));
+        // The days' own colours, from the whole year: a row's rail, or, where an octave's strand
+        // runs through a day of another colour (presentation::rails), that day's own inset.
+        let all = ordo("/calendar/2026/all");
+        let mut rows = vec![Vec::new(); 12];
+        for row in all.split(r#"<tr class="day day-color-"#).skip(1) {
+            let row = row.split("</tr>").next().unwrap();
+            let colour = match row.split(r#"<span class="day-inset day-color-"#).nth(1) {
+                Some(inset) => inset.split('"').next().unwrap(),
+                None => row.split(' ').next().unwrap().trim_end_matches('"'),
+            };
+            let month: usize = row.split(r#"id="d-2026-"#).nth(1).unwrap()[..2].parse().unwrap();
+            rows[month - 1].push(colour.to_string());
+        }
+        for (m, band) in bands_of_year.iter().enumerate() {
+            let mut days = Vec::new();
+            for rect in band.split("<rect ").skip(1) {
+                let attr = |name: &str| rect.split(&format!(r#"{name}=""#)).nth(1).unwrap().split('"').next().unwrap().to_string();
+                assert_eq!(attr("x").parse::<usize>().unwrap(), days.len(), "month {}: runs abut", m + 1);
+                let colour = attr("class").strip_prefix("day-color-").unwrap().to_string();
+                days.extend(std::iter::repeat_n(colour, attr("width").parse().unwrap()));
+            }
+            assert_eq!(days, rows[m], "month {}", m + 1);
+        }
+        // February ends early: 28 of the 31.
+        assert_eq!(rows[1].len(), 28);
+        // A month page and the whole year carry the same course.
+        assert_eq!(bands(&strip(&ordo("/calendar/2026/09"))), bands_of_year);
+        assert_eq!(bands(&strip(&all)), bands_of_year);
     }
 
     #[test]

@@ -228,6 +228,100 @@ fn the_ordo_month_matches_the_web_rows() {
     assert!(core.ordo_month(2026, 13).is_err());
 }
 
+/// A course's runs laid out a day at a time, `None` past a month's end.
+fn course_days(course: &[CourseMonthView]) -> Vec<Vec<Option<String>>> {
+    course
+        .iter()
+        .map(|m| {
+            let mut days = vec![None; course_span() as usize];
+            let mut next = 0;
+            for r in &m.runs {
+                assert_eq!(r.start, next, "runs abut, in order");
+                assert!(r.days > 0);
+                for d in r.start..r.start + r.days {
+                    days[d as usize] = Some(r.color.clone());
+                }
+                next = r.start + r.days;
+            }
+            days
+        })
+        .collect()
+}
+
+#[test]
+fn the_year_course_matches_the_web_strip() {
+    let core = OfficeCore::new().unwrap();
+    let fs = repo_data();
+    for year in [2026, 2027, 2028] {
+        // The web lays its band from the server's own office days (tools::year::office_days),
+        // the days its rows' colour rails are set from; the apps' must spell the same, day by day.
+        let web = tools::year::load_office_days(&fs, year).unwrap();
+        let mut want = vec![vec![None; course_span() as usize]; 12];
+        for d in &web {
+            want[d.date.month() as usize - 1][d.date.day() as usize - 1] = Some(d.color.as_str().to_string());
+        }
+        let course = core.ordo_course(year).unwrap();
+        assert_eq!(course.len(), 12);
+        assert_eq!(course_days(&course), want, "{year}");
+        // Runs are maximal: no two neighbours share a colour.
+        for m in &course {
+            assert!(m.runs.windows(2).all(|w| w[0].color != w[1].color), "{year}");
+        }
+        // February is short: its band ends at day 28 or 29, the hairline showing in its tail.
+        let feb = course[1].runs.last().unwrap();
+        assert_eq!(feb.start + feb.days, if year % 4 == 0 { 29 } else { 28 });
+    }
+    // A month page carries the same course, and its rows the same colours.
+    let march = core.ordo_month(2026, 3).unwrap();
+    assert_eq!(march.course, core.ordo_course(2026).unwrap());
+    let rows: Vec<_> = march.days.iter().map(|d| Some(d.color.clone())).collect();
+    assert_eq!(course_days(&march.course)[2][..31], rows[..]);
+    // Today's lozenge hangs at the middle of its day's 31st, as app.js places it.
+    assert!((course_place(13) - 12.5 / 31.0).abs() < 1e-12);
+}
+
+/// Home names the Nativity's octave under the Circumcision, its eighth day (#833), as the web does.
+#[test]
+fn home_names_the_nativity_octave_on_the_first_of_january() {
+    let core = OfficeCore::new().unwrap();
+    let note = |y, m, d| core.home(civil(y, m, d), civil(y, m, d), 9).unwrap().octave_note;
+    assert_eq!(note(2026, 12, 31), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 1), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 2), "");
+}
+
+/// The apps bind the octaves as the web's month rows do: both read `presentation::rails` over the
+/// whole year, so 1 January takes up the previous December's octave (#833, needs ruling #838).
+#[test]
+fn the_ordo_binds_the_octaves_as_the_web_does() {
+    let core = OfficeCore::new().unwrap();
+    let data = CalendarData::load(&repo_data()).unwrap();
+    for (year, month) in [(2026, 12), (2027, 1), (2027, 5), (2027, 6), (2027, 7)] {
+        let cal = build_calendar(year, &data).unwrap();
+        let want: Vec<_> = cal
+            .days
+            .iter()
+            .zip(presentation::rails::octave_rails(&cal, &data.feasts))
+            .filter(|(d, _)| d.date.month() as i32 == month)
+            .map(|(_, r)| (r.color.as_str().to_string(), r.inset.map(|c| c.as_str().to_string()).unwrap_or_default(), r.above, r.below))
+            .collect();
+        let got: Vec<_> = core
+            .ordo_month(year, month)
+            .unwrap()
+            .days
+            .into_iter()
+            .map(|d| (d.rail_color, d.rail_inset, d.bound_above, d.bound_below))
+            .collect();
+        assert_eq!(got, want, "{year}-{month}");
+    }
+    let december = core.ordo_month(2026, 12).unwrap();
+    let stephen = &december.days[25];
+    assert_eq!((stephen.color.as_str(), stephen.rail_color.as_str(), stephen.rail_inset.as_str()), ("red", "white", "red"));
+    assert!(stephen.bound_above && stephen.bound_below);
+    let first = &core.ordo_month(2027, 1).unwrap().days[0];
+    assert_eq!((first.rail_color.as_str(), first.rail_inset.as_str(), first.bound_above, first.bound_below), ("white", "", true, false));
+}
+
 #[test]
 fn reminders_name_each_office_on_the_chosen_days() {
     let core = OfficeCore::new().unwrap();
