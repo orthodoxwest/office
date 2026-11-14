@@ -21,8 +21,9 @@ crates/
                            (Space: steps of the body line), which the apps and style.css's
                            --space-* follow, its motion (Tempo: five motions, three curves),
                            which style.css's --tempo-*/--curve-*, Tempo.swift and Tempo.kt follow,
-                           and home's light moving with the hours (hour_light: the pass's timings,
-                           which app.js's HOUR_LIGHT and the apps play)
+                           home's light moving with the hours (hour_light: the pass's timings,
+                           which app.js's HOUR_LIGHT and the apps play), and the wall (wall: the
+                           colour every front's launch and first frame shows)
   presentation/            Words every front shares: day, season and date names, the current-hour
                            schedule (app.js mirrors it), home's invitation, the report-issue link,
                            the usage beacon's vocabulary (server, app.js and native apps),

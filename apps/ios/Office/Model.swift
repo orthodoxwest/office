@@ -191,6 +191,9 @@ struct Entry: Hashable {
 final class AppModel: ObservableObject {
     static let shared = AppModel()
 
+    /// Home comes into the light once a launch, on the wall the launch screen showed (`Loaded`).
+    let homeArrival = Arrival()
+
     /// Home's day; another one ends the crown's play, if one is under way.
     @Published var root: CivilDate {
         didSet {

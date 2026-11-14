@@ -32,17 +32,23 @@ struct Loaded<Value, Content: View>: View {
     let key: String
     let place: String
     let motion: Motion
+    /// Asked as the first content arrives whether it comes into the light (home, once a launch)
+    /// rather than simply appearing.
+    let arrival: Arrival?
     let load: () throws -> Value
     let content: (Value) -> Content
     @State private var shown: (place: String, value: Value)?
     @State private var failure: String?
+    /// The first content coming into the light, as it is inserted.
+    @State private var lighting = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `key` names what is composed; `place`, the page it is (by default the same).
-    init(key: String, place: String? = nil, motion: Motion = .fade, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
+    init(key: String, place: String? = nil, motion: Motion = .fade, arrival: Arrival? = nil, load: @escaping () throws -> Value, @ViewBuilder content: @escaping (Value) -> Content) {
         self.key = key
         self.place = place ?? key
         self.motion = motion
+        self.arrival = arrival
         self.load = load
         self.content = content
     }
@@ -50,7 +56,7 @@ struct Loaded<Value, Content: View>: View {
     var body: some View {
         ZStack {
             if let shown {
-                content(shown.value).id(shown.place).transition(transition)
+                content(shown.value).id(shown.place).transition(lighting ? AnyTransition.opacity.animation(Tempo.dimIn.animation) : transition)
             } else if let failure {
                 Message(text: failure)
             } else {
@@ -65,11 +71,17 @@ struct Loaded<Value, Content: View>: View {
             switch result {
             case let .success(v):
                 failure = nil
-                // The first content simply appears (the stack's push brings it), and the same
-                // page composed again changes in place; another page replaces it in motion.
-                if shown == nil || shown?.place == place {
+                // The first content simply appears (the stack's push brings it), unless it comes
+                // into the light on the wall the launch screen showed (home, once a launch: the
+                // wall first, over Tempo's dim, opacity only); the same page composed again
+                // changes in place; another page replaces it in motion.
+                if shown == nil, arrival?.take() == true, !reduceMotion {
+                    lighting = true
+                    withAnimation(Tempo.dimIn.animation) { shown = (place, v) }
+                } else if shown == nil || shown?.place == place {
                     shown = (place, v)
                 } else {
+                    lighting = false
                     withAnimation(.easeInOut(duration: 0.3)) { shown = (place, v) }
                 }
             case let .failure(e):
@@ -80,6 +92,21 @@ struct Loaded<Value, Content: View>: View {
     }
 
     private var transition: AnyTransition { inPlace(motion, reduceMotion: reduceMotion) }
+}
+
+/**
+ * The wall first: a page's first content that comes into the light on the wall the launch screen
+ * showed, over Tempo's dim, once (`AppModel.homeArrival`: home, once a launch). Taken, it is spent,
+ * so a return to the page within the session has no entrance.
+ */
+final class Arrival {
+    private var spent = false
+
+    /// True the first time it is asked.
+    func take() -> Bool {
+        defer { spent = true }
+        return !spent
+    }
 }
 
 /**

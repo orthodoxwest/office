@@ -78,7 +78,9 @@ pub enum Tempo {
     /// Page to page: the old page goes, then the new one comes, so two pages of prayer are never
     /// seen over each other. The way in waits for the way out.
     Turn,
-    /// The room changing as a whole: theme and text size, one beat.
+    /// The room changing as a whole: theme and text size, one beat. The apps' home comes into the
+    /// light on its way in once a launch (never on a return to it within the session), from the
+    /// wall the launch screen showed.
     Dim,
 }
 
@@ -93,6 +95,14 @@ impl Tempo {
     /// What a press moves rather than lights (the ordo day's rail running the row's full height)
     /// reaches its place over this, so the stretch is seen; it goes back over the touch's way out.
     pub const TOUCH_REACH: Beat = beat(120, 0, Curve::Arrive);
+
+    /// The wall first: on a cold start of the web's home, where its paint (the lining, the cross,
+    /// the invitation's wash, the ruled lines, the wall's powdering or vault, the Apse's stars)
+    /// comes later than the wall and the words, the paint is held until all of it is to hand and
+    /// then laid as one coat over this, opacity only (style.css's `--tempo-coat`, app.js's
+    /// `wallFirst`). Paint ready by the first frame is simply there. The apps draw their paint
+    /// with the page, so they have no coat; home comes into the light on [`Tempo::Dim`] instead.
+    pub const COAT: Beat = beat(240, 0, Curve::Arrive);
 
     /// The motion's name, as the web's `--tempo-*` properties name it.
     pub fn name(self) -> &'static str {
@@ -180,6 +190,34 @@ mod tests {
         assert_eq!(value("--tempo-touch-reach"), format!("{}ms", reach.ms));
         assert_eq!(value("--tempo-touch-reach-delay"), format!("{}ms", reach.delay));
         assert_eq!(value("--tempo-touch-reach-curve"), format!("var(--curve-{})", reach.curve.name()));
+        let coat = Tempo::COAT;
+        assert_eq!(value("--tempo-coat"), format!("{}ms", coat.ms));
+        assert_eq!(value("--tempo-coat-delay"), format!("{}ms", coat.delay));
+        assert_eq!(value("--tempo-coat-curve"), format!("var(--curve-{})", coat.curve.name()));
+    }
+
+    /// The wall first, on each front: the web's coat is laid on `--tempo-coat` (and app.js waits
+    /// for it before taking the transition off), and each app's home comes into the light on the
+    /// dim's way in, once a launch.
+    #[test]
+    fn the_wall_comes_first_on_every_front() {
+        let css = read("apps/office-web/static/style.css");
+        assert!(
+            css.contains("transition: opacity var(--tempo-coat) var(--tempo-coat-curve) var(--tempo-coat-delay);"),
+            "style.css lays the coat on --tempo-coat"
+        );
+        let js = read("apps/office-web/static/app.js");
+        assert!(js.contains("tempoMs(\"tempo-coat\")"), "app.js times the coat by --tempo-coat");
+        let swift = read("apps/ios/Office/HourScreen.swift");
+        assert!(
+            swift.contains(".transition(lighting ? AnyTransition.opacity.animation(Tempo.dimIn.animation) : transition)"),
+            "iOS home comes into the light on Tempo.dimIn"
+        );
+        let kt = read("apps/android/app/src/main/kotlin/org/orthodoxwest/office/MainActivity.kt");
+        assert!(
+            kt.contains("fadeIn(Tempo.dimIn.spec()) togetherWith ExitTransition.None"),
+            "Android home comes into the light on Tempo.dimIn"
+        );
     }
 
     /// The iOS app's table (`Tempo.swift`): `static let turnIn = Beat(ms: 210, delay: 90, curve: .arrive)`

@@ -8,10 +8,12 @@
 pub mod hour_light;
 pub mod initials;
 pub mod tempo;
+pub mod wall;
 
 pub use hour_light::{HourLight, LightFrame, light_at};
 pub use initials::{InitialFit, initial_fit, initial_size};
 pub use tempo::{Beat, Curve, Tempo};
+pub use wall::Wall;
 
 use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, hymn_sung_stanza_rubrics, hymn_sung_stanzas,

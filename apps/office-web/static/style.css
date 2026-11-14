@@ -5455,6 +5455,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
      unfold  a disclosure opens in 260ms; folds in 200
      turn    page to page: the old out in 90ms, then the new in 210
      dim     the room changing: 320ms
+   and the coat: on a cold start of home, its paint laid over the wall as
+   one, in 240ms (Tempo::COAT, "The wall first" below).
    No motion takes the browser's own `ease`. */
 :root {
   --curve-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -5494,6 +5496,9 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
   --tempo-dim-out: 320ms;
   --tempo-dim-out-delay: 0ms;
   --tempo-dim-out-curve: var(--curve-standard);
+  --tempo-coat: 240ms;
+  --tempo-coat-delay: 0ms;
+  --tempo-coat-curve: var(--curve-arrive);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -11669,6 +11674,61 @@ body.page-home::before {
   mask-position: top center;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
+}
+
+/* ── The wall first ──
+   A cold start is the wall, then its painting. On a fresh arrival at home
+   the wall, the arch, the frieze and every word stand from the first frame,
+   but the paint came later and piece by piece: measured on a cold load (a
+   phone, four times slower, a slow 4G link), the powdering some 480ms after
+   the first frame, the lining and the cross at 1.5s, the invitation's wash
+   at 1.8s, the stars by night at 0.5s and again 0.9s later when the italic
+   face moved the words they keep clear of, and the hand-ruled lines over
+   the CSS rules they replace as app.js ran. So the paint is held
+   (.wall-first, set by layout.html's pre-paint script on a fresh arrival
+   only, never on a page turn) until all of it is to hand, and then laid as
+   one coat over Tempo's coat, opacity only (app.js, wallFirst). Paint ready
+   before the first frame is simply there; under reduced motion the coat is
+   laid at once. The CSS rules the pen replaces stand down while held, as
+   they do once ruled, so no line is seen twice. Screen only: paper prints
+   whatever the page has. */
+@media screen {
+  :root.wall-first body.page-home::before,
+  :root.wall-first body.page-home .home-lining,
+  :root.wall-first body.page-home .home-crown,
+  :root.wall-first body.page-home .home-rules,
+  :root.wall-first body.page-home .home-vault-stars,
+  :root.wall-first body.page-home .pray-now::before {
+    opacity: 0;
+  }
+
+  :root.wall-first body.page-home .home-prayer-card h2 {
+    box-shadow: none;
+  }
+
+  :root.wall-first body.page-home .pray-now,
+  :root.wall-first body.page-home .pray-now:hover {
+    border-color: transparent;
+  }
+
+  :root.wall-first body.page-home .pray-now::after {
+    content: none;
+  }
+
+  :root.wall-first body.page-home .home-hour-links .home-hour-group {
+    border-color: transparent;
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  :root.wall-coat body.page-home::before,
+  :root.wall-coat body.page-home .home-lining,
+  :root.wall-coat body.page-home .home-crown,
+  :root.wall-coat body.page-home .home-rules,
+  :root.wall-coat body.page-home .home-vault-stars,
+  :root.wall-coat body.page-home .pray-now::before {
+    transition: opacity var(--tempo-coat) var(--tempo-coat-curve) var(--tempo-coat-delay);
+  }
 }
 
 /* ── Print ──

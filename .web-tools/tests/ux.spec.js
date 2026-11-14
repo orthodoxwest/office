@@ -6056,6 +6056,52 @@ test("home marks the device's hour before its script runs", async ({ page }) => 
   await page.unroute("**/static/app.js*");
 });
 
+// The wall first (style.css): on a fresh arrival home's paint is held until
+// all of it is to hand and then laid as one coat. The words never wait, the
+// CSS rules the pen replaces stand down meanwhile so no line is seen twice, and
+// a page turn from another of the Office's pages holds nothing.
+test("home's paint is laid as one coat on a fresh arrival, and never held on a page turn", async ({ page }) => {
+  let script, wash;
+  const scriptGoes = new Promise((resolve) => { script = resolve; });
+  const washComes = new Promise((resolve) => { wash = resolve; });
+  await page.route("**/static/app.js*", async (route) => { await scriptGoes; await route.continue(); });
+  await page.route("**/static/tablet.png*", async (route) => { await washComes; await route.continue(); });
+  await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
+  const root = page.locator("html");
+  await expect(page.locator("#home-date-heading")).toBeVisible();
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  const rules = () => page.evaluate(() => {
+    const prayNow = document.querySelector(".pray-now");
+    return [getComputedStyle(prayNow).borderTopColor, getComputedStyle(prayNow, "::after").content, getComputedStyle(document.querySelector(".home-prayer-card h2")).boxShadow];
+  });
+  expect(await rules()).toEqual(["rgba(0, 0, 0, 0)", "none", "none"]);
+  const paint = () => page.evaluate(() => {
+    const opacity = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo).opacity;
+    return [opacity("body", "::before"), opacity(".home-lining"), opacity(".home-crown"), opacity(".pray-now", "::before"), opacity(".home-rules")];
+  });
+  script();
+  await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
+  expect(await paint()).toEqual(["0", "0", "0", "0", "0"]);
+  await page.waitForTimeout(300);
+  await expect(root).toHaveClass(/\bwall-first\b/);
+  wash();
+  await expect(root).not.toHaveClass(/\bwall-first\b/);
+  await expect.poll(paint).toEqual(["1", "1", "1", "1", "1"]);
+  await expect(root).not.toHaveClass(/\bwall-coat\b/);
+  await page.unroute("**/static/app.js*");
+  await page.unroute("**/static/tablet.png*");
+
+  await page.addInitScript(() => {
+    document.addEventListener("readystatechange", () => {
+      if (document.readyState === "interactive") window.heldOnArrival = document.documentElement.classList.contains("wall-first");
+    });
+  });
+  await page.goto("/about");
+  await page.locator(".site-brand").click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await page.evaluate(() => window.heldOnArrival)).toBe(false);
+});
+
 // A press is seen: a tap marks the control at once, and one that opens a page
 // keeps the mark until the page goes; an ordo row is pressed as one control.
 // Reported from the page, which is leaving when the mark matters.
