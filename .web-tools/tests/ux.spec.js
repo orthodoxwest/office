@@ -1398,11 +1398,13 @@ test("the wide niche sets the hours one to a line where its heaviest day fits th
   }
 });
 
-test("the fold never cuts through the wide home's colophon, and a fitted niche never scrolls", async ({ page }) => {
-  // Where the zoom was held at its least, the colophon's tailpiece or words
-  // were sliced by the fold; where the niche fitted, a pixel or three of
-  // scroll remained. The colophon is now wholly in view or wholly below.
-  for (const [width, height] of [[1280, 800], [1180, 820], [1470, 830], [1440, 900], [1728, 1030], [1680, 1050], [1920, 1080], [820, 1180], [1024, 768]]) {
+// Where the zoom was held at its least, the colophon's tailpiece or words were
+// sliced by the fold; where the niche fitted, a pixel or three of scroll
+// remained. The colophon is now wholly in view or wholly below. One test a
+// size: eighteen fresh arrivals in one test, each now rastering home's paint
+// again when the wall first lays it, ran past a test's 30s on a busy runner.
+for (const [width, height] of [[1280, 800], [1180, 820], [1470, 830], [1440, 900], [1728, 1030], [1680, 1050], [1920, 1080], [820, 1180], [1024, 768]]) {
+  test(`the fold never cuts through the wide home's colophon, and a fitted niche never scrolls, at ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     for (const date of [testDate, "2026-12-13"]) {
       await openDatedPage(page, `/?date=${date}`);
@@ -1415,8 +1417,8 @@ test("the fold never cuts through the wide home's colophon, and a fitted niche n
       expect(whole || foot.top >= height - 0.5, `${at}: colophon cut by the fold`).toBe(true);
       if (whole) expect(foot.scroll, `${at}: no stray scroll`).toBeLessThanOrEqual(0);
     }
-  }
-});
+  });
+}
 
 test("a phone on its side keeps the day and the invitation above the fold", async ({ page }) => {
   // The niche's least zoom once left only the date and feast in view on a
@@ -6538,9 +6540,14 @@ test("home's paint is held whole on a black day by night, and every layer comes 
   await expect(page.locator("html")).toHaveClass(/\bwall-first\b/);
   await expect(page.locator(".home-hour-links.is-ruled")).toHaveCount(1);
   expect(await heldLayers(page)).toEqual(["0", "0", "0", "0", "0", "0"]);
+  // The coat is off only once it is laid: a busy WebKit starts a transition
+  // at its next frame, later than the tempo, and the cross was still at 0
+  // when the class went. Here the cross's coat runs well past its tempo.
+  const late = await page.addStyleTag({ content: ":root.wall-coat body.page-home .home-crown { transition-duration: 1.5s !important; }" });
   wash();
   await expect(page.locator("html")).not.toHaveClass(/\bwall-(first|coat)\b/);
   expect((await heldLayers(page))[2]).toBe("1");
+  await late.evaluate((tag) => tag.remove());
   await page.unroute("**/static/tablet.png*");
   const beats = await page.evaluate(() => {
     document.documentElement.classList.add("wall-coat");

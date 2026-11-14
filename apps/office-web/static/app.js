@@ -2695,9 +2695,26 @@ function plainClickOpensHere(e, link) {
       }
       root.classList.add("wall-coat");
       root.classList.remove("wall-first");
-      window.setTimeout(function () {
+      function dry() {
         root.classList.remove("wall-coat");
-      }, tempoMs("tempo-coat") + tempoMs("tempo-coat-delay") + 50);
+      }
+      // The coat is dry when its transitions end, not after its tempo by
+      // the clock: an engine starts a transition at its next frame, and a
+      // busy WebKit can start it later than the tempo, so the paint was
+      // still coming in after the coat was taken off. (Asking for the
+      // animations brings the style, and the transitions with it, up to
+      // date.) Where no engine lists them, the tempo stands.
+      var coat = typeof document.getAnimations === "function" ? document.getAnimations().filter(function (animation) {
+        var target = animation.effect && animation.effect.target;
+        return animation.transitionProperty === "opacity" && target && (target === document.body || target.matches(".home-lining, .home-crown, .home-vault-stars, .pray-now, .home-rules"));
+      }) : [];
+      if (coat.length) {
+        Promise.all(coat.map(function (animation) {
+          return animation.finished.catch(function () {});
+        })).then(dry);
+      } else {
+        window.setTimeout(dry, tempoMs("tempo-coat") + tempoMs("tempo-coat-delay") + 50);
+      }
     }
     // The images the held paint is drawn through, as the stylesheet
     // resolves them for this look and width. A mask's image is fetched in
