@@ -1,15 +1,21 @@
 package org.orthodoxwest.office
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,11 +37,14 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -119,19 +128,47 @@ fun GlossedText(text: AnnotatedString, block: BlockView, open: Int?, onOpen: (In
         )
         val gloss = open?.let { block.runs.getOrNull(it)?.gloss }
         val term = open?.let { i -> terms.firstOrNull { it.item.toInt() == i } }
-        if (gloss != null && term != null) {
-            val rects = {
+        val words = if (gloss != null && term != null) NoteWords(gloss.title, gloss.note) else null
+        val rects = term?.let {
+            {
                 val l = layout
                 val at = coordinates[0]
                 if (l == null || at == null || !at.isAttached) {
                     emptyList()
                 } else {
-                    termRects(l, term.start, term.end).map { Rect(at.localToWindow(it.topLeft), at.localToWindow(it.bottomRight)) }
+                    termRects(l, it.start, it.end).map { r -> Rect(at.localToWindow(r.topLeft), at.localToWindow(r.bottomRight)) }
                 }
             }
-            GlossNote(gloss, rects, onDismiss = { onOpen(null) })
         }
+        Note(words, rects ?: { emptyList() }, onDismiss = { onOpen(null) })
     }
+}
+
+/**
+ * A mark whose meaning is not on its face (the ordo's rank letters, its § and fish), as the web's
+ * `.month-table abbr`: a tap on it opens its `name` in the note a glossed word opens, above the
+ * mark, so the note never covers it. A second tap, a tap elsewhere or Back closes it. Compose
+ * answers a touch over the platform's whole minimum target round so small a mark. `label` is what
+ * a screen reader calls the mark; the note's words are read as they appear.
+ */
+@Composable
+fun NoteMark(name: String, label: String, modifier: Modifier = Modifier, mark: @Composable () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val coordinates = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    Box(
+        modifier
+            .onGloballyPositioned { coordinates[0] = it }
+            .tap(label = label) { open = !open }
+            .semantics { stateDescription = if (open) "Expanded" else "Collapsed" },
+    ) {
+        // The label speaks for the mark: a § or a fish read aloud says nothing.
+        Box(Modifier.clearAndSetSemantics {}) { mark() }
+    }
+    Note(
+        if (open) NoteWords("", name) else null,
+        rects = { coordinates[0]?.takeIf { it.isAttached }?.let { listOf(it.boundsInWindow()) } ?: emptyList() },
+        onDismiss = { open = false },
+    )
 }
 
 /** A term's box on each line it runs over, in the text's coordinates. */
@@ -184,15 +221,32 @@ private class NotePosition(
     }
 }
 
+/** What a note says: a glossed term's heading and note, or a mark's name alone (no heading). */
+data class NoteWords(val title: String, val note: String)
+
+/**
+ * The app's one answer to "what does this mean?" (the web's `.gloss-note`), for a rubric's term
+ * and an ordo's mark alike: a card of the surface ruled in gold, pointing at what it explains from
+ * above (`rects`, in the window). Open while `words` is given; it fades in and out on Tempo's
+ * settle, by its ink alone (words are faded, never slid), and holds its last words and place
+ * while it goes. With the system's animations off, it comes and goes at once.
+ */
 @Composable
-private fun GlossNote(gloss: GlossView, rects: () -> List<Rect>, onDismiss: () -> Unit) {
+fun Note(words: NoteWords?, rects: () -> List<Rect>, onDismiss: () -> Unit) {
+    val shown = remember { MutableTransitionState(false) }
+    shown.targetState = words != null
+    // Kept while the card fades out, so it does not empty or lose its place as it goes.
+    val kept = remember { arrayOfNulls<Pair<NoteWords, () -> List<Rect>>>(1) }
+    if (words != null) kept[0] = words to rects
+    val (said, at) = kept[0] ?: return
+    if (!shown.currentState && !shown.targetState) return
     val p = LocalPalette.current
     val density = LocalDensity.current
-    val current by rememberUpdatedState(rects)
+    val current by rememberUpdatedState(at)
     // The page runs under the status bar; the note stays clear of it.
     val inset = WindowInsets.safeDrawing.getTop(density)
     val position = with(density) {
-        remember(gloss, inset) { NotePosition({ current() }, ShadowRoom.roundToPx(), inset, NoteMargin.roundToPx(), NoteGap.roundToPx(), 14.dp.toPx()) }
+        remember(said, inset) { NotePosition({ current() }, ShadowRoom.roundToPx(), inset, NoteMargin.roundToPx(), NoteGap.roundToPx(), 14.dp.toPx()) }
     }
     // The web's shadows: plaster `0 .4rem 1.1rem` at 16%; on the night sky a deeper black.
     val shadow = if (p.dark) {
@@ -201,29 +255,33 @@ private fun GlossNote(gloss: GlossView, rects: () -> List<Rect>, onDismiss: () -
         Shadow(radius = 17.6.dp, color = Color(36, 28, 23).copy(alpha = 0.16f), offset = DpOffset(0.dp, 6.4.dp))
     }
     val shape = RoundedCornerShape(3.dp)
-    Popup(popupPositionProvider = position, onDismissRequest = onDismiss, properties = PopupProperties(focusable = true)) {
-        Box(
-            Modifier
-                .padding(ShadowRoom)
-                .width(NoteWidth)
-                .drawWithContent {
-                    drawContent()
-                    pointer(position.arrow, position.below, p.surface, p.goldLine)
-                },
-        ) {
-            Column(
+    // Going, it no longer holds the window's touches or Back.
+    Popup(popupPositionProvider = position, onDismissRequest = onDismiss, properties = PopupProperties(focusable = words != null)) {
+        AnimatedVisibility(shown, enter = fadeIn(Tempo.settleIn.spec()), exit = fadeOut(Tempo.settleOut.spec())) {
+            Box(
                 Modifier
-                    .fillMaxWidth()
-                    .dropShadow(shape, shadow)
-                    .background(p.surface, shape)
-                    .border(1.dp, p.goldLine, shape)
-                    // The surface's edge catching the light just inside the top (`inset 0 1px 0`).
-                    .drawBehind { drawRect(p.surfaceEdge, Offset(1.dp.toPx(), 1.dp.toPx()), size.copy(width = size.width - 2.dp.toPx(), height = 1.dp.toPx())) }
-                    .padding(start = 14.4.dp, end = 14.4.dp, top = 11.2.dp, bottom = 12.8.dp)
-                    .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                    .padding(ShadowRoom)
+                    // A mark's name is a word or two: the card is as wide as its words.
+                    .then(if (said.title.isEmpty()) Modifier.widthIn(max = NoteWidth).width(IntrinsicSize.Max) else Modifier.width(NoteWidth))
+                    .drawWithContent {
+                        drawContent()
+                        pointer(position.arrow, position.below, p.surface, p.goldLine)
+                    },
             ) {
-                Text(gloss.title, style = NoteTitle.copy(color = p.rubric), modifier = Modifier.padding(bottom = 3.2.dp))
-                Text(gloss.note, style = NoteText.copy(color = p.text))
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .dropShadow(shape, shadow)
+                        .background(p.surface, shape)
+                        .border(1.dp, p.goldLine, shape)
+                        // The surface's edge catching the light just inside the top (`inset 0 1px 0`).
+                        .drawBehind { drawRect(p.surfaceEdge, Offset(1.dp.toPx(), 1.dp.toPx()), size.copy(width = size.width - 2.dp.toPx(), height = 1.dp.toPx())) }
+                        .padding(start = 14.4.dp, end = 14.4.dp, top = 11.2.dp, bottom = 12.8.dp)
+                        .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                ) {
+                    if (said.title.isNotEmpty()) Text(said.title, style = NoteTitle.copy(color = p.rubric), modifier = Modifier.padding(bottom = 3.2.dp))
+                    Text(said.note, style = NoteText.copy(color = p.text))
+                }
             }
         }
     }

@@ -434,6 +434,13 @@ fn the_apps_give_the_webs_setting_hints() {
 }
 
 #[test]
+fn the_apps_name_the_ordos_marks_as_the_web() {
+    let words = ordo_mark_words();
+    assert_eq!(words.fasting, "Day of Fasting");
+    assert_eq!(words.abstinence, "Day of Abstinence");
+}
+
+#[test]
 fn the_apps_word_change_dates_day_links_as_the_web() {
     let words = day_nav_words();
     assert_eq!(words.previous, "Previous day");

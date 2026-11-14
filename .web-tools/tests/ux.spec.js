@@ -3878,15 +3878,10 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
 });
 
-// The fasting, abstinence and rank marks each spell themselves out, under a
-// mouse and under a finger alike, without the tap opening the day.
-test("ordo marks name themselves on hover and on a tap", async ({ browser, baseURL }) => {
-  const tipOf = (locator) => locator.evaluate((el) => {
-    const tip = getComputedStyle(el, "::after");
-    if (tip.display === "none") return null;
-    const box = el.getBoundingClientRect();
-    return { text: tip.content.replace(/^"|"$/g, ""), left: box.right - parseFloat(tip.width), width: document.documentElement.clientWidth };
-  });
+// The fasting, abstinence and rank marks each spell themselves out in the
+// hours' own note (the one a glossed word opens), under a mouse and under a
+// finger alike, without the tap opening the day, and never over the mark.
+test("ordo marks name themselves in the note on hover and on a tap", async ({ browser, baseURL }) => {
   // Ash Wednesday 2026 (Julian paschalion) fasts, abstains and ranks first class.
   for (const hasTouch of [true, false]) {
     const viewport = hasTouch ? { width: 320, height: 700 } : { width: 1280, height: 900 };
@@ -3897,17 +3892,87 @@ test("ordo marks name themselves on hover and on a tap", async ({ browser, baseU
     const scope = hasTouch ? row.locator(".day-mobile-flags") : row.locator("td.day-penitential-flag, td.day-rank");
     const marks = scope.locator("abbr");
     await expect(marks).toHaveCount(3);
+    const note = page.locator("#gloss-note");
     const expected = ["Day of Fasting", "Day of Abstinence", "Double of the 1st Class"];
     for (let i = 0; i < 3; i++) {
       const mark = marks.nth(i);
+      const how = `${hasTouch ? "tap" : "hover"} ${expected[i]}`;
+      // A control, and no system tooltip beside the note.
+      await expect(mark, how).toHaveAttribute("role", "button");
+      await expect(mark, how).toHaveAttribute("aria-controls", "gloss-note");
+      await expect(mark, how).not.toHaveAttribute("title", /./);
       if (hasTouch) await mark.tap(); else await mark.hover();
-      const tip = await tipOf(mark);
-      expect(tip?.text, `${hasTouch ? "tap" : "hover"} ${expected[i]}`).toBe(expected[i]);
-      expect(tip.left).toBeGreaterThanOrEqual(0);
+      await expect(mark, how).toHaveAttribute("aria-expanded", "true");
+      await expect(note, how).not.toHaveClass(/closed/);
+      await expect(note, how).toHaveText(expected[i]);
+      await expect.poll(() => note.evaluate((el) => getComputedStyle(el).opacity), how).toBe("1");
+      const [m, n] = [await mark.boundingBox(), await note.boundingBox()];
+      expect(n.x, how).toBeGreaterThanOrEqual(0);
+      expect(n.x + n.width, how).toBeLessThanOrEqual(viewport.width);
+      expect(n.y + n.height <= m.y || n.y >= m.y + m.height, `${how}: the note leaves its mark uncovered`).toBe(true);
+    }
+    if (hasTouch) {
+      // A second tap puts it away.
+      await marks.nth(2).tap();
+      await expect(note).toHaveClass(/closed/);
+      await expect(marks.nth(2)).toHaveAttribute("aria-expanded", "false");
+    } else {
+      // The pointer leaving puts a hovered note away; a click keeps it.
+      await page.mouse.move(5, 5);
+      await expect(note).toHaveClass(/closed/);
+      await marks.nth(2).click();
+      await expect(note).toHaveText(expected[2]);
+      await page.mouse.move(5, 5);
+      await page.waitForTimeout(300);
+      await expect(note).not.toHaveClass(/closed/);
+      await page.keyboard.press("Escape");
+      await expect(note).toHaveClass(/closed/);
+      await expect(marks.nth(2)).toBeFocused();
     }
     await expect(page).toHaveURL(/\/calendar\/2026\/02$/);
     await context.close();
   }
+});
+
+// A keyboard opens a mark's note as it opens a glossed word's: Enter, and
+// Escape gives the focus back.
+test("an ordo mark's note opens from the keyboard and closes on Escape", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, "/calendar/2026/02");
+  const rank = page.locator("#d-2026-02-25 td.day-rank abbr");
+  const note = page.locator("#gloss-note");
+  await rank.focus();
+  await expect(note).toHaveClass(/closed/);
+  await page.keyboard.press("Enter");
+  await expect(rank).toHaveAttribute("aria-expanded", "true");
+  await expect(note).toHaveText("Double of the 1st Class");
+  // A live region, so a screen reader hears the name as it is written.
+  await expect(note).toHaveAttribute("role", "status");
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveClass(/closed/);
+  await expect(note).toHaveText("");
+  await expect(rank).toBeFocused();
+});
+
+// The month's heading sticks to the top of the window; a mark's note keeps
+// below it rather than over it, as it keeps clear of the window's top.
+test("an ordo mark's note keeps clear of the sticky month heading", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, "/calendar/2026/02");
+  const row = page.locator("#d-2026-02-05");
+  await row.evaluate((el) => {
+    const h = el.closest(".month").querySelector("h2").getBoundingClientRect().height;
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - h - 4);
+  });
+  const rank = row.locator(".day-mobile-rank");
+  await rank.tap();
+  const note = page.locator("#gloss-note");
+  await expect(note).toHaveText("Greater Double");
+  const headBottom = await row.evaluate((el) => el.closest(".month").querySelector("h2").getBoundingClientRect().bottom);
+  const [m, n] = [await rank.boundingBox(), await note.boundingBox()];
+  expect(n.y).toBeGreaterThanOrEqual(headBottom - 1);
+  expect(n.y).toBeGreaterThanOrEqual(m.y + m.height);
+  await expect(note).toHaveClass(/below/);
 });
 
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
@@ -5330,6 +5395,63 @@ test("entirely in secret takes its own note", async ({ page }) => {
   await openDatedPage(page, `/compline/${testDate}`);
   await page.getByRole("button", { name: "entirely in secret" }).click();
   await expect(page.locator("#gloss-note")).toContainText("The whole prayer, shown in grey, is said silently.");
+});
+
+// One note answers a glossed word and an ordo mark alike: the same card,
+// fading in and out on Tempo's settle by its ink alone (no rise, no slide),
+// and cut under reduced motion.
+test("the note fades on Tempo's settle for a word and a mark alike, and cuts under reduced motion", async ({ page }) => {
+  const settle = await page.goto("/").then(() => page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const ms = (name) => parseFloat(root.getPropertyValue(name)) / 1000 + "s";
+    return { in: ms("--tempo-settle-in"), out: ms("--tempo-settle-out") };
+  }));
+  const card = (note) => note.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { property: s.transitionProperty, duration: s.transitionDuration, transform: s.transform, background: s.backgroundColor, border: s.borderTopColor, opacity: s.opacity, classes: el.className };
+  });
+  const looks = [];
+  for (const [path, open] of [
+    [`/lauds/${testDate}`, (page) => page.getByRole("button", { name: "secretly" }).first()],
+    ["/calendar/2026/02", (page) => page.locator("#d-2026-02-25 .day-mobile-rank")],
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await openDatedPage(page, path);
+    const note = page.locator("#gloss-note");
+    const trigger = open(page);
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.click();
+    await expect(note).not.toHaveClass(/closed|faded/);
+    const shown = await card(note);
+    expect(shown.property, path).toBe("opacity");
+    expect(shown.duration, path).toBe(settle.in);
+    expect(shown.transform, `${path}: never moved`).toBe("none");
+    looks.push([shown.background, shown.border]);
+    // Going, it fades with its words still in it, then is put out of sight.
+    // Read in the same task as the key, before the way out has run.
+    const going = await note.evaluate((el) => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      const s = getComputedStyle(el);
+      return { duration: s.transitionDuration, transform: s.transform, classes: el.className, text: el.textContent };
+    });
+    expect(going.classes, path).toMatch(/faded/);
+    expect(going.classes, path).not.toMatch(/closed/);
+    expect(going.duration, path).toBe(settle.out);
+    expect(going.transform, `${path}: never moved`).toBe("none");
+    expect(going.text, path).not.toBe("");
+    await expect(note).toHaveClass(/closed/);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await trigger.click();
+    await expect(note).not.toHaveClass(/closed|faded/);
+    expect(parseFloat((await card(note)).duration), `${path}: a cut`).toBeLessThan(0.001);
+    // Measured at its full size, so it opens clear of what it explains, as with motion.
+    const [n, t] = await Promise.all([note.boundingBox(), trigger.boundingBox()]);
+    expect(n.y + n.height <= t.y || n.y >= t.y + t.height, `${path}: clear of its word`).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(note).toHaveClass(/closed/);
+  }
+  expect(looks[1], "the same card for a word and a mark").toEqual(looks[0]);
 });
 
 test("home keeps feast and octave above the recovery link, including after midnight", async ({ page }) => {

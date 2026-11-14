@@ -303,8 +303,8 @@ class TokensTest {
     /**
      * A press and a panel move by Tempo on every front: bare words dim to Tempo's quiet (the web's
      * `--tempo-touch-quiet`, iOS's `Quiet`, Android's [Dim]), the ordo day's rail runs the row's
-     * height over Tempo's reach and back over its touch, and the menu and Settings panels settle
-     * in and leave on Tempo's settle. render-blocks holds the figures themselves.
+     * height over Tempo's reach and back over its touch, and the menu and Settings panels and the
+     * note settle in and leave on Tempo's settle. render-blocks holds the figures themselves.
      */
     @Test
     fun pressAndPanelKeepTempo() {
@@ -312,7 +312,7 @@ class TokensTest {
         assertTrue(css.contains("):is(:active, .is-pressed) {\n  opacity: var(--tempo-touch-quiet);\n}"))
         assertEquals(2, Regex("transition-duration: var\\(--tempo-touch-reach\\);").findAll(css).count())
         for (way in listOf("in", "out")) {
-            assertEquals(2, Regex("opacity var\\(--tempo-settle-$way\\) var\\(--tempo-settle-$way-curve\\)").findAll(css).count())
+            assertEquals(3, Regex("opacity var\\(--tempo-settle-$way\\) var\\(--tempo-settle-$way-curve\\)").findAll(css).count())
         }
         val chrome = File("src/main/kotlin/org/orthodoxwest/office/Chrome.kt").readText()
         assertTrue(chrome.contains("alpha.snapTo(Tempo.TOUCH_QUIET)"))

@@ -15,7 +15,9 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -104,6 +106,19 @@ class AccessibilityTest {
     fun anOrdoDayIsOneStop() {
         show(Page.Ordo(2026, 3))
         compose.onNode(hasContentDescription("Sunday, March 1. I Sunday in Lent. liturgical color: violet", substring = true)).assert(role(Role.Button))
+    }
+
+    /** An ordo mark names itself in the note a glossed word opens, as the web's `.month-table abbr`. */
+    @Test
+    fun anOrdoMarkOpensItsNote() {
+        show(Page.Ordo(2026, 3))
+        val rank = compose.onAllNodesWithContentDescription("Rank 1cl").onFirst()
+        rank.assert(role(Role.Button)).assert(state("Collapsed"))
+        rank.performClick()
+        compose.waitForIdle()
+        rank.assert(state("Expanded"))
+        compose.onNodeWithText("Double of the 1st Class").assertExists()
+        compose.onAllNodesWithContentDescription("Fasting").onFirst().assert(role(Role.Button))
     }
 
     @Test
