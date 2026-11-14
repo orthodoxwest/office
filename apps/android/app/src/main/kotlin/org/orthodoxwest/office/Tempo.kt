@@ -21,6 +21,15 @@ object Tempo {
     /** What a press moves rather than lights (the ordo day's rail running the row's height) reaches its place over this; it goes back over [touchOut]. */
     val touchReach = Beat(ms = 120, delay = 0, curve = Curve.Arrive)
 
+    /**
+     * The year's course laid in under the frontispiece's month strip, once a launch, never with
+     * animations off: one stroke crossing January to December, each month its twelfth of it.
+     */
+    const val COURSE_LAY_MS = 815
+
+    /** The stroke's pace, a brush's: it keeps moving to the end (the web's `--tempo-course-lay-curve`). */
+    val courseLayCurve = CubicBezierEasing(0.38f, 0.2f, 0.6f, 0.92f)
+
     /** A small panel settling under the beam, or a word's note fading in; it leaves faster than it came. */
     val settleIn = Beat(ms = 160, delay = 0, curve = Curve.Arrive)
     val settleOut = Beat(ms = 120, delay = 0, curve = Curve.Leave)

@@ -4209,6 +4209,127 @@ test("the strip's month marker moves with the month at midnight", async ({ page 
   await expect(october).toHaveClass(/is-today-month/);
   await expect(october).toHaveAttribute("aria-label", "October, this month");
   await expect(page.locator(".month-jump .is-today-month")).toHaveCount(1);
+  // The lozenge goes with it, to the first of October's 31sts along the course.
+  await expect(october).toHaveAttribute("style", /--today-x: 1\.613%/);
+  await expect(september).not.toHaveAttribute("style", /--today-x/);
+});
+
+test("the year's course runs under the strip, for the eye alone", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-11-13T12:00:00-05:00") });
+  for (const [width, path] of [[390, "/calendar/2026"], [390, "/calendar/2026/11"], [1280, "/calendar/2026"]]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, path);
+    const m = await page.evaluate(() => {
+      const nav = document.querySelector(".month-jump").getBoundingClientRect();
+      const links = [...document.querySelectorAll(".month-jump a")];
+      const bands = links.map((a) => {
+        const band = a.querySelector(".month-course");
+        const r = band.getBoundingClientRect();
+        const rects = [...band.querySelectorAll("rect")];
+        return {
+          hidden: band.getAttribute("aria-hidden"),
+          top: r.top - a.getBoundingClientRect().bottom,
+          height: r.height,
+          left: r.left - a.getBoundingClientRect().left,
+          width: r.width - a.getBoundingClientRect().width,
+          days: rects.reduce((n, rect) => n + Number(rect.getAttribute("width")), 0),
+          fills: rects.map((rect) => getComputedStyle(rect).fill),
+          below: r.bottom <= nav.bottom,
+        };
+      });
+      const today = document.querySelector(".month-jump a.is-today-month");
+      const t = today.getBoundingClientRect();
+      const after = getComputedStyle(today, "::after");
+      const band = today.querySelector(".month-course").getBoundingClientRect();
+      return {
+        bands,
+        text: links.map((a) => a.textContent),
+        // The lozenge's centre, from its own left and the translate that centres it.
+        lozengeX: parseFloat(after.left) / t.width,
+        lozengeBelowBand: t.bottom + 9.5 - parseFloat(after.height) * Math.SQRT2 / 2 >= band.bottom,
+        lozengeInNav: t.bottom + 9.5 + parseFloat(after.height) * Math.SQRT2 / 2 <= nav.bottom + 1,
+      };
+    });
+    expect(m.text.join(" "), path).toBe("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec");
+    for (const [i, b] of m.bands.entries()) {
+      expect(b.hidden, `${path} ${i}`).toBe("true");
+      expect(b.height, `${path} ${i}`).toBe(3);
+      expect(Math.abs(b.left) + Math.abs(b.width), `${path} ${i}`).toBeLessThan(0.01);
+      expect(b.top, `${path} ${i}`).toBeGreaterThan(0);
+      expect(b.below, `${path} ${i}`).toBe(true);
+      // Every fill is a pigment, never the default black of an unset --day-color.
+      expect(b.fills.every((f) => f !== "rgb(0, 0, 0)" && f !== "none"), `${path} ${i}`).toBe(true);
+    }
+    expect(m.bands.map((b) => b.days), path).toEqual([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+    expect(m.lozengeX, path).toBeCloseTo(12.5 / 31, 3);
+    expect(m.lozengeBelowBand, path).toBe(true);
+    expect(m.lozengeInNav, path).toBe(true);
+  }
+  // The band adds nothing to what is read: the strip's links keep their names alone.
+  const tree = await page.locator(".month-jump").ariaSnapshot();
+  expect(tree).not.toMatch(/img|graphics|svg/i);
+  expect(tree).toContain('link "November, this month"');
+});
+
+test("the year's course is laid in once a session, on the frontispiece alone", async ({ browser }) => {
+  // The strokes running on the bands, and each band's clip now.
+  const strokes = (page) => page.evaluate(() => ({
+    held: document.documentElement.hasAttribute("data-course-lay"),
+    running: document.getAnimations().filter((a) => a.effect && a.effect.target && a.effect.target.closest(".month-course")).length,
+  }));
+  // Each stroke is held at its start the moment it begins, so what is read does not depend on
+  // how long the page took to load.
+  const hold = () => {
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      const a = animate.apply(this, args);
+      if (this.closest && this.closest(".month-course")) a.pause();
+      return a;
+    };
+  };
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(hold);
+  const page = await ctx.newPage();
+  // A month page never lays it.
+  await page.goto("/calendar/2026/11");
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  // The first frontispiece of the session does: twelve strokes, one front.
+  await page.goto("/calendar/2026");
+  expect(await strokes(page)).toEqual({ held: false, running: 12 });
+  const front = await page.evaluate(() => {
+    const anims = document.getAnimations().filter((a) => a.effect.target.closest(".month-course"));
+    anims.forEach((a) => a.pause());
+    const at = (t) => anims.map((a) => {
+      a.currentTime = t;
+      return getComputedStyle(a.effect.target).clipPath;
+    });
+    const total = anims[0].effect.getComputedTiming().duration;
+    return { total, start: at(0), mid: at(total / 2), end: at(total) };
+  });
+  expect(front.total).toBe(815);
+  expect(front.start.every((c) => c === "inset(0px 100% 0px 0px)")).toBe(true);
+  expect(front.end.every((c) => c === "inset(0px 0% 0px 0px)")).toBe(true);
+  // Halfway through, the front stands mid-year: January laid, December not begun.
+  expect(front.mid[0]).toMatch(/^inset\(0px 0%/);
+  expect(front.mid[11]).toBe("inset(0px 100% 0px 0px)");
+  // Not again this session, in this year or another.
+  await page.goto("/calendar/2027");
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  // Nor on the way back, even with the session's memory gone.
+  await page.goto("/calendar/2026/11");
+  await page.evaluate(() => sessionStorage.clear());
+  await page.goBack();
+  await expect(page).toHaveURL(/\/calendar\/2027$/);
+  expect(await strokes(page)).toEqual({ held: false, running: 0 });
+  await ctx.close();
+  // Under reduced motion the band is simply there.
+  const still = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await still.addInitScript(hold);
+  const quiet = await still.newPage();
+  await quiet.goto("/calendar/2026");
+  expect(await strokes(quiet)).toEqual({ held: false, running: 0 });
+  expect(await quiet.locator(".month-course svg").first().evaluate((svg) => getComputedStyle(svg).clipPath)).toBe("none");
+  await still.close();
 });
 
 test("Tabula dates stay whole at the narrowest width and largest text", async ({ page }) => {

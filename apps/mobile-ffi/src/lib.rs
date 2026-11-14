@@ -71,6 +71,8 @@ pub struct OfficeCore {
     /// Every feast a reader can look up, and each year's keeping of them.
     feasts: FeastIndex,
     keepings: Mutex<HashMap<i32, Arc<YearIndex>>>,
+    /// Each year's course under the ordo's month strip, built from the calendar alone.
+    courses: Mutex<HashMap<i32, Vec<CourseMonthView>>>,
 }
 
 #[uniffi::export]
@@ -83,7 +85,14 @@ impl OfficeCore {
         let engine = Engine::load(&src).map_err(|e| failed(format!("creating office engine: {e}")))?;
         let calendar = CalendarData::load(&src).map_err(|e| failed(format!("loading calendar data: {e}")))?;
         let feasts = FeastIndex::new(&calendar);
-        Ok(Arc::new(OfficeCore { engine, calendar, years: Mutex::new(Vec::new()), feasts, keepings: Mutex::new(HashMap::new()) }))
+        Ok(Arc::new(OfficeCore {
+            engine,
+            calendar,
+            years: Mutex::new(Vec::new()),
+            feasts,
+            keepings: Mutex::new(HashMap::new()),
+            courses: Mutex::new(HashMap::new()),
+        }))
     }
 
     /// Composes `hour` (a name from `hour_names`) for the civil date in the
@@ -247,8 +256,50 @@ impl OfficeCore {
             .filter(|d| d.date.month() as i32 == month)
             .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable), self))
             .collect();
-        Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days })
+        Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days, course: self.ordo_course(year)? })
     }
+
+    /// The year's course under the ordo's month strip, as the web's: for each month, January
+    /// first, its runs of the rows' day colours (`presentation::course`). The calendar alone, no
+    /// hour composed; kept per year.
+    pub fn ordo_course(&self, year: i32) -> Result<Vec<CourseMonthView>, OfficeError> {
+        if let Some(c) = self.courses.lock().map_err(|e| failed(e.to_string()))?.get(&year) {
+            return Ok(c.clone());
+        }
+        let cal = build_calendar(year, &self.calendar).map_err(failed)?;
+        let course: Vec<CourseMonthView> = presentation::course::year_course(&cal.days)
+            .into_iter()
+            .map(|runs| CourseMonthView {
+                runs: runs
+                    .into_iter()
+                    .map(|r| CourseRunView { start: r.start as i32, days: r.days as i32, color: r.color.as_str().to_string() })
+                    .collect(),
+            })
+            .collect();
+        let mut courses = self.courses.lock().map_err(|e| failed(e.to_string()))?;
+        if courses.len() >= MAX_COURSE_YEARS {
+            courses.clear();
+        }
+        courses.insert(year, course.clone());
+        Ok(course)
+    }
+}
+
+/// The years of course kept at once: a reader turning far through the years starts afresh.
+const MAX_COURSE_YEARS: usize = 12;
+
+/// The days each month's band of the year's course is drawn across, whatever the month's length,
+/// so February is honestly short (`presentation::course::COURSE_SPAN`).
+#[uniffi::export]
+pub fn course_span() -> i32 {
+    presentation::course::COURSE_SPAN as i32
+}
+
+/// Where today's lozenge hangs along its month's band, as a fraction of the band's width; `day`
+/// is the day of the month.
+#[uniffi::export]
+pub fn course_place(day: i32) -> f64 {
+    presentation::course::course_place(day.max(1) as u32)
 }
 
 impl OfficeCore {
@@ -1072,6 +1123,23 @@ pub struct OrdoMonthView {
     pub year: i32,
     pub month: i32,
     pub days: Vec<OrdoDayView>,
+    /// The year's course for the month strip above the days.
+    pub course: Vec<CourseMonthView>,
+}
+
+/// One month's band of the year's course: its runs of day colours in order.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CourseMonthView {
+    pub runs: Vec<CourseRunView>,
+}
+
+/// `days` days of `color` ("white", "red", "green", "violet", "rose", "black"), from `start` days
+/// after the month's first, on a band of `course_span()` days.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CourseRunView {
+    pub start: i32,
+    pub days: i32,
+    pub color: String,
 }
 
 #[derive(Clone, Debug, uniffi::Record)]
