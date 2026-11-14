@@ -26,6 +26,7 @@ use presentation::{
 pub use data::EmbeddedData;
 pub use feasts::*;
 use presentation::feast::{FeastIndex, YearIndex};
+use presentation::rails::{Rail, octave_rails};
 use presentation::sun;
 // neuma's own bindings (namespace `neuma`) ride in this library, so the apps engrave a
 // `BlockKind::Score` block with the one native library they already load.
@@ -57,6 +58,8 @@ fn failed(message: impl Into<String>) -> OfficeError {
 struct Year {
     year: i32,
     days: Vec<Day>,
+    /// Each day's rail, the octaves bound (`presentation::rails`).
+    rails: Vec<Rail>,
     moveable: MoveableDates,
 }
 
@@ -244,8 +247,9 @@ impl OfficeCore {
         let days: Vec<OrdoDayView> = y
             .days
             .iter()
-            .filter(|d| d.date.month() as i32 == month)
-            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable), self))
+            .zip(&y.rails)
+            .filter(|(d, _)| d.date.month() as i32 == month)
+            .map(|(d, rail)| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable), *rail, self))
             .collect();
         Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days })
     }
@@ -260,9 +264,10 @@ impl OfficeCore {
             return Ok(y);
         }
         let cal = build_calendar(year, &self.calendar).map_err(failed)?;
+        let rails = octave_rails(&cal, &self.calendar.feasts);
         let office = resolve_office_days(&cal);
         let days = cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect();
-        let y = Arc::new(Year { year, days, moveable: MoveableDates::compute(year) });
+        let y = Arc::new(Year { year, days, rails, moveable: MoveableDates::compute(year) });
         if cached.len() == 2 {
             cached.remove(0);
         }
@@ -1103,6 +1108,16 @@ pub struct OrdoDayView {
     pub rank: String,
     pub rank_full: String,
     pub color: String,
+    /// The rail's colour beside the date: the day's own, or within an octave another feast
+    /// impedes, the octave's (the web's row `day-color-*`; `presentation::rails`).
+    pub rail_color: String,
+    /// Days bound together: the impeding feast's own colour, a lone bar beside the octave's rail,
+    /// or empty (the web's `.day-inset`).
+    pub rail_inset: String,
+    /// The rail runs up into the day before and down into the day after, through the hairline
+    /// (the web's `.bound-above`, `.bound-below`).
+    pub bound_above: bool,
+    pub bound_below: bool,
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
@@ -1122,7 +1137,7 @@ pub struct OrdoDayView {
 }
 
 impl OrdoDayView {
-    fn new(d: &Day, o: office::summary::OrdoDay, core: &OfficeCore) -> OrdoDayView {
+    fn new(d: &Day, o: office::summary::OrdoDay, rail: Rail, core: &OfficeCore) -> OrdoDayView {
         let comms = |c: &[CommSummary]| {
             c.iter()
                 .map(|c| CommemorationView {
@@ -1141,6 +1156,10 @@ impl OrdoDayView {
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
+            rail_color: rail.color.as_str().to_string(),
+            rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            bound_above: rail.above,
+            bound_below: rail.below,
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),

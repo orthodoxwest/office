@@ -124,10 +124,12 @@
       </thead>
       <tbody>
         {% for d in m.days %}
-        <tr class="day {{ d.color_class }}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
-          <td class="day-num" data-label="Day"><a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
+        {#- Days bound together: an octave's rail runs on through its days (.bound-above,
+             .bound-below), and a feast that impedes it stands beside it in its own colour. #}
+        <tr class="day {{ d.color_class }}{% if d.bound_above %} bound-above{% endif %}{% if d.bound_below %} bound-below{% endif %}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
+          <td class="day-num" data-label="Day">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}<a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
           <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
-          <td class="day-feast" data-label="Feast">
+          <td class="day-feast" data-label="Feast">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}
             <span class="sr-only">Liturgical color: {{ d.color }}. </span>
             <div class="day-mobile-head">
               <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}">

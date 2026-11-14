@@ -228,6 +228,38 @@ fn the_ordo_month_matches_the_web_rows() {
     assert!(core.ordo_month(2026, 13).is_err());
 }
 
+/// The apps bind the octaves as the web's month rows do: both read `presentation::rails` over the
+/// whole year, so 1 January takes up the previous December's octave (#833, needs ruling #838).
+#[test]
+fn the_ordo_binds_the_octaves_as_the_web_does() {
+    let core = OfficeCore::new().unwrap();
+    let data = CalendarData::load(&repo_data()).unwrap();
+    for (year, month) in [(2026, 12), (2027, 1), (2027, 5), (2027, 6), (2027, 7)] {
+        let cal = build_calendar(year, &data).unwrap();
+        let want: Vec<_> = cal
+            .days
+            .iter()
+            .zip(presentation::rails::octave_rails(&cal, &data.feasts))
+            .filter(|(d, _)| d.date.month() as i32 == month)
+            .map(|(_, r)| (r.color.as_str().to_string(), r.inset.map(|c| c.as_str().to_string()).unwrap_or_default(), r.above, r.below))
+            .collect();
+        let got: Vec<_> = core
+            .ordo_month(year, month)
+            .unwrap()
+            .days
+            .into_iter()
+            .map(|d| (d.rail_color, d.rail_inset, d.bound_above, d.bound_below))
+            .collect();
+        assert_eq!(got, want, "{year}-{month}");
+    }
+    let december = core.ordo_month(2026, 12).unwrap();
+    let stephen = &december.days[25];
+    assert_eq!((stephen.color.as_str(), stephen.rail_color.as_str(), stephen.rail_inset.as_str()), ("red", "white", "red"));
+    assert!(stephen.bound_above && stephen.bound_below);
+    let first = &core.ordo_month(2027, 1).unwrap().days[0];
+    assert_eq!((first.rail_color.as_str(), first.rail_inset.as_str(), first.bound_above, first.bound_below), ("white", "", true, false));
+}
+
 #[test]
 fn reminders_name_each_office_on_the_chosen_days() {
     let core = OfficeCore::new().unwrap();

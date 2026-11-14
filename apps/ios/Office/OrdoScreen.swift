@@ -623,8 +623,8 @@ private struct DayRow: View {
             // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
             .padding(.top, m.px(11.2))
             .padding(.bottom, m.px(9.6))
-            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: m.px(12.8), height: m.px(37.6)) }
-            Hairline(color: p.border)
+            .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: m.px(12.8), height: m.px(37.6)) }
+            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
         }
         .rowPool(held, x: 0.44)
         // Today is painted, not selected: inset 8pt from the gutters.
@@ -705,8 +705,8 @@ private struct DayRow: View {
             // The web's `.month-table td`: 0.5rem above and below, from 701px.
             .padding(.vertical, 8)
             // The day's liturgical colour as a rail beside its date, under the date's column.
-            .overlay(alignment: .topLeading) { DayRail(color: titleColor(d.color, p), held: held, top: 8 + 1.6, foot: 8) }
-            Hairline(color: p.border)
+            .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: 8 + 1.6, foot: 8) }
+            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
         }
         .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
@@ -720,9 +720,15 @@ private struct DayRow: View {
  * row's top, `height` tall or down to `foot` above its foot; while the row is held it runs the
  * row's full height, to the hairline, over Tempo's reach, and goes back over its touch (the web's
  * `.month-table tr.day.is-pressed` rail).
+ *
+ * Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`): within an
+ * octave the rail runs up to the row's top and down through the hairline into the next day's, so
+ * the octave's days read as one long bar; a feast that impedes the octave stands beside it as a
+ * lone bar of its own colour (the web's `.day-inset`), the octave's rail running on beneath it.
  */
 private struct DayRail: View {
-    let color: Color
+    let day: OrdoDayView
+    let palette: Palette
     let held: Bool
     let top: CGFloat
     var height: CGFloat? = nil
@@ -730,9 +736,17 @@ private struct DayRail: View {
 
     var body: some View {
         GeometryReader { g in
-            let from = held ? 0 : top
-            let to = held ? g.size.height : height.map { top + $0 } ?? g.size.height - foot
-            Rectangle().fill(color).frame(width: 3, height: max(0, to - from)).offset(y: from)
+            // The lone bar's foot, and the row's: through the hairline below when bound to the next day.
+            let lone = height.map { top + $0 } ?? g.size.height - foot
+            let end = day.boundBelow ? g.size.height + 1 : g.size.height
+            let from = held || day.boundAbove ? 0 : top
+            let to = held || day.boundBelow ? end : lone
+            ZStack(alignment: .topLeading) {
+                Rectangle().fill(titleColor(day.railColor, palette)).frame(width: 3, height: max(0, to - from)).offset(y: from)
+                if !day.railInset.isEmpty {
+                    Rectangle().fill(titleColor(day.railInset, palette)).frame(width: 3, height: max(0, lone - top)).offset(x: 6, y: top)
+                }
+            }
         }
         .frame(width: 3)
         .animation(held ? Tempo.touchReach.animation : Tempo.touchOut.animation, value: held)

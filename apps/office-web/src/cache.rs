@@ -5,14 +5,17 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use calendar::{CalendarData, MoveableDates, build_calendar};
-use office::Engine;
 use office::day::Day;
+use office::{Engine, resolve_office_days};
 use presentation::feast::{FeastIndex, YearIndex};
+use presentation::rails::{Rail, octave_rails};
 use render_html::view::MonthData;
 
 /// One year's office days, with each month's ordo rows built on first use.
 pub struct YearEntry {
     pub days: Vec<Day>,
+    /// Each day's rail, the octaves bound (`presentation::rails`).
+    pub rails: Vec<Rail>,
     pub moveable: MoveableDates,
     months: [OnceLock<Arc<MonthData>>; 12],
 }
@@ -76,8 +79,11 @@ impl YearCache {
             order.push(year);
             return Ok(e);
         }
-        let days = tools::year::office_days(&self.data, year)?;
-        let entry = Arc::new(YearEntry { days, moveable: MoveableDates::compute(year), months: Default::default() });
+        let cal = build_calendar(year, &self.data)?;
+        let rails = octave_rails(&cal, &self.data.feasts);
+        let office = resolve_office_days(&cal);
+        let days = cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect();
+        let entry = Arc::new(YearEntry { days, rails, moveable: MoveableDates::compute(year), months: Default::default() });
         if order.len() == MAX_CACHED_YEARS {
             let oldest = order.remove(0);
             entries.remove(&oldest);
@@ -107,7 +113,8 @@ impl YearEntry {
         Arc::clone(self.months[month as usize - 1].get_or_init(|| {
             let start = self.days.iter().position(|d| d.date.month() == month).unwrap_or(self.days.len());
             let len = self.days[start..].iter().take_while(|d| d.date.month() == month).count();
-            Arc::new(crate::handlers::build_month(&self.days[start..start + len], engine, &self.moveable, feasts))
+            let range = start..start + len;
+            Arc::new(crate::handlers::build_month(&self.days[range.clone()], &self.rails[range], engine, &self.moveable, feasts))
         }))
     }
 }
@@ -133,8 +140,12 @@ mod tests {
             assert!(Arc::ptr_eq(month, &results[0]), "concurrent requests did not reuse the composed month");
         }
         let entry = cache.get(2026).unwrap();
-        let september: Vec<Day> = entry.days.iter().filter(|d| d.date.month() == 9).cloned().collect();
-        assert_eq!(*results[0], crate::handlers::build_month(&september, engine, &entry.moveable, cache.feasts()));
+        let start = entry.days.iter().position(|d| d.date.month() == 9).unwrap();
+        let september = start..start + 30;
+        assert_eq!(
+            *results[0],
+            crate::handlers::build_month(&entry.days[september.clone()], &entry.rails[september], engine, &entry.moveable, cache.feasts())
+        );
         assert_eq!((results[0].name.as_str(), results[0].days.len()), ("September", 30));
         let year = cache.months(2026, engine).unwrap();
         assert_eq!(year.iter().map(|m| m.days.len()).sum::<usize>(), 365);
