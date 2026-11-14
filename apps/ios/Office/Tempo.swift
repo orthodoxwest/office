@@ -16,6 +16,9 @@ enum Tempo {
     /// What a press moves rather than lights (the ordo day's rail running the row's height)
     /// reaches its place over this; it goes back over `touchOut`.
     static let touchReach = Beat(ms: 120, delay: 0, curve: .arrive)
+    /// The consecration cross under the last Amen taking its gold, once the hour is marked prayed
+    /// and the cross stands wholly on screen: evenly, by opacity alone (`presentation::EndLeaf`).
+    static let gild = Beat(ms: 2000, delay: 0, curve: .standard)
     /// A small panel settling under the beam; it leaves faster than it came.
     static let settleIn = Beat(ms: 160, delay: 0, curve: .arrive)
     static let settleOut = Beat(ms: 120, delay: 0, curve: .leave)

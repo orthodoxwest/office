@@ -583,3 +583,28 @@ fn crown_plan_carries_presentations_figures() {
     // Light arrives faster than it leaves.
     assert!(crate::crown_plan(false).end < crate::crown_plan(true).end);
 }
+
+#[test]
+fn the_apps_gild_the_end_cross_by_the_shared_rule() {
+    let open = end_leaf_opens(false, false);
+    assert_eq!(open, EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, false), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, true), EndLeaf::Gilding);
+    assert_eq!(end_leaf_next(EndLeaf::Gilding, false, true, false), EndLeaf::Gilding);
+    assert_eq!(end_leaf_opens(false, true), EndLeaf::Gilt);
+    assert_eq!(end_leaf_opens(true, true), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(EndLeaf::Paint, true, true, true), EndLeaf::Paint);
+}
+
+#[test]
+fn the_apps_read_whether_an_hour_ends_bare() {
+    let core = OfficeCore::new().unwrap();
+    let hour = |name: &str, month, day| core.compose(name.into(), 2026, month, day, "private".into(), false, false).unwrap();
+    // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
+    let eve = hour("vespers", 11, 1);
+    assert!(!eve.bare && eve.end_bare);
+    let souls = hour("lauds", 11, 2);
+    assert!(souls.bare && souls.end_bare);
+    let plain = hour("vespers", 10, 31);
+    assert!(!plain.bare && !plain.end_bare);
+}

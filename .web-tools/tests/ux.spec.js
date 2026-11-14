@@ -791,6 +791,150 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
   await expect(page.locator(".home-hour-link.is-prayed")).toHaveCount(0);
 });
 
+// The cross under the last Amen takes its gold (presentation::EndLeaf). The
+// hour is read through at a praying pace until the cross's top first peeps in,
+// and the watch marks the hour with only its top 8px showing; the gold waits
+// until the cross stands whole. The installed clock also runs in real time, so
+// the watch may tick between any two steps here: no step may show more of the
+// cross than those 8px, or the mark and the whole cross could meet before the
+// test stands there (the app would rightly gild).
+async function prayToTheCross(page, day, hour) {
+  for (let i = 0; i < 80; i++) {
+    await page.clock.runFor(20_000);
+    const dy = await page.evaluate(() => {
+      const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
+      return Math.min(400, r.top - (innerHeight - 8));
+    });
+    if (dy <= 0) break;
+    await scrollHourBy(page, dy);
+  }
+  const marked = () => page.evaluate(([d, h]) => (JSON.parse(localStorage.getItem("office-prayed") || "{}")[d] || []).includes(h), [day, hour]);
+  for (let i = 0; i < 30 && !(await marked()); i++) await page.clock.runFor(5000);
+  expect(await marked()).toBe(true);
+}
+
+// Stands the whole cross on the screen, 20px above its foot.
+async function standAtTheCross(page) {
+  await page.evaluate(() => {
+    const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
+    scrollBy({ top: r.bottom - innerHeight + 20, behavior: "instant" });
+  });
+}
+
+// The leaf's opacity, and the transitions running on it.
+async function endLeaf(page) {
+  return page.evaluate(() => {
+    const end = document.querySelector(".hour-end-mark");
+    const style = getComputedStyle(end, "::after");
+    return {
+      content: style.content,
+      opacity: style.opacity,
+      fades: document.getAnimations()
+        .filter((a) => a.effect && a.effect.target === end && a.effect.pseudoElement === "::after")
+        .map((a) => ({ property: a.transitionProperty, duration: a.effect.getTiming().duration, easing: a.effect.getTiming().easing })),
+    };
+  });
+}
+
+test("the end cross takes its gold once the hour is marked and the cross stands whole", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  const cross = page.locator(".hour-end-mark");
+  // Scrolled through in seconds and left standing at the cross: not prayed, no gold.
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await page.clock.runFor(10_000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).opacity).toBe("0");
+  await page.goto("/compline/2026-10-07");
+  // Opened again and prayed through: the hour is marked as the cross peeps in, and the cross keeps its paint.
+  await prayToTheCross(page, "2026-10-07", "compline");
+  await page.clock.runFor(5000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "0", fades: [] });
+  // The cross stands whole: the gold comes up evenly by opacity over Tempo's gild.
+  await standAtTheCross(page);
+  await expect(cross).toHaveClass(/is-gilding/);
+  expect((await endLeaf(page)).fades).toEqual([{ property: "opacity", duration: 2000, easing: "cubic-bezier(0.4, 0, 0.2, 1)" }]);
+  await expect.poll(async () => (await endLeaf(page)).opacity, { timeout: 5000 }).toBe("1");
+  // Once: scrolled away and back, it stands gilt with nothing moving.
+  await scrollHourBy(page, -1500);
+  await page.clock.runFor(2000);
+  await standAtTheCross(page);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "1", fades: [] });
+});
+
+test("an hour prayed before opens with its cross gilt, and nothing moves", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-10-07T21:30:00") });
+  await page.addInitScript(() => localStorage.setItem("office-prayed", JSON.stringify({ "2026-10-07": ["compline"] })));
+  // Gilt before app.js could run: the page's own script under the cross lays it.
+  await page.route("**/app.js*", (route) => route.abort());
+  await page.goto("/compline/2026-10-07");
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass(/is-gilt/);
+  await standAtTheCross(page);
+  expect(await endLeaf(page)).toEqual({ content: '""', opacity: "1", fades: [] });
+  // Another hour of the day, not prayed, keeps its paint.
+  await page.goto("/vespers/2026-10-07");
+  await expect(page.locator(".hour-end-mark")).not.toHaveClass(/is-gilt/);
+  expect((await endLeaf(page)).opacity).toBe("0");
+});
+
+test("a bare hour's cross takes no leaf, prayed or not", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-11-02T09:00:00") });
+  // All Souls' Lauds, the Office of the Dead.
+  await page.goto("/lauds/2026-11-02");
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass(/is-bare/);
+  await prayToTheCross(page, "2026-11-02", "lauds");
+  await standAtTheCross(page);
+  await page.clock.runFor(3000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+  // Reopened, prayed: still no leaf.
+  await page.reload();
+  await expect(page.locator(".hour-end-mark")).not.toHaveClass(/is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+});
+
+test("an hour ending in a bare section takes no leaf", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-11-01T19:00:00") });
+  // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
+  await page.goto("/vespers/2026-11-01");
+  await expect(page.locator("body")).not.toHaveClass(/hour-bare/);
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass("hour-end-mark is-bare");
+  await prayToTheCross(page, "2026-11-01", "vespers");
+  await standAtTheCross(page);
+  await page.clock.runFor(3000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+});
+
+test("under reduced motion the end cross is simply gilt", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
+  await page.goto("/compline/2026-10-07");
+  await prayToTheCross(page, "2026-10-07", "compline");
+  expect((await endLeaf(page)).opacity).toBe("0");
+  await standAtTheCross(page);
+  await expect(page.locator(".hour-end-mark")).toHaveClass(/is-gilding/);
+  // No fade: the gild's own transition is never declared under reduced motion (its curve
+  // would show here, as the site-wide reduce block shortens durations but sets no curve), and
+  // whatever that block leaves is no motion.
+  const gate = await page.evaluate(() => {
+    const style = getComputedStyle(document.querySelector(".hour-end-mark"), "::after");
+    return { curve: style.transitionTimingFunction, delay: style.transitionDelay };
+  });
+  expect(gate).toEqual({ curve: "ease", delay: "0s" });
+  const now = await endLeaf(page);
+  expect(now.fades.every((f) => f.duration < 1 && f.easing !== "cubic-bezier(0.4, 0, 0.2, 1)")).toBe(true);
+  await expect.poll(async () => (await endLeaf(page)).opacity, { timeout: 500 }).toBe("1");
+});
+
 // The page hidden as a phone locks or another app comes forward.
 async function hidePage(page) {
   await page.evaluate(() => {

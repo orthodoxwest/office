@@ -21,6 +21,9 @@ object Tempo {
     /** What a press moves rather than lights (the ordo day's rail running the row's height) reaches its place over this; it goes back over [touchOut]. */
     val touchReach = Beat(ms = 120, delay = 0, curve = Curve.Arrive)
 
+    /** The consecration cross under the last Amen taking its gold, once the hour is marked prayed and the cross stands wholly on screen: evenly, by opacity alone (`presentation::EndLeaf`). */
+    val gild = Beat(ms = 2000, delay = 0, curve = Curve.Standard)
+
     /** A small panel settling under the beam, or a word's note fading in; it leaves faster than it came. */
     val settleIn = Beat(ms = 160, delay = 0, curve = Curve.Arrive)
     val settleOut = Beat(ms = 120, delay = 0, curve = Curve.Leave)
