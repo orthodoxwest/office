@@ -793,17 +793,21 @@ test("an hour read through at a praying pace is marked prayed on home", async ({
 
 // The cross under the last Amen takes its gold (presentation::EndLeaf). The
 // hour is read through at a praying pace until the cross's top first peeps in,
-// the reader stands with only its top 8px showing, where the mark is made,
-// and the watch marks the hour; the gold waits until the cross stands whole.
+// and the watch marks the hour with only its top 8px showing; the gold waits
+// until the cross stands whole. The installed clock also runs in real time, so
+// the watch may tick between any two steps here: no step may show more of the
+// cross than those 8px, or the mark and the whole cross could meet before the
+// test stands there (the app would rightly gild).
 async function prayToTheCross(page, day, hour) {
-  for (let i = 0; i < 80 && !(await atHourEnd(page)); i++) {
+  for (let i = 0; i < 80; i++) {
     await page.clock.runFor(20_000);
-    await scrollHourBy(page, 400);
+    const dy = await page.evaluate(() => {
+      const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
+      return Math.min(400, r.top - (innerHeight - 8));
+    });
+    if (dy <= 0) break;
+    await scrollHourBy(page, dy);
   }
-  await page.evaluate(() => {
-    const r = document.querySelector(".hour-end-mark").getBoundingClientRect();
-    scrollBy({ top: r.top - (innerHeight - 8), behavior: "instant" });
-  });
   const marked = () => page.evaluate(([d, h]) => (JSON.parse(localStorage.getItem("office-prayed") || "{}")[d] || []).includes(h), [day, hour]);
   for (let i = 0; i < 30 && !(await marked()); i++) await page.clock.runFor(5000);
   expect(await marked()).toBe(true);
