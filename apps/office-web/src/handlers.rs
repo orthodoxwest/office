@@ -128,6 +128,8 @@ pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &Mov
             rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
             bound_above: rail.above,
             bound_below: rail.below,
+            lead_to: rail.lead_to.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            lead_from: rail.lead_from.map(|c| c.as_str().to_string()).unwrap_or_default(),
             feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
@@ -1009,8 +1011,8 @@ mod tests {
             body[start..start + body[start..].find("</td>").unwrap()].to_string()
         };
         let december = get("/calendar/2026/12").2;
-        assert!(row(&december, "2026-12-24").starts_with(r#"<tr class="day day-color-violet" id="d-2026-12-24""#));
-        assert!(row(&december, "2026-12-25").starts_with(r#"<tr class="day day-color-white bound-below" "#));
+        assert!(row(&december, "2026-12-24").starts_with(r#"<tr class="day day-color-violet lead-to" id="d-2026-12-24""#));
+        assert!(row(&december, "2026-12-25").starts_with(r#"<tr class="day day-color-white bound-below lead-from" "#));
         let stephen = row(&december, "2026-12-26");
         assert!(stephen.starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#), "{stephen}");
         assert!(stephen.contains(r#"<span class="day-inset day-color-red" aria-hidden="true"></span>"#), "{stephen}");
@@ -1020,6 +1022,43 @@ mod tests {
         assert!(circumcision.starts_with(r#"<tr class="day day-color-white bound-above" "#), "{circumcision}");
         assert!(!circumcision.contains("day-inset"));
         assert!(row(&january, "2027-01-02").starts_with(r#"<tr class="day day-color-red" id="d-2027-01-02""#));
+    }
+
+    /// A vigil leads into its feast (presentation::rails; needs ruling #838, question 3(d)): on
+    /// Christmas Eve and the Vigil of St Laurence a thread runs from the vigil's rail into the
+    /// feast's, carried in the date's cell for the table and in the feast's for the phone's card.
+    /// St Andrew's vigil, anticipated over Advent Sunday, and the Vigil of Ss Peter & Paul,
+    /// commemorated within the Baptist's octave, have none.
+    #[test]
+    fn the_ordo_leads_a_vigil_into_its_feast() {
+        let row = |body: &str, date: &str| {
+            let at = body.find(&format!(r#"id="d-{date}""#)).unwrap();
+            let start = body[..at].rfind("<tr").unwrap();
+            body[start..start + body[start..].find("</tr>").unwrap()].to_string()
+        };
+        let thread = |own: &str, dir: &str, other: &str| {
+            format!(
+                r#"<span class="day-lead day-color-{own}" aria-hidden="true"><span class="day-thread {dir} day-color-{other}"></span></span>"#
+            )
+        };
+        for (month, vigil, feast, (v, f)) in
+            [("2026/12", "2026-12-24", "2026-12-25", ("violet", "white")), ("2027/08", "2027-08-09", "2027-08-10", ("violet", "red"))]
+        {
+            let body = get(&format!("/calendar/{month}")).2;
+            let (vigil, feast) = (row(&body, vigil), row(&body, feast));
+            assert!(vigil.starts_with(&format!(r#"<tr class="day day-color-{v} lead-to" "#)), "{vigil}");
+            assert_eq!(vigil.matches(&thread(v, "to-feast", f)).count(), 2, "{vigil}");
+            assert!(feast.contains(r#" lead-from" id="#), "{feast}");
+            assert_eq!(feast.matches(&thread(f, "from-vigil", v)).count(), 2, "{feast}");
+        }
+        for (month, days) in
+            [("2026/11", ["2026-11-28", "2026-11-29", "2026-11-30"]), ("2028/06", ["2028-06-27", "2028-06-28", "2028-06-29"])]
+        {
+            let body = get(&format!("/calendar/{month}")).2;
+            for day in days {
+                assert!(!row(&body, day).contains("day-lead"), "{day}");
+            }
+        }
     }
 
     /// A browser that has laid a score out names its column's width, and the hour's scores come

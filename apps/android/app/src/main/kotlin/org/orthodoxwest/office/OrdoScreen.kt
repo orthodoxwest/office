@@ -55,12 +55,15 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
@@ -646,13 +649,12 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
-        val rail = railColor(d.railColor, p)
-        val inset = d.railInset.takeIf { it.isNotEmpty() }?.let { railColor(it, p) }
+        val inks = railInks(d, p)
         // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
         Row(
             Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row.copy(at = 0.44f))).height(IntrinsicSize.Min)
                 // The day's liturgical colour as a rail beside its date, bound to its octave's days.
-                .drawBehind { dayRail(rail, reach.value, top = 12.8.dp.toPx(), bottom = (12.8 + 37.6).dp.toPx(), d, inset) }
+                .drawBehind { dayRail(inks, reach.value, top = 12.8.dp.toPx(), bottom = (12.8 + 37.6).dp.toPx(), d) }
                 .padding(top = 11.2.dp, bottom = 9.6.dp),
         ) {
             // The rail's room, as tall as it stands at rest.
@@ -691,22 +693,55 @@ private fun railReach(held: InteractionSource): State<Float> {
 }
 
 /**
+ * A day's rail's inks ([dayRail]): the rail's colour, the inset's, and the far ends of a vigil's
+ * thread, the feast's rail below the vigil's row and the vigil's above the feast's.
+ */
+private class RailInks(val rail: Color, val inset: Color?, val leadTo: Color?, val leadFrom: Color?)
+
+private fun railInks(d: OrdoDayView, p: Palette): RailInks {
+    fun ink(name: String) = name.takeIf { it.isNotEmpty() }?.let { railColor(it, p) }
+    return RailInks(railColor(d.railColor, p), ink(d.railInset), ink(d.railLeadTo), ink(d.railLeadFrom))
+}
+
+/** A vigil's thread is set at 70%, its colour halfway at the rule (the web's `.day-thread`). */
+private const val THREAD_ALPHA = 0.7f
+
+/** Halfway from the vigil's colour to the feast's, in Oklab (the web's `color-mix(in oklab, …)`). */
+private fun threadMid(vigil: Color, feast: Color): Color = lerp(vigil, feast, 0.5f)
+
+/**
  * A day's rail at the row's leading edge: from `top` to `bottom` at rest, the row's full height at
  * `reach` 1. Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`):
  * within an octave the rail runs up to the row's top and down through the hairline below into the
  * next day's, so the octave's days read as one long bar in the octave's colour; a feast that
  * impedes the octave, or a day of it in another colour, stands beside it as a lone bar of its own
  * colour, `inset` (the web's `.day-inset`).
+ *
+ * A vigil said as the day's office leads into its feast the next day (needs ruling #838, question
+ * 3(d); the web's `.day-thread`): a thread a third of the rail's width, on its centre, runs from
+ * the vigil's lone foot to the row's foot, across the hairline ([RowHairline]), and from the
+ * feast's row's top to its lone top, its colour passing from the vigil's into the feast's. It lies
+ * under the rail, which covers it while the row is held, and each end runs 1dp under its rail, so
+ * no rounding of the two edges leaves a line of ground between them.
  */
-private fun DrawScope.dayRail(color: Color, reach: Float, top: Float, bottom: Float, d: OrdoDayView, inset: Color?) {
+private fun DrawScope.dayRail(inks: RailInks, reach: Float, top: Float, bottom: Float, d: OrdoDayView) {
+    val w = 1.dp.toPx()
+    inks.leadTo?.let {
+        val brush = Brush.verticalGradient(listOf(inks.rail, threadMid(inks.rail, it)), startY = bottom - w, endY = size.height)
+        drawRect(brush, Offset(w, bottom - w), Size(w, size.height - bottom + w), alpha = THREAD_ALPHA)
+    }
+    inks.leadFrom?.let {
+        val brush = Brush.verticalGradient(listOf(threadMid(it, inks.rail), inks.rail), startY = 0f, endY = top + w)
+        drawRect(brush, Offset(w, 0f), Size(w, top + w), alpha = THREAD_ALPHA)
+    }
     val restTop = if (d.boundAbove) 0f else top
     // Through the row's hairline, which is drawn below the row.
     val end = if (d.boundBelow) size.height + 1.dp.toPx() else size.height
     val restBottom = if (d.boundBelow) end else bottom
     val from = restTop * (1f - reach)
     val to = restBottom + (end - restBottom) * reach
-    drawRect(color, Offset(0f, from), Size(3.dp.toPx(), to - from))
-    if (inset != null) drawRect(inset, Offset(6.dp.toPx(), top), Size(3.dp.toPx(), bottom - top))
+    drawRect(inks.rail, Offset(0f, from), Size(3.dp.toPx(), to - from))
+    if (inks.inset != null) drawRect(inks.inset, Offset(6.dp.toPx(), top), Size(3.dp.toPx(), bottom - top))
 }
 
 /**
@@ -765,8 +800,7 @@ private fun DayTableRow(
     unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
-    val rail = railColor(d.railColor, p)
-    val inset = d.railInset.takeIf { it.isNotEmpty() }?.let { railColor(it, p) }
+    val inks = railInks(d, p)
     val margin = LocalConfiguration.current.screenWidthDp >= 1000
     // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
     // gold line across the row, the day's number in gold.
@@ -788,7 +822,7 @@ private fun DayTableRow(
         Row(
             Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row)).height(IntrinsicSize.Min)
                 // The day's liturgical colour as a rail under the date's column, bound to its octave's days.
-                .drawBehind { dayRail(rail, reach.value, top = (8 + 1.6).dp.toPx(), bottom = size.height - 8.dp.toPx(), d, inset) }
+                .drawBehind { dayRail(inks, reach.value, top = (8 + 1.6).dp.toPx(), bottom = size.height - 8.dp.toPx(), d) }
                 .padding(vertical = 8.dp),
         ) {
             // From 1000dp Today is a note in the margin beside today's band (the web's), taking no
@@ -846,10 +880,22 @@ private fun DayTableRow(
     }
 }
 
-/** The rule under a day, leaving the rail's width where the rail runs on through it into the next day. */
+/**
+ * The rule under a day, leaving the rail's width where the rail runs on through it into the next
+ * day, and carrying a vigil's thread across it, at its colour halfway into the feast's ([dayRail]).
+ */
 @Composable
 private fun RowHairline(d: OrdoDayView) {
-    Hairline(LocalPalette.current.border, if (d.boundBelow) Modifier.padding(start = 3.dp) else Modifier)
+    val p = LocalPalette.current
+    val bound = if (d.boundBelow) Modifier.padding(start = 3.dp) else Modifier
+    val thread = d.railLeadTo.takeIf { it.isNotEmpty() }?.let { threadMid(railColor(d.railColor, p), railColor(it, p)) }
+    Hairline(
+        p.border,
+        if (thread == null) bound else bound.drawWithContent {
+            drawContent()
+            drawRect(thread, Offset(1.dp.toPx(), 0f), Size(1.dp.toPx(), size.height), alpha = THREAD_ALPHA)
+        },
+    )
 }
 
 /** What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`). */

@@ -4121,6 +4121,139 @@ test("an ordo mark's note keeps clear of the sticky month heading", async ({ pag
   await expect(note).toHaveClass(/below/);
 });
 
+// A vigil leads into its feast (presentation::rails; needs ruling #838,
+// question 3(d)): a 1px thread on the rail's centre runs from the foot of
+// the vigil's rail across the row's rule into the top of the feast's, on the
+// phone's cards and in the table. Read from the pixels: the thread's column is
+// inked from rail to rail through the rule, with no line of ground where an
+// end meets its rail, and the rail's outer column is not inked across the gap
+// (the vigil is not bound to its feast). Its colour passes from the vigil's
+// into the feast's, with no jump at the rule. Gone in forced colours.
+async function vigilThread(page, vigilId, feastId) {
+  const vigil = page.locator(`#d-${vigilId}`);
+  await vigil.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const g = await page.evaluate(([vigilId, feastId]) => {
+    const shown = (row, dir) => [...row.querySelectorAll(`.day-thread.${dir}`)].find((t) => t.getClientRects().length && t.getBoundingClientRect().height > 0);
+    const [v, f] = [vigilId, feastId].map((id) => document.getElementById(`d-${id}`));
+    const [to, from] = [shown(v, "to-feast"), shown(f, "from-vigil")];
+    const style = getComputedStyle(to);
+    return {
+      to: to.getBoundingClientRect().toJSON(),
+      from: from.getBoundingClientRect().toJSON(),
+      boundary: f.getBoundingClientRect().top,
+      opacity: style.opacity,
+      image: style.backgroundImage,
+      copies: v.querySelectorAll(".day-thread").length,
+    };
+  }, [vigilId, feastId]);
+  // From inside the vigil's rail, three CSS pixels above the thread, to inside the feast's.
+  const top = Math.floor(g.to.top) - 3;
+  const clip = { x: Math.floor(g.to.left) - 1, y: top, width: 6, height: Math.ceil(g.from.bottom) + 3 - top };
+  // The whole viewport, cut in the page: WebKit drops the 1px thread from a
+  // clipped screenshot at a fractional ratio.
+  const shot = (await page.screenshot()).toString("base64");
+  const ink = await page.evaluate(async ([data, clip, g]) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + data;
+    await img.decode();
+    const scale = img.width / innerWidth;
+    const [sx, sy] = [Math.round(clip.x * scale), Math.round(clip.y * scale)];
+    const [cw, ch] = [Math.round(clip.width * scale), Math.round(clip.height * scale)];
+    const canvas = Object.assign(document.createElement("canvas"), { width: cw, height: ch });
+    const context = canvas.getContext("2d");
+    context.drawImage(img, sx, sy, cw, ch, 0, 0, cw, ch);
+    const { data: px, width: w, height: h } = context.getImageData(0, 0, cw, ch);
+    const col = (cssX) => Math.min(w - 1, Math.floor((cssX - clip.x) * scale));
+    const row = (cssY) => Math.min(h - 1, Math.max(0, Math.floor((cssY - clip.y) * scale)));
+    const at = (x, y) => [...px.slice((y * w + x) * 4, (y * w + x) * 4 + 3)];
+    // The device columns the thread covers (more than one at a fractional
+    // ratio or position), the rail's outer column, and the ground beyond it.
+    const threadCols = [...new Set([col(g.to.left + 0.1), col(g.to.left + 0.5), col(g.to.left + 0.9)])];
+    const [thread, outer, ground] = [col(g.to.left + 0.5), col(g.to.left - 0.9), col(g.to.left + 3.6)];
+    const apart = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    // Inked: unlike the ground just right of the rail on the same line.
+    const inked = (x, y) => apart(at(x, y), at(ground, y)) > 20;
+    const rows = [...Array(h).keys()];
+    const colour = (cssY) => at(thread, row(cssY));
+    return {
+      bare: rows.filter((y) => !threadCols.some((x) => inked(x, y))),
+      // Lines of the gap, clear of both rails and the rule, where the rail's outer column is inked.
+      outer: rows.filter((y) => {
+        const css = clip.y + (y + 0.5) / scale;
+        const gap = (css > g.to.top + 2 && css < g.boundary - 1.5) || (css > g.boundary + 1.5 && css < g.from.bottom - 2);
+        return gap && inked(outer, y);
+      }),
+      // The two rails, the thread near each end, and either side of the rule.
+      vigilRail: colour(g.to.top - 2),
+      feastRail: colour(g.from.bottom + 2),
+      head: colour(g.to.top + 3),
+      tail: colour(g.from.bottom - 4),
+      above: colour(g.boundary - 2.5),
+      below: colour(g.boundary + 2),
+    };
+  }, [shot, clip, g]);
+  return { g, ink, vigil };
+}
+
+const apart = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+for (const width of [390, 800, 1280]) {
+  test(`a vigil's thread crosses the rule into its feast's rail at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    // Christmas Eve's violet into the Nativity's white; St Laurence's vigil's violet into his red.
+    for (const [month, vigilId, feastId] of [["2026/12", "2026-12-24", "2026-12-25"], ["2027/08", "2027-08-09", "2027-08-10"]]) {
+      await openDatedPage(page, `/calendar/${month}`);
+      const { g, ink, vigil } = await vigilThread(page, vigilId, feastId);
+      expect(g.copies).toBe(2);
+      expect(g.to.width).toBe(1);
+      expect(g.from.left).toBe(g.to.left);
+      expect(g.to.top).toBeLessThan(g.boundary);
+      expect(g.from.bottom).toBeGreaterThan(g.boundary);
+      expect(g.opacity).toBe("0.7");
+      expect(g.image).toMatch(/linear-gradient/);
+      // The thread's column is inked on every line from the vigil's rail to the feast's.
+      expect(ink.bare, vigilId).toEqual([]);
+      // The rail's outer column is bare across the gap: the rails are not joined.
+      expect(ink.outer, vigilId).toEqual([]);
+      // It runs from the vigil's colour toward the feast's (both lightened on the
+      // ground at 70%), and passes between them without a jump at the rule.
+      expect(apart(ink.head, ink.vigilRail), vigilId).toBeLessThan(apart(ink.tail, ink.vigilRail));
+      expect(apart(ink.tail, ink.feastRail), vigilId).toBeLessThan(apart(ink.head, ink.feastRail));
+      // Either side of the rule it is partway between its head and its tail (a
+      // thread that kept each row's own colour would jump by the whole span).
+      const span = apart(ink.head, ink.tail);
+      expect(apart(ink.above, ink.below), vigilId).toBeLessThan(0.75 * span);
+      expect(apart(ink.above, ink.tail), vigilId).toBeLessThan(0.9 * span);
+      expect(apart(ink.below, ink.head), vigilId).toBeLessThan(0.9 * span);
+      await page.emulateMedia({ forcedColors: "active" });
+      expect(await vigil.locator(".day-thread").evaluateAll((ts) => ts.every((t) => getComputedStyle(t).display === "none"))).toBe(true);
+      await page.emulateMedia({ forcedColors: "none" });
+    }
+  });
+}
+
+// At a fractional pixel ratio, or text size, the thread's ends and the rails'
+// edges round apart; each end runs under its rail so no line of ground shows.
+// One test for each ratio and text size, on a short viewport: a whole 3x
+// screenshot of a tall page is slow to take and to decode in the page.
+for (const dpr of [1.25, 1.5, 3]) {
+  for (const size of ["small", "large"]) {
+    for (const width of [320, 850, 1280]) {
+      test(`a vigil's thread meets its rails at ${dpr}x, ${size} text, ${width}px`, async ({ browser }) => {
+        const context = await browser.newContext({ deviceScaleFactor: dpr, viewport: { width, height: 360 } });
+        await context.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
+        const page = await context.newPage();
+        for (const [month, vigilId, feastId] of [["2026/05", "2026-05-30", "2026-05-31"], ["2027/08", "2027-08-09", "2027-08-10"]]) {
+          await openDatedPage(page, `/calendar/${month}`);
+          const { ink } = await vigilThread(page, vigilId, feastId);
+          expect(ink.bare, vigilId).toEqual([]);
+        }
+        await context.close();
+      });
+    }
+  }
+}
+
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
 // the title and every feast above a deep link. All geometric readings happen
 // in-page, so Playwright's font-waiting screenshot helper cannot mask the swap.

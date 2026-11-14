@@ -1231,6 +1231,13 @@ pub struct OrdoDayView {
     /// (the web's `.bound-above`, `.bound-below`).
     pub bound_above: bool,
     pub bound_below: bool,
+    /// A vigil's thread (`presentation::rails::vigil_leads_into_feast`; needs ruling #838,
+    /// question 3(d)): on the vigil's row the colour of the feast's rail below, into which a thin
+    /// line runs from the foot of this rail through the hairline; on the feast's row the colour of
+    /// the vigil's rail above, from which it comes into the top of this one; else empty (the web's
+    /// `.day-thread.to-feast`, `.day-thread.from-vigil`).
+    pub rail_lead_to: String,
+    pub rail_lead_from: String,
     pub fast: bool,
     pub abstinence: bool,
     pub commemorations: Vec<String>,
@@ -1273,6 +1280,8 @@ impl OrdoDayView {
             rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
             bound_above: rail.above,
             bound_below: rail.below,
+            rail_lead_to: rail.lead_to.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            rail_lead_from: rail.lead_from.map(|c| c.as_str().to_string()).unwrap_or_default(),
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),

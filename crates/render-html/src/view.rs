@@ -171,6 +171,10 @@ pub struct DayRow {
     /// The rail runs up into the day before and down into the day after, of the same octave.
     pub bound_above: bool,
     pub bound_below: bool,
+    /// A vigil's thread (`presentation::rails::vigil_leads_into_feast`): on the vigil's row the
+    /// feast's rail colour, on the feast's row the vigil's, or empty.
+    pub lead_to: String,
+    pub lead_from: String,
     pub feast_name: String,
     pub fast: bool,
     pub abstinence: bool,

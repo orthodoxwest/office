@@ -683,7 +683,7 @@ private struct DayRow: View {
             .padding(.top, m.px(11.2))
             .padding(.bottom, m.px(9.6))
             .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: m.px(12.8), height: m.px(37.6)) }
-            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
+            RowHairline(day: d, palette: p)
         }
         .rowPool(held, x: 0.44)
         // Today is painted, not selected: inset 8pt from the gutters.
@@ -765,7 +765,7 @@ private struct DayRow: View {
             .padding(.vertical, 8)
             // The day's liturgical colour as a rail beside its date, under the date's column.
             .overlay(alignment: .topLeading) { DayRail(day: d, palette: p, held: held, top: 8 + 1.6, foot: 8) }
-            Hairline(color: p.border).padding(.leading, d.boundBelow ? 3 : 0)
+            RowHairline(day: d, palette: p)
         }
         .rowPool(held, x: 0.3)
         // Today is painted, not selected: the band runs on across the row.
@@ -785,6 +785,13 @@ private struct DayRow: View {
  * the octave's days read as one long bar in the octave's colour; a feast that impedes the octave,
  * or a day of it in another colour, stands beside it as a lone bar of its own colour (the web's
  * `.day-inset`).
+ *
+ * A vigil said as the day's office leads into its feast the next day (needs ruling #838, question
+ * 3(d); the web's `.day-thread`): a thread a third of the rail's width, on its centre, runs from
+ * the vigil's lone foot to the row's foot, across the hairline (`RowHairline`), and from the
+ * feast's row's top to its lone top, its colour passing from the vigil's into the feast's. It lies
+ * under the rail, which covers it while the row is held, and each end runs 1pt under its rail, so
+ * no rounding of the two edges leaves a line of ground between them.
  */
 private struct DayRail: View {
     let day: OrdoDayView
@@ -801,8 +808,19 @@ private struct DayRail: View {
             let end = day.boundBelow ? g.size.height + 1 : g.size.height
             let from = held || day.boundAbove ? 0 : top
             let to = held || day.boundBelow ? end : lone
+            let rail = titleColor(day.railColor, palette)
             ZStack(alignment: .topLeading) {
-                Rectangle().fill(titleColor(day.railColor, palette)).frame(width: 3, height: max(0, to - from)).offset(y: from)
+                if !day.railLeadTo.isEmpty {
+                    let mid = threadMid(rail, titleColor(day.railLeadTo, palette))
+                    Rectangle().fill(LinearGradient(colors: [rail, mid], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 1, height: max(0, g.size.height - lone + 1)).opacity(threadOpacity).offset(x: 1, y: lone - 1)
+                }
+                if !day.railLeadFrom.isEmpty {
+                    let mid = threadMid(titleColor(day.railLeadFrom, palette), rail)
+                    Rectangle().fill(LinearGradient(colors: [mid, rail], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 1, height: top + 1).opacity(threadOpacity).offset(x: 1)
+                }
+                Rectangle().fill(rail).frame(width: 3, height: max(0, to - from)).offset(y: from)
                 if !day.railInset.isEmpty {
                     Rectangle().fill(titleColor(day.railInset, palette)).frame(width: 3, height: max(0, lone - top)).offset(x: 6, y: top)
                 }
@@ -814,6 +832,30 @@ private struct DayRail: View {
         .accessibilityHidden(true)
     }
 }
+
+/**
+ * The rule under a day, leaving the rail's width where the rail runs on through it into the next
+ * day, and carrying a vigil's thread across it, at its colour halfway into the feast's (`DayRail`).
+ */
+private struct RowHairline: View {
+    let day: OrdoDayView
+    let palette: Palette
+
+    var body: some View {
+        Hairline(color: palette.border)
+            .padding(.leading, day.boundBelow ? 3 : 0)
+            .overlay(alignment: .topLeading) {
+                if !day.railLeadTo.isEmpty {
+                    Rectangle().fill(threadMid(titleColor(day.railColor, palette), titleColor(day.railLeadTo, palette)))
+                        .frame(width: 1, height: 1).opacity(threadOpacity).offset(x: 1)
+                }
+            }
+            .accessibilityHidden(true)
+    }
+}
+
+/// A vigil's thread is set at 70%, its colour halfway at the rule (the web's `.day-thread`).
+private let threadOpacity = 0.7
 
 /**
  * Today in the ordo: home's invitation wash, thinner (`--today-wash`), ruled top and bottom in the
