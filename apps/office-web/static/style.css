@@ -4060,9 +4060,12 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
    foot of the vigil's rail across the rule into the top of the feast's, its
    colour passing from the vigil's into the feast's. It is drawn, not bound:
    both rails stay as they are. .day-lead carries the row's rail colour, its
-   .day-thread the other row's. Not a pseudo-element: td:first-child::after is
-   the Today note and the phone's tr::after its pressed pool. The apps draw the
-   same (OrdoScreen.swift, .kt). */
+   .day-thread the other row's. Each end runs 1px under its rail, which lies
+   above it, and the feast's half starts 1px up, over the rule, where the two
+   halves overlap, so no rounding of two edges (WebKit, at a fractional pixel
+   ratio or text size) leaves a line of ground or rule between them. Not a
+   pseudo-element: td:first-child::after is the Today note and the phone's
+   tr::after its pressed pool. The apps draw the same (OrdoScreen.swift, .kt). */
 .month-table .day-lead {
   display: contents;
   --thread-own: var(--day-color);
@@ -4077,12 +4080,12 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 }
 .month-table .day-thread.to-feast {
   bottom: -1px;
-  height: calc(0.65rem + 1px);
+  height: calc(0.65rem + 2px);
   background: linear-gradient(var(--thread-own), var(--thread-mid));
 }
 .month-table .day-thread.from-vigil {
-  top: 0;
-  height: 0.75rem;
+  top: -1px;
+  height: calc(0.75rem + 2px);
   background: linear-gradient(var(--thread-mid), var(--thread-own));
 }
 .month-table .day-feast > .day-lead { display: none; }
@@ -4539,8 +4542,8 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   /* The thread hangs from the card's rail, whose foot is 3.15rem down, and
      comes into the next card's rail, 0.8rem down. */
   .month-table .day-feast > .day-lead { display: contents; }
-  .month-table .day-thread.to-feast { top: 3.15rem; height: auto; }
-  .month-table .day-thread.from-vigil { height: 0.8rem; }
+  .month-table .day-thread.to-feast { top: calc(3.15rem - 1px); height: auto; }
+  .month-table .day-thread.from-vigil { height: calc(0.8rem + 2px); }
 }
 /* Wide, Today is a note in the margin beside today's band, so no row keeps
    a line for it. Between the phone and 1000px the table has no margin to
@@ -4564,8 +4567,8 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
     top: 0.45rem;
     bottom: 0.45rem;
   }
-  .month-table .day-thread.to-feast { height: calc(0.45rem + 1px); }
-  .month-table .day-thread.from-vigil { height: 0.45rem; }
+  .month-table .day-thread.to-feast { height: calc(0.45rem + 2px); }
+  .month-table .day-thread.from-vigil { height: calc(0.45rem + 2px); }
 }
 
 /* ── Finding a feast ──

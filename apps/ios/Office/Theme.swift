@@ -187,7 +187,7 @@ func titleColor(_ name: String, _ p: Palette) -> Color {
 func threadMid(_ a: Color, _ b: Color) -> Color {
     func oklab(_ c: Color) -> (Double, Double, Double) {
         var r: CGFloat = 0, g: CGFloat = 0, bl: CGFloat = 0, alpha: CGFloat = 0
-        UIColor(c).getRed(&r, green: &g, blue: &bl, alpha: &alpha)
+        _ = UIColor(c).getRed(&r, green: &g, blue: &bl, alpha: &alpha)
         func linear(_ v: CGFloat) -> Double {
             let v = Double(v)
             return v <= 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)

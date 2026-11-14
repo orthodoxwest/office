@@ -721,17 +721,18 @@ private fun threadMid(vigil: Color, feast: Color): Color = lerp(vigil, feast, 0.
  * 3(d); the web's `.day-thread`): a thread a third of the rail's width, on its centre, runs from
  * the vigil's lone foot to the row's foot, across the hairline ([RowHairline]), and from the
  * feast's row's top to its lone top, its colour passing from the vigil's into the feast's. It lies
- * under the rail, which covers it while the row is held.
+ * under the rail, which covers it while the row is held, and each end runs 1dp under its rail, so
+ * no rounding of the two edges leaves a line of ground between them.
  */
 private fun DrawScope.dayRail(inks: RailInks, reach: Float, top: Float, bottom: Float, d: OrdoDayView) {
     val w = 1.dp.toPx()
     inks.leadTo?.let {
-        val brush = Brush.verticalGradient(listOf(inks.rail, threadMid(inks.rail, it)), startY = bottom, endY = size.height)
-        drawRect(brush, Offset(w, bottom), Size(w, size.height - bottom), alpha = THREAD_ALPHA)
+        val brush = Brush.verticalGradient(listOf(inks.rail, threadMid(inks.rail, it)), startY = bottom - w, endY = size.height)
+        drawRect(brush, Offset(w, bottom - w), Size(w, size.height - bottom + w), alpha = THREAD_ALPHA)
     }
     inks.leadFrom?.let {
-        val brush = Brush.verticalGradient(listOf(threadMid(it, inks.rail), inks.rail), startY = 0f, endY = top)
-        drawRect(brush, Offset(w, 0f), Size(w, top), alpha = THREAD_ALPHA)
+        val brush = Brush.verticalGradient(listOf(threadMid(it, inks.rail), inks.rail), startY = 0f, endY = top + w)
+        drawRect(brush, Offset(w, 0f), Size(w, top + w), alpha = THREAD_ALPHA)
     }
     val restTop = if (d.boundAbove) 0f else top
     // Through the row's hairline, which is drawn below the row.

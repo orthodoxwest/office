@@ -790,7 +790,8 @@ private struct DayRow: View {
  * 3(d); the web's `.day-thread`): a thread a third of the rail's width, on its centre, runs from
  * the vigil's lone foot to the row's foot, across the hairline (`RowHairline`), and from the
  * feast's row's top to its lone top, its colour passing from the vigil's into the feast's. It lies
- * under the rail, which covers it while the row is held.
+ * under the rail, which covers it while the row is held, and each end runs 1pt under its rail, so
+ * no rounding of the two edges leaves a line of ground between them.
  */
 private struct DayRail: View {
     let day: OrdoDayView
@@ -812,12 +813,12 @@ private struct DayRail: View {
                 if !day.railLeadTo.isEmpty {
                     let mid = threadMid(rail, titleColor(day.railLeadTo, palette))
                     Rectangle().fill(LinearGradient(colors: [rail, mid], startPoint: .top, endPoint: .bottom))
-                        .frame(width: 1, height: max(0, g.size.height - lone)).opacity(threadOpacity).offset(x: 1, y: lone)
+                        .frame(width: 1, height: max(0, g.size.height - lone + 1)).opacity(threadOpacity).offset(x: 1, y: lone - 1)
                 }
                 if !day.railLeadFrom.isEmpty {
                     let mid = threadMid(titleColor(day.railLeadFrom, palette), rail)
                     Rectangle().fill(LinearGradient(colors: [mid, rail], startPoint: .top, endPoint: .bottom))
-                        .frame(width: 1, height: top).opacity(threadOpacity).offset(x: 1)
+                        .frame(width: 1, height: top + 1).opacity(threadOpacity).offset(x: 1)
                 }
                 Rectangle().fill(rail).frame(width: 3, height: max(0, to - from)).offset(y: from)
                 if !day.railInset.isEmpty {
