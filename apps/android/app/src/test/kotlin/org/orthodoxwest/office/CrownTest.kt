@@ -177,6 +177,39 @@ class CrownTest {
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
     }
 
+    /**
+     * The stars are always someone's: the sky's, or from the change of look the play's. The
+     * sky once left them out from the start of that change and the play drew them only from its
+     * end, and on a phone every star blinked out for the frames between.
+     */
+    private fun starsThroughTheChange(dark: Boolean) {
+        val stage = Stage(if (dark) ThemeChoice.NAVE else ThemeChoice.APSE)
+        show(stage)
+        compose.onNodeWithContentDescription(if (dark) "Switch to Apse" else "Switch to Nave").performClick()
+        val turn = played(crownPlan(dark).turn.toLong())
+        advance(turn - 64)
+        var at = turn - 64
+        var changing = 0
+        while (at < turn + 200) {
+            advance(16)
+            at += 16
+            val crown = stage.crown
+            val p = crown.play ?: break
+            if (p.capturing && !p.turned) changing++
+            // The sky leaves them out only when the play draws them.
+            assertTrue("at $at ms the stars were nobody's", crown.starAlpha() > 0f || crown.playDrawsStars())
+            assertEquals("at $at ms", p.capturing || p.turned, crown.playDrawsStars())
+        }
+        assertTrue("the frames of the change were seen", changing > 0)
+        assertTrue("the play reached its turn", stage.crown.play?.turned == true)
+    }
+
+    @Test
+    fun theStarsAreDrawnInEveryFrameOfDawnsChange() = starsThroughTheChange(dark = false)
+
+    @Test
+    fun theStarsAreDrawnInEveryFrameOfDusksChange() = starsThroughTheChange(dark = true)
+
     @Test
     fun aSecondTapDuringThePlayPlaysTheWayBackAtTheSettle() {
         val stage = Stage(ThemeChoice.NAVE)
