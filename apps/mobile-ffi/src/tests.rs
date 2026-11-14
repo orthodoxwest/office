@@ -270,6 +270,44 @@ fn the_ordo_binds_the_octaves_as_the_web_does() {
     assert_eq!((first.rail_color.as_str(), first.rail_inset.as_str(), first.bound_above, first.bound_below), ("white", "", true, false));
 }
 
+/// The apps lead a vigil into its feast as the web's month rows do (needs ruling #838, question
+/// 3(d)): both read `presentation::rails`, so the thread runs where the web draws it, across a
+/// month's page as across a row, and nowhere else.
+#[test]
+fn the_ordo_leads_a_vigil_into_its_feast_as_the_web_does() {
+    let core = OfficeCore::new().unwrap();
+    let data = CalendarData::load(&repo_data()).unwrap();
+    for year in [2026, 2027] {
+        let cal = build_calendar(year, &data).unwrap();
+        let rails = presentation::rails::octave_rails(&cal, &data.feasts);
+        let colour = |c: Option<calendar::Color>| c.map(|c| c.as_str().to_string()).unwrap_or_default();
+        for month in 1..=12 {
+            let want: Vec<_> = cal
+                .days
+                .iter()
+                .zip(&rails)
+                .filter(|(d, _)| d.date.month() as i32 == month)
+                .map(|(_, r)| (colour(r.lead_to), colour(r.lead_from)))
+                .collect();
+            let got: Vec<_> = core.ordo_month(year, month).unwrap().days.into_iter().map(|d| (d.rail_lead_to, d.rail_lead_from)).collect();
+            assert_eq!(got, want, "{year}-{month}");
+        }
+    }
+    let lead = |y, m, d: usize| {
+        let day = core.ordo_month(y, m).unwrap().days.swap_remove(d - 1);
+        (day.rail_lead_to, day.rail_lead_from)
+    };
+    assert_eq!(lead(2026, 12, 24), ("white".to_string(), String::new()));
+    assert_eq!(lead(2026, 12, 25), (String::new(), "violet".to_string()));
+    assert_eq!(lead(2027, 8, 9), ("red".to_string(), String::new()));
+    assert_eq!(lead(2027, 8, 10), (String::new(), "violet".to_string()));
+    // The Vigil of All Saints runs off October's page and into November's.
+    assert_eq!(lead(2026, 10, 31), ("white".to_string(), String::new()));
+    assert_eq!(lead(2026, 11, 1), (String::new(), "violet".to_string()));
+    // St Andrew's vigil, anticipated over Advent Sunday, leads nowhere.
+    assert_eq!(lead(2026, 11, 28), (String::new(), String::new()));
+}
+
 #[test]
 fn reminders_name_each_office_on_the_chosen_days() {
     let core = OfficeCore::new().unwrap();

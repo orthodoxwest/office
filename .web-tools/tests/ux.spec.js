@@ -4119,6 +4119,68 @@ test("an ordo mark's note keeps clear of the sticky month heading", async ({ pag
   await expect(note).toHaveClass(/below/);
 });
 
+// A vigil leads into its feast (presentation::rails; needs ruling #838,
+// question 3(d)): a 1px thread on the rail's centre runs from the foot of
+// the vigil's rail across the row's rule into the top of the feast's, on the
+// phone's cards and in the table. Read from the pixels at 1x: the thread's
+// column is inked from rail to rail through the rule, the rail's outer column
+// is not (the vigil is not bound to its feast). Gone in forced colours.
+for (const width of [390, 800, 1280]) {
+  test(`a vigil's thread crosses the rule into its feast's rail at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/calendar/2027/08");
+    const vigil = page.locator("#d-2027-08-09");
+    await vigil.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const g = await page.evaluate(() => {
+      const shown = (row, dir) => [...row.querySelectorAll(`.day-thread.${dir}`)].find((t) => t.getClientRects().length && t.getBoundingClientRect().height > 0);
+      const [v, f] = ["d-2027-08-09", "d-2027-08-10"].map((id) => document.getElementById(id));
+      const [to, from] = [shown(v, "to-feast"), shown(f, "from-vigil")];
+      const style = getComputedStyle(to);
+      return {
+        to: to.getBoundingClientRect().toJSON(),
+        from: from.getBoundingClientRect().toJSON(),
+        boundary: f.getBoundingClientRect().top,
+        opacity: style.opacity,
+        image: style.backgroundImage,
+        copies: v.querySelectorAll(".day-thread").length,
+      };
+    });
+    expect(g.copies).toBe(2);
+    expect(g.to.width).toBe(1);
+    expect(g.from.left).toBe(g.to.left);
+    expect(g.to.top).toBeLessThan(g.boundary);
+    expect(g.from.bottom).toBeGreaterThan(g.boundary);
+    expect(g.opacity).toBe("0.7");
+    expect(g.image).toMatch(/linear-gradient/);
+    // Two device pixels above the thread and below it lie the two rails.
+    const top = Math.floor(g.to.top) - 2;
+    const clip = { x: g.to.left - 1, y: top, width: 6, height: Math.ceil(g.from.bottom) + 2 - top };
+    const shot = (await page.screenshot({ clip })).toString("base64");
+    const ink = await page.evaluate(async (data) => {
+      const img = new Image();
+      img.src = "data:image/png;base64," + data;
+      await img.decode();
+      const canvas = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height });
+      const context = canvas.getContext("2d");
+      context.drawImage(img, 0, 0);
+      const { data: px, width: w, height: h } = context.getImageData(0, 0, img.width, img.height);
+      // Inked: unlike the ground just right of the rail on the same line.
+      const inked = (x, y) => {
+        const [i, j] = [(y * w + x) * 4, (y * w + 4) * 4];
+        return Math.abs(px[i] - px[j]) + Math.abs(px[i + 1] - px[j + 1]) + Math.abs(px[i + 2] - px[j + 2]) > 40;
+      };
+      const rows = [...Array(h).keys()];
+      return { thread: rows.filter((y) => !inked(1, y)), outer: rows.filter((y) => inked(0, y)).length, h };
+    }, shot);
+    // The thread's column is inked on every line from the vigil's rail to the feast's.
+    expect(ink.thread).toEqual([]);
+    // The rail's outer column only where the rails stand, not across the gap.
+    expect(ink.outer).toBeLessThan(ink.h - 4);
+    await page.emulateMedia({ forcedColors: "active" });
+    expect(await vigil.locator(".day-thread").evaluateAll((ts) => ts.every((t) => getComputedStyle(t).display === "none"))).toBe(true);
+  });
+}
+
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
 // the title and every feast above a deep link. All geometric readings happen
 // in-page, so Playwright's font-waiting screenshot helper cannot mask the swap.
