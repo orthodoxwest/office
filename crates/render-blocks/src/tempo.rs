@@ -221,9 +221,9 @@ mod tests {
         assert_eq!(value("--tempo-gild-curve"), format!("var(--curve-{})", gild.curve.name()));
     }
 
-    /// The wall first, on each front: the web's coat is laid on `--tempo-coat` (and app.js waits
-    /// for it before taking the transition off), and each app's home comes into the light on the
-    /// dim's way in, once a launch.
+    /// The wall first, on each front: the web's coat is laid on `--tempo-coat` (app.js takes the
+    /// transition off when the coat's transitions end, or after the tempo where an engine lists
+    /// none), and each app's home comes into the light on the dim's way in, once a launch.
     #[test]
     fn the_wall_comes_first_on_every_front() {
         let css = read("apps/office-web/static/style.css");
@@ -232,7 +232,7 @@ mod tests {
             "style.css lays the coat on --tempo-coat"
         );
         let js = read("apps/office-web/static/app.js");
-        assert!(js.contains("tempoMs(\"tempo-coat\")"), "app.js times the coat by --tempo-coat");
+        assert!(js.contains("tempoMs(\"tempo-coat\")"), "app.js falls back on --tempo-coat");
         let swift = read("apps/ios/Office/HourScreen.swift");
         assert!(
             swift.contains(".transition(lighting ? AnyTransition.opacity.animation(Tempo.dimIn.animation) : transition)"),
