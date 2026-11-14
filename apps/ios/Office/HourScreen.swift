@@ -373,11 +373,9 @@ struct HourScreen: View {
             // Held unseen for the moment the kept place is set.
             .opacity(placing ? 0 : 1)
             .coordinateSpace(name: Reading.space)
-            .onGeometryChange(for: CGSize.self) { $0.size } action: {
-                reading.endMark = (top: m.px(endCrossTop), size: m.px(endCrossSize))
-                reading.viewport = $0
-                width = $0.width
-            }
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { reading.viewport = $0; width = $0.width }
+            // The cross's place in the ending moves with the text size (the menu's Text row).
+            .onChange(of: m, initial: true) { reading.endMark = (top: m.px(endCrossTop), size: m.px(endCrossSize)) }
             .onChange(of: rows.count, initial: true) { reading.rows = rows.count }
             .overlay(alignment: .top) { ProgressHairline(reading: reading).ignoresSafeArea(edges: .top) }
             .revealing(scroll)
@@ -481,8 +479,8 @@ struct HourScreen: View {
         }
     }
 
-    /// A bare hour, or one ending in a bare section, takes no leaf.
-    private var endBare: Bool { view.bare || view.sections.last?.bare == true }
+    /// An hour ending bare (the core's `endBare`) takes no leaf.
+    private var endBare: Bool { view.endBare }
 
     /// The leaf on the cross that ends the hour now; before the page has looked, as it opens.
     private var leaf: EndLeaf {
@@ -650,7 +648,9 @@ final class Reading {
     @ObservationIgnored private var frames: [String: (row: Int, frame: CGRect)] = [:]
     /// Where the cross that ends the hour stands in the ending, from its top, and its size; and
     /// whether it stands wholly on the screen now, for its leaf.
-    @ObservationIgnored var endMark: (top: CGFloat, size: CGFloat) = (top: 0, size: .infinity)
+    @ObservationIgnored var endMark: (top: CGFloat, size: CGFloat) = (top: 0, size: .infinity) {
+        didSet { update() }
+    }
     private(set) var endMarkShown = false
 
     func place(_ id: String, at row: Int, _ frame: CGRect?) {

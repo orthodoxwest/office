@@ -181,11 +181,11 @@ fun HourScreen(
     }
     PrayedWatch(date, view.hour, listState, spans, spans.values.maxOfOrNull { it.second } ?: 0.0, end = "epilogue", state = progress)
     // The cross under the last Amen takes its gold once the hour is marked and the cross stands
-    // wholly on the screen; a bare hour, or one ending in a bare section, takes none.
+    // wholly on the screen; an hour ending bare (the core's `endBare`) takes none.
     val crossAt = with(LocalDensity.current) { EndCrossTop.roundToPx() to EndCrossSize.roundToPx() }
     val leaf = rememberEndLeaf(
         date, view.hour, listState,
-        bare = view.bare || view.sections.lastOrNull()?.bare == true,
+        bare = view.endBare,
         end = "epilogue", top = crossAt.first, size = crossAt.second,
     )
     // A bare hour (the Triduum, the Office of the Dead) takes off its leaf, as the web's

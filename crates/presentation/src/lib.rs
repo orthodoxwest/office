@@ -13,7 +13,7 @@ pub mod sun;
 pub mod usage;
 
 use calendar::{CalendarDay, Color, Date, MoveableDates, Rank, Season};
-use liturgy::{ElementType, OfficeHour};
+use liturgy::{ElementType, OfficeHour, OfficeSection};
 
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
@@ -344,7 +344,9 @@ pub fn reopens_at_place(same_hour: bool, prayed: bool, seconds_away: f64) -> boo
 /// prayed is gilt from the first paint, with nothing moving. A bare hour (the Triduum, the Office
 /// of the Dead, an hour whose last section is said bare) takes no leaf, as its capitals take none.
 ///
-/// The apps ask [`EndLeaf::opens`] and [`EndLeaf::next`]; app.js mirrors them.
+/// Whether an hour ends bare is [`ends_bare`], which every front reads (the web's `end_bare`,
+/// the apps' `HourView::end_bare`). The apps ask [`EndLeaf::opens`] and [`EndLeaf::next`];
+/// app.js mirrors them.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EndLeaf {
     /// The cross in its paint, as every hour ends.
@@ -353,6 +355,14 @@ pub enum EndLeaf {
     Gilding,
     /// Gilt from the first paint: the hour was prayed before this visit.
     Gilt,
+}
+
+/// Whether an hour ends bare, so that the cross under its last Amen takes no leaf: a bare hour
+/// (`OfficeHour::bare`), or one whose last section is said bare (Vespers of All Saints followed by
+/// Vespers of the Dead on the eve of All Souls, Diurnal pp. 641–642: the bare sections close the
+/// hour, so the cross follows them).
+pub fn ends_bare(bare: bool, sections: &[OfficeSection]) -> bool {
+    bare || sections.last().is_some_and(|s| s.bare)
 }
 
 impl EndLeaf {
@@ -737,6 +747,18 @@ mod tests {
         let tall = Reading::default().advance(0.0, total, 3600.0);
         assert_eq!(tall.read, PRAYED_LONGEST_STEP * PRAYED_WORDS_PER_SECOND);
         assert!(!Reading::default().prayed(0.0, true));
+    }
+
+    #[test]
+    fn an_hour_ends_bare_when_it_is_bare_or_its_last_section_is() {
+        let section = |bare| OfficeSection { label: String::new(), collapsible: false, bare, elements: Vec::new() };
+        assert!(!ends_bare(false, &[]));
+        assert!(!ends_bare(false, &[section(false), section(false)]));
+        assert!(ends_bare(true, &[section(false)]));
+        // Vespers of the Dead said after the day's Vespers: the hour ends bare.
+        assert!(ends_bare(false, &[section(false), section(true)]));
+        // A bare section that does not close the hour does not make its end bare.
+        assert!(!ends_bare(false, &[section(true), section(false)]));
     }
 
     #[test]

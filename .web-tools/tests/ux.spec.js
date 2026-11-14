@@ -895,6 +895,21 @@ test("a bare hour's cross takes no leaf, prayed or not", async ({ page }) => {
   expect((await endLeaf(page)).content).toBe("none");
 });
 
+test("an hour ending in a bare section takes no leaf", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-11-01T19:00:00") });
+  // Vespers of All Saints, then Vespers of the Dead: not a bare hour, but it ends bare.
+  await page.goto("/vespers/2026-11-01");
+  await expect(page.locator("body")).not.toHaveClass(/hour-bare/);
+  const cross = page.locator(".hour-end-mark");
+  await expect(cross).toHaveClass("hour-end-mark is-bare");
+  await prayToTheCross(page, "2026-11-01", "vespers");
+  await standAtTheCross(page);
+  await page.clock.runFor(3000);
+  await expect(cross).not.toHaveClass(/is-gilding|is-gilt/);
+  expect((await endLeaf(page)).content).toBe("none");
+});
+
 test("under reduced motion the end cross is simply gilt", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.clock.install({ time: new Date("2026-10-07T21:00:00") });
@@ -903,9 +918,16 @@ test("under reduced motion the end cross is simply gilt", async ({ page }) => {
   expect((await endLeaf(page)).opacity).toBe("0");
   await standAtTheCross(page);
   await expect(page.locator(".hour-end-mark")).toHaveClass(/is-gilding/);
-  // No fade: the leaf is laid at once (the reduce block's 0.01ms is no motion).
+  // No fade: the gild's own transition is never declared under reduced motion (its curve
+  // would show here, as the site-wide reduce block shortens durations but sets no curve), and
+  // whatever that block leaves is no motion.
+  const gate = await page.evaluate(() => {
+    const style = getComputedStyle(document.querySelector(".hour-end-mark"), "::after");
+    return { curve: style.transitionTimingFunction, delay: style.transitionDelay };
+  });
+  expect(gate).toEqual({ curve: "ease", delay: "0s" });
   const now = await endLeaf(page);
-  expect(now.fades.every((f) => f.duration < 1)).toBe(true);
+  expect(now.fades.every((f) => f.duration < 1 && f.easing !== "cubic-bezier(0.4, 0, 0.2, 1)")).toBe(true);
   await expect.poll(async () => (await endLeaf(page)).opacity, { timeout: 500 }).toBe("1");
 });
 

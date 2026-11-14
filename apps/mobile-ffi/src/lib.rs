@@ -1252,6 +1252,9 @@ pub struct HourView {
     /// muted ink, the headpiece carries no sun or moon and its rule closes, and on the Apse a
     /// veiled bare hour's vault goes dark.
     pub bare: bool,
+    /// Whether the hour ends bare (`presentation::ends_bare`), so the cross under its last Amen
+    /// takes no leaf: a bare hour, or one whose last section is said bare.
+    pub end_bare: bool,
     pub sections: Vec<SectionView>,
     /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
     pub report_url: String,
@@ -1287,6 +1290,7 @@ impl HourView {
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             first_class: !rank_class(hour.rank, hour.color, hour.bare).is_empty(),
             bare: hour.bare,
+            end_bare: presentation::ends_bare(hour.bare, &hour.sections),
             sections: blocks.into_iter().map(SectionView::from).collect(),
             report_url: report_url(hour, hour_name, &date_slug(d)),
             martyrology: None,

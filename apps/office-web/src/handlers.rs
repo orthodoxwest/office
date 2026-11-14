@@ -495,7 +495,7 @@ impl Server {
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
-            end_bare: hour.bare || hour.sections.last().is_some_and(|s| s.bare),
+            end_bare: presentation::ends_bare(hour.bare, &hour.sections),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -1196,6 +1196,24 @@ mod tests {
         assert!(classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
         let classes = body_classes(&format!("/vespers/{}", date_slug(m.pentecost.add_days(6))));
         assert!(!classes.iter().any(|c| c == "season-eastertide"), "{classes:?}");
+    }
+
+    /// The cross under the last Amen takes no leaf where the hour ends bare: a bare hour, and
+    /// Vespers of All Saints followed by Vespers of the Dead, which is not a bare hour.
+    #[test]
+    fn an_hour_ending_bare_marks_its_end_cross() {
+        let end = |path: &str| {
+            let (status, _, body) = get(path);
+            assert_eq!(status, StatusCode::OK, "{path}");
+            let at = body.find(r#"<span class="hour-end-mark"#).expect("end mark");
+            body[at..at + body[at..].find('>').unwrap()].to_string()
+        };
+        assert!(end("/vespers/2026-11-01").contains(r#"class="hour-end-mark is-bare""#));
+        assert!(!body_classes("/vespers/2026-11-01").iter().any(|c| c == "hour-bare"));
+        assert!(end("/lauds/2026-11-02").contains("is-bare"));
+        for path in ["/vespers/2026-10-31", "/lauds/2026-11-01", "/compline/2026-10-07"] {
+            assert!(!end(path).contains("is-bare"), "{path}");
+        }
     }
 
     /// A bare hour (the Triduum's, the Office of the Dead's) is stamped `hour-bare` and never
