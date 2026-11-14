@@ -495,6 +495,7 @@ impl Server {
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
+            end_bare: hour.bare || hour.sections.last().is_some_and(|s| s.bare),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();

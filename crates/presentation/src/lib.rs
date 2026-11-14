@@ -335,6 +335,43 @@ pub fn reopens_at_place(same_hour: bool, prayed: bool, seconds_away: f64) -> boo
     same_hour && !prayed && (0.0..=f64::from(PLACE_KEPT_MINUTES) * 60.0).contains(&seconds_away)
 }
 
+/// The leaf on the consecration cross that ends an hour, under its last Amen. The hour is marked
+/// prayed by [`Reading`] as ever, and home shows that mark as ever; the cross takes its gold only
+/// once the hour has been marked and the cross then stands wholly on the screen (that mark is
+/// made as the top of the cross first comes into sight, often while the Our Father is still being
+/// said, and gold at the foot of the screen then would be a glint during the prayer). The gold
+/// then comes up evenly over `render_blocks::Tempo::GILD`, once; reopened, an hour already
+/// prayed is gilt from the first paint, with nothing moving. A bare hour (the Triduum, the Office
+/// of the Dead, an hour whose last section is said bare) takes no leaf, as its capitals take none.
+///
+/// The apps ask [`EndLeaf::opens`] and [`EndLeaf::next`]; app.js mirrors them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EndLeaf {
+    /// The cross in its paint, as every hour ends.
+    Paint,
+    /// The gold coming up, in this visit: the one time it moves.
+    Gilding,
+    /// Gilt from the first paint: the hour was prayed before this visit.
+    Gilt,
+}
+
+impl EndLeaf {
+    /// The cross as the hour opens: gilt at once if home already marks the hour `prayed`, unless
+    /// the hour is `bare`.
+    pub fn opens(bare: bool, prayed: bool) -> EndLeaf {
+        if prayed && !bare { EndLeaf::Gilt } else { EndLeaf::Paint }
+    }
+
+    /// The cross after a look at the page: it starts gilding once the hour is marked `prayed` and
+    /// the cross is `wholly_shown`, and never goes back.
+    pub fn next(self, bare: bool, prayed: bool, wholly_shown: bool) -> EndLeaf {
+        match self {
+            EndLeaf::Paint if !bare && prayed && wholly_shown => EndLeaf::Gilding,
+            leaf @ (EndLeaf::Paint | EndLeaf::Gilding | EndLeaf::Gilt) => leaf,
+        }
+    }
+}
+
 /// The invitation on home for `shown`, given the reader's own day and clock hour.
 pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     if shown != now {
@@ -700,6 +737,25 @@ mod tests {
         let tall = Reading::default().advance(0.0, total, 3600.0);
         assert_eq!(tall.read, PRAYED_LONGEST_STEP * PRAYED_WORDS_PER_SECOND);
         assert!(!Reading::default().prayed(0.0, true));
+    }
+
+    #[test]
+    fn the_end_cross_takes_its_gold_once_prayed_and_wholly_shown() {
+        use EndLeaf::*;
+        // A first visit: paint until the hour is marked and the cross stands wholly on screen.
+        let open = EndLeaf::opens(false, false);
+        assert_eq!(open, Paint);
+        assert_eq!(open.next(false, false, true), Paint, "not yet prayed");
+        assert_eq!(open.next(false, true, false), Paint, "marked as the cross peeps in: no gold yet");
+        assert_eq!(open.next(false, true, true), Gilding);
+        // Once gilding it stays so, wherever the reader scrolls: it happens once.
+        assert_eq!(Gilding.next(false, true, false), Gilding);
+        // An hour prayed before is gilt from the first paint, and never gilds again.
+        assert_eq!(EndLeaf::opens(false, true), Gilt);
+        assert_eq!(Gilt.next(false, true, true), Gilt);
+        // A bare hour takes no leaf, prayed or not.
+        assert_eq!(EndLeaf::opens(true, true), Paint);
+        assert_eq!(EndLeaf::opens(true, false).next(true, true, true), Paint);
     }
 
     #[test]

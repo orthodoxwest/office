@@ -180,6 +180,13 @@ fun DrawScope.invitationRules(lining: Color, frontal: Color, seed: Int = 21, day
  */
 fun giltBrush(o: Ornament): Brush = Brush.linearGradient(0.08f to o.hi, 0.3f to mix(o.hi, Color.White, 0.55f), 0.52f to o.flat, 0.92f to o.lo)
 
+/**
+ * The leaf the cross that ends a prayed hour takes by day (the web's `.hour-end-mark::after`):
+ * [giltBrush] without its near-white stop, which loses an arm on plaster at 40dp. By night it is
+ * flat gilt, as the Apse's tituli.
+ */
+fun leafBrush(o: Ornament): Brush = Brush.linearGradient(0.08f to o.hi, 0.52f to o.flat, 0.92f to o.lo)
+
 /** The wash under the invitation, `tablet.png` stretched to it and tinted. */
 fun DrawScope.tabletWash(tablet: ImageBitmap, wash: Color) {
     if (wash.alpha == 0f) return

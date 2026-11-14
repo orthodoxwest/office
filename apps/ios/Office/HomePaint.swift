@@ -149,6 +149,14 @@ func throughPigment(_ ctx: GraphicsContext, _ path: Path, ink: Color, tile: CGFl
     }
 }
 
+/// The leaf the cross that ends a prayed hour takes (the web's `.hour-end-mark::after`, Android's
+/// `leafBrush`): by day home's first-class gilt without its near-white stop, which loses an arm on
+/// plaster at 40pt, in the season's gilding; by night flat gilt, as the Apse's tituli.
+func endLeafShading(_ o: Ornament, dark: Bool, size: CGFloat) -> GraphicsContext.Shading {
+    if dark { return .color(o.flat) }
+    return .linearGradient(Gradient(stops: [.init(color: o.hi, location: 0.08), .init(color: o.flat, location: 0.52), .init(color: o.lo, location: 0.92)]), startPoint: .zero, endPoint: CGPoint(x: size, y: size))
+}
+
 /// Home's consecration cross, as Android's `ConsecrationCross` with a brush: painted through the pigment, or filled with `shading` (gilt or leaf).
 struct Crown: View {
     let size: CGFloat

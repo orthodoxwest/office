@@ -583,3 +583,15 @@ fn crown_plan_carries_presentations_figures() {
     // Light arrives faster than it leaves.
     assert!(crate::crown_plan(false).end < crate::crown_plan(true).end);
 }
+
+#[test]
+fn the_apps_gild_the_end_cross_by_the_shared_rule() {
+    let open = end_leaf_opens(false, false);
+    assert_eq!(open, EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, false), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(open, false, true, true), EndLeaf::Gilding);
+    assert_eq!(end_leaf_next(EndLeaf::Gilding, false, true, false), EndLeaf::Gilding);
+    assert_eq!(end_leaf_opens(false, true), EndLeaf::Gilt);
+    assert_eq!(end_leaf_opens(true, true), EndLeaf::Paint);
+    assert_eq!(end_leaf_next(EndLeaf::Paint, true, true, true), EndLeaf::Paint);
+}
