@@ -11693,30 +11693,33 @@ body.page-home::before {
    they do once ruled, so no line is seen twice. Screen only: paper prints
    whatever the page has. */
 @media screen {
+  /* Important: the hold must win over every look's own figure for these
+     layers (a black day's cross by night is set at 0,6,0), and it lasts
+     only until the coat is laid. */
   :root.wall-first body.page-home::before,
   :root.wall-first body.page-home .home-lining,
   :root.wall-first body.page-home .home-crown,
   :root.wall-first body.page-home .home-rules,
   :root.wall-first body.page-home .home-vault-stars,
   :root.wall-first body.page-home .pray-now::before {
-    opacity: 0;
+    opacity: 0 !important;
   }
 
   :root.wall-first body.page-home .home-prayer-card h2 {
-    box-shadow: none;
+    box-shadow: none !important;
   }
 
   :root.wall-first body.page-home .pray-now,
   :root.wall-first body.page-home .pray-now:hover {
-    border-color: transparent;
+    border-color: transparent !important;
   }
 
   :root.wall-first body.page-home .pray-now::after {
-    content: none;
+    content: none !important;
   }
 
   :root.wall-first body.page-home .home-hour-links .home-hour-group {
-    border-color: transparent;
+    border-color: transparent !important;
   }
 }
 

@@ -2683,13 +2683,13 @@ function plainClickOpensHere(e, link) {
     function tempoMs(name) {
       return parseFloat(window.getComputedStyle(root).getPropertyValue("--" + name)) || 0;
     }
-    function lay() {
+    function lay(atOnce) {
       if (laid) {
         return;
       }
       laid = true;
       var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (still || !root.hasAttribute("data-wall-seen")) {
+      if (atOnce === true || still || !root.hasAttribute("data-wall-seen")) {
         root.classList.remove("wall-first");
         return;
       }
@@ -2741,6 +2741,13 @@ function plainClickOpensHere(e, link) {
       });
     }
     window.setTimeout(lay, 4000);
+    // A tap on the cross plays on the paint: whatever is still to come, it
+    // is laid at once, with no coat, rather than held under the play.
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.closest && e.target.closest(".home-crown-tap")) {
+        lay(true);
+      }
+    }, true);
     return {
       // Home's painter, after each pass: whether stars are wanted (by night)
       // and set, and how to ask it for another pass.

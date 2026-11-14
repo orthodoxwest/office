@@ -75,13 +75,22 @@ struct Loaded<Value, Content: View>: View {
                 // into the light on the wall the launch screen showed (home, once a launch: the
                 // wall first, over Tempo's dim, opacity only); the same page composed again
                 // changes in place; another page replaces it in motion.
+                // The arrival's dim belongs to its coming in only: once it has come, the page
+                // carries the ordinary transition again, so it leaves as any page does and two
+                // pages are never seen over each other.
                 if shown == nil, arrival?.take() == true, !reduceMotion {
                     lighting = true
-                    withAnimation(Tempo.dimIn.animation) { shown = (place, v) }
+                    withAnimation(Tempo.dimIn.animation) { shown = (place, v) } completion: { lighting = false }
                 } else if shown == nil || shown?.place == place {
                     shown = (place, v)
                 } else {
-                    lighting = false
+                    if lighting {
+                        // Replaced while still coming into the light: put the dim away in an
+                        // update of its own, a frame before the page goes.
+                        lighting = false
+                        try? await Task.sleep(for: .milliseconds(20))
+                        guard !Task.isCancelled else { return }
+                    }
                     withAnimation(.easeInOut(duration: 0.3)) { shown = (place, v) }
                 }
             case let .failure(e):

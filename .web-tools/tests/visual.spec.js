@@ -11,6 +11,9 @@ async function openForSnapshot(page, path, theme) {
   }, theme);
   await page.goto(path);
   await page.evaluate(() => document.fonts.ready);
+  // Home's paint is laid as one coat once it is all to hand (the wall
+  // first): shoot it laid, not held or coming in.
+  await page.waitForFunction(() => !document.documentElement.matches(".wall-first, .wall-coat"));
   // Ordo intentionally keeps a fallback when its font arrives late. Record
   // the cached-font appearance deterministically; UX tests cover a cold font.
   if (path.startsWith("/calendar/")) {

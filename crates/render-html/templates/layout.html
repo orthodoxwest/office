@@ -88,8 +88,7 @@
       {# The wall first (style.css): on a fresh arrival at home (from outside the Office, a
            bookmark, the installed app or a reload; never a page turn from another of its pages,
            which the turn already brings in), the painted layer is held until all of it is to
-           hand, and app.js (wallFirst) lays it as one coat. Without app.js it is let go once the
-           page has loaded, as it would have come. #}
+           hand, and app.js (wallFirst) lays it as one coat. #}
       try {
         var entry = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
         var kind = entry ? entry.type : "navigate";
@@ -99,9 +98,11 @@
           root.classList.add("wall-first");
           {# Whether a frame has been shown: paint ready before it is simply there. #}
           requestAnimationFrame(function () { root.setAttribute("data-wall-seen", ""); });
-          addEventListener("load", function () {
-            setTimeout(function () { if (!window.officeWallFirst) root.classList.remove("wall-first"); }, 1000);
-          });
+          {# Without app.js the paint is let go: a second after load, or after six seconds
+               whatever has come, so a script that hangs (and holds load) never keeps it back. #}
+          var unhold = function () { if (!window.officeWallFirst) root.classList.remove("wall-first"); };
+          addEventListener("load", function () { setTimeout(unhold, 1000); });
+          setTimeout(unhold, 6000);
         }
       } catch (e) {}
       {%- endif %}
