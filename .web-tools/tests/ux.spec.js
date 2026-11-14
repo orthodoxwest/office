@@ -4232,23 +4232,24 @@ for (const width of [390, 800, 1280]) {
 
 // At a fractional pixel ratio, or text size, the thread's ends and the rails'
 // edges round apart; each end runs under its rail so no line of ground shows.
+// One test for each ratio and text size, on a short viewport: a whole 3x
+// screenshot of a tall page is slow to take and to decode in the page.
 for (const dpr of [1.25, 1.5, 3]) {
-  test(`a vigil's thread meets its rails at ${dpr}x`, async ({ browser }) => {
-    for (const size of ["small", "large"]) {
-      const context = await browser.newContext({ deviceScaleFactor: dpr, viewport: { width: 390, height: 900 } });
-      await context.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
-      const page = await context.newPage();
-      for (const width of [320, 850, 1280]) {
-        await page.setViewportSize({ width, height: 900 });
+  for (const size of ["small", "large"]) {
+    for (const width of [320, 850, 1280]) {
+      test(`a vigil's thread meets its rails at ${dpr}x, ${size} text, ${width}px`, async ({ browser }) => {
+        const context = await browser.newContext({ deviceScaleFactor: dpr, viewport: { width, height: 360 } });
+        await context.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
+        const page = await context.newPage();
         for (const [month, vigilId, feastId] of [["2026/05", "2026-05-30", "2026-05-31"], ["2027/08", "2027-08-09", "2027-08-10"]]) {
           await openDatedPage(page, `/calendar/${month}`);
           const { ink } = await vigilThread(page, vigilId, feastId);
-          expect(ink.bare, `${size} ${width}px ${vigilId}`).toEqual([]);
+          expect(ink.bare, vigilId).toEqual([]);
         }
-      }
-      await context.close();
+        await context.close();
+      });
     }
-  });
+  }
 }
 
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
