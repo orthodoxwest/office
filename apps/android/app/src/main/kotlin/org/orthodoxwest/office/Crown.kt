@@ -733,11 +733,15 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
 
     // ---- The stars' say (the sky asks while it draws). ----
 
-    /** At rest, and until the turn, each star is the sky's; from the turn the play draws it. */
-    internal fun starAlpha(): Float {
-        val p = play ?: return 1f
-        return if (p.capturing || p.turned) 0f else 1f
-    }
+    /**
+     * At rest, and until the change of look begins, each star is the sky's; from then the play
+     * draws it. One rule for both sides, so no frame has the stars from neither: the sky once left
+     * them out from the start of the change and the play drew them only from its end, and they
+     * blinked out for the frames between.
+     */
+    internal fun playDrawsStars(): Boolean = play?.let { it.capturing || it.turned } ?: false
+
+    internal fun starAlpha(): Float = if (playDrawsStars()) 0f else 1f
 
     // ---- Drawing. ----
 
@@ -817,8 +821,8 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
             }
         }
 
-        // The stars, above the vault both ways, from the change of look.
-        if (old != null) stars(p, t)
+        // The stars, above the vault both ways, from the change of look ([playDrawsStars]).
+        stars(p, t)
 
         // The units, each handing its ink over at its moment.
         for ((key, unit) in units) {
@@ -1073,7 +1077,7 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
      * the cross deepens its gold as the plaster reaches it and goes out at the ending beat.
      */
     private fun DrawScope.stars(p: Play, t: Float) {
-        if (!p.turned) return
+        if (!playDrawsStars()) return
         val drawn = firmament.drawn
         if (drawn.isEmpty()) return
         val s = p.sums
