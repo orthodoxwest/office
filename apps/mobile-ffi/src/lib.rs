@@ -1108,11 +1108,11 @@ pub struct OrdoDayView {
     pub rank: String,
     pub rank_full: String,
     pub color: String,
-    /// The rail's colour beside the date: the day's own, or within an octave another feast
-    /// impedes, the octave's (the web's row `day-color-*`; `presentation::rails`).
+    /// The rail's colour beside the date: within an octave's strand the octave's, else the day's
+    /// own (the web's row `day-color-*`; `presentation::rails`).
     pub rail_color: String,
-    /// Days bound together: the impeding feast's own colour, a lone bar beside the octave's rail,
-    /// or empty (the web's `.day-inset`).
+    /// Days bound together: the day's own colour as a lone bar beside the octave's strand, where
+    /// it says another office or keeps another colour, or empty (the web's `.day-inset`).
     pub rail_inset: String,
     /// The rail runs up into the day before and down into the day after, through the hairline
     /// (the web's `.bound-above`, `.bound-below`).

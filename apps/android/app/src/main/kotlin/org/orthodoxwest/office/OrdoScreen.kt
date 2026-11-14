@@ -647,8 +647,9 @@ private fun railReach(held: InteractionSource): State<Float> {
  * A day's rail at the row's leading edge: from `top` to `bottom` at rest, the row's full height at
  * `reach` 1. Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`):
  * within an octave the rail runs up to the row's top and down through the hairline below into the
- * next day's, so the octave's days read as one long bar; a feast that impedes the octave stands
- * beside it as a lone bar of its own colour, `inset` (the web's `.day-inset`).
+ * next day's, so the octave's days read as one long bar in the octave's colour; a feast that
+ * impedes the octave, or a day of it in another colour, stands beside it as a lone bar of its own
+ * colour, `inset` (the web's `.day-inset`).
  */
 private fun DrawScope.dayRail(color: Color, reach: Float, top: Float, bottom: Float, d: OrdoDayView, inset: Color?) {
     val restTop = if (d.boundAbove) 0f else top

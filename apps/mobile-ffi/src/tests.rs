@@ -228,6 +228,16 @@ fn the_ordo_month_matches_the_web_rows() {
     assert!(core.ordo_month(2026, 13).is_err());
 }
 
+/// Home names the Nativity's octave under the Circumcision, its eighth day (#833), as the web does.
+#[test]
+fn home_names_the_nativity_octave_on_the_first_of_january() {
+    let core = OfficeCore::new().unwrap();
+    let note = |y, m, d| core.home(civil(y, m, d), civil(y, m, d), 9).unwrap().octave_note;
+    assert_eq!(note(2026, 12, 31), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 1), "Octave of Christmas");
+    assert_eq!(note(2027, 1, 2), "");
+}
+
 /// The apps bind the octaves as the web's month rows do: both read `presentation::rails` over the
 /// whole year, so 1 January takes up the previous December's octave (#833, needs ruling #838).
 #[test]

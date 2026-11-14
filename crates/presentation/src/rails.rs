@@ -10,9 +10,10 @@ use calendar::{CalendarDay, Color, FeastRef, YearCalendar};
 /// One day's rail. Outside a bound octave it is the day's own colour standing alone.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rail {
-    /// The rail's colour: the day's own, or on a day another feast impedes, the octave's.
+    /// The rail's colour: within a strand the octave's, else the day's own.
     pub color: Color,
-    /// The impeding feast's own colour, set as a short bar beside the rail that runs on.
+    /// The day's own colour, set as a short bar beside the strand, where the day says another
+    /// office or keeps another colour.
     pub inset: Option<Color>,
     /// The rail runs up into the day before, which is of the same octave.
     pub above: bool,
@@ -57,6 +58,12 @@ fn says_octave(day: &CalendarDay, octave: &FeastRef) -> bool {
 
 /// Each day's rail for a year's calendar, in the order of `cal.days`. The previous December and
 /// the next January decide whether the year's first and last rails run off the page.
+///
+/// A strand is drawn in the octave's colour from end to end. A day whose own colour is not the
+/// octave's, or that says another office (#838, question 2, A), shows its own colour beside the
+/// strand: St Stephen's red beside the Nativity's white, St Paul's white beside the red of Ss
+/// Peter & Paul. A day bound to neither neighbour is not a strand: it keeps its lone bar in its
+/// own colour, as outside any octave.
 pub fn octave_rails(cal: &YearCalendar, feasts: &[FeastRef]) -> Vec<Rail> {
     let octave = |d: &CalendarDay| bound_octave(d, feasts).map(|f| f.id.as_str());
     let days: Vec<&CalendarDay> =
@@ -65,8 +72,12 @@ pub fn octave_rails(cal: &YearCalendar, feasts: &[FeastRef]) -> Vec<Rail> {
         .map(|w| {
             let (before, day, after) = (w[0], w[1], w[2]);
             let Some(o) = bound_octave(day, feasts) else { return Rail::alone(day.color) };
-            let (color, inset) = if says_octave(day, o) { (day.color, None) } else { (o.color, Some(day.color)) };
-            Rail { color, inset, above: octave(before) == Some(o.id.as_str()), below: octave(after) == Some(o.id.as_str()) }
+            let (above, below) = (octave(before) == Some(o.id.as_str()), octave(after) == Some(o.id.as_str()));
+            if !above && !below {
+                return Rail::alone(day.color);
+            }
+            let inset = (day.color != o.color || !says_octave(day, o)).then_some(day.color);
+            Rail { color: o.color, inset, above, below }
         })
         .collect()
 }
@@ -132,8 +143,25 @@ mod tests {
         assert_eq!(pentecost[8], (6, 27, "white", "white", false, true));
         assert_eq!(pentecost[9], (6, 28, "white", "", true, false));
         assert_eq!(pentecost[10], (6, 29, "red", "", false, true));
+        // St Paul's day is the octave's own, in white (the ordos' "Lauds W"), beside its red.
         // Corpus Christi, 1 July, begins its own octave, which governs where the two overlap.
-        assert_eq!(pentecost[11], (6, 30, "white", "", true, false));
+        assert_eq!(pentecost[11], (6, 30, "red", "white", true, false));
+    }
+
+    /// A row bound to neither neighbour is drawn as outside any octave: its own colour, no inset.
+    /// Overlapping and transferred octaves leave such one-day remnants (Trinity 2027's like days
+    /// in 2018, 2029, 2035, 2040, 2043, 2046 and 2051), and they must not read as a strand.
+    #[test]
+    fn a_row_bound_to_no_neighbour_keeps_its_lone_bar() {
+        let data = CalendarData::load(&Data).unwrap();
+        for year in 2017..=2053 {
+            let cal = build_calendar(year, &data).unwrap();
+            for (d, r) in cal.days.iter().zip(octave_rails(&cal, &data.feasts)) {
+                if !r.above && !r.below {
+                    assert_eq!(r, Rail::alone(d.color), "{}", d.date);
+                }
+            }
+        }
     }
 
     /// Needs ruling #838 (question 1): the common octaves are bound with the privileged, and a

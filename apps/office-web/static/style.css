@@ -3953,8 +3953,9 @@ html[data-newcomer] .home-season {
 /* Days bound together (presentation::rails): an octave's rail runs unbroken
    down its days, through the rules between them, starting where a lone bar
    starts and stopping where one stops, so the strand reads as one long bar.
-   A feast that impedes the octave stands beside it as a lone bar of its own
-   colour (.day-inset), the octave's rail running on beneath it. The apps
+   The strand keeps the octave's colour; a feast that impedes the octave, or
+   a day of it in another colour, stands beside it as a lone bar of its own
+   colour (.day-inset). A day bound to neither neighbour keeps its lone bar. The apps
    draw the same (OrdoScreen.swift, .kt). */
 .month-table tr.day.bound-above > td:first-child::before { top: 0; }
 .month-table tr.day.bound-below > td:first-child::before,

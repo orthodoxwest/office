@@ -160,10 +160,10 @@ pub struct DayRow {
     pub rank: String,
     pub rank_full: String,
     pub color: String,
-    /// The rail's colour class: the day's own, or within an octave another feast impedes, the
-    /// octave's (`presentation::rails`).
+    /// The rail's colour class: within an octave's strand the octave's, else the day's own
+    /// (`presentation::rails`).
     pub color_class: String,
-    /// Days bound together: the impeding feast's own colour beside the octave's rail, or empty.
+    /// Days bound together: the day's own colour beside the octave's strand, or empty.
     pub rail_inset: String,
     /// The rail runs up into the day before and down into the day after, of the same octave.
     pub bound_above: bool,

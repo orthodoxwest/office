@@ -723,8 +723,9 @@ private struct DayRow: View {
  *
  * Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`): within an
  * octave the rail runs up to the row's top and down through the hairline into the next day's, so
- * the octave's days read as one long bar; a feast that impedes the octave stands beside it as a
- * lone bar of its own colour (the web's `.day-inset`), the octave's rail running on beneath it.
+ * the octave's days read as one long bar in the octave's colour; a feast that impedes the octave,
+ * or a day of it in another colour, stands beside it as a lone bar of its own colour (the web's
+ * `.day-inset`).
  */
 private struct DayRail: View {
     let day: OrdoDayView

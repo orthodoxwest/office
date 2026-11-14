@@ -975,6 +975,18 @@ mod tests {
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
     }
 
+    /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the
+    /// Nativity)"), so home names the octave under the Circumcision, as it does under St Stephen
+    /// and St Sylvester; 2 January is past it.
+    #[test]
+    fn home_names_the_nativity_octave_on_the_first_of_january() {
+        let note = r#"<p class="octave-note">Octave of Christmas</p>"#;
+        for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
+            assert!(get(&format!("/?date={date}")).2.contains(note), "{date}");
+        }
+        assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
+    }
+
     /// Days bound together (presentation::rails; needs ruling #838): the Nativity's rail runs
     /// from 25 December across the year's turn to 1 January, St Stephen's red standing beside its
     /// white, and the days outside it keep their lone bars and their markup.
