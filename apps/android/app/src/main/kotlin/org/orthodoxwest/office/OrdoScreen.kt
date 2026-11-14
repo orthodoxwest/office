@@ -599,12 +599,13 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
-        val rail = railColor(d.color, p)
+        val rail = railColor(d.railColor, p)
+        val inset = d.railInset.takeIf { it.isNotEmpty() }?.let { railColor(it, p) }
         // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
         Row(
             Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row.copy(at = 0.44f))).height(IntrinsicSize.Min)
-                // The day's liturgical colour as a rail beside its date.
-                .drawBehind { dayRail(rail, reach.value, top = 12.8.dp.toPx(), bottom = (12.8 + 37.6).dp.toPx()) }
+                // The day's liturgical colour as a rail beside its date, bound to its octave's days.
+                .drawBehind { dayRail(rail, reach.value, top = 12.8.dp.toPx(), bottom = (12.8 + 37.6).dp.toPx(), d, inset) }
                 .padding(top = 11.2.dp, bottom = 9.6.dp),
         ) {
             // The rail's room, as tall as it stands at rest.
@@ -627,7 +628,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
                 body()
             }
         }
-        Hairline(p.border)
+        RowHairline(d)
     }
 }
 
@@ -642,11 +643,23 @@ private fun railReach(held: InteractionSource): State<Float> {
     return animateFloatAsState(if (pressed) 1f else 0f, if (pressed) Tempo.touchReach.spec() else Tempo.touchOut.spec(), label = "rail")
 }
 
-/** A day's rail at the row's leading edge: from `top` to `bottom` at rest, the row's full height at `reach` 1. */
-private fun DrawScope.dayRail(color: Color, reach: Float, top: Float, bottom: Float) {
-    val from = top * (1f - reach)
-    val to = bottom + (size.height - bottom) * reach
+/**
+ * A day's rail at the row's leading edge: from `top` to `bottom` at rest, the row's full height at
+ * `reach` 1. Days bound together (`presentation::rails`, the web's `.bound-above`, `.bound-below`):
+ * within an octave the rail runs up to the row's top and down through the hairline below into the
+ * next day's, so the octave's days read as one long bar in the octave's colour; a feast that
+ * impedes the octave, or a day of it in another colour, stands beside it as a lone bar of its own
+ * colour, `inset` (the web's `.day-inset`).
+ */
+private fun DrawScope.dayRail(color: Color, reach: Float, top: Float, bottom: Float, d: OrdoDayView, inset: Color?) {
+    val restTop = if (d.boundAbove) 0f else top
+    // Through the row's hairline, which is drawn below the row.
+    val end = if (d.boundBelow) size.height + 1.dp.toPx() else size.height
+    val restBottom = if (d.boundBelow) end else bottom
+    val from = restTop * (1f - reach)
+    val to = restBottom + (end - restBottom) * reach
     drawRect(color, Offset(0f, from), Size(3.dp.toPx(), to - from))
+    if (inset != null) drawRect(inset, Offset(6.dp.toPx(), top), Size(3.dp.toPx(), bottom - top))
 }
 
 /**
@@ -705,7 +718,8 @@ private fun DayTableRow(
     unfolded: @Composable ColumnScope.() -> Unit,
 ) {
     val p = LocalPalette.current
-    val rail = railColor(d.color, p)
+    val rail = railColor(d.railColor, p)
+    val inset = d.railInset.takeIf { it.isNotEmpty() }?.let { railColor(it, p) }
     val margin = LocalConfiguration.current.screenWidthDp >= 1000
     // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
     // gold line across the row, the day's number in gold.
@@ -726,8 +740,8 @@ private fun DayTableRow(
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
         Row(
             Modifier.fillMaxWidth().indication(held, Lit(homeInk(p).nowPool, PoolShape.Row)).height(IntrinsicSize.Min)
-                // The day's liturgical colour as a rail under the date's column.
-                .drawBehind { dayRail(rail, reach.value, top = (8 + 1.6).dp.toPx(), bottom = size.height - 8.dp.toPx()) }
+                // The day's liturgical colour as a rail under the date's column, bound to its octave's days.
+                .drawBehind { dayRail(rail, reach.value, top = (8 + 1.6).dp.toPx(), bottom = size.height - 8.dp.toPx(), d, inset) }
                 .padding(vertical = 8.dp),
         ) {
             // From 1000dp Today is a note in the margin beside today's band (the web's), taking no
@@ -781,8 +795,14 @@ private fun DayTableRow(
                 OrdoMarks(d, fast = null, abstinence = false, rank = { Text(d.rank, style = Type.small.copy(fontSize = 12.48.sp, lineHeight = 17.5.sp, color = rankInk(d.rank, p))) })
             }
         }
-        Hairline(p.border)
+        RowHairline(d)
     }
+}
+
+/** The rule under a day, leaving the rail's width where the rail runs on through it into the next day. */
+@Composable
+private fun RowHairline(d: OrdoDayView) {
+    Hairline(LocalPalette.current.border, if (d.boundBelow) Modifier.padding(start = 3.dp) else Modifier)
 }
 
 /** What the § and the fish say in their notes, as the web's titles word them (`presentation::FAST_DAY`). */

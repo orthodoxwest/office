@@ -8,6 +8,7 @@ pub mod about;
 pub mod crown;
 pub mod feast;
 pub mod gloss;
+pub mod rails;
 pub mod reminders;
 pub mod sun;
 pub mod usage;

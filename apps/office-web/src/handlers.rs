@@ -11,6 +11,7 @@ use office::prime::reads_martyrology;
 use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine, HOUR_NAMES};
 use presentation::feast::{FeastIndex, is_feast_id};
+use presentation::rails::Rail;
 use render_html::chant;
 use render_html::links::{
     calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, feast_from, feast_link, home_link, hour_link,
@@ -109,12 +110,13 @@ fn comm_rows(comms: &[CommSummary], feasts: &FeastIndex, date: Date) -> Vec<Comm
 }
 
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
-/// and Vespers digest. `days` are the month's days in order.
-pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
+/// and Vespers digest. `days` are the month's days in order, `rails` their rails.
+pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &MoveableDates, feasts: &FeastIndex) -> MonthData {
     let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
-    for d in days {
+    for (i, d) in days.iter().enumerate() {
         let o = ordo_day(d, engine, moveable);
+        let rail = rails.get(i).copied().unwrap_or_else(|| Rail::alone(o.color));
         let mut row = DayRow {
             day_num: d.date.day(),
             weekday: d.date.weekday().name()[..3].to_string(),
@@ -122,7 +124,10 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates, feas
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
-            color_class: format!("day-color-{}", o.color.as_str()),
+            color_class: format!("day-color-{}", rail.color.as_str()),
+            rail_inset: rail.inset.map(|c| c.as_str().to_string()).unwrap_or_default(),
+            bound_above: rail.above,
+            bound_below: rail.below,
             feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
@@ -969,6 +974,42 @@ mod tests {
         let month = get("/calendar/2026/11").2;
         assert_eq!(month.matches(r##"expect.href = "#ordo-place""##).count(), 1, "the ordo's hold runs once");
         assert!(month.find(r##"expect.href = "#ordo-place""##).unwrap() < month.find("<body").unwrap());
+    }
+
+    /// 1 January is the Nativity's eighth day (#833; the 2026 ordo's "(Octave Day of the
+    /// Nativity)"), so home names the octave under the Circumcision, as it does under St Stephen
+    /// and St Sylvester; 2 January is past it.
+    #[test]
+    fn home_names_the_nativity_octave_on_the_first_of_january() {
+        let note = r#"<p class="octave-note">Octave of Christmas</p>"#;
+        for date in ["2026-12-26", "2026-12-31", "2027-01-01"] {
+            assert!(get(&format!("/?date={date}")).2.contains(note), "{date}");
+        }
+        assert!(!get("/?date=2027-01-02").2.contains("octave-note"));
+    }
+
+    /// Days bound together (presentation::rails; needs ruling #838): the Nativity's rail runs
+    /// from 25 December across the year's turn to 1 January, St Stephen's red standing beside its
+    /// white, and the days outside it keep their lone bars and their markup.
+    #[test]
+    fn the_ordo_binds_the_nativity_octave_across_the_new_year() {
+        let row = |body: &str, date: &str| {
+            let at = body.find(&format!(r#"id="d-{date}""#)).unwrap();
+            let start = body[..at].rfind("<tr").unwrap();
+            body[start..start + body[start..].find("</td>").unwrap()].to_string()
+        };
+        let december = get("/calendar/2026/12").2;
+        assert!(row(&december, "2026-12-24").starts_with(r#"<tr class="day day-color-violet" id="d-2026-12-24""#));
+        assert!(row(&december, "2026-12-25").starts_with(r#"<tr class="day day-color-white bound-below" "#));
+        let stephen = row(&december, "2026-12-26");
+        assert!(stephen.starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#), "{stephen}");
+        assert!(stephen.contains(r#"<span class="day-inset day-color-red" aria-hidden="true"></span>"#), "{stephen}");
+        assert!(row(&december, "2026-12-31").starts_with(r#"<tr class="day day-color-white bound-above bound-below" "#));
+        let january = get("/calendar/2027/01").2;
+        let circumcision = row(&january, "2027-01-01");
+        assert!(circumcision.starts_with(r#"<tr class="day day-color-white bound-above" "#), "{circumcision}");
+        assert!(!circumcision.contains("day-inset"));
+        assert!(row(&january, "2027-01-02").starts_with(r#"<tr class="day day-color-red" id="d-2027-01-02""#));
     }
 
     /// A browser that has laid a score out names its column's width, and the hour's scores come
