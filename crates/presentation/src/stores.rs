@@ -1,5 +1,5 @@
 //! Where the native apps are found, and the web's words for them: the colophon's quiet line
-//! ("Also an app for Android and iPhone", layout.html), the About page's paragraph, and the
+//! ("Also an app for Android, iPhone and iPad", layout.html), the About page's paragraph, and the
 //! Reminders page, which offers the app first and the calendar feed as the fallback, since an
 //! app's notifications are far better reminders than a subscribed calendar's. A reader on a phone
 //! sees only their own phone's store (the pre-paint script marks the platform). Nothing here
@@ -10,12 +10,14 @@ pub const PLAY_URL: &str = "https://play.google.com/store/apps/details?id=org.or
 
 /// The iOS app's numeric App Store ID (App Store Connect → App Information → Apple ID), or
 /// `None` while the app is not yet on the App Store. Setting it is the whole of the iOS switch:
-/// the colophon names iPhone beside Android, iPhone and iPad readers see their store's link in
+/// the colophon names iPhone and iPad beside Android, iPhone and iPad readers see their store's link in
 /// place of none, and Safari offers its own Smart App Banner (`apple-itunes-app`, layout.html).
 pub const APP_STORE_ID: Option<&str> = None;
 
-/// The colophon's words before the platforms.
+/// The colophon's words before the platforms, and its name for Apple's (the iOS app is built for
+/// both, apps/ios/project.yml's TARGETED_DEVICE_FAMILY).
 pub const APPS_LEAD: &str = "Also an app for";
+pub const APPS_APPLE: &str = "iPhone and iPad";
 
 /// The store buttons' words, as the stores' own badges word them.
 pub const PLAY_LABEL: &str = "Get it on Google Play";

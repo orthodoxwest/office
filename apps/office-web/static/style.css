@@ -1237,6 +1237,10 @@ body:is(.page-home, .page-hour) footer > p.app-stores {
 }
 
 /* The stores' buttons: Reminders' tablet, one to a store, side by side where they fit. */
+.store-buttons .reminder-subscribe {
+  flex: 1 1 14rem;
+}
+
 .store-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -5863,7 +5867,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.session-prayers::details-content,
     :root.motion-ready details.day-office-details::details-content,
     :root.motion-ready details.reminder-address::details-content,
-    :root.motion-ready details.reminder-help::details-content {
+    :root.motion-ready details.reminder-help::details-content,
+    :root.motion-ready details.reminder-calendar::details-content {
       block-size: 0;
       opacity: 0;
       overflow: clip;
@@ -5877,7 +5882,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.session-prayers[open]::details-content,
     :root.motion-ready details.day-office-details[open]::details-content,
     :root.motion-ready details.reminder-address[open]::details-content,
-    :root.motion-ready details.reminder-help[open]::details-content {
+    :root.motion-ready details.reminder-help[open]::details-content,
+    :root.motion-ready details.reminder-calendar[open]::details-content {
       block-size: auto;
       opacity: 1;
       transition:
@@ -10296,6 +10302,7 @@ html {
   .about a,
   .reminder-address > summary,
   .reminder-help > summary,
+  .reminder-calendar > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
@@ -10346,6 +10353,7 @@ html {
   .about a,
   .reminder-address > summary,
   .reminder-help > summary,
+  .reminder-calendar > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
@@ -11913,6 +11921,14 @@ body.page-hour .report-issue {
       mask-composite: intersect;
       animation: apse-vault-in linear both;
       animation-timeline: scroll(root);
+    }
+
+    /* The seam is measured from the colophon and report line alone: the
+       apps' line would push the footer a line taller and the vault out of
+       phase with the epilogue, so the wide hours leave it to the other
+       pages. */
+    body.page-hour footer > p.app-stores {
+      display: none;
     }
 
     body.page-hour .office-hour::before {

@@ -98,6 +98,7 @@ impl Pages {
         // The colophon's line on the native apps (presentation::stores); iOS joins it once
         // APP_STORE_ID is set.
         env.add_global("apps_lead", presentation::stores::APPS_LEAD);
+        env.add_global("apps_apple", presentation::stores::APPS_APPLE);
         env.add_global("play_url", presentation::stores::PLAY_URL);
         env.add_global("app_store_id", presentation::stores::APP_STORE_ID.unwrap_or(""));
         env.add_global("app_store_url", presentation::stores::app_store_url().unwrap_or_default());
