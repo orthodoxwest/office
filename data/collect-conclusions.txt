@@ -140,6 +140,9 @@ proper/st-anne/collect through-same
 proper/st-joachim/collect through-same
 proper/transfiguration/collect through-same
 proper/vigil-epiphany/collect through-same
+# Diurnal pp. 489 and 510 print St Cyril's and St Justin's collects with "Through the same".
+proper/st-cyril-jerusalem/collect through-same
+proper/comm-04-14-st-justin-martyr/commemoration-collect through-same
 
 # --- The Holy Spirit is mentioned: "in the unity of the same Holy Ghost" ---
 proper/pentecost/collect through-spirit
