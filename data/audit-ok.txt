@@ -94,7 +94,8 @@ st-venantius *
 st-callistus *
 finding-st-stephen *
 st-placidus-companions *
-st-perpetua-felicitas *
+# Perpetua & Felicitas: Common of Holy Women (Diurnal p. 482), psalm antiphons from it.
+st-perpetua-felicitas psalm-antiphon
 octave-day-st-stephen *
 octave-day-holy-innocents *
 st-gorazde-prague *

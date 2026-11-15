@@ -2631,7 +2631,10 @@ proper/st-maurus/short-responsory-first-vespers,76db5a052506,diurnal,,455,verifi
 proper/st-monica/collect,66636a918b2c,diurnal,,525,verified,codex,2026-09-17,Independent page-image readings agree; cache monastic-diurnal/0571.png; comparison
 proper/st-nicholas/collect,94851d58c59b,diurnal,,447,verified,codex,2026-09-13,Word-for-word after normalization
 proper/st-patrick/collect,db004999ed23,diurnal,,488,verified,codex,2026-09-13,Word-for-word after normalization
-proper/st-perpetua-felicitas/commemoration-collect,495f24ade6bd,diurnal,,483,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-perpetua-felicitas/benedictus-antiphon,3dcffd2b7273,diurnal,,482,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/chapter-none,ba0778b6c40e,diurnal,,55*,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/collect,495f24ade6bd,diurnal,,483,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/versicle-lauds,2a1e9249ee6b,diurnal,,483,verified,claude,2026-11-15,
 proper/st-peter-chrysologus/collect,734293de7d96,diurnal,,446,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-peter-damian/collect,9d571bc96451,diurnal,,481,verified,claude,2026-11-15,
 proper/st-placidus-companions/collect,fff8a2d0cd45,diurnal,,617,verified,codex,2026-09-05,Word-for-word after normalization
