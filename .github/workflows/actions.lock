@@ -96,7 +96,7 @@ dependencies:
         repo_id: 192625955
     'dtolnay/rust-toolchain@1.100.0':
         ref: '1.100.0'
-        commit: 'sha1-9522411a9bce8484da960823fc2f46e52f981f71'
+        commit: 'sha1-d5e4d57b030548f435d0befec15ff413a2c60eff'
         owner_id: 1940490
         repo_id: 260749683
     'gradle/actions@v6.4.1':
