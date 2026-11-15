@@ -158,8 +158,9 @@ R. Thanks be to God.
 @use proper/conversion-st-paul/versicle-sext
 
 [versicle-none]
-# SOURCE: Monastic Diurnal p. 550
-@use proper/conversion-st-paul/versicle-none
+# SOURCE: Monastic Diurnal p. 550 ("O God"; the Conversion's, p. 465, has "O Lord")
+V. Exceedingly honoured are thy friends, O God.
+R. Firmly stablished is their princedom.
 
 [hymn-lauds]
 # SOURCE: Monastic Diurnal p. 549 ("Short R. and Hymn as in the Common, p. 11*")

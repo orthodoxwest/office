@@ -1949,16 +1949,28 @@ fn a_commemorated_office_lends_its_hymn_ending() {
     for (m, d, name) in [(12, 18, "lauds"), (12, 18, "prime"), (8, 16, "lauds"), (8, 16, "terce")] {
         assert!(!hymn(2026, m, d, name).text.contains(VIRGIN_BORN), "2026-{m}-{d} {name}");
     }
-    // The Sorrows ending lives in the feast's own data; checked once it is there.
-    let sorrows = engine().texts.get("proper/our-lady-of-sorrows-passion/hymn-doxology");
-    if !sorrows.is_empty() && !corpus::is_omitted(sorrows) {
-        let line = "Who died to make thy servants live";
-        for (m, d, name) in [(4, 2, "compline"), (4, 3, "prime"), (4, 3, "terce"), (4, 3, "none")] {
-            assert!(hymn(2026, m, d, name).text.contains(line), "2026-{m}-{d} {name}");
-        }
-        for (m, d) in [(4, 2), (4, 3)] {
-            let h = hymn(2026, m, d, "vespers");
-            assert!(h.text.contains("Preserve and govern evermore") && !h.text.contains(line), "2026-{m}-{d} vespers");
-        }
+    let line = "Who died to make thy servants live";
+    for (m, d, name) in [(4, 2, "compline"), (4, 3, "prime"), (4, 3, "terce"), (4, 3, "none")] {
+        assert!(hymn(2026, m, d, name).text.contains(line), "2026-{m}-{d} {name}");
+    }
+    for (m, d) in [(4, 2), (4, 3)] {
+        let h = hymn(2026, m, d, "vespers");
+        assert!(h.text.contains("Preserve and govern evermore") && !h.text.contains(line), "2026-{m}-{d} vespers");
+    }
+}
+
+/// Friday Vespers in Paschaltide commemorate the Saturday Office of Our Lady
+/// with its Paschaltide antiphon and versicle, "O Queen of heaven" and "Full
+/// of grace are thy lips, alleluia" (Diurnal p. 71*), as Saturday Lauds says them.
+#[test]
+fn the_saturday_office_of_our_lady_is_commemorated_in_its_paschal_form() {
+    for date in ["2031-05-09", "2033-05-06", "2035-05-18"] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let refs: Vec<String> = hour.sections.iter().flat_map(|s| s.elements.iter()).flat_map(|e| e.source_refs.iter().cloned()).collect();
+        assert!(refs.iter().any(|r| r == "proper/saturday-office-bvm-paschal/magnificat-antiphon"), "{date}: {refs:?}");
+        assert!(refs.iter().any(|r| r == "proper/saturday-office-bvm-paschal/versicle-vespers"), "{date}: {refs:?}");
+        assert!(!refs.iter().any(|r| r.starts_with("proper/saturday-office-bvm/")), "{date}: {refs:?}");
     }
 }
