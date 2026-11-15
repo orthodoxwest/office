@@ -2612,7 +2612,7 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).tap();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer > p").tap();
+  await page.locator("footer > p").first().tap();
   await expect(menu).not.toHaveAttribute("open", "");
   // The word itself still closes it as well as opening it.
   await page.getByText("Menu", { exact: true }).tap();
@@ -2624,7 +2624,7 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   const settings = page.locator(".site-settings");
   await settings.locator("summary").tap();
   await expect(settings).toHaveAttribute("open", "");
-  await page.locator("footer > p").tap();
+  await page.locator("footer > p").first().tap();
   await expect(settings).not.toHaveAttribute("open", "");
 });
 
@@ -6751,3 +6751,33 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
   // The rail runs the row's height inside its rule (it grows there over 120ms).
   await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
 });
+
+// The native apps (presentation::stores): a phone sees only its own store, and on Android
+// Reminders leads with the app and shuts the calendar's fold before it is painted. An iPhone,
+// with no App Store listing yet, sees neither the offer nor the fold's title: its page reads as
+// the calendar alone, as before.
+for (const [platform, userAgent] of [
+  ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
+  ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
+]) {
+  test(`Reminders and the colophon offer the ${platform} reader their own app`, async ({ browser }) => {
+    const context = await browser.newContext({ userAgent, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.goto("/reminders");
+    await expect(page.locator("html")).toHaveAttribute("data-platform", platform);
+    const ios = await page.locator(".reminder-calendar.has-ios").count() > 0;
+    const offered = platform === "android" || ios;
+    const fold = page.locator("details.reminder-calendar");
+    expect(await fold.evaluate((d) => d.open)).toBe(!offered);
+    await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });
+    await expect(page.locator(".reminder-calendar > summary")).toBeVisible({ visible: offered });
+    await expect(page.locator(".reminders-app .app-store[data-store='android']")).toBeVisible({ visible: platform === "android" });
+    await expect(page.locator(".app-stores")).toBeVisible({ visible: offered });
+    if (platform === "android") {
+      await expect(page.locator(".app-stores")).toHaveText("Also an app for Android");
+      await page.locator(".reminder-calendar > summary").click();
+      await expect(page.locator("#reminders-form")).toBeVisible();
+    }
+    await context.close();
+  });
+}

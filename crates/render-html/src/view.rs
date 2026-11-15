@@ -432,6 +432,7 @@ impl AboutData {
                 AboutBlock::Key { mark, ink, text } => {
                     AboutBlockView { text: text.into(), mark: mark.into(), ink: ink.name(), ..block("key") }
                 }
+                AboutBlock::Elsewhere => block("elsewhere"),
                 AboutBlock::Invitation => block("invitation"),
             })
             .collect();

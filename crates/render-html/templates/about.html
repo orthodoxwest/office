@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
+{% extends "layout.html" %}{% block title %}{{ title }} — Daily Office{% endblock %}{% block description %}What the Divine Office is and where it comes from, the seven hours and when each is prayed, how to begin, and how to read the page.{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament, store_buttons %}
 {# The words are presentation::about's, which the native apps set too. The hour it is now is
    marked as on home (presentation::about::about_current_hour; app.js keeps it by the device's
    clock). #}
@@ -42,6 +42,13 @@
       </dl>
     </section>
     {%- endfor %}
+  </div>
+  {%- elif b.kind == "elsewhere" %}
+  {# The web's word on the other fronts: the apps and their stores (presentation::stores). Hidden
+       on an iPhone or iPad until the App Store listing is set, as the colophon's line is. #}
+  <div class="about-apps app-offer{% if app_store_url %} has-ios{% endif %}">
+    <p>{{ about_apps }}</p>
+    {{ store_buttons(false) }}
   </div>
   {%- elif b.kind == "invitation" %}
   {# Home's invitation, still: its tablet, words and link (app.js restates them by the device's

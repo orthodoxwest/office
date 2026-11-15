@@ -1034,7 +1034,9 @@ pub fn about_now(today: CivilDate, clock_hour: i32) -> Result<AboutNow, OfficeEr
 /// The page for newcomers, as the web's /about.
 #[uniffi::export]
 pub fn about() -> AboutView {
-    use presentation::about::{ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_MENU, ABOUT_TITLE, AboutBlock, AboutRun, about_runs};
+    use presentation::about::{
+        ABOUT, ABOUT_HOURS, ABOUT_INTRODUCTION, ABOUT_MENU, ABOUT_ON_THE_WEB, ABOUT_TITLE, AboutBlock, AboutRun, about_runs,
+    };
     let block = |kind: &str| AboutBlockView {
         kind: kind.into(),
         text: String::new(),
@@ -1043,22 +1045,25 @@ pub fn about() -> AboutView {
         mark: String::new(),
         ink: String::new(),
     };
+    let paragraph = |text: &str| AboutBlockView {
+        runs: about_runs(text)
+            .into_iter()
+            .map(|run| match run {
+                AboutRun::Text(text) => AboutRunView { text, link: String::new() },
+                AboutRun::Link { text, target } => AboutRunView { text, link: target },
+            })
+            .collect(),
+        ..block("paragraph")
+    };
     let blocks = ABOUT
         .iter()
         .map(|b| match *b {
             AboutBlock::Intro(text) => AboutBlockView { text: text.into(), ..block("intro") },
             AboutBlock::Verse { text, cite } => AboutBlockView { text: text.into(), cite: cite.into(), ..block("verse") },
             AboutBlock::Heading(text) => AboutBlockView { text: text.into(), ..block("heading") },
-            AboutBlock::Paragraph(text) => AboutBlockView {
-                runs: about_runs(text)
-                    .into_iter()
-                    .map(|run| match run {
-                        AboutRun::Text(text) => AboutRunView { text, link: String::new() },
-                        AboutRun::Link { text, target } => AboutRunView { text, link: target },
-                    })
-                    .collect(),
-                ..block("paragraph")
-            },
+            AboutBlock::Paragraph(text) => paragraph(text),
+            // The apps' word on the other front is the website, set as any paragraph.
+            AboutBlock::Elsewhere => paragraph(ABOUT_ON_THE_WEB),
             AboutBlock::Hours => block("hours"),
             AboutBlock::Note(text) => AboutBlockView { text: text.into(), ..block("note") },
             AboutBlock::Key { mark, ink, text } => {

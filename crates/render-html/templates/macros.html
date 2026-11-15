@@ -17,6 +17,16 @@
 </svg>
 {% endmacro %}
 {% macro fish() %}<svg class="fish-flag" width="18" height="9" fill="currentColor" aria-hidden="true" focusable="false"><use href="#icon-fish"/></svg>{% endmacro %}
+{# The stores' buttons (presentation::stores), set as Reminders' tablet, or as worded links. A phone sees only its own
+   (style.css's "The apps"); the App Store's comes with its listing. #}
+{% macro store_buttons(tablet=true) %}
+    <p class="store-buttons">
+      <a class="{% if tablet %}reminder-subscribe {% endif %}app-store" data-store="android" href="{{ play_url|url }}">{{ play_label }}</a>
+      {%- if app_store_url %}
+      <a class="{% if tablet %}reminder-subscribe {% endif %}app-store" data-store="ios" href="{{ app_store_url|url }}">{{ app_store_label }}</a>
+      {%- endif %}
+    </p>
+{% endmacro %}
 {% macro report_issue(report_url) %}
     <p class="report-issue">
       Spotted an error on this page? <a href="{{ report_url|url }}" target="_blank" rel="noopener">Report a problem</a>

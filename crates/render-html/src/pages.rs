@@ -95,6 +95,20 @@ impl Pages {
         // The About page's names in the menu and on home, as the apps set them.
         env.add_global("about_menu", presentation::about::ABOUT_MENU);
         env.add_global("about_introduction", presentation::about::ABOUT_INTRODUCTION);
+        // The colophon's line on the native apps (presentation::stores); iOS joins it once
+        // APP_STORE_ID is set.
+        env.add_global("apps_lead", presentation::stores::APPS_LEAD);
+        env.add_global("apps_apple", presentation::stores::APPS_APPLE);
+        env.add_global("play_url", presentation::stores::PLAY_URL);
+        env.add_global("app_store_id", presentation::stores::APP_STORE_ID.unwrap_or(""));
+        env.add_global("app_store_url", presentation::stores::app_store_url().unwrap_or_default());
+        env.add_global("play_label", presentation::stores::PLAY_LABEL);
+        env.add_global("app_store_label", presentation::stores::APP_STORE_LABEL);
+        env.add_global("about_apps", presentation::stores::ABOUT_APPS);
+        env.add_global("reminders_app", presentation::stores::REMINDERS_APP);
+        env.add_global("reminders_calendar", presentation::stores::REMINDERS_CALENDAR);
+        env.add_global("reminders_calendar_lead", presentation::stores::REMINDERS_CALENDAR_LEAD);
+        env.add_global("reminders_calendar_intro", presentation::stores::REMINDERS_CALENDAR_INTRO);
         // The office being prayed from each clock hour, as a script literal for home's pre-paint mark
         // of the hour ([start, slug, name, day offset], home.html).
         env.add_global("hour_schedule", Value::from_safe_string(hour_schedule_literal()));
@@ -248,6 +262,21 @@ mod tests {
         let late = pages.about(&AboutData::new(chrome(), today, 1)).unwrap();
         assert!(!late.contains("is-current"));
         assert!(late.contains(r#"<a class="pray-now" href="&#x2f;compline&#x2f;2026-11-12">Pray Compline</a>"#));
+    }
+
+    #[test]
+    fn colophon_names_only_the_apps_that_are_in_a_store() {
+        use crate::view::{AboutData, Chrome};
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
+        let chrome = Chrome { page: "about".into(), ..Chrome::default() };
+        let html = pages.about(&AboutData::new(chrome, calendar::Date::new(2026, 11, 13), 15)).unwrap();
+        let footer = &html[html.find("<footer>").unwrap()..];
+        assert!(footer.contains(r#"data-store="android"><a href="https:&#x2f;&#x2f;play.google.com&#x2f;store&#x2f;apps&#x2f;details?id=org.orthodoxwest.office">Android</a>"#));
+        // iPhone, Safari's banner and the line for an iPhone reader come with the listing.
+        let ios = presentation::stores::APP_STORE_ID.is_some();
+        assert_eq!(footer.contains(r#"data-store="ios""#), ios);
+        assert_eq!(footer.contains("app-stores has-ios"), ios);
+        assert_eq!(html.contains(r#"name="apple-itunes-app""#), ios);
     }
 
     #[test]

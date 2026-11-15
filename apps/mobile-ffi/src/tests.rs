@@ -183,7 +183,12 @@ fn about_lights_and_invites_to_the_hour_home_does() {
             "{hour}"
         );
     }
-    assert_eq!(crate::about().blocks.last().map(|b| b.kind.as_str()), Some("invitation"));
+    let blocks = crate::about().blocks;
+    assert_eq!(blocks.last().map(|b| b.kind.as_str()), Some("invitation"));
+    // Before it, the apps name the website, for a reader who found the app first.
+    let web = &blocks[blocks.len() - 2];
+    assert_eq!(web.kind, "paragraph");
+    assert!(web.runs.iter().any(|r| r.link == "https://orthodoxwestbreviary.com"));
 }
 
 #[test]

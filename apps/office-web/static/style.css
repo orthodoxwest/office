@@ -1208,6 +1208,114 @@ body:is(.page-home, .page-hour) footer > p {
   margin: calc(-1 * var(--reserve-pad)) 0;
 }
 
+/* ── The apps ──
+   The colophon's last line names the native apps (layout.html, presentation::stores), set as
+   the report line is. A phone sees only its own platform's (data-platform, set before the first
+   paint); an iPhone sees none until the App Store listing is set (.has-ios). Home keeps its
+   colophon to the one line: the wide home fits its niche and colophon to the screen. */
+
+footer .app-stores {
+  margin: 0.3rem 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+body:is(.page-home, .page-hour) footer > p.app-stores {
+  margin: calc(0.3rem - var(--reserve-pad)) 0 calc(-1 * var(--reserve-pad));
+}
+
+.app-stores a {
+  color: var(--accent);
+}
+
+:root[data-platform="android"] .app-store:not([data-store="android"]),
+:root[data-platform="ios"] .app-store:not([data-store="ios"]),
+:root[data-platform] .app-store-and,
+:root[data-platform="ios"] :is(.app-stores, .app-offer):not(.has-ios),
+.page-home .app-stores {
+  display: none;
+}
+
+/* The stores' buttons: Reminders' tablet, one to a store, side by side where they fit. */
+.store-buttons .reminder-subscribe {
+  flex: 1 1 14rem;
+}
+
+.store-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 0.2rem 0 0;
+}
+
+/* About keeps one tablet, its closing invitation to pray: the stores there are
+   worded links. */
+.about-apps .store-buttons {
+  gap: 0.2rem 1.2rem;
+}
+
+.reminders-app {
+  margin-bottom: 1.6rem;
+}
+
+.reminders-app .reminders-intro {
+  margin-bottom: 0.9rem;
+}
+
+/* The calendar feed's fold, under the app: a titulus over a rule, as the
+   page's sections are, with the caret its "Setting it up" carries. Where no
+   app can be offered, the fold has no title and the feed is the page. */
+.reminder-calendar {
+  border-top: 1px solid var(--border);
+}
+
+.reminder-calendar > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--touch-target);
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
+  list-style: none;
+}
+
+.reminder-calendar > summary::-webkit-details-marker {
+  display: none;
+}
+
+.reminder-calendar > summary::after {
+  content: "";
+  width: 0.34rem;
+  height: 0.28rem;
+  margin-left: 0.4rem;
+  background: var(--gold-line);
+  -webkit-mask: var(--reminder-caret) center / contain no-repeat;
+  mask: var(--reminder-caret) center / contain no-repeat;
+}
+
+.reminder-calendar[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) {
+  border-top: 0;
+}
+
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) > summary,
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) .reminder-calendar-lead {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .reminder-calendar > summary::after {
+    background: CanvasText;
+  }
+}
+
 /* ── Report a problem ── */
 
 .report-issue {
@@ -5759,7 +5867,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.session-prayers::details-content,
     :root.motion-ready details.day-office-details::details-content,
     :root.motion-ready details.reminder-address::details-content,
-    :root.motion-ready details.reminder-help::details-content {
+    :root.motion-ready details.reminder-help::details-content,
+    :root.motion-ready details.reminder-calendar::details-content {
       block-size: 0;
       opacity: 0;
       overflow: clip;
@@ -5773,7 +5882,8 @@ body.hour-bare .hour-header:has(.ornament-headpiece > span[data-sign]) {
     :root.motion-ready details.session-prayers[open]::details-content,
     :root.motion-ready details.day-office-details[open]::details-content,
     :root.motion-ready details.reminder-address[open]::details-content,
-    :root.motion-ready details.reminder-help[open]::details-content {
+    :root.motion-ready details.reminder-help[open]::details-content,
+    :root.motion-ready details.reminder-calendar[open]::details-content {
       block-size: auto;
       opacity: 1;
       transition:
@@ -10192,6 +10302,7 @@ html {
   .about a,
   .reminder-address > summary,
   .reminder-help > summary,
+  .reminder-calendar > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
@@ -10242,6 +10353,7 @@ html {
   .about a,
   .reminder-address > summary,
   .reminder-help > summary,
+  .reminder-calendar > summary,
   .reminders-privacy a,
   .reminder-help a,
   .leader-selector > summary,
@@ -11809,6 +11921,14 @@ body.page-hour .report-issue {
       mask-composite: intersect;
       animation: apse-vault-in linear both;
       animation-timeline: scroll(root);
+    }
+
+    /* The seam is measured from the colophon and report line alone: the
+       apps' line would push the footer a line taller and the vault out of
+       phase with the epilogue, so the wide hours leave it to the other
+       pages. */
+    body.page-hour footer > p.app-stores {
+      display: none;
     }
 
     body.page-hour .office-hour::before {
