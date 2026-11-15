@@ -12,6 +12,7 @@ pub mod concurrence;
 pub mod day;
 pub mod engine;
 pub mod feast;
+pub mod finish;
 pub mod hourdef;
 pub mod hymn;
 pub mod lauds_psalmody;

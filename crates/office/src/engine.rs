@@ -10,9 +10,10 @@ use liturgy::{ElementType, OfficeElement, OfficeHour, PrayerForm, VoiceSpan};
 use crate::conclusion::apply_conclusion;
 use crate::concurrence::VespersOwner;
 use crate::day::Day;
+use crate::finish::Settled;
 use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_triduum_form};
 use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
-use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
+use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, psalm_doxology_ref, says_psalm_doxology};
 use crate::texts::{OfficeTexts, load_texts};
 use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, seasonal, vespers, voice};
 
@@ -102,14 +103,12 @@ impl Engine {
                 "Diurnal pp. 360–361, Vespers apart from Mass",
             ));
         }
-        crate::leader::apply_leader(&mut hour, form, t)?;
-        drop_empty_sections(&mut hour);
-        canonicalize_source_refs(&mut hour, t);
-        collapse_uniform_antiphons(&mut hour);
-        mark_psalm_doxologies(&mut hour);
-        crate::posture::mark_postures(&mut hour, day, hour_name);
-        mark_announced_antiphons(&mut hour, day, hour_name);
-        crate::unrepeated::mark_unrepeated_openings(&mut hour);
+        // The shared passes, in the order their states allow (see `finish`).
+        let mut classified = Settled::settle(hour, form, t)?.classify();
+        crate::posture::mark_postures(&mut classified, day, hour_name);
+        let mut announced = classified.announce(day, hour_name);
+        crate::unrepeated::mark_unrepeated_openings(&mut announced);
+        let mut hour = announced.into_hour();
         crate::chant::attach_scores(&mut hour, t);
         append_context_decisions(&mut hour, day, hour_name, moveable);
         // A missing corpus entry is a composition failure, never rendered text:
@@ -122,7 +121,7 @@ impl Engine {
 }
 
 /// Review dependencies follow corpus aliases.
-fn canonicalize_source_refs(hour: &mut OfficeHour, t: &OfficeTexts) {
+pub(crate) fn canonicalize_source_refs(hour: &mut OfficeHour, t: &OfficeTexts) {
     for section in &mut hour.sections {
         for elem in &mut section.elements {
             let original = if elem.source_refs.is_empty() && !elem.source_ref.is_empty() {
@@ -226,7 +225,7 @@ fn append_evening_office_context_decisions(d: &mut Vec<Decision>, office_day: &D
 /// Psalm groups "under one antiphon": within a run of psalm-bearing
 /// sections, three or more consecutive equal antiphons keep only the first
 /// and the last.
-fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
+pub(crate) fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
     let has_psalmody = |s: &liturgy::OfficeSection| s.elements.iter().any(|e| e.kind.is_psalmody());
     let mut start = 0;
     while start < hour.sections.len() {
@@ -268,44 +267,12 @@ fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
 
 /// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
 /// of a Double office (General Rubrics I.4 / XXIV.8).
-fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
+pub(crate) fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
     if hour_name != "lauds" && hour_name != "vespers" {
         return false;
     }
     let office_day = if hour_name == "vespers" { vespers::vespers_office_day(day) } else { day.clone() };
     office_day.celebration.as_deref().is_some_and(|c| c.rank.is_double())
-}
-
-/// Flags the opening antiphon of each psalm when antiphons are not doubled.
-/// Vespers of the Dead is said as a Double.
-fn mark_announced_antiphons(hour: &mut OfficeHour, day: &Day, hour_name: &str) {
-    let doubled = antiphons_doubled(day, hour_name);
-    let mut in_dead = false;
-    for section in &mut hour.sections {
-        if section.label == VESPERS_OF_THE_DEAD_LABEL {
-            in_dead = true;
-        }
-        if doubled || in_dead {
-            continue;
-        }
-        let n = section.elements.len();
-        for i in 0..n {
-            if section.elements[i].kind == ElementType::Antiphon && i + 1 < n && section.elements[i + 1].kind.is_psalmody() {
-                section.elements[i].announce = true;
-            }
-        }
-    }
-}
-
-/// A doxology directly after a psalm or canticle is a psalm doxology.
-fn mark_psalm_doxologies(hour: &mut OfficeHour) {
-    for section in &mut hour.sections {
-        for i in 1..section.elements.len() {
-            if section.elements[i].kind == ElementType::Doxology && section.elements[i - 1].kind.is_psalmody() {
-                section.elements[i].kind = ElementType::PsalmDoxology;
-            }
-        }
-    }
 }
 
 /// Resolves a plain element by looking up its text.
@@ -397,10 +364,6 @@ pub fn append_resolved(elems: &mut Vec<OfficeElement>, oe: OfficeElement) {
     if !corpus::is_omitted(&oe.text) {
         elems.push(oe);
     }
-}
-
-fn drop_empty_sections(hour: &mut OfficeHour) {
-    hour.sections.retain(|s| !s.elements.is_empty());
 }
 
 fn element(kind: ElementType, text: String, slot_ref: &str, src: &str) -> OfficeElement {
