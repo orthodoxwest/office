@@ -174,7 +174,7 @@ Stay me with flagons, * comfort me with apples; for I am sick of love.
 
 [chapter-lauds]
 # SOURCE: Monastic Diurnal p. 507 (At Lauds)
-!Isaiah 53:1, 2
+!Isa. 53:1, 2
 Who hath believed our report? and to whom is the arm of the Lord revealed? For he shall grow up before him as a tender plant, * and as a root out of a dry ground.
 R. Thanks be to God.
 
@@ -188,13 +188,13 @@ R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: Monastic Diurnal pp. 508-509 (At Sext)
-!Isaiah 53:5
+!Isa. 53:5
 He was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; * and with his stripes we are healed.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: Monastic Diurnal p. 509 (At None)
-!Isaiah 53:8
+!Isa. 53:8
 Who shall declare his generation? for he was cut off out of the land of the living: * for the transgression of my people was he stricken.
 R. Thanks be to God.
 
