@@ -1365,6 +1365,14 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
         (Date::new(2037, 5, 27), "vespers", "st-bede-venerable", "O Teacher"),
         (Date::new(2046, 6, 17), "vespers", "st-ephrem-syrian", "O Teacher"),
         (Date::new(2046, 6, 18), "vespers", "st-ephrem-syrian", "O Teacher"),
+        // Martyrs' own antiphons, written for the rest of the year, yield to
+        // the Paschal Common of Martyrs (Diurnal p. 6*, §3; 2021 and 2024
+        // ordos: Ss John and Paul, "Light perpetual", "Daughters of
+        // Jerusalem", not "The righteous" and "These are the holy ones").
+        (Date::new(2024, 6, 25), "vespers", "ss-john-paul-martyrs", "Light perpetual"),
+        (Date::new(2024, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
+        (Date::new(2027, 6, 25), "vespers", "ss-john-paul-martyrs", "Light perpetual"),
+        (Date::new(2027, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
     ] {
         let found = commemorated(date, hour, owner);
         let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));

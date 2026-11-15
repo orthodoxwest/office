@@ -12,7 +12,7 @@ use crate::engine::{compact_refs, resolve_element};
 use crate::hourdef::HourElement;
 use crate::proper::{
     advent_date_commemoration_antiphon, feast_proper_ids, feast_proper_name, is_synthesized_feria, lookup_commons_text,
-    lookup_section_text, resolve_proper_text, substitute_proper_name,
+    lookup_section_text, paschal_common_antiphon, resolve_proper_text, substitute_proper_name,
 };
 use crate::psalmody::is_office_of_the_dead;
 use crate::texts::OfficeTexts;
@@ -202,8 +202,9 @@ fn lookup_following_office_commemoration(feast: &Feast, season: Season, referenc
     // The feast's own Vespers text outranks its Common's I-Vespers one.
     for candidate in candidates {
         for id in feast_proper_ids(feast) {
-            let (text, source) = lookup_section_text(&format!("proper/{id}/"), Some(season), "vespers", candidate, t);
-            if !text.is_empty() {
+            let found = lookup_section_text(&format!("proper/{id}/"), Some(season), "vespers", candidate, t);
+            if !found.0.is_empty() {
+                let (text, source) = paschal_common_antiphon(feast, season, "vespers", candidate, found, t);
                 return (substitute_proper_name(&text, &feast_proper_name(feast)), source);
             }
         }
@@ -392,16 +393,18 @@ fn lookup_commemoration_office(
     let proper_name = feast_proper_name(feast);
     let ids = feast_proper_ids(feast);
     for id in &ids {
-        let (text, resolved) = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, reference, t);
-        if !text.is_empty() {
+        let found = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, reference, t);
+        if !found.0.is_empty() {
+            let (text, resolved) = paschal_common_antiphon(feast, season, hour_name, reference, found, t);
             return (substitute_proper_name(&text, &proper_name), resolved);
         }
     }
     let fallbacks = commemoration_fallback_slots(hour_name, reference, first_vespers);
     for fallback in &fallbacks {
         for id in &ids {
-            let (text, resolved) = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, fallback, t);
-            if !text.is_empty() {
+            let found = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, fallback, t);
+            if !found.0.is_empty() {
+                let (text, resolved) = paschal_common_antiphon(feast, season, hour_name, fallback, found, t);
                 return (substitute_proper_name(&text, &proper_name), resolved);
             }
         }
