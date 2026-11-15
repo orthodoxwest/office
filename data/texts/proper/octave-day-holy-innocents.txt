@@ -174,3 +174,59 @@ These are they * which were not defiled with women; for they are virgins: and th
 #
 # [psalm-antiphon-5-first-vespers]
 # I Vespers override for psalm antiphon 5.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At Lauds: "Chapter and the rest as on the Feast, p. 201")
+@use proper/holy-innocents/chapter-lauds
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At Lauds: "Chapter and the rest as on the Feast, p. 201")
+@use proper/holy-innocents/short-responsory-lauds
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At Lauds: "Chapter and the rest as on the Feast, p. 201")
+@use proper/holy-innocents/hymn-lauds
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At Lauds: "Chapter and the rest as on the Feast, p. 201")
+@use proper/holy-innocents/versicle-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/chapter-terce
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/chapter-none
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/versicle-terce
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/versicle-sext
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 221 ("At the Little Hours all as on the Feast")
+@use proper/holy-innocents/versicle-none
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At I Vespers: "Chapter, Short R., and Hymn as at Vespers of the Feast, p. 203")
+@use proper/holy-innocents/chapter-vespers
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At I Vespers: "Chapter, Short R., and Hymn as at Vespers of the Feast, p. 203")
+@use proper/holy-innocents/short-responsory-vespers
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At I Vespers: "Chapter, Short R., and Hymn as at Vespers of the Feast, p. 203")
+@use proper/holy-innocents/hymn-vespers
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal p. 221 (January 4, At I Vespers: "V. Herod was exceeding wroth"), the Feast's Lauds versicle
+@use proper/holy-innocents/versicle-lauds

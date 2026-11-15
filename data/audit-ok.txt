@@ -96,8 +96,6 @@ finding-st-stephen *
 st-placidus-companions *
 # Perpetua & Felicitas: Common of Holy Women (Diurnal p. 482), psalm antiphons from it.
 st-perpetua-felicitas psalm-antiphon
-octave-day-st-stephen *
-octave-day-holy-innocents *
 st-gorazde-prague *
 st-ignatius-antioch *
 st-irenaeus *
@@ -138,7 +136,11 @@ chains-st-peter psalm-antiphon benedictus-antiphon magnificat-antiphon commemora
 chair-peter-rome *
 commemoration-st-paul-apostle magnificat-antiphon
 st-john-latin-gate psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-octave-day-st-john psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+# Octave days of St Stephen, St John and the Holy Innocents: the occurring feria's psalm
+# antiphons, the rest as on the Feast (Diurnal pp. 220-221).
+octave-day-st-stephen psalm-antiphon
+octave-day-st-john psalm-antiphon
+octave-day-holy-innocents psalm-antiphon
 
 # Vigils — ferial offices with proper collect (and sometimes a proper
 # Benedictus antiphon). Psalm antiphons come from the seasonal/ordinary
