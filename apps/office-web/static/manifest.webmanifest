@@ -7,6 +7,14 @@
   "display": "fullscreen",
   "background_color": "#faf3e9",
   "theme_color": "#faf3e9",
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=org.orthodoxwest.office",
+      "id": "org.orthodoxwest.office"
+    }
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/static/icons/icon-192.png",

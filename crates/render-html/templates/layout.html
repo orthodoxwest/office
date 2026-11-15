@@ -48,6 +48,14 @@
           history.replaceState(null, "", location.pathname + location.search);
         }
       } catch (e) {}
+      {# The reader's phone, if it is one, so the colophon names only its own app (style.css's
+           "The apps"). iPadOS calls itself a Mac, but a Mac has no touch screen. #}
+      try {
+        var ua = navigator.userAgent || "";
+        var platform = /Android/.test(ua) ? "android"
+          : (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) ? "ios" : "";
+        if (platform) document.documentElement.setAttribute("data-platform", platform);
+      } catch (e) {}
       try {
         var leaders = ["private", "deacon", "priest"];
         var requestedLeader = new URLSearchParams(location.search).get("form");
@@ -171,6 +179,9 @@
   {% if page == "usage" %}<style>@view-transition { navigation: none; }</style>{% endif %}
   <link rel="icon" type="image/svg+xml" href="{{ static("favicon.svg")|url }}">
   <link rel="manifest" href="{{ static("manifest.webmanifest")|url }}">
+  {# Safari's own Smart App Banner, dismissed with a tap and never shown elsewhere; only once the
+       App Store listing exists (presentation::stores::APP_STORE_ID). #}
+  {% if app_store_id %}<meta name="apple-itunes-app" content="app-id={{ app_store_id }}">{% endif %}
   <link rel="apple-touch-icon" href="{{ static("icons/apple-touch-icon.png")|url }}">
   <meta name="color-scheme" content="light dark">
   <script src="{{ static("leader.js")|url }}" defer></script>
@@ -252,6 +263,10 @@
     <p>Benedictine Divine Office</p>
     {# Footer matter a page adds under the tailpiece (the hours' report link). #}
     {% block footer_matter %}{% endblock %}
+    {# The native apps, in one quiet line (presentation::stores). A reader on a phone sees only
+         their own platform's, by the pre-paint script's data-platform; one on an iPhone or iPad
+         sees nothing until the App Store listing is set. #}
+    <p class="app-stores{% if app_store_url %} has-ios{% endif %}">{{ apps_lead }} <span class="app-store" data-store="android"><a href="{{ play_url|url }}">Android</a></span>{% if app_store_url %}<span class="app-store-and"> and </span><span class="app-store" data-store="ios"><a href="{{ app_store_url|url }}">iPhone</a></span>{% endif %}</p>
   </footer>
 </body>
 </html>

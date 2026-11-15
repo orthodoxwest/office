@@ -2612,7 +2612,7 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   await expect(menu).not.toHaveAttribute("open", "");
   await page.getByText("Menu", { exact: true }).tap();
   await expect(menu).toHaveAttribute("open", "");
-  await page.locator("footer > p").tap();
+  await page.locator("footer > p").first().tap();
   await expect(menu).not.toHaveAttribute("open", "");
   // The word itself still closes it as well as opening it.
   await page.getByText("Menu", { exact: true }).tap();
@@ -2624,7 +2624,7 @@ test("menus put away on a tap iOS Safari sends no click for", async ({ page }) =
   const settings = page.locator(".site-settings");
   await settings.locator("summary").tap();
   await expect(settings).toHaveAttribute("open", "");
-  await page.locator("footer > p").tap();
+  await page.locator("footer > p").first().tap();
   await expect(settings).not.toHaveAttribute("open", "");
 });
 

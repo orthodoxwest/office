@@ -1208,6 +1208,32 @@ body:is(.page-home, .page-hour) footer > p {
   margin: calc(-1 * var(--reserve-pad)) 0;
 }
 
+/* ── The apps ──
+   The colophon's last line names the native apps (layout.html, presentation::stores), set as
+   the report line is. A phone sees only its own platform's (data-platform, set before the first
+   paint); an iPhone sees none until the App Store listing is set (.has-ios). */
+
+footer .app-stores {
+  margin: 0.3rem 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+body:is(.page-home, .page-hour) footer > p.app-stores {
+  margin: calc(0.3rem - var(--reserve-pad)) 0 calc(-1 * var(--reserve-pad));
+}
+
+.app-stores a {
+  color: var(--accent);
+}
+
+:root[data-platform="android"] .app-store:not([data-store="android"]),
+:root[data-platform="ios"] .app-store:not([data-store="ios"]),
+:root[data-platform] .app-store-and,
+:root[data-platform="ios"] .app-stores:not(.has-ios) {
+  display: none;
+}
+
 /* ── Report a problem ── */
 
 .report-issue {

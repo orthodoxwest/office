@@ -11,6 +11,7 @@ pub mod feast;
 pub mod gloss;
 pub mod rails;
 pub mod reminders;
+pub mod stores;
 pub mod sun;
 pub mod usage;
 
