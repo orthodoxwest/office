@@ -640,7 +640,7 @@ fn vigil_preces_at_prime_and_at_compline_of_the_vespers_office() {
         (Date::new(2025, 11, 29), true),
         (Date::new(2026, 8, 8), true),
         (Date::new(2026, 11, 28), true),
-        (Date::new(2030, 2, 23), true),
+        (Date::new(2024, 2, 24), false),
         (Date::new(2025, 8, 9), false),
         (Date::new(2026, 7, 24), false),
         (Date::new(2026, 10, 31), false),

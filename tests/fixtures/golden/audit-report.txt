@@ -8,16 +8,14 @@
 
 === Translation review: 0 mixed-register, 0 modern-pronoun collect(s) ===
 
-=== Suppressed: 81 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 78 feast(s) via data/audit-ok.txt ===
   rogation-monday
   friday-after-ascension-octave
   whit-ember-wednesday
   whit-ember-friday
   whit-ember-saturday
-  our-lady-of-sorrows-passion
-  octave-day-st-stephen
-  octave-day-holy-innocents
   st-anthony-egypt
+  st-peter-damian
   st-matthias
   st-gregory-great
   st-patrick
@@ -74,7 +72,6 @@
   st-cyril-alexandria
   st-ignatius-antioch
   st-romuald
-  st-perpetua-felicitas
   st-cuthbert
   st-john-damascene
   st-leo-great

@@ -354,11 +354,15 @@ FEBRUARY
                Com. St Paul ("O holy Apostle Paul")
            Hours   No Preces
            Vespers w · II prec. · Mag. During his pontificate · No Suff.
+               Com. St Peter Damian, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. St Paul ("O holy Apostle Paul")
- 23  Tue     Vigil of St Matthias                       [s]   v
-           Lauds   v · Ben. The Lord hath raised up for us · No Preces · Suff.
-           Hours   Preces
+ 23  Tue     St Peter Damian, Bishop, Confessor & Doctor [d]   w
+           Vigil of St Matthias (s)
+           Lauds   w · Ben. Well done · No Preces · No Suff.
+               Com. Vigil of St Matthias ("The Lord hath raised up for us")
+           Hours   No Preces
            Vespers r · I fol. (St Matthias, Apostle) · Mag. They will deliver you up · No Suff.
+               Com. St Peter Damian, Bishop, Confessor & Doctor ("O Teacher right excellent")
  24  Wed     St Matthias, Apostle                       [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
@@ -419,11 +423,11 @@ MARCH
            Vespers r · I fol. (Ss Perpetua & Felicitas, Martyrs) · Mag. For theirs is the kingdom of heaven · No Suff.
                Com. Friday after Septuagesima ("So the last")
   6  Sat     Ss Perpetua & Felicitas, Martyrs           [d]   r
-           Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
+           Lauds   r · Ben. For theirs is the kingdom of heaven · No Preces · No Suff.
                Com. Saturday before Sexagesima ("Give light, O Lord")
            Hours   No Preces
            Vespers v · I fol. (Sexagesima Sunday) · Mag. The Lord · No Suff.
-               Com. Ss Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
+               Com. Ss Perpetua & Felicitas, Martyrs ("For theirs is the kingdom of heaven")
   7  Sun     Sexagesima Sunday                          [2cl] v
            Lauds   v · Ben. When much people · No Preces · Suff.
            Hours   Preces
@@ -694,17 +698,17 @@ APRIL
            Hours   Preces
            Vespers r · I fol. (St George, Martyr) · Mag. This is a Martyr · No Suff.
                Com. Thursday after Passion Sunday ("With desire")
-               Com. Our Lady of Sorrows ("O holy Mary")
+               Com. Our Lady of Sorrows ("Simeon")
  23  Fri  L§ ST GEORGE, MARTYR                          [1cl] r
            Friday after Passion Sunday (f2)
            Our Lady of Sorrows (gd)
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
                Com. Friday after Passion Sunday ("Now the feast day of the Jews")
-               Com. Our Lady of Sorrows ("Blessed art thou")
+               Com. Our Lady of Sorrows ("When Jesus therefore")
            Hours   No Preces
            Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
                Com. Friday after Passion Sunday ("The chief priests")
-               Com. Our Lady of Sorrows ("All generations")
+               Com. Our Lady of Sorrows ("When Jesus therefore")
  24  Sat  L§ Saturday after Passion Sunday              [f2]  v
            Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
            Hours   Preces
@@ -868,7 +872,7 @@ MAY
                Com. St Vincent of Lerins, Confessor ("I will liken him")
  24  Mon     Feria                                            w
            St Vincent of Lerins, Confessor (com)
-           Lauds   w · Ben. Blessed · No Preces · No Suff.
+           Lauds   w · Ben. And beginning · No Preces · No Suff.
                Com. St Vincent of Lerins, Confessor ("Well done, good and faithful servant")
            Hours   Preces
            Vespers w · Mag. Your sorrow · No Suff.
@@ -1094,7 +1098,7 @@ JUNE
  30  Wed     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)
            Day VII within the Octave of St John Baptist (sd)
-           Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
+           Lauds   w · Ben. Ye which have followed me · No Preces · No Suff.
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Day VII within the Octave of St John Baptist ("The mouth of Zacharias")
            Hours   No Preces

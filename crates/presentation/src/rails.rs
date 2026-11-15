@@ -286,7 +286,9 @@ mod tests {
                 }
             }
         }
-        assert_eq!(since_2026, 273);
-        assert_eq!(all, 360);
+        // St Peter Damian (23 Feb) takes the Vigil of St Matthias's day outside
+        // Lent, so that vigil is only commemorated (Diurnal p. 481).
+        assert_eq!(since_2026, 268);
+        assert_eq!(all, 354);
     }
 }
