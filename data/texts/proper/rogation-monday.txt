@@ -10,8 +10,13 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
+[collect]
+# SOURCE: Monastic Diurnal p. 386 (Rogation Monday, at Lauds: "This Collect is said at Lauds and the Hours on this day only")
+Grant, we beseech thee, Almighty God: that we who in our afflictions do put our trust in thy goodness, may ever be defended by thy protection against all adversities.
+
+[collect-vespers]
+# SOURCE: Monastic Diurnal p. 386 ("but at Vespers of this day ... the Collect of the preceding Sunday is said")
+@use proper/easter-sunday-5/collect
 #
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
