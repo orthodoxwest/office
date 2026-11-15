@@ -503,11 +503,17 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             // hymns of the metre (Our Lady of Sorrows, Diurnal pp. 505, 602);
             // @omit marks a hymn whose ending "is never changed".
             let (own_dox, own_ref) = resolve_proper_text(day, hour_name, "hymn-doxology", t);
+            let is_found = |r: &str| r.starts_with("seasonal/") || r.starts_with("proper/");
             let (dox, dox_ref) = match own_ref.starts_with("proper/") {
                 true => (own_dox, own_ref),
-                false => hymn_doxology(day, hour_name, t),
+                // A season's "never changed" mark (@omit) speaks for the
+                // season's own hymn, not a saint's that falls in it.
+                false => match hymn_doxology(day, hour_name, t) {
+                    seasonal if is_found(&seasonal.1) && (src.starts_with("seasonal/") || !corpus::is_omitted(&seasonal.0)) => seasonal,
+                    seasonal => commemorated_hymn_doxology(day, hour_name, t).unwrap_or(seasonal),
+                },
             };
-            let found = dox_ref.starts_with("seasonal/") || dox_ref.starts_with("proper/");
+            let found = is_found(&dox_ref);
             if found && !corpus::is_omitted(&dox) && has_common_metre_ending(&text) {
                 text = substitute_hymn_doxology(&text, &dox);
                 refs.push(dox_ref);
@@ -604,6 +610,48 @@ fn hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> (String, String
         return (String::new(), String::new());
     }
     resolve_proper_text(day, hour_name, reference, t)
+}
+
+/// General Rubrics XXIII.10: "if the Office of the day lacks a proper Hymn
+/// ending, the ending is taken from the first commemorated Office from among
+/// the others which has a proper ending. This is observed at I and II Vespers
+/// and at the Compline following them, so that the Hymn ending of any Feast
+/// ... is not used if the Commemoration itself is omitted at Vespers. If
+/// there is no proper Hymn ending, even of a commemorated Office, then it is
+/// taken from an occurring Common Octave or from the Season." The caller asks
+/// only when neither the office nor the season gives an ending, so the
+/// seasonal endings of Christmas, the Epiphany Octave and Paschaltide stand
+/// (XXIII.4–8). Lauds and the Hours through None take the commemorations of
+/// Lauds; Vespers and the Compline after it those of Vespers (Diurnal p. 505:
+/// Our Lady of Sorrows commemorated on the Friday after Passion Sunday ends
+/// the Hymns "at Compline and at the Hours through None"). A commemorated
+/// feast's ending is its own `hymn-doxology`, or Our Lady's (XXIII.4(c)),
+/// which is never used in Advent. A day within an Octave is not counted: a
+/// saint's feast within Our Lady's or Corpus Christi's Octave keeps the
+/// ordinary ending as the ordos print it (St Joachim, 2023–2026; ruling
+/// pending in #635).
+fn commemorated_hymn_doxology(day: &Day, hour_name: &str, t: &OfficeTexts) -> Option<(String, String)> {
+    const NATIVITY: &str = "seasonal/christmas/hymn-doxology";
+    if crate::psalmody::is_office_of_the_dead(day) {
+        return None;
+    }
+    let comms = match hour_name {
+        "vespers" | "compline" => day.commemorations.clone(),
+        _ => calendar::commemoration::lauds_commemorations(&day.cal),
+    };
+    comms.iter().find_map(|c| {
+        if octave_parent_id(c).is_some() || crate::proper::is_synthesized_feria(c) {
+            return None;
+        }
+        for id in crate::proper::feast_proper_ids(c) {
+            let key = format!("proper/{id}/hymn-doxology");
+            let text = t.get(&key);
+            if !text.is_empty() {
+                return (!corpus::is_omitted(text)).then(|| (text.to_string(), key));
+            }
+        }
+        (is_of_our_lady_or_corpus_christi(c) && day.season != Season::Advent).then(|| (t.get(NATIVITY).to_string(), NATIVITY.to_string()))
+    })
 }
 
 /// The Sunday within the Octave of Corpus Christi is always the II Sunday

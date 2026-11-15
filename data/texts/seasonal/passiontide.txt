@@ -147,6 +147,13 @@ Amen.
 [hymn-vespers]
 @use seasonal/passiontide/hymn-first-vespers
 
+[hymn-doxology-vespers]
+# Vexilla Regis keeps its last stanza: the Hymn at Vespers of the Holy Cross "has a proper last
+# verse which is never changed" (General Rubrics XXIII.4; Diurnal pp. 520-521), so a commemorated
+# office's ending (XXIII.10) is not put on it: Our Lady of Sorrows on the Friday after Passion
+# Sunday ends the Hymns only "at Compline and at the Hours through None" (Diurnal p. 505).
+@omit
+
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 149 (Saturdays in Passiontide)
 V. Deliver me, O Lord, from the evil man.

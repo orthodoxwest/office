@@ -1869,3 +1869,48 @@ fn confessors_marked_mtv_change_the_hymns_last_two_lines() {
     assert!(calendar::model::HymnMtv::UnlessFirstVespers.applies(false));
     assert!(calendar::model::HymnMtv::Yes.applies(true));
 }
+
+/// General Rubrics XXIII.10: an office without a proper hymn ending takes it
+/// from the first commemorated office that has one, at Lauds and the Hours
+/// from Lauds' commemorations, and at Vespers and the Compline after them
+/// from Vespers'. Our Lady of Walsingham commemorated on the XIX Sunday after
+/// Pentecost (2023) and at I Vespers on St Callistus the evening before gives
+/// Our Lady's ending (XXIII.4(c)); in Advent it is never used (the
+/// Expectation, 18 December), and a saint within Our Lady's Octave keeps the
+/// ordinary ending as the ordos print it (St Joachim; #635). On the Friday
+/// after Passion Sunday Our Lady of Sorrows' ending is said "at Compline and
+/// at the Hours through None" (Diurnal p. 505), never on Vexilla Regis, whose
+/// last stanza is never changed.
+#[test]
+fn a_commemorated_office_lends_its_hymn_ending() {
+    const VIRGIN_BORN: &str = "O Jesu, Virgin-born, to thee";
+    let hymn = |y: i32, m: i32, d: i32, name: &str| {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, m, d);
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+    };
+    for name in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] {
+        let h = hymn(2023, 10, 15, name);
+        assert!(h.text.contains(VIRGIN_BORN), "2023-10-15 {name}: {}", h.text);
+        assert!(h.source_refs.iter().any(|r| r == "seasonal/christmas/hymn-doxology"), "2023-10-15 {name}");
+    }
+    for name in ["vespers", "compline"] {
+        assert!(hymn(2023, 10, 14, name).text.contains(VIRGIN_BORN), "2023-10-14 {name}");
+    }
+    for (m, d, name) in [(12, 18, "lauds"), (12, 18, "prime"), (8, 16, "lauds"), (8, 16, "terce")] {
+        assert!(!hymn(2026, m, d, name).text.contains(VIRGIN_BORN), "2026-{m}-{d} {name}");
+    }
+    // The Sorrows ending lives in the feast's own data; checked once it is there.
+    let sorrows = engine().texts.get("proper/our-lady-of-sorrows-passion/hymn-doxology");
+    if !sorrows.is_empty() && !corpus::is_omitted(sorrows) {
+        let line = "Who died to make thy servants live";
+        for (m, d, name) in [(4, 2, "compline"), (4, 3, "prime"), (4, 3, "terce"), (4, 3, "none")] {
+            assert!(hymn(2026, m, d, name).text.contains(line), "2026-{m}-{d} {name}");
+        }
+        for (m, d) in [(4, 2), (4, 3)] {
+            let h = hymn(2026, m, d, "vespers");
+            assert!(h.text.contains("Preserve and govern evermore") && !h.text.contains(line), "2026-{m}-{d} vespers");
+        }
+    }
+}
