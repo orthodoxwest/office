@@ -163,7 +163,9 @@ presentation-bvm psalm-antiphon
 
 # Ferias: psalm antiphons come from the weekday psalter tables in
 # data/texts/ordinary/ (Benedictine ferial scheme), as in Divinum Officium.
-ash-wednesday psalm-antiphon
+# Ash Wednesday: "all is said as in the Psalter throughout the Year except that which is
+# appointed as proper" (Diurnal p. 243), and no chapter is appointed at Lauds.
+ash-wednesday psalm-antiphon chapter
 lent-ember-wednesday psalm-antiphon
 lent-ember-friday psalm-antiphon
 # Saturday Vespers is always the Sunday's I Vespers, so an Ember Saturday has no
