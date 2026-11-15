@@ -8,14 +8,13 @@
 
 === Translation review: 0 mixed-register, 0 modern-pronoun collect(s) ===
 
-=== Suppressed: 78 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 77 feast(s) via data/audit-ok.txt ===
   rogation-monday
   friday-after-ascension-octave
   whit-ember-wednesday
   whit-ember-friday
   whit-ember-saturday
   st-anthony-egypt
-  st-peter-damian
   st-matthias
   st-gregory-great
   st-patrick

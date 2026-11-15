@@ -251,8 +251,8 @@ impl CommemorationClass {
 /// The Diurnal's "m.t.v." mark on a Confessor's feast not kept on his
 /// death-day (p. 34*): the Iste Confessor's first stanza ends "On this his
 /// feast-day, year by year receiveth / Merited honours." Some feasts keep the
-/// mark "unless there be I Vespers" (Hilary, Peter Damian, Alphonsus, Charles,
-/// pp. 455, 481, 580, 655), whose eve is the death-day: their I Vespers sing
+/// mark "unless there be I Vespers" (Hilary, Alphonsus, Charles,
+/// pp. 455, 580, 655), whose eve is the death-day: their I Vespers sing
 /// the hymn unchanged.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum HymnMtv {

@@ -99,18 +99,6 @@ Category = apostle
 Month = 2
 Day = 22
 
-[st-peter-damian]
-Name = St Peter Damian, Bishop, Confessor & Doctor
-Rank = double
-Color = white
-Category = confessor-doctor
-ProperName = Peter
-HymnMtv = unless-first-vespers
-Month = 2
-Day = 23
-Source = Monastic Diurnal pp. xv, 481; archdiocesan ordos 2021-2025
-Notes = The 2026 ordo omits him, in the year the transferred Chair of St Peter took 23 February; kept pending #866
-
 [st-matthias]
 Name = St Matthias, Apostle
 Rank = double-2nd-class

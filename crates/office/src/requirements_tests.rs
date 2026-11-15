@@ -640,7 +640,7 @@ fn vigil_preces_at_prime_and_at_compline_of_the_vespers_office() {
         (Date::new(2025, 11, 29), true),
         (Date::new(2026, 8, 8), true),
         (Date::new(2026, 11, 28), true),
-        (Date::new(2024, 2, 24), false),
+        (Date::new(2030, 2, 23), true),
         (Date::new(2025, 8, 9), false),
         (Date::new(2026, 7, 24), false),
         (Date::new(2026, 10, 31), false),
@@ -1823,25 +1823,6 @@ fn pre_lenten_and_lenten_vespers_keep_the_psalter_antiphons() {
         let (id, vespers) = antiphons("vespers", moveable.easter.add_days(42));
         assert_eq!(id, "ascension-sunday-within-octave", "{y}");
         assert!(vespers.iter().all(|r| r.starts_with("proper/ascension")), "{y}: {vespers:?}");
-    }
-}
-
-/// St Peter Damian (23 February) is a Double that Lent reduces to a
-/// commemoration (Diurnal pp. xv, 481), and the Vigil of St Matthias that
-/// falls on a Lenten weekday is dropped (VI.2) without keeping the privileged
-/// feria out: 2018's Friday after Ash Wednesday and 2048's leap-year Monday.
-#[test]
-fn st_peter_damian_and_the_matthias_vigil_yield_to_the_lenten_feria() {
-    for (date, damian_kept) in [("2027-02-23", true), ("2018-02-23", false), ("2048-02-24", false)] {
-        let date = Date::parse(date).unwrap();
-        let (days, _) = year(date.year());
-        let day = &days[date.ordinal() as usize - 1];
-        let office = day.celebration.as_deref().map(|c| c.id.as_str());
-        if damian_kept {
-            assert_eq!(office, Some("st-peter-damian"), "{date}");
-        } else {
-            assert_eq!(office, Some("privileged-lenten-feria"), "{date}");
-        }
     }
 }
 
