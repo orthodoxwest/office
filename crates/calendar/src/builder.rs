@@ -718,8 +718,10 @@ fn build_calendar_year(
                 .find(|f| f.is_category(Category::Sunday))
                 .map(|f| f.proper_id.clone().unwrap_or_else(|| f.id.clone()));
         }
+        // A common vigil is no Lenten feria: VI.2 drops it in Lent, so it must not
+        // keep the privileged feria out (St Matthias's Vigil, Diurnal p. 481).
         if let Some(feria) = privileged_lenten_feria(current, &m, season, week_id.as_deref())
-            && !day_candidates.iter().any(|f| f.is_category(Category::Feria))
+            && !day_candidates.iter().any(|f| f.is_category(Category::Feria) && !f.is_vigil)
         {
             day_candidates.push(Arc::new(feria));
         }
