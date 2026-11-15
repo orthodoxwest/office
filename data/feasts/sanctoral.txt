@@ -249,6 +249,7 @@ Category = confessor-doctor
 ProperName = Basil
 Month = 6
 Day = 14
+HymnMtv = true
 
 [st-alban]
 Name = St Alban, Protomartyr of England
@@ -607,6 +608,7 @@ Category = confessor-doctor
 ProperName = Ambrose
 Month = 12
 Day = 7
+HymnMtv = true
 
 [st-lucy]
 Name = St Lucy, Virgin & Martyr
@@ -733,6 +735,7 @@ Category = confessor-doctor
 ProperName = John
 Month = 1
 Day = 27
+HymnMtv = true
 
 [st-scholastica]
 Name = St Scholastica, Virgin
@@ -943,6 +946,7 @@ Category = confessor-doctor
 ProperName = Peter
 Month = 12
 Day = 2
+HymnMtv = true
 
 [vigil-nativity]
 Name = Vigil of the Nativity of Our Lord
@@ -962,6 +966,7 @@ Category = confessor-doctor
 ProperName = Hilary
 Month = 1
 Day = 14
+HymnMtv = unless-first-vespers
 
 [chair-peter-rome]
 Name = Chair of St Peter in Rome
@@ -1009,6 +1014,7 @@ Category = confessor
 ProperName = Romuald
 Month = 2
 Day = 7
+HymnMtv = true
 
 [st-perpetua-felicitas]
 Name = Ss Perpetua & Felicitas, Martyrs
@@ -1044,6 +1050,7 @@ Category = confessor
 ProperName = John
 Month = 3
 Day = 27
+HymnMtv = true
 
 [st-leo-great]
 Name = St Leo the Great, Bishop, Confessor & Doctor
@@ -1053,6 +1060,7 @@ Category = confessor-doctor
 ProperName = Leo
 Month = 4
 Day = 11
+HymnMtv = true
 
 [st-bede-venerable]
 Name = St Bede the Venerable, Confessor & Doctor
@@ -1062,6 +1070,7 @@ Category = confessor
 ProperName = Bede
 Month = 5
 Day = 27
+HymnMtv = true
 
 [st-john-latin-gate]
 Name = St John before the Latin Gate
@@ -1115,6 +1124,7 @@ Category = confessor-bishop
 ProperName = Cyril and Methodius
 Month = 7
 Day = 7
+HymnMtv = true
 
 [translation-st-raphael]
 Name = Translation of St Raphael of Brooklyn

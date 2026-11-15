@@ -483,9 +483,20 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             e
         }
         "proper-hymn" => {
-            let (mut text, src) = resolve_proper_text(day, hour_name, r, t);
+            let (mut text, mut src) = resolve_proper_text(day, hour_name, r, t);
             if corpus::is_omitted(&text) {
                 return element(ElementType::Hymn, text, r, &src);
+            }
+            // Diurnal p. 34*: a feast marked m.t.v. sings the Confessor's
+            // hymn with its first stanza's last lines changed, which the
+            // Common keeps beside the hymn as `<hymn>-mtv`.
+            if let Some(c) = day.celebration.as_deref()
+                && c.hymn_mtv.applies(day.first_vespers() && hour_name == "vespers")
+                && let Some(key) = t.canonical_ref(&src).map(|k| format!("{k}-mtv"))
+                && !t.get(&key).is_empty()
+            {
+                text = t.get(&key).to_string();
+                src = key;
             }
             let mut refs = vec![src.clone()];
             // A proper `hymn-doxology` entry is the feast's own ending for

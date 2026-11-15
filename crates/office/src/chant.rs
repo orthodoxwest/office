@@ -833,34 +833,40 @@ mod engine_tests {
         ];
         let engine = Engine::load(&TestData("../../data".into())).unwrap();
         let data = CalendarData::load(&TestData("../../data".into())).unwrap();
-        let cal = build_calendar(2026, &data).unwrap();
-        let offices = resolve_office_days(&cal);
-        let moveable = MoveableDates::compute(2026);
         let summer = |d: calendar::Date| d >= calendar::Date::new(2026, 6, 20) && d <= calendar::Date::new(2026, 9, 26);
         let mut sung = BTreeSet::new();
-        for (cal_day, office) in cal.days.iter().zip(&offices) {
-            let day = Day::new(cal_day.clone(), office.clone());
-            for hour_name in ["lauds", "vespers"] {
-                let hour = engine.compose_hour(hour_name, &day, &moveable, PrayerForm::Private).unwrap();
-                let Some(hymn) = hour.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == ElementType::Hymn) else { continue };
-                let Some(key) = engine.texts.canonical_ref(&hymn.source_ref) else { continue };
-                let Some(tunes) = engine.texts.scores.get(key).filter(|t| t.len() > 1) else { continue };
-                let score = hymn.score.as_ref().unwrap_or_else(|| panic!("{hour_name} {}: {key} unscored", day.date));
-                let tune = tunes.iter().find(|(_, s)| s.gabc == score.gabc).map(|(t, _)| t.as_str()).unwrap();
-                let want = match key {
-                    "ordinary/vespers/hymn-saturday" if summer(day.date) => "summer",
-                    "ordinary/vespers/hymn-saturday" => "winter",
-                    _ if DOCTORS.iter().any(|d| hour.feast.starts_with(d)) => "doctor",
-                    "commons/confessor-bishop/hymn-vespers" => "bishop",
-                    _ => "confessor",
-                };
-                assert_eq!(tune, want, "{hour_name} {} ({}): {key}", day.date, hour.feast);
-                sung.insert(format!("{key}/{tune}"));
+        // The m.t.v. hymn of a Confessor not a Bishop is first sung in 2028 (St Romuald).
+        for year in [2026, 2028] {
+            let cal = build_calendar(year, &data).unwrap();
+            let offices = resolve_office_days(&cal);
+            let moveable = MoveableDates::compute(year);
+            for (cal_day, office) in cal.days.iter().zip(&offices) {
+                let day = Day::new(cal_day.clone(), office.clone());
+                for hour_name in ["lauds", "vespers"] {
+                    let hour = engine.compose_hour(hour_name, &day, &moveable, PrayerForm::Private).unwrap();
+                    let Some(hymn) = hour.sections.iter().flat_map(|s| &s.elements).find(|e| e.kind == ElementType::Hymn) else { continue };
+                    let Some(key) = engine.texts.canonical_ref(&hymn.source_ref) else { continue };
+                    if year != 2026 && !key.ends_with("-mtv") {
+                        continue;
+                    }
+                    let Some(tunes) = engine.texts.scores.get(key).filter(|t| t.len() > 1) else { continue };
+                    let score = hymn.score.as_ref().unwrap_or_else(|| panic!("{hour_name} {}: {key} unscored", day.date));
+                    let tune = tunes.iter().find(|(_, s)| s.gabc == score.gabc).map(|(t, _)| t.as_str()).unwrap();
+                    let want = match key {
+                        "ordinary/vespers/hymn-saturday" if summer(day.date) => "summer",
+                        "ordinary/vespers/hymn-saturday" => "winter",
+                        _ if DOCTORS.iter().any(|d| hour.feast.starts_with(d)) => "doctor",
+                        "commons/confessor-bishop/hymn-vespers" => "bishop",
+                        _ => "confessor",
+                    };
+                    assert_eq!(tune, want, "{hour_name} {} ({}): {key}", day.date, hour.feast);
+                    sung.insert(format!("{key}/{tune}"));
+                }
             }
         }
         let every: BTreeSet<String> =
             engine.texts.tunes.iter().flat_map(|(key, rows)| rows.iter().map(move |(tune, _)| format!("{key}/{tune}"))).collect();
-        assert_eq!(sung, every, "each tune sung somewhere in 2026");
+        assert_eq!(sung, every, "each tune sung somewhere in 2026 (or 2028 for an m.t.v. hymn)");
     }
 
     #[test]

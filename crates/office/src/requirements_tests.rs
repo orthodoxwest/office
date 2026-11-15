@@ -1829,3 +1829,43 @@ fn st_peter_damian_and_the_matthias_vigil_yield_to_the_lenten_feria() {
         }
     }
 }
+
+/// Diurnal p. 34* (and p. 42*): "If it be not the day of the Saint's death
+/// (indicated in the Proper by the letters m.t.v.)" Iste Confessor's first
+/// stanza ends "On this his feast-day, year by year receiveth / Merited
+/// honours." Marked: Chrysostom (p. 466; 2026 ordo 26 January, "Hymn
+/// m.t.v."), Peter Chrysologus (p. 446; 2026 ordo 1 December, "Hymn
+/// (m.t.v.)") and Bede, a Confessor not a Bishop (p. 528; 2026 ordo 26 May).
+/// Unmarked feasts keep "Merited this day": St Antony, and St Cyril on 28
+/// January (p. 466; the bracketed 9 February entry alone is marked).
+#[test]
+fn confessors_marked_mtv_change_the_hymns_last_two_lines() {
+    let (days, moveable) = year(2026);
+    let hymn = |m: i32, d: i32| {
+        let date = Date::new(2026, m, d);
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+    };
+    for (m, d, key) in [
+        (1, 26, "commons/confessor-bishop/hymn-vespers-mtv"),
+        (12, 1, "commons/confessor-bishop/hymn-vespers-mtv"),
+        (5, 26, "commons/confessor/hymn-vespers-mtv"),
+    ] {
+        let h = hymn(m, d);
+        assert_eq!(h.label, "Iste Confessor", "{m}-{d}");
+        assert!(h.text.contains("On this his feast-day, year by year receiveth\nMerited honours."), "{m}-{d}: {}", h.text);
+        assert!(!h.text.contains("Merited this day"), "{m}-{d}");
+        assert_eq!(h.source_ref, key, "{m}-{d}");
+        // The chant sets the changed lines to the same notes.
+        assert!(h.score.is_some(), "{m}-{d}: unscored");
+    }
+    for (m, d) in [(1, 16), (1, 27)] {
+        let h = hymn(m, d);
+        assert!(h.text.contains("Merited this day joyfully to enter\nHeavenly mansions."), "{m}-{d}: {}", h.text);
+    }
+    // "(m.t.v.) unless in any place there should be I Vespers" (Hilary,
+    // p. 455): the eve is his death-day, so I Vespers keep the hymn.
+    assert!(!calendar::model::HymnMtv::UnlessFirstVespers.applies(true));
+    assert!(calendar::model::HymnMtv::UnlessFirstVespers.applies(false));
+    assert!(calendar::model::HymnMtv::Yes.applies(true));
+}

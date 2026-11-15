@@ -248,6 +248,48 @@ impl CommemorationClass {
     }
 }
 
+/// The Diurnal's "m.t.v." mark on a Confessor's feast not kept on his
+/// death-day (p. 34*): the Iste Confessor's first stanza ends "On this his
+/// feast-day, year by year receiveth / Merited honours." Some feasts keep the
+/// mark "unless there be I Vespers" (Hilary, Peter Damian, Alphonsus, Charles,
+/// pp. 455, 481, 580, 655), whose eve is the death-day: their I Vespers sing
+/// the hymn unchanged.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum HymnMtv {
+    #[default]
+    No,
+    Yes,
+    UnlessFirstVespers,
+}
+
+impl HymnMtv {
+    pub fn parse(s: &str) -> Option<HymnMtv> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "false" => Some(HymnMtv::No),
+            "true" => Some(HymnMtv::Yes),
+            "unless-first-vespers" => Some(HymnMtv::UnlessFirstVespers),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            HymnMtv::No => "false",
+            HymnMtv::Yes => "true",
+            HymnMtv::UnlessFirstVespers => "unless-first-vespers",
+        }
+    }
+
+    /// Whether the hymn takes the changed lines at this Vespers.
+    pub fn applies(self, first_vespers: bool) -> bool {
+        match self {
+            HymnMtv::No => false,
+            HymnMtv::Yes => true,
+            HymnMtv::UnlessFirstVespers => !first_vespers,
+        }
+    }
+}
+
 /// The synthetic feast ID of the occurring privileged feria commemorated at
 /// Lauds on a penitential weekday feast day.
 pub const FERIA_COMMEMORATION_ID: &str = "penitential-feria";
@@ -322,6 +364,8 @@ pub struct Feast {
     pub secondary: bool,
     pub only_with: Option<String>,
     pub skip_roman_leap_shift: bool,
+    /// The Confessor's hymn in its m.t.v. form ([`HymnMtv`]).
+    pub hymn_mtv: HymnMtv,
     /// Free text in the data files ("base" unless given).
     pub source: Option<String>,
     /// Documentation only; never reaches output.
@@ -357,6 +401,7 @@ impl Feast {
             secondary: false,
             only_with: None,
             skip_roman_leap_shift: false,
+            hymn_mtv: HymnMtv::No,
             source: None,
             notes: None,
         }
