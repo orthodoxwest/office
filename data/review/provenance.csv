@@ -1989,6 +1989,24 @@ proper/nativity-sunday-within-octave/short-responsory-vespers,41e3e34db93d,diurn
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,Monastic Diurnal.pdf,"Sunday within the Octave of the Nativity, At Lauds, V. after hymn; PDF pages 252",206,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes codex attestation citing draft archdiocesan Lauds book p. 71.
 proper/octave-day-holy-innocents/magnificat-antiphon-first,d0fecbb41021,Monastic Diurnal.pdf,"January 4, Octave of the Holy Innocents, At I Vespers, Ant. on Magnificat; PDF pages 267",221,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 221.
 proper/octave-day-st-stephen/collect,de4d55dabcbf,Monastic Diurnal.pdf,"January 2, Octave of St Stephen, Collect; PDF pages 266",220,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 220.
+proper/our-lady-of-sorrows-passion/benedictus-antiphon,35c33c69666b,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-lauds,97f95ae4ba0c,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-none,e18d0caacc00,diurnal,,509,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-sext,8f613a9b13ad,diurnal,,508,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/collect,69bc54dab3bc,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/hymn-lauds,022a7c2b70bb,diurnal,,507,verified,claude,2026-11-15,"pp. 507-508; the print's misprint withold corrected to withhold"
+proper/our-lady-of-sorrows-passion/hymn-vespers,2fa26bd495d8,diurnal,,506,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/magnificat-antiphon-first,c6989cea2b80,diurnal,,504,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-1,17002fce9dd8,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-2,118a29c18d22,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-3,e3663587b267,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-4,7dfdad0b2f38,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-5,faa92f8b41bc,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/short-responsory-lauds,4d40d8408dc8,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/short-responsory-vespers,2e357044b47c,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-sext,669604f1e58e,diurnal,,509,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-terce,5dd15225da45,diurnal,,508,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-vespers,80c499a2f80a,diurnal,,504,verified,claude,2026-11-15,
 proper/our-lady-walsingham/magnificat-antiphon-first,24075e6d546f,Monastic Diurnal.pdf,"Common of Feasts of the B.V.M., I Vespers, Ant. on Magnificat 'O holy Mary'; PDF pages 778, 777","65*, 64*",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes claude attestation citing draft archdiocesan Vespers book p. 704.
 proper/palm-sunday/benedictus-antiphon,314d75b181a6,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization
 proper/palm-sunday/chapter-lauds,062559bb4abc,Monastic Diurnal.pdf,"Palm Sunday, At Lauds, Chapter Phil. 2:5-8; PDF pages 325",279,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the claude attestation of 2026-09-29: Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 279.
