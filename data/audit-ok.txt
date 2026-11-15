@@ -62,6 +62,7 @@ st-isidore-seville *
 st-leo-great *
 st-maximus-constantinople *
 st-peter-chrysologus *
+st-peter-damian *
 st-gregory-nazianzen *
 st-hilary *
 st-john-chrysostom *
@@ -261,3 +262,11 @@ holy-name-mary *
 #   John 16:5 "none of you asketh me, Whither goest thou?"
 #   John 14:9 "so long time with you, and yet hast thou not known me, Philip?"
 register-ok proper/easter-sunday-4/benedictus-antiphon proper/ss-philip-james/psalm-antiphon-3
+
+# Holy Week ferias say the weekday's own Vespers antiphons and psalms (Diurnal
+# p. 282, "Ants. and Psalms of Monday, p. 117"; 2026 ordo "Mon. Ps."), and
+# Laetare's Vespers take the Saturday and Sunday psalter antiphons (pp. 264, 266).
+holy-monday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+holy-tuesday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+holy-wednesday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
+laetare-sunday psalm-antiphon-1 psalm-antiphon-2 psalm-antiphon-3 psalm-antiphon-4
