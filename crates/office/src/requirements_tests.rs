@@ -1376,6 +1376,10 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
         (Date::new(2024, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
         (Date::new(2027, 6, 25), "vespers", "ss-john-paul-martyrs", "Light perpetual"),
         (Date::new(2027, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
+        // An office of its own keeps its antiphons and takes the Alleluia
+        // (XXIV.7): St John Baptist's octave within the Octave of Pentecost.
+        (Date::new(2051, 6, 30), "vespers", "nativity-john-baptist-octave-day", "When Zacharias"),
+        (Date::new(2051, 7, 1), "lauds", "nativity-john-baptist-octave-day", "The mouth of Zacharias"),
     ] {
         let found = commemorated(date, hour, owner);
         let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));

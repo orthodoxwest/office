@@ -269,6 +269,10 @@ pub fn lookup_commons_text(
 /// ones" (pp. 542-543). The Apostles' own antiphons are not displaced so (St
 /// Paul's "O holy Apostle Paul" is no Common's): no ordo shows one in
 /// Paschaltide, and they take Paschaltide's Alleluia instead (XXIV.7).
+/// Nor does a feast with an office of its own, whose Proper gives its psalm
+/// antiphons: St John Baptist's Nativity (Category martyr) keeps "When
+/// Zacharias" and "The mouth of Zacharias" for its octave in the Octave of
+/// Pentecost (2051, 30 June to 1 July).
 pub fn paschal_common_antiphon(
     feast: &Feast,
     season: Season,
@@ -284,6 +288,13 @@ pub fn paschal_common_antiphon(
         || !found.1.starts_with("proper/")
         || found.0.to_lowercase().contains("alleluia")
     {
+        return found;
+    }
+    let own_office = found
+        .1
+        .rsplit_once('/')
+        .is_some_and(|(dir, _)| ["psalm-antiphon", "psalm-antiphon-1"].iter().any(|k| !t.get(&format!("{dir}/{k}")).trim().is_empty()));
+    if own_office {
         return found;
     }
     let common = lookup_commons_text(feast.category, season, hour_name, reference, t);
