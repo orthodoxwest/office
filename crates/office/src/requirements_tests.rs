@@ -963,6 +963,10 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
         ("2026-07-11", &["prime", "terce", "none"]),
         ("2026-02-02", &["terce"]),
         ("2026-03-25", &["terce"]),
+        // XXIII.10: the Holy Name of Mary commemorated at the Sunday's I
+        // Vespers (2026 ordo, "Comm. BVM") lends Our Lady's ending to those
+        // Vespers and the Compline after them.
+        ("2026-09-12", &["vespers", "compline"]),
     ] {
         for &name in hours {
             assert!(hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
@@ -979,7 +983,6 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
         ("2026-08-16", "terce"),
         ("2025-06-24", "terce"),
         ("2026-12-13", "terce"),
-        ("2026-09-12", "compline"),
         ("2026-07-11", "compline"),
         ("2026-09-15", "terce"),
     ] {
@@ -1876,6 +1879,58 @@ fn confessors_marked_mtv_change_the_hymns_last_two_lines() {
     assert!(!calendar::model::HymnMtv::UnlessFirstVespers.applies(true));
     assert!(calendar::model::HymnMtv::UnlessFirstVespers.applies(false));
     assert!(calendar::model::HymnMtv::Yes.applies(true));
+}
+
+/// General Rubrics XXIV.7 and XXVII.3: in Paschaltide Alleluia ends every
+/// antiphon that lacks it, and the versicles after the Hymn and of the
+/// commemorations, but not the Preces, Right dear or a responsory's verses.
+/// The Apparition of St Michael (8 May) takes its office from 29 September
+/// (2026 ordo, "Ppr. Off. (609f)"), whose texts are written without it.
+#[test]
+fn paschaltide_adds_alleluia_to_antiphons_and_versicles() {
+    let elements = |date: Date, name: &str| {
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).collect::<Vec<_>>()
+    };
+    let alleluias = |s: &str| s.to_lowercase().matches("alleluia").count();
+    let lauds = elements(Date::new(2026, 5, 8), "lauds");
+    for e in lauds.iter().filter(|e| e.kind == ElementType::Antiphon && e.slot_ref != "marian-antiphon") {
+        assert!(e.text.to_lowercase().trim_end().ends_with("alleluia."), "{}: {}", e.slot_ref, e.text);
+    }
+    let ant = |slot: &str| lauds.iter().find(|e| e.slot_ref == slot).unwrap().text.clone();
+    assert!(ant("psalm-antiphon-1").ends_with("golden censer, alleluia."));
+    // Never doubled: "Salvation to our God, alleluia."
+    assert_eq!(alleluias(&ant("psalm-antiphon-2")), 1);
+    let versicle = lauds.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+    assert_eq!(
+        versicle.text.trim(),
+        "V. An Angel stood at the altar of the temple, alleluia.\nR. Having in his hand a golden censer, alleluia."
+    );
+    // Commemorated at I Vespers of the next day (2027-05-07) and at Lauds.
+    for (date, name) in [(Date::new(2027, 5, 7), "vespers"), (Date::new(2027, 5, 8), "lauds")] {
+        let found = elements(date, name);
+        let comm: Vec<_> = found.iter().filter(|e| e.is_commemoration && e.commemoration_owner_id == "apparition-st-michael").collect();
+        assert!(!comm.is_empty(), "{date} {name}");
+        for e in comm.iter().filter(|e| matches!(e.kind, ElementType::Antiphon | ElementType::Versicle)) {
+            assert!(
+                e.text.lines().filter(|l| !l.trim().is_empty()).all(|l| l.to_lowercase().contains("alleluia")),
+                "{date} {name}: {}",
+                e.text
+            );
+        }
+    }
+    // Not the responsory's verses, nor Our Lady's antiphon, nor out of Paschaltide.
+    for e in lauds.iter().filter(|e| e.kind == ElementType::ShortResponsory) {
+        assert!(!e.text.contains("censer, alleluia"), "{}", e.text);
+    }
+    let september = elements(Date::new(2026, 9, 29), "lauds");
+    let first = september.iter().find(|e| e.slot_ref == "psalm-antiphon-1").unwrap();
+    assert!(first.text.ends_with("golden censer."), "{}", first.text);
+    let prime = elements(Date::new(2026, 5, 8), "prime");
+    for e in prime.iter().filter(|e| e.kind == ElementType::Versicle && e.text.contains("Right dear")) {
+        assert!(!e.text.to_lowercase().contains("alleluia"), "{}", e.text);
+    }
 }
 
 /// General Rubrics XXIII.10: an office without a proper hymn ending takes it

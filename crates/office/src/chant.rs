@@ -851,7 +851,9 @@ mod engine_tests {
                     }
                     let Some(tunes) = engine.texts.scores.get(key).filter(|t| t.len() > 1) else { continue };
                     let score = hymn.score.as_ref().unwrap_or_else(|| panic!("{hour_name} {}: {key} unscored", day.date));
-                    let tune = tunes.iter().find(|(_, s)| s.gabc == score.gabc).map(|(t, _)| t.as_str()).unwrap();
+                    // A score singing the day's ending (XXIII.10) keeps its tune's header.
+                    let header = |gabc: &str| gabc.split("%%").next().unwrap_or("").to_string();
+                    let tune = tunes.iter().find(|(_, s)| header(&s.gabc) == header(&score.gabc)).map(|(t, _)| t.as_str()).unwrap();
                     let want = match key {
                         "ordinary/vespers/hymn-saturday" if summer(day.date) => "summer",
                         "ordinary/vespers/hymn-saturday" => "winter",

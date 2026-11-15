@@ -102,6 +102,7 @@ impl Engine {
                 "Diurnal pp. 360–361, Vespers apart from Mass",
             ));
         }
+        add_paschal_alleluias(&mut hour, day, hour_name);
         crate::leader::apply_leader(&mut hour, form, t)?;
         drop_empty_sections(&mut hour);
         canonicalize_source_refs(&mut hour, t);
@@ -118,6 +119,55 @@ impl Engine {
             return Err(format!("composing {hour_name} for {}: unresolved text {marker}", day.date));
         }
         Ok(hour)
+    }
+}
+
+/// Paschaltide's Alleluia on the texts that lack it. General Rubrics XXIV.7:
+/// "at the end of every Antiphon is added Alleluia, when this word is not
+/// found in them"; XXVII.3: "In Paschaltide, Alleluia is always added to
+/// these Versicles" (after the Hymn at Lauds and Vespers, after the Chapter
+/// at the Hours, and in a Commemoration, XXVII.1–2), "but it is not added to
+/// the Versicles in the Preces at Prime and Compline, the Versicle Right dear
+/// at Prime, or to the Verses of the Responsory". The Corpus writes most of
+/// these alleluias already (the Commons' paschal forms, Diurnal p. 6* §3);
+/// this supplies them where a text is borrowed from outside Paschaltide, as
+/// the Apparition of St Michael takes its office from 29 September (2026
+/// ordo, 8 May, "Ppr. Off. (609f)"). Our Lady's antiphon after the Hour has
+/// its own seasonal form (XXIV.11), and the Office of the Dead none.
+fn add_paschal_alleluias(hour: &mut OfficeHour, day: &Day, hour_name: &str) {
+    if !day.is_paschaltide(hour_name) || crate::psalmody::is_office_of_the_dead(day) {
+        return;
+    }
+    let has_alleluia = |s: &str| s.to_lowercase().contains("alleluia");
+    let with_alleluia = |s: &str| {
+        let body = s.trim_end().trim_end_matches(['.', ',', ';', ':']);
+        if body.ends_with(['?', '!']) { format!("{body} Alleluia.") } else { format!("{body}, alleluia.") }
+    };
+    for elem in hour.sections.iter_mut().flat_map(|s| s.elements.iter_mut()) {
+        if corpus::is_omitted(&elem.text) || elem.text.trim().is_empty() {
+            continue;
+        }
+        let slot = elem.slot_ref.as_str();
+        let antiphon = elem.kind == ElementType::Antiphon
+            && (slot.starts_with("psalm-antiphon")
+                || slot.starts_with("benedictus-antiphon")
+                || slot.starts_with("magnificat-antiphon")
+                || slot.starts_with("commemoration-antiphon"));
+        let versicle = elem.kind == ElementType::Versicle
+            && (slot == "versicle" || slot.starts_with("versicle-") || slot.starts_with("commemoration-versicle"));
+        if antiphon && !has_alleluia(&elem.text) {
+            elem.text = with_alleluia(&elem.text);
+        } else if versicle {
+            elem.text = elem
+                .text
+                .split('\n')
+                .map(|line| {
+                    let l = line.trim_start();
+                    if (l.starts_with("V. ") || l.starts_with("R. ")) && !has_alleluia(l) { with_alleluia(line) } else { line.to_string() }
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+        }
     }
 }
 
