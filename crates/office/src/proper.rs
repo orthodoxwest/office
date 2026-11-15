@@ -260,14 +260,15 @@ pub fn lookup_commons_text(
 
 /// Diurnal p. 6* §3: "in Paschaltide there is a special Common of Apostles,
 /// Evangelists, and Martyrs", while the other Commons are said "as out of
-/// Paschaltide" with Alleluia added. So a Proper antiphon of such a feast
-/// that is written for the rest of the year (it has no Alleluia) yields in
-/// Paschaltide to that special Common's antiphon for the same place: Ss John
-/// and Paul, commemorated in the Octave of Pentecost, take "Light perpetual"
-/// at Vespers and "Daughters of Jerusalem" at Lauds (2021 and 2024 ordos,
-/// 25-26 June), not their own "The righteous" and "These are the holy ones"
-/// (pp. 542-543). A Proper written for Paschaltide (Ss Philip and James, St
-/// John before the Latin Gate) keeps its own.
+/// Paschaltide" with Alleluia added. So a Martyr's Proper antiphon that is
+/// written for the rest of the year (it has no Alleluia) yields in
+/// Paschaltide to the Paschal Common of Martyrs' antiphon for the same place:
+/// Ss John and Paul, commemorated in the Octave of Pentecost, take "Light
+/// perpetual" at Vespers and "Daughters of Jerusalem" at Lauds (2021 and 2024
+/// ordos, 25-26 June), not their own "The righteous" and "These are the holy
+/// ones" (pp. 542-543). The Apostles' own antiphons are not displaced so (St
+/// Paul's "O holy Apostle Paul" is no Common's): no ordo shows one in
+/// Paschaltide, and they take Paschaltide's Alleluia instead (XXIV.7).
 pub fn paschal_common_antiphon(
     feast: &Feast,
     season: Season,
@@ -276,10 +277,7 @@ pub fn paschal_common_antiphon(
     found: (String, String),
     t: &OfficeTexts,
 ) -> (String, String) {
-    let special_common = matches!(
-        feast.category,
-        Some(Category::Apostle | Category::Evangelist | Category::Martyr | Category::Martyrs | Category::BishopMartyr)
-    );
+    let special_common = matches!(feast.category, Some(Category::Martyr | Category::Martyrs | Category::BishopMartyr));
     if season != Season::Easter
         || !special_common
         || !base_proper_ref(reference).contains("antiphon")
