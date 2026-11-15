@@ -1,12 +1,26 @@
-{% extends "layout.html" %}{% block title %}Daily Office — Reminders{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament %}
+{% extends "layout.html" %}{% block title %}Daily Office — Reminders{% endblock %}{% block content %}{% from "macros.html" import headpiece, period_ornament, store_buttons %}
 <div class="reminders">
   {{ headpiece() }}
   <h1>Set prayer reminders</h1>
-  <p class="reminders-intro">
-    Choose the hours you pray and their times. Each calendar event names the
-    office and feast of the day. Your schedule lives entirely in the private
-    calendar link below; nothing is stored on this site.
-  </p>
+  {# The app first: its notifications are far better reminders than a subscribed calendar's
+       (presentation::stores). On an iPhone or iPad it shows once the App Store listing is set. #}
+  <div class="reminders-app app-offer{% if app_store_url %} has-ios{% endif %}">
+    <p class="reminders-intro">{{ reminders_app }}</p>
+    {{ store_buttons() }}
+  </div>
+
+  {# The calendar feed, the fallback. Open as served (and without script); shut at once on a phone
+       whose store has the app, before it is painted. Where there is no app to offer, the fold's
+       title is hidden and the feed is simply the page. #}
+  <details class="reminder-calendar{% if app_store_url %} has-ios{% endif %}" open>
+  <summary>{{ reminders_calendar }}</summary>
+  <script>
+    (function () {
+      var platform = document.documentElement.getAttribute("data-platform");
+      if (platform === "android"{% if app_store_url %} || platform === "ios"{% endif %}) document.currentScript.parentNode.removeAttribute("open");
+    })();
+  </script>
+  <p class="reminders-intro"><span class="reminder-calendar-lead">{{ reminders_calendar_lead }} </span>{{ reminders_calendar_intro }}</p>
 
   <form id="reminders-form">
     <fieldset class="reminder-hours">
@@ -94,6 +108,7 @@
       (free, F-Droid or Play Store), add the feed URL, and its alerts work
       as configured.</p>
     </div>
+  </details>
   </details>
   <p class="reminders-privacy">No accounts, no advertising, no trackers: see <a href="/privacy">Privacy</a>.</p>
 </div>

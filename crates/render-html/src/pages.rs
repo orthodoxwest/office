@@ -101,6 +101,13 @@ impl Pages {
         env.add_global("play_url", presentation::stores::PLAY_URL);
         env.add_global("app_store_id", presentation::stores::APP_STORE_ID.unwrap_or(""));
         env.add_global("app_store_url", presentation::stores::app_store_url().unwrap_or_default());
+        env.add_global("play_label", presentation::stores::PLAY_LABEL);
+        env.add_global("app_store_label", presentation::stores::APP_STORE_LABEL);
+        env.add_global("about_apps", presentation::stores::ABOUT_APPS);
+        env.add_global("reminders_app", presentation::stores::REMINDERS_APP);
+        env.add_global("reminders_calendar", presentation::stores::REMINDERS_CALENDAR);
+        env.add_global("reminders_calendar_lead", presentation::stores::REMINDERS_CALENDAR_LEAD);
+        env.add_global("reminders_calendar_intro", presentation::stores::REMINDERS_CALENDAR_INTRO);
         // The office being prayed from each clock hour, as a script literal for home's pre-paint mark
         // of the hour ([start, slug, name, day offset], home.html).
         env.add_global("hour_schedule", Value::from_safe_string(hour_schedule_literal()));

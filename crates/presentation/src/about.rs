@@ -23,6 +23,10 @@ pub enum AboutBlock {
     Note(&'static str),
     /// A key to the page's marks: the mark, set in its `ink`, then what it means.
     Key { mark: &'static str, ink: KeyInk, text: &'static str },
+    /// Where else the Office is found, which each front words for itself: the web names the
+    /// native apps and their stores ([`crate::stores::ABOUT_APPS`]), and the apps name the
+    /// website ([`ABOUT_ON_THE_WEB`]), for those who found one and not the other.
+    Elsewhere,
     /// Home's invitation to pray the hour it is now ([`crate::invitation`]): the same tablet,
     /// words and link as home's, still, as the page's last word before its tailpiece.
     Invitation,
@@ -143,8 +147,14 @@ pub const ABOUT: &[AboutBlock] = &[
          [Privacy](/privacy). If you find a mistake, please tell us through the \
          [issue tracker](https://github.com/orthodoxwest/office/issues/new).",
     ),
+    AboutBlock::Elsewhere,
     AboutBlock::Invitation,
 ];
+
+/// The native apps' word on the website, in their [`AboutBlock::Elsewhere`]: a paragraph, which
+/// may carry links as the page's paragraphs do.
+pub const ABOUT_ON_THE_WEB: &str = "The Daily Office is also on the web at \
+     [orthodoxwestbreviary.com](https://orthodoxwestbreviary.com), to pray from a computer or any other device.";
 
 /// The hour the table marks as now at a clock hour (0–23), as home's directory marks it: none
 /// from midnight to 2 am, when the office being prayed is yesterday's Compline.
@@ -216,6 +226,18 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn the_website_is_named_by_its_address() {
+        assert_eq!(
+            about_runs(ABOUT_ON_THE_WEB).into_iter().find_map(|run| match run {
+                AboutRun::Link { text, target } => Some((text, target)),
+                AboutRun::Text(_) => None,
+            }),
+            Some(("orthodoxwestbreviary.com".into(), "https://orthodoxwestbreviary.com".into()))
+        );
+        assert!(crate::usage::ENDPOINT.starts_with("https://orthodoxwestbreviary.com/"));
     }
 
     #[test]

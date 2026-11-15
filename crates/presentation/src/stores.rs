@@ -1,7 +1,9 @@
-//! Where the native apps are found: the web's colophon tells a reader of them in one quiet line
-//! ("Also an app for Android and iPhone", layout.html), each name linking to its store, and a
-//! reader on a phone sees only their own phone's (the pre-paint script marks the platform).
-//! Nothing here interrupts a page: no banner of our own, no prompt, nothing over the prayers.
+//! Where the native apps are found, and the web's words for them: the colophon's quiet line
+//! ("Also an app for Android and iPhone", layout.html), the About page's paragraph, and the
+//! Reminders page, which offers the app first and the calendar feed as the fallback, since an
+//! app's notifications are far better reminders than a subscribed calendar's. A reader on a phone
+//! sees only their own phone's store (the pre-paint script marks the platform). Nothing here
+//! interrupts a page: no banner of our own, no prompt, nothing over the prayers.
 
 /// The Android app's Google Play listing.
 pub const PLAY_URL: &str = "https://play.google.com/store/apps/details?id=org.orthodoxwest.office";
@@ -14,6 +16,28 @@ pub const APP_STORE_ID: Option<&str> = None;
 
 /// The colophon's words before the platforms.
 pub const APPS_LEAD: &str = "Also an app for";
+
+/// The store buttons' words, as the stores' own badges word them.
+pub const PLAY_LABEL: &str = "Get it on Google Play";
+pub const APP_STORE_LABEL: &str = "Download on the App Store";
+
+/// The About page's paragraph on the apps, after "This app" (web only: the apps have no need of it).
+pub const ABOUT_APPS: &str = "The Daily Office is also an app for your phone. It keeps every hour to hand without a \
+     connection, and reminds you of the hours you keep with a notification that opens the office.";
+
+/// The Reminders page's first word: the app.
+pub const REMINDERS_APP: &str = "The Daily Office app is the best way to be reminded. At each hour you choose, a \
+     notification names the office and the day it keeps, and a tap opens it, even without a connection.";
+
+/// The fold that holds the calendar feed, shut on a phone that can have the app.
+pub const REMINDERS_CALENDAR: &str = "Use a calendar instead";
+
+/// The calendar feed's own introduction, inside that fold: its lead, said only where the app is
+/// offered, then the rest.
+pub const REMINDERS_CALENDAR_LEAD: &str = "If you can’t use the app, your calendar can remind you instead.";
+pub const REMINDERS_CALENDAR_INTRO: &str = "Choose the hours you pray and their times. Each calendar event names \
+     the office and feast of the day. Your schedule lives entirely in the private calendar link below; nothing \
+     is stored on this site.";
 
 /// The App Store listing for [`APP_STORE_ID`], once there is one.
 #[must_use]

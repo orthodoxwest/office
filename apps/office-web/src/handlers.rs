@@ -907,6 +907,29 @@ mod tests {
         assert_eq!(body.matches("class=\"reminder-period\"").count(), 3);
     }
 
+    // The app comes first on Reminders, and the calendar feed is the fallback: a fold served open
+    // (so a reader with no app to get, or no script, has the feed as the page), which a phone
+    // whose store has the app shuts before it is painted. About names the apps once, before its
+    // closing invitation.
+    #[test]
+    fn reminders_offers_the_app_before_the_calendar() {
+        let (_, _, body) = get("/reminders");
+        let app = body.find("class=\"reminders-app app-offer").expect("the app's offer");
+        let fold = body.find("<details class=\"reminder-calendar").expect("the calendar's fold");
+        let form = body.find("id=\"reminders-form\"").unwrap();
+        assert!(app < fold && fold < form);
+        assert!(
+            body[fold..].starts_with("<details class=\"reminder-calendar\" open>")
+                || body[fold..].starts_with("<details class=\"reminder-calendar has-ios\" open>")
+        );
+        assert!(body[app..fold].contains(presentation::stores::PLAY_LABEL));
+        assert!(body[fold..form].contains("removeAttribute(\"open\")"));
+        let (_, _, about) = get("/about");
+        let apps = about.find("class=\"about-apps").expect("the apps");
+        assert!(apps < about.find("about-door").unwrap());
+        assert!(!about.contains("orthodoxwestbreviary.com</a>"), "the web does not point to itself");
+    }
+
     // Home's head carries the day's versicle from Lauds on a plain day, and is
     // stripped on a violet day and through Passiontide; a day with
     // commemorations has them there instead.

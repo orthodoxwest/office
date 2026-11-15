@@ -1231,9 +1231,85 @@ body:is(.page-home, .page-hour) footer > p.app-stores {
 :root[data-platform="android"] .app-store:not([data-store="android"]),
 :root[data-platform="ios"] .app-store:not([data-store="ios"]),
 :root[data-platform] .app-store-and,
-:root[data-platform="ios"] .app-stores:not(.has-ios),
+:root[data-platform="ios"] :is(.app-stores, .app-offer):not(.has-ios),
 .page-home .app-stores {
   display: none;
+}
+
+/* The stores' buttons: Reminders' tablet, one to a store, side by side where they fit. */
+.store-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 0.2rem 0 0;
+}
+
+/* About keeps one tablet, its closing invitation to pray: the stores there are
+   worded links. */
+.about-apps .store-buttons {
+  gap: 0.2rem 1.2rem;
+}
+
+.reminders-app {
+  margin-bottom: 1.6rem;
+}
+
+.reminders-app .reminders-intro {
+  margin-bottom: 0.9rem;
+}
+
+/* The calendar feed's fold, under the app: a titulus over a rule, as the
+   page's sections are, with the caret its "Setting it up" carries. Where no
+   app can be offered, the fold has no title and the feed is the page. */
+.reminder-calendar {
+  border-top: 1px solid var(--border);
+}
+
+.reminder-calendar > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--touch-target);
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
+  list-style: none;
+}
+
+.reminder-calendar > summary::-webkit-details-marker {
+  display: none;
+}
+
+.reminder-calendar > summary::after {
+  content: "";
+  width: 0.34rem;
+  height: 0.28rem;
+  margin-left: 0.4rem;
+  background: var(--gold-line);
+  -webkit-mask: var(--reminder-caret) center / contain no-repeat;
+  mask: var(--reminder-caret) center / contain no-repeat;
+}
+
+.reminder-calendar[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) {
+  border-top: 0;
+}
+
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) > summary,
+:root[data-platform="ios"] .reminder-calendar:not(.has-ios) .reminder-calendar-lead {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .reminder-calendar > summary::after {
+    background: CanvasText;
+  }
 }
 
 /* ── Report a problem ── */
