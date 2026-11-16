@@ -84,7 +84,7 @@ struct OrdoScreen: View {
     /// Where the month heading pins, down from the screen's top (below the sensor housing), and
     /// where the heading stands now: pinned, its wall reaches up over that strip.
     @State private var pinLine: CGFloat = 0
-    @State private var headingPinned = false
+    @State private var headingTop: CGFloat = .infinity
 
     /// Where the day before a day asked for is brought: clear of the pinned month heading, a
     /// little below it (the web's `scroll-margin-top`, 3.5rem at the default size, less the row
@@ -125,7 +125,8 @@ struct OrdoScreen: View {
                         }
                         .ordoColumn(m, wide: wide)
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heading = $0 }
-                        .onGeometryChange(for: Bool.self) { $0.frame(in: .global).minY <= pinLine + 0.5 } action: { headingPinned = $0 }
+                        // Only near the top, where it can pin: further down, a scroll does not set the page again.
+                        .onGeometryChange(for: CGFloat.self) { min($0.frame(in: .global).minY, 160) } action: { headingTop = $0 }
                         // Pinned, it hides the days passing beneath it down to its rule with the
                         // wall's own copy, lined up with the wall, as the web's sticky heading's
                         // fixed copy and the Android app's: no box shows, pinned or at rest. Pinned
@@ -134,7 +135,7 @@ struct OrdoScreen: View {
                         .background {
                             WallCopy(wall: wall)
                                 .padding(.bottom, -4.5)
-                                .padding(.top, headingPinned ? -pinLine : 0)
+                                .padding(.top, headingTop <= pinLine + 0.5 ? -pinLine : 0)
                         }
                     }
                     let prev = number == 1 ? (year - 1, 12) : (year, number - 1)
