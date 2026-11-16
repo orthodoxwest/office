@@ -3010,6 +3010,10 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
 test("themes never change layout", async ({ browser }) => {
   // Light and Apse differ only in colour and material. Every element box and
   // every text line must match, so geometry tests need run in one theme.
+  // Eleven pairs of pages, the ordo's loaded twice, and the year's 14,000
+  // boxes: about 12s alone and 29s beside three other workers, which ran
+  // past the default 30s budget in CI. It takes the slow test's budget.
+  test.slow();
   const open = async (theme) => {
     const context = await browser.newContext();
     await context.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
