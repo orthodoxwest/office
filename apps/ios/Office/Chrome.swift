@@ -436,7 +436,7 @@ struct MenuPanel: View {
                     .padding(.leading, m.px(10.4))
                     .frame(width: m.px(54), alignment: .leading)
                     .accessibilityHidden(true)
-                Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                 ForEach([false, true], id: \.self) { on in
                     cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), spoken: "Martyrology at Prime \(on ? "on" : "off")") {
                         guard on != model.martyrology else { return }
@@ -455,7 +455,7 @@ struct MenuPanel: View {
                         .padding(.leading, m.px(10.4))
                         .frame(width: m.px(54), alignment: .leading)
                         .accessibilityHidden(true)
-                    Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                    Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                     ForEach([false, true], id: \.self) { on in
                         cell(on ? "ON" : "OFF", on == model.chant, .label(12, 0.06), spoken: "Chant \(on ? "on" : "off")") {
                             guard on != model.chant else { return }
@@ -892,7 +892,7 @@ struct DayPicker: View {
                             .accessibilityLabel(spokenDay(day, today: today))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
-                            Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                            Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                         }
                     }
                 }

@@ -136,13 +136,15 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
     /// Sets `text` beside a dropped capital: two lines (three past a descending tail), the remainder
     /// running on at the text edge. As beside the web's float, a line never starts short of the text's
     /// own edge, and the first line's opening word moves by the capital's tuck from where its line starts.
+    /// TextKit sets a line's indent from where an exclusion leaves off, so the lines after the first,
+    /// which keep the paragraph's indent, are excluded that much less.
     @discardableResult
     private func drop(_ initial: Initial, _ text: NSAttributedString) -> [Row] {
         let second = max(initial.edge, spec.restIndent)
         let first = max(0, second + initial.tuck)
         container.exclusionPaths = [
             UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
-            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
+            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second - spec.restIndent, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
         ]
         top = 0
         set(first: 0, rest: spec.restIndent, text: text)
