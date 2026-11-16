@@ -10,7 +10,7 @@
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
 # pinned=true; otherwise (or with `store`, or before any baselines exist) it takes the image's
-# default Xcode, its newest iOS runtime's iPhone 16 and 11-inch iPad Pro, and says pinned=false,
+# default Xcode, its newest iOS runtime's iPhone 17 and 11-inch iPad Pro, and says pinned=false,
 # since shots from another runtime differ in ways no page changed.
 set -euo pipefail
 
@@ -81,9 +81,9 @@ PY
     # A manual run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
     # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
     if [ -n "$store" ]; then
-      phone=$(pick iPhone 'iPhone 16 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
+      phone=$(pick iPhone 'iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
     else
-      phone=$(pick iPhone 'iPhone 16' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
+      phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
     fi
   fi
   local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}

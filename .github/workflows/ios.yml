@@ -111,7 +111,7 @@ jobs:
     name: Build, test and screenshot (simulator)
     needs: changes
     if: needs.changes.outputs.build == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       # The screenshots branch.
       contents: write
@@ -129,7 +129,7 @@ jobs:
           STORE: ${{ inputs.store }}
         run: |
           # The Xcode, runtime and devices the baselines were taken with (their environment.json),
-          # else the image's newest iPhone 16 and 11-inch iPad Pro. A manual run with `store` takes
+          # else the image's newest iPhone 17 and 11-inch iPad Pro. A manual run with `store` takes
           # the sizes App Store Connect asks for instead. Both simulators start booting now,
           # behind the builds.
           if [ "$STORE" = true ]; then
