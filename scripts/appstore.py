@@ -12,13 +12,12 @@ apps/ios/README.md ("TestFlight", "The App Store").
              approves it, and a build uploaded while its version is in review could never be
              released, so a version moves on as soon as it is submitted. project.yml stays the
              floor: raising its minor or major version there is how a person starts 1.1.0.
-  auto       Once a week. Unless a version is already with Apple or waiting to be released, or
-             Apple rejected one (a person reads why first), take the newest build that has
-             passed beta review and gone to the external testers, was uploaded at least
-             --min-age hours ago, and has a higher version than the App Store's, and submit it
-             for App Review as a new App Store version.
-  manual     The same now, for --build (default: the newest build with the external testers,
-             of any age). After a rejection, it renumbers the rejected version to that build's
+  auto       Once a day. Unless a version is already with Apple or waiting to be released, or
+             Apple rejected one (a person reads why first), take the newest valid build that
+             was uploaded at least --min-age hours ago (a soak for master's CI after the merge)
+             and has a higher version than the App Store's, and submit it for App Review as a
+             new App Store version. TestFlight's beta review and testers play no part.
+  manual     The same now, for --build (default: the newest valid build, of any age). After a rejection, it renumbers the rejected version to that build's
              version (uploads moved past the rejected number when it was submitted), attaches
              the build, marks Apple's item resolved and sends the submission again.
 
@@ -105,8 +104,6 @@ SUBMISSION_REJECTED = "UNRESOLVED_ISSUES"
 POLLS, POLL_SECONDS = 10, 15
 RETRIES, TIMEOUT = 4, 60
 sleep = time.sleep
-# A build's beta state once beta review has passed and it is with the external group.
-WITH_TESTERS = {"IN_BETA_TESTING"}
 
 
 def log(msg: str) -> None:
@@ -204,15 +201,15 @@ def builds_of(response: dict) -> list[dict]:
 
 def choose_build(builds: list[dict], live: tuple[int, int, int] | None, at: dt.datetime,
                  min_age: float, number: int = 0) -> dict | None:
-    """The build to submit: --build's, or the newest tested one, valid and above the App Store's version."""
+    """The build to submit: --build's, or the newest uploaded min_age hours ago; valid, unexpired and
+    above the App Store's version. Whether TestFlight's beta review passed it does not matter."""
     def releasable(b: dict) -> bool:
         return (b["processing"] == "VALID" and not b["expired"]
                 and (live is None or parse_version(b["version"]) > live))
 
     if number:
         return next((b for b in builds if b["number"] == number and releasable(b)), None)
-    ready = [b for b in builds if releasable(b) and b["external"] in WITH_TESTERS
-             and at - b["uploaded"] >= dt.timedelta(hours=min_age)]
+    ready = [b for b in builds if releasable(b) and at - b["uploaded"] >= dt.timedelta(hours=min_age)]
     return max(ready, key=lambda b: (parse_version(b["version"]), b["number"]), default=None)
 
 
@@ -241,7 +238,7 @@ def decide(versions: list[dict], submissions: list[dict], builds: list[dict], at
     if rejected and not manual:
         v = rejected[0]["attributes"]
         return None, (f"Apple rejected version {v['versionString']}. Read why in App Store Connect; once "
-                      "the cause is fixed and a newer build is with the testers, a manual run of this "
+                      "the cause is fixed in a newer build, a manual run of this "
                       "workflow resubmits the version with it (apps/ios/README.md).")
     allowed = {SUBMISSION_REJECTED} if rejected else set()
     open_subs = [s for s in submissions
@@ -258,7 +255,7 @@ def decide(versions: list[dict], submissions: list[dict], builds: list[dict], at
             return None, (f"Build {number} cannot be submitted: it is not a valid, unexpired build with a "
                           f"version above the App Store's {show(live) if live else '(none)'}.")
         return None, (f"Nothing to submit: the App Store has {show(live) if live else 'no release'}, and no "
-                      f"newer build has been with the external testers {min_age:g} hours.")
+                      f"newer valid build was uploaded {min_age:g} hours ago or more.")
 
     if rejected:
         # The rejected version is renumbered to the newer build's version and sent again on the

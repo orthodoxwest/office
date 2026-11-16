@@ -14,8 +14,9 @@ name: iOS TestFlight
 # then an upload takes one patch above the highest such version, which scripts/appstore.py
 # reads from the API before archiving, so nobody raises it by hand after a release. Raising
 # MARKETING_VERSION's minor or major in project.yml still starts a new line. Apple reviews the
-# first build of each version before external testers can install it. The weekly App Store
-# promotion (appstore-promote.yml) submits a build from here for App Review.
+# first build of each version before external testers can install it. The daily App Store
+# promotion (appstore-promote.yml) submits a build from here for App Review a day after its
+# upload, whether or not beta review has passed it or the group has it.
 on:
   push:
     branches: [master]

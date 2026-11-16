@@ -145,13 +145,26 @@ class DecideTest(unittest.TestCase):
         self.assertIsNone(plan["draft"])
         self.assertTrue(plan["update"])
 
-    def test_only_builds_with_the_external_testers(self):
-        for external in ["WAITING_FOR_BETA_REVIEW", "IN_BETA_REVIEW", "READY_FOR_BETA_SUBMISSION", "BETA_REJECTED",
-                         "EXPIRED", "MISSING_EXPORT_COMPLIANCE"]:
+    def test_beta_review_and_testers_play_no_part(self):
+        # No regular TestFlight testers: a valid build a day old goes, whatever its beta state.
+        for external in ["IN_BETA_TESTING", "WAITING_FOR_BETA_REVIEW", "IN_BETA_REVIEW", "READY_FOR_BETA_SUBMISSION",
+                         "BETA_REJECTED", "NOT_APPLICABLE", None]:
             with self.subTest(external):
-                plan, why = self.decide([ON_SALE], builds_response((825, "1.0.1", 30, "VALID", external)))
-                self.assertIsNone(plan)
-                self.assertIn("Nothing to submit", why)
+                plan, _ = self.decide([ON_SALE], builds_response((825, "1.0.1", 30, "VALID", external)))
+                self.assertEqual(plan["build"]["number"], 825)
+
+    def test_a_build_waits_a_day_after_its_upload(self):
+        builds = builds_response((830, "1.0.1", 23.9, "VALID", "IN_BETA_TESTING"))
+        plan, why = self.decide([ON_SALE], builds)
+        self.assertIsNone(plan)
+        self.assertIn("Nothing to submit", why)
+        self.assertEqual(self.decide([ON_SALE], builds, min_age=24 - 0.1)[0]["build"]["number"], 830)
+
+    def test_an_expired_build_is_never_chosen(self):
+        builds = builds_response((830, "1.0.1", 30, "VALID", "EXPIRED"))
+        builds["data"][0]["attributes"]["expired"] = True
+        self.assertIsNone(self.decide([ON_SALE], builds)[0])
+        self.assertIsNone(self.decide([ON_SALE], builds, min_age=0, number=830)[0])
 
     def test_only_valid_builds_above_the_live_version(self):
         builds = builds_response((830, "1.0.1", 30, "PROCESSING", "IN_BETA_TESTING"),
@@ -220,10 +233,12 @@ class DecideTest(unittest.TestCase):
         self.assertIn("1.1.0", why)
 
     def test_manual_takes_any_age_or_the_build_named(self):
-        builds = builds_response((830, "1.0.1", 2, "VALID", "IN_BETA_TESTING"),
-                                 (828, "1.0.1", 1, "VALID", "IN_BETA_REVIEW"))
+        builds = builds_response((830, "1.0.1", 2, "VALID", "IN_BETA_REVIEW"),
+                                 (828, "1.0.1", 1, "VALID", "IN_BETA_REVIEW"),
+                                 (827, "1.0.1", 1, "PROCESSING", None))
         self.assertEqual(self.decide([ON_SALE], builds, min_age=0)[0]["build"]["number"], 830)
         self.assertEqual(self.decide([ON_SALE], builds, min_age=0, number=828)[0]["build"]["number"], 828)
+        self.assertIsNone(self.decide([ON_SALE], builds, min_age=0, number=827)[0])
         self.assertIsNone(self.decide([ON_SALE], builds, min_age=0, number=999)[0])
 
     def test_the_first_release_has_no_update_steps(self):

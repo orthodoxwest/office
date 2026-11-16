@@ -1,26 +1,26 @@
 name: Submit to the App Store
 
-# Sends the iOS app's newest tested TestFlight build to App Review as a new App Store version,
-# without rebuilding: the App Store gets the build testers already have (scripts/appstore.py,
+# Sends the iOS app's newest TestFlight build to App Review as a new App Store version, without
+# rebuilding: the App Store gets the build master uploaded (scripts/appstore.py,
 # apps/ios/README.md "The App Store").
 #
-# Weekly: unless a version is already with Apple or waiting to be released, the newest build that
-# passed beta review, went to the external testers, was uploaded at least 24 hours before and has
-# a higher version than the App Store's is submitted. Once approved it is released by itself,
-# in Apple's seven-day phased release. A rejection stops the weekly runs until a person has read
-# Apple's reasons. Scheduled runs use the `appstore-auto` environment, with no reviewer.
+# Daily: unless a version is already with Apple or waiting to be released, the newest valid build
+# that was uploaded at least 24 hours before (a soak for master's CI and snapshot checks) and has
+# a higher version than the App Store's is submitted. TestFlight's beta review and testers play
+# no part. Once approved it is released by itself, in Apple's seven-day phased release. A
+# rejection stops the daily runs until a person has read Apple's reasons. Scheduled runs use the `appstore-auto` environment, with no reviewer.
 #
-# A manual run submits a build now (the newest with the external testers, of any age, unless a
-# build number is given); after a rejection it resubmits the rejected version with that build.
+# A manual run submits a build now (the newest valid one, of any age, unless a build number is
+# given); after a rejection it resubmits the rejected version with that build.
 # It uses the `appstore` environment, which has a required reviewer.
 on:
   schedule:
-    # Mondays at 15:00 UTC, mid-morning in America/New_York.
-    - cron: "0 15 * * 1"
+    # 15:00 UTC, mid-morning in America/New_York.
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       build:
-        description: "Build number to submit; empty means the newest with the external testers"
+        description: "Build number to submit; empty means the newest valid build"
         type: string
         default: ""
       notes:
@@ -40,7 +40,7 @@ permissions: {}
 
 jobs:
   promote:
-    name: ${{ github.event_name == 'schedule' && 'Submit a tested build' || 'Submit to the App Store now' }}
+    name: ${{ github.event_name == 'schedule' && 'Submit a day-old build' || 'Submit to the App Store now' }}
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     # A few minutes of reads and writes, and up to 150 s waiting for a version to be ready.

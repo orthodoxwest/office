@@ -176,7 +176,8 @@ So each App Store submission starts a new TestFlight version, and Apple's beta r
 the first build of every version (usually within a day) before external testers can install it.
 Builds uploaded while that review runs reach internal testers only; the first merge after it
 clears reaches the **Testers** group, and later builds of the same version normally go through
-without review. Builds lapse after 90 days, and a re-run for a commit already uploaded
+without review. The group is a convenience for anyone who wants builds early: nothing in the
+App Store submission below depends on it, nor on beta review, which gates nothing any more. Builds lapse after 90 days, and a re-run for a commit already uploaded
 is refused at the upload.
 
 Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
@@ -253,34 +254,38 @@ The **Submit to the App Store** workflow (`.github/workflows/appstore-promote.ym
 `scripts/appstore.py`) sends a TestFlight build to App Review through the App Store Connect API,
 without rebuilding, as the Android app's promotion moves a Closed testing build to production.
 
-- **Every Monday** at 15:00 UTC: unless a version is already with Apple or waiting to be
-  released, the newest build that passed beta review, is with the **Testers** group, was
-  uploaded at least 24 hours before and has a higher version than the App Store's is submitted.
+- **Every day** at 15:00 UTC: unless a version is already with Apple or waiting to be
+  released, the newest valid build that was uploaded at least 24 hours before and has a higher
+  version than the App Store's is submitted. The day is a soak, in which master's CI for the same
+  merge can show a problem; there are no regular TestFlight testers,
+  so TestFlight's beta review and the **Testers** group play no part, and what catches a problem
+  after that is App Review and readers' reports, during the phased release.
   The workflow creates the App Store version for the build's version string (or fills in one
   being prepared), attaches the build, sets *What's New*, chooses *Automatically release this
   version* and Apple's seven-day phased release, and submits it. Apple's review usually takes a
   day or two; once approved the version goes out by itself, to a growing share of automatic
-  updaters over seven days (anyone can download it at once). So a release a week at most,
-  and only while something new has been tested.
+  updaters over seven days (anyone can download it at once). While a version is with Apple or
+  waiting to be released nothing more is submitted, so merges in the meantime go out together in
+  the next release.
 - **What's New** is `apps/android/whatsnew.txt` as of the build's commit, the notes Google Play
   shows, or, while that is empty, "Corrections to the texts and improvements to the app." Edit
   it in App Store Connect before Apple's review starts if a release deserves more.
-- **Releasing now**: a manual run from the Actions tab submits the newest build with the
-  testers, of any age, or the build number given, with the notes given or the file's;
+- **Releasing now**: a manual run from the Actions tab submits the newest valid build, of any
+  age, or the build number given, with the notes given or the file's;
   *Only say what would be submitted* reads App Store Connect and changes nothing.
 - **Pausing**: disable the workflow in the Actions tab. A version in review can be taken back
   with *Remove from Review* in App Store Connect; the next run then fills in that version again
-  with the newest tested build and resubmits it, so disable the workflow first to keep it out.
+  with the newest build a day old and resubmits it, so disable the workflow first to keep it out.
   The phased release can be paused (up to 30 days) or finished at once on the version's page.
 - **A run that stopped** partway (App Store Connect slow or refusing) is finished by the next
   run: it reuses the version and draft submission it made, and sends them. A draft submission
   that also holds something else (an in-app event, say) is left alone until it is sent or
   emptied in App Store Connect.
-- **A rejection** stops the weekly submissions until a person acts, since Apple's reasons need
+- **A rejection** stops the daily submissions until a person acts, since Apple's reasons need
   reading first. Uploads moved past the rejected version's number when it was submitted, so the
-  fix comes in a build with a higher version. Once that build is with the testers, a manual run
+  fix comes in a build with a higher version. Once that build is uploaded, a manual run
   (the build number, or empty for the newest) renumbers the rejected version to the build's
-  version, attaches it, marks Apple's issue resolved and resubmits; weekly runs then carry on.
+  version, attaches it, marks Apple's issue resolved and resubmits; daily runs then carry on.
   By hand in App Store Connect the same is: on the rejected version's page change the version
   number to the new build's, choose that build under *Build*, save, and *Resubmit to App
   Review* (or reply in App Review's messages if the rejection was a misunderstanding).
