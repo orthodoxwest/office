@@ -102,7 +102,7 @@ jobs:
       needs.authorize.outputs.candidates_run == '' &&
       github.event.label.name == 'update-ios-snapshots' &&
       github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       contents: read
 
@@ -130,6 +130,9 @@ jobs:
         run: brew install xcodegen
 
       - name: Build the Rust core and its Swift bindings
+        env:
+          # Only the simulator's library: the device's is TestFlight's.
+          IOS_TARGETS: aarch64-apple-ios-sim
         run: apps/ios/build-core.sh
 
       - name: Generate the Xcode project

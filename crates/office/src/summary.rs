@@ -26,6 +26,9 @@ pub struct HourSummary {
     pub gospel_ant_full: String,
     pub preces: bool,
     pub suffrage: bool,
+    /// The Commemoration of the Cross, said in Paschaltide where the Suffrage
+    /// would be (Rubrics XXXVIII.2; the ordos' "Comm. HC").
+    pub cross: bool,
     pub comms: Vec<CommSummary>,
 }
 
@@ -36,11 +39,15 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
         gospel_ant_full: String::new(),
         preces: false,
         suffrage: false,
+        cross: false,
         comms: Vec::new(),
     };
     for sec in &hour.sections {
         if sec.label.contains("Suffrage") {
             s.suffrage = true;
+        }
+        if sec.label.contains("Commemoration of the Cross") {
+            s.cross = true;
         }
         for (i, el) in sec.elements.iter().enumerate() {
             if el.kind == ElementType::Preces {

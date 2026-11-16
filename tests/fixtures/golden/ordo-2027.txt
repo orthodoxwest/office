@@ -815,26 +815,26 @@ MAY
            Hours   No Preces
            Vespers r · II prec. · Mag. He the holy Cross endured · No Suff.
  13  Thu     Feria                                            w
-           Lauds   w · Ben. My heart burns · No Preces · No Suff.
+           Lauds   w · Ben. My heart burns · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. I did put my finger · No Suff.
+           Vespers w · Mag. I did put my finger · Comm. HC
                Com. St Boniface of Tarsus, Martyr ("Light perpetual")
  14  Fri  L  Feria                                            w
            St Boniface of Tarsus, Martyr (com)
-           Lauds   w · Ben. There came unto the tomb · No Preces · No Suff.
+           Lauds   w · Ben. There came unto the tomb · No Preces · Comm. HC
                Com. St Boniface of Tarsus, Martyr ("Daughters of Jerusalem")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · No Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · Comm. HC
  15  Sat     Saturday Office of the B.V.M.              [s]   w
-           Lauds   w · Ben. O Queen of heaven · No Preces · No Suff.
+           Lauds   w · Ben. O Queen of heaven · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (II Sunday after Easter) · Mag. I am · No Suff.
+           Vespers w · I fol. (II Sunday after Easter) · Mag. I am · Comm. HC
  16  Sun     II Sunday after Easter                     [sd]  w
-           Lauds   w · Ben. I am · No Preces · No Suff.
+           Lauds   w · Ben. I am · No Preces · Comm. HC
            Hours   No Preces
-           Vespers w · II prec. · Mag. I am · No Suff.
+           Vespers w · II prec. · Mag. I am · Comm. HC
  17  Mon     Feria                                            w
-           Lauds   w · Ben. Go ye into the world · No Preces · No Suff.
+           Lauds   w · Ben. Go ye into the world · No Preces · Comm. HC
            Hours   Preces
            Vespers r · I fol. (St Venantius, Martyr) · Mag. Light perpetual · No Suff.
  18  Tue     St Venantius, Martyr                       [d]   r
@@ -847,35 +847,35 @@ MAY
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
  20  Thu     Feria                                            w
-           Lauds   w · Ben. Art thou only · No Preces · No Suff.
+           Lauds   w · Ben. Art thou only · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. Other sheep I have · No Suff.
+           Vespers w · Mag. Other sheep I have · Comm. HC
  21  Fri  L  Feria                                            w
-           Lauds   w · Ben. Ought not Christ · No Preces · No Suff.
+           Lauds   w · Ben. Ought not Christ · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · No Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · Comm. HC
                Com. St Romanus, Abbot ("I will liken him")
  22  Sat     Saturday Office of the B.V.M.              [s]   w
            St Romanus, Abbot (com)
-           Lauds   w · Ben. O Queen of heaven · No Preces · No Suff.
+           Lauds   w · Ben. O Queen of heaven · No Preces · Comm. HC
                Com. St Romanus, Abbot ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers w · I fol. (III Sunday after Easter) · Mag. A little while · No Suff.
+           Vespers w · I fol. (III Sunday after Easter) · Mag. A little while · Comm. HC
  23  Sun     III Sunday after Easter                    [sd]  w
-           Lauds   w · Ben. A little while · No Preces · No Suff.
+           Lauds   w · Ben. A little while · No Preces · Comm. HC
            Hours   No Preces
-           Vespers w · II prec. · Mag. Verily I say unto you · No Suff.
+           Vespers w · II prec. · Mag. Verily I say unto you · Comm. HC
                Com. St Vincent of Lerins, Confessor ("I will liken him")
  24  Mon     Feria                                            w
            St Vincent of Lerins, Confessor (com)
-           Lauds   w · Ben. And beginning · No Preces · No Suff.
+           Lauds   w · Ben. And beginning · No Preces · Comm. HC
                Com. St Vincent of Lerins, Confessor ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers w · Mag. Your sorrow · No Suff.
+           Vespers w · Mag. Your sorrow · Comm. HC
                Com. St Urban, Bishop & Martyr ("Light perpetual")
  25  Tue     Feria                                            w
            St Urban, Bishop & Martyr (com)
-           Lauds   w · Ben. And they constrained him · No Preces · No Suff.
+           Lauds   w · Ben. And they constrained him · No Preces · Comm. HC
                Com. St Urban, Bishop & Martyr ("Daughters of Jerusalem")
            Hours   Preces
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
@@ -898,47 +898,47 @@ MAY
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
  28  Fri  L  Feria                                            w
-           Lauds   w · Ben. They knew the Lord Jesus · No Preces · No Suff.
+           Lauds   w · Ben. They knew the Lord Jesus · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · No Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · Comm. HC
  29  Sat     Saturday Office of the B.V.M.              [s]   w
-           Lauds   w · Ben. O Queen of heaven · No Preces · No Suff.
+           Lauds   w · Ben. O Queen of heaven · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (IV Sunday after Easter) · Mag. Now I go my way · No Suff.
+           Vespers w · I fol. (IV Sunday after Easter) · Mag. Now I go my way · Comm. HC
                Com. St Felix I, Bishop & Martyr ("Light perpetual")
  30  Sun     IV Sunday after Easter                     [sd]  w
            St Felix I, Bishop & Martyr (com)
-           Lauds   w · Ben. Now I go my way · No Preces · No Suff.
+           Lauds   w · Ben. Now I go my way · No Preces · Comm. HC
                Com. St Felix I, Bishop & Martyr ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Now I go my way · No Suff.
+           Vespers w · II prec. · Mag. Now I go my way · Comm. HC
                Com. St Petronilla, Virgin ("Come, thou Bride of Christ")
  31  Mon     Feria                                            w
            St Petronilla, Virgin (com)
-           Lauds   w · Ben. Did not our heart · No Preces · No Suff.
+           Lauds   w · Ben. Did not our heart · No Preces · Comm. HC
                Com. St Petronilla, Virgin ("The kingdom of heaven")
            Hours   Preces
-           Vespers w · Mag. I tell you the truth · No Suff.
+           Vespers w · Mag. I tell you the truth · Comm. HC
 
 JUNE
 ------------------------------------------------------------
   1  Tue     Feria                                            w
-           Lauds   w · Ben. Peace be unto you, it is I · No Preces · No Suff.
+           Lauds   w · Ben. Peace be unto you, it is I · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. When the Comforter · No Suff.
+           Vespers w · Mag. When the Comforter · Comm. HC
                Com. Ss Marcellinus, Peter & Erasmus, Martyrs ("Light perpetual")
   2  Wed     Feria                                            w
            Ss Marcellinus, Peter & Erasmus, Martyrs (com)
-           Lauds   w · Ben. A spirit · No Preces · No Suff.
+           Lauds   w · Ben. A spirit · No Preces · Comm. HC
                Com. Ss Marcellinus, Peter & Erasmus, Martyrs ("Daughters of Jerusalem")
            Hours   Preces
-           Vespers w · Mag. I have yet · No Suff.
+           Vespers w · Mag. I have yet · Comm. HC
   3  Thu     Feria                                            w
-           Lauds   w · Ben. The disciples · No Preces · No Suff.
+           Lauds   w · Ben. The disciples · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. For he shall not speak of himself · No Suff.
+           Vespers w · Mag. For he shall not speak of himself · Comm. HC
   4  Fri  L  Feria                                            w
-           Lauds   w · Ben. These are the words · No Preces · No Suff.
+           Lauds   w · Ben. These are the words · No Preces · Comm. HC
            Hours   Preces
            Vespers r · I fol. (St Boniface, Bishop & Martyr) · Mag. Light perpetual · No Suff.
   5  Sat     St Boniface, Bishop & Martyr               [d]   r
@@ -947,15 +947,15 @@ JUNE
            Vespers w · I fol. (V Sunday after Easter) · Mag. Hitherto · No Suff.
                Com. St Boniface, Bishop & Martyr ("O ye holy and righteous")
   6  Sun     V Sunday after Easter                      [sd]  w
-           Lauds   w · Ben. Hitherto · No Preces · No Suff.
+           Lauds   w · Ben. Hitherto · No Preces · Comm. HC
            Hours   No Preces
-           Vespers w · II prec. · Mag. Ask · No Suff.
+           Vespers w · II prec. · Mag. Ask · Comm. HC
   7  Mon     Rogation Monday                            [f2]  v
-           Lauds   v · Ben. Ask · No Preces · No Suff.
+           Lauds   v · Ben. Ask · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. For the Father · No Suff.
+           Vespers w · Mag. For the Father · Comm. HC
   8  Tue     Feria                                            w
-           Lauds   w · Ben. It behoved Christ to suffer · No Preces · No Suff.
+           Lauds   w · Ben. It behoved Christ to suffer · No Preces · Comm. HC
            Hours   Preces
            Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him · No Suff.
                Com. Ss Primus & Felician, Martyrs ("Light perpetual")
