@@ -496,7 +496,8 @@ final class AppModel: ObservableObject {
         root = date
         switch name {
         case "hour": path = visits([.hour(date, d.string(forKey: "hour") ?? currentOffice(clockHour: 9).hour)])
-        case "ordo": path = visits([.ordo(year: Int(date.year), month: Int(date.month), day: 0)])
+        // `-day YES` brings the date's day under the pinned month heading, as a link to a day does.
+        case "ordo": path = visits([.ordo(year: Int(date.year), month: Int(date.month), day: d.bool(forKey: "day") ? Int(date.day) : 0)])
         case "year": path = visits([.year(Int(date.year))])
         case "reminders": path = visits([.reminders])
         case "about": path = visits([.about])
@@ -504,8 +505,8 @@ final class AppModel: ObservableObject {
         case "feast": path = visits([.feast(d.string(forKey: "feast") ?? "st-benedict")])
         default: path = []
         }
-        // `-settings YES` opens the wide header's Settings, for its screenshot.
-        overlay = d.bool(forKey: "settings") ? .settings : .none
+        // `-settings YES` opens the wide header's Settings, and `-menu YES` the phone's menu, for their screenshots.
+        overlay = d.bool(forKey: "settings") ? .settings : d.bool(forKey: "menu") ? .menu : .none
         return true
     }
 }

@@ -436,7 +436,7 @@ struct MenuPanel: View {
                     .padding(.leading, m.px(10.4))
                     .frame(width: m.px(54), alignment: .leading)
                     .accessibilityHidden(true)
-                Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                 ForEach([false, true], id: \.self) { on in
                     cell(on ? "ON" : "OFF", on == model.martyrology, .label(12, 0.06), spoken: "Martyrology at Prime \(on ? "on" : "off")") {
                         guard on != model.martyrology else { return }
@@ -455,7 +455,7 @@ struct MenuPanel: View {
                         .padding(.leading, m.px(10.4))
                         .frame(width: m.px(54), alignment: .leading)
                         .accessibilityHidden(true)
-                    Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                    Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                     ForEach([false, true], id: \.self) { on in
                         cell(on ? "ON" : "OFF", on == model.chant, .label(12, 0.06), spoken: "Chant \(on ? "on" : "off")") {
                             guard on != model.chant else { return }
@@ -470,6 +470,8 @@ struct MenuPanel: View {
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
+        // Its own height, whatever the screen offers: a row never takes up the room below it.
+        .fixedSize(horizontal: false, vertical: true)
         .background {
             // By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster),
             // not a flat slab of the surface: the web's `.site-menu-panel` by night.
@@ -892,7 +894,11 @@ struct DayPicker: View {
                             .accessibilityLabel(spokenDay(day, today: today))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
-                            Color.clear.frame(maxWidth: .infinity, minHeight: 44)
+                            // As tall as a day's cell at any text size, and no taller.
+                            Text(" ").type(TextStyle(size: 18, line: 30, lining: true))
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .hidden()
+                                .accessibilityHidden(true)
                         }
                     }
                 }

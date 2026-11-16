@@ -95,7 +95,9 @@ The screenshots come from launch arguments:
   `home`, `ordo`, `year`, `reminders` or `about`, and `find` (with `-query benedict`) or `feast`
   (with `-feast st-benedict`);
 - `-today` fixes today;
-- `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
+- `-theme apse` chooses the theme, `-settings YES` opens the wide header's Settings, and
+  `-menu YES` the phone's menu;
+- `-day YES` brings the ordo to the date's day, under its pinned month heading;
 - `-anchor hymn`, `-anchor psalm` or `-anchor score` scrolls an hour to its first hymn, psalm or
   chant notation (with `-chant YES`).
 

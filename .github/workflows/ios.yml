@@ -197,7 +197,10 @@ jobs:
             shoot "$phone" "year-$theme" -page year -theme "$theme"
             shoot "$phone" "reminders-$theme" -page reminders -theme "$theme"
             shoot "$phone" "about-$theme" -page about -theme "$theme"
+            shoot "$phone" "menu-$theme" -page hour -hour compline -menu YES -theme "$theme"
           done
+          # The ordo scrolled to a day, its month heading pinned under the sensor housing.
+          shoot "$phone" "ordo-day-nave" -page ordo -day YES -theme nave
           # A saint's feast page, and Lent's Vespers hymn sung from its notation.
           shoot "$phone" "feast-nave" -page feast -feast st-benedict -theme nave
           shoot "$phone" "chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave

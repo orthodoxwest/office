@@ -81,6 +81,10 @@ struct OrdoScreen: View {
     @State private var heading: CGFloat = 0
     /// The wall's frame on the screen, for the pinned heading's copy of it.
     @State private var wall: CGRect = .zero
+    /// Where the month heading pins, down from the screen's top (below the sensor housing), and
+    /// where the heading stands now: pinned, its wall reaches up over that strip.
+    @State private var pinLine: CGFloat = 0
+    @State private var headingTop: CGFloat = .infinity
 
     /// Where the day before a day asked for is brought: clear of the pinned month heading, a
     /// little below it (the web's `scroll-margin-top`, 3.5rem at the default size, less the row
@@ -121,10 +125,18 @@ struct OrdoScreen: View {
                         }
                         .ordoColumn(m, wide: wide)
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heading = $0 }
+                        // Only near the top, where it can pin: further down, a scroll does not set the page again.
+                        .onGeometryChange(for: CGFloat.self) { min($0.frame(in: .global).minY, 160) } action: { headingTop = $0 }
                         // Pinned, it hides the days passing beneath it down to its rule with the
                         // wall's own copy, lined up with the wall, as the web's sticky heading's
-                        // fixed copy and the Android app's: no box shows, pinned or at rest.
-                        .background { WallCopy(wall: wall).padding(.bottom, -4.5) }
+                        // fixed copy and the Android app's: no box shows, pinned or at rest. Pinned
+                        // below the sensor housing, the copy reaches up to the screen's top, so no
+                        // day shows above the heading.
+                        .background {
+                            WallCopy(wall: wall)
+                                .padding(.bottom, -4.5)
+                                .padding(.top, headingTop <= pinLine + 0.5 ? -pinLine : 0)
+                        }
                     }
                     let prev = number == 1 ? (year - 1, 12) : (year, number - 1)
                     let next = number == 12 ? (year + 1, 1) : (year, number + 1)
@@ -145,6 +157,7 @@ struct OrdoScreen: View {
             }
             .opacity(focusDay > 0 && !placed ? 0 : 1)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
+            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY + $0.safeAreaInsets.top } action: { pinLine = $0 }
             // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.
             .background {
                 GeometryReader { _ in

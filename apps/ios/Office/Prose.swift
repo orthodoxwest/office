@@ -55,6 +55,9 @@ struct ProseSpec: Equatable {
     /// The indent of each paragraph's first line, and of the lines that run on (a hanging indent).
     var firstIndent: CGFloat = 0
     var restIndent: CGFloat = 0
+    /// Whether `restIndent` is the text's own edge (a verse, prose), every line after an initial's
+    /// first starting there, rather than a hang beneath a line's own start (a hymn's, a chant's).
+    var restIsEdge = false
     var tabs: [NSTextTab] = []
     var initial: Initial?
     /// How far the block reaches into the margin before its measure, for a sigil hung there ("All:").
@@ -136,16 +139,21 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
     /// Sets `text` beside a dropped capital: two lines (three past a descending tail), the remainder
     /// running on at the text edge. As beside the web's float, a line never starts short of the text's
     /// own edge, and the first line's opening word moves by the capital's tuck from where its line starts.
+    /// TextKit adds a line's indent to where an exclusion leaves off. Where the rest indent is the
+    /// text's edge, every line after the first (a wrap, or a line after a break) is indented by it, and
+    /// the exclusion beside the capital stops that much short, so they all start at the capital's edge;
+    /// where it is a hang, a line after a break starts at the edge and its wraps hang past it.
     @discardableResult
     private func drop(_ initial: Initial, _ text: NSAttributedString) -> [Row] {
         let second = max(initial.edge, spec.restIndent)
         let first = max(0, second + initial.tuck)
+        let indent = spec.restIsEdge ? spec.restIndent : 0
         container.exclusionPaths = [
             UIBezierPath(rect: CGRect(x: 0, y: 0, width: first, height: spec.line - 0.5)),
-            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
+            UIBezierPath(rect: CGRect(x: 0, y: spec.line, width: second - indent, height: spec.line * CGFloat(initial.rows - 1) - 0.5)),
         ]
         top = 0
-        set(first: 0, rest: spec.restIndent, text: text)
+        set(first: 0, rest: spec.restIndent, later: indent, text: text)
         capOrigin = CGPoint(x: initial.left, y: (lines().first?.minY ?? 0) + baseline + initial.drop)
         capFont = initial.deep
         return rows()
@@ -215,18 +223,28 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         return out
     }
 
-    private func set(first: CGFloat, rest: CGFloat, text source: NSAttributedString? = nil) {
+    /// Sets the paragraph style: `first` opens the text, `later` (`first` unless given) each paragraph after it.
+    private func set(first: CGFloat, rest: CGFloat, later: CGFloat? = nil, text source: NSAttributedString? = nil) {
         let text = NSMutableAttributedString(attributedString: source ?? spec.text)
-        let style = NSMutableParagraphStyle()
-        style.alignment = spec.alignment
-        style.firstLineHeadIndent = first
-        style.headIndent = rest
-        style.minimumLineHeight = spec.line
-        style.maximumLineHeight = spec.line
-        style.lineBreakMode = .byWordWrapping
-        style.tabStops = spec.tabs
-        style.defaultTabInterval = 0
-        text.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: text.length))
+        func style(_ head: CGFloat) -> NSParagraphStyle {
+            let style = NSMutableParagraphStyle()
+            style.alignment = spec.alignment
+            style.firstLineHeadIndent = head
+            style.headIndent = rest
+            style.minimumLineHeight = spec.line
+            style.maximumLineHeight = spec.line
+            style.lineBreakMode = .byWordWrapping
+            style.tabStops = spec.tabs
+            style.defaultTabInterval = 0
+            return style
+        }
+        let whole = NSRange(location: 0, length: text.length)
+        text.addAttribute(.paragraphStyle, value: style(first), range: whole)
+        if let later, later != first {
+            let opening = (text.string as NSString).paragraphRange(for: NSRange(location: 0, length: 0))
+            let after = NSRange(location: opening.upperBound, length: text.length - opening.upperBound)
+            if after.length > 0 { text.addAttribute(.paragraphStyle, value: style(later), range: after) }
+        }
         storage.setAttributedString(text)
     }
 
@@ -245,6 +263,16 @@ final class ProseLayout: NSObject, NSLayoutManagerDelegate {
         let glyphs = manager.glyphRange(for: container)
         manager.enumerateLineFragments(forGlyphRange: glyphs) { _, usedRect, _, _, _ in used = max(used, usedRect.maxX) }
         usedWidth = used.rounded(.up)
+    }
+
+    /// Where each line's first glyph stands, top to bottom.
+    var lineStarts: [CGFloat] {
+        var out: [CGFloat] = []
+        let glyphs = manager.glyphRange(for: container)
+        manager.enumerateLineFragments(forGlyphRange: glyphs) { rect, _, _, range, _ in
+            out.append(rect.minX + self.manager.location(forGlyphAt: range.location).x)
+        }
+        return out
     }
 
     /// The width a string sets in a face.

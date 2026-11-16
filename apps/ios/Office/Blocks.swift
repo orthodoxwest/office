@@ -250,6 +250,8 @@ func proseSpec(_ block: BlockView, _ p: Palette, _ o: Ornament, _ m: Metrics, ha
         var s = spec
         s.text = split.rest
         s.restIndent = max(s.restIndent, textStart)
+        // A hymn's or a chant's rest indent hangs a wrap beneath its line; elsewhere it is the text's edge.
+        s.restIsEdge = !(block.kind == .stanza || block.kind == .chantLine)
         let adapt: Initial.Adapt
         switch block.kind {
         case .verse: adapt = .psalm
