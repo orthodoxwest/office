@@ -159,6 +159,31 @@ final class ProseTests: XCTestCase {
         XCTAssertEqual(opened.height.truncatingRemainder(dividingBy: 32), 0)
     }
 
+    func testEveryLineBesideADeepInitialStartsAtItsEdge() {
+        let words = String(repeating: "ord, open thou our lips, and our mouth shall shew forth thy praise. ", count: 3)
+        // A verse's or prose's rest indent is the text's edge: beside the capital its wraps and the
+        // line after a break start where the first line does, and below it at the edge.
+        for text in [words, "ord, open thou our lips.\n" + words] {
+            var s = spec(text, initial: true, adapt: .dropped)
+            s.restIndent = 28.8
+            s.restIsEdge = true
+            let starts = ProseLayout(spec: s, width: 320).lineStarts
+            XCTAssertGreaterThan(starts.count, 2)
+            XCTAssertEqual(starts[0], 50, accuracy: 0.5)
+            XCTAssertEqual(starts[1], 50, accuracy: 0.5)
+            XCTAssertEqual(starts[2], 28.8, accuracy: 0.5)
+        }
+        // A hymn's rest indent hangs a wrap beneath its own line: its next line starts at the
+        // capital's edge, and a wrap beside the capital hangs past it.
+        var hymn = spec("ord of all, we pray.\n" + words, initial: true, adapt: .dropped)
+        hymn.restIndent = 17.6
+        let lines = ProseLayout(spec: hymn, width: 320).lineStarts
+        XCTAssertEqual(lines[1], 50, accuracy: 0.5)
+        var wrapped = spec(words, initial: true, adapt: .dropped)
+        wrapped.restIndent = 17.6
+        XCTAssertEqual(ProseLayout(spec: wrapped, width: 320).lineStarts[1], 50 + 17.6, accuracy: 0.5)
+    }
+
     func testAShortOpeningRaisesItsInitial() {
         let opened = ProseLayout(spec: spec("men.", initial: true), width: 320)
         // The raised capital is a letter of its line, whose height it leaves as it was.

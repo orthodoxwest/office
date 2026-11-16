@@ -894,7 +894,11 @@ struct DayPicker: View {
                             .accessibilityLabel(spokenDay(day, today: today))
                             .accessibilityAddTraits(day == shown ? .isSelected : [])
                         } else {
-                            Color.clear.frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
+                            // As tall as a day's cell at any text size, and no taller.
+                            Text(" ").type(TextStyle(size: 18, line: 30, lining: true))
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .hidden()
+                                .accessibilityHidden(true)
                         }
                     }
                 }
