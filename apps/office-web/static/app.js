@@ -3666,10 +3666,19 @@ function plainClickOpensHere(e, link) {
       return false;
     };
     if (window.ResizeObserver) {
+      // Every height is read before any allowance is written: a write
+      // between reads would lay the page out again for each row, which on
+      // the whole year's 365 rows held the first load for a third of a
+      // second.
       var dayRows = new ResizeObserver(function (entries) {
-        entries.forEach(function (entry) {
+        var heights = entries.map(function (entry) {
           var next = entry.target.nextElementSibling;
-          if (next) restUnderDayBefore(next);
+          return next && next.matches("tr.day") ? [next, entry.target.offsetHeight + "px"] : null;
+        });
+        heights.forEach(function (pair) {
+          if (pair && pair[0].style.getPropertyValue("--day-row") !== pair[1]) {
+            pair[0].style.setProperty("--day-row", pair[1]);
+          }
         });
       });
       calendarEl.querySelectorAll(".month-table tr.day").forEach(function (row) {
