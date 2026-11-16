@@ -63,7 +63,10 @@ fn section_headings(text: &str) -> String {
     if !text.contains("[section:") {
         return text.to_string();
     }
-    text.split('\n').map(|line| section_heading(line.trim()).map_or_else(|| line.to_string(), str::to_string)).collect::<Vec<_>>().join("\n")
+    text.split('\n')
+        .map(|line| section_heading(line.trim()).map_or_else(|| line.to_string(), str::to_string))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// A psalm's text with the opening words its antiphon has just said in
