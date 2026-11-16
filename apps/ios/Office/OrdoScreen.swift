@@ -75,6 +75,8 @@ struct OrdoScreen: View {
     /// The month faded out while "Show office details" changes every day at once.
     @State private var dimmed = false
     @State private var focused = false
+    /// Where the mark of the day brought into view stands on the screen, as last laid out.
+    @State private var markY: CGFloat?
     /// Whether the day asked for has been set in place: until then the month is held unseen, so it
     /// appears at the day with nothing moving (the web's month page holds itself the same way).
     @State private var placed = false
@@ -119,6 +121,9 @@ struct OrdoScreen: View {
                             // Where a day asked for is brought: a mark of no height at its top, which
                             // `focus` sets clear of the pinned heading.
                             Color.clear.frame(height: 0).id("d-\(d.date.day)")
+                                .onGeometryChange(for: CGFloat?.self) { proxy in
+                                    focusDay > 0 && Int(d.date.day) == max(1, focusDay - 1) ? proxy.frame(in: .global).minY : nil
+                                } action: { if let y = $0 { markY = y } }
                             DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails, turning: dimmed)
                                 .ordoColumn(m, wide: wide)
                                 .opacity(dimmed ? 0 : 1)
@@ -180,11 +185,20 @@ struct OrdoScreen: View {
                     // The day before comes to rest under the heading, so the day asked for is
                     // found among its neighbours, as the web's `scroll-margin-top` keeps a row
                     // above it; the month's first day has none before it here.
+                    // A lazy stack guesses the heights of rows it has not laid out, so one scroll can
+                    // land short or long; it is repeated until the mark stays where it was brought.
                     let anchorDay = max(1, focusDay - 1)
-                    DispatchQueue.main.async {
+                    func bring(_ tries: Int, last: CGFloat?) {
                         scroll.scrollTo("d-\(anchorDay)", anchor: focus)
-                        placed = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            if tries == 0 || (last != nil && markY != nil && abs(markY! - last!) < 0.5) {
+                                placed = true
+                            } else {
+                                bring(tries - 1, last: markY)
+                            }
+                        }
                     }
+                    DispatchQueue.main.async { bring(10, last: nil) }
                 } else {
                     placed = true
                 }
