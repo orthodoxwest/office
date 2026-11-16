@@ -122,9 +122,8 @@ difference is only a warning, since master cannot take the label.
 
 The app is installed once on each simulator, and every shot starts from its data cleared back to
 what the install left (defaults through cfprefsd, then the container), so no earlier shot's kept
-reading place, way back or settings reaches it; the phone's shots and the iPad's are taken at
-once; at a fixed day, today and hour (`-date`, `-today`, `-clock 9`), in
-New York's time zone, in English, at the default text size, with the status bar's time fixed; and
+reading place, way back or settings reaches it; at a fixed day, today and hour (`-date`,
+`-today`, `-clock 9`), in New York's time zone, in English, at the default text size, with the status bar's time fixed; and
 once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a marker to its
 temporary directory once the page's content is on screen and scrolled to its anchor; three
 minutes from launch without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,

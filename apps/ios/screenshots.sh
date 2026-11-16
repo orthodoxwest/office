@@ -189,7 +189,8 @@ shoot() {
     xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
     xcrun simctl install "$sim" "$app"
   done
-  # The phone's shots and the iPad's at once, each simulator on its own.
+  # The phone's shots, then the iPad's. (Taken at once, each simulator's launches waited on the
+  # other's, and the pair took longer than the two one after the other.)
   phone_shots() {
     for theme in nave apse; do
       one "$phone" "home-$theme" -page home -theme "$theme"
@@ -228,12 +229,8 @@ shoot() {
     one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
     one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
   }
-  phone_shots & local phone_job=$!
-  ipad_shots & local ipad_job=$!
-  local failed=0
-  wait "$phone_job" || failed=1
-  wait "$ipad_job" || failed=1
-  [ "$failed" = 0 ] || exit 1
+  phone_shots
+  ipad_shots
   # What they were taken with, which the baselines keep and the next run's `devices` follows.
   python3 - "$phone" "$ipad" "$out/environment.json" <<'PY'
 import json, plistlib, subprocess, sys
