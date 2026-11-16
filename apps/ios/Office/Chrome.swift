@@ -470,6 +470,8 @@ struct MenuPanel: View {
         }
         .padding(m.px(10.4))
         .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
+        // Its own height, whatever the screen offers: a row never takes up the room below it.
+        .fixedSize(horizontal: false, vertical: true)
         .background {
             // By night the menu opens on home's blue plaster (the phone panel's baked Apse plaster),
             // not a flat slab of the surface: the web's `.site-menu-panel` by night.
