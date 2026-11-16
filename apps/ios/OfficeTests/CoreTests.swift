@@ -222,6 +222,37 @@ final class ProseTests: XCTestCase {
 }
 
 /// The web's ornaments, drawn from their SVG paths.
+/// The chrome's panels keep the heights their rows give them, whatever the screen offers.
+@MainActor
+final class ChromeLayoutTests: XCTestCase {
+    private func height<V: View>(_ view: V, width: CGFloat = 390, offered: CGFloat) -> CGFloat {
+        UIHostingController(rootView: view).sizeThatFits(in: CGSize(width: width, height: offered)).height
+    }
+
+    func testTheMenuKeepsItsOwnHeight() {
+        let model = AppModel()
+        model.path = []
+        model.open(.hour(CivilDate(year: 2026, month: 3, day: 15), "prime"))
+        for wide in [false, true] {
+            let menu = MenuPanel(prefsOnly: wide).environmentObject(model)
+            // A tall screen leaves the panel as a short one does: no row takes up the room below it.
+            XCTAssertEqual(height(menu, offered: 2400), height(menu, offered: 700), accuracy: 0.5)
+        }
+    }
+
+    func testThePickersWeeksKeepADaysHeightAtAnySize() {
+        // February 2026 fills four weeks and leaves two blank; August 2026 fills all six.
+        for size in [DynamicTypeSize.large, .accessibility3] {
+            let m = Metrics(textSize: .large, dynamicType: size)
+            func picker(_ month: Int32) -> some View {
+                DayPicker(shown: CivilDate(year: 2026, month: month, day: 1), today: CivilDate(year: 2026, month: 3, day: 15), centred: true) { _ in }
+                    .environment(\.metrics, m)
+            }
+            XCTAssertEqual(height(picker(2), offered: 2400), height(picker(8), offered: 2400), accuracy: 0.5)
+        }
+    }
+}
+
 final class SVGTests: XCTestCase {
     func testArcsAndRelativeCommands() {
         // The morning engraving's sun: a half circle of radius 5 standing on y = 13.
