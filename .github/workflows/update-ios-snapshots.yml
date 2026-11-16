@@ -1,0 +1,367 @@
+name: Update iOS snapshots
+
+# The update-ios-snapshots label checks in the iOS simulator screenshots as the baselines
+# (apps/ios/snapshots/) that ios.yml compares each pull request's shots with, as
+# update-ux-snapshots does for the browser's. It has its own label, not the browser's: the
+# shots need a macOS build of half an hour or more, which a browser snapshot update should not
+# wait on, and most pull requests that move one set leave the other alone.
+#
+# Like every pull_request_target workflow this one is read from master, so the label works only
+# once this file is there; the pull request that added it was seeded with
+# `scripts/ios-snapshots.py fetch BRANCH`.
+on:
+  # This event loads the workflow definition from the default branch. The jobs that execute
+  # pull-request code must remain read-only.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [labeled]
+
+concurrency:
+  group: update-ios-snapshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  authorize:
+    name: Authorize snapshot update
+    if: >-
+      github.event.label.name == 'update-ios-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      candidates_run: ${{ steps.candidates.outputs.run_id }}
+
+    steps:
+      - name: Require a trusted label actor
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            if (context.actor === 'github-actions[bot]') {
+              core.setFailed('Workflow tokens cannot authorize snapshot updates.');
+              return;
+            }
+
+            const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor,
+            });
+            const trusted = new Set(['admin', 'maintain', 'write']);
+            if (!trusted.has(data.permission)) {
+              core.setFailed(
+                `@${context.actor} has ${data.permission} permission; write access is required.`
+              );
+              return;
+            }
+            core.notice(`Snapshot update authorized by @${context.actor}.`);
+
+      # ios.yml uploads the set it would check in on every pull request run it compares.
+      # Reusing it skips a macOS build and a new set of shots; it gets the same validation below.
+      - name: Find iOS snapshot candidates for this head
+        id: candidates
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            const head = context.payload.pull_request.head.sha;
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ios.yml',
+              event: 'pull_request',
+              head_sha: head,
+              per_page: 20,
+            });
+            const runs = data.workflow_runs.filter(run =>
+              run.head_sha === head &&
+              run.status === 'completed' &&
+              run.head_repository?.full_name === `${context.repo.owner}/${context.repo.repo}`
+            );
+            for (const run of runs) {
+              const { data: listing } = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                name: 'ios-snapshot-candidates',
+              });
+              if (listing.artifacts.some(artifact => !artifact.expired)) {
+                core.notice(`Using iOS snapshot candidates from run ${run.html_url}.`);
+                core.setOutput('run_id', String(run.id));
+                return;
+              }
+            }
+            core.notice('No iOS snapshot candidates for this head; taking the screenshots again.');
+
+  generate:
+    name: Take screenshots without write access
+    needs: authorize
+    if: >-
+      needs.authorize.result == 'success' &&
+      needs.authorize.outputs.candidates_run == '' &&
+      github.event.label.name == 'update-ios-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: macos-15
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      # As ios.yml: the baselines' Xcode, runtime and devices where the runner has them, else
+      # the image's newest, which the new set records.
+      - name: Choose and boot the simulators
+        id: sim
+        run: apps/ios/screenshots.sh devices >> "$GITHUB_OUTPUT"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.100.0
+        with:
+          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2.9.3
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build the Rust core and its Swift bindings
+        run: apps/ios/build-core.sh
+
+      - name: Generate the Xcode project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      # ios.yml runs the tests; the screenshots need only the app.
+      - name: Build the app
+        working-directory: apps/ios
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: |
+          mkdir -p build/review
+          if ! xcodebuild build -project Office.xcodeproj -scheme Office \
+            -destination "id=$PHONE" \
+            -derivedDataPath build/dd > build/review/xcodebuild.log 2>&1; then
+            grep -E "error:|: error|FAILED|failed|Undefined symbol" build/review/xcodebuild.log | head -n 120
+            tail -n 40 build/review/xcodebuild.log
+            exit 1
+          fi
+
+      - name: Render screenshots
+        working-directory: apps/ios
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+          IPAD: ${{ steps.sim.outputs.ipad }}
+        run: ./screenshots.sh shoot "$PHONE" "$IPAD" build/dd/Build/Products/Debug-iphonesimulator/Office.app build/review
+
+      # Only the shots that changed are taken anew: the rest keep their baselines' bytes.
+      - name: Compare with the checked-in baselines
+        run: |
+          python3 -m venv "$RUNNER_TEMP/snapshots"
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet pillow==12.3.0
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py compare apps/ios/build/review apps/ios/snapshots \
+            --updates apps/ios/build/review/snapshots --diffs apps/ios/build/review/snapshot-diffs \
+            --summary "$GITHUB_STEP_SUMMARY" || [ $? -eq 1 ]
+
+      - name: Upload untrusted snapshot candidates
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ios-snapshot-candidates
+          path: apps/ios/build/review/snapshots/
+          if-no-files-found: error
+          retention-days: 1
+
+  commit:
+    name: Validate and commit snapshots
+    needs: [authorize, generate]
+    if: >-
+      always() &&
+      needs.authorize.result == 'success' &&
+      (needs.generate.result == 'success' ||
+        (needs.generate.result == 'skipped' && needs.authorize.outputs.candidates_run != ''))
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: # zizmor: ignore[artipacked] the commit step pushes with these credentials
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download untrusted snapshot candidates from the iOS run
+        if: needs.authorize.outputs.candidates_run != ''
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: ios-snapshot-candidates
+          path: ${{ runner.temp }}/ios-snapshot-candidates
+          run-id: ${{ needs.authorize.outputs.candidates_run }}
+          github-token: ${{ github.token }}
+
+      - name: Download untrusted regenerated snapshot candidates
+        if: needs.authorize.outputs.candidates_run == ''
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: ios-snapshot-candidates
+          path: ${{ runner.temp }}/ios-snapshot-candidates
+
+      - name: Validate and stage snapshot candidates
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/ios-snapshot-candidates
+        run: |
+          set -euo pipefail
+          SNAPSHOT_DIR=apps/ios/snapshots
+
+          if [ -L "$SNAPSHOT_DIR" ] || { [ -e "$SNAPSHOT_DIR" ] && [ ! -d "$SNAPSHOT_DIR" ]; }; then
+            echo "::error::$SNAPSHOT_DIR must be a real directory."
+            exit 1
+          fi
+          mkdir -p "$SNAPSHOT_DIR"
+
+          # PNGs, and the one environment.json naming what they were taken with.
+          UNEXPECTED=$(find "$ARTIFACT_DIR" -mindepth 1 \
+            \( ! -type f -o \( ! -name '*.png' ! -name environment.json \) \) -print -quit)
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Snapshot artifact contains an unexpected entry: $UNEXPECTED"
+            exit 1
+          fi
+          UNEXPECTED=$(find "$ARTIFACT_DIR" -mindepth 2 -print -quit)
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Snapshot artifact contains a nested entry: $UNEXPECTED"
+            exit 1
+          fi
+
+          mapfile -t CANDIDATES < <(
+            find "$ARTIFACT_DIR" -mindepth 1 -maxdepth 1 -type f \
+              -name '*.png' -print | LC_ALL=C sort
+          )
+          if [ "${#CANDIDATES[@]}" -lt 1 ] || [ "${#CANDIDATES[@]}" -gt 80 ]; then
+            echo "::error::Expected between 1 and 80 snapshot PNGs; found ${#CANDIDATES[@]}."
+            exit 1
+          fi
+
+          for CANDIDATE in "${CANDIDATES[@]}"; do
+            SIZE=$(stat -c '%s' "$CANDIDATE")
+            SIGNATURE=$(head -c 8 "$CANDIDATE" | od -An -tx1 | tr -d ' \n')
+            if [ "$SIZE" -gt 5242880 ] || [ "$SIGNATURE" != '89504e470d0a1a0a' ]; then
+              echo "::error::Invalid snapshot candidate: $CANDIDATE"
+              exit 1
+            fi
+          done
+
+          ENVIRONMENT="$ARTIFACT_DIR/environment.json"
+          if [ ! -f "$ENVIRONMENT" ] || [ "$(stat -c '%s' "$ENVIRONMENT")" -gt 4096 ] || ! python3 - "$ENVIRONMENT" <<'PY'
+          import json, sys
+          env = json.load(open(sys.argv[1]))
+          keys = {"xcode", "runtime", "phone", "ipad"}
+          ok = isinstance(env, dict) and set(env) == keys and all(isinstance(v, str) and 0 < len(v) < 100 for v in env.values())
+          sys.exit(0 if ok else 1)
+          PY
+          then
+            echo "::error::Snapshot artifact has no valid environment.json."
+            exit 1
+          fi
+
+          UNEXPECTED=$(find "$SNAPSHOT_DIR" -mindepth 1 -maxdepth 1 \
+            \( ! -type f -o \( ! -name '*.png' ! -name environment.json \) \) -print -quit)
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Snapshot directory contains an unexpected entry: $UNEXPECTED"
+            exit 1
+          fi
+
+          find "$SNAPSHOT_DIR" -maxdepth 1 -type f \( -name '*.png' -o -name environment.json \) -delete
+          for CANDIDATE in "${CANDIDATES[@]}" "$ENVIRONMENT"; do
+            cp -- "$CANDIDATE" "$SNAPSHOT_DIR/$(basename "$CANDIDATE")"
+          done
+
+          git reset --quiet HEAD --
+          git add -A -- "$SNAPSHOT_DIR"
+
+          while IFS= read -r -d '' STAGED_PATH; do
+            case "$STAGED_PATH" in
+              "$SNAPSHOT_DIR"/*.png | "$SNAPSHOT_DIR"/environment.json) ;;
+              *)
+                echo "::error::Refusing to commit unexpected path: $STAGED_PATH"
+                exit 1
+                ;;
+            esac
+          done < <(git diff --cached --name-only -z)
+
+      - name: Commit and push
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --cached --quiet && echo "No iOS snapshot changes needed." || \
+            git commit --no-verify -m "test: regenerate iOS simulator snapshots"
+          git push origin "HEAD:refs/heads/$HEAD_REF"
+
+  report:
+    name: Report snapshot update
+    needs: [authorize, generate, commit]
+    if: >-
+      always() &&
+      github.event.label.name == 'update-ios-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Remove label
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'update-ios-snapshots',
+              });
+            } catch (_) {
+              // label may have already been removed — that's fine
+            }
+
+      - name: Comment result
+        uses: actions/github-script@v9.0.0
+        env:
+          UPDATE_SUCCEEDED: ${{ needs.commit.result == 'success' }}
+        with:
+          script: |
+            const marker = '<!-- ios-snapshot-update -->';
+            const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const succeeded = process.env.UPDATE_SUCCEEDED === 'true';
+            const body = succeeded
+              ? `## iOS snapshots updated\n\nCI took and validated the simulator baselines, then pushed them to this branch.\n\n${marker}`
+              : `## iOS snapshot update failed\n\nThe simulator baselines were not updated. Check the [workflow run](${runURL}) for details.\n\n${marker}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }

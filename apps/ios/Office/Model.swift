@@ -238,14 +238,17 @@ final class AppModel: ObservableObject {
     @Published private(set) var seasons: [Page: String] = [:]
     /// Today, read again whenever the app comes forward; a screenshot run can fix it.
     @Published private(set) var today: CivilDate
-    /// The hour of the clock, which chooses home's invitation.
-    @Published private(set) var clockHour = civil.component(.hour, from: Date())
+    /// The hour of the clock, which chooses home's invitation; a screenshot run can fix it (`-clock 9`).
+    @Published private(set) var clockHour = AppModel.pinnedClock ?? civil.component(.hour, from: Date())
     /// The hours prayed, for home's marks, as the web's `office-prayed`: "2026-10-07/lauds", kept
     /// on this device a week.
     @Published private(set) var prayed: Set<String>
 
     private let defaults = UserDefaults.standard
     private let pinnedToday: CivilDate?
+    /// The hour `-clock` fixes, so a screenshot shows the same invitation whenever it is taken.
+    private static let pinnedClock: Int? = UserDefaults.standard.object(forKey: "clock") == nil
+        ? nil : min(max(UserDefaults.standard.integer(forKey: "clock"), 0), 23)
     private var nextEntry = 1
 
     let hours: [String] = hourNames()
@@ -452,7 +455,7 @@ final class AppModel: ObservableObject {
     /// or the date may have turned since home was composed.
     func refreshToday(seen: Bool = false) {
         let date = Date()
-        let hour = civil.component(.hour, from: date)
+        let hour = AppModel.pinnedClock ?? civil.component(.hour, from: date)
         if hour != clockHour {
             step = nil
             // A tick a minute apart finds the turn within its first minute; one later (a timer
@@ -487,7 +490,7 @@ final class AppModel: ObservableObject {
     /**
      * What the launch asked for, for the simulator screenshots: `-page hour -hour lauds
      * -date 2026-03-15` (or home, ordo, year, reminders, about; find with `-query`, feast with
-     * `-feast`), with `-today` fixing today.
+     * `-feast`), with `-today` fixing today and `-clock 9` the hour of the clock.
      */
     func openFromLaunch() -> Bool {
         let d = UserDefaults.standard
