@@ -3,6 +3,7 @@
 
     ios-snapshots.py compare RAW BASELINES --updates DIR --diffs DIR [--summary FILE]
     ios-snapshots.py fetch BRANCH [--remote origin]
+    ios-snapshots.py store RAW OUT
 
 `compare` takes the simulator's full-size screenshots in RAW (apps/ios/screenshots.sh shoot),
 brings each down to the device's points (a third of an iPhone's pixels, half an iPad's) and
@@ -27,6 +28,12 @@ not-compared, differ, blank or none), and --summary a section for each of them. 
 `fetch` copies the comparable set a CI run published to ci/ios-screenshots/BRANCH (its
 snapshots/ folder) into apps/ios/snapshots/, for when the label cannot be used: on the pull
 request that first adds the workflow, which pull_request_target reads from master.
+
+`store` takes a store-size run's shots in RAW (a 6.9-inch iPhone and a 13-inch iPad) and writes
+the App Store's sets to OUT, numbered in STORE_SHOTS' order: iphone-6.9/, iphone-6.3/ (the 6.9's
+shots brought to 1206 x 2622, the size App Store Connect's 6.3-inch slot takes) and ipad-13/. Every
+picture is RGB: App Store Connect refuses a screenshot with an alpha channel, calling its
+dimensions invalid.
 """
 
 import argparse
@@ -281,6 +288,33 @@ def fetch(branch, remote="origin", into=BASELINES):
     print(f"{len(names)} files from {ref} into {into.relative_to(ROOT)}")
 
 
+# The App Store's screenshots, in the order the listing shows them.
+STORE_SHOTS = {
+    "iphone": ["home-nave", "feast-nave", "compline-nave", "compline-apse", "ordo-nave", "year-nave", "reminders-nave"],
+    "ipad": ["home-nave", "chant-nave", "feast-nave", "vespers-nave", "ordo-nave", "year-nave", "home-apse"],
+}
+STORE_SIZES = {"iphone-6.9": (1320, 2868), "iphone-6.3": (1206, 2622), "ipad-13": (2064, 2752)}
+
+
+def store(raw, out):
+    """The App Store's sets from a store-size run; see the module's docstring."""
+    from PIL import Image
+
+    for folder, (w, h) in STORE_SIZES.items():
+        device = folder.split("-")[0]
+        prefix = "ipad-" if device == "ipad" else ""
+        (out / folder).mkdir(parents=True, exist_ok=True)
+        for n, name in enumerate(STORE_SHOTS[device], 1):
+            with Image.open(raw / f"{prefix}{name}.png") as image:
+                shot = image.convert("RGB")
+            if shot.size != (w, h):
+                if folder == "iphone-6.3":
+                    shot = shot.resize((w, h), Image.LANCZOS)
+                else:
+                    raise SystemExit(f"{prefix}{name}.png is {shot.size[0]} x {shot.size[1]}, not the {w} x {h} {folder} takes")
+            shot.save(out / folder / f"{n}-{name}.png", optimize=True)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -294,7 +328,13 @@ def main(argv=None):
     f = sub.add_parser("fetch")
     f.add_argument("branch")
     f.add_argument("--remote", default="origin")
+    s = sub.add_parser("store")
+    s.add_argument("raw", type=pathlib.Path)
+    s.add_argument("out", type=pathlib.Path)
     args = parser.parse_args(argv)
+    if args.command == "store":
+        store(args.raw, args.out)
+        return 0
     if args.command == "fetch":
         fetch(args.branch, args.remote)
         return 0
