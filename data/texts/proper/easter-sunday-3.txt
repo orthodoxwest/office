@@ -1,10 +1,26 @@
 [magnificat-antiphon-monday]
 # SOURCE: diurnal p. 381
-Your sorrow * shall be turned into joy, alleluia: and your joy no man taketh from you, alleluia.
+Your sorrow * shall be turned into joy, alleluia: and your joy no man taketh from you, alleluia, alleluia.
+
+[benedictus-antiphon-monday]
+# SOURCE: Monastic Diurnal p. 381 (III Week after the Octave of Easter, Monday)
+And beginning * at Moses and all the prophets, he expounded unto them the scriptures concerning himself, alleluia.
 
 [benedictus-antiphon-tuesday]
 # SOURCE: diurnal p. 381
 And they constrained him, * saying, Abide with us, O Lord, for it is toward evening, alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: Monastic Diurnal p. 381 (III Week after the Octave of Easter, Tuesday)
+Sorrow * hath filled your heart: and your joy no man taketh from you, alleluia, alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: Monastic Diurnal p. 381 (III Week after the Octave of Easter, Wednesday)
+Abide with us, * for it is toward evening, and the day is far spent, alleluia.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: Monastic Diurnal p. 382 (III Week after the Octave of Easter, Wednesday)
+Your sorrow, * alleluia, shall be turned into joy, alleluia.
 
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 382 (III Week after the Octave of Easter, Thursday)

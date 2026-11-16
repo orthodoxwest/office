@@ -963,6 +963,10 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
         ("2026-07-11", &["prime", "terce", "none"]),
         ("2026-02-02", &["terce"]),
         ("2026-03-25", &["terce"]),
+        // XXIII.10: the Holy Name of Mary commemorated at the Sunday's I
+        // Vespers (2026 ordo, "Comm. BVM") lends Our Lady's ending to those
+        // Vespers and the Compline after them.
+        ("2026-09-12", &["vespers", "compline"]),
     ] {
         for &name in hours {
             assert!(hymn(date, name).contains(VIRGIN_BORN), "{date} {name}");
@@ -979,7 +983,6 @@ fn nativity_hymn_ending_on_corpus_christi_and_offices_of_our_lady() {
         ("2026-08-16", "terce"),
         ("2025-06-24", "terce"),
         ("2026-12-13", "terce"),
-        ("2026-09-12", "compline"),
         ("2026-07-11", "compline"),
         ("2026-09-15", "terce"),
     ] {
@@ -1365,6 +1368,18 @@ fn pentecost_week_commemorations_keep_paschaltide_forms() {
         (Date::new(2037, 5, 27), "vespers", "st-bede-venerable", "O Teacher"),
         (Date::new(2046, 6, 17), "vespers", "st-ephrem-syrian", "O Teacher"),
         (Date::new(2046, 6, 18), "vespers", "st-ephrem-syrian", "O Teacher"),
+        // Martyrs' own antiphons, written for the rest of the year, yield to
+        // the Paschal Common of Martyrs (Diurnal p. 6*, §3; 2021 and 2024
+        // ordos: Ss John and Paul, "Light perpetual", "Daughters of
+        // Jerusalem", not "The righteous" and "These are the holy ones").
+        (Date::new(2024, 6, 25), "vespers", "ss-john-paul-martyrs", "Light perpetual"),
+        (Date::new(2024, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
+        (Date::new(2027, 6, 25), "vespers", "ss-john-paul-martyrs", "Light perpetual"),
+        (Date::new(2027, 6, 26), "lauds", "ss-john-paul-martyrs", "Daughters of Jerusalem"),
+        // An office of its own keeps its antiphons and takes the Alleluia
+        // (XXIV.7): St John Baptist's octave within the Octave of Pentecost.
+        (Date::new(2051, 6, 30), "vespers", "nativity-john-baptist-octave-day", "When Zacharias"),
+        (Date::new(2051, 7, 1), "lauds", "nativity-john-baptist-octave-day", "The mouth of Zacharias"),
     ] {
         let found = commemorated(date, hour, owner);
         let (ant, vers) = (text(&found, ElementType::Antiphon), text(&found, ElementType::Versicle));
@@ -1808,5 +1823,154 @@ fn pre_lenten_and_lenten_vespers_keep_the_psalter_antiphons() {
         let (id, vespers) = antiphons("vespers", moveable.easter.add_days(42));
         assert_eq!(id, "ascension-sunday-within-octave", "{y}");
         assert!(vespers.iter().all(|r| r.starts_with("proper/ascension")), "{y}: {vespers:?}");
+    }
+}
+
+/// Diurnal p. 34* (and p. 42*): "If it be not the day of the Saint's death
+/// (indicated in the Proper by the letters m.t.v.)" Iste Confessor's first
+/// stanza ends "On this his feast-day, year by year receiveth / Merited
+/// honours." Marked: Chrysostom (p. 466; 2026 ordo 26 January, "Hymn
+/// m.t.v."), Peter Chrysologus (p. 446; 2026 ordo 1 December, "Hymn
+/// (m.t.v.)") and Bede, a Confessor not a Bishop (p. 528; 2026 ordo 26 May).
+/// Unmarked feasts keep "Merited this day": St Antony, and St Cyril on 28
+/// January (p. 466; the bracketed 9 February entry alone is marked).
+#[test]
+fn confessors_marked_mtv_change_the_hymns_last_two_lines() {
+    let (days, moveable) = year(2026);
+    let hymn = |m: i32, d: i32| {
+        let date = Date::new(2026, m, d);
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+    };
+    for (m, d, key) in [
+        (1, 26, "commons/confessor-bishop/hymn-vespers-mtv"),
+        (12, 1, "commons/confessor-bishop/hymn-vespers-mtv"),
+        (5, 26, "commons/confessor/hymn-vespers-mtv"),
+    ] {
+        let h = hymn(m, d);
+        assert_eq!(h.label, "Iste Confessor", "{m}-{d}");
+        assert!(h.text.contains("On this his feast-day, year by year receiveth\nMerited honours."), "{m}-{d}: {}", h.text);
+        assert!(!h.text.contains("Merited this day"), "{m}-{d}");
+        assert_eq!(h.source_ref, key, "{m}-{d}");
+        // The chant sets the changed lines to the same notes.
+        assert!(h.score.is_some(), "{m}-{d}: unscored");
+    }
+    for (m, d) in [(1, 16), (1, 27)] {
+        let h = hymn(m, d);
+        assert!(h.text.contains("Merited this day joyfully to enter\nHeavenly mansions."), "{m}-{d}: {}", h.text);
+    }
+    // "(m.t.v.) unless in any place there should be I Vespers" (Hilary,
+    // p. 455): the eve is his death-day, so I Vespers keep the hymn.
+    assert!(!calendar::model::HymnMtv::UnlessFirstVespers.applies(true));
+    assert!(calendar::model::HymnMtv::UnlessFirstVespers.applies(false));
+    assert!(calendar::model::HymnMtv::Yes.applies(true));
+}
+
+/// General Rubrics XXIV.7 and XXVII.3: in Paschaltide Alleluia ends every
+/// antiphon that lacks it, and the versicles after the Hymn and of the
+/// commemorations, but not the Preces, Right dear or a responsory's verses.
+/// The Apparition of St Michael (8 May) takes its office from 29 September
+/// (2026 ordo, "Ppr. Off. (609f)"), whose texts are written without it.
+#[test]
+fn paschaltide_adds_alleluia_to_antiphons_and_versicles() {
+    let elements = |date: Date, name: &str| {
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).collect::<Vec<_>>()
+    };
+    let alleluias = |s: &str| s.to_lowercase().matches("alleluia").count();
+    let lauds = elements(Date::new(2026, 5, 8), "lauds");
+    for e in lauds.iter().filter(|e| e.kind == ElementType::Antiphon && e.slot_ref != "marian-antiphon") {
+        assert!(e.text.to_lowercase().trim_end().ends_with("alleluia."), "{}: {}", e.slot_ref, e.text);
+    }
+    let ant = |slot: &str| lauds.iter().find(|e| e.slot_ref == slot).unwrap().text.clone();
+    assert!(ant("psalm-antiphon-1").ends_with("golden censer, alleluia."));
+    // Never doubled: "Salvation to our God, alleluia."
+    assert_eq!(alleluias(&ant("psalm-antiphon-2")), 1);
+    let versicle = lauds.iter().find(|e| e.kind == ElementType::Versicle && e.slot_ref == "versicle").unwrap();
+    assert_eq!(
+        versicle.text.trim(),
+        "V. An Angel stood at the altar of the temple, alleluia.\nR. Having in his hand a golden censer, alleluia."
+    );
+    // Commemorated at I Vespers of the next day (2027-05-07) and at Lauds.
+    for (date, name) in [(Date::new(2027, 5, 7), "vespers"), (Date::new(2027, 5, 8), "lauds")] {
+        let found = elements(date, name);
+        let comm: Vec<_> = found.iter().filter(|e| e.is_commemoration && e.commemoration_owner_id == "apparition-st-michael").collect();
+        assert!(!comm.is_empty(), "{date} {name}");
+        for e in comm.iter().filter(|e| matches!(e.kind, ElementType::Antiphon | ElementType::Versicle)) {
+            assert!(
+                e.text.lines().filter(|l| !l.trim().is_empty()).all(|l| l.to_lowercase().contains("alleluia")),
+                "{date} {name}: {}",
+                e.text
+            );
+        }
+    }
+    // Not the responsory's verses, nor Our Lady's antiphon, nor out of Paschaltide.
+    for e in lauds.iter().filter(|e| e.kind == ElementType::ShortResponsory) {
+        assert!(!e.text.contains("censer, alleluia"), "{}", e.text);
+    }
+    let september = elements(Date::new(2026, 9, 29), "lauds");
+    let first = september.iter().find(|e| e.slot_ref == "psalm-antiphon-1").unwrap();
+    assert!(first.text.ends_with("golden censer."), "{}", first.text);
+    let prime = elements(Date::new(2026, 5, 8), "prime");
+    for e in prime.iter().filter(|e| e.kind == ElementType::Versicle && e.text.contains("Right dear")) {
+        assert!(!e.text.to_lowercase().contains("alleluia"), "{}", e.text);
+    }
+}
+
+/// General Rubrics XXIII.10: an office without a proper hymn ending takes it
+/// from the first commemorated office that has one, at Lauds and the Hours
+/// from Lauds' commemorations, and at Vespers and the Compline after them
+/// from Vespers'. Our Lady of Walsingham commemorated on the XIX Sunday after
+/// Pentecost (2023) and at I Vespers on St Callistus the evening before gives
+/// Our Lady's ending (XXIII.4(c)); in Advent it is never used (the
+/// Expectation, 18 December), and a saint within Our Lady's Octave keeps the
+/// ordinary ending as the ordos print it (St Joachim; #635). On the Friday
+/// after Passion Sunday Our Lady of Sorrows' ending is said "at Compline and
+/// at the Hours through None" (Diurnal p. 505), never on Vexilla Regis, whose
+/// last stanza is never changed.
+#[test]
+fn a_commemorated_office_lends_its_hymn_ending() {
+    const VIRGIN_BORN: &str = "O Jesu, Virgin-born, to thee";
+    let hymn = |y: i32, m: i32, d: i32, name: &str| {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, m, d);
+        let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        hour.sections.into_iter().flat_map(|s| s.elements).find(|e| e.kind == ElementType::Hymn).unwrap()
+    };
+    for name in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] {
+        let h = hymn(2023, 10, 15, name);
+        assert!(h.text.contains(VIRGIN_BORN), "2023-10-15 {name}: {}", h.text);
+        assert!(h.source_refs.iter().any(|r| r == "seasonal/christmas/hymn-doxology"), "2023-10-15 {name}");
+    }
+    for name in ["vespers", "compline"] {
+        assert!(hymn(2023, 10, 14, name).text.contains(VIRGIN_BORN), "2023-10-14 {name}");
+    }
+    for (m, d, name) in [(12, 18, "lauds"), (12, 18, "prime"), (8, 16, "lauds"), (8, 16, "terce")] {
+        assert!(!hymn(2026, m, d, name).text.contains(VIRGIN_BORN), "2026-{m}-{d} {name}");
+    }
+    let line = "Who died to make thy servants live";
+    for (m, d, name) in [(4, 2, "compline"), (4, 3, "prime"), (4, 3, "terce"), (4, 3, "none")] {
+        assert!(hymn(2026, m, d, name).text.contains(line), "2026-{m}-{d} {name}");
+    }
+    for (m, d) in [(4, 2), (4, 3)] {
+        let h = hymn(2026, m, d, "vespers");
+        assert!(h.text.contains("Preserve and govern evermore") && !h.text.contains(line), "2026-{m}-{d} vespers");
+    }
+}
+
+/// Friday Vespers in Paschaltide commemorate the Saturday Office of Our Lady
+/// with its Paschaltide antiphon and versicle, "O Queen of heaven" and "Full
+/// of grace are thy lips, alleluia" (Diurnal p. 71*), as Saturday Lauds says them.
+#[test]
+fn the_saturday_office_of_our_lady_is_commemorated_in_its_paschal_form() {
+    for date in ["2031-05-09", "2033-05-06", "2035-05-18"] {
+        let date = Date::parse(date).unwrap();
+        let (days, moveable) = year(date.year());
+        let hour = engine().compose_hour("vespers", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let refs: Vec<String> = hour.sections.iter().flat_map(|s| s.elements.iter()).flat_map(|e| e.source_refs.iter().cloned()).collect();
+        assert!(refs.iter().any(|r| r == "proper/saturday-office-bvm-paschal/magnificat-antiphon"), "{date}: {refs:?}");
+        assert!(refs.iter().any(|r| r == "proper/saturday-office-bvm-paschal/versicle-vespers"), "{date}: {refs:?}");
+        assert!(!refs.iter().any(|r| r.starts_with("proper/saturday-office-bvm/")), "{date}: {refs:?}");
     }
 }

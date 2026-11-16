@@ -99,3 +99,81 @@ O holy Apostle Paul, * thou preacher of the truth and Doctor of the Gentiles, in
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon]
+@use proper/commemoration-st-paul-apostle/psalm-antiphon-1
+
+[psalm-antiphon-1]
+# SOURCE: Monastic Diurnal p. 548 (June 30, At Lauds and the Hours)
+@use proper/conversion-st-paul/psalm-antiphon-1
+
+[psalm-antiphon-2]
+# SOURCE: Monastic Diurnal p. 548
+@use proper/conversion-st-paul/psalm-antiphon-2
+
+[psalm-antiphon-3]
+# SOURCE: Monastic Diurnal p. 548
+@use proper/conversion-st-paul/psalm-antiphon-3
+
+[psalm-antiphon-4]
+# SOURCE: Monastic Diurnal pp. 548-549
+@use proper/conversion-st-paul/psalm-antiphon-4
+
+[psalm-antiphon-5]
+# SOURCE: Monastic Diurnal p. 549 (and p. 550, At None)
+@use proper/conversion-st-paul/psalm-antiphon-5
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 549 (June 30, At Lauds)
+!2 Tim. 4:7, 8
+I have fought a good fight, I have finished my course, I have kept the faith: henceforth there is laid up for me a crown of righteousness, * which the Lord, the righteous judge, shall give me at that day.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 550 ("Chapter as above at Lauds")
+@use proper/commemoration-st-paul-apostle/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 550 (June 30, At Sext)
+!2 Cor. 12:7-9
+Lest I should be exalted above measure through the abundance of the revelations, there was given to me a thorn in the flesh, the messenger of Satan to buffet me, lest I should be exalted above measure. For this thing I besought the Lord thrice, that it might depart from me. * And he said unto me, My grace is sufficient for thee.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 550 (June 30, At None)
+!1 Cor. 15:9, 10
+For I am the least of the apostles, that am not meet to be called an apostle, because I persecuted the church of God. * But by the grace of God I am what I am: and his grace which was bestowed upon me was not in vain.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 549 (June 30, At Lauds)
+@use proper/conversion-st-paul/versicle-lauds
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal p. 550
+@use proper/conversion-st-paul/versicle-terce
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 550
+@use proper/conversion-st-paul/versicle-sext
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 550 ("O God"; the Conversion's, p. 465, has "O Lord")
+V. Exceedingly honoured are thy friends, O God.
+R. Firmly stablished is their princedom.
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal p. 549 ("Short R. and Hymn as in the Common, p. 11*")
+@use commons/apostle/hymn-lauds
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 549
+@use commons/apostle/short-responsory-lauds
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal p. 549 (June 30, Ant. on Benedictus)
+Ye which have followed me * shall sit upon twelve thrones, judging the twelve tribes of Israel, saith the Lord.
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal p. 549; the 2021, 2022 and 2024 ordos commemorate St Paul at Lauds with "Ye which have followed me"
+@use proper/commemoration-st-paul-apostle/benedictus-antiphon

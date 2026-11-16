@@ -211,6 +211,38 @@ Earth's mighty fabric ruleth and directeth,
 Only and Trinal.
 
 Amen.
+[hymn-vespers-mtv]
+# SOURCE: Monastic Diurnal.pdf, p. 42* (Common of a Confessor not a Bishop, Hymn: "If it be not the day of the Saint's death
+# (indicated in the Proper by the letters m.t.v.) the last two lines read"); the rest as [hymn-vespers].
+# Sung for a feast whose data sets HymnMtv (crates/office/src/engine.rs).
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+On this his feast-day, year by year receiveth
+Merited honours.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have our portion
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Only and Trinal.
+
+Amen.
 [chapter-vespers]
 @use commons/confessor/chapter-lauds
 

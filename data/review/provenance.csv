@@ -110,6 +110,7 @@ commons/confessor-bishop/collect,e515745e2d36,Monastic Diurnal.pdf,"Common of a 
 commons/confessor-bishop/commemoration-versicle,2eb3198c7903,Monastic Diurnal.pdf,"Antiphons and Versicles for Commemorations, Common of a Confessor and Bishop, At I Vespers V./R. (3*); also I Vespers V. (35*); PDF pages 716, 748","3*, 35*",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes codex attestation citing draft archdiocesan Vespers book p. 631.
 commons/confessor-bishop/hymn-lauds,692c682798f3,Monastic Diurnal.pdf,"Common of a Confessor and Bishop, At Lauds, Hymn Jesu, Redemptor omnium; PDF pages 749",36*,verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes codex attestation citing draft archdiocesan Lauds book p. 659.
 commons/confessor-bishop/hymn-vespers,a097cbb44cda,A Noted Hymnary for the Anglican Breviary,,109,verified,codex,2026-07-17,
+commons/confessor-bishop/hymn-vespers-mtv,718ef71fcec3,diurnal,,34*,verified,claude,2026-11-15,"Changed last two lines of the first stanza read from p. 34*; the rest is hymn-vespers word for word (A Noted Hymnary for the Anglican Breviary p. 109), whose wording differs slightly from the Diurnal's (""feast day"", ""a portion""); kept identical to it outside the changed lines."
 commons/confessor-bishop/magnificat-antiphon,67446e2341cd,Monastic Diurnal.pdf,"Common of a Confessor and Bishop, At II Vespers, Ant. on Magnificat; PDF pages 754",41*,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 41*.
 commons/confessor-bishop/magnificat-antiphon-first,b5bfec8b77da,Monastic Diurnal.pdf,"Common of a Confessor and Bishop, At I Vespers, Ant. on Magnificat; PDF pages 748",35*,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 35*.
 commons/confessor-bishop/psalm-antiphon-1,5f2c5cecc139,Monastic Diurnal.pdf,"Common of a Confessor and Bishop, At Lauds and the Hours, Ant. 1; PDF pages 748",35*,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 35*.
@@ -159,6 +160,7 @@ commons/confessor/collect-alternate,75de7899ce3e,diurnal,,45*,verified,codex,202
 commons/confessor/collect-doctor,c9b49aa443a0,diurnal,,45*,verified,claude,2026-09-30,Direct page-image review (PDF page 758); wording confirmed.
 commons/confessor/hymn-lauds,99e3cf6f5463,A Noted Hymnary for the Anglican Breviary,,110,verified,codex,2026-07-17,
 commons/confessor/hymn-vespers,a6720922767d,A Noted Hymnary for the Anglican Breviary,,109,verified,codex,2026-07-17,
+commons/confessor/hymn-vespers-mtv,2a4924438436,diurnal,,42*,verified,claude,2026-11-15,"Changed last two lines of the first stanza read from p. 42*; the rest is hymn-vespers word for word (A Noted Hymnary for the Anglican Breviary p. 109), whose wording differs slightly from the Diurnal's (""feast day"", ""Only""); kept identical to it outside the changed lines."
 commons/confessor/magnificat-antiphon,45aa1c5fe883,Monastic Diurnal.pdf,"Common of a Confessor not a Bishop, At II Vespers, Ant. on Magnificat; PDF pages 759",46*,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 46*.
 commons/confessor/magnificat-antiphon-doctor,fb08e396290a,diurnal,,43*,verified,claude,2026-09-30,Direct page-image review (PDF pages 756 and 759); same antiphon printed for both Vespers.
 commons/confessor/magnificat-antiphon-first,827a688a00e4,Monastic Diurnal.pdf,"Common of a Confessor not a Bishop, At I Vespers, Ant. on Magnificat; PDF pages 755",42*,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 42*.
@@ -1232,8 +1234,12 @@ proper/comm-01-25-commemoration-of-st-peter/commemoration-antiphon-vespers,b8b37
 proper/comm-01-25-commemoration-of-st-peter/commemoration-collect,f468a5336263,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-01-25-commemoration-of-st-peter/commemoration-versicle-vespers,ea9cc7f6ba65,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-01-28-the-second-feast-of-st-agnes-virgin-martyr/commemoration-collect,0bed1ee0685c,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 525",PDF p. 8,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; corrected from the Vicariate Missal draft wording. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 624.
+proper/comm-03-01-st-david-of-wales-bishop-and-confessor/commemoration-collect,e91f624aada7,diurnal,,482,verified,claude,2026-11-15,
+proper/comm-03-02-st-chad-bishop-and-confessor/commemoration-collect,64c1a3353c1d,diurnal,,482,verified,claude,2026-11-15,
 proper/comm-03-10-the-forty-holy-martyrs/commemoration-collect,04340797f970,diurnal,,484,verified,claude,2026-10-09,Read from the page image of p. 484
+proper/comm-03-18-st-edward-king-and-martyr/commemoration-collect,a3f9d67dd6d4,diurnal,,537,verified,claude,2026-11-15,
 proper/comm-04-13-st-hermengild-martyr/commemoration-collect,283348a8b31d,supplemental-collects-2026-11.pdf,"April 13, St Hermenegild, Collect",2,verified,claude,2026-11-06,Page-image reading of the supplemental collects sheet; wording as printed.
+proper/comm-04-14-st-justin-martyr/commemoration-collect,9ccabe9f15dd,diurnal,,510,verified,claude,2026-11-15,
 proper/comm-05-24-st-vincent-of-lerins-confessor/commemoration-collect,a7dd39e6008d,supplemental-collects-2026-11.pdf,"May 24, St Vincent of Lerins, Collect",4,verified,claude,2026-11-06,"Page-image reading of the supplemental collects sheet; wording as printed. Conclusion Who liveth, as printed."
 proper/comm-06-10-st-margaret-of-scotland-queen-and-widow/commemoration-collect,0827d9854ae3,diurnal,,535,verified,codex,2026-09-03,Word-for-word after normalization
 proper/comm-06-12-ss-basilides-cyrinus-nabor-and-nazarius-martyrs/commemoration-collect,c2a4a4bce73a,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 642",PDF p. 11,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; wording confirmed. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 689.
@@ -1286,11 +1292,16 @@ proper/comm-extra-08-26-st-zephyrinus-pope-and-martyr/commemoration-collect,6bc7
 proper/comm-extra-08-30-ss-felix-and-adauctus-martyrs/commemoration-collect,0121789edcd3,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 746",PDF p. 16,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; wording confirmed. Supersedes claude attestation citing the Vicariate Missal draft PDF pp. 764-765.
 proper/comm-extra-09-28-st-wenceslaus-duke-martyr/commemoration-collect,981bd263d83f,Ordo-2026-Suppl-Collects.pdf,"English Missal for the Laity (1933), p. 768",PDF p. 17,verified,claude,2026-09-29,Page-image comparison with the supplement transcription; wording confirmed. Supersedes claude attestation citing the Vicariate Missal draft PDF p. 781.
 proper/comm-extra-10-25-ss-chrysanthus-and-daria-martyrs/commemoration-collect,7eb1c3248d9a,supplemental-collects-2026-11.pdf,"October 25, Ss Chrysanthus and Daria, Collect",10,verified,claude,2026-11-06,Page-image reading of the supplemental collects sheet; wording as printed.
+proper/commemoration-st-paul-apostle/benedictus-antiphon,4dca7edcf446,diurnal,,549,verified,claude,2026-11-15,
+proper/commemoration-st-paul-apostle/chapter-lauds,b81151d90b4d,diurnal,,549,verified,claude,2026-11-15,
+proper/commemoration-st-paul-apostle/chapter-none,3200326814cf,diurnal,,550,verified,claude,2026-11-15,
+proper/commemoration-st-paul-apostle/chapter-sext,5b1d3ba9afdb,diurnal,,550,verified,claude,2026-11-15,
 proper/commemoration-st-paul-apostle/collect,9a78b8b613ec,Monastic Diurnal.pdf,proper/commemoration-st-paul-apostle/collect; PDF pages 594,549,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording.
 proper/commemoration-st-paul-apostle/commemoration-antiphon,a3387c079b23,Monastic Diurnal.pdf,proper/commemoration-st-paul-apostle/commemoration-antiphon; PDF pages 511,465,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
 proper/commemoration-st-paul-apostle/commemoration-collect,9a78b8b613ec,Monastic Diurnal.pdf,proper/commemoration-st-paul-apostle/commemoration-collect; PDF pages 594,549,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording.
 proper/commemoration-st-paul-apostle/commemoration-versicle,e15223f03076,Monastic Diurnal.pdf,proper/commemoration-st-paul-apostle/commemoration-versicle; PDF pages 594,549,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
 proper/commemoration-st-paul-apostle/magnificat-antiphon-first,a3387c079b23,Monastic Diurnal.pdf,"June 30 (Commemoration of St Paul), At I Vespers, Ant. on Magnificat; PDF pages 593",548,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 548.
+proper/commemoration-st-paul-apostle/versicle-none,ae84a36d62ac,diurnal,,550,verified,claude,2026-11-15,
 proper/commemoration-st-peter-apostle/commemoration-antiphon-lauds,52503eefbfc5,diurnal,,549,verified,codex,2026-09-03,Word-for-word after normalization
 proper/commemoration-st-peter-apostle/commemoration-collect,f468a5336263,diurnal,,549,verified,codex,2026-09-03,Word-for-word after normalization
 proper/commemoration-st-peter-apostle/commemoration-versicle-lauds,ea9cc7f6ba65,diurnal,,549,verified,codex,2026-09-03,Word-for-word after normalization
@@ -1406,15 +1417,19 @@ proper/easter-sunday-2/magnificat-antiphon-tuesday,8e3350cd6935,Monastic Diurnal
 proper/easter-sunday-2/magnificat-antiphon-wednesday,82839b1d833c,Monastic Diurnal.pdf,"II Week after the Octave of Easter, Wednesday, Ant. on Magnificat; PDF pages 425",379,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 379.
 proper/easter-sunday-3/benedictus-antiphon,38c54b9c26d9,Monastic Diurnal.pdf,"III Sunday after Easter, At Lauds, Ant. on Benedictus 'A little while, as above at Vespers' -> Saturday At Vespers, Ant. on Magnificat; PDF pages 426",380,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 380.
 proper/easter-sunday-3/benedictus-antiphon-friday,5c8ea5f3d66d,Monastic Diurnal.pdf,"III Week after the Octave of Easter, Friday, Ant. on Benedictus; PDF pages 428",382,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 382.
+proper/easter-sunday-3/benedictus-antiphon-monday,fa4bf6ac6119,diurnal,,381,verified,claude,2026-11-15,
 proper/easter-sunday-3/benedictus-antiphon-thursday,43950cf2ef70,Monastic Diurnal.pdf,"III Week after the Octave of Easter, Thursday, Ant. on Benedictus; PDF pages 428",382,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 382.
 proper/easter-sunday-3/benedictus-antiphon-tuesday,8ded86581439,diurnal,,381,verified,codex,2026-09-11,Word-for-word after normalization
+proper/easter-sunday-3/benedictus-antiphon-wednesday,49936633e392,diurnal,,381,verified,claude,2026-11-15,
 proper/easter-sunday-3/chapter-first-vespers,e779a623c1fb,diurnal,,380,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the codex attestation of 2026-09-13: Word-for-word after normalization
 proper/easter-sunday-3/chapter-none,383e65b78b91,diurnal,,381,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the codex attestation of 2026-09-13: Word-for-word after normalization
 proper/easter-sunday-3/chapter-sext,50434618b5f3,diurnal,,380,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the codex attestation of 2026-09-13: Word-for-word after normalization
 proper/easter-sunday-3/collect,297841992205,diurnal,,380,verified,codex,2026-09-11,Word-for-word after normalization
 proper/easter-sunday-3/magnificat-antiphon,87eac0e355e0,Monastic Diurnal.pdf,"III Sunday after Easter, At Vespers, Ant. on Magnificat; PDF pages 427",381,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 381.
-proper/easter-sunday-3/magnificat-antiphon-monday,a221888e9e66,diurnal,,381,verified,codex,2026-09-11,Word-for-word after normalization
+proper/easter-sunday-3/magnificat-antiphon-monday,fa92eecab289,diurnal,,381,verified,claude,2026-11-15,
 proper/easter-sunday-3/magnificat-antiphon-thursday,e1d2a40a57a3,Monastic Diurnal.pdf,"III Week after the Octave of Easter, Thursday, Ant. on Magnificat; PDF pages 428",382,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 382.
+proper/easter-sunday-3/magnificat-antiphon-tuesday,e5495bef8676,diurnal,,381,verified,claude,2026-11-15,
+proper/easter-sunday-3/magnificat-antiphon-wednesday,95478f45f6f3,diurnal,,382,verified,claude,2026-11-15,
 proper/easter-sunday-4/benedictus-antiphon,b931d542a5e8,Monastic Diurnal.pdf,proper/easter-sunday-4/benedictus-antiphon; PDF pages 428,382,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
 proper/easter-sunday-4/benedictus-antiphon-friday,1f40b243c54f,Monastic Diurnal.pdf,"IV Week after the Octave of Easter, Friday, Ant. on Benedictus; PDF pages 430",384,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 384.
 proper/easter-sunday-4/benedictus-antiphon-monday,11577c39237b,Monastic Diurnal.pdf,"IV Week after the Octave of Easter, Monday, Ant. on Benedictus; PDF pages 430",384,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 384.
@@ -1977,10 +1992,28 @@ proper/nativity-john-baptist/versicle-vespers,d257356d4090,diurnal,,539,verified
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,Monastic Diurnal.pdf,"Sunday within the Octave of the Nativity, At Lauds, Ant. on Benedictus 'While all things, as above at Vespers' -> I Vespers Ant. on Magnificat p. 206; PDF pages 252, 250","206, 204",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes codex attestation citing draft archdiocesan Lauds book p. 69.
 proper/nativity-sunday-within-octave/collect,2a390d95131b,Monastic Diurnal.pdf,"Sunday within the Octave of the Nativity, At Lauds, Collect (also p. 204); PDF pages 252, 250","206, 204",verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes codex attestation citing draft archdiocesan Lauds book p. 73.
 proper/nativity-sunday-within-octave/magnificat-antiphon,158a5e660fa9,Monastic Diurnal.pdf,"Sunday within the Octave of the Nativity, At II Vespers, Ant. on Magnificat 'The Child Jesus'; PDF pages 253, 251","207, 205",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes claude attestation citing draft archdiocesan Vespers book p. 113.
-proper/nativity-sunday-within-octave/short-responsory-vespers,8f9cd55881f4,diurnal,,205,verified,codex,2026-09-13,Word-for-word after normalization
+proper/nativity-sunday-within-octave/short-responsory-vespers,41e3e34db93d,diurnal,,205,verified,claude,2026-11-15,"Abbreviated cue Alleluia expanded to the full response, as at Lauds"
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,Monastic Diurnal.pdf,"Sunday within the Octave of the Nativity, At Lauds, V. after hymn; PDF pages 252",206,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes codex attestation citing draft archdiocesan Lauds book p. 71.
 proper/octave-day-holy-innocents/magnificat-antiphon-first,d0fecbb41021,Monastic Diurnal.pdf,"January 4, Octave of the Holy Innocents, At I Vespers, Ant. on Magnificat; PDF pages 267",221,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 221.
 proper/octave-day-st-stephen/collect,de4d55dabcbf,Monastic Diurnal.pdf,"January 2, Octave of St Stephen, Collect; PDF pages 266",220,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 220.
+proper/our-lady-of-sorrows-passion/benedictus-antiphon,35c33c69666b,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-lauds,f24a01e32979,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-none,3e887ab31a18,diurnal,,509,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/chapter-sext,05be46c2acfc,diurnal,,508,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/collect,69bc54dab3bc,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/hymn-lauds,022a7c2b70bb,diurnal,,507,verified,claude,2026-11-15,pp. 507-508; the print's misprint withold corrected to withhold
+proper/our-lady-of-sorrows-passion/hymn-vespers,2fa26bd495d8,diurnal,,506,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/magnificat-antiphon-first,c6989cea2b80,diurnal,,504,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-1,17002fce9dd8,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-2,118a29c18d22,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-3,e3663587b267,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-4,7dfdad0b2f38,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/psalm-antiphon-5,faa92f8b41bc,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/short-responsory-lauds,4d40d8408dc8,diurnal,,507,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/short-responsory-vespers,2e357044b47c,diurnal,,505,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-sext,669604f1e58e,diurnal,,509,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-terce,5dd15225da45,diurnal,,508,verified,claude,2026-11-15,
+proper/our-lady-of-sorrows-passion/versicle-vespers,80c499a2f80a,diurnal,,504,verified,claude,2026-11-15,
 proper/our-lady-walsingham/magnificat-antiphon-first,24075e6d546f,Monastic Diurnal.pdf,"Common of Feasts of the B.V.M., I Vespers, Ant. on Magnificat 'O holy Mary'; PDF pages 778, 777","65*, 64*",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes claude attestation citing draft archdiocesan Vespers book p. 704.
 proper/palm-sunday/benedictus-antiphon,314d75b181a6,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization
 proper/palm-sunday/chapter-lauds,062559bb4abc,Monastic Diurnal.pdf,"Palm Sunday, At Lauds, Chapter Phil. 2:5-8; PDF pages 325",279,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the claude attestation of 2026-09-29: Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 279.
@@ -2228,6 +2261,7 @@ proper/quinquagesima/psalm-antiphon-3,1083d85cda7e,Monastic Diurnal.pdf,proper/q
 proper/quinquagesima/psalm-antiphon-4,fb802586e7b8,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization
 proper/quinquagesima/psalm-antiphon-5,eb8b20034ee4,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization
 proper/quinquagesima/versicle-lauds,b97da3621554,Monastic Diurnal.pdf,proper/quinquagesima/versicle-lauds,40,verified,codex,2026-09-26,Direct page-image reading; normalized wording matches the existing corpus.
+proper/rogation-monday/collect,d0780912df2e,diurnal,,386,verified,claude,2026-11-15,
 proper/saturday-office-bvm-christmastide/benedictus-antiphon,71723a27cb06,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Lauds",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-christmastide/magnificat-antiphon,e94affcbd982,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Vespers",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-paschal/magnificat-antiphon,420d7ab91a53,diurnal,"Office of Saint Mary on Saturday, III In Paschaltide, At Vespers",71*,verified,claude,2026-08-22,
@@ -2450,6 +2484,7 @@ proper/st-clement-i/psalm-antiphon-5,5197faf5b4eb,Monastic Diurnal.pdf,"Nov 23 S
 proper/st-columba-iona/collect,d4b4a293cbd9,Monastic Diurnal,"June 9, St Columba, Abbot",534–535,verified,codex,2026-09-16,Page-image reading with independent Claude Sonnet agreement; conclusion supplied by composer.
 proper/st-cuthbert/commemoration-collect,4fdc0e968c26,diurnal,,493,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-cyril-alexandria/collect,0b93aa232fe2,diurnal,,466,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-cyril-jerusalem/collect,6d7bf61bbece,diurnal,,488,verified,claude,2026-11-15,
 proper/st-edmund/collect,71181805e937,diurnal,,664,verified,codex,2026-09-05,Word-for-word after normalization
 proper/st-elias-prophet/benedictus-antiphon,9956e12258d6,elias-propers-july20.pdf,"St Elias the Prophet, benedictus-antiphon",3,verified,claude,2026-09-23,Direct page-image reading; agrees with the PDF's born-digital text layer after normalizing pointing.
 proper/st-elias-prophet/chapter-lauds,00e2ccac5390,elias-propers-july20.pdf,"St Elias the Prophet, chapter-lauds",2,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the claude attestation of 2026-09-23: Direct page-image reading; agrees with the PDF's born-digital text layer after normalizing pointing.
@@ -2492,7 +2527,9 @@ proper/st-gabriel-archangel/versicle-terce,d0fa20313df6,Monastic Diurnal.pdf,"Ma
 proper/st-gabriel-archangel/versicle-vespers,9c50d614fe3b,diurnal,"St Gabriel, At II Vespers",501,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-george/collect,60e7f9750312,diurnal,,512,verified,codex,2026-09-05,Word-for-word after normalization
 proper/st-gregory-great/benedictus-antiphon,e5a4bc687d31,Monastic Diurnal.pdf,"March 12 St Gregory the Great, At Lauds, Ant. on Benedictus; PDF pages 533",487,verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes claude attestation citing draft archdiocesan Lauds book p. 414.
-proper/st-gregory-great/chapter-lauds,fd8f37a41d0e,Monastic Diurnal.pdf,"proper/st-gregory-great/chapter-lauds; PDF pages 532, 85","486, 39",verified,claude,2026-10-13,"Reference restyled to the Diurnal's form (#694); wording unchanged from the codex attestation of 2026-09-27: Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization."
+proper/st-gregory-great/chapter-lauds,81b0e752b60d,diurnal,,486,verified,claude,2026-11-15,Mediant asterisk added where the Diurnal prints it; wording unchanged
+proper/st-gregory-great/chapter-none,274f666a5ca7,diurnal,,488,verified,claude,2026-11-15,
+proper/st-gregory-great/chapter-sext,d732fddaf35b,diurnal,,487,verified,claude,2026-11-15,
 proper/st-gregory-great/collect,4828ee47e1c8,diurnal,,487,verified,codex,2026-09-22,Word-for-word after normalization
 proper/st-gregory-great/hymn-lauds,52ce467a047a,Monastic Diurnal.pdf,"March 12 St Gregory the Great, At Lauds, Hymn Mella cor obdulcantia; PDF pages 532, 533","486, 487",verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes claude attestation citing draft archdiocesan Lauds book p. 412-413.
 proper/st-gregory-great/hymn-vespers,50e000cba212,Monastic Diurnal.pdf,"March 12 St Gregory the Great, At I Vespers, Hymn Anglorum jam Apostolus (II Vespers: hymn as at I Vespers, p. 488); PDF pages 531",485,verified,claude,2026-09-29,Direct page-image review; corrected to the printed wording. Supersedes claude attestation citing draft archdiocesan Vespers book p. 313-322.
@@ -2573,6 +2610,7 @@ proper/st-lawrence/psalm-antiphon-5,fdc740c528b5,Monastic Diurnal.pdf,proper/st-
 proper/st-lawrence/versicle-first-vespers,151889c05cfb,Monastic Diurnal.pdf,"Aug 10 St Laurence, At I Vespers: 'Short R., Hymn, and V. as in the Common of One Martyr, p. 20*'; V. printed on 21* after hymn Deus tuorum militum; PDF pages 629, 734","585, 21*",verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes claude attestation citing draft archdiocesan Vespers book p. 454.
 proper/st-lawrence/versicle-lauds,79ab01c744eb,diurnal,,586,verified,codex,2026-09-22,Word-for-word after normalization
 proper/st-lawrence/versicle-vespers,b6e308ad2d77,diurnal,,587,verified,codex,2026-09-22,Word-for-word after normalization
+proper/st-leo-great/collect,76b1a04c585b,diurnal,,510,verified,claude,2026-11-15,
 proper/st-lucy/benedictus-antiphon,e9e023ffde47,Monastic Diurnal.pdf,"December 13, St Lucy, Ant. on Benedictus; PDF pages 498",452,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 452.
 proper/st-lucy/collect,de6a4fa4d3fe,Monastic Diurnal.pdf,"December 13, St Lucy, At Lauds, Collect; PDF pages 498",452,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 452.
 proper/st-lucy/magnificat-antiphon,cfe9113ec7bd,Monastic Diurnal.pdf,"December 13, St Lucy, At II Vespers, Ant. on Magnificat; PDF pages 498",452,verified,claude,2026-09-29,Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 452.
@@ -2622,7 +2660,10 @@ proper/st-maurus/short-responsory-first-vespers,76db5a052506,diurnal,,455,verifi
 proper/st-monica/collect,66636a918b2c,diurnal,,525,verified,codex,2026-09-17,Independent page-image readings agree; cache monastic-diurnal/0571.png; comparison
 proper/st-nicholas/collect,94851d58c59b,diurnal,,447,verified,codex,2026-09-13,Word-for-word after normalization
 proper/st-patrick/collect,db004999ed23,diurnal,,488,verified,codex,2026-09-13,Word-for-word after normalization
-proper/st-perpetua-felicitas/commemoration-collect,495f24ade6bd,diurnal,,483,verified,codex,2026-09-03,Word-for-word after normalization
+proper/st-perpetua-felicitas/benedictus-antiphon,3dcffd2b7273,diurnal,,482,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/chapter-none,ba0778b6c40e,diurnal,,55*,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/collect,495f24ade6bd,diurnal,,483,verified,claude,2026-11-15,
+proper/st-perpetua-felicitas/versicle-lauds,2a1e9249ee6b,diurnal,,483,verified,claude,2026-11-15,
 proper/st-peter-chrysologus/collect,734293de7d96,diurnal,,446,verified,codex,2026-09-03,Word-for-word after normalization
 proper/st-placidus-companions/collect,fff8a2d0cd45,diurnal,,617,verified,codex,2026-09-05,Word-for-word after normalization
 proper/st-raphael-archangel/chapter-lauds,7271bce0dc93,Monastic Diurnal.pdf,"Oct 24, St Raphael, At Lauds, Chapter Tobit 12:12; PDF pages 677",633,verified,claude,2026-10-13,Reference restyled to the Diurnal's form (#694); wording unchanged from the claude attestation of 2026-09-29: Direct page-image review; wording confirmed. Supersedes grok attestation citing diurnal p. 633.

@@ -297,7 +297,7 @@ Month = 12
 Day = 25
 ```
 
-Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, Source, Notes.
+Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, OctaveClass (Rubrics VII.3 groups; inherited by generated days), OctaveDays/OctaveDay2–8 (ordo names for generated octave days), PrimaryOfOurLord (Diurnal rank table; §X Double exception), Secondary (Diurnal rank table; X.1(c) primary before secondary), CommemorationClass (named XIV.14 ferial exceptions), HasVigil, IsVigil with VigilOf, OctaveOf (octave continued by a day whose ID does not name it), CompanionOf, HymnMtv (`true` or `unless-first-vespers`: the Proper's "m.t.v.", Iste Confessor's changed lines from the Common's `hymn-vespers-mtv`, Diurnal p. 34*), Source, Notes.
 
 `data/feasts/monastic.txt` holds observances the ordo brackets "(Monastics & Oblates Only)". They
 are notation, not feasts: the ordo page, the text ordo and the apps' ordo print each as a bracketed

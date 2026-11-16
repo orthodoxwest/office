@@ -117,13 +117,44 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (This the Confessor, Conf and Bishop Vespers.docx)
-# NOTE: source provides an m.t.v. alternate first-stanza ending for feasts not kept on the saint's death-day; the current resolver has no per-feast hymn-stanza selector.
 Iste Confessor
 
 This the Confessor of the Lord, whose triumph
 Now through the wide world celebrate the faithful,
 Merited this day joyfully to enter
 Heavenly mansions.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have a portion,
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Onely and Trinal.
+
+Amen.
+[hymn-vespers-mtv]
+# SOURCE: Monastic Diurnal.pdf, p. 34* (Common of a Confessor and Bishop, Hymn: "If it be not the day of the Saint's death
+# (indicated in the Proper by the letters m.t.v.) the last two lines read"); the rest as [hymn-vespers].
+# Sung for a feast whose data sets HymnMtv (crates/office/src/engine.rs).
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+On this his feast-day, year by year receiveth
+Merited honours.
 
 Saintly and prudent, continent and humble,
 Chaste was he ever, peaceable and sober,
