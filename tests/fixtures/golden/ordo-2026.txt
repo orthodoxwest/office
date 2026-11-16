@@ -685,13 +685,13 @@ APRIL
            Hours   No Preces
            Vespers w · II prec. · Mag. The Lord loved him · No Suff.
  21  Tue     Feria                                            w
-           Lauds   w · Ben. I go before you · No Preces · No Suff.
+           Lauds   w · Ben. I go before you · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. Reach hither thy finger · No Suff.
+           Vespers w · Mag. Reach hither thy finger · Comm. HC
                Com. Ss Soter & Caius, Martyrs ("Light perpetual")
  22  Wed     Feria                                            w
            Ss Soter & Caius, Martyrs (com)
-           Lauds   w · Ben. I am the true vine · No Preces · No Suff.
+           Lauds   w · Ben. I am the true vine · No Preces · Comm. HC
                Com. Ss Soter & Caius, Martyrs ("Daughters of Jerusalem")
            Hours   Preces
            Vespers r · I fol. (St George, Martyr) · Mag. Light perpetual · No Suff.
@@ -764,12 +764,12 @@ MAY
                Com. III Sunday after Easter ("Verily I say unto you")
   4  Mon     Feria                                            w
            St Monica, Widow (com)
-           Lauds   w · Ben. And beginning · No Preces · No Suff.
+           Lauds   w · Ben. And beginning · No Preces · Comm. HC
                Com. St Monica, Widow ("Give her")
            Hours   Preces
-           Vespers w · Mag. Your sorrow · No Suff.
+           Vespers w · Mag. Your sorrow · Comm. HC
   5  Tue     Feria                                            w
-           Lauds   w · Ben. And they constrained him · No Preces · No Suff.
+           Lauds   w · Ben. And they constrained him · No Preces · Comm. HC
            Hours   Preces
            Vespers r · I fol. (St John before the Latin Gate) · Mag. John the Apostle · No Suff.
                Com. Octave of the Solemnity of St Joseph ("When Mary")
@@ -782,7 +782,7 @@ MAY
                Com. St Alexis Toth, Priest & Confessor ("I will liken him")
   7  Thu     Feria                                            w
            St Alexis Toth, Priest & Confessor (com)
-           Lauds   w · Ben. And he went in · No Preces · No Suff.
+           Lauds   w · Ben. And he went in · No Preces · Comm. HC
                Com. St Alexis Toth, Priest & Confessor ("Well done, good and faithful servant")
            Hours   Preces
            Vespers w · I fol. (Apparition of St Michael the Archangel) · Mag. While John beheld · No Suff.
@@ -802,42 +802,42 @@ MAY
                Com. Ss Gordian & Epimachus, Martyrs ("Light perpetual")
  10  Sun     IV Sunday after Easter                     [sd]  w
            Ss Gordian & Epimachus, Martyrs (com)
-           Lauds   w · Ben. Now I go my way · No Preces · No Suff.
+           Lauds   w · Ben. Now I go my way · No Preces · Comm. HC
                Com. Ss Gordian & Epimachus, Martyrs ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Now I go my way · No Suff.
+           Vespers w · II prec. · Mag. Now I go my way · Comm. HC
  11  Mon     Feria                                            w
-           Lauds   w · Ben. Did not our heart · No Preces · No Suff.
+           Lauds   w · Ben. Did not our heart · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. I tell you the truth · No Suff.
+           Vespers w · Mag. I tell you the truth · Comm. HC
                Com. Ss Nereus, Achilles, Domitilla & Pancras, Martyrs ("Light perpetual")
  12  Tue     Feria                                            w
            Ss Nereus, Achilles, Domitilla & Pancras, Martyrs (com)
-           Lauds   w · Ben. Peace be unto you, it is I · No Preces · No Suff.
+           Lauds   w · Ben. Peace be unto you, it is I · No Preces · Comm. HC
                Com. Ss Nereus, Achilles, Domitilla & Pancras, Martyrs ("Daughters of Jerusalem")
            Hours   Preces
-           Vespers w · Mag. When the Comforter · No Suff.
+           Vespers w · Mag. When the Comforter · Comm. HC
  13  Wed     Feria                                            w
-           Lauds   w · Ben. A spirit · No Preces · No Suff.
+           Lauds   w · Ben. A spirit · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · Mag. I have yet · No Suff.
+           Vespers w · Mag. I have yet · Comm. HC
                Com. St Boniface of Tarsus, Martyr ("Light perpetual")
  14  Thu     Feria                                            w
            St Boniface of Tarsus, Martyr (com)
-           Lauds   w · Ben. The disciples · No Preces · No Suff.
+           Lauds   w · Ben. The disciples · No Preces · Comm. HC
                Com. St Boniface of Tarsus, Martyr ("Daughters of Jerusalem")
            Hours   Preces
-           Vespers w · Mag. For he shall not speak of himself · No Suff.
+           Vespers w · Mag. For he shall not speak of himself · Comm. HC
  15  Fri  L  Feria                                            w
-           Lauds   w · Ben. These are the words · No Preces · No Suff.
+           Lauds   w · Ben. These are the words · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · No Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M.) · Mag. O Queen of heaven · Comm. HC
  16  Sat     Saturday Office of the B.V.M.              [s]   w
-           Lauds   w · Ben. O Queen of heaven · No Preces · No Suff.
+           Lauds   w · Ben. O Queen of heaven · No Preces · Comm. HC
            Hours   Preces
-           Vespers w · I fol. (V Sunday after Easter) · Mag. Hitherto · No Suff.
+           Vespers w · I fol. (V Sunday after Easter) · Mag. Hitherto · Comm. HC
  17  Sun     V Sunday after Easter                      [sd]  w
-           Lauds   w · Ben. Hitherto · No Preces · No Suff.
+           Lauds   w · Ben. Hitherto · No Preces · Comm. HC
            Hours   No Preces
            Vespers w · II prec. · Mag. Ask · No Suff.
                Com. St Venantius, Martyr ("Light perpetual")
@@ -851,12 +851,12 @@ MAY
                Com. St Pudentiana, Virgin ("Come, thou Bride of Christ")
  19  Tue     Feria                                            w
            St Pudentiana, Virgin (com)
-           Lauds   w · Ben. It behoved Christ to suffer · No Preces · No Suff.
+           Lauds   w · Ben. It behoved Christ to suffer · No Preces · Comm. HC
                Com. St Pudentiana, Virgin ("The kingdom of heaven")
            Hours   Preces
-           Vespers w · Mag. I came forth from the Father · No Suff.
+           Vespers w · Mag. I came forth from the Father · Comm. HC
  20  Wed     Vigil of the Ascension                     [s]   w
-           Lauds   w · Ben. Father, the hour is come · No Preces · No Suff.
+           Lauds   w · Ben. Father, the hour is come · No Preces · Comm. HC
            Hours   Preces
            Vespers w · I fol. (Ascension of Our Lord) · Mag. Father · No Suff.
  21  Thu     ASCENSION OF OUR LORD                      [1cl] w

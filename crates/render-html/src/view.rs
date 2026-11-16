@@ -186,10 +186,13 @@ pub struct DayRow {
     pub magnificat_antiphon: String,
     pub lauds_preces: bool,
     pub lauds_suffrage: bool,
+    /// The Commemoration of the Cross, said in Paschaltide in the Suffrage's place.
+    pub lauds_cross: bool,
     pub lauds_comms: Vec<CommemorationRow>,
     pub hours_preces: bool,
     pub vespers_preces: bool,
     pub vespers_suffrage: bool,
+    pub vespers_cross: bool,
     pub vespers_comms: Vec<CommemorationRow>,
     pub vespers_note: String,
 }

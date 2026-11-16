@@ -1974,3 +1974,19 @@ fn the_saturday_office_of_our_lady_is_commemorated_in_its_paschal_form() {
         assert!(!refs.iter().any(|r| r.starts_with("proper/saturday-office-bvm/")), "{date}: {refs:?}");
     }
 }
+
+/// The Friday after the Octave of the Ascension and the Vigil of Pentecost
+/// say the Hours of the Sunday within the octave ("Hours Of Sun. (392f)",
+/// 2026 ordo, 29 May; Diurnal p. 394), Prime included: its antiphon is the
+/// Sunday's first, as Terce, Sext and None take the Sunday's (#873).
+#[test]
+fn prime_after_the_ascension_octave_takes_the_sundays_antiphon() {
+    for (y, m, d) in [(2026, 5, 29), (2026, 5, 30), (2027, 6, 19)] {
+        let date = Date::new(y, m, d);
+        let (days, moveable) = year(y);
+        let prime = engine().compose_hour("prime", &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        let ant = prime.sections.iter().flat_map(|s| &s.elements).find(|e| e.slot_ref == "psalm-antiphon-1").unwrap();
+        assert!(ant.source_ref.starts_with("proper/ascension"), "{date}: {}", ant.source_ref);
+        assert!(ant.text.starts_with("Ye men of Galilee"), "{date}: {}", ant.text);
+    }
+}

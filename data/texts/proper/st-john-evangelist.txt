@@ -81,7 +81,40 @@ R. Thanks be to God.
 @use commons/apostle/short-responsory-vespers
 
 [hymn-lauds]
-@use commons/apostle/hymn-lauds
+# SOURCE: Monastic Diurnal.pdf, pp. 198–199 (the Apostle in the singular; the Christmas ending is the engine's)
+Exsultet cælum laudibus
+
+Let heaven's exultant praises ring,
+And earth with joy responsive sing:
+The Apostle's deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illumining,
+Regard the suppliant prayer we bring.
+
+The gates of heaven, at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The power, of old to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore;
+
+That Christ, the unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+
+Amen.
 
 [hymn-vespers]
 @use commons/apostle/hymn-vespers
@@ -147,20 +180,9 @@ R. Who leaned on the Lord's bosom at the last supper.
 # [hymn-sext]
 # Proper hymn at Sext.
 #
-[hymn-none]
-# SOURCE: diurnal p. 198
-Exsultet cælum laudibus
-
-LET heaven's exultant praises ring,
-And earth with joy responsive sing:
-The Apostle's deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illumining,
-Regard the suppliant prayer we bring.
-
+# [hymn-none]
+# Proper hymn at None.
+#
 # [hymn-compline]
 # Proper hymn at Compline.
 #

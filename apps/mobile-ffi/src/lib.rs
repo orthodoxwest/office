@@ -1252,11 +1252,14 @@ pub struct OrdoDayView {
     pub benedictus_antiphon: String,
     pub lauds_preces: bool,
     pub lauds_suffrage: bool,
+    /// The Commemoration of the Cross, said in Paschaltide in the Suffrage's place.
+    pub lauds_cross: bool,
     pub lauds_comms: Vec<CommemorationView>,
     pub hours_preces: bool,
     pub magnificat_antiphon: String,
     pub vespers_preces: bool,
     pub vespers_suffrage: bool,
+    pub vespers_cross: bool,
     pub vespers_comms: Vec<CommemorationView>,
     pub vespers_note: String,
 }
@@ -1304,11 +1307,13 @@ impl OrdoDayView {
             benedictus_antiphon: lauds.gospel_ant.clone(),
             lauds_preces: lauds.preces,
             lauds_suffrage: lauds.suffrage,
+            lauds_cross: lauds.cross,
             lauds_comms: comms(&lauds.comms),
             hours_preces: o.hours_preces,
             magnificat_antiphon: vespers.gospel_ant.clone(),
             vespers_preces: vespers.preces,
             vespers_suffrage: vespers.suffrage,
+            vespers_cross: vespers.cross,
             vespers_comms: comms(&vespers.comms),
             vespers_note: typeset(&o.vespers_note),
         }
@@ -1322,6 +1327,7 @@ fn empty_summary() -> HourSummary {
         gospel_ant_full: String::new(),
         preces: false,
         suffrage: false,
+        cross: false,
         comms: Vec::new(),
     }
 }

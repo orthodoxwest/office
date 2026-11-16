@@ -1,6 +1,6 @@
 //! Plain-text rendering of a composed hour, for the CLI and the text goldens.
 
-use corpus::lines::{psalm_verse_lines, split_leading_verse_number};
+use corpus::lines::{psalm_verse_lines, section_heading, split_leading_verse_number};
 use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, posture_cues_at, split_words};
 
 const MONTHS: [&str; 12] =
@@ -47,6 +47,7 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
             } else {
                 elem.display_text()
             };
+            let text = if elem.kind.is_psalmody() { section_headings(&text) } else { text };
             if !text.is_empty() {
                 b.push_str(&text);
                 b.push_str("\n\n");
@@ -54,6 +55,18 @@ pub fn format_office_hour(hour: &OfficeHour) -> String {
         }
     }
     b
+}
+
+/// A canticle's section breaks ("[section: Heading]") as their headings, as
+/// the web sets them (#869).
+fn section_headings(text: &str) -> String {
+    if !text.contains("[section:") {
+        return text.to_string();
+    }
+    text.split('\n')
+        .map(|line| section_heading(line.trim()).map_or_else(|| line.to_string(), str::to_string))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// A psalm's text with the opening words its antiphon has just said in
@@ -108,6 +121,11 @@ mod tests {
     use liturgy::{Posture, PostureCue};
 
     use super::*;
+
+    #[test]
+    fn canticle_section_breaks_print_as_headings() {
+        assert_eq!(section_headings("1. A * b.\n[section: Ignis succensus est]\n2. C * d."), "1. A * b.\nIgnis succensus est\n2. C * d.");
+    }
 
     #[test]
     fn posture_cues_are_bracketed_in_place() {

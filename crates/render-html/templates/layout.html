@@ -81,16 +81,16 @@
       } catch (e) {}
       {%- if page == "home" %}
       {# Apse's home shows its gold-leaf stars from the first frames: their field (app.js) is
-           fetched with the page, not after it, when the night theme is the one to be painted. #}
+           fetched with the page, not after it, when the night theme is the one to be painted.
+           app.js takes this fetch's answer rather than asking again: WebKit does not reuse a
+           `preload as=fetch` for a later fetch(), and fetched the field twice (#850). #}
       try {
         var night = document.documentElement.getAttribute("data-theme");
-        if (night === "dark" || (night === null && matchMedia("(prefers-color-scheme: dark)").matches)) {
-          var stars = document.createElement("link");
-          stars.rel = "preload";
-          stars.as = "fetch";
-          stars.crossOrigin = "anonymous";
-          stars.href = "{{ static("ornaments/stars.json")|url|safe }}";
-          document.head.appendChild(stars);
+        if (window.fetch && (night === "dark" || (night === null && matchMedia("(prefers-color-scheme: dark)").matches))) {
+          window.officeStars = fetch("{{ static("ornaments/stars.json")|url|safe }}").then(function (resp) {
+            return resp.ok ? resp.json() : null;
+          });
+          window.officeStars.catch(function () {});
         }
       } catch (e) {}
       {# The wall first (style.css): on a fresh arrival at home (from outside the Office, a
