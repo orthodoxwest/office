@@ -74,7 +74,8 @@ make ios          # apps/ios/build-core.sh, then xcodegen generate
 open apps/ios/Office.xcodeproj
 ```
 
-`build-core.sh` builds the Rust core as a static library for iPhone and the simulator, bundles
+`build-core.sh` builds the Rust core as a static library for iPhone and the simulator (or only
+the targets `IOS_TARGETS` names, as CI's simulator jobs do), bundles
 them as `build/OfficeCore.xcframework`, and generates the UniFFI bindings,
 `build/generated/office_mobile.swift`, from the host library as Android's Kotlin is generated.
 The same library carries neuma's chant engraving; its bindings (`build/generated/Neuma.swift`)
@@ -119,12 +120,14 @@ the shots are built from (the app, the core, the crates, `data/`, the shared fac
 so a text or engine change that moves a page is caught on its own pull request. On `master` a
 difference is only a warning, since master cannot take the label.
 
-Every shot is taken from a fresh install of the app, so no earlier shot's kept reading place,
-way back or settings reaches it; at a fixed day, today and hour (`-date`, `-today`, `-clock 9`), in
+The app is installed once on each simulator, and every shot starts from its data cleared back to
+what the install left (defaults through cfprefsd, then the container), so no earlier shot's kept
+reading place, way back or settings reaches it; the phone's shots and the iPad's are taken at
+once; at a fixed day, today and hour (`-date`, `-today`, `-clock 9`), in
 New York's time zone, in English, at the default text size, with the status bar's time fixed; and
 once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a marker to its
-temporary directory once the page's content is on screen and scrolled to its anchor; a minute
-without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,
+temporary directory once the page's content is on screen and scrolled to its anchor; three
+minutes from launch without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,
 one colour below the status bar as a page not yet drawn is, fails the comparison and is never
 offered as a baseline, nor fetched as one. The baselines record the Xcode, simulator runtime and devices they were
 taken with (`snapshots/environment.json`), and later runs take the same ones. When the runner

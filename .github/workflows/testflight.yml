@@ -84,6 +84,17 @@ jobs:
             echo "upload=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # rustup fetches the toolchain and its iOS targets slowly on the macOS runners (six to ten
+      # minutes a run); restored from the cache, it finds them installed and only checks the
+      # channel. The key follows the toolchain on the next step's uses: line.
+      - name: Cache the Rust toolchain
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.rustup/toolchains/1.100.0-aarch64-apple-darwin
+            ~/.rustup/update-hashes/1.100.0-aarch64-apple-darwin
+          key: rustup-1.100.0-aarch64-apple-darwin-ios
+
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0
         with:

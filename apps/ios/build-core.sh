@@ -12,7 +12,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 out="$here/build"
-targets=(aarch64-apple-ios aarch64-apple-ios-sim)
+# IOS_TARGETS narrows the targets: CI's simulator jobs build only aarch64-apple-ios-sim.
+read -r -a targets <<< "${IOS_TARGETS:-aarch64-apple-ios aarch64-apple-ios-sim}"
 export IPHONEOS_DEPLOYMENT_TARGET=17.0
 
 cd "$root"
