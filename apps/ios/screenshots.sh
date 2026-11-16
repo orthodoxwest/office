@@ -21,9 +21,16 @@ devices() {
   local store=${1:-}
   local xcode="" runtime="" phone_name="" ipad_name="" pinned=false
   if [ -z "$store" ] && [ -f "$recorded" ]; then
-    read -r xcode runtime < <(python3 -c 'import json, sys; e = json.load(open(sys.argv[1])); print(e["xcode"].replace(" ", "_"), e["runtime"])' "$recorded")
-    phone_name=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["phone"])' "$recorded")
-    ipad_name=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["ipad"])' "$recorded")
+    # Each value as scripts/ios-snapshots.py allows it (no newlines: they reach ::warning:: lines).
+    field() {
+      jq -er --arg k "$1" '.[$k] | select(type == "string" and test("^[A-Za-z0-9 ._()-]{1,100}$"))' "$recorded" \
+        || { echo "::error::$recorded: $1 is missing or malformed" >&2; exit 1; }
+    }
+    xcode=$(field xcode)
+    runtime=$(field runtime)
+    phone_name=$(field phone)
+    ipad_name=$(field ipad)
+    xcode=${xcode// /_}
     # "26.1_17B55": the version and build of the Xcode the baselines were taken with.
     local found=""
     for app in /Applications/Xcode*.app; do
@@ -98,15 +105,42 @@ shoot() {
   # The app's clock and zone, and the reader's language, are fixed with today; nothing else in
   # it moves at rest (the crown plays only when tapped, home's light only on a turn of the hour seen).
   export SIMCTL_CHILD_TZ=America/New_York
+  local frames=${RUNNER_TEMP:-/tmp}/frames
+  mkdir -p "$frames"
   # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it, at 9 AM.
   one() {
     local sim=$1 name=$2
     shift 2
     local day=${DATE:-2026-03-15}
-    xcrun simctl launch --terminate-running-process "$sim" "$id" \
+    # A fresh install for every shot: an earlier shot's kept reading place, way back, settings
+    # or prayed marks would otherwise open a later one differently, and an uninstall clears
+    # all of the app's container (defaults, scene storage, caches) without asking the app to.
+    xcrun simctl terminate "$sim" "$id" > /dev/null 2>&1 || true
+    xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
+    xcrun simctl install "$sim" "$app"
+    xcrun simctl launch "$sim" "$id" \
       -AppleLanguages '(en)' -AppleLocale en_US -today "$day" -date "$day" -clock 9 "$@" > /dev/null
-    sleep 7
-    xcrun simctl io "$sim" screenshot "$out/$name.png" > /dev/null
+    # Shot once the page has come to rest: two frames a second apart alike, after the four
+    # seconds a launch takes to compose (the launch wall is still too, and must not pass for
+    # the page). An anchored hour scrolls only once composed, so it settles later, and is
+    # waited for rather than raced. Twenty seconds at most; a page that never rests is shot
+    # anyway, and the comparison says so.
+    sleep 4
+    local last="$frames/last.png" this="$frames/this.png" waited=4
+    xcrun simctl io "$sim" screenshot "$last" > /dev/null
+    while :; do
+      sleep 1
+      waited=$((waited + 1))
+      xcrun simctl io "$sim" screenshot "$this" > /dev/null
+      if cmp -s "$last" "$this"; then break; fi
+      if [ "$waited" -ge 20 ]; then
+        echo "::warning::$name did not come to rest in 20 seconds" >&2
+        break
+      fi
+      mv "$this" "$last"
+    done
+    mv "$this" "$out/$name.png"
+    echo "$(date +%T) $name (${waited}s)"
   }
   for sim in "$phone" "$ipad"; do
     echo "$(date +%T) waiting for $sim to boot"
@@ -116,7 +150,6 @@ shoot() {
     # Dynamic Type at its default, whatever the image set.
     xcrun simctl ui "$sim" content_size large
     xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
-    xcrun simctl install "$sim" "$app"
   done
   for theme in nave apse; do
     one "$phone" "home-$theme" -page home -theme "$theme"

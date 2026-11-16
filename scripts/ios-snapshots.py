@@ -15,8 +15,10 @@ CHANNEL_TOLERANCE levels of 255, and a shot differs when more than PIXEL_RATIO o
   taken, and the environment the shots were taken in;
 - to --diffs, a picture of each changed shot: baseline, this run, and its differing pixels in red.
 
-It exits 0 when every shot matches, or when there are no baselines yet (with a notice); 1 when a
-shot changed, is new or is gone. Shots from another Xcode or runtime than the baselines'
+It exits 0 when every shot matches, when there are no baselines yet (with a notice) or when the
+shots were not compared (another environment, with a warning); 1 when a shot changed, is new or is
+gone. --output gets the state (matched, no-baselines, not-compared or differ), and --summary a
+section for each of them. Shots from another Xcode or runtime than the baselines'
 (environment.json) are not compared: they differ in ways no page changed.
 
 `fetch` copies the comparable set a CI run published to ci/ios-screenshots/BRANCH (its
@@ -27,6 +29,7 @@ request that first adds the workflow, which pull_request_target reads from maste
 import argparse
 import json
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -35,6 +38,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASELINES = ROOT / "apps/ios/snapshots"
 ENVIRONMENT = "environment.json"
 ENVIRONMENT_KEYS = ("xcode", "runtime", "phone", "ipad")
+# What each of its values may hold. They are echoed into workflow commands (::warning::), so no
+# newlines or markup; update-ios-snapshots.yml's commit job checks the same with jq.
+ENVIRONMENT_VALUE = re.compile(r"[A-Za-z0-9 ._()-]{1,100}")
 
 # A pixel differs when a channel moves by more than this many levels: antialiasing and the
 # box filter's rounding move edges by a few, a changed glyph or colour by far more.
@@ -91,13 +97,23 @@ def read_environment(folder):
     if not path.is_file():
         return None
     env = json.loads(path.read_text())
-    if not isinstance(env, dict) or set(env) != set(ENVIRONMENT_KEYS) or not all(isinstance(v, str) for v in env.values()):
-        raise SystemExit(f"{path}: expected an object of strings with exactly {', '.join(ENVIRONMENT_KEYS)}")
+    if (not isinstance(env, dict) or set(env) != set(ENVIRONMENT_KEYS)
+            or not all(isinstance(v, str) and ENVIRONMENT_VALUE.fullmatch(v) for v in env.values())):
+        raise SystemExit(f"{path}: expected exactly {', '.join(ENVIRONMENT_KEYS)}, each matching {ENVIRONMENT_VALUE.pattern}")
     return env
 
 
+def write_summary(summary, heading, text):
+    if summary:
+        with open(summary, "a") as out:
+            out.write(f"## iOS screenshots: {heading}\n\n{text}\n\n")
+
+
 def compare(raw, baselines, updates, diffs, summary=None):
-    """Compares the shots in raw with the baselines; returns the exit status and the report's lines."""
+    """
+    Compares the shots in raw with the baselines. Returns the exit status, the state
+    (matched, differ, no-baselines or not-compared) and the report's lines.
+    """
     from PIL import Image
 
     updates.mkdir(parents=True, exist_ok=True)
@@ -117,7 +133,8 @@ def compare(raw, baselines, updates, diffs, summary=None):
 
     if not shots:
         lines.append("::error::No screenshots to compare.")
-        return 1, lines
+        write_summary(summary, "none taken", "No screenshots were taken.")
+        return 2, "differ", lines
     if not kept:
         for name, path in shots.items():
             take(name, reduce(path))
@@ -125,7 +142,10 @@ def compare(raw, baselines, updates, diffs, summary=None):
             f"::notice::No iOS baselines yet: {len(shots)} shots taken, nothing compared. "
             "Add the update-ios-snapshots label to a pull request to check them in."
         )
-        return 0, lines
+        write_summary(summary, "no baselines", f"There are no baselines in `apps/ios/snapshots/` yet, so the {len(shots)} shots "
+                      "were not compared. The `ios-snapshot-candidates` artifact (and `snapshots/` on this branch's "
+                      "`ci/ios-screenshots/` branch) holds the set to check in.")
+        return 0, "no-baselines", lines
     if recorded and taken_in and recorded != taken_in:
         for name, path in shots.items():
             take(name, reduce(path))
@@ -135,7 +155,12 @@ def compare(raw, baselines, updates, diffs, summary=None):
             f"the baselines with {recorded['xcode']}, {recorded['runtime']} ({recorded['phone']}, {recorded['ipad']}); "
             "nothing compared. Add the update-ios-snapshots label to a pull request to take them again."
         )
-        return 0, lines
+        write_summary(summary, "not compared",
+                      f"These shots were taken with {taken_in['xcode']}, {taken_in['runtime']} ({taken_in['phone']}, "
+                      f"{taken_in['ipad']}), the baselines with {recorded['xcode']}, {recorded['runtime']} "
+                      f"({recorded['phone']}, {recorded['ipad']}), which this runner lacks; nothing was compared. "
+                      "The `update-ios-snapshots` label takes the baselines again on this image.")
+        return 0, "not-compared", lines
 
     changed, new, gone, same = [], [], [], []
     for name, path in shots.items():
@@ -172,7 +197,7 @@ def compare(raw, baselines, updates, diffs, summary=None):
         lines.append(f"::error title=iOS screenshot gone::{name}.png has a baseline but was not taken")
     if summary:
         with open(summary, "a") as out:
-            out.write("## iOS screenshots\n\n")
+            out.write(f"## iOS screenshots: {'changed' if changed or new or gone else 'matched'}\n\n")
             out.write(f"{len(same)} of {len(shots)} match their baselines (a pixel differs by more than "
                       f"{CHANNEL_TOLERANCE}/255 in a channel; a shot by more than {PIXEL_RATIO:.2%} of its pixels).\n\n")
             if changed or new or gone:
@@ -185,7 +210,9 @@ def compare(raw, baselines, updates, diffs, summary=None):
                     out.write(f"| `{name}` | baseline, not taken |\n")
                 out.write("\nThe `ios-snapshot-diffs` artifact has each changed shot beside its baseline. "
                           "If the change is intended, add the `update-ios-snapshots` label.\n")
-    return (1 if changed or new or gone else 0), lines
+    if changed or new or gone:
+        return 1, "differ", lines
+    return 0, "matched", lines
 
 
 def fetch(branch, remote="origin", into=BASELINES):
@@ -217,6 +244,7 @@ def main(argv=None):
     c.add_argument("--updates", type=pathlib.Path, required=True)
     c.add_argument("--diffs", type=pathlib.Path, required=True)
     c.add_argument("--summary")
+    c.add_argument("--output", help="a file to append state=<state> to, such as $GITHUB_OUTPUT")
     f = sub.add_parser("fetch")
     f.add_argument("branch")
     f.add_argument("--remote", default="origin")
@@ -224,8 +252,11 @@ def main(argv=None):
     if args.command == "fetch":
         fetch(args.branch, args.remote)
         return 0
-    status, lines = compare(args.raw, args.baselines, args.updates, args.diffs, args.summary)
+    status, state, lines = compare(args.raw, args.baselines, args.updates, args.diffs, args.summary)
     print("\n".join(lines))
+    if args.output:
+        with open(args.output, "a") as out:
+            out.write(f"state={state}\n")
     return status
 
 

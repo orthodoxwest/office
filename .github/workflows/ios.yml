@@ -10,8 +10,8 @@ name: iOS
 # (scripts/ios-snapshots.py has the tolerance). A pull request whose shots changed fails, with
 # each changed shot beside its baseline in the ios-snapshot-diffs artifact; the
 # update-ios-snapshots label checks this run's shots in (update-ios-snapshots.yml). On master a
-# change is only a warning: a data change can move a page without running this job on its pull
-# request, and master cannot take the label.
+# change is only a warning: master cannot take the label, so the next pull request that runs this
+# job takes them again.
 #
 # A pull request's paths filter looks at the whole pull request, so every push to one that ever
 # touched the app would run the whole job again. The `changes` job skips the build when the push
@@ -20,30 +20,42 @@ on:
   push:
     branches: [master]
     paths:
+      # Everything the app and its screenshots are built from: the app, the core and the corpus
+      # it embeds (apps/mobile-ffi/build.rs), the crates it composes with (one embeds the web's
+      # lyric metrics), the faces and plaster it shares with the Android app, and the comparison.
       - "apps/ios/**"
       - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
-      - "scripts/ios-snapshots.py"
-      - "scripts/test_ios_snapshots.py"
       - "crates/**"
-      - "apps/android/app/src/main/res/font/**"
-      - "apps/android/app/src/main/res/drawable-nodpi/**"
       - "data/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "apps/office-web/static/fonts/eb-garamond-lyrics.nmet"
+      - "apps/android/app/src/main/res/font/**"
+      - "apps/android/app/src/main/res/drawable-nodpi/**"
+      - "scripts/ios-snapshots.py"
+      - "scripts/ios-snapshots-requirements.txt"
+      - "scripts/test_ios_snapshots.py"
       - ".github/workflows/ios.yml"
   pull_request:
     branches: [master]
     paths:
+      # Everything the app and its screenshots are built from: the app, the core and the corpus
+      # it embeds (apps/mobile-ffi/build.rs), the crates it composes with (one embeds the web's
+      # lyric metrics), the faces and plaster it shares with the Android app, and the comparison.
       - "apps/ios/**"
       - "!apps/ios/README.md"
       - "apps/mobile-ffi/**"
-      - "scripts/ios-snapshots.py"
-      - "scripts/test_ios_snapshots.py"
-      - "crates/render-blocks/**"
-      # The faces and plaster the iOS app shares with the Android app.
+      - "crates/**"
+      - "data/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "apps/office-web/static/fonts/eb-garamond-lyrics.nmet"
       - "apps/android/app/src/main/res/font/**"
       - "apps/android/app/src/main/res/drawable-nodpi/**"
+      - "scripts/ios-snapshots.py"
+      - "scripts/ios-snapshots-requirements.txt"
+      - "scripts/test_ios_snapshots.py"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
     inputs:
@@ -76,7 +88,7 @@ jobs:
           AFTER: ${{ github.event.pull_request.head.sha }}
           # The pull_request paths above, as patterns on a changed file's path.
           APP_PATHS: >-
-            ^apps/ios/|^apps/mobile-ffi/|^scripts/(test_)?ios[-_]snapshots\.py$|^crates/render-blocks/|^apps/android/app/src/main/res/font/|^apps/android/app/src/main/res/drawable-nodpi/|^\.github/workflows/ios\.yml$
+            ^apps/ios/|^apps/mobile-ffi/|^crates/|^data/|^Cargo\.(toml|lock)$|^apps/office-web/static/fonts/eb-garamond-lyrics\.nmet$|^apps/android/app/src/main/res/font/|^apps/android/app/src/main/res/drawable-nodpi/|^scripts/(test_)?ios[-_]snapshots(-requirements\.txt|\.py)$|^\.github/workflows/ios\.yml$
         run: |
           build() { echo "$1"; echo "build=true" >> "$GITHUB_OUTPUT"; exit 0; }
           # Only a new push to an open pull request can be skipped; master and manual runs always build.
@@ -103,8 +115,8 @@ jobs:
     permissions:
       # The screenshots branch.
       contents: write
-      # The snapshot comparison's comment.
-      pull-requests: write
+    outputs:
+      snapshots: ${{ steps.compare.outputs.state }}
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -170,16 +182,14 @@ jobs:
         if: ${{ !inputs.store }}
         run: |
           python3 -m venv "$RUNNER_TEMP/snapshots"
-          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet pillow==12.3.0
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
           "$RUNNER_TEMP/snapshots/bin/python" scripts/test_ios_snapshots.py
-          set +e
+          # Exits 1 when the shots differ; state= (matched, differ, no-baselines, not-compared)
+          # goes to the step's outputs and a section to the summary either way.
           "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py compare apps/ios/build/review apps/ios/snapshots \
             --updates apps/ios/build/review/snapshots --diffs apps/ios/build/review/snapshot-diffs \
-            --summary "$GITHUB_STEP_SUMMARY"
-          status=$?
-          set -e
-          [ "$status" -le 1 ] || exit "$status"
-          echo "differ=$([ "$status" -eq 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+            --summary "$GITHUB_STEP_SUMMARY" --output "$GITHUB_OUTPUT" || [ $? -eq 1 ]
 
       - uses: actions/upload-artifact@v7.0.2
         if: always()
@@ -205,69 +215,13 @@ jobs:
           retention-days: 3
 
       - name: Upload snapshot diffs
-        if: steps.compare.outputs.differ == 'true'
+        if: steps.compare.outputs.state == 'differ'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: ios-snapshot-diffs
           path: apps/ios/build/review/snapshot-diffs/
           if-no-files-found: warn
           retention-days: 14
-
-      - name: Post or update the snapshot comment
-        if: >-
-          steps.compare.outcome == 'success' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/github-script@v9.0.0
-        env:
-          DIFFER: ${{ steps.compare.outputs.differ }}
-        with:
-          script: |
-            const marker = '<!-- ios-snapshot-result -->';
-            const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const differ = process.env.DIFFER === 'true';
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-            });
-            const existing = comments.find(c =>
-              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
-            );
-            if (!differ) {
-              if (existing) {
-                await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                  body: `## iOS screenshots passing\n\nThe simulator screenshots match their baselines.\n\n${marker}`,
-                });
-              }
-              return;
-            }
-            const body =
-              '## iOS screenshot mismatch detected\n\n' +
-              'The app built and its tests passed, but one or more simulator screenshots differ from the baselines in `apps/ios/snapshots/`. ' +
-              `The [run's summary](${runURL}) lists them, and its \`ios-snapshot-diffs\` artifact shows each beside its baseline.\n\n` +
-              '**If this change is intentional** — add the `update-ios-snapshots` label to this PR. ' +
-              'GitHub Actions will push the screenshots this run took (or take them again, if this run has none for the current head) to this branch.\n\n' +
-              '**If this is unexpected** — inspect the diffs and fix the app before applying the label.\n\n' +
-              marker;
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body,
-              });
-            }
 
       - name: Publish the screenshots to a branch
         # A fork's token cannot push; its run keeps the artifact.
@@ -287,7 +241,7 @@ jobs:
 
       # Last, so the artifacts and the screenshots branch are there to look at.
       - name: Fail if the screenshots differ
-        if: steps.compare.outputs.differ == 'true'
+        if: steps.compare.outputs.state == 'differ'
         env:
           EVENT: ${{ github.event_name }}
         run: |
@@ -296,3 +250,75 @@ jobs:
             exit 1
           fi
           echo "::warning::The iOS screenshots differ from their baselines; the next pull request that touches the app can take them again with the update-ios-snapshots label."
+
+  # Apart from the build, so the job that runs the pull request's code holds no token that can
+  # write to it.
+  comment:
+    name: Report the screenshot comparison
+    needs: build
+    if: >-
+      !cancelled() &&
+      needs.build.outputs.snapshots != '' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Post or update the snapshot comment
+        uses: actions/github-script@v9.0.0
+        env:
+          STATE: ${{ needs.build.outputs.snapshots }}
+        with:
+          script: |
+            const marker = '<!-- ios-snapshot-result -->';
+            const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const state = process.env.STATE;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+            let body;
+            if (state === 'differ') {
+              body =
+                '## iOS screenshot mismatch detected\n\n' +
+                'The app built and its tests passed, but one or more simulator screenshots differ from the baselines in `apps/ios/snapshots/`. ' +
+                `The [run's summary](${runURL}) lists them, and its \`ios-snapshot-diffs\` artifact shows each beside its baseline.\n\n` +
+                '**If this change is intentional** — add the `update-ios-snapshots` label to this PR. ' +
+                'GitHub Actions will push the screenshots this run took (or take them again, if this run has none for the current head) to this branch.\n\n' +
+                '**If this is unexpected** — inspect the diffs and fix the app before applying the label.\n\n' +
+                marker;
+            } else if (state === 'not-compared') {
+              body =
+                '## iOS screenshots not compared\n\n' +
+                `This runner lacks the Xcode or simulator runtime the baselines were taken with, so [this run](${runURL}) compared nothing. ` +
+                'Add the `update-ios-snapshots` label to take the baselines again on the current image.\n\n' +
+                marker;
+            } else if (existing) {
+              // Matched, or no baselines yet: only an earlier comment needs correcting.
+              body = state === 'matched'
+                ? `## iOS screenshots passing\n\nThe simulator screenshots match their baselines.\n\n${marker}`
+                : `## iOS screenshots not compared\n\nThere are no baselines yet; [this run](${runURL}) compared nothing.\n\n${marker}`;
+            } else {
+              return;
+            }
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }

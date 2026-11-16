@@ -47,7 +47,7 @@ class CompareTest(unittest.TestCase):
 
     def seed(self):
         """Takes the run's updates as the baselines, as the label's commit does."""
-        status, _ = self.run_compare()
+        status, _, _ = self.run_compare()
         self.updates.rename(self.base)
         for p in self.raw.iterdir():
             p.unlink()
@@ -56,9 +56,11 @@ class CompareTest(unittest.TestCase):
     def test_no_baselines_passes_with_a_notice_and_offers_every_shot(self):
         self.shot("home-nave")
         self.shot("ipad-home-nave", size=(834 * 2, 120 * 2))
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 0)
         self.assertIn("::notice::No iOS baselines yet", lines[0])
+        self.assertEqual(state, "no-baselines")
+        self.assertIn("no baselines", self.summary.read_text())
         with Image.open(self.updates / "home-nave.png") as a, Image.open(self.updates / "ipad-home-nave.png") as b:
             self.assertEqual(a.size, (393, 120))
             self.assertEqual(b.size, (834, 120))
@@ -69,8 +71,10 @@ class CompareTest(unittest.TestCase):
         self.seed()
         before = (self.base / "home-nave.png").read_bytes()
         self.shot("home-nave")
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 0, lines)
+        self.assertEqual(state, "matched")
+        self.assertIn("matched", self.summary.read_text())
         self.assertEqual((self.updates / "home-nave.png").read_bytes(), before)
         self.assertEqual(list(self.diffs.iterdir()), [])
 
@@ -90,7 +94,7 @@ class CompareTest(unittest.TestCase):
         for x in range(30):
             px[x, 0] = (0, 0, 0)
         image.save(path)
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 0, lines)
 
     def test_a_changed_word_fails_with_a_diff_picture(self):
@@ -99,8 +103,8 @@ class CompareTest(unittest.TestCase):
         self.seed()
         self.shot("vespers-nave", "Compline")
         self.shot("lauds-nave", "Lauds")
-        status, lines = self.run_compare()
-        self.assertEqual(status, 1)
+        status, state, lines = self.run_compare()
+        self.assertEqual((status, state), (1, "differ"))
         self.assertTrue(any("vespers-nave.png differs" in line for line in lines), lines)
         self.assertEqual([p.name for p in self.diffs.iterdir()], ["vespers-nave.png"])
         with Image.open(self.diffs / "vespers-nave.png") as sheet:
@@ -113,7 +117,7 @@ class CompareTest(unittest.TestCase):
         self.seed()
         self.shot("home-nave")
         self.shot("ordo-nave")
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 1)
         self.assertTrue(any("ordo-nave.png has no baseline" in line for line in lines), lines)
         self.assertTrue(any("about-nave.png has a baseline but was not taken" in line for line in lines), lines)
@@ -123,7 +127,7 @@ class CompareTest(unittest.TestCase):
         self.shot("home-nave")
         self.seed()
         self.shot("home-nave", size=(393 * 3, 121 * 3))
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 1)
         self.assertTrue(any("size 393x120 -> 393x121" in line for line in lines), lines)
 
@@ -131,15 +135,27 @@ class CompareTest(unittest.TestCase):
         self.shot("home-nave")
         self.seed()
         self.shot("home-nave", "Something else", env={**ENV, "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"})
-        status, lines = self.run_compare()
+        status, state, lines = self.run_compare()
         self.assertEqual(status, 0)
         self.assertIn("::warning::", lines[0])
+        self.assertEqual(state, "not-compared")
+        self.assertIn("not compared", self.summary.read_text())
         self.assertIn("iOS-27-0", (self.updates / "environment.json").read_text())
 
     def test_malformed_environment_is_refused(self):
-        self.shot("home-nave", env={"xcode": "26.1"})
-        with self.assertRaises(SystemExit):
-            self.run_compare()
+        for env in ({"xcode": "26.1"}, {**ENV, "phone": "iPhone 16\n::error::x"}, {**ENV, "ipad": ""}, {**ENV, "xcode": 26}):
+            with self.subTest(env=env):
+                self.shot("home-nave", env=env)
+                with self.assertRaises(SystemExit):
+                    self.run_compare()
+
+    def test_state_goes_to_the_output_file(self):
+        self.shot("home-nave")
+        output = pathlib.Path(self.tmp.name) / "output"
+        status = SNAP.main(["compare", str(self.raw), str(self.base), "--updates", str(self.updates),
+                            "--diffs", str(self.diffs), "--output", str(output)])
+        self.assertEqual(status, 0)
+        self.assertEqual(output.read_text(), "state=no-baselines\n")
 
     def test_excluded_shots_are_not_compared(self):
         self.shot("home-nave")

@@ -8,7 +8,9 @@ name: Update iOS snapshots
 #
 # Like every pull_request_target workflow this one is read from master, so the label works only
 # once this file is there; the pull request that added it was seeded with
-# `scripts/ios-snapshots.py fetch BRANCH`.
+# `scripts/ios-snapshots.py fetch BRANCH`. A fork's pull request cannot take the label: its
+# baselines are fetched and committed by hand. The commit is pushed with the workflow's token,
+# which starts no workflow, so the new head has no iOS run until the next push.
 on:
   # This event loads the workflow definition from the default branch. The jobs that execute
   # pull-request code must remain read-only.
@@ -160,7 +162,8 @@ jobs:
       - name: Compare with the checked-in baselines
         run: |
           python3 -m venv "$RUNNER_TEMP/snapshots"
-          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet pillow==12.3.0
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
           "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py compare apps/ios/build/review apps/ios/snapshots \
             --updates apps/ios/build/review/snapshots --diffs apps/ios/build/review/snapshot-diffs \
             --summary "$GITHUB_STEP_SUMMARY" || [ $? -eq 1 ]
@@ -251,14 +254,13 @@ jobs:
             fi
           done
 
+          # Checked with jq, not an interpreter: this job holds a write token, and an interpreter
+          # started in the pull request's checkout would load modules the pull request put there.
+          # Its values are echoed into workflow commands later, so no newlines or markup.
           ENVIRONMENT="$ARTIFACT_DIR/environment.json"
-          if [ ! -f "$ENVIRONMENT" ] || [ "$(stat -c '%s' "$ENVIRONMENT")" -gt 4096 ] || ! python3 - "$ENVIRONMENT" <<'PY'
-          import json, sys
-          env = json.load(open(sys.argv[1]))
-          keys = {"xcode", "runtime", "phone", "ipad"}
-          ok = isinstance(env, dict) and set(env) == keys and all(isinstance(v, str) and 0 < len(v) < 100 for v in env.values())
-          sys.exit(0 if ok else 1)
-          PY
+          if [ ! -f "$ENVIRONMENT" ] || [ "$(stat -c '%s' "$ENVIRONMENT")" -gt 4096 ] || ! jq -e '
+              type == "object" and (keys == ["ipad", "phone", "runtime", "xcode"]) and
+              all(.[]; type == "string" and test("^[A-Za-z0-9 ._()-]{1,100}$"))' "$ENVIRONMENT" > /dev/null
           then
             echo "::error::Snapshot artifact has no valid environment.json."
             exit 1
