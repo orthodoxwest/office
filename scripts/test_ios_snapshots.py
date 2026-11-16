@@ -38,7 +38,8 @@ class CompareTest(unittest.TestCase):
     def shot(self, name, text="Vespers", size=(393 * 3, 120 * 3), env=ENV):
         """A full-size simulator shot: plaster-ish noise-free page with a word on it."""
         image = Image.new("RGB", size, (244, 238, 226))
-        ImageDraw.Draw(image).text((60, 90), text, fill=(40, 30, 20), font_size=90)
+        # Below the status bar's 70 points, which the blank test leaves out.
+        ImageDraw.Draw(image).text((60, 240), text, fill=(40, 30, 20), font_size=90)
         image.save(self.raw / f"{name}.png")
         (self.raw / "environment.json").write_text(json.dumps(env))
 
@@ -55,7 +56,7 @@ class CompareTest(unittest.TestCase):
 
     def test_no_baselines_passes_with_a_notice_and_offers_every_shot(self):
         self.shot("home-nave")
-        self.shot("ipad-home-nave", size=(834 * 2, 120 * 2))
+        self.shot("ipad-home-nave", size=(834 * 2, 200 * 2))
         status, state, lines = self.run_compare()
         self.assertEqual(status, 0)
         self.assertIn("::notice::No iOS baselines yet", lines[0])
@@ -63,7 +64,7 @@ class CompareTest(unittest.TestCase):
         self.assertIn("no baselines", self.summary.read_text())
         with Image.open(self.updates / "home-nave.png") as a, Image.open(self.updates / "ipad-home-nave.png") as b:
             self.assertEqual(a.size, (393, 120))
-            self.assertEqual(b.size, (834, 120))
+            self.assertEqual(b.size, (834, 200))
         self.assertEqual(json.loads((self.updates / "environment.json").read_text()), ENV)
 
     def test_same_shots_match_and_keep_the_baseline_bytes(self):
@@ -148,6 +149,27 @@ class CompareTest(unittest.TestCase):
                 self.shot("home-nave", env=env)
                 with self.assertRaises(SystemExit):
                     self.run_compare()
+
+    def test_a_blank_shot_fails_and_is_never_offered(self):
+        self.shot("home-nave")
+        # The bare wall, with the island's black above the status line.
+        wall = Image.new("RGB", (393 * 3, 120 * 3), (244, 238, 226))
+        ImageDraw.Draw(wall).rectangle((450, 30, 730, 100), fill=(0, 0, 0))
+        wall.save(self.raw / "compline-nave.png")
+        status, state, lines = self.run_compare()
+        self.assertEqual((status, state), (2, "blank"))
+        self.assertTrue(any("compline-nave.png is blank" in line for line in lines), lines)
+        self.assertEqual(list(self.updates.glob("*.png")), [])
+        self.assertIn("blank", self.summary.read_text())
+
+    def test_blank_is_one_colour_below_the_status_bar(self):
+        page = Image.new("RGB", (393, 852), (244, 238, 226))
+        self.assertTrue(SNAP.is_blank(page))
+        ImageDraw.Draw(page).rectangle((150, 10, 240, 40), fill=(0, 0, 0))
+        self.assertTrue(SNAP.is_blank(page), "the island alone is still blank")
+        for y in range(100, 800, 30):
+            ImageDraw.Draw(page).text((20, y), "O God, make speed to save me", fill=(40, 30, 20), font_size=16)
+        self.assertFalse(SNAP.is_blank(page))
 
     def test_state_goes_to_the_output_file(self):
         self.shot("home-nave")

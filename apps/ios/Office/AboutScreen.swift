@@ -26,6 +26,7 @@ func aboutLink(_ target: String, defaults: UserDefaults = .standard) -> AboutLin
 struct AboutPage: View {
     var body: some View {
         AboutScreen(view: aboutPage)
+            .screenshotReady(.about)
             .background(PlasterWall())
             .toolbar(.hidden, for: .navigationBar)
     }

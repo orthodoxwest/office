@@ -122,8 +122,11 @@ difference is only a warning, since master cannot take the label.
 Every shot is taken from a fresh install of the app, so no earlier shot's kept reading place,
 way back or settings reaches it; at a fixed day, today and hour (`-date`, `-today`, `-clock 9`), in
 New York's time zone, in English, at the default text size, with the status bar's time fixed; and
-once the page has come to rest (two frames a second apart alike, after at least four seconds),
-so an hour's scroll to its anchor is waited for rather than raced. The baselines record the Xcode, simulator runtime and devices they were
+once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a marker to its
+temporary directory once the page's content is on screen and scrolled to its anchor; a minute
+without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,
+one colour below the status bar as a page not yet drawn is, fails the comparison and is never
+offered as a baseline, nor fetched as one. The baselines record the Xcode, simulator runtime and devices they were
 taken with (`snapshots/environment.json`), and later runs take the same ones. When the runner
 image no longer has them, the shots are taken on its newest and not compared, with a warning, until
 the baselines are taken again. Shots that cannot be made stable are listed with their reason in

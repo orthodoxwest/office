@@ -185,8 +185,8 @@ jobs:
           "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
             -r scripts/ios-snapshots-requirements.txt
           "$RUNNER_TEMP/snapshots/bin/python" scripts/test_ios_snapshots.py
-          # Exits 1 when the shots differ; state= (matched, differ, no-baselines, not-compared)
-          # goes to the step's outputs and a section to the summary either way.
+          # Exits 1 when the shots differ, 2 when one is blank (its page not drawn) or none was
+          # taken; state= goes to the step's outputs and a section to the summary either way.
           "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py compare apps/ios/build/review apps/ios/snapshots \
             --updates apps/ios/build/review/snapshots --diffs apps/ios/build/review/snapshot-diffs \
             --summary "$GITHUB_STEP_SUMMARY" --output "$GITHUB_OUTPUT" || [ $? -eq 1 ]
@@ -292,6 +292,12 @@ jobs:
                 '**If this change is intentional** — add the `update-ios-snapshots` label to this PR. ' +
                 'GitHub Actions will push the screenshots this run took (or take them again, if this run has none for the current head) to this branch.\n\n' +
                 '**If this is unexpected** — inspect the diffs and fix the app before applying the label.\n\n' +
+                marker;
+            } else if (state === 'blank' || state === 'none') {
+              body =
+                '## iOS screenshots not taken\n\n' +
+                `[This run](${runURL}) has a blank screenshot (a page not drawn when it was shot) or none at all, so nothing was compared and nothing can be checked in. ` +
+                'Its summary names the shots; the fault is in the app or the run, not in a baseline.\n\n' +
                 marker;
             } else if (state === 'not-compared') {
               body =

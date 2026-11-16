@@ -15,10 +15,13 @@ CHANNEL_TOLERANCE levels of 255, and a shot differs when more than PIXEL_RATIO o
   taken, and the environment the shots were taken in;
 - to --diffs, a picture of each changed shot: baseline, this run, and its differing pixels in red.
 
+A blank shot (one colour below the status bar: a page not yet drawn) fails the run and is never
+offered as a baseline; `fetch` refuses a set with one.
+
 It exits 0 when every shot matches, when there are no baselines yet (with a notice) or when the
 shots were not compared (another environment, with a warning); 1 when a shot changed, is new or is
-gone. --output gets the state (matched, no-baselines, not-compared or differ), and --summary a
-section for each of them. Shots from another Xcode or runtime than the baselines'
+gone; 2 when a shot is blank or none was taken. --output gets the state (matched, no-baselines,
+not-compared, differ, blank or none), and --summary a section for each of them. Shots from another Xcode or runtime than the baselines'
 (environment.json) are not compared: they differ in ways no page changed.
 
 `fetch` copies the comparable set a CI run published to ci/ios-screenshots/BRANCH (its
@@ -27,6 +30,7 @@ request that first adds the workflow, which pull_request_target reads from maste
 """
 
 import argparse
+import io
 import json
 import pathlib
 import re
@@ -49,6 +53,14 @@ CHANNEL_TOLERANCE = 24
 # points, less than one changed word.
 PIXEL_RATIO = 0.0005
 
+# A shot is blank, and never compared or kept, when below the status bar fewer than this share
+# of its pixels stand more than BLANK_LEVELS from its commonest grey: the bare wall of a page not
+# yet drawn (a page of text has several percent of ink, home its whole frontispiece).
+BLANK_RATIO = 0.005
+BLANK_LEVELS = 8
+# Points at the top left out of that test: the status bar and the Dynamic Island.
+STATUS_POINTS = 70
+
 # Shots taken for review but not compared, with why. None yet: every page is shot at a fixed
 # date and hour (-today, -date, -clock) and at rest.
 EXCLUDED: dict[str, str] = {}
@@ -65,6 +77,16 @@ def reduce(path):
 
     with Image.open(path) as image:
         return image.convert("RGB").reduce(scale_of(path.stem))
+
+
+def is_blank(image):
+    """Whether the shot (at points) is a page not yet drawn: one colour below the status bar."""
+    grey = image.convert("L").crop((0, min(STATUS_POINTS, image.height - 1), image.width, image.height))
+    histogram = grey.histogram()
+    common = max(range(256), key=histogram.__getitem__)
+    near = sum(histogram[max(0, common - BLANK_LEVELS):common + BLANK_LEVELS + 1])
+    total = grey.width * grey.height
+    return (total - near) / total < BLANK_RATIO
 
 
 def differing(a, b):
@@ -112,7 +134,7 @@ def write_summary(summary, heading, text):
 def compare(raw, baselines, updates, diffs, summary=None):
     """
     Compares the shots in raw with the baselines. Returns the exit status, the state
-    (matched, differ, no-baselines or not-compared) and the report's lines.
+    (matched, differ, no-baselines, not-compared; blank or none, which exit 2) and the report's lines.
     """
     from PIL import Image
 
@@ -131,10 +153,23 @@ def compare(raw, baselines, updates, diffs, summary=None):
     def take(name, image):
         image.save(updates / f"{name}.png", optimize=True)
 
+    # A blank shot is the app's or the run's fault, never a page to keep or compare.
+    blank = []
+    for name, path in list(shots.items()):
+        if is_blank(reduce(path)):
+            blank.append(name)
+            del shots[name]
+    if blank:
+        for name in blank:
+            lines.append(f"::error title=Blank iOS screenshot::{name}.png is blank: its page was not drawn when it was shot")
+        write_summary(summary, "blank", "These shots are blank (their page was not drawn when shot), so nothing was "
+                      "compared or offered for checking in: " + ", ".join(f"`{n}`" for n in blank) + ".")
+        return 2, "blank", lines
+
     if not shots:
         lines.append("::error::No screenshots to compare.")
         write_summary(summary, "none taken", "No screenshots were taken.")
-        return 2, "differ", lines
+        return 2, "none", lines
     if not kept:
         for name, path in shots.items():
             take(name, reduce(path))
@@ -226,11 +261,22 @@ def fetch(branch, remote="origin", into=BASELINES):
     names = [n for n in listing if n.endswith(".png") or n == f"snapshots/{ENVIRONMENT}"]
     if not any(n.endswith(".png") for n in names):
         raise SystemExit(f"{ref} has no snapshots/; has its iOS run finished?")
+    blobs = {n: subprocess.run(["git", "show", f"FETCH_HEAD:{n}"], cwd=ROOT, check=True, capture_output=True).stdout
+             for n in names}
+    from PIL import Image
+
+    blank = []
+    for n, blob in blobs.items():
+        if n.endswith(".png"):
+            with Image.open(io.BytesIO(blob)) as image:
+                if is_blank(image.convert("RGB")):
+                    blank.append(n)
+    if blank:
+        raise SystemExit(f"{ref} has blank shots, which must not become baselines: {', '.join(blank)}")
     into.mkdir(parents=True, exist_ok=True)
     for old in into.glob("*.png"):
         old.unlink()
-    for name in names:
-        blob = subprocess.run(["git", "show", f"FETCH_HEAD:{name}"], cwd=ROOT, check=True, capture_output=True).stdout
+    for name, blob in blobs.items():
         (into / pathlib.PurePosixPath(name).name).write_bytes(blob)
     print(f"{len(names)} files from {ref} into {into.relative_to(ROOT)}")
 

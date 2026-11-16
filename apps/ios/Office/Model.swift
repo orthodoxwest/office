@@ -487,6 +487,9 @@ final class AppModel: ObservableObject {
         path = visits(Array(pages.dropFirst()))
     }
 
+    /// The page a launch's `-page` opened, which marks itself drawn for the screenshots (`ScreenshotReady`).
+    @Published private(set) var launchPage: Page?
+
     /**
      * What the launch asked for, for the simulator screenshots: `-page hour -hour lauds
      * -date 2026-03-15` (or home, ordo, year, reminders, about; find with `-query`, feast with
@@ -510,6 +513,7 @@ final class AppModel: ObservableObject {
         }
         // `-settings YES` opens the wide header's Settings, and `-menu YES` the phone's menu, for their screenshots.
         overlay = d.bool(forKey: "settings") ? .settings : d.bool(forKey: "menu") ? .menu : .none
+        launchPage = page
         return true
     }
 }

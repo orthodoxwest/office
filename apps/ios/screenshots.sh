@@ -120,27 +120,39 @@ shoot() {
     xcrun simctl install "$sim" "$app"
     xcrun simctl launch "$sim" "$id" \
       -AppleLanguages '(en)' -AppleLocale en_US -today "$day" -date "$day" -clock 9 "$@" > /dev/null
-    # Shot once the page has come to rest: two frames a second apart alike, after the four
-    # seconds a launch takes to compose (the launch wall is still too, and must not pass for
-    # the page). An anchored hour scrolls only once composed, so it settles later, and is
-    # waited for rather than raced. Twenty seconds at most; a page that never rests is shot
-    # anyway, and the comparison says so.
-    sleep 4
-    local last="$frames/last.png" this="$frames/this.png" waited=4
+    # Shot once the app says the page asked for is drawn (ScreenshotReady.swift: composed, laid
+    # out, scrolled to its anchor), which the fresh install's empty temporary directory makes
+    # this launch's own; then once it has come to rest, two frames a second apart alike, so an
+    # arrival's fade or a panel's drop has finished. Until it is drawn the page can be the bare
+    # wall, as still as a finished one, so stillness alone is not enough.
+    local data marker waited=0
+    data=$(xcrun simctl get_app_container "$sim" "$id" data)
+    marker="$data/tmp/screenshot-ready"
+    until [ -f "$marker" ]; do
+      if [ "$waited" -ge 240 ]; then
+        echo "::error::$name: the app did not say its page was drawn within 60 seconds" >&2
+        xcrun simctl io "$sim" screenshot "$out/$name-not-drawn.png" > /dev/null || true
+        exit 1
+      fi
+      sleep 0.25
+      waited=$((waited + 1))
+    done
+    local last="$frames/last.png" this="$frames/this.png" settled=0
+    sleep 1
     xcrun simctl io "$sim" screenshot "$last" > /dev/null
     while :; do
       sleep 1
-      waited=$((waited + 1))
+      settled=$((settled + 1))
       xcrun simctl io "$sim" screenshot "$this" > /dev/null
       if cmp -s "$last" "$this"; then break; fi
-      if [ "$waited" -ge 20 ]; then
-        echo "::warning::$name did not come to rest in 20 seconds" >&2
+      if [ "$settled" -ge 20 ]; then
+        echo "::warning::$name did not come to rest in 20 seconds after it was drawn" >&2
         break
       fi
       mv "$this" "$last"
     done
     mv "$this" "$out/$name.png"
-    echo "$(date +%T) $name (${waited}s)"
+    echo "$(date +%T) $name (drawn after $((waited / 4))s, at rest $((settled + 1))s later)"
   }
   for sim in "$phone" "$ipad"; do
     echo "$(date +%T) waiting for $sim to boot"
