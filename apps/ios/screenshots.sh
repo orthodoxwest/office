@@ -49,17 +49,26 @@ devices() {
   fi
   xcodebuild -version >&2
   xcrun simctl list devices available -j > "${RUNNER_TEMP:-/tmp}/devices.json"
+  local sdk_version
+  sdk_version=$(xcrun --sdk iphonesimulator --show-sdk-version)
   pick() {
-    python3 - "${RUNNER_TEMP:-/tmp}/devices.json" "$1" "$2" "$3" "$4" <<'PY'
+    python3 - "${RUNNER_TEMP:-/tmp}/devices.json" "$1" "$2" "$3" "$4" "$sdk_version" <<'PY'
 import json, sys
-path, family, preferred, runtime, exact_name = sys.argv[1:]
+path, family, preferred, runtime, exact_name, sdk_version = sys.argv[1:]
 devices = json.load(open(path))["devices"]
 if runtime:
     if runtime not in devices:
         sys.exit(0)
     found = [d for d in devices[runtime] if d["name"] == exact_name]
 else:
-    ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")])
+    # The newest runtime this Xcode's simulator SDK can run that has the family: an image can
+    # carry a runtime newer than its default Xcode, whose devices xcodebuild cannot see.
+    version = lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")]
+    sdk = [int(x) for x in sdk_version.split(".")]
+    ios = sorted((k for k in devices if "iOS" in k and version(k) <= sdk
+                  and any(d["name"].startswith(family) for d in devices[k])), key=version)
+    if not ios:
+        sys.exit(0)
     runtime = ios[-1]
     found = [d for d in devices[runtime] if d["name"].startswith(family)]
     exact = [d for d in found if d["name"] == preferred]
@@ -85,6 +94,10 @@ PY
     else
       phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
     fi
+  fi
+  if [ -z "$phone" ] || [ -z "$ipad" ]; then
+    echo "::error::No iOS $sdk_version-or-older simulator runtime here has both an iPhone and an iPad." >&2
+    exit 1
   fi
   local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}
   xcrun simctl list devices | grep -E "$phone_id|$ipad_id" >&2
