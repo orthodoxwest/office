@@ -5,3 +5,5 @@
 # empty and builds go up with no notes. A manual run's "notes" input replaces it for that run.
 # Play takes at most 500 characters; a longer text stops the run before it builds.
 # Promoting a release to Production in Play Console keeps its notes, and you can edit them there.
+# The App Store's "What's New" is this text too, as of the build submitted for review
+# (scripts/appstore.py); App Store Connect takes up to 4,000 characters.
