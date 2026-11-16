@@ -160,11 +160,19 @@ to App Store Connect, and gives it to the TestFlight external group **Testers**.
 installs Apple's TestFlight app and opens the group's public link once; each later build
 reaches them there, as the Android preview's link always serves the newest APK.
 
-The version is `MARKETING_VERSION` in `project.yml`; the build number counts commits, as the
-Android version code does. Apple reviews the first build of each version (usually within a
+The build number counts commits, as the Android version code does. The version is chosen
+before each upload: `MARKETING_VERSION` in `project.yml`, unless App Store Connect already has
+that version (or a higher one) submitted, in review, waiting to be released or on sale, in which
+case the upload takes one patch above the highest such version (`scripts/appstore.py version`).
+App Store Connect closes a version to new builds once Apple approves it, and a build uploaded
+while its version is in review could never be released, so the version moves on as soon as a
+release is submitted: nobody edits `project.yml` after a release. It never goes back below a
+version TestFlight already has builds under. `project.yml` stays the floor, so raising its
+minor or major version (1.0.x to 1.1.0) is how to start a new line; pull requests and unsigned
+builds use it as it stands. Apple reviews the first build of each version (usually within a
 day) before external testers can install it, and normally lets later builds of the same
-version through without, so only a release should raise `MARKETING_VERSION`. Builds lapse after
-90 days, and a re-run for a commit already uploaded is refused at the upload.
+version through without. Builds lapse after 90 days, and a re-run for a commit already uploaded
+is refused at the upload.
 
 Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
 needs a Mac: the certificate is made with `openssl`, the rest on the web.
@@ -219,8 +227,7 @@ secrets; the API key does not expire.
 
 ## The App Store
 
-A release is a TestFlight build submitted for App Review in App Store Connect; nothing in CI
-submits one. Before the first:
+Before the first release, by hand in App Store Connect:
 
 - **The listing** (the app's App Store tab): subtitle, description, keywords, the Reference
   category, a support URL, and the web's privacy page as the privacy policy
@@ -232,7 +239,42 @@ submits one. Before the first:
 - **Screenshots**: a manual run of the iOS workflow with **store** ticked (above).
 - **Pricing and availability**: free, in the countries chosen.
 
-Then pick the build in the version's Build section and submit it. Once a version is on sale,
-App Store Connect refuses further uploads under it, so raise `MARKETING_VERSION` (1.0.0 to
-1.0.1, say) straight after a release, or TestFlight stops receiving builds.
+Each later version carries all of these over from the one before; change them in App Store
+Connect when they need it.
 
+### Submitting for review
+
+The **Submit to the App Store** workflow (`.github/workflows/appstore-promote.yml`,
+`scripts/appstore.py`) sends a TestFlight build to App Review through the App Store Connect API,
+without rebuilding, as the Android app's promotion moves a Closed testing build to production.
+
+- **Every Monday** at 15:00 UTC: unless a version is already with Apple or waiting to be
+  released, the newest build that passed beta review, is with the **Testers** group, was
+  uploaded at least 24 hours before and has a higher version than the App Store's is submitted.
+  The workflow creates the App Store version for the build's version string (or fills in one
+  being prepared), attaches the build, sets *What's New*, chooses *Automatically release this
+  version* and Apple's seven-day phased release, and submits it. Apple's review usually takes a
+  day or two; once approved the version goes out by itself, to a growing share of automatic
+  updaters over seven days (anyone can download it at once). So a release a week at most,
+  and only while something new has been tested.
+- **What's New** is `apps/android/whatsnew.txt` as of the build's commit, the notes Google Play
+  shows, or, while that is empty, "Corrections to the texts and improvements to the app." Edit
+  it in App Store Connect before Apple's review starts if a release deserves more.
+- **Releasing now**: a manual run from the Actions tab submits the newest build with the
+  testers, of any age, or the build number given, with the notes given or the file's;
+  *Only say what would be submitted* reads App Store Connect and changes nothing.
+- **Pausing**: disable the workflow in the Actions tab. A version in review can be taken back
+  with *Remove from Review* in App Store Connect; the next run then fills in that version again
+  with the newest tested build and resubmits it, so disable the workflow first to keep it out.
+  The phased release can be paused (up to 30 days) or finished at once on the version's page.
+- **A rejection** stops the weekly submissions: read Apple's reasons in App Store Connect, and
+  reply or resubmit there (or remove the version), and they resume.
+- **Export compliance** needs no answer: `ITSAppUsesNonExemptEncryption` is false in the
+  Info.plist (`project.yml`), so every build already says the app uses no non-exempt encryption.
+
+It uses the TestFlight API key (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY`, above), whose App
+Manager role may submit; without it runs warn and submit nothing. Scheduled runs use the
+`appstore-auto` environment, which GitHub creates on first use with no reviewer; manual runs use
+`appstore`. Create `appstore` (Settings → Environments) with a required reviewer, and give both
+environments the deployment branch rule *master*, so only master's copy of the workflow can
+submit.

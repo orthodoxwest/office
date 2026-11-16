@@ -90,6 +90,8 @@ scripts/
   project-status.py        Clergy-facing status report (`make project-status`)
   sweep-targets.py         Delete target/ in idle checkouts (`make sweep-targets`)
   play-promote.py          Promote a Closed testing build to Play production (play-promote.yml)
+  appstore.py              iOS version numbers (testflight.yml) and weekly App Review submission
+                           (appstore-promote.yml)
   pua-digits.py            Recover old-style digits from the 2025 AWRV cycle draft PDFs
   verify-psalms.py         Read-only comparison with the official BCP Psalter
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)

@@ -12,6 +12,8 @@ workflows:
         - 'gradle/actions@v6.4.1'
         - 'swatinem/rust-cache@v2.9.3'
         - 'taiki-e/install-action@v2.90.3'
+    '.github/workflows/appstore-promote.yml':
+        - 'actions/checkout@v7.0.1'
     '.github/workflows/ci.yml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'

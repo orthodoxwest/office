@@ -9,9 +9,13 @@ name: iOS TestFlight
 # change that breaks the release build is caught before it reaches master. Setting the secrets
 # up from a Linux machine is in apps/ios/README.md ("TestFlight").
 #
-# The version stays MARKETING_VERSION (project.yml); the build number counts commits, as the
-# Android version code does. Apple reviews the first build of each version before external
-# testers can install it, so only a release raises MARKETING_VERSION.
+# The build number counts commits, as the Android version code does. The version is
+# MARKETING_VERSION (project.yml) until App Store Connect has that version submitted or on sale;
+# then an upload takes one patch above the highest such version, which scripts/appstore.py
+# reads from the API before archiving, so nobody raises it by hand after a release. Raising
+# MARKETING_VERSION's minor or major in project.yml still starts a new line. Apple reviews the
+# first build of each version before external testers can install it. The weekly App Store
+# promotion (appstore-promote.yml) submits a build from here for App Review.
 on:
   push:
     branches: [master]
@@ -84,6 +88,20 @@ jobs:
             echo "upload=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # App Store Connect closes a version to uploads once it is submitted or on sale; the
+      # script picks the version this upload can take (apps/ios/README.md, "TestFlight").
+      - name: Choose the version
+        id: version
+        if: steps.mode.outputs.upload == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          version="$(python3 scripts/appstore.py version)"
+          echo "Version $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0
         with:
@@ -140,9 +158,13 @@ jobs:
         env:
           UPLOAD: ${{ steps.mode.outputs.upload }}
           BUILD: ${{ steps.mode.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
           TEAM: ${{ steps.signing.outputs.team }}
           PROFILE: ${{ steps.signing.outputs.profile }}
         run: |
+          # Without the API (pull requests, unsigned builds), project.yml's MARKETING_VERSION.
+          version=()
+          if [ -n "$VERSION" ]; then version=("MARKETING_VERSION=$VERSION"); fi
           if [ "$UPLOAD" = true ]; then
             signing=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$TEAM" "CODE_SIGN_IDENTITY=Apple Distribution"
                      "OFFICE_PROFILE=$PROFILE")
@@ -152,7 +174,7 @@ jobs:
           mkdir -p build/release
           if ! xcodebuild archive -project Office.xcodeproj -scheme Office -configuration Release \
             -destination generic/platform=iOS -archivePath build/release/Office.xcarchive \
-            -derivedDataPath build/dd-release "CURRENT_PROJECT_VERSION=$BUILD" "${signing[@]}" \
+            -derivedDataPath build/dd-release "CURRENT_PROJECT_VERSION=$BUILD" "${version[@]}" "${signing[@]}" \
             > build/release/archive.log 2>&1; then
             grep -E "error:|: error|FAILED|failed|Undefined symbol|No profile|No signing" build/release/archive.log | head -n 120
             tail -n 40 build/release/archive.log

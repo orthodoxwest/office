@@ -1,0 +1,79 @@
+name: Submit to the App Store
+
+# Sends the iOS app's newest tested TestFlight build to App Review as a new App Store version,
+# without rebuilding: the App Store gets the build testers already have (scripts/appstore.py,
+# apps/ios/README.md "The App Store").
+#
+# Weekly: unless a version is already with Apple or waiting to be released, the newest build that
+# passed beta review, went to the external testers, was uploaded at least 24 hours before and has
+# a higher version than the App Store's is submitted. Once approved it is released by itself,
+# in Apple's seven-day phased release. A rejection stops the promotions until someone answers
+# it in App Store Connect. Scheduled runs use the `appstore-auto` environment, with no reviewer.
+#
+# A manual run submits a build now (the newest with the external testers, of any age, unless a
+# build number is given); it uses the `appstore` environment, which has a required reviewer.
+on:
+  schedule:
+    # Mondays at 15:00 UTC, mid-morning in America/New_York.
+    - cron: "0 15 * * 1"
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Build number to submit; empty means the newest with the external testers"
+        type: string
+        default: ""
+      notes:
+        description: "What's New; empty uses apps/android/whatsnew.txt as of the build"
+        type: string
+        default: ""
+      dry_run:
+        description: "Only say what would be submitted"
+        type: boolean
+        default: false
+
+concurrency:
+  group: appstore-promote
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  promote:
+    name: ${{ github.event_name == 'schedule' && 'Submit a tested build' || 'Submit to the App Store now' }}
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'schedule' && 'appstore-auto' || 'appstore' }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Build numbers are commit counts; the build's commit holds its release notes.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Submit
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          EVENT: ${{ github.event_name }}
+          BUILD: ${{ inputs.build }}
+          NOTES: ${{ inputs.notes }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ] || [ -z "$ASC_KEY" ]; then
+            # Repository secrets (TestFlight's), or ones on both the appstore and appstore-auto environments.
+            echo "::warning::The App Store Connect key is not set for this environment; nothing submitted"
+            exit 0
+          fi
+          if [ "$EVENT" = schedule ]; then
+            set -- auto --min-age 24
+          else
+            set -- manual
+            if [ -n "$BUILD" ]; then set -- "$@" --build "$BUILD"; fi
+            if [ -n "$NOTES" ]; then set -- "$@" --notes "$NOTES"; fi
+            if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
+          fi
+          python3 scripts/appstore.py "$@"
