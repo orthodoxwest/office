@@ -971,7 +971,7 @@ private struct Digest: View {
         .padding(.bottom, m.px(8))
     }
 
-    private func hour(_ name: String, notes: [String], antiphon: String?, preces: Bool, suffrage: Bool, cross: Bool, comms: [CommemorationView]) -> some View {
+    private func hour(_ name: String, notes: [String], antiphon: String?, preces: Bool, suffrage: Bool, cross: Bool = false, comms: [CommemorationView]) -> some View {
         let line = TextStyle(size: 13.6, line: 20.4, italic: true)
         var marks = Text("")
         if let antiphon { marks = marks + Text(antiphon) }

@@ -1031,7 +1031,7 @@ private fun Digest(d: OrdoDayView, onFeast: (String) -> Unit) {
 }
 
 @Composable
-private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, cross: Boolean, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
+private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, cross: Boolean = false, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
     val line = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)
     Column(Modifier.padding(bottom = 4.dp)) {
