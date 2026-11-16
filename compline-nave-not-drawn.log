@@ -1,0 +1,14 @@
+# simctl spawn launchctl list (the app's line, if it was running)
+27198	0	UIKitApplication:org.orthodoxwest.office[65d7][rb-legacy]
+# the app's log since its install
+getpwuid_r did not find a match for uid 501
+Timestamp               Ty Process[PID:TID]
+2026-11-16 22:05:25.210 Df Office[27198:166c8] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x1016a5f70> (BB5CC720-9033-4D97-AA3D-163F7E63A85C)
+2026-11-16 22:05:25.210 Df Office[27198:166c8] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x1016a5f70> (BB5CC720-9033-4D97-AA3D-163F7E63A85C)
+2026-11-16 22:10:36.056 Df Office[27198:166c8] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:1 [87902DB3-7144-40EE-9778-3F510EC36E4B] (reporting strategy default)>
+2026-11-16 22:10:36.056 Df Office[27198:166c8] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:2 [BF7EFCA8-5D9C-47A4-AF02-44B847BB6745] (reporting strategy default)>
+2026-11-16 22:10:36.056 Df Office[27198:166c8] [com.apple.network:activity] Set activity <nw_activity 50:1 [87902DB3-7144-40EE-9778-3F510EC36E4B] (reporting strategy default)> as the global parent
+2026-11-16 22:10:36.172 Df Office[27198:166c8] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:org.orthodoxwest.office-default  persistentID: BB5CC720-9033-4D97-AA3D-163F7E63A85C
+2026-11-16 22:10:36.185 Df Office[27198:166c8] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x1016a5f70> (BB5CC720-9033-4D97-AA3D-163F7E63A85C)
+2026-11-16 22:10:36.188 Df Office[27198:166c8] [com.apple.UIKit:UpdateScheduler] Target list changed: <CADisplay:LCD PurpleMain>
+2026-11-16 22:10:36.455 A  Office[27198:166c8] (libswiftos.dylib) Activity for state dumps
