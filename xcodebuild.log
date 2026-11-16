@@ -1,0 +1,13 @@
+Command line invocation:
+    /Applications/Xcode_26.6.app/Contents/Developer/usr/bin/xcodebuild test -project Office.xcodeproj -scheme Office -destination id=5277349A-B219-4ED4-853A-8AE666B9F5B1 -derivedDataPath build/dd
+
+2026-11-16 21:46:38.378 xcodebuild[4095:20928] Writing error result bundle to /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/ResultBundle_2026-16-11_21-46-0036.xcresult
+xcodebuild: error: Unable to find a device matching the provided destination specifier:
+		{ id:5277349A-B219-4ED4-853A-8AE666B9F5B1 }
+
+	The requested device could not be found because no available devices matched the request.
+
+	Available destinations for the "Office" scheme:
+		{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:8f215f661e75e4b8863c21539b6ad332c197b51a, name:My Mac }
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+		{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
