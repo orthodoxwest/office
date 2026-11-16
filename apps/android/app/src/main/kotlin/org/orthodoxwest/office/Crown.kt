@@ -547,8 +547,6 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
     var choice: () -> ThemeChoice = { ThemeChoice.DEFAULT }
     var deviceDark = false
     var animationScale: () -> Float = { 1f }
-    /** One soft tick under the finger at the turn, as the look itself changes. */
-    var tick: () -> Unit = {}
     /** Saves the choice (at the tap), applies it (at the turn), or makes it the Menu's way. */
     var save: (ThemeChoice) -> Unit = {}
     var apply: (ThemeChoice) -> Unit = {}
@@ -694,7 +692,6 @@ class Crown internal constructor(internal val layer: GraphicsLayer, private val 
         }
         apply(p.choice)
         p.turned = true
-        tick()
     }
 
     /**

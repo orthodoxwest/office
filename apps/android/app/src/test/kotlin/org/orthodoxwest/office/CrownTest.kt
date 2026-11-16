@@ -50,7 +50,6 @@ class CrownTest {
         var theme by mutableStateOf(start)
         var saved: ThemeChoice? = null
         var plain = 0
-        var ticks = 0
         lateinit var crown: Crown
         lateinit var view: HomeView
     }
@@ -67,7 +66,6 @@ class CrownTest {
             crown.save = { stage.saved = it }
             crown.apply = { stage.theme = it }
             crown.plain = { stage.plain++; stage.theme = it }
-            crown.tick = { stage.ticks++ }
             Box(Modifier.fillMaxSize().crowning(crown)) {
                 OfficeTheme(choice = stage.theme, season = view.ornament) {
                     CompositionLocalProvider(LocalCrown provides crown) {
@@ -126,11 +124,8 @@ class CrownTest {
         assertTrue(stage.crown.playing)
         assertEquals(ThemeChoice.APSE, stage.saved)
         assertEquals(ThemeChoice.NAVE, stage.theme)
-        assertEquals(0, stage.ticks)
         advance(played(1000))
         assertEquals(ThemeChoice.APSE, stage.theme)
-        // One soft tick as the look changes.
-        assertEquals(1, stage.ticks)
         assertEquals("took the plain change: ${stage.crown.plainBecause}", 0, stage.plain)
         // The play's frames at the web strip's moments (ms of the timetable from the tap), the
         // last after the ending beat's last star.

@@ -17,7 +17,8 @@ import UIKit.UIGestureRecognizerSubclass
  *   the hour's colour multiplied over both (a layer of its own, blended, so it only shades). Each
  *   row and line of the day hands its ink over at its own moment: the old ink goes from the
  *   photograph and the live line's new ink comes in. The frieze holds its old look over all of
- *   it until its own span. A soft tick marks the turn.
+ *   it until its own span. The tap's own tick under the finger is the play's only one: a
+ *   second at the turn, most of a second after the touch, felt late.
  * - At the settle the photographs go, and the page is its live self; after a held breath, one
  *   last thing (the last star, or the morning star and the cross) ends the play.
  *
@@ -206,7 +207,6 @@ final class CrownPlayer: NSObject, ObservableObject {
         window.addSubview(host.view)
         host.view.layoutIfNeeded()
         run.host = host
-        crownTurning()
         let touches = CrownTouches { [weak self] point in self?.touched(point) }
         window.addGestureRecognizer(touches)
         watcher = touches
@@ -252,8 +252,6 @@ final class CrownPlayer: NSObject, ObservableObject {
             withTransaction(quiet) { run.model.turnTheme(run.choice) }
             run.switched = true
             run.phase = .turned
-            // One soft tick as the look turns under the reader's eyes.
-            crownTurned()
         case .turned:
             // One clock: everything from here is timed from the first frame of the new look,
             // however long the photographs took.
