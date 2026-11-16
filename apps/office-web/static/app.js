@@ -2903,9 +2903,12 @@ function plainClickOpensHere(e, link) {
         return;
       }
       loading = true;
-      fetch(sky.getAttribute("data-stars")).then(function (resp) {
+      // The page's head has already asked for the field when Apse is painted (layout.html).
+      var early = window.officeStars;
+      window.officeStars = null;
+      (early || fetch(sky.getAttribute("data-stars")).then(function (resp) {
         return resp.ok ? resp.json() : null;
-      }).then(function (data) {
+      })).then(function (data) {
         fields = data;
         schedule();
       }).catch(function () {});

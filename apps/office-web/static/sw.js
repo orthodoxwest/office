@@ -598,7 +598,23 @@ function pruneOldPages(cache, today) {
 
 // precacheUpcoming fetches the home page and all seven hours for the next
 // PRECACHE_DAYS days, at most once per day per worker version.
+// One top-up at a time: activation starts one and every page that registers
+// asks for one, and the day's stamp is written only when a run ends, so later
+// asks join the run in flight rather than fetching the same pages again (#831).
+var precacheRun = null;
+
 function precacheUpcoming() {
+  if (!precacheRun) {
+    precacheRun = runPrecache().then(function () {
+      precacheRun = null;
+    }, function () {
+      precacheRun = null;
+    });
+  }
+  return precacheRun;
+}
+
+function runPrecache() {
   var today = localDateSlug(new Date());
   var stampKey = "/__precache-stamp";
   var stampValue = VERSION + ":" + today;
@@ -625,7 +641,8 @@ function precacheUpcoming() {
           }
           d.setDate(d.getDate() + 1);
         }
-        urls = urls.concat(ordo);
+        // The ordo's few pages first, so the offline Ordo is ready soonest.
+        urls = ordo.concat(urls);
         urls.push("/reminders", "/about");
         return pruneOldPages(cache, today).then(function () {
           return uncachedURLs(cache, urls);

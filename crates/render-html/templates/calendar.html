@@ -29,6 +29,23 @@
   })();
 </script>
 {% elif view == "year" %}
+{#- A link into the year from before the ordo was set a month to a page
+     (/calendar/2026#d-2026-09-12, or #september) forwards to that month at once,
+     here in the head rather than in the body, which waits for the stylesheet: a
+     page only passing through never waits for it or starts a view transition (#832). #}
+<script>
+  (function () {
+    var day = /^#d-(\d{4})-(\d{2})-\d{2}$/.exec(location.hash);
+    var months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    var month = months.indexOf(location.hash.slice(1)) + 1;
+    if (day) {
+      location.replace("/calendar/" + day[1] + "/" + day[2] + location.search + location.hash);
+    } else if (month) {
+      location.replace("/calendar/{{ year }}/" + (month < 10 ? "0" : "") + month + location.search);
+    }
+    window.officeForwarded = Boolean(day || month);
+  })();
+</script>
 {#- The year's course is laid in on the frontispiece once a session: a first
      visit, not a return (Back), and never under reduced motion. Decided here,
      before the first paint, so the band is held unseen from the start and
@@ -37,7 +54,7 @@
 <script>
   (function () {
     try {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (window.officeForwarded || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       var arrival = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
       if (arrival && arrival.type === "back_forward") return;
       if (sessionStorage.getItem("office-course-laid")) return;
@@ -49,23 +66,6 @@
   })();
 </script>
 {% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish, feast_search %}
-{% if view == "year" %}
-{# A link into the year from before the ordo was set a month to a page
-     (/calendar/2026#d-2026-09-12, or #september) forwards to that month
-     before the frontispiece paints. #}
-<script>
-  (function () {
-    var day = /^#d-(\d{4})-(\d{2})-\d{2}$/.exec(location.hash);
-    var months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
-    var month = months.indexOf(location.hash.slice(1)) + 1;
-    if (day) {
-      location.replace("/calendar/" + day[1] + "/" + day[2] + location.search + location.hash);
-    } else if (month) {
-      location.replace("/calendar/{{ year }}/" + (month < 10 ? "0" : "") + month + location.search);
-    }
-  })();
-</script>
-{% endif %}
 <div class="calendar" data-view="{{ view }}">
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="svg-sprite" aria-hidden="true" focusable="false">
     <symbol id="icon-fish" viewBox="0 0 24 12">
