@@ -12,20 +12,24 @@ apps/ios/README.md ("TestFlight", "The App Store").
              approves it, and a build uploaded while its version is in review could never be
              released, so a version moves on as soon as it is submitted. project.yml stays the
              floor: raising its minor or major version there is how a person starts 1.1.0.
-  auto       Once a week. Unless a version is already in review or waiting to be released, or
-             Apple rejected one (a person answers that in App Store Connect), take the newest
-             build that has passed beta review and gone to the external testers, was uploaded
-             at least --min-age hours ago, and has a higher version than the App Store's, and
-             submit it for App Review as a new App Store version.
+  auto       Once a week. Unless a version is already with Apple or waiting to be released, or
+             Apple rejected one (a person reads why first), take the newest build that has
+             passed beta review and gone to the external testers, was uploaded at least
+             --min-age hours ago, and has a higher version than the App Store's, and submit it
+             for App Review as a new App Store version.
   manual     The same now, for --build (default: the newest build with the external testers,
-             of any age).
+             of any age). After a rejection, it renumbers the rejected version to that build's
+             version (uploads moved past the rejected number when it was submitted), attaches
+             the build, marks Apple's item resolved and sends the submission again.
 
 Submitting means: create the App Store version for the build's version string (or reuse one
-being prepared, renumbered), attach the build, set "What's New", release automatically once
+being prepared, or left on an unsent review submission by a run that stopped, renumbered),
+attach the build, set "What's New", release automatically once
 approved, in Apple's seven-day phased release, and send it for review through a review
 submission. Everything else (the listing, screenshots, App Privacy) App Store Connect carries
 over from the previous version. Each step looks before it acts, so a re-run after a failure
-picks up where it stopped. --dry-run reads App Store Connect and says what it would do.
+picks up where it stopped. A review submission being prepared that holds anything else is left
+alone. Reads are retried, with a timeout, when App Store Connect is slow or busy. --dry-run reads App Store Connect and says what it would do.
 
 "What's New" is --notes if given, otherwise apps/android/whatsnew.txt as of the build's commit
 (the notes Google Play shows; lines starting with # dropped), otherwise DEFAULT_NOTES. The build
@@ -60,10 +64,9 @@ NOTES_FILE = "apps/android/whatsnew.txt"
 DEFAULT_NOTES = "Corrections to the texts and improvements to the app."
 
 # App Store version states (appVersionState, and the older appStoreState it replaces; Apple's
-# AppVersionState and AppStoreVersionState). A version in one of these has been submitted:
+# AppVersionState and AppStoreVersionState). A version in one of these has been sent to Apple:
 # Apple is reviewing it, it waits to be released, or it is or was on sale.
 IN_FLIGHT = {
-    "READY_FOR_REVIEW",
     "WAITING_FOR_EXPORT_COMPLIANCE",
     "WAITING_FOR_REVIEW",
     "IN_REVIEW",
@@ -83,13 +86,25 @@ RELEASED = {
     "REMOVED_FROM_SALE",
 }
 SUBMITTED = IN_FLIGHT | RELEASED
-# Apple turned it down: a person reads why in App Store Connect and answers there.
-REJECTED = {"REJECTED", "METADATA_REJECTED", "INVALID_BINARY"}
-# Being prepared, or taken back out of review by the developer: this script may fill it in.
-EDITABLE = {"PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED"}
+# Apple turned it down: a person reads why in App Store Connect, and a manual run (or App Store
+# Connect) resubmits it with a newer build.
+REJECTED = {"REJECTED", "METADATA_REJECTED"}
+# Apple could not process the binary: only App Store Connect settles that.
+INVALID = {"INVALID_BINARY"}
+# A version on a review submission that was never sent (READY_FOR_REVIEW: a run that stopped
+# between adding it and submitting), being prepared, or taken back out of review by the
+# developer: this script may fill it in and send it.
+READY = "READY_FOR_REVIEW"
+EDITABLE = {"PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", READY}
 # Review submissions (ReviewSubmissionState) that are with Apple or wait on a person.
 SUBMISSION_BUSY = {"WAITING_FOR_REVIEW", "IN_REVIEW", "UNRESOLVED_ISSUES", "CANCELING", "COMPLETING"}
 SUBMISSION_DRAFT = "READY_FOR_REVIEW"
+SUBMISSION_REJECTED = "UNRESOLVED_ISSUES"
+# How long a version may take to show it is on the submission before it is sent (as fastlane's
+# deliver waits), and how often App Store Connect is asked again after a refusal or no answer.
+POLLS, POLL_SECONDS = 10, 15
+RETRIES, TIMEOUT = 4, 60
+sleep = time.sleep
 # A build's beta state once beta review has passed and it is with the external group.
 WITH_TESTERS = {"IN_BETA_TESTING"}
 
@@ -204,23 +219,35 @@ def choose_build(builds: list[dict], live: tuple[int, int, int] | None, at: dt.d
 # --- The decision -------------------------------------------------------------------------
 
 
+def words(s: str) -> str:
+    return s.lower().replace("_", " ")
+
+
 def decide(versions: list[dict], submissions: list[dict], builds: list[dict], at: dt.datetime,
-           min_age: float, number: int = 0) -> tuple[dict | None, str]:
+           min_age: float, number: int = 0, manual: bool = False) -> tuple[dict | None, str]:
     """What to submit, or None and why not. The plan names the build, the version to reuse
-    (None: create one), and whether a release exists to carry over from."""
+    (None: create one), the draft submission to send (None: create one), whether this answers
+    a rejection, and whether a release exists to carry over from."""
     busy = [v for v in versions if state(v) in IN_FLIGHT]
     if busy:
         v = busy[0]["attributes"]
-        return None, (f"Version {v['versionString']} is {state(busy[0]).lower().replace('_', ' ')}; "
+        return None, (f"Version {v['versionString']} is {words(state(busy[0]))}; "
                       "nothing more is submitted until Apple has released it.")
+    invalid = [v for v in versions if state(v) in INVALID]
+    if invalid:
+        return None, (f"Version {invalid[0]['attributes']['versionString']} has an invalid binary; "
+                      "settle it in App Store Connect and promotion resumes.")
     rejected = [v for v in versions if state(v) in REJECTED]
-    if rejected:
+    if rejected and not manual:
         v = rejected[0]["attributes"]
-        return None, (f"Apple rejected version {v['versionString']}; answer in App Store Connect "
-                      "(resubmit, or remove the version) and promotion resumes.")
-    open_subs = [s for s in submissions if s.get("attributes", {}).get("state") in SUBMISSION_BUSY]
+        return None, (f"Apple rejected version {v['versionString']}. Read why in App Store Connect; once "
+                      "the cause is fixed and a newer build is with the testers, a manual run of this "
+                      "workflow resubmits the version with it (apps/ios/README.md).")
+    allowed = {SUBMISSION_REJECTED} if rejected else set()
+    open_subs = [s for s in submissions
+                 if s.get("attributes", {}).get("state") in SUBMISSION_BUSY - allowed]
     if open_subs:
-        return None, (f"A review submission is {open_subs[0]['attributes']['state'].lower().replace('_', ' ')}; "
+        return None, (f"A review submission is {words(open_subs[0]['attributes']['state'])}; "
                       "nothing more is submitted until it is settled in App Store Connect.")
 
     released = store_versions(versions, RELEASED)
@@ -233,18 +260,26 @@ def decide(versions: list[dict], submissions: list[dict], builds: list[dict], at
         return None, (f"Nothing to submit: the App Store has {show(live) if live else 'no release'}, and no "
                       f"newer build has been with the external testers {min_age:g} hours.")
 
-    editable = [v for v in versions if state(v) in EDITABLE]
-    reuse = editable[0] if editable else None
+    if rejected:
+        # The rejected version is renumbered to the newer build's version and sent again on the
+        # submission Apple answered (a version string is editable while rejected, as fastlane's
+        # deliver relies on). Uploads moved past its number when it was submitted.
+        reuse = rejected[0]
+        draft = next((s for s in submissions if s["attributes"].get("state") == SUBMISSION_REJECTED), None)
+    else:
+        editable = [v for v in versions if state(v) in EDITABLE]
+        reuse = editable[0] if editable else None
+        draft = next((s for s in submissions if s.get("attributes", {}).get("state") == SUBMISSION_DRAFT), None)
     if reuse and parse_version(reuse["attributes"]["versionString"]) > parse_version(build["version"]):
-        return None, (f"Version {reuse['attributes']['versionString']} is being prepared in App Store Connect, "
-                      f"above build {build['number']}'s {build['version']}; it is left for whoever made it.")
-    draft = next((s for s in submissions if s.get("attributes", {}).get("state") == SUBMISSION_DRAFT), None)
-    return {"build": build, "reuse": reuse, "draft": draft, "update": live is not None}, ""
+        return None, (f"Version {reuse['attributes']['versionString']} is {words(state(reuse))} in App Store "
+                      f"Connect, above build {build['number']}'s {build['version']}; it is left for whoever made it.")
+    return {"build": build, "reuse": reuse, "draft": draft, "resubmit": bool(rejected),
+            "update": live is not None}, ""
 
 
-def notes_at(commit: str | None) -> str:
-    """apps/android/whatsnew.txt at the commit (HEAD if unknown), without its # lines."""
-    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{commit or 'HEAD'}:{NOTES_FILE}"],
+def notes_at(commit: str) -> str:
+    """apps/android/whatsnew.txt at the commit, without its # lines."""
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{commit}:{NOTES_FILE}"],
                        capture_output=True, text=True)
     if r.returncode != 0:
         return ""
@@ -315,6 +350,10 @@ def jwt(key_id: str, issuer: str, key_pem: str, at: int | None = None) -> str:
     return f"{head}.{body}.{b64url(der_to_raw(r.stdout))}"
 
 
+class ApiError(Exception):
+    pass
+
+
 class Api:
     def __init__(self, key_id: str, issuer: str, key_pem: str, dry_run: bool = False):
         self.creds, self.dry_run = (key_id, issuer, key_pem), dry_run
@@ -323,18 +362,29 @@ class Api:
     def call(self, method: str, path: str, body: dict | None = None) -> dict:
         if method != "GET" and self.dry_run:
             sys.exit(f"::error::Dry run, yet asked to {method} {path}")
-        if time.time() - self.made > 600:
-            self.token, self.made = jwt(*self.creds), time.time()
         url = path if path.startswith("https://") else API + path
         data = json.dumps(body).encode() if body is not None else None
-        req = urllib.request.Request(url, data=data, method=method, headers={
-            "Authorization": f"Bearer {self.token}", "Content-Type": "application/json"})
-        try:
-            with urllib.request.urlopen(req) as resp:
-                raw = resp.read()
-        except urllib.error.HTTPError as e:
-            sys.exit(f"::error::App Store Connect {method} {path}: {e.code} {e.read().decode(errors='replace')}")
-        return json.loads(raw) if raw else {}
+        for attempt in range(RETRIES + 1):
+            if time.time() - self.made > 600:
+                self.token, self.made = jwt(*self.creds), time.time()
+            req = urllib.request.Request(url, data=data, method=method, headers={
+                "Authorization": f"Bearer {self.token}", "Content-Type": "application/json"})
+            try:
+                with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                    raw = resp.read()
+                return json.loads(raw) if raw else {}
+            except urllib.error.HTTPError as e:
+                # A refusal for rate is never carried out, so any request may be sent again; a
+                # server error or no answer may have been, so only a read is.
+                again = e.code == 429 or (e.code >= 500 and method == "GET")
+                problem = f"{e.code} {e.read().decode(errors='replace')}"
+            except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+                again, problem = method == "GET", str(getattr(e, "reason", e))
+            if not again or attempt == RETRIES:
+                raise ApiError(f"App Store Connect {method} {path}: {problem}")
+            log(f"App Store Connect {method} {path}: {problem}; asking again")
+            sleep(2 ** (attempt + 1))
+        raise AssertionError("unreachable")
 
     def get_all(self, path: str) -> dict:
         """A list endpoint's every page, data and included joined."""
@@ -385,10 +435,27 @@ def credentials() -> tuple[str, str, str]:
         sys.exit(f"::error::{e.args[0]} is not set")
 
 
-def submit(api: Api, app: str, plan: dict, notes: str) -> str:
-    """Carry out decide()'s plan; each step checks what is already there."""
-    build, version = plan["build"], plan["reuse"]
+def items_of(api: Api, submission: str) -> list[dict]:
+    return api.get_all(f"/v1/reviewSubmissions/{submission}/items?include=appStoreVersion")["data"]
+
+
+def item_version(item: dict) -> str | None:
+    return ((item.get("relationships", {}).get("appStoreVersion") or {}).get("data") or {}).get("id")
+
+
+def submit(api: Api, app: str, plan: dict, notes: str) -> str | None:
+    """Carry out decide()'s plan; each step checks what is already there. None, with a summary,
+    when the draft submission holds something else, which is left for whoever put it there."""
+    build, version, draft = plan["build"], plan["reuse"], plan["draft"]
     ref = {"type": "builds", "id": build["id"]}
+    items = items_of(api, draft["id"]) if draft else []
+    mine = version["id"] if version else None
+    foreign = [i for i in items if item_version(i) != mine]
+    if foreign:
+        summary(f"The review submission being prepared in App Store Connect holds {len(foreign)} item(s) "
+                "other than this version (an in-app event, or another version); nothing is submitted "
+                "until it is sent or emptied there.")
+        return None
     if version is None:
         version = api.call("POST", "/v1/appStoreVersions", {"data": {
             "type": "appStoreVersions",
@@ -416,7 +483,11 @@ def submit(api: Api, app: str, plan: dict, notes: str) -> str:
             "type": "builds", "id": build["id"], "attributes": {"usesNonExemptEncryption": False}}})
 
     if plan["update"]:  # the first release has no "What's New" and no phased release
-        for loc in api.get_all(f"/v1/appStoreVersions/{vid}/appStoreVersionLocalizations")["data"]:
+        locs = api.get_all(f"/v1/appStoreVersions/{vid}/appStoreVersionLocalizations")["data"]
+        if not locs:
+            log(f"::warning::Version {build['version']} has no localizations, so What's New is not set; "
+                "App Review may refuse it until it is filled in in App Store Connect.")
+        for loc in locs:
             if loc["attributes"].get("whatsNew") != notes:
                 api.call("PATCH", f"/v1/appStoreVersionLocalizations/{loc['id']}", {"data": {
                     "type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": {"whatsNew": notes}}})
@@ -428,17 +499,12 @@ def submit(api: Api, app: str, plan: dict, notes: str) -> str:
                 "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}},
             }})
 
-    draft = plan["draft"]
     if draft is None:
         draft = api.call("POST", "/v1/reviewSubmissions", {"data": {
             "type": "reviewSubmissions", "attributes": {"platform": "IOS"},
             "relationships": {"app": {"data": {"type": "apps", "id": app}}},
         }})["data"]
-        items = []
-    else:
-        items = api.get_all(f"/v1/reviewSubmissions/{draft['id']}/items")["data"]
-    held = {((i.get("relationships", {}).get("appStoreVersion") or {}).get("data") or {}).get("id") for i in items}
-    if vid not in held:
+    if not items:
         api.call("POST", "/v1/reviewSubmissionItems", {"data": {
             "type": "reviewSubmissionItems",
             "relationships": {
@@ -446,6 +512,24 @@ def submit(api: Api, app: str, plan: dict, notes: str) -> str:
                 "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}},
             },
         }})
+    if plan["resubmit"]:
+        # Apple's answer is dealt with: the rejected item is marked resolved, and the
+        # submission is sent again.
+        for item in items:
+            if item.get("attributes", {}).get("state") in {"REJECTED", "UNRESOLVED_ISSUES"}:
+                api.call("PATCH", f"/v1/reviewSubmissionItems/{item['id']}", {"data": {
+                    "type": "reviewSubmissionItems", "id": item["id"], "attributes": {"resolved": True}}})
+    else:
+        # App Store Connect takes a moment to show the version as on the submission, and refuses
+        # to send it before (fastlane's deliver waits the same way).
+        for attempt in range(POLLS):
+            current = api.call("GET", f"/v1/appStoreVersions/{vid}")["data"]
+            if state(current) == READY:
+                break
+            if attempt == POLLS - 1:
+                raise ApiError(f"Version {build['version']} is still {words(state(current))}, not ready for "
+                               f"review, after {POLLS * POLL_SECONDS} seconds; the next run sends it.")
+            sleep(POLL_SECONDS)
     api.call("PATCH", f"/v1/reviewSubmissions/{draft['id']}", {"data": {
         "type": "reviewSubmissions", "id": draft["id"], "attributes": {"submitted": True}}})
     return vid
@@ -460,6 +544,14 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
+    try:
+        run(args)
+    except ApiError as e:
+        # testflight.yml warns and falls back when the version cannot be read.
+        sys.exit(str(e) if args.mode == "version" else f"::error::{e}")
+
+
+def run(args: argparse.Namespace) -> None:
     api = Api(*credentials(), dry_run=args.dry_run)
     app = app_id(api)
     versions = read_versions(api, app)
@@ -476,22 +568,26 @@ def main() -> None:
     submissions = read_submissions(api, app)
     builds = read_builds(api, app)
     log(f"Builds: {[(b['version'], b['number'], b['processing'], b['external']) for b in builds[:10]]}")
-    plan, why = decide(versions, submissions, builds, now(),
-                       args.min_age if args.mode == "auto" else 0.0, args.build)
+    manual = args.mode == "manual"
+    plan, why = decide(versions, submissions, builds, now(), 0.0 if manual else args.min_age, args.build, manual)
     if plan is None:
         summary(why)
         return
     build = plan["build"]
-    notes = args.notes.strip() or notes_at(commit_of(build["number"])) or DEFAULT_NOTES
+    commit = commit_of(build["number"])
+    notes = args.notes.strip() or (notes_at(commit) if commit else "") or DEFAULT_NOTES
     what = (f"Submitting build {build['number']} as version {build['version']} for App Review, released "
             f"automatically once approved" + (", phased over seven days" if plan["update"] else ""))
-    if plan["reuse"] is not None:
-        what += f" (in App Store Connect's version {plan['reuse']['attributes']['versionString']}, being prepared)"
+    if plan["resubmit"]:
+        what += f" (resubmitting rejected version {plan['reuse']['attributes']['versionString']})"
+    elif plan["reuse"] is not None:
+        what += (f" (in App Store Connect's version {plan['reuse']['attributes']['versionString']}, "
+                 f"{words(state(plan['reuse']))})")
     if args.dry_run:
         summary(f"Dry run: {what}. What's New:\n\n{notes}")
         return
-    submit(api, app, plan, notes)
-    summary(f"{what}. What's New:\n\n{notes}")
+    if submit(api, app, plan, notes) is not None:
+        summary(f"{what}. What's New:\n\n{notes}")
 
 
 if __name__ == "__main__":

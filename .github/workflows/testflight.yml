@@ -98,9 +98,14 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY: ${{ secrets.ASC_KEY }}
         run: |
-          version="$(python3 scripts/appstore.py version)"
-          echo "Version $version"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # The script retries slow or busy answers; if App Store Connect still cannot be read,
+          # the upload goes ahead under project.yml's version rather than not at all.
+          if version="$(python3 scripts/appstore.py version)"; then
+            echo "Version $version"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Could not read App Store Connect's versions; building project.yml's MARKETING_VERSION, which App Store Connect refuses if that version is closed."
+          fi
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.100.0

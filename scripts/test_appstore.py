@@ -109,7 +109,8 @@ class VersionTest(unittest.TestCase):
         self.assertEqual(STORE.next_marketing_version("1.0.0", [v], []), "1.0.1")
 
     def test_a_version_being_prepared_or_rejected_takes_uploads(self):
-        for app_state in ["PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED"]:
+        for app_state in ["PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW", "DEVELOPER_REJECTED", "REJECTED",
+                          "METADATA_REJECTED"]:
             with self.subTest(app_state):
                 self.assertEqual(STORE.next_marketing_version("1.0.0", [version("v", "1.0.0", app_state)], []), "1.0.0")
 
@@ -130,8 +131,8 @@ class VersionTest(unittest.TestCase):
 
 
 class DecideTest(unittest.TestCase):
-    def decide(self, versions, builds, submissions=(), min_age=24, number=0):
-        return STORE.decide(list(versions), list(submissions), STORE.builds_of(builds), NOW, min_age, number)
+    def decide(self, versions, builds, submissions=(), min_age=24, number=0, manual=False):
+        return STORE.decide(list(versions), list(submissions), STORE.builds_of(builds), NOW, min_age, number, manual)
 
     def test_the_newest_tested_build_a_day_old_is_chosen(self):
         builds = builds_response((830, "1.0.1", 2, "VALID", "IN_BETA_TESTING"),
@@ -168,9 +169,35 @@ class DecideTest(unittest.TestCase):
 
     def test_a_rejection_waits_for_a_person(self):
         builds = builds_response((830, "1.0.2", 30, "VALID", "IN_BETA_TESTING"))
-        plan, why = self.decide([ON_SALE, version("v101", "1.0.1", "REJECTED")], builds)
+        for app_state in ["REJECTED", "METADATA_REJECTED", "INVALID_BINARY"]:
+            with self.subTest(app_state):
+                plan, why = self.decide([ON_SALE, version("v101", "1.0.1", app_state)], builds,
+                                        [submission("s1", "UNRESOLVED_ISSUES")])
+                self.assertIsNone(plan)
+                self.assertIn("1.0.1", why)
+
+    def test_a_manual_run_resubmits_a_rejected_version_with_a_newer_build(self):
+        builds = builds_response((830, "1.0.2", 3, "VALID", "IN_BETA_TESTING"))
+        rejected = version("v101", "1.0.1", "REJECTED")
+        unresolved = submission("s1", "UNRESOLVED_ISSUES")
+        plan, _ = self.decide([ON_SALE, rejected], builds, [unresolved], min_age=0, manual=True)
+        self.assertIs(plan["reuse"], rejected)
+        self.assertIs(plan["draft"], unresolved)
+        self.assertTrue(plan["resubmit"])
+        self.assertEqual(plan["build"]["version"], "1.0.2")
+        # An invalid binary is still for App Store Connect alone.
+        plan, _ = self.decide([ON_SALE, version("v101", "1.0.1", "INVALID_BINARY")], builds, min_age=0, manual=True)
         self.assertIsNone(plan)
-        self.assertIn("rejected", why)
+
+    def test_a_version_left_on_an_unsent_submission_is_resumed(self):
+        # A run added 1.0.1 to a draft submission and stopped before sending it.
+        builds = builds_response((825, "1.0.1", 30, "VALID", "IN_BETA_TESTING"))
+        waiting = version("v101", "1.0.1", "READY_FOR_REVIEW")
+        draft = submission("s1", "READY_FOR_REVIEW")
+        plan, _ = self.decide([ON_SALE, waiting], builds, [draft])
+        self.assertIs(plan["reuse"], waiting)
+        self.assertIs(plan["draft"], draft)
+        self.assertFalse(plan["resubmit"])
 
     def test_an_open_review_submission_waits(self):
         builds = builds_response((825, "1.0.1", 30, "VALID", "IN_BETA_TESTING"))
@@ -205,14 +232,23 @@ class DecideTest(unittest.TestCase):
 
 
 class FakeApi:
-    """Records writes; answers reads from a table of path prefixes."""
+    """Records writes; answers reads from a table of paths (the longest matching prefix). A
+    version read with no entry answers READY_FOR_REVIEW, as App Store Connect does once the
+    version is on a submission."""
 
     def __init__(self, reads):
-        self.reads, self.writes = reads, []
+        self.reads, self.writes, self.version_reads = reads, [], 0
 
     def call(self, method, path, body=None):
         if method == "GET":
-            return next(v for k, v in self.reads.items() if path.startswith(k))
+            keys = [k for k in self.reads if path.startswith(k)]
+            if keys:
+                answer = self.reads[max(keys, key=len)]
+                return answer() if callable(answer) else answer
+            if path.startswith("/v1/appStoreVersions/") and path.count("/") == 3:
+                self.version_reads += 1
+                return {"data": version(path.rsplit("/", 1)[1], "1.0.1", "READY_FOR_REVIEW")}
+            raise AssertionError(f"unexpected GET {path}")
         self.writes.append((method, path, body))
         if method == "POST":
             return {"data": {"type": body["data"]["type"], "id": f"new-{body['data']['type']}"}}
@@ -224,21 +260,36 @@ class FakeApi:
 
 LOCALIZATION = {"type": "appStoreVersionLocalizations", "id": "loc-en",
                 "attributes": {"locale": "en-US", "whatsNew": None, "description": "The Divine Office."}}
+NEW = "/v1/appStoreVersions/new-appStoreVersions"
+
+
+def item(iid, vid, item_state="READY_FOR_REVIEW"):
+    """A reviewSubmissionItems resource as GET .../items?include=appStoreVersion returns it."""
+    return {"type": "reviewSubmissionItems", "id": iid, "attributes": {"state": item_state},
+            "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}
+
+
+def writes(api):
+    return [(m, p) for m, p, _ in api.writes]
 
 
 class SubmitTest(unittest.TestCase):
-    def plan(self, versions, submissions=(), encryption=False):
-        builds = builds_response((825, "1.0.1", 30, "VALID", "IN_BETA_TESTING", encryption))
-        plan, why = STORE.decide(versions, list(submissions), STORE.builds_of(builds), NOW, 24)
+    def setUp(self):
+        patcher = mock.patch.object(STORE, "sleep", lambda _s: None)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def plan(self, versions, submissions=(), encryption=False, manual=False, number=825, string="1.0.1"):
+        builds = builds_response((number, string, 30, "VALID", "IN_BETA_TESTING", encryption))
+        plan, why = STORE.decide(versions, list(submissions), STORE.builds_of(builds), NOW, 24, 0, manual)
         self.assertIsNotNone(plan, why)
         return plan
 
     def test_a_new_version_is_created_filled_in_and_submitted(self):
-        api = FakeApi({"/v1/appStoreVersions/new-appStoreVersions/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
-                       "/v1/appStoreVersions/new-appStoreVersions/appStoreVersionPhasedRelease": {"data": None}})
-        STORE.submit(api, APP, self.plan([ON_SALE]), "Feast pages redesigned.")
-        writes = [(m, p) for m, p, _ in api.writes]
-        self.assertEqual(writes, [
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": {"data": None}})
+        self.assertEqual(STORE.submit(api, APP, self.plan([ON_SALE]), "Feast pages redesigned."), "new-appStoreVersions")
+        self.assertEqual(writes(api), [
             ("POST", "/v1/appStoreVersions"),
             ("PATCH", "/v1/appStoreVersionLocalizations/loc-en"),
             ("POST", "/v1/appStoreVersionPhasedReleases"),
@@ -250,56 +301,170 @@ class SubmitTest(unittest.TestCase):
         self.assertEqual(create["attributes"], {"platform": "IOS", "versionString": "1.0.1", "releaseType": "AFTER_APPROVAL"})
         self.assertEqual(create["relationships"]["build"]["data"], {"type": "builds", "id": "build-825"})
         self.assertEqual(api.writes[1][2]["data"]["attributes"], {"whatsNew": "Feast pages redesigned."})
+        self.assertEqual(api.writes[2][2]["data"]["attributes"], {"phasedReleaseState": "INACTIVE"})
         self.assertEqual(api.writes[2][2]["data"]["relationships"]["appStoreVersion"]["data"]["id"], "new-appStoreVersions")
-        item = api.writes[4][2]["data"]["relationships"]
-        self.assertEqual(item["reviewSubmission"]["data"]["id"], "new-reviewSubmissions")
-        self.assertEqual(item["appStoreVersion"]["data"]["id"], "new-appStoreVersions")
+        rel = api.writes[4][2]["data"]["relationships"]
+        self.assertEqual(rel["reviewSubmission"]["data"]["id"], "new-reviewSubmissions")
+        self.assertEqual(rel["appStoreVersion"]["data"]["id"], "new-appStoreVersions")
         self.assertEqual(api.writes[5][2]["data"]["attributes"], {"submitted": True})
+        self.assertEqual(api.version_reads, 1)
 
-    def test_a_rerun_reuses_what_the_first_run_made(self):
-        prepared = version("v101", "1.0.1", "PREPARE_FOR_SUBMISSION")
+    def test_it_waits_for_the_version_to_be_ready_before_sending(self):
+        answers = iter(["PREPARE_FOR_SUBMISSION", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"])
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": {"data": None},
+                       NEW: lambda: {"data": version("new-appStoreVersions", "1.0.1", next(answers))}})
+        STORE.submit(api, APP, self.plan([ON_SALE]), "Notes.")
+        self.assertEqual(writes(api)[-1], ("PATCH", "/v1/reviewSubmissions/new-reviewSubmissions"))
+
+    def test_a_version_that_never_becomes_ready_is_not_sent(self):
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": {"data": None},
+                       NEW: {"data": version("new-appStoreVersions", "1.0.1", "PREPARE_FOR_SUBMISSION")}})
+        with self.assertRaisesRegex(STORE.ApiError, "not ready for review"):
+            STORE.submit(api, APP, self.plan([ON_SALE]), "Notes.")
+        self.assertNotIn(("PATCH", "/v1/reviewSubmissions/new-reviewSubmissions"), writes(api))
+
+    def test_a_run_that_stopped_before_sending_is_finished(self):
+        # The first run added 1.0.1 to a draft submission, then failed to send it: App Store
+        # Connect shows the version and the submission as ready for review.
+        waiting = version("v101", "1.0.1", "READY_FOR_REVIEW")
         draft = submission("s1", "READY_FOR_REVIEW")
-        item = {"type": "reviewSubmissionItems", "id": "i1", "attributes": {"state": "READY_FOR_REVIEW"},
-                "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": "v101"}}}}
         done = dict(LOCALIZATION, attributes=dict(LOCALIZATION["attributes"], whatsNew="Notes."))
         api = FakeApi({"/v1/appStoreVersions/v101/appStoreVersionLocalizations": {"data": [done]},
                        "/v1/appStoreVersions/v101/appStoreVersionPhasedRelease": {"data": {
                            "type": "appStoreVersionPhasedReleases", "id": "p1",
                            "attributes": {"phasedReleaseState": "INACTIVE"}}},
-                       "/v1/reviewSubmissions/s1/items": {"data": [item]}})
-        STORE.submit(api, APP, self.plan([ON_SALE, prepared], [draft]), "Notes.")
-        self.assertEqual([(m, p) for m, p, _ in api.writes], [
+                       "/v1/reviewSubmissions/s1/items?include=appStoreVersion": {"data": [item("i1", "v101")]}})
+        STORE.submit(api, APP, self.plan([ON_SALE, waiting], [draft]), "Notes.")
+        self.assertEqual(writes(api), [
             ("PATCH", "/v1/appStoreVersions/v101/relationships/build"),
             ("PATCH", "/v1/reviewSubmissions/s1"),
         ])
         self.assertEqual(api.writes[0][2], {"data": {"type": "builds", "id": "build-825"}})
 
+    def test_a_draft_holding_something_else_is_left_alone(self):
+        prepared = version("v101", "1.0.1", "PREPARE_FOR_SUBMISSION")
+        draft = submission("s1", "READY_FOR_REVIEW")
+        event = {"type": "reviewSubmissionItems", "id": "i9", "attributes": {"state": "READY_FOR_REVIEW"},
+                 "relationships": {"appStoreVersion": {"data": None},
+                                   "appEvent": {"data": {"type": "appEvents", "id": "e1"}}}}
+        for held in [[event], [item("i8", "v999")]]:
+            with self.subTest(held=held[0]["id"]):
+                api = FakeApi({"/v1/reviewSubmissions/s1/items?include=appStoreVersion": {"data": held}})
+                with contextlib.redirect_stderr(io.StringIO()):
+                    self.assertIsNone(STORE.submit(api, APP, self.plan([ON_SALE, prepared], [draft]), "Notes."))
+                self.assertEqual(api.writes, [])
+
+    def test_a_rejected_version_is_renumbered_and_resubmitted(self):
+        rejected = version("v101", "1.0.1", "REJECTED")
+        unresolved = submission("s1", "UNRESOLVED_ISSUES")
+        api = FakeApi({"/v1/appStoreVersions/v101/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       "/v1/appStoreVersions/v101/appStoreVersionPhasedRelease": {"data": {
+                           "type": "appStoreVersionPhasedReleases", "id": "p1",
+                           "attributes": {"phasedReleaseState": "INACTIVE"}}},
+                       "/v1/reviewSubmissions/s1/items?include=appStoreVersion": {
+                           "data": [item("i1", "v101", "REJECTED")]}})
+        plan = self.plan([ON_SALE, rejected], [unresolved], manual=True, number=830, string="1.0.2")
+        STORE.submit(api, APP, plan, "Notes.")
+        self.assertEqual(writes(api), [
+            ("PATCH", "/v1/appStoreVersions/v101"),
+            ("PATCH", "/v1/appStoreVersions/v101/relationships/build"),
+            ("PATCH", "/v1/appStoreVersionLocalizations/loc-en"),
+            ("PATCH", "/v1/reviewSubmissionItems/i1"),
+            ("PATCH", "/v1/reviewSubmissions/s1"),
+        ])
+        self.assertEqual(api.writes[0][2]["data"]["attributes"], {"versionString": "1.0.2"})
+        self.assertEqual(api.writes[3][2]["data"]["attributes"], {"resolved": True})
+        self.assertEqual(api.version_reads, 0)
+
     def test_a_prepared_version_is_renumbered_and_set_to_release_on_approval(self):
         prepared = version("v101", "1.0.0", "DEVELOPER_REJECTED", release="MANUAL")
-        api = FakeApi({"/v1/appStoreVersions/v101/appStoreVersionLocalizations": {"data": []},
-                       "/v1/appStoreVersions/v101/appStoreVersionPhasedRelease": {"data": None},
-                       "/v1/reviewSubmissions": {"data": []}})
-        plan = self.plan([prepared])
-        STORE.submit(api, APP, plan, "Notes.")
+        api = FakeApi({})
+        STORE.submit(api, APP, self.plan([prepared]), "Notes.")
         self.assertEqual(api.writes[0][:2], ("PATCH", "/v1/appStoreVersions/v101"))
         self.assertEqual(api.writes[0][2]["data"]["attributes"], {"versionString": "1.0.1", "releaseType": "AFTER_APPROVAL"})
 
+    def test_no_localizations_is_warned_about(self):
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": []},
+                       f"{NEW}/appStoreVersionPhasedRelease": {"data": None}})
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            STORE.submit(api, APP, self.plan([ON_SALE]), "Notes.")
+        self.assertIn("::warning::Version 1.0.1 has no localizations", err.getvalue())
+
     def test_export_compliance_is_answered_only_when_missing(self):
-        api = FakeApi({"/v1/appStoreVersions/new-appStoreVersions/appStoreVersionLocalizations": {"data": []},
-                       "/v1/appStoreVersions/new-appStoreVersions/appStoreVersionPhasedRelease": {"data": None}})
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": {"data": None}})
         STORE.submit(api, APP, self.plan([ON_SALE], encryption=None), "Notes.")
         patch = [b for m, p, b in api.writes if p == "/v1/builds/build-825"]
         self.assertEqual(patch[0]["data"]["attributes"], {"usesNonExemptEncryption": False})
 
 
+class RetryTest(unittest.TestCase):
+    def call(self, method, failures):
+        """Api.call against urlopen failing with each of `failures` in turn, then answering."""
+        sequence = list(failures)
+        calls = []
+
+        class Response(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def urlopen(req, timeout):
+            calls.append(timeout)
+            if sequence:
+                failure = sequence.pop(0)
+                if isinstance(failure, int):
+                    raise STORE.urllib.error.HTTPError(req.full_url, failure, "x", {}, io.BytesIO(b"{}"))
+                raise failure
+            return Response(b'{"data": []}')
+
+        api = STORE.Api("K", "I", "P")
+        api.token, api.made = "t", STORE.time.time()
+        with mock.patch.object(STORE.urllib.request, "urlopen", urlopen), \
+                mock.patch.object(STORE, "sleep", lambda _s: None), \
+                contextlib.redirect_stderr(io.StringIO()):
+            try:
+                return api.call(method, "/v1/apps", None if method == "GET" else {"data": {}}), calls
+            except STORE.ApiError as e:
+                return e, calls
+
+    def test_reads_are_retried_with_a_timeout(self):
+        result, calls = self.call("GET", [503, STORE.urllib.error.URLError("reset"), TimeoutError("slow")])
+        self.assertEqual(result, {"data": []})
+        self.assertEqual(calls, [STORE.TIMEOUT] * 4)
+
+    def test_rate_limits_are_retried_for_writes_too(self):
+        self.assertEqual(self.call("PATCH", [429])[0], {"data": []})
+
+    def test_writes_are_not_repeated_after_a_server_error_or_no_answer(self):
+        for failure in [500, STORE.urllib.error.URLError("reset")]:
+            result, calls = self.call("POST", [failure])
+            self.assertIsInstance(result, STORE.ApiError)
+            self.assertEqual(len(calls), 1)
+
+    def test_a_refusal_is_not_retried_and_retries_run_out(self):
+        result, calls = self.call("GET", [409])
+        self.assertIsInstance(result, STORE.ApiError)
+        self.assertEqual(len(calls), 1)
+        result, calls = self.call("GET", [503] * (STORE.RETRIES + 1))
+        self.assertIsInstance(result, STORE.ApiError)
+        self.assertEqual(len(calls), STORE.RETRIES + 1)
+
+
 class MainTest(unittest.TestCase):
     def run_main(self, argv, reads):
+        # commit_of finds nothing: the default notes, never HEAD's file, are used.
         api = FakeApi(reads)
         out, err = io.StringIO(), io.StringIO()
         with mock.patch.object(STORE, "Api", lambda *a, **k: api), \
                 mock.patch.object(STORE, "now", lambda: NOW), \
                 mock.patch.object(STORE, "commit_of", lambda n: None), \
-                mock.patch.object(STORE, "notes_at", lambda c: ""), \
+                mock.patch.object(STORE, "notes_at", lambda c: "Notes from HEAD."), \
                 mock.patch.dict(os.environ, {"ASC_KEY_ID": "K", "ASC_ISSUER_ID": "I", "ASC_KEY": "P",
                                              "GITHUB_STEP_SUMMARY": ""}), \
                 mock.patch.object(sys, "argv", ["appstore.py", *argv]), \
@@ -331,6 +496,7 @@ class MainTest(unittest.TestCase):
         self.assertEqual(api.writes, [])
         self.assertIn("Dry run: Submitting build 825 as version 1.0.1", err)
         self.assertIn(STORE.DEFAULT_NOTES, err)
+        self.assertNotIn("Notes from HEAD.", err)
 
 
 class TokenTest(unittest.TestCase):

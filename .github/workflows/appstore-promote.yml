@@ -7,11 +7,12 @@ name: Submit to the App Store
 # Weekly: unless a version is already with Apple or waiting to be released, the newest build that
 # passed beta review, went to the external testers, was uploaded at least 24 hours before and has
 # a higher version than the App Store's is submitted. Once approved it is released by itself,
-# in Apple's seven-day phased release. A rejection stops the promotions until someone answers
-# it in App Store Connect. Scheduled runs use the `appstore-auto` environment, with no reviewer.
+# in Apple's seven-day phased release. A rejection stops the weekly runs until a person has read
+# Apple's reasons. Scheduled runs use the `appstore-auto` environment, with no reviewer.
 #
 # A manual run submits a build now (the newest with the external testers, of any age, unless a
-# build number is given); it uses the `appstore` environment, which has a required reviewer.
+# build number is given); after a rejection it resubmits the rejected version with that build.
+# It uses the `appstore` environment, which has a required reviewer.
 on:
   schedule:
     # Mondays at 15:00 UTC, mid-morning in America/New_York.
@@ -42,6 +43,8 @@ jobs:
     name: ${{ github.event_name == 'schedule' && 'Submit a tested build' || 'Submit to the App Store now' }}
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    # A few minutes of reads and writes, and up to 150 s waiting for a version to be ready.
+    timeout-minutes: 20
     environment: ${{ github.event_name == 'schedule' && 'appstore-auto' || 'appstore' }}
     permissions:
       contents: read

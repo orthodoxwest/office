@@ -169,9 +169,14 @@ while its version is in review could never be released, so the version moves on 
 release is submitted: nobody edits `project.yml` after a release. It never goes back below a
 version TestFlight already has builds under. `project.yml` stays the floor, so raising its
 minor or major version (1.0.x to 1.1.0) is how to start a new line; pull requests and unsigned
-builds use it as it stands. Apple reviews the first build of each version (usually within a
-day) before external testers can install it, and normally lets later builds of the same
-version through without. Builds lapse after 90 days, and a re-run for a commit already uploaded
+builds use it as it stands. If App Store Connect cannot be read, the upload goes ahead under
+`project.yml`'s version with a warning.
+
+So each App Store submission starts a new TestFlight version, and Apple's beta review checks
+the first build of every version (usually within a day) before external testers can install it.
+Builds uploaded while that review runs reach internal testers only; the first merge after it
+clears reaches the **Testers** group, and later builds of the same version normally go through
+without review. Builds lapse after 90 days, and a re-run for a commit already uploaded
 is refused at the upload.
 
 Until the secrets below exist, `master` builds unsigned and uploads nothing. None of the setup
@@ -267,8 +272,18 @@ without rebuilding, as the Android app's promotion moves a Closed testing build 
   with *Remove from Review* in App Store Connect; the next run then fills in that version again
   with the newest tested build and resubmits it, so disable the workflow first to keep it out.
   The phased release can be paused (up to 30 days) or finished at once on the version's page.
-- **A rejection** stops the weekly submissions: read Apple's reasons in App Store Connect, and
-  reply or resubmit there (or remove the version), and they resume.
+- **A run that stopped** partway (App Store Connect slow or refusing) is finished by the next
+  run: it reuses the version and draft submission it made, and sends them. A draft submission
+  that also holds something else (an in-app event, say) is left alone until it is sent or
+  emptied in App Store Connect.
+- **A rejection** stops the weekly submissions until a person acts, since Apple's reasons need
+  reading first. Uploads moved past the rejected version's number when it was submitted, so the
+  fix comes in a build with a higher version. Once that build is with the testers, a manual run
+  (the build number, or empty for the newest) renumbers the rejected version to the build's
+  version, attaches it, marks Apple's issue resolved and resubmits; weekly runs then carry on.
+  By hand in App Store Connect the same is: on the rejected version's page change the version
+  number to the new build's, choose that build under *Build*, save, and *Resubmit to App
+  Review* (or reply in App Review's messages if the rejection was a misunderstanding).
 - **Export compliance** needs no answer: `ITSAppUsesNonExemptEncryption` is false in the
   Info.plist (`project.yml`), so every build already says the app uses no non-exempt encryption.
 
