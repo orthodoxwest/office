@@ -3643,16 +3643,36 @@ function plainClickOpensHere(e, link) {
 
     // A day asked for (#d-…, Today) comes to rest with the whole day before
     // it in view above, under the pinned month heading: style.css allows one
-    // plain row (--day-row); here the row before gives its own height, before
-    // an in-page link scrolls, and on arrival, where the browser has already
-    // brought the day to that plain row's place. The month's first day has
-    // its heading above it instead.
+    // plain row (--day-row); here the row before gives its own height, kept
+    // on every day as the rows are laid out and laid out again (fonts, a new
+    // width, an opened office), so the browser's own scroll to a day asked
+    // for in place (a typed address, Back across days) already comes to rest
+    // there, with no second scroll after it. It is measured again before an
+    // in-page link scrolls, and on arrival. The month's first day has its
+    // heading above it instead. restUnderDayBefore answers whether the day's
+    // allowance changed.
     var restUnderDayBefore = function (row) {
       var before = row && row.matches("tr.day") && row.previousElementSibling;
       if (before && before.matches("tr.day")) {
-        row.style.setProperty("--day-row", before.offsetHeight + "px");
+        var height = before.offsetHeight + "px";
+        if (row.style.getPropertyValue("--day-row") !== height) {
+          row.style.setProperty("--day-row", height);
+          return true;
+        }
       }
+      return false;
     };
+    if (window.ResizeObserver) {
+      var dayRows = new ResizeObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var next = entry.target.nextElementSibling;
+          if (next) restUnderDayBefore(next);
+        });
+      });
+      calendarEl.querySelectorAll(".month-table tr.day").forEach(function (row) {
+        dayRows.observe(row);
+      });
+    }
     document.addEventListener("click", function (e) {
       var link = e.target.closest && e.target.closest('a[href^="#d-"]');
       if (link) {
@@ -3673,24 +3693,34 @@ function plainClickOpensHere(e, link) {
     // The day arrived at (#d-…) keeps its gold ground until the reader moves
     // on: the first scroll of their own lets it go (.target-released), so it
     // never stands as a second "you are here" beside Today. The browser's own
-    // scroll to the day is not the reader's; a new day asked for marks again.
+    // scroll to the day is not the reader's; a new day asked for marks again,
+    // as soon as the browser says so (popstate, before its scroll, where the
+    // engine sends one; hashchange after it), and a scroll lets go only the
+    // day already marked, never one the address names but no event has yet.
+    var markedHash = location.hash;
+    var markAskedDay = function () {
+      if (location.hash === markedHash) return;
+      markedHash = location.hash;
+      readerMoved = false;
+      calendarEl.classList.remove("target-released");
+    };
     var noteReaderMoved = function () { readerMoved = true; };
     ["wheel", "touchmove", "keydown"].forEach(function (type) {
       window.addEventListener(type, noteReaderMoved, { passive: true });
     });
     window.addEventListener("scroll", function () {
-      if (readerMoved && location.hash) {
+      if (readerMoved && location.hash && location.hash === markedHash) {
         calendarEl.classList.add("target-released");
       }
     }, { passive: true });
+    window.addEventListener("popstate", markAskedDay);
     window.addEventListener("hashchange", function () {
-      readerMoved = false;
-      calendarEl.classList.remove("target-released");
-      // A day asked for in place (a typed address, Back across days), which
-      // no link's click prepared.
+      markAskedDay();
+      // A day asked for in place whose row before was laid out anew since
+      // it was last measured (a width not yet reported, or no observer):
+      // the browser's scroll took the old height.
       var day = location.hash.indexOf("#d-") === 0 ? document.getElementById(location.hash.slice(1)) : null;
-      if (day && day.matches("tr.day") && !day.style.getPropertyValue("--day-row")) {
-        restUnderDayBefore(day);
+      if (day && day.matches("tr.day") && restUnderDayBefore(day)) {
         day.scrollIntoView({ block: "start", behavior: "instant" });
       }
     });

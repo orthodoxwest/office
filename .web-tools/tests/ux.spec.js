@@ -3010,6 +3010,10 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
 test("themes never change layout", async ({ browser }) => {
   // Light and Apse differ only in colour and material. Every element box and
   // every text line must match, so geometry tests need run in one theme.
+  // Eleven pairs of pages, the ordo's loaded twice, and the year's 14,000
+  // boxes: about 12s alone and 29s beside three other workers, which ran
+  // past the default 30s budget in CI. It takes the slow test's budget.
+  test.slow();
   const open = async (theme) => {
     const context = await browser.newContext();
     await context.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
@@ -6637,10 +6641,23 @@ test("the brand on today's home stays put", async ({ page, baseURL }) => {
 });
 
 // A day asked for comes to rest with the day before it in view under the
-// pinned month heading, and its gold lets go once the reader scrolls.
+// pinned month heading, and its gold lets go once the reader scrolls. The
+// second day is asked for in place (the same page, a new #d-…): the browser's
+// own scroll brings it to rest, and it is read there too, at the hashchange
+// (heard before app.js's), so nothing after it may be what puts it right.
 test("the ordo shows the day before a day asked for, and lets the asked day go", async ({ page }) => {
+  await page.addInitScript(() => addEventListener("hashchange", () => {
+    const day = document.getElementById(location.hash.slice(1));
+    window.landed = {
+      heading: day.closest(".month").querySelector("h2").getBoundingClientRect().bottom,
+      before: day.previousElementSibling.getBoundingClientRect().top,
+      ground: getComputedStyle(day.lastElementChild).backgroundColor,
+    };
+  }));
   for (const [width, day, before] of [[390, "14", "13"], [1280, "22", "21"]]) {
     await page.setViewportSize({ width, height: 900 });
+    // The new width laid out, as it is long before a reader asks for a day.
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     await page.goto(`/calendar/2026/09#d-2026-09-${day}`);
     await page.evaluate(() => document.fonts.ready);
     const place = await page.evaluate(([day, before]) => ({
@@ -6648,6 +6665,12 @@ test("the ordo shows the day before a day asked for, and lets the asked day go",
       before: document.getElementById(`d-2026-09-${before}`).getBoundingClientRect().top,
     }), [day, before]);
     expect(place.before, `${width}px`).toBeGreaterThanOrEqual(place.heading - 2);
+    if (day === "22") {
+      await expect.poll(() => page.evaluate(() => window.landed)).toBeTruthy();
+      const landed = await page.evaluate(() => window.landed);
+      expect(landed.before, `${width}px, as the browser landed`).toBeGreaterThanOrEqual(landed.heading - 2);
+      expect(landed.ground, "gold as the browser landed").not.toBe("rgba(0, 0, 0, 0)");
+    }
     const ground = () => page.locator(`#d-2026-09-${day} > td`).last().evaluate((td) => getComputedStyle(td).backgroundColor);
     expect(await ground()).not.toBe("rgba(0, 0, 0, 0)");
     // The reader's own scroll (mobile WebKit has no wheel to send).
