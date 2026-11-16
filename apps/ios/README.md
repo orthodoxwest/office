@@ -148,6 +148,9 @@ branch's last run's set from `ci/ios-screenshots/BRANCH` into `snapshots/`, to c
 
 A manual run with **store** ticked takes the same pages at the sizes App Store Connect asks for,
 on a 6.9-inch iPhone and a 13-inch iPad, and publishes them to `ci/ios-screenshots/<branch>-store`.
+Its `store/` folder holds the listing's sets ready to upload (`scripts/ios-snapshots.py store`):
+`iphone-6.9/`, `iphone-6.3/` (the size App Store Connect's 6.3-inch slot takes) and `ipad-13/`, numbered
+in the listing's order and without an alpha channel, which App Store Connect refuses.
 
 ## Signing
 

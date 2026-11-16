@@ -190,5 +190,36 @@ class CompareTest(unittest.TestCase):
         self.assertEqual([p.name for p in self.updates.glob("*.png")], ["home-nave.png"])
 
 
+
+@unittest.skipIf(Image is None, "Pillow is not installed")
+class StoreTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.raw = pathlib.Path(self.tmp.name) / "raw"
+        self.out = pathlib.Path(self.tmp.name) / "out"
+        self.raw.mkdir()
+        for name in SNAP.STORE_SHOTS["iphone"]:
+            Image.new("RGBA", (1320, 2868), (240, 230, 220, 255)).save(self.raw / f"{name}.png")
+        for name in SNAP.STORE_SHOTS["ipad"]:
+            Image.new("RGBA", (2064, 2752), (240, 230, 220, 255)).save(self.raw / f"ipad-{name}.png")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_sets_are_numbered_sized_and_opaque(self):
+        SNAP.store(self.raw, self.out)
+        for folder, size in SNAP.STORE_SIZES.items():
+            files = sorted((self.out / folder).iterdir())
+            self.assertEqual(len(files), 7, folder)
+            self.assertTrue(files[0].name.startswith("1-"))
+            for f in files:
+                with Image.open(f) as image:
+                    self.assertEqual((image.size, image.mode), (size, "RGB"), f)
+
+    def test_a_shot_at_the_wrong_size_stops(self):
+        Image.new("RGB", (1206, 2622)).save(self.raw / "home-nave.png")
+        with self.assertRaises(SystemExit):
+            SNAP.store(self.raw, self.out)
+
 if __name__ == "__main__":
     unittest.main()

@@ -180,6 +180,14 @@ jobs:
           IPAD: ${{ steps.sim.outputs.ipad }}
         run: ./screenshots.sh shoot "$PHONE" "$IPAD" build/dd/Build/Products/Debug-iphonesimulator/Office.app build/review
 
+      - name: Arrange the App Store's sets
+        if: ${{ inputs.store }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/snapshots"
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
+          "$RUNNER_TEMP/snapshots/bin/python" scripts/ios-snapshots.py store apps/ios/build/review apps/ios/build/review/store
+
       - name: Compare with the checked-in baselines
         id: compare
         if: ${{ !inputs.store }}
