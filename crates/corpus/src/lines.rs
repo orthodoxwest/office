@@ -107,7 +107,7 @@ fn parse_psalm_lines(text: &str) -> (PsalmText, Vec<usize>) {
 }
 
 /// A "[section: Heading]" canticle break.
-fn section_heading(line: &str) -> Option<&str> {
+pub fn section_heading(line: &str) -> Option<&str> {
     let inner = line.strip_prefix("[section:")?.strip_suffix(']')?;
     Some(inner.trim())
 }

@@ -178,7 +178,7 @@
             {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}
             <div class="day-disclosures">
-            {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_note or d.lauds_comms or d.vespers_comms %}
+            {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_note or d.lauds_comms or d.vespers_comms %}
             <details class="day-office-details">
               <summary>Office details</summary>
               <dl class="day-office-digest">
@@ -188,13 +188,14 @@
                 <dd>{% for c in d.commemorations %}{% set href = d.commemoration_hrefs[loop.index0] if loop.index0 < d.commemoration_hrefs|length else "" %}<span class="day-office-comm">Com. {% if href %}<a class="feast-link" href="{{ href|url }}">{{ c|typeset }}</a>{% else %}{{ c|typeset }}{% endif %}</span>{% endfor %}</dd>
               </div>
               {% endif %}
-              {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_comms %}
+              {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.lauds_comms %}
               <div class="day-office-hour">
                 <dt>Lauds</dt>
                 <dd>
                   {% if d.benedictus_antiphon %}<span class="day-office-incipit">Ben. &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.lauds_preces %}<span class="day-office-badge">Preces</span>{% endif %}
                   {% if d.lauds_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% if d.lauds_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
                   {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>
@@ -205,7 +206,7 @@
                 <dd><span class="day-office-badge">Preces</span></dd>
               </div>
               {% endif %}
-              {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_comms or d.vespers_note %}
+              {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_comms or d.vespers_note %}
               <div class="day-office-hour">
                 <dt>Vespers</dt>
                 <dd>
@@ -213,6 +214,7 @@
                   {% if d.magnificat_antiphon %}<span class="day-office-incipit">Mag. &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
                   {% if d.vespers_preces %}<span class="day-office-badge">Preces</span>{% endif %}
                   {% if d.vespers_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% if d.vespers_cross %}<span class="day-office-badge">Commemoration of the Cross</span>{% endif %}
                   {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {% if c.href %}<a class="feast-link" href="{{ c.href|url }}">{{ c.name|typeset }}</a>{% else %}{{ c.name|typeset }}{% endif %}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
                 </dd>
               </div>

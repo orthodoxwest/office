@@ -520,8 +520,8 @@ private struct DayRow: View {
     /// How far the row stands from the window's left edge: from 1000pt wide the margin holds Today.
     @State private var left: CGFloat = 0
 
-    private var hasLauds: Bool { !d.benedictusAntiphon.isEmpty || d.laudsPreces || d.laudsSuffrage || !d.laudsComms.isEmpty }
-    private var hasVespers: Bool { !d.magnificatAntiphon.isEmpty || d.vespersPreces || d.vespersSuffrage || !d.vespersComms.isEmpty || !d.vespersNote.isEmpty }
+    private var hasLauds: Bool { !d.benedictusAntiphon.isEmpty || d.laudsPreces || d.laudsSuffrage || d.laudsCross || !d.laudsComms.isEmpty }
+    private var hasVespers: Bool { !d.magnificatAntiphon.isEmpty || d.vespersPreces || d.vespersSuffrage || d.vespersCross || !d.vespersComms.isEmpty || !d.vespersNote.isEmpty }
     private var hasDetails: Bool { !d.commemorations.isEmpty || hasLauds || d.hoursPreces || hasVespers }
 
     /// The day's commemorations that open its office details, each with its feast's page: one its
@@ -958,11 +958,11 @@ private struct Digest: View {
                 hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms)
             }
             if hasLauds {
-                hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, comms: d.laudsComms)
+                hour("Lauds", notes: [], antiphon: d.benedictusAntiphon.isEmpty ? nil : "Ben. “\(d.benedictusAntiphon)”", preces: d.laudsPreces, suffrage: d.laudsSuffrage, cross: d.laudsCross, comms: d.laudsComms)
             }
             if d.hoursPreces { hour("Hours", notes: [], antiphon: nil, preces: true, suffrage: false, comms: []) }
             if hasVespers {
-                hour("Vespers", notes: d.vespersNote.isEmpty ? [] : [d.vespersNote], antiphon: d.magnificatAntiphon.isEmpty ? nil : "Mag. “\(d.magnificatAntiphon)”", preces: d.vespersPreces, suffrage: d.vespersSuffrage, comms: d.vespersComms)
+                hour("Vespers", notes: d.vespersNote.isEmpty ? [] : [d.vespersNote], antiphon: d.magnificatAntiphon.isEmpty ? nil : "Mag. “\(d.magnificatAntiphon)”", preces: d.vespersPreces, suffrage: d.vespersSuffrage, cross: d.vespersCross, comms: d.vespersComms)
             }
         }
         .padding(m.px(8))
@@ -971,13 +971,14 @@ private struct Digest: View {
         .padding(.bottom, m.px(8))
     }
 
-    private func hour(_ name: String, notes: [String], antiphon: String?, preces: Bool, suffrage: Bool, comms: [CommemorationView]) -> some View {
+    private func hour(_ name: String, notes: [String], antiphon: String?, preces: Bool, suffrage: Bool, cross: Bool, comms: [CommemorationView]) -> some View {
         let line = TextStyle(size: 13.6, line: 20.4, italic: true)
         var marks = Text("")
         if let antiphon { marks = marks + Text(antiphon) }
         var rubric = [String]()
         if preces { rubric.append("Preces") }
         if suffrage { rubric.append("Suffrage") }
+        if cross { rubric.append("Commemoration of the Cross") }
         if !rubric.isEmpty {
             let lead = antiphon == nil ? "" : "  "
             marks = marks + Text(lead + rubric.joined(separator: "  ")).font(Font(garamond(13.6 * m.type))).foregroundColor(p.rubric)
@@ -985,7 +986,7 @@ private struct Digest: View {
         return VStack(alignment: .leading, spacing: 0) {
             Text(name.uppercased()).type(TextStyle.label(12, 0.06).sized(12, line: 18)).foregroundStyle(p.accent).padding(.bottom, m.px(2.4))
             ForEach(notes, id: \.self) { Text($0).type(line).foregroundStyle(p.muted) }
-            if antiphon != nil || preces || suffrage { marks.type(line).foregroundStyle(p.muted) }
+            if antiphon != nil || preces || suffrage || cross { marks.type(line).foregroundStyle(p.muted) }
             // A commemoration's name leads to its feast's page, underlined as the web's `.feast-link`.
             ForEach(comms, id: \.self) { c in
                 let text = Text("Com. ") + Text(c.name).underline(!c.feastId.isEmpty, color: p.goldLine) + Text(c.incipit.isEmpty ? "" : " “\(c.incipit)”")

@@ -990,8 +990,8 @@ private fun OrdoDayView.dayComms(): List<CommemorationView> {
     return commemorations.mapIndexed { i, name -> CommemorationView(name, "", commemorationIds.getOrElse(i) { "" }) }.filter { it.name !in named }
 }
 
-private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsComms.isNotEmpty()
-private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vespersPreces || vespersSuffrage || vespersComms.isNotEmpty() || vespersNote.isNotEmpty()
+private fun OrdoDayView.hasLauds() = benedictusAntiphon.isNotEmpty() || laudsPreces || laudsSuffrage || laudsCross || laudsComms.isNotEmpty()
+private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vespersPreces || vespersSuffrage || vespersCross || vespersComms.isNotEmpty() || vespersNote.isNotEmpty()
 
 @Composable
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
@@ -1021,29 +1021,30 @@ private fun Digest(d: OrdoDayView, onFeast: (String) -> Unit) {
         val day = d.dayComms()
         if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day, onFeast = onFeast)
         if (d.hasLauds()) {
-            DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsComms, onFeast)
+            DigestHour("Lauds", emptyList(), d.benedictusAntiphon.takeIf { it.isNotEmpty() }?.let { "Ben. “$it”" }, d.laudsPreces, d.laudsSuffrage, d.laudsCross, d.laudsComms, onFeast)
         }
         if (d.hoursPreces) DigestHour("Hours", emptyList(), null, preces = true, suffrage = false, comms = emptyList(), onFeast = onFeast)
         if (d.hasVespers()) {
-            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), d.magnificatAntiphon.takeIf { it.isNotEmpty() }?.let { "Mag. “$it”" }, d.vespersPreces, d.vespersSuffrage, d.vespersComms, onFeast)
+            DigestHour("Vespers", listOfNotNull(d.vespersNote.takeIf { it.isNotEmpty() }), d.magnificatAntiphon.takeIf { it.isNotEmpty() }?.let { "Mag. “$it”" }, d.vespersPreces, d.vespersSuffrage, d.vespersCross, d.vespersComms, onFeast)
         }
     }
 }
 
 @Composable
-private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
+private fun DigestHour(name: String, notes: List<String>, antiphon: String?, preces: Boolean, suffrage: Boolean, cross: Boolean, comms: List<CommemorationView>, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
     val line = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.muted, fontStyle = FontStyle.Italic)
     Column(Modifier.padding(bottom = 4.dp)) {
         Text(name.uppercase(), Modifier.padding(bottom = 2.4.dp), style = Type.label(12f, 0.06f).copy(color = p.accent, lineHeight = 18.sp))
         notes.forEach { Text(it, style = line) }
-        if (antiphon != null || preces || suffrage) {
+        if (antiphon != null || preces || suffrage || cross) {
             Text(
                 buildAnnotatedString {
                     if (antiphon != null) append(antiphon)
                     withStyle(SpanStyle(color = p.rubric, fontStyle = FontStyle.Normal)) {
                         if (preces) append((if (length > 0) "  " else "") + "Preces")
                         if (suffrage) append((if (length > 0) "  " else "") + "Suffrage")
+                        if (cross) append((if (length > 0) "  " else "") + "Commemoration of the Cross")
                     }
                 },
                 style = line,

@@ -153,12 +153,14 @@ pub fn build_month(days: &[Day], rails: &[Rail], engine: &Engine, moveable: &Mov
             row.benedictus_antiphon = lauds.gospel_ant;
             row.lauds_preces = lauds.preces;
             row.lauds_suffrage = lauds.suffrage;
+            row.lauds_cross = lauds.cross;
             row.lauds_comms = comm_rows(&lauds.comms, feasts, d.date);
         }
         if let Some(vespers) = o.vespers {
             row.magnificat_antiphon = vespers.gospel_ant;
             row.vespers_preces = vespers.preces;
             row.vespers_suffrage = vespers.suffrage;
+            row.vespers_cross = vespers.cross;
             row.vespers_comms = comm_rows(&vespers.comms, feasts, d.date);
         }
         // The day's commemorations open its office details; one its Lauds or Vespers names with
