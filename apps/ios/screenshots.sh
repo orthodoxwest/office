@@ -10,7 +10,7 @@
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
 # pinned=true; otherwise (or with `store`, or before any baselines exist) it takes the image's
-# default Xcode, its newest iOS runtime's iPhone 16 and 11-inch iPad Pro, and says pinned=false,
+# default Xcode, its newest iOS runtime's iPhone 17 and 11-inch iPad Pro, and says pinned=false,
 # since shots from another runtime differ in ways no page changed.
 set -euo pipefail
 
@@ -81,9 +81,9 @@ PY
     # A manual run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
     # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
     if [ -n "$store" ]; then
-      phone=$(pick iPhone 'iPhone 16 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
+      phone=$(pick iPhone 'iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
     else
-      phone=$(pick iPhone 'iPhone 16' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
+      phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
     fi
   fi
   local phone_id=${phone%%$'\t'*} ipad_id=${ipad%%$'\t'*}
@@ -107,24 +107,34 @@ shoot() {
   export SIMCTL_CHILD_TZ=America/New_York
   local frames=${RUNNER_TEMP:-/tmp}/frames
   mkdir -p "$frames"
+  # Installed once on each simulator; before every shot, `fresh` puts the app back as an install
+  # leaves it. An earlier shot's kept reading place, way back, settings or prayed marks would
+  # otherwise open a later one differently. A reinstall did this too, but took 15 to 40 seconds a
+  # shot on the runners, most of the screenshots' time.
+  fresh() {
+    local sim=$1 data
+    xcrun simctl terminate "$sim" "$id" > /dev/null 2>&1 || true
+    data=$(xcrun simctl get_app_container "$sim" "$id" data)
+    # The defaults through cfprefsd, which may still hold the last launch's in memory and would
+    # write them back over a file merely deleted; then everything else the app keeps (scene
+    # storage, caches, the screenshot marker), as the install made it.
+    xcrun simctl spawn "$sim" defaults delete "$data/Library/Preferences/$id" > /dev/null 2>&1 || true
+    rm -rf "$data/Library" "$data/Documents" "$data/tmp"
+    mkdir -p "$data/Library/Preferences" "$data/Library/Caches" "$data/Documents" "$data/tmp"
+  }
   # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it, at 9 AM.
   one() {
     local sim=$1 name=$2
     shift 2
     local day=${DATE:-2026-03-15}
-    # A fresh install for every shot: an earlier shot's kept reading place, way back, settings
-    # or prayed marks would otherwise open a later one differently, and an uninstall clears
-    # all of the app's container (defaults, scene storage, caches) without asking the app to.
     local began=$SECONDS
-    xcrun simctl terminate "$sim" "$id" > /dev/null 2>&1 || true
-    xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
-    xcrun simctl install "$sim" "$app"
+    fresh "$sim"
     xcrun simctl launch "$sim" "$id" \
       -AppleLanguages '(en)' -AppleLocale en_US -today "$day" -date "$day" -clock 9 "$@" > /dev/null
     local launched=$SECONDS
     # Shot once the app says the page asked for is drawn (ScreenshotReady.swift: composed, laid
-    # out, scrolled to its anchor), which the fresh install's empty temporary directory makes
-    # this launch's own; then once it has come to rest, two frames a second apart alike, so an
+    # out, scrolled to its anchor), which `fresh` emptying the temporary directory makes this
+    # launch's own; then once it has come to rest, two frames a second apart alike, so an
     # arrival's fade or a panel's drop has finished. Until it is drawn the page can be the bare
     # wall, as still as a finished one, so stillness alone is not enough.
     # A launch on the runner's simulators now and then stalls before its first frame, on any
@@ -151,7 +161,7 @@ shoot() {
       sleep 0.25
     done
     local drawn=$((SECONDS - launched))
-    local last="$frames/last.png" this="$frames/this.png" settled=0
+    local last="$frames/$sim-last.png" this="$frames/$sim-this.png" settled=0
     sleep 1
     xcrun simctl io "$sim" screenshot "$last" > /dev/null
     while :; do
@@ -166,7 +176,7 @@ shoot() {
       mv "$this" "$last"
     done
     mv "$this" "$out/$name.png"
-    echo "$(date +%T) $name (installed and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
+    echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
   for sim in "$phone" "$ipad"; do
     echo "$(date +%T) waiting for $sim to boot"
@@ -176,41 +186,51 @@ shoot() {
     # Dynamic Type at its default, whatever the image set.
     xcrun simctl ui "$sim" content_size large
     xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
+    xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
+    xcrun simctl install "$sim" "$app"
   done
-  for theme in nave apse; do
-    one "$phone" "home-$theme" -page home -theme "$theme"
-    for hour in lauds vespers compline; do
-      one "$phone" "$hour-$theme" -page hour -hour "$hour" -theme "$theme"
+  # The phone's shots, then the iPad's. (Taken at once, each simulator's launches waited on the
+  # other's, and the pair took longer than the two one after the other.)
+  phone_shots() {
+    for theme in nave apse; do
+      one "$phone" "home-$theme" -page home -theme "$theme"
+      for hour in lauds vespers compline; do
+        one "$phone" "$hour-$theme" -page hour -hour "$hour" -theme "$theme"
+      done
+      one "$phone" "psalm-$theme" -page hour -hour vespers -anchor psalm -theme "$theme"
+      one "$phone" "hymn-$theme" -page hour -hour vespers -anchor hymn -theme "$theme"
+      one "$phone" "ordo-$theme" -page ordo -theme "$theme"
+      one "$phone" "year-$theme" -page year -theme "$theme"
+      one "$phone" "reminders-$theme" -page reminders -theme "$theme"
+      one "$phone" "about-$theme" -page about -theme "$theme"
+      one "$phone" "menu-$theme" -page hour -hour compline -menu YES -theme "$theme"
     done
-    one "$phone" "psalm-$theme" -page hour -hour vespers -anchor psalm -theme "$theme"
-    one "$phone" "hymn-$theme" -page hour -hour vespers -anchor hymn -theme "$theme"
-    one "$phone" "ordo-$theme" -page ordo -theme "$theme"
-    one "$phone" "year-$theme" -page year -theme "$theme"
-    one "$phone" "reminders-$theme" -page reminders -theme "$theme"
-    one "$phone" "about-$theme" -page about -theme "$theme"
-    one "$phone" "menu-$theme" -page hour -hour compline -menu YES -theme "$theme"
-  done
-  # The ordo scrolled to a day, its month heading pinned under the sensor housing.
-  one "$phone" "ordo-day-nave" -page ordo -day YES -theme nave
-  # A saint's feast page, and Lent's Vespers hymn sung from its notation.
-  one "$phone" "feast-nave" -page feast -feast st-benedict -theme nave
-  one "$phone" "chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
-  # Eastertide's warmer gilding.
-  DATE=2026-04-12 one "$phone" "easter-nave" -page hour -hour lauds -theme nave
-  # A first-class day's hour in its frame.
-  for theme in nave apse; do
-    DATE=2026-12-25 one "$phone" "christmas-$theme" -page hour -hour lauds -theme "$theme"
-  done
+    # The ordo scrolled to a day, its month heading pinned under the sensor housing.
+    one "$phone" "ordo-day-nave" -page ordo -day YES -theme nave
+    # A saint's feast page, and Lent's Vespers hymn sung from its notation.
+    one "$phone" "feast-nave" -page feast -feast st-benedict -theme nave
+    one "$phone" "chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
+    # Eastertide's warmer gilding.
+    DATE=2026-04-12 one "$phone" "easter-nave" -page hour -hour lauds -theme nave
+    # A first-class day's hour in its frame.
+    for theme in nave apse; do
+      DATE=2026-12-25 one "$phone" "christmas-$theme" -page hour -hour lauds -theme "$theme"
+    done
+  }
   # The desktop composition on an iPad.
-  for theme in nave apse; do
-    one "$ipad" "ipad-home-$theme" -page home -theme "$theme"
-    one "$ipad" "ipad-vespers-$theme" -page hour -hour vespers -theme "$theme"
-    one "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
-  done
-  one "$ipad" "ipad-year-nave" -page year -theme nave
-  one "$ipad" "ipad-feast-nave" -page feast -feast st-benedict -theme nave
-  one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
-  one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
+  ipad_shots() {
+    for theme in nave apse; do
+      one "$ipad" "ipad-home-$theme" -page home -theme "$theme"
+      one "$ipad" "ipad-vespers-$theme" -page hour -hour vespers -theme "$theme"
+      one "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
+    done
+    one "$ipad" "ipad-year-nave" -page year -theme nave
+    one "$ipad" "ipad-feast-nave" -page feast -feast st-benedict -theme nave
+    one "$ipad" "ipad-chant-nave" -page hour -hour vespers -anchor score -chant YES -theme nave
+    one "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
+  }
+  phone_shots
+  ipad_shots
   # What they were taken with, which the baselines keep and the next run's `devices` follows.
   python3 - "$phone" "$ipad" "$out/environment.json" <<'PY'
 import json, plistlib, subprocess, sys
