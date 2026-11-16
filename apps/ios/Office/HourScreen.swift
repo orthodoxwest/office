@@ -461,13 +461,18 @@ struct HourScreen: View {
                         DispatchQueue.main.async {
                             scroll.scrollTo(place.row, anchor: UnitPoint(x: 0.5, y: place.anchor))
                             placing = false
+                            ScreenshotReady.mark(.hour(date, view.hour), in: model)
                         }
                     }
                     return
                 }
                 // For review screenshots: `-anchor hymn` or `-anchor psalm` opens at the first one.
-                guard let id = anchor(rows) else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { scroll.scrollTo(id, anchor: .top) }
+                guard let id = anchor(rows) else { return ScreenshotReady.mark(.hour(date, view.hour), in: model) }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    scroll.scrollTo(id, anchor: .top)
+                    // The screenshot waits for the scroll, not a guess at its time.
+                    ScreenshotReady.mark(.hour(date, view.hour), in: model)
+                }
             }
         }
         .environment(\.ornament, o)

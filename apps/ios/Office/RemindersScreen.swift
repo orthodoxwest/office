@@ -5,6 +5,7 @@ import UserNotifications
 struct RemindersPage: View {
     var body: some View {
         RemindersScreen()
+            .screenshotReady(.reminders)
             .background(PlasterWall())
             .toolbar(.hidden, for: .navigationBar)
     }

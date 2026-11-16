@@ -26,6 +26,7 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
+	python3 scripts/test_ios_snapshots.py
 
 # Optional local diagnostic; normal checks do not collect coverage.
 test-coverage: ## Inspect local Rust coverage (requires cargo-llvm-cov and llvm-tools-preview)

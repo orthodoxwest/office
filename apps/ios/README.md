@@ -86,15 +86,15 @@ shares the web's faces with the Android app (`apps/android/app/src/main/res/font
 ## Continuous integration
 
 `.github/workflows/ios.yml` runs on macOS: it builds the core, generates the project, runs
-`OfficeTests` in the simulator, and launches the app at fixed pages to take screenshots.
-Each page is shot on an iPhone and an iPad, in both themes.
+`OfficeTests` in the simulator, and launches the app at fixed pages to take screenshots
+(`screenshots.sh`). Each page is shot on an iPhone and an iPad, in both themes.
 
 The screenshots come from launch arguments:
 
 - `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
   `home`, `ordo`, `year`, `reminders` or `about`, and `find` (with `-query benedict`) or `feast`
   (with `-feast st-benedict`);
-- `-today` fixes today;
+- `-today` fixes today, and `-clock 9` the hour of the clock (home's invitation, About's hours);
 - `-theme apse` chooses the theme, `-settings YES` opens the wide header's Settings, and
   `-menu YES` the phone's menu;
 - `-day YES` brings the ordo to the date's day, under its pinned month heading;
@@ -103,6 +103,46 @@ The screenshots come from launch arguments:
 
 The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to
 the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
+
+### Screenshot baselines
+
+The screenshots are compared with baselines checked in at `snapshots/`, as the web's browser
+snapshots are (`scripts/ios-snapshots.py`). Each shot is brought down to the device's points (a
+third of an iPhone's pixels, half an iPad's) before it is compared and kept, which keeps the
+folder near the web's in size and lets antialiasing average out. A pixel differs when a channel
+moves by more than 24 levels of 255, and a shot differs when more than 0.05% of its pixels do
+(the web's `maxDiffPixelRatio`), which a changed word still exceeds. A pull request whose shots
+differ, are new or are gone fails; the run's summary names them, and its `ios-snapshot-diffs`
+artifact shows each beside its baseline with the changed pixels in red; the summary and the
+pull request's comment also say when nothing was compared. The job runs on any change to what
+the shots are built from (the app, the core, the crates, `data/`, the shared faces and plaster),
+so a text or engine change that moves a page is caught on its own pull request. On `master` a
+difference is only a warning, since master cannot take the label.
+
+Every shot is taken from a fresh install of the app, so no earlier shot's kept reading place,
+way back or settings reaches it; at a fixed day, today and hour (`-date`, `-today`, `-clock 9`), in
+New York's time zone, in English, at the default text size, with the status bar's time fixed; and
+once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a marker to its
+temporary directory once the page's content is on screen and scrolled to its anchor; a minute
+without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,
+one colour below the status bar as a page not yet drawn is, fails the comparison and is never
+offered as a baseline, nor fetched as one. The baselines record the Xcode, simulator runtime and devices they were
+taken with (`snapshots/environment.json`), and later runs take the same ones. When the runner
+image no longer has them, the shots are taken on its newest and not compared, with a warning, until
+the baselines are taken again. Shots that cannot be made stable are listed with their reason in
+`EXCLUDED` in `scripts/ios-snapshots.py` (none so far). The App Store sizes are never compared.
+
+When a change to the shots is intended, add the **update-ios-snapshots** label to the pull
+request (`.github/workflows/update-ios-snapshots.yml`). It reuses the set the pull request's
+last iOS run would check in, or builds the app and takes the screenshots again on macOS when
+there is none, validates the files, and pushes them to the branch; a shot that still matches
+keeps its baseline's bytes. The label is the browser's `update-ux-snapshots`' twin rather than
+the same label, so that a browser update need not wait on a macOS build. Its commit is pushed
+with the workflow's own token, which starts no workflow, so the new head has no iOS result until
+the next push to the branch runs the job again. A fork's pull request cannot take the label (its
+branch is not this repository's), and its iOS run publishes no branch; its baselines are taken
+on a branch here. Without the label, `python3 scripts/ios-snapshots.py fetch BRANCH` copies a
+branch's last run's set from `ci/ios-screenshots/BRANCH` into `snapshots/`, to commit by hand.
 
 A manual run with **store** ticked takes the same pages at the sizes App Store Connect asks for,
 on a 6.9-inch iPhone and a 13-inch iPad, and publishes them to `ci/ios-screenshots/<branch>-store`.

@@ -12,7 +12,7 @@ struct OrdoPage: View {
         Loaded(key: "\(y)-\(mo)", motion: model.motion(to: .ordo(year: y, month: mo, day: day))) {
             try Office.core.get().ordoMonth(year: Int32(y), month: Int32(mo))
         } content: { view in
-            OrdoScreen(month: view, focusDay: day)
+            OrdoScreen(month: view, focusDay: day, page: .ordo(year: y, month: mo, day: day))
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)
@@ -31,6 +31,8 @@ struct YearPage: View {
         // Drawn at once, so another year moves in as soon as it is asked for.
         ZStack {
             OrdoYearScreen(view: ordoYear(year: Int32(year)), course: course?.year == year ? course?.months : nil)
+                // Drawn once the year's course has come.
+                .screenshotReady(.year(year), ready: course?.year == year)
                 .id(year)
                 .transition(inPlace(model.motion(to: .year(year)), reduceMotion: reduceMotion))
         }
@@ -63,6 +65,8 @@ extension View {
 struct OrdoScreen: View {
     let month: OrdoMonthView
     let focusDay: Int
+    /// The page it is, which marks itself drawn for the screenshots once the day asked for is placed.
+    let page: Page
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -110,14 +114,19 @@ struct OrdoScreen: View {
                     // The month's heading stays pinned while its days scroll under it (the web's
                     // sticky `.month h2`), so the way back to the top stays in reach.
                     Section {
-                        if wide { DayColumns().ordoColumn(m, wide: wide).opacity(dimmed ? 0 : 1) }
-                        ForEach(month.days, id: \.date.day) { d in
-                            // Where a day asked for is brought: a mark of no height at its top, which
-                            // `focus` sets clear of the pinned heading.
-                            Color.clear.frame(height: 0).id("d-\(d.date.day)")
-                            DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails, turning: dimmed)
-                                .ordoColumn(m, wide: wide)
-                                .opacity(dimmed ? 0 : 1)
+                        // The month's days are laid out together, not lazily: a lazy stack guesses
+                        // the heights of rows it has not laid out, so a day brought into view landed
+                        // short or long from one opening to the next.
+                        VStack(spacing: 0) {
+                            if wide { DayColumns().ordoColumn(m, wide: wide).opacity(dimmed ? 0 : 1) }
+                            ForEach(month.days, id: \.date.day) { d in
+                                // Where a day asked for is brought: a mark of no height at its top, which
+                                // `focus` sets clear of the pinned heading.
+                                Color.clear.frame(height: 0).id("d-\(d.date.day)")
+                                DayRow(d: d, isToday: d.date == model.today, allDetails: allDetails, turning: dimmed)
+                                    .ordoColumn(m, wide: wide)
+                                    .opacity(dimmed ? 0 : 1)
+                            }
                         }
                     } header: {
                         MonthHeading(name: monthName(number)) {
@@ -156,6 +165,8 @@ struct OrdoScreen: View {
                 }
             }
             .opacity(focusDay > 0 && !placed ? 0 : 1)
+            // Held unseen until placed, so drawn only then.
+            .screenshotReady(page, ready: placed)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
             .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY + $0.safeAreaInsets.top } action: { pinLine = $0 }
             // The wall's frame, as `PlasterWall` stands it: the whole screen, under the bars.

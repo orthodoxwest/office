@@ -35,6 +35,7 @@ struct FeastPage: View {
             return view
         } content: { view in
             FeastScreen(view: view, entry: entry)
+                .screenshotReady(.feast(id))
         }
         .background(PlasterWall())
         .toolbar(.hidden, for: .navigationBar)

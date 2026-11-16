@@ -161,10 +161,13 @@ otherwise.
 - **The app shows the assembled hour.** No rubric that only explains an omission; rubrics that
   make sense only in print belong in the diurnal repo, not this corpus. No settings toggles,
   exports or QR codes unless asked.
-- **Checked-in baselines.** Browser snapshots live in `.web-tools/visual.spec.js-snapshots/` and
-  the composed 28-year outputs in `tests/fixtures/golden/`. Read them before rebuilding an answer by hand. The
-  `update-ux-snapshots` label regenerates the browser snapshots as `update-golden` does the goldens;
-  a PR that renames visible text or changes fonts runs `make test-ux` and refreshes both.
+- **Checked-in baselines.** Browser snapshots live in `.web-tools/visual.spec.js-snapshots/`, the
+  iOS simulator's in `apps/ios/snapshots/`, and the composed 28-year outputs in
+  `tests/fixtures/golden/`. Read them before rebuilding an answer by hand. The
+  `update-ux-snapshots` label regenerates the browser snapshots and `update-ios-snapshots` the
+  iOS ones (on macOS, in CI) as `update-golden` does the goldens; a PR that renames visible text
+  or changes fonts runs `make test-ux` and refreshes the browser's and, when the iOS job runs, the
+  iOS ones too.
 
 ## Composition checks
 
