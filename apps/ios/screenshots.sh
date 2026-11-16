@@ -115,28 +115,42 @@ shoot() {
     # A fresh install for every shot: an earlier shot's kept reading place, way back, settings
     # or prayed marks would otherwise open a later one differently, and an uninstall clears
     # all of the app's container (defaults, scene storage, caches) without asking the app to.
+    local began=$SECONDS
     xcrun simctl terminate "$sim" "$id" > /dev/null 2>&1 || true
     xcrun simctl uninstall "$sim" "$id" > /dev/null 2>&1 || true
     xcrun simctl install "$sim" "$app"
     xcrun simctl launch "$sim" "$id" \
       -AppleLanguages '(en)' -AppleLocale en_US -today "$day" -date "$day" -clock 9 "$@" > /dev/null
+    local launched=$SECONDS
     # Shot once the app says the page asked for is drawn (ScreenshotReady.swift: composed, laid
     # out, scrolled to its anchor), which the fresh install's empty temporary directory makes
     # this launch's own; then once it has come to rest, two frames a second apart alike, so an
     # arrival's fade or a panel's drop has finished. Until it is drawn the page can be the bare
     # wall, as still as a finished one, so stillness alone is not enough.
-    local data marker waited=0
+    # A launch on the runner's simulators now and then stalls before its first frame, on any
+    # page and at any place in the run: most pages say they are drawn at once, but 20 to 59
+    # seconds have been seen, and one master run's home took just over a minute. So the wait
+    # allows three minutes, counted by the clock from the launch, and a launch that still has
+    # not drawn leaves its screen, the app's log and whether it was running beside the shots.
+    local data marker deadline=180
     data=$(xcrun simctl get_app_container "$sim" "$id" data)
     marker="$data/tmp/screenshot-ready"
     until [ -f "$marker" ]; do
-      if [ "$waited" -ge 240 ]; then
-        echo "::error::$name: the app did not say its page was drawn within 60 seconds" >&2
+      if [ $((SECONDS - launched)) -ge "$deadline" ]; then
+        echo "::error::$name: the app did not say its page was drawn within $deadline seconds of its launch" >&2
         xcrun simctl io "$sim" screenshot "$out/$name-not-drawn.png" > /dev/null || true
+        {
+          echo "# simctl spawn launchctl list (the app's line, if it was running)"
+          xcrun simctl spawn "$sim" launchctl list 2>&1 | grep -F "$id" || echo "not running"
+          echo "# the app's log since its install"
+          xcrun simctl spawn "$sim" log show --style compact --last "$((SECONDS - began + 10))s" \
+            --predicate 'process == "Office"' 2>&1 | tail -n 400
+        } > "$out/$name-not-drawn.log" || true
         exit 1
       fi
       sleep 0.25
-      waited=$((waited + 1))
     done
+    local drawn=$((SECONDS - launched))
     local last="$frames/last.png" this="$frames/this.png" settled=0
     sleep 1
     xcrun simctl io "$sim" screenshot "$last" > /dev/null
@@ -152,7 +166,7 @@ shoot() {
       mv "$this" "$last"
     done
     mv "$this" "$out/$name.png"
-    echo "$(date +%T) $name (drawn after $((waited / 4))s, at rest $((settled + 1))s later)"
+    echo "$(date +%T) $name (installed and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
   for sim in "$phone" "$ipad"; do
     echo "$(date +%T) waiting for $sim to boot"
