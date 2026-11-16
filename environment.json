@@ -1,0 +1,6 @@
+{
+  "xcode": "16.4 16F6",
+  "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+  "phone": "iPhone 16",
+  "ipad": "iPad Pro 11-inch (M5)"
+}
