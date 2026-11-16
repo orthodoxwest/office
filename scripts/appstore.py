@@ -348,7 +348,9 @@ def jwt(key_id: str, issuer: str, key_pem: str, at: int | None = None) -> str:
 
 
 class ApiError(Exception):
-    pass
+    def __init__(self, message: str, status: int | None = None):
+        super().__init__(message)
+        self.status = status
 
 
 class Api:
@@ -374,11 +376,11 @@ class Api:
                 # A refusal for rate is never carried out, so any request may be sent again; a
                 # server error or no answer may have been, so only a read is.
                 again = e.code == 429 or (e.code >= 500 and method == "GET")
-                problem = f"{e.code} {e.read().decode(errors='replace')}"
+                problem, status = f"{e.code} {e.read().decode(errors='replace')}", e.code
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
-                again, problem = method == "GET", str(getattr(e, "reason", e))
+                again, problem, status = method == "GET", str(getattr(e, "reason", e)), None
             if not again or attempt == RETRIES:
-                raise ApiError(f"App Store Connect {method} {path}: {problem}")
+                raise ApiError(f"App Store Connect {method} {path}: {problem}", status)
             log(f"App Store Connect {method} {path}: {problem}; asking again")
             sleep(2 ** (attempt + 1))
         raise AssertionError("unreachable")
@@ -488,7 +490,14 @@ def submit(api: Api, app: str, plan: dict, notes: str) -> str | None:
             if loc["attributes"].get("whatsNew") != notes:
                 api.call("PATCH", f"/v1/appStoreVersionLocalizations/{loc['id']}", {"data": {
                     "type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": {"whatsNew": notes}}})
-        phased = api.call("GET", f"/v1/appStoreVersions/{vid}/appStoreVersionPhasedRelease").get("data")
+        # A version with no phased release yet may answer 404 rather than empty data, as
+        # fastlane's deliver finds ("returns no data error so need to rescue").
+        try:
+            phased = api.call("GET", f"/v1/appStoreVersions/{vid}/appStoreVersionPhasedRelease").get("data")
+        except ApiError as e:
+            if e.status != 404:
+                raise
+            phased = None
         if not phased:
             api.call("POST", "/v1/appStoreVersionPhasedReleases", {"data": {
                 "type": "appStoreVersionPhasedReleases",

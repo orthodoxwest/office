@@ -76,7 +76,7 @@ jobs:
           else
             set -- manual
             if [ -n "$BUILD" ]; then set -- "$@" --build "$BUILD"; fi
-            if [ -n "$NOTES" ]; then set -- "$@" --notes "$NOTES"; fi
+            if [ -n "$NOTES" ]; then set -- "$@" "--notes=$NOTES"; fi
             if [ "$DRY_RUN" = true ]; then set -- "$@" --dry-run; fi
           fi
           python3 scripts/appstore.py "$@"

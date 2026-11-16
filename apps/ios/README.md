@@ -266,7 +266,9 @@ without rebuilding, as the Android app's promotion moves a Closed testing build 
   day or two; once approved the version goes out by itself, to a growing share of automatic
   updaters over seven days (anyone can download it at once). While a version is with Apple or
   waiting to be released nothing more is submitted, so merges in the meantime go out together in
-  the next release.
+  the next release. A version set to be released by hand (1.0.0 was) waits in *Pending Developer
+  Release* until someone presses *Release this version* in App Store Connect, and holds back the
+  next one until then.
 - **What's New** is `apps/android/whatsnew.txt` as of the build's commit, the notes Google Play
   shows, or, while that is empty, "Corrections to the texts and improvements to the app." Edit
   it in App Store Connect before Apple's review starts if a release deserves more.

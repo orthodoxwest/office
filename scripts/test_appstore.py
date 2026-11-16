@@ -259,6 +259,8 @@ class FakeApi:
             keys = [k for k in self.reads if path.startswith(k)]
             if keys:
                 answer = self.reads[max(keys, key=len)]
+                if isinstance(answer, Exception):
+                    raise answer
                 return answer() if callable(answer) else answer
             if path.startswith("/v1/appStoreVersions/") and path.count("/") == 3:
                 self.version_reads += 1
@@ -299,6 +301,18 @@ class SubmitTest(unittest.TestCase):
         plan, why = STORE.decide(versions, list(submissions), STORE.builds_of(builds), NOW, 24, 0, manual)
         self.assertIsNotNone(plan, why)
         return plan
+
+    def test_a_missing_phased_release_that_answers_404_is_created(self):
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": STORE.ApiError("404 NOT_FOUND", 404)})
+        STORE.submit(api, APP, self.plan([ON_SALE]), "Feast pages redesigned.")
+        self.assertIn(("POST", "/v1/appStoreVersionPhasedReleases"), writes(api))
+
+    def test_another_error_reading_the_phased_release_still_stops(self):
+        api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
+                       f"{NEW}/appStoreVersionPhasedRelease": STORE.ApiError("403 FORBIDDEN", 403)})
+        with self.assertRaisesRegex(STORE.ApiError, "403"):
+            STORE.submit(api, APP, self.plan([ON_SALE]), "Feast pages redesigned.")
 
     def test_a_new_version_is_created_filled_in_and_submitted(self):
         api = FakeApi({f"{NEW}/appStoreVersionLocalizations": {"data": [LOCALIZATION]},
