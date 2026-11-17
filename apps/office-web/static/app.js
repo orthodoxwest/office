@@ -78,7 +78,7 @@ document.documentElement.classList.add("js");
 // reduced motion; it never rises or slides.
 (function () {
   var terms = Array.prototype.slice.call(document.querySelectorAll(".gloss-term[data-gloss]"));
-  var marks = Array.prototype.slice.call(document.querySelectorAll(".month-table abbr[title]"));
+  var marks = Array.prototype.slice.call(document.querySelectorAll(".month-table abbr[title], .find-rank[title]"));
   if (!terms.length && !marks.length) return;
   // Kept in the page and emptied rather than hidden, so a screen reader
   // hears each note as it is written into the live region.
@@ -3892,8 +3892,11 @@ function plainClickOpensHere(e, link) {
       }
     });
 
+    // A tap on a day's row, off its date and its marks, opens or closes the
+    // day's office details: the row is read in place, and only the date leads
+    // to the day. Its summary keeps the keyboard's way in.
     calendarEl.addEventListener("click", function (e) {
-      if (e.target.closest("a, abbr, details")) {
+      if (e.defaultPrevented || e.target.closest("a, abbr, details, button, [role='button']")) {
         return;
       }
       var selection = window.getSelection();
@@ -3901,12 +3904,11 @@ function plainClickOpensHere(e, link) {
         return;
       }
       var row = e.target.closest("tr.day");
-      if (!row) {
-        return;
-      }
-      var link = row.querySelector(".day-num a, .day-mobile-date");
-      if (link) {
-        window.location.href = link.getAttribute("href");
+      // Through the summary's own click, so the row opens on the same fold,
+      // and is kept the same way, as the summary does.
+      var summary = row && row.querySelector(".day-office-details > summary");
+      if (summary) {
+        summary.click();
       }
     });
   }
@@ -5526,7 +5528,7 @@ function plainClickOpensHere(e, link) {
 (function () {
   if (!window.PointerEvent) return;
   var PRESSABLE = "a[href], button:not(:disabled), summary, label, [role='button']";
-  var ROW_LINKS = ".day-feast-name, .day-mobile-date, .day-num a";
+  var ROW_LINKS = ".day-mobile-date, .day-num a";
   var REST_MS = 90;
   var SLOP_PX = 10;
   var KEEP_MS = 8000;
@@ -5559,11 +5561,9 @@ function plainClickOpensHere(e, link) {
   // Whether a click on el leaves for another of the site's pages.
   function leaves(e, el) {
     if (el.matches("tr.day")) {
-      // The day's own link, opened in a new tab or window, leaves the row here.
+      // Only the day's date leaves; the rest of the row opens its details in place.
       var own = e.target.closest("a[href]");
-      if (own && !plainClickOpensHere(e, own)) return false;
-      var selection = window.getSelection && window.getSelection();
-      return !(selection && !selection.isCollapsed);
+      return Boolean(own) && plainClickOpensHere(e, own);
     }
     if (!el.matches("a[href]") || e.defaultPrevented || !plainClickOpensHere(e, el)) return false;
     if (el.origin !== location.origin) return false;

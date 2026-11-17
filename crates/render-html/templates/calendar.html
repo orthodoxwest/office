@@ -173,7 +173,8 @@
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
-            <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
+            {# Only the date leads to the day; a tap on the rest of the row opens its office details (app.js). #}
+            <span class="day-feast-name">{{ d.feast_name|typeset }}</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
             {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}

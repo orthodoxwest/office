@@ -100,28 +100,33 @@ struct FindScreen: View {
     private func result(_ r: FeastResultView) -> some View {
         let ink = rankTone(r.rankTone, p)
         return VStack(alignment: .leading, spacing: 0) {
-            Button { model.open(.feast(r.id)) } label: {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .top, spacing: 0) {
+            // The rank's letters stand beside the feast's button, not in it, so a tap on them names
+            // the rank in a note (as the ordo's marks do) rather than opening the feast.
+            HStack(alignment: .top, spacing: 0) {
+                Button { model.open(.feast(r.id)) } label: {
+                    VStack(alignment: .leading, spacing: 0) {
                         Text(r.name).type(Scale.body.sized(21.6, line: 27)).foregroundStyle(ink)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        if !r.rank.isEmpty {
-                            Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
-                                .padding(.leading, m.px(12)).padding(.top, m.px(4))
-                        }
+                        (Text(r.meta + " · ") + Text(feastWordsShared.everyYear).foregroundColor(p.accent))
+                            .type(Scale.small.sized(14.7, line: 21)).foregroundStyle(p.muted)
+                            .multilineTextAlignment(.leading)
+                            .padding(.top, m.px(3)).padding(.bottom, m.px(6))
                     }
-                    (Text(r.meta + " · ") + Text(feastWordsShared.everyYear).foregroundColor(p.accent))
-                        .type(Scale.small.sized(14.7, line: 21)).foregroundStyle(p.muted)
-                        .multilineTextAlignment(.leading)
-                        .padding(.top, m.px(3)).padding(.bottom, m.px(6))
+                }
+                .buttonStyle(Quiet())
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(r.name), \(r.rankFull). \(r.meta)")
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityHint("Opens the feast's page")
+                if !r.rank.isEmpty {
+                    let letters = Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
+                    Group {
+                        if r.rankFull.isEmpty { letters.accessibilityHidden(true) } else { NoteMark(name: r.rankFull, label: "Rank \(r.rank)") { letters } }
+                    }
+                    .padding(.leading, m.px(12)).padding(.top, m.px(4))
                 }
             }
-            .buttonStyle(Quiet())
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(r.name), \(r.rankFull). \(r.meta)")
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityHint("Opens the feast's page")
             ForEach(Array(r.years.enumerated()), id: \.offset) { i, y in YearRow(y: y, first: i == 0) }
             Hairline(color: p.border).padding(.top, m.px(12))
         }

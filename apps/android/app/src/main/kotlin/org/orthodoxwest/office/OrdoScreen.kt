@@ -596,8 +596,12 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         "abstinence".takeIf { d.abstinence },
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
+    // A tap on the feast's line opens or closes the details, as the disclosure does: the row is
+    // read in place, and only the date leads to the day (the web's row).
+    val toggle: () -> Unit = { open["details"] = !details }
+    val onName: Modifier = if (hasDetails) Modifier.tap(onClick = toggle) else Modifier
     val buttons: @Composable RowScope.() -> Unit = {
-        if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
+        if (hasDetails) SmallDisclosure("Office details", details, toggle)
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
         // Shown for the whole month at once, the rows stay where they are, and change at once
@@ -605,7 +609,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         Unfold(details && hasDetails, reveal = open["details"] != null, instant = turningAll) { Digest(d, onFeast) }
     }
     val anyOpen = details && hasDetails
-    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
+    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, onName, modifier, anyOpen, buttons, unfolded)
     val body: @Composable ColumnScope.() -> Unit = {
         // Today is said once, in the gold of its number, at the right of today's second line, which
         // is otherwise empty: no row keeps a line for it.
@@ -645,7 +649,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
             },
         ),
     ) {
-        // A finger on the date or the name lights the whole row: home's pool of light, a long
+        // A finger on the date lights the whole row: home's pool of light, a long
         // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
@@ -664,9 +668,9 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
             }
             Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    // The date's stop already says the feast; the feast is a second target for the eye only.
-                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
+                Row(onName.semantics { hideFromAccessibility() }, verticalAlignment = Alignment.Top) {
+                    // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
+                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f))
                     // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
                     // Each names itself in a note when tapped ([OrdoMarks]).
                     Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -794,6 +798,7 @@ private fun DayTableRow(
     isToday: Boolean,
     spoken: String,
     onDay: (LocalDate) -> Unit,
+    onName: Modifier,
     modifier: Modifier,
     anyOpen: Boolean,
     buttons: @Composable RowScope.() -> Unit,
@@ -815,7 +820,7 @@ private fun DayTableRow(
             },
         ),
     ) {
-        // A finger on the date or the name lights the whole row ([Lit]), as on a phone.
+        // A finger on the date lights the whole row ([Lit]), as on a phone.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
@@ -848,16 +853,16 @@ private fun DayTableRow(
             }
             Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
-                // The date's stop already says the feast; the feast is a second target for the eye only.
+                // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
                 val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
                 // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                 if (anyOpen || d.monastic.isNotEmpty()) {
-                    FeastName(d, name, Modifier.tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
+                    FeastName(d, name, onName.semantics { hideFromAccessibility() })
                     Monastic(d)
                     Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                 } else {
                     Row {
-                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().then(onName).semantics { hideFromAccessibility() })
                         Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                     }
                 }

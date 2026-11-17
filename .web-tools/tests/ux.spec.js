@@ -4427,9 +4427,25 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
-  await page.locator("#d-2026-03-01 .day-feast-name").click();
+  await page.locator("#d-2026-03-01 .day-mobile-date").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
   await context.close();
+});
+
+test("a tap on an ordo day's row opens its office details; only the date leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  await row.locator(".day-feast-name").click();
+  await expect(details).toHaveAttribute("open", "");
+  await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  // Again, it closes; the rank's mark answers with its note, not the row.
+  await row.locator(".day-feast-name").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await row.locator(".day-mobile-rank").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await row.locator(".day-mobile-date").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
 });
 
 // One theme: overflow and touch targets are geometry, which themes share
@@ -6157,6 +6173,22 @@ test("escaped page links retain navigation and report query values", async ({ pa
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
 });
 
+// Find's rank letters name the rank in the ordo marks' note, as the ordo's do,
+// rather than leaving it to a mouse's tooltip.
+test("a found feast's rank names itself in a note when tapped", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  const rank = page.locator(".find-rank").first();
+  const note = page.locator("#gloss-note");
+  await expect(rank).toHaveAttribute("role", "button");
+  await expect(rank).not.toHaveAttribute("title", /./);
+  await rank.click();
+  await expect(rank).toHaveAttribute("aria-expanded", "true");
+  await expect(note).not.toHaveText("");
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveClass(/closed/);
+});
+
 test("a feast's page leads back to the search that found it", async ({ page }) => {
   await page.goto("/calendar/find?q=raphael");
   await page.locator(".find-name").first().click();
@@ -6712,8 +6744,9 @@ test("a tapped ordo row and a tapped hour show their press at once", async ({ br
   });
   const row = page.locator("#d-2026-09-20");
   await row.scrollIntoViewIfNeeded();
-  const box = await row.boundingBox();
-  await page.touchscreen.tap(box.x + box.width * 0.7, box.y + box.height - 6);
+  // The row's date leads to the day; the rest of the row opens its details.
+  const box = await row.locator(".day-mobile-date").boundingBox();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForURL(/\?date=2026-09-20/);
   expect(seen).toContain("d-2026-09-20");
   // After app.js's own listener: keep the page, and say how the hour stood.

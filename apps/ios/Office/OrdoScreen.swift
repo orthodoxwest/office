@@ -615,8 +615,15 @@ private struct DayRow: View {
 
     /// The day's one disclosure, "Office details", which holds its commemorations and its office.
     @ViewBuilder private var disclosureButtons: some View {
+        if hasDetails { small("Office details", details ?? allDetails, toggle: toggleDetails) }
+    }
+
+    /// Opens or closes the day's details. A tap on the feast's line does it too, as the
+    /// disclosure does: the row is read in place, and only the date leads to the day (the web's row).
+    private func toggleDetails() {
+        guard hasDetails else { return }
         let open = details ?? allDetails
-        if hasDetails { small("Office details", open) { withAnimation(disclosing(!open)) { details = !open } } }
+        withAnimation(disclosing(!open)) { details = !open }
     }
 
     @ViewBuilder private var disclosures: some View {
@@ -681,11 +688,11 @@ private struct DayRow: View {
                 .accessibilityHint("Opens the day")
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .top, spacing: 0) {
-                        // The date's stop already says the feast; the feast is a second target for the eye only.
-                        Button(action: openDay) {
+                        // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
+                        Button(action: toggleDetails) {
                             feastName(Scale.body.sized(16, line: 21.6))
                         }
-                        .buttonStyle(Holding(held: $held))
+                        .buttonStyle(Quiet())
                         .accessibilityHidden(true)
                         // The card's marks stay quiet, as the web's: red in a row means rank. Each
                         // names itself in a note when tapped (`NoteMark`).
@@ -740,15 +747,16 @@ private struct DayRow: View {
                     let name = Scale.body.sized(16, line: 22.4)
                     // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                     if anyOpen || !d.monastic.isEmpty {
-                        Button(action: openDay) { feastName(name) }
-                            .buttonStyle(Holding(held: $held))
+                        // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
+                        Button(action: toggleDetails) { feastName(name) }
+                            .buttonStyle(Quiet())
                             .accessibilityHidden(true)
                         monastic
                         disclosureButtons
                     } else {
                         HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
-                            Button(action: openDay) { feastName(name, fill: false) }
-                                .buttonStyle(Holding(held: $held))
+                            Button(action: toggleDetails) { feastName(name, fill: false) }
+                                .buttonStyle(Quiet())
                                 .accessibilityHidden(true)
                                 .layoutPriority(1)
                             disclosureButtons.fixedSize()
