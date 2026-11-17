@@ -10,8 +10,8 @@
 # The checked-in baselines (apps/ios/snapshots/) record the Xcode, runtime and devices they were
 # taken with (environment.json). `devices` takes the same ones when the runner has them, and says
 # pinned=true; otherwise (or with `store`, or before any baselines exist) it takes the image's
-# default Xcode, its newest iOS runtime's iPhone 17 and 11-inch iPad Pro, and says pinned=false,
-# since shots from another runtime differ in ways no page changed.
+# default Xcode, an iPhone 17 and an 11-inch iPad Pro, each from the newest iOS runtime that has
+# it, and says pinned=false, since shots from another runtime differ in ways no page changed.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -65,14 +65,22 @@ else:
     # carry a runtime newer than its default Xcode, whose devices xcodebuild cannot see.
     version = lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")]
     sdk = [int(x) for x in sdk_version.split(".")]
-    ios = sorted((k for k in devices if "iOS" in k and version(k) <= sdk
-                  and any(d["name"].startswith(family) for d in devices[k])), key=version)
+    # `preferred` is one or more models, best first, split by "|" (a store size's model changes
+    # with the image). A point release's runtime can carry only a new model (Xcode 27.1's iOS
+    # 27.1 has only the iPhone Duo), so the newest runtime with a preferred model wins, else the
+    # newest with the family.
+    usable = [k for k in devices if "iOS" in k and version(k) <= sdk]
+    has = lambda k, prefix: any(d["name"].startswith(prefix) for d in devices[k])
+    for prefix in [*preferred.split("|"), family]:
+        ios = sorted((k for k in usable if has(k, prefix)), key=version)
+        if ios:
+            break
     if not ios:
         sys.exit(0)
     runtime = ios[-1]
-    found = [d for d in devices[runtime] if d["name"].startswith(family)]
-    exact = [d for d in found if d["name"] == preferred]
-    found = exact or [d for d in found if d["name"].startswith(preferred)] or found
+    found = [d for d in devices[runtime] if d["name"].startswith(prefix)]
+    exact = [d for d in found if d["name"] in preferred.split("|")]
+    found = exact or found
 if found:
     print(found[0]["udid"], runtime, found[0]["name"], sep="\t")
 PY
@@ -90,7 +98,7 @@ PY
     # A manual run with `store` takes the sizes App Store Connect asks for instead: the 6.9-inch
     # iPhone (1320 x 2868) and the 13-inch iPad (2064 x 2752).
     if [ -n "$store" ]; then
-      phone=$(pick iPhone 'iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
+      phone=$(pick iPhone 'iPhone 18 Pro Max|iPhone 17 Pro Max' '' '') ipad=$(pick iPad 'iPad Pro 13' '' '')
     else
       phone=$(pick iPhone 'iPhone 17' '' '') ipad=$(pick iPad 'iPad Pro 11' '' '')
     fi
