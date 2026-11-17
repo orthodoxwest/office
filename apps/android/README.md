@@ -163,7 +163,8 @@ page count toward the day's readers, an hour and the ordo in their own columns, 
 reminders on as the web counts a generated feed link; only today's pages (a day either side)
 count. Each page counts once a day. In place of the web's cookie the app sends a random
 identifier it replaces every reporting day (America/New_York), so nothing it sends ties one day
-to the next. A beacon is best effort: it is never queued offline, retried later, or shown.
+to the next. It keeps the last two days a beacon of its own was counted, and says only whether
+today is the first in its week and month (`usage_periods`). A beacon is best effort: it is never queued offline, retried later, or shown.
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,

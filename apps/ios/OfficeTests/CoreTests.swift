@@ -619,9 +619,9 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: today, hour: "vespers"), dark: true, form: "priest")
         usage.record(.remindersOn, dark: true, form: "priest")
         XCTAssertEqual(posted.map { $0.body }, [
-            "site appearance:nave screen:mobile visit:first client:ios",
-            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios",
-            "reminders appearance:apse screen:mobile visit:first client:ios",
+            "site appearance:nave screen:mobile visit:first client:ios week:first month:first",
+            "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:ios week:first month:first",
+            "reminders appearance:apse screen:mobile visit:first client:ios week:first month:first",
         ])
         XCTAssertEqual(Set(posted.map { $0.id }).count, 1)
         XCTAssertNotNil(posted[0].id.range(of: "^[0-9a-f]{32}$", options: .regularExpression))
@@ -633,9 +633,9 @@ final class UsageTests: XCTestCase {
         usage.record(.hour(date: today, hour: "compline"), dark: false, form: "private", chant: true)
         usage.record(.home(date: today), dark: false, form: "private", chant: true)
         XCTAssertEqual(posted.map { $0.body }, [
-            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios",
-            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios",
-            "site appearance:nave screen:mobile visit:first client:ios",
+            "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:ios week:first month:first",
+            "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:ios week:first month:first",
+            "site appearance:nave screen:mobile visit:first client:ios week:first month:first",
         ])
     }
 
@@ -648,7 +648,7 @@ final class UsageTests: XCTestCase {
         // The search and the feast pages are not counted, as on the web.
         XCTAssertNil(Page.find("benedict").usageEvent)
         XCTAssertNil(Page.feast("st-benedict").usageEvent)
-        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["ordo appearance:nave screen:mobile visit:first client:ios week:first month:first"])
     }
 
     func testTheIdentifierLastsOneReportingDay() {
@@ -679,6 +679,32 @@ final class UsageTests: XCTestCase {
         usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
         XCTAssertEqual(posted.map { $0.body.contains("visit:first") }, [true, false])
         XCTAssertTrue(posted[1].body.contains("visit:returning"))
+    }
+
+    // Sunday 15 March 2026 closes a week; Monday opens the next in the same month.
+    func testAWeekAndAMonthOpenOnTheirFirstCountedDay() {
+        let start = now
+        for (days, date) in [(0, today), (1, CivilDate(year: 2026, month: 3, day: 16)), (3, CivilDate(year: 2026, month: 3, day: 18)), (17, CivilDate(year: 2026, month: 4, day: 1))] {
+            now = start.addingTimeInterval(Double(days) * 86_400)
+            let usage = usage()
+            usage.record(.home(date: date), dark: false, form: "private")
+            usage.record(.hour(date: date, hour: "lauds"), dark: false, form: "private")
+        }
+        let periods = ["week:first month:first", "week:first month:again", "week:again month:again", "week:first month:first"]
+        XCTAssertEqual(posted.map { String($0.body.components(separatedBy: "client:ios ").last ?? "") }, periods.flatMap { [$0, $0] })
+    }
+
+    // A beacon that never arrived leaves the week unopened: the next day's is still its first.
+    func testAWeekOpensOnlyWhenABeaconIsCounted() {
+        let start = now
+        online = false
+        usage().record(.home(date: today), dark: false, form: "private")
+        online = true
+        for days in [2, 3] {
+            now = start.addingTimeInterval(Double(days) * 86_400)
+            usage().record(.home(date: CivilDate(year: 2026, month: 3, day: Int32(15 + days))), dark: false, form: "private")
+        }
+        XCTAssertEqual(posted.map { String($0.body.components(separatedBy: "client:ios ").last ?? "") }, ["week:first month:first", "week:again month:again"])
     }
 
     func testAnInstallationThatReportedBeforeIsReturning() {
@@ -734,7 +760,7 @@ final class UsageTests: XCTestCase {
         XCTAssertTrue(posted.isEmpty)
         now = now.addingTimeInterval(Usage.settling)
         usage.record(.home(date: today), dark: false, form: "private")
-        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios week:first month:first"])
     }
 
     // Home's introduction counts days from the first opening; the count waits for the install to
@@ -744,7 +770,7 @@ final class UsageTests: XCTestCase {
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 0)
         now = now.addingTimeInterval(86_400)
         usage().record(.home(date: CivilDate(year: 2026, month: 3, day: 16)), dark: false, form: "private")
-        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios"])
+        XCTAssertEqual(posted.map { $0.body }, ["site appearance:nave screen:mobile visit:first client:ios week:first month:first"])
         XCTAssertEqual(Usage.daysSinceFirst(defaults: defaults, now: now), 1)
     }
 

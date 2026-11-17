@@ -60,7 +60,7 @@
   }
 
   function valueNodes(count, sum, compact = false) {
-    const counts = compact ? String(count) : `${count} ${count === 1 ? "browser-day" : "browser-days"}`;
+    const counts = compact ? String(count) : `${count} ${count === 1 ? "reader" : "readers"}`;
     const values = selected(measure) === "share" ? [share(count, sum), counts] : [counts, share(count, sum)];
     return [node("span", values[0], "usage-value-primary"), node("span", ` (${values[1]})`, "usage-value-secondary")];
   }
@@ -93,7 +93,7 @@
   function table() {
     const table = get("explore-table");
     table.replaceChildren();
-    table.append(node("caption", `${group.Label}: ${selected(measure) === "share" ? "percentages, with browser-days in parentheses" : "browser-days, with percentages in parentheses"}; newest first`));
+    table.append(node("caption", `${group.Label}: ${selected(measure) === "share" ? "percentages, with readers in parentheses" : "readers, with percentages in parentheses"}; newest first`));
     const head = node("thead"), header = node("tr");
     for (const label of ["Period", ...group.Series, "Days observed"]) {
       const th = node("th", label); th.scope = "col"; header.append(th);
@@ -150,8 +150,10 @@
     const lines = get("explore-lines");
     lines.replaceChildren();
     // Today, or this week, is still filling: as a count it would read as a fall,
-    // so it stands apart as a lone point. A share is fair at any hour.
+    // so it stands apart as a lone point; so does a first week the window or the
+    // record cuts short, which would read as a rise. A share is fair at any hour.
     const today = group.Points[group.Points.length - 1].Day;
+    const weekly = selected(interval) === "week";
     group.Series.forEach((label, series) => {
       let path = "", connected = false;
       const dots = [];
@@ -160,9 +162,9 @@
         if (!sum) { connected = false; return; }
         const value = shares ? 100 * bucket.counts[series] / sum : bucket.counts[series];
         const px = x(index), py = y(value);
-        const apart = !shares && bucket.last === today;
+        const apart = !shares && (bucket.last === today || (weekly && bucket.days < 7));
         path += `${connected && !apart ? "L" : "M"}${px.toFixed(2)},${py.toFixed(2)} `;
-        connected = true;
+        connected = !apart || bucket.last === today;
         // Isolated observations remain visible even on a long window.
         if (apart || buckets.length <= 60 || !index || !total(buckets[index - 1].counts) || index === buckets.length - 1 || !total(buckets[index + 1].counts)) {
           dots.push(svg("circle", { cx: px, cy: py, r: 3, class: `usage-series-${series}` }));
@@ -182,7 +184,7 @@
     get("explore-coverage").textContent = `${reported} of ${group.Points.length} days reported${first > 0 ? ` · Chart begins ${format(points[0].Day)}` : ""}`;
     get("explore-first").textContent = format(points[0].Day);
     get("explore-last").textContent = format(points[points.length - 1].Day);
-    get("explore-chart-title").textContent = `${group.Label}: ${shares ? "share of category" : "browser-days"} by ${selected(interval)}`;
+    get("explore-chart-title").textContent = `${group.Label}: ${shares ? "share of category" : "readers"} by ${selected(interval)}`;
     get("explore-empty").hidden = peak > 0;
     slider.max = buckets.length - 1;
     slider.disabled = buckets.length <= 1;
@@ -205,5 +207,6 @@
   links();
   document.querySelector(".usage-breakdown-fallback").hidden = true;
   root.hidden = false;
-  document.querySelector(".usage-explore-link").hidden = false;
+  // A bookmarked exploration opens where it was left.
+  if (params.has("compare")) root.closest("details").open = true;
 })();

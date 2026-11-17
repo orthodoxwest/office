@@ -843,7 +843,7 @@ mod tests {
 
     // app.js writes the browser's beacon by hand in presentation::usage's vocabulary: every
     // "family:value" it can send is one the server reads, and it names every family a browser
-    // reports (new-client is the server's own). The test reads the code from usageVisitToken to
+    // reports (new-client and offices are the server's own). The test reads the code from usageVisitToken to
     // the next top-level IIFE, takes each double-quoted string that opens " family:", and finds
     // the prayer forms as one array literal; keep app.js's beacon code in that shape.
     #[test]
@@ -863,7 +863,7 @@ mod tests {
             let family = DIMENSIONS.iter().find(|d| d.key == *key).unwrap_or_else(|| panic!("app.js sends unknown family {key}"));
             assert!(value.is_empty() || family.values.contains(value), "app.js sends {key}:{value}");
         }
-        for family in DIMENSIONS.iter().filter(|d| d.key != "new-client") {
+        for family in DIMENSIONS.iter().filter(|d| !["new-client", "offices"].contains(&d.key)) {
             assert!(tokens.iter().any(|(key, _)| *key == family.key), "app.js never sends {}", family.key);
         }
         let forms = format!("[{}]", PRAYER_FORMS.iter().map(|f| format!("\"{f}\"")).collect::<Vec<_>>().join(", "));

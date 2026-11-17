@@ -745,8 +745,9 @@ pub enum UsageEvent {
 /// for today or a day either side (the ordo: this year or either side) is counted, so reading
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
 /// `martyrology` and `chant` the hour's `HourView::martyrology` and `HourView::chant`; `first`
-/// whether the installation is counted for the first time today.
-#[uniffi::export(default(martyrology = None, first = None, chant = None))]
+/// whether the installation is counted for the first time today; `week` and `month` whether
+/// today is its first counted day of the week and of the month ([`usage_periods`]).
+#[uniffi::export(default(martyrology = None, first = None, chant = None, week = None, month = None))]
 // The page's facts stay plain arguments with defaults, so each app passes only what it knows.
 #[allow(clippy::too_many_arguments)]
 pub fn usage_beacon(
@@ -758,6 +759,8 @@ pub fn usage_beacon(
     martyrology: Option<bool>,
     first: Option<bool>,
     chant: Option<bool>,
+    week: Option<bool>,
+    month: Option<bool>,
 ) -> Option<String> {
     use presentation::usage::{App, app_beacon, current_day, current_year};
     let today = today.parse().ok()?;
@@ -772,7 +775,26 @@ pub fn usage_beacon(
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form, martyrology, chant, first)
+    app_beacon(scope, app, dark, &form, martyrology, chant, first, week, month)
+}
+
+/// Whether a reporting day opens the installation's week and month.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct UsagePeriods {
+    pub week: bool,
+    pub month: bool,
+}
+
+/// Whether the reporting day `today` ("2026-11-18") is the first this installation is counted in
+/// its calendar week (Monday to Sunday) and month. `last` is the latest reporting day one of its
+/// beacons counted and `previous` the counted day before that: the app keeps both, moving them on
+/// when a beacon is counted on a new day, and sends only the answer. None when `today` is no date.
+#[uniffi::export]
+pub fn usage_periods(today: String, last: Option<String>, previous: Option<String>) -> Option<UsagePeriods> {
+    use calendar::Date;
+    let day = |s: Option<String>| s.as_deref().and_then(Date::parse);
+    let (week, month) = presentation::usage::periods(day(last), day(previous), Date::parse(&today)?);
+    Some(UsagePeriods { week, month })
 }
 
 /// Where a release build of the apps posts its beacons until the server names another.

@@ -450,7 +450,7 @@ fn the_reminder_rule_is_written_out_from_the_apps_choices() {
 #[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None);
+    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None, None, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -468,14 +468,29 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             UsageClient::Android,
             Some(true),
             Some(false),
-            Some(true)
+            Some(true),
+            Some(true),
+            Some(false)
         )
         .as_deref(),
-        Some("prime appearance:nave screen:mobile prayer-form:private martyrology:shown chant:on visit:returning client:android")
+        Some(
+            "prime appearance:nave screen:mobile prayer-form:private martyrology:shown chant:on visit:returning client:android week:first month:again"
+        )
     );
     assert_eq!(
-        usage_beacon(UsageEvent::Home { date: today }, today, true, "private".into(), UsageClient::Ios, None, Some(true), Some(false))
-            .as_deref(),
+        usage_beacon(
+            UsageEvent::Home { date: today },
+            today,
+            true,
+            "private".into(),
+            UsageClient::Ios,
+            None,
+            Some(true),
+            Some(false),
+            None,
+            None
+        )
+        .as_deref(),
         Some("site appearance:apse screen:mobile visit:first client:ios")
     );
     // The archive, and anything the server would refuse, are not counted.
@@ -488,6 +503,15 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
     ] {
         assert_eq!(beacon(event.clone()), None, "{event:?}");
     }
+    // The week and the month open on the first counted day, and every beacon of that day says so.
+    let periods = |last: Option<&str>, previous: Option<&str>| {
+        usage_periods("2026-11-18".into(), last.map(String::from), previous.map(String::from)).map(|p| (p.week, p.month))
+    };
+    assert_eq!(periods(None, None), Some((true, true)));
+    assert_eq!(periods(Some("2026-11-16"), None), Some((false, false)));
+    assert_eq!(periods(Some("2026-11-18"), Some("2026-11-15")), Some((true, false)));
+    assert_eq!(periods(Some("garbled"), None), Some((true, true)));
+    assert_eq!(usage_periods("soon".into(), None, None), None);
     assert!(usage_endpoint().starts_with("https://") && usage_endpoint().ends_with("/api/usage"));
     assert_eq!(usage_advertised_endpoint(usage_endpoint()), Some(usage_endpoint()));
     assert_eq!(usage_advertised_endpoint("http://example.org/api/usage".into()), None);

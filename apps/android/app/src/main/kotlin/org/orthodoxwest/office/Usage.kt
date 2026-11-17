@@ -21,6 +21,7 @@ import org.orthodoxwest.office.core.usageAdvertisedEndpoint
 import org.orthodoxwest.office.core.usageBeacon
 import org.orthodoxwest.office.core.usageEndpoint
 import org.orthodoxwest.office.core.usageEndpointHeader
+import org.orthodoxwest.office.core.usagePeriods
 
 /**
  * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
@@ -32,7 +33,9 @@ import org.orthodoxwest.office.core.usageEndpointHeader
  * The server knows a reader only by an identifier it hashes with the day. The app makes a fresh
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
  * sends ties one day to the next. The app also keeps the day it was first counted, and says
- * only whether today is that day (new) or not (returning). Best effort: nothing is queued while
+ * only whether today is that day (new) or not (returning); and the last two days a beacon of
+ * its own was counted, and says only whether today is the first in its week and in its month,
+ * so the server can add up a week's readers. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
  * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a phone in
  * Play's pre-launch report, which installs every uploaded build fresh on several test devices and
@@ -67,7 +70,10 @@ class Usage(
         if (installed != null && Duration.between(installed, clock.instant()) < SETTLING) return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
         val first = firstDay(day) == day
-        val body = usageBeacon(event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant) ?: return
+        val periods = synchronized(prefs) { usagePeriods(day, prefs.getString(LAST, null), prefs.getString(PREVIOUS, null)) }
+        val body = usageBeacon(
+            event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant, periods?.week, periods?.month,
+        ) ?: return
         val key = "$day $body"
         synchronized(sent) {
             if (!sent.add(key)) return
@@ -77,11 +83,21 @@ class Usage(
         executor.execute {
             val reply = runCatching { post(endpoint, id, body) }.getOrDefault(Reply(false))
             // A failure is forgotten, so the next visit tries again.
-            if (!reply.ok) synchronized(sent) { sent.remove(key) }
+            if (reply.ok) counted(day) else synchronized(sent) { sent.remove(key) }
             reply.endpoint?.let(::usageAdvertisedEndpoint)?.let { next ->
                 synchronized(prefs) { prefs.edit().putString(ENDPOINT, next).apply() }
             }
         }
+    }
+
+    /**
+     * Keeps `day` as the latest reporting day a beacon was counted, and the one before it: what
+     * `usagePeriods` reads to say whether a day opens the week and the month. Kept only once a
+     * beacon has arrived, so a day that never reported opens nothing.
+     */
+    private fun counted(day: String) = synchronized(prefs) {
+        val last = prefs.getString(LAST, null)
+        if (last != day) prefs.edit().putString(PREVIOUS, last).putString(LAST, day).apply()
     }
 
     /**
@@ -120,6 +136,8 @@ class Usage(
         private const val DAY = "usage-day"
         private const val ID = "usage-id"
         private const val FIRST = "usage-first"
+        private const val LAST = "usage-counted"
+        private const val PREVIOUS = "usage-counted-before"
         private const val BEFORE = "before"
         private const val OPENED = "about-first"
         private const val ENDPOINT = "usage-endpoint"

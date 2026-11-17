@@ -17,8 +17,9 @@ pub const ENDPOINT: &str = "https://orthodoxwestbreviary.com/api/usage";
 /// posts there next time, so builds already installed follow the site to its new address.
 pub const ENDPOINT_HEADER: &str = "office-usage-endpoint";
 
-/// The longest beacon body the server reads.
-pub const MAX_BEACON: usize = 128;
+/// The longest beacon body the server reads. A longer one is refused whole, so the limit keeps
+/// well clear of the longest beacon any front writes (`beacons_fit_the_limit`).
+pub const MAX_BEACON: usize = 192;
 
 /// The seven hours, as the usage store names its office scopes.
 pub const HOURS: [&str; 7] = liturgy::HOUR_NAMES;
@@ -39,7 +40,7 @@ pub struct Dimension<'a> {
 /// Families of mutually exclusive values describing how a page was
 /// rendered. Stored as "<key>:<value>"; a written key or value is never
 /// redefined.
-pub const DIMENSIONS: [Dimension<'static>; 8] = [
+pub const DIMENSIONS: [Dimension<'static>; 11] = [
     Dimension { key: "appearance", values: &["nave", "apse"] },
     Dimension { key: "screen", values: &["desktop", "mobile"] },
     Dimension { key: "prayer-form", values: PRAYER_FORMS },
@@ -57,7 +58,47 @@ pub const DIMENSIONS: [Dimension<'static>; 8] = [
     // The client of a first-day visit, so new readers can be told apart by client. The server
     // derives it from a beacon's `visit:first` and `client` ([`new_client`]); no client sends it.
     Dimension { key: "new-client", values: CLIENTS },
+    // Whether this is the first reporting day of the calendar week (Monday to Sunday), and of the
+    // calendar month, on which this browser or installation is counted. The device remembers the
+    // last two days it was counted and sends only the word, so a week's `week:first` counts sum to
+    // the readers of that week with nothing sent that links one day to another ([`periods`]).
+    Dimension { key: "week", values: PERIODS },
+    Dimension { key: "month", values: PERIODS },
+    // How many of the seven hours a reader has opened today. The server derives it as each hour
+    // is first opened ([`offices_scope`]): a reader sits under one value, the day's count so far.
+    Dimension { key: "offices", values: OFFICES },
 ];
+
+/// The `week` and `month` families' values: the period's first counted day, then every later one.
+pub const PERIODS: &[&str] = &["first", "again"];
+
+/// The `offices` family's values: the number of hours opened in a day.
+pub const OFFICES: &[&str] = &["1", "2", "3", "4", "5", "6", "7"];
+
+/// The families the server derives; a beacon cannot claim them.
+const DERIVED: &[&str] = &["new-client", "offices"];
+
+/// The `offices` scope of a reader who has opened `hours` of the seven today.
+pub fn offices_scope(hours: usize) -> Option<String> {
+    (1..=OFFICES.len()).contains(&hours).then(|| format!("offices:{hours}"))
+}
+
+/// The Monday that begins `day`'s reporting week.
+pub fn week_start(day: Date) -> Date {
+    day.add_days(-((day.weekday().number() + 6) % 7))
+}
+
+/// Whether `today` is the first day this device is counted in its calendar week, and in its
+/// calendar month. `last` is the latest reporting day one of its beacons counted and `previous`
+/// the counted day before that; today's own beacons all say the same, since once today is `last`
+/// the answer is read from `previous`. A device with no days kept is first in both.
+pub fn periods(last: Option<Date>, previous: Option<Date>, today: Date) -> (bool, bool) {
+    let before = if last == Some(today) { previous } else { last };
+    match before {
+        None => (true, true),
+        Some(b) => (week_start(b) != week_start(today), (b.year(), b.month()) != (today.year(), today.month())),
+    }
+}
 
 /// The `client` family's values.
 pub const CLIENTS: &[&str] = &["browser", "pwa", "android", "ios"];
@@ -117,7 +158,7 @@ pub fn parse_event(body: &str) -> Option<Event> {
     let mut seen = Vec::new();
     for field in fields {
         let Some(key) = dimension_key(field) else { continue };
-        if key == "new-client"
+        if DERIVED.contains(&key)
             || seen.contains(&key)
             || (matches!(key, "prayer-form" | "chant") && !HOURS.contains(&scope))
             || (key == "martyrology" && scope != "prime")
@@ -151,7 +192,9 @@ impl App {
 /// pointer); an office page adds the prayer form it was read in, and Prime whether the reader's
 /// setting showed its Martyrology (`None` on a day without one), and an hour with a score whether
 /// the Chant setting showed it (`None` on an hour without one). `first` is whether the
-/// installation is counted for the first time today (`None` when it cannot tell).
+/// installation is counted for the first time today (`None` when it cannot tell); `week` and
+/// `month` whether today is its first counted day of the week and of the month ([`periods`]).
+#[allow(clippy::too_many_arguments)]
 pub fn app_beacon(
     scope: &str,
     app: App,
@@ -160,6 +203,8 @@ pub fn app_beacon(
     martyrology: Option<bool>,
     chant: Option<bool>,
     first: Option<bool>,
+    week: Option<bool>,
+    month: Option<bool>,
 ) -> Option<String> {
     if !valid_scope(scope) {
         return None;
@@ -180,6 +225,11 @@ pub fn app_beacon(
         body.push_str(&format!(" visit:{}", VISITS[usize::from(!first)]));
     }
     body.push_str(&format!(" client:{}", app.as_str()));
+    for (key, first) in [("week", week), ("month", month)] {
+        if let Some(first) = first {
+            body.push_str(&format!(" {key}:{}", PERIODS[usize::from(!first)]));
+        }
+    }
     Some(body)
 }
 
@@ -255,6 +305,10 @@ mod tests {
             ("vespers visit:returning visit:first", "vespers", vec!["visit:returning"]),
             // The server derives the new reader's client; a beacon cannot claim it.
             ("site new-client:android visit:first", "site", vec!["visit:first"]),
+            ("lauds offices:3 client:ios", "lauds", vec!["client:ios"]),
+            // Any page can say whether the week and the month are new.
+            ("ordo client:pwa week:first month:again", "ordo", vec!["client:pwa", "week:first", "month:again"]),
+            ("site week:again week:first month:sometimes", "site", vec!["week:again"]),
         ] {
             let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
             assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
@@ -307,7 +361,7 @@ mod tests {
                         for (martyrology, chant, first) in
                             options.into_iter().flat_map(|m| options.into_iter().flat_map(move |c| options.map(|f| (m, c, f))))
                         {
-                            let body = app_beacon(scope, app, dark, form, martyrology, chant, first).unwrap();
+                            let body = app_beacon(scope, app, dark, form, martyrology, chant, first, first, martyrology).unwrap();
                             assert!(body.len() <= MAX_BEACON, "{body:?} is too long");
                             let event = parse_event(&body).unwrap();
                             assert_eq!(event.scope, *scope);
@@ -316,28 +370,74 @@ mod tests {
                             assert_eq!(body.contains("martyrology:"), *scope == "prime" && martyrology.is_some(), "{body:?}");
                             assert_eq!(body.contains("chant:"), HOURS.contains(scope) && chant.is_some(), "{body:?}");
                             assert_eq!(body.contains("visit:"), first.is_some(), "{body:?}");
+                            assert_eq!(body.contains(" week:"), first.is_some(), "{body:?}");
+                            assert_eq!(body.contains(" month:"), martyrology.is_some(), "{body:?}");
                         }
                     }
                 }
             }
         }
         assert_eq!(
-            app_beacon("compline", App::Android, false, "priest", None, None, None).as_deref(),
+            app_beacon("compline", App::Android, false, "priest", None, None, None, None, None).as_deref(),
             Some("compline appearance:nave screen:mobile prayer-form:priest client:android")
         );
         assert_eq!(
-            app_beacon("site", App::Ios, true, "priest", Some(true), Some(true), Some(true)).as_deref(),
+            app_beacon("site", App::Ios, true, "priest", Some(true), Some(true), Some(true), None, None).as_deref(),
             Some("site appearance:apse screen:mobile visit:first client:ios")
         );
         assert_eq!(
-            app_beacon("vespers", App::Ios, false, "cantor", None, Some(true), None).as_deref(),
-            Some("vespers appearance:nave screen:mobile chant:on client:ios")
+            app_beacon("vespers", App::Ios, false, "cantor", None, Some(true), None, Some(true), Some(false)).as_deref(),
+            Some("vespers appearance:nave screen:mobile chant:on client:ios week:first month:again")
         );
         assert_eq!(
-            app_beacon("prime", App::Android, true, "private", Some(false), Some(false), Some(false)).as_deref(),
-            Some("prime appearance:apse screen:mobile prayer-form:private martyrology:hidden chant:off visit:returning client:android")
+            app_beacon("prime", App::Android, true, "private", Some(false), Some(false), Some(false), Some(false), Some(false)).as_deref(),
+            Some(
+                "prime appearance:apse screen:mobile prayer-form:private martyrology:hidden chant:off visit:returning client:android week:again month:again"
+            )
         );
-        assert!(app_beacon("matins", App::Android, false, "private", None, None, None).is_none());
+        assert!(app_beacon("matins", App::Android, false, "private", None, None, None, None, None).is_none());
+    }
+
+    // The longest beacon each front writes leaves room: one over the limit loses the whole visit.
+    #[test]
+    fn beacons_fit_the_limit() {
+        // app.js's usageBeaconBody at its longest: Prime with a Martyrology and a score.
+        let web = "prime appearance:nave screen:desktop prayer-form:private martyrology:hidden chant:off visit:returning client:browser week:again month:again";
+        let event = parse_event(web).unwrap();
+        assert_eq!(event.dimensions.len(), 9, "the server dropped one of the web's tokens");
+        let app =
+            app_beacon("prime", App::Android, false, "private", Some(false), Some(false), Some(false), Some(false), Some(false)).unwrap();
+        for body in [web, app.as_str()] {
+            assert!(body.len() + 32 <= MAX_BEACON, "{} bytes leaves no room in {MAX_BEACON}: {body:?}", body.len());
+        }
+    }
+
+    #[test]
+    fn a_week_and_a_month_begin_on_the_first_counted_day() {
+        let d = |m, day| Date::new(2026, m, day);
+        // Monday 16 November 2026.
+        assert_eq!(week_start(d(11, 16)), d(11, 16));
+        assert_eq!(week_start(d(11, 22)), d(11, 16));
+        assert_eq!(week_start(d(11, 15)), d(11, 9));
+        for (last, previous, today, want) in [
+            (None, None, d(11, 18), (true, true)),
+            // Counted on Monday; Wednesday is the same week and month.
+            (Some(d(11, 16)), None, d(11, 18), (false, false)),
+            // Every beacon of the first day says first, the day's own mark notwithstanding.
+            (Some(d(11, 18)), None, d(11, 18), (true, true)),
+            (Some(d(11, 18)), Some(d(11, 15)), d(11, 18), (true, false)),
+            (Some(d(11, 18)), Some(d(11, 16)), d(11, 18), (false, false)),
+            // Sunday to Monday is a new week; the 30th to the 1st a new month in the same week.
+            (Some(d(11, 22)), Some(d(11, 20)), d(11, 23), (true, false)),
+            (Some(d(11, 30)), None, d(12, 1), (false, true)),
+            // The same day of the month a year on is a new month.
+            (Some(Date::new(2025, 11, 18)), None, d(11, 18), (true, true)),
+        ] {
+            assert_eq!(periods(last, previous, today), want, "{last:?} {previous:?} {today:?}");
+        }
+        assert_eq!(offices_scope(1).as_deref(), Some("offices:1"));
+        assert_eq!(offices_scope(7).as_deref(), Some("offices:7"));
+        assert!(offices_scope(0).is_none() && offices_scope(8).is_none());
     }
 
     #[test]
