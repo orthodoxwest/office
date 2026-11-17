@@ -147,6 +147,9 @@ pub struct Store {
     conn: Mutex<Connection>,
 }
 
+/// The longest window `daily` reads: the report's longest, and the days before it that its summary reads.
+const MAX_DAYS: usize = 365 + render_html::usage::LOOKBACK;
+
 impl Store {
     pub fn open(path: &str) -> Result<Store, String> {
         let conn = Connection::open(path).map_err(|e| e.to_string())?;
@@ -215,8 +218,11 @@ CREATE TABLE IF NOT EXISTS seen (
                     |r| r.get(0),
                 )
                 .map_err(|e| e.to_string())?;
+            // Only a reader counted there is moved: on the day the server begins keeping these,
+            // an hour opened before it began left no count to take from.
             if let Some(before) = offices_scope(n as usize - 1) {
-                add(&before, -1)?;
+                tx.execute("UPDATE totals SET users = users - 1 WHERE day = ? AND scope = ? AND users > 0", params![day, before])
+                    .map_err(|e| e.to_string())?;
             }
             if let Some(now) = offices_scope(n as usize) {
                 add(&now, 1)?;
@@ -234,7 +240,7 @@ CREATE TABLE IF NOT EXISTS seen (
 
     /// A zero-filled window of `days`, newest first.
     pub fn daily(&self, now: jiff::Timestamp, days: usize) -> Result<Vec<UsageDay>, String> {
-        if !(1..=430).contains(&days) {
+        if !(1..=MAX_DAYS).contains(&days) {
             return Err("invalid day window".into());
         }
         let today = eastern_day(now);
@@ -281,7 +287,8 @@ const CORRECTIONS: render_html::usage::Corrections = render_html::usage::Correct
         ("2026-10-12", "Google Play's test phones were still crawling the Android app: 18 of the day's 40"),
     ],
     // The iOS app reached the App Store on 16 November 2026. Until then its only installs were
-    // TestFlight's and App Review's, which have not reported since (Usage.swift's storeInstall).
+    // TestFlight's and App Review's, which stop reporting with the first build that carries
+    // Usage.swift's storeInstall.
     released: &[(
         "ios",
         "2026-11-16",
@@ -359,11 +366,50 @@ fn settle_visit(mut dimensions: Vec<String>, seen: bool, new: bool) -> Vec<Strin
     dimensions
 }
 
-/// Seconds from `now` to the next reporting day's start, New York's midnight.
-fn until_midnight(now: jiff::Timestamp) -> i64 {
+/// A week's and a month's flags, kept as the first day's are and for the same reason: the page's
+/// own marks of the days it was counted (`office-counted`) are erased by Safari after a week
+/// away, which would open a month twice, and are not written at all when the page is left before
+/// a beacon's reply. Each is (the beacon's family, the flag that lasts the period, the flag that
+/// lasts the day the period was opened). A browser holding a period's flag, and not on the day it
+/// was given, has been counted in that period whatever its page says. Each holds only "1".
+const PERIOD_COOKIES: [(&str, &str, &str); 2] =
+    [("week", "office-week", "office-week-first"), ("month", "office-month", "office-month-first")];
+
+/// A beacon's dimensions with a period's `first` made `again` when the browser was counted in
+/// the period on an earlier day: it holds the period's flag, and its opening day's has lapsed.
+fn settle_periods(mut dimensions: Vec<String>, held: [(bool, bool); 2]) -> Vec<String> {
+    for ((key, ..), (period, opened_today)) in PERIOD_COOKIES.iter().zip(held) {
+        if period && !opened_today {
+            for d in &mut dimensions {
+                if d.strip_suffix(":first") == Some(key) {
+                    *d = format!("{key}:again");
+                }
+            }
+        }
+    }
+    dimensions
+}
+
+/// Seconds from `now` to the start of the reporting day `days` after today's, New York's midnight.
+fn until_day(now: jiff::Timestamp, days: i64) -> i64 {
     let z = now.to_zoned(eastern());
-    let next = z.date().tomorrow().ok().and_then(|d| d.to_zoned(eastern()).ok());
-    next.map_or(86_400, |n| (n.timestamp().as_second() - now.as_second()).max(1))
+    let next = z.date().checked_add(jiff::Span::new().days(days)).ok().and_then(|d| d.to_zoned(eastern()).ok());
+    next.map_or(86_400 * days, |n| (n.timestamp().as_second() - now.as_second()).max(1))
+}
+
+/// Seconds from `now` to the next reporting day's start.
+fn until_midnight(now: jiff::Timestamp) -> i64 {
+    until_day(now, 1)
+}
+
+/// Seconds from `now` to the end of the reporting week (Monday's start) or month.
+fn until_period_end(now: jiff::Timestamp, key: &str) -> i64 {
+    let today = now.to_zoned(eastern()).date();
+    let days = match key {
+        "week" => 7 - i64::from(today.weekday().to_monday_zero_offset()),
+        _ => i64::from(today.days_in_month() - today.day()) + 1,
+    };
+    until_day(now, days)
 }
 
 /// `POST /api/usage`: one page view's beacon. `canonical` is the site's canonical host, if set.
@@ -423,12 +469,23 @@ fn event_at(
     let secure = if header_value(headers, "x-forwarded-proto") == "https" { "; Secure" } else { "" };
     let seen = cookie(headers, SEEN_COOKIE).as_deref() == Some("1");
     let new = cookie(headers, NEW_COOKIE).as_deref() == Some("1");
-    let dimensions = settle_visit(event.dimensions, seen, new);
+    let flag = |name: &str| cookie(headers, name).as_deref() == Some("1");
+    let periods = PERIOD_COOKIES.map(|(_, period, opened)| (flag(period), flag(opened)));
+    let dimensions = settle_periods(settle_visit(event.dimensions, seen, new), periods);
     // Only a browser sends an Origin; the apps keep their own first day and take no cookies.
     if !origin.is_empty() {
         let mut flags = vec![format!("{SEEN_COOKIE}=1; Path=/api/usage; Max-Age=34560000; HttpOnly{secure}; SameSite=Strict")];
         if !seen {
             flags.push(format!("{NEW_COOKIE}=1; Path=/api/usage; Max-Age={}; HttpOnly{secure}; SameSite=Strict", until_midnight(now)));
+        }
+        // A period's flags are given with the first beacon that speaks of it, so a page too old
+        // to say is not later taken for one already counted.
+        for ((key, period, opened), (held, _)) in PERIOD_COOKIES.iter().zip(periods) {
+            if !held && dimensions.iter().any(|d| d.split_once(':').is_some_and(|(family, _)| family == *key)) {
+                for (name, age) in [(period, until_period_end(now, key)), (opened, until_midnight(now))] {
+                    flags.push(format!("{name}=1; Path=/api/usage; Max-Age={age}; HttpOnly{secure}; SameSite=Strict"));
+                }
+            }
         }
         for flag in flags {
             if let Ok(v) = header::HeaderValue::from_str(&flag) {
@@ -860,6 +917,82 @@ mod tests {
         for (scope, n) in [("site", 4), ("visit:first", 3), ("visit:returning", 1), ("new-client:browser", 2), ("new-client:pwa", 1)] {
             assert_eq!(sum(scope), n, "{scope}");
         }
+    }
+
+    // The page's own marks of the days it was counted are lost when Safari erases its storage, or
+    // never written when the page is left before a beacon's reply; the server's flags hold.
+    #[test]
+    fn a_browser_counted_in_a_week_or_month_is_not_first_again_whatever_its_page_says() {
+        let db = TempDb::new("periods");
+        let store = db.open();
+        // Wednesday 11 November 2026, 9 p.m. in New York: the week ends in four days and three
+        // hours, the month in nineteen days and three hours.
+        let post = |day: i8, cookies: &str, body: &str| {
+            let mut headers = HeaderMap::new();
+            headers.insert("x-office-usage", "1".parse().unwrap());
+            headers.insert(header::ORIGIN, "https://office.example".parse().unwrap());
+            headers.insert(header::USER_AGENT, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) Safari/604.1".parse().unwrap());
+            headers.insert(header::COOKIE, format!("office-seen=1{cookies}").parse().unwrap());
+            let now = eastern_at(2026, 11, day, 21, 0);
+            event_at(now, Some(&store), &Method::POST, &headers, "office.example", None, Some(body.as_bytes().to_vec()))
+        };
+        let flags = |r: &Response<Body>| {
+            r.headers()
+                .get_all(header::SET_COOKIE)
+                .iter()
+                .map(|v| v.to_str().unwrap().to_string())
+                .filter(|c| c.starts_with("office-week") || c.starts_with("office-month"))
+                .collect::<Vec<_>>()
+        };
+        let id = "; office-usage=0123456789abcdef0123456789abcdef";
+        let fresh = post(11, id, "site week:first month:first");
+        assert_eq!(
+            flags(&fresh),
+            [
+                "office-week=1; Path=/api/usage; Max-Age=356400; HttpOnly; SameSite=Strict",
+                "office-week-first=1; Path=/api/usage; Max-Age=10800; HttpOnly; SameSite=Strict",
+                "office-month=1; Path=/api/usage; Max-Age=1652400; HttpOnly; SameSite=Strict",
+                "office-month-first=1; Path=/api/usage; Max-Age=10800; HttpOnly; SameSite=Strict",
+            ]
+        );
+        // Later the same day its page still says first, and it is: nothing is set again.
+        let all = "; office-week=1; office-week-first=1; office-month=1; office-month-first=1";
+        assert!(flags(&post(11, &format!("{id}{all}"), "lauds week:first month:first")).is_empty());
+        // The next day, its marks never written: again in both.
+        assert!(flags(&post(12, "; office-week=1; office-month=1", "site week:first month:first")).is_empty());
+        // The next week, its storage erased: the week opens, and its flags are given; the month does not.
+        let next = post(20, "; office-month=1", "site week:first month:first");
+        assert_eq!(flags(&next).len(), 2, "{:?}", flags(&next));
+        // A page too old to say is given no flag, so it is not taken for counted when it updates.
+        assert!(flags(&post(21, "", "site client:browser")).is_empty());
+        let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
+        for (scope, n) in [("week:first", 2), ("week:again", 1), ("month:first", 1), ("month:again", 2)] {
+            assert_eq!(sum(scope), n, "{scope}");
+        }
+        assert_eq!(until_period_end(eastern_at(2026, 11, 15, 23, 0), "week"), 3600, "Sunday night");
+        assert_eq!(until_period_end(eastern_at(2026, 11, 16, 0, 0), "week"), 7 * 86_400, "Monday");
+        assert_eq!(until_period_end(eastern_at(2026, 11, 30, 23, 0), "month"), 3600);
+        assert_eq!(until_period_end(eastern_at(2026, 12, 1, 0, 0), "month"), 31 * 86_400);
+    }
+
+    // On the day the server begins keeping hours per reader, an hour opened before it began left
+    // no count to move: nothing goes below zero, and another reader's count is the worst it takes.
+    #[test]
+    fn hours_opened_before_the_count_began_take_nothing_below_zero() {
+        let db = TempDb::new("offices-first-day");
+        let store = db.open();
+        let now = eastern_at(2026, 9, 4, 9, 0);
+        store.record(now, "a", "lauds", &[]).unwrap();
+        store.conn.lock().unwrap().execute("DELETE FROM totals WHERE scope LIKE 'offices:%'", []).unwrap();
+        store.record(now, "a", "vespers", &[]).unwrap();
+        let row = &store.daily(now, 1).unwrap()[0];
+        let offices: Vec<(&str, i64)> =
+            row.dimensions.iter().filter(|(k, _)| k.starts_with("offices:")).map(|(k, v)| (k.as_str(), *v)).collect();
+        assert_eq!(offices, [("offices:2", 1)]);
+        // The report's longest window and the days its summary reads fit the store's limit.
+        let longest = *render_html::usage::WINDOWS.iter().max().unwrap() as usize + render_html::usage::LOOKBACK;
+        assert_eq!(store.daily(now, longest).unwrap().len(), longest);
+        assert!(store.daily(now, longest + 1).is_err());
     }
 
     #[test]

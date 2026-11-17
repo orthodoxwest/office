@@ -539,6 +539,28 @@ function usageCounted(day) {
   }
 }
 
+// One beacon at a time. A browser begins each reporting day without the server's identifier
+// cookie, and two beacons sent before the first reply (the touch that engages the reminders page,
+// then its click) would each be given one and count two readers.
+var usageQueue = Promise.resolve();
+function usagePost(body, signal) {
+  var sent = usageQueue.then(function () {
+    return fetch("/api/usage", {
+      method: "POST",
+      headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
+      body: body,
+      credentials: "same-origin",
+      cache: "no-store",
+      // The tap that opens an hour from home is also what engages the page: the beacon must
+      // outlive the navigation, or its cookies are lost and the next page counts a second browser.
+      keepalive: true,
+      signal: signal
+    });
+  });
+  usageQueue = sent.catch(function () {});
+  return sent;
+}
+
 function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
   var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
@@ -1701,14 +1723,7 @@ function plainClickOpensHere(e, link) {
   var reportUsageAction = function (scope) {
     try {
       var day = usageReportingDay();
-      fetch("/api/usage", {
-        method: "POST",
-        headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-        body: usageBeaconBody(scope),
-        credentials: "same-origin",
-        cache: "no-store",
-        keepalive: true
-      }).then(function (response) {
+      usagePost(usageBeaconBody(scope)).then(function (response) {
         if (response.ok) usageCounted(day);
       }).catch(function () {});
     } catch {
@@ -5560,17 +5575,7 @@ function plainClickOpensHere(e, link) {
     pending = true;
     var controller = new AbortController();
     var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
-    fetch("/api/usage", {
-      method: "POST",
-      headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-      body: body,
-      credentials: "same-origin",
-      cache: "no-store",
-      // The tap that opens an hour from home is also what engages the page: the beacon must
-      // outlive the navigation, or its cookie is lost and the next page counts a second browser.
-      keepalive: true,
-      signal: controller.signal
-    }).then(function (response) {
+    usagePost(body, controller.signal).then(function (response) {
       if (!response.ok) return;
       recorded.add(key);
       usageCounted(day);

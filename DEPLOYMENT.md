@@ -40,7 +40,7 @@ month. The chart splits each day's bar into returning and new and draws a
 trailing seven-day average. "Where they read" sets each client's week against
 the one before; "What they open" gives each hour, the ordo and reminders as a
 share of the period's readers, and how many hours a reader opens; "Settings in
-use" gives one share per setting, with every family's series over time behind a
+use" gives one share of each setting's reports, with every family's series over time behind a
 disclosure (weekly by default; a part week stands apart at either end).
 
 **Counts that were not readers.** The store keeps what it was sent; the report
@@ -85,8 +85,19 @@ counted (`office-counted` and `office-counted-before` in localStorage, `usage-co
 `usage-counted-before` in the apps), moves them on only when a beacon has arrived, and sends the
 two words (`presentation::usage::periods`; app.js mirrors it). Every beacon of a first day says
 `first`. Older clients say nothing, so the report shows how many of the period's readers reported
-and a week leads only once every day of it was reported. Safari's seven-day erasure cannot
-recount a reader within a week, since seven days away always ends in another week.
+and a week leads only once every day of it was reported; a period whose first days went
+unreported is counted from the day reports began, and says so.
+
+A page's marks can fail it: Safari erases them after seven days away, which would open a month
+twice, and a page left before a beacon's reply never writes them. So for a browser the server
+keeps flags of its own, as it does for the first day: `office-week=1` until the week ends and
+`office-month=1` until the month ends, each given with `office-week-first=1` or
+`office-month-first=1`, which lapse at New York's midnight. A browser holding a period's flag
+without its first-day flag was counted in the period on an earlier day, and its `first` is counted
+as `again`. The flags are given only to a beacon that says the words. The apps take no cookies:
+an app's beacon that arrived without its reply (a timeout after the server counted it) is said
+`first` again on the reader's next day in the period. The browser sends one beacon at a time, so
+the day's first has set the identifier before the next is sent.
 
 `offices:1`…`offices:7` is derived by the server, like `new-client`: as a reader first opens an
 hour, they move from one count to the next, so each sits under the number of hours opened so far
@@ -160,8 +171,8 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
 (until New York's midnight, HttpOnly, SameSite=Strict, Secure over HTTPS, path
 `/api/usage`; a month-long one from before is cut short on its next beacon); the
-apps send their own daily ID in its place, so no front sends an identifier on two days. `office-seen` and `office-new` (same attributes) hold only `1`
-and settle `visit:first` as above; the apps get none of these cookies.
+apps send their own daily ID in its place, so no front sends an identifier on two days. `office-seen`, `office-new` and the four week and month flags (same attributes) hold only `1`
+and settle `visit:first`, `week:first` and `month:first` as above; the apps get none of these cookies.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept

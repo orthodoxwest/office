@@ -10311,7 +10311,6 @@ html {
   .feast-everyone a,
   .feast-see a,
   .privacy a,
-  .usage-notes summary,
   .usage-trend-details summary,
   .not-found-home a,
   .site-menu nav a,
@@ -10360,7 +10359,6 @@ html {
   .feast-everyone a,
   .feast-see a,
   .privacy a,
-  .usage-notes summary,
   .usage-trend-details summary,
   .not-found-home a,
   .site-menu nav a,
@@ -12312,8 +12310,6 @@ body.page-home::before {
 .usage-page h2 { scroll-margin-top: 1.5rem; }
 .usage-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 0 1.5rem; }
 .usage-overview .usage-panel { margin-bottom: 0; }
-.usage-overview .usage-trend { margin-top: 2.2rem; }
-.usage-overview .usage-chart { height: 12rem; }
 .usage-office-totals { margin: 0; font-size: .9rem; font-variant-numeric: lining-nums tabular-nums; }
 .usage-office-totals dd { display: flex; align-items: center; gap: .7rem; margin: 0; }
 .usage-explorer [hidden] { display: none; }
@@ -12344,7 +12340,7 @@ body.page-home::before {
 .usage-trend figcaption { display: flex; flex-wrap: wrap; gap: .35rem 1.2rem; margin: .8rem 0 0 2.4rem; color: var(--muted); font-size: .85rem; }
 .usage-key { display: inline-flex; align-items: center; gap: .4rem; }
 .usage-key::before { content: ""; box-sizing: border-box; width: .75rem; height: .75rem; background: var(--accent); }
-.usage-key-new::before { opacity: .38; }
+.usage-key-new::before { background: color-mix(in srgb, var(--surface) 62%, var(--accent)); }
 .usage-key-plain::before { background: var(--muted); opacity: .5; }
 .usage-key-average::before { width: 1.2rem; height: 0; background: none; border-top: 1.5px solid var(--text); }
 .usage-key-today::before { background: none; border: 1px dashed var(--text); }
@@ -12374,10 +12370,15 @@ body.page-home::before {
 .usage-notes ul { margin: 0; padding-left: 1.1rem; font-size: .9rem; }
 .usage-notes li { margin-block: .4rem; }
 .usage-notes a { color: var(--accent); text-decoration-color: var(--gold-line); text-underline-offset: .25em; }
+/* Eleven columns need about 58rem: under that the hours go by their initials, the full name
+   kept for a screen reader, and the ordo and reminders stay with the wide table. */
+@media (max-width: 940px) {
+  .usage-hour abbr { display: inline; }
+  .usage-hour span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .usage-wide { display: none; }
+}
 @media (max-width: 700px) {
   .usage-headline { font-size: 1.45rem; }
-  .usage-hour abbr { display: inline; }
-  .usage-hour span, .usage-wide { display: none; }
   .usage-days { font-size: .85rem; }
   .usage-table.usage-days th, .usage-table.usage-days td { padding: .6rem .2rem; }
   .usage-table.usage-days thead th { font-size: .62rem; letter-spacing: 0; }
@@ -12394,9 +12395,10 @@ body.page-home::before {
 @media (hover: hover) {
   .usage-table tbody tr:hover > * { background: var(--bg); }
 }
-.usage-notes summary, .usage-trend-details summary { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; cursor: pointer; color: var(--text); font-size: .9rem; list-style: none; }
-.usage-notes summary::-webkit-details-marker, .usage-trend-details summary::-webkit-details-marker { display: none; }
-.usage-notes summary::after, .usage-trend-details summary::after { content: "▾"; color: var(--gold-line); }
+.usage-trend-details summary { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; cursor: pointer; color: var(--text); font-size: .9rem; list-style: none; }
+.usage-trend-details summary::-webkit-details-marker { display: none; }
+.usage-trend-details summary::after { content: "▾"; color: var(--gold-line); }
+.usage-trend-details[open] > summary::after { content: "▴"; }
 @media (max-width: 850px) {
   .usage-overview { grid-template-columns: 1fr; gap: 0; }
 }
@@ -12413,7 +12415,7 @@ body.page-home::before {
   .usage-summary .usage-stat-note { font-size: .75rem; }
   .usage-panel { padding: 1rem .8rem; }
   .usage-section-heading { gap: .5rem; }
-  .usage-overview .usage-chart { height: 9rem; }
+  .usage-chart { height: 9rem; }
   .usage-table th, .usage-table td { padding: .7rem .55rem; }
 }
 /* Trend exploration belongs to the working report, with no new theme colours. */
@@ -12431,7 +12433,6 @@ body.page-home::before {
 .usage-value-secondary { color: var(--muted); font-size: .85rem; }
 #usage-inspect-values .usage-value-primary { display: block; font-size: 1.25rem; }
 #usage-inspect-values .usage-value-secondary { display: block; }
-.usage-explorer .usage-splits-note a { color: var(--accent); }
 .usage-explorer > .usage-splits-note { margin-top: .7rem; }
 .usage-explore-legend { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; list-style: none; padding: 0; margin: 1.2rem 0; font-size: .9rem; }
 .usage-explore-legend li { display: flex; gap: .45rem; align-items: center; }
@@ -12472,6 +12473,7 @@ body.page-home::before {
   .usage-table th, .usage-table td { padding: .35rem; }
   .usage-table-wrap { max-height: none; overflow: visible; }
   .usage-table th { position: static !important; }
+  .usage-window, .usage-over-time, .usage-days ~ summary, details:has(.usage-days) > summary { display: none; }
 }
 
 /* Prime carries the Martyrology section twice, as the rubric and as the

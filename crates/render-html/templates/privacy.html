@@ -24,7 +24,9 @@
     To count a reader once rather than at every page, the website keeps a random
     identifier in a cookie used for nothing else, sent only with these notes and
     discarded when the day ends, and each app makes a fresh random identifier
-    every day. The server stores
+    every day. Beside it the website keeps a few cookies that hold only a “1”,
+    the same for everyone: that this browser has been counted before, and that
+    it has been counted this week and this month. The server stores
     only a fingerprint of that identifier combined with the date, deletes those
     after two days, and keeps only the daily totals, so nothing it keeps ties one
     day’s reading to another’s. Your browser’s ordinary description of itself is
@@ -43,7 +45,8 @@
     Your settings (appearance, text size, prayer form and the Martyrology),
     your time zone, which picks the day to show, and, with Chant on, the width of
     your page, which sets the notation to fit it, are kept in your browser or the
-    app. A reminder schedule lives entirely in the calendar link you make, or in
+    app, as are the first day and the last two days it was counted, from which
+    it answers the yes or no above. A reminder schedule lives entirely in the calendar link you make, or in
     the app on your phone; the server builds the calendar from that link each
     time and keeps no copy.
   </p>
@@ -54,6 +57,6 @@
     <a href="https://github.com/orthodoxwest/office/issues/new">project’s issue tracker</a>.
     If this policy changes, this page will say so.
   </p>
-  <p class="privacy-updated">Last updated 13 November 2026.</p>
+  <p class="privacy-updated">Last updated 16 November 2026.</p>
 </div>
 {% endblock %}

@@ -5013,6 +5013,29 @@ test("engaged visits to a current page send an event, passive and background one
   expect(events.length).toBe(2);
 });
 
+test("the usage report keeps its explorer shut until it is used", async ({ page }) => {
+  await page.goto("/admin/usage?days=7");
+  const explorer = page.locator(".usage-over-time");
+  const tab = page.locator(".usage-window a").first();
+  await expect(page.locator(".usage-explorer")).toBeAttached();
+  // A period's link is the period alone, so following it does not open the explorer.
+  await expect(tab).toHaveAttribute("href", "?days=7");
+  await expect(explorer).not.toHaveAttribute("open", "");
+  // The daily table fits its panel at any width: no sideways scroll inside it.
+  for (const width of [390, 720, 900]) {
+    await page.setViewportSize({ width, height: 800 });
+    const [scroll, client] = await page.locator(".usage-days").first().evaluate(table => [table.parentElement.scrollWidth, table.parentElement.clientWidth]);
+    expect(scroll, `daily table at ${width}px`).toBeLessThanOrEqual(client);
+  }
+  // Once a control is changed the choice travels with the links, and a link so made opens it.
+  await explorer.locator("> summary").click();
+  await page.locator("#usage-measure label", { hasText: "%" }).click();
+  await expect(tab).toHaveAttribute("href", /days=7&compare=client&interval=day&measure=share/);
+  await tab.click();
+  await expect(explorer).toHaveAttribute("open", "");
+  await expect(page.locator("#usage-measure input[value=share]")).toBeChecked();
+});
+
 test("the dated archive is freely readable but never counted", async ({ page }) => {
   const events = [];
   await page.route("**/api/usage", async route => {

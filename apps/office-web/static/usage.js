@@ -2,6 +2,11 @@
 // are requested, stored, or inferred here. The existing report works without JS.
 (function () {
   "use strict";
+  // Paper has no disclosure to open: the folded days print with the rest.
+  addEventListener("beforeprint", () => document.querySelectorAll(".usage-days").forEach(table => {
+    const fold = table.closest("details");
+    if (fold) fold.open = true;
+  }));
   const root = document.querySelector(".usage-explorer");
   if (!root) return;
   const groups = JSON.parse(document.getElementById("usage-trend-data").textContent);
@@ -19,6 +24,8 @@
       if (option) option.checked = true;
     }
   }
+  // Two or three weeks make no line: a short window opens by day.
+  if (!params.has("interval") && groups[0].Points.length < 21) interval.querySelector("input[value=day]").checked = true;
   const date = day => new Date(`${day}T12:00:00Z`);
   const format = day => date(day).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const total = counts => counts.reduce((sum, count) => sum + count, 0);
@@ -86,7 +93,7 @@
     });
     const partial = selected(interval) === "week" && bucket.days < 7 ? " Partial week in this view." : "";
     const note = get("inspect-note");
-    note.textContent = (sum ? (selected(interval) === "week" ? `${bucket.reported} of ${bucket.days} days reported.` : "") : "No observations. Percentages are unavailable.") + partial;
+    note.textContent = (sum ? (selected(interval) === "week" ? `${bucket.reported} of ${bucket.days} ${bucket.days === 1 ? "day" : "days"} reported.` : "") : "No observations. Percentages are unavailable.") + partial;
     note.hidden = !note.textContent;
   }
 
@@ -181,7 +188,7 @@
       item.append(key, node("span", label)); legend.append(item);
     });
     const reported = group.Points.filter(point => total(point.Counts)).length;
-    get("explore-coverage").textContent = `${reported} of ${group.Points.length} days reported${first > 0 ? ` · Chart begins ${format(points[0].Day)}` : ""}`;
+    get("explore-coverage").textContent = `${reported} of ${group.Points.length} ${group.Points.length === 1 ? "day" : "days"} reported${first > 0 ? ` · Chart begins ${format(points[0].Day)}` : ""}`;
     get("explore-first").textContent = format(points[0].Day);
     get("explore-last").textContent = format(points[points.length - 1].Day);
     get("explore-chart-title").textContent = `${group.Label}: ${shares ? "share of category" : "readers"} by ${selected(interval)}`;
@@ -203,10 +210,12 @@
   chart.addEventListener("pointerdown", point);
   chart.addEventListener("pointermove", event => { if (event.pointerType === "mouse") point(event); });
   draw();
-  // Initial navigation leaves the URL alone, but restores bookmarked controls.
-  links();
   document.querySelector(".usage-breakdown-fallback").hidden = true;
   root.hidden = false;
-  // A bookmarked exploration opens where it was left.
-  if (params.has("compare")) root.closest("details").open = true;
+  // A bookmarked exploration opens where it was left, and keeps its controls from one period to
+  // the next; otherwise the periods' links are left alone until a control is changed.
+  if (params.has("compare")) {
+    root.closest("details").open = true;
+    links();
+  }
 })();

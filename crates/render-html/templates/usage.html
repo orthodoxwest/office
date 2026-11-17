@@ -3,7 +3,7 @@
 {% macro day_table(rows, caption, first) %}
       <table class="usage-table usage-days">
         <caption class="sr-only">{{ caption }}</caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">Readers</th><th scope="col">New</th>{% for h in hours %}<th scope="col" class="usage-hour"><abbr title="{{ h|titlecase }}">{{ h[:1]|upper }}</abbr><span>{{ h|titlecase }}</span></th>{% endfor %}<th scope="col" class="usage-wide">Ordo</th><th scope="col" class="usage-wide">Reminders</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Readers</th><th scope="col">New</th>{% for h in hours %}<th scope="col" class="usage-hour"><abbr title="{{ h|titlecase }}" aria-hidden="true">{{ h[:1]|upper }}</abbr><span>{{ h|titlecase }}</span></th>{% endfor %}<th scope="col" class="usage-wide">Ordo</th><th scope="col" class="usage-wide">Reminders</th></tr></thead>
         <tbody>{% for row in rows %}<tr class="{% if first and loop.first %}usage-today{% endif %}{% if row.week_start %} usage-week-start{% endif %}{% if row.excluded %} usage-excluded{% endif %}"{% if row.excluded %} title="{{ row.note }}"{% endif %}><th scope="row"><time datetime="{{ row.day }}">{{ row.label }}</time> <span class="usage-weekday">{% if first and loop.first %}Today{% else %}{{ row.weekday }}{% endif %}</span>{% if row.excluded %}<span class="sr-only"> (left out: {{ row.note }})</span>{% endif %}</th><td class="usage-total">{{ row.users }}</td>{% if row.new_readers is none %}<td class="usage-zero"><span aria-hidden="true">–</span><span class="sr-only">not yet counted</span></td>{% else %}<td{% if not row.new_readers %} class="usage-zero"{% endif %}>{{ row.new_readers }}</td>{% endif %}{% for n in row.hours %}<td{% if not n %} class="usage-zero"{% endif %}>{{ n }}</td>{% endfor %}<td class="usage-wide{% if not row.ordo %} usage-zero{% endif %}">{{ row.ordo }}</td><td class="usage-wide{% if not row.reminders %} usage-zero{% endif %}">{{ row.reminders }}</td></tr>{% endfor %}</tbody>
       </table>
 {% endmacro %}
@@ -38,7 +38,7 @@
       </div>
       <div class="usage-chart-dates" aria-hidden="true">{% for t in dates %}<span style="--at: {{ t.at }}%">{{ t.label }}</span>{% endfor %}</div>
       </div>
-      {% if not max %}<p class="usage-empty">No visits recorded in this period.<br><span>Counts will appear as readers open the app.</span></p>{% endif %}
+      {% if empty %}<p class="usage-empty">No visits recorded in this period.<br><span>Counts will appear as readers open the app.</span></p>{% endif %}
       <figcaption>{% if chart_split %}<span class="usage-key usage-key-returning">Returning</span><span class="usage-key usage-key-new">New that day</span>{% endif %}{% if chart_plain %}<span class="usage-key usage-key-plain">{% if chart_split %}Not yet told apart{% else %}Readers{% endif %}</span>{% endif %}{% if rolling_path %}<span class="usage-key usage-key-average">7-day average</span>{% endif %}<span class="usage-key usage-key-today">Today, in progress</span>{% if chart_excluded %}<span class="usage-key usage-key-excluded">Test devices, left out</span>{% endif %}</figcaption>
     </figure>
   </section>
@@ -47,7 +47,7 @@
     <div class="usage-section-heading"><div><h2 id="usage-clients-title">Where they read</h2><p>Readers a day in the last 7 days, the 7 before (the mark), and new readers in the week</p></div></div>
     <table class="usage-table usage-clients">
       <thead><tr><th scope="col"><span class="sr-only">Where</span></th><th scope="col" class="usage-clients-bar"><span class="sr-only">Last 7 days, with a mark at the 7 before</span></th><th scope="col">A day</th><th scope="col">Before</th><th scope="col">New</th></tr></thead>
-      <tbody>{% for c in clients %}<tr><th scope="row">{{ c.name }}</th><td class="usage-clients-bar"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect width="{{ c.width }}" height="8"/>{% if c.mark %}<path d="M{{ c.mark }} -3V11" vector-effect="non-scaling-stroke"/>{% endif %}</svg></td><td class="usage-total">{{ c.now }}</td><td>{% if c.before %}{% if c.direction == "up" %}<span class="usage-direction" aria-hidden="true">↑</span><span class="sr-only">up from </span>{% elif c.direction == "down" %}<span class="usage-direction" aria-hidden="true">↓</span><span class="sr-only">down from </span>{% endif %}{{ c.before }}{% else %}<span aria-hidden="true">–</span>{% endif %}</td><td{% if not c.new %} class="usage-zero"{% endif %}>{{ c.new }}</td></tr>{% endfor %}</tbody>
+      <tbody>{% for c in clients %}<tr><th scope="row">{{ c.name }}</th><td class="usage-clients-bar"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect width="{{ c.width }}" height="8"/>{% if c.mark %}<path d="M{{ c.mark }} -3V11" vector-effect="non-scaling-stroke"/>{% endif %}</svg></td><td class="usage-total">{% if c.direction == "up" %}<span class="usage-direction" aria-hidden="true">↑</span><span class="sr-only">up to </span>{% elif c.direction == "down" %}<span class="usage-direction" aria-hidden="true">↓</span><span class="sr-only">down to </span>{% endif %}{{ c.now }}</td><td>{% if c.before %}{{ c.before }}{% else %}<span aria-hidden="true">–</span>{% endif %}</td><td{% if not c.new %} class="usage-zero"{% endif %}>{{ c.new }}</td></tr>{% endfor %}</tbody>
     </table>
     <p class="usage-splits-note">A reader who moves from the browser to an app is new there, and one fewer here.</p>
   </section>{% endif %}
@@ -59,7 +59,7 @@
   </section>
   </div>
   <section class="usage-panel" aria-labelledby="usage-settings-title">
-    <div class="usage-section-heading"><div><h2 id="usage-settings-title">Settings in use</h2><p>Share of the period’s readers who reported each</p></div></div>
+    <div class="usage-section-heading"><div><h2 id="usage-settings-title">Settings in use</h2><p>Each setting’s share of the period’s reports: a reader counts once a day in each</p></div></div>
     {% if settings %}<dl class="usage-office-totals usage-settings">{% for o in settings %}<div><dt>{{ o.name }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>{% else %}<p class="usage-splits-note">Nothing reported in this period.</p>{% endif %}
     <details class="usage-trend-details usage-over-time"><summary>Each of these over time</summary>
     <div class="usage-breakdown-fallback">
@@ -109,7 +109,7 @@
       <li>A reader is one browser or app installation on one day: not a person, and not a completed prayer. Two devices are two readers.</li>
       <li>Days are Eastern time. Today is still filling, and is left out of every average.</li>
       <li>New means first counted on that device; clearing site data or reinstalling makes a reader new again.</li>
-      <li>Hours and settings overlap: a reader who opens Lauds and Vespers counts in both.</li>
+      <li>Hours and settings overlap: a reader who opens Lauds and Vespers counts in both, and one who changes a setting during the day counts under both of its values.</li>
       <li>A week’s and a month’s readers are devices too, added up without anything that links one day to another.</li>
       {% for c in corrections %}<li>{{ c }}</li>{% endfor %}
     </ul>

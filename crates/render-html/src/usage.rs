@@ -156,6 +156,8 @@ pub struct UsageData {
     pub period_note: String,
     /// The highest daily count the chart is scaled to.
     pub max: i64,
+    /// No reader on any day of the window, a day set aside included.
+    pub empty: bool,
     pub chart: Vec<UsageBar>,
     pub ticks: Vec<UsageTick>,
     /// The ticks' gridlines, as an SVG path in the chart's coordinates.
@@ -197,6 +199,10 @@ pub const LOOKBACK: usize = 62;
 
 /// The windows offered, in days.
 pub const WINDOWS: [i64; 4] = [7, 30, 90, 365];
+
+/// The room a date under the chart takes, as a share of the plot's width on a phone.
+const DATE_GAP: f64 = 14.0;
+const TODAY_GAP: f64 = 11.0;
 
 /// Rows of the daily table shown before the rest are folded away.
 const TABLE_ROWS: usize = 14;
@@ -325,7 +331,7 @@ pub fn usage_data(
     periods(&mut d, &all, &year);
     chart(&mut d, &all, window);
     d.clients = clients(&all);
-    breakdowns(&mut d, window, &year);
+    breakdowns(&mut d, &all, window, &year);
     for (day, why) in corrections.test_days {
         if window.iter().any(|r| r.day == *day) {
             d.corrections.push(format!("{}: {why}. The day is shown, but left out of every average, share and scale.", label(day)));
@@ -335,7 +341,7 @@ pub fn usage_data(
         if window.iter().any(|r| r.day.as_str() < *day) {
             let name = CLIENT_NAMES.iter().find(|(key, ..)| key == client).map_or(*client, |c| c.1);
             d.corrections.push(format!(
-                "{name} before {}: {why}. Those counts are left out of readers, new readers and the clients; the hours they opened remain.",
+                "{name} before {}: {why}. Those counts are left out of readers, new readers and the clients. The hours they opened and the settings they reported cannot be told from readers' and remain.",
                 label(day)
             ));
         }
@@ -352,10 +358,10 @@ fn tabs(days: i64, since: Option<&str>, today: &str, year: &str) -> Vec<UsageTab
         (Some(first), Some(today)) => i64::from(today.days_since(first)) + 1,
         _ => 0,
     };
-    let whole = WINDOWS.iter().copied().find(|&n| n > recorded);
+    let whole = WINDOWS.iter().copied().find(|&n| n >= recorded);
     WINDOWS
         .iter()
-        .filter(|&&n| n <= recorded || Some(n) == whole)
+        .filter(|&&n| n < recorded || Some(n) == whole)
         .map(|&n| UsageTab {
             days: n,
             label: match since {
@@ -379,10 +385,10 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
         value: all[0].users.to_string(),
         note: {
             let mut parts = Vec::new();
-            if let Some(y) = all.get(1) {
+            if let Some(y) = all.get(1).filter(|r| !r.excluded) {
                 parts.push(format!("Yesterday {}", y.users));
             }
-            if let (Some(w), Some(t)) = (all.get(7), Date::parse(&all[0].day)) {
+            if let (Some(w), Some(t)) = (all.get(7).filter(|r| !r.excluded), Date::parse(&all[0].day)) {
                 parts.push(format!("last {} {}", WEEKDAY_NAMES[t.weekday().number() as usize], w.users));
             }
             parts.join(" · ")
@@ -398,7 +404,9 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
     d.headline_rest = match before.and_then(|b| mean(b, users)) {
         _ if week.len() < 7 => format!(" over {} completed day{}.", week.len(), if week.len() == 1 { "" } else { "s" }),
         None => " last week.".into(),
-        Some(b) if b > 0.0 && ((now - b) / b).abs() < LEVEL => format!(" last week, about level with the week before ({}).", whole(b)),
+        Some(b) if whole(now) == whole(b) || (b > 0.0 && ((now - b) / b).abs() < LEVEL) => {
+            format!(" last week, about level with the week before ({}).", whole(b))
+        }
         Some(b) if now > b => format!(" last week, up from {} the week before.", whole(b)),
         Some(b) => format!(" last week, down from {} the week before.", whole(b)),
     };
@@ -440,11 +448,12 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
             .map(|(n, phrase)| format!("{n} {phrase}"))
             .collect();
         d.headline_detail = format!(
-            "Of those, {} a day were returning{}. {new} were new in the week{}{}.",
+            "Of those, {} a day were returning{}. {new} were new in the week{}.{}",
             whole(back),
             back_before.map_or(String::new(), |b| format!(" ({} the week before)", whole(b))),
             new_before.map_or(String::new(), |b| format!(" ({b} before)")),
-            if by_client.is_empty() { String::new() } else { format!(": {}", by_client.join(", ")) },
+            // A reader new to one client may have been counted on another, so these can pass the total.
+            if by_client.is_empty() { String::new() } else { format!(" New to each client: {}.", by_client.join(", ")) },
         );
     }
     tiles.push(today);
@@ -457,7 +466,7 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
 fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
     let Some(today) = Date::parse(&all[0].day) else { return };
     let reported = |r: &&UsageDay, key: &str| family(r, key) > 0;
-    let mut covered = (0, 0);
+    let mut partial = false;
     for (key, noun, this_start, last_start) in [
         ("week", "week", week_start(today), week_start(today).add_days(-7)),
         ("month", "month", Date::new(today.year(), today.month() as i32, 1), {
@@ -469,7 +478,9 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
         let span = |from: Date, to: Date| -> Vec<&UsageDay> {
             all.iter().filter(|r| Date::parse(&r.day).is_some_and(|t| t.days_since(from) >= 0 && to.days_since(t) > 0)).collect()
         };
-        let this: Vec<&UsageDay> = span(this_start, today.add_days(1)).into_iter().filter(|r| reported(r, key)).collect();
+        // Newest first: the period in progress runs from its first reported day.
+        let mut this = span(this_start, today.add_days(1));
+        this.truncate(this.iter().rposition(|r| reported(r, key)).map_or(0, |i| i + 1));
         let last = span(last_start, this_start);
         let last_whole = last.len() as i32 == this_start.days_since(last_start) && last.iter().all(|r| reported(r, key) || r.users == 0);
         let sum = |rows: &[&UsageDay]| rows.iter().map(|r| dim(r, &first)).sum::<i64>();
@@ -478,30 +489,46 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
             (Some(a), _) => date_label(&a.day, year),
             _ => String::new(),
         };
+        // The share of the counted days' readers whose client said either word.
+        let coverage = |rows: &[&UsageDay]| {
+            let (said, of) = rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
+            (of > 0 && said * 20 < of * 19).then(|| format!(" · {} of readers reporting", percent(said, of)))
+        };
         let so_far = (!this.is_empty()).then(|| sum(&this));
-        let tile = if last_whole && last.iter().any(|r| reported(r, key)) {
-            UsageTile {
+        let (mut tile, counted) = if last_whole && last.iter().any(|r| reported(r, key)) {
+            let tile = UsageTile {
                 label: format!("Readers, last {noun}"),
                 value: sum(&last).to_string(),
                 note: format!("{}{}", range(&last), so_far.map_or(String::new(), |n| format!(" · this {noun} so far {n}"))),
                 bars: Vec::new(),
-            }
-        } else if let Some(n) = so_far {
-            UsageTile { label: format!("Readers, this {noun} so far"), value: n.to_string(), note: range(&this), bars: Vec::new() }
+            };
+            (tile, &last)
+        } else if let (Some(n), Some(began)) = (so_far, this.last()) {
+            // A period whose first days went unreported is counted from the day reports began.
+            let whole = Date::parse(&began.day) == Some(this_start);
+            let tile = UsageTile {
+                label: if whole {
+                    format!("Readers, this {noun} so far")
+                } else {
+                    format!("Readers since {}", date_label(&began.day, year))
+                },
+                value: n.to_string(),
+                note: if whole { range(&this) } else { format!("Not the whole {noun}: {}", range(&this)) },
+                bars: Vec::new(),
+            };
+            (tile, &this)
         } else {
             continue;
         };
-        d.period_tiles.push(tile);
-        for r in if last_whole { last.iter() } else { this.iter() } {
-            covered.0 += family(r, key).min(r.users);
-            covered.1 += r.users;
+        if let Some(c) = coverage(counted) {
+            tile.note.push_str(&c);
+            partial = true;
         }
+        d.period_tiles.push(tile);
     }
-    if covered.1 > 0 && covered.0 * 20 < covered.1 * 19 {
-        d.period_note = format!(
-            "Reported by {} of readers so far: a browser or app says so once it has the version that counts weeks, so these run low until all have it.",
-            percent(covered.0, covered.1)
-        );
+    if partial {
+        d.period_note =
+            "A browser or app reports these once it has the version that counts weeks, so they run low until all have it.".into();
     }
 }
 
@@ -509,6 +536,7 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
 fn chart(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
     let peak = window.iter().filter(|r| !r.excluded).map(|r| r.users).max().unwrap_or(0);
     d.max = peak;
+    d.empty = window.iter().all(|r| r.users == 0);
     let (top, step) = scale(peak);
     let n = window.len();
     let width = 720.0 / n as f64;
@@ -565,9 +593,13 @@ fn chart(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
     // The first day, then each month's first, clear of both ends.
     let at = |i: usize| 100.0 * ((n - 1 - i) as f64 + 0.5) / n as f64;
     d.dates.push(UsageTick { at: format_float(at(n - 1)), label: window[n - 1].label.clone() });
+    // A label is about a seventh of a phone's plot wide: the first is set from the left edge and
+    // "Today" from the right, and each mark between stands a label clear of the one before.
+    let mut last = DATE_GAP * if window[n - 1].label.contains(',') { 1.5 } else { 1.0 };
     for (i, row) in window.iter().enumerate().rev() {
-        if row.day.ends_with("-01") && (12.0..88.0).contains(&at(i)) {
+        if row.day.ends_with("-01") && at(i) >= last + DATE_GAP / 2.0 && at(i) <= 100.0 - TODAY_GAP - DATE_GAP / 2.0 {
             d.dates.push(UsageTick { at: format_float(at(i)), label: row.label.clone() });
+            last = at(i) + DATE_GAP / 2.0;
         }
     }
     if n > 1 {
@@ -623,7 +655,7 @@ fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
 }
 
 /// What the window's readers opened, and the settings they read with.
-fn breakdowns(d: &mut UsageData, window: &[UsageDay], year: &str) {
+fn breakdowns(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay], year: &str) {
     let readers = total(window, |r| r.users);
     d.readers = readers;
     let share = |name: &str, count: i64, peak: i64| UsageShare {
@@ -637,8 +669,12 @@ fn breakdowns(d: &mut UsageData, window: &[UsageDay], year: &str) {
     let peak = counts.iter().copied().chain([ordo, reminders]).max().unwrap_or(0);
     d.opens = HOURS.iter().zip(&counts).map(|(name, &count)| share(name, count, peak)).collect();
     d.opens_extra = vec![share("ordo", ordo, peak), share("reminders", reminders, peak)];
-    // Hours per reader, from the first day the server kept them.
-    let kept: Vec<&UsageDay> = window.iter().filter(|r| !r.excluded && family(r, "offices") > 0).collect();
+    // Hours per reader, over completed days (today's readers have the rest of the day to open
+    // more), from the day after the server began keeping them: on that first day the hours
+    // opened before it began were not kept.
+    let began = all.iter().rposition(|r| family(r, "offices") > 0).filter(|&i| i + 1 < all.len()).map(|i| all[i].day.as_str());
+    let kept: Vec<&UsageDay> =
+        window.iter().skip(1).filter(|r| !r.excluded && family(r, "offices") > 0 && Some(r.day.as_str()) != began).collect();
     if let Some(first) = kept.last() {
         let by = |n: usize| kept.iter().map(|r| dim(r, &format!("offices:{n}"))).sum::<i64>();
         let opened: i64 = (1..=7).map(by).sum();
@@ -832,6 +868,14 @@ mod tests {
         let d = data(days(0, &[1; 40]), 90, "2026-08-27");
         let tabs: Vec<(i64, &str, bool)> = d.tabs.iter().map(|t| (t.days, t.label.as_str(), t.current)).collect();
         assert_eq!(tabs, [(7, "7 days", false), (30, "30 days", false), (90, "Since Aug 27", true)]);
+        // A record just as long as a window is that window, once.
+        let d = data(days(0, &[1; 29]), 30, "2026-09-07");
+        let tabs: Vec<(i64, &str, bool)> = d.tabs.iter().map(|t| (t.days, t.label.as_str(), t.current)).collect();
+        assert_eq!(tabs, [(7, "7 days", false), (30, "Since Sep 7", true)]);
+        // Dates under the bars stand clear of each other: a month's first beside the window's
+        // first day is not named.
+        let d = data(days(0, &[1; 40]), 9, "2026-08-27");
+        assert_eq!(d.dates.iter().map(|t| t.label.as_str()).collect::<Vec<_>>(), ["Sep 28", "Today"]);
         let d = data(days(0, &[1; 40]), 365, "2026-08-27");
         assert!(d.tabs[2].current, "a longer window than the record is the whole record");
     }
@@ -849,6 +893,7 @@ mod tests {
         // Under a fifth either way is not told from chance.
         assert_eq!(headline(days(0, &weeks(36, 33))), "36 readers a day last week, about level with the week before (33).");
         assert_eq!(headline(days(0, &weeks(4, 0))), "4 readers a day last week, up from 0 the week before.");
+        assert_eq!(headline(days(0, &weeks(0, 0))), "0 readers a day last week, about level with the week before (0).");
         assert_eq!(headline(days(0, &[6; 9])), "6 readers a day last week.");
         assert_eq!(headline(days(0, &[3, 5])), "4 readers a day over 2 completed days.");
         assert_eq!(headline(days(3, &[])), "No completed days yet.");
@@ -877,7 +922,7 @@ mod tests {
         assert_eq!(tiles[2], ("New, in 7 days", "21", "7 the week before"));
         assert_eq!(
             d.headline_detail,
-            "Of those, 7 a day were returning (9 the week before). 21 were new in the week (7 before): 14 in a browser, 7 on Android."
+            "Of those, 7 a day were returning (9 the week before). 21 were new in the week (7 before). New to each client: 14 in a browser, 7 on Android."
         );
         // New readers were first told apart fourteen days ago: the days before show none, not zero.
         assert_eq!(d.rows.iter().map(|r| r.new_readers).collect::<Vec<_>>(), [Some(3); 7]);
@@ -992,9 +1037,8 @@ mod tests {
                     ("prayer-form:deacon", 1),
                 ],
             ),
-            row("2026-09-03", 0),
         ];
-        let d = data(rows, 7, "2026-09-03");
+        let d = data(rows.clone(), 7, "2026-09-04");
         let opens: Vec<(&str, &str, &str, &str)> = d
             .opens
             .iter()
@@ -1006,15 +1050,26 @@ mod tests {
         assert_eq!(opens[2], ("terce", "0%", "0", "0"));
         assert_eq!(opens[7..], [("ordo", "25%", "5", "63"), ("reminders", "5%", "1", "13")]);
         assert_eq!(d.readers, 20);
-        // Hours per reader are read only from the days the server kept them.
+        // Hours per reader are read only from completed days the server kept them.
         assert_eq!(
             d.offices_note,
             "Since Sep 4, 60% of readers opened an hour, 2.0 each on average: one hour 50%, two 33%, three 0%, four or more 17%."
         );
         let settings: Vec<(&str, &str, &str)> = d.settings.iter().map(|o| (o.name.as_str(), o.value.as_str(), o.detail.as_str())).collect();
         assert_eq!(settings, [("Appearance", "75%", "Apse (dark)"), ("Prayer form", "30%", "clerical: priest 20%, deacon 10%")]);
+        // Today is still filling, and on the server's first day of keeping them the hours opened
+        // before it began are missing: neither is read.
+        let mut later =
+            vec![with(row("2026-09-07", 4), &[("offices:1", 4)]), with(row("2026-09-06", 10), &[("offices:1", 1), ("offices:3", 4)])];
+        later.extend(rows);
+        later.push(row("2026-09-03", 0));
+        let d = data(later, 7, "2026-09-03");
+        assert_eq!(
+            d.offices_note,
+            "Since Sep 6, 50% of readers opened an hour, 2.6 each on average: one hour 20%, two 0%, three 80%, four or more 0%."
+        );
         let d = data(vec![row("2026-09-05", 0)], 7, "2026-09-05");
-        assert!(d.opens.iter().all(|o| o.width == "0" && o.value == "—") && d.offices_note.is_empty() && d.settings.is_empty());
+        assert!(d.empty && d.opens.iter().all(|o| o.width == "0" && o.value == "—") && d.offices_note.is_empty() && d.settings.is_empty());
     }
 
     #[test]
@@ -1071,8 +1126,21 @@ mod tests {
         for row in &mut rows[..2] {
             row.users = 20;
         }
-        let d = data(rows, 7, "2026-01-01");
-        assert!(d.period_note.starts_with("Reported by "), "{}", d.period_note);
+        let d = data(rows.clone(), 7, "2026-01-01");
+        assert!(!d.period_note.is_empty());
+        assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4 · this week so far 13");
+        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 75% of readers reporting");
+        // A month whose first days went unreported is counted from the day reports began, and
+        // its share is of those days' readers.
+        for key in ["month:first", "month:again"] {
+            rows[5].dimensions.remove(key);
+        }
+        let d = data(rows.clone(), 7, "2026-01-01");
+        let month = &d.period_tiles[1];
+        assert_eq!(
+            (month.label.as_str(), month.value.as_str(), month.note.as_str()),
+            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 71% of readers reporting")
+        );
         assert!(data(days(10, &[10; 20]), 7, "2026-01-01").period_tiles.is_empty());
     }
 
