@@ -400,17 +400,25 @@ mod routing_tests {
         assert!(home.contains("icons&#x2f;share-card.png") && home.contains("summary_large_image"));
         let (status, _) = get("example.org", &pwa::asset_url("icons/share-card.png")).await;
         assert_eq!(status, StatusCode::OK, "the preview card is served");
-        let (_, far) = get("example.org", "/calendar/1950").await;
+        let this_year = Server::local_year();
+        let (_, far) = get("example.org", &format!("/calendar/{}", this_year - 10)).await;
         assert!(far.contains("noindex"));
         // A crawler follows the year links only to the years search indexes, not a year at a
         // time from end to end: each new year is a year's calendar built on the server.
-        assert_eq!(far.matches("rel=\"nofollow\"").count(), 2, "neither of 1950's neighbours is indexed");
+        assert_eq!(far.matches("rel=\"nofollow\"").count(), 2, "neither neighbour of a far year is indexed");
         // Nor is a year beyond the ones every front offers built at all.
-        for path in ["/calendar/1899", "/calendar/2101/01", "/calendar/4294969196", "/lauds/2101-01-01", "/?date=1899-12-31"] {
-            let (status, _) = get("example.org", path).await;
+        let years = presentation::offered_years(this_year);
+        let (before, after) = (years.start() - 1, years.end() + 1);
+        for path in [
+            format!("/calendar/{before}"),
+            format!("/calendar/{after}/01"),
+            "/calendar/4294969196".to_string(),
+            format!("/lauds/{after}-01-01"),
+            format!("/?date={before}-12-31"),
+        ] {
+            let (status, _) = get("example.org", &path).await;
             assert_eq!(status, StatusCode::NOT_FOUND, "{path}");
         }
-        let this_year = Server::local_year();
         let (_, current) = get("example.org", &format!("/calendar/{this_year}")).await;
         let nofollow = format!("{}\" rel=\"nofollow\"", this_year - 1);
         assert!(current.contains(&nofollow) && current.matches("rel=\"nofollow\"").count() == 1, "next year is followed, last year not");

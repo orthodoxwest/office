@@ -24,13 +24,17 @@ pub struct YearEntry {
 
 const MAX_CACHED_YEARS: usize = 8;
 
-/// Only the years every front offers are built (`presentation::offered_year`): the ordo's
-/// links stop there, and a request beyond them does not set the server building years no
-/// reader asked for.
+/// Whether `year` is one every front offers now (`presentation::offered_years`), by the
+/// server's clock. Only these are built: the ordo's links stop there, and a request beyond them
+/// does not set the server building years no reader is offered.
+pub fn offered_year(year: i32) -> bool {
+    presentation::offered_years(crate::Server::local_year()).contains(&year)
+}
+
 fn offered(year: i32) -> Result<(), String> {
-    match presentation::offered_year(year) {
+    match offered_year(year) {
         true => Ok(()),
-        false => Err(format!("{year} is outside {}–{}", presentation::FIRST_YEAR, presentation::LAST_YEAR)),
+        false => Err(format!("{year} is outside the years offered")),
     }
 }
 
@@ -219,8 +223,10 @@ mod tests {
     #[test]
     fn builds_only_the_offered_years() {
         let cache = cache();
-        assert!(cache.get(1899).is_err() && cache.get(2101).is_err() && cache.keeping(2101).is_err());
-        assert!(cache.get(1900).is_ok() && cache.get(2100).is_ok());
+        let years = presentation::offered_years(crate::Server::local_year());
+        let (first, last) = (*years.start(), *years.end());
+        assert!(cache.get(first - 1).is_err() && cache.get(last + 1).is_err() && cache.keeping(last + 1).is_err());
+        assert!(cache.get(first).is_ok() && cache.get(last).is_ok());
         assert_eq!(cache.builds.load(Ordering::Relaxed), 2);
     }
 

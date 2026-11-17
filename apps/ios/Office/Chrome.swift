@@ -693,9 +693,16 @@ struct Disclosure: View {
 /// Change date's day links, worded as the web's.
 private let dayNav = dayNavWords()
 
-/// The picker's span of years, presentation's FIRST_YEAR to LAST_YEAR, as the web's (app.js
-/// PICKER_FIRST_YEAR, PICKER_LAST_YEAR); the ordo's year links stop at its ends too.
-let pickerYears = 1900...2100
+/// How far back and ahead of this year the picker reaches (presentation's offered_years), as the
+/// web's (app.js YEARS_BACK, YEARS_AHEAD); the ordo's year links stop at its ends too.
+let yearsBack = 30
+let yearsAhead = 100
+
+/// The picker's span of years, from this year's.
+var pickerYears: ClosedRange<Int> {
+    let year = Calendar(identifier: .gregorian).component(.year, from: Date())
+    return (year - yearsBack)...(year + yearsAhead)
+}
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days are
