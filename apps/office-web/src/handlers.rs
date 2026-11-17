@@ -591,6 +591,8 @@ impl Server {
             name: if y == year { MONTHS[m as usize - 1].to_string() } else { format!("{} {y}", MONTHS[m as usize - 1]) },
             href: calendar_month_link(y, m),
         };
+        // Search needs only this year's ordo and the next.
+        let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let data = CalendarData {
             chrome: Chrome {
                 page: "calendar".into(),
@@ -599,7 +601,7 @@ impl Server {
                 site: req.site.into(),
                 canonical: same_view(year),
                 // Every year has an ordo; search needs only this one and the next.
-                noindex: !(now.year()..=now.year() + 1).contains(&year),
+                noindex: !indexed(year),
                 ..Chrome::default()
             },
             year,
@@ -609,6 +611,8 @@ impl Server {
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
             next_year_link: same_view(year + 1),
+            prev_year_follow: indexed(year - 1),
+            next_year_follow: indexed(year + 1),
             year_link: calendar_year_link(year),
             all_link: calendar_all_link(year),
             month_links: MONTHS
@@ -1193,8 +1197,10 @@ mod tests {
         assert_eq!(strip.matches(r#"aria-current="page""#).count(), 1);
         assert!(strip.contains(r#"data-month="2026-09""#));
         assert_eq!(body.matches(r#"aria-current="page""#).count(), 2, "the month and the Ordo menu item");
-        assert!(body.contains(r#"href="/calendar/2025/09" aria-label="Previous year, 2025""#));
-        assert!(body.contains(r#"href="/calendar/2027/09" aria-label="Next year, 2027""#));
+        // (Whether a crawler follows them depends on the year it is; see
+        // search_engines_find_the_undated_pages_on_the_canonical_host.)
+        assert!(body.contains(r#"href="/calendar/2025/09""#) && body.contains(r#"aria-label="Previous year, 2025""#));
+        assert!(body.contains(r#"href="/calendar/2027/09""#) && body.contains(r#"aria-label="Next year, 2027""#));
         for want in [
             r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
             r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
