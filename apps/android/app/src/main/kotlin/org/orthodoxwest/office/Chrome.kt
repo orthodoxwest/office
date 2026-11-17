@@ -877,8 +877,8 @@ internal val FOLD_MS = Tempo.unfoldOut.ms
 internal const val MONTH_OUT_MS = 70
 internal const val MONTH_IN_MS = 140
 
-/** The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
-private val PICKER_YEARS = 1950..2150
+/** The picker's span of years, presentation's FIRST_YEAR to LAST_YEAR, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR). */
+internal val PICKER_YEARS = 1900..2100
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days

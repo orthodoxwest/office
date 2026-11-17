@@ -273,9 +273,12 @@ pub struct CalendarData {
     pub prev_year_link: String,
     pub next_year_link: String,
     /// Whether a crawler may follow the year links: only to the years search indexes, so
-    /// that a crawler does not walk the ordo a year at a time from 1 to 9999.
+    /// that a crawler does not walk the ordo a year at a time from end to end.
     pub prev_year_follow: bool,
     pub next_year_follow: bool,
+    /// Whether the neighbouring years are offered (`presentation::offered_year`).
+    pub has_prev_year: bool,
+    pub has_next_year: bool,
     pub year_link: String,
     pub all_link: String,
     pub month_links: Vec<MonthLink>,

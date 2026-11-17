@@ -2169,10 +2169,10 @@ function plainClickOpensHere(e, link) {
     "July", "August", "September", "October", "November", "December",
   ];
   var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  // The picker offers a working span of years; the native field's min and
-  // max in the templates match it.
-  var PICKER_FIRST_YEAR = 1950;
-  var PICKER_LAST_YEAR = 2150;
+  // The picker offers the years every front offers (presentation's FIRST_YEAR
+  // and LAST_YEAR); the native field's min and max in the templates match it.
+  var PICKER_FIRST_YEAR = 1900;
+  var PICKER_LAST_YEAR = 2100;
 
   // Dates are UTC midnights built with setUTCFullYear, which neither maps
   // years 0-99 onto the 1900s nor shifts across daylight saving, and which

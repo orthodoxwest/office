@@ -693,8 +693,9 @@ struct Disclosure: View {
 /// Change date's day links, worded as the web's.
 private let dayNav = dayNavWords()
 
-/// The picker's span of years, as the web's (app.js PICKER_FIRST_YEAR, PICKER_LAST_YEAR).
-private let pickerYears = 1950...2150
+/// The picker's span of years, presentation's FIRST_YEAR to LAST_YEAR, as the web's (app.js
+/// PICKER_FIRST_YEAR, PICKER_LAST_YEAR); the ordo's year links stop at its ends too.
+let pickerYears = 1900...2100
 
 /**
  * The hand-set date picker (app.js): Previous · Today · Next, then a month grid whose days are

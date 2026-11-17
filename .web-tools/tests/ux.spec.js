@@ -3948,13 +3948,11 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
 });
 
-test("the date picker keeps to 1950-2150", async ({ page }) => {
+test("the date picker keeps to 1900-2100", async ({ page }) => {
   const picker = page.getByRole("group", { name: "Choose a date" });
   for (const [path, month, closed, open] of [
-    ["/lauds/2150-12-15", "December 2150", "Next month", "Previous month"],
-    ["/lauds/1950-01-10", "January 1950", "Previous month", "Next month"],
-    // Outside the span, the picker opens at the nearer end.
-    ["/lauds/2200-06-01", "December 2150", "Next month", "Previous month"],
+    ["/lauds/2100-12-15", "December 2100", "Next month", "Previous month"],
+    ["/lauds/1900-01-10", "January 1900", "Previous month", "Next month"],
   ]) {
     await openDatedPage(page, path);
     await page.locator("button.hour-meta-date").click();
@@ -3962,17 +3960,19 @@ test("the date picker keeps to 1950-2150", async ({ page }) => {
     await expect(picker.getByRole("button", { name: closed })).toBeDisabled();
     await expect(picker.getByRole("button", { name: open })).toBeEnabled();
   }
+  // Outside the span there is no page (presentation::offered_year).
+  expect((await page.goto("/lauds/2200-06-01")).status()).toBe(404);
   // Keys stop at the end rather than leaving the span.
-  await page.goto("/lauds/2150-12-15");
+  await page.goto("/lauds/2100-12-15");
   await page.locator("button.hour-meta-date").click();
   // Let the opening's toggle run first: it resets the roving focus to the
   // page's day, as a reader's own keypress always follows it.
-  await expect(picker.getByRole("grid", { name: "December 2150" })).toBeVisible();
+  await expect(picker.getByRole("grid", { name: "December 2100" })).toBeVisible();
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve))));
-  await picker.getByRole("link", { name: "Thursday, December 31, 2150" }).focus();
+  await picker.getByRole("link", { name: "Friday, December 31, 2100" }).focus();
   await page.keyboard.press("ArrowRight");
-  await expect(picker.getByRole("link", { name: "Thursday, December 31, 2150" })).toBeFocused();
-  await expect(page.locator(".date-jump")).toHaveAttribute("max", "2150-12-31");
+  await expect(picker.getByRole("link", { name: "Friday, December 31, 2100" })).toBeFocused();
+  await expect(page.locator(".date-jump")).toHaveAttribute("max", "2100-12-31");
 });
 
 test("home's date picker opens the chosen day's home", async ({ page }) => {

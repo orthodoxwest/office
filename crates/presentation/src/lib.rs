@@ -18,6 +18,18 @@ pub mod usage;
 use calendar::{CalendarDay, Color, Date, MoveableDates, Rank, Season};
 use liturgy::{ElementType, OfficeHour, OfficeSection};
 
+/// The years every front offers: the date pickers (app.js's PICKER_FIRST_YEAR and
+/// PICKER_LAST_YEAR, Chrome.kt's PICKER_YEARS, Chrome.swift's pickerYears and the templates'
+/// date fields) and the ordo's year links stop at their ends, and the web server builds no
+/// year outside them, so that a crawler walking the ordo cannot keep it building years.
+pub const FIRST_YEAR: i32 = 1900;
+pub const LAST_YEAR: i32 = 2100;
+
+/// Whether `year` is one the fronts offer ([`FIRST_YEAR`] to [`LAST_YEAR`]).
+pub fn offered_year(year: i32) -> bool {
+    (FIRST_YEAR..=LAST_YEAR).contains(&year)
+}
+
 /// Capitalizes the first letter ("advent" → "Advent").
 pub fn title_case(s: &str) -> String {
     let mut chars = s.chars();
@@ -540,6 +552,24 @@ pub fn year_roman(year: i32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Every front's date picker and the templates' date fields keep to the offered years.
+    #[test]
+    fn every_front_offers_the_same_years() {
+        let read =
+            |path: &str| std::fs::read_to_string(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(path)).expect(path);
+        let (first, last) = (FIRST_YEAR, LAST_YEAR);
+        let js = read("apps/office-web/static/app.js");
+        assert!(js.contains(&format!("var PICKER_FIRST_YEAR = {first};")) && js.contains(&format!("var PICKER_LAST_YEAR = {last};")));
+        for template in ["home", "hour"] {
+            let html = read(&format!("crates/render-html/templates/{template}.html"));
+            assert!(html.contains(&format!(r#"min="{first}-01-01" max="{last}-12-31""#)), "{template}.html's date field");
+        }
+        let kotlin = read("apps/android/app/src/main/kotlin/org/orthodoxwest/office/Chrome.kt");
+        assert!(kotlin.contains(&format!("val PICKER_YEARS = {first}..{last}")), "Chrome.kt");
+        let swift = read("apps/ios/Office/Chrome.swift");
+        assert!(swift.contains(&format!("let pickerYears = {first}...{last}")), "Chrome.swift");
+    }
 
     #[test]
     fn lauds_prime_and_vespers_open_their_prayers() {

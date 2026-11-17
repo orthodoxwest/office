@@ -330,6 +330,9 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(ds)),
             }
         };
+        if !presentation::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let slug = date_slug(date);
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
@@ -422,6 +425,10 @@ impl Server {
                 None => return self.error_page(req, StatusCode::BAD_REQUEST, &invalid_date(date_str)),
             }
         };
+        // Years beyond the ones every front offers are not built (see `YearCache::get`).
+        if !presentation::offered_year(date.year()) {
+            return self.not_found_page(req);
+        }
         let entry = match self.cache.get(date.year()) {
             Ok(e) => e,
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
@@ -551,7 +558,9 @@ impl Server {
             return redirect(&target, StatusCode::FOUND);
         }
         let year = match data_format::atoi(parts[1]) {
-            Ok(y) if (1..=9999).contains(&y) => y as i32,
+            // Years beyond the ones every front offers are not built (see `YearCache::get`).
+            Ok(y) if i32::try_from(y).is_ok_and(presentation::offered_year) => y as i32,
+            Ok(_) => return self.not_found_page(req),
             // Beneath a year that is not one, there is no page at all.
             _ if parts.len() == 3 => return self.not_found_page(req),
             _ => return self.error_page(req, StatusCode::BAD_REQUEST, &format!("Invalid year {}.", data_format::quote(parts[1]))),
@@ -613,6 +622,8 @@ impl Server {
             next_year_link: same_view(year + 1),
             prev_year_follow: indexed(year - 1),
             next_year_follow: indexed(year + 1),
+            has_prev_year: presentation::offered_year(year - 1),
+            has_next_year: presentation::offered_year(year + 1),
             year_link: calendar_year_link(year),
             all_link: calendar_all_link(year),
             month_links: MONTHS
@@ -638,12 +649,12 @@ impl Server {
                 .collect(),
             months,
             prev_month: current.and_then(|m| match m {
-                1 if year > 1 => Some(step(year - 1, 12)),
+                1 if presentation::offered_year(year - 1) => Some(step(year - 1, 12)),
                 1 => None,
                 m => Some(step(year, m - 1)),
             }),
             next_month: current.and_then(|m| match m {
-                12 if year < 9999 => Some(step(year + 1, 1)),
+                12 if presentation::offered_year(year + 1) => Some(step(year + 1, 1)),
                 12 => None,
                 m => Some(step(year, m + 1)),
             }),
@@ -1216,8 +1227,11 @@ mod tests {
         assert!(ordo("/calendar/2026/01").contains(
             r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
         ));
-        assert!(!ordo("/calendar/0001/01").contains("Previous month"));
-        assert!(!ordo("/calendar/9999/12").contains("Next month"));
+        // The ordo runs over the years every front offers, and stops at their ends.
+        let first = ordo("/calendar/1900/01");
+        assert!(!first.contains("Previous month") && !first.contains("Previous year") && first.contains("Next year, 1901"));
+        let last = ordo("/calendar/2100/12");
+        assert!(!last.contains("Next month") && !last.contains("Next year") && last.contains("Previous year, 2099"));
     }
 
     /// An observance kept by monastics and oblates only is the ordo's bracketed line under the
