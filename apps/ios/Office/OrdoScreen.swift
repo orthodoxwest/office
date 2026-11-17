@@ -973,7 +973,8 @@ private struct Digest: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // The row's tap opens these in place; this leads on to the day (the web's `.day-office-open`).
+            // The row's tap opens these in place; this, above the digest's rule, leads on to the
+            // day (the web's `.day-office-open`).
             Button {
                 model.choseInOrdo(d.date)
                 model.open(.home(d.date))
@@ -981,7 +982,14 @@ private struct Digest: View {
                 Text("\(markWords.openDay) ›").type(Scale.small.sized(13.6, line: 20.4)).foregroundStyle(p.accent)
             }
             .buttonStyle(Quiet())
+            .padding(.top, m.px(2.4))
             .padding(.bottom, m.px(5.6))
+            digest
+        }
+    }
+
+    private var digest: some View {
+        VStack(alignment: .leading, spacing: 0) {
             if !dayComms.isEmpty {
                 hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms)
             }

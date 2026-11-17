@@ -1025,17 +1025,18 @@ private val TodayNote: TextStyle
 
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable
-private fun Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (String) -> Unit) {
+private fun ColumnScope.Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
+    // The row's tap opens these in place; this, above the digest's rule, leads on to the day (the
+    // web's `.day-office-open`).
+    Text(
+        "${MARK_WORDS.openDay} ›",
+        Modifier.padding(top = 2.4.dp, bottom = 5.6.dp).tap(onClick = onDay),
+        style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.accent),
+    )
     Column(
         Modifier.fillMaxWidth().padding(bottom = 8.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(8.dp),
     ) {
-        // The row's tap opens these in place; this leads on to the day (the web's `.day-office-open`).
-        Text(
-            "${MARK_WORDS.openDay} ›",
-            Modifier.padding(bottom = 5.6.dp).tap(onClick = onDay),
-            style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.accent),
-        )
         // The day's commemorations first, under "Day", as the hours' rows are set.
         val day = d.dayComms()
         if (day.isNotEmpty()) DigestHour("Day", emptyList(), null, preces = false, suffrage = false, comms = day, onFeast = onFeast)
