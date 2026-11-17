@@ -197,6 +197,7 @@ struct Niche: View {
 
     var body: some View {
         Canvas { ctx, full in
+            ScreenshotGeometry.note("niche.canvas", "\(full)")
             let rem = m.px(16)
             let card = Card(arch: arch, full: full)
             let o = card.origin, size = card.size

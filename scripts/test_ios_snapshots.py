@@ -112,6 +112,21 @@ class CompareTest(unittest.TestCase):
             self.assertEqual(sheet.size, (393 * 3 + 16, 120))
         self.assertIn("`vespers-nave` | changed", self.summary.read_text())
 
+    def test_a_changed_shot_reports_what_its_page_measured_then_and_now(self):
+        self.shot("ipad-home-nave", "Vespers")
+        (self.raw / "ipad-home-nave.geometry.txt").write_text("home.card: (130.0, 210.0, 557.0, 870.0)\n")
+        self.seed()
+        self.assertTrue((self.base / "ipad-home-nave.geometry.txt").is_file())
+        self.shot("ipad-home-nave", "Compline")
+        (self.raw / "ipad-home-nave.geometry.txt").write_text("home.card: (130.0, 210.0, 574.0, 895.0)\n")
+        status, _, _ = self.run_compare()
+        self.assertEqual(status, 1)
+        summary = self.summary.read_text()
+        self.assertIn("ipad-home-nave: what the page measured", summary)
+        self.assertIn("557.0", summary)
+        self.assertIn("574.0", summary)
+        self.assertEqual((self.updates / "ipad-home-nave.geometry.txt").read_text(), "home.card: (130.0, 210.0, 574.0, 895.0)\n")
+
     def test_new_and_gone_shots_fail_and_updates_follow_the_shots(self):
         self.shot("home-nave")
         self.shot("about-nave")
