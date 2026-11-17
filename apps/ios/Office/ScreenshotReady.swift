@@ -39,3 +39,33 @@ private struct ScreenshotReadyMark: ViewModifier {
         }
     }
 }
+
+/**
+ * For the simulator screenshots too: what a page measured of its own layout, kept beside its shot
+ * (apps/ios/screenshots.sh saves it as `<shot>.geometry.txt`), so a shot that differs from its
+ * baseline says which measure moved (#891). Each value is kept with the first it took and how
+ * often it changed. A launch without `-page` notes nothing.
+ */
+enum ScreenshotGeometry {
+    static let file = FileManager.default.temporaryDirectory.appendingPathComponent("screenshot-geometry.txt")
+    private static let on = ProcessInfo.processInfo.arguments.contains("-page")
+    private static var notes: [String: (first: String, last: String, changes: Int)] = [:]
+
+    /// Notes `value` under `key`, and writes the page's notes out again.
+    static func note(_ key: String, _ value: String) {
+        guard on else { return }
+        DispatchQueue.main.async {
+            if let old = notes[key] {
+                guard old.last != value else { return }
+                notes[key] = (first: old.first, last: value, changes: old.changes + 1)
+            } else {
+                notes[key] = (first: value, last: value, changes: 0)
+            }
+            let text = notes.keys.sorted().map { key in
+                let n = notes[key]!
+                return n.changes == 0 ? "\(key): \(n.last)" : "\(key): \(n.last) (first \(n.first), changed \(n.changes) times)"
+            }.joined(separator: "\n")
+            try? Data((text + "\n").utf8).write(to: file, options: .atomic)
+        }
+    }
+}

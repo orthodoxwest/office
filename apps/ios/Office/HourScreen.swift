@@ -724,6 +724,7 @@ final class Reading {
 
     private func update() {
         let now = read()
+        ScreenshotGeometry.note("hour.reading", "ratio \(now), rows \(rows), frames \(frames.count), heights \(heights.count), viewport \(viewport)")
         if abs(now - ratio) > 0.0005 || (now != ratio && (now == 0 || now == 1)) { ratio = now }
         let mark = frames[Reading.ending].map { $0.frame.minY + endMark.top }
         let shown = mark.map { Reading.whollyShown(from: $0, size: endMark.size, foot: viewport.height) } ?? false

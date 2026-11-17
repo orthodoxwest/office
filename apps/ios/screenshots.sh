@@ -189,6 +189,11 @@ shoot() {
       mv "$this" "$last"
     done
     mv "$this" "$out/$name.png"
+    # What the page measured of itself (ScreenshotGeometry), beside the shot and in the log, so a
+    # shot that differs from its baseline says which measure moved (#891).
+    if cp "$data/tmp/screenshot-geometry.txt" "$out/$name.geometry.txt" 2> /dev/null; then
+      sed "s/^/    $name /" "$out/$name.geometry.txt"
+    fi
     echo "$(date +%T) $name (cleared and launched in $((launched - began))s, drawn after ${drawn}s, at rest $((settled + 1))s later)"
   }
   for sim in "$phone" "$ipad"; do
