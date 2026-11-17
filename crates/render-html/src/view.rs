@@ -260,6 +260,10 @@ pub struct TabulaData {
 pub struct MonthStep {
     pub name: String,
     pub href: String,
+    /// Whether a crawler may follow it: only within the years search indexes, as the year
+    /// links (`CalendarData::prev_year_follow`), so that it does not walk the ordo a month at
+    /// a time from end to end either.
+    pub follow: bool,
 }
 
 /// An ordo page: one month, the year's frontispiece, or the whole year.

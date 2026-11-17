@@ -126,7 +126,9 @@ function revalidate(req, cached) {
   if (!tag) {
     return networkFetch(req);
   }
-  return fetch(req.url, { headers: { "If-None-Match": tag }, cache: "no-store", credentials: "same-origin" });
+  // Redirects stay unfollowed, as for the navigation itself: a page that now
+  // redirects is not stored under its old key.
+  return fetch(req.url, { headers: { "If-None-Match": tag }, cache: "no-store", credentials: "same-origin", redirect: "manual" });
 }
 
 function putIfOk(cache, req, resp) {

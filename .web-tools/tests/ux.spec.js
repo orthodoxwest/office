@@ -3867,6 +3867,21 @@ test("home's Change date turns the hours into the calendar in their place", asyn
   }
 });
 
+test("home's Change date brings the card's foot to rest however late its turn ends", async ({ page }) => {
+  // A loaded device can start the turn's transition late, so that it ends after the frames
+  // that follow it were due to stop; a long transition stands in for that here.
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.waitForFunction(() => document.documentElement.classList.contains("motion-ready"));
+  await page.addStyleTag({ content: ":root { --tempo-unfold-in: 600ms !important; }" });
+  await page.locator(".home-hero details.home-date-nav > summary").click();
+  await expect(page.locator(".home-stage")).not.toHaveClass(/is-turning/);
+  await expect.poll(() => page.evaluate(() => {
+    const foot = document.querySelector(".home-hero").getBoundingClientRect().bottom;
+    return foot <= innerHeight - 15 && foot > innerHeight - 33;
+  }), { message: "the card's foot at rest on its gutter" }).toBe(true);
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
@@ -5845,6 +5860,10 @@ test("a page beyond the saved fortnight waits for a slow server, and offline ans
       asked.push({ held, status: answer.status() });
       await route.fulfill({ response: answer });
     });
+    // The tag names the reader's hour (America/New_York, whole hours from UTC), so a check
+    // made in the next hour is answered with the page.
+    const hour = () => Math.floor(Date.now() / 3600000);
+    const before = hour();
     const response = await page.goto(far);
     expect(response.status()).toBe(200);
     await expect(page.locator("#offline-heading")).toHaveCount(0);
@@ -5853,10 +5872,7 @@ test("a page beyond the saved fortnight waits for a slow server, and offline ans
     expect(asked).toHaveLength(1);
 
     // Opened again, the saved copy shows at once and is checked by its tag: the server,
-    // finding it unchanged, sends nothing. (The tag names the reader's hour, so a check made
-    // in the next hour is answered with the page.)
-    const hour = () => Math.floor(Date.now() / 3600000);
-    const before = hour();
+    // finding it unchanged, sends nothing.
     await page.goto(far);
     await expect.poll(() => asked.length).toBe(2);
     expect(asked[1].held).toMatch(/^W\/"/);

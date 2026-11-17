@@ -253,9 +253,9 @@
   <span id="ordo-place" hidden></span>
   {# The hours' continuation: the same diamond, labels and targets. #}
   <nav class="hour-continuation ordo-continuation" aria-label="Other months">
-    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
+    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"{% if not prev_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
     <a class="day-hours-link" href="{{ year_link|url }}">{{ year }} Ordo</a>
-    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"{% if not next_month.follow %} rel="nofollow"{% endif %}><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
   </nav>
   {% endif %}
   {% endif %}

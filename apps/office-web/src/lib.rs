@@ -151,7 +151,7 @@ impl Server {
             && (method == Method::GET || method == Method::HEAD);
         let tag = page.then(|| {
             let target = uri.path_and_query().map(|p| p.as_str()).unwrap_or("/");
-            etag::page_tag(self.version(), &site, target, headers, web_time::now_in(&self.user_location(&req)))
+            etag::page_tag(self.version(), &site, target, headers, web_time::now_in(&self.user_location(&req)), Server::local_year())
         });
         if let Some(tag) = &tag
             && etag::matches(headers, tag)
@@ -178,7 +178,9 @@ impl Server {
         if let Some(tag) = tag
             && resp.status() == StatusCode::OK
         {
+            // The tag names the reader's cookies, so the page varies with them.
             http::set(&mut resp, header::ETAG, &tag);
+            http::set(&mut resp, header::VARY, "Cookie");
         }
         resp
     }
@@ -478,6 +480,11 @@ mod routing_tests {
         // A crawler follows the year links only to the years search indexes, not a year at a
         // time from end to end: each new year is a year's calendar built on the server.
         assert_eq!(far.matches("rel=\"nofollow\"").count(), 2, "neither neighbour of a far year is indexed");
+        // Nor month by month across the years.
+        let (_, january) = get("example.org", &format!("/calendar/{}/01", this_year - 10)).await;
+        assert!(january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Previous month"), "{january}");
+        let (_, this_january) = get("example.org", &format!("/calendar/{this_year}/12")).await;
+        assert!(!this_january.contains("rel=\"nofollow\"><span class=\"continuation-label\">Next month"), "next year is indexed");
         // Nor is a year beyond the ones every front offers built at all.
         let years = presentation::offered_years(this_year);
         let (before, after) = (years.start() - 1, years.end() + 1);

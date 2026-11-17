@@ -11,10 +11,11 @@ use axum::http::{HeaderMap, Response, StatusCode, header};
 
 use crate::http::{response, set};
 
-/// The page's entity tag. `now` is the reader's date and hour (`web_time::now_in`).
-pub fn page_tag(version: &str, site: &str, target: &str, headers: &HeaderMap, now: (calendar::Date, i8)) -> String {
+/// The page's entity tag. `now` is the reader's date and hour (`web_time::now_in`) and
+/// `server_year` the server's own, which sets the years the date fields offer.
+pub fn page_tag(version: &str, site: &str, target: &str, headers: &HeaderMap, now: (calendar::Date, i8), server_year: i32) -> String {
     let mut h = DefaultHasher::new();
-    (site, target).hash(&mut h);
+    (site, target, server_year).hash(&mut h);
     for cookies in headers.get_all(header::COOKIE) {
         cookies.as_bytes().hash(&mut h);
     }
@@ -33,10 +34,11 @@ pub fn matches(headers: &HeaderMap, tag: &str) -> bool {
         .any(|t| opaque(t) == opaque(tag))
 }
 
-/// "Not modified", carrying the tag and the pages' revalidation rule.
+/// "Not modified", carrying the tag and the pages' revalidation rule and `Vary`.
 pub fn not_modified(tag: &str) -> Response<Body> {
-    let mut resp = response(StatusCode::NOT_MODIFIED, String::new());
+    let mut resp = response(StatusCode::NOT_MODIFIED, Body::empty());
     set(&mut resp, header::ETAG, tag);
     set(&mut resp, header::CACHE_CONTROL, "no-cache");
+    set(&mut resp, header::VARY, "Cookie");
     resp
 }

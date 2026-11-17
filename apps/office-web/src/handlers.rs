@@ -602,12 +602,13 @@ impl Server {
             Ok(entry) => presentation::course::year_course(entry.days.iter().map(|d| &**d)),
             Err(e) => return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, &format!("error building calendar: {e}")),
         };
+        // Search needs only this year's ordo and the next.
+        let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let step = |y: i32, m: u32| MonthStep {
             name: if y == year { MONTHS[m as usize - 1].to_string() } else { format!("{} {y}", MONTHS[m as usize - 1]) },
             href: calendar_month_link(y, m),
+            follow: indexed(y),
         };
-        // Search needs only this year's ordo and the next.
-        let indexed = |y: i32| (now.year()..=now.year() + 1).contains(&y);
         let data = CalendarData {
             chrome: Chrome {
                 page: "calendar".into(),
@@ -1218,6 +1219,9 @@ mod tests {
         // search_engines_find_the_undated_pages_on_the_canonical_host.)
         assert!(body.contains(r#"href="/calendar/2025/09""#) && body.contains(r#"aria-label="Previous year, 2025""#));
         assert!(body.contains(r#"href="/calendar/2027/09""#) && body.contains(r#"aria-label="Next year, 2027""#));
+        // The month links, whichever a crawler follows this year.
+        let unruled = |page: String| page.replace(r#" rel="nofollow""#, "");
+        let body = unruled(body);
         for want in [
             r#"href="/calendar/2026/08"><span class="continuation-label">Previous month</span><span>&larr; August</span>"#,
             r#"href="/calendar/2026/10"><span class="continuation-label">Next month</span><span>October &rarr;</span>"#,
@@ -1227,10 +1231,10 @@ mod tests {
         }
         // Neighbours across the year name their year.
         assert!(
-            ordo("/calendar/2026/12")
+            unruled(ordo("/calendar/2026/12"))
                 .contains(r#"href="/calendar/2027/01"><span class="continuation-label">Next month</span><span>January 2027 &rarr;</span>"#)
         );
-        assert!(ordo("/calendar/2026/01").contains(
+        assert!(unruled(ordo("/calendar/2026/01")).contains(
             r#"href="/calendar/2025/12"><span class="continuation-label">Previous month</span><span>&larr; December 2025</span>"#
         ));
         // The ordo runs over the years every front offers, and stops at their ends.
