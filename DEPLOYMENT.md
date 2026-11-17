@@ -54,7 +54,8 @@ apart and remain. The page lists whatever its window leaves out.
 overall and once in each hour it opens. Ordo counts a viewed calendar page;
 Reminders counts a *generated* feed link, not a visit to `/reminders`. Home
 counts toward the total only. Preloads don't count; offline use and no-JS
-browsers are missed; multiple devices or cleared cookies inflate the count.
+browsers are missed (offline hours are said later only as `offline:yes`); multiple devices or
+cleared cookies inflate the count.
 
 **Rendering dimensions.** The same beacon reports `appearance:nave|apse` (as
 rendered, chosen or inherited) and `screen:desktop|mobile` (mobile means under
@@ -102,6 +103,33 @@ the day's first has set the identifier before the next is sent.
 `offices:1`…`offices:7` is derived by the server, like `new-client`: as a reader first opens an
 hour, they move from one count to the next, so each sits under the number of hours opened so far
 that day. The dedupe rows already say which hours a day's hash has opened; nothing new is kept.
+`new-offices:1`…`new-offices:7` is the same count for readers whose visit today is their first,
+so the report can say how far a new reader gets on their first day.
+
+**How they keep the hours.** Clients from `version:2` on also send, after the period words:
+
+- `version:2`, the vocabulary they speak, so the report counts how many readers can say the rest
+  (the server derives `reported:<hour>`, an hour opened by such a client, as their base);
+- `tenure:week|month|longer`, how long ago this browser or installation first opened the Office,
+  from the first day it keeps (a first day kept before `FIRST_DAYS_KEPT_SINCE` reads `longer`
+  only once that is a month past). The server drops it with the `visit:first` it rewrites, but a
+  browser whose storage Safari erased says it is newer than it is on the days after;
+- `last-week:1|2-3|4-6|7`, only beside `week:first`: the days the last calendar week was
+  counted, from a tally of the current week's counted days (`office-week-days`,
+  `usage-week-days`); the server drops it with the `week:first` it rewrites;
+- `timely:<hour>`, an hour opened in its own time by the device's clock (the current-hour
+  schedule), and `prayed:<hour>`, an hour shown marked prayed (the web resends it when the reader
+  marks it). Each is accepted only beside its own hour's scope;
+- `offline:yes`, once, when an hour not yet counted that day did not report (`office-offline`,
+  `usage-offline`): the apps on any failed reply, the browser on an error reply or with no
+  network, since leaving a page also cuts its reply off. An hour never opened online again is
+  never said;
+- `reminder:on|off`, the apps only: the web's reminders live in a subscribed calendar link the
+  server cannot see.
+
+Each is one bucket, never a date or a count that would link one day to another. The report's
+"How they keep the hours" gives the share of reporting readers in each, and each hour's opened-at-
+its-time and prayed shares of the reports.
 Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which
@@ -118,7 +146,7 @@ an old series ends where its meaning ended. The vocabulary lives in
 `presentation::usage`, shared by the server's parser and the apps' beacons
 (app.js mirrors it). The server only has to understand the scope; unknown
 tokens from newer or older cached clients are dropped and the page still counts.
-A body over `MAX_BEACON` (192 bytes) is refused whole, so the longest beacon each front writes is
+A body over `MAX_BEACON` (288 bytes) is refused whole, so the longest beacon each front writes is
 tested against it with room to spare (`beacons_fit_the_limit`). The browser sends its beacon
 `keepalive`, so the tap that opens an hour from home, which is also what first engages the page,
 does not lose the reply's cookie and count a second browser on the next page.
@@ -136,7 +164,7 @@ Reminders. The same current-page window applies (`current_day`, `current_year`);
 there is no engagement gate, since nothing crawls an app. Instead of a cookie the
 server sets, each app sends a random ID it replaces every reporting day, so
 nothing it sends ties one day to the next. Beacons are best effort: never queued
-offline or retried later. Debug builds (and so the apps' tests and CI
+offline or retried later (an hour that failed is said only as `offline:yes`). Debug builds (and so the apps' tests and CI
 screenshots) never report.
 
 **Scraping is welcome but never counted.** `robots.txt` leaves every page open, but a

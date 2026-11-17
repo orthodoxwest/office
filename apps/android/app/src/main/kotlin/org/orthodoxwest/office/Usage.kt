@@ -10,6 +10,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -17,11 +18,13 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import org.orthodoxwest.office.core.UsageClient
 import org.orthodoxwest.office.core.UsageEvent
+import org.orthodoxwest.office.core.UsageHabits
 import org.orthodoxwest.office.core.usageAdvertisedEndpoint
 import org.orthodoxwest.office.core.usageBeacon
 import org.orthodoxwest.office.core.usageEndpoint
 import org.orthodoxwest.office.core.usageEndpointHeader
 import org.orthodoxwest.office.core.usagePeriods
+import org.orthodoxwest.office.core.usageTally
 
 /**
  * The daily usage counts, reported as the web reports them (DEPLOYMENT.md, "Usage metrics"):
@@ -35,7 +38,11 @@ import org.orthodoxwest.office.core.usagePeriods
  * sends ties one day to the next. The app also keeps the day it was first counted, and says
  * only whether today is that day (new) or not (returning); and the last two days a beacon of
  * its own was counted, and says only whether today is the first in its week and in its month,
- * so the server can add up a week's readers. Best effort: nothing is queued while
+ * so the server can add up a week's readers. Beside those it says, in buckets and yes-or-no words
+ * the core writes (`UsageHabits`): how long ago it was first counted, on the week's first day how
+ * many days it was counted the week before (it keeps a tally of the week's days), an hour opened
+ * at its own time by the phone's clock, an hour prayed (home's mark), an hour opened that could
+ * not report since a beacon last arrived, and whether reminders are on. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only release and preview builds report
  * (`BuildConfig.COUNT_USAGE`); debug builds, and so the tests, never do. Nor does a phone in
  * Play's pre-launch report, which installs every uploaded build fresh on several test devices and
@@ -63,18 +70,40 @@ class Usage(
 
     /**
      * `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
-     * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any.
+     * `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any; `prayed`
+     * whether the hour shown is marked prayed; `reminders` whether the app's reminders are on.
      */
-    fun record(event: UsageEvent, dark: Boolean, form: String, martyrology: Boolean? = null, chant: Boolean? = null) {
+    fun record(
+        event: UsageEvent,
+        dark: Boolean,
+        form: String,
+        martyrology: Boolean? = null,
+        chant: Boolean? = null,
+        prayed: Boolean = false,
+        reminders: Boolean? = null,
+    ) {
         if (!enabled) return
         if (installed != null && Duration.between(installed, clock.instant()) < SETTLING) return
         val day = LocalDate.now(clock.withZone(REPORTING)).toString()
-        val first = firstDay(day) == day
-        val periods = synchronized(prefs) { usagePeriods(day, prefs.getString(LAST, null), prefs.getString(PREVIOUS, null)) }
+        val firstDay = firstDay(day)
+        val first = firstDay == day
+        val (periods, habits) = synchronized(prefs) {
+            usagePeriods(day, prefs.getString(LAST, null), prefs.getString(PREVIOUS, null)) to UsageHabits(
+                reportingDay = day,
+                firstDay = firstDay,
+                tally = prefs.getString(TALLY, null),
+                clockHour = LocalTime.now(clock).hour,
+                prayed = prayed,
+                offline = prefs.getBoolean(OFFLINE, false),
+                reminders = reminders,
+            )
+        }
         val body = usageBeacon(
             event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant, periods?.week, periods?.month,
+            habits,
         ) ?: return
-        val key = "$day $body"
+        // Saying a failed hour is not a new page: it neither sends again nor counts apart.
+        val key = "$day ${body.replace(" offline:yes", "")}"
         synchronized(sent) {
             if (!sent.add(key)) return
         }
@@ -82,8 +111,10 @@ class Usage(
         val endpoint = synchronized(prefs) { prefs.getString(ENDPOINT, null) } ?: usageEndpoint()
         executor.execute {
             val reply = runCatching { post(endpoint, id, body) }.getOrDefault(Reply(false))
-            // A failure is forgotten, so the next visit tries again.
-            if (reply.ok) counted(day) else synchronized(sent) { sent.remove(key) }
+            // A failure is forgotten, so the next visit tries again. An hour whose beacon did not
+            // arrive is said on the next that does.
+            if (reply.ok) counted(day, body) else synchronized(sent) { sent.remove(key) }
+            if (!reply.ok && event is UsageEvent.Hour) synchronized(prefs) { prefs.edit().putBoolean(OFFLINE, true).apply() }
             reply.endpoint?.let(::usageAdvertisedEndpoint)?.let { next ->
                 synchronized(prefs) { prefs.edit().putString(ENDPOINT, next).apply() }
             }
@@ -95,9 +126,12 @@ class Usage(
      * `usagePeriods` reads to say whether a day opens the week and the month. Kept only once a
      * beacon has arrived, so a day that never reported opens nothing.
      */
-    private fun counted(day: String) = synchronized(prefs) {
+    private fun counted(day: String, body: String) = synchronized(prefs) {
+        val edit = prefs.edit()
+        if (" offline:yes" in body) edit.remove(OFFLINE)
         val last = prefs.getString(LAST, null)
-        if (last != day) prefs.edit().putString(PREVIOUS, last).putString(LAST, day).apply()
+        if (last != day) edit.putString(PREVIOUS, last).putString(LAST, day).putString(TALLY, usageTally(prefs.getString(TALLY, null), day))
+        edit.apply()
     }
 
     /**
@@ -138,6 +172,8 @@ class Usage(
         private const val FIRST = "usage-first"
         private const val LAST = "usage-counted"
         private const val PREVIOUS = "usage-counted-before"
+        private const val TALLY = "usage-week-days"
+        private const val OFFLINE = "usage-offline"
         private const val BEFORE = "before"
         private const val OPENED = "about-first"
         private const val ENDPOINT = "usage-endpoint"

@@ -198,6 +198,8 @@ CREATE TABLE IF NOT EXISTS seen (
             .map_err(|e| e.to_string())
         };
         let mut opened = false;
+        let reports = dimensions.iter().any(|d| d.starts_with("version:"));
+        let reported = HOURS.contains(&scope).then(|| format!("reported:{scope}"));
         for v in scopes {
             let n =
                 tx.execute("INSERT OR IGNORE INTO seen VALUES (?, ?, ?)", params![day, hash.as_slice(), v]).map_err(|e| e.to_string())?;
@@ -206,6 +208,16 @@ CREATE TABLE IF NOT EXISTS seen (
             }
             add(v, 1)?;
             opened |= HOURS.contains(&v);
+        }
+        // An hour opened by a client that says whether it was opened at its time and prayed: the
+        // share's denominator. Counted once, whichever of the hour's beacons first said it.
+        if let Some(reported) = reported.filter(|_| reports)
+            && tx
+                .execute("INSERT OR IGNORE INTO seen VALUES (?, ?, ?)", params![day, hash.as_slice(), reported])
+                .map_err(|e| e.to_string())?
+                > 0
+        {
+            add(&reported, 1)?;
         }
         // A newly opened hour moves the reader from one `offices` count to the next, so each
         // reader sits under the number of hours opened so far today.
@@ -218,14 +230,27 @@ CREATE TABLE IF NOT EXISTS seen (
                     |r| r.get(0),
                 )
                 .map_err(|e| e.to_string())?;
-            // Only a reader counted there is moved: on the day the server begins keeping these,
-            // an hour opened before it began left no count to take from.
-            if let Some(before) = offices_scope(n as usize - 1) {
-                tx.execute("UPDATE totals SET users = users - 1 WHERE day = ? AND scope = ? AND users > 0", params![day, before])
+            // A reader whose visit today is their first is counted again among the new.
+            let new: i64 = tx
+                .query_row(
+                    "SELECT COUNT(*) FROM seen WHERE day = ? AND browser = ? AND scope = 'visit:first'",
+                    params![day, hash.as_slice()],
+                    |r| r.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+            for prefix in if new > 0 { &["", "new-"][..] } else { &[""][..] } {
+                // Only a reader counted there is moved: on the day the server begins keeping
+                // these, an hour opened before it began left no count to take from.
+                if let Some(before) = offices_scope(n as usize - 1) {
+                    tx.execute(
+                        "UPDATE totals SET users = users - 1 WHERE day = ? AND scope = ? AND users > 0",
+                        params![day, format!("{prefix}{before}")],
+                    )
                     .map_err(|e| e.to_string())?;
-            }
-            if let Some(now) = offices_scope(n as usize) {
-                add(&now, 1)?;
+                }
+                if let Some(now) = offices_scope(n as usize) {
+                    add(&format!("{prefix}{now}"), 1)?;
+                }
             }
         }
         tx.commit().map_err(|e| e.to_string())
@@ -356,12 +381,15 @@ const NEW_COOKIE: &str = "office-new";
 /// A beacon's dimensions with its first visit made returning when the browser was counted on an
 /// earlier reporting day: seen before, and its new flag lapsed.
 fn settle_visit(mut dimensions: Vec<String>, seen: bool, new: bool) -> Vec<String> {
-    if seen && !new {
+    if seen && !new && dimensions.iter().any(|d| d == "visit:first") {
         for d in &mut dimensions {
             if d == "visit:first" {
                 *d = "visit:returning".to_string();
             }
         }
+        // The page reckoned its tenure from the first day it lost: it is older than it says,
+        // by how much the server cannot tell.
+        dimensions.retain(|d| !d.starts_with("tenure:"));
     }
     dimensions
 }
@@ -384,6 +412,10 @@ fn settle_periods(mut dimensions: Vec<String>, held: [(bool, bool); 2]) -> Vec<S
                 if d.strip_suffix(":first") == Some(key) {
                     *d = format!("{key}:again");
                 }
+            }
+            // The week before was told on the week's first day, if it was counted.
+            if *key == "week" {
+                dimensions.retain(|d| !d.starts_with("last-week:"));
             }
         }
     }
@@ -714,12 +746,15 @@ mod tests {
     // Every stored family has a report breakdown.
     #[test]
     fn trend_dimensions_cover_the_vocabulary() {
-        use render_html::usage::{OFFICES_FOLD, TREND_LABELS};
-        assert_eq!(TREND_LABELS.len(), DIMENSIONS.len());
+        use render_html::usage::{HOUR_FAMILIES, OFFICES_FOLD, TREND_LABELS};
+        assert_eq!(TREND_LABELS.len() + HOUR_FAMILIES.len(), DIMENSIONS.len());
+        for key in HOUR_FAMILIES {
+            assert!(TREND_LABELS.iter().all(|(k, ..)| *k != key) && DIMENSIONS.iter().any(|d| d.key == key), "{key}");
+        }
         for (key, _, labels) in TREND_LABELS {
             let dimension = DIMENSIONS.iter().find(|d| d.key == key).unwrap_or_else(|| panic!("unmapped {key}"));
             // The hours opened in a day are drawn with the larger counts as one series.
-            let series = if key == "offices" { OFFICES_FOLD } else { dimension.values.len() };
+            let series = if key.ends_with("offices") { OFFICES_FOLD } else { dimension.values.len() };
             assert_eq!(series, labels.len(), "{key}");
             assert!(labels.iter().all(|l| !l.is_empty()), "{key}");
         }
@@ -755,6 +790,48 @@ mod tests {
         assert_eq!(store.daily(tomorrow, 1).unwrap()[0].dimensions.get("offices:1"), Some(&1));
         // A beacon cannot claim a count of its own.
         assert!(parse_event("lauds offices:7").unwrap().dimensions.is_empty());
+    }
+
+    // The hours a reporting client opened are the denominator of those it opened at their time
+    // and prayed; a new reader's hours are counted again among the new.
+    #[test]
+    fn reporting_readers_hours_and_new_readers_hours() {
+        let db = TempDb::new("habits");
+        let store = db.open();
+        let now = eastern_at(2026, 11, 18, 9, 0);
+        for (browser, body) in [
+            ("a", "lauds visit:first version:2 timely:lauds"),
+            ("a", "lauds visit:first version:2 timely:lauds prayed:lauds"),
+            ("a", "prime visit:first version:2"),
+            ("b", "lauds visit:returning"),
+            ("c", "vespers visit:returning version:2 prayed:vespers offline:yes"),
+            ("c", "site visit:returning version:2"),
+        ] {
+            let event = parse_event(body).unwrap();
+            store.record(now, browser, &event.scope, &event.dimensions).unwrap();
+        }
+        let row = &store.daily(now, 1).unwrap()[0];
+        let got = |scope: &str| row.dimensions.get(scope).copied().unwrap_or(0);
+        assert_eq!((row.hours[0], got("reported:lauds"), got("timely:lauds"), got("prayed:lauds")), (2, 1, 1, 1));
+        assert_eq!((got("reported:prime"), got("reported:vespers"), got("prayed:vespers"), got("offline:yes")), (1, 1, 1, 1));
+        assert_eq!((got("offices:1"), got("offices:2")), (2, 1));
+        assert_eq!((got("new-offices:1"), got("new-offices:2")), (0, 1));
+        // What the server learns from its own flags overrules a page that lost its marks.
+        let dims = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        assert_eq!(
+            settle_visit(dims(&["visit:first", "tenure:week", "client:browser"]), true, false),
+            dims(&["visit:returning", "client:browser"])
+        );
+        assert_eq!(settle_visit(dims(&["visit:first", "tenure:week"]), true, true), dims(&["visit:first", "tenure:week"]));
+        assert_eq!(settle_visit(dims(&["visit:returning", "tenure:month"]), true, false), dims(&["visit:returning", "tenure:month"]));
+        assert_eq!(
+            settle_periods(dims(&["week:first", "last-week:2-3", "month:first"]), [(true, false), (false, false)]),
+            dims(&["week:again", "month:first"])
+        );
+        assert_eq!(
+            settle_periods(dims(&["week:first", "last-week:2-3"]), [(true, true), (true, false)]),
+            dims(&["week:first", "last-week:2-3"])
+        );
     }
 
     // A week's first days add up to its readers: each browser says "first" on one day of the week.
@@ -822,7 +899,7 @@ mod tests {
     // cookie, and an agent naming the app.
     #[test]
     fn app_beacons_count_under_their_own_identifier() {
-        use presentation::usage::{App, app_beacon};
+        use presentation::usage::{App, Habits, app_beacon};
         let db = TempDb::new("apps");
         let store = db.open();
         for (id, agent, app) in [
@@ -834,9 +911,20 @@ mod tests {
             headers.insert("x-office-usage", "1".parse().unwrap());
             headers.insert(header::USER_AGENT, agent.parse().unwrap());
             headers.insert(header::COOKIE, format!("office-usage={id}").parse().unwrap());
-            let body = app_beacon("lauds", app, false, "priest", None, Some(app == App::Ios), Some(true), Some(true), Some(false))
-                .unwrap()
-                .into_bytes();
+            let body = app_beacon(
+                "lauds",
+                app,
+                false,
+                "priest",
+                None,
+                Some(app == App::Ios),
+                Some(true),
+                Some(true),
+                Some(false),
+                Some(&Habits::default()),
+            )
+            .unwrap()
+            .into_bytes();
             let response = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", None, Some(body.clone()));
             assert_eq!(response.status(), StatusCode::NO_CONTENT, "{agent}");
             assert!(response.headers().get(header::SET_COOKIE).is_none(), "{agent} was given a cookie");
