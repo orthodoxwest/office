@@ -11,19 +11,36 @@ import Foundation
  * random one each reporting day (America/New_York, as the server reckons days), so nothing it
  * sends ties one day to the next. The app also keeps the day it was first opened, and says
  * only whether today is that day (new) or not (returning); home offers the About page for that
- * day's first week. Best effort: nothing is queued while
+ * day's first week. It keeps too the last two days a beacon of its own was counted, and says only
+ * whether today is the first in its week and in its month, so the server can add up a week's
+ * readers. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only Release builds report (`OfficeCountsUsage`,
  * set in project.yml); Debug builds, and so the tests and the simulator screenshots, never do.
  * Nor does a device Apple installs each uploaded TestFlight build on fresh, to check it: each
  * would count as a new reader, about one for every build. Nothing on those devices says so, but
  * each is done with the build soon after installing it, so an installation reports only once it
- * is `settling` old, as Android's does.
+ * is `settling` old, as Android's does. TestFlight builds and the copy App Review runs carry a
+ * sandbox receipt, and a simulator none of the store's: neither reports (`storeInstall`), so each
+ * submission's review is not a new reader, and the store's own installs are the readers counted.
  *
  * Beacons go to the production server until a reply names the site's new address
  * (`usageEndpointHeader`); the app keeps that and posts there from then on.
  */
 final class Usage {
-    static let shared = Usage(installed: Usage.installedAt())
+    static let shared = Usage(
+        enabled: Bundle.main.object(forInfoDictionaryKey: "OfficeCountsUsage") as? String == "YES" && Usage.storeInstall,
+        installed: Usage.installedAt()
+    )
+
+    /// Whether this copy came from the App Store. TestFlight's, and the one App Review runs, have
+    /// a receipt named for the sandbox; a simulator's build is nobody's install.
+    static var storeInstall: Bool {
+        #if targetEnvironment(simulator)
+        return false
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent != "sandboxReceipt"
+        #endif
+    }
 
     /**
      * How old an installation must be before it reports, as Android's `Usage.SETTLING`. A
@@ -75,7 +92,11 @@ final class Usage {
         if let installed, date.timeIntervalSince(installed) < Usage.settling { return }
         let day = Usage.reportingDay(date)
         let first = Usage.firstDay(day, defaults) == day
-        guard let body = usageBeacon(event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant) else { return }
+        let periods = usagePeriods(today: day, last: defaults.string(forKey: "usage-counted"), previous: defaults.string(forKey: "usage-counted-before"))
+        guard let body = usageBeacon(
+            event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant,
+            week: periods?.week, month: periods?.month
+        ) else { return }
         let key = day + " " + body
         lock.lock()
         let fresh = sent.insert(key).inserted
@@ -87,11 +108,23 @@ final class Usage {
                 self.defaults.set(next, forKey: "usage-endpoint")
             }
             // A failure is forgotten, so the next visit tries again.
-            guard !ok else { return }
+            guard !ok else { return self.counted(day) }
             self.lock.lock()
             self.sent.remove(key)
             self.lock.unlock()
         }
+    }
+
+    /// Keeps `day` as the latest reporting day a beacon was counted, and the one before it: what
+    /// `usagePeriods` reads to say whether a day opens the week and the month. Kept only once a
+    /// beacon has arrived, so a day that never reported opens nothing.
+    private func counted(_ day: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        let last = defaults.string(forKey: "usage-counted")
+        guard last != day else { return }
+        defaults.set(last, forKey: "usage-counted-before")
+        defaults.set(day, forKey: "usage-counted")
     }
 
     /// The reporting day the app was first counted. An installation that reported before this

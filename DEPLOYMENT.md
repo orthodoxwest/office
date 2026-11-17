@@ -28,11 +28,27 @@ other than this one and the next, and error pages are `noindex`.
 ## Usage metrics
 
 `/admin/usage` is an unlinked, unauthenticated, `noindex` report (excluded from
-the service-worker cache) of daily unique browsers, overall and per office,
-ordo, and reminder feed, over 7/30/90/365 days. Days are America/New_York.
-Its headline is the last seven completed days' average against the seven
-before, and the chart draws a trailing seven-day average, so a launch isn't
-averaged in with the quiet months before it.
+the service-worker cache) of daily readers over 7, 30, 90 or 365 days (a window
+longer than the record is offered once, as "Since" its first day). Days are
+America/New_York. A reader is one browser or app installation on one day. The
+page leads with a sentence: the last seven completed days' average against the
+seven before, called "about level" when they differ by under a fifth, which at
+a few dozen readers a day is chance. Under it are the same figure over four
+weeks, returning readers a day, new readers in the week, and today so far;
+then, once clients report them, the readers of the last calendar week and
+month. The chart splits each day's bar into returning and new and draws a
+trailing seven-day average. "Where they read" sets each client's week against
+the one before; "What they open" gives each hour, the ordo and reminders as a
+share of the period's readers, and how many hours a reader opens; "Settings in
+use" gives one share of each setting's reports, with every family's series over time behind a
+disclosure (weekly by default; a part week stands apart at either end).
+
+**Counts that were not readers.** The store keeps what it was sent; the report
+reads it through `usage::CORRECTIONS`. A day test devices swamped (`test_days`)
+is drawn and listed but left out of every average, share and scale. A client's
+counts before the day it reached readers (`released`) are taken out of readers,
+new readers and the clients; the hours those devices opened cannot be told
+apart and remain. The page lists whatever its window leaves out.
 
 **What counts.** Visible pages, not completed prayers. A browser counts once
 overall and once in each hour it opens. Ordo counts a viewed calendar page;
@@ -55,9 +71,37 @@ A browser that brings the first without the second was counted on an earlier day
 returning whatever its page says. Both hold only `1`, so no date is sent. An iOS Home Screen web app has its own
 cookies as well as its own storage, so installing one still counts as new once. Neither app reports until its installation is two hours old: Play's
 pre-launch phones and the devices Apple checks each TestFlight upload on are fresh installs that
-are gone within the hour, and each counted as a new reader. `client:browser|pwa|android|ios` separates a browser tab,
+are gone within the hour, and each counted as a new reader. The iOS app also stays silent in a
+copy with a sandbox receipt, which is TestFlight's and the one App Review runs for each submission, and
+in a simulator (`Usage.storeInstall`). `client:browser|pwa|android|ios` separates a browser tab,
 the web app installed to a home screen, and the native apps. The server also counts a
 first-day visit under `new-client:<client>`, so new readers split by client; no beacon sends it.
+
+`week:first|again` and `month:first|again` say whether today is the first reporting day this
+browser or installation is counted in its calendar week (Monday to Sunday) and month, so a week's
+`week:first` counts add up to that week's readers, and a month's likewise, with nothing sent that
+links one day to another. Each front keeps the last two reporting days one of its beacons was
+counted (`office-counted` and `office-counted-before` in localStorage, `usage-counted` and
+`usage-counted-before` in the apps), moves them on only when a beacon has arrived, and sends the
+two words (`presentation::usage::periods`; app.js mirrors it). Every beacon of a first day says
+`first`. Older clients say nothing, so the report shows how many of the period's readers reported
+and a week leads only once every day of it was reported; a period whose first days went
+unreported is counted from the day reports began, and says so.
+
+A page's marks can fail it: Safari erases them after seven days away, which would open a month
+twice, and a page left before a beacon's reply never writes them. So for a browser the server
+keeps flags of its own, as it does for the first day: `office-week=1` until the week ends and
+`office-month=1` until the month ends, each given with `office-week-first=1` or
+`office-month-first=1`, which lapse at New York's midnight. A browser holding a period's flag
+without its first-day flag was counted in the period on an earlier day, and its `first` is counted
+as `again`. The flags are given only to a beacon that says the words. The apps take no cookies:
+an app's beacon that arrived without its reply (a timeout after the server counted it) is said
+`first` again on the reader's next day in the period. The browser sends one beacon at a time, so
+the day's first has set the identifier before the next is sent.
+
+`offices:1`…`offices:7` is derived by the server, like `new-client`: as a reader first opens an
+hour, they move from one count to the next, so each sits under the number of hours opened so far
+that day. The dedupe rows already say which hours a day's hash has opened; nothing new is kept.
 Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which
@@ -74,6 +118,10 @@ an old series ends where its meaning ended. The vocabulary lives in
 `presentation::usage`, shared by the server's parser and the apps' beacons
 (app.js mirrors it). The server only has to understand the scope; unknown
 tokens from newer or older cached clients are dropped and the page still counts.
+A body over `MAX_BEACON` (192 bytes) is refused whole, so the longest beacon each front writes is
+tested against it with room to spare (`beacons_fit_the_limit`). The browser sends its beacon
+`keepalive`, so the tap that opens an hour from home, which is also what first engages the page,
+does not lose the reply's cookie and count a second browser on the next page.
 
 **The native apps.** Release builds of the Android and iOS apps post the same
 beacon to `https://orthodoxwestbreviary.com/api/usage` (`presentation::usage::ENDPOINT`)
@@ -121,9 +169,10 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 ```
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
-(30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`); the
-apps send their own daily ID in its place. `office-seen` and `office-new` (same attributes) hold only `1`
-and settle `visit:first` as above; the apps get none of these cookies.
+(until New York's midnight, HttpOnly, SameSite=Strict, Secure over HTTPS, path
+`/api/usage`; a month-long one from before is cut short on its next beacon); the
+apps send their own daily ID in its place, so no front sends an identifier on two days. `office-seen`, `office-new` and the four week and month flags (same attributes) hold only `1`
+and settle `visit:first`, `week:first` and `month:first` as above; the apps get none of these cookies.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept

@@ -5009,8 +5009,31 @@ test("engaged visits to a current page send an event, passive and background one
   // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
   await engage(page);
-  await expect(page.getByRole("heading", { name: "Daily usage", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Usage", exact: true })).toBeVisible();
   expect(events.length).toBe(2);
+});
+
+test("the usage report keeps its explorer shut until it is used", async ({ page }) => {
+  await page.goto("/admin/usage?days=7");
+  const explorer = page.locator(".usage-over-time");
+  const tab = page.locator(".usage-window a").first();
+  await expect(page.locator(".usage-explorer")).toBeAttached();
+  // A period's link is the period alone, so following it does not open the explorer.
+  await expect(tab).toHaveAttribute("href", "?days=7");
+  await expect(explorer).not.toHaveAttribute("open", "");
+  // The daily table fits its panel at any width: no sideways scroll inside it.
+  for (const width of [390, 720, 900]) {
+    await page.setViewportSize({ width, height: 800 });
+    const [scroll, client] = await page.locator(".usage-days").first().evaluate(table => [table.parentElement.scrollWidth, table.parentElement.clientWidth]);
+    expect(scroll, `daily table at ${width}px`).toBeLessThanOrEqual(client);
+  }
+  // Once a control is changed the choice travels with the links, and a link so made opens it.
+  await explorer.locator("> summary").click();
+  await page.locator("#usage-measure label", { hasText: "%" }).click();
+  await expect(tab).toHaveAttribute("href", /days=7&compare=client&interval=day&measure=share/);
+  await tab.click();
+  await expect(explorer).toHaveAttribute("open", "");
+  await expect(page.locator("#usage-measure input[value=share]")).toBeChecked();
 });
 
 test("the dated archive is freely readable but never counted", async ({ page }) => {
@@ -5091,14 +5114,14 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser week:first month:first");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
 });
 
@@ -5113,7 +5136,7 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
   await page.goto(`/?date=${easternDay()}`);
   await engage(page);
   await expect.poll(() => events.length).toBe(1);
-  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa");
+  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa week:first month:first");
 });
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
@@ -5138,6 +5161,48 @@ test("a browser is new on the day it first opens the Office and returning after"
   // A reader from before this was counted, with a saved setting, is not mistaken for a new one.
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem("office-theme", "dark"); });
   expect(await visit()).toBe("returning");
+});
+
+// The device keeps the last two days it was counted; the beacon says only whether today opens
+// its week and its month, and every beacon of such a day says so.
+test("a browser opens its week and month on the first day it is counted in them", async ({ page }) => {
+  const events = [];
+  let online = true;
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: online ? 204 : 503 });
+  });
+  const visit = async () => {
+    events.length = 0;
+    await page.goto(`/?date=${easternDay()}`);
+    await engage(page);
+    await expect.poll(() => events.length).toBe(1);
+    return events[0].match(/week:\w+ month:\w+/)[0];
+  };
+  const today = easternDay();
+  const kept = () => page.evaluate(() => [localStorage.getItem("office-counted"), localStorage.getItem("office-counted-before")]);
+  // A beacon the server did not count opens nothing.
+  online = false;
+  expect(await visit()).toBe("week:first month:first");
+  expect(await kept()).toEqual([null, null]);
+  online = true;
+  expect(await visit()).toBe("week:first month:first");
+  await expect.poll(kept).toEqual([today, null]);
+  expect(await visit()).toBe("week:first month:first");
+  // Counted on an earlier day of this week and month: again in both.
+  const monday = new Date(`${today}T12:00:00Z`);
+  monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+  const weekStart = monday.toISOString().slice(0, 10);
+  const earlier = (day) => page.evaluate((d) => { localStorage.setItem("office-counted", d); localStorage.removeItem("office-counted-before"); }, day);
+  if (weekStart !== today && weekStart.slice(0, 7) === today.slice(0, 7)) {
+    await earlier(weekStart);
+    expect(await visit()).toBe("week:again month:again");
+    await expect.poll(kept).toEqual([today, weekStart]);
+    expect(await visit()).toBe("week:again month:again");
+  }
+  // Last counted a year ago: a new week and a new month.
+  await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
+  expect(await visit()).toBe("week:first month:first");
 });
 
 // Home offers the introduction beside Change date for a reader's first week, in the season's
@@ -5224,11 +5289,11 @@ test.describe("on a screen with a mouse", () => {
       return events[0].replace(/ chant:\w+/, "");
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser week:first month:first");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
   });
 });
 
@@ -5237,7 +5302,7 @@ test.describe("on a screen with a mouse", () => {
 test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {
   const today = async (page) => {
     await page.goto("/admin/usage?days=7");
-    const row = page.locator("tbody tr").filter({ has: page.locator(".usage-total") }).first();
+    const row = page.locator(".usage-days tbody tr").first();
     return Number(await row.locator("td.usage-total").innerText());
   };
 

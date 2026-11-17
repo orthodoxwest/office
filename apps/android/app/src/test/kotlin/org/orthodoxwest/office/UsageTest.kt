@@ -64,9 +64,9 @@ class UsageTest {
         usage.record(UsageEvent.RemindersOn, dark = true, form = "priest")
         assertEquals(
             listOf(
-                "site appearance:nave screen:mobile visit:first client:android",
-                "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:android",
-                "reminders appearance:apse screen:mobile visit:first client:android",
+                "site appearance:nave screen:mobile visit:first client:android week:first month:first",
+                "vespers appearance:apse screen:mobile prayer-form:priest visit:first client:android week:first month:first",
+                "reminders appearance:apse screen:mobile visit:first client:android week:first month:first",
             ),
             posted.map { it.second },
         )
@@ -83,9 +83,9 @@ class UsageTest {
         usage.record(UsageEvent.Home(today), dark = false, form = "private", chant = true)
         assertEquals(
             listOf(
-                "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:android",
-                "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:android",
-                "site appearance:nave screen:mobile visit:first client:android",
+                "compline appearance:nave screen:mobile prayer-form:private chant:off visit:first client:android week:first month:first",
+                "compline appearance:nave screen:mobile prayer-form:private chant:on visit:first client:android week:first month:first",
+                "site appearance:nave screen:mobile visit:first client:android week:first month:first",
             ),
             posted.map { it.second },
         )
@@ -120,6 +120,39 @@ class UsageTest {
         now = Instant.parse("2026-03-16T15:00:00Z")
         usage().record(UsageEvent.Home(CivilDate(2026, 3, 16)), dark = false, form = "private")
         assertEquals(listOf("visit:first", "visit:returning"), posted.map { Regex("visit:\\w+").find(it.second)!!.value })
+    }
+
+    // Sunday 15 March 2026 closes a week; Monday opens the next in the same month.
+    @Test
+    fun aWeekAndAMonthOpenOnTheirFirstCountedDay() {
+        fun on(instant: String, date: CivilDate) {
+            now = Instant.parse(instant)
+            val usage = usage()
+            usage.record(UsageEvent.Home(date), dark = false, form = "private")
+            usage.record(UsageEvent.Hour(date, "lauds"), dark = false, form = "private")
+        }
+        on("2026-03-15T15:00:00Z", today)
+        on("2026-03-16T15:00:00Z", CivilDate(2026, 3, 16))
+        on("2026-03-18T15:00:00Z", CivilDate(2026, 3, 18))
+        on("2026-04-01T15:00:00Z", CivilDate(2026, 4, 1))
+        assertEquals(
+            listOf("week:first month:first", "week:first month:again", "week:again month:again", "week:first month:first")
+                .flatMap { listOf(it, it) },
+            posted.map { it.second.substringAfter("client:android ") },
+        )
+    }
+
+    // A beacon that never arrived leaves the week unopened: the next day's is still its first.
+    @Test
+    fun aWeekOpensOnlyWhenABeaconIsCounted() {
+        online = false
+        usage().record(UsageEvent.Home(today), dark = false, form = "private")
+        online = true
+        now = Instant.parse("2026-03-17T15:00:00Z")
+        usage().record(UsageEvent.Home(CivilDate(2026, 3, 17)), dark = false, form = "private")
+        now = Instant.parse("2026-03-18T15:00:00Z")
+        usage().record(UsageEvent.Home(CivilDate(2026, 3, 18)), dark = false, form = "private")
+        assertEquals(listOf("week:first month:first", "week:again month:again"), posted.map { it.second.substringAfter("client:android ") })
     }
 
     @Test
@@ -217,6 +250,6 @@ class UsageTest {
         assertTrue(posted.isEmpty())
         now = now.plus(Usage.SETTLING)
         usage.record(UsageEvent.Home(today), dark = false, form = "private")
-        assertEquals(listOf("site appearance:nave screen:mobile visit:first client:android"), posted.map { it.second })
+        assertEquals(listOf("site appearance:nave screen:mobile visit:first client:android week:first month:first"), posted.map { it.second })
     }
 }

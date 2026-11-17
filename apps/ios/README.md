@@ -62,7 +62,10 @@ web's daily usage report: `Usage.swift` posts the Rust core's beacon when a page
 it is read changes, or the app comes forward, once a day each, under a random identifier it
 replaces every reporting day. Only Release builds report (`OfficeCountsUsage`, set per
 configuration in `project.yml`); Debug builds, and so the tests and the simulator screenshots,
-never do. `UsageTests` checks what counts, the daily identifier, and the retry.
+never do. Nor does a copy with a sandbox receipt (TestFlight's, and the one App Review runs for
+each submission) or a simulator's (`Usage.storeInstall`): only App Store installs are readers.
+`UsageTests` checks what counts, the daily identifier, the week's and month's first day, and the
+retry.
 
 ## Building
 

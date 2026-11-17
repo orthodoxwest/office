@@ -480,12 +480,15 @@ document.documentElement.classList.add("js");
 // two dateless flags (usage.rs) that say whether it has counted this browser before. The mark is made on the first page load, counted or not, so a later page
 // served by the offline copy is not mistaken for an old reader. Without storage nothing is said.
 var USAGE_FIRST_KEY = "office-first-counted";
+function usageReportingDay() {
+  var parts = {};
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" })
+    .formatToParts(new Date()).forEach(function (part) { parts[part.type] = part.value; });
+  return parts.year + "-" + parts.month + "-" + parts.day;
+}
 function usageVisitToken() {
   try {
-    var parts = {};
-    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" })
-      .formatToParts(new Date()).forEach(function (part) { parts[part.type] = part.value; });
-    var day = parts.year + "-" + parts.month + "-" + parts.day;
+    var day = usageReportingDay();
     var first = localStorage.getItem(USAGE_FIRST_KEY);
     if (!first) {
       var used = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
@@ -499,6 +502,71 @@ function usageVisitToken() {
   }
 }
 usageVisitToken();
+
+// Whether today is the first reporting day this browser is counted in its calendar week (Monday
+// to Sunday) and month, so the server can add a week's first days up into that week's readers
+// (presentation::usage::periods, which the apps call). The browser keeps the last two days one
+// of its beacons was counted, written only once a beacon has arrived (usageCounted): a page that
+// never reported opens no week. Only the two words are sent. Without storage nothing is said.
+var USAGE_COUNTED_KEY = "office-counted";
+var USAGE_COUNTED_BEFORE_KEY = "office-counted-before";
+function usagePeriodTokens() {
+  try {
+    var day = usageReportingDay();
+    var last = localStorage.getItem(USAGE_COUNTED_KEY);
+    var before = last === day ? localStorage.getItem(USAGE_COUNTED_BEFORE_KEY) : last;
+    var monday = function (iso) {
+      var date = new Date(iso + "T12:00:00Z");
+      date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+      return date.toISOString().slice(0, 10);
+    };
+    var dated = /^\d{4}-\d{2}-\d{2}$/.test(before || "");
+    return (dated && monday(before) === monday(day) ? " week:again" : " week:first") +
+      (dated && before.slice(0, 7) === day.slice(0, 7) ? " month:again" : " month:first");
+  } catch {
+    return "";
+  }
+}
+// A beacon sent on `day` was counted: move the two kept days on.
+function usageCounted(day) {
+  try {
+    var last = localStorage.getItem(USAGE_COUNTED_KEY);
+    if (last === day) return;
+    if (last) localStorage.setItem(USAGE_COUNTED_BEFORE_KEY, last);
+    localStorage.setItem(USAGE_COUNTED_KEY, day);
+  } catch {
+    // Without storage every day opens a week; nothing is said (usagePeriodTokens).
+  }
+}
+
+// One beacon at a time. A browser begins each reporting day without the server's identifier
+// cookie, and two beacons sent before the first reply (the touch that engages the reminders page,
+// then its click) would each be given one and count two readers.
+var usageQueue = Promise.resolve();
+function usagePost(body, timeout) {
+  var sent = usageQueue.then(function () {
+    // The wait for a reply is counted from the sending, not from the queueing.
+    var signal;
+    if (timeout) {
+      var controller = new AbortController();
+      window.setTimeout(function () { controller.abort(); }, timeout);
+      signal = controller.signal;
+    }
+    return fetch("/api/usage", {
+      method: "POST",
+      headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
+      body: body,
+      credentials: "same-origin",
+      cache: "no-store",
+      // The tap that opens an hour from home is also what engages the page: the beacon must
+      // outlive the navigation, or its cookies are lost and the next page counts a second browser.
+      keepalive: true,
+      signal: signal
+    });
+  });
+  usageQueue = sent.catch(function () {});
+  return sent;
+}
 
 function usageBeaconBody(scope) {
   var leader = document.documentElement.getAttribute("data-leader") || "private";
@@ -516,7 +584,7 @@ function usageBeaconBody(scope) {
   var chantToken = document.body.classList.contains("page-hour") && document.querySelector('[data-chant-variant="on"]')
     ? (document.documentElement.getAttribute("data-chant") === "on" ? " chant:on" : " chant:off")
     : "";
-  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken;
+  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken + usagePeriodTokens();
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }
@@ -1661,12 +1729,9 @@ function plainClickOpensHere(e, link) {
   // person praying.
   var reportUsageAction = function (scope) {
     try {
-      fetch("/api/usage", {
-        method: "POST",
-        headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-        body: usageBeaconBody(scope),
-        credentials: "same-origin",
-        cache: "no-store"
+      var day = usageReportingDay();
+      usagePost(usageBeaconBody(scope)).then(function (response) {
+        if (response.ok) usageCounted(day);
       }).catch(function () {});
     } catch {
       // Ignored — best effort.
@@ -5515,21 +5580,13 @@ function plainClickOpensHere(e, link) {
     var key = day + " " + body;
     if (recorded.has(key) || !current(day)) return;
     pending = true;
-    var controller = new AbortController();
-    var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
-    fetch("/api/usage", {
-      method: "POST",
-      headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-      body: body,
-      credentials: "same-origin",
-      cache: "no-store",
-      signal: controller.signal
-    }).then(function (response) {
-      if (response.ok) recorded.add(key);
+    usagePost(body, 4000).then(function (response) {
+      if (!response.ok) return;
+      recorded.add(key);
+      usageCounted(day);
     }).catch(function () {
       // Best effort: never delay prayer or queue offline browsing history.
     }).finally(function () {
-      window.clearTimeout(timeout);
       pending = false;
       // A selection made while the previous beacon was in flight still
       // records the form actually selected, without duplicating page totals.
