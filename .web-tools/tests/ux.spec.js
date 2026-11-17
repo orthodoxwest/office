@@ -5767,6 +5767,46 @@ test("the ordo's current month and frontispiece are saved for offline use", asyn
   } finally { await context.close(); }
 });
 
+test("a page beyond the saved fortnight waits for a slow server, and offline answers at once", async ({ browser, baseURL, browserName }) => {
+  test.skip(browserName === "webkit", "Playwright routes a service worker's own fetches only in Chromium, and its WebKit fails any navigation once context.setOffline(true) is set");
+  const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
+  try {
+    const page = await context.newPage();
+    const today = await serverTodaySlug(page);
+    await page.goto(`/lauds/${today}`);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true }));
+    });
+    // A month a year and more ahead is never precached; the server takes longer to
+    // answer it than the worker once waited before calling the reader offline.
+    const year = Number(today.slice(0, 4)) + 1;
+    const far = `/calendar/${year}/07`;
+    let asked = 0;
+    await context.route(`**${far}`, async route => {
+      asked += 1;
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      await route.continue();
+    });
+    const response = await page.goto(far);
+    expect(response.status()).toBe(200);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
+    await expect(page.locator(`a[href^="/calendar/${year}"]`).first()).toBeAttached();
+    // One fetch for the page, not a second racing it.
+    expect(asked).toBe(1);
+
+    // With no connection, a page the cache does not hold says so without waiting.
+    await context.setOffline(true);
+    const started = Date.now();
+    await page.goto(`/calendar/${year}/08`);
+    await expect(page.locator("#offline-heading")).toBeVisible();
+    expect(Date.now() - started).toBeLessThan(2000);
+    // A page it holds still opens offline.
+    await page.goto(far);
+    await expect(page.locator("#offline-heading")).toHaveCount(0);
+  } finally { await context.close(); }
+});
+
 test('prayer-form controls fit both themes and narrow or wide reading', async ({ page }) => {
   await page.goto(`/compline/${testDate}`);
   for (const width of [320, 1280]) {
