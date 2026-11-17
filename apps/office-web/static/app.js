@@ -543,8 +543,15 @@ function usageCounted(day) {
 // cookie, and two beacons sent before the first reply (the touch that engages the reminders page,
 // then its click) would each be given one and count two readers.
 var usageQueue = Promise.resolve();
-function usagePost(body, signal) {
+function usagePost(body, timeout) {
   var sent = usageQueue.then(function () {
+    // The wait for a reply is counted from the sending, not from the queueing.
+    var signal;
+    if (timeout) {
+      var controller = new AbortController();
+      window.setTimeout(function () { controller.abort(); }, timeout);
+      signal = controller.signal;
+    }
     return fetch("/api/usage", {
       method: "POST",
       headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
@@ -5573,16 +5580,13 @@ function plainClickOpensHere(e, link) {
     var key = day + " " + body;
     if (recorded.has(key) || !current(day)) return;
     pending = true;
-    var controller = new AbortController();
-    var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
-    usagePost(body, controller.signal).then(function (response) {
+    usagePost(body, 4000).then(function (response) {
       if (!response.ok) return;
       recorded.add(key);
       usageCounted(day);
     }).catch(function () {
       // Best effort: never delay prayer or queue offline browsing history.
     }).finally(function () {
-      window.clearTimeout(timeout);
       pending = false;
       // A selection made while the previous beacon was in flight still
       // records the form actually selected, without duplicating page totals.

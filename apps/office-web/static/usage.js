@@ -3,10 +3,13 @@
 (function () {
   "use strict";
   // Paper has no disclosure to open: the folded days print with the rest.
-  addEventListener("beforeprint", () => document.querySelectorAll(".usage-days").forEach(table => {
-    const fold = table.closest("details");
-    if (fold) fold.open = true;
-  }));
+  const folds = () => Array.from(document.querySelectorAll(".usage-days"), table => table.closest("details")).filter(Boolean);
+  let unfolded = [];
+  addEventListener("beforeprint", () => {
+    unfolded = folds().filter(fold => !fold.open);
+    unfolded.forEach(fold => { fold.open = true; });
+  });
+  addEventListener("afterprint", () => unfolded.forEach(fold => { fold.open = false; }));
   const root = document.querySelector(".usage-explorer");
   if (!root) return;
   const groups = JSON.parse(document.getElementById("usage-trend-data").textContent);

@@ -481,6 +481,8 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
         // Newest first: the period in progress runs from its first reported day.
         let mut this = span(this_start, today.add_days(1));
         this.truncate(this.iter().rposition(|r| reported(r, key)).map_or(0, |i| i + 1));
+        // A day with no reader had nothing to report: the period is whole without it.
+        let began_reading = all.iter().filter(|r| r.users > 0).filter_map(|r| Date::parse(&r.day)).rfind(|t| t.days_since(this_start) >= 0);
         let last = span(last_start, this_start);
         let last_whole = last.len() as i32 == this_start.days_since(last_start) && last.iter().all(|r| reported(r, key) || r.users == 0);
         let sum = |rows: &[&UsageDay]| rows.iter().map(|r| dim(r, &first)).sum::<i64>();
@@ -492,20 +494,25 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
         // The share of the counted days' readers whose client said either word.
         let coverage = |rows: &[&UsageDay]| {
             let (said, of) = rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
-            (of > 0 && said * 20 < of * 19).then(|| format!(" · {} of readers reporting", percent(said, of)))
+            (of > 0 && said * 20 < of * 19).then(|| format!("{} of its readers reporting", percent(said, of)))
         };
         let so_far = (!this.is_empty()).then(|| sum(&this));
-        let (mut tile, counted) = if last_whole && last.iter().any(|r| reported(r, key)) {
+        let (mut tile, counted): (UsageTile, Option<String>) = if last_whole && last.iter().any(|r| reported(r, key)) {
             let tile = UsageTile {
                 label: format!("Readers, last {noun}"),
                 value: sum(&last).to_string(),
-                note: format!("{}{}", range(&last), so_far.map_or(String::new(), |n| format!(" · this {noun} so far {n}"))),
+                note: [Some(range(&last)), coverage(&last), so_far.map(|n| format!("this {noun} so far {n}"))]
+                    .into_iter()
+                    .flatten()
+                    .collect::<Vec<_>>()
+                    .join(" · "),
                 bars: Vec::new(),
             };
-            (tile, &last)
+            partial |= coverage(&last).is_some();
+            (tile, None)
         } else if let (Some(n), Some(began)) = (so_far, this.last()) {
             // A period whose first days went unreported is counted from the day reports began.
-            let whole = Date::parse(&began.day) == Some(this_start);
+            let whole = Date::parse(&began.day) == Some(this_start) || Date::parse(&began.day) == began_reading;
             let tile = UsageTile {
                 label: if whole {
                     format!("Readers, this {noun} so far")
@@ -516,12 +523,12 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
                 note: if whole { range(&this) } else { format!("Not the whole {noun}: {}", range(&this)) },
                 bars: Vec::new(),
             };
-            (tile, &this)
+            (tile, coverage(&this))
         } else {
             continue;
         };
-        if let Some(c) = coverage(counted) {
-            tile.note.push_str(&c);
+        if let Some(c) = counted {
+            tile.note.push_str(&format!(" · {c}"));
             partial = true;
         }
         d.period_tiles.push(tile);
@@ -595,11 +602,14 @@ fn chart(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
     d.dates.push(UsageTick { at: format_float(at(n - 1)), label: window[n - 1].label.clone() });
     // A label is about a seventh of a phone's plot wide: the first is set from the left edge and
     // "Today" from the right, and each mark between stands a label clear of the one before.
-    let mut last = DATE_GAP * if window[n - 1].label.contains(',') { 1.5 } else { 1.0 };
+    // A label that names its year is wider.
+    let room = |label: &str| if label.contains(',') { 1.7 * DATE_GAP } else { DATE_GAP };
+    let mut last = room(&window[n - 1].label);
     for (i, row) in window.iter().enumerate().rev() {
-        if row.day.ends_with("-01") && at(i) >= last + DATE_GAP / 2.0 && at(i) <= 100.0 - TODAY_GAP - DATE_GAP / 2.0 {
+        let half = room(&row.label) / 2.0;
+        if row.day.ends_with("-01") && at(i) >= last + half && at(i) <= 100.0 - TODAY_GAP - half {
             d.dates.push(UsageTick { at: format_float(at(i)), label: row.label.clone() });
-            last = at(i) + DATE_GAP / 2.0;
+            last = at(i) + half;
         }
     }
     if n > 1 {
@@ -873,9 +883,9 @@ mod tests {
         let tabs: Vec<(i64, &str, bool)> = d.tabs.iter().map(|t| (t.days, t.label.as_str(), t.current)).collect();
         assert_eq!(tabs, [(7, "7 days", false), (30, "Since Sep 7", true)]);
         // Dates under the bars stand clear of each other: a month's first beside the window's
-        // first day is not named.
-        let d = data(days(0, &[1; 40]), 9, "2026-08-27");
-        assert_eq!(d.dates.iter().map(|t| t.label.as_str()).collect::<Vec<_>>(), ["Sep 28", "Today"]);
+        // first day, or beside today, is not named.
+        let d = data(days(0, &[1; 40]), 38, "2026-08-27");
+        assert_eq!(d.dates.iter().map(|t| t.label.as_str()).collect::<Vec<_>>(), ["Aug 30", "Today"]);
         let d = data(days(0, &[1; 40]), 365, "2026-08-27");
         assert!(d.tabs[2].current, "a longer window than the record is the whole record");
     }
@@ -1129,7 +1139,7 @@ mod tests {
         let d = data(rows.clone(), 7, "2026-01-01");
         assert!(!d.period_note.is_empty());
         assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4 · this week so far 13");
-        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 75% of readers reporting");
+        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 75% of its readers reporting");
         // A month whose first days went unreported is counted from the day reports began, and
         // its share is of those days' readers.
         for key in ["month:first", "month:again"] {
@@ -1139,7 +1149,18 @@ mod tests {
         let month = &d.period_tiles[1];
         assert_eq!(
             (month.label.as_str(), month.value.as_str(), month.note.as_str()),
-            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 71% of readers reporting")
+            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 71% of its readers reporting")
+        );
+        // A first day nobody read on had nothing to report, and the month is whole without it.
+        rows[5].users = 0;
+        assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[1].label, "Readers, this month so far");
+        // Last week's share stands beside last week, before this week's figure.
+        for row in &mut rows[2..9] {
+            row.users = 20;
+        }
+        assert_eq!(
+            data(rows.clone(), 7, "2026-01-01").period_tiles[0].note,
+            "Sep 28 – Oct 4 · 50% of its readers reporting · this week so far 13"
         );
         assert!(data(days(10, &[10; 20]), 7, "2026-01-01").period_tiles.is_empty());
     }

@@ -509,7 +509,9 @@ fn event_at(
     }
     if store.record(now, &id, &event.scope, &dimensions).is_err() {
         let mut failed = response(StatusCode::SERVICE_UNAVAILABLE, Body::empty());
-        for c in resp.headers().get_all(header::SET_COOKIE) {
+        // A period's flags say the browser was counted in it, and it was not.
+        let period = |c: &header::HeaderValue| PERIOD_COOKIES.iter().any(|(_, name, _)| c.as_bytes().starts_with(name.as_bytes()));
+        for c in resp.headers().get_all(header::SET_COOKIE).iter().filter(|c| !period(c)) {
             failed.headers_mut().append(header::SET_COOKIE, c.clone());
         }
         return with_usage_headers(failed);
