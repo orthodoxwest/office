@@ -53,7 +53,7 @@ devices() {
   sdk_version=$(xcrun --sdk iphonesimulator --show-sdk-version)
   pick() {
     python3 - "${RUNNER_TEMP:-/tmp}/devices.json" "$1" "$2" "$3" "$4" "$sdk_version" <<'PY'
-import json, sys
+import json, re, sys
 path, family, preferred, runtime, exact_name, sdk_version = sys.argv[1:]
 devices = json.load(open(path))["devices"]
 if runtime:
@@ -63,13 +63,15 @@ if runtime:
 else:
     # The newest runtime this Xcode's simulator SDK can run that has the family: an image can
     # carry a runtime newer than its default Xcode, whose devices xcodebuild cannot see.
-    version = lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")]
+    # A key can carry a suffix after the version (Xcode 27.1's iOS-27-1-iPhone19-1 for a model
+    # with its own build), so only the leading numbers count.
+    version = lambda k: [int(x) for x in re.search(r"iOS-(\d+(?:-\d+)*)", k).group(1).split("-")]
     sdk = [int(x) for x in sdk_version.split(".")]
     # `preferred` is one or more models, best first, split by "|" (a store size's model changes
     # with the image). A point release's runtime can carry only a new model (Xcode 27.1's iOS
     # 27.1 has only the iPhone Duo), so the newest runtime with a preferred model wins, else the
     # newest with the family.
-    usable = [k for k in devices if "iOS" in k and version(k) <= sdk]
+    usable = [k for k in devices if re.search(r"iOS-\d", k) and version(k) <= sdk]
     has = lambda k, prefix: any(d["name"].startswith(prefix) for d in devices[k])
     for prefix in [*preferred.split("|"), family]:
         ios = sorted((k for k in usable if has(k, prefix)), key=version)
