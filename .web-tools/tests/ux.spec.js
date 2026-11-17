@@ -5151,6 +5151,9 @@ test("a browser is new on the day it first opens the Office and returning after"
     await page.goto(`/?date=${easternDay()}`);
     await engage(page);
     await expect.poll(() => events.length).toBe(1);
+    // Leave for a page that never reports before the test changes storage: a beacon still
+    // settling would otherwise report again in the words the change gives it.
+    await page.goto("/privacy");
     return events[0].match(/visit:(\w+)/)[1];
   };
   // Any number of pages on the first day are new; an earlier first day is returning.

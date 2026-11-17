@@ -556,6 +556,7 @@ var USAGE_OFFLINE_KEY = "office-offline";
 var USAGE_FIRST_KEPT = "2026-11-10";
 // presentation::CURRENT_HOUR_SCHEDULE as [start, hour, day offset].
 var USAGE_OPENED = new Date();
+var USAGE_OPENED_DAY = null;
 var USAGE_HOUR_STARTS = [[0, "compline", -1], [2, "lauds", 0], [7, "prime", 0], [9, "terce", 0], [11, "sext", 0], [13, "none", 0], [17, "vespers", 0], [20, "compline", 0]];
 function usageMonday(iso) {
   var date = new Date(iso + "T12:00:00Z");
@@ -576,6 +577,9 @@ function usageHabitTokens(scope, weekFirst) {
   var tokens = " version:2";
   try {
     var day = usageReportingDay();
+    // A page kept open into a new reporting day is opened anew for it, as the apps' are.
+    if (USAGE_OPENED_DAY !== null && USAGE_OPENED_DAY !== day) USAGE_OPENED = new Date();
+    USAGE_OPENED_DAY = day;
     var first = localStorage.getItem(USAGE_FIRST_KEY);
     var age = /^\d{4}-\d{2}-\d{2}$/.test(first || "") ? usageDaysBetween(first, day)
       : first === "before" && usageDaysBetween(USAGE_FIRST_KEPT, day) >= 30 ? 30 : -1;
@@ -5657,6 +5661,8 @@ function plainClickOpensHere(e, link) {
   };
 
   var recorded = new Set();
+  // The days this page was counted, whatever its words then: an hour counted is never missed.
+  var counted = new Set();
   var pending = false;
   var engaged = false;
   function record() {
@@ -5667,7 +5673,7 @@ function plainClickOpensHere(e, link) {
     var key = day + " " + usageUnmissed(body);
     if (!navigator.onLine) {
       // Only an hour not yet counted today missed its report.
-      if (current(day) && !recorded.has(key)) usageMissed(scope);
+      if (current(day) && !counted.has(day)) usageMissed(scope);
       return;
     }
     if (recorded.has(key) || !current(day)) return;
@@ -5675,6 +5681,7 @@ function plainClickOpensHere(e, link) {
     usagePost(body, 4000).then(function (response) {
       if (!response.ok) return usageMissed(scope);
       recorded.add(key);
+      counted.add(day);
       usageCounted(day);
       usageReported(body);
     }).catch(function () {
@@ -5726,7 +5733,12 @@ function plainClickOpensHere(e, link) {
       pause();
     }
   });
-  window.addEventListener("pageshow", function () { resume(); record(); });
+  window.addEventListener("pageshow", function (event) {
+    // A page brought back from the back-forward cache is opened anew.
+    if (event.persisted) USAGE_OPENED = new Date();
+    resume();
+    record();
+  });
   window.addEventListener("online", record);
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
   window.addEventListener("officemartyrologychange", function () { engage(); record(); });
