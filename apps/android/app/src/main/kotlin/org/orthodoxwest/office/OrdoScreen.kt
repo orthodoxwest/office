@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.InteractionSource
@@ -64,6 +65,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
@@ -596,17 +598,23 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
         "abstinence".takeIf { d.abstinence },
         d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
     ).joinToString(". ")
+    // A tap on the row, off its date, its marks and the open digest, opens or closes the details,
+    // as the disclosure does: the row is read in place, and only the date leads to the day (the
+    // web's row). A gesture, not a control: the disclosure is the screen reader's way in, and the
+    // marks and the disclosure, which are controls, take their own taps first.
+    val toggle: () -> Unit = { open["details"] = !details }
+    val rowTap: Modifier = if (hasDetails) Modifier.pointerInput(details) { detectTapGestures { toggle() } } else Modifier
     val buttons: @Composable RowScope.() -> Unit = {
-        if (hasDetails) SmallDisclosure("Office details", details) { open["details"] = !details }
+        if (hasDetails) SmallDisclosure("Office details", details, toggle)
     }
     val unfolded: @Composable ColumnScope.() -> Unit = {
         // Shown for the whole month at once, the rows stay where they are, and change at once
         // while the month is faded.
-        Unfold(details && hasDetails, reveal = open["details"] != null, instant = turningAll) { Digest(d, onFeast) }
+        Unfold(details && hasDetails, reveal = open["details"] != null, instant = turningAll) { Digest(d, { onDay(date) }, onFeast) }
     }
     val anyOpen = details && hasDetails
-    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, modifier, anyOpen, buttons, unfolded)
-    val body: @Composable ColumnScope.() -> Unit = {
+    if (LocalWide.current) return DayTableRow(d, date, isToday, spoken, onDay, rowTap, modifier, anyOpen, buttons, unfolded)
+    val secondLine: @Composable ColumnScope.() -> Unit = {
         // Today is said once, in the gold of its number, at the right of today's second line, which
         // is otherwise empty: no row keeps a line for it.
         Row(Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(9.6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -616,7 +624,6 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
                 Text("Today", Modifier.padding(end = 8.dp).semantics { hideFromAccessibility() }, style = TodayNote)
             }
         }
-        unfolded()
     }
     // Today is painted, not selected: home's invitation wash, thinner, ruled top and bottom in the
     // gold line inset 8dp from the gutters and thinning out toward them, the day's number in gold.
@@ -645,7 +652,7 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
             },
         ),
     ) {
-        // A finger on the date or the name lights the whole row: home's pool of light, a long
+        // A finger on the date lights the whole row: home's pool of light, a long
         // lozenge under its words ([Lit]); the parts themselves neither dim nor light.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
@@ -664,17 +671,20 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, turnin
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
             }
             Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    // The date's stop already says the feast; the feast is a second target for the eye only.
-                    FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
-                    // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
-                    // Each names itself in a note when tapped ([OrdoMarks]).
-                    Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OrdoMarks(d, fast = { Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted)) }, rank = { Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted)) })
+                Column(rowTap) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        // The date's stop already says the feast.
+                        FeastName(d, Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp), Modifier.weight(1f).semantics { hideFromAccessibility() })
+                        // The phone's marks stay quiet, as the web's card sets them: the name carries the rank's ink.
+                        // Each names itself in a note when tapped ([OrdoMarks]).
+                        Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            OrdoMarks(d, fast = { Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted)) }, rank = { Text(d.rank, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted)) })
+                        }
                     }
+                    Monastic(d)
+                    secondLine()
                 }
-                Monastic(d)
-                body()
+                unfolded()
             }
         }
         RowHairline(d)
@@ -794,6 +804,7 @@ private fun DayTableRow(
     isToday: Boolean,
     spoken: String,
     onDay: (LocalDate) -> Unit,
+    rowTap: Modifier,
     modifier: Modifier,
     anyOpen: Boolean,
     buttons: @Composable RowScope.() -> Unit,
@@ -815,7 +826,7 @@ private fun DayTableRow(
             },
         ),
     ) {
-        // A finger on the date or the name lights the whole row ([Lit]), as on a phone.
+        // A finger on the date lights the whole row ([Lit]), as on a phone.
         val held = remember { MutableInteractionSource() }
         val reach = railReach(held)
         // The web's `.month-table td`: 0.5rem above and below, from 701px.
@@ -846,18 +857,20 @@ private fun DayTableRow(
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 23.sp, color = if (isToday) p.gold else p.accent, fontFeatureSettings = "lnum"))
                 if (isToday && !margin) Text("Today", style = Type.small.copy(fontSize = 11.2.sp, lineHeight = 15.7.sp, color = p.accent))
             }
-            Text(d.weekday, Modifier.width(WeekCol).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
+            Text(d.weekday, Modifier.width(WeekCol).fillMaxHeight().then(rowTap).padding(horizontal = 7.2.dp, vertical = 3.dp).clearAndSetSemantics {}, style = Type.small.copy(fontSize = 12.8.sp, color = p.muted))
             Column(Modifier.weight(1f).padding(horizontal = 7.2.dp)) {
-                // The date's stop already says the feast; the feast is a second target for the eye only.
+                // The date's stop already says the feast.
                 val name = Type.body.copy(fontSize = 16.sp, lineHeight = 22.4.sp)
                 // A bracketed line sits under the name, so the disclosures drop below it as on the web.
                 if (anyOpen || d.monastic.isNotEmpty()) {
-                    FeastName(d, name, Modifier.tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
-                    Monastic(d)
-                    Row(horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                    Column(rowTap) {
+                        FeastName(d, name, Modifier.semantics { hideFromAccessibility() })
+                        Monastic(d)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
+                    }
                 } else {
-                    Row {
-                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().tap(source = held) { onDay(date) }.semantics { hideFromAccessibility() })
+                    Row(Modifier.fillMaxWidth().then(rowTap)) {
+                        FeastName(d, name, Modifier.weight(1f, fill = false).alignByBaseline().semantics { hideFromAccessibility() })
                         Row(Modifier.padding(start = 20.dp).alignByBaseline(), horizontalArrangement = Arrangement.spacedBy(9.6.dp)) { buttons() }
                     }
                 }
@@ -1012,8 +1025,15 @@ private val TodayNote: TextStyle
 
 /** The office digest: each hour's gospel antiphon, preces, suffrage, and commemorations. */
 @Composable
-private fun Digest(d: OrdoDayView, onFeast: (String) -> Unit) {
+private fun ColumnScope.Digest(d: OrdoDayView, onDay: () -> Unit, onFeast: (String) -> Unit) {
     val p = LocalPalette.current
+    // The row's tap opens these in place; this, above the digest's rule, leads on to the day (the
+    // web's `.day-office-open`).
+    Text(
+        "${MARK_WORDS.openDay} ›",
+        Modifier.padding(top = 2.4.dp, bottom = 5.6.dp).tap(onClick = onDay),
+        style = Type.small.copy(fontSize = 13.6.sp, lineHeight = 20.4.sp, color = p.accent),
+    )
     Column(
         Modifier.fillMaxWidth().padding(bottom = 8.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(8.dp),
     ) {

@@ -97,6 +97,11 @@ struct FindScreen: View {
         }
     }
 
+    private func rankLetters(_ r: FeastResultView, _ ink: Color) -> some View {
+        Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
+            .padding(.leading, m.px(12)).padding(.top, m.px(4))
+    }
+
     private func result(_ r: FeastResultView) -> some View {
         let ink = rankTone(r.rankTone, p)
         return VStack(alignment: .leading, spacing: 0) {
@@ -106,10 +111,8 @@ struct FindScreen: View {
                         Text(r.name).type(Scale.body.sized(21.6, line: 27)).foregroundStyle(ink)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        if !r.rank.isEmpty {
-                            Text(r.rank).type(Scale.small.sized(15.2, line: 20)).foregroundStyle(ink)
-                                .padding(.leading, m.px(12)).padding(.top, m.px(4))
-                        }
+                        // The rank's room: its letters lie over the button (below), not in it.
+                        if !r.rank.isEmpty { rankLetters(r, ink).hidden() }
                     }
                     (Text(r.meta + " · ") + Text(feastWordsShared.everyYear).foregroundColor(p.accent))
                         .type(Scale.small.sized(14.7, line: 21)).foregroundStyle(p.muted)
@@ -122,6 +125,19 @@ struct FindScreen: View {
             .accessibilityLabel("\(r.name), \(r.rankFull). \(r.meta)")
             .accessibilityAddTraits(.isHeader)
             .accessibilityHint("Opens the feast's page")
+            // Over the feast's button, so a tap on the rank names it in a note (as the ordo's marks
+            // do) rather than opening the feast.
+            .overlay(alignment: .topTrailing) {
+                if !r.rank.isEmpty {
+                    Group {
+                        if r.rankFull.isEmpty {
+                            rankLetters(r, ink).accessibilityHidden(true)
+                        } else {
+                            NoteMark(name: r.rankFull, label: "Rank \(r.rank)") { rankLetters(r, ink) }
+                        }
+                    }
+                }
+            }
             ForEach(Array(r.years.enumerated()), id: \.offset) { i, y in YearRow(y: y, first: i == 0) }
             Hairline(color: p.border).padding(.top, m.px(12))
         }
