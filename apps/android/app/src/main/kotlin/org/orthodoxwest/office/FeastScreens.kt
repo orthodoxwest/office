@@ -136,15 +136,14 @@ fun FindScreen(
                 Row(verticalAlignment = Alignment.Top) {
                     Text(
                         r.name,
-                        Modifier.weight(1f).tap(action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
+                        Modifier.weight(1f).tap(label = listOf(r.name, r.rankFull).filter { it.isNotEmpty() }.joinToString(", "), action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
                         style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 27.sp, color = rankTone(r.rankTone, p)),
                     )
                     if (r.rank.isNotEmpty()) {
-                        Text(
-                            r.rank,
-                            Modifier.padding(start = 12.dp, top = 4.dp).semantics { contentDescription = r.rankFull },
-                            style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p)),
-                        )
+                        // The rank's letters name the rank in a note when tapped, as the ordo's marks do.
+                        val letters = @Composable { Text(r.rank, style = Type.small.copy(fontSize = 15.2.sp, lineHeight = 20.sp, color = rankTone(r.rankTone, p))) }
+                        val at = Modifier.padding(start = 12.dp, top = 4.dp)
+                        if (r.rankFull.isNotEmpty()) NoteMark(r.rankFull, "Rank ${r.rank}", at) { letters() } else Box(at) { letters() }
                     }
                 }
                 Text(

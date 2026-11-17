@@ -90,6 +90,9 @@ struct HomeScreen: View {
                                         Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
                                     })
                                     .frame(maxWidth: zoomed.px(layout.card))
+                                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                        ScreenshotGeometry.note("home.card", "\($0) of \(zoomed.px(layout.card)) at zoom \(layout.zoom) in \(geo.size)")
+                                    }
                                     .environment(\.metrics, zoomed)
                                     .padding(.horizontal, 24)
                                     .padding(.top, zoomed.px(layout.air))
@@ -120,7 +123,10 @@ struct HomeScreen: View {
                 }
             }
         }
-        .onPreferenceChange(NicheFrameKey.self) { nicheFrame = $0 }
+        .onPreferenceChange(NicheFrameKey.self) { frame in
+            nicheFrame = frame
+            ScreenshotGeometry.note("home.niche", "\(frame.map { "\($0)" } ?? "none")")
+        }
         .onPreferenceChange(CrownFrameKey.self) { frames in
             crownFrames.value = frames
             // A scroll or a new layout ends the crown's play: its photographs cannot move.

@@ -48,6 +48,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASELINES = ROOT / "apps/ios/snapshots"
 ENVIRONMENT = "environment.json"
+# What a shot's page measured of its own layout (apps/ios/Office/ScreenshotReady.swift), beside it.
+GEOMETRY = ".geometry.txt"
 ENVIRONMENT_KEYS = ("xcode", "runtime", "phone", "ipad")
 # What each of its values may hold. They are echoed into workflow commands (::warning::), so no
 # newlines or markup; update-ios-snapshots.yml's commit job checks the same with jq.
@@ -147,7 +149,7 @@ def compare(raw, baselines, updates, diffs, summary=None):
 
     updates.mkdir(parents=True, exist_ok=True)
     diffs.mkdir(parents=True, exist_ok=True)
-    for old in [*updates.glob("*.png"), *diffs.glob("*.png")]:
+    for old in [*updates.glob("*.png"), *updates.glob(f"*{GEOMETRY}"), *diffs.glob("*.png")]:
         old.unlink()
     shots = {p.stem: p for p in sorted(raw.glob("*.png")) if p.stem not in EXCLUDED}
     kept = {p.stem: p for p in sorted(baselines.glob("*.png"))} if baselines.is_dir() else {}
@@ -155,6 +157,11 @@ def compare(raw, baselines, updates, diffs, summary=None):
     recorded = read_environment(baselines) if baselines.is_dir() else None
     if taken_in:
         (updates / ENVIRONMENT).write_text(json.dumps(taken_in, indent=2) + "\n")
+    # What each page measured of itself goes with its shot, so the next baselines carry it too.
+    for name in shots:
+        if (raw / f"{name}{GEOMETRY}").is_file():
+            shutil.copyfile(raw / f"{name}{GEOMETRY}", updates / f"{name}{GEOMETRY}")
+
     lines = []
 
     def take(name, image):
@@ -252,9 +259,23 @@ def compare(raw, baselines, updates, diffs, summary=None):
                     out.write(f"| `{name}` | baseline, not taken |\n")
                 out.write("\nThe `ios-snapshot-diffs` artifact has each changed shot beside its baseline. "
                           "If the change is intended, add the `update-ios-snapshots` label.\n")
+                for name, _ in changed:
+                    measured = geometry_report(name, baselines, raw)
+                    if measured:
+                        out.write(f"\n<details><summary>{name}: what the page measured</summary>\n\n{measured}\n</details>\n")
     if changed or new or gone:
         return 1, "differ", lines
     return 0, "matched", lines
+
+
+def geometry_report(name, baselines, raw):
+    """The baseline's and this run's measures of a shot's page (ScreenshotGeometry), where kept."""
+    parts = []
+    for label, folder in (("baseline", baselines), ("this run", raw)):
+        path = folder / f"{name}{GEOMETRY}"
+        if path.is_file():
+            parts.append(f"{label}:\n\n```\n{path.read_text().rstrip()}\n```\n")
+    return "\n".join(parts)
 
 
 def fetch(branch, remote="origin", into=BASELINES):
@@ -265,7 +286,7 @@ def fetch(branch, remote="origin", into=BASELINES):
         ["git", "ls-tree", "--name-only", "FETCH_HEAD", "snapshots/"],
         cwd=ROOT, check=True, capture_output=True, text=True,
     ).stdout.split()
-    names = [n for n in listing if n.endswith(".png") or n == f"snapshots/{ENVIRONMENT}"]
+    names = [n for n in listing if n.endswith((".png", GEOMETRY)) or n == f"snapshots/{ENVIRONMENT}"]
     if not any(n.endswith(".png") for n in names):
         raise SystemExit(f"{ref} has no snapshots/; has its iOS run finished?")
     blobs = {n: subprocess.run(["git", "show", f"FETCH_HEAD:{n}"], cwd=ROOT, check=True, capture_output=True).stdout
@@ -281,7 +302,7 @@ def fetch(branch, remote="origin", into=BASELINES):
     if blank:
         raise SystemExit(f"{ref} has blank shots, which must not become baselines: {', '.join(blank)}")
     into.mkdir(parents=True, exist_ok=True)
-    for old in into.glob("*.png"):
+    for old in [*into.glob("*.png"), *into.glob(f"*{GEOMETRY}")]:
         old.unlink()
     for name, blob in blobs.items():
         (into / pathlib.PurePosixPath(name).name).write_bytes(blob)

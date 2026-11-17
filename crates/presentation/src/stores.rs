@@ -12,7 +12,7 @@ pub const PLAY_URL: &str = "https://play.google.com/store/apps/details?id=org.or
 /// `None` while the app is not yet on the App Store. Setting it is the whole of the iOS switch:
 /// the colophon names iPhone and iPad beside Android, iPhone and iPad readers see their store's link in
 /// place of none, and Safari offers its own Smart App Banner (`apple-itunes-app`, layout.html).
-pub const APP_STORE_ID: Option<&str> = None;
+pub const APP_STORE_ID: Option<&str> = Some("6828679748");
 
 /// The colophon's words before the platforms, and its name for Apple's (the iOS app is built for
 /// both, apps/ios/project.yml's TARGETED_DEVICE_FAMILY).

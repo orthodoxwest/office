@@ -4432,9 +4432,59 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: /^November\b/ }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   page = await open("/calendar/2026/03");
-  await page.locator("#d-2026-03-01 .day-feast-name").click();
+  await page.locator("#d-2026-03-01 .day-mobile-date").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
   await context.close();
+});
+
+test("a tap on an ordo day's row opens its office details; only the date leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  await row.locator(".day-feast-name").click();
+  await expect(details).toHaveAttribute("open", "");
+  await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  // Opened, its head leads on to the day.
+  await expect(details.locator(".day-office-open")).toHaveAttribute("href", /date=2026-03-01/);
+  // Again, it closes; the rank's mark answers with its note, not the row.
+  await row.locator(".day-feast-name").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await row.locator(".day-mobile-rank").click();
+  await expect(details).not.toHaveAttribute("open", "");
+  await row.locator(".day-mobile-date").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+// The row's other answers: a tap that puts a mark's note away does only that;
+// the wide table's empty width and its weekday toggle the row too, a second
+// tap beside the open details closes them, and the date's whole cell leads to
+// the day, saying the feast as it does.
+test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  const note = page.locator("#gloss-note");
+  await row.locator(".day-mobile-rank").tap();
+  await expect(note).not.toHaveClass(/closed/);
+  await row.locator(".day-feast-name").tap();
+  await expect(note).toHaveClass(/closed/);
+  await expect(details).not.toHaveAttribute("open", "");
+  await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const wk = row.locator("td.day-wk");
+  await wk.click();
+  await expect(details).toHaveAttribute("open", "");
+  // Open, the details take the line's width: a tap on their empty right closes them.
+  const box = await details.boundingBox();
+  await page.mouse.click(box.x + box.width - 4, box.y + 6);
+  await expect(details).not.toHaveAttribute("open", "");
+  const cell = await row.locator("td.day-num").boundingBox();
+  const link = await row.locator("td.day-num a").boundingBox();
+  expect(cell.height).toBeGreaterThan(link.height + 10);
+  // Its corner, off the numeral (the row may still be folding shut below).
+  await page.mouse.click(cell.x + 4, cell.y + 4);
+  await expect(page).toHaveURL(/date=2026-03-01/);
 });
 
 // One theme: overflow and touch targets are geometry, which themes share
@@ -6214,6 +6264,22 @@ test("escaped page links retain navigation and report query values", async ({ pa
   await expect(page).toHaveURL(/\/prime\/2026-06-07/);
 });
 
+// Find's rank letters name the rank in the ordo marks' note, as the ordo's do,
+// rather than leaving it to a mouse's tooltip.
+test("a found feast's rank names itself in a note when tapped", async ({ page }) => {
+  await page.goto("/calendar/find?q=raphael");
+  const rank = page.locator(".find-rank").first();
+  const note = page.locator("#gloss-note");
+  await expect(rank).toHaveAttribute("role", "button");
+  await expect(rank).not.toHaveAttribute("title", /./);
+  await rank.click();
+  await expect(rank).toHaveAttribute("aria-expanded", "true");
+  await expect(note).not.toHaveText("");
+  await expect(page).toHaveURL(/\/calendar\/find\?q=raphael$/);
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveClass(/closed/);
+});
+
 test("a feast's page leads back to the search that found it", async ({ page }) => {
   await page.goto("/calendar/find?q=raphael");
   await page.locator(".find-name").first().click();
@@ -6769,8 +6835,9 @@ test("a tapped ordo row and a tapped hour show their press at once", async ({ br
   });
   const row = page.locator("#d-2026-09-20");
   await row.scrollIntoViewIfNeeded();
-  const box = await row.boundingBox();
-  await page.touchscreen.tap(box.x + box.width * 0.7, box.y + box.height - 6);
+  // The row's date leads to the day; the rest of the row opens its details.
+  const box = await row.locator(".day-mobile-date").boundingBox();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForURL(/\?date=2026-09-20/);
   expect(seen).toContain("d-2026-09-20");
   // After app.js's own listener: keep the page, and say how the hour stood.
@@ -6949,10 +7016,10 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
   await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
 });
 
-// The native apps (presentation::stores): a phone sees only its own store, and on Android
-// Reminders leads with the app and shuts the calendar's fold before it is painted. An iPhone,
-// with no App Store listing yet, sees neither the offer nor the fold's title: its page reads as
-// the calendar alone, as before.
+// The native apps (presentation::stores): a phone sees only its own store, and Reminders leads
+// with the app and shuts the calendar's fold before it is painted. Were there no App Store
+// listing (APP_STORE_ID unset), an iPhone would see neither the offer nor the fold's title, and
+// its page would read as the calendar alone.
 for (const [platform, userAgent] of [
   ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
   ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
@@ -6969,11 +7036,16 @@ for (const [platform, userAgent] of [
     await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });
     await expect(page.locator(".reminder-calendar > summary")).toBeVisible({ visible: offered });
     await expect(page.locator(".reminders-app .app-store[data-store='android']")).toBeVisible({ visible: platform === "android" });
+    await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toBeVisible({ visible: platform === "ios" && ios });
     await expect(page.locator(".app-stores")).toBeVisible({ visible: offered });
+    // The colophon names every store the apps are in, whatever the reader's phone.
+    if (offered) await expect(page.locator(".app-stores")).toHaveText(ios ? "Also an app for Android, iPhone and iPad" : "Also an app for Android");
     if (platform === "android") {
-      await expect(page.locator(".app-stores")).toHaveText("Also an app for Android");
       await page.locator(".reminder-calendar > summary").click();
       await expect(page.locator("#reminders-form")).toBeVisible();
+    }
+    if (platform === "ios" && ios) {
+      await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toHaveAttribute("href", /^https:\/\/apps\.apple\.com\/app\/id\d+$/);
     }
     await context.close();
   });
