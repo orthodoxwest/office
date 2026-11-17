@@ -140,6 +140,18 @@ jobs:
         run: xcodegen generate
 
       # ios.yml runs the tests; the screenshots need only the app.
+      # xcodebuild lists no simulator at all, only placeholders, and fails while the image is
+      # still making its simulator runtime ready (seen on macos-26 with a booting phone), so the
+      # build waits for the phone to finish booting first.
+      - name: Wait for the phone to boot
+        env:
+          PHONE: ${{ steps.sim.outputs.phone }}
+        run: |
+          start=$SECONDS
+          xcrun simctl bootstatus "$PHONE" -b > /dev/null
+          echo "booted after $((SECONDS - start))s of waiting"
+          xcrun simctl list runtimes
+
       - name: Build the app
         working-directory: apps/ios
         env:

@@ -122,17 +122,18 @@ difference is only a warning, since master cannot take the label.
 
 The app is installed once on each simulator, and every shot starts from its data cleared back to
 what the install left (defaults through cfprefsd, then the container), so no earlier shot's kept
-reading place, way back or settings reaches it; at a fixed day, today and hour (`-date`,
-`-today`, `-clock 9`), in New York's time zone, in English, at the default text size, with the status bar's time fixed; and
-once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a marker to its
-temporary directory once the page's content is on screen and scrolled to its anchor; three
-minutes from launch without it fails the run) and has come to rest (two frames a second apart alike). A blank shot,
-one colour below the status bar as a page not yet drawn is, fails the comparison and is never
-offered as a baseline, nor fetched as one. The baselines record the Xcode, simulator runtime and devices they were
-taken with (`snapshots/environment.json`), and later runs take the same ones. When the runner
-image no longer has them, the shots are taken on its newest and not compared, with a warning, until
-the baselines are taken again. Shots that cannot be made stable are listed with their reason in
-`EXCLUDED` in `scripts/ios-snapshots.py` (none so far). The App Store sizes are never compared.
+reading place, way back or settings reaches it; at a fixed day, today and hour (`-date`, `-today`,
+`-clock 9`), in New York's time zone, in English, at the default text size, with the status bar's
+time fixed; and once the app says the page asked for is drawn (`ScreenshotReady.swift` writes a
+marker to its temporary directory once the page's content is on screen and scrolled to its anchor;
+three minutes from launch without it fails the run) and has come to rest (two frames a second apart
+alike). A blank shot, one colour below the status bar as a page not yet drawn is, fails the
+comparison and is never offered as a baseline, nor fetched as one. The baselines record the Xcode,
+simulator runtime and devices they were taken with (`snapshots/environment.json`), and later runs
+take the same ones. When the runner image no longer has them, the shots are taken on its newest and
+not compared, with a warning, until the baselines are taken again. Shots that cannot be made stable
+are listed with their reason in `EXCLUDED` in `scripts/ios-snapshots.py` (none so far). The App
+Store sizes are never compared.
 
 When a change to the shots is intended, add the **update-ios-snapshots** label to the pull
 request (`.github/workflows/update-ios-snapshots.yml`). It reuses the set the pull request's
