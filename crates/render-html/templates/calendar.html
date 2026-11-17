@@ -155,12 +155,12 @@
              the row's rail colour, the inner the other row's. #}
         {%- set thread %}{% if d.lead_to %}<span class="day-lead {{ d.color_class }}" aria-hidden="true"><span class="day-thread to-feast day-color-{{ d.lead_to }}"></span></span>{% elif d.lead_from %}<span class="day-lead {{ d.color_class }}" aria-hidden="true"><span class="day-thread from-vigil day-color-{{ d.lead_from }}"></span></span>{% endif %}{% endset %}
         <tr class="day {{ d.color_class }}{% if d.bound_above %} bound-above{% endif %}{% if d.bound_below %} bound-below{% endif %}{% if d.lead_to %} lead-to{% endif %}{% if d.lead_from %} lead-from{% endif %}" id="d-{{ d.date_slug }}"{% if d.rank %} data-rank="{{ d.rank }}"{% endif %}>
-          <td class="day-num" data-label="Day">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}<a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
+          <td class="day-num" data-label="Day">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}<a href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">{{ d.day_num }}</a></td>
           <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
           <td class="day-feast" data-label="Feast">{% if d.rail_inset %}<span class="day-inset day-color-{{ d.rail_inset }}" aria-hidden="true"></span>{% endif %}{{ thread }}
             <span class="sr-only">Liturgical color: {{ d.color }}. </span>
             <div class="day-mobile-head">
-              <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}">
+              <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}" aria-describedby="n-{{ d.date_slug }}">
                 <span class="day-mobile-num">{{ d.day_num }}</span>
                 <span class="day-mobile-weekday">{{ d.weekday }}</span>
               </a>
@@ -173,8 +173,9 @@
                 {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
               </span>
             </div>
-            {# Only the date leads to the day; a tap on the rest of the row opens its office details (app.js). #}
-            <span class="day-feast-name">{{ d.feast_name|typeset }}</span>
+            {# Only the date leads to the day, and says the feast as it is described; a tap on the
+               rest of the row opens its office details (app.js). #}
+            <span class="day-feast-name" id="n-{{ d.date_slug }}">{{ d.feast_name|typeset }}</span>
             {# Kept by monastics and oblates only: the ordo's bracketed line, never the day's office. #}
             {% if d.monastic %}<div class="day-monastic">{% for o in d.monastic %}<p>[{{ o.heading|typeset }}] <abbr tabindex="0" title="{{ o.rank_full }}">{{ o.rank }}</abbr>{% if o.office %}<span class="day-monastic-office">{{ o.office|typeset }}</span>{% endif %}</p>{% endfor %}</div>{% endif %}
             {# One disclosure holds the day's commemorations and its office. #}
@@ -182,6 +183,8 @@
             {% if d.commemorations or d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_cross or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_cross or d.vespers_note or d.lauds_comms or d.vespers_comms %}
             <details class="day-office-details">
               <summary>Office details</summary>
+              {# The row's tap opens these in place; this leads on to the day. #}
+              <a class="day-office-open" href="{{ home_link(d.date_slug)|url }}">{{ open_this_day }} ›</a>
               <dl class="day-office-digest">
               {% if d.commemorations %}
               <div class="day-office-hour">

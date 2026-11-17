@@ -211,8 +211,13 @@ document.documentElement.classList.add("js");
   // iOS Safari sends no click for a tap on plain text, so a tap elsewhere is
   // heard on pointerup (as the header's overlays hear it); click stays for
   // the keyboard and finds the note already closed after a mouse.
+  // The tap that puts a note away does only that: the ordo row under it does
+  // not also open its details (calendarEl's click reads the time).
   function outside(e) {
-    if (open && !open.contains(e.target) && !note.contains(e.target)) close(false);
+    if (open && !open.contains(e.target) && !note.contains(e.target)) {
+      close(false);
+      note.dataset.closedAt = String(Date.now());
+    }
   }
   document.addEventListener("pointerup", function (e) {
     if (e.button === 0) outside(e);
@@ -3767,10 +3772,6 @@ function plainClickOpensHere(e, link) {
     }, function () {});
   })();
 
-  // calendarRowClicks makes the whole ordo row navigate to the day's home
-  // page. The day-number link stays as the keyboard/no-JS path; clicks on
-  // links, rank tooltips, and the office details disclosure keep their own
-  // behavior, and selecting text never navigates.
   var calendarEl = document.querySelector(".calendar");
   if (calendarEl) {
     var monthLinks = calendarEl.querySelectorAll(".month-jump a");
@@ -3894,13 +3895,21 @@ function plainClickOpensHere(e, link) {
 
     // A tap on a day's row, off its date and its marks, opens or closes the
     // day's office details: the row is read in place, and only the date leads
-    // to the day. Its summary keeps the keyboard's way in.
+    // to the day. Its summary keeps the keyboard's way in. The open digest
+    // reads as text; the open box's empty width closes it again.
     calendarEl.addEventListener("click", function (e) {
-      if (e.defaultPrevented || e.target.closest("a, abbr, details, button, [role='button']")) {
+      if (e.defaultPrevented || e.target.closest("a, abbr, summary, .day-office-digest, button, [role='button']")) {
         return;
       }
+      // A drag that selects leaves the row as it was; a double click to
+      // select a word opens and closes it again.
       var selection = window.getSelection();
-      if (selection && !selection.isCollapsed) {
+      if (e.detail < 2 && selection && !selection.isCollapsed) {
+        return;
+      }
+      // A tap that put a mark's note away does only that.
+      var glossNote = document.getElementById("gloss-note");
+      if (glossNote && Date.now() - Number(glossNote.dataset.closedAt || 0) < 300) {
         return;
       }
       var row = e.target.closest("tr.day");
@@ -5522,9 +5531,10 @@ function plainClickOpensHere(e, link) {
 // native list), as does the control a tap lands on, at once. A link to
 // another of the site's pages keeps it until the page goes, so the last thing
 // seen is the press; anything else lets go at once, and style.css eases the
-// release over 200ms (and draws .is-pressed as :active). An ordo row is one
-// control with the day's own links (calendarRowClicks). A mouse has :active,
-// and its click is marked the same way.
+// release over 200ms (and draws .is-pressed as :active). An ordo row lights
+// whole only under its date, which leads to the day; the rest of the row opens
+// its details in place. A mouse has :active, and its click is marked the
+// same way.
 (function () {
   if (!window.PointerEvent) return;
   var PRESSABLE = "a[href], button:not(:disabled), summary, label, [role='button']";
@@ -5542,7 +5552,7 @@ function plainClickOpensHere(e, link) {
     var row = target.closest(".js .month-table tr.day");
     if (row && !target.closest("abbr, details")) {
       var link = target.closest("a");
-      if (!link || link.matches(ROW_LINKS)) return row;
+      if (link && link.matches(ROW_LINKS)) return row;
     }
     return target.closest(PRESSABLE);
   }
@@ -5561,7 +5571,7 @@ function plainClickOpensHere(e, link) {
   // Whether a click on el leaves for another of the site's pages.
   function leaves(e, el) {
     if (el.matches("tr.day")) {
-      // Only the day's date leaves; the rest of the row opens its details in place.
+      // Lit only under its date, which leaves for the day.
       var own = e.target.closest("a[href]");
       return Boolean(own) && plainClickOpensHere(e, own);
     }

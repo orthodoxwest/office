@@ -136,7 +136,7 @@ fun FindScreen(
                 Row(verticalAlignment = Alignment.Top) {
                     Text(
                         r.name,
-                        Modifier.weight(1f).tap(action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
+                        Modifier.weight(1f).tap(label = listOf(r.name, r.rankFull).filter { it.isNotEmpty() }.joinToString(", "), action = "open the feast's page") { onFeast(r.id) }.semantics { heading() },
                         style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 27.sp, color = rankTone(r.rankTone, p)),
                     )
                     if (r.rank.isNotEmpty()) {

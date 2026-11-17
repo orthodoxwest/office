@@ -4049,9 +4049,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 }
 
 /* The ordo's day links are a line of type in a taller row: each answers
-   to the row's height under a finger, not only to its letters. A feast's
-   name reaches up into its row's own padding and barely down, where the
-   day's disclosures begin. */
+   to the row's height under a finger, not only to its letters. */
 .tabula-tables dd a::after {
   content: "";
   position: absolute;
@@ -4116,7 +4114,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 }
 /* A finger on a row: app.js marks it (.is-pressed) after a rest or on the
    tap, not :active, which iOS Safari sets under a thumb starting a scroll.
-   The row keeps it until the page leaves. It lies under home's pool of
+   Only the date lights it, and the row keeps it until the page leaves. It lies under home's pool of
    light, a long lozenge under the day's name with no edge at the rules, at
    full strength, and the day's rail runs the row's full height. */
 .month-table tr.day > td:first-child::before {
@@ -4236,11 +4234,7 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 .is-today .day-mobile-date::after { visibility: visible; }
 :where(.calendar:not(.target-released)) .month-table tr:target > td { border-bottom-color: var(--gold-line); }
 .day-mobile-head { display: none; }
-.day-feast-name {
-  position: relative;
-  color: var(--text);
-  text-decoration: none;
-}
+.day-feast-name { color: var(--text); }
 .month-table th:nth-child(1), .month-table td.day-num { width: 2.8rem; }
 .month-table th:first-child,
 .month-table td.day-num {
@@ -4271,6 +4265,13 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
   line-height: 1.2;
 }
 .month-table .day-num a:hover { text-decoration: underline; }
+/* The wide table's date is the way to the day: its whole cell answers, not
+   only the numeral. */
+.month-table .day-num a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
 /* A Kalendar has no hyperlinks: the rank keeps its ink and loses the rule.
    Each mark, and Find's rank, names itself in the hours' note (app.js), as a
    glossed term does; without the script, its title. */
@@ -4357,6 +4358,15 @@ html[data-course-lay] .month-course svg { clip-path: inset(0 100% 0 0); }
 .day-monastic p { margin: 0.15rem 0 0; }
 .day-monastic abbr { font-style: normal; }
 .day-monastic-office { display: block; }
+/* At the head of the opened details, the way on to the day. */
+.day-office-open {
+  display: inline-block;
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.day-office-open:hover { text-decoration: underline; }
 .day-office-digest {
   margin: 0 0 0.5rem;
   padding: 0.6rem 0.75rem;

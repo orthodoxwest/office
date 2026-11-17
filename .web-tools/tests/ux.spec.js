@@ -4439,12 +4439,46 @@ test("a tap on an ordo day's row opens its office details; only the date leads t
   await row.locator(".day-feast-name").click();
   await expect(details).toHaveAttribute("open", "");
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  // Opened, its head leads on to the day.
+  await expect(details.locator(".day-office-open")).toHaveAttribute("href", /date=2026-03-01/);
   // Again, it closes; the rank's mark answers with its note, not the row.
   await row.locator(".day-feast-name").click();
   await expect(details).not.toHaveAttribute("open", "");
   await row.locator(".day-mobile-rank").click();
   await expect(details).not.toHaveAttribute("open", "");
   await row.locator(".day-mobile-date").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+});
+
+// The row's other answers: a tap that puts a mark's note away does only that;
+// the wide table's empty width and its weekday toggle the row too, a second
+// tap beside the open details closes them, and the date's whole cell leads to
+// the day, saying the feast as it does.
+test("an ordo row's tap leaves a mark's note alone, and its date's cell leads to the day", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026/03");
+  const row = page.locator("#d-2026-03-01");
+  const details = row.locator(".day-office-details");
+  const note = page.locator("#gloss-note");
+  await row.locator(".day-mobile-rank").tap();
+  await expect(note).not.toHaveClass(/closed/);
+  await row.locator(".day-feast-name").tap();
+  await expect(note).toHaveClass(/closed/);
+  await expect(details).not.toHaveAttribute("open", "");
+  await expect(row.locator(".day-mobile-date")).toHaveAccessibleDescription(/\S/);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const wk = row.locator("td.day-wk");
+  await wk.click();
+  await expect(details).toHaveAttribute("open", "");
+  // Open, the details take the line's width: a tap on their empty right closes them.
+  const box = await details.boundingBox();
+  await page.mouse.click(box.x + box.width - 4, box.y + 6);
+  await expect(details).not.toHaveAttribute("open", "");
+  const cell = await row.locator("td.day-num").boundingBox();
+  const link = await row.locator("td.day-num a").boundingBox();
+  expect(cell.height).toBeGreaterThan(link.height + 10);
+  // Its corner, off the numeral (the row may still be folding shut below).
+  await page.mouse.click(cell.x + 4, cell.y + 4);
   await expect(page).toHaveURL(/date=2026-03-01/);
 });
 

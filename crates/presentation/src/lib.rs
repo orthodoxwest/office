@@ -202,6 +202,10 @@ pub const NEXT_DAY: &str = "Next day";
 pub const FAST_DAY: &str = "Day of Fasting";
 pub const ABSTINENCE_DAY: &str = "Day of Abstinence";
 
+/// The link at the head of an ordo day's opened details, on every front: a tap on the row opens
+/// the details in place, and this leads on to the day (each front adds its own "›").
+pub const OPEN_THIS_DAY: &str = "Open this day";
+
 /// The line under the menu's Chant setting, on every front.
 pub const CHANT_HINT: &str = "Shows the hymn and the Marian antiphon in chant notation, where notation is available.";
 

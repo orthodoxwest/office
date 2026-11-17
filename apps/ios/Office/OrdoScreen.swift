@@ -515,7 +515,7 @@ private struct DayRow: View {
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
     @State private var details: Bool?
-    /// A finger on the day's date or name: the row lies under home's pool of light (`Holding`).
+    /// A finger on the day's date: the row lies under home's pool of light (`Holding`).
     @State private var held = false
     /// How far the row stands from the window's left edge: from 1000pt wide the margin holds Today.
     @State private var left: CGFloat = 0
@@ -618,15 +618,17 @@ private struct DayRow: View {
         if hasDetails { small("Office details", details ?? allDetails, toggle: toggleDetails) }
     }
 
-    /// Opens or closes the day's details. A tap on the feast's line does it too, as the
-    /// disclosure does: the row is read in place, and only the date leads to the day (the web's row).
+    /// Opens or closes the day's details. A tap on the row, off its date, its marks and the open
+    /// digest, does it too: the row is read in place, and only the date leads to the day (the
+    /// web's row). A gesture, not a control: the disclosure is VoiceOver's way in, and the marks
+    /// and the disclosure, which are buttons, take their own taps first.
     private func toggleDetails() {
         guard hasDetails else { return }
         let open = details ?? allDetails
         withAnimation(disclosing(!open)) { details = !open }
     }
 
-    @ViewBuilder private var disclosures: some View {
+    private var secondLine: some View {
         // Today is said once, in the gold of its number, at the right of today's second line,
         // which is otherwise empty: no row keeps a line for it.
         HStack(alignment: .center, spacing: 0) {
@@ -636,8 +638,8 @@ private struct DayRow: View {
                 todayNote.padding(.trailing, m.px(8))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, m.px(1))
-        disclosed
     }
 
     /// "Today", in small caps and the gold of today's number, darkened by day (the web's
@@ -687,27 +689,29 @@ private struct DayRow: View {
                 .accessibilityLabel(spoken)
                 .accessibilityHint("Opens the day")
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .top, spacing: 0) {
-                        // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
-                        Button(action: toggleDetails) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(alignment: .top, spacing: 0) {
+                            // The date's stop already says the feast.
                             feastName(Scale.body.sized(16, line: 21.6))
-                        }
-                        .buttonStyle(Quiet())
-                        .accessibilityHidden(true)
-                        // The card's marks stay quiet, as the web's: red in a row means rank. Each
-                        // names itself in a note when tapped (`NoteMark`).
-                        HStack(spacing: m.px(6)) {
-                            if d.fast { fastMark { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) } }
-                            if d.abstinence { abstinenceMark }
-                            if !d.rank.isEmpty {
-                                rankMark { Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted) }
+                                .accessibilityHidden(true)
+                            // The card's marks stay quiet, as the web's: red in a row means rank. Each
+                            // names itself in a note when tapped (`NoteMark`).
+                            HStack(spacing: m.px(6)) {
+                                if d.fast { fastMark { Text("§").type(Scale.small.sized(12)).foregroundStyle(p.muted) } }
+                                if d.abstinence { abstinenceMark }
+                                if !d.rank.isEmpty {
+                                    rankMark { Text(d.rank).type(Scale.small.sized(12, line: 16.8)).foregroundStyle(p.muted) }
+                                }
                             }
+                            .padding(.leading, m.px(8))
+                            .padding(.top, m.px(2))
                         }
-                        .padding(.leading, m.px(8))
-                        .padding(.top, m.px(2))
+                        monastic
+                        secondLine
                     }
-                    monastic
-                    disclosures
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: toggleDetails)
+                    disclosed
                 }
             }
             // A row as tall as its type (the web's `.day-feast` on a phone: 0.7rem above, 0.6rem below).
@@ -739,6 +743,9 @@ private struct DayRow: View {
                 Text(d.weekday).type(Scale.small.sized(12.8)).foregroundStyle(p.muted)
                     .padding(.horizontal, 7.2).padding(.vertical, 3)
                     .frame(width: weekColumn, alignment: .leading)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: toggleDetails)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
                     // The disclosures share the feast's line, 1.25rem after the name (the web's
@@ -746,23 +753,27 @@ private struct DayRow: View {
                     // day; one that is open drops below the name at the column's full width.
                     let name = Scale.body.sized(16, line: 22.4)
                     // A bracketed line sits under the name, so the disclosures drop below it as on the web.
-                    if anyOpen || !d.monastic.isEmpty {
-                        // The date's stop already says the feast; the disclosure is the screen reader's way to the details.
-                        Button(action: toggleDetails) { feastName(name) }
-                            .buttonStyle(Quiet())
-                            .accessibilityHidden(true)
-                        monastic
-                        disclosureButtons
-                    } else {
-                        HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
-                            Button(action: toggleDetails) { feastName(name, fill: false) }
-                                .buttonStyle(Quiet())
-                                .accessibilityHidden(true)
-                                .layoutPriority(1)
-                            disclosureButtons.fixedSize()
-                            Spacer(minLength: 0)
+                    Group {
+                        if anyOpen || !d.monastic.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                // The date's stop already says the feast.
+                                feastName(name).accessibilityHidden(true)
+                                monastic
+                                disclosureButtons
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            HStack(alignment: .firstTextBaseline, spacing: m.px(20)) {
+                                feastName(name, fill: false)
+                                    .accessibilityHidden(true)
+                                    .layoutPriority(1)
+                                disclosureButtons.fixedSize()
+                                Spacer(minLength: 0)
+                            }
                         }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: toggleDetails)
                     disclosed
                 }
                 .padding(.horizontal, 7.2)
@@ -962,6 +973,15 @@ private struct Digest: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // The row's tap opens these in place; this leads on to the day (the web's `.day-office-open`).
+            Button {
+                model.choseInOrdo(d.date)
+                model.open(.home(d.date))
+            } label: {
+                Text("\(markWords.openDay) ›").type(Scale.small.sized(13.6, line: 20.4)).foregroundStyle(p.accent)
+            }
+            .buttonStyle(Quiet())
+            .padding(.bottom, m.px(5.6))
             if !dayComms.isEmpty {
                 hour("Day", notes: [], antiphon: nil, preces: false, suffrage: false, comms: dayComms)
             }
