@@ -6892,10 +6892,10 @@ test("a pressed row takes the pool of light and bare words dim", async ({ page }
   await expect.poll(() => row.evaluate((el) => Math.abs(parseFloat(getComputedStyle(el, "::before").height) - el.clientHeight))).toBeLessThan(0.5);
 });
 
-// The native apps (presentation::stores): a phone sees only its own store, and on Android
-// Reminders leads with the app and shuts the calendar's fold before it is painted. An iPhone,
-// with no App Store listing yet, sees neither the offer nor the fold's title: its page reads as
-// the calendar alone, as before.
+// The native apps (presentation::stores): a phone sees only its own store, and Reminders leads
+// with the app and shuts the calendar's fold before it is painted. Were there no App Store
+// listing (APP_STORE_ID unset), an iPhone would see neither the offer nor the fold's title, and
+// its page would read as the calendar alone.
 for (const [platform, userAgent] of [
   ["android", "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"],
   ["ios", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"],
@@ -6912,11 +6912,16 @@ for (const [platform, userAgent] of [
     await expect(page.locator(".reminders-app")).toBeVisible({ visible: offered });
     await expect(page.locator(".reminder-calendar > summary")).toBeVisible({ visible: offered });
     await expect(page.locator(".reminders-app .app-store[data-store='android']")).toBeVisible({ visible: platform === "android" });
+    await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toBeVisible({ visible: platform === "ios" && ios });
     await expect(page.locator(".app-stores")).toBeVisible({ visible: offered });
+    // The colophon names every store the apps are in, whatever the reader's phone.
+    if (offered) await expect(page.locator(".app-stores")).toHaveText(ios ? "Also an app for Android, iPhone and iPad" : "Also an app for Android");
     if (platform === "android") {
-      await expect(page.locator(".app-stores")).toHaveText("Also an app for Android");
       await page.locator(".reminder-calendar > summary").click();
       await expect(page.locator("#reminders-form")).toBeVisible();
+    }
+    if (platform === "ios" && ios) {
+      await expect(page.locator(".reminders-app .app-store[data-store='ios']")).toHaveAttribute("href", /^https:\/\/apps\.apple\.com\/app\/id\d+$/);
     }
     await context.close();
   });
