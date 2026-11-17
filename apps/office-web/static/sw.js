@@ -117,6 +117,18 @@ function networkFetch(req) {
   return fetch(req, { cache: "reload" });
 }
 
+// revalidate asks the network for a page the cache holds, naming the copy held
+// by its ETag: the server answers 304 Not Modified, composing and sending
+// nothing, while the page is unchanged (a 304 is not ok, so putIfOk keeps the
+// copy). A copy without a tag is fetched whole, as networkFetch does.
+function revalidate(req, cached) {
+  var tag = cached.headers.get("ETag");
+  if (!tag) {
+    return networkFetch(req);
+  }
+  return fetch(req.url, { headers: { "If-None-Match": tag }, cache: "no-store", credentials: "same-origin" });
+}
+
 function putIfOk(cache, req, resp) {
   // An origin response may explicitly prohibit storage. Keep this guard here
   // so older callers cannot accidentally cache a newly introduced no-store
@@ -464,7 +476,7 @@ function staleWhileRevalidate(req, url) {
 
     return cacheMatchFirst(cache, candidates).then(function (cached) {
       if (cached) {
-        networkFetch(req).then(function (resp) {
+        revalidate(req, cached).then(function (resp) {
           return putIfOk(cache, storeKey, resp);
         }).catch(function () {});
         return cached;

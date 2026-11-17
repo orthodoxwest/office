@@ -5787,18 +5787,30 @@ test("a page beyond the saved fortnight waits for a slow server, and offline ans
     // answer it than the worker once waited before calling the reader offline.
     const year = Number(today.slice(0, 4)) + 1;
     const far = `/calendar/${year}/07`;
-    let asked = 0;
+    const asked = [];
     await context.route(`**${far}`, async route => {
-      asked += 1;
-      await new Promise(resolve => setTimeout(resolve, 4000));
-      await route.continue();
+      const held = route.request().headers()["if-none-match"];
+      if (asked.length === 0) await new Promise(resolve => setTimeout(resolve, 4000));
+      const answer = await route.fetch();
+      asked.push({ held, status: answer.status() });
+      await route.fulfill({ response: answer });
     });
     const response = await page.goto(far);
     expect(response.status()).toBe(200);
     await expect(page.locator("#offline-heading")).toHaveCount(0);
     await expect(page.locator(`a[href^="/calendar/${year}"]`).first()).toBeAttached();
     // One fetch for the page, not a second racing it.
-    expect(asked).toBe(1);
+    expect(asked).toHaveLength(1);
+
+    // Opened again, the saved copy shows at once and is checked by its tag: the server,
+    // finding it unchanged, sends nothing. (The tag names the reader's hour, so a check made
+    // in the next hour is answered with the page.)
+    const hour = () => Math.floor(Date.now() / 3600000);
+    const before = hour();
+    await page.goto(far);
+    await expect.poll(() => asked.length).toBe(2);
+    expect(asked[1].held).toMatch(/^W\/"/);
+    expect(asked[1].status).toBe(hour() === before ? 304 : 200);
 
     // With no connection, a page the cache does not hold says so without waiting.
     await context.setOffline(true);

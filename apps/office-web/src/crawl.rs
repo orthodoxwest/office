@@ -17,9 +17,16 @@ use crate::http::{response, set};
 const PAGES: [&str; 11] =
     ["/", "/lauds", "/prime", "/terce", "/sext", "/none", "/vespers", "/compline", "/reminders", "/privacy", "/about"];
 
-/// Crawl everything a reader sees; skip the usage report, the beacon and the reminder feed.
+/// Crawl everything a reader sees but the dated days and hours; skip the usage report, the
+/// beacon and the reminder feed. A dated day or hour carries `noindex`, and there is one for
+/// every day of the years offered, each composed for the asking, so a crawler is kept off them
+/// rather than left to fetch them only to drop them: the undated `/lauds` and home stay open.
 pub fn robots(site: &str) -> Response<Body> {
-    let body = format!("User-agent: *\nDisallow: /admin/\nDisallow: /api/\nDisallow: /office.ics\n\nSitemap: {site}/sitemap.xml\n");
+    let mut body = String::from("User-agent: *\nDisallow: /admin/\nDisallow: /api/\nDisallow: /office.ics\nDisallow: /?date=\n");
+    for hour in liturgy::HOUR_NAMES {
+        body.push_str(&format!("Disallow: /{hour}/\nDisallow: /{hour}?date=\n"));
+    }
+    body.push_str(&format!("\nSitemap: {site}/sitemap.xml\n"));
     text(body, "text/plain; charset=utf-8")
 }
 
