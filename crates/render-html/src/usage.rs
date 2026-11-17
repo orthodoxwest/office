@@ -75,6 +75,17 @@ pub struct UsageClient {
     pub new: i64,
 }
 
+/// An hour's row in "How they keep the hours": of the readers whose client says so, the share who
+/// opened it at its own time, and who prayed it to the end.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct UsageKeep {
+    pub name: String,
+    /// Readers whose client reports, who opened the hour.
+    pub reported: i64,
+    pub timely: String,
+    pub prayed: String,
+}
+
 /// A summary figure.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct UsageTile {
@@ -179,6 +190,13 @@ pub struct UsageData {
     /// How many readers opened an hour, and how many hours; empty until the server counts it.
     pub offices_note: String,
     pub settings: Vec<UsageShare>,
+    /// Each hour opened at its time and prayed, by readers whose client says so.
+    pub keeping: Vec<UsageKeep>,
+    /// The readers' habits, as shares: how long they have read, last week's days, a new reader's
+    /// first day, an hour that could not report, reminders in the apps.
+    pub habits: Vec<UsageShare>,
+    /// The share of readers whose client reports these.
+    pub habits_note: String,
     pub hours: Vec<String>,
     /// The newest days, then the rest of the window.
     pub rows: Vec<UsageDay>,
@@ -332,6 +350,7 @@ pub fn usage_data(
     chart(&mut d, &all, window);
     d.clients = clients(&all);
     breakdowns(&mut d, &all, window, &year);
+    habits(&mut d, &all, window);
     for (day, why) in corrections.test_days {
         if window.iter().any(|r| r.day == *day) {
             d.corrections.push(format!("{}: {why}. The day is shown, but left out of every average, share and scale.", label(day)));
@@ -730,9 +749,85 @@ fn breakdowns(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay], year: &s
     );
 }
 
+/// The families the newer clients report, read over the window's completed days.
+fn habits(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
+    let days: Vec<&UsageDay> = window.iter().skip(1).filter(|r| !r.excluded).collect();
+    let sum = |scope: &str| days.iter().map(|r| dim(r, scope)).sum::<i64>();
+    let reporting = sum(&format!("version:{}", presentation::usage::VERSION));
+    if reporting == 0 {
+        return;
+    }
+    let readers: i64 = days.iter().map(|r| r.users).sum();
+    d.habits_note = format!(
+        "Reported by {} of the period’s readers{}.",
+        percent(reporting, readers),
+        if reporting * 20 < readers * 19 { ": a browser or app says these once it has the version that counts them" } else { "" }
+    );
+    d.keeping = HOURS
+        .iter()
+        .map(|h| {
+            let reported = sum(&format!("reported:{h}"));
+            UsageKeep {
+                name: h.to_string(),
+                reported,
+                timely: percent(sum(&format!("timely:{h}")), reported),
+                prayed: percent(sum(&format!("prayed:{h}")), reported),
+            }
+        })
+        .collect();
+    let mut row = |name: &str, part: i64, of: i64, detail: String| {
+        if of > 0 {
+            d.habits.push(UsageShare {
+                name: name.into(),
+                value: percent(part, of),
+                detail,
+                width: format_float((100.0 * part as f64 / of as f64).round()),
+            });
+        }
+    };
+    let tenure: Vec<i64> = presentation::usage::TENURES.iter().map(|t| sum(&format!("tenure:{t}"))).collect();
+    let told: i64 = tenure.iter().sum();
+    row(
+        "In their first week",
+        tenure[0],
+        told,
+        format!("of {told} who said; {} in their first month, {} longer", percent(tenure[1], told), percent(tenure[2], told)),
+    );
+    let weeks: Vec<i64> = presentation::usage::LAST_WEEK.iter().map(|n| sum(&format!("last-week:{n}"))).collect();
+    let back: i64 = weeks.iter().sum();
+    row(
+        "Four or more days last week",
+        weeks[2] + weeks[3],
+        back,
+        format!(
+            "of {back} back for a new week; one day {}, two or three {}, all seven {}",
+            percent(weeks[0], back),
+            percent(weeks[1], back),
+            percent(weeks[3], back)
+        ),
+    );
+    // A new reader's first day, from the day after the server began keeping it.
+    let began = all.iter().rposition(|r| family(r, "new-offices") > 0).filter(|&i| i + 1 < all.len()).map(|i| all[i].day.as_str());
+    let kept: Vec<&&UsageDay> = days.iter().filter(|r| family(r, "new-offices") > 0 && Some(r.day.as_str()) != began).collect();
+    let new: i64 = kept.iter().map(|r| dim(r, "visit:first")).sum();
+    let by = |n: usize| kept.iter().map(|r| dim(r, &format!("new-offices:{n}"))).sum::<i64>();
+    let opened: i64 = (1..=7).map(by).sum();
+    let hours: i64 = (1..=7).map(|n| n as i64 * by(n)).sum();
+    row(
+        "New readers who opened an hour",
+        opened,
+        new,
+        format!("of {new} on their first day, {:.1} hours each", hours as f64 / opened.max(1) as f64),
+    );
+    row("Opened an hour that could not report", sum("offline:yes"), reporting, "since their last report: no network, or no answer".into());
+    let (on, off) = (sum("reminder:on"), sum("reminder:off"));
+    row("Reminders on, in the apps", on, on + off, format!("of {} app readers", on + off));
+}
+
 /// Each family's breakdown: its heading and its values' labels, in the store's value order.
 /// The hours opened in a day are drawn as four series, [`OFFICES_FOLD`] and more as one.
-pub const TREND_LABELS: [(&str, &str, &[&str]); 11] = [
+/// The hours' own families (`timely`, `prayed`, `reported`) are read in "How they keep the hours".
+pub const TREND_LABELS: [(&str, &str, &[&str]); 17] = [
     ("client", "Where they read", &["Browser tab", "Home-screen web app", "Android app", "iOS app"]),
     ("visit", "New or returning", &["New", "Returning"]),
     ("new-client", "New readers, by where they read", &["Browser tab", "Home-screen web app", "Android app", "iOS app"]),
@@ -744,7 +839,16 @@ pub const TREND_LABELS: [(&str, &str, &[&str]); 11] = [
     ("martyrology", "Martyrology at Prime", &["Shown", "Hidden"]),
     ("appearance", "Appearance", &["Nave", "Apse"]),
     ("screen", "Screen", &["Desktop", "Mobile"]),
+    ("version", "Clients that report how they keep the hours", &["Reporting"]),
+    ("tenure", "How long they have read", &["First week", "First month", "Longer"]),
+    ("last-week", "Days read the week before", &["One", "Two or three", "Four to six", "All seven"]),
+    ("new-offices", "Hours a new reader opened", &["One", "Two", "Three", "Four or more"]),
+    ("offline", "Opened an hour that could not report", &["Yes"]),
+    ("reminder", "Reminders, in the apps", &["On", "Off"]),
 ];
+
+/// The families read in "How they keep the hours" rather than the explorer.
+pub const HOUR_FAMILIES: [&str; 3] = ["timely", "prayed", "reported"];
 
 /// The `offices` value from which the report draws one series.
 pub const OFFICES_FOLD: usize = 4;
@@ -761,7 +865,7 @@ fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> 
         let Some(dimension) = dimensions.iter().find(|d| d.key == key) else { continue };
         let scopes: Vec<String> = dimension.values.iter().map(|v| format!("{key}:{v}")).collect();
         let mut points = points(&scopes);
-        if key == "offices" {
+        if key == "offices" || key == "new-offices" {
             for point in &mut points {
                 let rest: i64 = point.counts.drain(OFFICES_FOLD - 1..).sum();
                 point.counts.push(rest);
@@ -1166,6 +1270,59 @@ mod tests {
     }
 
     #[test]
+    fn how_they_keep_the_hours() {
+        // Today, then two completed days, the older of them the first the server kept a new
+        // reader's hours: it is left out of those.
+        let rows = vec![
+            with(row("2026-11-20", 50), &[("version:2", 50), ("reported:lauds", 40), ("prayed:lauds", 40)]),
+            with(
+                row("2026-11-19", 20),
+                &[
+                    ("version:2", 10),
+                    ("reported:lauds", 8),
+                    ("timely:lauds", 6),
+                    ("prayed:lauds", 2),
+                    ("tenure:week", 2),
+                    ("tenure:month", 3),
+                    ("tenure:longer", 5),
+                    ("last-week:1", 1),
+                    ("last-week:7", 3),
+                    ("visit:first", 4),
+                    ("new-offices:1", 2),
+                    ("new-offices:3", 1),
+                    ("offline:yes", 1),
+                    ("reminder:on", 1),
+                    ("reminder:off", 3),
+                ],
+            ),
+            with(row("2026-11-18", 10), &[("version:2", 2), ("reported:lauds", 2), ("visit:first", 2), ("new-offices:1", 2)]),
+            row("2026-11-17", 0),
+        ];
+        let d = data(rows, 7, "2026-11-17");
+        assert_eq!(
+            d.habits_note,
+            "Reported by 40% of the period’s readers: a browser or app says these once it has the version that counts them."
+        );
+        let lauds = &d.keeping[0];
+        assert_eq!((lauds.reported, lauds.timely.as_str(), lauds.prayed.as_str()), (10, "60%", "20%"));
+        assert_eq!(d.keeping[1].timely, "—");
+        let habits: Vec<(&str, &str, &str)> = d.habits.iter().map(|o| (o.name.as_str(), o.value.as_str(), o.detail.as_str())).collect();
+        assert_eq!(
+            habits,
+            [
+                ("In their first week", "20%", "of 10 who said; 30% in their first month, 50% longer"),
+                ("Four or more days last week", "75%", "of 4 back for a new week; one day 25%, two or three 0%, all seven 75%"),
+                ("New readers who opened an hour", "75%", "of 4 on their first day, 1.7 hours each"),
+                ("Opened an hour that could not report", "8%", "since their last report: no network, or no answer"),
+                ("Reminders on, in the apps", "25%", "of 4 app readers"),
+            ]
+        );
+        // Before any client reports, there is no section.
+        let d = data(days(0, &[5; 9]), 7, "2026-01-01");
+        assert!(d.habits_note.is_empty() && d.keeping.is_empty() && d.habits.is_empty());
+    }
+
+    #[test]
     fn trends_keep_scope_counts_and_chronological_dates() {
         let dimensions = [
             ("appearance:apse", 5),
@@ -1181,7 +1338,7 @@ mod tests {
         ];
         let rows = vec![with(row("2026-09-14", 0), &dimensions), row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), DIMENSIONS.len());
+        assert_eq!(groups.len(), DIMENSIONS.len() - HOUR_FAMILIES.len());
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"

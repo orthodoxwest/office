@@ -746,8 +746,9 @@ pub enum UsageEvent {
 /// the archive leaves no trace. `dark` is the appearance on screen; `form` the prayer form;
 /// `martyrology` and `chant` the hour's `HourView::martyrology` and `HourView::chant`; `first`
 /// whether the installation is counted for the first time today; `week` and `month` whether
-/// today is its first counted day of the week and of the month ([`usage_periods`]).
-#[uniffi::export(default(martyrology = None, first = None, chant = None, week = None, month = None))]
+/// today is its first counted day of the week and of the month ([`usage_periods`]); `habits` what
+/// else the installation kept and knows ([`UsageHabits`]).
+#[uniffi::export(default(martyrology = None, first = None, chant = None, week = None, month = None, habits = None))]
 // The page's facts stay plain arguments with defaults, so each app passes only what it knows.
 #[allow(clippy::too_many_arguments)]
 pub fn usage_beacon(
@@ -761,9 +762,11 @@ pub fn usage_beacon(
     chant: Option<bool>,
     week: Option<bool>,
     month: Option<bool>,
+    habits: Option<UsageHabits>,
 ) -> Option<String> {
-    use presentation::usage::{App, app_beacon, current_day, current_year};
-    let today = today.parse().ok()?;
+    use presentation::usage::{App, Habits, app_beacon, at_its_time, current_day, current_year, last_week, tally_parse, tenure};
+    let local: Date = today.parse().ok()?;
+    let today = local;
     let scope = match &event {
         UsageEvent::Home { date } => current_day(date.parse().ok()?, today).then_some("site")?,
         UsageEvent::Hour { date, hour } => current_day(date.parse().ok()?, today).then_some(hour.as_str())?,
@@ -775,7 +778,61 @@ pub fn usage_beacon(
         UsageClient::Android => App::Android,
         UsageClient::Ios => App::Ios,
     };
-    app_beacon(scope, app, dark, &form, martyrology, chant, first, week, month)
+    let habits = habits.map(|h| {
+        let day = Date::parse(&h.reporting_day);
+        let kept = h.tally.as_deref().and_then(tally_parse);
+        Habits {
+            tenure: day.and_then(|d| match h.first_day.as_deref() {
+                Some("before") => tenure(None, d),
+                Some(first) => Date::parse(first).and_then(|f| tenure(Some(f), d)),
+                None => None,
+            }),
+            last_week: day.filter(|_| week == Some(true)).and_then(|d| last_week(kept, d)),
+            timely: match (&event, h.clock_hour) {
+                (UsageEvent::Hour { date, hour }, Some(clock)) => {
+                    date.parse().ok().is_some_and(|page: Date| at_its_time(hour, page, local, clock_hour_i8(clock)))
+                }
+                _ => false,
+            },
+            prayed: h.prayed,
+            offline: h.offline,
+            reminders: h.reminders,
+        }
+    });
+    app_beacon(scope, app, dark, &form, martyrology, chant, first, week, month, habits.as_ref())
+}
+
+/// What an installation kept and knows beside the page, for its beacon ([`usage_beacon`]).
+#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
+pub struct UsageHabits {
+    /// Today's reporting day ("2026-11-18", America/New_York).
+    pub reporting_day: String,
+    /// The reporting day the installation was first counted, as kept: a day, or "before".
+    #[uniffi(default = None)]
+    pub first_day: Option<String>,
+    /// The week's tally of counted days, as kept ([`usage_tally`]).
+    #[uniffi(default = None)]
+    pub tally: Option<String>,
+    /// The phone clock's hour, 0–23, for whether an hour is opened at its own time.
+    #[uniffi(default = None)]
+    pub clock_hour: Option<i32>,
+    /// Whether the hour shown is marked prayed (home's mark).
+    #[uniffi(default = false)]
+    pub prayed: bool,
+    /// Whether an hour was opened that could not report since a beacon was last counted.
+    #[uniffi(default = false)]
+    pub offline: bool,
+    /// Whether the app's reminders are on.
+    #[uniffi(default = None)]
+    pub reminders: Option<bool>,
+}
+
+/// The week's tally of counted days after a beacon is counted on the new reporting day `day`:
+/// what the app keeps, and passes back as [`UsageHabits::tally`]. A garbled tally starts again.
+#[uniffi::export]
+pub fn usage_tally(kept: Option<String>, day: String) -> Option<String> {
+    use presentation::usage::{tally_after, tally_parse, tally_text};
+    Some(tally_text(tally_after(kept.as_deref().and_then(tally_parse), Date::parse(&day)?)))
 }
 
 /// Whether a reporting day opens the installation's week and month.

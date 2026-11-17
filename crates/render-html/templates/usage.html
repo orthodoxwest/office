@@ -58,6 +58,15 @@
     {% if offices_note %}<p class="usage-splits-note">{{ offices_note }}</p>{% endif %}
   </section>
   </div>
+  {% if habits_note %}<section class="usage-panel" aria-labelledby="usage-keeping-title">
+    <div class="usage-section-heading"><div><h2 id="usage-keeping-title">How they keep the hours</h2><p>{{ habits_note }}</p></div></div>
+    <table class="usage-table usage-keeping">
+      <thead><tr><th scope="col">Hour</th><th scope="col">Opened</th><th scope="col">At its time</th><th scope="col">Prayed</th></tr></thead>
+      <tbody>{% for k in keeping %}<tr><th scope="row">{{ k.name|titlecase }}</th><td{% if not k.reported %} class="usage-zero"{% endif %}>{{ k.reported }}</td><td>{{ k.timely }}</td><td>{{ k.prayed }}</td></tr>{% endfor %}</tbody>
+    </table>
+    <p class="usage-splits-note">At its time is by the reader’s own clock, as home’s invitation reckons it. Prayed is read to the end at a praying pace, as home marks it.</p>
+    {% if habits %}<dl class="usage-office-totals usage-settings usage-habits">{% for o in habits %}<div><dt>{{ o.name }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>{% endif %}
+  </section>{% endif %}
   <section class="usage-panel" aria-labelledby="usage-settings-title">
     <div class="usage-section-heading"><div><h2 id="usage-settings-title">Settings in use</h2><p>Each setting’s share of the period’s reports: a reader counts once a day in each</p></div></div>
     {% if settings %}<dl class="usage-office-totals usage-settings">{% for o in settings %}<div><dt>{{ o.name }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>{% else %}<p class="usage-splits-note">Nothing reported in this period.</p>{% endif %}

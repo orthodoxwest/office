@@ -5110,18 +5110,18 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
     // beacon still settling would otherwise re-report in the new appearance.
     await page.goto("/privacy");
     // Whether today's Vespers has a score, and so reports chant:, is the day's.
-    return events[0].replace(/ chant:\w+/, "");
+    return events[0].replace(/ chant:\w+/, "").replace(/ timely:\w+/, "");
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser week:first month:first");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
 });
 
@@ -5136,7 +5136,7 @@ test("the installed web app reports itself apart from a browser tab", async ({ p
   await page.goto(`/?date=${easternDay()}`);
   await engage(page);
   await expect.poll(() => events.length).toBe(1);
-  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa week:first month:first");
+  expect(events[0]).toBe("site appearance:nave screen:mobile visit:first client:pwa week:first month:first version:2 tenure:week");
 });
 
 // The device keeps only the day it first opened the Office; the beacon says first or returning.
@@ -5203,6 +5203,49 @@ test("a browser opens its week and month on the first day it is counted in them"
   // Last counted a year ago: a new week and a new month.
   await earlier(`${Number(today.slice(0, 4)) - 1}${today.slice(4)}`.replace(/-02-29$/, "-02-28"));
   expect(await visit()).toBe("week:first month:first");
+});
+
+// How a reader keeps the hours, in buckets: how long ago the Office was first opened here, an
+// hour opened in its time and marked prayed, and an hour whose beacon failed, said next time.
+test("the beacon says how a reader keeps the hours", async ({ page }) => {
+  const events = [];
+  let online = true;
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: online ? 204 : 503 });
+  });
+  // Half past six in the evening in New York (half past seven in summer): Vespers' time.
+  const today = easternDay();
+  await page.clock.setFixedTime(new Date(`${today}T18:30:00-05:00`));
+  await page.goto(`/vespers/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0]).toMatch(/ version:2 tenure:week timely:vespers(?: |$)/);
+  expect(events[0]).not.toContain("prayed:");
+  // Marked prayed: said at once.
+  await page.evaluate((day) => {
+    localStorage.setItem("office-prayed", JSON.stringify({ [day]: ["vespers"] }));
+    window.dispatchEvent(new Event("officeprayed"));
+  }, today);
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1]).toMatch(/ timely:vespers prayed:vespers(?: |$)/);
+  // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
+  online = false;
+  await page.goto(`/lauds/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(3);
+  expect(events[2]).not.toContain("timely:");
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("office-offline"))).toBe("1");
+  online = true;
+  await page.goto(`/?date=${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(4);
+  expect(events[3]).toMatch(/ offline:yes$/);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
+  await page.goto(`/prime/${today}`);
+  await engage(page);
+  await expect.poll(() => events.length).toBe(5);
+  expect(events[4]).not.toContain("offline:");
 });
 
 // Home offers the introduction beside Change date for a reader's first week, in the season's
@@ -5286,14 +5329,14 @@ test.describe("on a screen with a mouse", () => {
       // Leave for a page that never reports before changing the device: a
       // beacon still settling would otherwise re-report in the new appearance.
       await page.goto("/privacy");
-      return events[0].replace(/ chant:\w+/, "");
+      return events[0].replace(/ chant:\w+/, "").replace(/ timely:\w+/, "");
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser week:first month:first");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private visit:first client:browser week:first month:first version:2 tenure:week");
   });
 });
 

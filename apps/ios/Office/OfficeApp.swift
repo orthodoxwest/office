@@ -93,7 +93,8 @@ struct RootView: View {
         let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
         let visit = Visit(
             page: model.page, form: model.form, dark: palette.dark, today: model.today, active: phase == .active,
-            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page)
+            martyrology: model.martyrologyShown(on: model.page), chant: model.chantShown(on: model.page),
+            prayed: model.page.prayed(in: model)
         )
         // The header's measures scale with the reader's text, so the panels under it do too.
         let m = Metrics(textSize: model.textSize, dynamicType: dynamicType)
@@ -162,7 +163,10 @@ struct RootView: View {
         // (Usage.swift).
         .onChange(of: visit, initial: true) { _, v in
             guard v.active, let event = v.page.usageEvent else { return }
-            Usage.shared.record(event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant)
+            Usage.shared.record(
+                event, dark: v.dark, form: v.form, martyrology: v.martyrology, chant: v.chant, prayed: v.prayed,
+                reminders: ReminderStore.load().on
+            )
         }
         .onReceive(minute) { _ in
             if phase == .active { model.refreshToday(seen: true) }
@@ -214,6 +218,15 @@ private struct Visit: Equatable {
     let martyrology: Bool?
     /// On an hour with a score, whether its notation was shown, once composed.
     let chant: Bool?
+    /// On an hour, whether it is marked prayed: the mark says so in the day's usage.
+    let prayed: Bool
+}
+
+private extension Page {
+    func prayed(in model: AppModel) -> Bool {
+        if case let .hour(date, hour) = self { return model.hoursPrayed(on: date).contains(hour) }
+        return false
+    }
 }
 
 /// The pages hide the navigation bar, as the web has none; the edge swipe back stays.

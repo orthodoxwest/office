@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
@@ -233,6 +235,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
 
     init {
         load()
+        // An hour marked prayed says so in the day's usage.
+        viewModelScope.launch { snapshotFlow { Prayed.version }.drop(1).collect { countVisit() } }
         // Checked in steps of a minute rather than awaited as one delay to the next hour: a delay
         // stops counting while the phone sleeps, and a return is not always announced.
         viewModelScope.launch {
@@ -446,7 +450,8 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
         // Prime reports whether its Martyrology was shown, and an hour with a score whether its
         // notation was, once the hour on screen is this page's.
         val hour = shown?.takeIf { it.entry.id == entry.id }?.content as? Content.Hour
-        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant)
+        val prayed = (page as? Page.Hour)?.let { Prayed.hours(getApplication(), it.date).contains(it.hour) } ?: false
+        usage.record(event, dark(), form, hour?.view?.martyrology, hour?.view?.chant, prayed, reminders.on)
     }
 
     /** Whether the Apse is on screen: the reader's choice, or the phone's own dark mode under Default. */

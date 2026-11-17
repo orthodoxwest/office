@@ -450,7 +450,8 @@ fn the_reminder_rule_is_written_out_from_the_apps_choices() {
 #[test]
 fn usage_beacons_count_current_pages_as_the_web_does() {
     let today = civil(2026, 3, 15);
-    let beacon = |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None, None, None);
+    let beacon =
+        |event: UsageEvent| usage_beacon(event, today, false, "deacon".into(), UsageClient::Android, None, None, None, None, None, None);
     assert_eq!(
         beacon(UsageEvent::Hour { date: civil(2026, 3, 14), hour: "vespers".into() }).as_deref(),
         Some("vespers appearance:nave screen:mobile prayer-form:deacon client:android")
@@ -470,7 +471,8 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             Some(false),
             Some(true),
             Some(true),
-            Some(false)
+            Some(false),
+            None
         )
         .as_deref(),
         Some(
@@ -488,11 +490,55 @@ fn usage_beacons_count_current_pages_as_the_web_does() {
             Some(true),
             Some(false),
             None,
+            None,
             None
         )
         .as_deref(),
         Some("site appearance:apse screen:mobile visit:first client:ios")
     );
+    // What the installation kept and knows: how long it has been counted, last week's days on the
+    // week's first day, an hour opened at its own time and prayed, offline, and its reminders.
+    let habits = |first: &str, clock: i32| UsageHabits {
+        reporting_day: "2026-03-16".into(),
+        first_day: Some(first.into()),
+        tally: Some("2026-03-09 5".into()),
+        clock_hour: Some(clock),
+        prayed: true,
+        offline: true,
+        reminders: Some(false),
+    };
+    let monday = civil(2026, 3, 16);
+    let lauds = |habits: UsageHabits, week: bool| {
+        usage_beacon(
+            UsageEvent::Hour { date: monday, hour: "lauds".into() },
+            monday,
+            false,
+            "private".into(),
+            UsageClient::Ios,
+            None,
+            Some(false),
+            None,
+            Some(week),
+            Some(false),
+            Some(habits),
+        )
+    };
+    assert_eq!(
+        lauds(habits("2026-03-01", 6), true).as_deref(),
+        Some(
+            "lauds appearance:nave screen:mobile prayer-form:private visit:returning client:ios week:first month:again version:2 tenure:month last-week:4-6 timely:lauds prayed:lauds offline:yes reminder:off"
+        )
+    );
+    // Later in the week, at another hour, from before first days were kept: none of those.
+    assert_eq!(
+        lauds(UsageHabits { prayed: false, offline: false, reminders: None, ..habits("before", 9) }, false).as_deref(),
+        Some("lauds appearance:nave screen:mobile prayer-form:private visit:returning client:ios week:again month:again version:2")
+    );
+    // The tally moves on as a beacon is counted on a new day.
+    assert_eq!(usage_tally(Some("2026-03-16 2".into()), "2026-03-18".into()).as_deref(), Some("2026-03-16 3"));
+    assert_eq!(usage_tally(Some("2026-03-09 7".into()), "2026-03-16".into()).as_deref(), Some("2026-03-16 1"));
+    assert_eq!(usage_tally(Some("garbled".into()), "2026-03-16".into()).as_deref(), Some("2026-03-16 1"));
+    assert_eq!(usage_tally(None, "not a day".into()), None);
     // The archive, and anything the server would refuse, are not counted.
     for event in [
         UsageEvent::Hour { date: civil(2026, 3, 17), hour: "lauds".into() },

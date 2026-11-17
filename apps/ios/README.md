@@ -64,8 +64,10 @@ replaces every reporting day. Only Release builds report (`OfficeCountsUsage`, s
 configuration in `project.yml`); Debug builds, and so the tests and the simulator screenshots,
 never do. Nor does a copy with a sandbox receipt (TestFlight's, and the one App Review runs for
 each submission) or a simulator's (`Usage.storeInstall`): only App Store installs are readers.
-`UsageTests` checks what counts, the daily identifier, the week's and month's first day, and the
-retry.
+It sends the same habits as the Android app (`UsageHabits`: how long it has been counted, last
+week's days, an hour at its time and prayed, a failed hour said next time, reminders on or off).
+`UsageTests` checks what counts, the daily identifier, the week's and month's first day, the
+habits, and the retry.
 
 ## Building
 

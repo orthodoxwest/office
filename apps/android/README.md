@@ -164,7 +164,12 @@ reminders on as the web counts a generated feed link; only today's pages (a day 
 count. Each page counts once a day. In place of the web's cookie the app sends a random
 identifier it replaces every reporting day (America/New_York), so nothing it sends ties one day
 to the next. It keeps the last two days a beacon of its own was counted, and says only whether
-today is the first in its week and month (`usage_periods`). A beacon is best effort: it is never queued offline, retried later, or shown.
+today is the first in its week and month (`usage_periods`). It also tells, in buckets the core
+writes (`UsageHabits`), how long ago it first reported, its counted days last week, whether an
+hour is opened at its time by the phone's clock and marked prayed, and whether reminders are on;
+it keeps a tally of the week's counted days (`usage-week-days`) and one flag (`usage-offline`) for
+an hour whose beacon failed, said as `offline:yes` on the next that arrives. A beacon is best
+effort: it is never queued offline, retried later, or shown.
 
 This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
 `release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
@@ -174,8 +179,8 @@ outnumber the testers. Nothing on those phones reliably marks them (not all carr
 `firebase.test.lab` system setting, which still rules out those that do, and the Play Store
 installs the build), but each is wiped within minutes, so an installation reports only once it is
 two hours old (`Usage.SETTLING`). A reader's first hours on a new install go uncounted; an update
-keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, and the
-test-device exclusion.
+keeps the install time. `UsageTest` checks what counts, the daily identifier, the retry, the
+habits, and the test-device exclusion.
 
 ## Trying it on a phone
 

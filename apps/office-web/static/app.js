@@ -527,15 +527,95 @@ function usagePeriodTokens() {
     return "";
   }
 }
-// A beacon sent on `day` was counted: move the two kept days on.
+// A beacon sent on `day` was counted: move the two kept days on, and the week's tally of counted
+// days (presentation::usage::tally_after).
 function usageCounted(day) {
   try {
     var last = localStorage.getItem(USAGE_COUNTED_KEY);
     if (last === day) return;
     if (last) localStorage.setItem(USAGE_COUNTED_BEFORE_KEY, last);
     localStorage.setItem(USAGE_COUNTED_KEY, day);
+    var tally = usageTally();
+    var monday = usageMonday(day);
+    localStorage.setItem(USAGE_TALLY_KEY, monday + " " + (tally && tally.monday === monday ? tally.days + 1 : 1));
   } catch {
     // Without storage every day opens a week; nothing is said (usagePeriodTokens).
+  }
+}
+
+// What else the browser says, as presentation::usage::Habits: the version of these words; how
+// long ago it was first counted (its first week, first month, or longer); on the first day of a
+// week, on how many days it was counted the week before; an hour opened at its own time by the
+// reader's clock, as home's invitation reckons it; an hour prayed, as home marks it; and whether
+// an hour was opened that could not report since a beacon last arrived. Only these words are
+// sent; the days stay here. The web cannot see its reminders, which live in a calendar.
+var USAGE_TALLY_KEY = "office-week-days";
+var USAGE_OFFLINE_KEY = "office-offline";
+// presentation::usage::FIRST_DAYS_KEPT_SINCE: a browser from before it is past its first month
+// only once that day is a month gone.
+var USAGE_FIRST_KEPT = "2026-11-10";
+// presentation::CURRENT_HOUR_SCHEDULE as [start, hour, day offset].
+var USAGE_HOUR_STARTS = [[0, "compline", -1], [2, "lauds", 0], [7, "prime", 0], [9, "terce", 0], [11, "sext", 0], [13, "none", 0], [17, "vespers", 0], [20, "compline", 0]];
+function usageMonday(iso) {
+  var date = new Date(iso + "T12:00:00Z");
+  date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+  return date.toISOString().slice(0, 10);
+}
+function usageDaysBetween(from, to) {
+  return Math.round((Date.parse(to + "T12:00:00Z") - Date.parse(from + "T12:00:00Z")) / 864e5);
+}
+function usageTally() {
+  var match = /^(\d{4}-\d{2}-\d{2}) ([1-7])$/.exec(localStorage.getItem(USAGE_TALLY_KEY) || "");
+  return match ? { monday: match[1], days: Number(match[2]) } : null;
+}
+function usageLocalDay(date) {
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+}
+function usageHabitTokens(scope, weekFirst) {
+  var tokens = " version:2";
+  try {
+    var day = usageReportingDay();
+    var first = localStorage.getItem(USAGE_FIRST_KEY);
+    var age = /^\d{4}-\d{2}-\d{2}$/.test(first || "") ? usageDaysBetween(first, day)
+      : first === "before" && usageDaysBetween(USAGE_FIRST_KEPT, day) >= 30 ? 30 : -1;
+    if (first && age >= 0) tokens += " tenure:" + (age < 7 ? "week" : age < 30 ? "month" : "longer");
+    var tally = usageTally();
+    if (weekFirst && tally && usageDaysBetween(tally.monday, usageMonday(day)) === 7) {
+      tokens += " last-week:" + (tally.days === 1 ? "1" : tally.days <= 3 ? "2-3" : tally.days <= 6 ? "4-6" : "7");
+    }
+    var page = document.body.getAttribute("data-usage-when") || "";
+    if (document.body.classList.contains("page-" + scope) && /^\d{4}-\d{2}-\d{2}$/.test(page)) {
+      var now = new Date();
+      var entry = USAGE_HOUR_STARTS.filter(function (start) { return now.getHours() >= start[0]; }).pop();
+      var local = new Date(now.getFullYear(), now.getMonth(), now.getDate() + entry[2]);
+      if (entry[1] === scope && usageLocalDay(local) === page) tokens += " timely:" + scope;
+      var prayed = JSON.parse(localStorage.getItem("office-prayed") || "{}");
+      if (prayed && Array.isArray(prayed[page]) && prayed[page].indexOf(scope) >= 0) tokens += " prayed:" + scope;
+    }
+    if (localStorage.getItem(USAGE_OFFLINE_KEY) === "1") tokens += " offline:yes";
+  } catch {
+    // Without storage, only the version is said.
+  }
+  return tokens;
+}
+// An hour whose beacon did not arrive (no network, or no answer), said on the next that does.
+function usageMissed(scope) {
+  if (["lauds", "prime", "terce", "sext", "none", "vespers", "compline"].indexOf(scope) < 0) return;
+  try {
+    localStorage.setItem(USAGE_OFFLINE_KEY, "1");
+  } catch {
+    // Without storage it goes unsaid.
+  }
+}
+function usageUnmissed(body) {
+  return body.replace(" offline:yes", "");
+}
+function usageReported(body) {
+  if (body.indexOf(" offline:yes") < 0) return;
+  try {
+    localStorage.removeItem(USAGE_OFFLINE_KEY);
+  } catch {
+    // Said again next time; the server counts a reader once a day.
   }
 }
 
@@ -584,7 +664,8 @@ function usageBeaconBody(scope) {
   var chantToken = document.body.classList.contains("page-hour") && document.querySelector('[data-chant-variant="on"]')
     ? (document.documentElement.getAttribute("data-chant") === "on" ? " chant:on" : " chant:off")
     : "";
-  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken + usagePeriodTokens();
+  var periods = usagePeriodTokens();
+  clientToken = martyrologyToken + chantToken + usageVisitToken() + clientToken + periods + usageHabitTokens(scope, periods.indexOf(" week:first") >= 0);
   if (!window.matchMedia) {
     return scope + leaderToken + clientToken;
   }
@@ -1730,8 +1811,11 @@ function plainClickOpensHere(e, link) {
   var reportUsageAction = function (scope) {
     try {
       var day = usageReportingDay();
-      usagePost(usageBeaconBody(scope)).then(function (response) {
-        if (response.ok) usageCounted(day);
+      var body = usageBeaconBody(scope);
+      usagePost(body).then(function (response) {
+        if (!response.ok) return;
+        usageCounted(day);
+        usageReported(body);
       }).catch(function () {});
     } catch {
       // Ignored — best effort.
@@ -5574,23 +5658,32 @@ function plainClickOpensHere(e, link) {
   var pending = false;
   var engaged = false;
   function record() {
-    if (!engaged || document.visibilityState !== "visible" || !navigator.onLine || pending) return;
+    if (!engaged || document.visibilityState !== "visible" || pending) return;
+    if (!navigator.onLine) {
+      if (current(today())) usageMissed(scope);
+      return;
+    }
     var day = today();
     var body = usageBeaconBody(scope);
-    var key = day + " " + body;
+    // Saying a failed hour is not a new page: it neither sends again nor counts apart.
+    var key = day + " " + usageUnmissed(body);
     if (recorded.has(key) || !current(day)) return;
     pending = true;
     usagePost(body, 4000).then(function (response) {
-      if (!response.ok) return;
+      if (!response.ok) return usageMissed(scope);
       recorded.add(key);
       usageCounted(day);
+      usageReported(body);
     }).catch(function () {
-      // Best effort: never delay prayer or queue offline browsing history.
+      // Best effort: never delay prayer or queue offline browsing history. An hour whose beacon
+      // did not arrive for want of a network is said on the next that does. Leaving the page
+      // also cuts the reply off, though the beacon was sent (keepalive), so that is not said.
+      if (!navigator.onLine) usageMissed(scope);
     }).finally(function () {
       pending = false;
       // A selection made while the previous beacon was in flight still
       // records the form actually selected, without duplicating page totals.
-      if (usageBeaconBody(scope) !== body) record();
+      if (usageUnmissed(usageBeaconBody(scope)) !== usageUnmissed(body)) record();
     });
   }
 
@@ -5635,6 +5728,8 @@ function plainClickOpensHere(e, link) {
   window.addEventListener("officeleaderchange", function () { engage(); record(); });
   window.addEventListener("officemartyrologychange", function () { engage(); record(); });
   window.addEventListener("officechantchange", function () { engage(); record(); });
+  // An hour marked prayed says so.
+  window.addEventListener("officeprayed", record);
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();
@@ -5710,6 +5805,7 @@ function plainClickOpensHere(e, link) {
     prayed[day] = list;
     try {
       localStorage.setItem(PRAYED_KEY, JSON.stringify(prayed));
+      window.dispatchEvent(new Event("officeprayed"));
     } catch {
       /* Storage refused: the hour simply goes unmarked. */
     }

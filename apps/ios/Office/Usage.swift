@@ -13,7 +13,11 @@ import Foundation
  * only whether today is that day (new) or not (returning); home offers the About page for that
  * day's first week. It keeps too the last two days a beacon of its own was counted, and says only
  * whether today is the first in its week and in its month, so the server can add up a week's
- * readers. Best effort: nothing is queued while
+ * readers. Beside those it says, in buckets and yes-or-no words the core writes (`UsageHabits`):
+ * how long ago it was first counted, on the week's first day how many days it was counted the
+ * week before (it keeps a tally of the week's days), an hour opened at its own time by the phone's
+ * clock, an hour prayed (home's mark), an hour opened that could not report since a beacon last
+ * arrived, and whether reminders are on. Best effort: nothing is queued while
  * offline, retried, or shown to the reader. Only Release builds report (`OfficeCountsUsage`,
  * set in project.yml); Debug builds, and so the tests and the simulator screenshots, never do.
  * Nor does a device Apple installs each uploaded TestFlight build on fresh, to check it: each
@@ -85,17 +89,27 @@ final class Usage {
     }
 
     /// `martyrology` is Prime's `HourView.martyrology`: whether its reading was shown, if it had one;
-    /// `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any.
-    func record(_ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil, chant: Bool? = nil) {
+    /// `chant` an hour's `HourView.chant`: whether its scores were shown, if it had any; `prayed`
+    /// whether the hour shown is marked prayed; `reminders` whether the app's reminders are on.
+    func record(
+        _ event: UsageEvent, dark: Bool, form: String, martyrology: Bool? = nil, chant: Bool? = nil,
+        prayed: Bool = false, reminders: Bool? = nil
+    ) {
         guard enabled else { return }
         let date = now()
         if let installed, date.timeIntervalSince(installed) < Usage.settling { return }
         let day = Usage.reportingDay(date)
-        let first = Usage.firstDay(day, defaults) == day
+        let firstDay = Usage.firstDay(day, defaults)
+        let first = firstDay == day
         let periods = usagePeriods(today: day, last: defaults.string(forKey: "usage-counted"), previous: defaults.string(forKey: "usage-counted-before"))
+        let habits = UsageHabits(
+            reportingDay: day, firstDay: firstDay, tally: defaults.string(forKey: "usage-week-days"),
+            clockHour: Int32(Calendar.current.component(.hour, from: date)), prayed: prayed,
+            offline: defaults.bool(forKey: "usage-offline"), reminders: reminders
+        )
         guard let body = usageBeacon(
             event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant,
-            week: periods?.week, month: periods?.month
+            week: periods?.week, month: periods?.month, habits: habits
         ) else { return }
         let key = day + " " + body
         lock.lock()
@@ -103,12 +117,16 @@ final class Usage {
         lock.unlock()
         guard fresh else { return }
         let endpoint = defaults.string(forKey: "usage-endpoint") ?? usageEndpoint()
+        let hour: Bool
+        if case .hour = event { hour = true } else { hour = false }
         post(endpoint, identifier(for: day), body) { ok, advertised in
             if let next = advertised.flatMap({ usageAdvertisedEndpoint(value: $0) }) {
                 self.defaults.set(next, forKey: "usage-endpoint")
             }
-            // A failure is forgotten, so the next visit tries again.
-            guard !ok else { return self.counted(day) }
+            // A failure is forgotten, so the next visit tries again. An hour whose beacon did not
+            // arrive is said on the next that does.
+            guard !ok else { return self.counted(day, body) }
+            if hour { self.defaults.set(true, forKey: "usage-offline") }
             self.lock.lock()
             self.sent.remove(key)
             self.lock.unlock()
@@ -118,13 +136,15 @@ final class Usage {
     /// Keeps `day` as the latest reporting day a beacon was counted, and the one before it: what
     /// `usagePeriods` reads to say whether a day opens the week and the month. Kept only once a
     /// beacon has arrived, so a day that never reported opens nothing.
-    private func counted(_ day: String) {
+    private func counted(_ day: String, _ body: String) {
         lock.lock()
         defer { lock.unlock() }
+        if body.contains(" offline:yes") { defaults.removeObject(forKey: "usage-offline") }
         let last = defaults.string(forKey: "usage-counted")
         guard last != day else { return }
         defaults.set(last, forKey: "usage-counted-before")
         defaults.set(day, forKey: "usage-counted")
+        defaults.set(usageTally(kept: defaults.string(forKey: "usage-week-days"), day: day), forKey: "usage-week-days")
     }
 
     /// The reporting day the app was first counted. An installation that reported before this

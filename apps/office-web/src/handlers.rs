@@ -863,9 +863,20 @@ mod tests {
             let family = DIMENSIONS.iter().find(|d| d.key == *key).unwrap_or_else(|| panic!("app.js sends unknown family {key}"));
             assert!(value.is_empty() || family.values.contains(value), "app.js sends {key}:{value}");
         }
-        for family in DIMENSIONS.iter().filter(|d| !["new-client", "offices"].contains(&d.key)) {
+        // The server derives four; the web cannot see its reminders, which live in a calendar.
+        for family in DIMENSIONS.iter().filter(|d| !["new-client", "offices", "reported", "new-offices", "reminder"].contains(&d.key)) {
             assert!(tokens.iter().any(|(key, _)| *key == family.key), "app.js never sends {}", family.key);
         }
+        assert!(beacon.contains(&format!("\" version:{}\"", presentation::usage::VERSION)), "app.js's version");
+        // The hour schedule, and the day first days were kept from, as presentation has them.
+        let starts = presentation::CURRENT_HOUR_SCHEDULE
+            .iter()
+            .map(|(start, slug, _, offset)| format!("[{start}, \"{slug}\", {offset}]"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        assert!(beacon.contains(&format!("var USAGE_HOUR_STARTS = [{starts}];")), "app.js's hour starts are [{starts}]");
+        let (y, m, d) = presentation::usage::FIRST_DAYS_KEPT_SINCE;
+        assert!(beacon.contains(&format!("var USAGE_FIRST_KEPT = \"{y}-{m:02}-{d:02}\";")), "app.js's first days kept");
         let forms = format!("[{}]", PRAYER_FORMS.iter().map(|f| format!("\"{f}\"")).collect::<Vec<_>>().join(", "));
         assert!(beacon.contains(&forms), "app.js's prayer forms are {forms}");
     }
