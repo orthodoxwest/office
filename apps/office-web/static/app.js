@@ -555,6 +555,7 @@ var USAGE_OFFLINE_KEY = "office-offline";
 // only once that day is a month gone.
 var USAGE_FIRST_KEPT = "2026-11-10";
 // presentation::CURRENT_HOUR_SCHEDULE as [start, hour, day offset].
+var USAGE_OPENED = new Date();
 var USAGE_HOUR_STARTS = [[0, "compline", -1], [2, "lauds", 0], [7, "prime", 0], [9, "terce", 0], [11, "sext", 0], [13, "none", 0], [17, "vespers", 0], [20, "compline", 0]];
 function usageMonday(iso) {
   var date = new Date(iso + "T12:00:00Z");
@@ -585,7 +586,8 @@ function usageHabitTokens(scope, weekFirst) {
     }
     var page = document.body.getAttribute("data-usage-when") || "";
     if (document.body.classList.contains("page-" + scope) && /^\d{4}-\d{2}-\d{2}$/.test(page)) {
-      var now = new Date();
+      // By the clock when the page was opened, as the apps reckon it when a page is shown.
+      var now = USAGE_OPENED;
       var entry = USAGE_HOUR_STARTS.filter(function (start) { return now.getHours() >= start[0]; }).pop();
       var local = new Date(now.getFullYear(), now.getMonth(), now.getDate() + entry[2]);
       if (entry[1] === scope && usageLocalDay(local) === page) tokens += " timely:" + scope;
@@ -5659,14 +5661,15 @@ function plainClickOpensHere(e, link) {
   var engaged = false;
   function record() {
     if (!engaged || document.visibilityState !== "visible" || pending) return;
-    if (!navigator.onLine) {
-      if (current(today())) usageMissed(scope);
-      return;
-    }
     var day = today();
     var body = usageBeaconBody(scope);
     // Saying a failed hour is not a new page: it neither sends again nor counts apart.
     var key = day + " " + usageUnmissed(body);
+    if (!navigator.onLine) {
+      // Only an hour not yet counted today missed its report.
+      if (current(day) && !recorded.has(key)) usageMissed(scope);
+      return;
+    }
     if (recorded.has(key) || !current(day)) return;
     pending = true;
     usagePost(body, 4000).then(function (response) {

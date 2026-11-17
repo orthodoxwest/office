@@ -136,7 +136,9 @@ pub fn tenure(first: Option<Date>, today: Date) -> Option<&'static str> {
         }
     };
     Some(match days {
-        ..7 => "week",
+        // A first day ahead of today (a clock set back) says nothing, as the web's does.
+        ..0 => return None,
+        0..7 => "week",
         7..30 => "month",
         _ => "longer",
     })
@@ -322,6 +324,10 @@ pub fn parse_event(body: &str) -> Option<Event> {
         }
         seen.push(key);
         event.dimensions.push(field.to_string());
+    }
+    // The hours' habits are read against `reported`, which only a beacon with a version adds to.
+    if !event.dimensions.iter().any(|d| d.starts_with("version:")) {
+        event.dimensions.retain(|d| !OWN_HOUR.iter().any(|f| d.strip_prefix(f).is_some_and(|v| v.starts_with(':'))));
     }
     Some(event)
 }
@@ -581,7 +587,7 @@ mod tests {
     #[test]
     fn beacons_fit_the_limit() {
         // app.js's usageBeaconBody at its longest: Compline with a score, at its time and prayed,
-        // after a week offline, from a browser in its first month.
+        // after a week offline, from a browser past its first month.
         let web = "compline appearance:nave screen:desktop prayer-form:private chant:off visit:returning client:browser week:first month:again version:2 tenure:longer last-week:4-6 timely:compline prayed:compline offline:yes";
         let event = parse_event(web).unwrap();
         assert_eq!(event.dimensions.len(), 14, "the server dropped one of the web's tokens");
@@ -607,6 +613,13 @@ mod tests {
         assert_eq!(tenure(Some(d(10, 18)), d(11, 17)), Some("longer"));
         assert_eq!(tenure(None, d(12, 9)), None);
         assert_eq!(tenure(None, d(12, 10)), Some("longer"));
+        // A first day ahead of today (a clock set back) says nothing.
+        assert_eq!(tenure(Some(d(11, 18)), d(11, 17)), None);
+        // An hour's habits are read against the hours a version reported, so without one they
+        // are dropped.
+        let words = |body: &str| parse_event(body).unwrap().dimensions;
+        assert_eq!(words("lauds timely:lauds prayed:lauds offline:yes"), ["offline:yes"]);
+        assert_eq!(words("lauds version:2 timely:lauds prayed:lauds"), ["version:2", "timely:lauds", "prayed:lauds"]);
         // The tally counts a week's days, and starts again with the next week.
         let monday = d(11, 16);
         let mut kept = None;

@@ -102,7 +102,8 @@ class Usage(
             event, LocalDate.now(clock).toCivil(), dark, form, UsageClient.ANDROID, martyrology, first, chant, periods?.week, periods?.month,
             habits,
         ) ?: return
-        val key = "$day $body"
+        // Saying a failed hour is not a new page: it neither sends again nor counts apart.
+        val key = "$day ${body.replace(" offline:yes", "")}"
         synchronized(sent) {
             if (!sent.add(key)) return
         }

@@ -112,16 +112,18 @@ so the report can say how far a new reader gets on their first day.
   (the server derives `reported:<hour>`, an hour opened by such a client, as their base);
 - `tenure:week|month|longer`, how long ago this browser or installation first opened the Office,
   from the first day it keeps (a first day kept before `FIRST_DAYS_KEPT_SINCE` reads `longer`
-  only once that is a month past). The server drops it with the `visit:first` it rewrites;
+  only once that is a month past). The server drops it with the `visit:first` it rewrites, but a
+  browser whose storage Safari erased says it is newer than it is on the days after;
 - `last-week:1|2-3|4-6|7`, only beside `week:first`: the days the last calendar week was
   counted, from a tally of the current week's counted days (`office-week-days`,
   `usage-week-days`); the server drops it with the `week:first` it rewrites;
 - `timely:<hour>`, an hour opened in its own time by the device's clock (the current-hour
   schedule), and `prayed:<hour>`, an hour shown marked prayed (the web resends it when the reader
   marks it). Each is accepted only beside its own hour's scope;
-- `offline:yes`, once, when an hour opened since the last counted beacon did not arrive
-  (`office-offline`, `usage-offline`): a lower bound on offline use, since an hour never opened
-  online is never said;
+- `offline:yes`, once, when an hour not yet counted that day did not report (`office-offline`,
+  `usage-offline`): the apps on any failed reply, the browser on an error reply or with no
+  network, since leaving a page also cuts its reply off. An hour never opened online again is
+  never said;
 - `reminder:on|off`, the apps only: the web's reminders live in a subscribed calendar link the
   server cannot see.
 

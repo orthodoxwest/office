@@ -806,9 +806,10 @@ fn habits(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
             percent(weeks[3], back)
         ),
     );
-    // A new reader's first day, from the day after the server began keeping it.
-    let began = all.iter().rposition(|r| family(r, "new-offices") > 0).filter(|&i| i + 1 < all.len()).map(|i| all[i].day.as_str());
-    let kept: Vec<&&UsageDay> = days.iter().filter(|r| family(r, "new-offices") > 0 && Some(r.day.as_str()) != began).collect();
+    // A new reader's first day, from the day after the server began keeping it: the first day a
+    // client said its version, which came with it, unless that is where the record begins.
+    let began = all.iter().rposition(|r| family(r, "version") > 0).filter(|&i| i + 1 < all.len()).map(|i| all[i].day.as_str());
+    let kept: Vec<&&UsageDay> = days.iter().filter(|r| family(r, "version") > 0 && began.is_none_or(|b| r.day.as_str() > b)).collect();
     let new: i64 = kept.iter().map(|r| dim(r, "visit:first")).sum();
     let by = |n: usize| kept.iter().map(|r| dim(r, &format!("new-offices:{n}"))).sum::<i64>();
     let opened: i64 = (1..=7).map(by).sum();

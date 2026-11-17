@@ -5229,6 +5229,12 @@ test("the beacon says how a reader keeps the hours", async ({ page }) => {
   }, today);
   await expect.poll(() => events.length).toBe(2);
   expect(events[1]).toMatch(/ timely:vespers prayed:vespers(?: |$)/);
+  // The network lost on an hour already counted: nothing went unreported.
+  await page.context().setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event("pageshow")));
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => localStorage.getItem("office-offline"))).toBe(null);
+  await page.context().setOffline(false);
   // Lauds now is out of its time; its beacon fails, and the next that arrives says so, once.
   online = false;
   await page.goto(`/lauds/${today}`);

@@ -691,7 +691,7 @@ final class UsageTests: XCTestCase {
             usage.record(.hour(date: date, hour: "lauds"), dark: false, form: "private")
         }
         let periods = ["week:first month:first", "week:first month:again", "week:again month:again", "week:first month:first"]
-        XCTAssertEqual(posted.map { periods($0.body) }, periods.flatMap { [$0, $0] })
+        XCTAssertEqual(posted.map { periodWords($0.body) }, periods.flatMap { [$0, $0] })
     }
 
     // A beacon that never arrived leaves the week unopened: the next day's is still its first.
@@ -704,10 +704,10 @@ final class UsageTests: XCTestCase {
             now = start.addingTimeInterval(Double(days) * 86_400)
             usage().record(.home(date: CivilDate(year: 2026, month: 3, day: Int32(15 + days))), dark: false, form: "private")
         }
-        XCTAssertEqual(posted.map { periods($0.body) }, ["week:first month:first", "week:again month:again"])
+        XCTAssertEqual(posted.map { periodWords($0.body) }, ["week:first month:first", "week:again month:again"])
     }
 
-    private func periods(_ body: String) -> String {
+    private func periodWords(_ body: String) -> String {
         body.range(of: #"week:\w+ month:\w+"#, options: .regularExpression).map { String(body[$0]) } ?? ""
     }
 

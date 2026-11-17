@@ -111,7 +111,8 @@ final class Usage {
             event: event, today: .of(date), dark: dark, form: form, client: .ios, martyrology: martyrology, first: first, chant: chant,
             week: periods?.week, month: periods?.month, habits: habits
         ) else { return }
-        let key = day + " " + body
+        // Saying a failed hour is not a new page: it neither sends again nor counts apart.
+        let key = day + " " + body.replacingOccurrences(of: " offline:yes", with: "")
         lock.lock()
         let fresh = sent.insert(key).inserted
         lock.unlock()
