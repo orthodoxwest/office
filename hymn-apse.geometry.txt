@@ -1,0 +1,2 @@
+home.niche: none
+hour.reading: ratio 0.5108932716150939, rows 156, frames 9, heights 17, viewport (402.0, 778.0) (first ratio 0.0, rows 0, frames 0, heights 0, viewport (402.0, 778.0), changed 26 times)
