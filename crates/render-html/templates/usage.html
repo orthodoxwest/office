@@ -19,8 +19,8 @@
   <p class="usage-headline">{% if headline_figure %}<strong>{{ headline_figure }}</strong>{% endif %}{{ headline_rest }}</p>
   {# The last week whatever the period, so a launch is not averaged in with quiet months. #}
   <dl class="usage-summary">{{ tile_list(tiles) }}</dl>
-  {% if period_tiles %}<dl class="usage-summary usage-periods">{{ tile_list(period_tiles) }}</dl>
-  {% if period_note %}<p class="usage-splits-note usage-period-note">{{ period_note }}</p>{% endif %}{% endif %}
+  {% if period_tiles %}<dl class="usage-summary usage-periods">{{ tile_list(period_tiles) }}</dl>{% endif %}
+  {% if period_note %}<p class="usage-splits-note usage-period-note">{{ period_note }}</p>{% endif %}
   <section class="usage-panel" aria-labelledby="usage-trend-title">
     <div class="usage-section-heading"><div><h2 id="usage-trend-title">Readers each day</h2><p>{{ first_date }} – {{ last_date }} · Eastern time</p></div><span class="usage-period">{{ recorded_days }} day{% if recorded_days != 1 %}s{% endif %}</span></div>
     <figure class="usage-trend">
@@ -51,7 +51,7 @@
     <p class="usage-splits-note">A reader who moves from the browser to an app is new there, and one fewer here.</p>
   </section>{% endif %}
   <section class="usage-panel" aria-labelledby="usage-popular-title">
-    <div class="usage-section-heading"><div><h2 id="usage-popular-title">What they open</h2><p>Share of the period’s {{ readers }} readers who opened each, a reader counted once on each day they read</p></div></div>
+    <div class="usage-section-heading"><div><h2 id="usage-popular-title">What they open</h2><p>Share of the period’s {{ readers }} daily visits that opened each: a reader counts once a day</p></div></div>
     <dl class="usage-office-totals">{% for o in opens %}<div><dt>{{ o.name|titlecase }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>
     <dl class="usage-office-totals usage-office-extra">{% for o in opens_extra %}<div><dt>{{ o.name|capitalize }}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ o.width }}" height="8"/></svg><span class="usage-share">{{ o.value }}</span><span class="usage-count">{{ o.detail }}</span></dd></div>{% endfor %}</dl>
     {% if offices_note %}<p class="usage-splits-note">{{ offices_note }}</p>{% endif %}
