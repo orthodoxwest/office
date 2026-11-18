@@ -145,6 +145,16 @@ shoot() {
     rm -rf "$data/Library" "$data/Documents" "$data/tmp"
     mkdir -p "$data/Library/Preferences" "$data/Library/Caches" "$data/Documents" "$data/tmp"
   }
+  # Whether a full-size shot is the bare wall, a page not yet on the screen, by the comparison's
+  # own test (scripts/ios-snapshots.py blank). Without SNAPSHOT_PYTHON (a Python with Pillow)
+  # nothing is taken for wall, and the comparison still refuses a blank shot afterwards.
+  wall() {
+    [ -n "${SNAPSHOT_PYTHON:-}" ] || return 1
+    case "$2" in
+      ipad-*) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" --ipad ;;
+      *) "$SNAPSHOT_PYTHON" "$here/../../scripts/ios-snapshots.py" blank "$1" ;;
+    esac
+  }
   # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it, at 9 AM.
   one() {
     local sim=$1 name=$2
@@ -191,9 +201,12 @@ shoot() {
       sleep 1
       settled=$((settled + 1))
       xcrun simctl io "$sim" screenshot "$this" > /dev/null
-      if cmp -s "$last" "$this"; then break; fi
+      # Still, and showing the page: on Xcode 27's simulators the screen can stay the bare wall
+      # (the launch screen's colour) for some seconds after the app says its page is drawn, and
+      # two frames of wall are alike. So a still wall waits on, as a moving frame does.
+      if cmp -s "$last" "$this" && ! wall "$this" "$name"; then break; fi
       if [ "$settled" -ge 20 ]; then
-        echo "::warning::$name did not come to rest in 20 seconds after it was drawn" >&2
+        echo "::warning::$name did not come to rest, or still showed the bare wall, 20 seconds after it was drawn" >&2
         break
       fi
       mv "$this" "$last"

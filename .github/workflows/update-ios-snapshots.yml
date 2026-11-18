@@ -167,9 +167,18 @@ jobs:
             exit 1
           fi
 
+      # Pillow, for the shots' blank test while they are taken (screenshots.sh) and the
+      # comparison after.
+      - name: Set up the snapshot tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/snapshots"
+          "$RUNNER_TEMP/snapshots/bin/pip" install --quiet --require-hashes --only-binary :all: \
+            -r scripts/ios-snapshots-requirements.txt
+
       - name: Render screenshots
         working-directory: apps/ios
         env:
+          SNAPSHOT_PYTHON: ${{ runner.temp }}/snapshots/bin/python
           PHONE: ${{ steps.sim.outputs.phone }}
           IPAD: ${{ steps.sim.outputs.ipad }}
         run: ./screenshots.sh shoot "$PHONE" "$IPAD" build/dd/Build/Products/Debug-iphonesimulator/Office.app build/review
