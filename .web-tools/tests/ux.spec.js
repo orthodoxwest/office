@@ -1733,6 +1733,8 @@ test("a tap on home's crown turns the look over, and the tap back restores the r
   const settled = await boxes();
   await page.reload();
   await expect(page.locator(".home-crown-tap")).toBeVisible();
+  // The reloaded page's stars come by the same fetch, so wait for them as above.
+  await expect(page.locator(".home-hero")).toHaveAttribute("data-stars", /^\d+$/);
   expect(await boxes()).toBe(settled);
 });
 
