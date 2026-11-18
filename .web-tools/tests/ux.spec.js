@@ -612,15 +612,15 @@ test("the phone's table of hours keeps one shape whichever hour is now", async (
       };
     });
   const shapes = [];
-  for (const [time, gloss] of [["10:00", "Mid-morning prayer"], ["18:00", "Evening prayer"], ["06:00", "Morning praise"]]) {
+  for (const [time, gloss] of [["10:00", "Mid-morning prayer"], ["18:00", "Evening prayer"], ["06:00", "Morning praise"], ["01:00", "Prayer before sleep"]]) {
     await page.clock.setFixedTime(new Date(`2026-03-15T${time}:00-04:00`));
     await openDatedPage(page, `/?date=${testDate}`);
     await expect(page.locator(".pray-now-gloss")).toHaveText(gloss);
     await expect(page.locator(".home-hour-link-note:visible")).toHaveCount(0);
     shapes.push(await shape());
   }
-  expect(shapes[1]).toEqual(shapes[0]);
-  expect(shapes[2]).toEqual(shapes[0]);
+  // (At one, yesterday's Compline is invited and no hour of the table is now.)
+  shapes.slice(1).forEach((shape) => expect(shape).toEqual(shapes[0]));
   // Another day's "Open Lauds" says nothing more.
   await openDatedPage(page, "/?date=2026-03-16");
   await expect(page.locator(".pray-now-gloss")).toBeHidden();
@@ -6774,6 +6774,9 @@ test("home marks the device's hour before its script runs", async ({ page }) => 
   await page.goto(`/?date=${testDate}`, { waitUntil: "commit" });
   await expect(page.locator(".pray-now-label")).toHaveText("Pray Terce");
   await expect(page.locator(".pray-now")).toHaveAttribute("href", `/terce/${testDate}`);
+  // The gloss is the hour's from the first paint, so the tablet never grows when app.js comes.
+  await expect(page.locator(".pray-now-gloss")).toHaveText("Mid-morning prayer");
+  await expect(page.locator(".pray-now-gloss")).toBeVisible();
   await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute("data-hour", "terce");
   await expect(page.locator(".home-hour-link.is-current")).toHaveCount(1);
   release();

@@ -183,8 +183,8 @@
         var ours = shown === slug(now) || shown === slug(day);
         var href = null, label = "Open Lauds", hour = null;
         card.querySelectorAll(".home-hour-link").forEach(function (link) {
-          var hour = link.getAttribute("data-hour");
-          var current = ours && entry[3] === 0 && hour === entry[1];
+          var each = link.getAttribute("data-hour");
+          var current = ours && entry[3] === 0 && each === entry[1];
           var state = link.querySelector(".home-hour-link-state");
           link.classList.toggle("is-current", current);
           if (current) {
@@ -201,7 +201,7 @@
           } else {
             link.removeAttribute("aria-current");
             if (state) state.parentNode.removeChild(state);
-            if (hour === "lauds" && !href) href = link.getAttribute("href");
+            if (each === "lauds" && !href) href = link.getAttribute("href");
           }
         });
         if (ours && entry[3] !== 0) {
