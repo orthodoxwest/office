@@ -38,9 +38,10 @@ weeks, returning readers a day, new readers in the week, and today so far;
 then, once clients report them, the readers of the last calendar week and
 month. The chart splits each day's bar into returning and new and draws a
 trailing seven-day average. "Where they read" sets each client's week against
-the one before; "What they open" gives each hour, the ordo and reminders as a
-share of the period's readers, and how many hours a reader opens; "Settings in
-use" gives one share of each setting's reports, with every family's series over time behind a
+the one before (a client released within it is averaged from its release, and
+says so); "What they open" gives each hour, the ordo and reminders as a share of
+the period's readers, and how many hours a reader opens, once a week of that has
+been kept; "Settings in use" gives one share of each setting's reports, with every family's series over time behind a
 disclosure (weekly by default; a part week stands apart at either end).
 
 **Counts that were not readers.** The store keeps what it was sent; the report
@@ -87,7 +88,9 @@ counted (`office-counted` and `office-counted-before` in localStorage, `usage-co
 two words (`presentation::usage::periods`; app.js mirrors it). Every beacon of a first day says
 `first`. Older clients say nothing, so the report shows how many of the period's readers reported
 and a week leads only once every day of it was reported; a period whose first days went
-unreported is counted from the day reports began, and says so.
+unreported is counted from the day reports began, and says so. While under nine in ten of a
+period's readers report, its figure counts updated clients rather than readers, and can fall
+below one day's readers, so it is withheld and the report gives the share (rounded down) instead.
 
 A page's marks can fail it: Safari erases them after seven days away, which would open a month
 twice, and a page left before a beacon's reply never writes them. So for a browser the server
@@ -129,7 +132,8 @@ so the report can say how far a new reader gets on their first day.
 
 Each is one bucket, never a date or a count that would link one day to another. The report's
 "How they keep the hours" gives the share of reporting readers in each, and each hour's opened-at-
-its-time and prayed shares of the reports.
+its-time and prayed shares of the reports; under 20 reports, an hour gives its counts ("6 of 10")
+instead, as a share of a handful reads as a finding.
 Prime, on a day
 with a Martyrology reading, also reports `martyrology:shown|hidden`: whether the
 reader's Settings choice (off by default) read it or left the rubric, which

@@ -317,7 +317,7 @@ const CORRECTIONS: render_html::usage::Corrections = render_html::usage::Correct
     released: &[(
         "ios",
         "2026-11-16",
-        "it reached the App Store that day, and every earlier install was Apple's review or a TestFlight test",
+        "it reached the App Store that day, and every earlier install was Apple’s review or a TestFlight test",
     )],
 };
 

@@ -156,11 +156,10 @@ pub struct UsageData {
     pub recorded_days: i64,
     pub first_date: String,
     pub last_date: String,
-    /// The report in a sentence: its figure, the rest of the sentence, and a second sentence on
-    /// returning and new readers.
+    /// The report in a sentence: its figure and the rest of the sentence. The tiles under it
+    /// split the readers into returning and new.
     pub headline_figure: String,
     pub headline_rest: String,
-    pub headline_detail: String,
     pub tiles: Vec<UsageTile>,
     /// Readers in a calendar week and month, once any client reports them.
     pub period_tiles: Vec<UsageTile>,
@@ -193,7 +192,7 @@ pub struct UsageData {
     /// Each hour opened at its time and prayed, by readers whose client says so.
     pub keeping: Vec<UsageKeep>,
     /// The readers' habits, as shares: how long they have read, last week's days, a new reader's
-    /// first day, an hour that could not report, reminders in the apps.
+    /// first day, an hour that went uncounted, reminders in the apps.
     pub habits: Vec<UsageShare>,
     /// The share of readers whose client reports these.
     pub habits_note: String,
@@ -225,6 +224,10 @@ const TODAY_GAP: f64 = 11.0;
 /// Rows of the daily table shown before the rest are folded away.
 const TABLE_ROWS: usize = 14;
 
+/// Tenths of a period's readers whose client must report the period before its readers are
+/// shown: below it the figure counts the updated clients more than the readers.
+const REPORTING: i64 = 9;
+
 /// A week-on-week change smaller than this is not told from a level week: at a few dozen readers
 /// a day, two weeks' averages differ by a tenth or more by chance.
 const LEVEL: f64 = 0.2;
@@ -235,6 +238,13 @@ fn whole(n: f64) -> String {
 
 fn percent(part: i64, of: i64) -> String {
     if of > 0 { format!("{}%", (100.0 * part as f64 / of as f64).round() as i64) } else { "—".into() }
+}
+
+/// Under this many, a share is given as its counts: 0% of 8 reads as a finding, 0 of 8 does not.
+const FEW: i64 = 20;
+
+fn small_share(part: i64, of: i64) -> String {
+    if of > 0 && of < FEW { format!("{part} of {of}") } else { percent(part, of) }
 }
 
 fn dim(row: &UsageDay, scope: &str) -> i64 {
@@ -348,7 +358,7 @@ pub fn usage_data(
     summary(&mut d, &all);
     periods(&mut d, &all, &year);
     chart(&mut d, &all, window);
-    d.clients = clients(&all);
+    d.clients = clients(&all, corrections.released, &year);
     breakdowns(&mut d, &all, window, &year);
     habits(&mut d, &all, window);
     for (day, why) in corrections.test_days {
@@ -360,7 +370,7 @@ pub fn usage_data(
         if window.iter().any(|r| r.day.as_str() < *day) {
             let name = CLIENT_NAMES.iter().find(|(key, ..)| key == client).map_or(*client, |c| c.1);
             d.corrections.push(format!(
-                "{name} before {}: {why}. Those counts are left out of readers, new readers and the clients. The hours they opened and the settings they reported cannot be told from readers' and remain.",
+                "{name} before {}: {why}. Those installs are left out of the reader counts; the hours and settings they reported stay in, as they cannot be told from readers’.",
                 label(day)
             ));
         }
@@ -422,12 +432,12 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
     d.headline_figure = format!("{} readers a day", whole(now));
     d.headline_rest = match before.and_then(|b| mean(b, users)) {
         _ if week.len() < 7 => format!(" over {} completed day{}.", week.len(), if week.len() == 1 { "" } else { "s" }),
-        None => " last week.".into(),
+        None => " over the last 7 days.".into(),
         Some(b) if whole(now) == whole(b) || (b > 0.0 && ((now - b) / b).abs() < LEVEL) => {
-            format!(" last week, about level with the week before ({}).", whole(b))
+            format!(" over the last 7 days, about level with the 7 before ({}).", whole(b))
         }
-        Some(b) if now > b => format!(" last week, up from {} the week before.", whole(b)),
-        Some(b) => format!(" last week, down from {} the week before.", whole(b)),
+        Some(b) if now > b => format!(" over the last 7 days, up from {} the 7 before.", whole(b)),
+        Some(b) => format!(" over the last 7 days, down from {} the 7 before.", whole(b)),
     };
     // Up to four weeks, oldest first, for the first figure's small bars.
     let weeks: Vec<f64> = (0..4).rev().filter_map(|k| completed.get(7 * k..7 * k + 7).and_then(|w| mean(w, users))).collect();
@@ -451,29 +461,15 @@ fn summary(d: &mut UsageData, all: &[UsageDay]) {
         tiles.push(UsageTile {
             label: "Returning, a day".into(),
             value: whole(back),
-            note: back_before.map_or_else(|| "Counted before that day".into(), |b| format!("{} the week before", whole(b))),
+            note: back_before.map_or_else(|| "Counted before that day".into(), |b| format!("{} the 7 days before", whole(b))),
             bars: Vec::new(),
         });
         tiles.push(UsageTile {
             label: "New, in 7 days".into(),
             value: new.to_string(),
-            note: new_before.map_or_else(|| "First counted in the week".into(), |b| format!("{b} the week before")),
+            note: new_before.map_or_else(|| "First counted in the week".into(), |b| format!("{b} the 7 days before")),
             bars: Vec::new(),
         });
-        let by_client: Vec<String> = CLIENT_NAMES
-            .iter()
-            .map(|(key, _, phrase)| (total(week, |r| dim(r, &format!("new-client:{key}"))), phrase))
-            .filter(|(n, _)| *n > 0)
-            .map(|(n, phrase)| format!("{n} {phrase}"))
-            .collect();
-        d.headline_detail = format!(
-            "Of those, {} a day were returning{}. {new} were new in the week{}.{}",
-            whole(back),
-            back_before.map_or(String::new(), |b| format!(" ({} the week before)", whole(b))),
-            new_before.map_or(String::new(), |b| format!(" ({b} before)")),
-            // A reader new to one client may have been counted on another, so these can pass the total.
-            if by_client.is_empty() { String::new() } else { format!(" New to each client: {}.", by_client.join(", ")) },
-        );
     }
     tiles.push(today);
     d.tiles = tiles;
@@ -486,6 +482,7 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
     let Some(today) = Date::parse(&all[0].day) else { return };
     let reported = |r: &&UsageDay, key: &str| family(r, key) > 0;
     let mut partial = false;
+    let mut withheld: Vec<(String, (i64, i64))> = Vec::new();
     for (key, noun, this_start, last_start) in [
         ("week", "week", week_start(today), week_start(today).add_days(-7)),
         ("month", "month", Date::new(today.year(), today.month() as i32, 1), {
@@ -510,15 +507,25 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
             (Some(a), _) => date_label(&a.day, year),
             _ => String::new(),
         };
-        // The share of the counted days' readers whose client said either word.
+        // The counted days' readers whose client said either word, and all of them.
+        let said = |rows: &[&UsageDay]| rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
         let coverage = |rows: &[&UsageDay]| {
-            let (said, of) = rows.iter().fold((0, 0), |(said, of), r| (said + family(r, key).min(r.users), of + r.users));
+            let (said, of) = said(rows);
             (of > 0 && said * 20 < of * 19).then(|| format!("{} of its readers reporting", percent(said, of)))
         };
-        let so_far = (!this.is_empty()).then(|| sum(&this));
-        let (mut tile, counted): (UsageTile, Option<String>) = if last_whole && last.iter().any(|r| reported(r, key)) {
+        // Too few reporting, and the sum is a count of the clients that have updated, not of the
+        // readers: it can fall below a single day's readers. It is withheld, and the note says why.
+        let enough = |rows: &[&UsageDay]| {
+            let (said, of) = said(rows);
+            of == 0 || said * 10 >= of * REPORTING
+        };
+        if !this.is_empty() && !enough(&this) {
+            withheld.push((format!("this {noun}"), said(&this)));
+        }
+        let so_far = (!this.is_empty() && enough(&this)).then(|| sum(&this));
+        let (mut tile, counted): (UsageTile, Option<String>) = if last_whole && last.iter().any(|r| reported(r, key)) && enough(&last) {
             let tile = UsageTile {
-                label: format!("Readers, last {noun}"),
+                label: format!("Different readers, last {noun}"),
                 value: sum(&last).to_string(),
                 note: [Some(range(&last)), coverage(&last), so_far.map(|n| format!("this {noun} so far {n}"))]
                     .into_iter()
@@ -534,9 +541,9 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
             let whole = Date::parse(&began.day) == Some(this_start) || Date::parse(&began.day) == began_reading;
             let tile = UsageTile {
                 label: if whole {
-                    format!("Readers, this {noun} so far")
+                    format!("Different readers, this {noun} so far")
                 } else {
-                    format!("Readers since {}", date_label(&began.day, year))
+                    format!("Different readers since {}", date_label(&began.day, year))
                 },
                 value: n.to_string(),
                 note: if whole { range(&this) } else { format!("Not the whole {noun}: {}", range(&this)) },
@@ -544,6 +551,10 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
             };
             (tile, coverage(&this))
         } else {
+            // A last period too few reported, with nothing of this one to show in its place.
+            if last_whole && last.iter().any(|r| reported(r, key)) && !withheld.iter().any(|(n, _)| n.ends_with(noun)) {
+                withheld.push((format!("last {noun}"), said(&last)));
+            }
             continue;
         };
         if let Some(c) = counted {
@@ -553,8 +564,28 @@ fn periods(d: &mut UsageData, all: &[UsageDay], year: &str) {
         d.period_tiles.push(tile);
     }
     if partial {
-        d.period_note =
-            "A browser or app reports these once it has the version that counts weeks, so they run low until all have it.".into();
+        d.period_note = "A figure with a share beside it counts only the readers whose browser or app reports it, so it runs low.".into();
+    }
+    // A period withheld: say why there is no figure, and how near it is. The share is rounded
+    // down, so it never reads as the threshold it has not reached.
+    if !withheld.is_empty() {
+        let many = withheld.len() > 1;
+        let names = withheld.iter().map(|(name, _)| format!("{name}’s")).collect::<Vec<_>>().join(" and ");
+        let mut shares =
+            withheld.iter().map(|(_, (said, of))| format!("{}%", if *of > 0 { 100 * said / of } else { 0 })).collect::<Vec<_>>();
+        // One share when both are the same.
+        shares.dedup();
+        let note = format!(
+            "{}{} {} until {}0% of {} readers have a browser or app that reports {}: {} so far.",
+            names[..1].to_uppercase(),
+            &names[1..],
+            if many { "figures wait" } else { "figure waits" },
+            REPORTING,
+            if many { "their" } else { "its" },
+            if many { "them" } else { "it" },
+            shares.join(" and "),
+        );
+        d.period_note = if d.period_note.is_empty() { note } else { format!("{} {note}", d.period_note) };
     }
 }
 
@@ -637,15 +668,13 @@ fn chart(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
 }
 
 /// The clients as the report names them: stored value, name, and how a new reader arrived.
-const CLIENT_NAMES: [(&str, &str, &str); 4] = [
-    ("browser", "Browser tab", "in a browser"),
-    ("pwa", "Home-screen web app", "as a home-screen web app"),
-    ("android", "Android app", "on Android"),
-    ("ios", "iOS app", "on iOS"),
-];
+const CLIENT_NAMES: [(&str, &str); 4] =
+    [("browser", "Browser tab"), ("pwa", "Home-screen web app"), ("android", "Android app"), ("ios", "iOS app")];
 
 /// Each client's readers a day over the last seven completed days, against the seven before.
-fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
+/// A client released partway through is averaged over the days since, not with the days before
+/// it had readers.
+fn clients(all: &[UsageDay], released: &[(&str, &str, &str)], year: &str) -> Vec<UsageClient> {
     let completed = &all[1..];
     let week = &completed[..completed.len().min(7)];
     let before = completed.get(7..14);
@@ -654,12 +683,19 @@ fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
         return Vec::new();
     }
     let before = before.filter(|b| reported(b));
-    let rows: Vec<(&str, f64, Option<f64>, i64)> = CLIENT_NAMES
+    let rows: Vec<(String, f64, Option<f64>, i64)> = CLIENT_NAMES
         .iter()
-        .map(|(key, name, _)| {
-            let count = |r: &UsageDay| Some(dim(r, &format!("client:{key}")));
+        .map(|(key, name)| {
+            let since = released.iter().find(|(client, ..)| client == key).map_or("", |c| c.1);
+            let count = |r: &UsageDay| (r.day.as_str() >= since).then(|| dim(r, &format!("client:{key}")));
+            // Released within the week, its average is of fewer days, and the row says from when.
+            let name = if week.iter().any(|r| r.day.as_str() < since) {
+                format!("{name}, since {}", date_label(since, year))
+            } else {
+                name.to_string()
+            };
             (
-                *name,
+                name,
                 mean(week, count).unwrap_or(0.0),
                 before.and_then(|b| mean(b, count)),
                 total(week, |r| dim(r, &format!("new-client:{key}"))),
@@ -669,7 +705,7 @@ fn clients(all: &[UsageDay]) -> Vec<UsageClient> {
     let peak = rows.iter().map(|r| r.1.max(r.2.unwrap_or(0.0))).fold(0.0, f64::max).max(1.0);
     rows.into_iter()
         .map(|(name, now, before, new)| UsageClient {
-            name: name.into(),
+            name,
             now: whole(now),
             before: before.map_or(String::new(), whole),
             direction: match before {
@@ -704,7 +740,10 @@ fn breakdowns(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay], year: &s
     let began = all.iter().rposition(|r| family(r, "offices") > 0).filter(|&i| i + 1 < all.len()).map(|i| all[i].day.as_str());
     let kept: Vec<&UsageDay> =
         window.iter().skip(1).filter(|r| !r.excluded && family(r, "offices") > 0 && Some(r.day.as_str()) != began).collect();
-    if let Some(first) = kept.last() {
+    // A day or two says little of habit: the figure waits until a week of them has been kept,
+    // whatever the window.
+    let a_week = all.iter().rposition(|r| family(r, "offices") > 0).is_some_and(|i| i > 7);
+    if let Some(first) = kept.last().filter(|_| a_week) {
         let by = |n: usize| kept.iter().map(|r| dim(r, &format!("offices:{n}"))).sum::<i64>();
         let opened: i64 = (1..=7).map(by).sum();
         let hours: i64 = (1..=7).map(|n| n as i64 * by(n)).sum();
@@ -770,8 +809,8 @@ fn habits(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
             UsageKeep {
                 name: h.to_string(),
                 reported,
-                timely: percent(sum(&format!("timely:{h}")), reported),
-                prayed: percent(sum(&format!("prayed:{h}")), reported),
+                timely: small_share(sum(&format!("timely:{h}")), reported),
+                prayed: small_share(sum(&format!("prayed:{h}")), reported),
             }
         })
         .collect();
@@ -820,7 +859,7 @@ fn habits(d: &mut UsageData, all: &[UsageDay], window: &[UsageDay]) {
         new,
         format!("of {new} on their first day, {:.1} hours each", hours as f64 / opened.max(1) as f64),
     );
-    row("Opened an hour that could not report", sum("offline:yes"), reporting, "since their last report: no network, or no answer".into());
+    row("Opened an hour that went uncounted", sum("offline:yes"), reporting, "since their last report: no network, or no answer".into());
     let (on, off) = (sum("reminder:on"), sum("reminder:off"));
     row("Reminders on, in the apps", on, on + off, format!("of {} app readers", on + off));
 }
@@ -844,7 +883,7 @@ pub const TREND_LABELS: [(&str, &str, &[&str]); 17] = [
     ("tenure", "How long they have read", &["First week", "First month", "Longer"]),
     ("last-week", "Days read the week before", &["One", "Two or three", "Four to six", "All seven"]),
     ("new-offices", "Hours a new reader opened", &["One", "Two", "Three", "Four or more"]),
-    ("offline", "Opened an hour that could not report", &["Yes"]),
+    ("offline", "Opened an hour that went uncounted", &["Yes"]),
     ("reminder", "Reminders, in the apps", &["On", "Off"]),
 ];
 
@@ -863,6 +902,11 @@ fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> 
     };
     let mut groups = Vec::new();
     for (key, label, series) in TREND_LABELS {
+        // A period's first and again days are read as the week's and month's readers, at the
+        // top of the report, and only once enough clients report them; over time they say no more.
+        if key == "week" || key == "month" {
+            continue;
+        }
         let Some(dimension) = dimensions.iter().find(|d| d.key == key) else { continue };
         let scopes: Vec<String> = dimension.values.iter().map(|v| format!("{key}:{v}")).collect();
         let mut points = points(&scopes);
@@ -1003,13 +1047,13 @@ mod tests {
         };
         // The window is seven days, but the comparison reads the days before it; today never counts.
         let weeks = |now: i64, before: i64| [vec![now; 7], vec![before; 7]].concat();
-        assert_eq!(headline(days(500, &weeks(20, 10))), "20 readers a day last week, up from 10 the week before.");
-        assert_eq!(headline(days(0, &weeks(9, 12))), "9 readers a day last week, down from 12 the week before.");
+        assert_eq!(headline(days(500, &weeks(20, 10))), "20 readers a day over the last 7 days, up from 10 the 7 before.");
+        assert_eq!(headline(days(0, &weeks(9, 12))), "9 readers a day over the last 7 days, down from 12 the 7 before.");
         // Under a fifth either way is not told from chance.
-        assert_eq!(headline(days(0, &weeks(36, 33))), "36 readers a day last week, about level with the week before (33).");
-        assert_eq!(headline(days(0, &weeks(4, 0))), "4 readers a day last week, up from 0 the week before.");
-        assert_eq!(headline(days(0, &weeks(0, 0))), "0 readers a day last week, about level with the week before (0).");
-        assert_eq!(headline(days(0, &[6; 9])), "6 readers a day last week.");
+        assert_eq!(headline(days(0, &weeks(36, 33))), "36 readers a day over the last 7 days, about level with the 7 before (33).");
+        assert_eq!(headline(days(0, &weeks(4, 0))), "4 readers a day over the last 7 days, up from 0 the 7 before.");
+        assert_eq!(headline(days(0, &weeks(0, 0))), "0 readers a day over the last 7 days, about level with the 7 before (0).");
+        assert_eq!(headline(days(0, &[6; 9])), "6 readers a day over the last 7 days.");
         assert_eq!(headline(days(0, &[3, 5])), "4 readers a day over 2 completed days.");
         assert_eq!(headline(days(3, &[])), "No completed days yet.");
         // Four weeks, oldest first, under the first figure.
@@ -1033,16 +1077,12 @@ mod tests {
         }
         let d = data(rows, 7, "2026-01-01");
         let tiles: Vec<(&str, &str, &str)> = d.tiles.iter().map(|t| (t.label.as_str(), t.value.as_str(), t.note.as_str())).collect();
-        assert_eq!(tiles[1], ("Returning, a day", "7", "9 the week before"));
-        assert_eq!(tiles[2], ("New, in 7 days", "21", "7 the week before"));
-        assert_eq!(
-            d.headline_detail,
-            "Of those, 7 a day were returning (9 the week before). 21 were new in the week (7 before). New to each client: 14 in a browser, 7 on Android."
-        );
+        assert_eq!(tiles[1], ("Returning, a day", "7", "9 the 7 days before"));
+        assert_eq!(tiles[2], ("New, in 7 days", "21", "7 the 7 days before"));
         // New readers were first told apart fourteen days ago: the days before show none, not zero.
         assert_eq!(d.rows.iter().map(|r| r.new_readers).collect::<Vec<_>>(), [Some(3); 7]);
         let d = data(days(0, &[5; 20]), 30, "2026-01-01");
-        assert!(d.rows.iter().chain(&d.more_rows).all(|r| r.new_readers.is_none()) && d.tiles.len() == 2 && d.headline_detail.is_empty());
+        assert!(d.rows.iter().chain(&d.more_rows).all(|r| r.new_readers.is_none()) && d.tiles.len() == 2);
         assert!(d.chart_plain && !d.chart_split);
     }
 
@@ -1092,7 +1132,8 @@ mod tests {
         assert_eq!(d.readers, 4 + 20 + 14 * 4, "the period's readers");
         assert_eq!(d.opens[0].detail, "0", "the crawl's hours were counted");
         let ios = &d.clients[3];
-        assert_eq!((ios.name.as_str(), ios.now.as_str(), ios.new), ("iOS app", "1", 4));
+        // Averaged over the days since its release, not with the zeros before it.
+        assert_eq!((ios.name.as_str(), ios.now.as_str(), ios.new), ("iOS app, since Oct 5", "6", 4));
         assert_eq!(d.tiles[2].value, "10", "new readers in the week: 5, then five days of 1");
         assert_eq!(d.corrections.len(), 2);
         assert!(
@@ -1165,23 +1206,26 @@ mod tests {
         assert_eq!(opens[2], ("terce", "0%", "0", "0"));
         assert_eq!(opens[7..], [("ordo", "25%", "5", "63"), ("reminders", "5%", "1", "13")]);
         assert_eq!(d.readers, 20);
-        // Hours per reader are read only from completed days the server kept them.
-        assert_eq!(
-            d.offices_note,
-            "Since Sep 4, 60% of readers opened an hour, 2.0 each on average: one hour 50%, two 33%, three 0%, four or more 17%."
-        );
+        // A day of them says little of habit: hours per reader wait for a week.
+        assert!(d.offices_note.is_empty());
         let settings: Vec<(&str, &str, &str)> = d.settings.iter().map(|o| (o.name.as_str(), o.value.as_str(), o.detail.as_str())).collect();
         assert_eq!(settings, [("Appearance", "75%", "Apse (dark)"), ("Prayer form", "30%", "clerical: priest 20%, deacon 10%")]);
-        // Today is still filling, and on the server's first day of keeping them the hours opened
-        // before it began are missing: neither is read.
+        // Two days are still short of a week.
         let mut later =
             vec![with(row("2026-09-07", 4), &[("offices:1", 4)]), with(row("2026-09-06", 10), &[("offices:1", 1), ("offices:3", 4)])];
         later.extend(rows);
         later.push(row("2026-09-03", 0));
-        let d = data(later, 7, "2026-09-03");
+        assert!(data(later, 7, "2026-09-03").offices_note.is_empty());
+        // Today is still filling, and on the server's first day of keeping them the hours opened
+        // before it began are missing: a week is read between them.
+        let mut week: Vec<UsageDay> = (0..9)
+            .map(|i| with(row(&presentation::date_slug(Date::new(2026, 9, 13).add_days(-i)), 10), &[("offices:1", 1), ("offices:3", 4)]))
+            .collect();
+        week.push(row("2026-09-04", 0));
+        // The seven-day window reads its six completed days.
         assert_eq!(
-            d.offices_note,
-            "Since Sep 6, 50% of readers opened an hour, 2.6 each on average: one hour 20%, two 0%, three 80%, four or more 0%."
+            data(week, 7, "2026-09-04").offices_note,
+            "Since Sep 7, 50% of readers opened an hour, 2.6 each on average: one hour 20%, two 0%, three 80%, four or more 0%."
         );
         let d = data(vec![row("2026-09-05", 0)], 7, "2026-09-05");
         assert!(d.empty && d.opens.iter().all(|o| o.width == "0" && o.value == "—") && d.offices_note.is_empty() && d.settings.is_empty());
@@ -1225,7 +1269,13 @@ mod tests {
         }
         let d = data(rows.clone(), 7, "2026-01-01");
         let tiles: Vec<(&str, &str, &str)> = d.period_tiles.iter().map(|t| (t.label.as_str(), t.value.as_str(), t.note.as_str())).collect();
-        assert_eq!(tiles, [("Readers, this week so far", "13", "Oct 5 – Oct 6"), ("Readers, this month so far", "26", "Oct 1 – Oct 6")]);
+        assert_eq!(
+            tiles,
+            [
+                ("Different readers, this week so far", "13", "Oct 5 – Oct 6"),
+                ("Different readers, this month so far", "26", "Oct 1 – Oct 6")
+            ]
+        );
         assert!(d.period_note.is_empty(), "every reader reported: {}", d.period_note);
         // Once the week before was reported on every day, it leads.
         for row in &mut rows[7..9] {
@@ -1235,16 +1285,22 @@ mod tests {
         let week = &d.period_tiles[0];
         assert_eq!(
             (week.label.as_str(), week.value.as_str(), week.note.as_str()),
-            ("Readers, last week", "24", "Sep 28 – Oct 4 · this week so far 13")
+            ("Different readers, last week", "24", "Sep 28 – Oct 4 · this week so far 13")
         );
         // Clients that have not updated say nothing, and the report says how many did.
         for row in &mut rows[..2] {
-            row.users = 20;
+            row.users = 12;
         }
         let d = data(rows.clone(), 7, "2026-01-01");
-        assert!(!d.period_note.is_empty());
-        assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4 · this week so far 13");
-        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 75% of its readers reporting");
+        assert_eq!(d.period_tiles[1].note, "Oct 1 – Oct 6 · 94% of its readers reporting");
+        // Too few, and this week's figure would count the clients that updated rather than the
+        // readers, below a single day's: it is withheld, and the note says how near it is.
+        assert_eq!(d.period_tiles[0].note, "Sep 28 – Oct 4");
+        assert_eq!(
+            d.period_note,
+            "A figure with a share beside it counts only the readers whose browser or app reports it, so it runs low. This week’s \
+             figure waits until 90% of its readers have a browser or app that reports it: 83% so far."
+        );
         // A month whose first days went unreported is counted from the day reports began, and
         // its share is of those days' readers.
         for key in ["month:first", "month:again"] {
@@ -1254,20 +1310,48 @@ mod tests {
         let month = &d.period_tiles[1];
         assert_eq!(
             (month.label.as_str(), month.value.as_str(), month.note.as_str()),
-            ("Readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 71% of its readers reporting")
+            ("Different readers since Oct 2", "16", "Not the whole month: Oct 2 – Oct 6 · 93% of its readers reporting")
         );
         // A first day nobody read on had nothing to report, and the month is whole without it.
         rows[5].users = 0;
-        assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[1].label, "Readers, this month so far");
-        // Last week's share stands beside last week, before this week's figure.
+        assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[1].label, "Different readers, this month so far");
+        // Last week's share stands beside last week.
         for row in &mut rows[2..9] {
-            row.users = 20;
+            row.users = 11;
         }
+        assert_eq!(data(rows.clone(), 7, "2026-01-01").period_tiles[0].note, "Sep 28 – Oct 4 · 91% of its readers reporting");
+        // When most clients have not updated, no period is shown: 81 this week beside 103 today
+        // read as a count, and was one of the updated clients.
+        for row in &mut rows[..9] {
+            row.users = 30;
+        }
+        let d = data(rows.clone(), 7, "2026-01-01");
+        assert!(d.period_tiles.is_empty());
         assert_eq!(
-            data(rows.clone(), 7, "2026-01-01").period_tiles[0].note,
-            "Sep 28 – Oct 4 · 50% of its readers reporting · this week so far 13"
+            d.period_note,
+            "This week’s and this month’s figures wait until 90% of their readers have a browser or app that reports them: 33% \
+             so far."
         );
         assert!(data(days(10, &[10; 20]), 7, "2026-01-01").period_tiles.is_empty());
+    }
+
+    #[test]
+    fn a_withheld_periods_share_is_rounded_down_and_a_last_week_withheld_says_so() {
+        // Today is Tuesday 6 October. 179 of this week's 200 readers reported: 89.5%, short of 90.
+        let mut rows = days(100, &[100; 20]);
+        rows[0].dimensions.insert("week:first".into(), 89);
+        rows[1].dimensions.insert("week:first".into(), 90);
+        let d = data(rows, 7, "2026-01-01");
+        assert!(d.period_tiles.is_empty());
+        assert_eq!(d.period_note, "This week’s figure waits until 90% of its readers have a browser or app that reports it: 89% so far.");
+        // Last week was reported on every day by half its readers, and nothing yet this week.
+        let mut rows = days(10, &[10; 20]);
+        for row in &mut rows[2..9] {
+            row.dimensions.insert("week:first".into(), 5);
+        }
+        let d = data(rows, 7, "2026-01-01");
+        assert!(d.period_tiles.is_empty());
+        assert_eq!(d.period_note, "Last week’s figure waits until 90% of its readers have a browser or app that reports it: 50% so far.");
     }
 
     #[test]
@@ -1305,7 +1389,8 @@ mod tests {
             "Reported by 40% of the period’s readers: a browser or app says these once it has the version that counts them."
         );
         let lauds = &d.keeping[0];
-        assert_eq!((lauds.reported, lauds.timely.as_str(), lauds.prayed.as_str()), (10, "60%", "20%"));
+        // Under twenty, a share is given as its counts.
+        assert_eq!((lauds.reported, lauds.timely.as_str(), lauds.prayed.as_str()), (10, "6 of 10", "2 of 10"));
         assert_eq!(d.keeping[1].timely, "—");
         let habits: Vec<(&str, &str, &str)> = d.habits.iter().map(|o| (o.name.as_str(), o.value.as_str(), o.detail.as_str())).collect();
         assert_eq!(
@@ -1314,7 +1399,7 @@ mod tests {
                 ("In their first week", "20%", "of 10 who said; 30% in their first month, 50% longer"),
                 ("Four or more days last week", "75%", "of 4 back for a new week; one day 25%, two or three 0%, all seven 75%"),
                 ("New readers who opened an hour", "75%", "of 4 on their first day, 1.7 hours each"),
-                ("Opened an hour that could not report", "8%", "since their last report: no network, or no answer"),
+                ("Opened an hour that went uncounted", "8%", "since their last report: no network, or no answer"),
                 ("Reminders on, in the apps", "25%", "of 4 app readers"),
             ]
         );
@@ -1339,7 +1424,9 @@ mod tests {
         ];
         let rows = vec![with(row("2026-09-14", 0), &dimensions), row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), DIMENSIONS.len() - HOUR_FAMILIES.len());
+        // The week and month families are read only at the top, as the periods' readers.
+        assert_eq!(groups.len(), DIMENSIONS.len() - HOUR_FAMILIES.len() - 2);
+        assert!(groups.iter().all(|g| g.key != "week" && g.key != "month"));
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
@@ -1353,7 +1440,6 @@ mod tests {
         assert_eq!(groups[0].key, "client", "the explorer opens on where they read");
         assert_eq!(counts("client"), [0, 0, 0, 3]);
         assert_eq!(counts("appearance"), [0, 5]);
-        assert_eq!(counts("week"), [9, 0]);
         // Four hours and more are one series.
         assert_eq!(counts("offices"), [4, 0, 0, 3]);
     }
